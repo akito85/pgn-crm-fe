@@ -1,0 +1,959 @@
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Form, Spin } from "antd";
+import BreadCrumb from "../../../../components/BreadCrumb";
+import RadioTabs from "../../../../components/RadioTabs";
+import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
+import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
+import Promo from "./Form/Promo";
+import ButtonComponent from "../../../../components/ButtonComponent";
+import { useLocation, useNavigate } from "react-router-dom";
+import SVGIcon from "../../../../assets/Icon/index";
+import { WarningOutlined, LeftOutlined } from "@ant-design/icons";
+import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
+import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
+import { getConfigFileMaster } from "../../../../redux/slices/attachmentSlice";
+import BaseContainer from "../../../../components/BaseContainer";
+import ApprovalComponentGeneral from "../../../../components/Approval/ApprovalComponentGeneral";
+import {
+  ModalConfirm,
+  ModalError,
+} from "../../../../components/Modal/ModalPopUp";
+import {
+  createPromo,
+  getAttachmentCategoryPromo,
+  getAvailableApprovalPromo,
+  getDetailPromo,
+  getDetailPromoDraft,
+  getListCriteriaPromo,
+  getListPromoCategory,
+  getListPromoType,
+  getPromoAttachment,
+  getSelectedApprovalPromo,
+  updatePromo,
+} from "../../../../redux/slices/product_promo/promoSlice";
+import { handleMandatory } from "../Product/utils";
+import {
+  showModalError,
+  showModalSuccess,
+  validateCreateUpdate,
+} from "../../../../redux/slices/general_slice";
+import { columnsTableCriteriaPromo } from "./Table/TableCriteriaPromo";
+import { dateFormatting, hasValue } from "../../../../utils";
+import ModalCustom from "../../../../components/Modal/ModalCustom";
+import PromoDiscountConfirm from "./Pages/PromoDiscountConfirm";
+import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
+import {
+  handleDisabledEachColumnCriteria,
+  handleMappingCriteriaGeneral,
+  handleCheckCriteriaMissingValidation,
+} from "../UtilsProduct/UtilsAllProduct";
+
+const PromoDiscountCreateAndUpdate = ({ type }) => {
+  // Selector
+  const {
+    dataListCriteria,
+    dataListAppHierId,
+    dataListAppHierDetail,
+    loading,
+    data_promo_type,
+    data_promo_category,
+    data_promoDiscountDetail,
+    data_promoDiscountDetailDraft,
+    data_listAttachment,
+  } = useSelector((state) => state.promo);
+
+  // Declaration
+  const [form] = Form.useForm();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const id = location?.state?.id; //id
+
+  const [tabPagesPromo, setTabPagesPromo] = useState([
+    {
+      value: "Promo",
+      paramValue: [
+        //mandatory fields
+        "name",
+        "startDate",
+        "endDate",
+        "promoCategory",
+        "promoType",
+        "criteria",
+      ],
+    },
+    { value: "Approval", paramValue: ["apphierId"] },
+    { value: "Attachment" },
+  ]);
+
+  const [valuePage, setValuePage] = useState(tabPagesPromo[0].value);
+  const [modalBack, setModalBack] = useState(false);
+  const [modalError, setModalError] = useState(false);
+  const [modalConfirm, setModalConfirm] = useState(false);
+  const [loadingForm, setLoadingForm] = useState(false);
+
+  // State
+  const [flag, setFlag] = useState(false);
+  const [bodyError, setBodyError] = useState({});
+  const [bodyData, setBodyData] = useState({});
+
+  //approval
+  const [dataListDetailApproval, setDataListDetailApproval] = useState([]);
+  const [dataApprovalId, setDataApprovalId] = useState();
+  const [dataApproval, setDataApproval] = useState([]);
+
+  const [listDataAttachment, setListDataAttachment] = useState([]);
+  //criteria
+  const [criteriaValues, setCriteriaValues] = useState([]);
+  const [criteriaOptions, setCriteriaOptions] = useState([]);
+  const [listDataCriteria, setListDataCriteria] = useState([]);
+  const [storedDataInline, setStoredDataInline] = useState(false);
+  const [startDate, setStartDate] = useState();
+  const [endDate, setEndDate] = useState();
+  const [missingColumn, setMissingColumn] = useState();
+
+  //condition
+  const [listDataCondition, setListDataCondition] = useState([]);
+
+  // Breadcrumbs
+  const routes = [
+    {
+      path: "",
+      breadcrumbName: "Product & Promo",
+    },
+    {
+      path: PRODUCT_PROMO_ROUTES.VIEW_PROMO_DISCOUNT,
+      breadcrumbName: "Promo Discount",
+    },
+    {
+      path:
+        type === "create"
+          ? PRODUCT_PROMO_ROUTES.CREATE_PROMO_DISCOUNT
+          : PRODUCT_PROMO_ROUTES.UPDATE_PROMO_DISCOUNT,
+      breadcrumbName:
+        type === "create" ? "Create Promo Discount" : "Update Promo Discount",
+    },
+  ];
+
+  //useEffect
+  useEffect(() => {
+    dispatch(getListCriteriaPromo());
+    dispatch(getListPromoType());
+    dispatch(getListPromoCategory());
+    dispatch(getAvailableApprovalPromo());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (type === "update" && id) {
+      dispatch(getDetailPromo(id));
+      dispatch(getDetailPromoDraft(id));
+    }
+  }, [dispatch, type, id]);
+
+  const handleAssertData = useCallback(
+    (dataDetail, dataCompare = [], dataListCriteria = []) => {
+      const tempCriteriaValues = dataDetail?.productPromoCriteriaDtos
+        ?.map((item) => {
+          return {
+            id: item?.id || null,
+            idCriteria: item?.idCriteria,
+            idPromo: item?.idPromo || null,
+          };
+        })
+        ?.map((item) => item.idCriteria);
+
+      // console.log(tempDataCriteriaList,"data") //
+      setStartDate(moment(dataDetail?.startDate));
+      setDataApprovalId(dataDetail?.appHierId);
+      setListDataAttachment(
+        (dataDetail?.attachmentListDto || [])?.map((item) => {
+          return {
+            ...item,
+            createdDate: moment(item.createdDate).format(dateFormatting.date),
+            // fileSize: bytesConverter(item.fileSize || 0),
+            // urlFile1: `${urlLink(item?.id)}`,
+            dataType: "exist",
+          };
+        })
+      );
+
+      form.setFieldsValue({
+        name: dataDetail?.name,
+        promoCategory: dataDetail?.category,
+        promoType: dataDetail?.type,
+        startDate: dataDetail?.startDate
+          ? moment(dataDetail?.startDate)
+          : moment(),
+        endDate: dataDetail?.endDate ? moment(dataDetail?.endDate) : null,
+        criteria: tempCriteriaValues,
+        description: dataDetail?.description,
+        apphierId: dataDetail?.appHierId,
+      });
+      setCriteriaValues(tempCriteriaValues);
+      setListDataCriteria(
+        handleDisabledEachColumnCriteria({
+          dataDetail: dataDetail?.productPromoCriteriaDataDtos.filter(
+            (data) => data?.allCriteria !== true
+          ),
+          dataCompare: dataCompare,
+          idName: "idPromo",
+          idCompare: "idPromo",
+          status: dataDetail?.status,
+          statusApproval: dataDetail?.statusApproval,
+          columnsTable: columnsTableCriteriaPromo(),
+          dataListCriteria: dataListCriteria,
+        })
+      );
+      setListDataCondition(dataDetail?.productPromoConditionDtos?.map((item) => {
+        return {
+          ...item,
+          value: item?.adjustmentValue,
+        }
+      }));
+    },
+    [form]
+  );
+
+  useEffect(() => {
+    if (
+      type === "update" &&
+      id &&
+      data_promoDiscountDetail &&
+      data_promoDiscountDetail?.id === id &&
+      dataListCriteria &&
+      dataListCriteria?.length > 0
+    ) {
+      if (
+        //draft
+        data_promoDiscountDetailDraft &&
+        data_promoDiscountDetailDraft?.id === id
+      ) {
+        const body = {
+          ...data_promoDiscountDetailDraft,
+          attachmentListDto: data_promoDiscountDetail?.attachmentListDto || [],
+          status: data_promoDiscountDetail?.status,
+          statusApproval: data_promoDiscountDetail?.statusApproval,
+        };
+
+        handleAssertData(
+          body,
+          data_promoDiscountDetail?.productPromoCriteriaDataDtos || [],
+          dataListCriteria
+        );
+      } else {
+        handleAssertData(data_promoDiscountDetail, [], dataListCriteria);
+      }
+    }
+  }, [data_promoDiscountDetail, data_promoDiscountDetailDraft, handleAssertData, dataListCriteria, type, id]);
+
+  useEffect(() => {
+    if (
+      dataListCriteria &&
+      dataListCriteria?.length > 0
+    ) {
+      const tempCriterias = (dataListCriteria|| [])?.map((criteria) => ({
+        name: criteria.text,
+        value: criteria.id,
+        code: criteria.code,
+      }));
+      setCriteriaOptions(tempCriterias);
+    }
+  }, [dataListCriteria]);
+
+  useEffect(() => {
+    //ddl approval
+    if (dataListAppHierId && dataListAppHierId.length > 0) {
+      const tempAppHier = dataListAppHierId.map((appHier) => ({
+        name: appHier.approvalName,
+        value: appHier.appHierId,
+      }));
+
+      setDataApproval(tempAppHier);
+    }
+  }, [dataListAppHierId]);
+
+  useEffect(() => {
+    //get table
+    if (dataApprovalId && dataApprovalId !== undefined) {
+      dispatch(getSelectedApprovalPromo({ id: dataApprovalId }));
+    }
+  }, [dispatch, dataApprovalId]);
+
+  useEffect(() => {
+    if (dataListAppHierDetail && dataListAppHierDetail.length > 0) {
+      const data = dataListAppHierDetail.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: a?.employeeDetail
+          ? a.employeeDetail.map((b, index) => ({
+              ...b,
+              key: index + 1,
+            }))
+          : [],
+      }));
+      setDataListDetailApproval(data);
+    } else {
+      setDataListDetailApproval([]);
+    }
+  }, [dataListAppHierDetail]);
+
+  // Dependency Criteria
+  const handleSelectCriteria = (value) => {
+    let res = [...criteriaValues, value];
+    if (res.includes(26)) { //13
+      res.push(27);
+    }
+    if (res.includes(27)) { //14
+      res.push(139); //39
+    }
+    if (res.includes(139)) {
+      res.push(28); //15
+    }
+    if (res.includes(33)) { //20
+      res.push(32); //19
+    }
+    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
+    outputArray = outputArray.includes(37) ? [37] : outputArray;
+    setCriteriaValues(outputArray);
+    form.setFieldsValue({
+      criteria: outputArray,
+    });
+  };
+
+  const handleDeselectCriteria = (value) => {
+    let res = criteriaValues.filter((item) => item !== value);
+    if (!res.includes(28)) { //15
+      res = res.filter((item) => item !== 139); //39
+    }
+    if (!res.includes(139)) { // 39
+      res = res.filter((item) => item !== 27); //14
+    }
+    if (!res.includes(27)) { //14
+      res = res.filter((item) => item !== 26); //13
+    }
+    if (!res.includes(32)) { //19
+      res = res.filter((item) => item !== 33); //20
+    }
+    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
+    outputArray = outputArray.includes(37) ? [37] : outputArray;
+    setCriteriaValues(outputArray);
+    form.setFieldsValue({
+      criteria: outputArray,
+    });
+    if(outputArray?.length > 0 && outputArray.includes(37) ){
+      setListDataCriteria([]);
+    }
+  };
+
+  const handleClearCriteria = () => {
+    setCriteriaValues([]);
+  };
+
+  const handleStartDate = (e) => {
+    form.resetFields(["endDate"]);
+    if (e === null || e === undefined) {
+      setStartDate(e);
+    } else {
+      setStartDate(moment(e));
+    }
+  };
+
+  const handleEndDate = (value) => {
+    setEndDate(value);
+    return value;
+  };
+
+  const handleErrorSubmit = ({ values, errorFields, outOfDate }) => {
+    handleMandatory(setTabPagesPromo, listDataAttachment, errorFields);
+  };
+
+  const formatCriteria = (data = []) => {
+    const tempArray = criteriaOptions.filter((item) =>
+      data.includes(item.value)
+    );
+    return tempArray
+      .map((data) => data.name)
+      .reduce((current, next) => current + `, ${next}`, "")
+      .slice(1);
+  };
+
+  const handleDescriptionSuccess = useCallback(
+    (data, type) => {
+      let text = "";
+      switch (type) {
+        case "create":
+          text = `Your data has been ${data.action !== "DRAFT" ? "submitted" : "created"}.`;
+          break;
+        case "update":
+          text = `Your data has been ${data.action !== "DRAFT" ? "submitted" : "updated"}.`;
+          break;
+        default:
+      }
+      const successMessage = {
+        title: "Successful",
+        description: text,
+      };
+      dispatch(showModalSuccess(successMessage));
+    },
+    [dispatch]
+  );
+
+  const handleBodyConfirm = useCallback(
+    (bodyData) => {
+      let dataCriteriaObject = listDataCriteria.map((item, index) =>
+        handleMappingCriteriaGeneral({
+          item: item,
+          index: index,
+          columnsTable: columnsTableCriteriaPromo(),
+          criteriaValues: criteriaValues,
+          dataListCriteria: dataListCriteria,
+        })
+      );
+
+      let criteriaArrayObject = bodyData.criteria.map((item) => {
+        let tempData =
+          id && data_promoDiscountDetailDraft?.id === id
+            ? data_promoDiscountDetailDraft?.productPromoCriteriaDtos || []
+            : data_promoDiscountDetail?.productPromoCriteriaDtos || [];
+        const temp = tempData?.filter((a) => item === a.criteria);
+        return {
+          id: temp[0]?.id || null,
+          idCriteria: item,
+          idPromo: temp[0]?.idPromo || null,
+        };
+      });
+
+      // const includesAll = bodyData.criteria.includes(24);
+
+      return {
+        id: type === "update" ? id : undefined,
+        name: bodyData.name,
+        description: bodyData.description ? bodyData.description : null,
+        type: bodyData.promoType,
+        typeName: bodyData?.typeName,
+        category: bodyData.promoCategory,
+        categoryName: bodyData?.categoryName,
+        startDate: moment(bodyData?.startDate).format(dateFormatting.date),
+        endDate: bodyData?.endDate
+          ? moment(bodyData?.endDate).format(dateFormatting.date)
+          : null,
+        apphierId: bodyData.apphierId,
+        action: flag ? "SUBMIT" : "DRAFT",
+        productPromoConditionDtos: (listDataCondition || [])?.map((item) => {
+          return {
+            id: item?.id || null,
+            name: item?.name,
+            operator: item?.operator,
+            dataType: item?.dataType,
+            adjustmentValue: item?.value,
+            startDate: moment(item?.startDate).format(dateFormatting.date),
+            endDate: item?.endDate
+              ? moment(item?.endDate).format(dateFormatting.date)
+              : null,
+          };
+        }),
+        productPromoCriteriaDtos: criteriaArrayObject,
+        productPromoCriteriaDataDtos: dataCriteriaObject,
+        // description: bodyData.description || null,
+      };
+    },
+    [
+      criteriaValues,
+      dataListCriteria,
+      data_promoDiscountDetail,
+      data_promoDiscountDetailDraft,
+      flag,
+      id,
+      listDataCondition,
+      listDataCriteria,
+      type,
+    ]
+  );
+
+  // Handle Save
+  const handleSave = useCallback(
+    async (formValue) => {
+      try {
+        if (listDataAttachment.length === 0) {
+          handleMandatory(setTabPagesPromo, listDataAttachment); // attachment mandatory onFinish
+        } else {
+          handleMandatory(setTabPagesPromo, listDataAttachment); // clearing all badge
+          if (
+            listDataCriteria.length === 0 &&
+            !formValue.criteria.includes(37)
+          ) {
+            const errorBody = {
+              title: "Failed",
+              description: "Criteria Mandatory. Please insert data.",
+            };
+            dispatch(showModalError(errorBody));
+          } else if (storedDataInline) {
+            const errorBody = {
+              title: "Failed",
+              description: `Please save data table inline before submit. Please try again.`,
+            };
+            dispatch(showModalError(errorBody));
+          } else if (
+            handleCheckCriteriaMissingValidation(
+              criteriaOptions,
+              formValue?.criteria,
+              listDataCriteria,
+              () => {},
+              1
+            )
+          ) {
+            const errorBody = {
+              title: "Failed",
+              description: `There is missing values in table criteria. Please try again`,
+            };
+            dispatch(showModalError(errorBody));
+          } else {
+            setBodyData({
+              ...formValue,
+              typeName: data_promo_type?.find(
+                (item) => item?.id === formValue?.promoType
+              )?.text,
+              categoryName: data_promo_category?.find(
+                (item) => item?.id === formValue?.promoCategory
+              )?.text,
+              status: type === "update" ? data_promoDiscountDetail?.status : undefined,
+            });
+            setTabPagesPromo([
+              {
+                value: "Promo",
+                paramValue: [
+                  //mandatory fields
+                  "name",
+                  "startDate",
+                  "endDate",
+                  "category",
+                  "promoType",
+                  "criteria",
+                ],
+              },
+              { value: "Approval", paramValue: ["apphierId"] },
+              { value: "Attachment" },
+            ]);
+
+            const validateValueObj = {
+              body: handleBodyConfirm({
+                ...formValue,
+                typeName: data_promo_type?.find(
+                  (item) => item?.id === formValue?.promoType
+                )?.text,
+                categoryName: data_promo_category?.find(
+                  (item) => item?.id === formValue?.promoCategory
+                )?.text,
+              }),
+              services: productPromoHttpService,
+              endPoint:
+                type === "create"
+                  ? "/v1/dbs/api/product-promo/validate-create"
+                  : "/v1/dbs/api/product-promo/validate-update",
+              type: type,
+            };
+            await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
+
+            setModalConfirm(true);
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [
+      listDataAttachment,
+      listDataCriteria,
+      storedDataInline,
+      criteriaOptions,
+      dispatch,
+      data_promo_type,
+      data_promo_category,
+      handleBodyConfirm,
+      type
+    ]
+  );
+
+  const handleConfirm = () => {
+    setModalConfirm(false);
+
+    let dataCriteriaObject = listDataCriteria.map((item, index) =>
+      handleMappingCriteriaGeneral({
+        item: item,
+        index: index,
+        columnsTable: columnsTableCriteriaPromo(),
+        criteriaValues: criteriaValues,
+        dataListCriteria: dataListCriteria,
+      })
+    );
+
+    let criteriaArrayObject = bodyData.criteria.map((item) => {
+      let tempData =
+        id && data_promoDiscountDetailDraft?.id === id
+          ? data_promoDiscountDetailDraft?.productPromoCriteriaDtos || []
+          : data_promoDiscountDetail?.productPromoCriteriaDtos || [];
+      const temp = tempData?.filter((a) => item === a.criteria);
+      return {
+        id: temp[0]?.id || null,
+        idCriteria: item,
+        idPromo: temp[0]?.idPromo || null,
+      };
+    });
+
+    // const includesAll = bodyData.criteria.includes(24);
+
+    const body = {
+      id: type === "update" ? id : undefined,
+      name: bodyData.name,
+      description: bodyData.description ? bodyData.description : null,
+      type: bodyData.promoType,
+      typeName: bodyData?.typeName,
+      category: bodyData.promoCategory,
+      categoryName: bodyData?.categoryName,
+      startDate: moment(bodyData?.startDate).format(dateFormatting.date),
+      endDate: bodyData?.endDate
+        ? moment(bodyData?.endDate).format(dateFormatting.date)
+        : null,
+      apphierId: bodyData.apphierId,
+      action: flag ? "SUBMIT" : "DRAFT",
+      status: bodyData?.status || undefined,
+      productPromoConditionDtos: (listDataCondition || [])?.map((item) => {
+        return {
+          id: item?.id || null,
+          name: item?.name,
+          operator: item?.operator,
+          dataType: item?.dataType,
+          adjustmentValue: item?.value,
+          startDate: moment(item?.startDate).format(dateFormatting.date),
+          endDate: item?.endDate
+            ? moment(item?.endDate).format(dateFormatting.date)
+            : null,
+        };
+      }),
+      productPromoCriteriaDtos: criteriaArrayObject,
+      productPromoCriteriaDataDtos: dataCriteriaObject,
+      // description: bodyData.description || null,
+    };
+    // console.log(body, "body");
+    dispatch(type === "create" ? createPromo(body) : updatePromo(body))
+      .unwrap()
+      .then(async (dataForm) => {
+        const idData = dataForm?.id
+        setLoadingForm(true);
+        const filterDataAttach = listDataAttachment.filter(
+          (item) => item.dataType !== "exist"
+        );
+        for (let icon = 0; icon < filterDataAttach.length; icon++) {
+          const element = filterDataAttach[icon];
+          const body = {
+            files: element.file,
+            category: element.fileCategoryId,
+            refId: hasValue(idData) ? idData : id,
+          };
+          await productPromoHttpService.uploadAttachment(
+            `/v1/dbs/api/product-promo/upload-attachment`,
+            body
+          );
+        }
+        setLoadingForm(false);
+        handleDescriptionSuccess(body, type);
+      })
+      .catch((error) => {
+        if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+          const message =
+            (error.response &&
+              error.response.data &&
+              error.response.data.message) ||
+            error.message ||
+            error.toString();
+          setBodyError({ message });
+          setModalError(true);
+        }
+      });
+  };
+
+  const handleRetry = () => {
+    handleSave(bodyError?.value);
+    setModalError(false);
+  };
+
+  const handleClear = (type) => {
+    if (type === "create") {
+      form.resetFields();
+      setCriteriaValues([]);
+      setCriteriaOptions([]);
+      setListDataCriteria([]);
+      setStoredDataInline(false);
+      setStartDate();
+      setListDataAttachment([]);
+      setDataApprovalId();
+      setDataListDetailApproval([]);
+      setBodyData({});
+      setBodyError({});
+      setListDataCondition([]);
+    } else {
+      setListDataAttachment(
+        (data_listAttachment || [])?.map((item) => {
+          return {
+            ...item,
+            createdDate: moment(item.createdDate).format(dateFormatting.date),
+            // fileSize: bytesConverter(item.fileSize || 0),
+            // urlFile1: `${urlLink(item?.id)}`,
+            dataType: "exist",
+          };
+        })
+      );
+      if (
+        //draft
+        data_promoDiscountDetailDraft &&
+        data_promoDiscountDetailDraft?.id === id
+      ) {
+        const body = {
+          ...data_promoDiscountDetailDraft,
+          status: data_promoDiscountDetail?.status,
+          statusApproval: data_promoDiscountDetail?.statusApproval,
+        };
+
+        handleAssertData(
+          body,
+          data_promoDiscountDetail?.productPromoCriteriaDataDtos || [],
+          dataListCriteria
+        );
+      } else {
+        handleAssertData(data_promoDiscountDetail, [], dataListCriteria);
+      }
+    }
+  };
+
+  return (
+    <LayoutMenu>
+      <Spin spinning={loading || loadingForm}>
+        <BreadCrumb routes={routes} />
+        <div className={"w-full flex flex-col"}>
+          <div className={"w-full flex justify-start"}>
+            <RadioTabs
+              data={tabPagesPromo}
+              onChange={(e) => setValuePage(e.target.value)}
+              currentPosition={valuePage}
+            />
+          </div>
+        </div>
+
+        <Form
+          id="form"
+          layout="vertical"
+          form={form}
+          onFinish={handleSave}
+          onFinishFailed={handleErrorSubmit}
+        >
+          <div
+            style={{
+              display:
+                valuePage !== tabPagesPromo[0].value ? "none" : undefined,
+            }}
+          >
+            <Promo
+              type={type}
+              criteriaOptionsFix={criteriaOptions}
+              promoCategoryOptions={data_promo_category || []}
+              promoTypeOptions={data_promo_type || []}
+              handleSelectCriteria={handleSelectCriteria}
+              handleDeselectCriteria={handleDeselectCriteria}
+              handleClearCriteria={handleClearCriteria}
+              handleStartDate={handleStartDate}
+              startDate={startDate}
+              listDataCriteria={listDataCriteria}
+              setListDataCriteria={setListDataCriteria}
+              criteriaValues={criteriaValues}
+              storedDataInline={storedDataInline}
+              setStoredDataInline={setStoredDataInline}
+              status={data_promoDiscountDetail?.status}
+              statusApproval={data_promoDiscountDetail?.statusApproval}
+              listDataCondition={listDataCondition}
+              setListDataCondition={setListDataCondition}
+              endDate={endDate}
+              handleEndDate={handleEndDate}
+            />
+          </div>
+
+          <div
+            style={{
+              display:
+                valuePage !== tabPagesPromo[1].value ? "none" : undefined,
+            }}
+          >
+            <BaseContainer header={"APPROVAL INFORMATION"}>
+              <ApprovalComponentGeneral
+                dataTable={dataListDetailApproval}
+                dataOption={dataApproval}
+                selectedHierarchy={dataApprovalId}
+                updateSelectedHierarchy={setDataApprovalId}
+              />
+            </BaseContainer>
+          </div>
+
+          <div
+            style={{
+              display:
+                valuePage !== tabPagesPromo[2].value ? "none" : undefined,
+            }}
+          >
+            <BaseContainer header={"Attachment Information"}>
+              <AttachmentComponent
+                type={type}
+                data={listDataAttachment}
+                updateData={setListDataAttachment}
+                dispatch={dispatch}
+                getAPICategory={getAttachmentCategoryPromo}
+                getAPIGuard={getConfigFileMaster}
+                typeSelector={"promo"}
+                mandatory={true}
+              />
+            </BaseContainer>
+          </div>
+
+          <div className="w-full flex justify-between mt-10">
+            <div className=" flex">
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => {
+                  setModalBack(true);
+                }}
+                icon={
+                  <LeftOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 24,
+                      justifyItems: "center",
+                    }}
+                  />
+                }
+              >
+                Back
+              </ButtonComponent>
+            </div>
+
+            <div className={"w-full flex justify-end gap-5"}>
+              <Form.Item>
+                <ButtonComponent
+                  icon={<SVGIcon name="IconButtonClear" width={24} />}
+                  type="submit"
+                  onClick={() => {
+                    handleClear(type);
+                  }}
+                  disabled={storedDataInline}
+                >
+                  {type === "create" ? "Clear" : "Reset"}
+                </ButtonComponent>
+              </Form.Item>
+              <Form.Item>
+                <ButtonComponent
+                  type="submit"
+                  htmlType={"submit"}
+                  onClick={() => setFlag(false)}
+                  disabled={storedDataInline}
+                >
+                  Save as Draft
+                </ButtonComponent>
+              </Form.Item>
+              <Form.Item>
+                <ButtonComponent
+                  type="submit"
+                  htmlType={"submit"}
+                  onClick={() => setFlag(true)}
+                  disabled={storedDataInline}
+                >
+                  Save & Submit
+                </ButtonComponent>
+              </Form.Item>
+            </div>
+          </div>
+        </Form>
+
+        {modalConfirm ? (
+          <ModalCustom
+            isOpen={modalConfirm}
+            handleCancel={() => setModalConfirm(false)}
+            header={"CONFIRMATION"}
+            width={1200}
+            type={"confirmation"}
+            footer={
+              <div className="w-full flex justify-end gap-5">
+                <ButtonComponent
+                  type={"default"}
+                  onClick={() => {
+                    setModalConfirm(false);
+                  }}
+                >
+                  Cancel
+                </ButtonComponent>
+                <ButtonComponent
+                  type={"submit"}
+                  onClick={() => {
+                    handleConfirm();
+                  }}
+                  disabled={loading || loadingForm}
+                >
+                  Confirm
+                </ButtonComponent>
+              </div>
+            }
+          >
+            <PromoDiscountConfirm
+              listAttachment={listDataAttachment}
+              listDataCriteria={listDataCriteria}
+              criteriaValues={criteriaValues}
+              listCriteria={formatCriteria(bodyData?.criteria || [])}
+              listDataCondition={listDataCondition}
+              dataConfirm={bodyData}
+              dataApproval={dataApprovalId}
+              dataApprovalTable={dataListDetailApproval}
+              listApproval={dataApproval}
+            />
+          </ModalCustom>
+        ) : null}
+
+        {modalError ? (
+          <ModalError
+            isOpen={modalError}
+            handleOk={handleRetry}
+            handleCancel={() => {
+              setModalError(false);
+            }}
+            customText={"Try Again"}
+          >
+            <div className="px-5 pt-5 pb-[10px] justify-center">
+              <div className="w-full flex gap-[20px]">
+                <SVGIcon name="IconFailed" width={48} />
+                <p className="text-[18px] font-bold">{"Failed"}</p>
+              </div>
+              <p className="pl-[70px]">{`Your data was not ${
+                type === "create" ? "Created." : "Updated."
+              } ${bodyError?.message}`}</p>
+              <p className="pl-[70px]">Please try again.</p>
+            </div>
+          </ModalError>
+        ) : null}
+
+        {modalBack ? (
+          <ModalConfirm
+            isOpen={modalBack}
+            handleCancel={() => setModalBack(false)}
+            handleOk={() => navigate(-1)}
+            width={400}
+          >
+            <div className="flex justify-center mt-5 gap-[20px]">
+              <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+              <p className="text-[18px] font-bold">
+                Are you sure you want to back?
+              </p>
+            </div>
+          </ModalConfirm>
+        ) : null}
+      </Spin>
+    </LayoutMenu>
+  );
+};
+
+export default PromoDiscountCreateAndUpdate;
