@@ -1,0 +1,17 @@
+import React, { useEffect } from "react";
+import BreadCrumb from "../../components/BreadCrumb";
+import LayoutMenu from "../../components/SidebarMenu/LayoutMenu";
+import { useDispatch, useSelector } from "react-redux";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
+
+const Dashboard = () => {
+	
+	return (
+		<LayoutMenu>
+			<BreadCrumb pageName={["testing", "testing"]} />
+			<h2>Dashboard</h2>
+		</LayoutMenu>		
+	);
+};
+
+export default Dashboard;

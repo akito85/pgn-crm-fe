@@ -1,0 +1,147 @@
+import { Tooltip } from "antd";
+import Highlighter from "react-highlight-words";
+import {
+    getColumnSearchPropsPaging,
+  } from "../../../../../../utils/getColumnSearchProps";
+export const columnAdjusmentList = (
+  page = 1,
+  pageSize = 10,
+  searchInput,
+  searchedColumn,
+  searchText,
+  handleSearch = () => {}
+) => [
+  {
+    title: "NO",
+    width: 60,
+    align: "center",
+    render: (text, object, index) => (page - 1) * pageSize + index + 1,
+  },
+  {
+    title: "PERIOD TAGIHAN",
+    dataIndex: "",
+    align: "center",
+    sorter: true,
+    ...getColumnSearchPropsPaging(
+      "",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "period"
+    ),
+  },
+  {
+    title: "INVOICE NO",
+    dataIndex: "",
+    align: "left",
+    sorter: true,
+    ...getColumnSearchPropsPaging(
+      "",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+  },
+  {
+    title: "TYPE",
+    dataIndex: "",
+    align: "left",
+    sorter: true,
+    ...getColumnSearchPropsPaging(
+      "",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+  },
+  {
+    title: "TYPE QUANTITY",
+    dataIndex: "",
+    align: "left",
+    sorter: true,
+    ...getColumnSearchPropsPaging(
+      "",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+  },
+  {
+    title: "QUANTITY",
+    dataIndex: "",
+    align: "right",
+    sorter: true,
+    ...getColumnSearchPropsPaging(
+      "",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+  },
+  {
+    title: "VALUE",
+    dataIndex: "",
+    align: "right",
+    sorter: true,
+    ...getColumnSearchPropsPaging(
+      "",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+  },
+  {
+    title: "TOTAL AMOUNT",
+    dataIndex: "",
+    align: "right",
+    sorter: true,
+    ...getColumnSearchPropsPaging(
+      "",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+  },
+  {
+    title: "REMARK",
+    dataIndex: "",
+    align: "left",
+    sorter: true,
+    ...getColumnSearchPropsPaging(
+      "",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+  },
+  {
+    title: "CREATED BY",
+    dataIndex: "",
+    align: "left",
+    sorter: true,
+    ...getColumnSearchPropsPaging(
+      "",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+  },
+];

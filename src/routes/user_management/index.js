@@ -1,0 +1,128 @@
+import { USER_ROUTES } from "./user_routes";
+import { USER_ELEMENTS } from "./user_elements";
+
+export const user_management = [
+  // user menu
+  {
+    path: USER_ROUTES.VIEW_USER,
+    element: USER_ELEMENTS.VIEW_USER_PAGE,
+  },
+  {
+    path: USER_ROUTES.CREATE_USER,
+    element: USER_ELEMENTS.CREATE_USER_PAGE,
+  },
+  {
+    path: USER_ROUTES.DETAIL_USER,
+    element: USER_ELEMENTS.DETAIL_USER_PAGE,
+  },
+  {
+    path: USER_ROUTES.CHANGE_AUTH,
+    element: USER_ELEMENTS.CHANGE_AUTH_PAGE,
+  },
+  {
+    path: USER_ROUTES.GENERATE_PASSWORD,
+    element: USER_ELEMENTS.GENERATE_PASSWORD_PAGE,
+  },
+  {
+    path: USER_ROUTES.UPLOAD_USER,
+    element: USER_ELEMENTS.UPLOAD_USER_PAGE,
+  },
+  {
+    path: USER_ROUTES.UPDATE_USER,
+    element: USER_ELEMENTS.UPDATE_USER_PAGE,
+  },
+  // position menu
+  {
+    path: USER_ROUTES.VIEW_POSITION,
+    element: USER_ELEMENTS.VIEW_POSITION_PAGE,
+  },
+  {
+    path: USER_ROUTES.DETAIL_POSITION,
+    element: USER_ELEMENTS.DETAIL_POSITION_PAGE,
+  },
+  {
+    path: USER_ROUTES.CREATE_POSITION,
+    element: USER_ELEMENTS.CREATE_POSITION_PAGE,
+  },
+  {
+    path: USER_ROUTES.UPDATE_POSITION,
+    element: USER_ELEMENTS.UPDATE_POSITION_PAGE,
+  },
+  // employee menu
+  {
+    path: USER_ROUTES.VIEW_EMPLOYEE,
+    element: USER_ELEMENTS.VIEW_EMPLOYEE_PAGE,
+  },
+  {
+    path: USER_ROUTES.DETAIL_EMPLOYEE,
+    element: USER_ELEMENTS.DETAIL_EMPLOYEE_PAGE,
+  },
+  {
+    path: USER_ROUTES.CREATE_EMPLOYEE,
+    element: USER_ELEMENTS.CREATE_EMPLOYEE_PAGE,
+  },
+  {
+    path: USER_ROUTES.UPDATE_EMPLOYEE,
+    element: USER_ELEMENTS.UPDATE_EMPLOYEE_PAGE,
+  },
+  {
+    path: USER_ROUTES.UPLOAD_EMPLOYEE,
+    element: USER_ELEMENTS.UPLOAD_EMPLOYEE_PAGE,
+  },
+  {
+    path: USER_ROUTES.FORWARD_TASK,
+    element: USER_ELEMENTS.FORWARD_TASK_PAGE,
+  },
+  // DELEGATION
+  {
+    path: USER_ROUTES.VIEW_DELEGATION,
+    element: USER_ELEMENTS.VIEW_DELEGATION_PAGE,
+  },
+  {
+    path: USER_ROUTES.CREATE_DELEGATION,
+    element: USER_ELEMENTS.CREATE_DELEGATION_PAGE,
+  },
+  {
+    path: USER_ROUTES.DETAIL_DELEGATION,
+    element: USER_ELEMENTS.DETAIL_DELEGATION_PAGE,
+  },
+  // approval hierarchy
+  {
+    path: USER_ROUTES.VIEW_APPROVAL_HIERARCHY,
+    element: USER_ELEMENTS.VIEW_APPROVAL_PAGE,
+  },
+  {
+    path: USER_ROUTES.CREATE_APPROVAL_HIERARCHY,
+    element: USER_ELEMENTS.CREATE_APPROVAL_PAGE,
+  },
+  {
+    path: USER_ROUTES.DETAIL_APPROVAL_HIERARCHY,
+    element: USER_ELEMENTS.DETAIL_APPROVAL_PAGE,
+  },
+  {
+    path: USER_ROUTES.UPDATE_APPROVAL_HIERARCHY,
+    element: USER_ELEMENTS.UPDATE_APPROVAL_PAGE,
+  },
+  {
+    path: USER_ROUTES.VIEW_PROFILE,
+    element: USER_ELEMENTS.VIEW_PROFILE,
+  },
+
+  // DATA HIEARARCHY
+  {
+    path: USER_ROUTES.VIEW_DATA_ACCESS,
+    element: USER_ELEMENTS.VIEW_DATA_ACCESS_PAGE,
+  },
+  {
+    path: USER_ROUTES.DETAIL_DATA_ACCESS,
+    element: USER_ELEMENTS.DETAIL_DATA_ACCESS_PAGE,
+  },
+  {
+    path: USER_ROUTES.CREATE_DATA_ACCESS,
+    element: USER_ELEMENTS.CREATE_DATA_ACCESS_PAGE,
+  },
+  {
+    path: USER_ROUTES.UPDATE_DATA_ACCESS,
+    element: USER_ELEMENTS.UPDATE_DATA_ACCESS_PAGE,
+  },
+];

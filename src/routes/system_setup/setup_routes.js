@@ -1,0 +1,74 @@
+export const SYSTEM_SETUP_ROUTES = {
+  // menus routes
+  VIEW_MENU: "/system-setup/menu",
+  CREATE_MENU: "/system-setup/menu/create",
+  UPDATE_MENU: "/system-setup/menu/update",
+
+  // global type
+  VIEW_GLOBAL_TYPE: "/system-setup/global-type",
+  CREATE_GLOBAL_TYPE: "/system-setup/global-type/create",
+  DETAIL_GLOBAL_TYPE: "/system-setup/global-type/view",
+  // DETAIL_GLOBAL_TYPE:'/system-setup/global-type/detail/&{id}',
+  UPDATE_GLOBAL_TYPE: "/system-setup/global-type/update",
+  // UPDATE_GLOBAL_TYPE:'/system-setup/global-type/update/${id}',
+
+  // global properties
+  VIEW_GLOBAL_PROPERTIES: "/system-setup/global-properties",
+  DETAIL_GLOBAL_PROPERTIES: "/system-setup/global-properties/view",
+  CREATE_GLOBAL_PROPERTIES: "/system-setup/global-properties/create",
+  UPDATE_GLOBAL_PROPERTIES: "/system-setup/global-properties/update",
+
+  // action
+  VIEW_ACTION: "/system-setup/action",
+  CREATE_ACTION: "/system-setup/action/create",
+  UPDATE_ACTION: "/system-setup/action/update",
+  // UPDATE_ACTION:'system-setup/action/update/${id}'
+
+  // entity
+  VIEW_ENTITY: "/system-setup/entity",
+  CREATE_ENTITY: "/system-setup/entity/create",
+  UPDATE_ENTITY: "/system-setup/entity/update",
+  DETAIL_ENTITY: "/system-setup/entity/view",
+
+  // cost center
+  VIEW_COST_CENTER: "/system-setup/master-data/cost-center",
+  CREATE_COST_CENTER: "/system-setup/master-data/cost-center/create",
+  UPDATE_COST_CENTER: "/system-setup/master-data/cost-center/update",
+
+  // group access
+  VIEW_GROUP_ACCESS: "/system-setup/group-access",
+  CREATE_GROUP_ACCESS: "/system-setup/group-access/create",
+  UPDATE_GROUP_ACCESS: "/system-setup/group-access/update",
+
+  // Announcement
+  VIEW_ANNOUNCEMENT: "/system-setup/announcement",
+  CREATE_ANNOUNCEMENT: "/system-setup/announcement/create",
+  UPDATE_ANNOUNCEMENT: "/system-setup/announcement/update",
+  DETAIL_ANNOUNCEMENT: "/system-setup/announcement/view",
+
+  // JOB
+  VIEW_JOB: "/system-setup/job",
+  CREATE_JOB: "/system-setup/job/create",
+  UPDATE_JOB: "/system-setup/job/update",
+
+  // BACKGROUND
+  VIEW_LOGIN_BACKGROUND: "/system-setup/login-background",
+  CREATE_LOGIN_BACKGROUND: "/system-setup/login-background/create",
+  UPDATE_LOGIN_BACKGROUND: "/system-setup/login-background/update",
+  DETAIL_LOGIN_BACKGROUND: "/system-setup/login-background/view",
+
+  // POSITION MASTER DATA
+  VIEW_MASTER_POSITION: "/system-setup/master-data/position",
+  CREATE_MASTER_POSITION: "/system-setup/master-data/position/create",
+  UPDATE_MASTER_POSITION: "/system-setup/master-data/position/update",
+
+  // ASSETS
+  VIEW_MASTER_ASSETS:'/system-setup/assets',
+  CREATE_MASTER_ASSETS:'/system-setup/assets/create',
+  UPDATE_MASTER_ASSETS:'/system-setup/assets/update',
+  DETAIL_MASTER_ASSETS: '/system-setup/assets/view',
+  UPLOAD_MASTER_ASSETS:'/system-setup/assets/upload',
+
+  // MAINTENANCE MODE
+  VIEW_MAINTENANCE_MODE: "/system-setup/maintenance-mode",
+};

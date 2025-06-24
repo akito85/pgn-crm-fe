@@ -1,0 +1,778 @@
+import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import { Form, Spin } from "antd";
+import React, { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import BaseContainer from "../../../../../../components/BaseContainer";
+import BreadCrumb from "../../../../../../components/BreadCrumb";
+import ButtonComponent from "../../../../../../components/ButtonComponent";
+import RadioTabs from "../../../../../../components/RadioTabs";
+import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
+import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
+import DailyRateCreate from "./DailyRateCreate";
+import SVGIcon from "../../../../../../assets/Icon/index";
+import ModalConfirmDailyRate from "./ModalConfirmDailyRate";
+import ModalCustom from "../../../../../../components/Modal/ModalCustom";
+import ApprovalComponentGeneral from "../../../../../../components/Approval/ApprovalComponentGeneral";
+import {
+  createMasterDailyRates,
+  getAllApprovalList,
+  getCurrencyDDL,
+  getDetailDR,
+  getDetailDraftDR,
+  getListApprovalById,
+  getListCategory,
+  getRateTypeDDL,
+  updateMasterDailyRates,
+} from "../../../../../../redux/slices/rating_billing_invoice/MasterData/dailyrate";
+import ratingBillingHttpService from "../../../../../../redux/services/ratingBillingHttpService";
+import {
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../../../redux/slices/general_slice";
+import moment from "moment";
+import { dateFormatting } from "../../../../../../utils";
+import AttachmentComponent from "../../../../../../components/Attachment/AttachmentComponent";
+import { getConfigFileRBIData } from "../../../../../../redux/slices/attachmentSlice";
+import { configApp } from "../../../../../../constants/configApp";
+import ModalBack from "../../../../../../components/Modal/ModalBack";
+import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
+
+const DailyRateForm = ({ type }) => {
+  const {
+    data_cur,
+    dataListAppHierId,
+    dataListAppHierDetail,
+    data_rate,
+    loading,
+    data_detail,
+    data_detail_draft,
+  } = useSelector((state) => state.daily_rate);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [form] = Form.useForm();
+  const formValue = form.getFieldsValue();
+  const listTypeSubmit = [true, false];
+  const { id, status, statusApproval } = location?.state || {};
+
+  const [appHierOptions, setAppHierOptions] = useState([]);
+  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+  const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [kirimBody, setKirimBody] = useState({});
+  const [bodyError, setBodyError] = useState({});
+  const [loadingForm, setLoadingForm] = useState(loading);
+  const [ratesId, setRatesId] = useState();
+  const [selectedHierarchy, setSelectedHierarchy] = useState();
+  const [convertedRate, setConvertedRate] = useState();
+  const [typeSubmit, setTypeSubmit] = useState(listTypeSubmit[0]);
+
+  const [modalBack, setModalBack] = useState(false);
+  const [modalConfirm, setModalConfirm] = useState(false);
+  const [modalError, setModalError] = useState(false);
+
+  // useeffect
+  useEffect(() => {
+    dispatch(getCurrencyDDL());
+    dispatch(getAllApprovalList());
+    dispatch(getRateTypeDDL());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (id && type === "update") {
+      dispatch(getDetailDR(id));
+      dispatch(getDetailDraftDR(id));
+    }
+  }, [dispatch, id, type, status, statusApproval]);
+
+  useEffect(() => {
+    if (dataListAppHierId && dataListAppHierId.length > 0) {
+      const tempAppHier = dataListAppHierId.map((appHier) => ({
+        name: appHier.approvalName,
+        value: appHier.appHierId,
+      }));
+      setAppHierOptions(tempAppHier);
+    }
+  }, [dataListAppHierId]);
+
+  useEffect(() => {
+    if (selectedHierarchy && selectedHierarchy !== 0) {
+      dispatch(getListApprovalById({ id: selectedHierarchy }));
+    }
+  }, [dispatch, selectedHierarchy]);
+
+  useEffect(() => {
+    if (dataListAppHierDetail && dataListAppHierDetail.length > 0) {
+      const data = dataListAppHierDetail.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: a.employeeDetail.map((b, index) => ({
+          ...b,
+          key: index + 1,
+        })),
+      }));
+      setAppHierDataDetail(data);
+    } else {
+      setAppHierDataDetail([]);
+    }
+  }, [dataListAppHierDetail]);
+
+  // filter to curency and from
+  const fCurrencyName = data_cur
+    ?.filter((a) => a.Id === formValue?.fCurrency)
+    ?.find((b) => b.text)?.text;
+  const tCurrencyName = data_cur
+    ?.filter((a) => a.Id === formValue?.tCurrency)
+    ?.find((b) => b.text)?.text;
+  const rTypeName = data_rate
+    ?.filter((a) => a.code === formValue?.rateType)
+    ?.find((b) => b.text)?.text;
+
+  const asserDataDetail = useCallback(
+    (data_detail) => {
+      const appHier = data_detail?.appHierId || [];
+      const dataAttachment = (data_detail?.mattachments || []).map((item) => {
+        return {
+          id: item.id,
+          size: item.size,
+          fileName: item.fileName,
+          fileSize: item.fileSize,
+          fileType: item.fileType,
+          fileCategoryId: item.fileCategoryId,
+          fileCategoryName: item.fileCategoryName,
+          pathFile: item.pathFile,
+          urlFile1: item.urlFile1,
+          urlFile2: item.urlFile2,
+          createdBy: item.createdBy,
+          createdDate: item.createdDate
+            ? moment(item.createdDate).format("DD MMM YYYY")
+            : "",
+          dataType: "exist",
+        };
+      });
+      setSelectedHierarchy(appHier);
+      setListDataAttachment(dataAttachment);
+      form.setFieldsValue({
+        id: data_detail?.ratesId,
+        rateType: data_detail?.rateType,
+        fCurrency: data_detail?.fromCurrency,
+        tCurrency: data_detail?.toCurrency,
+        rateDate:
+          data_detail?.rateDate === null
+            ? moment()
+            : moment(data_detail?.rateDate).clone(),
+        convertedRate: data_detail?.convertedRate,
+        description: data_detail?.description,
+        apphierId: appHier,
+      });
+    },
+    [form]
+  );
+
+  const asserDataDetailDraft = useCallback(
+    (data_detail_draft, data_detail) => {
+      const appHier = data_detail_draft?.appHierId || [];
+      setSelectedHierarchy(appHier);
+      const dataAttachment = (data_detail?.mattachments || []).map((item) => {
+        return {
+          id: item.id,
+          size: item.size,
+          fileName: item.fileName,
+          fileSize: item.fileSize,
+          fileType: item.fileType,
+          fileCategoryId: item.fileCategoryId,
+          fileCategoryName: item.fileCategoryName,
+          pathFile: item.pathFile,
+          urlFile1: item.urlFile1,
+          urlFile2: item.urlFile2,
+          createdBy: item.createdBy,
+          createdDate: item.createdDate
+            ? moment(item.createdDate).format("DD MMM YYYY")
+            : "",
+          dataType: "exist",
+        };
+      });
+      setListDataAttachment(dataAttachment);
+      form.setFieldsValue({
+        id: data_detail_draft?.ratesId,
+        rateType: data_detail_draft?.rateType,
+        fCurrency: data_detail_draft?.fromCurrency,
+        tCurrency: data_detail_draft?.toCurrency,
+        rateDate:
+          data_detail_draft?.rateDate === null
+            ? moment()
+            : moment(data_detail_draft?.rateDate).clone(),
+        convertedRate: data_detail_draft?.convertedRate,
+        apphierId: appHier,
+        description: data_detail_draft?.description,
+      });
+    },
+    [form]
+  );
+
+  useEffect(() => {
+    if (
+      id &&
+      type === "update" &&
+      data_detail_draft?.ratesId === id &&
+      data_detail?.ratesId === id
+    ) {
+      asserDataDetailDraft(data_detail_draft, data_detail);
+    } else if (
+      id &&
+      type === "update" &&
+      !data_detail_draft?.ratesId &&
+      data_detail?.ratesId === id
+    ) {
+      asserDataDetail(data_detail);
+    }
+  }, [
+    id,
+    type,
+    data_detail,
+    data_detail_draft,
+    asserDataDetail,
+    asserDataDetailDraft,
+  ]);
+
+  useEffect(() => {
+    if (
+      formValue.approvalHierarchy &&
+      !appHierOptions
+        .map((item) => item.value)
+        .includes(formValue.approvalHierarchy)
+    ) {
+      form.setFieldsValue({ approvalHierarchy: null });
+      setSelectedHierarchy(null);
+    }
+  }, [formValue, appHierOptions, form]);
+
+  //handle Tab
+  const [tabData, setTabData] = useState([
+    {
+      value: "Daily Rate",
+      paramValue: [
+        "rateType",
+        "fCurrency",
+        "tCurrency",
+        "rateDate",
+        "convertedRate",
+      ],
+    },
+    { value: "Approval", paramValue: ["apphierId"] },
+    { value: "Attachment" },
+  ]);
+  const [valuePage, setValuePage] = useState(tabData[0].value);
+  const onChange = (e) => {
+    setValuePage(e.target.value);
+  };
+
+  const routes = [
+    {
+      path: "",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Datap",
+    },
+    {
+      path: RBI_ROUTES.DAILY_RATE_VIEW,
+      breadcrumbName: "Daily Rate",
+    },
+    {
+      path: RBI_ROUTES.DAILY_RATE_CREATE,
+      breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
+    },
+  ];
+
+  // Validation Button Back
+  const handleBack = () => {
+    if (
+      form.getFieldValue() === null ||
+      Object.keys(form.getFieldValue()).length === 0
+    ) {
+      navigate(-1);
+    } else {
+      setModalBack(true);
+    }
+  };
+
+  //handle Error Vlaidasi
+  const handleMandatory = (
+    setListSectionInfo = () => {},
+    listDataAttachment,
+    errorFields
+  ) => {
+    setListSectionInfo((prevState) => {
+      const res = prevState.map((item) => {
+        const errorBadge =
+          item.value !== "Attachment"
+            ? (errorFields || []).reduce(
+                (current, next) =>
+                  item.paramValue.includes(next.name[0])
+                    ? current + 1
+                    : current,
+                0
+              )
+            : listDataAttachment.length < 1
+            ? 1
+            : 0;
+        return {
+          value: item.value,
+          paramValue: item.paramValue,
+          errorBadge,
+        };
+      });
+      return res;
+    });
+  };
+
+  // Handle Error Tab Form
+  const handleError = ({ values, errorFields, outOfDate }) => {
+    handleMandatory(setTabData, listDataAttachment, errorFields);
+  };
+
+  // process data body
+  const processData = ({
+    type,
+    kirimBody,
+    data_detail,
+    fCurrencyName,
+    tCurrencyName,
+    rTypeName,
+  }) => {
+    const body = {
+      ...kirimBody,
+      convertedRateName: kirimBody?.convertedRate,
+      fromCurrencyName: type === "update" ? fCurrencyName : undefined,
+      toCurrencyName: type === "update" ? tCurrencyName : undefined,
+      rateTypeName: type === "update" ? rTypeName : undefined,
+      ratesId: type === "update" ? data_detail?.ratesId : undefined,
+    };
+
+    return body;
+  };
+
+  // Validate Data before Modal
+  const checkDataValidity = async (formValue) => {
+    const url =
+      type === "create"
+        ? "/v1/dbs/api/daily-rate/validate-create"
+        : "/v1/dbs/api/daily-rate/validate-update";
+
+    const body = processData({
+      kirimBody: formValue,
+      data_detail,
+      fCurrencyName,
+      rTypeName,
+      tCurrencyName,
+      type
+    });
+
+    try {
+      await dispatch(
+        validateCreateUpdate({
+          body: body,
+          services: ratingBillingHttpService,
+          endPoint: url,
+          type: type,
+        })
+      )?.unwrap();
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const handleClear = () => {
+    if (type === "create") {
+      form.resetFields();
+      setAppHierDataDetail([]);
+      setSelectedHierarchy("");
+      setKirimBody({});
+      setListDataAttachment([]);
+      setTabData([
+        {
+          value: "Daily Rate",
+          paramValue: [
+            "rateType",
+            "fCurrency",
+            "tCurrency",
+            "rateDate",
+            "convertedRate",
+          ],
+        },
+        { value: "Approval", paramValue: ["apphierId"] },
+        { value: "Attachment" },
+      ]);
+    } else {
+      if (id && data_detail_draft?.ratesId === id) {
+        asserDataDetailDraft(data_detail_draft);
+      } else if (
+        id &&
+        !data_detail_draft?.ratesId &&
+        data_detail?.ratesId === id
+      ) {
+        asserDataDetail(data_detail);
+      }
+    }
+  };
+
+  // handle Save & Submit Form
+  const handleSubmitForm = async (formValue) => {
+    if (listDataAttachment.length === 0) {
+      handleMandatory(setTabData, listDataAttachment);
+    } else {
+      handleMandatory(setTabData, listDataAttachment);
+      if (formValue?.tCurrency === formValue?.fCurrency) {
+        const errorBody = {
+          title: "Failed",
+          description: "From currency cannot be the same as to currency!",
+        };
+        dispatch(showModalError(errorBody));
+      } else {
+        const dataValue = {
+          rateType: formValue?.rateType,
+          fromCurrency: formValue?.fCurrency,
+          toCurrency: formValue?.tCurrency,
+          rateDate: moment(formValue?.rateDate).format(
+            dateFormatting.dateCapital
+          ),
+          convertedRate: formValue?.convertedRate,
+          description: formValue?.description,
+          appHierId: formValue?.apphierId,
+          submit: typeSubmit,
+        };
+        const isDataValid = await checkDataValidity(dataValue);
+
+        if (isDataValid) {
+          setModalConfirm(true);
+          setKirimBody(dataValue);
+          setTabData([
+            {
+              value: "Daily Rate",
+              paramValue: [
+                "rateType",
+                "fCurrency",
+                "tCurrency",
+                "rateDate",
+                "convertedRate",
+              ],
+            },
+            { value: "Approval", paramValue: ["apphierId"] },
+            { value: "Attachment" },
+          ]);
+        } else {
+          setModalConfirm(false);
+        }
+      }
+    }
+  };
+
+  //cancle modall
+  const handleCancelModalConfirm = () => {
+    setModalConfirm(false);
+    // setValue(tabData[0].value);
+  };
+
+  const handleProcessModalConfirm = async () => {
+    const body = processData({
+      kirimBody,
+      data_detail,
+      fCurrencyName,
+      rTypeName,
+      tCurrencyName,
+      type
+    });
+    // const body = {
+    //   ...kirimBody,
+    //   convertedRateName: kirimBody?.convertedRate,
+    // };
+
+    // const bodyUpdate = {
+    //   ...kirimBody,
+    //   fromCurrencyName: fCurrencyName,
+    //   toCurrencyName: tCurrencyName,
+    //   rateTypeName: rTypeName,
+    //   convertedRateName: kirimBody?.convertedRate,
+    // };
+
+
+    if (type !== "update") {
+      dispatch(createMasterDailyRates(body))
+        .unwrap()
+        .then(async (data) => {
+          let dailyRate = data?.id;
+          setLoadingForm(true);
+          for (let icon = 0; icon < listDataAttachment.length; icon++) {
+            const element = listDataAttachment[icon];
+            const body = {
+              files: element.file,
+              refId: dailyRate,
+              category: element.fileCategoryId,
+            };
+            const response = await ratingBillingHttpService.uploadAttachment(
+              `/v1/dbs/api/daily-rate/upload-attachment`,
+              body
+            );
+          }
+          setLoadingForm(false);
+          setRatesId(dailyRate);
+          handleCancelModalConfirm();
+          handleClear();
+        })
+        .catch((error) => {
+          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+            const message =
+              (error.response &&
+                error.response.data &&
+                error.response.data.message) ||
+              error.message ||
+              error.toString();
+            dispatch(showModalError(message));
+          }
+        });
+    } else {
+      // const bodys = {
+      //   ...bodyUpdate,
+      //   ratesId: data_detail?.ratesId,
+      // };
+
+      dispatch(updateMasterDailyRates(body))
+        .unwrap()
+        .then(async () => {
+          setLoadingForm(true);
+          const filterDataAttach = listDataAttachment.filter(
+            (item) => item.dataType !== "exist"
+          );
+          for (let icon = 0; icon < filterDataAttach.length; icon++) {
+            const element = filterDataAttach[icon];
+            const body = {
+              files: element.file,
+              refId: data_detail?.ratesId,
+              category: element.fileCategoryId,
+            };
+            const response = await ratingBillingHttpService.uploadAttachment(
+              `/v1/dbs/api/daily-rate/upload-attachment`,
+              body
+            );
+          }
+          setLoadingForm(false);
+          setRatesId(ratesId);
+          handleCancelModalConfirm();
+          form.resetFields();
+          setSelectedHierarchy("");
+          setListDataAttachment([]);
+        })
+        .catch((error) => {
+          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+            const message =
+              (error.response &&
+                error.response.data &&
+                error.response.data.message) ||
+              error.message ||
+              error.toString();
+            dispatch(showModalError(message));
+          }
+        });
+    }
+  };
+
+  const handleCloseModalError = () => {
+    setModalError(false);
+    setBodyError({});
+  };
+
+  const handleRetry = () => {
+    handleProcessModalConfirm();
+    setModalError(false);
+    setBodyError({});
+  };
+
+  return (
+    <LayoutMenu>
+      <Spin spinning={loading || loadingForm}>
+        <BreadCrumb routes={routes} />
+        <RadioTabs
+          data={tabData}
+          onChange={onChange}
+          currentPosition={valuePage}
+        />
+
+        <Form
+          layout="vertical"
+          form={form}
+          onFinish={handleSubmitForm}
+          onFinishFailed={handleError}
+        >
+          <div
+            style={{
+              display: valuePage !== tabData[0].value ? "none" : undefined,
+            }}
+          >
+            <DailyRateCreate
+              dataCurrency={data_cur}
+              dataRateType={data_rate}
+              setConvertedRate={setConvertedRate}
+              convertedRate={convertedRate}
+              status={status}
+            />
+          </div>
+
+          <div
+            style={{
+              display: valuePage !== tabData[1].value ? "none" : undefined,
+            }}
+          >
+            <BaseContainer header={"APPROVAL INFORMATION"}>
+              <ApprovalComponentGeneral
+                dataTable={appHierDataDetail}
+                dataOption={appHierOptions}
+                selectedHierarchy={selectedHierarchy}
+                updateSelectedHierarchy={setSelectedHierarchy}
+              />
+            </BaseContainer>
+          </div>
+
+          <div
+            style={{
+              display: valuePage !== tabData[2].value ? "none" : undefined,
+            }}
+          >
+            <BaseContainer header={"ATTCHMENT INFORMATION"}>
+              <AttachmentComponent
+                type={type}
+                data={listDataAttachment}
+                updateData={setListDataAttachment}
+                typeSelector={"daily_rate"}
+                dispatch={dispatch}
+                getAPICategory={getListCategory}
+                service={ratingBillingHttpService}
+                configApplication={configApp.RATING_BILLING_SERVICE}
+                getAPIGuard={getConfigFileRBIData}
+                typeRBI={"data"}
+                mandatory={true}
+              />
+            </BaseContainer>
+          </div>
+
+          <div className="flex w-full justify-between align-middle my-3">
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => handleBack()}
+              icon={
+                <LeftOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 24,
+                    justifyItems: "center",
+                  }}
+                />
+              }
+            >
+              Back
+            </ButtonComponent>
+            <div className="flex align-middle gap-3">
+              <ButtonComponent
+                icon={
+                  <SVGIcon
+                    name={
+                      type === "update" ? `IconButtonReset` : `IconButtonClear`
+                    }
+                    width={24}
+                  />
+                }
+                type="submit"
+                onClick={handleClear}
+              >
+                {type === "update" ? "Reset" : "Clear"}
+              </ButtonComponent>
+              <ButtonComponent
+                htmlType="submit"
+                type="submit"
+                onClick={() => setTypeSubmit(listTypeSubmit[1])}
+                // disabled={disableSubmit}
+              >
+                Save as Draft
+              </ButtonComponent>
+
+              <ButtonComponent
+                htmlType="submit"
+                type="submit"
+                onClick={() => setTypeSubmit(listTypeSubmit[0])}
+                // disabled={disableSubmit}
+              >
+                Save & Submit
+              </ButtonComponent>
+            </div>
+          </div>
+        </Form>
+
+        <ModalCustom
+          isOpen={modalConfirm}
+          handleCancel={handleCancelModalConfirm}
+          header={"Confirmation"}
+          width={1000}
+          type={"confirmation"}
+          footer={
+            <div className="w-full flex justify-end gap-5 p-4">
+              <ButtonComponent
+                onClick={handleCancelModalConfirm}
+                type="default"
+              >
+                Cancel
+              </ButtonComponent>
+              <ButtonComponent
+                type="submit"
+                onClick={handleProcessModalConfirm}
+              >
+                Confirm
+              </ButtonComponent>
+            </div>
+          }
+        >
+          <ModalConfirmDailyRate
+            data={kirimBody}
+            data_cur={data_cur}
+            data_rate={data_rate}
+            tabData={tabData}
+            listDataAttachment={listDataAttachment}
+            listDataAppHierDetail={appHierDataDetail}
+            dataOption={appHierOptions}
+            selectedHierarchy={selectedHierarchy}
+          />
+        </ModalCustom>
+
+        {/* Modal Back*/}
+        <ModalBack
+          isOpen={modalBack}
+          handleCancel={() => setModalBack(false)}
+          handleOk={() => navigate(-1)}
+        />
+
+        {/* Modal Retry */}
+        <ModalError
+          isOpen={modalError}
+          handleOk={handleRetry}
+          handleCancel={handleCloseModalError}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">{`Your data was not ${
+              typeSubmit === 1 ? "created" : "submitted"
+            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+      </Spin>
+    </LayoutMenu>
+  );
+};
+
+export default DailyRateForm;
