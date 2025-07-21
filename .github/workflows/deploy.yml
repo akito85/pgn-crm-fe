@@ -4,7 +4,7 @@ on:
     branches:
       - main
       - master
-      - frontendservice-temp
+      - add-new-front-end
 
 jobs:
   deploy:
