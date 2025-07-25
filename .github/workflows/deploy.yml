@@ -42,7 +42,7 @@ jobs:
           node:22.11.0 \
           sh -c "npm install -g npm@10.9.0 && npm install --force && npm run build"
 
-    - name: Temp Packaging React To Docker Image and Push to Registry
+    - name: Temp Packaging React To Docker Image and Push to Registry debug
       run: |
         DOCKER_TAG="registry.pgn.co.id/billing-dev/pgn-frontend:1.0.0-alpha"
         docker build -t "${DOCKER_TAG}" .
