@@ -63,12 +63,12 @@ jobs:
       run: |
         HELM_CHART_PATH="${{ vars.HELM_CATALOG_APP }}"
         helm package pgn-frontend pgn-frontend/ --version 0.1.0
-        helm push pgn-frontend-0.1.0.tgz "oci://registry.pgn.co.id/billing-dev/helm/pgn-frontend"
+        helm push pgn-frontend-0.1.0.tgz "oci://registry.pgn.co.id/energy/helm/pgn-frontend"
 
     - name: Deploy Kubernetes manifests
       run: |
         HELM_CHART_PATH="${{ vars.HELM_CATALOG_APP }}"
-        helm upgrade --install pgn-frontend "${HELM_CHART_PATH}" --version 0.1.0 \
+        helm upgrade --install pgn-frontend "oci://registry.pgn.co.id/energy/helm/pgn-frontend/pgn-frontend" --version 0.1.0 \
           --namespace=energy-development \
           --set resources.limits.cpu="${{ vars.CPU_LIMIT }}" \
           --set resources.limits.memory="${{ vars.MEMORY_LIMIT }}" \
