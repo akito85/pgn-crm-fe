@@ -27,20 +27,20 @@ jobs:
         password: ${{ secrets.REGISTRY_PASSWORD }}
         registry: ${{ vars.REGISTRY_URL }}
 
-    - name: Build React Application
-      run: |
-        docker run --rm \
-          -v "$(pwd):/app" \
-          -v "/app/node_modules" \
-          -w /app \
-          node:22.11.0 \
-          sh -c "npm install -g npm@10.9.0 && npm install --force && npm run build"
+    # - name: Build React Application
+    #   run: |
+    #     docker run --rm \
+    #       -v "$(pwd):/app" \
+    #       -v "/app/node_modules" \
+    #       -w /app \
+    #       node:22.11.0 \
+    #       sh -c "npm install -g npm@10.9.0 && npm install --force && npm run build"
 
-    - name: Packaging React To Docker Image and Push to Registry
-      run: |
-        DOCKER_TAG="${{ vars.IMAGE_NAME }}:1.0.0-alpha"
-        docker build -t "${DOCKER_TAG}" .
-        docker push "${DOCKER_TAG}"
+    # - name: Packaging React To Docker Image and Push to Registry
+    #   run: |
+    #     DOCKER_TAG="${{ vars.IMAGE_NAME }}:1.0.0-alpha"
+    #     docker build -t "${DOCKER_TAG}" .
+    #     docker push "${DOCKER_TAG}"
 
     - name: Set up kubeconfig to access cluster
       run: |
