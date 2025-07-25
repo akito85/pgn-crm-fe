@@ -58,10 +58,17 @@ jobs:
         helm registry login registry.pgn.co.id \
           -u ${{ secrets.REGISTRY_USERNAME }} \
           -p ${{ secrets.REGISTRY_PASSWORD }}
+    
+    - name: Push helm
+      run: |
+        HELM_CHART_PATH="${{ vars.HELM_CATALOG_APP }}"
+        helm package pgn-frontend pgn-frontend/ --version 0.1.0
+        helm push pgn-frontend-0.1.0.tgz "${HELM_CHART_PATH}"
 
     - name: Deploy Kubernetes manifests
       run: |
-        helm upgrade --install pgn-frontend oci://registry.pgn.co.id/billing-dev/helm/pgn-frontend/pgn-frontend --version 0.1.0 \
+        HELM_CHART_PATH="${{ vars.HELM_CATALOG_APP }}"
+        helm upgrade --install pgn-frontend "${HELM_CHART_PATH}" --version 0.1.0 \
           --namespace=energy-development \
           --set resources.limits.cpu="${{ vars.CPU_LIMIT }}" \
           --set resources.limits.memory="${{ vars.MEMORY_LIMIT }}" \
