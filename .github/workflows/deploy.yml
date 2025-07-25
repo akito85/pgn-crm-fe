@@ -2,8 +2,6 @@ name: Deploy to AKS with Kubeconfig
 on:
   push:
     branches:
-      - main
-      - master
       - add-new-front-end
 
 jobs:
