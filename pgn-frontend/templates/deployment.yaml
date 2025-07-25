@@ -1,0 +1,107 @@
+{{- if .Values.deployment.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pgn-frontend.fullname" . }}
+  namespace: {{ .Values.podAnnotations.releaseNamespace }}
+  labels:
+    helm.sh/chart: {{ include "pgn-frontend.fullname" . }}-{{ .Chart.Version }}
+    app.kubernetes.io/name: {{ include "pgn-frontend.fullname" . }}
+    app.kubernetes.io/instance: {{ include "pgn-frontend.fullname" . }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "pgn-frontend.fullname" . }}
+      app.kubernetes.io/instance: {{ include "pgn-frontend.fullname" . }}
+  template:
+    metadata:
+      annotations:
+        meta.helm.sh/release-name: {{ include "pgn-frontend.fullname" . }}
+        rollout-timestamp: {{ now | quote }}
+        meta.helm.sh/release-namespace: {{ .Values.podAnnotations.releaseNamespace | quote}}
+        {{- if .Values.podAnnotations.vault.enabled }}
+        vault.hashicorp.com/auth-path: {{ .Values.podAnnotations.vault.authPath | quote}}
+        vault.hashicorp.com/agent-inject: {{ .Values.podAnnotations.vault.enabled | quote}}
+        vault.hashicorp.com/agent-inject-status: {{ .Values.podAnnotations.vault.inject | quote}}
+        vault.hashicorp.com/agent-inject-secret-db-access.properties: {{ .Values.podAnnotations.vault.secretPath | quote}}
+        vault.hashicorp.com/agent-inject-template-db-access.properties: | 
+          {{ "{{- with secret \""}}energy-development/db_access{{ "\" -}}" }}
+          {{ .Values.podAnnotations.vault.access_properties_un }} 
+          {{ .Values.podAnnotations.vault.access_properties_pw }}
+          {{ "{{- end }}" }}
+        vault.hashicorp.com/role: {{ .Values.podAnnotations.vault.role | quote}}
+        {{- end }}
+      labels:
+        helm.sh/chart: {{ include "pgn-frontend.fullname" . }}-{{ .Chart.Version }}
+        app.kubernetes.io/name: {{ include "pgn-frontend.fullname" . }}
+        app.kubernetes.io/instance: {{ include "pgn-frontend.fullname" . }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.imagePullSecrets.name }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          {{- if .Values.podAnnotations.vault.enabled }}
+          env:
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "file:/vault/secrets/db-access.properties"
+          {{- end }}
+          livenessProbe:
+            tcpSocket:
+              port: {{.Values.service.port }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds | default 60 }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds | default 15 }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds | default 10 }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold | default 1 }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold | default 10 }}
+          readinessProbe:
+            tcpSocket:
+              port: {{.Values.service.port }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds | default 60 }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds | default 15 }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds | default 10 }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold | default 1 }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold | default 10 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

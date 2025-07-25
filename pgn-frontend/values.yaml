@@ -1,0 +1,133 @@
+# Default values for pgn-frontend.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+deployment:
+  enabled: true
+
+image:
+  name: "imagePath"
+  pullPolicy: Always
+  tag: "latest"
+
+imagePullSecrets:
+  - name: ""
+#nameOverride: ""
+#fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: 
+  releaseNamespace: "default"
+  vault:
+    enabled: true
+    authPath: ""
+    role: "default"
+    access_path: ""
+    secretPath: "energy-development/db_access"
+    inject: "update"
+    access_properties_un: spring.crm-datasource.userName={{ .Data.data.username }}
+    access_properties_pw: spring.crm-datasource.password={{ .Data.data.password }}
+podLabels:
+  helm.sh/chart: pgn-frontend
+  app.kubernetes.io/name: pgn-frontend
+  app.kubernetes.io/instance: pgn-frontend
+  app.kubernetes.io/version: "1.0.0"
+  app.kubernetes.io/managed-by: Helm
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  enabled: false
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: "nginx"
+  hosts:
+    - host: dev-energy.pgn.co.id
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: pgn-frontend
+              port:
+                number: 80
+  tls:
+    - secretName: crm-developemnt-tls
+      hosts:
+        - dev-energy.pgn.co.id
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+   limits:
+     cpu: 100m
+     memory: 1Gi
+   requests:
+     cpu: 100m
+     memory: 128Mi
+
+livenessProbe:
+  tcpSocket: 80
+  initialDelaySeconds: 240
+  timeoutSeconds: 10
+  successThreshold: 1
+  failureThreshold: 5
+readinessProbe:
+  tcpSocket: 80
+  initialDelaySeconds: 240
+  timeoutSeconds: 10
+  successThreshold: 1
+  failureThreshold: 5
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+testconnection:
+  enabled: false
