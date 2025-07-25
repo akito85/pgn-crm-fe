@@ -63,7 +63,7 @@ jobs:
       run: |
         HELM_CHART_PATH="${{ vars.HELM_CATALOG_APP }}"
         helm package pgn-frontend pgn-frontend/ --version 0.1.0
-        helm push pgn-frontend-0.1.0.tgz "${HELM_CHART_PATH}"
+        helm push pgn-frontend-0.1.0.tgz "oci://registry.pgn.co.id/billing-dev/helm/pgn-frontend"
 
     - name: Deploy Kubernetes manifests
       run: |
