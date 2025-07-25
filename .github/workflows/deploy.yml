@@ -19,22 +19,36 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
-    - name: Authenticate to Docker Registry
+    
+    - name: Temp Authenticate to Docker Registry
       uses: docker/login-action@v3
       with:
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-        registry: ${{ vars.REGISTRY_URL }}
+        username: "crmadmin"
+        password: "3tAQ8Ev5GkTCuIHXn"
+        registry: "registry.pgn.co.id"
 
-    # - name: Build React Application
-    #   run: |
-    #     docker run --rm \
-    #       -v "$(pwd):/app" \
-    #       -v "/app/node_modules" \
-    #       -w /app \
-    #       node:22.11.0 \
-    #       sh -c "npm install -g npm@10.9.0 && npm install --force && npm run build"
+    # - name: Authenticate to Docker Registry
+    #   uses: docker/login-action@v3
+    #   with:
+    #     username: ${{ secrets.REGISTRY_USERNAME }}
+    #     password: ${{ secrets.REGISTRY_PASSWORD }}
+    #     registry: ${{ env.REGISTRY_URL }}
+
+
+    - name: Build React Application
+      run: |
+        docker run --rm \
+          -v "$(pwd):/app" \
+          -v "/app/node_modules" \
+          -w /app \
+          node:22.11.0 \
+          sh -c "npm install -g npm@10.9.0 && npm install --force && npm run build"
+
+    - name: Temp Packaging Java To Docker Image and Push to Registry
+      run: |
+        DOCKER_TAG="registry.pgn.co.id/billing-dev/pgn-frontend:1.0.0-alpha"
+        docker build -t "${DOCKER_TAG}" .
+        docker push "${DOCKER_TAG}"
 
     # - name: Packaging React To Docker Image and Push to Registry
     #   run: |
@@ -52,47 +66,56 @@ jobs:
     - name: Test Kubernetes connectivity
       run: |
         kubectl get pods -n ${{ vars.KUBE_NAMESPACE }}
-
-    - name: Registry Authentication
+    
+    - name: Temp Registry Authentication
       run: |
         helm registry login registry.pgn.co.id \
-          -u ${{ secrets.REGISTRY_USERNAME }} \
-          -p ${{ secrets.REGISTRY_PASSWORD }}
+          -u "crmadmin" \
+          -p "3tAQ8Ev5GkTCuIHXn"
+
+    # - name: Registry Authentication
+    #   run: |
+    #     helm registry login registry.pgn.co.id \
+    #       -u ${{ secrets.REGISTRY_USERNAME }} \
+    #       -p ${{ secrets.REGISTRY_PASSWORD }}
     
-    - name: Push helm
-      run: |
-        HELM_CHART_PATH="${{ vars.HELM_CATALOG_APP }}"
-        helm package pgn-frontend pgn-frontend/ --version 0.1.0
-        helm push pgn-frontend-0.1.0.tgz "oci://registry.pgn.co.id/energy/helm/pgn-frontend"
+    # - name: Push helm
+    #   run: |
+    #     HELM_CHART_PATH="${{ vars.HELM_CATALOG_APP }}"
+    #     helm package pgn-frontend pgn-frontend/ --version 0.1.0
+    #     helm push pgn-frontend-0.1.0.tgz "oci://registry.pgn.co.id/energy/helm/pgn-frontend"
 
     - name: Temp Deploy Kubernetes manifests
       run: |
-        HELM_CHART_PATH="${{ vars.HELM_CATALOG_APP }}"
-        helm template pgn-frontend "oci://registry.pgn.co.id/energy/helm/pgn-frontend/pgn-frontend" --version 0.1.0 \
-          --namespace=energy-development \
-          --set resources.limits.cpu="${{ vars.CPU_LIMIT }}" \
-          --set resources.limits.memory="${{ vars.MEMORY_LIMIT }}" \
-          --set resources.requests.cpu="${{ vars.CPU_REQUEST }}" \
-          --set resources.requests.memory="${{ vars.MEMORY_REQUEST }}" \
-          --set serviceAccount.name="${{ vars.VAULT_SERVICE_ACCOUNT }}" \
-          --set podAnnotations.vault.authPath="auth/energy-development-kubernetes" \
+        helm upgrade --install pgn-frontend oci://registry.pgn.co.id/billing-dev/helm/pgn-frontend/pgn-frontend --version 0.1.0 \
+          --namespace=${{ vars.KUBE_NAMESPACE }} \
+          --set resources.limits.cpu=${{ vars.CPU_LIMIT }} \
+          --set resources.limits.memory=${{ vars.MEMORY_LIMIT }} \
+          --set resources.requests.cpu=${{ vars.CPU_REQUEST }} \
+          --set resources.requests.memory=${{ vars.MEMORY_REQUEST }} \
+          --set serviceAccount.name=${{ vars.VAULT_SERVICE_ACCOUNT }} \
+          --set podAnnotations.vault.authPath=${{ vars.VAULT_AUTH_PATH }} \
           --set podAnnotations.vault.secretPath=${{ vars.VAULT_CONFIG_PATH }} \
           --set imagePullSecrets.name=${{ vars.IMAGE_PULL_SECRET }} \
           --set podAnnotations.releaseNamespace=${{ vars.KUBE_NAMESPACE }} \
-          --set image.name=${{ vars.IMAGE_NAME }} \
+          --set image.name="registry.pgn.co.id/billing-dev/pgn-frontend" \
           --set image.tag="1.0.0-alpha" \
           --set podAnnotations.vault.role=${{ vars.VAULT_ROLE }}
-        helm upgrade --install pgn-frontend "oci://registry.pgn.co.id/energy/helm/pgn-frontend/pgn-frontend" --version 0.1.0 \
-          --namespace=energy-development \
-          --set resources.limits.cpu="${{ vars.CPU_LIMIT }}" \
-          --set resources.limits.memory="${{ vars.MEMORY_LIMIT }}" \
-          --set resources.requests.cpu="${{ vars.CPU_REQUEST }}" \
-          --set resources.requests.memory="${{ vars.MEMORY_REQUEST }}" \
-          --set serviceAccount.name="${{ vars.VAULT_SERVICE_ACCOUNT }}" \
-          --set podAnnotations.vault.authPath="auth/energy-development-kubernetes" \
-          --set podAnnotations.vault.secretPath=${{ vars.VAULT_CONFIG_PATH }} \
-          --set imagePullSecrets.name=${{ vars.IMAGE_PULL_SECRET }} \
-          --set podAnnotations.releaseNamespace=${{ vars.KUBE_NAMESPACE }} \
-          --set image.name=${{ vars.IMAGE_NAME }} \
-          --set image.tag="1.0.0-alpha" \
-          --set podAnnotations.vault.role=${{ vars.VAULT_ROLE }}
+
+    # - name: Deploy Kubernetes manifests
+    #   run: |
+    #     HELM_CHART_PATH="${{ vars.HELM_CATALOG_APP }}"
+    #     helm upgrade --install pgn-frontend "oci://registry.pgn.co.id/energy/helm/pgn-frontend/pgn-frontend" --version 0.1.0 \
+    #       --namespace=energy-development \
+    #       --set resources.limits.cpu="${{ vars.CPU_LIMIT }}" \
+    #       --set resources.limits.memory="${{ vars.MEMORY_LIMIT }}" \
+    #       --set resources.requests.cpu="${{ vars.CPU_REQUEST }}" \
+    #       --set resources.requests.memory="${{ vars.MEMORY_REQUEST }}" \
+    #       --set serviceAccount.name="${{ vars.VAULT_SERVICE_ACCOUNT }}" \
+    #       --set podAnnotations.vault.authPath="auth/energy-development-kubernetes" \
+    #       --set podAnnotations.vault.secretPath=${{ vars.VAULT_CONFIG_PATH }} \
+    #       --set imagePullSecrets.name=${{ vars.IMAGE_PULL_SECRET }} \
+    #       --set podAnnotations.releaseNamespace=${{ vars.KUBE_NAMESPACE }} \
+    #       --set image.name=${{ vars.IMAGE_NAME }} \
+    #       --set image.tag="1.0.0-alpha" \
+    #       --set podAnnotations.vault.role=${{ vars.VAULT_ROLE }}

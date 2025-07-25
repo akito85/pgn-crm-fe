@@ -27,7 +27,7 @@ spec:
         meta.helm.sh/release-name: {{ include "pgn-frontend.fullname" . }}
         rollout-timestamp: {{ now | quote }}
         meta.helm.sh/release-namespace: {{ .Values.podAnnotations.releaseNamespace | quote}}
-        {{- if .Values.podAnnotations.vault.enabled }}
+        {{- if .Values.podAnnotations.showVault }}
         vault.hashicorp.com/auth-path: {{ .Values.podAnnotations.vault.authPath | quote}}
         vault.hashicorp.com/agent-inject: {{ .Values.podAnnotations.vault.enabled | quote}}
         vault.hashicorp.com/agent-inject-status: {{ .Values.podAnnotations.vault.inject | quote}}
@@ -61,11 +61,9 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
-          {{- if .Values.podAnnotations.vault.enabled }}
           env:
             - name: SPRING_CONFIG_ADDITIONAL_LOCATION
               value: "file:/vault/secrets/db-access.properties"
-          {{- end }}
           livenessProbe:
             tcpSocket:
               port: {{.Values.service.port }}
