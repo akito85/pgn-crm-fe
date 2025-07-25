@@ -68,6 +68,20 @@ jobs:
     - name: Temp Deploy Kubernetes manifests
       run: |
         HELM_CHART_PATH="${{ vars.HELM_CATALOG_APP }}"
+        helm template pgn-frontend "oci://registry.pgn.co.id/energy/helm/pgn-frontend/pgn-frontend" --version 0.1.0 \
+          --namespace=energy-development \
+          --set resources.limits.cpu="${{ vars.CPU_LIMIT }}" \
+          --set resources.limits.memory="${{ vars.MEMORY_LIMIT }}" \
+          --set resources.requests.cpu="${{ vars.CPU_REQUEST }}" \
+          --set resources.requests.memory="${{ vars.MEMORY_REQUEST }}" \
+          --set serviceAccount.name="${{ vars.VAULT_SERVICE_ACCOUNT }}" \
+          --set podAnnotations.vault.authPath="auth/energy-development-kubernetes" \
+          --set podAnnotations.vault.secretPath=${{ vars.VAULT_CONFIG_PATH }} \
+          --set imagePullSecrets.name=${{ vars.IMAGE_PULL_SECRET }} \
+          --set podAnnotations.releaseNamespace=${{ vars.KUBE_NAMESPACE }} \
+          --set image.name=${{ vars.IMAGE_NAME }} \
+          --set image.tag="1.0.0-alpha" \
+          --set podAnnotations.vault.role=${{ vars.VAULT_ROLE }}
         helm upgrade --install pgn-frontend "oci://registry.pgn.co.id/energy/helm/pgn-frontend/pgn-frontend" --version 0.1.0 \
           --namespace=energy-development \
           --set resources.limits.cpu="${{ vars.CPU_LIMIT }}" \
