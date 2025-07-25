@@ -65,7 +65,7 @@ jobs:
         helm package pgn-frontend pgn-frontend/ --version 0.1.0
         helm push pgn-frontend-0.1.0.tgz "oci://registry.pgn.co.id/energy/helm/pgn-frontend"
 
-    - name: Deploy Kubernetes manifests
+    - name: Temp Deploy Kubernetes manifests
       run: |
         HELM_CHART_PATH="${{ vars.HELM_CATALOG_APP }}"
         helm upgrade --install pgn-frontend "oci://registry.pgn.co.id/energy/helm/pgn-frontend/pgn-frontend" --version 0.1.0 \
