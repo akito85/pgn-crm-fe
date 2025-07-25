@@ -84,6 +84,10 @@ import accountGasUtilizationReducer from '../slices/account_management/detailAcc
 import additionalInfoReducer from "../slices/account_management/detailAccount/additionalInformation";
 import equpmentReducer from "../slices/account_management/detailAccount/equpmentSlice";
 import criteriaReducer from '../slices/criteria_slice';
+import { reportCustomerSlice } from "../slices/report/report_customer_slice";
+import { setupListeners } from "@reduxjs/toolkit/dist/query";
+import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement"; 
+
 const reducer = combineReducers({
   auth: authReducer,
   message: messageReducer,
@@ -188,7 +192,12 @@ const reducer = combineReducers({
   attachment: attachmentReducer,
 
   // criteria
-  criteria_slice : criteriaReducer
+  criteria_slice: criteriaReducer,
+
+  // report
+  [reportCustomerSlice.reducerPath]: reportCustomerSlice.reducer,
+  [reportCustomerAgreementSlice.reducerPath] : reportCustomerAgreementSlice.reducer
+
 });
 
 
@@ -204,8 +213,9 @@ const defaultThrottleOptions = {
 const store = configureStore({
   reducer: reducer,
   devTools: true,
-  // middleware: (getDefaultMiddleware) =>
-  //   getDefaultMiddleware().concat(throttleMiddleware)
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(reportCustomerSlice.middleware),
 });
 
+setupListeners(store.dispatch)
 export default store;

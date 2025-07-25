@@ -12,6 +12,7 @@ const initialState = {
   message: "",
   isSuccess: false,
   isFailed: false,
+  loading_group_access: false
 };
 
 export const getAllGroupAccessPaginate = createAsyncThunk(
@@ -288,10 +289,12 @@ const groupAccessSlice = createSlice({
     [detailGroupAccess.pending]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = true;
+      state.loading_group_access = true;
     },
     [detailGroupAccess.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
+      state.loading_group_access = false;
     },
     [detailGroupAccess.rejected]: (state, action) => {
       state.data_detail = action.payload;

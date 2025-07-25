@@ -88,7 +88,7 @@ const GroupAccessForm = (props) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
-  const { data_detail, dataMenu, dataUserLevel, loading } =
+  const { data_detail, dataMenu, dataUserLevel, loading, loading_group_access } =
     useSelector((state) => state.groupAccess);
   const { bodyError } = useSelector(state => state?.general);
   const [menu, setMenu] = useState([]);
@@ -215,6 +215,7 @@ const GroupAccessForm = (props) => {
     setModalConfirm(false);
   };
 
+  
 
   const handleSave = () => {
 
@@ -305,7 +306,7 @@ const GroupAccessForm = (props) => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
     <LayoutMenu>
-      <Spin spinning={loading}>
+      <Spin spinning={loading || loading_group_access}>
         <BreadCrumb routes={routes} />
         <Form
           form={form}

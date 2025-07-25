@@ -45,7 +45,7 @@ import {
 import NotFound from "../../app/NotFound";
 import { IconModal } from "../../utils/Icon";
 import InputComponent from "../InputComponent";
-import {  errorCode,  } from "../../utils";
+import { errorCode, } from "../../utils";
 
 const { Content, Sider, Header } = Layout;
 
@@ -490,7 +490,8 @@ const LayoutMenu = ({ children }) => {
               ) : null}
               {modalError ? (
                 <ModalError
-                  isOpen={modalError && errorCode(bodyError) !== 500}
+                  // isOpen={modalError && errorCode(bodyError) !== 500}
+                  isOpen={modalError}
                   handleOk={handleCloseModalError}
                   handleCancel={handleCloseModalError}
                   customText={bodyError?.code === 500 ? "Try Again" : "OK"}

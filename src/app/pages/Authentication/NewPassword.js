@@ -10,8 +10,6 @@ import {
 } from "antd";
 import {
 	ExclamationCircleOutlined,
-	EyeInvisibleOutlined,
-	EyeTwoTone,
 } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { bgLogin, pgnLogo } from "../../../assets/img";
@@ -128,119 +126,117 @@ const NewPassword = () => {
 	}
 	return (
 		<Spin spinning={loading}>
-			<div className="w-screen h-screen grid grid-cols-12 dark:bg-dark-blue">
+			<div className="w-screen h-screen flex">
 				<div
 					className="col-span-12 flex bg-no-repeat bg-cover w-full justify-end items-center"
-					style={{
-						backgroundImage: `url(${bgLogin})`,
-					}}
 				>
-					<div className={"w-full h-screen bg-transparent"}></div>
-					<Card style={{ width: "50%", minHeight: "100vh" }}>
-						<div
-							className={"flex flex-col gap-8 justify-between h-[90vh] my-auto"}
-						>
+					<div className={"w-2/3 h-screen bg-transparent"}>
+						<div className="flex justify-center items-center h-screen">
+							<img src={bgLogin} className={'h-full w-full  object-cover'} alt={'login'} />
+						</div>
+					</div>
+					<Card style={{ width: "50%", height: '100%' }} className="card-login">
+						<div className={"flex flex-col gap-8"}>
 							<img
 								className="mx-auto mt-7 h-12 w-auto"
 								src={pgnLogo}
 								alt="Your Company"
 							/>
-
-							{/* form */}
-							<div
-								className={
-									"flex flex-col justify-center items-center w-full px-11 "
-								}
+						</div>
+						{/* form */}
+						<div
+							className={
+								"flex flex-col justify-between pt-16 h-[541px] items-center w-full px-11 gap-2"
+							}
+						>
+							<Form
+								name="normal_login"
+								layout="vertical"
+								form={form}
+								onFinish={handleSave}
+								className={"w-full"}
 							>
-								<Form
-									name="normal_login"
-									layout="vertical"
-									form={form}
-									onFinish={handleSave}
-									className={"w-full"}
-								>
-									<Form.Item
-										label={"New Password"}
-										name="newPassword"
-										className={"mt-9"}
-										rules={[
-											{
-												required: true,
-												message: "Please input your password!",
-											},
-											{ min: data?.pLength, message: `Minimal password ${data?.pLength} characters` },
-											// { pattern: /^(?!.*<>).*$/, message: `Format password incorrect, password can not contain` }
+								<Form.Item
+									label={"New Password"}
+									name="newPassword"
+									className={"mt-9"}
+									rules={[
+										{
+											required: true,
+											message: "Please input your password!",
+										},
+										{ min: data?.pLength, message: `Minimal password ${data?.pLength} characters` },
+										// { pattern: /^(?!.*<>).*$/, message: `Format password incorrect, password can not contain` }
 
-										]}
-									>
-										<Input.Password
-											className="bg-transparent mb-2 !text-base"
-											style={{ borderRadius: "9px" }}
-										/>
-									</Form.Item>
-									<Form.Item
-										label={'Confirm New Password'}
-										name="confirmNewPassword"
-										className={"mt-9"}
-										dependencies={['newPassword']}
-										rules={[
-											{
-												required: true,
-												message: "Please input your password!",
+									]}
+								>
+									<Input.Password
+										className="bg-transparent mb-2 !text-base"
+										style={{ borderRadius: "9px" }}
+									/>
+								</Form.Item>
+								<Form.Item
+									label={'Confirm New Password'}
+									name="confirmNewPassword"
+									className={"mt-9"}
+									dependencies={['newPassword']}
+									rules={[
+										{
+											required: true,
+											message: "Please input your password!",
+										},
+										{ min: data?.pLength, message: `Minimal password ${data?.pLength} characters` },
+										// { pattern: /^(?!.*<>).*$/, message: `Format password incorrect, password can not contain` },
+										({ getFieldValue }) => ({
+											validator(_, value) {
+												if (!value || getFieldValue('newPassword') === value) {
+													return Promise.resolve();
+												}
+												return Promise.reject(' Password not matches');
 											},
-											{ min: data?.pLength, message: `Minimal password ${data?.pLength} characters` },
-											// { pattern: /^(?!.*<>).*$/, message: `Format password incorrect, password can not contain` },
-											({ getFieldValue }) => ({
-												validator(_, value) {
-													if (!value || getFieldValue('newPassword') === value) {
-														return Promise.resolve();
-													}
-													return Promise.reject(' Password not matches');
-												},
-											}),
-										]}
-									>
-										<Input.Password
-											className="bg-transparent mb-2 !text-base"
-											style={{ borderRadius: "9px" }}
-										/>
-									</Form.Item>
-									<div className={'w-full text-end mt-2 pr-2s'}>
-										{renderMessage()}
-									</div>
-									{/* {isMatches === false && (
+										}),
+									]}
+								>
+									<Input.Password
+										className="bg-transparent mb-2 !text-base"
+										style={{ borderRadius: "9px" }}
+									/>
+								</Form.Item>
+								<div className={'w-full text-end mt-2 pr-2s'}>
+									{renderMessage()}
+								</div>
+								{/* {isMatches === false && (
 										<span className={"text-red-600 "}>
 											{" "}
 											Password not matches
 										</span>
 									)} */}
-									<div
-										className={
-											"w-full flex flex-col items-center justify-center mt-5"
-										}
-									>
-										<Form.Item className={"w-full"}>
-											<button
-												type="submit"
-												className={
-													"bg-[#3C6DB2] hover:bg-[#3663a2] text-white text-sm px-4 py-4 border rounded-lg w-full border-none cursor-pointer"
-												}
-											>
-												<span> Submit</span>
-											</button>
-										</Form.Item>
-									</div>
-								</Form>
-							</div>
-							{/* footer card*/}
-							<span className="dark:text-[#0880AE] text-[10px] flex justify-center mb-8">
-								Copyrights © 2022 Astra Graphia Information Technology. All
-								rights reserved
-							</span>
+								<div
+									className={
+										"w-full flex flex-col items-center justify-center mt-5"
+									}
+								>
+									<Form.Item className={"w-full"}>
+										<button
+											type="submit"
+											className={
+												"bg-[#3C6DB2] hover:bg-[#3663a2] text-white text-sm px-4 py-4 border rounded-lg w-full border-none cursor-pointer"
+											}
+										>
+											<span> Submit</span>
+										</button>
+									</Form.Item>
+								</div>
+							</Form>
 						</div>
+						{/* footer card*/}
+						<span className="text-[#3C6DB2] text-[10px] flex justify-center">
+							Copyrights © 2022 Astra Graphia Information Technology. All
+							rights reserved
+						</span>
 					</Card>
 				</div>
-			</div>
+			</div >
 			<ModalSuccess
 				isOpen={modalSuccess}
 				handleOk={handleCloseModalSuccess}
@@ -272,7 +268,7 @@ const NewPassword = () => {
 					<p className="pl-[70px]">{bodyError?.description}</p>
 				</div>
 			</ModalError>
-		</Spin>
+		</Spin >
 	);
 };
 

@@ -948,3 +948,21 @@ span.ant-tree-title {
  .ant-upload-list{
   width: 100% !important;
  }
+
+
+ .card-login .ant-card-body{
+  height: 100% !important;
+  position:  relative !important;
+  display: flex  !important;
+  justify-content: space-around !important;
+  flex-direction: column !important;
+ }
+
+ .card-login .ant-card-body::after{
+  display: none  !important;
+  height: 100% !important;
+ }
+ .card-login .ant-card-body::before{
+  display: none  !important;
+  height: 100% !important;
+ }

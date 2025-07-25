@@ -1,7 +1,7 @@
 import { FilterOutlined } from "@ant-design/icons";
 import { DatePicker, Input, TimePicker } from "antd";
 import Highlighter from "react-highlight-words";
-import { dateFormatting, hasValue, renderDateConverter } from ".";
+import { dateFormatting, hasValue } from ".";
 import moment from "moment";
 // import InputComponent from "../components/InputComponent";
 // import { format } from "react-number-format/types/numeric_format";
@@ -15,7 +15,8 @@ export const getColumnSearchPropsPaging = (
   searchText,
   handleSearch,
   excludeRender = false,
-  typeFilter = "input"
+  typeFilter = "input",
+  search
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
@@ -42,6 +43,9 @@ export const getColumnSearchPropsPaging = (
           ) : null}
           {typeFilter === "datePeriod" ? (
             <DatePicker onChange={onDataChange} picker="month" format={dateFormatting.datePeriod} ref={searchInput} value={hasValue(searchText) && moment(searchText).clone()} />
+          ) : null}
+          {typeFilter === "year_only" ? (
+            <DatePicker onChange={onDataChange} picker="year" format={dateFormatting.year_only} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
           ) : null}
           {typeFilter === "hour" ? (
             <TimePicker format={dateFormatting?.hour_format} onChange={onDataChange} />
@@ -152,7 +156,8 @@ export const getColumnSearchProps = (
   searchText,
   handleSearch,
   excludeRender = false,
-  typeFilter = "input"
+  typeFilter = "input",
+  search
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
@@ -178,6 +183,9 @@ export const getColumnSearchProps = (
           ) : null}
           {typeFilter === "datePeriod" ? (
             <DatePicker onChange={onDataChange} picker="month" format={dateFormatting.datePeriod} />
+          ) : null}
+           {typeFilter === "year_only" ? (
+            <DatePicker onChange={onDataChange} picker="year" format={dateFormatting.year_only} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
           ) : null}
           {typeFilter === "hour" ? (
             <TimePicker format={dateFormatting?.hour_format} onChange={onDataChange} />

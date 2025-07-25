@@ -38,8 +38,7 @@ jobs:
 
     - name: Packaging React To Docker Image and Push to Registry
       run: |
-        cd Energy-FrontendService/
-        DOCKER_TAG="${{ vars.REGISTRY_URL }}/${{ vars.IMAGE_NAME }}:1.0.0-alpha"
+        DOCKER_TAG="${{ vars.IMAGE_NAME }}:1.0.0-alpha"
         docker build -t "${DOCKER_TAG}" .
         docker push "${DOCKER_TAG}"
 

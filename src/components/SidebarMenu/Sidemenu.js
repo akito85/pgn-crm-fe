@@ -38,7 +38,7 @@ const whitelistMenu = [
   "Late Charges Rule",
   "Rate Type",
   "Tax Implication Rule",
-  "Billing Cycle Detail", 
+  "Billing Cycle Detail",
   "Distribution Media",
   "Financial Information",
   "Gas Source Quality",
@@ -55,11 +55,11 @@ const SideMenu = ({ isCollapsed }) => {
   const location = useLocation();
   const [active, setActive] = useState([]);
   const [temporaryKeys, setTemporaryKeys] = useState([]);
+  const [isNewTab, setIsNewTab] = useState(['/rating-billing']);
   const getLocation = location.pathname;
   const { side_bar } = useSelector(state => state?.auth)
 
-  
-  const datas = useMemo(() =>JSON.parse(side_bar), [side_bar]);
+  const datas = useMemo(() => JSON.parse(side_bar), [side_bar]);
 
   // convert to flat map from tree data
   const extractPaths = useCallback((data) =>
@@ -125,6 +125,7 @@ const SideMenu = ({ isCollapsed }) => {
   }
 
 
+
   // filtering path
   const filterMenuByPath = (data, targetPath) => {
     const filterRecursive = (items) => {
@@ -181,8 +182,28 @@ const SideMenu = ({ isCollapsed }) => {
   }
   const menu = removeProfileItems(datas);
 
+  const newTabCallback = useCallback((data) => {
+    if (data?.path?.includes('https://dev-plasma.pgn.co.id/')) {
+    return (
+      <a href={"https://plasma.pgn.co.id/"} about={data?.namew} target="_blank" rel="noopener noreferrer">
+        {data?.name}
+      </a>
+    )
+    } else if (data?.path?.includes('http://10.129.2.39:8080/ords/f?p=113')) {
+    return (
+      <a href={"http://rms.pgn.co.id:7780/apex/f?p=113"} target="_blank" rel="noopener noreferrer">
+        {data?.name}
+      </a>
+    )
+  } else{
+    return (
+      <Link to={data?.path}>{data?.name}</Link>
+    )
+  }
+  
+  }, []);
   // render sub menu
-  const generateMenuItems = (data) => {
+  const generateMenuItems = useCallback((data) => {
     return data.map((item) => {
       if (item.children) {
         return (
@@ -221,12 +242,20 @@ const SideMenu = ({ isCollapsed }) => {
               />
             }
           >
-            <Link to={item.path}>{item.name}</Link>
+            {newTabCallback(item)}
+            {/* {item?.path?.includes('/rating-billing') || item?.path?.includes('receipt-and-collection') ?
+              <a href={item.path} target="_blank" rel="noopener noreferrer">
+                {item.name}
+              </a>
+
+              :
+              <Link to={item.path}>{item.name}</Link>
+            } */}
           </Menu.Item>
         );
       }
     });
-  };
+  }, [active, isCollapsed, newTabCallback]);
 
   // render props if collapse
   const renderProps = (collapsed) => {
@@ -247,6 +276,7 @@ const SideMenu = ({ isCollapsed }) => {
       }
     }
   }
+
 
   return (
     <div>

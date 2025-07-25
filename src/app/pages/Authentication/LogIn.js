@@ -42,7 +42,7 @@ const LogIn = (props) => {
 		}
 	}, [bodyError]);
 
-	
+
 	useEffect(() => {
 		loadCaptchaEnginge(8)
 		dispatch(setUserLevel(type));
@@ -102,7 +102,7 @@ const LogIn = (props) => {
 						<div className={`${data?.length === 0 ? 'w-full' : 'w-2/3'} h-full`}>
 							{data?.length > 0 ?
 								<div className="w-full">
-									<Carousel  autoplay speed={740}>
+									<Carousel autoplay speed={740}>
 										{data?.map((item, key) => (
 											<div className="flex justify-center items-center h-screen" key={key}>
 												<img src={item?.urlLogo2} className={'mx-auto h-full w-full object-cover'} alt={item?.name} />
@@ -120,21 +120,21 @@ const LogIn = (props) => {
 								</div>
 							}
 						</div>
-						<Card style={{ width: '50%', height: '100%' }}>
+						<Card style={{ width: '50%' }} className="card-login" >
 							<div className={"flex flex-col gap-8 "}>
 								<img
 									className="mx-auto mt-7 h-12 w-auto"
 									src={pgnLogo}
 									alt="Your Company"
 								/>
-								<h2 className="text-center text-base tracking-tight dark:text-[#3C6DB2]">
+								<h2 className="text-center text-base tracking-tight text-[#3C6DB2]">
 									Please login with your registered account
 								</h2>
 							</div>
 							{/* form */}
 							<div
 								className={
-									"flex flex-col justify-center items-center w-full px-11 mt-[3.62rem]"
+									"flex flex-col justify-center items-center w-full px-11 gap-2"
 								}
 							>
 								<Form
@@ -230,13 +230,13 @@ const LogIn = (props) => {
 												</Form.Item>
 											</div>
 											<div className="flex justify-end ">
-												<LoadCanvasTemplate reloadText="Reload" />
+												<LoadCanvasTemplate reloadText="Reload"  />
 											</div>
 										</div>
 									</Form.Item>
 									<div
 										className={
-											"w-full flex flex-col items-center justify-center mt-5"
+											"w-full flex flex-col items-center justify-center mt-2"
 										}
 									>
 										<Form.Item className={"w-full"}>
@@ -252,7 +252,7 @@ const LogIn = (props) => {
 										<Link
 											to="/forgot-password"
 											state={{ type: type }}
-											className=" dark:text-[#3C6DB2] cursor-pointer mb-7"
+											className=" text-[#3C6DB2] cursor-pointer pb-4"
 										>
 											Forgot Password
 										</Link>
@@ -260,7 +260,7 @@ const LogIn = (props) => {
 								</Form>
 							</div>
 							{/* footer card*/}
-							<span className="dark:text-[#0880AE] text-[10px] flex justify-center mb-8">
+							<span className="text-[#3C6DB2] text-[10px] flex justify-center">
 								Copyrights © 2022 Astra Graphia Information Technology. All
 								rights reserved
 							</span>
