@@ -65,8 +65,8 @@ jobs:
     # HELM_NAME="pgn-frontend"
     - name: Deploy Kubernetes manifests
       run: |
-        HELM_CHART_PATH="${{ vars.HELM_CATALOG_APP }}/${{ vars.HELM_NAME }}"
-        HELM_NAME="${{ vars.HELM_NAME }}"
+        HELM_CHART_PATH="${{ vars.HELM_NAME }}/${{ vars.HELM_CATALOG_APP }}"
+        HELM_CATALOG_APP="${{ vars.HELM_CATALOG_APP }}"
         helm upgrade --install "${HELM_NAME}" "${HELM_CHART_PATH}" --version 0.1.0 \
           --namespace=energy-development \
           --set resources.limits.cpu="${{ vars.CPU_LIMIT }}" \
