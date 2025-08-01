@@ -67,7 +67,7 @@ jobs:
       run: |
         HELM_CHART_PATH="${{ vars.HELM_NAME }}/${{ vars.HELM_CATALOG_APP }}"
         HELM_CATALOG_APP="${{ vars.HELM_CATALOG_APP }}"
-        helm upgrade --install "${HELM_NAME}" "${HELM_CHART_PATH}" --version 0.1.0 \
+        helm upgrade --install "${HELM_CATALOG_APP}" "${HELM_CHART_PATH}" --version 0.1.0 \
           --namespace=energy-development \
           --set resources.limits.cpu="${{ vars.CPU_LIMIT }}" \
           --set resources.limits.memory="${{ vars.MEMORY_LIMIT }}" \
