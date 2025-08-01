@@ -44,12 +44,6 @@ jobs:
     - name: Test Kubernetes connectivity
       run: |
         kubectl get pods -n ${{ vars.KUBE_NAMESPACE }}
-    
-    # - name: Temp Registry Authentication
-    #   run: |
-    #     helm registry login registry.pgn.co.id \
-    #       -u "crmadmin" \
-    #       -p "3tAQ8Ev5GkTCuIHXn"
 
     - name: Registry Authentication
       run: |
@@ -57,19 +51,23 @@ jobs:
           -u ${{ secrets.REGISTRY_USERNAME }} \
           -p ${{ secrets.REGISTRY_PASSWORD }}
 
-    # "oci://registry.pgn.co.id/energy/helm/pgn-frontend"
-    # "{{ vars.HELM_CATALOG_APP }}"
+    # HELM_CATALOG_APP="oci://registry.pgn.co.id/energy/helm/pgn-frontend"
+    # HELM_NAME="pgn-frontend"
     - name: Push helm
       run: |
-        helm package pgn-frontend --version 0.1.0
-        helm push pgn-frontend-0.1.0.tgz "oci://registry.pgn.co.id/energy/helm/pgn-frontend"
+        HELM_CATALOG_APP="${{ vars.HELM_CATALOG_APP }}"
+        HELM_NAME="${{ vars.HELM_NAME }}"
+        helm package "${HELM_CATALOG_APP}"
+        PREPARED_HELM_TO_PUSH="${{ vars.HELM_CATALOG_APP }}-0.1.0.tgz"
+        helm push "./${PREPARED_HELM_TO_PUSH}" "${HELM_NAME}"
 
-    # "oci://registry.pgn.co.id/energy/helm/pgn-frontend"
-    # "{{ vars.HELM_CATALOG_APP }}/{{ vars.SERVICE_NAME }}"
+    # HELM_CHART_PATH="oci://registry.pgn.co.id/energy/helm/pgn-frontend/pgn-frontend"
+    # HELM_NAME="pgn-frontend"
     - name: Deploy Kubernetes manifests
       run: |
-        HELM_CHART_PATH="${{ vars.HELM_CATALOG_APP }}"
-        helm upgrade --install pgn-frontend "oci://registry.pgn.co.id/energy/helm/pgn-frontend/pgn-frontend" --version 0.1.0 \
+        HELM_CHART_PATH="{{ vars.HELM_CATALOG_APP }}/{{ vars.HELM_NAME }}"
+        HELM_NAME="{{ vars.HELM_NAME }}"
+        helm upgrade --install "${HELM_NAME}" "${HELM_CHART_PATH}" --version 0.1.0 \
           --namespace=energy-development \
           --set resources.limits.cpu="${{ vars.CPU_LIMIT }}" \
           --set resources.limits.memory="${{ vars.MEMORY_LIMIT }}" \
@@ -83,20 +81,3 @@ jobs:
           --set image.name=${{ vars.IMAGE_NAME }} \
           --set image.tag="1.0.0-alpha" \
           --set podAnnotations.vault.role=${{ vars.VAULT_ROLE }}
-
-    # - name: Temp Deploy Kubernetes manifests
-    #   run: |
-    #     helm upgrade --install pgn-frontend oci://registry.pgn.co.id/billing-dev/helm/pgn-frontend/pgn-frontend --version 0.1.0 \
-    #       --namespace=${{ vars.KUBE_NAMESPACE }} \
-    #       --set resources.limits.cpu=${{ vars.CPU_LIMIT }} \
-    #       --set resources.limits.memory=${{ vars.MEMORY_LIMIT }} \
-    #       --set resources.requests.cpu=${{ vars.CPU_REQUEST }} \
-    #       --set resources.requests.memory=${{ vars.MEMORY_REQUEST }} \
-    #       --set serviceAccount.name=${{ vars.VAULT_SERVICE_ACCOUNT }} \
-    #       --set podAnnotations.vault.authPath=${{ vars.VAULT_AUTH_PATH }} \
-    #       --set podAnnotations.vault.secretPath=${{ vars.VAULT_CONFIG_PATH }} \
-    #       --set imagePullSecrets.name=${{ vars.IMAGE_PULL_SECRET }} \
-    #       --set podAnnotations.releaseNamespace=${{ vars.KUBE_NAMESPACE }} \
-    #       --set image.name="registry.pgn.co.id/billing-dev/pgn-frontend" \
-    #       --set image.tag="1.0.0-alpha" \
-    #       --set podAnnotations.vault.role=${{ vars.VAULT_ROLE }}
