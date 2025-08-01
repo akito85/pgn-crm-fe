@@ -61,7 +61,7 @@ jobs:
         PREPARED_HELM_TO_PUSH="${{ vars.HELM_CATALOG_APP }}-0.1.0.tgz"
         helm push "./${PREPARED_HELM_TO_PUSH}" "${HELM_NAME}"
 
-    # HELM_CHART_PATH="oci://registry.pgn.co.id/energy/helm/pgn-frontend/pgn-frontend"
+    # HELM_CHART_PATH="oci://registry.pgn.co.id/energy/helm/pgn-frontend/pgn-frontend" --trigger
     # HELM_NAME="pgn-frontend"
     - name: Deploy Kubernetes manifests
       run: |
