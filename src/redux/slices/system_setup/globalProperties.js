@@ -86,17 +86,6 @@ export const inactiveGlobalProperties = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), status, errorMessage(error)), action: "INACTIVE_GLOBAL_PROPERTIES", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      //   thunkAPI.dispatch(validateError({ error: error, action: "INACTIVE_GLOBAL_PROPERTIES", back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not ${status}. ${error?.response?.data?.message}. Please try again.`,
-      //     icon: "icon_error_inactivate",
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
       return thunkAPI.rejectWithValue(error);
     }
   }
@@ -125,16 +114,6 @@ export const createGlobalProperties = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_GLOBAL_PROPERTIES", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      //   thunkAPI.dispatch(validateError({ error: error, action: "CREATE_GLOBAL_PROPERTIES", back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not created. ${error?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
       return thunkAPI.rejectWithValue(error);
     }
   }
@@ -150,16 +129,6 @@ export const updateGlobalProperties = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'updated', errorMessage(error)), action: "UPDATE_GLOBAL_PROPERTIES", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      //   thunkAPI.dispatch(validateError({ error: error, action: "UPDATE_GLOBAL_PROPERTIES", back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not updated. ${error?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
       return thunkAPI.rejectWithValue(error);
     }
   }

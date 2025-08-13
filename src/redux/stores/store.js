@@ -5,7 +5,6 @@ import messageReducer from "../slices/message";
 import entityReducer from "../slices/system_setup/entity";
 import userReducer from "../slices/user_management/user";
 import employeeReducer from "../slices/user_management/employee";
-import generatePasswordReducer from "../slices/user_management/generate_password";
 import globalPropertiesReducer from "../slices/system_setup/globalProperties";
 import masterPositionReducer from "../slices/system_setup/master_data/master_position";
 import globalTypesReducer from "../slices/system_setup/globalTypes";
@@ -199,13 +198,6 @@ const reducer = combineReducers({
   [reportCustomerAgreementSlice.reducerPath] : reportCustomerAgreementSlice.reducer
 
 });
-
-
-const defaultWait = 1000;
-const defaultThrottleOptions = {
-  leading: true,
-  trailing: false,
-};
 
 // add throttle middlewares
 // const throttleMiddleware = throttle(defaultWait, defaultThrottleOptions)

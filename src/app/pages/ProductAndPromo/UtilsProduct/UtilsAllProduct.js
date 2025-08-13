@@ -57,6 +57,26 @@ export const dataDependAdvanced = (dependDataIndex, key, dataEditRecord) => {
   }
 };
 
+export const dataDepended = (
+  dependDataIndex = "",
+  dataIndexKey = "",
+  recordData = {},
+  recordDependedData = {}
+) => {
+  if (hasValue(dependDataIndex)) {
+    switch (dataIndexKey.toLowerCase()) {
+      case "tiering":
+        return ![2302, 2301]?.includes(
+          recordDependedData[recordData?.key + dependDataIndex]?.value
+        );
+
+      default:
+        return !hasValue(
+          recordDependedData[recordData?.key + dependDataIndex]?.value
+        );
+    }
+  }
+};
 export const checkEditableUnCriteria = (dataIndex, dataType = null) => {
   switch (dataIndex) {
     case "adjustmentType":
@@ -282,7 +302,6 @@ export const handleCheckCriteriaMissingValidation = (
   setMissingColumn = () => {},
   minimumData = 0
 ) => {
-  
   let missingColumn = [];
   const tempArray = criteriaOptions.filter((item) =>
     dataCriteria?.includes(item.value)

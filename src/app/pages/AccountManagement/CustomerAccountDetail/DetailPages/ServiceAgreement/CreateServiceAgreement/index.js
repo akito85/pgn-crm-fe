@@ -23,14 +23,14 @@ import SaInformation from "./SaInformation";
 import SaDetail from "./SaDetail";
 import Attachment from "./Attachment";
 import Approval from "./Approval";
-import { 
-  getListTermOfPayment, 
-  getPjbg, 
-  getSaType, 
-  getServiceType, 
-  getListBillingCycle, 
-  getInvoiceTemplate, 
-  getApprovalList, 
+import {
+  getListTermOfPayment,
+  getPjbg,
+  getSaType,
+  getServiceType,
+  getListBillingCycle,
+  getInvoiceTemplate,
+  getApprovalList,
   getDetailApproval,
   getDetailProductSa,
   getDetailProductByVersion,
@@ -41,9 +41,12 @@ import {
   getListPriceRuleById,
   getListChooseTos,
   checkValidateCreateSa,
-  getDetailServiceAgreement
+  getDetailServiceAgreement,
 } from "../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
-import { ModalConfirm, ModalError } from "../../../../../../../components/Modal/ModalPopUp";
+import {
+  ModalConfirm,
+  ModalError,
+} from "../../../../../../../components/Modal/ModalPopUp";
 import ConfirmationSa from "./Modal/ConfirmationSa";
 import { hasValue } from "../../../../../../../utils";
 
@@ -51,21 +54,22 @@ const CreateServiceAgreement = ({ saType }) => {
   const dispatch = useDispatch();
   const containerRef = useRef(null);
   const headerRef = useRef(null);
-  const segmentElement = headerRef?.current?.querySelector('#segment');
+  const segmentElement = headerRef?.current?.querySelector("#segment");
   const segmentValue = segmentElement?.innerText;
   const [form] = Form.useForm();
   const formValue = form.getFieldValue();
 
-  
   const [tabPagesSaDetail, setTabPagesSaDetail] = useState([
     { value: "Pricing", paramValue: ["priceCode"] },
     { value: "Calculation Rule", paramValue: ["calculationType"] },
     { value: "Term of Service" },
     { value: "Late Charge" },
     { value: "Tax Implication" },
-  ])
-  
-  const [valuePageSaDetail, setValuePageSaDetail] = useState(tabPagesSaDetail[0].value);
+  ]);
+
+  const [valuePageSaDetail, setValuePageSaDetail] = useState(
+    tabPagesSaDetail[0].value
+  );
   const [modalSaDetail, setModalSaDetail] = useState(false);
   const [modalChooseProduct, setModalChooseProduct] = useState(false);
   const [modalBack, setModalBack] = useState(false);
@@ -80,13 +84,12 @@ const CreateServiceAgreement = ({ saType }) => {
   const [saInfoObj, setSaInfoObj] = useState({});
   const [saDetailObj, setSaDetailObj] = useState();
   const [saApprovalObj, setSaApprovalObj] = useState({});
-  const [typeSubmit, setTypeSubmit] = useState('');
+  const [typeSubmit, setTypeSubmit] = useState("");
   const [dataListVersion, setDataListVersion] = useState([]);
 
-  const [dataTableDetailProduct, setDataTableDetailProduct] = useState({})
-  const [modalValidateSa, setModalValidateSa] = useState(false)
-  const [messageValidateSa, setMessageValidateSa] = useState("")
-  
+  const [dataTableDetailProduct, setDataTableDetailProduct] = useState({});
+  const [modalValidateSa, setModalValidateSa] = useState(false);
+  const [messageValidateSa, setMessageValidateSa] = useState("");
 
   // For SA Information Date
   const [serviceAgreementDate, setServiceAgreementDate] = useState("");
@@ -98,7 +101,7 @@ const CreateServiceAgreement = ({ saType }) => {
   // For approval
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [dataTableApproval, setDataTableApproval] = useState([]);
-  
+
   // Table Data Product Detail
   const [dataTableProduct, setDataTableProduct] = useState([]);
   // Table Data Pricing Rule
@@ -116,23 +119,22 @@ const CreateServiceAgreement = ({ saType }) => {
   // Table Data Tax Implication
   const [dataTaxImplication, setDataTaxImplication] = useState([]);
   // Price Adjustment
-  const [priceAdjustment, setPriceAdjustment] = useState('');
-  const [priceAdjustmentSelect, setPriceAdjustmentSelect] = useState('');
+  const [priceAdjustment, setPriceAdjustment] = useState("");
+  const [priceAdjustmentSelect, setPriceAdjustmentSelect] = useState("");
   const [priceAdjustmentSelectId, setPriceAdjustmentSelectId] = useState(null);
 
   const [modalValidateAttachment, setModalValidateAttachment] = useState(false);
 
-
   // Selector Slice
-  const { 
-    data_service_type, 
-    data_sa_type=[], 
-    data_pjbg=[], 
-    data_term_of_payment, 
-    data_billing_cycle, 
+  const {
+    data_service_type,
+    data_sa_type = [],
+    data_pjbg = [],
+    data_term_of_payment,
+    data_billing_cycle,
     data_invoice_template,
-    data_approval_list, 
-    data_approval_detail, 
+    data_approval_list,
+    data_approval_detail,
     data_product_detail,
     data_tax_implication,
     data_price_rule,
@@ -141,21 +143,20 @@ const CreateServiceAgreement = ({ saType }) => {
     data_list_choose_tos,
     data_late_charge,
     data_detail,
-    loading 
+    loading,
   } = useSelector((state) => state.accountServiceAgreement);
-  
+
   const { data_accountDetail } = useSelector(
     (state) => state.accountManagement
-    );
+  );
 
-  
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
-  const [loadingForm, setLoadingForm] = useState(false)
+  const [loadingForm, setLoadingForm] = useState(false);
   const isLoading = loading || loadingForm;
-  
+
   // set Reset if amandemen / addon
-  const [isReset, setIsReset] = useState(false)
+  const [isReset, setIsReset] = useState(false);
 
   // State Location
   const location = useLocation();
@@ -174,36 +175,34 @@ const CreateServiceAgreement = ({ saType }) => {
     isMain: true,
     typeSa: "main",
     productTypeId: 245,
-  }
+  };
   // Use Effect
   useEffect(() => {
-    dispatch(getServiceType())
+    dispatch(getServiceType());
     // dispatch(getSaType())
-    dispatch(getPjbg())
-    dispatch(getListTermOfPayment(idAccount))
-    dispatch(getListBillingCycle())
-    dispatch(getInvoiceTemplate(idAccount))
-    dispatch(getApprovalList())
-    setSaDetailObj({createFrom: 1})
-    form.setFieldsValue({createFrom: 1})
+    dispatch(getPjbg());
+    dispatch(getListTermOfPayment(idAccount));
+    dispatch(getListBillingCycle());
+    dispatch(getInvoiceTemplate(idAccount));
+    dispatch(getApprovalList());
+    setSaDetailObj({ createFrom: 1 });
+    form.setFieldsValue({ createFrom: 1 });
     dispatch(resetDataDetail());
-    setDataTableDetailProduct({})
-  }, [])
-  
+    setDataTableDetailProduct({});
+  }, []);
 
   useEffect(() => {
-    let typeSa = saRecordData?.typeSa === "main" ? "main" : "addon"
-    if(saInfoObj.serviceType !== undefined){
-      dispatch(getSaType({type: typeSa, id:saInfoObj.serviceType}))
+    let typeSa = saRecordData?.typeSa === "main" ? "main" : "addon";
+    if (saInfoObj.serviceType !== undefined) {
+      dispatch(getSaType({ type: typeSa, id: saInfoObj.serviceType }));
     }
-  }, [saRecordData?.typeSa, saInfoObj?.serviceType])
-  
+  }, [saRecordData?.typeSa, saInfoObj?.serviceType]);
 
   useEffect(() => {
-    if(saReferenceNumber){
+    if (saReferenceNumber) {
       setSaInfoObj({
-        ...saInfoObj, 
-        serviceAgreementReferenceNumber:saReferenceNumber,
+        ...saInfoObj,
+        serviceAgreementReferenceNumber: saReferenceNumber,
         saReferenceNumber: saRecordData?.saReferenceNumber,
         serviceType: saRecordData?.serviceType,
         serviceAgreementType: saRecordData?.typeSa === "addon" ? 92 : 91,
@@ -214,9 +213,9 @@ const CreateServiceAgreement = ({ saType }) => {
         termOfPayment: saRecordData?.termOfPayment,
         invoiceTemplate: saRecordData?.invoiceTemplate,
         // serviceAgreementDate: moment(saRecordData?.saDate).clone()
-      })
+      });
       form.setFieldsValue({
-        serviceAgreementReferenceNumber:saReferenceNumber,
+        serviceAgreementReferenceNumber: saReferenceNumber,
         saReferenceNumber: saRecordData?.saReferenceNumber,
         serviceType: saRecordData?.serviceType,
         serviceAgreementType: saRecordData?.typeSa === "addon" ? 92 : 91,
@@ -227,244 +226,261 @@ const CreateServiceAgreement = ({ saType }) => {
         termOfPayment: saRecordData?.termOfPayment,
         invoiceTemplate: saRecordData?.invoiceTemplate,
         // serviceAgreementDate: moment(saRecordData?.saDate).clone()
-      })
+      });
     }
-  }, [isReset])
-  
+  }, [isReset]);
+
   useEffect(() => {
-    if(data_approval_detail?.length > 0){
-      setDataTableApproval(data_approval_detail)
+    if (data_approval_detail?.length > 0) {
+      setDataTableApproval(data_approval_detail);
     }
-  }, [data_approval_detail])
+  }, [data_approval_detail]);
 
   // get data for Create Amandemen
   useEffect(() => {
-    if(idSa && saRecordData?.typeSa ===  "Amendment"){
+    if (idSa && saRecordData?.typeSa === "Amendment") {
       dispatch(getDetailServiceAgreement(idSa))
-      .unwrap()
-      .then((data) => {
+        .unwrap()
+        .then((data) => {
+          // Start DDL Product Selected
+          const tempProductDetail = data?.saDetail;
+          const paymentTypeId = 210;
+          const chargingMethodId = 214;
+          const hasIdpaymentTypeId = tempProductDetail.filter(
+            (item) => item.nameId === paymentTypeId
+          );
+          const haschargingMethodId = tempProductDetail.filter(
+            (item) => item.nameId === chargingMethodId
+          );
+          // End DDL Product Selected
 
-        // Start DDL Product Selected
-        const tempProductDetail = data?.saDetail ;
-        const paymentTypeId = 210;
-        const chargingMethodId = 214;
-        const hasIdpaymentTypeId = tempProductDetail.filter(item => item.nameId === paymentTypeId);
-        const haschargingMethodId = tempProductDetail.filter(item => item.nameId === chargingMethodId);
-        // End DDL Product Selected
+          // Start Ddl Calc Rule - Calc Type
+          const tempCalcRuleDetail = data?.saCalcRule;
+          const calculationTypeId = 687;
+          const hasIdCalcTypeId = tempCalcRuleDetail.filter(
+            (item) => item.nameId === calculationTypeId
+          );
+          // End Ddl Calc Rule - Calc Type
 
-        // Start Ddl Calc Rule - Calc Type
-        const tempCalcRuleDetail = data?.saCalcRule
-        const calculationTypeId = 687;
-        const hasIdCalcTypeId = tempCalcRuleDetail.filter(item => item.nameId === calculationTypeId);
-        // End Ddl Calc Rule - Calc Type
+          //Price Adjustment logic
+          let cleanedString = "";
+          const priceAdjustmentOne = data?.saInfo?.idrAdjustment ?? null;
+          const priceAdjustmentTwo = data?.saInfo?.usdAdjustment ?? null;
+          const mergeTextAdjustment = `${
+            priceAdjustmentOne?.adjustmentText || ""
+          } - ${priceAdjustmentTwo?.adjustmentText || ""}`.trim();
+          cleanedString = mergeTextAdjustment.replace(/-+$/, "");
 
-        //Price Adjustment logic
-        let cleanedString = ''
-        const priceAdjustmentOne = data?.saInfo?.idrAdjustment ?? null
-        const priceAdjustmentTwo = data?.saInfo?.usdAdjustment ?? null
-        const mergeTextAdjustment = `${priceAdjustmentOne?.adjustmentText || ''} - ${priceAdjustmentTwo?.adjustmentText || ''}`.trim();
-        cleanedString = mergeTextAdjustment.replace(/-+$/, '');
+          const mergeIdAdjustment = [
+            priceAdjustmentOne?.priceAdjustmentDetailId || null,
+            priceAdjustmentTwo?.priceAdjustmentDetailId || null,
+          ].filter(Boolean);
 
-        const mergeIdAdjustment = [
-          priceAdjustmentOne?.priceAdjustmentDetailId || null, 
-          priceAdjustmentTwo?.priceAdjustmentDetailId || null
-        ].filter(Boolean);
-
-        setDataListVersion(data?.versionList || [])
-        setSaDetailObj({
-          createFrom: data?.saInfo?.productVersionId === null ? 2 : 1 ,
-          pricingRule: data?.saInfo?.pricingRuleId,
-          priceCodeText: data?.saInfo?.fullPriceCode,
-          priceCode: data?.saInfo?.idMPricing,
-          pricingRuleText: data?.saInfo?.pricingRuleName,
-          productName: data?.saInfo?.productName,
-          productType: data?.saInfo?.productType,
-          serviceTypeProduct: data?.saInfo?.serviceType,
-          productClass: data?.saInfo?.productClass,
-          productVersionId: data?.saInfo?.productVersionId,
-          productId: data?.saInfo?.productId,
-          paymentType: hasIdpaymentTypeId[0].unitId,
-          chargingMethod: haschargingMethodId[0].unitId,
-          calculationType: parseInt(hasIdCalcTypeId[0].unitId),
-          descriptionProduct: data?.product?.description || null,
-          objPaymentType: {
-            name: 210,
-            unit: hasIdpaymentTypeId[0].uom,
-            value: null,
-            description: null,
-            unitName: hasIdpaymentTypeId[0].unit
-          },
-          objChargingMethod: {
-            name: 214,
-            unit: haschargingMethodId[0].uom,
-            value: null,
-            description: null,
-            unitName: haschargingMethodId[0].unit
-          },
-          priceAdjustmentId: mergeIdAdjustment,
-          priceAdjustmentText: cleanedString
-        })
-        form.setFieldsValue({
-          createFrom: data?.saInfo?.productVersionId === null ? 2 : 1,
-          productType: data?.saInfo?.productType,
-          serviceTypeProduct: data?.saInfo?.serviceType,
-          productClass: data?.saInfo?.productClass,
-          productVersionId: data?.saInfo?.productVersionId,
-          pricingRule: data?.saInfo?.pricingRuleId,
-          priceCode: data?.saInfo?.idMPricing,
-          paymentType: hasIdpaymentTypeId[0].unitId,
-          chargingMethod: haschargingMethodId[0].unitId,
-          calculationType: parseInt(hasIdCalcTypeId[0].unitId),
-          priceAdjustment: cleanedString,
-          descriptionProduct: data?.product?.description || null,
-        });
-        handleDetailApproval(data?.saInfo?.appHierId)
-
-        // Define Data From API
-        const dataDetailPricing = (
-          data?.saPricing ||
-          []
-        ).map((item, index) => {
-          return {
-            currency: item.currency,
-            currencyId: item.currencyId,
-            description: item.description ? item.description : null,
-            flag: null,
-            id: item.id,
-            idPricing: item.id,
-            key: index + 1,
-            lineNumber: item.lineNumber,
-            max: item.max,
-            maximumName: null,
-            min: item.min,
-            priceCode: item.idMPricing,
-            priceCodeName: item.priceCode,
-            priceDetail: `${item.value}/${item.currency}/${item.uom}`,
-            unlimited: item.isUnlim == "Y" ? true : false,
-            uom: item.uomId,
-            uomName: item.uom,
-            value: item.value,
-            adjustment: item?.adjustment?.adjustmentText,
-            adjustmentId: item?.adjustment?.priceAdjustmentDetailId
-          };
-        });
-
-        const calculationRule = (
-          data?.saCalcRule || []
-        ).map((item) => {
-          return {
-            key: `${item?.id}`,
-            id: item?.id,
-            name: {
-              value: item?.nameId,
-              label: item?.name,
-              key: `${item?.nameId}`,
+          setDataListVersion(data?.versionList || []);
+          setSaDetailObj({
+            createFrom: data?.saInfo?.productVersionId === null ? 2 : 1,
+            pricingRule: data?.saInfo?.pricingRuleId,
+            priceCodeText: data?.saInfo?.fullPriceCode,
+            priceCode: data?.saInfo?.idMPricing,
+            pricingRuleText: data?.saInfo?.pricingRuleName,
+            productName: data?.saInfo?.productName,
+            productType: data?.saInfo?.productType,
+            serviceTypeProduct: data?.saInfo?.serviceType,
+            productClass: data?.saInfo?.productClass,
+            productVersionId: data?.saInfo?.productVersionId,
+            productId: data?.saInfo?.productId,
+            paymentType: hasIdpaymentTypeId[0].unitId,
+            chargingMethod: haschargingMethodId[0].unitId,
+            calculationType: parseInt(hasIdCalcTypeId[0].unitId),
+            descriptionProduct: data?.product?.description || null,
+            objPaymentType: {
+              name: 210,
+              unit: hasIdpaymentTypeId[0].uom,
+              value: null,
+              description: null,
+              unitName: hasIdpaymentTypeId[0].unit,
             },
-            value: item?.value,
-            unit: {
-              key: item.unitId !== null ? item?.unitId : null,
-              value: item.Id !== null ? item?.unitId : null,
-              label: item.unit !== null ? item?.unit : null,
+            objChargingMethod: {
+              name: 214,
+              unit: haschargingMethodId[0].uom,
+              value: null,
+              description: null,
+              unitName: haschargingMethodId[0].unit,
             },
-            description: item?.description ? item?.description : null,
-          };
-        });
-        const excludedIds = [paymentTypeId, chargingMethodId]
-        const tempProductWithoutTwoNameProduct = tempProductDetail.filter(item => !excludedIds.includes(item.nameId))
-        const productDetail = (tempProductWithoutTwoNameProduct || []).map((item) => {
-          return {
-            key: item?.id,
-            id: item?.id,
-            name: {
-              value: item?.nameId,
-              label: item?.name,
-            },
-            value: item?.value,
-            unit: {
-              key: item.unitId !== null ? item?.unitId : null,
-              value: item.unitId !== null ? item?.unitId : null,
-              label: item.unit !== null ? item?.unit : null,
-            },
-            description: item?.description,
-          };
-        });
+            priceAdjustmentId: mergeIdAdjustment,
+            priceAdjustmentText: cleanedString,
+          });
+          form.setFieldsValue({
+            createFrom: data?.saInfo?.productVersionId === null ? 2 : 1,
+            productType: data?.saInfo?.productType,
+            serviceTypeProduct: data?.saInfo?.serviceType,
+            productClass: data?.saInfo?.productClass,
+            productVersionId: data?.saInfo?.productVersionId,
+            pricingRule: data?.saInfo?.pricingRuleId,
+            priceCode: data?.saInfo?.idMPricing,
+            paymentType: hasIdpaymentTypeId[0].unitId,
+            chargingMethod: haschargingMethodId[0].unitId,
+            calculationType: parseInt(hasIdCalcTypeId[0].unitId),
+            priceAdjustment: cleanedString,
+            descriptionProduct: data?.product?.description || null,
+          });
+          handleDetailApproval(data?.saInfo?.appHierId);
 
-        if(data?.saLateCharge || data?.saLateCharge !== null){
-          const dataArrayLateCharge = Object.keys(data?.saLateCharge).map(key => data?.saLateCharge[key]);
-          const filteredDataLateCharge = dataArrayLateCharge.filter(item => item !== null);
-          setDataTableLateCharge(filteredDataLateCharge)
-        }else{
-          setDataTableLateCharge([])
-        }
+          // Define Data From API
+          const dataDetailPricing = (data?.saPricing || []).map(
+            (item, index) => {
+              return {
+                currency: item.currency,
+                currencyId: item.currencyId,
+                description: item.description ? item.description : null,
+                flag: null,
+                id: item.id,
+                idPricing: item.id,
+                key: index + 1,
+                lineNumber: item.lineNumber,
+                max: item.max,
+                maximumName: null,
+                min: item.min,
+                priceCode: item.idMPricing,
+                priceCodeName: item.priceCode,
+                priceDetail: `${item.value}/${item.currency}/${item.uom}`,
+                unlimited: item.isUnlim == "Y" ? true : false,
+                uom: item.uomId,
+                uomName: item.uom,
+                value: item.value,
+                adjustment: item?.adjustment?.adjustmentText,
+                adjustmentId: item?.adjustment?.priceAdjustmentDetailId,
+              };
+            }
+          );
 
-        if(data?.saTaxImplication || data?.saTaxImplication !== null){
-          const dataArrayTaxImplication = Object.keys(data?.saTaxImplication).map(key => data?.saTaxImplication[key]);
-          const filteredDataTaxImplication = dataArrayTaxImplication.filter(item => item !== null);
-          setDataTaxImplication(filteredDataTaxImplication)
-        }else{
-          setDataTaxImplication([])
-        }
-        setSendLateCharge(data?.saLateCharge)
-        setDataTableProduct(productDetail);
-        setDataPricing(dataDetailPricing);
-        setDataTableCalcRule(calculationRule);
-        const tempTos = (data?.saTOS || []).map((item, index) => {
-          return {
-            ...item,
-            key: index + 1,
-            tosDetail: item.tosDetail?.map((b, index) => ({
-              ...b,
-              attributeName: b?.attribute,
+          const calculationRule = (data?.saCalcRule || []).map((item) => {
+            return {
+              key: `${item?.id}`,
+              id: item?.id,
+              name: {
+                value: item?.nameId,
+                label: item?.name,
+                key: `${item?.nameId}`,
+              },
+              value: item?.value,
+              unit: {
+                key: item.unitId !== null ? item?.unitId : null,
+                value: item.Id !== null ? item?.unitId : null,
+                label: item.unit !== null ? item?.unit : null,
+              },
+              description: item?.description ? item?.description : null,
+            };
+          });
+          const excludedIds = [paymentTypeId, chargingMethodId];
+          const tempProductWithoutTwoNameProduct = tempProductDetail.filter(
+            (item) => !excludedIds.includes(item.nameId)
+          );
+          const productDetail = (tempProductWithoutTwoNameProduct || []).map(
+            (item) => {
+              return {
+                key: item?.id,
+                id: item?.id,
+                name: {
+                  value: item?.nameId,
+                  label: item?.name,
+                },
+                value: item?.value,
+                unit: {
+                  key: item.unitId !== null ? item?.unitId : null,
+                  value: item.unitId !== null ? item?.unitId : null,
+                  label: item.unit !== null ? item?.unit : null,
+                },
+                description: item?.description,
+              };
+            }
+          );
+
+          if (data?.saLateCharge || data?.saLateCharge !== null) {
+            const dataArrayLateCharge = Object.keys(data?.saLateCharge).map(
+              (key) => data?.saLateCharge[key]
+            );
+            const filteredDataLateCharge = dataArrayLateCharge.filter(
+              (item) => item !== null
+            );
+            setDataTableLateCharge(filteredDataLateCharge);
+          } else {
+            setDataTableLateCharge([]);
+          }
+
+          if (data?.saTaxImplication || data?.saTaxImplication !== null) {
+            const dataArrayTaxImplication = Object.keys(
+              data?.saTaxImplication
+            ).map((key) => data?.saTaxImplication[key]);
+            const filteredDataTaxImplication = dataArrayTaxImplication.filter(
+              (item) => item !== null
+            );
+            setDataTaxImplication(filteredDataTaxImplication);
+          } else {
+            setDataTaxImplication([]);
+          }
+          setSendLateCharge(data?.saLateCharge);
+          setDataTableProduct(productDetail);
+          setDataPricing(dataDetailPricing);
+          setDataTableCalcRule(calculationRule);
+          const tempTos = (data?.saTOS || []).map((item, index) => {
+            return {
+              ...item,
               key: index + 1,
-            })),
-          };
-        })
+              tosDetail: item.tosDetail?.map((b, index) => ({
+                ...b,
+                attributeName: b?.attribute,
+                key: index + 1,
+              })),
+            };
+          });
 
-        setDataTermOfService(tempTos);
-        // setDataTaxImplication(data?.saTaxImplication);
-        // setListDataAttachment(dataAttachment);
-        let cstmTiering ={
-          name: "Custom Tiering",
-          pricingRuleId: -1
-        }
-        if(data?.saInfo?.productVersionId === null){
-          dispatch(getPriceCode(idAccount))
-          .unwrap()
-          .then((data) => {
-            if(data){
-              setDdlPriceCode(data)
-            }
-          })
-          .catch(() => {
-            console.log("error");
-          });
-          dispatch(getPriceRule(idAccount))
-          .unwrap()
-          .then((data) => {
-            if(data){
-              setDdlPriceRule(data)
-            }
-          })
-          .catch(() => {
-            console.log("error");
-          });
-        }else{
-          setDdlPriceCode(data?.product?.productPricing?.priceCodeList)
-          setDdlPriceRule([...data?.product?.productPricing?.priceRuleList, cstmTiering])
-        }
-          
-      })
-      .catch((error) => {
-        console.log(error)
-      });
+          setDataTermOfService(tempTos);
+          // setDataTaxImplication(data?.saTaxImplication);
+          // setListDataAttachment(dataAttachment);
+          let cstmTiering = {
+            name: "Custom Tiering",
+            pricingRuleId: -1,
+          };
+          if (data?.saInfo?.productVersionId === null) {
+            dispatch(getPriceCode(idAccount))
+              .unwrap()
+              .then((data) => {
+                if (data) {
+                  setDdlPriceCode(data);
+                }
+              })
+              .catch(() => {
+                console.log("error");
+              });
+            dispatch(getPriceRule(idAccount))
+              .unwrap()
+              .then((data) => {
+                if (data) {
+                  setDdlPriceRule(data);
+                }
+              })
+              .catch(() => {
+                console.log("error");
+              });
+          } else {
+            setDdlPriceCode(data?.product?.productPricing?.priceCodeList);
+            setDdlPriceRule([
+              ...data?.product?.productPricing?.priceRuleList,
+              cstmTiering,
+            ]);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
   }, [idSa, isReset]);
 
-
   // handle get detail approval
   const handleDetailApproval = (e) => {
-    dispatch(getDetailApproval(e))
-  }
+    dispatch(getDetailApproval(e));
+  };
 
   const routes = (item) => {
     return [
@@ -478,7 +494,7 @@ const CreateServiceAgreement = ({ saType }) => {
           isMain: true,
           typeSa: "main",
           productTypeId: 245,
-        }
+        },
       },
       {
         path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD,
@@ -488,8 +504,8 @@ const CreateServiceAgreement = ({ saType }) => {
         path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
         breadcrumbName: "Detail Customer",
         state: {
-					idAccount: item.idAccount,
-				}
+          idAccount: item.idAccount,
+        },
       },
       {
         path: "",
@@ -501,10 +517,10 @@ const CreateServiceAgreement = ({ saType }) => {
           isMain: true,
           typeSa: "main",
           productTypeId: 245,
-        }
+        },
       },
     ];
-  }
+  };
   // HANDLE SA INFO OBJECT
   const handleSaInformationObj = (e, type) => {
     let result;
@@ -529,19 +545,18 @@ const CreateServiceAgreement = ({ saType }) => {
 
   // HANDLE SA DETAIL OBJECT
   const handleSaDetailObj = (e, type) => {
-
     let result;
     switch (type) {
       case "productName":
-        case "productType":
-          case "serviceType":
+      case "productType":
+      case "serviceType":
       case "produtClass":
         result = e.target.value;
         break;
       default:
         result = e;
         break;
-      }
+    }
     setSaDetailObj((prevState) => ({
       ...prevState,
       [type]: result,
@@ -581,8 +596,12 @@ const CreateServiceAgreement = ({ saType }) => {
   };
   const validateGasInPlanDate = () => {
     let obj2 = saInfoObj.gasInPlanDate;
-    if (saInfoObj.serviceType === 608 && (obj2 !== undefined || obj2 !== null) && !saInfoObj.alreadyGasIn) {
-        return obj2;
+    if (
+      saInfoObj.serviceType === 608 &&
+      (obj2 !== undefined || obj2 !== null) &&
+      !saInfoObj.alreadyGasIn
+    ) {
+      return obj2;
     } else {
       return true;
     }
@@ -602,57 +621,80 @@ const CreateServiceAgreement = ({ saType }) => {
       !saInfoObj.termOfPayment ||
       !saInfoObj.invoiceTemplate;
 
-      let validate2 =
+    let validate2 =
       !formValue.serviceAgreementNumber ||
       !formValue.serviceAgreementDate ||
       !formValue.startDate ||
       !validateGasInPlanDate() ||
       !formValue.endDate;
-      
+
     return isMain ? validate : validate2;
   };
 
   const validateSaNumb = () => {
-    const regex = /^[a-zA-Z0-9\-/\.]+$/
-    if (regex.test(saInfoObj.serviceAgreementNumber) || saInfoObj.serviceAgreementNumber === '') {
-      return true
-    }else{
-      return false
+    const regex = /^[a-zA-Z0-9\-/\.]+$/;
+    if (
+      regex.test(saInfoObj.serviceAgreementNumber) ||
+      saInfoObj.serviceAgreementNumber === ""
+    ) {
+      return true;
+    } else {
+      return false;
     }
-  }
+  };
 
   // ========== End Validation SA INFO ==========
 
-
   // Clear Data
   const handleClear = () => {
-    if(current === 0){
-      setSaInfoObj({})
-      form.resetFields(["serviceType", "serviceAgreementReferenceNumber", "serviceAgreementNumber", "serviceAgreementType", "pjbgType", "serviceAgreementDate", "startDate", "endDate", "billingCycle", "termOfPayment", "invoiceTemplate", "gasInPlanDate", "commitmentDate", "description"])
-    } else if(current === 1){
-      setDataTableProduct([])
-      setDataPricing([])
-      setDdlPriceCode([])
-      setDdlPriceRule([])
-      setDataTableCalcRule([])
-      setDataTermOfService([])
-      setDataTableLateCharge([])
-      form.resetFields(['createFrom', 'productType', 'productClass', 'serviceTypeProduct', 'productVersionId'])
+    if (current === 0) {
+      setSaInfoObj({});
+      form.resetFields([
+        "serviceType",
+        "serviceAgreementReferenceNumber",
+        "serviceAgreementNumber",
+        "serviceAgreementType",
+        "pjbgType",
+        "serviceAgreementDate",
+        "startDate",
+        "endDate",
+        "billingCycle",
+        "termOfPayment",
+        "invoiceTemplate",
+        "gasInPlanDate",
+        "commitmentDate",
+        "description",
+      ]);
+    } else if (current === 1) {
+      setDataTableProduct([]);
+      setDataPricing([]);
+      setDdlPriceCode([]);
+      setDdlPriceRule([]);
+      setDataTableCalcRule([]);
+      setDataTermOfService([]);
+      setDataTableLateCharge([]);
+      form.resetFields([
+        "createFrom",
+        "productType",
+        "productClass",
+        "serviceTypeProduct",
+        "productVersionId",
+      ]);
       dispatch(resetDataDetail());
       setSaDetailObj({
-        createFrom: 1
-      })
-      
+        createFrom: 1,
+      });
+
       form.setFieldsValue({
-        createFrom: 1
-      })
-    } else if(current === 2){
-      setSaApprovalObj({})
-      form.resetFields(['appHierId'])
-      setAppHierDataDetail([])
-      setDataTableApproval([])
-    } else{
-      setListDataAttachment([])
+        createFrom: 1,
+      });
+    } else if (current === 2) {
+      setSaApprovalObj({});
+      form.resetFields(["appHierId"]);
+      setAppHierDataDetail([]);
+      setDataTableApproval([]);
+    } else {
+      setListDataAttachment([]);
     }
     // setAppHierDataDetail([])
     // setListDataAttachment([])
@@ -664,7 +706,7 @@ const CreateServiceAgreement = ({ saType }) => {
     //   form.resetFields();
     // }else{
     //   setSaInfoObj({
-    //     ...saInfoObj, 
+    //     ...saInfoObj,
     //     endDate: null
     //   })
     //   form.resetFields(['endDate', 'startDate', 'serviceAgreementDate', 'serviceAgreementNumber'])
@@ -672,391 +714,485 @@ const CreateServiceAgreement = ({ saType }) => {
     // setTimeout(() => {
     //   setCurrent(0)
     // }, 500);
-  }
+  };
 
   // Handle get detail Product By id
-  const getProductDetailById = (id) =>{
-    const body ={
+  const getProductDetailById = (id) => {
+    const body = {
       accountId: idAccount,
       productId: id,
-      saDate: moment(saInfoObj.serviceAgreementDate).format('YYYY-MM-DD')
+      saDate: moment(saInfoObj.serviceAgreementDate).format("YYYY-MM-DD"),
       // saDate: 2023-10-20"
-    }
-    dispatch(getDetailProductSa({body:body}))
-    .unwrap()
-    .then((data) => {
-      if(data.product !== null){
-        // Start DDL Product Selected
-        const tempProductDetail = data?.product?.productDetail ;
-        const paymentTypeId = 210;
-        const chargingMethodId = 214;
-        const hasIdpaymentTypeId = tempProductDetail.filter(item => item.nameId === paymentTypeId);
-        const haschargingMethodId = tempProductDetail.filter(item => item.nameId === chargingMethodId);
-        // End DDL Product Selected
+    };
+    dispatch(getDetailProductSa({ body: body }))
+      .unwrap()
+      .then((data) => {
+        if (data.product !== null) {
+          // Start DDL Product Selected
+          const tempProductDetail = data?.product?.productDetail;
+          const paymentTypeId = 210;
+          const chargingMethodId = 214;
+          const hasIdpaymentTypeId = tempProductDetail.filter(
+            (item) => item.nameId === paymentTypeId
+          );
+          const haschargingMethodId = tempProductDetail.filter(
+            (item) => item.nameId === chargingMethodId
+          );
+          // End DDL Product Selected
 
-        // Start Ddl Calc Rule - Calc Type
-        const tempCalcRuleDetail = data?.product?.productCalcRule
-        const calculationTypeId = 687;
-        const hasIdCalcTypeId = tempCalcRuleDetail.filter(item => item.nameId === calculationTypeId);
-        // End Ddl Calc Rule - Calc Type
-        
+          // Start Ddl Calc Rule - Calc Type
+          const tempCalcRuleDetail = data?.product?.productCalcRule;
+          const calculationTypeId = 687;
+          const hasIdCalcTypeId = tempCalcRuleDetail.filter(
+            (item) => item.nameId === calculationTypeId
+          );
+          // End Ddl Calc Rule - Calc Type
 
-        // Price Adustment logic
-        const priceCodeTemp = data?.product?.productPricing?.priceCodeList
-        const priceAdjustmentTemp = priceCodeTemp?.map(item=> {
-          return item?.mpricingDetail
-        })
-        const adjustmentOne = priceAdjustmentTemp[0][0]?.adjustment
-        const adjustmentTwo = priceAdjustmentTemp[0][1]?.adjustment
-        const mergePriceAdjustmentId = [
-          adjustmentOne?.priceAdjustmentDetailId || null,
-          adjustmentTwo?.priceAdjustmentDetailId || null,
-        ].filter(Boolean);
-        let cleanedString =''
-        if(priceAdjustmentTemp){
-          const mergedAdjustmentText = `${adjustmentOne?.adjustmentText || ''} - ${adjustmentTwo?.adjustmentText || ''}`.trim();
-          cleanedString = mergedAdjustmentText.replace(/-+$/, '');
-          setPriceAdjustmentSelect(cleanedString)
-          setPriceAdjustmentSelectId(mergePriceAdjustmentId.length > 0 ? mergePriceAdjustmentId : null)
-        }
-
-        setModalChooseProduct(false)
-        setDataListVersion(data.versionList)
-        setSaDetailObj({
-          ...saDetailObj, 
-          productClass: data.product.productClass,
-          serviceTypeProduct: data.product.serviceType,
-          productType: data.product.productType,
-          productVersionId: data.versionList[0].id,
-          productId: id,
-          productName: data.product.productName,
-          description: data.product.description,
-          priceCode: data.product.productPricing.priceCodeList.length > 0 ? data.product.productPricing.priceCodeList[0].id : null,
-          priceCodeText: data?.product?.productPricing.priceCodeList.length > 0 ? data?.product?.productPricing.priceCodeList[0].priceCode : null,
-          pricingRule: data.product.productPricing.priceRuleTiering.length > 0 ? data.product.productPricing.priceRuleList[0].pricingRuleId : null,
-          pricingRuleText: data?.product?.productPricing.priceRuleTiering.length > 0 ? data?.product?.productPricing.priceRuleList[0].name : null,
-          paymentType: parseInt(hasIdpaymentTypeId[0].uom),
-          chargingMethod: parseInt(haschargingMethodId[0].uom),
-          calculationType: parseInt(hasIdCalcTypeId[0].uom),
-          descriptionProduct:data.product.description || null,
-          objPaymentType: {
-            name: 210,
-            unit: parseInt(hasIdpaymentTypeId[0].uom),
-            value: null,
-            description: null,
-            unitName: hasIdpaymentTypeId[0].unitName
-          },
-          objChargingMethod: {
-            name: 214,
-            unit: parseInt(haschargingMethodId[0].uom),
-            value: null,
-            description: null,
-            unitName: haschargingMethodId[0].unitName
-          },
-
-          objCaclucationType: {
-            name: 687,
-            unit: parseInt(hasIdCalcTypeId[0].uom),
-            value: null,
-          },
-          priceAdjustmentId: mergePriceAdjustmentId.length > 0 ? mergePriceAdjustmentId : null,
-          priceAdjustmentText: cleanedString
-        })
-        form.setFieldsValue({
-          productClass: data.product.productClass,
-          serviceTypeProduct: data.product.serviceType,
-          productType: data.product.productType,
-          productVersionId: data.versionList[0].id,
-          productName: data.product.productName,
-          priceCode: data.product.productPricing.priceCodeList.length > 0 ? data.product.productPricing.priceCodeList[0].id : null,
-          pricingRule: data.product.productPricing.priceRuleTiering.length > 0 ? data.product.productPricing.priceRuleList[0].pricingRuleId : null,
-          paymentType: parseInt(hasIdpaymentTypeId[0].uom),
-          chargingMethod: parseInt(haschargingMethodId[0].uom),
-          calculationType: parseInt(hasIdCalcTypeId[0].uom),
-          priceAdjustment: cleanedString,
-          descriptionProduct:data.product.description || null,
-          chooseProduct: data.product.productName,
-        })
-        setDdlPriceCode(data?.product?.productPricing?.priceCodeList)
-        let cstmTiering ={
-          name: "Custom Tiering",
-          pricingRuleId: -1
-        }
-        setDdlPriceRule([...data?.product?.productPricing?.priceRuleList,cstmTiering])
-        
-        const excludedIds = [paymentTypeId, chargingMethodId]
-        const tempProductWithoutTwoNameProduct = tempProductDetail.filter(item => !excludedIds.includes(item.nameId))
-        const productDetail = (tempProductWithoutTwoNameProduct || []).map((item) => {
-          return {
-            key: item?.id,
-            id: item?.id,
-            name: {
-              value: item?.nameId,
-              label: item?.name
-            },
-            value: item?.value,
-            unit: {
-              key: item?.uom,
-              value: item?.uom !== null ? parseInt(item?.uom) : null,
-              label: item?.unitName
-            },
-            description: item?.description
+          // Price Adustment logic
+          const priceCodeTemp = data?.product?.productPricing?.priceCodeList;
+          const priceAdjustmentTemp = priceCodeTemp?.map((item) => {
+            return item?.mpricingDetail;
+          });
+          const adjustmentOne = priceAdjustmentTemp[0][0]?.adjustment;
+          const adjustmentTwo = priceAdjustmentTemp[0][1]?.adjustment;
+          const mergePriceAdjustmentId = [
+            adjustmentOne?.priceAdjustmentDetailId || null,
+            adjustmentTwo?.priceAdjustmentDetailId || null,
+          ].filter(Boolean);
+          let cleanedString = "";
+          if (priceAdjustmentTemp) {
+            const mergedAdjustmentText = `${
+              adjustmentOne?.adjustmentText || ""
+            } - ${adjustmentTwo?.adjustmentText || ""}`.trim();
+            cleanedString = mergedAdjustmentText.replace(/-+$/, "");
+            setPriceAdjustmentSelect(cleanedString);
+            setPriceAdjustmentSelectId(
+              mergePriceAdjustmentId.length > 0 ? mergePriceAdjustmentId : null
+            );
           }
-        })
 
-        const tempCalcRuleWithoutCalcType = tempCalcRuleDetail.filter(item => ![687].includes(item.nameId))
-        const calculationRule = (tempCalcRuleWithoutCalcType || []).map((item) => {
-          return {
-            key: `${item?.id}`,
-            id: item?.id,
-            name: {
-              value: item?.nameId,
-              label: item?.name,
-              key: `${item?.nameId}`
+          setModalChooseProduct(false);
+          setDataListVersion(data.versionList);
+          setSaDetailObj({
+            ...saDetailObj,
+            productClass: data.product.productClass,
+            serviceTypeProduct: data.product.serviceType,
+            productType: data.product.productType,
+            productVersionId: data.versionList[0].id,
+            productId: id,
+            productName: data.product.productName,
+            description: data.product.description,
+            priceCode:
+              data.product.productPricing.priceCodeList.length > 0
+                ? data.product.productPricing.priceCodeList[0].id
+                : null,
+            priceCodeText:
+              data?.product?.productPricing.priceCodeList.length > 0
+                ? data?.product?.productPricing.priceCodeList[0].priceCode
+                : null,
+            pricingRule:
+              data.product.productPricing.priceRuleTiering.length > 0
+                ? data.product.productPricing.priceRuleList[0].pricingRuleId
+                : null,
+            pricingRuleText:
+              data?.product?.productPricing.priceRuleTiering.length > 0
+                ? data?.product?.productPricing.priceRuleList[0].name
+                : null,
+            paymentType: parseInt(hasIdpaymentTypeId[0].uom),
+            chargingMethod: parseInt(haschargingMethodId[0].uom),
+            calculationType: parseInt(hasIdCalcTypeId[0].uom),
+            descriptionProduct: data.product.description || null,
+            objPaymentType: {
+              name: 210,
+              unit: parseInt(hasIdpaymentTypeId[0].uom),
+              value: null,
+              description: null,
+              unitName: hasIdpaymentTypeId[0].unitName,
             },
-            value: item?.value,
-            unit: {
-              value: item?.uom !== null ? item?.uom : null,
-              key: item?.uom,
-              label: item?.uomName
+            objChargingMethod: {
+              name: 214,
+              unit: parseInt(haschargingMethodId[0].uom),
+              value: null,
+              description: null,
+              unitName: haschargingMethodId[0].unitName,
             },
-            description: item?.description
-          }
-        })
-        const dataDetailPricing = (data?.product?.productPricing?.priceRuleTiering || []).map((item, index) => {
-          return{
-            currency: item.currency,
-            currencyId: item.currency,
-            description: item.description,
-            flag: null,
-            id: item.priceCodeId,
-            idPricing: item.pricingRuleDetailId,
-            key: index + 1,
-            lineNumber: item.lineNumber,
-            max: item.max,
-            maximumName: null,
-            min: item.min,
-            priceCode: item.priceCodeId,
-            priceCodeName: item.priceCode,
-            priceDetail: `${item.value}/${item.currencyName}/${item.uomName}`,
-            unlimited: item.isUnlim,
-            uom: item.uom,
-            uomName: item.uom,
-            value: item.value,
-            adjustment: item?.adjustment?.adjustmentText,
-            adjustmentId: item?.adjustment?.priceAdjustmentDetailId
-          }
-        })
 
-        if(data?.product?.lateCharge !== null){
-          const dataArrayLateCharge = Object.keys(data?.product?.lateCharge).map(key => data?.product?.lateCharge[key]);
-          const filteredDataLateCharge = dataArrayLateCharge.filter(item => item !== null);
-          setDataTableLateCharge(filteredDataLateCharge)
-        }else{
-          setDataTableLateCharge([])
-        }
-        setSendLateCharge(data?.product?.lateCharge)
-        setDataTableCalcRule(calculationRule)
-        setDataTableProduct(productDetail)
-        setDataPricing(dataDetailPricing)
-        const tempTos = (data?.product?.productTos || []).map((item, index) => {
-          return {
-            ...item,
-            key: index + 1,
-            tosDetail: item.tosDetail?.map((b, index) => ({
-              ...b,
-              attributeName: b?.attributeName,
-              key: index + 1,
-            })),
+            objCaclucationType: {
+              name: 687,
+              unit: parseInt(hasIdCalcTypeId[0].uom),
+              value: null,
+            },
+            priceAdjustmentId:
+              mergePriceAdjustmentId.length > 0 ? mergePriceAdjustmentId : null,
+            priceAdjustmentText: cleanedString,
+          });
+          form.setFieldsValue({
+            productClass: data.product.productClass,
+            serviceTypeProduct: data.product.serviceType,
+            productType: data.product.productType,
+            productVersionId: data.versionList[0].id,
+            productName: data.product.productName,
+            priceCode:
+              data.product.productPricing.priceCodeList.length > 0
+                ? data.product.productPricing.priceCodeList[0].id
+                : null,
+            pricingRule:
+              data.product.productPricing.priceRuleTiering.length > 0
+                ? data.product.productPricing.priceRuleList[0].pricingRuleId
+                : null,
+            paymentType: parseInt(hasIdpaymentTypeId[0].uom),
+            chargingMethod: parseInt(haschargingMethodId[0].uom),
+            calculationType: parseInt(hasIdCalcTypeId[0].uom),
+            priceAdjustment: cleanedString,
+            descriptionProduct: data.product.description || null,
+            chooseProduct: data.product.productName,
+          });
+          setDdlPriceCode(data?.product?.productPricing?.priceCodeList);
+          let cstmTiering = {
+            name: "Custom Tiering",
+            pricingRuleId: -1,
           };
-        })
-        setDataTermOfService(data?.product?.productTos !== null ? tempTos : [])
-      }
-    })
-    .catch(() => {
-      console.log("error");
-    });
-  }
+          setDdlPriceRule([
+            ...data?.product?.productPricing?.priceRuleList,
+            cstmTiering,
+          ]);
 
-  
+          const excludedIds = [paymentTypeId, chargingMethodId];
+          const tempProductWithoutTwoNameProduct = tempProductDetail.filter(
+            (item) => !excludedIds.includes(item.nameId)
+          );
+          const productDetail = (tempProductWithoutTwoNameProduct || []).map(
+            (item) => {
+              return {
+                key: item?.id,
+                id: item?.id,
+                name: {
+                  value: item?.nameId,
+                  label: item?.name,
+                },
+                value: item?.value,
+                unit: {
+                  key: item?.uom,
+                  value: item?.uom !== null ? parseInt(item?.uom) : null,
+                  label: item?.unitName,
+                },
+                description: item?.description,
+              };
+            }
+          );
+
+          const tempCalcRuleWithoutCalcType = tempCalcRuleDetail.filter(
+            (item) => ![687].includes(item.nameId)
+          );
+          const calculationRule = (tempCalcRuleWithoutCalcType || []).map(
+            (item) => {
+              return {
+                key: `${item?.id}`,
+                id: item?.id,
+                name: {
+                  value: item?.nameId,
+                  label: item?.name,
+                  key: `${item?.nameId}`,
+                },
+                value: item?.value,
+                unit: {
+                  value: item?.uom !== null ? item?.uom : null,
+                  key: item?.uom,
+                  label: item?.uomName,
+                },
+                description: item?.description,
+              };
+            }
+          );
+          const dataDetailPricing = (
+            data?.product?.productPricing?.priceRuleTiering || []
+          ).map((item, index) => {
+            return {
+              currency: item.currency,
+              currencyId: item.currency,
+              description: item.description,
+              flag: null,
+              id: item.priceCodeId,
+              idPricing: item.pricingRuleDetailId,
+              key: index + 1,
+              lineNumber: item.lineNumber,
+              max: item.max,
+              maximumName: null,
+              min: item.min,
+              priceCode: item.priceCodeId,
+              priceCodeName: item.priceCode,
+              priceDetail: `${item.value}/${item.currencyName}/${item.uomName}`,
+              unlimited: item.isUnlim,
+              uom: item.uom,
+              uomName: item.uom,
+              value: item.value,
+              adjustment: item?.adjustment?.adjustmentText,
+              adjustmentId: item?.adjustment?.priceAdjustmentDetailId,
+            };
+          });
+
+          if (data?.product?.lateCharge !== null) {
+            const dataArrayLateCharge = Object.keys(
+              data?.product?.lateCharge
+            ).map((key) => data?.product?.lateCharge[key]);
+            const filteredDataLateCharge = dataArrayLateCharge.filter(
+              (item) => item !== null
+            );
+            setDataTableLateCharge(filteredDataLateCharge);
+          } else {
+            setDataTableLateCharge([]);
+          }
+          setSendLateCharge(data?.product?.lateCharge);
+          setDataTableCalcRule(calculationRule);
+          setDataTableProduct(productDetail);
+          setDataPricing(dataDetailPricing);
+          const tempTos = (data?.product?.productTos || []).map(
+            (item, index) => {
+              return {
+                ...item,
+                key: index + 1,
+                tosDetail: item.tosDetail?.map((b, index) => ({
+                  ...b,
+                  attributeName: b?.attributeName,
+                  key: index + 1,
+                })),
+              };
+            }
+          );
+          setDataTermOfService(
+            data?.product?.productTos !== null ? tempTos : []
+          );
+        }
+      })
+      .catch(() => {
+        console.log("error");
+      });
+  };
+
   // Handle get detail Product By id by version
   const getDetailProductByVersionId = (id) => {
-    const body ={
+    const body = {
       accountId: idAccount,
       id: id,
-    }
-    dispatch(getDetailProductByVersion({body}))
-    .unwrap()
-    .then((data) => {
-      if(data){
-        // Start DDL Product Selected
-        const tempProductDetail = data?.productDetail ;
-        const paymentTypeId = 210;
-        const chargingMethodId = 214;
-        const hasIdpaymentTypeId = tempProductDetail.filter(item => item.nameId === paymentTypeId);
-        const haschargingMethodId = tempProductDetail.filter(item => item.nameId === chargingMethodId);
-        // End DDL Product Selected
+    };
+    dispatch(getDetailProductByVersion({ body }))
+      .unwrap()
+      .then((data) => {
+        if (data) {
+          // Start DDL Product Selected
+          const tempProductDetail = data?.productDetail;
+          const paymentTypeId = 210;
+          const chargingMethodId = 214;
+          const hasIdpaymentTypeId = tempProductDetail.filter(
+            (item) => item.nameId === paymentTypeId
+          );
+          const haschargingMethodId = tempProductDetail.filter(
+            (item) => item.nameId === chargingMethodId
+          );
+          // End DDL Product Selected
 
-        // Start Ddl Calc Rule - Calc Type
-        const tempCalcRuleDetail = data?.productCalcRule
-        const calculationTypeId = 687;
-        const hasIdCalcTypeId = tempCalcRuleDetail.filter(item => item.nameId === calculationTypeId);
-        // End Ddl Calc Rule - Calc Type
+          // Start Ddl Calc Rule - Calc Type
+          const tempCalcRuleDetail = data?.productCalcRule;
+          const calculationTypeId = 687;
+          const hasIdCalcTypeId = tempCalcRuleDetail.filter(
+            (item) => item.nameId === calculationTypeId
+          );
+          // End Ddl Calc Rule - Calc Type
 
-        // Price Adustment logic
-        const priceCodeTemp = data?.productPricing?.priceCodeList
-        const priceAdjustmentTemp = priceCodeTemp?.map(item=> {
-          return item?.mpricingDetail
-        })
-        const adjustmentOne = priceAdjustmentTemp[0][0]?.adjustment
-        const adjustmentTwo = priceAdjustmentTemp[0][1]?.adjustment
-        const mergePriceAdjustmentId = [
-          adjustmentOne?.priceAdjustmentDetailId || null,
-          adjustmentTwo?.priceAdjustmentDetailId || null,
-        ].filter(Boolean);
-        let cleanedString = ''
-        if(priceAdjustmentTemp){
-          const mergedAdjustmentText = `${adjustmentOne?.adjustmentText || ''} - ${adjustmentTwo?.adjustmentText || ''}`.trim();
-          cleanedString = mergedAdjustmentText.replace(/-+$/, '');
-          setPriceAdjustmentSelect(cleanedString)
-          setPriceAdjustmentSelectId(mergePriceAdjustmentId.length > 0 ? mergePriceAdjustmentId : null)
-        }
-
-        setModalChooseProduct(false)
-        setSaDetailObj({
-          ...saDetailObj, 
-          productClass: data?.productClass,
-          serviceTypeProduct: data?.serviceType,
-          productType: data?.productType,
-          productName: data?.productName,
-          description: data?.description,
-          priceCode: data?.productPricing.priceCodeList.length > 0 ? data?.productPricing.priceCodeList[0].id : null,
-          priceCodeText: data?.productPricing.priceCodeList.length > 0 ? data?.productPricing.priceCodeList[0].priceCode : null,
-          pricingRule: data?.productPricing.priceRuleList.length > 0 ? data?.productPricing.priceRuleList[0].pricingRuleId : null,
-          pricingRuleText: data?.productPricing.priceRuleList.length > 0 ? data?.productPricing.priceRuleList[0].name : null,
-          paymentType: parseInt(hasIdpaymentTypeId[0].uom),
-          chargingMethod: parseInt(haschargingMethodId[0].uom),
-          calculationType: parseInt(hasIdCalcTypeId[0].uom),
-          descriptionProduct:data.description || null,
-          objPaymentType: {
-            name: 210,
-            unit: parseInt(hasIdpaymentTypeId[0].uom),
-            unitName: hasIdpaymentTypeId[0].unitName,
-            value: null,
-            description: null
-          },
-          objChargingMethod: {
-            name: 214,
-            unit: parseInt(haschargingMethodId[0].uom),
-            unitName: haschargingMethodId[0].unitName,
-            value: null,
-            description: null
-          },
-          priceAdjustmentId: mergePriceAdjustmentId.length > 0 ? mergePriceAdjustmentId : null,
-          priceAdjustmentText: cleanedString
-        })
-        form.setFieldsValue({
-          productClass: data?.productClass,
-          serviceTypeProduct: data?.serviceType,
-          productType: data?.productType,
-          productName: data?.productName,
-          priceCode: data?.productPricing.priceCodeList.length > 0 ? data?.productPricing.priceCodeList[0].id : null,
-          pricingRule: data?.productPricing.priceRuleList.length > 0 ? data?.productPricing.priceRuleList[0].pricingRuleId : null,
-          paymentType: parseInt(hasIdpaymentTypeId[0].uom),
-          chargingMethod: parseInt(haschargingMethodId[0].uom),
-          calculationType: parseInt(hasIdCalcTypeId[0].uom),
-          priceAdjustment: cleanedString,
-          descriptionProduct:data.description || null,
-        })
-        setDdlPriceCode(data?.productPricing?.priceCodeList)
-        let cstmTiering ={
-          name: "Custom Tiering",
-          pricingRuleId: -1
-        }
-        setDdlPriceRule([...data?.productPricing?.priceRuleList,cstmTiering])
-
-        const excludedIds = [paymentTypeId, chargingMethodId]
-        const tempProductWithoutTwoNameProduct = tempProductDetail.filter(item => !excludedIds.includes(item.nameId))
-        const productDetail = (tempProductWithoutTwoNameProduct || []).map((item) => {
-          return {
-            key: item?.id,
-            id: item?.id,
-            name: {
-              value: item?.nameId,
-              label: item?.name
-            },
-            value: item?.value,
-            unit: {
-              key: item?.uom !== null ? item?.uom : null,
-              value: item?.uom !== null ? parseInt(item?.uom) : null,
-              label: item?.unitName !== null ? item?.unitName : null
-            },
-            description: item?.description
+          // Price Adustment logic
+          const priceCodeTemp = data?.productPricing?.priceCodeList;
+          const priceAdjustmentTemp = priceCodeTemp?.map((item) => {
+            return item?.mpricingDetail;
+          });
+          const adjustmentOne = priceAdjustmentTemp[0][0]?.adjustment;
+          const adjustmentTwo = priceAdjustmentTemp[0][1]?.adjustment;
+          const mergePriceAdjustmentId = [
+            adjustmentOne?.priceAdjustmentDetailId || null,
+            adjustmentTwo?.priceAdjustmentDetailId || null,
+          ].filter(Boolean);
+          let cleanedString = "";
+          if (priceAdjustmentTemp) {
+            const mergedAdjustmentText = `${
+              adjustmentOne?.adjustmentText || ""
+            } - ${adjustmentTwo?.adjustmentText || ""}`.trim();
+            cleanedString = mergedAdjustmentText.replace(/-+$/, "");
+            setPriceAdjustmentSelect(cleanedString);
+            setPriceAdjustmentSelectId(
+              mergePriceAdjustmentId.length > 0 ? mergePriceAdjustmentId : null
+            );
           }
-        })
 
-        const tempCalcRuleWithoutCalcType = tempCalcRuleDetail.filter(item => ![687].includes(item.nameId))
-        const calculationRule = (tempCalcRuleWithoutCalcType || []).map((item) => {
-          return {
-            key: `${item?.id}`,
-            id: item?.id,
-            name: {
-              value: item?.nameId,
-              label: item?.name,
-              key: `${item?.nameId}`
+          setModalChooseProduct(false);
+          setSaDetailObj({
+            ...saDetailObj,
+            productClass: data?.productClass,
+            serviceTypeProduct: data?.serviceType,
+            productType: data?.productType,
+            productName: data?.productName,
+            description: data?.description,
+            priceCode:
+              data?.productPricing.priceCodeList.length > 0
+                ? data?.productPricing.priceCodeList[0].id
+                : null,
+            priceCodeText:
+              data?.productPricing.priceCodeList.length > 0
+                ? data?.productPricing.priceCodeList[0].priceCode
+                : null,
+            pricingRule:
+              data?.productPricing.priceRuleList.length > 0
+                ? data?.productPricing.priceRuleList[0].pricingRuleId
+                : null,
+            pricingRuleText:
+              data?.productPricing.priceRuleList.length > 0
+                ? data?.productPricing.priceRuleList[0].name
+                : null,
+            paymentType: parseInt(hasIdpaymentTypeId[0].uom),
+            chargingMethod: parseInt(haschargingMethodId[0].uom),
+            calculationType: parseInt(hasIdCalcTypeId[0].uom),
+            descriptionProduct: data.description || null,
+            objPaymentType: {
+              name: 210,
+              unit: parseInt(hasIdpaymentTypeId[0].uom),
+              unitName: hasIdpaymentTypeId[0].unitName,
+              value: null,
+              description: null,
             },
-            value: item?.value,
-            unit: {
-              value: item?.uom !== null ? parseInt(item?.uom) : null,
-              key: item?.uom,
-              label: item?.uomName
+            objChargingMethod: {
+              name: 214,
+              unit: parseInt(haschargingMethodId[0].uom),
+              unitName: haschargingMethodId[0].unitName,
+              value: null,
+              description: null,
             },
-            description: item?.description
-          }
-        })
-        const dataDetailPricing = (data?.productPricing?.priceRuleTiering || []).map((item, index) => {
-          return{
-            currency: item.currency,
-            currencyId: item.currency,
-            description: item.description,
-            flag: null,
-            id: item.priceCodeId,
-            idPricing: item.pricingRuleDetailId,
-            key: index + 1,
-            lineNumber: item.lineNumber,
-            max: item.max,
-            maximumName: null,
-            min: item.min,
-            priceCode: item.priceCodeId,
-            priceCodeName: item.priceCode,
-            priceDetail: `${item.value}/${item.currencyName}/${item.uomName}`,
-            unlimited: item.isUnlim,
-            uom: item.uom,
-            uomName: item.uom,
-            value: item.value,
-            adjustment: item?.adjustment?.adjustmentText,
-            adjustmentId: item?.adjustment?.priceAdjustmentDetailId
-          }
-        })
+            priceAdjustmentId:
+              mergePriceAdjustmentId.length > 0 ? mergePriceAdjustmentId : null,
+            priceAdjustmentText: cleanedString,
+          });
+          form.setFieldsValue({
+            productClass: data?.productClass,
+            serviceTypeProduct: data?.serviceType,
+            productType: data?.productType,
+            productName: data?.productName,
+            priceCode:
+              data?.productPricing.priceCodeList.length > 0
+                ? data?.productPricing.priceCodeList[0].id
+                : null,
+            pricingRule:
+              data?.productPricing.priceRuleList.length > 0
+                ? data?.productPricing.priceRuleList[0].pricingRuleId
+                : null,
+            paymentType: parseInt(hasIdpaymentTypeId[0].uom),
+            chargingMethod: parseInt(haschargingMethodId[0].uom),
+            calculationType: parseInt(hasIdCalcTypeId[0].uom),
+            priceAdjustment: cleanedString,
+            descriptionProduct: data.description || null,
+          });
+          setDdlPriceCode(data?.productPricing?.priceCodeList);
+          let cstmTiering = {
+            name: "Custom Tiering",
+            pricingRuleId: -1,
+          };
+          setDdlPriceRule([
+            ...data?.productPricing?.priceRuleList,
+            cstmTiering,
+          ]);
 
-				if(data?.lateCharge !== null){
-					const dataArrayLateCharge = Object.keys(data?.lateCharge).map(key => data?.lateCharge[key]);
-					const filteredDataLateCharge = dataArrayLateCharge.filter(item => item !== null);
-          setDataTableLateCharge(filteredDataLateCharge)
-        }else{
-          setDataTableLateCharge([])
+          const excludedIds = [paymentTypeId, chargingMethodId];
+          const tempProductWithoutTwoNameProduct = tempProductDetail.filter(
+            (item) => !excludedIds.includes(item.nameId)
+          );
+          const productDetail = (tempProductWithoutTwoNameProduct || []).map(
+            (item) => {
+              return {
+                key: item?.id,
+                id: item?.id,
+                name: {
+                  value: item?.nameId,
+                  label: item?.name,
+                },
+                value: item?.value,
+                unit: {
+                  key: item?.uom !== null ? item?.uom : null,
+                  value: item?.uom !== null ? parseInt(item?.uom) : null,
+                  label: item?.unitName !== null ? item?.unitName : null,
+                },
+                description: item?.description,
+              };
+            }
+          );
+
+          const tempCalcRuleWithoutCalcType = tempCalcRuleDetail.filter(
+            (item) => ![687].includes(item.nameId)
+          );
+          const calculationRule = (tempCalcRuleWithoutCalcType || []).map(
+            (item) => {
+              return {
+                key: `${item?.id}`,
+                id: item?.id,
+                name: {
+                  value: item?.nameId,
+                  label: item?.name,
+                  key: `${item?.nameId}`,
+                },
+                value: item?.value,
+                unit: {
+                  value: item?.uom !== null ? parseInt(item?.uom) : null,
+                  key: item?.uom,
+                  label: item?.uomName,
+                },
+                description: item?.description,
+              };
+            }
+          );
+          const dataDetailPricing = (
+            data?.productPricing?.priceRuleTiering || []
+          ).map((item, index) => {
+            return {
+              currency: item.currency,
+              currencyId: item.currency,
+              description: item.description,
+              flag: null,
+              id: item.priceCodeId,
+              idPricing: item.pricingRuleDetailId,
+              key: index + 1,
+              lineNumber: item.lineNumber,
+              max: item.max,
+              maximumName: null,
+              min: item.min,
+              priceCode: item.priceCodeId,
+              priceCodeName: item.priceCode,
+              priceDetail: `${item.value}/${item.currencyName}/${item.uomName}`,
+              unlimited: item.isUnlim,
+              uom: item.uom,
+              uomName: item.uom,
+              value: item.value,
+              adjustment: item?.adjustment?.adjustmentText,
+              adjustmentId: item?.adjustment?.priceAdjustmentDetailId,
+            };
+          });
+
+          if (data?.lateCharge !== null) {
+            const dataArrayLateCharge = Object.keys(data?.lateCharge).map(
+              (key) => data?.lateCharge[key]
+            );
+            const filteredDataLateCharge = dataArrayLateCharge.filter(
+              (item) => item !== null
+            );
+            setDataTableLateCharge(filteredDataLateCharge);
+          } else {
+            setDataTableLateCharge([]);
+          }
+          setSendLateCharge(data?.lateCharge);
+          setDataTableCalcRule(calculationRule);
+          setDataTableProduct(productDetail);
+          setDataPricing(dataDetailPricing);
+          setDataTermOfService(data?.productTos || []);
         }
-        setSendLateCharge(data?.lateCharge)
-        setDataTableCalcRule(calculationRule)
-        setDataTableProduct(productDetail)
-        setDataPricing(dataDetailPricing)
-        setDataTermOfService(data?.productTos || [])
-      }
-    })
-    .catch(() => {
-      console.log("error");
-    });
-  }
+      })
+      .catch(() => {
+        console.log("error");
+      });
+  };
 
   // const checkArrayTiering = (arr) => {
   //   if (!Array.isArray(arr)) {
@@ -1071,12 +1207,15 @@ const CreateServiceAgreement = ({ saType }) => {
   //   return false;
   // }
   const checkArrayTiering = (arr) => {
-    if (saDetailObj.pricingRule === null || saDetailObj.pricingRule === undefined && arr.length === 0) {
+    if (
+      saDetailObj.pricingRule === null ||
+      (saDetailObj.pricingRule === undefined && arr.length === 0)
+    ) {
       return true;
     } else {
       return Array.isArray(arr) && arr.length >= 2;
     }
-  }
+  };
 
   // ===== STEPS SERVICE AGREEMENT =====
   const steps = [
@@ -1092,7 +1231,9 @@ const CreateServiceAgreement = ({ saType }) => {
           setGasInPlanDate={setGasInPlanDate}
           setCommitmentDate={setCommitmentDate}
           segment={segment}
-          dataServiceType={data_service_type}
+          dataServiceType={data_service_type?.map((item) => {
+            return { id: item.id, value: item.name };
+          })}
           dataSaType={data_sa_type}
           dataPjbg={data_pjbg}
           dataTermOfPayment={data_term_of_payment}
@@ -1115,8 +1256,8 @@ const CreateServiceAgreement = ({ saType }) => {
     {
       title: "Service Agreement Detail",
       content: (
-        <SaDetail 
-          handleSaDetailObj={handleSaDetailObj} 
+        <SaDetail
+          handleSaDetailObj={handleSaDetailObj}
           saDetailObj={saDetailObj}
           saInfoObj={saInfoObj}
           form={form}
@@ -1172,9 +1313,9 @@ const CreateServiceAgreement = ({ saType }) => {
       ),
       // disabled: !saDetailObj.createFrom || (saDetailObj.createFrom === 1 && !saDetailObj.productName || !saDetailObj.productVersionId),
       disabled: false,
-      // dataTableProduct.length === 0 || 
-      // dataTableCalcRule.length === 0 || 
-      // !saDetailObj.paymentType || 
+      // dataTableProduct.length === 0 ||
+      // dataTableCalcRule.length === 0 ||
+      // !saDetailObj.paymentType ||
       // !saDetailObj.chargingMethod ||
       // !saDetailObj.calculationType ||
       // !checkArrayTiering(dataPricing)
@@ -1182,7 +1323,7 @@ const CreateServiceAgreement = ({ saType }) => {
     {
       title: "Approval",
       content: (
-        <Approval 
+        <Approval
           dataApprovalList={data_approval_list}
           // dataDetailApproval={data_approval_detail}
           dataDetailApproval={dataTableApproval}
@@ -1214,102 +1355,102 @@ const CreateServiceAgreement = ({ saType }) => {
 
   const navigate = useNavigate();
   const next = () => {
-    if(current === 0 && saInfoObj.serviceType === 608 && isMain){
-      const body ={
-        saId:idSa,
+    if (current === 0 && saInfoObj.serviceType === 608 && isMain) {
+      const body = {
+        saId: idSa,
         accountId: idAccount,
         isMain: true,
         productId: null,
         startDate: null,
         endDate: null,
-        saType: "main"
-      }
-      dispatch(checkValidateCreateSa({body}))
-      .unwrap()
-      .then((data) => {
-       if(data?.data?.isCreated === true){
-        setCurrent(current + 1);
-       }else{
-          setModalValidateSa(true)
-          setMessageValidateSa(data?.message)
-          setCurrent(current = 0);
-       }
-      })
-      .catch((error) => {
-        if(error?.data){
-          let message = error?.data?.message 
-          if(error?.data?.data?.isCreated === false){
-            setModalValidateSa(true)
-            setMessageValidateSa(message)
-            setCurrent(current = 0);
+        saType: "main",
+      };
+      dispatch(checkValidateCreateSa({ body }))
+        .unwrap()
+        .then((data) => {
+          if (data?.data?.isCreated === true) {
+            setCurrent(current + 1);
+          } else {
+            setModalValidateSa(true);
+            setMessageValidateSa(data?.message);
+            setCurrent((current = 0));
           }
-        }
-      });
-    }else if(saRecordData?.typeSa === "Amendment"){
-      const body ={
-        saId:idSa,
+        })
+        .catch((error) => {
+          if (error?.data) {
+            let message = error?.data?.message;
+            if (error?.data?.data?.isCreated === false) {
+              setModalValidateSa(true);
+              setMessageValidateSa(message);
+              setCurrent((current = 0));
+            }
+          }
+        });
+    } else if (saRecordData?.typeSa === "Amendment") {
+      const body = {
+        saId: idSa,
         accountId: idAccount,
         isMain: false,
         productId: null,
-        startDate: moment(saInfoObj.startDate).format('YYYY-MM-DD'),
-        endDate: moment(saInfoObj.endDate).format('YYYY-MM-DD'),
+        startDate: moment(saInfoObj.startDate).format("YYYY-MM-DD"),
+        endDate: moment(saInfoObj.endDate).format("YYYY-MM-DD"),
         saType: "Amendment",
         saReferenceNumber: saReferenceNumber,
-      }
-      dispatch(checkValidateCreateSa({body}))
-      .unwrap()
-      .then((data) => {
-       if(data?.data?.isCreated === true){
-        setCurrent(current + 1);
-       }else{
-          setModalValidateSa(true)
-          setMessageValidateSa(data?.message)
-          setCurrent(current = 0);
-       }
-      })
-      .catch((error) => {
-        if(error?.data){
-          let message = error?.data?.message 
-          if(error?.data?.data?.isCreated === false){
-            setModalValidateSa(true)
-            setMessageValidateSa(message)
-            setCurrent(current = 0);
+      };
+      dispatch(checkValidateCreateSa({ body }))
+        .unwrap()
+        .then((data) => {
+          if (data?.data?.isCreated === true) {
+            setCurrent(current + 1);
+          } else {
+            setModalValidateSa(true);
+            setMessageValidateSa(data?.message);
+            setCurrent((current = 0));
           }
-        }
-      });
-    }else if(current === 1 && saRecordData?.typeSa === "addon"){
-      const body ={
-        saId:idSa,
+        })
+        .catch((error) => {
+          if (error?.data) {
+            let message = error?.data?.message;
+            if (error?.data?.data?.isCreated === false) {
+              setModalValidateSa(true);
+              setMessageValidateSa(message);
+              setCurrent((current = 0));
+            }
+          }
+        });
+    } else if (current === 1 && saRecordData?.typeSa === "addon") {
+      const body = {
+        saId: idSa,
         accountId: idAccount,
         isMain: false,
         productId: saDetailObj?.productId,
-        startDate: moment(saInfoObj.startDate).format('YYYY-MM-DD'),
-        endDate: moment(saInfoObj.endDate).format('YYYY-MM-DD'),
+        startDate: moment(saInfoObj.startDate).format("YYYY-MM-DD"),
+        endDate: moment(saInfoObj.endDate).format("YYYY-MM-DD"),
         saType: "addon",
         saReferenceNumber: saReferenceNumber,
-      }
-      dispatch(checkValidateCreateSa({body}))
-      .unwrap()
-      .then((data) => {
-       if(data?.data?.isCreated === true){
-        setCurrent(current + 1);
-       }else{
-          setModalValidateSa(true)
-          setMessageValidateSa(data?.message)
-          setCurrent(current = 1);
-       }
-      })
-      .catch((error) => {
-        if(error?.data){
-          let message = error?.data?.message 
-          if(error?.data?.data?.isCreated === false){
-            setModalValidateSa(true)
-            setMessageValidateSa(message)
-            setCurrent(current = 1);
+      };
+      dispatch(checkValidateCreateSa({ body }))
+        .unwrap()
+        .then((data) => {
+          if (data?.data?.isCreated === true) {
+            setCurrent(current + 1);
+          } else {
+            setModalValidateSa(true);
+            setMessageValidateSa(data?.message);
+            setCurrent((current = 1));
           }
-        }
-      });
-    }else{
+        })
+        .catch((error) => {
+          if (error?.data) {
+            let message = error?.data?.message;
+            if (error?.data?.data?.isCreated === false) {
+              setModalValidateSa(true);
+              setMessageValidateSa(message);
+              setCurrent((current = 1));
+            }
+          }
+        });
+    } else {
       setCurrent(current + 1);
     }
   };
@@ -1322,14 +1463,23 @@ const CreateServiceAgreement = ({ saType }) => {
     }
   };
 
-  const handleMandatory = (setTabPagesSaDetail = () => {}, listDataAttachment, errorFields) => {
+  const handleMandatory = (
+    setTabPagesSaDetail = () => {},
+    listDataAttachment,
+    errorFields
+  ) => {
     setTabPagesSaDetail((prevState) => {
       const res = prevState.map((item) => {
-        const errorBadge = item.value === "Calculation Rule" || item?.value === "Pricing" ? (errorFields || []).reduce(
-          (current, next) =>
-            item?.paramValue?.includes(next.name[0]) ? current + 1 : current,
-          0
-        ) : 0;
+        const errorBadge =
+          item.value === "Calculation Rule" || item?.value === "Pricing"
+            ? (errorFields || []).reduce(
+                (current, next) =>
+                  item?.paramValue?.includes(next.name[0])
+                    ? current + 1
+                    : current,
+                0
+              )
+            : 0;
         return {
           value: item.value,
           paramValue: item.paramValue,
@@ -1338,64 +1488,70 @@ const CreateServiceAgreement = ({ saType }) => {
       });
       return res;
     });
-  }
+  };
 
   const functionCheckSaInformation = () => {
-    form.validateFields()
-    .then((values) => {
-      next();
-      scrollRightHandler();
-    })
-    .catch((error) => {
-      console.error("Validation failed:", error);
-      // Handle the rejected result here
-    });
-  }
-  
+    form
+      .validateFields()
+      .then((values) => {
+        next();
+        scrollRightHandler();
+      })
+      .catch((error) => {
+        console.error("Validation failed:", error);
+        // Handle the rejected result here
+      });
+  };
+
   const functionCheckApproval = () => {
-    form.validateFields()
-    .then((values) => {
-      next();
-      scrollRightHandler();
-    })
-    .catch((error) => {
-      console.error("Validation failed:", error);
-      // Handle the rejected result here
-    });
-  }
+    form
+      .validateFields()
+      .then((values) => {
+        next();
+        scrollRightHandler();
+      })
+      .catch((error) => {
+        console.error("Validation failed:", error);
+        // Handle the rejected result here
+      });
+  };
 
   const funtionCheckSaDetail = () => {
-      form
-        .validateFields()
-        .then((values) => {
-          handleMandatory(setTabPagesSaDetail, listDataAttachment);
-          console.log(saDetailObj?.pricingRule);
-          
-          if(dataPricing?.length < 2 && hasValue(saDetailObj?.pricingRule)) {
-            setModalSaDetail(true)
-          } else {
-            next();
-            scrollRightHandler();
-          }
-        })
-        .catch((error) => {
-          console.error("Validation failed:", error);
-          handleMandatory(setTabPagesSaDetail, listDataAttachment, error.errorFields);
-          // Handle the rejected result here
-        });
-  }
+    form
+      .validateFields()
+      .then((values) => {
+        handleMandatory(setTabPagesSaDetail, listDataAttachment);
+        console.log(saDetailObj?.pricingRule);
+
+        if (dataPricing?.length < 2 && hasValue(saDetailObj?.pricingRule)) {
+          setModalSaDetail(true);
+        } else {
+          next();
+          scrollRightHandler();
+        }
+      })
+      .catch((error) => {
+        console.error("Validation failed:", error);
+        handleMandatory(
+          setTabPagesSaDetail,
+          listDataAttachment,
+          error.errorFields
+        );
+        // Handle the rejected result here
+      });
+  };
 
   const handleButtonNext = () => {
-    switch(steps[current]?.title){
+    switch (steps[current]?.title) {
       case "Service Agreement Information":
         functionCheckSaInformation();
         break;
-        case "Service Agreement Detail":
-          funtionCheckSaDetail();
-          break;
-        case "Approval":
-          functionCheckApproval();
-          break;
+      case "Service Agreement Detail":
+        funtionCheckSaDetail();
+        break;
+      case "Approval":
+        functionCheckApproval();
+        break;
       default:
         next();
         scrollRightHandler();
@@ -1405,8 +1561,8 @@ const CreateServiceAgreement = ({ saType }) => {
 
   const items = steps.map((item) => ({
     key: item.title,
-    title: item.title
-  }))
+    title: item.title,
+  }));
 
   const handleScroll = () => {
     if (containerRef.current) {
@@ -1422,49 +1578,52 @@ const CreateServiceAgreement = ({ saType }) => {
 
   // Save/show to confirmation modal
   const handleSubmitForm = (formValue) => {
-    
-    if(listDataAttachment.length > 0){
-      const objPaymentType ={
+    if (listDataAttachment.length > 0) {
+      const objPaymentType = {
         name: {
-          label:null,
-          value: 210
+          label: null,
+          value: 210,
         },
         unit: {
-          label:null,
-          value: saDetailObj.paymentType
+          label: null,
+          value: saDetailObj.paymentType,
         },
         value: null,
         description: null,
-      }
-      const objChargingMethodType ={
+      };
+      const objChargingMethodType = {
         name: {
-          label:null,
-          value: 214
+          label: null,
+          value: 214,
         },
         unit: {
-          label:null,
-          value: saDetailObj.chargingMethod
+          label: null,
+          value: saDetailObj.chargingMethod,
         },
         value: null,
         description: null,
-      }
+      };
       const objCalcType = {
         name: {
           label: null,
-          value: 687
+          value: 687,
         },
         unit: {
           label: null,
-          value: `${saDetailObj?.calculationType}`
+          value: `${saDetailObj?.calculationType}`,
         },
-        value: null
-      }
-  
-      const tempArrayProduct = [...dataTableProduct, objPaymentType, objChargingMethodType]
-      const tempArrayCalcRule = [...dataTableCalcRule, objCalcType]
-      const body ={
+        value: null,
+      };
+
+      const tempArrayProduct = [
+        ...dataTableProduct,
+        objPaymentType,
+        objChargingMethodType,
+      ];
+      const tempArrayCalcRule = [...dataTableCalcRule, objCalcType];
+      const body = {
         isDraft: typeSubmit === "draft" && true,
-        saInfo : {
+        saInfo: {
           saReferenceNumber: saReferenceNumber ? saReferenceNumber : null,
           accountId: idAccount,
           isMain: isMain,
@@ -1472,80 +1631,124 @@ const CreateServiceAgreement = ({ saType }) => {
           saNumber: saInfoObj.serviceAgreementNumber,
           saType: saInfoObj.serviceAgreementType,
           pjbgType: saInfoObj.pjbgType,
-          saDate: saInfoObj.serviceAgreementDate ? moment(saInfoObj.serviceAgreementDate).format('YYYY-MM-DD') : '',
-          startDate: saInfoObj.startDate? moment(saInfoObj.startDate).format('YYYY-MM-DD') : '',
-          endDate: saInfoObj.endDate? moment(saInfoObj.endDate).format('YYYY-MM-DD') : '',
+          saDate: saInfoObj.serviceAgreementDate
+            ? moment(saInfoObj.serviceAgreementDate).format("YYYY-MM-DD")
+            : "",
+          startDate: saInfoObj.startDate
+            ? moment(saInfoObj.startDate).format("YYYY-MM-DD")
+            : "",
+          endDate: saInfoObj.endDate
+            ? moment(saInfoObj.endDate).format("YYYY-MM-DD")
+            : "",
           billingCycle: saInfoObj.billingCycle,
           termOfPayment: saInfoObj.termOfPayment,
           invoiceTemplate: saInfoObj.invoiceTemplate,
-          gasInPlanDate: saInfoObj.gasInPlanDate ? moment(saInfoObj.gasInPlanDate).format('YYYY-MM-DD') : '',
-          commitmentDate: saInfoObj.commitmentDate ? moment(saInfoObj.commitmentDate).format('YYYY-MM-DD') : '',
+          gasInPlanDate: saInfoObj.gasInPlanDate
+            ? moment(saInfoObj.gasInPlanDate).format("YYYY-MM-DD")
+            : "",
+          commitmentDate: saInfoObj.commitmentDate
+            ? moment(saInfoObj.commitmentDate).format("YYYY-MM-DD")
+            : "",
           description: saInfoObj.description || null,
-          alreadyGasIn: hasValue(saInfoObj?.alreadyGasIn) ?  saInfoObj?.alreadyGasIn : false,
+          alreadyGasIn: hasValue(saInfoObj?.alreadyGasIn)
+            ? saInfoObj?.alreadyGasIn
+            : false,
         },
         saDetail: {
-          productVersionId: saDetailObj.productVersionId !== undefined ? saDetailObj.productVersionId : null,
+          productVersionId:
+            saDetailObj.productVersionId !== undefined
+              ? saDetailObj.productVersionId
+              : null,
           isCustom: saDetailObj.createFrom === 1 ? "Y" : "N",
           productDetail: tempArrayProduct.map((item) => {
-            return{
+            return {
               name: item.name !== null ? item.name.value : null,
-              unit: item.unit !== null && item.unit !== undefined ? item.unit.value : null,
+              unit:
+                item.unit !== null && item.unit !== undefined
+                  ? item.unit.value
+                  : null,
               value: item.value !== null ? item.value : null,
-              description: item.description !== null && item.description !== undefined ? item.description : null,
-            }
+              description:
+                item.description !== null && item.description !== undefined
+                  ? item.description
+                  : null,
+            };
           }),
           productPricing: {
             priceCodeId: saDetailObj.priceCode,
             priceRuleId: saDetailObj.pricingRule,
             priceAdjustment: saDetailObj.priceAdjustmentId || null,
-            priceRuleTiering: dataPricing.map(item =>{
-              return{
+            priceRuleTiering: dataPricing.map((item) => {
+              return {
                 line: item?.lineNumber,
                 min: item?.min,
                 max: item?.max,
                 isUnlimited: item?.unlimited,
-                priceId: item?.priceCode,     
-                priceAdjustment: item?.adjustmentId ? item?.adjustmentId : null             
-              }
-            })
+                priceId: item?.priceCode,
+                priceAdjustment: item?.adjustmentId ? item?.adjustmentId : null,
+              };
+            }),
           },
-          productCalcRule: tempArrayCalcRule.map(item => {
-            return{
+          productCalcRule: tempArrayCalcRule.map((item) => {
+            return {
               name: item.name !== undefined ? item.name.value : null,
-              unit: item.unit !== null && item.unit !== undefined ? `${item.unit.value}` : null,
-              value: item.value !== undefined ? item.value : null
-            }
+              unit:
+                item.unit !== null && item.unit !== undefined
+                  ? `${item.unit.value}`
+                  : null,
+              value: item.value !== undefined ? item.value : null,
+            };
           }),
           productTOS: (dataTermOfService || []).map((item) => {
             return {
-              tosId: item.tosId !== undefined ? item.tosId : null, 
-              tosName: item.tosName !== undefined ? item.tosName : null, 
-              description: item.description !== undefined ? item.description : null,
-              tosDetail: item.tosDetail !== undefined ? item.tosDetail.map((itemDetail) => {
-                return {
-                  attribute: itemDetail.attribute !== undefined ? parseInt(itemDetail.attribute) : null, 
-                  unit: itemDetail.unit !== undefined ? itemDetail.unit : null,
-                  value: itemDetail.value !== undefined ? itemDetail.value : null,
-                  fromItem: itemDetail.fromItem !== undefined ? itemDetail.fromItem : null,
-                };
-              }): null,
+              tosId: item.tosId !== undefined ? item.tosId : null,
+              tosName: item.tosName !== undefined ? item.tosName : null,
+              description:
+                item.description !== undefined ? item.description : null,
+              tosDetail:
+                item.tosDetail !== undefined
+                  ? item.tosDetail.map((itemDetail) => {
+                      return {
+                        attribute:
+                          itemDetail.attribute !== undefined
+                            ? parseInt(itemDetail.attribute)
+                            : null,
+                        unit:
+                          itemDetail.unit !== undefined
+                            ? itemDetail.unit
+                            : null,
+                        value:
+                          itemDetail.value !== undefined
+                            ? itemDetail.value
+                            : null,
+                        fromItem:
+                          itemDetail.fromItem !== undefined
+                            ? itemDetail.fromItem
+                            : null,
+                      };
+                    })
+                  : null,
             };
           }),
           lateChargeIDR: sendLateCharge?.lateChargeIDR?.lateChargeId || null,
           lateChargeUSD: sendLateCharge?.lateChargeUSD?.lateChargeId || null,
-          taxImplicationPPN: (dataTaxImplication[0]) ? dataTaxImplication[0].taxImplicationId : null,
-          taxImplicationPPh: (dataTaxImplication[1]) ? dataTaxImplication[1].taxImplicationId : null,
+          taxImplicationPPN: dataTaxImplication[0]
+            ? dataTaxImplication[0].taxImplicationId
+            : null,
+          taxImplicationPPh: dataTaxImplication[1]
+            ? dataTaxImplication[1].taxImplicationId
+            : null,
         },
         appHierId: saApprovalObj.appHierId,
-      }
-      setDataFinal(body)
+      };
+      setDataFinal(body);
       setModalConfirm(true);
-    }else{
-      setModalValidateAttachment(true)
+    } else {
+      setModalValidateAttachment(true);
     }
   };
 
-  const handleConfirm = () =>{
+  const handleConfirm = () => {
     // const getUniqueListBy = (arr) => {
     //   return [
     //     ...new Map(
@@ -1553,25 +1756,28 @@ const CreateServiceAgreement = ({ saType }) => {
     //     ).values(),
     //   ];
     // };
-    const  transformArray = (array) => {
+    const transformArray = (array) => {
       const result = [];
       const tempObj = {};
-  
-      array.forEach(item => {
+
+      array.forEach((item) => {
         const key = `${item.min}_${item.max}_${item.priceId}`;
         if (tempObj[key]) {
           tempObj[key].priceAdjustment.push(item.priceAdjustment);
         } else {
-          tempObj[key] = { ...item, priceAdjustment: item.priceAdjustment ? [item.priceAdjustment] : [] };
+          tempObj[key] = {
+            ...item,
+            priceAdjustment: item.priceAdjustment ? [item.priceAdjustment] : [],
+          };
         }
       });
-  
+
       for (const key in tempObj) {
         result.push(tempObj[key]);
       }
-  
+
       return result;
-  }
+    };
 
     const body = {
       ...dataFinal,
@@ -1579,46 +1785,48 @@ const CreateServiceAgreement = ({ saType }) => {
         ...dataFinal.saDetail,
         productPricing: {
           ...dataFinal.saDetail.productPricing,
-          priceRuleTiering: transformArray(dataFinal.saDetail.productPricing.priceRuleTiering)
-        }
-      }
-    }
+          priceRuleTiering: transformArray(
+            dataFinal.saDetail.productPricing.priceRuleTiering
+          ),
+        },
+      },
+    };
 
-    dispatch(createServiceAgreement({body:body}))
-    .unwrap()
-    .then(async (data) => {
-      setLoadingForm(true);
-      const idServiceagreement = data.saId;
-      for (let icon = 0; icon < listDataAttachment.length; icon++) {
-        const element = listDataAttachment[icon];
-        const body = {
-          files: element.file,
-          category: element.categoryId,
-          isUpdate: false
-        };
-        await accountManagementPromoHttpService.uploadAttachment(
-          `/v1/dbs/api/sa/uploadAttachment/${idServiceagreement}`,
-          body
-        );
-      }
-      setLoadingForm(false);
-      setModalConfirm(false);
-    })
-    .catch((error) => {
-      if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-        const message =
-          (error.response &&
-            error.response.data &&
-            error.response.data.message) ||
-          error.message ||
-          error.toString();
-        setBodyError({ message });
-        setModalError(true);
-      }
-      setModalConfirm(false);
-    });
+    dispatch(createServiceAgreement({ body: body }))
+      .unwrap()
+      .then(async (data) => {
+        setLoadingForm(true);
+        const idServiceagreement = data.saId;
+        for (let icon = 0; icon < listDataAttachment.length; icon++) {
+          const element = listDataAttachment[icon];
+          const body = {
+            files: element.file,
+            category: element.categoryId,
+            isUpdate: false,
+          };
+          await accountManagementPromoHttpService.uploadAttachment(
+            `/v1/dbs/api/sa/uploadAttachment/${idServiceagreement}`,
+            body
+          );
+        }
+        setLoadingForm(false);
+        setModalConfirm(false);
+      })
+      .catch((error) => {
+        if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+          const message =
+            (error.response &&
+              error.response.data &&
+              error.response.data.message) ||
+            error.message ||
+            error.toString();
+          setBodyError({ message });
+          setModalError(true);
+        }
+        setModalConfirm(false);
+      });
     dispatch(resetDataDetail());
-  }
+  };
 
   const handleCloseModalError = () => {
     setModalError(false);
@@ -1794,6 +2002,7 @@ const CreateServiceAgreement = ({ saType }) => {
                 idAccount: idAccount,
                 idCustomer: idCustomer,
               }}
+              // replace
             >
               <ButtonComponent type={"submit"}>Confirm</ButtonComponent>
             </Link>

@@ -1,12 +1,9 @@
-import { Menu, Tooltip } from "antd";
+import { Menu } from "antd";
 import React, { useCallback, useEffect, useMemo } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import SVGIcon from "../../../src/assets/Icon/index";
 import { useState } from "react";
-import { key } from "localforage";
-import { hasValue } from "../../utils";
-import { data } from "autoprefixer";
 
 /** Whitelist Sidemenu */
 const whitelistMenu = [
@@ -49,36 +46,40 @@ const whitelistMenu = [
   "Product Distribution",
   "Additional Information",
   "Account Equipment",
-  "Detail Product"
+  "Detail Product",
 ];
 const SideMenu = ({ isCollapsed }) => {
   const location = useLocation();
   const [active, setActive] = useState([]);
   const [temporaryKeys, setTemporaryKeys] = useState([]);
-  const [isNewTab, setIsNewTab] = useState(['/rating-billing']);
   const getLocation = location.pathname;
-  const { side_bar } = useSelector(state => state?.auth)
+  const { side_bar } = useSelector((state) => state?.auth);
 
   const datas = useMemo(() => JSON.parse(side_bar), [side_bar]);
 
   // convert to flat map from tree data
-  const extractPaths = useCallback((data) =>
-    data.flatMap((item) => [
-      item,
-      ...(item.children ? extractPaths(item.children) : []),
-      // ...(item.children ? extractPaths(item.children) : []),
-    ]), []);
+  const extractPaths = useCallback(
+    (data) =>
+      data.flatMap((item) => [
+        item,
+        ...(item.children ? extractPaths(item.children) : []),
+        // ...(item.children ? extractPaths(item.children) : []),
+      ]),
+    []
+  );
 
   // flat aray from tree data
-  const extractPathsKey = useCallback((data, parentKey = "") =>
-    data.flatMap((item) => {
-      const uniqueKey = parentKey ? `${parentKey}-${item.id}` : item.id;
-      return [
-        { ...item, key: uniqueKey },
-        ...(item.children ? extractPathsKey(item.children, uniqueKey) : [])
-      ];
-    }), []);
-
+  const extractPathsKey = useCallback(
+    (data, parentKey = "") =>
+      data.flatMap((item) => {
+        const uniqueKey = parentKey ? `${parentKey}-${item.id}` : item.id;
+        return [
+          { ...item, key: uniqueKey },
+          ...(item.children ? extractPathsKey(item.children, uniqueKey) : []),
+        ];
+      }),
+    []
+  );
 
   // find specific parent
   const findMatchingPath = (data, currentPath) => {
@@ -103,7 +104,7 @@ const SideMenu = ({ isCollapsed }) => {
 
   // mapping menu and add key
   const mappingMenu = (data, parentKey = "") => {
-    return data?.map(item => {
+    return data?.map((item) => {
       const uniqueKey = parentKey ? `${parentKey}-${item.id}` : item.id;
       if (item?.children) {
         return {
@@ -111,36 +112,36 @@ const SideMenu = ({ isCollapsed }) => {
           label: item?.name,
           path: item?.path,
           ...item,
-          children: mappingMenu(item?.children, uniqueKey)
-        }
+          children: mappingMenu(item?.children, uniqueKey),
+        };
       } else {
         return {
           key: uniqueKey?.toString(),
           label: item?.name,
           path: item?.path,
-          ...item
-        }
+          ...item,
+        };
       }
-    })
-  }
-
-
+    });
+  };
 
   // filtering path
   const filterMenuByPath = (data, targetPath) => {
     const filterRecursive = (items) => {
-      return items?.map(item => {
-        if (item?.path === targetPath) {
-          return item;
-        }
-        if (item.children) {
-          const filteredChildren = filterRecursive(item.children);
-          if (filteredChildren.length > 0) {
-            return { ...item, children: filteredChildren };
+      return items
+        ?.map((item) => {
+          if (item?.path === targetPath) {
+            return item;
           }
-        }
-        return null;
-      }).filter(item => item !== null);
+          if (item.children) {
+            const filteredChildren = filterRecursive(item.children);
+            if (filteredChildren.length > 0) {
+              return { ...item, children: filteredChildren };
+            }
+          }
+          return null;
+        })
+        .filter((item) => item !== null);
     };
 
     return filterRecursive(data);
@@ -153,8 +154,11 @@ const SideMenu = ({ isCollapsed }) => {
     if (activeKeys?.length === 0) {
       const keys = extractPathsKey(datas);
       const findMatching = findMatchingPath(keys, getLocation);
-      const parentKey = filterMenuByPath(mappingMenu(datas), findMatching?.path)
-      const extractingKeys = extractPaths(parentKey)?.map(item => item?.key);
+      const parentKey = filterMenuByPath(
+        mappingMenu(datas),
+        findMatching?.path
+      );
+      const extractingKeys = extractPaths(parentKey)?.map((item) => item?.key);
       setTemporaryKeys(extractingKeys);
     }
     setActive(extractPaths(activeKeys).map((item) => item.key));
@@ -183,100 +187,104 @@ const SideMenu = ({ isCollapsed }) => {
   const menu = removeProfileItems(datas);
 
   const newTabCallback = useCallback((data) => {
-    if (data?.path?.includes('https://dev-plasma.pgn.co.id/')) {
-    return (
-      <a href={"https://plasma.pgn.co.id/"} about={data?.namew} target="_blank" rel="noopener noreferrer">
-        {data?.name}
-      </a>
-    )
-    } else if (data?.path?.includes('http://10.129.2.39:8080/ords/f?p=113')) {
-    return (
-      <a href={"http://rms.pgn.co.id:7780/apex/f?p=113"} target="_blank" rel="noopener noreferrer">
-        {data?.name}
-      </a>
-    )
-  } else{
-    return (
-      <Link to={data?.path}>{data?.name}</Link>
-    )
-  }
-  
+    if (data?.path?.includes("https://dev-plasma.pgn.co.id/")) {
+      return (
+        <a
+          href={"https://plasma.pgn.co.id/"}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {data?.name}
+        </a>
+      );
+    } else if (data?.path?.includes("http://10.129.2.39:8080/ords/f?p=113")) {
+      return (
+        <a
+          href={"http://rms.pgn.co.id:7780/apex/f?p=113"}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {data?.name}
+        </a>
+      );
+    } else {
+      return <Link to={data?.path}>{data?.name}</Link>;
+    }
   }, []);
   // render sub menu
-  const generateMenuItems = useCallback((data) => {
-    return data.map((item) => {
-      if (item.children) {
-        return (
-          <Menu.SubMenu
-            key={item?.key}
-            icon={
-              <SVGIcon
-                name={item?.icon}
-                width={20}
-                style={{
-                  marginRight: isCollapsed ? "80px" : "12px",
-                  marginLeft: isCollapsed ? "-5px" : "",
-                  marginTop: isCollapsed ? "10px" : "",
-                }}
-              />
-            }
-            title={<span>{item.name}</span>}
-          >
-            {generateMenuItems(item.children)}
-          </Menu.SubMenu>
-        );
-      } else {
-        return (
-          <Menu.Item
-            key={item?.key}
-            className={active?.includes(item?.key) && isCollapsed && "ant-menu-submenu ant-menu-submenu-vertical ant-menu-submenu-selected ant-menu-submenu-title"}
-            icon={
-              <SVGIcon
-                name={item?.icon}
-                width={20}
-                style={{
-                  marginRight: isCollapsed ? "80px" : "12px",
-                  marginLeft: isCollapsed ? "-5px" : "",
-                  marginTop: isCollapsed ? "10px" : "",
-                }}
-              />
-            }
-          >
-            {newTabCallback(item)}
-            {/* {item?.path?.includes('/rating-billing') || item?.path?.includes('receipt-and-collection') ?
-              <a href={item.path} target="_blank" rel="noopener noreferrer">
-                {item.name}
-              </a>
-
-              :
-              <Link to={item.path}>{item.name}</Link>
-            } */}
-          </Menu.Item>
-        );
-      }
-    });
-  }, [active, isCollapsed, newTabCallback]);
+  const generateMenuItems = useCallback(
+    (data) => {
+      return data.map((item) => {
+        if (item.children) {
+          return (
+            <Menu.SubMenu
+              key={item?.key}
+              icon={
+                <SVGIcon
+                  name={item?.icon}
+                  width={20}
+                  style={{
+                    marginRight: isCollapsed ? "80px" : "12px",
+                    marginLeft: isCollapsed ? "-5px" : "",
+                    marginTop: isCollapsed ? "10px" : "",
+                  }}
+                />
+              }
+              title={<span>{item.name}</span>}
+            >
+              {generateMenuItems(item.children)}
+            </Menu.SubMenu>
+          );
+        } else {
+          return (
+            <Menu.Item
+              key={item?.key}
+              className={
+                active?.includes(item?.key) &&
+                isCollapsed &&
+                "ant-menu-submenu ant-menu-submenu-vertical ant-menu-submenu-selected ant-menu-submenu-title"
+              }
+              icon={
+                <SVGIcon
+                  name={item?.icon}
+                  width={20}
+                  style={{
+                    marginRight: isCollapsed ? "80px" : "12px",
+                    marginLeft: isCollapsed ? "-5px" : "",
+                    marginTop: isCollapsed ? "10px" : "",
+                  }}
+                />
+              }
+            >
+              {newTabCallback(item)}
+              {/* <Link to={item.path}>{item.name}</Link> */}
+            </Menu.Item>
+          );
+        }
+      });
+    },
+    [active, isCollapsed, newTabCallback]
+  );
 
   // render props if collapse
   const renderProps = (collapsed) => {
     if (collapsed) {
       return {
-        defaultOpenKeys: active?.length === 0 ? temporaryKeys : active
-      }
+        defaultOpenKeys: active?.length === 0 ? temporaryKeys : active,
+      };
     } else {
       return {
         openKeys: active?.length === 0 ? temporaryKeys : active,
         onOpenChange: (keys) => {
           if (active?.length === 0) {
-            setTemporaryKeys(keys)
+            setTemporaryKeys(keys);
           } else {
-            setActive(keys)
+            setActive(keys);
           }
-        }
-      }
+        },
+      };
     }
-  }
-
+  };
 
   return (
     <div>

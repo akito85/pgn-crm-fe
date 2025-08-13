@@ -2,8 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { validateError, showModalError } from "../general_slice";
 import { setBodyError, showModalSuccess } from "../general_slice";
 import userHttpService from "../../services/userHttpService";
-import { errorBody, errorCode, errorMessage, hasValue } from "../../../utils";
-import { statusCode } from "../../../constants/statusCode";
+import { errorBody, errorCode, errorMessage } from "../../../utils";
 
 const initialState = {
   loading: false,
@@ -91,26 +90,6 @@ export const createHtmlAnnouncement = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_HTML_ANNOUNCEMENT", back: false }))
-
-      // const message =
-      //   (error.response &&
-      //     error.response.data &&
-      //     error.response.data.message) ||
-      //   error.message ||
-      //   error.toString();
-      // if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-      //   if (error.response.data.code === 419) {
-      //     thunkAPI.dispatch(
-      //       validateError({ error, action: "CREATE_HTML_ANNOUNCEMENT" })
-      //     );
-      //   } else {
-      //     const errorBody = {
-      //       title: "Failed",
-      //       description: `Your data was not created ${message}.`,
-      //     };
-      //     thunkAPI.dispatch(showModalError(errorBody));
-      //   }
-      // }
       return thunkAPI.rejectWithValue(error);
     }
   }

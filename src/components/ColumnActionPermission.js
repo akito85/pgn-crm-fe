@@ -1,5 +1,4 @@
 import { MoreOutlined } from "@ant-design/icons";
-import { render } from "@testing-library/react";
 import { Popover, Space } from "antd";
 import { useMemo } from "react";
 import useGrantAccessHooks from "./useGrantAccessHooks";
@@ -27,6 +26,8 @@ export const RenderContentActions = (
                 ?.map((item) => {
                   if (permissions?.includes(item?.action)) {
                     return item?.render(record, totalLength);
+                  }else {
+                    return null;
                   }
                 })}
             </Space>
@@ -51,6 +52,8 @@ export const RenderContentActions = (
                 item?.action === sliceColumn?.toLowerCase()
               ) {
                 return item?.render(record, totalLength);
+              }else {
+                return null;
               }
             })}
         </div>
@@ -62,6 +65,8 @@ export const RenderContentActions = (
         {itemRender?.map((item) => {
           if (permissions?.includes(item?.action)) {
             return item?.render(record, totalLength);
+          }else {
+            return null;
           }
         })}
       </div>

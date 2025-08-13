@@ -11,36 +11,33 @@ import { rating_billing } from "./rating_billing";
 import { invoice } from "./invoice";
 import report_setup from "./report";
 export const index = [
-	{
-		path: "/",
-		element: <Dashboard />,
-		authority: "00"
-	},
-	{
-		path: '/monitoring-session',
-		element: <MonitoringSession />,
-		authority: "10"
-	},
-	{
-		path: '/generate-password/:id',
-		element:<NewPassword/>
-	},
-	{
-		path: '/switch-entity',
-		element: <SwitchPage type={'switch-entity'} />,
-		authority:'130'
-	},
-	{
-		path: '/switch-position',
-		element: <SwitchPage type={'switch-position'} />,
-		authority:'130'
-	},
-	...product_promo,
-	...user_management,
-	...system_setup,
-	...account_management,
-	...receipt_and_collection,
-	...rating_billing,
-	...invoice,
-	...report_setup
+  {
+    path: "/",
+    element: <Dashboard />,
+  },
+  {
+    path: "/monitoring-session",
+    element: <MonitoringSession />,
+  },
+  {
+    path: "/generate-password/:id",
+    element: <NewPassword />,
+  },
+  {
+    path: "/switch-entity",
+    element: <SwitchPage type={"switch-entity"} />,
+    authority: "130",
+  },
+  {
+    path: "/switch-position",
+    element: <SwitchPage type={"switch-position"} />,
+  },
+  ...product_promo,
+  ...user_management,
+  ...system_setup,
+  ...account_management,
+  ...receipt_and_collection,
+  ...rating_billing,
+  ...invoice,
+  ...report_setup,
 ];

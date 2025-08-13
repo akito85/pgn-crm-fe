@@ -106,16 +106,6 @@ export const updateAction = createAsyncThunk(
       return data;
     } catch (error) {
       thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'updated', errorMessage(error)), action: "UPDATE_ACTION", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      //   thunkAPI?.dispatch(validateError({ error: error, action: "UPDATE_ACTION", back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not updated. ${error?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -138,18 +128,6 @@ export const inactiveAction = createAsyncThunk(
       return data;
     } catch (error) {
       thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), statusData, errorMessage(error)), action: "INACTIVE_ACTION", back: false }))
-
-      // if (hasValue(error?.response?.data) === false && statusCode?.includes(error?.response?.status)) {
-      //   thunkAPI?.dispatch(validateError({ error: error, action: "INACTIVE_ACTION", back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     code: errorCode(error),
-      //     description: `Your data was not ${statusData}. ${errorMessage(error)}. Please try again.`,
-      //     return: false,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }

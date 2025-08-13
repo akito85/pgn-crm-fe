@@ -28,11 +28,11 @@ const CustomerReportList = () => {
         return [
             {
                 path: "",
-                breadcrumbName: "Report",
+                breadcrumbName: "Summary",
             },
             {
                 path: REPORT_ROUTES.VIEW_CUSTOMER_REPORT,
-                breadcrumbName: "Customer Summary",
+                breadcrumbName: "Account Summary",
             },
         ]
     }, []);
@@ -45,7 +45,7 @@ const CustomerReportList = () => {
                 <Spin spinning={loading}>
                     <BreadCrumb routes={routes} />
                     <Toolbar items={itemActions} />
-                    <BaseContainer header={'Customer Summary'}>
+                    <BaseContainer header={'Account Summary'}>
                         <TablePagination
                             dataSource={data?.result}
                             totalData={data?.page?.totalElements}

@@ -8,7 +8,7 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import { NumericFormat } from "react-number-format";
 import { columnsTableCriteriaPromo } from "../PromoDiscount/Table/TableCriteriaPromo";
 import { dateFormatting, hasValue } from "../../../../utils";
-import { checkEditableUnCriteria, dataDependAdvanced, handleMappingBodyTiering } from "./UtilsAllProduct";
+import { checkEditableUnCriteria, dataDependAdvanced, dataDepended, handleMappingBodyTiering } from "./UtilsAllProduct";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../components/Card/CardComponent";
 import DetailText from "../../../../components/DetailText";
@@ -128,7 +128,7 @@ const EditableCell = ({
             allowClear
             optionFilterProp="children"
             labelInValue
-            disabled={disabledCondition(dependDataIndex, dataIndex, record)}
+            disabled={dataDepended(dependDataIndex, dataIndex, record, dataEditRecord)}
             filterOption={(input, option) =>
               (option?.children ?? "")
                 .toLowerCase()
@@ -447,26 +447,26 @@ const FunctionalCriteriaProduct = ({
           editDataRecord: editDataRecord,
           key: key,
         })
+        
         dispatch(getApi?.getTieringList(body));
       }
-    }
-    
-    if (
-      ([...dataCriteria]?.includes(
-        columnsTable()?.find((item) => item?.dataIndex === index)?.indexValue
-      ) ||
-        dataCriteria?.includes(37))
-    ) {
+    }   
+    // if (
+    //   ([...dataCriteria]?.includes(
+    //     columnsTable()?.find((item) => item?.dataIndex === index)?.indexValue
+    //   ) ||
+    //     dataCriteria?.includes(37))
+    // ) {
       
-      formTableCriteria.resetFields(["tiering", "fromItem"]);
-        setEditDataRecord((prevState) => {
-          return {
-            ...prevState,
-            [key + "fromItem"]: undefined,
-            [key + "tiering"]: undefined,
-          };
-        });
-    }
+    //   formTableCriteria.resetFields(["tiering", "fromItem"]);
+    //     setEditDataRecord((prevState) => {
+    //       return {
+    //         ...prevState,
+    //         [key + "fromItem"]: undefined,
+    //         [key + "tiering"]: undefined,
+    //       };
+    //     });
+    // }
     
     return value;
   },[dataCriteria, dispatch, editDataRecord, formTableCriteria]);

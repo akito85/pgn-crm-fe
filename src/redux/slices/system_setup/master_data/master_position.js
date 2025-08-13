@@ -1,8 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import userHttpService from "../../../services/userHttpService";
-import { showModalError, showModalSuccess, validateError } from "../../general_slice";
-import { statusCode } from "../../../../constants/statusCode";
-import { errorBody, errorCode, errorMessage, hasValue } from "../../../../utils";
+import { showModalSuccess, validateError } from "../../general_slice";
+import { errorBody, errorCode, errorMessage } from "../../../../utils";
 
 const initialState = {
   data: [],
@@ -25,7 +24,13 @@ export const getListMasterPosition = createAsyncThunk(
       const response = await userHttpService.getPagination(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "LIST_MASTER_POSITION", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "LIST_MASTER_POSITION",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -38,7 +43,13 @@ export const getDetailMasterPosition = createAsyncThunk(
       const response = await userHttpService.getDetail(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "GET_DETAIL_MASTER_POSITION", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "GET_DETAIL_MASTER_POSITION",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -56,29 +67,47 @@ export const createMasterPosition = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(response), 'created', errorMessage(response)), action: "CREATE_MASTER_POSITION", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(
+            errorCode(response),
+            "created",
+            errorMessage(response)
+          ),
+          action: "CREATE_MASTER_POSITION",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
 );
 
-export const validateCreatePosition = createAsyncThunk('VALIDATE_CREATE', async (body, thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/position/validate-create`;
-    const response = await userHttpService.createData(url, body);
-    return response.data;
-  } catch (error) {
-    thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "VALIDATE_CREATE", back: false }))
-    return thunkAPI.rejectWithValue(error.response.data);
+export const validateCreatePosition = createAsyncThunk(
+  "VALIDATE_CREATE",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/position/validate-create`;
+      const response = await userHttpService.createData(url, body);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "VALIDATE_CREATE",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
   }
-});
-
+);
 
 export const inactiveMasterPosition = createAsyncThunk(
   "INACTIVE_MASTER_POSITION",
   async (body, thunkAPI) => {
     console.log(body);
-    let status = body?.statusData === 'ACTIVE' ? 'inactivated' : 'activated'
+    let status = body?.statusData === "ACTIVE" ? "inactivated" : "activated";
     try {
       const url = `/v1/dbs/api/position/active/inactive`;
       const response = await userHttpService.activationWithRemark(url, body);
@@ -90,7 +119,13 @@ export const inactiveMasterPosition = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(response), status, errorMessage(response)), action: "INACTIVE_MASTER_POSITION", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(response), status, errorMessage(response)),
+          action: "INACTIVE_MASTER_POSITION",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -103,7 +138,17 @@ export const deleteMasterPosition = createAsyncThunk(
       const response = await userHttpService.deleteData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(response), 'deleted', errorMessage(response)), action: "DELETE_MASTER_POSITION", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(
+            errorCode(response),
+            "deleted",
+            errorMessage(response)
+          ),
+          action: "DELETE_MASTER_POSITION",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -121,12 +166,21 @@ export const updateMasterPosition = createAsyncThunk(
       thunkApi.dispatch(showModalSuccess(successMessage));
       return response?.data;
     } catch (response) {
-      thunkApi.dispatch(validateError({ error: errorBody(errorCode(response), 'updated', errorMessage(response)), action: "UPDATE_MASTER_POSITION", back: false }))
+      thunkApi.dispatch(
+        validateError({
+          error: errorBody(
+            errorCode(response),
+            "updated",
+            errorMessage(response)
+          ),
+          action: "UPDATE_MASTER_POSITION",
+          back: false,
+        })
+      );
       return thunkApi.rejectWithValue(response.response.data);
     }
   }
 );
-
 
 export const downloadMasterPosition = createAsyncThunk(
   "DOWNLOAD_MASTER_POSITION",
@@ -139,7 +193,13 @@ export const downloadMasterPosition = createAsyncThunk(
       const response = await userHttpService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_MASTER_POSITION", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_MASTER_POSITION",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -152,7 +212,13 @@ export const getAllCostCenterDDL = createAsyncThunk(
       const response = await userHttpService.getAll(url);
       return response;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "GET_DDL_COST_CENTER", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "GET_DDL_COST_CENTER",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -238,7 +304,7 @@ const masterPositionSlice = createSlice({
       state.data = action.payload;
       state.loading = false;
     },
-   
+
     // update position
     [downloadMasterPosition.pending]: (state, action) => {
       state.loading = true;

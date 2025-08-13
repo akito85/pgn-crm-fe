@@ -1,9 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import userHttpService from "../../services/userHttpService";
-import {
-  showModalSuccess,
-  validateError,
-} from "../general_slice";
+import { showModalSuccess, validateError } from "../general_slice";
 import { errorBody, errorCode, errorMessage, hasValue } from "../../../utils";
 
 const initialState = {
@@ -88,7 +85,13 @@ export const createUser = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_USER", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "CREATE_USER",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -106,7 +109,13 @@ export const updateUser = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'updated', errorMessage(error)), action: "UPDATE_USER", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "updated", errorMessage(error)),
+          action: "UPDATE_USER",
+          back: false,
+        })
+      );
 
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -128,7 +137,13 @@ export const inactiveUser = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return data.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), status, errorMessage(error)), action: "INACTIVE_USER", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), status, errorMessage(error)),
+          action: "INACTIVE_USER",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response.data);
     }
   }
@@ -212,17 +227,13 @@ export const uploadUser = createAsyncThunk(
       );
       return data;
     } catch (e) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(e), 'updated', errorMessage(e)), action: "UPLOAD_USER", back: false }))
-
-      // if (statusCode?.includes(e?.response?.data?.code)) {
-      //   thunkAPI.validateError({ e, action: "UPLOAD_USER", back: false });
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not updated. ${message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(e), "updated", errorMessage(e)),
+          action: "UPLOAD_USER",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(e?.response);
     }
   }
@@ -356,24 +367,13 @@ export const finalUploadUser = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return data?.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "UPLOAD_USER", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      //   thunkAPI.dispatch(
-      //     validateError({
-      //       error: error,
-      //       action: "FINAL_UPLOAD_USER",
-      //       back: false,
-      //     })
-      //   );
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     data: error.response.data.data,
-      //     description: `Your data was not created. ${error.response.data.message}. Please try again`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "UPLOAD_USER",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -386,24 +386,13 @@ export const generatePasswordLink = createAsyncThunk(
       const data = await userHttpService.createData(url, body);
       return data?.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "GENERATE_PASSWORD_LINK", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      //   thunkAPI.dispatch(
-      //     validateError({
-      //       error: error,
-      //       action: "GENERATE_PASSWORD_LINK",
-      //       back: false,
-      //     })
-      //   );
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     data: error.response.data.data,
-      //     description: `Your data was not created. ${error.response.data.message}. Please try again`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "GENERATE_PASSWORD_LINK",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -441,48 +430,44 @@ export const changeAuthType = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CHANGE_AUTH_TYPE", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      //   thunkAPI.dispatch(
-      //     validateError({
-      //       error: error,
-      //       action: "CHANGE_AUTH_TYPE",
-      //       back: false,
-      //     })
-      //   );
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     data: error.response.data.data,
-      //     description: `Your data was not created. ${error.response.data.message}. Please try again`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "CHANGE_AUTH_TYPE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
 
-export const getUserPositionTo = createAsyncThunk("GET_USER_POSITION_TO", async (id, thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/forward-task/forward-to/${id}`;
-    if (hasValue(id)) {
-      const response = await userHttpService.getDetail(url);
-      if (errorMessage(response) === "No Position Can't Be Forward") {
-        throw response
-      } else {
-        return response.data;
+export const getUserPositionTo = createAsyncThunk(
+  "GET_USER_POSITION_TO",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/forward-task/forward-to/${id}`;
+      if (hasValue(id)) {
+        const response = await userHttpService.getDetail(url);
+        if (errorMessage(response) === "No Position Can't Be Forward") {
+          throw response;
+        } else {
+          return response.data;
+        }
       }
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "forwaded", errorMessage(error)),
+          action: "GET_USER_POSITION_TO",
+        })
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data
+      );
     }
-  } catch (error) {
-    thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'forwaded', errorMessage(error)), action: "GET_USER_POSITION_TO" }));
-    return thunkAPI.rejectWithValue(
-      error.response.data.code === 419 ? null : error.response.data
-    );
   }
-});
-
+);
 
 export const forwardTaskUser = createAsyncThunk(
   "FORWARD_TASK_USER",
@@ -497,7 +482,13 @@ export const forwardTaskUser = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'forwarded', errorMessage(error)), action: "FORWARD_TASK_USER", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "forwarded", errorMessage(error)),
+          action: "FORWARD_TASK_USER",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }

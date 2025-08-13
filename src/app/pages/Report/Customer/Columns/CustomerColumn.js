@@ -1,4 +1,4 @@
-import { renderColumn, renderDateColumn } from "../../../../../utils";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 
 function formatNPWP(npwpNumber) {
@@ -49,6 +49,54 @@ const columns = (
       ),
   },
   {
+    title: "CUSTOMER IDENTIFICATION TYPE",
+    dataIndex: "identificationType",
+    align: "center",
+    sorter: true,
+    width: 300,
+    ...getColumnSearchPropsPaging(
+      "identificationType",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "identificationType",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "CUSTOMER IDENTIFICATION NUMBER",
+    dataIndex: "customerIdentificationNumber",
+    sorter: true,
+    align: "left",
+    width: 400,
+    ...getColumnSearchPropsPaging(
+      "customerIdentificationNumber",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "customerIdentificationNumber",
+        searchedColumn,
+        searchText,
+        formatNPWP(text),
+        false,
+        "input",
+        search
+      ),
+  },
+  {
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
     sorter: true,
@@ -90,80 +138,6 @@ const columns = (
         searchedColumn,
         searchText,
         text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "CUSTOMER STATUS",
-    dataIndex: "customerStatus",
-    sorter: true,
-    width: 200,
-    // fixed:"right",
-    ...getColumnSearchPropsPaging(
-      "customerStatus",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false,
-      "status"
-    ),
-    render: (text) =>
-      renderColumn(
-        "customerStatus",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "status",
-        search
-      ),
-  },
-  {
-    title: "CUSTOMER IDENTIFICATION TYPE",
-    dataIndex: "customerIdentificationType",
-    align: "center",
-    sorter: true,
-    width: 300,
-    ...getColumnSearchPropsPaging(
-      "customerIdentificationType",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "customerIdentificationType",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "CUSTOMER IDENTIFICATION NUMBER",
-    dataIndex: "customerIdentificationNumber",
-    sorter: true,
-    align: "left",
-    width: 400,
-    ...getColumnSearchPropsPaging(
-      "customerIdentificationNumber",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "customerIdentificationNumber",
-        searchedColumn,
-        searchText,
-        formatNPWP(text),
         false,
         "input",
         search
@@ -223,6 +197,30 @@ const columns = (
       ),
   },
   {
+    title: "SEX",
+    dataIndex: "sex",
+    sorter: true,
+    align: "center",
+    width: 160,
+    ...getColumnSearchPropsPaging(
+      "sex",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "sex",
+        searchedColumn,
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
     title: "MARITAL STATUS",
     dataIndex: "maritalStatus",
     sorter: true,
@@ -250,16 +248,13 @@ const columns = (
       ),
   },
   {
-    title: "SEX",
-    dataIndex: "sex",
+    title: "SEARCH KEY",
+    dataIndex: "searchKey",
     sorter: true,
-    align: "center",
-    ellipsis: {
-      showTitle: false,
-    },
+    align: "left",
     width: 300,
     ...getColumnSearchPropsPaging(
-      "sex",
+      "searchKey",
       searchInput,
       searchInput,
       searchText,
@@ -267,12 +262,38 @@ const columns = (
     ),
     render: (text) =>
       renderColumn(
-        "sex",
+        "searchKey",
         searchedColumn,
         searchText,
         text,
-        true,
+        false,
         "input",
+        search
+      ),
+  },
+  {
+    title: "CUSTOMER STATUS",
+    dataIndex: "customerStatus",
+    sorter: true,
+    width: 200,
+    // fixed:"right",
+    ...getColumnSearchPropsPaging(
+      "customerStatus",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false,
+      "status"
+    ),
+    render: (text) =>
+      renderColumn(
+        "customerStatus",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "status",
         search
       ),
   },
@@ -295,6 +316,232 @@ const columns = (
     render: (text) =>
       renderColumn(
         "customerDescription",
+        searchedColumn,
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "ACCOUNT NUMBER",
+    dataIndex: "accountNumber",
+    align: "left",
+    sorter: true,
+    width: 320,
+    ...getColumnSearchPropsPaging(
+      "accountNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "accountNumber",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "ACCOUNT REGISTRATION NUMBER",
+    dataIndex: "registrationNumber",
+    align: "left",
+    sorter: true,
+    width: 350,
+    ...getColumnSearchPropsPaging(
+      "registrationNumber",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "registrationNumber",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "ACCOUNT NAME",
+    dataIndex: "accountName",
+    align: "left",
+    sorter: true,
+    width: 300,
+    ...getColumnSearchPropsPaging(
+      "accountName",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "accountName",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "CATEGORY",
+    dataIndex: "category",
+    align: "left",
+    sorter: true,
+    width: 300,
+    ...getColumnSearchPropsPaging(
+      "category",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "category",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "ACCOUNT GROUP",
+    dataIndex: "accountGroup",
+    align: "center",
+    sorter: true,
+    width: 220,
+    ...getColumnSearchPropsPaging(
+      "accountGroup",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "accountGroup",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "ACCOUNT REFERENCE ID",
+    dataIndex: "accountReferenceId",
+    align: "center",
+    sorter: true,
+    width: 320,
+    ...getColumnSearchPropsPaging(
+      "accountReferenceId",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "accountReferenceId",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "CUSTOMER MANAGEMENT",
+    dataIndex: "customerManagement",
+    align: "left",
+    sorter: true,
+    ellipsis: {
+      showTitle: true,
+    },
+    width: 370,
+    ...getColumnSearchPropsPaging(
+      "customerManagement",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "customerManagement",
+        searchedColumn,
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "ACCOUNT STATUS",
+    dataIndex: "accountStatus",
+    sorter: true,
+    align: "center",
+    width: 180,
+    ...getColumnSearchPropsPaging(
+      "accountStatus",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false,
+      "status"
+    ),
+    render: (text) =>
+      renderColumn(
+        "accountStatus",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "status",
+        search
+      ),
+  },
+  {
+    title: "ACCOUNT DESCRIPTION",
+    dataIndex: "accountDescription",
+    ellipsis: {
+      showTitle: false,
+    },
+    sorter: true,
+    width: 370,
+    ...getColumnSearchPropsPaging(
+      "accountDescription",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "accountDescription",
         searchedColumn,
         searchText,
         text,
@@ -353,103 +600,6 @@ const columns = (
       ),
   },
   {
-    title: "AREA CODE",
-    dataIndex: "areaCode",
-    sorter: true,
-    align: "left",
-    width: 180,
-    ...getColumnSearchPropsPaging(
-      "areaCode",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "areaCode",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "ACCOUNT NUMBER",
-    dataIndex: "accountNumber",
-    align: "left",
-    sorter: true,
-    width: 320,
-    ...getColumnSearchPropsPaging(
-      "accountNumber",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) =>
-      renderColumn(
-        "accountNumber",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "REGISTRATION NUMBER",
-    dataIndex: "registrationNumber",
-    align: "left",
-    sorter: true,
-    width: 350,
-    ...getColumnSearchPropsPaging(
-      "registrationNumber",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "registrationNumber",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "ACCOUNT NAME",
-    dataIndex: "accountName",
-    align: "left",
-    sorter: true,
-    width: 300,
-    ...getColumnSearchPropsPaging(
-      "accountName",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "accountName",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
     title: "METER READING CODE",
     dataIndex: "meterReadingCode",
     align: "center",
@@ -476,33 +626,6 @@ const columns = (
         search
       ),
   },
-  // {
-  //     title: "SECTOR",
-  //     dataIndex: "industrialSector",
-  //     align: "center",
-  //     sorter: true,
-  //     ellipsis: {
-  //         showTitle: false,
-  //     },
-  //     width: 260,
-  //     ...getColumnSearchPropsPaging(
-  //         'industrialSector',
-  //         searchInput,
-  //         searchInput,
-  //         searchText,
-  //         handleSearch
-  //     ),
-  //     render: (text) => renderColumn(
-  //         'industrialSector',
-  //         searchedColumn,
-  //         searchText,
-  //         text,
-  //         true,
-  //         'input',
-  //         search
-  //     )
-  // },
-
   {
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
@@ -552,13 +675,13 @@ const columns = (
       ),
   },
   {
-    title: "ACCOUNT CATEGORY",
-    dataIndex: "accountCategory",
+    title: "ACCOUNT TYPE",
+    dataIndex: "accountType",
     align: "center",
     sorter: true,
     width: 280,
     ...getColumnSearchPropsPaging(
-      "accountCategory",
+      "accountType",
       searchInput,
       searchInput,
       searchText,
@@ -566,7 +689,7 @@ const columns = (
     ),
     render: (text) =>
       renderColumn(
-        "accountCategory",
+        "accountType",
         searchedColumn,
         searchText,
         text,
@@ -600,21 +723,22 @@ const columns = (
       ),
   },
   {
-    title: "ACCOUNT TYPE",
-    dataIndex: "accountType",
-    align: "center",
+    title: "PRIORITY",
+    dataIndex: "priority",
     sorter: true,
-    width: 280,
+    align: "center",
+    width: 150,
     ...getColumnSearchPropsPaging(
-      "accountType",
+      "priority",
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
+      false
     ),
     render: (text) =>
       renderColumn(
-        "accountType",
+        "priority",
         searchedColumn,
         searchText,
         text,
@@ -623,29 +747,58 @@ const columns = (
         search
       ),
   },
-  // {
-  //     title: "REKENING",
-  //     dataIndex: "jenisRekening",
-  //     align: "center",
-  //     sorter: true,
-  //     width: 180,
-  //     ...getColumnSearchPropsPaging(
-  //         'jenisRekening',
-  //         searchInput,
-  //         searchInput,
-  //         searchText,
-  //         handleSearch
-  //     ),
-  //     render: (text) => renderColumn(
-  //         'jenisRekening',
-  //         searchedColumn,
-  //         searchText,
-  //         text,
-  //         false,
-  //         'input',
-  //         search
-  //     )
-  // },
+  {
+    title: "CORPORATE",
+    dataIndex: "isCorporate",
+    align: "center",
+    sorter: true,
+    width: 170,
+    ...getColumnSearchPropsPaging(
+      "isCorporate",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false,
+      "yes_or_no"
+    ),
+    render: (text) =>
+      renderColumn(
+        "isCorporate",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "RATING & BILLING EXCEPTION",
+    dataIndex: "isException",
+    align: "center",
+    sorter: true,
+    width: 280,
+    ...getColumnSearchPropsPaging(
+      "isException",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false,
+      "yes_or_no"
+    ),
+    render: (text) =>
+      renderColumn(
+        "isException",
+        searchedColumn,
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
   {
     title: "INDUSTRIAL SECTOR",
     dataIndex: "industrialSector",
@@ -669,56 +822,6 @@ const columns = (
         searchText,
         text,
         true,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "GAS SOURCE",
-    dataIndex: "gasSource",
-    sorter: true,
-    align: "center",
-    width: 180,
-    ...getColumnSearchPropsPaging(
-      "gasSource",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "gasSource",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "SERVICE TYPE",
-    dataIndex: "serviceType",
-    sorter: true,
-    align: "center",
-    width: 180,
-    ...getColumnSearchPropsPaging(
-      "serviceType",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "serviceType",
-        searchedColumn,
-        searchText,
-        text,
-        false,
         "input",
         search
       ),
@@ -761,16 +864,17 @@ const columns = (
       searchText,
       handleSearch,
       false,
-      "year_only",
+      "input",
       search
     ),
     render: (text) =>
-      renderDateColumn(
+      renderColumn(
         "budgetYear",
         searchedColumn,
         searchText,
         text,
-        "year",
+        false,
+        "input",
         search
       ),
   },
@@ -799,967 +903,15 @@ const columns = (
       ),
   },
   {
-    title: "PRIORITY",
-    dataIndex: "priority",
-    sorter: true,
-    align: "center",
-    width: 150,
-    ...getColumnSearchPropsPaging(
-      "priority",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "priority",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "VA STATUS",
-    dataIndex: "vaStatus",
-    sorter: true,
-    width: 250,
-    ...getColumnSearchPropsPaging(
-      "vaStatus",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false,
-      "status"
-    ),
-    render: (text) =>
-      renderColumn(
-        "vaStatus",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "status",
-        search
-      ),
-  },
-  {
-    title: "PREPAID",
-    dataIndex: "prepaid",
-    sorter: true,
-    width: 280,
-    ...getColumnSearchPropsPaging(
-      "prepaid",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "prepaid",
-        searchedColumn,
-        searchText,
-        text,
-        true,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "CALORIE TYPE",
-    dataIndex: "calorieType",
-    sorter: true,
-    width: 300,
-    align: "center",
-    ...getColumnSearchPropsPaging(
-      "calorieType",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "calorieType",
-        searchedColumn,
-        searchText,
-        text,
-        true,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "PAYMENT CHANNEL",
-    dataIndex: "paymentChannel",
-    sorter: true,
-    align: "center",
-    width: 250,
-    ...getColumnSearchPropsPaging(
-      "paymentChannel",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false,
-      "input"
-    ),
-    render: (text) =>
-      renderColumn(
-        "paymentChannel",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "IS CORPORATE",
-    dataIndex: "isCorporate",
-    align: "center",
-    sorter: true,
-    width: 170,
-    ...getColumnSearchPropsPaging(
-      "isCorporate",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false,
-      "yes_or_no"
-    ),
-    render: (text) =>
-      renderColumn(
-        "isCorporate",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "IS EXCEPTION",
-    dataIndex: "isException",
-    align: "center",
-    sorter: true,
-    width: 170,
-    ...getColumnSearchPropsPaging(
-      "isException",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false,
-      "yes_or_no"
-    ),
-    render: (text) =>
-      renderColumn(
-        "isException",
-        searchedColumn,
-        searchText,
-        text,
-        true,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "DATE AGREEMENT",
-    dataIndex: "dateAgreement",
-    align: "center",
-    sorter: true,
-    width: 200,
-    ...getColumnSearchPropsPaging(
-      "dateAgreement",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false,
-      "date",
-      search
-    ),
-    render: (text) =>
-      renderDateColumn(
-        "dateAgreement",
-        searchedColumn,
-        searchText,
-        text,
-        "date",
-        search
-      ),
-  },
-  {
-    title: "DATE GAS IN",
-    dataIndex: "dateGasIn",
-    align: "center",
-    sorter: true,
-    width: 170,
-    ...getColumnSearchPropsPaging(
-      "dateGasIn",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false,
-      "date",
-      search
-    ),
-    render: (text) =>
-      renderDateColumn(
-        "dateGasIn",
-        searchedColumn,
-        searchText,
-        text,
-        "date",
-        search
-      ),
-  },
-  {
-    title: "DATE UNSUBSCRIPTION",
-    dataIndex: "dateUnsubcription",
-    align: "center",
-    sorter: true,
-    width: 240,
-    ...getColumnSearchPropsPaging(
-      "dateUnsubcription",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false,
-      "date",
-      search
-    ),
-    render: (text) =>
-      renderDateColumn(
-        "dateUnsubcription",
-        searchedColumn,
-        searchText,
-        text,
-        "date",
-        search
-      ),
-  },
-  {
-    title: "CUSTOMER MANAGEMENT NAME",
-    dataIndex: "customerManagementName",
-    align: "left",
-    sorter: true,
-    ellipsis: {
-      showTitle: true,
-    },
-    width: 370,
-    ...getColumnSearchPropsPaging(
-      "customerManagementName",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "customerManagementName",
-        searchedColumn,
-        searchText,
-        text,
-        true,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "ACCOUNT DESCRIPTION",
-    dataIndex: "accountDescription",
-    ellipsis: {
-      showTitle: false,
-    },
-    sorter: true,
-    width: 370,
-    ...getColumnSearchPropsPaging(
-      "accountDescription",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "accountDescription",
-        searchedColumn,
-        searchText,
-        text,
-        true,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "CEO",
-    dataIndex: "ceo",
-    align: "left",
-    sorter: true,
-    width: 220,
-    ...getColumnSearchPropsPaging(
-      "ceo",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "ceo",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "COMPANY GROUP",
-    dataIndex: "companyGroup",
-    align: "left",
-    sorter: true,
-    width: 300,
-    ...getColumnSearchPropsPaging(
-      "companyGroup",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "companyGroup",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "NON ORGANIC WORKERS",
-    dataIndex: "nonorganicWorkers",
-    ellipsis: {
-      showTitle: false,
-    },
-    sorter: true,
-    width: 370,
-    ...getColumnSearchPropsPaging(
-      "nonorganicWorkers",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "nonorganicWorkers",
-        searchedColumn,
-        searchText,
-        text,
-        true,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "OWNERSHIP",
-    dataIndex: "ownership",
-    sorter: true,
-    width: 300,
-    ...getColumnSearchPropsPaging(
-      "ownership",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "ownership",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "MONTHLY TURN OVER",
-    dataIndex: "monthlyTurnover",
-    align: "rigth",
-    sorter: true,
-    width: 220,
-    ...getColumnSearchPropsPaging(
-      "monthlyTurnover",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "monthlyTurnover",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "MAIN PH NUM",
-    dataIndex: "mainPhNum",
-    sorter: true,
-    width: 300,
-    ...getColumnSearchPropsPaging(
-      "mainPhNum",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "mainPhNum",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "WORKING PER WEEKS",
-    dataIndex: "workingdayPerWeeks",
-    sorter: true,
-    width: 300,
-    ...getColumnSearchPropsPaging(
-      "workingdayPerWeeks",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "workingdayPerWeeks",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "status",
-        search
-      ),
-  },
-  {
-    title: "WORKING PER DAY",
-    dataIndex: "workinghourPerDay",
-    sorter: true,
-    width: 300,
-    ...getColumnSearchPropsPaging(
-      "workinghourPerDay",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "workinghourPerDay",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "CONTACT NAME",
-    dataIndex: "contactName",
-    sorter: true,
-    width: 250,
-    ...getColumnSearchPropsPaging(
-      "contactName",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "contactName",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "FIRST NAME",
-    dataIndex: "firstName",
-    sorter: true,
-    width: 200,
-    ...getColumnSearchPropsPaging(
-      "firstName",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "firstName",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "MIDDLE NAME",
-    dataIndex: "middleName",
-    sorter: true,
-    width: 200,
-    ...getColumnSearchPropsPaging(
-      "middleName",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "middleName",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "LAST NAME",
-    dataIndex: "lastName",
-    sorter: true,
-    width: 200,
-    ...getColumnSearchPropsPaging(
-      "lastName",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "lastName",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "JOB NAME",
-    dataIndex: "jobName",
-    sorter: true,
-    align: "center",
-    width: 230,
-    ...getColumnSearchPropsPaging(
-      "jobName",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false,
-      "date"
-    ),
-    render: (text) =>
-      renderColumn(
-        "jobName",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "POSITION NAME",
-    dataIndex: "positionName",
-    sorter: true,
-    align: "center",
-    width: 230,
-    ...getColumnSearchPropsPaging(
-      "positionName",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false,
-      "date"
-    ),
-    render: (text) =>
-      renderColumn(
-        "positionName",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    sorter: true,
-    title: "CONTACT PERSON",
-    dataIndex: "contactPerson",
-    width: 280,
-    ...getColumnSearchPropsPaging(
-      "contactPerson",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "contactPerson",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    sorter: true,
-    title: "CONTACT ADDRESS",
-    dataIndex: "contactAddress",
-    ellipsis: {
-      showTitle: false,
-    },
-    width: 370,
-    ...getColumnSearchPropsPaging(
-      "contactAddress",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "contactAddress",
-        searchedColumn,
-        searchText,
-        text,
-        true,
-        "input",
-        search
-      ),
-  },
-  {
-    sorter: true,
-    title: "CELLPHONE",
-    dataIndex: "cellphone",
-    width: 280,
-    ...getColumnSearchPropsPaging(
-      "cellphone",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "cellphone",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    sorter: true,
-    title: "HOME PHONE",
-    dataIndex: "homephone",
-    width: 280,
-    ...getColumnSearchPropsPaging(
-      "homephone",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "homephone",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    sorter: true,
-    title: "PHONE NUMBER",
-    dataIndex: "phonenumber",
-    width: 280,
-    ...getColumnSearchPropsPaging(
-      "phonenumber",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "phonenumber",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    sorter: true,
-    title: "FAX NUMBER",
-    dataIndex: "faxnumber",
-    width: 280,
-    ...getColumnSearchPropsPaging(
-      "faxnumber",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "faxnumber",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "EMAIL",
-    dataIndex: "email",
-    sorter: true,
-    width: 300,
-    ...getColumnSearchPropsPaging(
-      "email",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "email",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "WEBSITE",
-    dataIndex: "website",
-    sorter: true,
-    width: 300,
-    ...getColumnSearchPropsPaging(
-      "website",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "website",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "DESCRIPTION",
-    dataIndex: "description",
-    sorter: true,
-    ellipsis: {
-      showTitle: false,
-    },
-    width: 400,
-    ...getColumnSearchPropsPaging(
-      "description",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false,
-      "input"
-    ),
-    render: (text) =>
-      renderColumn(
-        "description",
-        searchedColumn,
-        searchText,
-        text,
-        true,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "PRIMARY FLAG",
-    dataIndex: "primaryFlag",
-    width: 160,
-    sorter: true,
-    // fixed: "right",
-    ...getColumnSearchPropsPaging(
-      "primaryFlag",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "primaryFlag",
-        searchedColumn,
-        searchText,
-        text?.toLowerCase() === "y" ? "primary" : "non-primary",
-        false,
-        "status",
-        search
-      ),
-  },
-  {
-    title: "STATUS",
-    dataIndex: "status",
-    sorter: true,
-    // fixed: "right",
-    width: 160,
-    ...getColumnSearchPropsPaging(
-      "status",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false
-    ),
-    render: (text) =>
-      renderColumn(
-        "status",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "status",
-        search
-      ),
-  },
-  {
-    title: "FULL ADDRESS",
-    dataIndex: "fullAddress",
-    sorter: true,
-    ellipsis: {
-      showTitle: false,
-    },
-    width: 400,
-    ...getColumnSearchPropsPaging(
-      "fullAddress",
-      searchInput,
-      searchInput,
-      searchText,
-      handleSearch,
-      false,
-      "input"
-    ),
-    render: (text) =>
-      renderColumn(
-        "fullAddress",
-        searchedColumn,
-        searchText,
-        text,
-        true,
-        "input",
-        search
-      ),
-  },
-  {
     title: "ADDRESS",
-    dataIndex: "fullAddress",
+    dataIndex: "address",
     sorter: true,
     ellipsis: {
       showTitle: false,
     },
     width: 400,
     ...getColumnSearchPropsPaging(
-      "fullAddress",
+      "address",
       searchInput,
       searchedColumn,
       searchText,
@@ -1767,7 +919,7 @@ const columns = (
     ),
     render: (text) =>
       renderColumn(
-        "fullAddress",
+        "address",
         searchedColumn,
         searchText,
         text?.toUpperCase(),
@@ -1778,13 +930,13 @@ const columns = (
   },
 
   {
-    title: "TYPE",
-    dataIndex: "type",
+    title: "ADDRESS TYPE",
+    dataIndex: "addressType",
     sorter: true,
     align: "center",
     width: 180,
     ...getColumnSearchPropsPaging(
-      "type",
+      "addressType",
       searchInput,
       searchedColumn,
       searchText,
@@ -1792,7 +944,7 @@ const columns = (
     ),
     render: (text) =>
       renderColumn(
-        "type",
+        "addressType",
         searchedColumn,
         searchText,
         text,
@@ -1824,30 +976,30 @@ const columns = (
         search
       ),
   },
-  //   {
-  //     title: "FLOOR",
-  //     dataIndex: "floor",
-  //     sorter: true,
-  //     width: 180,
-  //     align: "center",
-  //     ...getColumnSearchPropsPaging(
-  //       "floor",
-  //       searchInput,
-  //       searchedColumn,
-  //       searchText,
-  //       handleSearch
-  //     ),
-  //     render: (text) =>
-  //       renderColumn(
-  //         "floor",
-  //         searchedColumn,
-  //         searchText,
-  //         text,
-  //         false,
-  //         "input",
-  //         search
-  //       ),
-  //   },
+  {
+    title: "FLOOR",
+    dataIndex: "floor",
+    sorter: true,
+    width: 120,
+    align: "center",
+    ...getColumnSearchPropsPaging(
+      "floor",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "floor",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
   {
     title: "HOUSE NAME",
     dataIndex: "houseName",
@@ -1946,12 +1098,12 @@ const columns = (
   },
   {
     title: "RT",
-    dataIndex: "neighborhood1",
+    dataIndex: "rt",
     sorter: true,
     width: 120,
     align: "center",
     ...getColumnSearchPropsPaging(
-      "neighborhood1",
+      "rt",
       searchInput,
       searchedColumn,
       searchText,
@@ -1959,7 +1111,7 @@ const columns = (
     ),
     render: (text) =>
       renderColumn(
-        "neighborhood1",
+        "rt",
         searchedColumn,
         searchText,
         text,
@@ -1970,12 +1122,12 @@ const columns = (
   },
   {
     title: "RW",
-    dataIndex: "neighborhood2",
+    dataIndex: "rw",
     sorter: true,
     width: 120,
     align: "center",
     ...getColumnSearchPropsPaging(
-      "neighborhood2",
+      "rw",
       searchInput,
       searchedColumn,
       searchText,
@@ -1983,7 +1135,7 @@ const columns = (
     ),
     render: (text) =>
       renderColumn(
-        "neighborhood2",
+        "rw",
         searchedColumn,
         searchText,
         text,
@@ -1992,6 +1144,31 @@ const columns = (
         search
       ),
   },
+  {
+    title: "POSTAL CODE",
+    dataIndex: "postalCode",
+    sorter: true,
+    align: "center",
+    width: 180,
+    ...getColumnSearchPropsPaging(
+      "postalCode",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "postalCode",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+
   {
     title: "SUB DISTRICT",
     dataIndex: "subDistrict",
@@ -2085,30 +1262,6 @@ const columns = (
       ),
   },
   {
-    title: "POSTAL CODE",
-    dataIndex: "postalCode",
-    sorter: true,
-    align: "center",
-    width: 180,
-    ...getColumnSearchPropsPaging(
-      "postalCode",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "postalCode",
-        searchedColumn,
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
     title: "COUNTRY",
     dataIndex: "country",
     sorter: true,
@@ -2132,15 +1285,12 @@ const columns = (
       ),
   },
   {
-    title: "LONGITUDE",
-    dataIndex: "longitude",
+    title: "BUSINESS PURPOSE",
+    dataIndex: "businessPurpose",
     sorter: true,
-    ellipsis: {
-      showTitle: false,
-    },
-    width: 160,
+    width: 250,
     ...getColumnSearchPropsPaging(
-      "longitude",
+      "businessPurpose",
       searchInput,
       searchedColumn,
       searchText,
@@ -2148,75 +1298,193 @@ const columns = (
     ),
     render: (text) =>
       renderColumn(
-        "longitude",
+        "businessPurpose",
         searchedColumn,
         searchText,
         text,
-        true,
+        false,
         "input",
         search
       ),
   },
   {
-    title: "LATITUDE",
-    dataIndex: "latitude",
-    sorter: true,
-    ellipsis: {
-      showTitle: false,
-    },
-    width: 160,
-    ...getColumnSearchPropsPaging(
-      "latitude",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "latitude",
-        searchedColumn,
-        searchText,
-        text,
-        true,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "ALTITUDE",
-    dataIndex: "altitude",
-    sorter: true,
-    ellipsis: {
-      showTitle: false,
-    },
-    width: 160,
-    ...getColumnSearchPropsPaging(
-      "altitude",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "altitude",
-        searchedColumn,
-        searchText,
-        text,
-        true,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "PREMISE FLAG",
-    dataIndex: "premiseFlag",
-    width: 160,
+    title: "PREMISE",
+    dataIndex: "premise",
     sorter: true,
     align: "center",
+    width: 180,
     ...getColumnSearchPropsPaging(
-      "premiseFlag",
+      "premise",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      false,
+      "yes_or_no",
+      search
+    ),
+    render: (text) =>
+      renderColumn(
+        "premise",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "CONTACT NAME",
+    dataIndex: "contactName",
+    sorter: true,
+    width: 250,
+    ...getColumnSearchPropsPaging(
+      "contactName",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "contactName",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "JOB NAME",
+    dataIndex: "jobName",
+    sorter: true,
+    align: "center",
+    width: 230,
+    ...getColumnSearchPropsPaging(
+      "jobName",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false,
+      "date"
+    ),
+    render: (text) =>
+      renderColumn(
+        "jobName",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "POSITION NAME",
+    dataIndex: "positionName",
+    sorter: true,
+    align: "center",
+    width: 230,
+    ...getColumnSearchPropsPaging(
+      "positionName",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false,
+      "date"
+    ),
+    render: (text) =>
+      renderColumn(
+        "positionName",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "FIRST NAME",
+    dataIndex: "firstName",
+    sorter: true,
+    width: 200,
+    ...getColumnSearchPropsPaging(
+      "firstName",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "firstName",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "MIDDLE NAME",
+    dataIndex: "middleName",
+    sorter: true,
+    width: 200,
+    ...getColumnSearchPropsPaging(
+      "middleName",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "middleName",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "LAST NAME",
+    dataIndex: "lastName",
+    sorter: true,
+    width: 200,
+    ...getColumnSearchPropsPaging(
+      "lastName",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "lastName",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "EMAIL",
+    dataIndex: "email",
+    sorter: true,
+    width: 300,
+    ...getColumnSearchPropsPaging(
+      "email",
       searchInput,
       searchInput,
       searchText,
@@ -2225,25 +1493,244 @@ const columns = (
     ),
     render: (text) =>
       renderColumn(
-        "premiseFlag",
+        "email",
         searchedColumn,
         searchText,
-        text?.toLowerCase() === "n" ? "No" : "Yes",
+        text,
         false,
         "input",
         search
       ),
   },
   {
-    title: "ADDITIONAL NOTE",
-    dataIndex: "additionalNote",
     sorter: true,
-    ellipsis: {
-      showTitle: false,
-    },
-    width: 370,
+    title: "PGN MOBILE PHONE",
+    dataIndex: "pgnMobile",
+    width: 280,
     ...getColumnSearchPropsPaging(
-      "additionalNote",
+      "pgnMobile",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "pgnMobile",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    sorter: true,
+    title: "PHONE",
+    dataIndex: "phone",
+    width: 280,
+    ...getColumnSearchPropsPaging(
+      "phone",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "phone",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    sorter: true,
+    title: "FAX",
+    dataIndex: "faxnumber",
+    width: 280,
+    ...getColumnSearchPropsPaging(
+      "faxnumber",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "faxnumber",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "WEBSITE",
+    dataIndex: "website",
+    sorter: true,
+    width: 300,
+    ...getColumnSearchPropsPaging(
+      "website",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "website",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    sorter: true,
+    title: "MOBILE PHONE",
+    dataIndex: "mobilePhone",
+    width: 280,
+    ...getColumnSearchPropsPaging(
+      "mobilePhone",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "mobilePhone",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    sorter: true,
+    title: "WHATSAPP",
+    dataIndex: "whatsapp",
+    width: 280,
+    ...getColumnSearchPropsPaging(
+      "whatsapp",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "whatsapp",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    sorter: true,
+    title: "MEDIA",
+    dataIndex: "media",
+    align: "center",
+    width: 280,
+    ...getColumnSearchPropsPaging(
+      "media",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "media",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "START DATE",
+    dataIndex: "startDate",
+    align: "center",
+    sorter: true,
+    width: 200,
+    ...getColumnSearchPropsPaging(
+      "startDate",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false,
+      "date",
+      search
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "startDate",
+        searchedColumn,
+        searchText,
+        text,
+        "date",
+        search
+      ),
+  },
+  {
+    title: "END DATE",
+    dataIndex: "endDate",
+    align: "center",
+    sorter: true,
+    width: 200,
+    ...getColumnSearchPropsPaging(
+      "endDate",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false,
+      "date",
+      search
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "endDate",
+        searchedColumn,
+        searchText,
+        text,
+        "date",
+        search
+      ),
+  },
+  {
+    title: "PAYMENT CHANNEL",
+    dataIndex: "paymentChannel",
+    sorter: true,
+    align: "center",
+    width: 250,
+    ...getColumnSearchPropsPaging(
+      "paymentChannel",
       searchInput,
       searchInput,
       searchText,
@@ -2253,11 +1740,59 @@ const columns = (
     ),
     render: (text) =>
       renderColumn(
-        "additionalNote",
+        "paymentChannel",
         searchedColumn,
         searchText,
         text,
-        true,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "TAX IDENTIFIER TYPE",
+    dataIndex: "taxIdentifierType",
+    width: 210,
+    sorter: true,
+    align: "center",
+    ...getColumnSearchPropsPaging(
+      "taxIdentifierType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "taxIdentifierType",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "TAX IDENTIFIER NAME",
+    dataIndex: "taxIdentifierName",
+    width: 330,
+    sorter: true,
+    align: "left",
+    ...getColumnSearchPropsPaging(
+      "taxIdentifierName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "taxIdentifierName",
+        searchedColumn,
+        searchText,
+        text,
+        false,
         "input",
         search
       ),
@@ -2272,7 +1807,7 @@ const columns = (
     },
     align: "right",
     ...getColumnSearchPropsPaging(
-      "taxIdentifierTypeValue",
+      "taxIdentifierNumber",
       searchInput,
       searchedColumn,
       searchText,
@@ -2280,49 +1815,25 @@ const columns = (
     ),
     render: (text) =>
       renderColumn(
-        "taxIdentifierTypeValue",
+        "taxIdentifierNumber",
         searchedColumn,
         searchText,
         text,
         true,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "TAX IDENTIFIER NAME",
-    dataIndex: "taxIdentifierName",
-    width: 330,
-    sorter: true,
-    align: "right",
-    ...getColumnSearchPropsPaging(
-      "taxIdentifierName",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "taxIdentifierName",
-        searchedColumn,
-        searchText,
-        text,
-        false,
         "input",
         search
       ),
   },
   {
     title: "TAX IDENTIFIER ADDRESS",
-    dataIndex: "taxIdentifierAddressValue",
+    dataIndex: "taxIdentifierAddress",
     sorter: true,
     ellipsis: {
       showTitle: false,
     },
     width: 400,
     ...getColumnSearchPropsPaging(
-      "taxIdentifierName",
+      "taxIdentifierAddress",
       searchInput,
       searchedColumn,
       searchText,
@@ -2330,7 +1841,7 @@ const columns = (
     ),
     render: (text) =>
       renderColumn(
-        "taxIdentifierName",
+        "taxIdentifierAddress",
         searchedColumn,
         searchText,
         text,
@@ -2339,64 +1850,84 @@ const columns = (
         search
       ),
   },
-
+  {
+    title: "RECEIVABLE ACCOUNT",
+    dataIndex: "receivableAccount",
+    sorter: true,
+    width: 300,
+    ...getColumnSearchPropsPaging(
+      "receivableAccount",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "receivableAccount",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "REVENUE ACCOUNT",
+    dataIndex: "revenueAccount",
+    sorter: true,
+    width: 300,
+    ...getColumnSearchPropsPaging(
+      "revenueAccount",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "revenueAccount",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
   // {
-  //     title: "PRIMARY FLAG",
-  //     dataIndex: "primaryFlag",
-  //     width: 160,
-  //     sorter: true,
-  //     ...getColumnSearchPropsPaging(
-  //         'primaryFlag',
-  //         searchInput,
-  //         searchInput,
-  //         searchText,
-  //         handleSearch,
-  //         false,
-  //         'status'
-  //     ),
-  //     render: (text) => renderColumn(
-  //         'primaryFlag',
-  //         searchedColumn,
-  //         searchText,
-  //         text,
-  //         false,
-  //         'status',
-  //         search
-  //     )
-  // },
-  //   {
-  //     title: "TAX IDENTIFIER TYPE",
-  //     dataIndex: "taxIdentifierTypeValue",
-  //     width: 210,
-  //     sorter: true,
-  //     align: "center",
-  //     ...getColumnSearchPropsPaging(
-  //       "taxIdentifierTypeValue",
-  //       searchInput,
-  //       searchedColumn,
+  //   title: "BILLING BUCKET CODE",
+  //   dataIndex: "billingBucketCode",
+  //   sorter: true,
+  //   width: 250,
+  //   ...getColumnSearchPropsPaging(
+  //     search,
+  //     "billingBucketCode",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch
+  //   ),
+  //   render: (text) =>
+  //     renderColumn(
+  //       "billingBucketCode",
+  //       hasValue(search["billingBucketCode"]),
   //       searchText,
-  //       handleSearch
+  //       text,
+  //       false,
+  //       "input",
+  //       search
   //     ),
-  //     render: (text) =>
-  //       renderColumn(
-  //         "taxIdentifierTypeValue",
-  //         searchedColumn,
-  //         searchText,
-  //         text,
-  //         false,
-  //         "input",
-  //         search
-  //       ),
-  //   },
-
+  // },
   {
-    title: "TAX RELATION IDENTIFIER TYPE",
-    dataIndex: "taxRelationIdentifierType",
-    width: 280,
+    title: "BILLING BUCKET NAME",
+    dataIndex: "billingBucketName",
     sorter: true,
-    align: "center",
+    width: 300,
     ...getColumnSearchPropsPaging(
-      "taxRelationIdentifierType",
+      search,
+      "billingBucketName",
       searchInput,
       searchedColumn,
       searchText,
@@ -2404,7 +1935,31 @@ const columns = (
     ),
     render: (text) =>
       renderColumn(
-        "taxRelationIdentifierType",
+        "billingBucketName",
+        hasValue(search["billingBucketName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "CATEGORY",
+    dataIndex: "category",
+    align: "left",
+    sorter: true,
+    width: 300,
+    ...getColumnSearchPropsPaging(
+      "category",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "category",
         searchedColumn,
         searchText,
         text,
@@ -2414,12 +1969,12 @@ const columns = (
       ),
   },
   {
-    title: "TAX RELATION IDENTIFIER NAME",
-    dataIndex: "taxRelationIdentifierName",
-    width: 420,
+    title: "PPN",
+    dataIndex: "ppn",
     sorter: true,
+    width: 200,
     ...getColumnSearchPropsPaging(
-      "taxRelationIdentifierName",
+      "ppn",
       searchInput,
       searchedColumn,
       searchText,
@@ -2427,7 +1982,7 @@ const columns = (
     ),
     render: (text) =>
       renderColumn(
-        "taxRelationIdentifierName",
+        "ppn",
         searchedColumn,
         searchText,
         text,
@@ -2437,25 +1992,48 @@ const columns = (
       ),
   },
   {
-    title: "TAX RELATION IDENTIFIER ADDRESS",
-    dataIndex: "taxRelationIdentifierAddress",
+    title: "PPH",
+    dataIndex: "pph",
+    sorter: true,
+    width: 200,
+    ...getColumnSearchPropsPaging(
+      "pph",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "pph",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PREMISE ADDRESS",
+    dataIndex: "premiseAddress",
     sorter: true,
     ellipsis: {
       showTitle: false,
     },
-    width: 480,
+    width: 400,
     ...getColumnSearchPropsPaging(
-      "taxRelationIdentifierAddress",
+      "premiseAddress",
       searchInput,
       searchInput,
       searchText,
       handleSearch,
       false,
-      "date"
+      "input"
     ),
     render: (text) =>
       renderColumn(
-        "taxRelationIdentifierAddress",
+        "premiseAddress",
         searchedColumn,
         searchText,
         text,
@@ -2465,23 +2043,21 @@ const columns = (
       ),
   },
   {
-    title: "IS BAD DEBT",
-    dataIndex: "isBadDebt",
-    align: "center",
+    title: "SA NUMBER",
+    dataIndex: "saNumber",
     sorter: true,
-    width: 180,
+    width: 250,
     ...getColumnSearchPropsPaging(
-      "isBadDebt",
+      "saNumber",
       searchInput,
-      searchInput,
+      searchedColumn,
       searchText,
       handleSearch,
-      false,
-      "yes_or_no"
+      true
     ),
     render: (text) =>
       renderColumn(
-        "isBadDebt",
+        "saNumber",
         searchedColumn,
         searchText,
         text,
@@ -2491,13 +2067,312 @@ const columns = (
       ),
   },
   {
-    title: "IS SYNC",
-    dataIndex: "isSync",
+    title: "SA REFERENCE NUMBER",
+    dataIndex: "saReferenceNumber",
+    sorter: true,
+    width: 250,
+    ...getColumnSearchPropsPaging(
+      search,
+      "saReferenceNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "saReferenceNumber",
+        hasValue(search["saReferenceNumber"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "SERVICE TYPE",
+    dataIndex: "serviceType",
+    sorter: true,
+    align: "center",
+    width: 180,
+    ...getColumnSearchPropsPaging(
+      "serviceType",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "serviceType",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "SA TYPE",
+    dataIndex: "saType",
+    sorter: true,
+    align: "center",
+    width: 180,
+    ...getColumnSearchPropsPaging(
+      "saType",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "saType",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PJBG TYPE",
+    dataIndex: "pjbgType",
     align: "center",
     sorter: true,
     width: 160,
     ...getColumnSearchPropsPaging(
-      "isSync",
+      "pjbgType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "pjbgType",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "SA DATE",
+    dataIndex: "saDate",
+    align: "center",
+    sorter: true,
+    width: 160,
+    ...getColumnSearchPropsPaging(
+      "saDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date"
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "saDate",
+        searchedColumn,
+        searchText,
+        text,
+        "date",
+        search
+      ),
+  },
+  {
+    title: "START DATE",
+    dataIndex: "startDateSa",
+    align: "center",
+    sorter: true,
+    width: 160,
+    ...getColumnSearchPropsPaging(
+      "startDateSa",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date"
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "startDateSa",
+        searchedColumn,
+        searchText,
+        text,
+        "date",
+        search
+      ),
+  },
+  {
+    title: "END DATE",
+    dataIndex: "endDateSa",
+    align: "center",
+    sorter: true,
+    width: 160,
+    ...getColumnSearchPropsPaging(
+      "endDateSa",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date"
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "endDateSa",
+        searchedColumn,
+        searchText,
+        text,
+        "date",
+        search
+      ),
+  },
+  {
+    title: "COMMITMENT DATE",
+    dataIndex: "commitmentDate",
+    align: "center",
+    sorter: true,
+    width: 220,
+    ...getColumnSearchPropsPaging(
+      "commitmentDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date"
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "commitmentDate",
+        searchedColumn,
+        searchText,
+        text,
+        "date",
+        search
+      ),
+  },
+  {
+    title: "BILLING CYCLE",
+    dataIndex: "billingCycle",
+    align: "center",
+    sorter: true,
+    width: 280,
+    ...getColumnSearchPropsPaging(
+      "billingCycle",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "billingCycle",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "TERM OF PAYMENT",
+    dataIndex: "termsOfPaymentName",
+    align: "center",
+    sorter: true,
+    width: 280,
+    ...getColumnSearchPropsPaging(
+      search,
+      "termsOfPaymentName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "termsOfPaymentName",
+        hasValue(search["termsOfPaymentName"]),
+        searchText,
+        text?.value,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "INVOICE TEMPLATE",
+    dataIndex: "invoiceTemplate",
+    sorter: true,
+    width: 280,
+    ...getColumnSearchPropsPaging(
+      search,
+      "invoiceTemplate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "invoiceTemplate",
+        hasValue(search["invoiceTemplate"]),
+        searchText,
+        text?.value,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "GAS IN PLAN DATE",
+    dataIndex: "gasInPlanDate",
+    align: "center",
+    sorter: true,
+    width: 200,
+    ...getColumnSearchPropsPaging(
+      "gasInPlanDate",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false,
+      "date",
+      search
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "gasInPlanDate",
+        searchedColumn,
+        searchText,
+        text,
+        "date",
+        search
+      ),
+  },
+  {
+    title: "ALREADY GAS IN",
+    dataIndex: "alreadyGasIn",
+    align: "center",
+    sorter: true,
+    width: 220,
+    ...getColumnSearchPropsPaging(
+      "alreadyGasIn",
       searchInput,
       searchInput,
       searchText,
@@ -2507,7 +2382,7 @@ const columns = (
     ),
     render: (text) =>
       renderColumn(
-        "isSync",
+        "alreadyGasIn",
         searchedColumn,
         searchText,
         text,
@@ -2516,110 +2391,512 @@ const columns = (
         search
       ),
   },
-  //   {
-  //     title: "ACCOUNT DESCRIPTION",
-  //     dataIndex: "accountDescription",
-  //     ellipsis: {
-  //       showTitle: false,
-  //     },
-  //     sorter: true,
-  //     width: 400,
-  //     ...getColumnSearchPropsPaging(
-  //       "accountDescription",
-  //       searchInput,
-  //       searchInput,
-  //       searchText,
-  //       handleSearch,
-  //       false,
-  //       "date"
-  //     ),
-  //     render: (text) =>
-  //       renderColumn(
-  //         "accountDescription",
-  //         searchedColumn,
-  //         searchText,
-  //         text,
-  //         true,
-  //         "input",
-  //         search
-  //       ),
-  //   },
-  //   {
-  //     title: "PRIMARY FLAG",
-  //     dataIndex: "primaryFlag",
-  //     width: 160,
-  //     sorter: true,
-  //     fixed: "right",
-  //     ...getColumnSearchPropsPaging(
-  //       "primaryFlag",
-  //       searchInput,
-  //       searchInput,
-  //       searchText,
-  //       handleSearch
-  //     ),
-  //     render: (text) =>
-  //       renderColumn(
-  //         "primaryFlag",
-  //         searchedColumn,
-  //         searchText,
-  //         text?.toLowerCase() === "y" ? "primary" : "non-primary",
-  //         false,
-  //         "status",
-  //         search
-  //       ),
-  //   },
-  //   {
-  //     title: "STATUS",
-  //     dataIndex: "status",
-  //     sorter: true,
-  //     fixed: "right",
-  //     width: 160,
-  //     ...getColumnSearchPropsPaging(
-  //       "status",
-  //       searchInput,
-  //       searchInput,
-  //       searchText,
-  //       handleSearch,
-  //       false
-  //     ),
-  //     render: (text) =>
-  //       renderColumn(
-  //         "status",
-  //         searchedColumn,
-  //         searchText,
-  //         text,
-  //         false,
-  //         "status",
-  //         search
-  //       ),
-  //   },
-  // {
-  //   title: "ACCOUNT STATUS",
-  //   dataIndex: "status",
-  //   sorter: true,
-  //   // align: "center",
-  //   width: 180,
-  //   fixed: "right",
-  //   ...getColumnSearchPropsPaging(
-  //     "status",
-  //     searchInput,
-  //     searchInput,
-  //     searchText,
-  //     handleSearch,
-  //     false,
-  //     "status"
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "status",
-  //       searchedColumn,
-  //       searchText,
-  //       text,
-  //       false,
-  //       "status",
-  //       search
-  //     ),
-  // },
+  {
+    title: "PRODUCT",
+    width: 240,
+    sorter: true,
+    dataIndex: "product",
+    ellipsis: {
+      showTitle: false,
+    },
+    ...getColumnSearchPropsPaging(
+      "product",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "product",
+        hasValue(search["product"]),
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRODUCT TYPE",
+    width: 240,
+    sorter: true,
+    dataIndex: "productType",
+    algin: "center",
+    ...getColumnSearchPropsPaging(
+      "productType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "productType",
+        hasValue(search["productType"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRODUCT CLASS",
+    width: 240,
+    sorter: true,
+    dataIndex: "productClass",
+    ...getColumnSearchPropsPaging(
+      "productClass",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "productClass",
+        hasValue(search["productClass"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRODUCT VERSION",
+    width: 240,
+    sorter: true,
+    dataIndex: "productVersionId",
+    ...getColumnSearchPropsPaging(
+      "productVersionId",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "productVersionId",
+        hasValue(search["productVersionId"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "CREATE FORM",
+    width: 200,
+    sorter: true,
+    dataIndex: "createForm",
+    ...getColumnSearchPropsPaging(
+      "createForm",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      'yes_or_no',
+    ),
+    render: (text) =>
+      renderColumn(
+        "createForm",
+        hasValue(search["createForm"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PAYMENT TYPE",
+    dataIndex: "paymentType",
+    key: "paymentType",
+    sorter: true,
+    width: 180,
+    align: "center",
+    ...getColumnSearchPropsPaging(
+      "paymentType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "paymentType",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "CHARGING METHOD",
+    dataIndex: "chargingMethod",
+    key: "chargingMethod",
+    sorter: true,
+    width: 200,
+    align: "center",
+    ...getColumnSearchPropsPaging(
+      "chargingMethod",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "chargingMethod",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "UOM",
+    dataIndex: "uom",
+    align: "center",
+    sorter: true,
+    width: 150,
+    ...getColumnSearchPropsPaging(
+      "uom",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "uom",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  // ref dari create account table
+  {
+    title: "MINIMUM",
+    dataIndex: "min",
+    align: "left",
+    sorter: true,
+    width: 190,
+    ...getColumnSearchPropsPaging(
+      "min",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "min",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "MAXIMUM",
+    dataIndex: "max",
+    align: "left",
+    sorter: true,
+    width: 190,
+    ...getColumnSearchPropsPaging(
+      "max",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "max",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRESSURE",
+    dataIndex: "pressure",
+    align: "",
+    sorter: true,
+    width: 190,
+    ...getColumnSearchPropsPaging(
+      "pressure",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "pressure",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "CONTRACT PRESSURE",
+    dataIndex: "contractPressure",
+    align: "",
+    sorter: true,
+    ellipsis: {
+      showTitle: false,
+    },
+    width: 280,
+    ...getColumnSearchPropsPaging(
+      "contractPressure",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "contractPressure",
+        searchedColumn,
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRICE CODE",
+    sorter: true,
+    dataIndex: "priceCode",
+    width: 280,
+    ellipsis: { showTitle: false },
+    ...getColumnSearchPropsPaging(
+      "priceCode",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "priceCode",
+        searchedColumn,
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRICE ADJUSTMENT IDR",
+    sorter: true,
+    dataIndex: "priceadjustmentIdr",
+    width: 250,
+    ...getColumnSearchPropsPaging(
+      "priceadjustmentIdr",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "priceadjustmentIdr",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRICE ADJUSTMENT USD",
+    sorter: true,
+    dataIndex: "priceAdjustmentUsd",
+    width: 250,
+    ...getColumnSearchPropsPaging(
+      "priceAdjustmentUsd",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "priceAdjustmentUsd",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRICING RULE",
+    sorter: true,
+    dataIndex: "pricingRule",
+    width: 280,
+    ellipsis: {
+      showTitle: false,
+    },
+    ...getColumnSearchPropsPaging(
+      "pricingRule",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "pricingRule",
+        searchedColumn,
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "CALORIE TYPE",
+    dataIndex: "calorieType",
+    sorter: true,
+    width: 300,
+    align: "center",
+    ...getColumnSearchPropsPaging(
+      "calorieType",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "calorieType",
+        searchedColumn,
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "CALORIE CODE",
+    dataIndex: "calorieCode",
+    sorter: true,
+    width: 220,
+    ...getColumnSearchPropsPaging(
+      "calorieCode",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "calorieCode",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "GAS SOURCE",
+    dataIndex: "gasSourceName",
+    sorter: true,
+    align: "center",
+    width: 250,
+    ...getColumnSearchPropsPaging(
+      "gasSourceName",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "gasSourceName",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    sorter: true,
+    title: "GAS SOURCE DESCRIPTION",
+    dataIndex: "gasSourceDesc",
+    ellipsis: {
+      showTitle: false,
+    },
+    width: 330,
+    ...getColumnSearchPropsPaging(
+      "gasSourceDesc",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "gasSourceDesc",
+        searchedColumn,
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
 ];
 
 export default columns;

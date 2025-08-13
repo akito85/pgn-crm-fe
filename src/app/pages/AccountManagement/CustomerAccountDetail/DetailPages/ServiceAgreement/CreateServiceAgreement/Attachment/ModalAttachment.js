@@ -40,9 +40,9 @@ const ModalAttachment = ({
 
 
   // Use Effect
-  useEffect(() => {
-    dispatch(getSelectCategory());
-  }, []);
+  // useEffect(() => {
+  //   dispatch(getSelectCategory());
+  // }, []);
 
   useEffect(() => {
     const tempFileExt = (valueGuard?.fileExt || "")
@@ -206,6 +206,8 @@ const ModalAttachment = ({
     setUrlLink(e.target.value);
   };
 
+  console.log(categoryOptions);
+  
   return (
     <Modal
       open={openUpload}
@@ -236,8 +238,8 @@ const ModalAttachment = ({
                 onChange={handleCategory}
                 labelInValue
               >
-                {categoryOptions?.data?.map((data, index) => (
-                  <Select.Option key={index} value={data.glbTypeValId}>
+                {categoryOptions?.map((data, index) => (
+                  <Select.Option key={index} value={data.id}>
                     {data.text}
                   </Select.Option>
                 ))}
