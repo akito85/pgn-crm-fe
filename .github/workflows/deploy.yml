@@ -2,18 +2,18 @@ name: Deploy to AKS with Kubeconfig
 on:
   push:
     branches:
-      - add-new-front-end
+      - stg
 
 jobs:
   deploy:
     runs-on:
-      group: Development
+      group: Staging
       labels:
         - self-hosted
         - Linux
-        - Development
+        - Staging
         - X64
-    environment: development
+    environment: staging
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -68,16 +68,16 @@ jobs:
         HELM_CHART_PATH="${{ vars.HELM_NAME }}/${{ vars.HELM_CATALOG_APP }}"
         HELM_CATALOG_APP="${{ vars.HELM_CATALOG_APP }}"
         helm upgrade --install "${HELM_CATALOG_APP}" "${HELM_CHART_PATH}" --version 0.1.0 \
-          --namespace=energy-development \
+          --namespace="${{ vars.KUBE_NAMESPACE }}" \
           --set resources.limits.cpu="${{ vars.CPU_LIMIT }}" \
           --set resources.limits.memory="${{ vars.MEMORY_LIMIT }}" \
           --set resources.requests.cpu="${{ vars.CPU_REQUEST }}" \
           --set resources.requests.memory="${{ vars.MEMORY_REQUEST }}" \
           --set serviceAccount.name="${{ vars.VAULT_SERVICE_ACCOUNT }}" \
-          --set podAnnotations.vault.authPath="auth/energy-development-kubernetes" \
+          --set podAnnotations.vault.authPath="${{ vars.VAULT_AUTH_PATH }}" \
           --set podAnnotations.vault.secretPath=${{ vars.VAULT_CONFIG_PATH }} \
           --set imagePullSecrets.name=${{ vars.IMAGE_PULL_SECRET }} \
           --set podAnnotations.releaseNamespace=${{ vars.KUBE_NAMESPACE }} \
           --set image.name=${{ vars.IMAGE_NAME }} \
-          --set image.tag="1.0.0-alpha" \
+          --set image.tag="1.0.0-beta" \
           --set podAnnotations.vault.role=${{ vars.VAULT_ROLE }}

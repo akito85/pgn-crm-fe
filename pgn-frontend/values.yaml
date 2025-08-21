@@ -1,4 +1,4 @@
-# Default values for dbs-module-account.
+# Default values for pgn-frontend.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -34,14 +34,12 @@ podAnnotations:
     authPath: ""
     role: "default"
     access_path: ""
-    secretPath: "energy-development/db_access"
+    secretPath: "energy-staging/secret_access"
     inject: "update"
-    access_properties_un: spring.crm-datasource.userName={{ .Data.data.username }}
-    access_properties_pw: spring.crm-datasource.password={{ .Data.data.password }}
 podLabels:
-  helm.sh/chart: dbs-module-account
-  app.kubernetes.io/name: dbs-module-account
-  app.kubernetes.io/instance: dbs-module-account
+  helm.sh/chart: pgn-frontend
+  app.kubernetes.io/name: pgn-frontend
+  app.kubernetes.io/instance: pgn-frontend
   app.kubernetes.io/version: "1.0.0"
   app.kubernetes.io/managed-by: Helm
 
@@ -66,19 +64,19 @@ ingress:
   enabled: false
   className: "nginx"
   hosts:
-    - host: dev-energy.pgn.co.id
+    - host: stg-energy.pgn.co.id
       paths:
         - path: /
           pathType: Prefix
           backend:
             service:
-              name: dbs-module-account
+              name: pgn-frontend
               port:
                 number: 80
   tls:
-    - secretName: crm-developemnt-tls
+    - secretName: null
       hosts:
-        - dev-energy.pgn.co.id
+        - stg-energy.pgn.co.id
 
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
