@@ -1,0 +1,175 @@
+import axios from "axios";
+import { configApp } from "../../constants/configApp";
+import { tokenHeader } from "../../utils/tokenHeader";
+import FileSaver from "file-saver";
+import { errorCode, hasValue } from "../../utils";
+
+const getAll = async (url) => {
+  try {
+    const response = await axios.get(configApp.MASTER_MANAGEMENT + url, {
+      headers: tokenHeader(),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+const getPagination = async (url) => {
+  try {
+    const response = await axios.get(configApp.MASTER_MANAGEMENT + url, {
+      headers: tokenHeader(),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+const getDetail = async (url) => {
+  try {
+    const response = await axios.get(configApp.MASTER_MANAGEMENT + url, {
+      headers: tokenHeader(),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+const getDetailByIdBody = async (url, id) => {
+  try {
+    const response = await axios.get(
+      configApp.MASTER_MANAGEMENT + url,
+      { id: id },
+      { headers: tokenHeader() }
+    );
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+const downloadData = async (url) => {
+  try {
+    const response = await axios.get(configApp.MASTER_MANAGEMENT + url, {
+      headers: tokenHeader(),
+      responseType: "blob",
+    });
+    if (hasValue(response.headers?.get("content-disposition"))) {
+      const filename = response.headers
+        .get("content-disposition")
+        .split(";")
+        .find((n) => n.includes("filename="))
+        .replace("filename=", "")
+        .trim();
+
+      const blob = await response?.data;
+      FileSaver.saveAs(blob, filename);
+    } else if (errorCode(response) === 204) {
+      throw response
+    }
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const createData = async (url, body) => {
+  try {
+    const response = await axios.post(configApp.MASTER_MANAGEMENT + url, body, {
+      headers: tokenHeader(),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateData = async (url, data) => {
+  try {
+    const response = await axios.put(configApp.MASTER_MANAGEMENT + url, data, {
+      headers: tokenHeader(),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateDataWithMethodPost = async (url, data) => {
+  try {
+    const response = await axios.post(configApp.MASTER_MANAGEMENT + url, data, {
+      headers: tokenHeader(),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const deleteData = async (url) => {
+  try {
+    const response = await axios.delete(configApp.MASTER_MANAGEMENT + url, {
+      headers: tokenHeader(),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const activationWithRemark = async (url, body) => {
+  try {
+    const response = await axios.post(configApp.MASTER_MANAGEMENT + url, body, {
+      headers: tokenHeader(),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const activationWithOutRemark = async (url, body) => {
+  try {
+    const response = await axios.post(configApp.MASTER_MANAGEMENT + url, body, {
+      headers: tokenHeader(),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+const uploadAttachment = async (url, body) => {
+  try {
+    const response = await axios.post(configApp.MASTER_MANAGEMENT + url, body, {
+      headers: { ...tokenHeader(), "Content-Type": "multipart/form-data" },
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const checkGrantedAccessProduct = async (body) => {
+	try {
+		const response = await axios.post(configApp.USER_MANAGEMENT_SERVICE + '/v1/dbs/api/auth/check-granted-access', { pathUrl: body }, { headers: tokenHeader() });
+		return response.data;
+	} catch (error) {
+		throw error;
+	}
+}
+
+const productPromoHttpService = {
+  getAll,
+  getPagination,
+  getDetail,
+  downloadData,
+  createData,
+  updateData,
+  deleteData,
+  getDetailByIdBody,
+  activationWithRemark,
+  activationWithOutRemark,
+  updateDataWithMethodPost,
+  uploadAttachment,
+  checkGrantedAccessProduct,
+};
+
+export default productPromoHttpService;

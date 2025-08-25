@@ -1,0 +1,944 @@
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import ratingBillingHttpService from "../../services/ratingBillingHttpService";
+import {
+  showModalSuccess,
+  setBodyError,
+  showModalError,
+  validateError,
+} from "../general_slice";
+
+const initialState = {
+  data: [],
+  loading: false,
+  loadingModal: false,
+  list_sor: [],
+  list_service_type: [],
+  list_account_group: [],
+  list_customer_segment: [],
+  list_calculation_type: [],
+  list_scheduler_type: [],
+  list_cost_center: [],
+  list_meter_reading_code: [],
+  list_specific_customer: [],
+  list_billing_cycle: [],
+  list_billing_period: [],
+  detail_calculation_job: null,
+  list_calculation_log: [],
+  list_calculation_result: [],
+  list_calculation_no_paging: [],
+  data_user_calculation: {},
+};
+
+// pagination slice
+export const getCalculationPaginate = createAsyncThunk(
+  "GET_CALCULATION_PAGINATE",
+  async ({ search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "generateDate~desc";
+      const url = `/v1/dbs/api/rbi/calculation/list-calculationjob?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+// pagination history
+export const getHistoryCalculationPaginate = createAsyncThunk(
+  "GET_HISTORY_CALCULATION_PAGINATE",
+  async ({ search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "resultId~desc";
+      const url = `/v1/dbs/api/rbi/calculation/list-calculationhistory?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+
+// downlaod slice
+export const donwloadedExcel = createAsyncThunk(
+  "DOWNLOAD_CALCULATION_EXCEL",
+  async ({ search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "generateDate~desc";
+      const url = `/v1/dbs/api/rbi/calculation/download-filter?size=${pageSize}&page=${page}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.downloadData(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_CALCULATION_EXCEL", back: false }))
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const donwloadedHistoryExcel = createAsyncThunk(
+  "DOWNLOAD_CALCULATION_HISTORY_EXCEL",
+  async ({ search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "createdDate~desc";
+      const url = `/v1/dbs/api/rbi/calculation/download-filter-history?size=${pageSize}&page=${page}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.downloadData(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_CALCULATION_HISTORY_EXCEL", back: false }))
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+// get lov slice
+export const getListSor = createAsyncThunk("GET_LIST_SOR", async (thunkAPI) => {
+  try {
+    const url = `/v1/dbs/api/rbi/calculation/sor?ccType=SOR`;
+    const response = await ratingBillingHttpService.getAll(url);
+    return response.data;
+  } catch (error) {
+    const message =
+      error?.response?.data?.message || error?.message || error?.toString();
+    if (
+      error?.response?.data?.code === 500 ||
+      error?.response?.data?.code === 419
+    ) {
+      thunkAPI.dispatch(setBodyError(error));
+    } else {
+      const errorBody = {
+        title: "Failed",
+        description: `${message}`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+    }
+    return error;
+  }
+});
+export const getListServiceType = createAsyncThunk(
+  "GET_LIST_SERVICE_TYPE",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/servicetype`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+export const getListAccountGroup = createAsyncThunk(
+  "GET_LIST_ACCOUNT_GROUP",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/accountgrouptype`;
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body
+      );
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+export const getListCustomerSegment = createAsyncThunk(
+  "GET_LIST_CUSTOMER_SEGMENT",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/accountsegment`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+export const getListCalculationType = createAsyncThunk(
+  "GET_LIST_CALCULATION_TYPE",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/calculationtype`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+export const getListSchedulerType = createAsyncThunk(
+  "GET_LIST_SCHEDULER_TYPE",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/schedulertype`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+export const getListCostCenter = createAsyncThunk(
+  "GET_LIST_COST_CENTER",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/costcenter`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+export const getListMeterReadingCode = createAsyncThunk(
+  "GET_LIST_METER_READING_CODE",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/meterreadingcode`;
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body
+      );
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+export const getListSpecificCustomer = createAsyncThunk(
+  "GET_LIST_SPECIFIC_CUSTOMER",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/speccustacc`;
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body
+      );
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+export const getListBillingCycle = createAsyncThunk(
+  "GET_LIST_BILLING_CYCLE",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/billingcycle`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+export const getListBillingPeriod = createAsyncThunk(
+  "GET_LIST_BILLING_PERIOD",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/billingperiod/${id}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+
+export const getUserDetailCalculation = createAsyncThunk(
+  "GET_USER_DETAIL_CALCULATION_JOB",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/user-detail`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+
+// create calculation slice
+export const createCalculation = createAsyncThunk(
+  "CREATE_CALCULATION",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/create-calculationjob`;
+      const response = await ratingBillingHttpService.createData(url, body);
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        if (error?.response?.data?.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not created. ${message}.`,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error.response.data);
+      }
+    }
+  }
+);
+
+// detail calulation slice
+export const getDetailCalculationJob = createAsyncThunk(
+  "GET_DETAIL_CALCULATION_JOB",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/list-detailcalculation/${id}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+// detail calculation log
+export const getDetailCalculationLog = createAsyncThunk(
+  "GET_DETAIL_CALCULATION_LOG",
+  async ({ calCode, search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/rbi/calculation/list-detailcalculationlog?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}&calCode=${calCode}`;
+      const response = await ratingBillingHttpService.getListPagination(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+// detail calcultaion result
+export const getDetailCalculationResult = createAsyncThunk(
+  "GET_DETAIL_CALCULATION_LOG",
+  async ({ calCode, calType, search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/rbi/calculation/list-detailcalculationresult?calCode=${calCode}&calType=${calType}&sort=${sortParams}&page=${page}&size=${pageSize}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+// detail calcultaion result no paging
+export const getDetailCalculationResultNoPaging = createAsyncThunk(
+  "GET_DETAIL_CALCULATION_LOG_NO_PAGING",
+  async ({ calCode, calType }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/list-detailresultrecalculate`;
+      const params = { calCode, calType };
+      const response = await ratingBillingHttpService.getListPagination(
+        url,
+        params
+      );
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+//recalculate di detail
+export const recalculateData = createAsyncThunk(
+  "RECALCULATE_DATA_DETAIL",
+  async (body, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/calculation/recalculate";
+      const response = await ratingBillingHttpService.createData(url, body);
+      const messsage = response?.message;
+      const successBody = {
+        title: "Successful",
+        description: `${messsage}`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        if (error?.response?.data?.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not recalculated. ${message}.`,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error.response.data);
+      }
+    }
+  }
+);
+
+//retry data calculate
+export const retryData = createAsyncThunk(
+  "RETRTY_DATA",
+  async (body, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/calculation/retry";
+      const response = await ratingBillingHttpService.createData(url, body);
+      const messsage = response?.message;
+      const successBody = {
+        title: "Successful",
+        description: `${messsage}`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        if (error?.response?.data?.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not retried. ${message}.`,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error.response.data);
+      }
+    }
+  }
+);
+
+const calculationSlice = createSlice({
+  name: "calculation",
+  initialState,
+  extraReducers: {
+    // get pagination calculation
+    [getCalculationPaginate.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getCalculationPaginate.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data = action.payload;
+    },
+    [getCalculationPaginate.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // get pagination calculation history
+    [getHistoryCalculationPaginate.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getHistoryCalculationPaginate.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data = action.payload;
+    },
+    [getHistoryCalculationPaginate.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // download excel
+    [donwloadedExcel.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [donwloadedExcel.fulfilled]: (state, action) => {
+      state.loading = false;
+      // state.data = action.payload;
+    },
+    [donwloadedExcel.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // download excel
+    [donwloadedHistoryExcel.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [donwloadedHistoryExcel.fulfilled]: (state, action) => {
+      state.loading = false;
+      // state.data = action.payload;
+    },
+    [donwloadedHistoryExcel.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // lov sor
+    [getListSor.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getListSor.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_sor = action.payload;
+    },
+    [getListSor.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // lov service type
+    [getListServiceType.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getListServiceType.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_service_type = action.payload;
+    },
+    [getListServiceType.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // lov scheduler type
+    [getListSchedulerType.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getListSchedulerType.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_scheduler_type = action.payload;
+    },
+    [getListSchedulerType.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // lov meter reading code
+    [getListMeterReadingCode.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getListMeterReadingCode.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_meter_reading_code = action.payload;
+    },
+    [getListMeterReadingCode.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // lov customer segment
+    [getListCustomerSegment.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getListCustomerSegment.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_customer_segment = action.payload;
+    },
+    [getListCustomerSegment.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // lov cost center
+    [getListCostCenter.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getListCostCenter.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_cost_center = action.payload;
+    },
+    [getListCostCenter.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // lov calculation type
+    [getListCalculationType.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getListCalculationType.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_calculation_type = action.payload;
+    },
+    [getListCalculationType.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // lov account group
+    [getListAccountGroup.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getListAccountGroup.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_account_group = action.payload;
+    },
+    [getListAccountGroup.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // lov specific customer
+    [getListSpecificCustomer.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getListSpecificCustomer.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_specific_customer = action.payload;
+    },
+    [getListSpecificCustomer.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // lov billing cycle
+    [getListBillingCycle.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getListBillingCycle.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_billing_cycle = action.payload;
+    },
+    [getListBillingCycle.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // lov billing period
+    [getListBillingPeriod.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getListBillingPeriod.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_billing_period = action.payload;
+    },
+    [getListBillingPeriod.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // lov user detail calculation
+    [getUserDetailCalculation.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getUserDetailCalculation.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_user_calculation = action.payload;
+    },
+    [getUserDetailCalculation.rejected]: (state, action) => {
+      state.loading = false;
+    },
+
+    // create calculation
+    [createCalculation.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [createCalculation.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data = action.payload;
+    },
+    [createCalculation.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // get detail calculation job
+    [getDetailCalculationJob.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getDetailCalculationJob.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.detail_calculation_job = action.payload;
+    },
+    [getDetailCalculationJob.rejected]: (state, action) => {
+      state.loading = false;
+    },
+    // get detail calculation log
+    [getDetailCalculationLog.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getDetailCalculationLog.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_calculation_result = action.payload;
+    },
+    [getDetailCalculationLog.rejected]: (state, action) => {
+      state.loading = false;
+    },
+
+    // get detail calculation log no paigng
+    [getDetailCalculationResultNoPaging.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getDetailCalculationResultNoPaging.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_calculation_no_paging = action.payload;
+    },
+    [getDetailCalculationResultNoPaging.rejected]: (state, action) => {
+      state.loading = false;
+    },
+
+    //DETAIL MATCH FORCE
+    // [getTableForce.pending]: (state, action) => {
+    //   state.loading = true;
+    // },
+    // [getTableForce.fulfilled]: (state, action) => {
+    //   state.data_force = action.payload;
+    //   state.loading = false;
+    // },
+    // [getTableForce.rejected]: (state, action) => {
+    //   state.loading = true;
+    // },
+
+    /** recalculate data */
+    [recalculateData.pending]: (state, action) => {
+      state.loading = true;
+      state.dataRequest = action.payload;
+    },
+    [recalculateData.fulfilled]: (state, action) => {
+      state.dataRequest = action.payload;
+      state.loading = false;
+    },
+    [recalculateData.rejected]: (state, action) => {
+      state.dataRequest = action.payload;
+      state.loading = false;
+    },
+
+    //retry dataa
+    [retryData.pending]: (state, action) => {
+      state.loadingModal = true;
+      state.dataRetry = action.payload;
+    },
+    [retryData.fulfilled]: (state, action) => {
+      state.dataRetry = action.payload;
+      state.loadingModal = false;
+    },
+    [retryData.rejected]: (state, action) => {
+      state.dataRetry = action.payload;
+      state.loadingModal = false;
+    },
+  },
+});
+
+const { reducer } = calculationSlice;
+export default reducer;

@@ -1,0 +1,646 @@
+import React, { useEffect, useState } from "react";
+import { Form, Spin } from "antd";
+import { LeftOutlined } from "@ant-design/icons";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
+import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
+import BreadCrumb from "../../../../../../components/BreadCrumb";
+import RadioTabs from "../../../../../../components/RadioTabs";
+import SVGIcon from "../../../../../../assets/Icon";
+import ButtonComponent from "../../../../../../components/ButtonComponent";
+import BillingCycleSectionForm from "../Form/BillingCycleSectionForm";
+import BaseContainer from "../../../../../../components/BaseContainer";
+import ratingBillingHttpService from "../../../../../../redux/services/ratingBillingHttpService";
+import { configApp } from "../../../../../../constants/configApp";
+import ApprovalComponentGeneral from "../../../../../../components/Approval/ApprovalComponentGeneral";
+import {
+  getTimeUnit,
+  getApprovalHierarchy,
+  getDetailApproval,
+  getListCategoryFile,
+  getInfoDetail,
+  getInfoDetailDraft,
+  createBillingCycle,
+  updateBillingCycle,
+} from "../../../../../../redux/slices/rating_billing_invoice/MasterData/billingCycle";
+import AttachmentComponent from "../../../../../../components/Attachment/AttachmentComponent";
+import { getConfigFileRBIData } from "../../../../../../redux/slices/attachmentSlice";
+import ModalConfirmationBillingCycle from "../Modal/ModalConfirmationBillingCycle";
+import { dateFormatting } from "../../../../../../utils";
+import ModalBack from "../../../../../../components/Modal/ModalBack";
+import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
+import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
+import { validateCreateUpdate } from "../../../../../../redux/slices/general_slice";
+
+const BillingCycleForm = ({ type }) => {
+  const {
+    loading,
+    dataListAppHierId,
+    dataListAppHierDetail,
+    dataInfoDetail,
+    dataInfoDetailDraft,
+    list_time_unit,
+  } = useSelector((state) => state.billingCycle);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [form] = Form.useForm();
+  const { id, status, statusApproval } = location?.state || {};
+
+  const [valuePage, setValuePage] = useState("Billing Cycle");
+  const [appHierOptions, setAppHierOptions] = useState([]);
+  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+  const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [selectedHierarchy, setSelectedHierarchy] = useState();
+  const [bodyData, setBodyData] = useState({});
+  const [bodyError, setBodyError] = useState({});
+  const [modalConfirm, setModalConfirm] = useState(false);
+  const [modalBack, setModalBack] = useState(false);
+  const [modalError, setModalError] = useState(false);
+  const [flag, setFlag] = useState(false);
+  const [loadingForm, setLoadingForm] = useState(false);
+  const [startDate, setStartDate] = useState();
+
+  const isLoading = loading || loadingForm;
+
+  console.log(id, "id");
+
+  const [tabPages, setTabPages] = useState([
+    {
+      value: "Billing Cycle",
+      paramValue: [
+        "beginCycle",
+        "endCycle",
+        "timeUnit",
+        "invoiceDate",
+        "startDate",
+      ],
+    },
+    { value: "Approval", paramValue: ["apphierId"] },
+    { value: "Attachment" },
+  ]);
+
+  const routes = [
+    {
+      path: "",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
+    },
+    {
+      path: RBI_ROUTES.BILLING_CYCLE_VIEW,
+      breadcrumbName: "Billing Cycle",
+    },
+    {
+      path:
+        type === "create"
+          ? RBI_ROUTES.BILLING_CYCLE_CREATE
+          : RBI_ROUTES.BILLING_CYCLE_UPDATE,
+      breadcrumbName:
+        type === "create" ? "Create Billing Cycle" : "Update Billing Cycle",
+    },
+  ];
+
+  useEffect(() => {
+    dispatch(getTimeUnit());
+    dispatch(getApprovalHierarchy());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (id && type === "update") {
+      dispatch(getInfoDetail(id));
+      dispatch(getInfoDetailDraft(id));
+    }
+  }, [dispatch, id, type]);
+
+  useEffect(() => {
+    if (
+      id &&
+      dataInfoDetailDraft?.billingCycleId === id &&
+      dataInfoDetail?.billingCycleId === id
+    ) {
+      const datadraftAttachment = (dataInfoDetail?.attachmentDtoList || []).map(
+        (item) => {
+          return {
+            id: item.id,
+            size: item.size,
+            fileName: item.fileName,
+            fileSize: item.fileSize,
+            fileType: item.fileType,
+            fileCategoryId: item.fileCategoryId,
+            fileCategoryName: item.fileCategoryName,
+            pathFile: item.pathFile,
+            urlFile1: item.urlFile1,
+            urlFile2: item.urlFile2,
+            uploadBy: item.createdBy,
+            uploadDate: item.createdDate
+              ? moment(item.createdDate).format("DD MMM YYYY")
+              : "",
+            dataType: "exist",
+          };
+        }
+      );
+      form.setFieldsValue({
+        beginCycle: dataInfoDetailDraft.beginCycle,
+        endCycle: dataInfoDetailDraft.endCycle,
+        timeUnit: dataInfoDetailDraft.timeUnit.id,
+        invoiceDate: dataInfoDetailDraft.invoiceDate,
+        startDate: moment(dataInfoDetailDraft?.startDate),
+        endDate: dataInfoDetailDraft?.endDate
+          ? moment(dataInfoDetailDraft?.endDate)
+          : undefined,
+        description: dataInfoDetailDraft.description,
+        apphierId: dataInfoDetailDraft?.approvalHierarchy,
+      });
+
+      setStartDate(moment(dataInfoDetailDraft?.startDate));
+      setSelectedHierarchy(dataInfoDetailDraft?.approvalHierarchy);
+      setListDataAttachment(datadraftAttachment);
+    } else if (
+      id &&
+      !dataInfoDetailDraft?.billingCycleId &&
+      dataInfoDetail?.billingCycleId === id
+    ) {
+      const dataAttachment = (dataInfoDetail?.attachmentDtoList || []).map(
+        (item) => {
+          return {
+            id: item.id,
+            size: item.size,
+            fileName: item.fileName,
+            fileSize: item.fileSize,
+            fileType: item.fileType,
+            fileCategoryId: item.fileCategoryId,
+            fileCategoryName: item.fileCategoryName,
+            pathFile: item.pathFile,
+            urlFile1: item.urlFile1,
+            urlFile2: item.urlFile2,
+            uploadBy: item.createdBy,
+            uploadDate: item.createdDate
+              ? moment(item.createdDate).format("DD MMM YYYY")
+              : "",
+            dataType: "exist",
+          };
+        }
+      );
+      form.setFieldsValue({
+        beginCycle: dataInfoDetail.beginCycle,
+        endCycle: dataInfoDetail.endCycle,
+        timeUnit: dataInfoDetail.timeUnit.id,
+        invoiceDate: dataInfoDetail.invoiceDate,
+        startDate: moment(dataInfoDetail?.startDate),
+        endDate: dataInfoDetail?.endDate
+          ? moment(dataInfoDetail?.endDate)
+          : undefined,
+        description: dataInfoDetail.description,
+        apphierId: dataInfoDetail?.approvalHierarchy,
+      });
+
+      setStartDate(moment(dataInfoDetail?.startDate));
+      setSelectedHierarchy(dataInfoDetail?.approvalHierarchy);
+      setListDataAttachment(dataAttachment);
+    }
+  }, [id, type, form, dataInfoDetail, dataInfoDetailDraft]);
+
+  useEffect(() => {
+    if (dataListAppHierId && dataListAppHierId.length > 0) {
+      const tempAppHier = dataListAppHierId.map((appHier) => ({
+        name: appHier.approvalName,
+        value: appHier.appHierId,
+      }));
+      setAppHierOptions(tempAppHier);
+    }
+  }, [dataListAppHierId]);
+
+  useEffect(() => {
+    if (selectedHierarchy && selectedHierarchy !== 0) {
+      dispatch(getDetailApproval({ id: selectedHierarchy }));
+    }
+  }, [dispatch, selectedHierarchy]);
+
+  useEffect(() => {
+    if (dataListAppHierDetail && dataListAppHierDetail.length > 0) {
+      const data = dataListAppHierDetail.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: a.employeeDetail.map((b, index) => ({
+          ...b,
+          key: index + 1,
+        })),
+      }));
+      setAppHierDataDetail(data);
+    } else {
+      setAppHierDataDetail([]);
+    }
+  }, [dataListAppHierDetail]);
+
+  const handleMandatory = (
+    setListSectionInfo = () => {},
+    listDataAttachment,
+    errorFields
+  ) => {
+    setListSectionInfo((prevState) => {
+      const res = prevState.map((item) => {
+        const errorBadge =
+          item.value !== "Attachment"
+            ? (errorFields || []).reduce(
+                (current, next) =>
+                  item.paramValue.includes(next.name[0])
+                    ? current + 1
+                    : current,
+                0
+              )
+            : listDataAttachment.length < 1
+            ? 1
+            : 0;
+        return {
+          value: item.value,
+          paramValue: item.paramValue,
+          errorBadge,
+        };
+      });
+      return res;
+    });
+  };
+
+  const handleError = ({ values, errorFields, outOfDate }) => {
+    handleMandatory(setTabPages, listDataAttachment, errorFields);
+  };
+
+  const processData = ({ bodyData, id, type, dateFormatting, flag }) => {
+    const body = {
+      isSubmit: flag,
+      startDate: moment(bodyData?.startDate).format(dateFormatting.date),
+      endDate: bodyData?.endDate
+        ? moment(bodyData?.endDate).format(dateFormatting.date)
+        : null,
+      billingCycleId: type === "update" ? id : null,
+      beginCycle: bodyData.beginCycle,
+      endCycle: bodyData.endCycle,
+      timeUnit: bodyData.timeUnit,
+      invoiceDate: bodyData.invoiceDate,
+      description: bodyData.description || null,
+      appHierId: bodyData.apphierId || bodyData.appHierId,
+    };
+
+    return body;
+  };
+
+  // Validate Data before Modal
+  const checkDataValidity = async (formValue) => {
+    const url =
+      type === "create"
+        ? "/v1/dbs/api/billingcycle/validate-create"
+        : "/v1/dbs/api/billingcycle/validate-update";
+
+    const body = processData({
+      bodyData: formValue,
+      id,
+      type,
+      dateFormatting,
+      flag,
+    });
+
+    try {
+      await dispatch(
+        validateCreateUpdate({
+          body: body,
+          services: ratingBillingHttpService,
+          endPoint: url,
+          type: type,
+        })
+      )?.unwrap();
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const handleSubmitForm = async (formValue) => {
+    if (listDataAttachment.length === 0) {
+      handleMandatory(setTabPages, listDataAttachment);
+    } else {
+      const isDataValid = await checkDataValidity(formValue);
+
+      if (isDataValid) {
+        setBodyData({
+          beginCycle: formValue.beginCycle,
+          endCycle: formValue.endCycle,
+          timeUnit: formValue.timeUnit,
+          invoiceDate: formValue.invoiceDate,
+          startDate: moment(formValue?.startDate).format(dateFormatting.date),
+          endDate: formValue?.endDate
+            ? moment(formValue?.endDate).format(dateFormatting.date)
+            : null,
+          description: formValue.description || null,
+          appHierId: formValue.apphierId,
+        });
+        setModalConfirm(true);
+        setTabPages([
+          {
+            value: "Billing Cycle",
+            paramValue: [
+              "beginCycle",
+              "endCycle",
+              "timeUnit",
+              "invoiceDate",
+              "startDate",
+            ],
+          },
+          { value: "Approval", paramValue: ["apphierId"] },
+          { value: "Attachment" },
+        ]);
+      } else {
+        setModalConfirm(false);
+      }
+    }
+  };
+
+  const handleClear = () => {
+    if (type === "create") {
+      form.resetFields();
+      setAppHierDataDetail([]);
+      setAppHierOptions([]);
+      setSelectedHierarchy("");
+      setListDataAttachment([]);
+      setBodyData({});
+      setTabPages([
+        {
+          value: "Billing Cycle",
+          paramValue: [
+            "beginCycle",
+            "endCycle",
+            "timeUnit",
+            "invoiceDate",
+            "startDate",
+          ],
+        },
+        { value: "Approval", paramValue: ["apphierId"] },
+        { value: "Attachment" },
+      ]);
+    } else {
+      dispatch(getInfoDetail(id));
+      dispatch(getInfoDetailDraft(id));
+    }
+  };
+
+  const handleConfirm = async () => {
+    setModalConfirm(false);
+    // const payload = {
+    //   ...bodyData,
+    //   isSubmit: flag,
+    //   startDate: moment(bodyData?.startDate).format(dateFormatting.date),
+    //   endDate: bodyData?.endDate
+    //     ? moment(bodyData?.endDate).format(dateFormatting.date)
+    //     : null,
+    //   billingCycleId: type === "update" ? id : null,
+    // };
+
+    const payload = processData({
+      bodyData: bodyData,
+      dateFormatting,
+      flag,
+      id,
+      type,
+    });
+    if (type === "create") {
+      dispatch(createBillingCycle(payload))
+        .unwrap()
+        .then(async (dataForm) => {
+          let billingCycleId = dataForm.billingCycleId;
+          setLoadingForm(true);
+          for (let icon = 0; icon < listDataAttachment.length; icon++) {
+            const element = listDataAttachment[icon];
+            const body = {
+              files: element.file,
+              fileCategoryId: element.fileCategoryId,
+              referensiId: billingCycleId,
+            };
+            await ratingBillingHttpService.uploadAttachment(
+              `/v1/dbs/api/billingcycle/attachment-upload`,
+              body
+            );
+          }
+          setLoadingForm(false);
+          setModalConfirm(false);
+          handleClear();
+        })
+        .catch((error) => {
+          if (Math.floor((error?.response?.data.code || 0) / 100) === 5) {
+            const message =
+              (error.response &&
+                error?.response?.data &&
+                error?.response?.data.message) ||
+              error.message ||
+              error.toString();
+            setBodyError({ message });
+            setModalError(true);
+          }
+        });
+    } else {
+      dispatch(updateBillingCycle(payload))
+        .unwrap()
+        .then(async (dataForm) => {
+          let billingCycleId = dataForm.billingCycleId;
+          const filterDataAttach = listDataAttachment.filter(
+            (item) => item.dataType !== "exist"
+          );
+          setLoadingForm(true);
+          for (let icon = 0; icon < filterDataAttach.length; icon++) {
+            const element = filterDataAttach[icon];
+            const body = {
+              files: element.file,
+              fileCategoryId: element.fileCategoryId,
+              referensiId: billingCycleId,
+            };
+            await ratingBillingHttpService.uploadAttachment(
+              `/v1/dbs/api/billingcycle/attachment-upload`,
+              body
+            );
+          }
+          setLoadingForm(false);
+          setModalConfirm(false);
+          handleClear();
+        })
+        .catch((error) => {
+          if (Math.floor((error?.response?.data.code || 0) / 100) === 5) {
+            const message =
+              (error.response &&
+                error?.response?.data &&
+                error?.response?.data.message) ||
+              error.message ||
+              error.toString();
+            setBodyError({ message });
+            setModalError(true);
+          }
+        });
+    }
+  };
+
+  const handleCloseModalError = () => {
+    setModalError(false);
+    setBodyError({});
+  };
+
+  const handleRetry = () => {
+    handleConfirm();
+    setModalError(false);
+    setBodyError({});
+  };
+
+  // Function Get Data StartDate
+  const handleStartDate = (value) => {
+    form.resetFields(["endDate"]);
+    setStartDate(value);
+    return value;
+  };
+  return (
+    <LayoutMenu>
+      <Spin spinning={isLoading}>
+        <BreadCrumb routes={routes} />
+        <RadioTabs
+          data={tabPages}
+          onChange={(e) => setValuePage(e.target.value)}
+          currentPosition={valuePage}
+        />
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmitForm}
+          onFinishFailed={handleError}
+        >
+          <div className={`${valuePage !== "Billing Cycle" ? "hidden" : ""}`}>
+            <BillingCycleSectionForm
+              type={type}
+              dataTimeUnit={list_time_unit}
+              startDate={startDate}
+              status={status}
+              handleStartDate={handleStartDate}
+            />
+          </div>
+
+          <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
+            <BaseContainer header={"Approval Information"}>
+              <ApprovalComponentGeneral
+                type={type}
+                dataTable={appHierDataDetail}
+                dataOption={appHierOptions}
+                selectedHierarchy={selectedHierarchy}
+                updateSelectedHierarchy={setSelectedHierarchy}
+              />
+            </BaseContainer>
+          </div>
+
+          <div className={`${valuePage !== "Attachment" ? "hidden" : ""}`}>
+            <BaseContainer header={"Attachment Information"}>
+              <AttachmentComponent
+                type={type}
+                data={listDataAttachment}
+                updateData={setListDataAttachment}
+                dispatch={dispatch}
+                typeSelector="billingCycle"
+                getAPICategory={getListCategoryFile}
+                service={ratingBillingHttpService}
+                configApplication={configApp.RATING_BILLING_SERVICE}
+                getAPIGuard={getConfigFileRBIData}
+                typeRBI={"data"}
+                mandatory={true}
+              />
+            </BaseContainer>
+          </div>
+
+          <div className="mt-[30px] flex">
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => setModalBack(true)}
+              icon={
+                <LeftOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 24,
+                    justifyItems: "center",
+                  }}
+                />
+              }
+            >
+              Back
+            </ButtonComponent>
+
+            <div className={"w-full flex justify-end gap-5"}>
+              <Form.Item>
+                <ButtonComponent
+                  icon={<SVGIcon name="IconButtonClear" width={24} />}
+                  type="submit"
+                  onClick={() => {
+                    handleClear();
+                  }}
+                >
+                  {type === "update" ? "Reset" : "Clear"}
+                </ButtonComponent>
+              </Form.Item>
+              <Form.Item>
+                <ButtonComponent
+                  type="submit"
+                  htmlType={"submit"}
+                  onClick={() => setFlag(false)}
+                >
+                  Save as Draft
+                </ButtonComponent>
+              </Form.Item>
+              <Form.Item>
+                <ButtonComponent
+                  type="submit"
+                  htmlType={"submit"}
+                  onClick={() => setFlag(true)}
+                >
+                  Save & Submit
+                </ButtonComponent>
+              </Form.Item>
+            </div>
+          </div>
+        </Form>
+
+        <ModalConfirmationBillingCycle
+          isOpen={modalConfirm}
+          handleCancel={() => setModalConfirm(false)}
+          handleConfirm={() => handleConfirm()}
+          data={bodyData}
+          listDataAppHierDetail={appHierDataDetail}
+          apiApproval={dataListAppHierId}
+          listDataAttachment={listDataAttachment}
+          dataOption={appHierOptions}
+          selectedHierarchy={selectedHierarchy}
+          apiTimeUnit={list_time_unit}
+        />
+
+        <ModalBack
+          isOpen={modalBack}
+          handleCancel={() => setModalBack(false)}
+          handleOk={() => navigate(-1)}
+        />
+
+        <ModalError
+          isOpen={modalError}
+          handleOk={handleRetry}
+          handleCancel={handleCloseModalError}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">{`Your data was not ${
+              flag === 1 ? "created" : "submitted"
+            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+      </Spin>
+    </LayoutMenu>
+  );
+};
+export default BillingCycleForm;
