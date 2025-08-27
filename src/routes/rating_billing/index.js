@@ -1,4 +1,3 @@
-import { element } from "prop-types";
 import { RBI_ELEMENTS } from "./rbi_elements";
 import { RBI_ROUTES } from "./rbi_routes";
 

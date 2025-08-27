@@ -59,85 +59,132 @@ const AccountDetailInformation = ({
   // handleChangeInteraction = () => {},
 }) => {
   const { path } = usePrevLocContext();
+  console.log(path);
 
-  useEffect(() => {
-    switch(section){
-      case dataTabs.adi:
-        dispatch(getGrantedAccessAccount('/account-management/account-standard/additional-information'))
-    }
-  },[dispatch, section])
+  // useEffect(() => {
+  //   switch (section) {
+  //     case dataTabs.adi:
+  //       dispatch(
+  //         getGrantedAccessAccount(
+  //           "/account-management/account-standard/additional-information"
+  //         )
+  //       );
+  //   }
+  // }, [dispatch, section]);
 
   useEffect(() => {
     if (
-      path && (
-        path.pathname.includes("/account-management/account-standard/service-agreement") ||
-        path.pathname.includes("/account-management/account-standard/service-agreement-main/create") ||
-        path.pathname.includes("/account-management/account-standard/service-agreement-addon/create") ||
-        path.pathname.includes("/account-management/account-standard/service-agreement-amandemen/create") ||
-        path.pathname.includes("/account-management/account-standard/service-agreement/update")
-      ) 
+      path &&
+      (path.pathname.includes(
+        "/account-management/account-standard/service-agreement"
+      ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/service-agreement-main/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/service-agreement-addon/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/service-agreement-amandemen/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/service-agreement/update"
+        ))
     ) {
       setTypeAccountInfoDetailSection(dataTabs.serviceAgreement);
     } else if (
-      path && (
-        path.pathname.includes("/account-management/account-standard/address/create") ||
-        path.pathname.includes("/account-management/account-standard/address/update") ||
-        path.pathname.includes("/account-management/account-onetime/address/create") ||
-        path.pathname.includes("/account-management/account-onetime/address/update")
-      )
-    ){
+      path &&
+      (path.pathname.includes(
+        "/account-management/account-standard/address/create"
+      ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/address/update"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/address/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/address/update"
+        ))
+    ) {
       setTypeAccountInfoDetailSection(dataTabs.accountAddress);
     } else if (
-      path && (
-        path.pathname.includes("/account-management/account-standard/contact/create") ||
-        path.pathname.includes("/account-management/account-standard/contact/update") ||
-        path.pathname.includes("/account-management/account-onetime/contact/create") ||
-        path.pathname.includes("/account-management/account-onetime/contact/update")
-      )
-    ){
+      path &&
+      (path.pathname.includes(
+        "/account-management/account-standard/contact/create"
+      ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/contact/update"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/contact/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/contact/update"
+        ))
+    ) {
       setTypeAccountInfoDetailSection(dataTabs.accountContact);
     } else if (
-      path && (
-        path.pathname.includes("/account-management/account-standard/service-point/view") ||
-        path.pathname.includes("/account-management/account-standard/premise/view") ||
-        path.pathname.includes("/account-management/account-onetime/service-point/view") ||
-        path.pathname.includes("/account-management/account-onetime/premise/view")
-      )
-    ){  
+      path &&
+      (path.pathname.includes(
+        "/account-management/account-standard/service-point/view"
+      ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/premise/view"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/service-point/view"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/premise/view"
+        ))
+    ) {
       setTypeAccountInfoDetailSection(dataTabs.premise);
     } else if (
-      path && (
-        path.pathname.includes("/account-management/account-standard/account-information/update") ||
-        path.pathname.includes("/account-management/account-onetime/account-information/update")
-      )
-    ){
+      path &&
+      (path.pathname.includes(
+        "/account-management/account-standard/account-information/update"
+      ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/account-information/update"
+        ))
+    ) {
       setTypeAccountInfoDetailSection(dataTabs.ai);
     } else if (
-      path && (
-        path.pathname.includes("/account-management/account-standard/gas-utilization/create") ||
-        path.pathname.includes("/account-management/account-standard/gas-utilization/update")
-      )
-    ){
+      path &&
+      (path.pathname.includes(
+        "/account-management/account-standard/gas-utilization/create"
+      ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/gas-utilization/update"
+        ))
+    ) {
       setTypeAccountInfoDetailSection(dataTabs.gu);
     } else if (
-      path && (
-        path.pathname.includes("/account-management/account-standard/product-distribution/create") ||
-        path.pathname.includes("/account-management/account-standard/product-distribution/update")
-      )
-    ){
+      path &&
+      (path.pathname.includes(
+        "/account-management/account-standard/product-distribution/create"
+      ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/product-distribution/update"
+        ))
+    ) {
       setTypeAccountInfoDetailSection(dataTabs.pd);
     } else if (
-      path && (
-        path.pathname.includes("/account-management/account-standard/raw-material-source/create") ||
-        path.pathname.includes("/account-management/account-standard/raw-material-source/update")
-      )
-    ){
+      path &&
+      (path.pathname.includes(
+        "/account-management/account-standard/raw-material-source/create"
+      ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/raw-material-source/update"
+        ))
+    ) {
       setTypeAccountInfoDetailSection(dataTabs.ras);
     } else {
       setTypeAccountInfoDetailSection(dataTabs.ai);
     }
   }, [path]);
-  
+
   const sliderLeft = () => {
     const slider = document.getElementById("sliderTabAccount");
     slider.scrollLeft = slider.scrollLeft - 250;
@@ -238,24 +285,20 @@ const AccountDetailInformation = ({
         return (
           <AdditionalInformation
             idAccount={id}
-          // handleChangeInteraction={handleChangeInteraction}
+            // handleChangeInteraction={handleChangeInteraction}
           />
         );
       case dataTabs.eq:
         return (
-          <EquipmentPage idAccount={id} idCustomer={idCustomer} type={type}/>
+          <EquipmentPage idAccount={id} idCustomer={idCustomer} type={type} />
         );
       case dataTabs.pd:
-        return (
-          <ProductDistribution id={id} idCustomer={idCustomer}/>
-        );
+        return <ProductDistribution id={id} idCustomer={idCustomer} />;
       case dataTabs.ras:
-        return (
-          <RawMaterialSource  id={id} idCustomer={idCustomer}/>
-        );
+        return <RawMaterialSource id={id} idCustomer={idCustomer} />;
       case dataTabs.gu:
         return (
-          <GasUtilization idAccount={id} idCustomer={idCustomer} type={type}/>
+          <GasUtilization idAccount={id} idCustomer={idCustomer} type={type} />
         );
       default:
         return <></>;

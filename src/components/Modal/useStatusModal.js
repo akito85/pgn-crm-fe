@@ -1,5 +1,3 @@
-
-import { useState } from "react";
 import { message } from "../../constants/message";
 
 const useStatusModal = (typeModal ="", isSuccess, isFailed, status) => {

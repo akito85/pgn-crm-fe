@@ -1,13 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import userHttpService from "../../services/userHttpService";
-import {  showModalSuccess, validateError } from "../general_slice";
+import { showModalSuccess, validateError } from "../general_slice";
 import { errorBody, errorCode, errorMessage } from "../../../utils";
 
 const initialState = {
   data: null,
   data_detail: null,
   isFailed: false,
-  data_actions: null
+  data_actions: null,
 };
 
 export const getAllMenuPaginate = createAsyncThunk(
@@ -21,7 +21,9 @@ export const getAllMenuPaginate = createAsyncThunk(
       const response = await userHttpService.getPagination(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_ALL_MENU", back: false }));
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_ALL_MENU", back: false })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -35,7 +37,9 @@ export const getMenuDetail = createAsyncThunk(
       const data = await userHttpService.getDetail(url);
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_MENU_DETAIL", back: false }));
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_MENU_DETAIL", back: false })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -52,7 +56,9 @@ export const downloadMenu = createAsyncThunk(
       const response = await userHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_MENU", back: false }))
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "DOWNLOAD_MENU", back: false })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -61,7 +67,7 @@ export const downloadMenu = createAsyncThunk(
 export const inactiveMenu = createAsyncThunk(
   "INACTIVE_MENU",
   async (body, thunkAPI) => {
-    let statusData = body?.status === "ACTIVE" ? "inactivated" : 'activated';
+    let statusData = body?.status === "ACTIVE" ? "inactivated" : "activated";
     try {
       const url = `/v1/dbs/api/menus/inactive/${body?.id}`;
       const data = await userHttpService.activationWithDelete(url);
@@ -74,18 +80,13 @@ export const inactiveMenu = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), statusData, errorMessage(error)), action: "INACTIVE_MENU", back: false }))
-
-      // if (hasValue(error?.response?.data) === false && statusCode?.includes(error?.response?.status)) {
-      //   thunkAPI.dispatch(validateError({ error: error, action: "INACTIVE_MENU", back: false }));
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     code: errorCode(error),
-      //     description: `Your data was not ${statusData}. ${errorMessage(error)}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), statusData, errorMessage(error)),
+          action: "INACTIVE_MENU",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -93,7 +94,7 @@ export const inactiveMenu = createAsyncThunk(
 
 export const updateMenu = createAsyncThunk(
   "UPDATE_MENU",
-  async (body , thunkAPI) => {
+  async (body, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/menus/`;
       const data = await userHttpService.updateData(url, body);
@@ -104,17 +105,13 @@ export const updateMenu = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'updated', errorMessage(error)), action: "UPDATE_MENU", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      //   thunkAPI.dispatch(validateError({ error: error, action: "UPDATE_MENU", back: false }));
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not updated. ${error?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "updated", errorMessage(error)),
+          action: "UPDATE_MENU",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -133,17 +130,13 @@ export const getCreateMenu = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_MENU", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      //   thunkAPI.dispatch(validateError({ error: error, action: "CREATE_MENU", back: false }));
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not created. ${error?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "CREATE_MENU",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -157,7 +150,9 @@ export const getParent = createAsyncThunk(
       const data = await userHttpService.getAll(url);
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_PARENT_MENU", back: false }));
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_PARENT_MENU", back: false })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -170,8 +165,9 @@ export const getActions = createAsyncThunk(
       const data = await userHttpService.getAll(url);
       return data;
     } catch (error) {
-
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_ACTIONS", back: false }));
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_ACTIONS", back: false })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }

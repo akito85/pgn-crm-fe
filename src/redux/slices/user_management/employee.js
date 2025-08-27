@@ -361,19 +361,6 @@ export const uploadEmployee = createAsyncThunk(
       return data;
     } catch (e) {
       thunkAPI.dispatch(validateError({ error: errorBody(errorCode(e), 'updated', errorMessage(e)), action: "UPLOAD_EMPLOYEE", back: false }))
-
-      // if (statusCode?.includes(e?.response?.data?.code)) {
-      //   thunkAPI.dispatch(
-      //     validateError({ error: e, action: "UPLOAD_EMPLOYEE", back: false })
-      //   );
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     data: e.response.data.data,
-      //     description: `${e.response.data.message}. Please try again`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
       return thunkAPI.rejectWithValue(e?.response);
     }
   }
@@ -393,23 +380,6 @@ export const saveUploadEmployee = createAsyncThunk(
       return data;
     } catch (error) {
       thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'uploaded', errorMessage(error)), action: "SAVE_UPLOAD_EMPLOYEE", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      //   thunkAPI.dispatch(
-      //     validateError({
-      //       error: error,
-      //       action: "UPLOAD_EMPLOYEE",
-      //       back: false,
-      //     })
-      //   );
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     data: error.response.data.data,
-      //     description: `Your file was not uploaded. ${error.response.data.message}. Please try again`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
       return thunk.rejectWithValue(error.response.data);
     }
   }

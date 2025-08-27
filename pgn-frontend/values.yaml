@@ -1,17 +1,18 @@
-# Default values for pgn-frontend.
+# Default values for dbs-module-account.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
+deployment:
+  enabled: true
 
 image:
-  repository: registry.pgn.co.id/billing-dev/pgn-frontend
+  name: "imagePath"
   pullPolicy: Always
-  # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
 imagePullSecrets:
-  - name: pgnregcred
+  name: ""
 #nameOverride: ""
 #fullnameOverride: ""
 
@@ -24,21 +25,37 @@ serviceAccount:
   annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
-  name: ""
+  name: "default"
+#
+podAnnotations:
+  releaseNamespace: "default"
+  vault:
+    enabled: true
+    authPath: ""
+    role: "default"
+    access_path: ""
+    secretPath: "energy-development/db_access"
+    inject: "update"
+    access_properties_un: spring.crm-datasource.userName={{ .Data.data.username }}
+    access_properties_pw: spring.crm-datasource.password={{ .Data.data.password }}
+podLabels:
+  helm.sh/chart: dbs-module-account
+  app.kubernetes.io/name: dbs-module-account
+  app.kubernetes.io/instance: dbs-module-account
+  app.kubernetes.io/version: "1.0.0"
+  app.kubernetes.io/managed-by: Helm
 
-podAnnotations: {}
-podLabels: {}
-
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext: {}
+#
+#podSecurityContext: {}
+## fsGroup: 2000
+#
+#securityContext: {}
   # capabilities:
   #   drop:
   #   - ALL
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
-  # runAsUser: 1000
+# runAsUser: 1000
 
 service:
   enabled: false
@@ -55,7 +72,7 @@ ingress:
           pathType: Prefix
           backend:
             service:
-              name: pgn-frontend
+              name: dbs-module-account
               port:
                 number: 80
   tls:
@@ -68,23 +85,23 @@ resources:
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-   limits:
-     cpu: 100m
-     memory: 1Gi
-   requests:
-     cpu: 100m
-     memory: 128Mi
-
+  limits:
+    cpu: 1
+    memory: 1Gi
+  requests:
+    cpu: 1
+    memory: 128Mi
+#
 livenessProbe:
   tcpSocket: 80
-  initialDelaySeconds: 480
-  timeoutSeconds: 10
+  initialDelaySeconds: 180
+  timeoutSeconds: 20
   successThreshold: 1
   failureThreshold: 5
 readinessProbe:
   tcpSocket: 80
-  initialDelaySeconds: 480
-  timeoutSeconds: 10
+  initialDelaySeconds: 180
+  timeoutSeconds: 20
   successThreshold: 1
   failureThreshold: 5
 

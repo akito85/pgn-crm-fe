@@ -205,12 +205,14 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
           dataListCriteria: dataListCriteria,
         })
       );
-      setListDataCondition(dataDetail?.productPromoConditionDtos?.map((item) => {
-        return {
-          ...item,
-          value: item?.adjustmentValue,
-        }
-      }));
+      setListDataCondition(
+        dataDetail?.productPromoConditionDtos?.map((item) => {
+          return {
+            ...item,
+            value: item?.adjustmentValue,
+          };
+        })
+      );
     },
     [form]
   );
@@ -245,14 +247,18 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
         handleAssertData(data_promoDiscountDetail, [], dataListCriteria);
       }
     }
-  }, [data_promoDiscountDetail, data_promoDiscountDetailDraft, handleAssertData, dataListCriteria, type, id]);
+  }, [
+    data_promoDiscountDetail,
+    data_promoDiscountDetailDraft,
+    handleAssertData,
+    dataListCriteria,
+    type,
+    id,
+  ]);
 
   useEffect(() => {
-    if (
-      dataListCriteria &&
-      dataListCriteria?.length > 0
-    ) {
-      const tempCriterias = (dataListCriteria|| [])?.map((criteria) => ({
+    if (dataListCriteria && dataListCriteria?.length > 0) {
+      const tempCriterias = (dataListCriteria || [])?.map((criteria) => ({
         name: criteria.text,
         value: criteria.id,
         code: criteria.code,
@@ -301,16 +307,19 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
   // Dependency Criteria
   const handleSelectCriteria = (value) => {
     let res = [...criteriaValues, value];
-    if (res.includes(26)) { //13
+    if (res.includes(26)) {
+      //13
       res.push(27);
     }
-    if (res.includes(27)) { //14
+    if (res.includes(27)) {
+      //14
       res.push(139); //39
     }
     if (res.includes(139)) {
       res.push(28); //15
     }
-    if (res.includes(33)) { //20
+    if (res.includes(33)) {
+      //20
       res.push(32); //19
     }
     let outputArray = res.filter((item, index) => res.indexOf(item) === index);
@@ -323,16 +332,20 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
 
   const handleDeselectCriteria = (value) => {
     let res = criteriaValues.filter((item) => item !== value);
-    if (!res.includes(28)) { //15
+    if (!res.includes(28)) {
+      //15
       res = res.filter((item) => item !== 139); //39
     }
-    if (!res.includes(139)) { // 39
+    if (!res.includes(139)) {
+      // 39
       res = res.filter((item) => item !== 27); //14
     }
-    if (!res.includes(27)) { //14
+    if (!res.includes(27)) {
+      //14
       res = res.filter((item) => item !== 26); //13
     }
-    if (!res.includes(32)) { //19
+    if (!res.includes(32)) {
+      //19
       res = res.filter((item) => item !== 33); //20
     }
     let outputArray = res.filter((item, index) => res.indexOf(item) === index);
@@ -341,7 +354,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
     form.setFieldsValue({
       criteria: outputArray,
     });
-    if(outputArray?.length > 0 && outputArray.includes(37) ){
+    if (outputArray?.length > 0 && outputArray.includes(37)) {
       setListDataCriteria([]);
     }
   };
@@ -383,10 +396,14 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       let text = "";
       switch (type) {
         case "create":
-          text = `Your data has been ${data.action !== "DRAFT" ? "submitted" : "created"}.`;
+          text = `Your data has been ${
+            data.action !== "DRAFT" ? "submitted" : "created"
+          }.`;
           break;
         case "update":
-          text = `Your data has been ${data.action !== "DRAFT" ? "submitted" : "updated"}.`;
+          text = `Your data has been ${
+            data.action !== "DRAFT" ? "submitted" : "updated"
+          }.`;
           break;
         default:
       }
@@ -494,20 +511,21 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
               description: `Please save data table inline before submit. Please try again.`,
             };
             dispatch(showModalError(errorBody));
-          } else if (
-            handleCheckCriteriaMissingValidation(
-              criteriaOptions,
-              formValue?.criteria,
-              listDataCriteria,
-              () => {},
-              1
-            )
-          ) {
-            const errorBody = {
-              title: "Failed",
-              description: `There is missing values in table criteria. Please try again`,
-            };
-            dispatch(showModalError(errorBody));
+            // } else if (
+            //   handleCheckCriteriaMissingValidation(
+            //     criteriaOptions,
+            //     formValue?.criteria,
+            //     listDataCriteria,
+            //     () => {},
+            //     1
+            //   )
+            // ) {
+            //   const errorBody = {
+            //     title: "Failed",
+            //     description: `There is missing values in table criteria. Please try again`,
+            //   };
+            //   dispatch(showModalError(errorBody));
+            // }
           } else {
             setBodyData({
               ...formValue,
@@ -517,7 +535,10 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
               categoryName: data_promo_category?.find(
                 (item) => item?.id === formValue?.promoCategory
               )?.text,
-              status: type === "update" ? data_promoDiscountDetail?.status : undefined,
+              status:
+                type === "update"
+                  ? data_promoDiscountDetail?.status
+                  : undefined,
             });
             setTabPagesPromo([
               {
@@ -571,7 +592,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       data_promo_type,
       data_promo_category,
       handleBodyConfirm,
-      type
+      type,
     ]
   );
 
@@ -639,7 +660,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
     dispatch(type === "create" ? createPromo(body) : updatePromo(body))
       .unwrap()
       .then(async (dataForm) => {
-        const idData = dataForm?.id
+        const idData = dataForm?.id;
         setLoadingForm(true);
         const filterDataAttach = listDataAttachment.filter(
           (item) => item.dataType !== "exist"

@@ -1,8 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import userHttpService from "../../services/userHttpService";
-import { showModalError, showModalSuccess, validateError } from "../general_slice";
-import { statusCode } from "../../../constants/statusCode";
-import { errorBody, errorCode, errorMessage, hasValue } from "../../../utils";
+import { showModalSuccess, validateError } from "../general_slice";
+import { errorBody, errorCode, errorMessage } from "../../../utils";
 
 const initialState = {
   data: null,
@@ -24,7 +23,13 @@ export const getDataAccessPaginate = createAsyncThunk(
       const data = await userHttpService.getPagination(url);
       return data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action: "GET_DATA_ACCESS_PAGINATE", back: false }))
+      thunkAPI?.dispatch(
+        validateError({
+          error: error,
+          action: "GET_DATA_ACCESS_PAGINATE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -37,7 +42,13 @@ export const getDetailDataAccess = createAsyncThunk(
       const data = await userHttpService.getDetail(url);
       return data?.data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action: "GET_DETAIL_DATA_ACCESS", back: false }))
+      thunkAPI?.dispatch(
+        validateError({
+          error: error,
+          action: "GET_DETAIL_DATA_ACCESS",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -53,7 +64,13 @@ export const downloadDataAccess = createAsyncThunk(
       const response = await userHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action: "DOWNLOAD_DATA_ACCESS_VIEW", back: false }))
+      thunkAPI?.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_DATA_ACCESS_VIEW",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -71,7 +88,13 @@ export const downloadDetail = createAsyncThunk(
       const data = await userHttpService.downloadData(url);
       return data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action: "DOWNLOAD_DATA_ACCESS", back: false }))
+      thunkAPI?.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_DATA_ACCESS",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -90,17 +113,13 @@ export const createDataAccess = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_DATA_ACCESS", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      //   thunkAPI?.dispatch(validateError({ error: error, action: "CREATE_DATA_ACCESS", back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not created. ${error?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "CREATE_DATA_ACCESS",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error);
     }
   }
@@ -115,22 +134,18 @@ export const dupliacateDataAccess = createAsyncThunk(
       const successMessage = {
         title: "Successfull",
         description: data?.message,
-        return: false
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'duplicated', errorMessage(error)), action: "DUPLICATION_DATA_ACCESS", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      //   thunkAPI?.dispatch(validateError({ error: error, action: "DUPLICATION_DATA_ACCESS", back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not duplicated. ${error?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "duplicated", errorMessage(error)),
+          action: "DUPLICATION_DATA_ACCESS",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -149,18 +164,13 @@ export const activationDataAccess = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'activated', errorMessage(error)), action: "ACTIVATION_DATA_ACCESS", back: false }))
-
-      // const errorLog = error?.response?.data?.code || error?.response?.status
-      // if (statusCode?.includes(errorLog)) {
-      //   thunkAPI?.dispatch(validateError({ error: error, action: "ACTIVATION_DATA_ACCESS", back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not activated. ${error?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "activated", errorMessage(error)),
+          action: "ACTIVATION_DATA_ACCESS",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -178,17 +188,13 @@ export const updateDataAccess = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'updated', errorMessage(error)), action: "UPDATE_DATA_ACCES", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      //   thunkAPI?.dispatch(validateError({ error: error, action: "UPDATE_DATA_ACCES", back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not updated. ${error?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "updated", errorMessage(error)),
+          action: "UPDATE_DATA_ACCES",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -201,7 +207,13 @@ export const getDetailCostCenter = createAsyncThunk(
       const data = await userHttpService.getDetail(url);
       return data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action: "GET_DETAIL_COST_CENTER", back: false }))
+      thunkAPI?.dispatch(
+        validateError({
+          error: error,
+          action: "GET_DETAIL_COST_CENTER",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -214,18 +226,13 @@ export const activationCostCenter = createAsyncThunk(
       const data = await userHttpService.updateData(url, body);
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'activated', errorMessage(error)), action: "ACTIVATION_COST_CENTER", back: false }))
-
-      // if (statusCode?.includes(error?.response?.status) && hasValue(error?.response?.data) === false) {
-      //   thunkAPI?.dispatch(validateError({ error: error, action: "ACTIVATION_COST_CENTER", back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     code: errorCode(error),
-      //     description: `Your data was not activated. ${error?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "activated", errorMessage(error)),
+          action: "ACTIVATION_COST_CENTER",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -238,7 +245,13 @@ export const getAllCostCenter = createAsyncThunk(
       const data = await userHttpService.getAll(url);
       return data?.data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action: "GET_ALL_COST_CENTER", back: false }))
+      thunkAPI?.dispatch(
+        validateError({
+          error: error,
+          action: "GET_ALL_COST_CENTER",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }

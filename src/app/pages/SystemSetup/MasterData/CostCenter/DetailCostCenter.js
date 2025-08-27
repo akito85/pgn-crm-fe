@@ -27,7 +27,6 @@ const DetailCostCenter = (props) => {
   const [search, setSearch] = useState("");
 
 
-  console.log(openModal);
   const handleResetState = useCallback(() => {
     setCurrentLog(1)
     setSizeLog(10)

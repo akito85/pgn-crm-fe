@@ -1,17 +1,14 @@
 import Action from "../../app/pages/SystemSetup/Action/Action";
 import ActionCreate from "../../app/pages/SystemSetup/Action/ActionCreate";
-import ActionEdit from "../../app/pages/SystemSetup/Action/ActionEdit";
-import ApprovalHierarchyForm from "../../app/pages/SystemSetup/ApprovalHierarchy/ApprovalHierarchyForm";
-import ApprovalHierarchyPage from "../../app/pages/SystemSetup/ApprovalHierarchy/ApprovalHierarchyPage";
-import CreateGlobalType from "../../app/pages/SystemSetup/GlobalType/CreateGlobalType";
 import DetailGlobalType from "../../app/pages/SystemSetup/GlobalType/DetailGlobalType";
-import EditGlobalType from "../../app/pages/SystemSetup/GlobalType/EditGlobalType";
+import GlobalTypeForm from "../../app/pages/SystemSetup/GlobalType/GlobalTypeForm";
 import ViewGlobalType from "../../app/pages/SystemSetup/GlobalType/ViewGlobalType";
 import Menu from "../../app/pages/SystemSetup/Menu/Menu";
+import FormMenu from "../../app/pages/SystemSetup/Menu/FormMenu";
 import GlobalProperties from "../../app/pages/SystemSetup/GlobalProperties/GlobalProperties";
 import GlobalPropertiesDetail from "../../app/pages/SystemSetup/GlobalProperties/GlobalPropertiesDetail";
-// import GlobalPropertiesEdit from "../../app/pages/SystemSetup/GlobalProperties/GlobalPropertiesEdit";
 import GlobalPropertiesForm from "../../app/pages/SystemSetup/GlobalProperties/GlobalPropertiesForm";
+import GlobalPropertiesUpdate from "../../app/pages/SystemSetup/GlobalProperties/GlobalPropertiesUpdate";
 import EntityPage from "../../app/pages/SystemSetup/Entity/Entity";
 import EntityDetail from "../../app/pages/SystemSetup/Entity/EntityDetail";
 import EntityForm from "../../app/pages/SystemSetup/Entity/EntityForm";
@@ -30,12 +27,10 @@ import GroupAccessForm from "../../app/pages/SystemSetup/GroupAccess/GroupAccess
 import LoginBackgroundDetail from "../../app/pages/SystemSetup/LoginBackground/LoginBackgroundDetail";
 import MaintenanceModePage from "../../app/pages/SystemSetup/MaintenanceMode/MaintenanceModePage";
 import CostCenterForm from "../../app/pages/SystemSetup/MasterData/CostCenter/CostCenterForm";
-import FormMenu from "../../app/pages/SystemSetup/Menu/FormMenu";
-import GlobalPropertiesUpdate from "../../app/pages/SystemSetup/GlobalProperties/GlobalPropertiesUpdate";
-import GlobalTypeForm from "../../app/pages/SystemSetup/GlobalType/GlobalTypeForm";
 import FormAssets from "../../app/pages/SystemSetup/MasterData/Assets/FormAssets";
 import ViewAssets from "../../app/pages/SystemSetup/MasterData/Assets/ViewAssets";
 import DetailAssets from "../../app/pages/SystemSetup/MasterData/Assets/DetailAssets";
+import GroupAccessFormBackup from "../../app/pages/SystemSetup/GroupAccess/GroupAccessFormBackup";
 
 export const SYSTEM_SETUP_ELEMENTS = {
   // menu
@@ -78,7 +73,7 @@ export const SYSTEM_SETUP_ELEMENTS = {
   // CREATE_GROUP_ACCESS_PAGE: <GroupAccessCreate />,
   // UPDATE_GROUP_ACCESS_PAGE: <GroupAccessEdit />,
   CREATE_GROUP_ACCESS_PAGE: <GroupAccessForm type="create" />,
-  UPDATE_GROUP_ACCESS_PAGE: <GroupAccessForm type="update" />,
+  UPDATE_GROUP_ACCESS_PAGE: <GroupAccessFormBackup type="update" />,
 
   // Announcement
   VIEW_ANNOUNCEMENT_PAGE: <AnnouncementPage />,

@@ -49,16 +49,6 @@ export const createGlobalType = createAsyncThunk(
       return response.data;
     } catch (response) {
       thunkAPI.dispatch(validateError({ error: errorBody(errorCode(response), 'created', errorMessage(response)), action: "CREATE_GLOBAL_TYPE", back: false }))
-
-      // if (statusCode?.includes(response?.response?.data?.code)) {
-      // thunkAPI.dispatch(validateError({ error: response, action: "CREATE_GLOBAL_TYPE", back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not created. ${response?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
       return thunkAPI.rejectWithValue(response);
     }
   }
@@ -79,16 +69,6 @@ export const updateGlobalType = createAsyncThunk(
       return response.data;
     } catch (response) {
       thunkAPI.dispatch(validateError({ error: errorBody(errorCode(response), 'updated', errorMessage(response)), action: "UPDATE_GLOBAL_TYPE", back: false }))
-
-      // if (statusCode?.includes(response?.response?.data?.code)) {
-      // thunkAPI.dispatch(validateError({ error: response, action: "UPDATE_GLOBAL_TYPE", back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not updated. ${response?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
       return thunkAPI.rejectWithValue(response);
     }
   }

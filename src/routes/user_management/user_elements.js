@@ -9,8 +9,6 @@ import UserForm from "../../app/pages/UserManagement/User/UserForm";
 import UserPage from "../../app/pages/UserManagement/User/UserPage";
 import Employee from "../../app/pages/UserManagement/Employee/Employee";
 import EmployeeDetail from "../../app/pages/UserManagement/Employee/EmployeeDetail";
-import EmployeeCreate from "../../app/pages/UserManagement/Employee/EmployeeCreate";
-import EmployeeEdit from "../../app/pages/UserManagement/Employee/EmployeeEdit";
 import ForwardTaskForm from "../../app/pages/UserManagement/Employee/ForwardTaskForm";
 import EmployeeUpload from "../../app/pages/UserManagement/Employee/EmployeeUpload";
 import DelegationPage from "../../app/pages/UserManagement/Delegation/DelegationPage";

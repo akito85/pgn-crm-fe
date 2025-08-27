@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { logoutTokenExpired } from "./user_management/auth";
-import { errorBody, errorCode, errorMessage, hasValue } from "../../utils";
+import { errorBody, errorCode, errorMessage } from "../../utils";
 
 const initialState = {
   bodyError: null,

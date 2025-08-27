@@ -5,7 +5,6 @@ import messageReducer from "../slices/message";
 import entityReducer from "../slices/system_setup/entity";
 import userReducer from "../slices/user_management/user";
 import employeeReducer from "../slices/user_management/employee";
-import generatePasswordReducer from "../slices/user_management/generate_password";
 import globalPropertiesReducer from "../slices/system_setup/globalProperties";
 import masterPositionReducer from "../slices/system_setup/master_data/master_position";
 import globalTypesReducer from "../slices/system_setup/globalTypes";
@@ -84,6 +83,10 @@ import accountGasUtilizationReducer from '../slices/account_management/detailAcc
 import additionalInfoReducer from "../slices/account_management/detailAccount/additionalInformation";
 import equpmentReducer from "../slices/account_management/detailAccount/equpmentSlice";
 import criteriaReducer from '../slices/criteria_slice';
+import { reportCustomerSlice } from "../slices/report/report_customer_slice";
+import { setupListeners } from "@reduxjs/toolkit/dist/query";
+import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement"; 
+
 const reducer = combineReducers({
   auth: authReducer,
   message: messageReducer,
@@ -188,15 +191,13 @@ const reducer = combineReducers({
   attachment: attachmentReducer,
 
   // criteria
-  criteria_slice : criteriaReducer
+  criteria_slice: criteriaReducer,
+
+  // report
+  [reportCustomerSlice.reducerPath]: reportCustomerSlice.reducer,
+  [reportCustomerAgreementSlice.reducerPath] : reportCustomerAgreementSlice.reducer
+
 });
-
-
-const defaultWait = 1000;
-const defaultThrottleOptions = {
-  leading: true,
-  trailing: false,
-};
 
 // add throttle middlewares
 // const throttleMiddleware = throttle(defaultWait, defaultThrottleOptions)
@@ -204,8 +205,9 @@ const defaultThrottleOptions = {
 const store = configureStore({
   reducer: reducer,
   devTools: true,
-  // middleware: (getDefaultMiddleware) =>
-  //   getDefaultMiddleware().concat(throttleMiddleware)
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(reportCustomerSlice.middleware),
 });
 
+setupListeners(store.dispatch)
 export default store;

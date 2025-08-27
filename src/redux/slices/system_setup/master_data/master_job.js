@@ -1,8 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import userHttpService from "../../../services/userHttpService";
-import { showModalError, showModalSuccess, validateError } from "../../general_slice";
-import { statusCode } from "../../../../constants/statusCode";
-import { errorBody, errorCode, errorMessage, hasValue } from "../../../../utils";
+import { showModalSuccess, validateError } from "../../general_slice";
+import { errorBody, errorCode, errorMessage } from "../../../../utils";
 
 const initialState = {
   data: [],
@@ -23,7 +22,13 @@ export const getListMasterJob = createAsyncThunk(
       const response = await userHttpService.getPagination(url);
       return response.data;
     } catch (response) {
-      thunkApi.dispatch(validateError({ error: response, action: 'GET_LIST_MASTER_JOB', back: false }))
+      thunkApi.dispatch(
+        validateError({
+          error: response,
+          action: "GET_LIST_MASTER_JOB",
+          back: false,
+        })
+      );
       return thunkApi.rejectWithValue(response.response.data);
     }
   }
@@ -37,7 +42,13 @@ export const getAllMasterJob = createAsyncThunk(
       const response = await userHttpService.getAll(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: 'GET_ALL_LIST_MASTER_JOB', back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "GET_ALL_LIST_MASTER_JOB",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -51,7 +62,13 @@ export const getDetailMasterJob = createAsyncThunk(
       const response = await userHttpService.getDetail(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: 'GET_DETAIL_MASTER_JOB', back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "GET_DETAIL_MASTER_JOB",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -70,17 +87,26 @@ export const createMasterJob = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(response), 'created', errorMessage(response)), action: "CREATE_MASTER_JOB", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(
+            errorCode(response),
+            "created",
+            errorMessage(response)
+          ),
+          action: "CREATE_MASTER_JOB",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
 );
 
-
 export const inactiveMasterJob = createAsyncThunk(
   "INACTIVE_MASTER_JOB",
   async ({ id, body }, thunkAPI) => {
-    let statusData = body?.status === 'Activate' ? 'activated' : 'inactivated'
+    let statusData = body?.status === "Activate" ? "activated" : "inactivated";
     try {
       const url = `/v1/dbs/api/job/active/inactive/${id}`;
       const response = await userHttpService.activationWithRemark(url, body);
@@ -93,7 +119,17 @@ export const inactiveMasterJob = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(response), statusData, errorMessage(response)), action: "INACTIVE_MASTER_JOB", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(
+            errorCode(response),
+            statusData,
+            errorMessage(response)
+          ),
+          action: "INACTIVE_MASTER_JOB",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -112,7 +148,17 @@ export const updateMasterJob = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(response), 'updated', errorMessage(response)), action: "UPDATE_MASTER_JOB", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(
+            errorCode(response),
+            "updated",
+            errorMessage(response)
+          ),
+          action: "UPDATE_MASTER_JOB",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -129,7 +175,13 @@ export const downloadMasterJob = createAsyncThunk(
       const response = await userHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: 'DOWNLOAD_MASTER_JOB', back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_MASTER_JOB",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }

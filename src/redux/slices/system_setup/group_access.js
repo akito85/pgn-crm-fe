@@ -12,12 +12,12 @@ const initialState = {
   message: "",
   isSuccess: false,
   isFailed: false,
+  loading_group_access: false,
 };
 
 export const getAllGroupAccessPaginate = createAsyncThunk(
   "GET_ALL_GROUP_ACCESS_PAGINATE",
-  async ({ search, page, pageSize, sort }, thunkAPI
-  ) => {
+  async ({ search, page, pageSize, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams = sort === undefined || sort === "" ? "gaId~desc" : sort;
@@ -25,7 +25,13 @@ export const getAllGroupAccessPaginate = createAsyncThunk(
       const response = await userHttpService.getPagination(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_ALL_GROUP_ACCESS_MENU", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_ALL_GROUP_ACCESS_MENU",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -40,7 +46,13 @@ export const getAllGroupAccessMenu = createAsyncThunk(
       const response = await userHttpService.getAll(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "GET_ALL_GROUP_ACCESS_MENU", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "GET_ALL_GROUP_ACCESS_MENU",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -54,7 +66,13 @@ export const getAllUserLevel = createAsyncThunk(
       const response = await userHttpService.getAll(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "GET_ALL_USER_LEVEL_MENU", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "GET_ALL_USER_LEVEL_MENU",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -63,7 +81,7 @@ export const getAllUserLevel = createAsyncThunk(
 export const activeAndInactiveGroupAccess = createAsyncThunk(
   "ACTIVE_GROUP_ACCESS",
   async ({ id, status }, thunkAPI) => {
-    let statusData = status === "ACTIVE" ? "inactivated" : 'activated';
+    let statusData = status === "ACTIVE" ? "inactivated" : "activated";
     try {
       const url = `/v1/dbs/api/ga/active/inactive/${id}`;
       const response = await userHttpService.activationWithDelete(url);
@@ -76,19 +94,17 @@ export const activeAndInactiveGroupAccess = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(response), statusData, errorMessage(response)), action: "ACTIVE_GROUP_ACCESS", back: false }))
-
-      // if (statusCode?.includes(response?.response?.status) && hasValue(response?.response?.data) === false) {
-      //   thunkAPI?.dispatch(validateError({ error: response, action: "ACTIVE_GROUP_ACCESS", back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     code: errorCode(response),
-      //     description: `Your data was not ${statusData}. ${response?.response?.data?.message}. Please try again.`,
-      //     return: false,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(
+            errorCode(response),
+            statusData,
+            errorMessage(response)
+          ),
+          action: "ACTIVE_GROUP_ACCESS",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -104,7 +120,13 @@ export const downloadGroupAccess = createAsyncThunk(
       const response = await userHttpService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_ACTION", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_ACTION",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -123,17 +145,13 @@ export const createGroupAccess = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_GROUP_ACCESS", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      //   thunkAPI.dispatch(validateError({ error: error, action: "CREATE_GROUP_ACCESS", back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not created. ${error?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "CREATE_GROUP_ACCESS",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -143,7 +161,7 @@ export const updateGroupAccess = createAsyncThunk(
   "UPDATE_GROUP_ACCESS",
   async ({ body, responseSuccess }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/ga/update";
+      const url = "/v1/dbs/api/ga//update-group-access";
       const response = await userHttpService.updateData(url, body);
       const successBody = {
         title: "Successfull",
@@ -152,17 +170,13 @@ export const updateGroupAccess = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'updated', errorMessage(error)), action: "UPDATE_GROUP_ACCESS", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      // thunkAPI.dispatch(validateError({ error: error, action: "UPDATE_GROUP_ACCESS", back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not updated. ${error?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "updated", errorMessage(error)),
+          action: "UPDATE_GROUP_ACCESS",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -176,7 +190,13 @@ export const detailGroupAccess = createAsyncThunk(
       const response = await userHttpService.getDetail(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_GROUP_ACCESS_DETAIL", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_GROUP_ACCESS_DETAIL",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -288,10 +308,12 @@ const groupAccessSlice = createSlice({
     [detailGroupAccess.pending]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = true;
+      state.loading_group_access = true;
     },
     [detailGroupAccess.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
+      state.loading_group_access = false;
     },
     [detailGroupAccess.rejected]: (state, action) => {
       state.data_detail = action.payload;

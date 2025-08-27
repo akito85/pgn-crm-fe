@@ -1,8 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import userHttpService from "../../services/userHttpService";
-import {  showModalError, showModalSuccess, validateError } from "../general_slice";
-import { statusCode } from "../../../constants/statusCode";
-import { errorBody, errorCode, errorMessage, hasValue } from "../../../utils";
+import { showModalSuccess, validateError } from "../general_slice";
+import { errorBody, errorCode, errorMessage } from "../../../utils";
 
 const initialState = {
   data: [],
@@ -17,7 +16,7 @@ const initialState = {
 export const inactiveAppHierarchy = createAsyncThunk(
   "INACTIVE_APPROVAL_HIERARCHY",
   async ({ id, body }, thunkAPI) => {
-    let status = body?.status === "ACTIVE" ? "inactivated" : 'activated';
+    let status = body?.status === "ACTIVE" ? "inactivated" : "activated";
     try {
       let reqBody = {
         id: id,
@@ -34,18 +33,13 @@ export const inactiveAppHierarchy = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(response), status, errorMessage(response)), action: "CREATE_APPROVAL_HIEARARCHY", back: false }))
-
-      // if (statusCode?.includes(response?.response?.status) && hasValue(response?.response?.data) === false) {
-      // thunkAPI?.dispatch(validateError({ error: response, action: 'INACTIVE_APPROVAL_HIERARCHY', back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     code: errorCode(response),
-      //     description: `Your data was not ${status}. ${response?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(response), status, errorMessage(response)),
+          action: "CREATE_APPROVAL_HIEARARCHY",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -62,9 +56,14 @@ export const getApprovHierarchyPaginate = createAsyncThunk(
       const response = await userHttpService.getPagination(url);
       return response.data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action: 'GET_ALL_APPROVAL_PAGINATE', back: false }))
+      thunkAPI?.dispatch(
+        validateError({
+          error: error,
+          action: "GET_ALL_APPROVAL_PAGINATE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
-
     }
   }
 );
@@ -77,7 +76,13 @@ export const detailPositionHierarchy = createAsyncThunk(
       const response = await userHttpService.getDetail(url);
       return response.data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action: 'GET_APPROVAL_HIERARCHY_DETAIL', back: false }))
+      thunkAPI?.dispatch(
+        validateError({
+          error: error,
+          action: "GET_APPROVAL_HIERARCHY_DETAIL",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -85,13 +90,19 @@ export const detailPositionHierarchy = createAsyncThunk(
 
 export const getAppCode = createAsyncThunk(
   "GET_APPROVAL_HIERARCHY_CODE",
-  async (_,thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/apphier/code";
       const data = await userHttpService.getAll(url);
       return data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action: 'GET_APPROVAL_HIERARCHY_CODE', back: false }))
+      thunkAPI?.dispatch(
+        validateError({
+          error: error,
+          action: "GET_APPROVAL_HIERARCHY_CODE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -110,17 +121,13 @@ export const createHierarchy = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_APPROVAL_HIEARARCHY", back: false }))
-
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      //   thunkAPI?.dispatch(validateError({ error: error, action: 'CREATE_APPROVAL_HIEARARCHY', back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not created. ${error?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "CREATE_APPROVAL_HIEARARCHY",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -137,7 +144,13 @@ export const downloadHierarchy = createAsyncThunk(
       const response = await userHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action: 'DOWNLOAD_APPROVAL', back: false }))
+      thunkAPI?.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_APPROVAL",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -145,13 +158,15 @@ export const downloadHierarchy = createAsyncThunk(
 
 export const getPositionDDL = createAsyncThunk(
   "GET_POSITION _DDL",
-  async (_,thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/positionhierarchy/position";
       const data = await userHttpService.getAll(url);
       return data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action: 'GET_POSITION', back: false }))
+      thunkAPI?.dispatch(
+        validateError({ error: error, action: "GET_POSITION", back: false })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -165,12 +180,17 @@ export const getEmployeeByIdPosition = createAsyncThunk(
       const data = await userHttpService.getDetail(url);
       return data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action: 'GET_EMPLOYEE_BY_ID', back: false }))
+      thunkAPI?.dispatch(
+        validateError({
+          error: error,
+          action: "GET_EMPLOYEE_BY_ID",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
-
 
 export const getAppType = createAsyncThunk(
   "GET_APPROVAL_HIERARCHY_TYPE",
@@ -180,7 +200,13 @@ export const getAppType = createAsyncThunk(
       const data = await userHttpService.getAll(url);
       return data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action: 'GET_APPROVAL_HIERARCHY_TYPE', back: false }))
+      thunkAPI?.dispatch(
+        validateError({
+          error: error,
+          action: "GET_APPROVAL_HIERARCHY_TYPE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -198,16 +224,13 @@ export const updateAppHier = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'updated', errorMessage(error)), action: "UPDATE_APPHIER", back: false }))
-      // if (statusCode?.includes(error?.response?.data?.code)) {
-      // thunkAPI?.dispatch(validateError({ error: error, action: 'UPDATE_APPHIER', back: false }))
-      // } else {
-      //   const errorBody = {
-      //     title: "Failed",
-      //     description: `Your data was not updated. ${error?.response?.data?.message}. Please try again.`,
-      //   };
-      //   thunkAPI.dispatch(showModalError(errorBody));
-      // }
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "updated", errorMessage(error)),
+          action: "UPDATE_APPHIER",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
