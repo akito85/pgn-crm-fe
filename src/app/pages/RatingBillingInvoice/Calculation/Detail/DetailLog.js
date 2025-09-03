@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BaseContainer from "../../../../../components/BaseContainer";
-import { getDetailCalculationLog } from "../../../../../redux/slices/rating_billing_invoice/calculation";
+import { getCalculateLogPaginate, getDetailCalculationLog } from "../../../../../redux/slices/rating_billing_invoice/calculation";
 import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import TableCalculateLog from "./Table/TableCalculateLog";
 
 const DetailLog = ({ data, tabHeader }) => {
   const { list_calculation_result, loading } = useSelector(
@@ -315,6 +316,7 @@ const DetailLog = ({ data, tabHeader }) => {
         tableScrolled={{ x: 2000, y: 600 }}
         onSort={onSort}
       />
+      <TableCalculateLog calculationCode={calculationCode} />
     </BaseContainer>
   );
 };
