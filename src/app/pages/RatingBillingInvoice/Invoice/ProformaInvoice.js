@@ -1,5 +1,5 @@
-// ViewInvoice.js
 import React, { useEffect, useRef, useState } from "react";
+import ReactDOM from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Form, Select, Tooltip } from "antd";
 import axios from "axios";
@@ -32,7 +32,7 @@ import { useColumnActionPermission } from "../../../../components/ColumnActionPe
 import { EyeOutlined } from "@ant-design/icons";
 import { InvoiceDummy } from "./dummyInvoiceData";
 
-const ViewInvoice = () => {
+const ProformaInvoice = () => {
   // Selector
   const { data, loading, data_detail, data_format, data_billing } = useSelector(
     (state) => state.invoice
@@ -97,8 +97,8 @@ const ViewInvoice = () => {
       breadcrumbName: "Invoice",
     },
     {
-      path: INVOICE_ROUTES.GENERATE_INVOICE_VIEW,
-      breadcrumbName: "Invoice",
+      path: INVOICE_ROUTES.PROFORMA_INVOICE_VIEW,
+      breadcrumbName: "Proforma Invoice",
     },
   ];
 
@@ -158,7 +158,7 @@ const ViewInvoice = () => {
     setModalReGenerate(true);
   };
 
-  // Handle Preview File
+  // Handle Preview
   const handlePreviewFile = async (record) => {
     try {
       const response = await axios.get(
@@ -211,7 +211,7 @@ const ViewInvoice = () => {
     setBodyError({});
   };
 
-  // Handle Confirm ReGenerate
+  // Handle Preview
   const handleConfirmReGenerate = async (res, handleClear) => {
     try {
       setModalReGenerate(false);
@@ -277,22 +277,17 @@ const ViewInvoice = () => {
           type="submit"
           onClick={handleDownload}
         >
-          Export Data
+          Download List
         </ButtonComponent>
       ),
     },
     {
       action: "Create",
       render: (
-        // trigger generate invoice
         <ButtonComponent
           icon={<SVGIcon name="IconButtonCreate" width={24} />}
           type="submit"
-          onClick={() => {
-            // Open new page instead of modal
-            window.location.href =
-              "/invoice/generate-invoice/generate-form-invoice";
-          }}
+          onClick={() => setModalGenerate(true)}
         >
           Generate Invoice
         </ButtonComponent>
@@ -361,26 +356,11 @@ const ViewInvoice = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <BaseContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">Invoice List</p>
-              <div>
-                <ButtonComponent
-                  icon={<SVGIcon name="IconButtonCreate" width={24} />}
-                  type="submit"
-                  onClick={() => {
-                    // Open new page instead of modal
-                    window.location.href =
-                      "/invoice/generate-invoice/generate-form-invoice";
-                  }}
-                >
-                  Generate Invoice
-                </ButtonComponent>
-              </div>
-            </div>
-          }
-        >
+        <div className="w-full flex justify-end gap-[20px]">
+          <Toolbar items={itemGrantAccess} />
+        </div>
+
+        <BaseContainer header={"Proforma Invoice List"}>
           <div className="w-full">
             <TablePagination
               dataSource={dataSource}
@@ -405,12 +385,10 @@ const ViewInvoice = () => {
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
-              // onSizeChanger={handleChange}
-              // totalData={data?.page?.totalElements}
-              totalData={dataSource.length}
+              onSizeChanger={handleChange}
+              totalData={data?.page?.totalElements}
               tableScrolled={{ y: 525, x: 12000 }}
               onSort={onSortApi}
-              handleDownload={handleDownload}
             />
           </div>
         </BaseContainer>
@@ -470,7 +448,6 @@ const ViewInvoice = () => {
         </ModalError>
 
         {/* Modal Generate */}
-        {/*
         <ModalGenerateInvoice
           isOpen={modalGenerate}
           handleCancel={() => setModalGenerate(false)}
@@ -479,10 +456,9 @@ const ViewInvoice = () => {
           setBodyError={setBodyError}
           setModalError={setModalError}
         />
-        */}
       </Spin>
     </LayoutMenu>
   );
 };
 
-export default ViewInvoice;
+export default ProformaInvoice;

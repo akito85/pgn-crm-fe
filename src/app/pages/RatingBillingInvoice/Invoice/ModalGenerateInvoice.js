@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Steps, Form } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -24,7 +24,14 @@ for (let i = 0; i < 10; i++) {
   });
 }
 
-const ModalGenerateInvoice = ({ isOpen, handleCancel, data, refreshTable, setBodyError, setModalError }) => {
+const ModalGenerateInvoice = ({
+  isOpen,
+  handleCancel,
+  data,
+  refreshTable,
+  setBodyError,
+  setModalError,
+}) => {
   // Selector
 
   // Declaration
@@ -51,26 +58,30 @@ const ModalGenerateInvoice = ({ isOpen, handleCancel, data, refreshTable, setBod
   useEffect(() => {
     if (isOpen === false) {
       form.resetFields();
-      setSelectedRowKeys([])
+      setSelectedRowKeys([]);
       setDataTable([]);
-      setFilterRowSelected([])
+      setFilterRowSelected([]);
     } else {
       if (data) {
-        setDataTable(data?.map((item, index) => {
-          return {
-            key: index + 1,
-            ...item
-          }
-        }));
+        setDataTable(
+          data?.map((item, index) => {
+            return {
+              key: index + 1,
+              ...item,
+            };
+          })
+        );
       }
     }
   }, [data, form, isOpen]);
 
-  useEffect(() => { 
+  useEffect(() => {
     if (selectedRowKeys?.length !== 0) {
-      setFilterRowSelected(dataTable?.filter(item => selectedRowKeys?.includes(item?.key)));
+      setFilterRowSelected(
+        dataTable?.filter((item) => selectedRowKeys?.includes(item?.key))
+      );
     }
-  }, [dataTable, selectedRowKeys])
+  }, [dataTable, selectedRowKeys]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -128,9 +139,9 @@ const ModalGenerateInvoice = ({ isOpen, handleCancel, data, refreshTable, setBod
   const next = () => {
     setPage(1);
     setPageSize(10);
-    setSearch("")
-    setSearchText("")
-    setSearchedColumn("")
+    setSearch("");
+    setSearchText("");
+    setSearchedColumn("");
     setCurrent(current + 1);
   };
 
@@ -138,9 +149,9 @@ const ModalGenerateInvoice = ({ isOpen, handleCancel, data, refreshTable, setBod
   const prev = () => {
     setPage(1);
     setPageSize(10);
-    setSearch("")
-    setSearchText("")
-    setSearchedColumn("")
+    setSearch("");
+    setSearchText("");
+    setSearchedColumn("");
     setCurrent(current - 1);
   };
 
@@ -183,24 +194,24 @@ const ModalGenerateInvoice = ({ isOpen, handleCancel, data, refreshTable, setBod
       invoiceNumbers: filterRowSelected.map((a) => a.invoiceNumber),
       remark: remark,
     };
-    dispatch(createGenerate(body))      
-    .unwrap()
-    .then(() => {
-      refreshTable();
-    })
-    .catch((error) => {
-      if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-        const message =
-          (error?.response &&
-            error?.response?.data &&
-            error?.response?.data?.message) ||
-          error?.message ||
-          error?.toString();
-        console.log(error);
-        setBodyError({ message });
-        setModalError(true);
-      }
-    });
+    dispatch(createGenerate(body))
+      .unwrap()
+      .then(() => {
+        refreshTable();
+      })
+      .catch((error) => {
+        if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+          const message =
+            (error?.response &&
+              error?.response?.data &&
+              error?.response?.data?.message) ||
+            error?.message ||
+            error?.toString();
+          console.log(error);
+          setBodyError({ message });
+          setModalError(true);
+        }
+      });
     handleCancel();
   };
 
@@ -357,8 +368,8 @@ const ModalGenerateInvoice = ({ isOpen, handleCancel, data, refreshTable, setBod
             />
           </div>
           <div>
-            <DetailText label={'Remark'}>
-              {form.getFieldValue('remark')}
+            <DetailText label={"Remark"}>
+              {form.getFieldValue("remark")}
             </DetailText>
           </div>
         </div>

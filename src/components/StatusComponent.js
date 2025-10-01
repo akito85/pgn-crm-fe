@@ -122,7 +122,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       // className={`text-white ${bg} mx-8 my-0 p-1 rounded-2xl text-center w-40`}
       className={
         type === "status"
-          ? `text-white ${bgcolor} my-0 py-1 px-2 rounded-2xl text-center w-auto`
+          ? `text-white ${bgcolor} px-2 mt-3 rounded-xl text-center w-full`
           : `${color} font-semibold`
       }
     >
