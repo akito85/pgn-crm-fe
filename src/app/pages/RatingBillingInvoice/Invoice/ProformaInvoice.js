@@ -1,5 +1,5 @@
+// ProformaInvoice.js
 import React, { useEffect, useRef, useState } from "react";
-import ReactDOM from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Form, Select, Tooltip } from "antd";
 import axios from "axios";
@@ -29,7 +29,11 @@ import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrRej
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
-import { EyeOutlined } from "@ant-design/icons";
+import {
+  DownloadOutlined,
+  EyeOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import { InvoiceDummy } from "./dummyInvoiceData";
 
 const ProformaInvoice = () => {
@@ -158,7 +162,7 @@ const ProformaInvoice = () => {
     setModalReGenerate(true);
   };
 
-  // Handle Preview
+  // Handle Preview File
   const handlePreviewFile = async (record) => {
     try {
       const response = await axios.get(
@@ -211,7 +215,7 @@ const ProformaInvoice = () => {
     setBodyError({});
   };
 
-  // Handle Preview
+  // Handle Confirm ReGenerate
   const handleConfirmReGenerate = async (res, handleClear) => {
     try {
       setModalReGenerate(false);
@@ -277,19 +281,24 @@ const ProformaInvoice = () => {
           type="submit"
           onClick={handleDownload}
         >
-          Download List
+          Export Data
         </ButtonComponent>
       ),
     },
     {
       action: "Create",
       render: (
+        // trigger generate invoice
         <ButtonComponent
           icon={<SVGIcon name="IconButtonCreate" width={24} />}
           type="submit"
-          onClick={() => setModalGenerate(true)}
+          onClick={() => {
+            // Open new page instead of modal
+            window.location.href =
+              INVOICE_ROUTES.GENERATE_PROFORMA_INVOICE_FORM;
+          }}
         >
-          Generate Invoice
+          Generate Proforma Invoice
         </ButtonComponent>
       ),
     },
@@ -300,13 +309,22 @@ const ProformaInvoice = () => {
       type: "table",
       render: (record) => {
         return (
-          <Tooltip title="Detail">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDetail"
-                width={24}
-                onClick={() => handleDetail(record)}
-              />
+          <Tooltip title="Detail Invoice Log">
+            <div
+              className="pt-1 cursor-pointer"
+              onClick={() => {
+                handleDetail(record);
+                setTimeout(
+                  () =>
+                    window.scrollTo({
+                      top: document.body.scrollHeight,
+                      behavior: "smooth",
+                    }),
+                  100
+                );
+              }}
+            >
+              <EyeOutlined style={{ fontSize: "20px" }} />
             </div>
           </Tooltip>
         );
@@ -318,12 +336,11 @@ const ProformaInvoice = () => {
       render: (record) => {
         return (
           <Tooltip title="Re-Generate">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconReGenerate"
-                width={24}
-                onClick={() => handleReGenerate(record)}
-              />
+            <div
+              className="pt-1 cursor-pointer"
+              onClick={() => handleReGenerate(record)}
+            >
+              <ReloadOutlined style={{ fontSize: "20px" }} />
             </div>
           </Tooltip>
         );
@@ -334,16 +351,12 @@ const ProformaInvoice = () => {
       type: "table",
       render: (record) => {
         return (
-          <Tooltip title="Preview">
-            <div className="pt-1">
-              <EyeOutlined
-                style={{
-                  fontSize: "24px",
-                  color: "#0075bf",
-                  cursor: "pointer",
-                }}
-                onClick={() => handlePreviewFile(record)}
-              />
+          <Tooltip title="Download">
+            <div
+              className="pt-1 cursor-pointer"
+              onClick={() => handlePreviewFile(record)}
+            >
+              <DownloadOutlined style={{ fontSize: "25px" }} />
             </div>
           </Tooltip>
         );
@@ -356,11 +369,26 @@ const ProformaInvoice = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <div className="w-full flex justify-end gap-[20px]">
-          <Toolbar items={itemGrantAccess} />
-        </div>
-
-        <BaseContainer header={"Proforma Invoice List"}>
+        <BaseContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">Proforma Invoice List</p>
+              <div>
+                <ButtonComponent
+                  icon={<SVGIcon name="IconButtonCreate" width={24} />}
+                  type="submit"
+                  onClick={() => {
+                    // Open new page instead of modal
+                    window.location.href =
+                      INVOICE_ROUTES.GENERATE_PROFORMA_INVOICE_FORM;
+                  }}
+                >
+                  Generate Proforma Invoice
+                </ButtonComponent>
+              </div>
+            </div>
+          }
+        >
           <div className="w-full">
             <TablePagination
               dataSource={dataSource}
@@ -385,10 +413,12 @@ const ProformaInvoice = () => {
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
-              onSizeChanger={handleChange}
-              totalData={data?.page?.totalElements}
+              // onSizeChanger={handleChange}
+              // totalData={data?.page?.totalElements}
+              totalData={dataSource.length}
               tableScrolled={{ y: 525, x: 12000 }}
               onSort={onSortApi}
+              handleDownload={handleDownload}
             />
           </div>
         </BaseContainer>
@@ -448,6 +478,7 @@ const ProformaInvoice = () => {
         </ModalError>
 
         {/* Modal Generate */}
+        {/*
         <ModalGenerateInvoice
           isOpen={modalGenerate}
           handleCancel={() => setModalGenerate(false)}
@@ -456,6 +487,7 @@ const ProformaInvoice = () => {
           setBodyError={setBodyError}
           setModalError={setModalError}
         />
+        */}
       </Spin>
     </LayoutMenu>
   );

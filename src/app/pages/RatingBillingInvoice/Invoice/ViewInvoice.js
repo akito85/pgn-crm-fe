@@ -29,7 +29,11 @@ import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrRej
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
-import { EyeOutlined } from "@ant-design/icons";
+import {
+  DownloadOutlined,
+  EyeOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import { InvoiceDummy } from "./dummyInvoiceData";
 
 const ViewInvoice = () => {
@@ -305,13 +309,22 @@ const ViewInvoice = () => {
       type: "table",
       render: (record) => {
         return (
-          <Tooltip title="Detail">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDetail"
-                width={24}
-                onClick={() => handleDetail(record)}
-              />
+          <Tooltip title="Detail Invoice Log">
+            <div
+              className="pt-1 cursor-pointer"
+              onClick={() => {
+                handleDetail(record);
+                setTimeout(
+                  () =>
+                    window.scrollTo({
+                      top: document.body.scrollHeight,
+                      behavior: "smooth",
+                    }),
+                  100
+                );
+              }}
+            >
+              <EyeOutlined style={{ fontSize: "20px" }} />
             </div>
           </Tooltip>
         );
@@ -323,12 +336,11 @@ const ViewInvoice = () => {
       render: (record) => {
         return (
           <Tooltip title="Re-Generate">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconReGenerate"
-                width={24}
-                onClick={() => handleReGenerate(record)}
-              />
+            <div
+              className="pt-1 cursor-pointer"
+              onClick={() => handleReGenerate(record)}
+            >
+              <ReloadOutlined style={{ fontSize: "20px" }} />
             </div>
           </Tooltip>
         );
@@ -339,16 +351,12 @@ const ViewInvoice = () => {
       type: "table",
       render: (record) => {
         return (
-          <Tooltip title="Preview">
-            <div className="pt-1">
-              <EyeOutlined
-                style={{
-                  fontSize: "24px",
-                  color: "#0075bf",
-                  cursor: "pointer",
-                }}
-                onClick={() => handlePreviewFile(record)}
-              />
+          <Tooltip title="Download">
+            <div
+              className="pt-1 cursor-pointer"
+              onClick={() => handlePreviewFile(record)}
+            >
+              <DownloadOutlined style={{ fontSize: "25px" }} />
             </div>
           </Tooltip>
         );

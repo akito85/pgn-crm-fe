@@ -1,5 +1,10 @@
 // TablePagination.js
-import { DownloadOutlined, DownOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  DownOutlined,
+  FilterOutlined,
+} from "@ant-design/icons";
 import {
   Button,
   Input,
@@ -120,22 +125,43 @@ const TablePagination = ({
             visible={dropdownVisible}
             onVisibleChange={(flag) => setDropdownVisible(flag)}
           >
-            <Button>
-              Show / Hide Column <DownOutlined />
+            <Button
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                border: "1px solid #BDBDBD",
+                height: "40px",
+                color: "black",
+              }}
+            >
+              Show / Hide Column <DownOutlined style={{ fontSize: "15px" }} />
             </Button>
           </Dropdown>
 
           <div className="w-full flex justify-end gap-2">
             <Button
               icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
-              className="rounded-[5px] w-fit h-[40px] bg-gray-100"
+              style={{
+                border: "1px solid #BDBDBD",
+                color: "black",
+                height: "40px",
+              }}
             >
               Export (PDF)
             </Button>
 
             {/* button trigger modal */}
-            <Button onClick={() => setIsAdvanceOpen(true)}>
-              Search Advance
+            <Button
+              onClick={() => setIsAdvanceOpen(true)}
+              style={{
+                border: "1px solid #BDBDBD",
+                color: "black",
+                height: "40px",
+              }}
+            >
+              <FilterOutlined style={{ fontSize: "20px" }} />
+              Advance Filter
             </Button>
           </div>
         </div>
@@ -232,10 +258,24 @@ const TablePagination = ({
             className="flex-1 rounded-lg border border-gray-300 p-2"
           />
           <div className="flex flex-col gap-2">
-            <Button className="bg-blue-100 text-blue-600 rounded-md w-20 h-10">
+            <Button
+              style={{
+                backgroundColor: "#E6F4FA",
+                color: "#0175BF",
+                border: "none",
+                height: "40px",
+              }}
+            >
               + AND
             </Button>
-            <Button className="bg-blue-100 text-blue-600 rounded-md w-20 h-10">
+            <Button
+              style={{
+                backgroundColor: "#E6F4FA",
+                color: "#0175BF",
+                border: "none",
+                height: "40px",
+              }}
+            >
               + OR
             </Button>
           </div>
@@ -245,11 +285,25 @@ const TablePagination = ({
           Hint/Tips will be placed here.
         </p>
 
-        <div className="flex justify-end gap-2">
-          <Button danger className="bg-red-100 rounded-md px-4 py-2">
+        <div className="flex justify-between bg-[#F5F5F5] -mx-[40px] -mb-[40px] px-[40px] py-[10px] gap-2">
+          <Button
+            style={{
+              border: "none",
+              color: "#D32F2F",
+              backgroundColor: "#FFEBEE",
+            }}
+          >
+            <DeleteOutlined
+              style={{
+                display: "flex",
+                alignItems: "center",
+                fontSize: "20px",
+                height: "40px",
+              }}
+            />
             Clear Filter
           </Button>
-          <Button type="primary" className="rounded-md px-4 py-2">
+          <Button type="primary" style={{ height: "42px", fontSize: "16px" }}>
             Search
           </Button>
         </div>

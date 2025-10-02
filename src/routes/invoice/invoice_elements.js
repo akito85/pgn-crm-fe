@@ -1,6 +1,7 @@
 import ViewInvoice from "../../app/pages/RatingBillingInvoice/Invoice/ViewInvoice";
 import ProformaInvoice from "../../app/pages/RatingBillingInvoice/Invoice/ProformaInvoice";
 import GenerateInvoicePage from "../../app/pages/RatingBillingInvoice/Invoice/GenerateInvoicePage";
+import GenerateProformaInvoicePage from "../../app/pages/RatingBillingInvoice/Invoice/GenerateProformaInvoicePage";
 
 export const INVOICE_ELEMENTS = {
   // Generate Invoice List (main page)
@@ -9,4 +10,6 @@ export const INVOICE_ELEMENTS = {
   GENERATE_INVOICE_FORM_PAGE: <GenerateInvoicePage />,
   // Proforma Invoice
   PROFORMA_INVOICE_VIEW_PAGE: <ProformaInvoice />,
+  // Generate Proforma Invoice Form (new page)
+  GENERATE_PROFORMA_INVOICE_FORM_PAGE: <GenerateProformaInvoicePage />,
 };

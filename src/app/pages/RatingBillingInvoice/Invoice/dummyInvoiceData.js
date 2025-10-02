@@ -33,7 +33,7 @@ export const InvoiceDummy = () => [
     totalAmountEqvIdr: 5250000,
     totalAmountEqvUsd: 350,
     remark: "January electricity billing",
-    status: "Paid",
+    status: "Completed",
   },
   {
     invoiceNumber: "INV-2025-0002",
@@ -69,7 +69,7 @@ export const InvoiceDummy = () => [
     totalAmountEqvIdr: 3150000,
     totalAmountEqvUsd: 210,
     remark: "January water billing",
-    status: "InProgress",
+    status: "Generating",
   },
   {
     invoiceNumber: "INV-2025-0003",
@@ -105,7 +105,7 @@ export const InvoiceDummy = () => [
     totalAmountEqvIdr: 2100000,
     totalAmountEqvUsd: 140,
     remark: "Internet subscription January",
-    status: "Paid",
+    status: "Failed",
   },
   {
     invoiceNumber: "INV-2025-0004",
@@ -141,7 +141,7 @@ export const InvoiceDummy = () => [
     totalAmountEqvIdr: 8400000,
     totalAmountEqvUsd: 560,
     remark: "Q1 maintenance billing",
-    status: "Unpaid",
+    status: "Completed",
   },
   {
     invoiceNumber: "INV-2025-0005",
@@ -177,7 +177,7 @@ export const InvoiceDummy = () => [
     totalAmountEqvIdr: 12600000,
     totalAmountEqvUsd: 840,
     remark: "Annual software license",
-    status: "Paid",
+    status: "Generating",
   },
   {
     invoiceNumber: "INV-2025-0006",
@@ -213,7 +213,7 @@ export const InvoiceDummy = () => [
     totalAmountEqvIdr: 4200000,
     totalAmountEqvUsd: 280,
     remark: "January security service",
-    status: "InProgress",
+    status: "Failed",
   },
   {
     invoiceNumber: "INV-2025-0007",
@@ -249,7 +249,7 @@ export const InvoiceDummy = () => [
     totalAmountEqvIdr: 2625000,
     totalAmountEqvUsd: 175,
     remark: "January cleaning service",
-    status: "Paid",
+    status: "Completed",
   },
   {
     invoiceNumber: "INV-2025-0008",
@@ -285,7 +285,7 @@ export const InvoiceDummy = () => [
     totalAmountEqvIdr: 10500000,
     totalAmountEqvUsd: 700,
     remark: "Consulting project billing",
-    status: "Unpaid",
+    status: "Generating",
   },
   {
     invoiceNumber: "INV-2025-0009",
@@ -321,7 +321,7 @@ export const InvoiceDummy = () => [
     totalAmountEqvIdr: 6300000,
     totalAmountEqvUsd: 420,
     remark: "Training program billing",
-    status: "InProgress",
+    status: "Failed",
   },
   {
     invoiceNumber: "INV-2025-0010",
@@ -357,6 +357,6 @@ export const InvoiceDummy = () => [
     totalAmountEqvIdr: 7350000,
     totalAmountEqvUsd: 490,
     remark: "January logistics billing",
-    status: "Paid",
+    status: "Completed",
   },
 ];

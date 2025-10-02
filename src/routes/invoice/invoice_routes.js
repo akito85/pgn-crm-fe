@@ -5,4 +5,7 @@ export const INVOICE_ROUTES = {
   GENERATE_INVOICE_FORM: "/invoice/generate-invoice/generate-form-invoice",
   // proforma invoice
   PROFORMA_INVOICE_VIEW: "/invoice/proforma-invoice",
+  // generate proforma invoice form (new page)
+  GENERATE_PROFORMA_INVOICE_FORM:
+    "/invoice/proforma-invoice/generate-form-proforma",
 };

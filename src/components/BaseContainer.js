@@ -8,8 +8,8 @@ const BaseContainer = ({ header, subHeader, children, type, element }) => {
           <div className="p-4">{element}</div>
         </>
       ) : (
-        <div className="flex flex-col bg-[#F9F9F9] p-4 border-b rounded-t-lg font-bold uppercase">
-          <div className="text-[22px]">{header}</div>
+        <div className="flex flex-col bg-[#F9F9F9] p-4 border-b rounded-t-lg uppercase">
+          <div className="text-[22px] font-bold">{header}</div>
           <div className="text-primary text-xs font-bold">{subHeader}</div>
         </div>
       )}

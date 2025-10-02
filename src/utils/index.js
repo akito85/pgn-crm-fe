@@ -201,7 +201,7 @@ export const renderColumn = (
   if (searchedColumn) {
     if (type === "status") {
       return (
-        <div className={" flex justify-center"}>
+        <div className={"flex"}>
           <StatusComponent colour={text}>{toTitleCase(text)}</StatusComponent>
         </div>
       );
