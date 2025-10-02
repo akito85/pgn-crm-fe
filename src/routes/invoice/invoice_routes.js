@@ -8,4 +8,6 @@ export const INVOICE_ROUTES = {
   // generate proforma invoice form (new page)
   GENERATE_PROFORMA_INVOICE_FORM:
     "/invoice/proforma-invoice/generate-form-proforma",
+  // e-meterai management
+  E_METERAI_MANAGEMENT: "/invoice/e-meterai-management",
 };
