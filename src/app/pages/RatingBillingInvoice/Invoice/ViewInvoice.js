@@ -45,8 +45,9 @@ const ViewInvoice = () => {
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  // const dataSource = data?.result;
-  const dataSource = InvoiceDummy();
+  const dataSource = data?.content || [];
+  // console.log("data", data?.content);
+  // const dataSource = InvoiceDummy();
 
   // State
   const [page, setPage] = useState(1);
@@ -76,9 +77,15 @@ const ViewInvoice = () => {
       }
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+
+    let searchParam = undefined;
+    if (tempSearch) {
+      // Hanya kirim search jika ada nilai
+      searchParam = encodeURIComponent(JSON.stringify(search));
+    }
     dispatch(
       getAllInvoicePaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
+        search: searchParam,
         page,
         pageSize,
         sort,
@@ -150,10 +157,42 @@ const ViewInvoice = () => {
   };
 
   // Handle Detail
-  const handleDetail = (record) => {
-    setPageDetail(true);
-    dispatch(getDetailInvoice(record?.invoiceNumber));
-    setInvoiceNumber(record?.invoiceNumber);
+  const handleDetail = async (record) => {
+    console.log("=== START handleDetail ===");
+    console.log("Record:", record);
+    console.log("Invoice Number:", record?.invoiceNumber);
+
+    try {
+      setPageDetail(true);
+
+      // Gunakan .unwrap() untuk mendapatkan actual response atau error
+      const result = await dispatch(
+        getDetailInvoice(record?.invoiceNumber)
+      ).unwrap();
+
+      console.log("✅ Success - Detail loaded:", result);
+      setInvoiceNumber(record?.invoiceNumber);
+
+      // Scroll ke detail section
+      setTimeout(
+        () =>
+          window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: "smooth",
+          }),
+        100
+      );
+    } catch (error) {
+      console.error("❌ ERROR in handleDetail ===");
+      console.error("Error object:", error);
+      console.error("Error message:", error?.message);
+      console.error("Error response:", error?.response);
+      console.error("Error data:", error?.response?.data);
+      console.error("Full error:", JSON.stringify(error, null, 2));
+
+      // Reset state karena gagal
+      setPageDetail(false);
+    }
   };
 
   // Handle Re Generate
@@ -166,10 +205,12 @@ const ViewInvoice = () => {
   const handlePreviewFile = async (record) => {
     try {
       const response = await axios.get(
-        configApp.RATING_BILLING_SERVICE +
-          `/v1/dbs/api/rbi/invoice/${record?.invoiceNumber}/preview`,
+        `https://d28a5698909b.ngrok-free.app/api/v1/invoices/download/${record?.invoiceNumber}`,
         {
-          headers: tokenHeader(),
+          headers: {
+            // tokenHeader(),
+            "ngrok-skip-browser-warning": "true",
+          },
           responseType: "arraybuffer",
         }
       );
@@ -331,7 +372,7 @@ const ViewInvoice = () => {
       },
     },
     {
-      action: "Preview",
+      action: "Regenerate",
       type: "table",
       render: (record) => {
         return (
@@ -347,7 +388,7 @@ const ViewInvoice = () => {
       },
     },
     {
-      action: "Regenerate",
+      action: "Preview",
       type: "table",
       render: (record) => {
         return (
@@ -424,9 +465,9 @@ const ViewInvoice = () => {
         </BaseContainer>
 
         {/* Invoice Log */}
-        {pageDetail === true ? (
+        {pageDetail === true && data_detail ? (
           <DetailInvoice
-            detail={data_detail?.logs}
+            detail={data_detail || []}
             invoiceNumber={invoiceNumber}
           />
         ) : null}

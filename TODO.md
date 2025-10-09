@@ -1,5 +1,0 @@
-- [x] Change STATUS column alignment from center to left in ViewInvoice.js table
-  - [x] Add align: "left" to STATUS column in TableViewInvoice.js
-  - [x] Modify render function to use justify-start for left alignment
-- [x] Add scroll to bottom when clicking EyeOutlined icon in ViewInvoice.js
-  - [x] Modify onClick in itemGrantAccess "View" action to include window.scrollTo after handleDetail

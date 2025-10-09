@@ -2,6 +2,9 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import ratingBillingHttpService from "../../services/ratingBillingHttpService";
 import { showModalError, validateError } from "../general_slice";
 import { showModalSuccess } from "../general_slice";
+import axios from "axios";
+
+const BASE_URL = "https://d28a5698909b.ngrok-free.app/api/v1/invoices";
 
 const initialState = {
   data: [],
@@ -11,33 +14,44 @@ const initialState = {
   message: "",
   data_detail: null,
   data_format: null,
-  data_billing: null
+  data_billing: null,
 };
 
 export const getAllInvoicePaginate = createAsyncThunk(
   "GET_ALL_INVOICE_PAGINATE",
   async ({ page, pageSize, search, sort }, thunkAPI) => {
     try {
-      // const searchParams = search === undefined ? "" : search;
       const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/rbi/invoice?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${search}`;
-      const response = await ratingBillingHttpService.getPagination(url);
+        sort === undefined || sort === "" ? "createdDate,desc" : sort;
+      const url = `${BASE_URL}?page=0&size=${pageSize}&sort=${sortParams}&search=${
+        search || ""
+      }`;
+      const response = await axios.get(url, {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
+      console.log("response", response);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );
 export const getDetailInvoice = createAsyncThunk(
   "GET_DETAIL_INVOICE",
-  async (id, thunkAPI) => {
+  async (invoiceNumber, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/invoice/${id}`;
-      const response = await ratingBillingHttpService.getDetail(url);
-      return response;
+      const url = `${BASE_URL}/${invoiceNumber}`;
+      const response = await axios.get(url, {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
+      const data = response?.data;
+      return Array.isArray(data) ? data : [data];
     } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );
@@ -67,14 +81,14 @@ export const getBillingApproval = createAsyncThunk(
 );
 export const createRegenerate = createAsyncThunk(
   "CREATE_REGENRATE",
-  async ({id, body}, thunkAPI) => {
+  async ({ id, body }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/invoice/${id}/regenerate`;
       const response = await ratingBillingHttpService.createData(url, body);
       const successMessage = {
         title: "Successful",
         description: "Your data has been created",
-        return: false
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response;
@@ -103,7 +117,7 @@ export const createGenerate = createAsyncThunk(
       const successMessage = {
         title: "Successful",
         description: "Your data has been created",
-        return : false
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response;
@@ -125,18 +139,21 @@ export const createGenerate = createAsyncThunk(
 );
 
 export const getDownloadList = createAsyncThunk(
-  "DOWNLOAD_INVOICE_LIST",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  "DOWNLOAD_INVOICE",
+  async (invoiceNumber, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/rbi/invoice/download-filter?search=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-      const response = await ratingBillingHttpService.downloadData(url);
+      const url = `${BASE_URL}/download/${invoiceNumber}`;
+      const response = await axios.get(url, { responseType: "blob" });
       return response.data;
-    } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_INVOICE_LIST", back: false }))
-      return thunkAPI.rejectWithValue(response.response.data);
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error,
+          action: "DOWNLOAD_INVOICE",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );

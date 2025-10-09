@@ -148,7 +148,7 @@ const TablePagination = ({
                 height: "40px",
               }}
             >
-              Export (PDF)
+              Export List
             </Button>
 
             {/* button trigger modal */}

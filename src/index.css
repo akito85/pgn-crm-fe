@@ -76,7 +76,7 @@ tr:nth-child(even) > td.ant-table-cell-fix-right,
   font-size: 13px;
   background: transparent;
   padding: 5px 10px !important;
-  color: #fff !important;
+  /* color: #fff !important; */
 }
 
 input[type="text"] {
