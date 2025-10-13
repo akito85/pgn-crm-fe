@@ -10,4 +10,6 @@ export const INVOICE_ROUTES = {
     "/invoice/proforma-invoice/generate-form-proforma",
   // e-meterai management
   E_METERAI_MANAGEMENT: "/invoice/e-meterai-management",
+  // management delivery invoice
+  MANAGEMENT_DELIVERY_INVOICE: "/invoice/management-delivery-invoice",
 };

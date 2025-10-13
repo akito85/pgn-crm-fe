@@ -3,6 +3,7 @@ import ProformaInvoice from "../../app/pages/RatingBillingInvoice/Invoice/Profor
 import GenerateInvoicePage from "../../app/pages/RatingBillingInvoice/Invoice/GenerateInvoicePage";
 import GenerateProformaInvoicePage from "../../app/pages/RatingBillingInvoice/Invoice/GenerateProformaInvoicePage";
 import EMeteraiManagement from "../../app/pages/RatingBillingInvoice/Invoice/EMeteraiManagement";
+import ManagementDeliveryInvoice from "../../app/pages/RatingBillingInvoice/Invoice/ManagementDeliveryInvoice";
 
 export const INVOICE_ELEMENTS = {
   // Generate Invoice List (main page)
@@ -15,4 +16,6 @@ export const INVOICE_ELEMENTS = {
   GENERATE_PROFORMA_INVOICE_FORM_PAGE: <GenerateProformaInvoicePage />,
   // E-Meterai Management
   E_METERAI_MANAGEMENT_PAGE: <EMeteraiManagement />,
+  // Management Delivery Invoice
+  MANAGEMENT_DELIVERY_INVOICE_PAGE: <ManagementDeliveryInvoice />,
 };
