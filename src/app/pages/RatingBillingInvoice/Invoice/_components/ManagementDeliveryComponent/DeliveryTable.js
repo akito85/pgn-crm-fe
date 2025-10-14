@@ -1,9 +1,9 @@
-import { Button, Table } from "antd";
+import { Button, Dropdown, Table } from "antd";
 import ChannelBadge from "./ChannelBadge";
 import StatusTag from "./StatusTag";
+import { EllipsisOutlined } from "@ant-design/icons";
 
-// Invoice Table Component
-const DeliveryTable = ({ dataSource, loading, onViewDetail }) => {
+const DeliveryTable = ({ dataSource, loading, onViewDetail, onPreview }) => {
   const columns = [
     {
       title: "No. Invoice",
@@ -60,19 +60,46 @@ const DeliveryTable = ({ dataSource, loading, onViewDetail }) => {
     {
       title: "Aksi",
       key: "action",
-      width: 100,
+      width: 80,
       align: "center",
       fixed: "right",
-      render: (_, record) => (
-        <Button
-          type="primary"
-          size="small"
-          onClick={() => onViewDetail(record)}
-          style={{ borderRadius: "6px" }}
-        >
-          Detail
-        </Button>
-      ),
+      render: (_, record) => {
+        const items = [
+          {
+            key: "detail",
+            label: "📋 Detail",
+            onClick: () => onViewDetail(record),
+          },
+          {
+            key: "preview",
+            label: "👁️ Preview",
+            onClick: () => onPreview(record),
+          },
+        ];
+
+        return (
+          <div className="w-full flex justify-center">
+            <Dropdown
+              menu={{ items }}
+              trigger={["click"]}
+              placement="bottomRight"
+            >
+              <Button
+                type="text"
+                icon={<EllipsisOutlined style={{ fontSize: "18px" }} />}
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  padding: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              />
+            </Dropdown>
+          </div>
+        );
+      },
     },
   ];
 

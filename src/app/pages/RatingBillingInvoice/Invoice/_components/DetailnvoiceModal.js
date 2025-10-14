@@ -1,5 +1,5 @@
 // components/ManagementDeliveryInvoice/DetailInvoiceModal.js
-import React from "react";
+import React, { useState } from "react";
 import {
   Modal,
   Button,
@@ -12,6 +12,7 @@ import {
   message,
 } from "antd";
 import { FileTextOutlined, ReloadOutlined } from "@ant-design/icons";
+import LogDetailModal from "./ManagementDeliveryComponent/LogDetailModal";
 
 // Status Tag Component
 const StatusTag = ({ status }) => {
@@ -59,6 +60,9 @@ const StatusTag = ({ status }) => {
 };
 
 const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
+  const [logModalVisible, setLogModalVisible] = useState(false);
+  const [selectedLog, setSelectedLog] = useState(null);
+
   if (!invoiceData) return null;
 
   // Mock detailed data - Replace with actual API data
@@ -92,10 +96,9 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
   };
 
   const handleViewLog = (delivery) => {
-    message.info(
-      `Menampilkan log untuk ${delivery.channel} - ${delivery.recipient}`
-    );
-    // Implement actual log viewing logic here
+    console.log("Opening log for:", delivery);
+    setSelectedLog(delivery);
+    setLogModalVisible(true);
   };
 
   const handleResend = (delivery) => {
@@ -136,9 +139,10 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
           marginBottom: "16px",
           backgroundColor: "#f9fafb",
           border: "1px solid #e5e7eb",
+          padding: "16px",
         }}
       >
-        <Row gutter={[16, 16]} className="p-5">
+        <Row gutter={[16, 16]}>
           <Col span={12}>
             <div style={{ marginBottom: "12px" }}>
               <div
@@ -239,12 +243,12 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
           <Card
             key={delivery.id}
             style={{
-              padding: "10px",
               marginBottom: "12px",
               border: "1px solid #e5e7eb",
               borderLeft: `4px solid ${
                 delivery.status === "Terkirim" ? "#52c41a" : "#ff4d4f"
               }`,
+              padding: "16px",
             }}
             bodyStyle={{ padding: "16px" }}
           >
@@ -323,6 +327,7 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
                       type="primary"
                       danger
                       size="small"
+                      //   icon={<ReloadOutlined />}
                       onClick={() => handleResend(delivery)}
                       style={{ width: "100%", fontSize: "12px" }}
                     >
@@ -352,6 +357,16 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
           </Card>
         ))}
       </div>
+
+      {/* Log Detail Modal - Nested Modal */}
+      <LogDetailModal
+        visible={logModalVisible}
+        onCancel={() => {
+          setLogModalVisible(false);
+          setSelectedLog(null);
+        }}
+        logData={selectedLog}
+      />
     </Modal>
   );
 };

@@ -8,6 +8,9 @@ import FilterSection from "./_components/ManagementDeliveryComponent/FilterSecti
 import DeliveryTable from "./_components/ManagementDeliveryComponent/DeliveryTable";
 import CreateJobModal from "./_components/CreateJobModal";
 import DetailInvoiceModal from "./_components/DetailnvoiceModal";
+import PreviewMessageModal from "./_components/ManagementDeliveryComponent/PreviewMessageModal";
+
+// Import modular components
 
 // Main Component
 const ManagementDeliveryInvoice = () => {
@@ -16,6 +19,7 @@ const ManagementDeliveryInvoice = () => {
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [previewModalVisible, setPreviewModalVisible] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
 
   // Summary data
@@ -98,6 +102,12 @@ const ManagementDeliveryInvoice = () => {
     console.log("View detail for:", record);
     setSelectedInvoice(record);
     setDetailModalVisible(true);
+  };
+
+  const handlePreview = (record) => {
+    console.log("Preview message for:", record);
+    setSelectedInvoice(record);
+    setPreviewModalVisible(true);
   };
 
   const handleCreateJob = (jobData) => {
@@ -200,6 +210,7 @@ const ManagementDeliveryInvoice = () => {
               dataSource={invoiceData}
               loading={loading}
               onViewDetail={handleViewDetail}
+              onPreview={handlePreview}
             />
           </div>
         </Card>
@@ -219,6 +230,16 @@ const ManagementDeliveryInvoice = () => {
             setSelectedInvoice(null);
           }}
           invoiceData={selectedInvoice}
+        />
+
+        {/* Preview Message Modal */}
+        <PreviewMessageModal
+          visible={previewModalVisible}
+          onCancel={() => {
+            setPreviewModalVisible(false);
+            setSelectedInvoice(null);
+          }}
+          messageData={selectedInvoice}
         />
       </div>
     </LayoutMenu>
