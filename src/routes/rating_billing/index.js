@@ -248,4 +248,10 @@ export const rating_billing = [
     path: RBI_ROUTES.TAX_CODE_DETAIL,
     element: RBI_ELEMENTS.TAX_CODE_DETAIL_ELEMENT,
   },
+
+  // Management Billing Installment
+  {
+    path: RBI_ROUTES.MANAGEMENT_BILLING_INSTALLMENT_VIEW,
+    element: RBI_ELEMENTS.MANAGEMENT_BILLING_INSTALLMENT_VIEW_ELEMENT,
+  },
 ];

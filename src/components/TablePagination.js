@@ -139,7 +139,7 @@ const TablePagination = ({
             </Button>
           </Dropdown>
 
-          <div className="w-full flex justify-end gap-2">
+          <div className="w-full flex justify-end gap-2 hidden">
             <Button
               icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
               style={{

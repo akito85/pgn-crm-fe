@@ -1,5 +1,5 @@
 // components/InvoiceProcessingTable.js
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Table,
   Button,
@@ -14,6 +14,8 @@ import {
   Divider,
   Dropdown,
   Menu,
+  Checkbox,
+  Radio,
 } from "antd";
 import dayjs from "dayjs";
 import {
@@ -24,6 +26,8 @@ import {
   RedoOutlined,
   EyeOutlined,
   FileProtectOutlined,
+  PushpinOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
 
 const { RangePicker } = DatePicker;
@@ -46,68 +50,61 @@ const InvoiceProcessingTable = ({
   const [stampingStatusFilter, setStampingStatusFilter] = useState("all");
   const [signingStatusFilter, setSigningStatusFilter] = useState("all");
 
-  // Filter options
-  const stampingStatusOptions = [
-    { value: "all", label: "All Stamping Status" },
-    { value: "not-processed", label: "Not Processed" },
-    { value: "pending-approval", label: "Pending Approval" },
-    { value: "success", label: "Success" },
-    { value: "failed", label: "Failed" },
-  ];
+  // Column fixing settings
+  const [fixedColumns, setFixedColumns] = useState({
+    invoiceNumber: "left",
+  });
+  const [columnFixDropdownVisible, setColumnFixDropdownVisible] =
+    useState(false);
 
-  const signingStatusOptions = [
-    { value: "all", label: "All Signing Status" },
-    { value: "not-processed", label: "Not Processed" },
-    { value: "success", label: "Success" },
-  ];
-
-  // Get status color with black text
-  const getStampingStatusColor = (status) => {
-    const statusMap = {
-      "Pending Approval": "orange",
-      Success: "green",
-      Failed: "red",
-      "Not Processed": "default",
-    };
-    return statusMap[status] || "default";
-  };
-
-  const getSigningStatusColor = (status) => {
-    const statusMap = {
-      "Not Processed": "default",
-      Success: "green",
-    };
-    return statusMap[status] || "default";
-  };
-
-  // Table columns
-  const columns = [
+  // Available columns definition (in order)
+  const allColumnDefinitions = [
     {
+      key: "invoiceNumber",
       title: "Invoice #",
       dataIndex: "invoiceNumber",
-      key: "invoiceNumber",
       width: 130,
-      fixed: "left",
       render: (text) => <span style={{ fontWeight: "600" }}>{text}</span>,
     },
     {
+      key: "customer",
       title: "Customer",
       dataIndex: "customer",
-      key: "customer",
       width: 220,
       ellipsis: true,
     },
     {
+      key: "dummyColumn1",
+      title: "Dummy Column 1",
+      dataIndex: "customer",
+      width: 220,
+      ellipsis: true,
+    },
+    {
+      key: "dummyColumn2",
+      title: "Dummy Column 2",
+      dataIndex: "customer",
+      width: 220,
+      ellipsis: true,
+    },
+    {
+      key: "dummyColumn3",
+      title: "Dummy Column 3",
+      dataIndex: "customer",
+      width: 220,
+      ellipsis: true,
+    },
+    {
+      key: "issueDate",
       title: "Issue Date",
       dataIndex: "issueDate",
-      key: "issueDate",
       width: 120,
       align: "center",
     },
     {
+      key: "amount",
       title: "Amount (IDR)",
       dataIndex: "amount",
-      key: "amount",
       width: 150,
       align: "right",
       render: (amount) => (
@@ -117,51 +114,70 @@ const InvoiceProcessingTable = ({
       ),
     },
     {
+      key: "stampingStatus",
       title: "Stamping Status",
       dataIndex: "stampingStatus",
-      key: "stampingStatus",
       width: 160,
-      fixed: "right",
       align: "center",
-      render: (status) => (
-        <Tag
-          color={getStampingStatusColor(status)}
-          style={{
-            color: "#000",
-            fontWeight: "500",
-            padding: "4px 12px",
-            fontSize: "13px",
-          }}
-        >
-          {status}
-        </Tag>
-      ),
+      render: (status) => {
+        const getStampingStatusColor = (status) => {
+          const statusMap = {
+            "Pending Approval": "orange",
+            Success: "green",
+            Failed: "red",
+            "Not Processed": "default",
+          };
+          return statusMap[status] || "default";
+        };
+
+        return (
+          <Tag
+            color={getStampingStatusColor(status)}
+            style={{
+              color: "#000",
+              fontWeight: "500",
+              padding: "4px 12px",
+              fontSize: "13px",
+            }}
+          >
+            {status}
+          </Tag>
+        );
+      },
     },
     {
+      key: "signingStatus",
       title: "Signing Status",
       dataIndex: "signingStatus",
-      key: "signingStatus",
       width: 150,
-      fixed: "right",
       align: "center",
-      render: (status) => (
-        <Tag
-          color={getSigningStatusColor(status)}
-          style={{
-            color: "#000",
-            fontWeight: "500",
-            padding: "4px 12px",
-            fontSize: "13px",
-          }}
-        >
-          {status}
-        </Tag>
-      ),
+      render: (status) => {
+        const getSigningStatusColor = (status) => {
+          const statusMap = {
+            "Not Processed": "default",
+            Success: "green",
+          };
+          return statusMap[status] || "default";
+        };
+
+        return (
+          <Tag
+            color={getSigningStatusColor(status)}
+            style={{
+              color: "#000",
+              fontWeight: "500",
+              padding: "4px 12px",
+              fontSize: "13px",
+            }}
+          >
+            {status}
+          </Tag>
+        );
+      },
     },
     {
-      title: "Actions",
       key: "actions",
-      fixed: "right",
+      title: "Actions",
       width: 80,
       align: "center",
       render: (_, record) => {
@@ -212,6 +228,69 @@ const InvoiceProcessingTable = ({
     },
   ];
 
+  // Reorder and apply fixed positions to columns
+  const columns = useMemo(() => {
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    allColumnDefinitions.forEach((col) => {
+      const fixedPos = fixedColumns[col.key];
+      const colWithFixed = { ...col, fixed: fixedPos || undefined };
+
+      if (fixedPos === "left") {
+        leftFixed.push(colWithFixed);
+      } else if (fixedPos === "right") {
+        rightFixed.push(colWithFixed);
+      } else {
+        normal.push(colWithFixed);
+      }
+    });
+
+    return [...leftFixed, ...normal, ...rightFixed];
+  }, [fixedColumns]);
+
+  const handleColumnFixChange = (columnKey, checked) => {
+    if (checked) {
+      // Determine default position based on column index
+      const columnIndex = allColumnDefinitions.findIndex(
+        (col) => col.key === columnKey
+      );
+      const isFirstColumn = columnIndex === 0;
+      const isLastColumn = columnIndex === allColumnDefinitions.length - 1;
+
+      let defaultPosition = "left";
+      if (isLastColumn) {
+        defaultPosition = "right";
+      }
+
+      setFixedColumns((prev) => ({ ...prev, [columnKey]: defaultPosition }));
+    } else {
+      const newFixed = { ...fixedColumns };
+      delete newFixed[columnKey];
+      setFixedColumns(newFixed);
+    }
+  };
+
+  const handleColumnPositionChange = (columnKey, position) => {
+    setFixedColumns((prev) => ({ ...prev, [columnKey]: position }));
+  };
+
+  // Filter options
+  const stampingStatusOptions = [
+    { value: "all", label: "All Stamping Status" },
+    { value: "not-processed", label: "Not Processed" },
+    { value: "pending-approval", label: "Pending Approval" },
+    { value: "success", label: "Success" },
+    { value: "failed", label: "Failed" },
+  ];
+
+  const signingStatusOptions = [
+    { value: "all", label: "All Signing Status" },
+    { value: "not-processed", label: "Not Processed" },
+    { value: "success", label: "Success" },
+  ];
+
   const handlePageChange = (newPage, newPageSize) => {
     setPage(newPage);
     if (newPageSize !== pageSize) {
@@ -219,6 +298,160 @@ const InvoiceProcessingTable = ({
       setPage(1);
     }
   };
+
+  // Check if column can have specific position
+  const canFixLeft = (columnIndex) => {
+    return columnIndex !== allColumnDefinitions.length - 1;
+  };
+
+  const canFixRight = (columnIndex) => {
+    return columnIndex !== 0;
+  };
+
+  // Column fixing menu
+  const columnFixMenu = (
+    <div
+      style={{
+        padding: "12px",
+        marginTop: "30px",
+        minWidth: "320px",
+        maxHeight: "500px",
+        overflowY: "auto",
+        border: "1px solid #ddd",
+        borderRadius: "6px",
+        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+        backgroundColor: "#fff",
+      }}
+    >
+      <div
+        style={{
+          marginBottom: "12px",
+          fontWeight: "600",
+          fontSize: "14px",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          color: "#262626",
+        }}
+      >
+        <PushpinOutlined />
+        Fix Columns Position
+      </div>
+      <Divider style={{ margin: "8px 0" }} />
+
+      {allColumnDefinitions.map((col, index) => {
+        const isFixed = !!fixedColumns[col.key];
+        const position = fixedColumns[col.key] || "left";
+        const isFirstColumn = index === 0;
+        const isLastColumn = index === allColumnDefinitions.length - 1;
+
+        return (
+          <div
+            key={col.key}
+            style={{
+              marginBottom: "16px",
+              padding: "12px",
+              backgroundColor: isFixed ? "#f0f5ff" : "#fafafa",
+              borderRadius: "6px",
+              border: isFixed ? "1px solid #d6e4ff" : "1px solid #f0f0f0",
+              transition: "all 0.3s",
+            }}
+          >
+            <div style={{ marginBottom: isFixed ? "8px" : "0" }}>
+              <Checkbox
+                checked={isFixed}
+                onChange={(e) =>
+                  handleColumnFixChange(col.key, e.target.checked)
+                }
+                style={{ fontWeight: "500" }}
+              >
+                {col.title}
+              </Checkbox>
+            </div>
+
+            {isFixed && (
+              <div
+                style={{
+                  marginLeft: "24px",
+                  marginTop: "8px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    marginBottom: "4px",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      color: "#595959",
+                      fontWeight: "500",
+                    }}
+                  >
+                    Position:
+                  </span>
+                  <Radio.Group
+                    value={position}
+                    onChange={(e) =>
+                      handleColumnPositionChange(col.key, e.target.value)
+                    }
+                    size="small"
+                    buttonStyle="solid"
+                    style={{ display: "flex", gap: "6px" }}
+                  >
+                    <Radio.Button value="left" disabled={!canFixLeft(index)}>
+                      Left
+                    </Radio.Button>
+                    <Radio.Button value="right" disabled={!canFixRight(index)}>
+                      Right
+                    </Radio.Button>
+                  </Radio.Group>
+                </div>
+                {(isFirstColumn || isLastColumn) && (
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#8c8c8c",
+                      marginTop: "4px",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    {isFirstColumn && "* First column can only be fixed left"}
+                    {isLastColumn && "* Last column can only be fixed right"}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      <Divider style={{ margin: "12px 0" }} />
+
+      <div
+        style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}
+      >
+        <Button
+          size="small"
+          onClick={() => setFixedColumns({})}
+          style={{ flex: 1 }}
+        >
+          Clear All
+        </Button>
+        <Button
+          size="small"
+          type="primary"
+          onClick={() => setColumnFixDropdownVisible(false)}
+          style={{ flex: 1 }}
+        >
+          Done
+        </Button>
+      </div>
+    </div>
+  );
 
   return (
     <div style={{ width: "100%" }}>
@@ -285,6 +518,29 @@ const InvoiceProcessingTable = ({
                 </Option>
               ))}
             </Select>
+          </Col>
+
+          <Col xs={24} sm={12} lg={6}>
+            <div
+              style={{
+                marginBottom: "8px",
+                fontWeight: "500",
+                color: "transparent",
+              }}
+            >
+              _
+            </div>
+            <Dropdown
+              overlay={columnFixMenu}
+              trigger={["click"]}
+              visible={columnFixDropdownVisible}
+              onVisibleChange={setColumnFixDropdownVisible}
+              placement="bottomRight"
+            >
+              <Button icon={<SettingOutlined />} style={{ width: "100%" }}>
+                Fix Columns ({Object.keys(fixedColumns).length})
+              </Button>
+            </Dropdown>
           </Col>
         </Row>
         <Table
