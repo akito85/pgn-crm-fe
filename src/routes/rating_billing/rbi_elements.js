@@ -42,6 +42,7 @@ import TaxCodeView from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode
 import TaxCodeDetail from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode/TaxCodeDetail";
 import TaxCodeForm from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode/TaxCodeForm";
 import ManagementBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/ManagementBillingInstallmentPage";
+import CreateBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/CreateBillingInstallmentPage";
 
 export const RBI_ELEMENTS = {
   // calculation elements render
@@ -134,5 +135,8 @@ export const RBI_ELEMENTS = {
   // Management Billing Installment
   MANAGEMENT_BILLING_INSTALLMENT_VIEW_ELEMENT: (
     <ManagementBillingInstallmentPage />
+  ),
+  MANAGEMENT_BILLING_INSTALLMENT_CREATE_ELEMENT: (
+    <CreateBillingInstallmentPage />
   ),
 };

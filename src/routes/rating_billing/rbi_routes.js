@@ -91,4 +91,6 @@ export const RBI_ROUTES = {
   // MANAGEMENT BILLING INSTALLMENT
   MANAGEMENT_BILLING_INSTALLMENT_VIEW:
     "/rating-billing/management-billing-installment",
+  MANAGEMENT_BILLING_INSTALLMENT_CREATE:
+    "/rating-billing/management-billing-installment/create",
 };

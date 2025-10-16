@@ -2,7 +2,7 @@ import React from "react";
 
 const BaseContainer = ({ header, subHeader, children, type, element }) => {
   return (
-    <div className="drop-shadow-lg bg-white rounded-lg w-full mt-5">
+    <div className="drop-shadow-lg bg-white rounded-lg w-full my-5">
       {type === "profile" || type === "tab" ? (
         <>
           <div className="p-4">{element}</div>

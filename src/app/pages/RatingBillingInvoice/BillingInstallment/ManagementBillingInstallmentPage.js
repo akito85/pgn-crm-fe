@@ -8,6 +8,7 @@ import {
   EyeOutlined,
   FileTextOutlined,
 } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
@@ -21,6 +22,7 @@ const ManagementBillingInstallmentPage = () => {
   const [statusFilter, setStatusFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+  const navigate = useNavigate();
 
   // Breadcrumbs
   const routes = [
@@ -95,7 +97,7 @@ const ManagementBillingInstallmentPage = () => {
   };
 
   const handleNewRequest = () => {
-    console.log("New installment request");
+    navigate(RBI_ROUTES.MANAGEMENT_BILLING_INSTALLMENT_CREATE);
   };
 
   const handleExport = () => {
