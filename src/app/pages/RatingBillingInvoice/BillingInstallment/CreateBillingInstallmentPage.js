@@ -179,7 +179,6 @@ const CreateInstallmentBillingPage = () => {
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-
         <BaseContainer
           header={
             <p
