@@ -8,7 +8,7 @@ import {
   validateError,
 } from "../general_slice";
 
-const CUSTOM_BASE_URL = "https://fbac1d8e4370.ngrok-free.app";
+const CUSTOM_BASE_URL = process.env.REACT_APP_BASE_URL_NGROK;
 
 const initialState = {
   data: [],
