@@ -1,4 +1,7 @@
 import BillingPage from "../../app/pages/RatingBillingInvoice/Billing/BillingPage";
+import PrabillingPage from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingPage";
+import PrabillingForm from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingForm";
+import PrabillingDetailLog from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingDetailLog";
 import CalculationDetail from "../../app/pages/RatingBillingInvoice/Calculation/Detail/CalculationDetail";
 import CalculationForm from "../../app/pages/RatingBillingInvoice/Calculation/CalculationForm";
 import CalculationPage from "../../app/pages/RatingBillingInvoice/Calculation/CalculationPage";
@@ -43,8 +46,20 @@ import TaxCodeDetail from "../../app/pages/RatingBillingInvoice/MasterData/TaxCo
 import TaxCodeForm from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode/TaxCodeForm";
 import ManagementBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/ManagementBillingInstallmentPage";
 import CreateBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/CreateBillingInstallmentPage";
+import PrabillingDetail from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingDetail";
+import MonitoringCustomerPage from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/MonitoringCustomerPage";
+import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/prabillCustomer/AccountDetailPage";
+
+
 
 export const RBI_ELEMENTS = {
+   // prabilling elements render
+  PRABILLING_VIEW_ELEMENTS: <PrabillingPage />,
+  PRABILLING_CREATE_ELEMENTS: <PrabillingForm type={"create"} />,
+  PRABILLOG_VIEW_ELEMENTS: <PrabillingDetailLog/>,
+  PRABILLING_DETAIL_ELEMENTS: <PrabillingDetail />,
+  PRABILLCUS_DETAIL_ELEMENTS: <AccountDetailPage />,
+
   // calculation elements render
   CALCULATION_VIEW_ELEMENTS: <CalculationPage />,
   CALCULATION_DETAIL_ELEMENTS: <CalculationDetail />,
@@ -56,6 +71,9 @@ export const RBI_ELEMENTS = {
 
   // billing elements render
   BILLING_VIEW_PAGE: <BillingPage />,
+
+  // monitoring usage
+  MONITORING_CUSTOMER_VIEW_ELEMENTS: <MonitoringCustomerPage />,
 
   // monitoring usage
   MONITORING_USAGE_VIEW_ELEMENTS: <MonitoringUsagePage />,
