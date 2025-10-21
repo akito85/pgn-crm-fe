@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, Modal, Spin, Select, DatePicker } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import moment from "moment"; // Changed from dayjs to moment
+import moment from "moment";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -67,7 +67,6 @@ const PrabillingForm = ({ type }) => {
   const formValue = form.getFieldsValue();
 
   const DEFAULT_SEARCH_LIMIT = 50;
-  const FETCH_ALL_LIMIT = 99999;
   const MAX_SEARCH_LENGTH = 50;
 
   const [dataSpecificCustomer, setDataSpecificCustomer] = useState({
@@ -92,8 +91,8 @@ const PrabillingForm = ({ type }) => {
   const [filteredCustomerList, setFilteredCustomerList] = useState([]);
   const searchTimeoutRef = useRef(null);
 
-  const [allCustomersList, setAllCustomersList] = useState([]);
-  const [loadingAllCustomers, setLoadingAllCustomers] = useState(false);
+  const [openWarningPopulate, setOpenWarningPopulate] = useState(false);
+  const [pendingDataFinal, setPendingDataFinal] = useState(null);
 
   useEffect(() => {
     dispatch(getListSor());
@@ -226,21 +225,17 @@ const PrabillingForm = ({ type }) => {
       "scheduleDateTime",
       "remark",
     ];
-    if (defaultData?.costCenter.length > 0) {
+    if (defaultData?.costCenter?.length > 0) {
       tempData = tempData.filter((item) => item !== "costCenter");
     }
-    if (defaultData?.sor.length > 0) {
+    if (defaultData?.sor) {
       tempData = tempData.filter((item) => item !== "sor");
     }
     form.resetFields(tempData);
     setSelectedScheduleType(null);
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
-    setAllCustomersList([]);
   };
-
-  const [openWarningPopulate, setOpenWarningPopulate] = useState(false);
-  const [pendingDataFinal, setPendingDataFinal] = useState(null);
 
   const onFinish = async (formValue) => {
     const tempDataFinal = {
@@ -250,7 +245,7 @@ const PrabillingForm = ({ type }) => {
       sor: formValue?.sor,
       scheduleType: formValue?.type,
       scheduleDateTime: formValue?.scheduleDateTime 
-        ? moment(formValue.scheduleDateTime).format('YYYY-MM-DD HH:mm:ss') // Changed from dayjs to moment
+        ? moment(formValue.scheduleDateTime).format('YYYY-MM-DD HH:mm:ss')
         : null,
       calculationType: formValue?.calculation_type,
       remark: formValue?.remark,
@@ -310,47 +305,9 @@ const PrabillingForm = ({ type }) => {
     }
   };
 
-  const fetchAllCustomers = async () => {
-    setLoadingAllCustomers(true);
-    try {
-      const fetchAllParams = {
-        ...dataSpecificCustomer,
-        search: "",
-        limit: FETCH_ALL_LIMIT,
-      };
-
-      const result = await dispatch(
-        getListSpecificCustomer(fetchAllParams)
-      ).unwrap();
-
-      setAllCustomersList(result || []);
-      return result || [];
-    } catch (error) {
-      console.error("Error fetching all customers:", error);
-      setAllCustomersList([]);
-      return [];
-    } finally {
-      setLoadingAllCustomers(false);
-    }
-  };
-
-  const handleConfirmPopulateAll = async () => {
+  const handleConfirmPopulateAll = () => {
     setOpenWarningPopulate(false);
-
-    const allCustomers = await fetchAllCustomers();
-
-    const updatedDataFinal = {
-      ...pendingDataFinal,
-      rRbiCalculationSpecificCustomer: allCustomers.map((customer) => ({
-        id: null,
-        calCode: null,
-        custNumb: customer.accountNumber,
-      })),
-      fetchedAllCustomers: true,
-      totalCustomersFetched: allCustomers.length,
-    };
-
-    setDataFinal(updatedDataFinal);
+    setDataFinal(pendingDataFinal);
     setOpenModal(true);
   };
 
@@ -380,24 +337,12 @@ const PrabillingForm = ({ type }) => {
       setModalError(true);
       return;
     }
-    let finalSpecificAccounts = [];
 
-    if (dataFinal?.fetchedAllCustomers) {
-      finalSpecificAccounts = (
-        dataFinal?.rRbiCalculationSpecificCustomer || []
-      ).map((item) => item.custNumb);
-    } else {
-      const selectedSpecificAccounts = (
-        dataFinal?.rRbiCalculationSpecificCustomer || []
-      )
-        .filter((item) => item.custNumb)
-        .map((item) => item.custNumb);
-
-      finalSpecificAccounts =
-        selectedSpecificAccounts.length > 0
-          ? selectedSpecificAccounts
-          : (list_specific_customer || []).map((item) => item.accountNumber);
-    }
+    const finalSpecificAccounts = (
+      dataFinal?.rRbiCalculationSpecificCustomer || []
+    )
+      .filter((item) => item.custNumb)
+      .map((item) => item.custNumb);
 
     const tempBody = {
       billingCycle:
@@ -490,7 +435,6 @@ const PrabillingForm = ({ type }) => {
     });
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
-    setAllCustomersList([]);
     form.resetFields(["specificCustomer"]);
   };
 
@@ -506,7 +450,6 @@ const PrabillingForm = ({ type }) => {
     });
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
-    setAllCustomersList([]);
 
     const body = {
       ccIds: (e || []).map((data) => {
@@ -530,7 +473,6 @@ const PrabillingForm = ({ type }) => {
     });
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
-    setAllCustomersList([]);
     form.resetFields(["specificCustomer"]);
   };
 
@@ -545,7 +487,6 @@ const PrabillingForm = ({ type }) => {
     });
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
-    setAllCustomersList([]);
     form.resetFields(["specificCustomer"]);
   };
 
@@ -561,7 +502,6 @@ const PrabillingForm = ({ type }) => {
     });
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
-    setAllCustomersList([]);
 
     if (e && e.length > 0) {
       dispatch(getListAccountGroup(e));
@@ -572,7 +512,6 @@ const PrabillingForm = ({ type }) => {
 
   const handleScheduleTypeChange = (value) => {
     setSelectedScheduleType(value);
-    // Reset scheduleDateTime jika bukan schedule
     const selectedType = list_scheduler_type?.find(item => item.id === value);
     if (selectedType?.name?.toLowerCase() !== 'schedule') {
       form.setFieldValue('scheduleDateTime', null);
@@ -597,7 +536,6 @@ const PrabillingForm = ({ type }) => {
     setSelectedScheduleType(null);
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
-    setAllCustomersList([]);
     setModalSuccess(false);
     setOpenModal(false);
   };
@@ -834,7 +772,6 @@ const PrabillingForm = ({ type }) => {
               />
             </Form.Item>
             
-            {/* Conditional Schedule DateTime Field */}
             {selectedScheduleType && 
              list_scheduler_type?.find(item => item.id === selectedScheduleType)?.name?.toLowerCase() === 'scheduler' && (
               <Form.Item
@@ -853,7 +790,6 @@ const PrabillingForm = ({ type }) => {
                   placeholder="Select date and time"
                   className="w-full"
                   disabledDate={(current) => {
-                    // Changed from dayjs to moment
                     return current && current < moment().startOf('day');
                   }}
                 />
@@ -931,8 +867,7 @@ const PrabillingForm = ({ type }) => {
         isOpen={openWarningPopulate}
         handleCancel={handleCancelPopulateAll}
         handleOk={handleConfirmPopulateAll}
-        width={650}
-        confirmLoading={loadingAllCustomers}
+        width={700}
       >
         <div className="flex flex-col justify-center mt-5 gap-[20px] px-4">
           <div className="flex items-start gap-[20px]">
@@ -952,19 +887,19 @@ const PrabillingForm = ({ type }) => {
               </p>
               <div className="mt-3 p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
                 <p className="text-[14px] font-semibold text-orange-800">
-                  ⚠️ This will fetch and process{" "}
+                  The system will process{" "}
                   <span className="text-[16px] font-bold">ALL customers</span>{" "}
-                  matching your filter criteria
+                  that match your filter criteria
                 </p>
               </div>
 
-              <div className="mt-4 p-3 bg-gray-50 rounded border border-gray-200 max-h-[400px] overflow-y-auto">
+              <div className="mt-4 p-3 bg-gray-50 rounded border border-gray-200 max-h-[300px] overflow-y-auto">
                 <p className="text-[13px] font-semibold text-gray-700 mb-3">
                   Current Filter Criteria:
                 </p>
 
-                <div className="mb-3 pb-3 border-b border-gray-200">
-                  <div className="flex items-start gap-2">
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
                     <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
                       SOR:
                     </span>
@@ -974,11 +909,9 @@ const PrabillingForm = ({ type }) => {
                       )?.name || "All"}
                     </span>
                   </div>
-                </div>
 
-                {pendingDataFinal?.rRbiCalculationCostCenter?.length > 0 && (
-                  <div className="mb-3 pb-3 border-b border-gray-200">
-                    <div className="flex items-start gap-2">
+                  {pendingDataFinal?.rRbiCalculationCostCenter?.length > 0 && (
+                    <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
                       <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
                         Cost Center:
                       </span>
@@ -987,35 +920,13 @@ const PrabillingForm = ({ type }) => {
                           {pendingDataFinal.rRbiCalculationCostCenter.length}{" "}
                           selected
                         </span>
-                        <ul className="mt-2 space-y-1">
-                          {pendingDataFinal.rRbiCalculationCostCenter.map(
-                            (item, idx) => {
-                              const ccName = list_cost_center?.data?.find(
-                                (cc) => cc.id === item.costCenter
-                              )?.name;
-                              return (
-                                <li
-                                  key={idx}
-                                  className="text-[12px] text-gray-600 flex items-start"
-                                >
-                                  <span className="text-blue-500 mr-1">•</span>
-                                  <span>
-                                    {ccName || `ID: ${item.costCenter}`}
-                                  </span>
-                                </li>
-                              );
-                            }
-                          )}
-                        </ul>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {pendingDataFinal?.rRbiCalculationMeterReadingCode?.length >
-                  0 && (
-                  <div className="mb-3 pb-3 border-b border-gray-200">
-                    <div className="flex items-start gap-2">
+                  {pendingDataFinal?.rRbiCalculationMeterReadingCode?.length >
+                    0 && (
+                    <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
                       <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
                         Meter Reading Code:
                       </span>
@@ -1027,40 +938,13 @@ const PrabillingForm = ({ type }) => {
                           }{" "}
                           selected
                         </span>
-                        <ul className="mt-2 space-y-1">
-                          {pendingDataFinal.rRbiCalculationMeterReadingCode.map(
-                            (item, idx) => {
-                              const mergedMrc = list_meter_reading_code?.reduce(
-                                (result, current) =>
-                                  result?.concat(current?.dtoList),
-                                []
-                              );
-                              const mrcName = mergedMrc?.find(
-                                (mrc) => mrc.id === item.mreadingCode
-                              )?.name;
-                              return (
-                                <li
-                                  key={idx}
-                                  className="text-[12px] text-gray-600 flex items-start"
-                                >
-                                  <span className="text-blue-500 mr-1">•</span>
-                                  <span>
-                                    {mrcName || `ID: ${item.mreadingCode}`}
-                                  </span>
-                                </li>
-                              );
-                            }
-                          )}
-                        </ul>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {pendingDataFinal?.rRbiCalculationAccountSegment?.length >
-                  0 && (
-                  <div className="mb-3 pb-3 border-b border-gray-200">
-                    <div className="flex items-start gap-2">
+                  {pendingDataFinal?.rRbiCalculationAccountSegment?.length >
+                    0 && (
+                    <div className="flex items-start gap-2 pb-2 border-b border-gray-200">
                       <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
                         Account Segment:
                       </span>
@@ -1072,36 +956,13 @@ const PrabillingForm = ({ type }) => {
                           }{" "}
                           selected
                         </span>
-                        <ul className="mt-2 space-y-1">
-                          {pendingDataFinal.rRbiCalculationAccountSegment.map(
-                            (item, idx) => {
-                              const segmentName =
-                                list_customer_segment?.Data?.find(
-                                  (seg) => seg.id === item.accSegment
-                                )?.name;
-                              return (
-                                <li
-                                  key={idx}
-                                  className="text-[12px] text-gray-600 flex items-start"
-                                >
-                                  <span className="text-blue-500 mr-1">•</span>
-                                  <span>
-                                    {segmentName || `ID: ${item.accSegment}`}
-                                  </span>
-                                </li>
-                              );
-                            }
-                          )}
-                        </ul>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {pendingDataFinal?.rRbiCalculationAccountGroupType?.length >
-                  0 && (
-                  <div className="mb-3">
-                    <div className="flex items-start gap-2">
+                  {pendingDataFinal?.rRbiCalculationAccountGroupType?.length >
+                    0 && (
+                    <div className="flex items-start gap-2 pb-2">
                       <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
                         Account Group Type:
                       </span>
@@ -1113,51 +974,33 @@ const PrabillingForm = ({ type }) => {
                           }{" "}
                           selected
                         </span>
-                        <ul className="mt-2 space-y-1">
-                          {pendingDataFinal.rRbiCalculationAccountGroupType.map(
-                            (item, idx) => {
-                              const groupName =
-                                list_account_group?.find(
-                                  (group) =>
-                                    group.glb_TYPE_VAL_ID === item.accGroupType
-                                )?.glb_VALUE ||
-                                list_account_group?.find(
-                                  (group) =>
-                                    group.glb_TYPE_VAL_ID === item.accGroupType
-                                )?.name;
-                              return (
-                                <li
-                                  key={idx}
-                                  className="text-[12px] text-gray-600 flex items-start"
-                                >
-                                  <span className="text-blue-500 mr-1">•</span>
-                                  <span>
-                                    {groupName || `ID: ${item.accGroupType}`}
-                                  </span>
-                                </li>
-                              );
-                            }
-                          )}
-                        </ul>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+
+                  {!pendingDataFinal?.rRbiCalculationCostCenter?.length &&
+                    !pendingDataFinal?.rRbiCalculationMeterReadingCode
+                      ?.length &&
+                    !pendingDataFinal?.rRbiCalculationAccountSegment?.length &&
+                    !pendingDataFinal?.rRbiCalculationAccountGroupType
+                      ?.length && (
+                      <div className="text-[13px] text-gray-500 italic">
+                        No additional filters applied - will process all
+                        customers for selected SOR
+                      </div>
+                    )}
+                </div>
               </div>
 
               <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
                 <p className="text-[13px] text-blue-800">
-                  <strong>Note:</strong> When you click "OK", the system will:
+                  <strong>Note:</strong> The backend will automatically populate
+                  all customers matching these criteria for processing.
                 </p>
-                <ol className="text-[13px] text-blue-700 mt-2 ml-4 space-y-1 list-decimal">
-                  <li>Fetch ALL customers from backend (limit: -1)</li>
-                  <li>Display the total count in confirmation modal</li>
-                  <li>Process all fetched customers for prabilling</li>
-                </ol>
               </div>
 
               <p className="text-[14px] text-gray-700 font-medium mt-4">
-                Are you sure you want to continue?
+                Do you want to continue?
               </p>
             </div>
           </div>
@@ -1181,39 +1024,7 @@ const PrabillingForm = ({ type }) => {
           </div>
         }
       >
-        <div className="space-y-4">
-          {dataFinal?.fetchedAllCustomers && (
-            <div className="p-4 bg-green-50 border-l-4 border-green-500 rounded">
-              <div className="flex items-start gap-3">
-                <svg
-                  className="w-5 h-5 text-green-600 mt-0.5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <div>
-                  <p className="text-[14px] font-semibold text-green-800">
-                    All Customers Fetched Successfully
-                  </p>
-                  <p className="text-[13px] text-green-700 mt-1">
-                    Total customers to be processed:{" "}
-                    <span className="font-bold text-[15px]">
-                      {dataFinal?.totalCustomersFetched || 0}
-                    </span>{" "}
-                    accounts
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <FormConfirmation data={dataFinal} />
-        </div>
+        <FormConfirmation data={dataFinal} />
       </ModalCustom>
 
       <Modal

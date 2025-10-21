@@ -4,7 +4,7 @@ import { showModalError, validateError } from "../general_slice";
 import { showModalSuccess } from "../general_slice";
 import axios from "axios";
 
-const BASE_URL = "https://d28a5698909b.ngrok-free.app/api/v1/invoices";
+const BASE_URL = "https://215307f9b9ec.ngrok-free.app/api/v1/invoices";
 
 const initialState = {
   data: [],
