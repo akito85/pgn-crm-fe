@@ -30,7 +30,7 @@ const InvoiceTemplateSectionForm = ({
   statusApproval,
   handleStartDate = () => {},
   handleEndDate = () => {},
-  disableDateProps = false
+  disableDateProps = false,
 }) => {
   // Selector
   const {
@@ -133,7 +133,8 @@ const InvoiceTemplateSectionForm = ({
             ]}
           >
             <InputComponent
-              disabled={type !== "create" && status !== "DRAFT" ? true : false} maxLength={100}
+              disabled={type !== "create" && status !== "DRAFT" ? true : false}
+              maxLength={100}
             />
           </Form.Item>
 
@@ -213,7 +214,11 @@ const InvoiceTemplateSectionForm = ({
             <DateComponent
               dateDisable={disabledDate}
               onChange={(e) => handleStartDate(e)}
-              disabled={status !== "DRAFT" && type !== "create" || disableDateProps ? true : false}
+              disabled={
+                (status !== "DRAFT" && type !== "create") || disableDateProps
+                  ? true
+                  : false
+              }
             />
           </Form.Item>
 
@@ -226,7 +231,7 @@ const InvoiceTemplateSectionForm = ({
                   (value && moment(startDate) <= moment(value)) || !value
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error("End date must before Start date")
+                        new Error("End date must before Start date"),
                       ),
               },
             ]}

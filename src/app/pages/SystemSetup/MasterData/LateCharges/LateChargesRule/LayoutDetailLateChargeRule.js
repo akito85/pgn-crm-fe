@@ -97,7 +97,7 @@ const LayoutDetailLateChargeRule = ({
       </BaseContainer> */}
       <BaseContainer header={"HISTORY LOG INFORMATION"}>
         <div className="grid grid-cols-5 w-full">
-          <DetailText label={'Record ID'}>
+          <DetailText label={"Record ID"}>
             {dataLogInformation?.lateChargeRuleId}
           </DetailText>
           <DetailText label={"Created Date"}>

@@ -28,7 +28,7 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 const BillingBucketView = () => {
   // Selector
   const { data, loading, data_approval_history } = useSelector(
-    (state) => state.billing_bucket
+    (state) => state.billing_bucket,
   );
 
   // Declaration
@@ -54,7 +54,12 @@ const BillingBucketView = () => {
   // Use Effect
   useEffect(() => {
     dispatch(
-      getAllBillingBucketPaginate({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort })
+      getAllBillingBucketPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
     );
   }, [search, sort, page, pageSize, dispatch]);
 
@@ -172,7 +177,7 @@ const BillingBucketView = () => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -225,7 +230,7 @@ const BillingBucketView = () => {
         pageSize,
         sort,
         search: tempSearch,
-      })
+      }),
     );
   };
 
@@ -285,11 +290,22 @@ const BillingBucketView = () => {
         const linkContent =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={isEditable ? "#0075bf" : "#8D91A0"} width={24} />}
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={24}
+                />
+              }
               border={false}
               disabled={!isEditable}
             >
-              <span className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"}`}> Update</span>
+              <span
+                className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"}`}
+              >
+                {" "}
+                Update
+              </span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
@@ -401,7 +417,6 @@ const BillingBucketView = () => {
         return Content;
       },
     },
-
   ];
 
   return (
@@ -425,11 +440,11 @@ const BillingBucketView = () => {
                   searchInput,
                   searchedColumn,
                   searchText,
-                  handleSearch
+                  handleSearch,
                 ),
                 ...useColumnActionPermission(
                   ["view", "activate", "update", "history"],
-                  itemGrantAccess
+                  itemGrantAccess,
                 ),
               ]}
               current={page}
@@ -460,8 +475,9 @@ const BillingBucketView = () => {
           dispatch={dispatch}
           getAPIOption={getListApprovalHierarchy}
           getAPIDetail={getListApprovalHierarchyDetail}
-          alertMessage={`Are you sure you want to inactivate this Billing Bucket with name ${chooseId?.billingBucketCode || ""
-            }?`}
+          alertMessage={`Are you sure you want to inactivate this Billing Bucket with name ${
+            chooseId?.billingBucketCode || ""
+          }?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}

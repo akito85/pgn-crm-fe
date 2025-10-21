@@ -1,9 +1,9 @@
-import React,{ useState, useEffect, useRef } from 'react'
-import GridLayout from '../../../../../../../../components/GridLayout'
-import DetailText from '../../../../../../../../components/DetailText'
-import TablePagination from '../../../../../../../../components/TablePagination';
+import React, { useState, useEffect, useRef } from "react";
+import GridLayout from "../../../../../../../../components/GridLayout";
+import DetailText from "../../../../../../../../components/DetailText";
+import TablePagination from "../../../../../../../../components/TablePagination";
 
-const LateCharge = ({data}) => {
+const LateCharge = ({ data }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -15,28 +15,30 @@ const LateCharge = ({data}) => {
   const [dataTableLateCharge, setDataTableLateCharge] = useState([]);
 
   useEffect(() => {
-    if(data?.saLateCharge || data?.saLateCharge !== null){
-      const dataArrayLateCharge = Object.keys(data?.saLateCharge).map(key => data?.saLateCharge[key]);
-      let filteredDataLateCharge = dataArrayLateCharge.filter(item => item !== null);
-      filteredDataLateCharge.map(item=>{
-        return{
+    if (data?.saLateCharge || data?.saLateCharge !== null) {
+      const dataArrayLateCharge = Object.keys(data?.saLateCharge).map(
+        (key) => data?.saLateCharge[key],
+      );
+      let filteredDataLateCharge = dataArrayLateCharge.filter(
+        (item) => item !== null,
+      );
+      filteredDataLateCharge.map((item) => {
+        return {
           ...item,
-          maxAmount: item.maxAmount !== null ? item.maxAmount : ''
-        }
-      })
-      
-      
-      setDataTableLateCharge(filteredDataLateCharge)
-    }else{
-      setDataTableLateCharge([])
+          maxAmount: item.maxAmount !== null ? item.maxAmount : "",
+        };
+      });
+
+      setDataTableLateCharge(filteredDataLateCharge);
+    } else {
+      setDataTableLateCharge([]);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    setTotalElement(dataTableLateCharge?.length)
-  }, [dataTableLateCharge])
-  
-  
+    setTotalElement(dataTableLateCharge?.length);
+  }, [dataTableLateCharge]);
+
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
@@ -123,7 +125,7 @@ const LateCharge = ({data}) => {
         dataIndex: "maxAmount",
         width: 150,
         sorter: true,
-        align: 'right'
+        align: "right",
         // ...getColumnSearchProps("unit"),
       },
       {
@@ -134,9 +136,9 @@ const LateCharge = ({data}) => {
         // ...getColumnSearchProps("unit"),
       },
     ];
-    return result
-  }
-  
+    return result;
+  };
+
   return (
     <div>
       <div className={"w-full py-6"}>
@@ -144,7 +146,7 @@ const LateCharge = ({data}) => {
           pageSize={pageSize}
           current={page}
           dataSource={filterDataByPage()}
-          tableScrolled={{y: 525, x: 1500 }}
+          tableScrolled={{ y: 525, x: 1500 }}
           totalData={totalElement}
           onChange={handleChangeSize}
           onSort={onSort}
@@ -159,7 +161,7 @@ const LateCharge = ({data}) => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LateCharge
+export default LateCharge;

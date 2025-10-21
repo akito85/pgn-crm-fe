@@ -42,7 +42,7 @@ const ProductSectionForm = ({
   const disabledDate = (current) => {
     return false;
   };
-  
+
   return (
     <div className="grid grid-cols-3 w-full gap-3">
       <Form.Item

@@ -12,7 +12,7 @@ const ModalConfirmationLoginBackground = ({
   handleConfirm = () => {},
   type,
 }) => {
-console.log(type);
+  console.log(type);
   return (
     <ModalCustom
       isOpen={isOpen}

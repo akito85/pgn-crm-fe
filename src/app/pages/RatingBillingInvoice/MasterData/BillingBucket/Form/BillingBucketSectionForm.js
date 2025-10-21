@@ -26,18 +26,18 @@ const BillingBucketSectionForm = ({
   startDate,
   endDate,
   listDataBI = [],
-  setListDataBI = () => { },
-  handleStartDate = () => { },
-  handleEndDate = () => { },
+  setListDataBI = () => {},
+  handleStartDate = () => {},
+  handleEndDate = () => {},
   priority,
   setPriority,
   status,
   statusApproval,
-  disabledDate = false
+  disabledDate = false,
 }) => {
   // Selector
   const { data_priority_period, data_criteria } = useSelector(
-    (state) => state.billing_bucket
+    (state) => state.billing_bucket,
   );
 
   // Declaration
@@ -137,7 +137,8 @@ const BillingBucketSectionForm = ({
             ]}
           >
             <InputComponent
-              disabled={status !== "DRAFT" && type === "update" ? true : false} maxLength={100}
+              disabled={status !== "DRAFT" && type === "update" ? true : false}
+              maxLength={100}
             />
           </Form.Item>
 
@@ -152,7 +153,8 @@ const BillingBucketSectionForm = ({
             ]}
           >
             <InputComponent
-              disabled={status !== "DRAFT" && type === "update" ? true : false} maxLength={100}
+              disabled={status !== "DRAFT" && type === "update" ? true : false}
+              maxLength={100}
             />
           </Form.Item>
 
@@ -181,12 +183,16 @@ const BillingBucketSectionForm = ({
             rules={[
               { required: true, message: "Please input your Start Date!" },
             ]}
-          // getValueFromEvent={handleStartDate}
+            // getValueFromEvent={handleStartDate}
           >
             <DateComponent
               onChange={(e) => handleStartDate(e)}
               dateDisable={disabledStartDate}
-              disabled={(status !== "DRAFT" && type === "update" ) || disabledDate ? true : false}
+              disabled={
+                (status !== "DRAFT" && type === "update") || disabledDate
+                  ? true
+                  : false
+              }
             />
           </Form.Item>
 
@@ -199,8 +205,8 @@ const BillingBucketSectionForm = ({
                   (value && moment(startDate) <= moment(value)) || !value
                     ? Promise.resolve()
                     : Promise.reject(
-                      new Error("End date must before Start date")
-                    ),
+                        new Error("End date must before Start date"),
+                      ),
               },
             ]}
           >

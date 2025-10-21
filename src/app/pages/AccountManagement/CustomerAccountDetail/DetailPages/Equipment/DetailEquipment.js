@@ -32,8 +32,12 @@ const DetailEquipment = ({ isOpen, setIsOpen, dataDetail }) => {
           <DetailText label="Name">{dataDetail?.name}</DetailText>
           <DetailText label="Type">{dataDetail?.typeEquipment}</DetailText>
           <DetailText label="Merk">{dataDetail?.brand}</DetailText>
-          <DetailText label="Quantity">{dataDetail?.qty} {dataDetail?.qtyUom}</DetailText>
-          <DetailText label="Capacity">{dataDetail?.cap} {dataDetail?.capUom}</DetailText>
+          <DetailText label="Quantity">
+            {dataDetail?.qty} {dataDetail?.qtyUom}
+          </DetailText>
+          <DetailText label="Capacity">
+            {dataDetail?.cap} {dataDetail?.capUom}
+          </DetailText>
           <DetailText label="Energy Consumption">
             {dataDetail?.con} {dataDetail?.conUom}
           </DetailText>

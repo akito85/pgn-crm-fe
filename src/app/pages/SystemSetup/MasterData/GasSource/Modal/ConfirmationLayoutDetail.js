@@ -39,7 +39,9 @@ const ConfirmationLayoutDetail = ({
         </span>
 
         <div className="w-full grid grid-cols-3 gap-5 pt-[30px]">
-          <DetailText label="Document Number">{data?.documentNumber}</DetailText>
+          <DetailText label="Document Number">
+            {data?.documentNumber}
+          </DetailText>
           <DetailText label="Start Date">
             {data?.startDate
               ? moment(data.startDate).format(dateFormatting.date)

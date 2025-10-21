@@ -23,7 +23,7 @@ export const columnAttachmentData = (
   handleSearch = () => {},
   handleDelete = () => {},
   type,
-  handleShow
+  handleShow,
 ) => {
   const res = [
     {
@@ -42,7 +42,7 @@ export const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -57,7 +57,7 @@ export const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (filename) => (
         <Tooltip placement="topLeft" title={filename}>
@@ -74,7 +74,7 @@ export const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -86,7 +86,7 @@ export const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -99,7 +99,7 @@ export const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -138,13 +138,13 @@ export const columnAttachmentData = (
       (column) =>
         column.dataIndex !== "uploadBy" &&
         column.dataIndex !== "uploadDate" &&
-        column.title !== "ACTION"
+        column.title !== "ACTION",
     );
   }
   return type !== "detail"
     ? res.filter(
         (column) =>
-          column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate"
+          column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate",
       )
     : res;
 };
@@ -157,7 +157,9 @@ const AttachmentForm = ({
   dispatch = () => {},
 }) => {
   // Selector
-  const { data_categoryAttachment } = useSelector((state) => state[typeSelector]);
+  const { data_categoryAttachment } = useSelector(
+    (state) => state[typeSelector],
+  );
   const { dataGlobalPropAttachment } = useSelector((state) => state.product);
   // Declaration
   const searchInput = useRef(null);
@@ -180,7 +182,7 @@ const AttachmentForm = ({
   }, [data]);
 
   useEffect(() => {
-    dispatch(getCategoryAttachment())
+    dispatch(getCategoryAttachment());
   }, []);
 
   useEffect(() => {
@@ -277,7 +279,7 @@ const AttachmentForm = ({
         {
           headers: tokenHeader(),
           responseType: "blob",
-        }
+        },
       );
       const base64 = await getBase64(response.data);
       setLoadingDownload(false);
@@ -295,11 +297,11 @@ const AttachmentForm = ({
           <div className="flex flex-col w-full gap-2">
             <p className="text-[13px] mb-0 text-dg-grey-dark">
               Attach File:
-              {(
+              {
                 <span className={"pl-1"} style={{ color: "red" }}>
                   *
                 </span>
-              )}
+              }
             </p>
             <div className="flex flex-row gap-2 items-center">
               <ButtonComponent
@@ -330,7 +332,7 @@ const AttachmentForm = ({
             handleSearch,
             handleDelete,
             type,
-            handleShow
+            handleShow,
           )}
           onSort={onSort}
         />

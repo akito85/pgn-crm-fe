@@ -1,10 +1,7 @@
-import React,{useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../components/TablePagination'
+import React, { useState, useEffect, useRef } from "react";
+import TablePagination from "../../../../../../../../components/TablePagination";
 
-const TableLateCharge = ({
-  dataTableLateCharge,
-  setDataTableLateCharge
-}) => {
+const TableLateCharge = ({ dataTableLateCharge, setDataTableLateCharge }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -15,10 +12,9 @@ const TableLateCharge = ({
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    setTotalElement(dataTableLateCharge?.length)
-  }, [])
-  
-  
+    setTotalElement(dataTableLateCharge?.length);
+  }, []);
+
   // const columns =[
   //   {
   //     title: "NO",
@@ -121,7 +117,7 @@ const TableLateCharge = ({
     searchText = "",
     handleSearch = () => {},
   }) => {
-    const result =[
+    const result = [
       {
         title: "NO",
         align: "center",
@@ -161,17 +157,17 @@ const TableLateCharge = ({
         dataIndex: "description",
         // ...getColumnSearchProps("segment"),
       },
-    ]
-    return result
-  }
+    ];
+    return result;
+  };
 
   return (
     <div>
-      <TablePagination 
+      <TablePagination
         pageSize={pageSize}
         current={page}
         dataSource={filterDataByPage()}
-        tableScrolled={{y: 525, x: 1500 }}
+        tableScrolled={{ y: 525, x: 1500 }}
         totalData={totalElement}
         onChange={handleChangeSize}
         onSort={onSort}
@@ -185,7 +181,7 @@ const TableLateCharge = ({
         })}
       />
     </div>
-  )
-}
+  );
+};
 
-export default TableLateCharge
+export default TableLateCharge;

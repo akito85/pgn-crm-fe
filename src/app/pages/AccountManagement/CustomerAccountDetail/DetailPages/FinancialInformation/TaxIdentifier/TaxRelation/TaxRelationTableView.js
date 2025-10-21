@@ -12,11 +12,15 @@ import Highlighter from "react-highlight-words";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import { useColumnActionPermissionAccount } from "../../../../../ComponentAccount/ColumnActionPermissionAccount";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../../utils/getColumnSearchProps";
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../../../utils";
 
 const TaxRelationTableView = ({
   data = [],
-  handleModalInactive = () => { },
+  handleModalInactive = () => {},
   handleChange = {},
   handleChangeSize = {},
   totalElement = {},
@@ -27,9 +31,9 @@ const TaxRelationTableView = ({
   searchedColumn,
   search,
   searchInput,
-  handleSearch = () => { },
+  handleSearch = () => {},
   setTaxRelationName,
-  access
+  access,
 }) => {
   //useState
   const [modalDetail, setModalDetail] = useState();
@@ -67,9 +71,18 @@ const TaxRelationTableView = ({
         searchText,
         handleSearch,
         true,
-        'input',
+        "input",
       ),
-      render: (text) => renderColumn('accountNumber', hasValue(search['accountNumber']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "accountNumber",
+          hasValue(search["accountNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACCOUNT NAME",
@@ -84,9 +97,18 @@ const TaxRelationTableView = ({
         searchText,
         handleSearch,
         true,
-        'input',
+        "input",
       ),
-      render: (text) => renderColumn('accountName', hasValue(search['accountName']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "accountName",
+          hasValue(search["accountName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "TAX IDENTIFIER NUMBER",
@@ -102,9 +124,18 @@ const TaxRelationTableView = ({
         searchText,
         handleSearch,
         true,
-        'input',
+        "input",
       ),
-      render: (text) => renderColumn('taxIdentifierNumber', hasValue(search['taxIdentifierNumber']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "taxIdentifierNumber",
+          hasValue(search["taxIdentifierNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "TAX IDENTIFIER ADDRESS",
@@ -120,12 +151,21 @@ const TaxRelationTableView = ({
         searchText,
         handleSearch,
         true,
-        'input',
+        "input",
       ),
       ellipsis: {
         showTitle: true,
       },
-      render: (text) => renderColumn('taxIdentifierAddressValue', hasValue(search['taxIdentifierAddressValue']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "taxIdentifierAddressValue",
+          hasValue(search["taxIdentifierAddressValue"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "START DATE",
@@ -143,7 +183,15 @@ const TaxRelationTableView = ({
         true,
         "date",
       ),
-      render: (text) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "startDate",
+          hasValue(search["startDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "END DATE",
@@ -161,7 +209,15 @@ const TaxRelationTableView = ({
         true,
         "date",
       ),
-      render: (text) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "endDate",
+          hasValue(search["endDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -177,12 +233,21 @@ const TaxRelationTableView = ({
         searchText,
         handleSearch,
         true,
-        'input',
+        "input",
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('description', hasValue(search['description']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          hasValue(search["description"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -198,9 +263,18 @@ const TaxRelationTableView = ({
         searchText,
         handleSearch,
         true,
-        'input',
+        "input",
       ),
-      render: (text) => renderColumn('status', hasValue(search['status']), searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          hasValue(search["status"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
     // {
     //   title: "ACTION",
@@ -263,8 +337,8 @@ const TaxRelationTableView = ({
               />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
 
     {
@@ -272,22 +346,24 @@ const TaxRelationTableView = ({
       type: "table",
       render: (record, data) => {
         return (
-          <Tooltip title={`${record.status === "ACTIVE" ? "Activate" : "Inactivate"}`}>
+          <Tooltip
+            title={`${record.status === "ACTIVE" ? "Activate" : "Inactivate"}`}
+          >
             <div className="pt-1">
               <Checkbox
                 onClick={() => {
                   handleModalInactive(true, record);
-                  setTaxRelationName(record.accountName)
+                  setTaxRelationName(record.accountName);
                 }}
                 disabled={record.status === "INACTIVE" ? true : false}
                 checked={record.status === "INACTIVE" ? true : false}
               ></Checkbox>
             </div>
           </Tooltip>
-        )
-      }
-    }
-  ]
+        );
+      },
+    },
+  ];
 
   return (
     <Fragment>
@@ -305,7 +381,7 @@ const TaxRelationTableView = ({
           ...useColumnActionPermissionAccount(
             ["Activate", "View", "Update"],
             itemActions,
-            access
+            access,
           ),
         ]}
       />

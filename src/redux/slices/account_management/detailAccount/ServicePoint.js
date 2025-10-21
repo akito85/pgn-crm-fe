@@ -26,7 +26,7 @@ export const getDetailServicePoint = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAssetAssignment = createAsyncThunk(
@@ -39,23 +39,23 @@ export const getAssetAssignment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // ASSET
 export const getChooseAsset = createAsyncThunk(
   "GET_CHOOSE_ASSET",
-  async ({ page, pageSize, sort, search },thunkAPI) => {
+  async ({ page, pageSize, sort, search }, thunkAPI) => {
     try {
       const sortParams =
-      sort === undefined || sort === "" ? "createdDate~desc" : sort;
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/premise/servicePoint/assets/choose?searchs=${search}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const createAsset = createAsyncThunk(
@@ -83,7 +83,7 @@ export const createAsset = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const checkSerialAsset = createAsyncThunk(
@@ -91,7 +91,10 @@ export const checkSerialAsset = createAsyncThunk(
   async (body, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/premise/servicePoint/assets/serialnumber-brand`;
-      const response = await accountManagementService.activationWithRemark(url, body);
+      const response = await accountManagementService.activationWithRemark(
+        url,
+        body,
+      );
       return response;
     } catch (error) {
       const message =
@@ -111,7 +114,7 @@ export const checkSerialAsset = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const inActiveAsset = createAsyncThunk(
@@ -145,7 +148,7 @@ export const inActiveAsset = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 //global type
@@ -159,7 +162,7 @@ export const getGlobalTypeListAssetName = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getGlobalTypeListType = createAsyncThunk(
@@ -172,7 +175,7 @@ export const getGlobalTypeListType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getGlobalTypeListBrand = createAsyncThunk(
@@ -185,10 +188,10 @@ export const getGlobalTypeListBrand = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
-export const getGlobalListServiceType= createAsyncThunk(
+export const getGlobalListServiceType = createAsyncThunk(
   "GET_GLOBAL_TYPE_LIST_SERVICE_TYPE",
   async (thunkAPI) => {
     try {
@@ -198,10 +201,10 @@ export const getGlobalListServiceType= createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
-export const getGlobalListGsize= createAsyncThunk(
+export const getGlobalListGsize = createAsyncThunk(
   "GET_GLOBAL_TYPE_LIST_GSIZE",
   async (thunkAPI) => {
     try {
@@ -211,7 +214,7 @@ export const getGlobalListGsize= createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getGlobalListProductName = createAsyncThunk(
@@ -224,10 +227,10 @@ export const getGlobalListProductName = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
-export const getGlobalListAnsi= createAsyncThunk(
+export const getGlobalListAnsi = createAsyncThunk(
   "GET_GLOBAL_TYPE_LIST_ANSI",
   async (thunkAPI) => {
     try {
@@ -237,7 +240,7 @@ export const getGlobalListAnsi= createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const servicePointSlice = createSlice({

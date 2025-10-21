@@ -10,7 +10,7 @@ const getColumnSearchProps = (
   handleSearch,
   excludeRender = false,
   onFilter = (value, record) =>
-    record[dataIndex]?.toString()?.toLowerCase()?.includes(value.toLowerCase())
+    record[dataIndex]?.toString()?.toLowerCase()?.includes(value.toLowerCase()),
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
@@ -90,7 +90,7 @@ export const columnsTableCriteriaTOS = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
 ) => [
   {
     title: "ACCOUNT CATEGORY",
@@ -108,7 +108,7 @@ export const columnsTableCriteriaTOS = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -127,7 +127,7 @@ export const columnsTableCriteriaTOS = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -146,7 +146,7 @@ export const columnsTableCriteriaTOS = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -166,7 +166,7 @@ export const columnsTableCriteriaTOS = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -185,7 +185,7 @@ export const columnsTableCriteriaTOS = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -204,7 +204,7 @@ export const columnsTableCriteriaTOS = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -223,7 +223,7 @@ export const columnsTableCriteriaTOS = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -242,7 +242,7 @@ export const columnsTableCriteriaTOS = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -261,7 +261,7 @@ export const columnsTableCriteriaTOS = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -281,7 +281,7 @@ export const columnsTableCriteriaTOS = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -301,7 +301,7 @@ export const columnsTableCriteriaTOS = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -321,7 +321,7 @@ export const columnsTableCriteriaTOS = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -340,7 +340,7 @@ export const columnsTableCriteriaTOS = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -359,7 +359,7 @@ export const columnsTableCriteriaTOS = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -378,7 +378,7 @@ export const columnsTableCriteriaTOS = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
 ];

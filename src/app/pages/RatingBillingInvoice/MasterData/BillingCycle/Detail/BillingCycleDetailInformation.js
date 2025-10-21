@@ -56,7 +56,7 @@ const BillingCycleDetailInformation = ({
         pageSize: 10,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
-      })
+      }),
     );
   }, [id, dispatch]);
 
@@ -99,7 +99,7 @@ const BillingCycleDetailInformation = ({
         id: chooseId,
         isOpen: isOpen,
         remark: res.remark,
-      })
+      }),
     )
       .unwrap()
       .then(() => {
@@ -107,7 +107,13 @@ const BillingCycleDetailInformation = ({
         setRemark("");
         form.resetFields();
         dispatch(
-          getBillingPeriodList({ id: id, search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize })
+          getBillingPeriodList({
+            id: id,
+            search: encodeURIComponent(JSON.stringify(search)),
+            sort,
+            page,
+            pageSize,
+          }),
         );
       })
       .catch(() => {
@@ -129,8 +135,8 @@ const BillingCycleDetailInformation = ({
   };
 
   const handleDetail = (id) => {
-    if(id){
-      setIdDetailPeriod(id)
+    if (id) {
+      setIdDetailPeriod(id);
       dispatch(getDetailPeriod(id));
       // dispatch(
       //   getHistoryPeriod({
@@ -196,7 +202,10 @@ const BillingCycleDetailInformation = ({
                 {data?.statusApproval}
               </DetailText>
               <div className="col-span-4">
-                <DetailText label="Description" classTextAdditional={'break-words'}>
+                <DetailText
+                  label="Description"
+                  classTextAdditional={"break-words"}
+                >
                   {data?.description || ""}
                 </DetailText>
               </div>
@@ -220,7 +229,7 @@ const BillingCycleDetailInformation = ({
                 searchInput,
                 searchedColumn,
                 searchText,
-                handleSearch
+                handleSearch,
               )}
               showCreateButton={
                 action === "ACTIVE" && statusApproval === "APPROVED"

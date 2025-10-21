@@ -5,7 +5,10 @@ import { useDispatch, useSelector } from "react-redux";
 
 import BaseContainer from "../../../../../../components/BaseContainer";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValue,
+} from "../../../../../../utils/getColumnSearchProps";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import DetailEquipment from "./DetailEquipment";
@@ -44,7 +47,7 @@ const columns = (
   setModalCreateUpdate,
   setIdEquipment,
   dispatch,
-  handleDelete
+  handleDelete,
 ) => {
   return [
     {
@@ -63,10 +66,18 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn("name", hasValue(search['name']), searchText, text,false, 'input', search),
-
+      render: (text) =>
+        renderColumn(
+          "name",
+          hasValue(search["name"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "TYPE",
@@ -78,9 +89,18 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn("typeEquipment", hasValue(search['typeEquipment']), searchText, text, false, 'input', search),
+      render: (text) =>
+        renderColumn(
+          "typeEquipment",
+          hasValue(search["typeEquipment"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "BRAND",
@@ -92,9 +112,18 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn("brand", hasValue(search['brand']), searchText, text, false, 'input', search),
+      render: (text) =>
+        renderColumn(
+          "brand",
+          hasValue(search["brand"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "QUANTITY",
@@ -107,9 +136,18 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn("qtyValue", hasValue(search['qtyValue']), searchText, text, false, 'input', search),
+      render: (text) =>
+        renderColumn(
+          "qtyValue",
+          hasValue(search["qtyValue"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "CAPACITY",
@@ -122,9 +160,18 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn("capValue", hasValue(search['capValue']), searchText, text, false, 'input', search),
+      render: (text) =>
+        renderColumn(
+          "capValue",
+          hasValue(search["capValue"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ENERGY CONSUMPTION",
@@ -137,9 +184,18 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn("conValue", hasValue(search['conValue']), searchText, text, false, 'input', search),
+      render: (text) =>
+        renderColumn(
+          "conValue",
+          hasValue(search["conValue"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "GAS CONVERSION/MONTH",
@@ -152,9 +208,18 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn("gasConvValue", hasValue(search['gasConvValue']), searchText, text, false, 'input', search),
+      render: (text) =>
+        renderColumn(
+          "gasConvValue",
+          hasValue(search["gasConvValue"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "OPERATIOIN HOURS/DAY",
@@ -167,9 +232,18 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn("noh", hasValue(search['noh']), searchText, text, false, 'input', search),
+      render: (text) =>
+        renderColumn(
+          "noh",
+          hasValue(search["noh"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "OPERATIOIN DAYS/WEEK",
@@ -182,9 +256,18 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn("nod", hasValue(search['nod']), searchText, text, false, 'input', search),
+      render: (text) =>
+        renderColumn(
+          "nod",
+          hasValue(search["nod"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DUAL FUEL",
@@ -196,9 +279,18 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn("isDualFuel", hasValue(search['isDualFuel']), searchText, text, false, 'input', search),
+      render: (text) =>
+        renderColumn(
+          "isDualFuel",
+          hasValue(search["isDualFuel"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "FUEL TYPE 1",
@@ -210,9 +302,18 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn("fuelType1", hasValue(search['fuelType1']), searchText, text, false, 'input', search),
+      render: (text) =>
+        renderColumn(
+          "fuelType1",
+          hasValue(search["fuelType1"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "FUEL TYPE 2",
@@ -224,9 +325,18 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn("fuelType2", hasValue(search['fuelType2']), searchText, text, false, 'input', search),
+      render: (text) =>
+        renderColumn(
+          "fuelType2",
+          hasValue(search["fuelType2"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -238,9 +348,18 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn("description", hasValue(search['description']), searchText, text, false, 'input', search),
+      render: (text) =>
+        renderColumn(
+          "description",
+          hasValue(search["description"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
   ];
 };
@@ -248,11 +367,9 @@ const columns = (
 const EquipmentPage = ({ idAccount, idCustomer }) => {
   const dispatch = useDispatch();
   const { data, loading, data_detail } = useSelector(
-    (state) => state.accountEquipment
+    (state) => state.accountEquipment,
   );
-  const { access_account } = useSelector(
-    (state) => state.accountManagement
-  );
+  const { access_account } = useSelector((state) => state.accountManagement);
   const [form] = Form.useForm();
 
   const [page, setPage] = useState(1);
@@ -273,12 +390,20 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
   const location = useLocation();
 
   useEffect(() => {
-    if(location?.pathname.includes('account-standard')) {
-      dispatch(getGrantedAccessAccount('/account-management/account-standard/equipment'))
-    }else{
-      dispatch(getGrantedAccessAccount('/account-management/account-onetime/equipment'))
+    if (location?.pathname.includes("account-standard")) {
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-standard/equipment",
+        ),
+      );
+    } else {
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-onetime/equipment",
+        ),
+      );
     }
-  }, [dispatch])
+  }, [dispatch]);
 
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
@@ -289,7 +414,7 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
         sort,
         page,
         pageSize,
-      })
+      }),
     );
   }, [idAccount, search, page, pageSize, sort, dispatch]);
 
@@ -321,26 +446,26 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
 
   const handleSave = () => {
     dispatch(createEqupment(body?.body))
-    .unwrap()
-    .then(() => {
-      form.resetFields();
-      setOpenConfirmation(false);
-      const reqSearch = encodeURIComponent(JSON.stringify(search));
-      dispatch(
-        getListEqupment({
-          id: idAccount,
-          search: reqSearch,
-          sort,
-          page,
-          pageSize,
-        })
-      );
-    })  
-    .catch((err) => {
-      console.log(err)
-      return;
-    });
-}
+      .unwrap()
+      .then(() => {
+        form.resetFields();
+        setOpenConfirmation(false);
+        const reqSearch = encodeURIComponent(JSON.stringify(search));
+        dispatch(
+          getListEqupment({
+            id: idAccount,
+            search: reqSearch,
+            sort,
+            page,
+            pageSize,
+          }),
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+        return;
+      });
+  };
   const handleDetail = async (r) => {
     setModalDetail(true);
     dispatch(getDetailEquipment({ id: r?.id }));
@@ -349,39 +474,39 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
   const handleDelete = (id) => {
     setOpenModalDelete(true);
     setIdEquipment(id);
-  }
+  };
   const handleConfirmModalDelete = () => {
     setOpenModalDelete(false);
     dispatch(deleteEquipment({ id: idEquipment }))
-    .unwrap()
-    .then(() => {
-      form.resetFields();
-      setOpenConfirmation(false);
-      const reqSearch = encodeURIComponent(JSON.stringify(search));
-      dispatch(
-        getListEqupment({
-          id: idAccount,
-          search: reqSearch,
-          sort,
-          page,
-          pageSize,
-        })
-      );
-    })  
-    .catch((err) => {
-      console.log(err)
-      return;
-    });
+      .unwrap()
+      .then(() => {
+        form.resetFields();
+        setOpenConfirmation(false);
+        const reqSearch = encodeURIComponent(JSON.stringify(search));
+        dispatch(
+          getListEqupment({
+            id: idAccount,
+            search: reqSearch,
+            sort,
+            page,
+            pageSize,
+          }),
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+        return;
+      });
   };
   const handleCloseModalDelete = () => {
     setOpenModalDelete(false);
     setIdEquipment("");
-  };  
+  };
 
   const itemActions = [
     //action toolbar
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <ButtonComponent
           icon={<PlusOutlined style={{ fontSize: "24px" }} />}
@@ -393,7 +518,7 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
         >
           Create
         </ButtonComponent>
-      )
+      ),
     },
 
     // Column Action Table
@@ -414,8 +539,8 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
               />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
       action: "Update",
@@ -436,8 +561,8 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
               />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
       action: "Hapus",
@@ -453,8 +578,8 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
               />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
   ];
   return (
@@ -462,7 +587,10 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
       <Spin spinning={loading}>
         <BaseContainer header={"Equipment List"}>
           <div className="flex w-full justify-end gap-3 mb-5">
-            <ToolbarAccount items={itemActions} advancedAccess={access_account} />
+            <ToolbarAccount
+              items={itemActions}
+              advancedAccess={access_account}
+            />
           </div>
           <TablePaginationNew
             dataSource={data?.result}
@@ -487,13 +615,13 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
                 setModalCreateUpdate,
                 setIdEquipment,
                 dispatch,
-                handleDelete
+                handleDelete,
               ),
               ...useColumnActionPermissionAccount(
                 ["View", "Update", "Hapus"],
                 itemActions,
-                access_account
-              )
+                access_account,
+              ),
             ]}
           />
         </BaseContainer>

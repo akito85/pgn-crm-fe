@@ -23,7 +23,10 @@ import {
 } from "../../../../components/Modal/ModalPopUp";
 import TermOfServiceConfirmation from "./Modal/TermOfServiceConfirmation";
 import { columnsTableCriteriaTOS } from "./Utils/TableCriteriaTos";
-import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../redux/slices/general_slice";
 import FunctionalCriteriaProduct from "../UtilsProduct/FunctionalCriteriaProduct";
 import {
   getBudgetList,
@@ -42,13 +45,16 @@ import {
   getDistrictList,
 } from "../../../../redux/slices/product_promo/tos";
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
-import { handleCheckCriteriaMissingValidation, handleMappingCriteriaGeneral } from "../UtilsProduct/UtilsAllProduct";
+import {
+  handleCheckCriteriaMissingValidation,
+  handleMappingCriteriaGeneral,
+} from "../UtilsProduct/UtilsAllProduct";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
 
 const TermOfServiceCreate = () => {
   // Selector
   const { loading, data_attribute, data_criteria } = useSelector(
-    (state) => state.tos
+    (state) => state.tos,
   );
 
   // Declaration
@@ -77,11 +83,7 @@ const TermOfServiceCreate = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (
-      data_criteria &&
-      data_criteria &&
-      data_criteria?.length > 0
-    ) {
+    if (data_criteria && data_criteria && data_criteria?.length > 0) {
       const tempCriterias = (data_criteria || [])?.map((criteria) => ({
         name: criteria.text,
         value: criteria.id,
@@ -189,43 +191,43 @@ const TermOfServiceCreate = () => {
   };
 
   // Handle Confirmation
-  const handleSave = useCallback( async (formValue) => {
-    try{
-      let errorBody = {};
-      if (
-        !formValue.rPricingRuleCriterias.includes(24) &&
-        listDataCriteria.length === 0
-      ) {
-        errorBody = {
-          title: "Failed",
-          description: `Term of Service Detail Mandatory. Please try again.`,
-        };
-        dispatch(showModalError(errorBody));
-      } else if (storedDataInline) {
-        errorBody = {
-          title: "Failed",
-          description: `Please save data table inline before submit. Please try again.`,
-        };
-        dispatch(showModalError(errorBody));
-      } else if (
-        handleCheckCriteriaMissingValidation(
-          criteriaOptions,
-          formValue?.rPricingRuleCriterias,
-          listDataCriteria,
-          () => {}
-        )
-      ) {
-        const errorBody = {
-          title: "Failed",
-          description: `There is missing values in table criteria. Please try again`,
-        };
-        dispatch(showModalError(errorBody));
-      } else {
-        const dataValue = { ...formValue };
-        setData(dataValue);
-  
-        let dataCriteriaObject = listDataCriteria.map(
-          (item, index) =>
+  const handleSave = useCallback(
+    async (formValue) => {
+      try {
+        let errorBody = {};
+        if (
+          !formValue.rPricingRuleCriterias.includes(24) &&
+          listDataCriteria.length === 0
+        ) {
+          errorBody = {
+            title: "Failed",
+            description: `Term of Service Detail Mandatory. Please try again.`,
+          };
+          dispatch(showModalError(errorBody));
+        } else if (storedDataInline) {
+          errorBody = {
+            title: "Failed",
+            description: `Please save data table inline before submit. Please try again.`,
+          };
+          dispatch(showModalError(errorBody));
+        } else if (
+          handleCheckCriteriaMissingValidation(
+            criteriaOptions,
+            formValue?.rPricingRuleCriterias,
+            listDataCriteria,
+            () => {},
+          )
+        ) {
+          const errorBody = {
+            title: "Failed",
+            description: `There is missing values in table criteria. Please try again`,
+          };
+          dispatch(showModalError(errorBody));
+        } else {
+          const dataValue = { ...formValue };
+          setData(dataValue);
+
+          let dataCriteriaObject = listDataCriteria.map((item, index) =>
             // {
             handleMappingCriteriaGeneral({
               item: item,
@@ -239,52 +241,62 @@ const TermOfServiceCreate = () => {
                   name: item.text,
                 };
               }),
-            })
-        );
-    
-        // Attribute
-        const attributeArrayObject = dataValue.attribute.map((item) => {
-          return {
-            id: null,
-            idTos: null,
-            idAttr: item,
-          };
-        });
-    
-        // Criteria
-        const criteriaArrayObject = dataValue.rPricingRuleCriterias.map((item) => {
-          return {
-            id: null,
-            idTos: null,
-            idCri: item,
-          };
-        });
-    
-        const includesAll = dataValue.rPricingRuleCriterias.includes(24);
-        const body = {
-          name: dataValue.name,
-          description: dataValue.description,
-          tosAttrDtos: attributeArrayObject,
-          tosCrtDtos: criteriaArrayObject,
-          tosMCriteriaDtos: includesAll
-            ? [{ allCriteria: true }]
-            : dataCriteriaObject,
-        };
+            }),
+          );
 
-        const validateValueObj = {
-          body: body,
-          services: productPromoHttpService,
-          endPoint: "/v1/dbs/api/tos/validate-create",
-          type: "create",
-        };
-        await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
-  
-        setModalConfirm(true);
+          // Attribute
+          const attributeArrayObject = dataValue.attribute.map((item) => {
+            return {
+              id: null,
+              idTos: null,
+              idAttr: item,
+            };
+          });
+
+          // Criteria
+          const criteriaArrayObject = dataValue.rPricingRuleCriterias.map(
+            (item) => {
+              return {
+                id: null,
+                idTos: null,
+                idCri: item,
+              };
+            },
+          );
+
+          const includesAll = dataValue.rPricingRuleCriterias.includes(24);
+          const body = {
+            name: dataValue.name,
+            description: dataValue.description,
+            tosAttrDtos: attributeArrayObject,
+            tosCrtDtos: criteriaArrayObject,
+            tosMCriteriaDtos: includesAll
+              ? [{ allCriteria: true }]
+              : dataCriteriaObject,
+          };
+
+          const validateValueObj = {
+            body: body,
+            services: productPromoHttpService,
+            endPoint: "/v1/dbs/api/tos/validate-create",
+            type: "create",
+          };
+          await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
+
+          setModalConfirm(true);
+        }
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      console.log(error);
-    }
-  },[dispatch, showModalError, storedDataInline, criteriaOptions, listDataCriteria]);
+    },
+    [
+      dispatch,
+      showModalError,
+      storedDataInline,
+      criteriaOptions,
+      listDataCriteria,
+    ],
+  );
 
   // Handle Confirm
   const handleConfirm = () => {
@@ -303,7 +315,7 @@ const TermOfServiceCreate = () => {
               name: item.text,
             };
           }),
-        })
+        }),
       // return {
       //   referenceId: null,
       //   customer: item.customer?.value || null,
@@ -378,7 +390,7 @@ const TermOfServiceCreate = () => {
             error?.response?.data?.message ||
             error?.message ||
             error?.toString();
-          setModalConfirm(false)
+          setModalConfirm(false);
           setBodyError({ message });
           setModalError(true);
         }
@@ -410,7 +422,7 @@ const TermOfServiceCreate = () => {
                 name={"name"}
                 rules={[{ required: true, message: "Please input your Name!" }]}
               >
-                <InputComponent maxLength={100}/>
+                <InputComponent maxLength={100} />
               </Form.Item>
               <div className="col-span-2">
                 <Form.Item

@@ -19,7 +19,7 @@ const TermOfServiceConfirmation = ({
 }) => {
   // find data attribute
   const matchedObjectsAttribute = apiAttribute?.filter((obj) =>
-    data?.attribute?.includes(obj.glbTypeValId)
+    data?.attribute?.includes(obj.glbTypeValId),
   );
   const matchedNamesAttribute = matchedObjectsAttribute
     ?.map((obj) => obj.name)
@@ -27,7 +27,7 @@ const TermOfServiceConfirmation = ({
 
   // find data criteria
   const matchedObjectsCriteria = apiCriteria?.filter((obj) =>
-    data?.rPricingRuleCriterias?.includes(obj.glbTypeValId || obj?.id)
+    data?.rPricingRuleCriterias?.includes(obj.glbTypeValId || obj?.id),
   );
   const matchedNamesCriteria = matchedObjectsCriteria
     ?.map((obj) => obj.name || obj?.text)
@@ -84,7 +84,7 @@ const TermOfServiceConfirmation = ({
             criteria information
           </span>
           <div className="pt-[30px]">
-          <FunctionalCriteriaProduct
+            <FunctionalCriteriaProduct
               type={"preview"}
               data={listDataCriteria}
               dataCriteria={criteriaValues}

@@ -7,7 +7,7 @@ const getColumnSearchProps = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
 ) => ({
   filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
     <div
@@ -65,7 +65,7 @@ export const columnsApproval = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -81,7 +81,7 @@ export const columnsApproval = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -92,7 +92,7 @@ export const columnsApproval = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
 ];
@@ -101,7 +101,7 @@ export const columnsExpandApproval = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -117,7 +117,7 @@ export const columnsExpandApproval = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
 ];

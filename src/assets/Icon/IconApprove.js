@@ -4,7 +4,7 @@ const SVG = ({
   style = {},
   width = "100%",
   className = "",
-  onClick = () => { },
+  onClick = () => {},
   color = "#ACC424",
 }) => (
   <svg

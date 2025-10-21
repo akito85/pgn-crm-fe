@@ -1,7 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BaseContainer from "../../../../../../components/BaseContainer";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValue,
+} from "../../../../../../utils/getColumnSearchProps";
 import { getAllDetailServiceAgreementPaginate } from "../../../../../../redux/slices/rating_billing_invoice/rating";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { hasValue, renderColumn } from "../../../../../../utils";
@@ -12,8 +15,8 @@ export const columnsDetailServiceAgreement = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { },
-  search
+  handleSearch = () => {},
+  search,
 ) => [
   {
     title: "NO",
@@ -32,9 +35,18 @@ export const columnsDetailServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('name', hasValue(search['name']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "name",
+        hasValue(search["name"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "VALUE",
@@ -47,9 +59,18 @@ export const columnsDetailServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('value', hasValue(search['value']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "value",
+        hasValue(search["value"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "UNIT",
@@ -62,9 +83,18 @@ export const columnsDetailServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('unit', hasValue(search['unit']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "unit",
+        hasValue(search["unit"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
 ];
 
@@ -94,7 +124,7 @@ const DetailSection = ({ SAId }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [SAId, search, page, pageSize, sort, dispatch]);
 
@@ -141,7 +171,7 @@ const DetailSection = ({ SAId }) => {
             searchedColumn,
             searchText,
             handleSearch,
-            search
+            search,
           )}
           current={page}
           pageSize={pageSize}

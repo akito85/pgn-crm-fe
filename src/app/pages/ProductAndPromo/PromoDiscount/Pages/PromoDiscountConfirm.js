@@ -6,10 +6,10 @@ import AttachmentSectionForm from "../../Pricing/Form/AttachmentSectionForm";
 
 const PromoDiscountConfirm = ({
   dataConfirm,
-	listDataCriteria = [],
-	criteriaValues = {},
-	listCriteria=[],
-	listDataCondition = [],
+  listDataCriteria = [],
+  criteriaValues = {},
+  listCriteria = [],
+  listDataCondition = [],
   dataApproval,
   dataApprovalTable,
   listApproval,
@@ -29,9 +29,9 @@ const PromoDiscountConfirm = ({
           <PromoDiscountConfirmPromoSection
             dataConfirm={dataConfirm}
             listDataCriteria={listDataCriteria}
-						criteriaValues={criteriaValues}
-						listCriteria={listCriteria}
-						listDataCondition={listDataCondition}
+            criteriaValues={criteriaValues}
+            listCriteria={listCriteria}
+            listDataCondition={listDataCondition}
           />
         );
       case "Approval":

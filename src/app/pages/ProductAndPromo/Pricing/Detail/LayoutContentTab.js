@@ -51,21 +51,21 @@ const LayoutContentTab = ({
           />
         ) : (
           <FunctionalCriteriaProduct
-          data={listDataCriteria} //data
-          dataCriteria={criteriaValues} //ddl
-          type={type}
-          selector="pricing"
-          columnsTable={columnsTableCriteriaAll}
-          // fixedColumn={[
-          //   "ADJUSTMENT TYPE",
-          //   "ADJUSTMENT VALUE",
-          //   "UOM",
-          //   "DESCRIPTION",
-          //   "MAX VALUE UOM",
-          //   "FROM ITEM",
-          //   "TIERING",
-          // ]}
-        />
+            data={listDataCriteria} //data
+            dataCriteria={criteriaValues} //ddl
+            type={type}
+            selector="pricing"
+            columnsTable={columnsTableCriteriaAll}
+            // fixedColumn={[
+            //   "ADJUSTMENT TYPE",
+            //   "ADJUSTMENT VALUE",
+            //   "UOM",
+            //   "DESCRIPTION",
+            //   "MAX VALUE UOM",
+            //   "FROM ITEM",
+            //   "TIERING",
+            // ]}
+          />
           // <PricingDetailTableCriteria
           //   type={type}
           //   data={listDataCriteria}

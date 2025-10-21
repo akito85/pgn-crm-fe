@@ -4,7 +4,7 @@ import {
   EyeInvisibleOutlined,
   EyeTwoTone,
 } from "@ant-design/icons";
-import {  Form, Input, Popover, Spin, Tooltip } from "antd";
+import { Form, Input, Popover, Spin, Tooltip } from "antd";
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import BaseContainer from "../../components/BaseContainer";
@@ -70,7 +70,10 @@ const ChangePassword = () => {
                         required: true,
                         message: "Please input your new password!",
                       },
-                      { pattern: /^(?!.*<>).*$/, message: `Format password incorrect, password can not contain` }
+                      {
+                        pattern: /^(?!.*<>).*$/,
+                        message: `Format password incorrect, password can not contain`,
+                      },
                     ]}
                   >
                     <Input.Password
@@ -94,7 +97,10 @@ const ChangePassword = () => {
                         required: true,
                         message: "Please input your confirmation password!",
                       },
-                      { pattern: /^(?!.*<>).*$/, message: `Format password incorrect, password can not contain` }
+                      {
+                        pattern: /^(?!.*<>).*$/,
+                        message: `Format password incorrect, password can not contain`,
+                      },
                     ]}
                   >
                     <Input.Password
@@ -136,34 +142,34 @@ const ChangePassword = () => {
             </div>
           </div>
           <div className="flex justify-end mt-52 mb-2">
+            <ButtonComponent
+              icon={<DeleteOutlined style={{ fontSize: "16px" }} />}
+              onClick={() => clearStateAction()}
+              type="default"
+            >
+              Clear
+            </ButtonComponent>
+            {newPassword && confirmPassword ? (
               <ButtonComponent
-                icon={<DeleteOutlined style={{ fontSize: "16px" }} />}
-                onClick={() => clearStateAction()}
-                type="default"
+                // onClick={() => previewActionConfirm()}
+                type="submit"
               >
-                Clear
+                Save
               </ButtonComponent>
-              {newPassword && confirmPassword ? (
-                <ButtonComponent
-                  // onClick={() => previewActionConfirm()}
-                  type="submit"
-                >
-                  Save
-                </ButtonComponent>
-              ) : (
-                <Popover placement="top" content={content} trigger="hover">
-                  <div>
-                    <ButtonComponent
-                      disabled
-                      // onClick={() => previewActionConfirm()}
-                      type="submit"
-                    >
-                      Save
-                    </ButtonComponent>
-                  </div>
-                </Popover>
-              )}
-            </div>
+            ) : (
+              <Popover placement="top" content={content} trigger="hover">
+                <div>
+                  <ButtonComponent
+                    disabled
+                    // onClick={() => previewActionConfirm()}
+                    type="submit"
+                  >
+                    Save
+                  </ButtonComponent>
+                </div>
+              </Popover>
+            )}
+          </div>
         </BaseContainer>
       </Spin>
     </LayoutMenu>

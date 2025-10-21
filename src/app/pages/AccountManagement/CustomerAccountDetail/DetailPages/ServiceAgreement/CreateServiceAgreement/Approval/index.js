@@ -1,16 +1,16 @@
-import React,{useState, useEffect, useRef} from 'react'
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import BaseContainer from '../../../../../../../../components/BaseContainer'
-import TablePagination from '../../../../../../../../components/TablePagination'
-import { Form, Input, Select, Spin } from 'antd';
-import SelectComponent from '../../../../../../../../components/SelectComponent';
+import BaseContainer from "../../../../../../../../components/BaseContainer";
+import TablePagination from "../../../../../../../../components/TablePagination";
+import { Form, Input, Select, Spin } from "antd";
+import SelectComponent from "../../../../../../../../components/SelectComponent";
 import { getListApprovalById } from "../../../../../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
-import { FilterOutlined } from '@ant-design/icons';
-import Highlighter from 'react-highlight-words';
+import { FilterOutlined } from "@ant-design/icons";
+import Highlighter from "react-highlight-words";
 
 const expandedRowRender = (record) => {
-  const dataExpand = record?.employeeDetail
+  const dataExpand = record?.employeeDetail;
   const columns = [
     {
       title: "NO",
@@ -19,9 +19,9 @@ const expandedRowRender = (record) => {
       render: (text, object, index) => index + 1,
     },
     {
-      title: 'EMPLOYEE',
-      dataIndex: 'employeeName',
-    }
+      title: "EMPLOYEE",
+      dataIndex: "employeeName",
+    },
   ];
   return (
     <div className="flex flex-col py-4 pr-4 pl-[48px]">
@@ -35,7 +35,7 @@ const expandedRowRender = (record) => {
         columns={columns}
       />
     </div>
-  )
+  );
 };
 
 const Approval = ({
@@ -43,11 +43,11 @@ const Approval = ({
   dataDetailApproval,
   handleDetailApproval,
   setAppHierDataDetail,
-  appHierDataDetail=[],
+  appHierDataDetail = [],
   handleSaApprovalObj,
   saApprovalObj,
   loading,
-  form
+  form,
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -56,7 +56,7 @@ const Approval = ({
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
 
-  const isApprovalId = form.getFieldsValue('appHierId')
+  const isApprovalId = form.getFieldsValue("appHierId");
 
   useEffect(() => {
     const data = dataDetailApproval?.map((a, index) => ({
@@ -68,8 +68,7 @@ const Approval = ({
       })),
     }));
     setAppHierDataDetail(data);
-  }, [dataDetailApproval])
-
+  }, [dataDetailApproval]);
 
   const columns = [
     {
@@ -79,31 +78,31 @@ const Approval = ({
       render: (text, object, index) => index + 1,
     },
     {
-      title: 'HIERARCHY',
-      dataIndex: 'hierarchy',
+      title: "HIERARCHY",
+      dataIndex: "hierarchy",
     },
     {
-      title: 'POSITION',
-      dataIndex: 'position',
-    }
+      title: "POSITION",
+      dataIndex: "position",
+    },
   ];
-  const dataSource = []
+  const dataSource = [];
   for (let i = 0; i < 10; ++i) {
     dataSource.push({
-      key: i+1,
+      key: i + 1,
       hierarchy: "Submiter",
       position: "CM Bogor 1",
       dataDetail: [
         {
-          employee: `Karyawan ${i+1}`
+          employee: `Karyawan ${i + 1}`,
         },
         {
-          employee: `Karyawan ${i+2}`
+          employee: `Karyawan ${i + 2}`,
         },
         {
-          employee: `Karyawan ${i+3}`
-        }
-      ]
+          employee: `Karyawan ${i + 3}`,
+        },
+      ],
     });
   }
 
@@ -118,7 +117,7 @@ const Approval = ({
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch
+    handleSearch,
   ) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
       <div
@@ -176,7 +175,7 @@ const Approval = ({
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch
+    handleSearch,
   ) => {
     return [
       {
@@ -193,7 +192,7 @@ const Approval = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -204,7 +203,7 @@ const Approval = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
     ];
@@ -215,25 +214,27 @@ const Approval = ({
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
-  
+
   return (
     <div>
-      <div className="pt-8 pb-4"><h3 className="text-primary text-xs font-bold uppercase">APPROVAL</h3></div>
+      <div className="pt-8 pb-4">
+        <h3 className="text-primary text-xs font-bold uppercase">APPROVAL</h3>
+      </div>
       <div className="w-full grid grid-cols-1 gap-2">
         <div className="w-1/3">
           <Form.Item
             label={"Approval Hierarchy"}
             name={"appHierId"}
-            getValueFromEvent={(e) =>handleSaApprovalObj(e, "appHierId")}
+            getValueFromEvent={(e) => handleSaApprovalObj(e, "appHierId")}
             rules={[
               {
                 message: "Please input your Approval Hierarchy",
                 required: true,
               },
             ]}
-            className='pb-6'
+            className="pb-6"
           >
-            <SelectComponent onChange={(e)=>handleDetailApproval(e)}>
+            <SelectComponent onChange={(e) => handleDetailApproval(e)}>
               {dataApprovalList?.map((data, index) => (
                 <Select.Option key={index} value={data?.appHierId}>
                   {data?.approvalName}
@@ -247,7 +248,7 @@ const Approval = ({
       {/* Table */}
       <Spin spinning={loading}>
         {isApprovalId && isApprovalId.appHierId !== undefined && (
-          <div className='py-3 mb-6'>
+          <div className="py-3 mb-6">
             <TablePagination
               useSelect={false}
               usePagination={false}
@@ -256,7 +257,7 @@ const Approval = ({
                 searchInput,
                 searchedColumn,
                 searchText,
-                handleSearch
+                handleSearch,
               )}
               expandable={{
                 expandedRowRender,
@@ -266,7 +267,7 @@ const Approval = ({
         )}
       </Spin>
     </div>
-  )
-}
+  );
+};
 
-export default Approval
+export default Approval;

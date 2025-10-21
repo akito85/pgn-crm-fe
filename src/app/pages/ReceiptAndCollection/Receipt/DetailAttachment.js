@@ -17,7 +17,6 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import TablePagination from "../../../../components/TablePagination";
 import ModalAttachment from "../../ProductAndPromo/Pricing/Form/ModalAttachment";
 
-
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
   switch (dataIndex) {
@@ -34,7 +33,6 @@ const onFilter = (dataIndex, value, record) => {
       return record[dataIndex]?.toLowerCase().includes(search);
   }
 };
-
 
 const sorter = (fieldSort, a, b) => {
   const handleDataSort = (obj) => {
@@ -53,7 +51,7 @@ const sorter = (fieldSort, a, b) => {
   };
   let fa = handleDataSort(a);
   let fb = handleDataSort(b);
-  if (fieldSort === 'fileSize') {
+  if (fieldSort === "fileSize") {
     return fa - fb;
   } else {
     return fa.localeCompare(fb);
@@ -66,10 +64,10 @@ const columnAttachmentData = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { },
-  handleDelete = () => { },
+  handleSearch = () => {},
+  handleDelete = () => {},
   type,
-  handleShow
+  handleShow,
 ) => {
   const res = [
     {
@@ -90,7 +88,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -107,7 +105,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         searchedColumn === "fileName" ? (
@@ -139,7 +137,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -154,7 +152,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -169,7 +167,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (fileSize, r, i) => (
         <span>
@@ -196,8 +194,9 @@ const columnAttachmentData = (
             {type !== "detail" ? (
               <Tooltip title="Delete">
                 <span
-                  className={`flex justify-center${r.dataType === "exist" ? " cursor-not-allowed" : ""
-                    }`}
+                  className={`flex justify-center${
+                    r.dataType === "exist" ? " cursor-not-allowed" : ""
+                  }`}
                 >
                   <SVGIcon
                     name="IconDelete"
@@ -222,24 +221,25 @@ const columnAttachmentData = (
       (column) =>
         column.dataIndex !== "createdBy" &&
         column.dataIndex !== "createdDate" &&
-        column.title !== "ACTION"
+        column.title !== "ACTION",
     );
   }
   return type !== "detail"
     ? res.filter(
-      (column) =>
-        column.dataIndex !== "createdBy" && column.dataIndex !== "createdDate"
-    )
+        (column) =>
+          column.dataIndex !== "createdBy" &&
+          column.dataIndex !== "createdDate",
+      )
     : res;
 };
 
 const DetailAttachment = ({
   data = [],
-  updateData = () => { },
+  updateData = () => {},
   type,
   typeSelector,
-  dispatch = () => { },
-  getAPICategory = () => { },
+  dispatch = () => {},
+  getAPICategory = () => {},
   service,
   configApplication,
   getAPIGuard,
@@ -445,7 +445,7 @@ const DetailAttachment = ({
             handleSearch,
             handleDelete,
             type,
-            handleShow
+            handleShow,
           )}
           onSort={onSort}
         />

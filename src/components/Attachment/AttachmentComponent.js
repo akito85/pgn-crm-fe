@@ -80,7 +80,7 @@ const columnAttachmentData = (
   handleSearch = () => {},
   handleDelete = () => {},
   type,
-  handleShow
+  handleShow,
 ) => {
   const res = [
     {
@@ -101,7 +101,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -118,7 +118,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         searchedColumn === "fileName" ? (
@@ -150,7 +150,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -165,7 +165,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -180,7 +180,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (fileSize, r, i) => (
         <span>
@@ -234,13 +234,14 @@ const columnAttachmentData = (
       (column) =>
         column.dataIndex !== "createdBy" &&
         column.dataIndex !== "createdDate" &&
-        column.title !== "ACTION"
+        column.title !== "ACTION",
     );
   }
   return type !== "detail"
     ? res.filter(
         (column) =>
-          column.dataIndex !== "createdBy" && column.dataIndex !== "createdDate"
+          column.dataIndex !== "createdBy" &&
+          column.dataIndex !== "createdDate",
       )
     : res;
 };
@@ -457,7 +458,7 @@ const AttachmentComponent = ({
             handleSearch,
             handleDelete,
             type,
-            handleShow
+            handleShow,
           )}
           onSort={onSort}
         />

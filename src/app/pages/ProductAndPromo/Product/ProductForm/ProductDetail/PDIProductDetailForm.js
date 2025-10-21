@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValueFE,
+} from "../../../../../../utils/getColumnSearchProps";
 import { Form, Input, InputNumber, Select, Table, Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
 import {
@@ -14,7 +17,11 @@ import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import { getColumnSearchPropsCriteria } from "../../columnTableCriteria";
-import { hasValue, renderColumn, requiredMessage } from "../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  requiredMessage,
+} from "../../../../../../utils";
 import InputComponent from "../../../../../../components/InputComponent";
 
 const onFilter = (dataIndex, value, record) => {
@@ -92,7 +99,8 @@ const EditableCell = ({
     option.props.children.toLowerCase().includes(input.toLowerCase());
 
   const dependentData = () => {
-    if (!dataEditRecord[key + dependDataIndex]?.isParent) { //options.length === 0
+    if (!dataEditRecord[key + dependDataIndex]?.isParent) {
+      //options.length === 0
       return true;
     }
     return !dataDepend;
@@ -199,7 +207,7 @@ const PDIProductDetailForm = ({
   const exludeExisting =
     dataTable.length > 0 ? dataTable.map((item) => item?.name?.value) : [];
   const listName = dataListNameProductDetail.filter(
-    (item) => ![...excludeOptionName, ...exludeExisting].includes(item.value)
+    (item) => ![...excludeOptionName, ...exludeExisting].includes(item.value),
   );
   const [search, setSearch] = useState({});
 
@@ -238,23 +246,26 @@ const PDIProductDetailForm = ({
   const handleEditDataRecord = (data, key, index) => {
     const keyName = key + index;
     const value = index === "description" ? data.target.value : data;
-    if(index === "name") {
-      formTable.resetFields(["unit","value"])
+    if (index === "name") {
+      formTable.resetFields(["unit", "value"]);
     }
     setEditDataRecord((prevState) => {
       return {
         ...prevState,
-        [keyName]: index === "name" ? {
-          ...value,
-          isParent: dataListNameProductDetail.find(
-            (item) => item.value === value.value
-          )?.isParent,
-        }: value,
+        [keyName]:
+          index === "name"
+            ? {
+                ...value,
+                isParent: dataListNameProductDetail.find(
+                  (item) => item.value === value.value,
+                )?.isParent,
+              }
+            : value,
       };
     });
     if (index === `name`) {
       const temp = dataListNameProductDetail.filter(
-        (item) => item.value === data?.value
+        (item) => item.value === data?.value,
       );
       // console.log(temp);
       if (temp.length > 0) {
@@ -280,9 +291,10 @@ const PDIProductDetailForm = ({
               attribute === "name"
                 ? {
                     ...tempData,
-                    isParent: dataListNameProductDetail.find(
-                      (item) => item.value === tempData.value
-                    )?.isParent || false,
+                    isParent:
+                      dataListNameProductDetail.find(
+                        (item) => item.value === tempData.value,
+                      )?.isParent || false,
                   }
                 : tempData,
           };
@@ -292,7 +304,7 @@ const PDIProductDetailForm = ({
     setEditingKey(record.key);
     if (record?.name && record?.name?.value) {
       const temp = dataListNameProductDetail.filter(
-        (item) => item.value === record?.name?.value
+        (item) => item.value === record?.name?.value,
       );
       if (temp.length > 0) {
         dispatch(getListUnit({ id: temp[0].id }));
@@ -351,7 +363,7 @@ const PDIProductDetailForm = ({
 
   const deleteRow = (record) => {
     updateTable((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -369,9 +381,7 @@ const PDIProductDetailForm = ({
         title: "NAME",
         width: 240,
         dataIndex: "name",
-        filteredValue: search?.["name"]
-        ? [search?.["name"]]
-        : null,
+        filteredValue: search?.["name"] ? [search?.["name"]] : null,
         // onFilter: (value, record) => onFilter("name", value, record),
         sorter: (a, b) => sorter("name", a, b),
         options: listName,
@@ -393,7 +403,7 @@ const PDIProductDetailForm = ({
           handleSearch,
           true,
           "input",
-          storedData
+          storedData,
         ),
         render: (text) =>
           renderColumn(
@@ -403,16 +413,14 @@ const PDIProductDetailForm = ({
             text?.label,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
         title: "VALUE",
         width: 240,
         dataIndex: "value",
-        filteredValue: search?.["value"]
-        ? [search?.["value"]]
-        : null,
+        filteredValue: search?.["value"] ? [search?.["value"]] : null,
         // onFilter: (value, record) => onFilter("value", value, record),
         sorter: (a, b) => sorter("value", a, b),
         align: "right",
@@ -434,7 +442,7 @@ const PDIProductDetailForm = ({
           handleSearch,
           true,
           "input",
-          storedData
+          storedData,
         ),
         render: (text) =>
           renderColumn(
@@ -444,7 +452,7 @@ const PDIProductDetailForm = ({
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -452,9 +460,7 @@ const PDIProductDetailForm = ({
         width: 240,
         align: "center",
         dataIndex: "unit",
-        filteredValue: search?.["unit"]
-        ? [search?.["unit"]]
-        : null,
+        filteredValue: search?.["unit"] ? [search?.["unit"]] : null,
         // onFilter: (unit, record) => onFilter("unit", unit, record),
         sorter: (a, b) => sorter("unit", a, b),
         options: dataListUnit,
@@ -476,7 +482,7 @@ const PDIProductDetailForm = ({
           handleSearch,
           true,
           "input",
-          storedData
+          storedData,
         ),
         render: (text) =>
           renderColumn(
@@ -486,7 +492,7 @@ const PDIProductDetailForm = ({
             text?.label,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -494,8 +500,8 @@ const PDIProductDetailForm = ({
         width: 240,
         dataIndex: "description",
         filteredValue: search?.["description"]
-        ? [search?.["description"]]
-        : null,
+          ? [search?.["description"]]
+          : null,
         // onFilter: (value, record) => onFilter("description", value, record),
         sorter: (a, b) => sorter("description", a, b),
         inputType: "description",
@@ -511,7 +517,7 @@ const PDIProductDetailForm = ({
           handleSearch,
           true,
           "input",
-          storedData
+          storedData,
         ),
         render: (text) =>
           renderColumn(
@@ -521,7 +527,7 @@ const PDIProductDetailForm = ({
             text,
             true,
             "input",
-            search
+            search,
           ),
         // ...getColumnSearchPropsPaging(
         //   "description",
@@ -671,7 +677,9 @@ const PDIProductDetailForm = ({
           <div className="grid grid-cols-2 gap-4 w-full">
             <Form.Item
               name={"paymentType"}
-              rules={[{ message: requiredMessage("Payment Type"), required: true }]}
+              rules={[
+                { message: requiredMessage("Payment Type"), required: true },
+              ]}
               className="no-margin-form w-full"
               getValueFromEvent={(e) => updateBody(e, "paymentType")}
               label={"Payment Type"}
@@ -687,7 +695,9 @@ const PDIProductDetailForm = ({
             </Form.Item>
             <Form.Item
               name={"chargingMethod"}
-              rules={[{ message: requiredMessage("Charging Method"), required: true }]}
+              rules={[
+                { message: requiredMessage("Charging Method"), required: true },
+              ]}
               className="no-margin-form w-full"
               getValueFromEvent={(e) => updateBody(e, "chargingMethod")}
               label={"Charging Method"}
@@ -756,7 +766,7 @@ const PDIProductDetailForm = ({
                   dataEditRecord: editDataRecord,
                   handleEditDataRecord: handleEditDataRecord,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],

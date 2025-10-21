@@ -7,7 +7,10 @@ import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { Button, Form, Upload, Image, Spin } from "antd";
-import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../redux/slices/general_slice";
 import { UploadOutlined, LeftOutlined } from "@ant-design/icons";
 import DateComponent from "../../../../components/DateComponent";
 import InputComponent from "../../../../components/InputComponent";
@@ -33,10 +36,10 @@ const { Dragger } = Upload;
 
 const LoginBackgroundForm = ({ type }) => {
   const { loading, detail_Background } = useSelector(
-    (state) => state.login_background
+    (state) => state.login_background,
   );
   const { allow_file } = useSelector((state) => state.entity);
-  const { bodyError, isLoading } = useSelector(state => state?.general);
+  const { bodyError, isLoading } = useSelector((state) => state?.general);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -70,10 +73,11 @@ const LoginBackgroundForm = ({ type }) => {
     },
     {
       path: "",
-      breadcrumbName: `${type === "create"
-        ? "Create Login Background"
-        : "Update Login Background"
-        }`,
+      breadcrumbName: `${
+        type === "create"
+          ? "Create Login Background"
+          : "Update Login Background"
+      }`,
     },
   ];
 
@@ -106,13 +110,12 @@ const LoginBackgroundForm = ({ type }) => {
         ?.toLowerCase()
         ?.split(",")
         ?.map((item) => `.${item}`)
-        ?.join(", ")
+        ?.join(", "),
     );
     setStartDate(moment(detail_Background?.startDate));
     setFileList([]);
   }, [form, detail_Background, type, allow_file]);
 
- 
   const handleStartDate = (e) => {
     if (e === null || e === undefined) {
       setStartDate(e);
@@ -135,19 +138,18 @@ const LoginBackgroundForm = ({ type }) => {
 
   const handleCloseModalError = () => {
     setModalConfirm(false);
-
   };
 
   const handleRetry = () => {
     handleCancelTryAgain();
-    if (bodyError?.action === 'CREATE_BACKGROUND') {
-      dispatch(createBackground(payload?.body))
-    } else if (bodyError?.action === 'UPDATE_BACKGROUND') {
-      dispatch(updateBackground(payload?.body))
-    } else if (bodyError?.action === 'VALIDATE_CREATE_UPDATE') {
-      dispatch(validateCreateUpdate(payload?.validateValue))
+    if (bodyError?.action === "CREATE_BACKGROUND") {
+      dispatch(createBackground(payload?.body));
+    } else if (bodyError?.action === "UPDATE_BACKGROUND") {
+      dispatch(updateBackground(payload?.body));
+    } else if (bodyError?.action === "VALIDATE_CREATE_UPDATE") {
+      dispatch(validateCreateUpdate(payload?.validateValue));
     } else {
-      dispatch(getDetailBackground(id))
+      dispatch(getDetailBackground(id));
     }
     handleCloseModalError();
   };
@@ -195,57 +197,73 @@ const LoginBackgroundForm = ({ type }) => {
         urlImage: formValue?.urlImage,
       });
 
-      if (type === 'update') {
+      if (type === "update") {
         body = {
           backgroundName: formValue.backgroundName,
-          startDate: hasValue(formValue.startDate) ? renderDateConverter(formValue?.startDate, 'date') : null,
-          endDate: hasValue(formValue.endDate) ? renderDateConverter(formValue.endDate, 'date') : null,
+          startDate: hasValue(formValue.startDate)
+            ? renderDateConverter(formValue?.startDate, "date")
+            : null,
+          endDate: hasValue(formValue.endDate)
+            ? renderDateConverter(formValue.endDate, "date")
+            : null,
           description: formValue.description,
           imageBackground: image,
           fileName: fileName,
           urlImage: formValue?.urlImage,
           loginBackgroundId: type === "update" ? id : undefined,
-        }
-        validateValueObj = { body: body, services: userHttpService, endPoint: '/v1/dbs/api/background/validate-update', type }
+        };
+        validateValueObj = {
+          body: body,
+          services: userHttpService,
+          endPoint: "/v1/dbs/api/background/validate-update",
+          type,
+        };
       } else {
         body = {
           backgroundName: formValue.backgroundName,
-          startDate: hasValue(formValue.startDate) ? renderDateConverter(formValue?.startDate, 'date') : null,
-          endDate: hasValue(formValue.endDate) ? renderDateConverter(formValue.endDate, 'date') : null,
+          startDate: hasValue(formValue.startDate)
+            ? renderDateConverter(formValue?.startDate, "date")
+            : null,
+          endDate: hasValue(formValue.endDate)
+            ? renderDateConverter(formValue.endDate, "date")
+            : null,
           description: formValue.description,
           imageBackground: image,
           fileName: fileName,
           urlImage: formValue?.urlImage,
-        }
-        validateValueObj = { body: body, services: userHttpService, endPoint: '/v1/dbs/api/background/validate-create', type }
+        };
+        validateValueObj = {
+          body: body,
+          services: userHttpService,
+          endPoint: "/v1/dbs/api/background/validate-create",
+          type,
+        };
       }
 
       setPayload({
         body: body,
-        validateValue: validateValueObj
+        validateValue: validateValueObj,
       });
-      await dispatch(validateCreateUpdate(validateValueObj))?.unwrap()
+      await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
       setModalConfirm(true);
     } catch (error) {
       setModalConfirm(false);
-
     }
   };
 
   const handleConfirm = async () => {
     try {
-      setModalConfirm(false)
+      setModalConfirm(false);
       if (type === "create") {
-        await dispatch(createBackground(payload?.body))?.unwrap()
+        await dispatch(createBackground(payload?.body))?.unwrap();
       } else {
-        await dispatch(updateBackground(payload?.body))?.unwrap()
+        await dispatch(updateBackground(payload?.body))?.unwrap();
       }
     } catch (error) {
-      setModalConfirm(false)
-
+      setModalConfirm(false);
     }
   };
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
     <LayoutMenu>
       <Spin spinning={loading || isLoading}>
@@ -254,7 +272,7 @@ const LoginBackgroundForm = ({ type }) => {
           form={form}
           layout="vertical"
           onFinish={onFinish}
-        // onFinishFailed={handleError}
+          // onFinishFailed={handleError}
         >
           <BaseContainer
             header={
@@ -278,12 +296,13 @@ const LoginBackgroundForm = ({ type }) => {
                   name={"image"}
                   rules={formMessageRequired(
                     "logo",
-                    fileList?.length > 0 && detail_Background?.data?.logo !== null
+                    fileList?.length > 0 &&
+                      detail_Background?.data?.logo !== null
                       ? false
-                      : true
+                      : true,
                   )}
                   className={"w-full"}
-                // getValueFromEvent={getFile}
+                  // getValueFromEvent={getFile}
                 >
                   <Upload
                     fileList={fileList}
@@ -341,7 +360,7 @@ const LoginBackgroundForm = ({ type }) => {
                         Choose File
                       </Button>
                       {fileList.length === 0 &&
-                        detail_Background?.imageBackground === null ? (
+                      detail_Background?.imageBackground === null ? (
                         <span className={"text-gray-500 text-xs ml-2"}>
                           {" "}
                           No Image Choosen
@@ -382,10 +401,10 @@ const LoginBackgroundForm = ({ type }) => {
                         (value && moment(startDate) <= moment(value)) || !value
                           ? Promise.resolve()
                           : Promise.reject(
-                            new Error(
-                              "The end date must be greater than or equal to the start date!"
-                            )
-                          ),
+                              new Error(
+                                "The end date must be greater than or equal to the start date!",
+                              ),
+                            ),
                     },
                   ]}
                 >

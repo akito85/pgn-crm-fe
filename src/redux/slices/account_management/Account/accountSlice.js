@@ -51,7 +51,7 @@ const initialState = {
   data_accountOneTime: [],
   data_customerOneTime: [],
   data_detailCustomerOnetime: [],
-  IsPremiseAlready: {}
+  IsPremiseAlready: {},
 };
 
 export const getAllAccountStandardPaginate = createAsyncThunk(
@@ -67,7 +67,7 @@ export const getAllAccountStandardPaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAllAccountOneTimePaginate = createAsyncThunk(
@@ -83,7 +83,7 @@ export const getAllAccountOneTimePaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAllContactPaginate = createAsyncThunk(
@@ -91,7 +91,7 @@ export const getAllContactPaginate = createAsyncThunk(
   async ({ customerId, page, pageSize, search, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
-      const isId = customerId ? `&customerId=${customerId}` : ""
+      const isId = customerId ? `&customerId=${customerId}` : "";
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/account/list-contact?${isId}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
@@ -100,7 +100,7 @@ export const getAllContactPaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAllAddressPaginate = createAsyncThunk(
@@ -116,7 +116,7 @@ export const getAllAddressPaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAllAccountPaginate = createAsyncThunk(
@@ -132,7 +132,7 @@ export const getAllAccountPaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAllCustomerOneTimePaginate = createAsyncThunk(
@@ -148,7 +148,7 @@ export const getAllCustomerOneTimePaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const checkCustomer = createAsyncThunk(
@@ -161,7 +161,7 @@ export const checkCustomer = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getFinancialInfo = createAsyncThunk(
@@ -174,7 +174,7 @@ export const getFinancialInfo = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const createAccount = createAsyncThunk(
@@ -203,7 +203,7 @@ export const createAccount = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getCustomerType = createAsyncThunk(
@@ -216,7 +216,7 @@ export const getCustomerType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getIdentificationType = createAsyncThunk(
@@ -229,7 +229,7 @@ export const getIdentificationType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSex = createAsyncThunk("GET_SEX_TYPE", async (thunkAPI) => {
@@ -252,7 +252,7 @@ export const getMaritalStatus = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getMeterReadingCode = createAsyncThunk(
@@ -265,7 +265,7 @@ export const getMeterReadingCode = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountCategory = createAsyncThunk(
@@ -278,7 +278,7 @@ export const getAccountCategory = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountSegment = createAsyncThunk(
@@ -291,7 +291,7 @@ export const getAccountSegment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountGroupType = createAsyncThunk(
@@ -304,7 +304,7 @@ export const getAccountGroupType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountType = createAsyncThunk(
@@ -317,7 +317,7 @@ export const getAccountType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getClassificationType = createAsyncThunk(
@@ -330,7 +330,7 @@ export const getClassificationType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getPriority = createAsyncThunk(
@@ -343,7 +343,7 @@ export const getPriority = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getIndustrialSector = createAsyncThunk(
@@ -356,7 +356,7 @@ export const getIndustrialSector = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getBudgetYear = createAsyncThunk(
@@ -369,7 +369,7 @@ export const getBudgetYear = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getBudget = createAsyncThunk("GET_BUDGET", async (thunkAPI) => {
@@ -392,7 +392,7 @@ export const getTeritory = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCategoryAttachment = createAsyncThunk(
@@ -405,7 +405,7 @@ export const getCategoryAttachment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCountry = createAsyncThunk("GET_COUNTRY", async (thunkAPI) => {
@@ -428,7 +428,7 @@ export const getProvince = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCity = createAsyncThunk("GET_CITY", async (id, thunkAPI) => {
@@ -451,7 +451,7 @@ export const getDistrict = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSubDistrict = createAsyncThunk(
@@ -464,7 +464,7 @@ export const getSubDistrict = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getPostalCode = createAsyncThunk(
@@ -477,7 +477,7 @@ export const getPostalCode = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getType = createAsyncThunk("GET_TYPE", async (thunkAPI) => {
@@ -500,7 +500,7 @@ export const getBusinessPurpose = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getJob = createAsyncThunk("GET_JOB", async (thunkAPI) => {
@@ -523,7 +523,7 @@ export const getPosition = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getContactType = createAsyncThunk(
@@ -536,7 +536,7 @@ export const getContactType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getInputType = createAsyncThunk(
@@ -549,7 +549,7 @@ export const getInputType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCountryCode = createAsyncThunk(
@@ -562,7 +562,7 @@ export const getCountryCode = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCountryZone = createAsyncThunk(
@@ -575,7 +575,7 @@ export const getCountryZone = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getProductName = createAsyncThunk(
@@ -588,7 +588,7 @@ export const getProductName = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getTaxIdentifierType = createAsyncThunk(
@@ -601,7 +601,7 @@ export const getTaxIdentifierType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getPaymentChannel = createAsyncThunk(
@@ -614,7 +614,7 @@ export const getPaymentChannel = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailCustomerOneTime = createAsyncThunk(
@@ -627,7 +627,7 @@ export const getDetailCustomerOneTime = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadAccountStandard = createAsyncThunk(
@@ -639,10 +639,16 @@ export const downloadAccountStandard = createAsyncThunk(
       const response = await accountManagementService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_ACCOUNT_STANDARD", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_ACCOUNT_STANDARD",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const downloadAccountOneTime = createAsyncThunk(
@@ -654,10 +660,16 @@ export const downloadAccountOneTime = createAsyncThunk(
       const response = await accountManagementService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_ACCOUNT_ONE_TIME", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_ACCOUNT_ONE_TIME",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const checkContactExist = createAsyncThunk(
@@ -665,7 +677,10 @@ export const checkContactExist = createAsyncThunk(
   async (body, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/account-standart/is-contact-exist`;
-      const response = await accountManagementService.activationWithRemark(url, body);
+      const response = await accountManagementService.activationWithRemark(
+        url,
+        body,
+      );
       return response;
     } catch (error) {
       const message =
@@ -685,7 +700,7 @@ export const checkContactExist = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const checkRegistrationNumber = createAsyncThunk(
@@ -693,7 +708,10 @@ export const checkRegistrationNumber = createAsyncThunk(
   async (body, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/account-standart/is-registration-number-exist`;
-      const response = await accountManagementService.activationWithRemark(url, body);
+      const response = await accountManagementService.activationWithRemark(
+        url,
+        body,
+      );
       return response;
     } catch (error) {
       const message =
@@ -713,7 +731,7 @@ export const checkRegistrationNumber = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const checkIsPremiseAlready = createAsyncThunk(
@@ -726,7 +744,7 @@ export const checkIsPremiseAlready = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const accountSlice = createSlice({
@@ -1341,7 +1359,7 @@ const accountSlice = createSlice({
       state.data_detailCustomerOnetime = action.payload;
     },
 
-    // Check if 
+    // Check if
     [checkIsPremiseAlready.pending]: (state, action) => {
       state.loading = true;
       state.isPremiseAlready = action.payload;
@@ -1354,7 +1372,6 @@ const accountSlice = createSlice({
       state.loading = false;
       state.isPremiseAlready = action.payload;
     },
-    
   },
 });
 

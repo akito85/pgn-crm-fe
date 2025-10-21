@@ -17,12 +17,13 @@ const ModalConfirmationAnnouncement = ({
   apiDelegateTo = [],
   apiPosition = [],
 }) => {
+  const position = apiPosition
+    ?.filter((a) => a.id === data?.positionDelegateTo)
+    ?.find((v) => v.name)?.name;
 
-  const position = apiPosition?.filter((a) => a.id === data?.positionDelegateTo)
-  ?.find((v) => v.name)?.name;
-
-  const delegateTo = apiDelegateTo?.filter((a) => a.id === data?.delegateTo)
-  ?.find((v) => v.name)?.name;
+  const delegateTo = apiDelegateTo
+    ?.filter((a) => a.id === data?.delegateTo)
+    ?.find((v) => v.name)?.name;
 
   return (
     <ModalCustom

@@ -125,7 +125,7 @@ const ListDetailBank = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       setListDataAttachment(dataAttachment);
       setDataText(data_detail?.bank);
@@ -153,7 +153,7 @@ const ListDetailBank = () => {
                 };
               }),
             };
-          }
+          },
         );
         setDataSourceDraft(data);
         setTotalElementDraft(data?.lenght);
@@ -177,7 +177,7 @@ const ListDetailBank = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       setDataTextDraft(data_detail_draft?.bank);
       setListDataAttachmentDraft(dataAttachment);
@@ -260,15 +260,15 @@ const ListDetailBank = () => {
 
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
-    let data
+    let data;
 
-    if (data_detail?.tApprovalDto?.approvalType.toLowerCase() === 'bank') {
+    if (data_detail?.tApprovalDto?.approvalType.toLowerCase() === "bank") {
       data = {
         bankId: id,
         remark: res.remark,
         approvalId: data_detail?.tApprovalDto?.tAppId,
         action: approveOrReject.toUpperCase(),
-        type: data_detail?.tApprovalDto?.approvalType
+        type: data_detail?.tApprovalDto?.approvalType,
       };
     } else {
       data = {
@@ -276,9 +276,8 @@ const ListDetailBank = () => {
         remark: res.remark,
         approvalId: data_detail?.tApprovalDto?.tAppId,
         action: approveOrReject.toUpperCase(),
-        type: data_detail?.tApprovalDto?.approvalType
+        type: data_detail?.tApprovalDto?.approvalType,
       };
-
     }
     dispatch(approveOrRejectInactiveBank({ body: data }));
     setModalConfirm(false);

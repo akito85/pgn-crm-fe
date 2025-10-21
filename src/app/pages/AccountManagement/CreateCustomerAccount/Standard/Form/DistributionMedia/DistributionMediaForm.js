@@ -306,7 +306,7 @@ const DistributionMediaForm = ({
       title: "REMARK",
       dataIndex: "description",
       ellipsis: {
-        showTitle:false
+        showTitle: false,
       },
       render: (building) => (
         <Tooltip placement="topLeft" title={building}>
@@ -456,17 +456,15 @@ const DistributionMediaForm = ({
 
   // Handle Modal Detail
   const handleDetail = (r) => {
-    const data = data_productName?.filter(
-      (a) => a.productId === r.productId
-    );
-    const dataAdditional ={
+    const data = data_productName?.filter((a) => a.productId === r.productId);
+    const dataAdditional = {
       startDate: r.startDate,
       remark: r.description,
-    }
-    const mergeData ={
+    };
+    const mergeData = {
       ...data[0],
-      ...dataAdditional
-    }
+      ...dataAdditional,
+    };
     setDataDetail(mergeData);
     setModalDetail(true);
   };
@@ -520,9 +518,13 @@ const DistributionMediaForm = ({
   // Delete Row
   const handleDelete = useCallback(
     (r) => {
-      setData((prevState) => prevState.filter((e) => e.key !== r).map((e, i) => ({ ...e, key: i + 1 })));
+      setData((prevState) =>
+        prevState
+          .filter((e) => e.key !== r)
+          .map((e, i) => ({ ...e, key: i + 1 })),
+      );
     },
-    [data]
+    [data],
   );
 
   // Data Product
@@ -531,17 +533,23 @@ const DistributionMediaForm = ({
 
   // Filter Product
   const filterProductName = () => {
-    if(dataProductName?.length > 0){
+    if (dataProductName?.length > 0) {
       return typeModal === "create"
-      ? data_productName?.filter((a) => !dataProductName?.includes(a.productId))
-      : [
-          ...(data_productName?.filter((a) => !dataProductName?.includes(a.productId))),
-          ...(data_productName.filter((data) => data?.productId === dataUpdate?.productId)),
-      ];
+        ? data_productName?.filter(
+            (a) => !dataProductName?.includes(a.productId),
+          )
+        : [
+            ...data_productName?.filter(
+              (a) => !dataProductName?.includes(a.productId),
+            ),
+            ...data_productName.filter(
+              (data) => data?.productId === dataUpdate?.productId,
+            ),
+          ];
     } else {
       return data_productName;
     }
-  }
+  };
 
   return (
     <div>

@@ -22,7 +22,7 @@ const PremiseDetail = () =>
   {
     const dispatch = useDispatch();
     const { data_premiseDetail, loading } = useSelector(
-      (state) => state.premise
+      (state) => state.premise,
     );
 
     //declare
@@ -86,14 +86,14 @@ const PremiseDetail = () =>
           breadcrumbName: "Detail Account",
           state: {
             idAccount: id,
-          }
+          },
         },
         {
           path: "",
           breadcrumbName: "Detail Premise",
         },
       ];
-    }
+    };
 
     return (
       <LayoutMenu>
@@ -219,7 +219,7 @@ const PremiseDetail = () =>
               </DetailText>
               <DetailText label="Created Date">
                 {moment(data_premiseDetail?.createdDate).format(
-                  dateFormatting.dateTime
+                  dateFormatting.dateTime,
                 )}
               </DetailText>
               <DetailText label="Created By">

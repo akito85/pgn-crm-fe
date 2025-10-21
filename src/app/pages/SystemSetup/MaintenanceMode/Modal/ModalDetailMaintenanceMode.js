@@ -15,7 +15,7 @@ const ModalDetailMaintenanceMode = ({
 }) => {
   // Selector
   const { detail_MaintenanceMode } = useSelector(
-    (state) => state.maintenanceMode
+    (state) => state.maintenanceMode,
   );
 
   // Declaration
@@ -48,7 +48,7 @@ const ModalDetailMaintenanceMode = ({
         <DetailText label={"Start Date"}>
           {detail_MaintenanceMode?.startDate
             ? moment(detail_MaintenanceMode?.startDate).format(
-                dateFormatting.date
+                dateFormatting.date,
               )
             : ""}
         </DetailText>
@@ -61,7 +61,7 @@ const ModalDetailMaintenanceMode = ({
         <DetailText label={"End Date"}>
           {detail_MaintenanceMode?.endDate
             ? moment(detail_MaintenanceMode?.endtDate).format(
-                dateFormatting.date
+                dateFormatting.date,
               )
             : ""}
         </DetailText>

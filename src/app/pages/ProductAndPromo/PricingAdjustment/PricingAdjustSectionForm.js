@@ -21,7 +21,7 @@ const PricingAdjustSectionForm = ({
   handleDeselectCriteria = () => {},
   handleClearCriteria = () => {},
   priceCode = "",
-  status = ""
+  status = "",
 }) => {
   const [description, setDescription] = useState("");
   const criteriaOptionsFix =
@@ -47,7 +47,10 @@ const PricingAdjustSectionForm = ({
               className={"w-full no-margin-form"}
               label={"Adjustment Name"}
             >
-              <InputComponent type="text" disabled={(type === "update" && status === "ACTIVE")} />
+              <InputComponent
+                type="text"
+                disabled={type === "update" && status === "ACTIVE"}
+              />
             </Form.Item>
           </div>
         </div>

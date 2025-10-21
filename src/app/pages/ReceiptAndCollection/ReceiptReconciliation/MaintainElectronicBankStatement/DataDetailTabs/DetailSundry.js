@@ -68,7 +68,7 @@ export const columnAwal = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -86,7 +86,7 @@ export const columnAwal = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "receiptCode" ? (
@@ -121,7 +121,7 @@ export const columnAwal = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "sor" ? (
@@ -154,7 +154,7 @@ export const columnAwal = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -189,7 +189,7 @@ export const columnAwal = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -224,7 +224,7 @@ export const columnAwal = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -259,7 +259,7 @@ export const columnAwal = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -295,7 +295,7 @@ export const columnAwal = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "receiptDate" ? (
@@ -329,7 +329,7 @@ export const columnAwal = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -366,7 +366,7 @@ export const columnAwal = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "statusApproval" ? (
@@ -468,8 +468,8 @@ export const columnAwal = (
                             r?.status === "Active"
                               ? true
                               : false || r?.status === "Draft"
-                              ? true
-                              : null
+                                ? true
+                                : null
                           }
                           disabled={true}
                           className="gap-7"
@@ -568,7 +568,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
   const [approveOrReject, setApproveOrReject] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [listDataAttachmentApprove, setListDataAttachmentApprove] = useState(
-    []
+    [],
   );
 
   const [pageSelect, setPageSelect] = useState(1);
@@ -597,7 +597,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
         pageSize,
         sort,
         id,
-      })
+      }),
     );
   }, [search, page, pageSize, sort, dispatch, id]);
 
@@ -620,7 +620,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
         boolean: showModal,
         page: pageSelect,
         pageSize: pageSizeSelect,
-      })
+      }),
     );
   }, [
     searchSelect,
@@ -713,11 +713,11 @@ const DetailSundry = ({ data, id, isApprover }) => {
   };
 
   const matchedObjectsCriteria = data_sundry_select?.filter((obj) =>
-    keyTableForceSelected.includes(obj.receiptReconcileId)
+    keyTableForceSelected.includes(obj.receiptReconcileId),
   );
 
   const combineAttachment = matchedObjectsCriteria?.flatMap(
-    (obj) => obj.attachmentDtoList || []
+    (obj) => obj.attachmentDtoList || [],
   );
 
   //attachment untuk approve use effect nya
@@ -764,7 +764,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => {}
+    handleSearch = () => {},
   ) => [
     {
       title: "NO",
@@ -782,7 +782,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         searchedColumn === "receiptCode" ? (
@@ -817,7 +817,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         searchedColumn === "sor" ? (
@@ -849,7 +849,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -884,7 +884,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -919,7 +919,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -954,7 +954,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -990,7 +990,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         searchedColumn === "receiptDate" ? (
@@ -1025,7 +1025,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
         // dataCustomer,
         // selectCustomer,
         // handleSelectCustomer
@@ -1056,7 +1056,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -1091,7 +1091,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -1126,7 +1126,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (approvalStatus) => {
         let text;
@@ -1330,7 +1330,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/receipt/upload-attachment/${elements}`,
-              body
+              body,
             );
           }
         }
@@ -1345,7 +1345,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -1371,7 +1371,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
     };
     const tempData = (data_sundry_select || [])
       .filter((data) =>
-        keyTableForceSelected.includes(data?.receiptReconcileId)
+        keyTableForceSelected.includes(data?.receiptReconcileId),
       )
       ?.map((item) => {
         const dataApprov = {
@@ -1402,7 +1402,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/receipt/upload-attachment/${elements}`,
-              body
+              body,
             );
           }
         }
@@ -1417,7 +1417,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -1599,7 +1599,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
                 searchInput,
                 searchedColumn,
                 searchText,
-                handleSearch
+                handleSearch,
                 // handleSelectCustomer,
                 // dataCustomer,
                 // selectCustomer
@@ -1656,7 +1656,7 @@ const DetailSundry = ({ data, id, isApprover }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         )}
         current={page}
         pageSize={pageSize}

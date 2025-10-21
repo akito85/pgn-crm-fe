@@ -29,7 +29,9 @@ const CustomerInformation = ({ data = {}, type }) => {
           {data?.foundedBirthPlace}
         </DetailText>
         <DetailText label="Birth/Founded Date">
-          {data?.foundedBirthDate ? moment(data?.foundedBirthDate).format(dateFormatting.date) : ""}
+          {data?.foundedBirthDate
+            ? moment(data?.foundedBirthDate).format(dateFormatting.date)
+            : ""}
         </DetailText>
         {type !== 58 ? (
           <>
@@ -53,7 +55,6 @@ const CustomerInformation = ({ data = {}, type }) => {
       <div className="w-full">
         <DetailText label="Description">{data?.description}</DetailText>
       </div>
-
     </Fragment>
   );
 };

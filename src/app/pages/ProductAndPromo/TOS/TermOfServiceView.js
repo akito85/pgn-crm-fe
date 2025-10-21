@@ -69,7 +69,7 @@ const TermOfServiceView = () => {
         sort,
         page,
         pageSize,
-      })
+      }),
     );
   }, [search, sort, page, pageSize]);
 
@@ -185,7 +185,7 @@ const TermOfServiceView = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -195,7 +195,7 @@ const TermOfServiceView = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -212,7 +212,7 @@ const TermOfServiceView = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -222,7 +222,7 @@ const TermOfServiceView = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
       // render: (text) =>
       //   searchedColumn === "attributes" ? (
@@ -257,7 +257,7 @@ const TermOfServiceView = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -267,7 +267,7 @@ const TermOfServiceView = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
       // render: (text) =>
       //   searchedColumn === "criterias" ? (
@@ -302,7 +302,7 @@ const TermOfServiceView = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -312,7 +312,7 @@ const TermOfServiceView = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
       // render: (text) =>
       //   searchedColumn === "description" ? (
@@ -346,7 +346,7 @@ const TermOfServiceView = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         let text;
@@ -370,7 +370,7 @@ const TermOfServiceView = () => {
               text,
               false,
               "status",
-              search
+              search,
             )
           : text;
       },
@@ -482,7 +482,7 @@ const TermOfServiceView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -508,7 +508,7 @@ const TermOfServiceView = () => {
             sort,
             page,
             pageSize,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -712,7 +712,7 @@ const TermOfServiceView = () => {
                 ...columns,
                 ...useColumnActionPermission(
                   ["view", "Update", "Activate"],
-                  itemsActionView
+                  itemsActionView,
                 ),
               ]}
               current={page}

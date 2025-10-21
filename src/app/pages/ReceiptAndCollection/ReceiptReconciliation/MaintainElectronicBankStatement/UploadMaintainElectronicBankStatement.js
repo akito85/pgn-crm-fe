@@ -39,7 +39,7 @@ const MAX_FILE_SIZE = 5000000;
 
 const UploadMaintainElectronicBankStatement = (updateData = () => {}) => {
   const { bankDDL, data_type, data, loading } = useSelector(
-    (state) => state.electronic
+    (state) => state.electronic,
   );
 
   const [form] = Form.useForm();
@@ -117,7 +117,7 @@ const UploadMaintainElectronicBankStatement = (updateData = () => {}) => {
         setSubmit(true);
         return false;
       },
-      [bank, type]
+      [bank, type],
     ),
   };
 
@@ -159,7 +159,7 @@ const UploadMaintainElectronicBankStatement = (updateData = () => {}) => {
             return { ...file, status: "error" };
           }
           return file;
-        })
+        }),
       );
       // Add a return statement or handle the error here
       return; // or throw error; or any other appropriate action

@@ -1,9 +1,7 @@
-import React from 'react'
+import React from "react";
 
 const ModalApprovalHistory = () => {
-  return (
-    <div>ModalApprovalHistory</div>
-  )
-}
+  return <div>ModalApprovalHistory</div>;
+};
 
-export default ModalApprovalHistory
+export default ModalApprovalHistory;

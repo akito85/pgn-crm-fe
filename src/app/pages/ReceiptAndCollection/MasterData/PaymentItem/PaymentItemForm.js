@@ -60,7 +60,7 @@ const PaymentItemForm = (props) => {
     // const startDate = today.clone().startOf("month");
     // const endDate = today.clone().endOf("month");
     // return current < startDate || current > endDate;
-    return false
+    return false;
   };
 
   return (

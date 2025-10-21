@@ -30,7 +30,7 @@ export const getListTosSubmissionPaging = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListAppHier = createAsyncThunk(
@@ -46,7 +46,7 @@ export const getListAppHier = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListAppHierInactive = createAsyncThunk(
@@ -59,7 +59,7 @@ export const getListAppHierInactive = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListAppHierDetail = createAsyncThunk(
@@ -79,7 +79,7 @@ export const getListAppHierDetail = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListAppHierDetailInactive = createAsyncThunk(
@@ -92,7 +92,7 @@ export const getListAppHierDetailInactive = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListCategory = createAsyncThunk(
@@ -101,11 +101,14 @@ export const getListCategory = createAsyncThunk(
     try {
       const url = "/v1/dbs/api/tossubmission/list-category";
       const response = await accountManagementService.getAll(url);
-      return response.data.map((category) => ({ glbTypeValId : category?.id, name: category?.text}));
+      return response.data.map((category) => ({
+        glbTypeValId: category?.id,
+        name: category?.text,
+      }));
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const inactiveTosSubmission = createAsyncThunk(
@@ -115,7 +118,7 @@ export const inactiveTosSubmission = createAsyncThunk(
       const url = `/v1/dbs/api/tossubmission/inactivate`;
       const response = await accountManagementService.activationWithRemark(
         url,
-        data
+        data,
       );
       const successBody = {
         title: "Successful",
@@ -137,7 +140,7 @@ export const inactiveTosSubmission = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const deleteDraftTosSubmission = createAsyncThunk(
@@ -166,7 +169,7 @@ export const deleteDraftTosSubmission = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 /**Get list select tos submission Paginate*/
@@ -182,7 +185,7 @@ export const getListSelectTosSubmissionPaging = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailTosSubmission = createAsyncThunk(
@@ -195,7 +198,7 @@ export const getDetailTosSubmission = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const createTosSubmissionBody = createAsyncThunk(
@@ -222,7 +225,7 @@ export const createTosSubmissionBody = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateTosSubmissionBody = createAsyncThunk(
@@ -249,7 +252,7 @@ export const updateTosSubmissionBody = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approvalCreateTosSubmission = createAsyncThunk(
@@ -259,7 +262,7 @@ export const approvalCreateTosSubmission = createAsyncThunk(
       const url = `/v1/dbs/api/tossubmission/approve-tos-submission`;
       const response = await accountManagementService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -289,7 +292,7 @@ export const approvalCreateTosSubmission = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approvalInactiveTosSubmission = createAsyncThunk(
@@ -299,7 +302,7 @@ export const approvalInactiveTosSubmission = createAsyncThunk(
       const url = `/v1/dbs/api/tossubmission/approve-inactive-tos-submission`;
       const response = await accountManagementService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -329,7 +332,7 @@ export const approvalInactiveTosSubmission = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -342,7 +345,7 @@ export const getApprovalHistory = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const validateOverlapTos = createAsyncThunk(
@@ -355,7 +358,7 @@ export const validateOverlapTos = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const tosSubmissionSlice = createSlice({

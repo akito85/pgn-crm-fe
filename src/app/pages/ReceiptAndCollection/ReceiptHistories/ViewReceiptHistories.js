@@ -36,7 +36,7 @@ export const columns = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -54,7 +54,7 @@ export const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       searchedColumn === "id" ? (
@@ -85,7 +85,7 @@ export const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,
@@ -119,7 +119,7 @@ export const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       searchedColumn === "customer" ? (
@@ -152,7 +152,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "account" ? (
@@ -184,7 +184,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "receiptNumber" ? (
@@ -217,7 +217,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "startDate" ? (
@@ -255,7 +255,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "currency" ? (
@@ -288,7 +288,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "amount" ? (
@@ -322,7 +322,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "paymentType" ? (
@@ -354,7 +354,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "paymentMethod" ? (
@@ -386,7 +386,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "receiptChannel" ? (
@@ -420,7 +420,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (index) => {
       let text;
@@ -465,7 +465,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "bank" ? (
@@ -497,7 +497,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "collectingAgent" ? (
@@ -529,7 +529,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "deliveryChannel" ? (
@@ -561,7 +561,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "paymentCycle" ? (
@@ -593,7 +593,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "paymentPeriod" ? (
@@ -627,7 +627,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "rateType" ? (
@@ -662,7 +662,7 @@ export const columns = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "rateDate" ? (
@@ -693,7 +693,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "rate" ? (
@@ -726,7 +726,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "convertedCurrency" ? (
@@ -759,7 +759,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "equivalentAmount" ? (
@@ -791,7 +791,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "refNumber" ? (
@@ -823,7 +823,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "bankStatementName" ? (
@@ -857,7 +857,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "source" ? (
@@ -891,7 +891,7 @@ export const columns = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "bankStatementDate" ? (
@@ -924,7 +924,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (appliedAmount) => (
       <NumericFormat
@@ -949,7 +949,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (equivalentAppliedAmount) => (
       <NumericFormat
@@ -974,7 +974,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (unAppliedAmount) => (
       <NumericFormat
@@ -999,7 +999,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (equivalentUnApplyAmount) => (
       <NumericFormat
@@ -1024,7 +1024,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (refundAmount) => (
       <NumericFormat
@@ -1049,7 +1049,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (transferAmount) => (
       <NumericFormat
@@ -1076,7 +1076,7 @@ export const columns = (
       searchText,
       handleSearch,
       true,
-      "datetime"
+      "datetime",
     ),
     render: (text) =>
       searchedColumn === "createdDate" ? (
@@ -1109,7 +1109,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -1269,7 +1269,7 @@ const ViewReceiptHistories = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
@@ -1395,7 +1395,7 @@ const ViewReceiptHistories = () => {
       }
       const fix = result.slice(
         (currentLog - 1) * sizeLog,
-        currentLog * sizeLog
+        currentLog * sizeLog,
       );
       return type === "data" ? fix : result.length;
     };
@@ -1416,7 +1416,7 @@ const ViewReceiptHistories = () => {
           searchInput2,
           searchedColumn2,
           searchText2,
-          handleSearch2
+          handleSearch2,
         ),
       },
       {
@@ -1430,7 +1430,7 @@ const ViewReceiptHistories = () => {
           searchedColumn2,
           searchText2,
           handleSearch2,
-          false
+          false,
         ),
       },
       {
@@ -1446,7 +1446,7 @@ const ViewReceiptHistories = () => {
           searchedColumn2,
           searchText2,
           handleSearch2,
-          false
+          false,
         ),
       },
       {
@@ -1461,7 +1461,7 @@ const ViewReceiptHistories = () => {
           searchedColumn2,
           searchText2,
           handleSearch2,
-          false
+          false,
         ),
       },
       {
@@ -1478,7 +1478,7 @@ const ViewReceiptHistories = () => {
           searchedColumn2,
           searchText2,
           handleSearch2,
-          false
+          false,
         ),
         // render: (allocateDate) => hasValue(allocateDate) && moment(allocateDate).format("DD MMM YYYY"),
       },
@@ -1494,7 +1494,7 @@ const ViewReceiptHistories = () => {
           searchText2,
           handleSearch2,
           false,
-          "date"
+          "date",
         ),
         render: (allocateDate) =>
           hasValue(allocateDate) && moment(allocateDate).format("DD MMM YYYY"),
@@ -1511,7 +1511,7 @@ const ViewReceiptHistories = () => {
           searchText2,
           handleSearch2,
           false,
-          "number"
+          "number",
         ),
         // render: (allocateDate) => hasValue(allocateDate) && moment(allocateDate).format("DD MMM YYYY"),
       },
@@ -1527,7 +1527,7 @@ const ViewReceiptHistories = () => {
           searchText2,
           handleSearch2,
           false,
-          "number"
+          "number",
         ),
         // render: (allocateDate) => hasValue(allocateDate) && moment(allocateDate).format("DD MMM YYYY"),
       },
@@ -1542,7 +1542,7 @@ const ViewReceiptHistories = () => {
           searchedColumn2,
           searchText2,
           handleSearch2,
-          false
+          false,
         ),
       },
       {
@@ -1558,7 +1558,7 @@ const ViewReceiptHistories = () => {
           searchedColumn2,
           searchText2,
           handleSearch2,
-          false
+          false,
         ),
       },
       {
@@ -1572,7 +1572,7 @@ const ViewReceiptHistories = () => {
           searchedColumn2,
           searchText2,
           handleSearch2,
-          false
+          false,
         ),
       },
       {
@@ -1587,7 +1587,7 @@ const ViewReceiptHistories = () => {
           searchedColumn2,
           searchText2,
           handleSearch2,
-          false
+          false,
         ),
         render: (text) =>
           searchedColumn === "createdDate" ? (
@@ -1622,7 +1622,7 @@ const ViewReceiptHistories = () => {
           searchedColumn2,
           searchText2,
           handleSearch2,
-          false
+          false,
         ),
       },
       {
@@ -1637,7 +1637,7 @@ const ViewReceiptHistories = () => {
           searchedColumn2,
           searchText2,
           handleSearch2,
-          false
+          false,
         ),
         render: (text) =>
           searchedColumn === "updatedDate" ? (
@@ -1672,7 +1672,7 @@ const ViewReceiptHistories = () => {
           searchedColumn2,
           searchText2,
           handleSearch2,
-          false
+          false,
         ),
       },
       {
@@ -1688,7 +1688,7 @@ const ViewReceiptHistories = () => {
           searchedColumn2,
           searchText2,
           handleSearch2,
-          false
+          false,
         ),
         render: (text) =>
           searchedColumn === "statusApproval" ? (
@@ -1737,7 +1737,7 @@ const ViewReceiptHistories = () => {
         page: page,
         pageSize: pageSize,
         sort: sort,
-      })
+      }),
     );
   };
 
@@ -1806,7 +1806,7 @@ const ViewReceiptHistories = () => {
               searchInput,
               searchedColumn,
               searchText,
-              handleSearch
+              handleSearch,
             )}
             pageSize={pageSize}
             current={page}

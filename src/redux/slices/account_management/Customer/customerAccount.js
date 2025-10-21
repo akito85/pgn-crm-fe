@@ -1,6 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import accountManagementService from "../../../services/account_management/accountManagementService";
-import { showModalError, showModalSuccess, validateError, setBodyError } from "../../general_slice";
+import {
+  showModalError,
+  showModalSuccess,
+  validateError,
+  setBodyError,
+} from "../../general_slice";
 
 const initialState = {
   data_customer: [],
@@ -14,11 +19,11 @@ const initialState = {
   data_globalSex: [],
   data_globalMartialStatus: [],
   dataListCategory: [],
-  loadingAccount : false,
-  data_customer_advanced:[],
-  data_globalTypeCondition:[],
-  data_globalTypeOperator:[],
-  data_globalTypeColumn:[],
+  loadingAccount: false,
+  data_customer_advanced: [],
+  data_globalTypeCondition: [],
+  data_globalTypeOperator: [],
+  data_globalTypeColumn: [],
 };
 
 //Customer
@@ -32,7 +37,7 @@ export const getCustomerAccount = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getCustomerAccountAdvancedFilter = createAsyncThunk(
@@ -42,12 +47,15 @@ export const getCustomerAccountAdvancedFilter = createAsyncThunk(
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/account-info/paging-customer?searchs=${search}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      const response = await accountManagementService.updateDataWithMethodPost(
+        url,
+        body,
+      );
       return response?.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getCustomerDetail = createAsyncThunk(
@@ -60,7 +68,7 @@ export const getCustomerDetail = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const inActiveCustomer = createAsyncThunk(
@@ -94,7 +102,7 @@ export const inActiveCustomer = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getListCustomerAccount = createAsyncThunk(
@@ -108,7 +116,7 @@ export const getListCustomerAccount = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListCustomerAddress = createAsyncThunk(
@@ -123,21 +131,21 @@ export const getListCustomerAddress = createAsyncThunk(
       return response?.data;
     } catch (error) {
       const message =
-      error?.response?.data?.message || error?.message || error?.toString();
-    if (
-      error?.response?.data?.code === 500 ||
-      error?.response?.data?.code === 419
-    ) {
-      thunkAPI.dispatch(setBodyError(error));
-    } else {
-      const errorBody = {
-        title: "Failed",
-        description: `${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
     }
-    }
-  }
+  },
 );
 
 export const getListCustomerContact = createAsyncThunk(
@@ -151,7 +159,7 @@ export const getListCustomerContact = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const downloadCustomer = createAsyncThunk(
@@ -159,20 +167,35 @@ export const downloadCustomer = createAsyncThunk(
   async ({ search, page, pageSize, sort, body }, thunkAPI) => {
     try {
       const sortParams =
-      sort === undefined || sort === "" ? "createdDate~desc" : sort
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/account-info/download-customer?searchs=${search}&page=
       ${page}&size=${pageSize}&sort=${sortParams}`;
-      const response = await accountManagementService.downloadDataAdvanced(url, body);
-      if(response?.status === 204) {
-        thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_CUSTOMER", back: false }))
+      const response = await accountManagementService.downloadDataAdvanced(
+        url,
+        body,
+      );
+      if (response?.status === 204) {
+        thunkAPI.dispatch(
+          validateError({
+            error: response,
+            action: "DOWNLOAD_CUSTOMER",
+            back: false,
+          }),
+        );
       } else {
         return response;
       }
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_CUSTOMER", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_CUSTOMER",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getCustomerAttachment = createAsyncThunk(
@@ -185,7 +208,7 @@ export const getCustomerAttachment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const updateCustomer = createAsyncThunk(
@@ -218,7 +241,7 @@ export const updateCustomer = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getListCategoryFile = createAsyncThunk(
@@ -231,10 +254,10 @@ export const getListCategoryFile = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
-export const getGlobalCustomerType= createAsyncThunk(
+export const getGlobalCustomerType = createAsyncThunk(
   "GET_GLOBAL_CUSTOMER_TYPE",
   async (thunkAPI) => {
     try {
@@ -244,10 +267,10 @@ export const getGlobalCustomerType= createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
-export const getGlobalIdentificationType= createAsyncThunk(
+export const getGlobalIdentificationType = createAsyncThunk(
   "GET_GLOBAL_IDENTIFICATION_TYPE",
   async (thunkAPI) => {
     try {
@@ -257,10 +280,10 @@ export const getGlobalIdentificationType= createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
-export const getGlobalSex= createAsyncThunk(
+export const getGlobalSex = createAsyncThunk(
   "GET_GLOBAL_SEX",
   async (thunkAPI) => {
     try {
@@ -270,10 +293,10 @@ export const getGlobalSex= createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
-export const getGlobalMartialStatus= createAsyncThunk(
+export const getGlobalMartialStatus = createAsyncThunk(
   "GET_GLOBAL_MARTIAL_STATUS",
   async (thunkAPI) => {
     try {
@@ -283,10 +306,10 @@ export const getGlobalMartialStatus= createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
-export const getGlobalSearchCondition= createAsyncThunk(
+export const getGlobalSearchCondition = createAsyncThunk(
   "GET_GLOBAL_SEARCH_CONDITION",
   async (thunkAPI) => {
     try {
@@ -296,10 +319,10 @@ export const getGlobalSearchCondition= createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
-export const getGlobalSearchOperator= createAsyncThunk(
+export const getGlobalSearchOperator = createAsyncThunk(
   "GET_GLOBAL_SEARCH_OPERATOR",
   async (thunkAPI) => {
     try {
@@ -309,10 +332,10 @@ export const getGlobalSearchOperator= createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
-export const getGlobalSearchColumn= createAsyncThunk(
+export const getGlobalSearchColumn = createAsyncThunk(
   "GET_GLOBAL_SEARCH_COLUMN",
   async (thunkAPI) => {
     try {
@@ -322,7 +345,7 @@ export const getGlobalSearchColumn= createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const customerAccountSlice = createSlice({
@@ -502,28 +525,28 @@ const customerAccountSlice = createSlice({
     },
 
     [getGlobalSearchCondition.pending]: (state, action) => {
-      state.data_globalTypeCondition= action.payload;
+      state.data_globalTypeCondition = action.payload;
       state.loading = true;
     },
     [getGlobalSearchCondition.fulfilled]: (state, action) => {
-      state.data_globalTypeCondition= action.payload;
+      state.data_globalTypeCondition = action.payload;
       state.loading = false;
     },
     [getGlobalSearchCondition.rejected]: (state, action) => {
-      state.data_globalTypeCondition= action.payload;
+      state.data_globalTypeCondition = action.payload;
       state.loading = false;
     },
 
     [getGlobalSearchOperator.pending]: (state, action) => {
-      state.data_globalTypeOperator= action.payload;
+      state.data_globalTypeOperator = action.payload;
       state.loading = true;
     },
     [getGlobalSearchOperator.fulfilled]: (state, action) => {
-      state.data_globalTypeOperator= action.payload;
+      state.data_globalTypeOperator = action.payload;
       state.loading = false;
     },
     [getGlobalSearchOperator.rejected]: (state, action) => {
-      state.data_globalTypeOperator= action.payload;
+      state.data_globalTypeOperator = action.payload;
       state.loading = false;
     },
 

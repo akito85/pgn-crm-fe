@@ -29,7 +29,7 @@ import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOr
 const BillingBucketDetail = () => {
   // Selector
   const { loading, data_detail, data_detail_draft } = useSelector(
-    (state) => state.billing_bucket
+    (state) => state.billing_bucket,
   );
 
   // Declaration
@@ -108,7 +108,7 @@ const BillingBucketDetail = () => {
             updatedDate: item.updatedDate,
             updatedBy: item.updatedBy,
           };
-        }
+        },
       );
 
       // Data Attachment Information
@@ -131,7 +131,7 @@ const BillingBucketDetail = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Information
@@ -385,7 +385,7 @@ const BillingBucketDetail = () => {
           })
         : approveRejectBillingBucket({
             body: data,
-          })
+          }),
     )
       .unwrap()
       .then(() => {
@@ -422,7 +422,7 @@ const BillingBucketDetail = () => {
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail.requestedDate
                       ? moment(
-                          bodyApproval.approvalDetail.requestedDate
+                          bodyApproval.approvalDetail.requestedDate,
                         ).format(dateFormatting.date)
                       : ""}
                   </DetailText>

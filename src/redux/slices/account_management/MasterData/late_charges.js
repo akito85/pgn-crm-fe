@@ -1,6 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import accountManagementService from "../../../services/account_management/accountManagementService";
-import { showModalError, showModalSuccess, validateError } from "../../general_slice";
+import {
+  showModalError,
+  showModalSuccess,
+  validateError,
+} from "../../general_slice";
 
 const initialState = {
   data: null,
@@ -49,7 +53,7 @@ export const getLateChargePaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadLateCharge = createAsyncThunk(
@@ -63,10 +67,16 @@ export const downloadLateCharge = createAsyncThunk(
       const response = await accountManagementService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_LATE_CHARGE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_LATE_CHARGE",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailLateCharge = createAsyncThunk(
@@ -79,7 +89,7 @@ export const getDetailLateCharge = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const createLateCharge = createAsyncThunk(
   "CREATE_LATE_CHARGE",
@@ -105,7 +115,7 @@ export const createLateCharge = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 export const updateLateCharge = createAsyncThunk(
   "UPDATE_LATE_CHARGE",
@@ -131,7 +141,7 @@ export const updateLateCharge = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 export const activeInactiveLateCharge = createAsyncThunk(
   "ACTIVE_INACTIVE_LATE_CHARGE",
@@ -140,7 +150,7 @@ export const activeInactiveLateCharge = createAsyncThunk(
       const url = "/v1/dbs/api/master/late-charge/inactive-latecharge";
       const response = await accountManagementService.activationWithOutRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: `Successful`,
@@ -162,7 +172,7 @@ export const activeInactiveLateCharge = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getSelectCriteria = createAsyncThunk(
@@ -174,13 +184,13 @@ export const getSelectCriteria = createAsyncThunk(
       return (response?.data || []).map((item) => ({
         label: item.text,
         value: item.id,
-        code: item?.code
+        code: item?.code,
       }));
       // return response?.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSelectCurrency = createAsyncThunk(
@@ -196,7 +206,7 @@ export const getSelectCurrency = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 /** Get List Criteria */
@@ -215,7 +225,7 @@ export const getCountryList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getProvinceList = createAsyncThunk(
@@ -233,7 +243,7 @@ export const getProvinceList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCityList = createAsyncThunk(
@@ -251,7 +261,7 @@ export const getCityList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCostCenterList = createAsyncThunk(
@@ -264,7 +274,7 @@ export const getCostCenterList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSorList = createAsyncThunk(
@@ -277,7 +287,7 @@ export const getSorList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDistrictList = createAsyncThunk(
@@ -295,7 +305,7 @@ export const getDistrictList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSubDistrictList = createAsyncThunk(
@@ -313,7 +323,7 @@ export const getSubDistrictList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountNumberList = createAsyncThunk(
@@ -331,7 +341,7 @@ export const getAccountNumberList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getClassificationTypeList = createAsyncThunk(
@@ -349,7 +359,7 @@ export const getClassificationTypeList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountSegment = createAsyncThunk(
@@ -367,7 +377,7 @@ export const getAccountSegment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSATypeList = createAsyncThunk(
@@ -385,7 +395,7 @@ export const getSATypeList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountCategoryList = createAsyncThunk(
@@ -398,7 +408,7 @@ export const getAccountCategoryList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountGroupList = createAsyncThunk(
@@ -416,7 +426,7 @@ export const getAccountGroupList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountTypeList = createAsyncThunk(
@@ -434,7 +444,7 @@ export const getAccountTypeList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getLateChargeRulePaginate = createAsyncThunk(
@@ -450,7 +460,7 @@ export const getLateChargeRulePaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListAppHier = createAsyncThunk(
@@ -463,7 +473,7 @@ export const getListAppHier = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListAppHierDetail = createAsyncThunk(
@@ -476,7 +486,7 @@ export const getListAppHierDetail = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListCategory = createAsyncThunk(
@@ -489,13 +499,13 @@ export const getListCategory = createAsyncThunk(
       return response.data.map((item) => {
         return {
           glbTypeValId: item.id,
-          name: item.name
-        }
+          name: item.name,
+        };
       });
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -508,7 +518,7 @@ export const getApprovalHistory = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const inactiveLateChargeRule = createAsyncThunk(
@@ -518,7 +528,7 @@ export const inactiveLateChargeRule = createAsyncThunk(
       const url = `/v1/dbs/api/master/late-charge/inactive-latecharge-rule`;
       const response = await accountManagementService.activationWithOutRemark(
         url,
-        data
+        data,
       );
       const successBody = {
         title: "Successful",
@@ -540,7 +550,7 @@ export const inactiveLateChargeRule = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getVariableNameList = createAsyncThunk(
@@ -558,7 +568,7 @@ export const getVariableNameList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getOperationFormulaList = createAsyncThunk(
@@ -576,7 +586,7 @@ export const getOperationFormulaList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getOperatorConditionList = createAsyncThunk(
@@ -594,7 +604,7 @@ export const getOperatorConditionList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDataTypeConditionList = createAsyncThunk(
@@ -612,7 +622,7 @@ export const getDataTypeConditionList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailLateChargeRule = createAsyncThunk(
@@ -625,7 +635,7 @@ export const getDetailLateChargeRule = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getDetailDraftLateChargeRule = createAsyncThunk(
@@ -638,7 +648,7 @@ export const getDetailDraftLateChargeRule = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const approvalCreateLateChargeRule = createAsyncThunk(
@@ -648,12 +658,13 @@ export const approvalCreateLateChargeRule = createAsyncThunk(
       const url = `/v1/dbs/api/master/late-charge/approve-latecharge-rule`;
       const response = await accountManagementService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
-        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
-          }.`,
+        description: `Your data has been ${
+          body.action === "APPROVE" ? "approved" : "rejected"
+        }.`,
         // alertDescription:
         //   body.action === "REJECT"
         //     ? "Warning! if you reject this data, you will need to request approval again."
@@ -668,15 +679,16 @@ export const approvalCreateLateChargeRule = createAsyncThunk(
       if (Math.floor((error?.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+          description: `Your data was not ${
+            body.action === "APPROVE" ? "approved" : "rejected"
+          }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approvalInactiveLateChargeRule = createAsyncThunk(
@@ -686,12 +698,13 @@ export const approvalInactiveLateChargeRule = createAsyncThunk(
       const url = `/v1/dbs/api/master/late-charge/approve-inactive-latecharge-rule`;
       const response = await accountManagementService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
-        description: `Your data has been late charge ${body.action === "APPROVE" ? "approved" : "rejected"
-          }.`,
+        description: `Your data has been late charge ${
+          body.action === "APPROVE" ? "approved" : "rejected"
+        }.`,
         // alertDescription:
         //   body.action === "REJECT"
         //     ? "Warning! if you reject this data, you will need to request approval again."
@@ -706,15 +719,16 @@ export const approvalInactiveLateChargeRule = createAsyncThunk(
       if (Math.floor((error?.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+          description: `Your data was not ${
+            body.action === "APPROVE" ? "approved" : "rejected"
+          }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const createLateChargeRuleBody = createAsyncThunk(
@@ -737,14 +751,15 @@ export const createLateChargeRuleBody = createAsyncThunk(
       if (Math.floor((error?.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.isSubmit ? "created" : "submitted"
-            }. ${message}.`,
+          description: `Your data was not ${
+            body.isSubmit ? "created" : "submitted"
+          }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateLateChargeRuleBody = createAsyncThunk(
@@ -767,14 +782,15 @@ export const updateLateChargeRuleBody = createAsyncThunk(
       if (Math.floor((error?.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.isSubmit ? "updated" : "submitted"
-            }. ${message}.`,
+          description: `Your data was not ${
+            body.isSubmit ? "updated" : "submitted"
+          }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 export const deleteLateChargeRule = createAsyncThunk(
   "DELETE_LATE_CHARGE_RULE",
@@ -801,7 +817,7 @@ export const deleteLateChargeRule = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const checkStartDate = createAsyncThunk(
@@ -814,7 +830,7 @@ export const checkStartDate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const lateChargeSlice = createSlice({

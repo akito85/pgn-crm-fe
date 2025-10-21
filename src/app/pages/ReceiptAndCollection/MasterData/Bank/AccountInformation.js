@@ -55,7 +55,7 @@ const AccountInformation = ({ type, bankId }) => {
     loading,
     data_modal,
     message,
-    data_list_gl
+    data_list_gl,
   } = useSelector((state) => state.bank);
 
   const dispatch = useDispatch();
@@ -76,7 +76,7 @@ const AccountInformation = ({ type, bankId }) => {
   const [loadingForm, setLoadingForm] = useState(loading);
   const [Id, setId] = useState();
   const [storedData, setStoredData] = useState(false);
-console.log(data_list_gl, ' data list gl');
+  console.log(data_list_gl, " data list gl");
 
   //use effect
   useEffect(() => {
@@ -183,7 +183,7 @@ console.log(data_list_gl, ' data list gl');
             id: item?.criteria,
             transactionCalendarId: item?.transactionCalendarId,
           };
-        }
+        },
       );
       const mappingCriteria = criteriaSelect?.map((a) => a.id);
       const dataCriteriaList = (
@@ -242,7 +242,7 @@ console.log(data_list_gl, ' data list gl');
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       setSelectedHierarchy(data_modal?.accountBankDto?.appHierId);
@@ -433,7 +433,7 @@ console.log(data_list_gl, ' data list gl');
         const errorBadge = errorFields.reduce(
           (current, next) =>
             item.paramValue.includes(next.name[0]) ? current + 1 : current,
-          0
+          0,
         );
         return {
           value: item.value,
@@ -474,7 +474,7 @@ console.log(data_list_gl, ' data list gl');
           };
           const response = await receiptCollectionHttpService.uploadImage(
             `/v1/dbs/api/attachment/upload/v1`,
-            body
+            body,
           );
         }
         setLoadingForm(loadingForm);

@@ -33,7 +33,7 @@ export const columnsAllocation = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -52,7 +52,7 @@ export const columnsAllocation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => {
       if (searchedColumn === "allocationId") {
@@ -91,7 +91,7 @@ export const columnsAllocation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => {
       if (searchedColumn === "allocationNumber") {
@@ -130,7 +130,7 @@ export const columnsAllocation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => {
       if (searchedColumn === "allocationType") {
@@ -169,7 +169,7 @@ export const columnsAllocation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => {
       if (searchedColumn === "billingItem") {
@@ -210,7 +210,7 @@ export const columnsAllocation = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "allocationDate" ? (
@@ -244,7 +244,7 @@ export const columnsAllocation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => {
       if (searchedColumn === "invoiceCurrency") {
@@ -284,7 +284,7 @@ export const columnsAllocation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => {
       if (searchedColumn === "billingItemAmount") {
@@ -327,7 +327,7 @@ export const columnsAllocation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => {
       if (searchedColumn === "allocationAmount") {
@@ -367,7 +367,7 @@ export const columnsAllocation = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     // render: (text) => text.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   },
@@ -382,7 +382,7 @@ export const columnsAllocation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => {
       if (searchedColumn === "allocationStatus") {
@@ -424,7 +424,7 @@ export const columnsAllocation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => {
       if (searchedColumn === "invoiceNumber") {
@@ -465,7 +465,7 @@ export const columnsAllocation = (
       searchText,
       handleSearch,
       true,
-      "datePeriod"
+      "datePeriod",
     ),
     render: (text) =>
       searchedColumn === "billingPeriod" ? (
@@ -502,7 +502,7 @@ export const columnsAllocation = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "rateDate" ? (
@@ -538,7 +538,7 @@ export const columnsAllocation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => {
       if (searchedColumn === "rateAmount") {
@@ -579,7 +579,7 @@ export const columnsAllocation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => {
       if (searchedColumn === "convertedCurrency") {
@@ -619,7 +619,7 @@ export const columnsAllocation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => {
       if (searchedColumn === "equivalentAmount") {
@@ -666,7 +666,7 @@ export const columnsAllocation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
   },
 ];
@@ -727,7 +727,7 @@ const DetailReceipt = ({
         pageSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
-      })
+      }),
     );
   }, [id, page, pageSize, sort, search]);
 
@@ -843,7 +843,7 @@ const DetailReceipt = ({
             <DetailText label="Bank Statement Date">
               {data_detail?.bankStatementDate
                 ? moment(data_detail?.bankStatementDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : " "}
             </DetailText>
@@ -871,7 +871,7 @@ const DetailReceipt = ({
               {data_detail?.rateDate === null
                 ? ""
                 : moment(data_detail?.rateDate).format(
-                    dateFormatting.dateCapital
+                    dateFormatting.dateCapital,
                   )}
             </DetailText>
             <DetailText label="Amount Equivalent">

@@ -91,7 +91,7 @@ const ListDetailTOP = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       setListDataAttachment(dataAttachment);
       // Data Criteria name
@@ -131,7 +131,7 @@ const ListDetailTOP = () => {
             updatedDate: item.updateDate,
             updatedBy: item.updatedBy,
           };
-        }
+        },
       );
       setListDataCriteria(dataCriteriaList);
       setCriteriaValues(mappingCriteria);
@@ -195,7 +195,7 @@ const ListDetailTOP = () => {
             key: index + 1,
             // type: "exist",
           };
-        }
+        },
       );
       setDataTextDraft(data_detail_draft?.information);
       setListDataCriteriaDraft(dataCriteriaList);

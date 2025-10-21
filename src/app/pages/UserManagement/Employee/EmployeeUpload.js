@@ -35,7 +35,7 @@ const EmployeeUpload = () => {
   const { data_list_upload, loading } = useSelector((state) => state.employee);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation()
+  const location = useLocation();
   const [fileName, setFileName] = useState("");
   const [fileList, setFileList] = useState([]);
   const [modalBack, setModalBack] = useState(false);
@@ -44,13 +44,16 @@ const EmployeeUpload = () => {
   const [dataExcel, setDataExcel] = useState([]);
   const [dataEmployeeList, setDataEmployeeList] = useState([]);
   const [dataAssignmentEmployeeList, setDataAssignmentEmployeeList] = useState(
-    []
+    [],
   );
   const [fileProgress, setFileProgress] = useState(0);
   const [form] = Form.useForm();
   // use Effect
   useEffect(() => {
-    if (data_list_upload?.code === 200 && location?.pathname === USER_ROUTES.UPLOAD_EMPLOYEE) {
+    if (
+      data_list_upload?.code === 200 &&
+      location?.pathname === USER_ROUTES.UPLOAD_EMPLOYEE
+    ) {
       setShowListUpload(true);
       setFirstStep(false);
       setDataExcel(data_list_upload?.data);
@@ -58,7 +61,7 @@ const EmployeeUpload = () => {
         {},
         ...data_list_upload?.data?.map((item) => {
           return item;
-        })
+        }),
       );
       setDataEmployeeList(
         dataConverter?.uploadEmployeeDTO?.map((item) => {
@@ -75,7 +78,7 @@ const EmployeeUpload = () => {
             description: item?.description,
             status: item?.status,
           };
-        })
+        }),
       );
       setDataAssignmentEmployeeList(
         dataConverter?.uploadAssignmentDTO?.map((item) => {
@@ -88,11 +91,11 @@ const EmployeeUpload = () => {
             startDate: moment(item?.startDate).clone(),
             status: item?.status,
           };
-        })
+        }),
       );
     } else {
       setFirstStep(true);
-      setClearDataUpload()
+      setClearDataUpload();
     }
   }, [showListUpload, data_list_upload, firstStep, location]);
 
@@ -102,7 +105,6 @@ const EmployeeUpload = () => {
       dispatch(setClearDataUpload());
     };
   }, [dispatch]);
-
 
   // handle change file
   const handleFileChange = ({ fileList }) => {
@@ -123,7 +125,7 @@ const EmployeeUpload = () => {
       return false;
     },
     onChange: handleFileChange,
-    disabled: showListUpload
+    disabled: showListUpload,
   };
 
   // handle remove file
@@ -135,36 +137,38 @@ const EmployeeUpload = () => {
     });
   };
 
-  // handle upload 
+  // handle upload
   const handleUpload = async () => {
     try {
-      setFileProgress(0)
-      const body = { image: fileName, onProgress: (progress) => setFileProgress(progress) };
+      setFileProgress(0);
+      const body = {
+        image: fileName,
+        onProgress: (progress) => setFileProgress(progress),
+      };
       await dispatch(uploadEmployee(body)).unwrap();
-
     } catch (error) {
       setFileList((prevFileList) =>
         prevFileList.map((file) => {
           if (file.name === fileName.name) {
-            return { ...file, status: 'error' };
+            return { ...file, status: "error" };
           }
           return file;
-        })
+        }),
       );
     }
   };
 
-  // handle reupload 
+  // handle reupload
   const reUploadFile = () => {
     setFileList((prevFileList) =>
       prevFileList.map((file) => ({
         ...file,
         percent: 0,
-        status: 'uploading'
-      }))
+        status: "uploading",
+      })),
     );
     handleUpload();
-  }
+  };
 
   // handle onFinish form
   const onFinish = async () => {
@@ -173,20 +177,29 @@ const EmployeeUpload = () => {
         return {
           ...item,
           empType: item?.empType?.toString(),
-          empTypeId: typeof item?.empType === 'string' ? item?.empTypeId?.toString() : item?.empType?.toString(),
-          startDate: moment(item?.startDate).format(dateFormatting?.dateCapital),
+          empTypeId:
+            typeof item?.empType === "string"
+              ? item?.empTypeId?.toString()
+              : item?.empType?.toString(),
+          startDate: moment(item?.startDate).format(
+            dateFormatting?.dateCapital,
+          ),
           endDate: moment(item?.endDate).format(dateFormatting?.dateCapital),
-        }
+        };
       });
-      const assignmentEmployeeListItem = dataAssignmentEmployeeList?.map((item) => {
-        return {
-          ...item,
-          jobId: item?.jobId?.toString(),
-          positionId: item?.positionId.toString(),
-          startDate: moment(item?.startDate).format(dateFormatting?.dateCapital),
-          endDate: moment(item?.endDate).format(dateFormatting?.dateCapital),
-        }
-      });
+      const assignmentEmployeeListItem = dataAssignmentEmployeeList?.map(
+        (item) => {
+          return {
+            ...item,
+            jobId: item?.jobId?.toString(),
+            positionId: item?.positionId.toString(),
+            startDate: moment(item?.startDate).format(
+              dateFormatting?.dateCapital,
+            ),
+            endDate: moment(item?.endDate).format(dateFormatting?.dateCapital),
+          };
+        },
+      );
       const body = {
         uploadEmployeeDTO: [...employeeListItem],
         uploadAssignmentDTO: [...assignmentEmployeeListItem],
@@ -216,14 +229,13 @@ const EmployeeUpload = () => {
     },
   ];
 
-
   // handle reset upload and set default table
   const handleReset = () => {
-    dispatch(setClearDataUpload())
+    dispatch(setClearDataUpload());
     setDataAssignmentEmployeeList([]);
     setDataEmployeeList([]);
-    setShowListUpload(false)
-    setFileList([])
+    setShowListUpload(false);
+    setFileList([]);
   };
 
   return (
@@ -232,7 +244,7 @@ const EmployeeUpload = () => {
         <BreadCrumb routes={routes} />
         <div className={"w-full flex justify-end"}>
           <ButtonComponent
-            icon={<DownloadOutlined style={{ fontSize: '24px' }} />}
+            icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
             onClick={() => {
               dispatch(downloadEmpTemlpate());
             }}
@@ -322,7 +334,12 @@ const EmployeeUpload = () => {
                   />
                   {file.status === "error" && (
                     <ButtonComponent border={false}>
-                      <span className={"text-green-800 mr-2"} onClick={reUploadFile}>Re-upload</span>
+                      <span
+                        className={"text-green-800 mr-2"}
+                        onClick={reUploadFile}
+                      >
+                        Re-upload
+                      </span>
                       <UndoOutlined style={{ color: "#58804D" }} />
                     </ButtonComponent>
                   )}
@@ -340,17 +357,21 @@ const EmployeeUpload = () => {
                 Back
               </ButtonComponent>
               <div className="w-full justify-end flex gap-2">
-                {firstStep === false &&
-                  <ButtonComponent type={"submit"} onClick={handleReset} icon={
-                    <SVGIcon
-                      name={`IconButtonClear`}
-                      width={24}
-                    />
-                  } disabled={firstStep}>
+                {firstStep === false && (
+                  <ButtonComponent
+                    type={"submit"}
+                    onClick={handleReset}
+                    icon={<SVGIcon name={`IconButtonClear`} width={24} />}
+                    disabled={firstStep}
+                  >
                     Clear
                   </ButtonComponent>
-                }
-                <ButtonComponent type={"submit"} htmlType={"submit"} disabled={firstStep}>
+                )}
+                <ButtonComponent
+                  type={"submit"}
+                  htmlType={"submit"}
+                  disabled={firstStep}
+                >
                   Save
                 </ButtonComponent>
               </div>
@@ -365,10 +386,9 @@ const EmployeeUpload = () => {
             setModalBack(false);
           }}
           handleOk={() => {
-            navigate(-1)
-            dispatch(setClearDataUpload())
-          }
-          }
+            navigate(-1);
+            dispatch(setClearDataUpload());
+          }}
           width={400}
         >
           <div className="flex justify-center mt-5 gap-[20px]">

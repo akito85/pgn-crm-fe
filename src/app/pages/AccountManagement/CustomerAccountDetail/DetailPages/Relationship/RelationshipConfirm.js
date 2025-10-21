@@ -50,9 +50,7 @@ const data_detail = {
   updatedDate: "22 Agustus 2023 11:03:55",
 };
 
-const RelationshipConfirm = ({
-	data = {}
-}) => {
+const RelationshipConfirm = ({ data = {} }) => {
   // useEffect(() => {},[]);
   return (
     <Fragment>
@@ -63,15 +61,9 @@ const RelationshipConfirm = ({
       <div className="w-full grid grid-cols-4 gap-4">
         {/* Account information */}
 
-        <DetailText label="Object Table">
-          {data?.objectTable}
-        </DetailText>
-        <DetailText label="Object Id">
-          {data?.objectId}
-        </DetailText>
-        <DetailText label="Relation Code">
-          {data?.relationCode}
-        </DetailText>
+        <DetailText label="Object Table">{data?.objectTable}</DetailText>
+        <DetailText label="Object Id">{data?.objectId}</DetailText>
+        <DetailText label="Relation Code">{data?.relationCode}</DetailText>
         <DetailText label="Direction Flag">{data?.directionFlag}</DetailText>
       </div>
     </Fragment>

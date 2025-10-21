@@ -1,9 +1,7 @@
-import React from 'react'
+import React from "react";
 
 const TableTaxImplicationRuleCondition = () => {
-  return (
-    <div>TableTaxImplicationRuleCondition</div>
-  )
-}
+  return <div>TableTaxImplicationRuleCondition</div>;
+};
 
-export default TableTaxImplicationRuleCondition
+export default TableTaxImplicationRuleCondition;

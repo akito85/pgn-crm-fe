@@ -32,7 +32,7 @@ const PositionForm = (props) => {
     data_detail: data_position,
     loading,
   } = useSelector((state) => state.master_position);
-  const { bodyError, isLoading } = useSelector(state => state?.general);
+  const { bodyError, isLoading } = useSelector((state) => state?.general);
 
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -72,20 +72,21 @@ const PositionForm = (props) => {
     },
     {
       path: "",
-      breadcrumbName: `${type === "update" ? "Update Position" : "Create Position"
-        }`,
+      breadcrumbName: `${
+        type === "update" ? "Update Position" : "Create Position"
+      }`,
     },
   ];
   const handleSave = async () => {
     try {
-      handleCancel()
+      handleCancel();
       if (type === "update") {
         await dispatch(updateMasterPosition(payload?.requestBody))?.unwrap();
       } else {
         await dispatch(createMasterPosition(payload?.requestBody))?.unwrap();
       }
     } catch (error) {
-      handleCancel()
+      handleCancel();
     }
   };
 
@@ -93,24 +94,35 @@ const PositionForm = (props) => {
     try {
       let url;
       let body;
-      if (type === 'update') {
-        body = { ...formValue, id: location?.state?.id }
-        url = '/v1/dbs/api/position/validate-update'
+      if (type === "update") {
+        body = { ...formValue, id: location?.state?.id };
+        url = "/v1/dbs/api/position/validate-update";
       } else {
-        body = formValue
-        url = '/v1/dbs/api/position/validate-create'
+        body = formValue;
+        url = "/v1/dbs/api/position/validate-create";
       }
       setPayload({
         requestBody: body,
-        validateCreateUpdate: { body: body, services: userHttpService, endPoint: url, type }
+        validateCreateUpdate: {
+          body: body,
+          services: userHttpService,
+          endPoint: url,
+          type,
+        },
       });
-      await dispatch(validateCreateUpdate({ body: body, services: userHttpService, endPoint: url, type }))?.unwrap();
+      await dispatch(
+        validateCreateUpdate({
+          body: body,
+          services: userHttpService,
+          endPoint: url,
+          type,
+        }),
+      )?.unwrap();
       setOpenModal(true);
     } catch (error) {
       setOpenModal(false);
     }
   };
-
 
   const onFinishFailed = () => {
     setOpenModal(false);
@@ -130,25 +142,26 @@ const PositionForm = (props) => {
     }
   };
   // render cost center
-  const costCenterName = data_cost_center?.data?.find(item => item?.id === formValue?.costCenter)?.name;
-
+  const costCenterName = data_cost_center?.data?.find(
+    (item) => item?.id === formValue?.costCenter,
+  )?.name;
 
   const handleRetry = () => {
-    handleCancelTryAgain()
-    handleCancel()
-    if (bodyError?.action === 'CREATE_MASTER_POSITION') {
-      dispatch(createMasterPosition(payload?.requestBody))
-    } else if (bodyError?.action === 'UPDATE_MASTER_POSITION') {
-      dispatch(updateMasterPosition(payload?.requestBody))
-    } else if (bodyError?.action === 'GET_DETAIL_MASTER_POSITION') {
-      dispatch(getDetailMasterPosition(location?.state?.id))
-    } else if (bodyError?.action === 'VALIDATE_CREATE_UPDATE') {
-      dispatch(validateCreateUpdate(payload?.validateCreateUpdate))
+    handleCancelTryAgain();
+    handleCancel();
+    if (bodyError?.action === "CREATE_MASTER_POSITION") {
+      dispatch(createMasterPosition(payload?.requestBody));
+    } else if (bodyError?.action === "UPDATE_MASTER_POSITION") {
+      dispatch(updateMasterPosition(payload?.requestBody));
+    } else if (bodyError?.action === "GET_DETAIL_MASTER_POSITION") {
+      dispatch(getDetailMasterPosition(location?.state?.id));
+    } else if (bodyError?.action === "VALIDATE_CREATE_UPDATE") {
+      dispatch(validateCreateUpdate(payload?.validateCreateUpdate));
     } else {
-      dispatch(getAllCostCenterDDL())
+      dispatch(getAllCostCenterDDL());
     }
-  }
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  };
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
     <LayoutMenu>
@@ -163,8 +176,9 @@ const PositionForm = (props) => {
         >
           <Spin spinning={loading || isLoading}>
             <BaseContainer
-              header={`${type === "update" ? "UPDATE POSITION" : "CREATE POSITION"
-                }`}
+              header={`${
+                type === "update" ? "UPDATE POSITION" : "CREATE POSITION"
+              }`}
             >
               <div className={"flex flex-col w-full"}>
                 <div className={"flex gap-4"}>
@@ -174,9 +188,12 @@ const PositionForm = (props) => {
                     rules={formMessageRequired("name")}
                     name={"name"}
                   >
-                    <Input disabled={type === 'update'} onInput={(e) =>
-                      (e.target.value = e.target.value.trimStart())
-                    } />
+                    <Input
+                      disabled={type === "update"}
+                      onInput={(e) =>
+                        (e.target.value = e.target.value.trimStart())
+                      }
+                    />
                   </Form.Item>
                   <Form.Item
                     className={"w-full"}
@@ -196,7 +213,6 @@ const PositionForm = (props) => {
                 </div>
                 <Form.Item label={"Description"} name={"description"}>
                   <InputComponent type="textarea" />
-
                 </Form.Item>
               </div>
             </BaseContainer>

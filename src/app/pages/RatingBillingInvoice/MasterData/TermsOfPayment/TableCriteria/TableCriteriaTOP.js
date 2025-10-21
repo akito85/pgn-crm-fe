@@ -10,7 +10,7 @@ const getColumnSearchProps = (
   searchText,
   handleSearch,
   excludeRender = false,
-  typeFilter = "input"
+  typeFilter = "input",
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
@@ -129,7 +129,7 @@ export const columnsTableCriteriaTOP = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
 ) => [
   {
     sorter: true,
@@ -149,7 +149,7 @@ export const columnsTableCriteriaTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -170,7 +170,7 @@ export const columnsTableCriteriaTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -191,7 +191,7 @@ export const columnsTableCriteriaTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -213,7 +213,7 @@ export const columnsTableCriteriaTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -234,7 +234,7 @@ export const columnsTableCriteriaTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -255,7 +255,7 @@ export const columnsTableCriteriaTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -276,7 +276,7 @@ export const columnsTableCriteriaTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -297,7 +297,7 @@ export const columnsTableCriteriaTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -318,7 +318,7 @@ export const columnsTableCriteriaTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -340,7 +340,7 @@ export const columnsTableCriteriaTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -362,7 +362,7 @@ export const columnsTableCriteriaTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -384,7 +384,7 @@ export const columnsTableCriteriaTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -405,7 +405,7 @@ export const columnsTableCriteriaTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -426,7 +426,7 @@ export const columnsTableCriteriaTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -447,7 +447,7 @@ export const columnsTableCriteriaTOP = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (index) => {
       const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -485,7 +485,7 @@ export const columnsTableCriteriaTOP = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (index) => {
       const text = index ? moment(index).format("DD MMM YYYY") : "";

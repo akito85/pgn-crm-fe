@@ -214,8 +214,8 @@ const TableInlineTos = ({
   action,
   useSelect = false,
   usePagination = false,
-  onChangePage = () => { },
-  onSizeChanger = () => { },
+  onChangePage = () => {},
+  onSizeChanger = () => {},
   pageSize,
   current,
   totalData,
@@ -226,7 +226,7 @@ const TableInlineTos = ({
   actionButton,
   onSort,
   useContainer = true,
-  setDisabledButton = () => { }
+  setDisabledButton = () => {},
 }) => {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
@@ -241,7 +241,7 @@ const TableInlineTos = ({
   useEffect(() => {
     if (mode === "update") {
       setData(
-        tableData?.map((row, index) => ({ ...row, key: index.toString() }))
+        tableData?.map((row, index) => ({ ...row, key: index.toString() })),
       );
     } else {
       setData(tableData);
@@ -249,10 +249,9 @@ const TableInlineTos = ({
   }, [mode, tableData]);
 
   useEffect(() => {
-    setDisabledButton(storedDate)
+    setDisabledButton(storedDate);
   }, [setDisabledButton, storedDate]);
 
-  
   const edit = (record, field) => {
     form.setFieldsValue(record);
     setEditingKey(record.key);
@@ -310,7 +309,7 @@ const TableInlineTos = ({
     setStatusAction("add");
     const newRow = {
       key: (data.length + 1).toString(),
-      status: "ACTIVE"
+      status: "ACTIVE",
     };
     setData((prevData) => [...prevData, newRow]);
     setEditingKey(newRow.key);
@@ -330,17 +329,15 @@ const TableInlineTos = ({
         icon={<SVGIcon name="IconDelete" width={24} color={"#C0BEC6"} />}
         border={false}
       />
-    ) : (
-      // <ButtonComponent
-      //   onClick={() => deleteRow(record.key)}
-      //   disabled={editingKey !== ""}
-      //   icon={
-      //     <SVGIcon name="IconDelete" width={24} />
-      //   }
-      //   border={false}
-      // />
-      null
-    );
+    ) : // <ButtonComponent
+    //   onClick={() => deleteRow(record.key)}
+    //   disabled={editingKey !== ""}
+    //   icon={
+    //     <SVGIcon name="IconDelete" width={24} />
+    //   }
+    //   border={false}
+    // />
+    null;
   };
   const columns = [
     ...cols,
@@ -348,7 +345,7 @@ const TableInlineTos = ({
       title: "ACTIONS",
       dataIndex: "operation",
       align: "center",
-      fixed: 'right',
+      fixed: "right",
       width: 150,
       render: (_, record) => {
         const editable = record.key === editingKey;
@@ -374,7 +371,7 @@ const TableInlineTos = ({
                 <Popover
                   content={
                     <Space direction="vertical">
-                      {record?.id ?
+                      {record?.id ? (
                         <ButtonComponent
                           icon={<SVGIcon name="IconDetail" width={24} />}
                           border={false}
@@ -382,16 +379,22 @@ const TableInlineTos = ({
                         >
                           <span className={"text-black"}> Detail</span>
                         </ButtonComponent>
-                        :
+                      ) : (
                         <ButtonComponent
                           disabled
-                          icon={<SVGIcon name="IconDetail" color={"#C0BEC6"} width={24} />}
+                          icon={
+                            <SVGIcon
+                              name="IconDetail"
+                              color={"#C0BEC6"}
+                              width={24}
+                            />
+                          }
                           border={false}
-                        // onClick={() => onDetail(record?.id)}
+                          // onClick={() => onDetail(record?.id)}
                         >
                           <span className={"text-[#C0BEC6]"}> Detail</span>
                         </ButtonComponent>
-                      }
+                      )}
                       <ButtonComponent
                         onClick={() => edit(record)}
                         disabled={editingKey !== ""}
@@ -567,10 +570,10 @@ const TableInlineTos = ({
                     regex: regex,
                     required: required,
                     disableDate,
-                    disabledField: col.disabledField
+                    disabledField: col.disabledField,
                   }),
                 };
-              })
+              }),
             )}
             rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
             components={{
@@ -592,7 +595,7 @@ const TableInlineTos = ({
       {useSelect || usePagination ? (
         <div className={"w-full flex mb-5 gap-2 justify-between"}>
           {useSelect ? (
-            <div className={'w-2/5'}>
+            <div className={"w-2/5"}>
               <Select
                 mode="multiple"
                 placeholder="Show All Column"
@@ -658,7 +661,7 @@ const TableInlineTos = ({
                   disableDate,
                 }),
               };
-            })
+            }),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

@@ -26,11 +26,11 @@ const AdjustmentBISectionForm = ({
   invoiceNumber,
   dataInvoice,
   adjustmentId,
-  showAction
+  showAction,
 }) => {
   // Selector
   const { dataListItem, dataDetailType } = useSelector(
-    (state) => state.adjustmentBilling
+    (state) => state.adjustmentBilling,
   );
 
   // Declaration
@@ -55,7 +55,6 @@ const AdjustmentBISectionForm = ({
   const [modalHistory, setModalHistory] = useState(false);
   const [dataHistory, setDataHistory] = useState({});
 
-
   // Use Effect
   useEffect(() => {
     dispatch(getListDetailType());
@@ -70,7 +69,7 @@ const AdjustmentBISectionForm = ({
   useEffect(() => {
     if (dataItem) {
       const dataListItemDetail = dataListItem?.data?.find(
-        (a) => a.billingItem === dataItem
+        (a) => a.billingItem === dataItem,
       );
 
       formDetail.setFieldsValue({
@@ -100,7 +99,7 @@ const AdjustmentBISectionForm = ({
     let newTotalAmount = formDetail.getFieldValue().amount;
     let currency = formDetail.getFieldValue().currency;
     const dataListItemDetail = dataListItem?.data?.find(
-      (a) => a.billingItem === dataItem
+      (a) => a.billingItem === dataItem,
     );
 
     if (adjustmentAmount) {
@@ -230,7 +229,7 @@ const AdjustmentBISectionForm = ({
             tempValue.length > 0
               ? tempValue[0].replace(
                   /\B(?=(\d{3})+(?!\d))/g,
-                  thousandSeparator
+                  thousandSeparator,
                 ) + descimal
               : "";
           return format.toLowerCase();
@@ -265,7 +264,7 @@ const AdjustmentBISectionForm = ({
     (r) => {
       setListDataABI((prevState) => prevState.filter((e) => e.key !== r.key));
     },
-    [listDataABI]
+    [listDataABI],
   );
 
   // Handle Cancel Modal
@@ -290,13 +289,12 @@ const AdjustmentBISectionForm = ({
   const dataBillingItem =
     listDataABI?.length > 0 ? listDataABI?.map((item) => item?.item) : [];
 
-    // console.log(dataBillingItem);
-    
+  // console.log(dataBillingItem);
 
   const filterBillingItem = () => {
     return dataBillingItem.length > 0
       ? dataListItem?.data?.filter(
-          (a) => !dataBillingItem?.includes(a.billingItem)
+          (a) => !dataBillingItem?.includes(a.billingItem),
         )
       : dataListItem?.data;
   };
@@ -304,7 +302,7 @@ const AdjustmentBISectionForm = ({
   // Handle Add Value to Array
   const handleAdd = (formValue) => {
     const findDataItem = dataListItem?.data?.find(
-      (item) => item.billingItem === formValue?.item
+      (item) => item.billingItem === formValue?.item,
     )?.billingItemCode;
 
     if (typeModal === "create") {
@@ -345,7 +343,7 @@ const AdjustmentBISectionForm = ({
 
   // Handle Update
   const handleUpdate = (r) => {
-    setDataItem(r?.item)
+    setDataItem(r?.item);
     setDataUpdate(r);
     setKeyTable(r?.key);
     setTypeModal("update");
@@ -423,8 +421,8 @@ const AdjustmentBISectionForm = ({
               onFilter,
               sorter,
               handleDetail,
-              showAction
-            )
+              showAction,
+            ),
           )}
         />
       </div>
@@ -687,9 +685,7 @@ const AdjustmentBISectionForm = ({
         }
       >
         <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-          <DetailText label="Record ID">
-            {dataHistory.recordId}
-          </DetailText>
+          <DetailText label="Record ID">{dataHistory.recordId}</DetailText>
           <DetailText label="Created Date">
             {dataHistory?.createdDate
               ? moment(dataHistory.createdDate).format(dateFormatting.dateTime)

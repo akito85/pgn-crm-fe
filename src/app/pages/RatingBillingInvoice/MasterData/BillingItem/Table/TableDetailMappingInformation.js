@@ -1,9 +1,16 @@
 import moment from "moment";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValueFE,
+} from "../../../../../../utils/getColumnSearchProps";
 import Highlighter from "react-highlight-words";
 import { Tooltip } from "antd";
 import SVGIcon from "../../../../../../assets/Icon/index";
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
 
 export const columnsDetail = (
   search,
@@ -19,7 +26,7 @@ export const columnsDetail = (
   onFilter = () => {},
   sorterDetail = () => {},
   dataMappingItem = [],
-  handleDetailHistory = () => {}
+  handleDetailHistory = () => {},
   // dataMapDetailItemList = [],
 ) => [
   {
@@ -38,9 +45,9 @@ export const columnsDetail = (
     // ...(type === "detail"
     //   ? { sorter: true }
     //   : {
-          // onFilter: (value, record) => onFilter("itemName", value, record),
-          sorter: (a, b) => sorterDetail("itemName", a, b),
-        // }),
+    // onFilter: (value, record) => onFilter("itemName", value, record),
+    sorter: (a, b) => sorterDetail("itemName", a, b),
+    // }),
     editable: true,
     inputType: "select",
     required: true,
@@ -61,7 +68,7 @@ export const columnsDetail = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -71,7 +78,7 @@ export const columnsDetail = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // render: (text) => {
     //   // if (dataSourceBy !== "BE") {
@@ -95,9 +102,9 @@ export const columnsDetail = (
     // ...(type === "detail"
     //   ? { sorter: true }
     //   : {
-          // onFilter: (value, record) => onFilter("startDate", value, record),
-          sorter: (a, b) => sorterDetail("startDate", a, b),
-        // }),
+    // onFilter: (value, record) => onFilter("startDate", value, record),
+    sorter: (a, b) => sorterDetail("startDate", a, b),
+    // }),
     editable: true,
     inputType: "date",
     align: "center",
@@ -111,7 +118,7 @@ export const columnsDetail = (
       handleSearch,
       true,
       "date",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderDateColumn(
@@ -120,7 +127,7 @@ export const columnsDetail = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "startDate",
@@ -158,9 +165,9 @@ export const columnsDetail = (
     // ...(type === "detail"
     //   ? { sorter: true }
     //   : {
-          // onFilter: (value, record) => onFilter("endDate", value, record),
-          sorter: (a, b) => sorterDetail("endDate", a, b),
-        // }),
+    // onFilter: (value, record) => onFilter("endDate", value, record),
+    sorter: (a, b) => sorterDetail("endDate", a, b),
+    // }),
     editable: true,
     align: "center",
     inputType: "date",
@@ -173,7 +180,7 @@ export const columnsDetail = (
       handleSearch,
       true,
       "date",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderDateColumn(
@@ -182,7 +189,7 @@ export const columnsDetail = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "endDate",

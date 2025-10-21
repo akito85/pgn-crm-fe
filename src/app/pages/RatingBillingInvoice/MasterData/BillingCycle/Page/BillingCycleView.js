@@ -41,7 +41,7 @@ const BillingCycleView = ({ type }) => {
   const [bodyError, setBodyError] = useState({});
   const [chooseId, setChooseId] = useState();
   const { data_list_billing_cycle, loading, dataApprovalHistory } = useSelector(
-    (state) => state.billingCycle
+    (state) => state.billingCycle,
   );
   const routes = [
     {
@@ -70,7 +70,7 @@ const BillingCycleView = ({ type }) => {
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
-      downloadBillingCycle({ search: tempSearch, page, pageSize, sort })
+      downloadBillingCycle({ search: tempSearch, page, pageSize, sort }),
     );
   };
 
@@ -109,7 +109,14 @@ const BillingCycleView = ({ type }) => {
   };
 
   useEffect(() => {
-    dispatch(getBillingCycleList({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }));
+    dispatch(
+      getBillingCycleList({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
+    );
   }, [dispatch, search, page, pageSize, sort]);
 
   useEffect(() => {
@@ -188,7 +195,7 @@ const BillingCycleView = ({ type }) => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -272,11 +279,22 @@ const BillingCycleView = ({ type }) => {
         const linkContent =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={isEditable ? "#0075bf" : "#8D91A0"} width={24} />}
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={24}
+                />
+              }
               border={false}
               disabled={!isEditable}
             >
-              <span className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"}`}> Update</span>
+              <span
+                className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"}`}
+              >
+                {" "}
+                Update
+              </span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
@@ -417,11 +435,11 @@ const BillingCycleView = ({ type }) => {
                   searchText,
                   handleSearch,
                   handleApprovalHistory,
-                  handleInactive
+                  handleInactive,
                 ),
                 ...useColumnActionPermission(
                   ["activate", "view", "update", "history"],
-                  itemGrantAccess
+                  itemGrantAccess,
                 ),
               ]}
               tableScrolled={{ y: 525, x: 2200 }}

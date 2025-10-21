@@ -18,7 +18,7 @@ const data = [
     bilPeriod: "Sewa GOR",
     dueDate: "Pcs",
     price: "15000",
-    priceUsd:"1.00",
+    priceUsd: "1.00",
     status: "Active",
     createdBy: "Annisa",
     createdDate: "21 Agustus 2023 11:03:55",
@@ -31,7 +31,7 @@ const data = [
     bilPeriod: "Sewa Tanah",
     dueDate: "M2",
     price: "15000",
-    priceUsd:"1.00",
+    priceUsd: "1.00",
     status: "Active",
     createdBy: "Annisa",
     createdDate: "21 Agustus 2023 11:03:55",
@@ -44,7 +44,7 @@ const data = [
     bilPeriod: "Sewa Tanah",
     dueDate: "M2",
     price: "15000",
-    priceUsd:"1.00",
+    priceUsd: "1.00",
     status: "Inactive",
     createdBy: "Annisa",
     createdDate: "21 Agustus 2023 11:03:55",
@@ -53,9 +53,7 @@ const data = [
   },
 ];
 
-const AccountBillingTable = ({
-    handleChangeInteraction = () => {},
-}) => {
+const AccountBillingTable = ({ handleChangeInteraction = () => {} }) => {
   // const dispatch = useDispatch();
   // const { data_detail, loading } = useSelector(
   //   (state) => state.accountManagement

@@ -127,8 +127,8 @@ const EditableCell = ({
                       } else {
                         return Promise.reject(
                           new Error(
-                            "Please adjust value. Total Percentage must be 100%"
-                          )
+                            "Please adjust value. Total Percentage must be 100%",
+                          ),
                         );
                       }
                     },
@@ -152,7 +152,7 @@ const getColumnSearchProps = (
   searchText,
   handleSearch,
   excludeRender = false,
-  typeFilter = "input"
+  typeFilter = "input",
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
@@ -253,7 +253,9 @@ const FunctionalPDDetail = ({
 
   const filterItem = () => {
     return dataItem?.length > 0
-      ? data_country?.filter((a) => !dataItem?.some((b) => b?.value === a?.value))
+      ? data_country?.filter(
+          (a) => !dataItem?.some((b) => b?.value === a?.value),
+        )
       : data_country;
   };
 
@@ -424,7 +426,7 @@ const FunctionalPDDetail = ({
   // Function Delete Row
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -481,7 +483,7 @@ const FunctionalPDDetail = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -498,7 +500,7 @@ const FunctionalPDDetail = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -659,7 +661,7 @@ const FunctionalPDDetail = ({
                   validateBoolean: validateBoolean,
                   formPD: formPD,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],

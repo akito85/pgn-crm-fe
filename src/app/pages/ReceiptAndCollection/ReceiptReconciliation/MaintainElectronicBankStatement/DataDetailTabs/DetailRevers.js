@@ -70,7 +70,7 @@ const DetailRevers = (props) => {
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [listDataAttachmentApprove, setListDataAttachmentApprove] = useState(
-    []
+    [],
   );
 
   const [tableDatas, setTableDatas] = useState([]);
@@ -105,7 +105,7 @@ const DetailRevers = (props) => {
         pageSize,
         sort,
         id,
-      })
+      }),
     );
   }, [search, page, pageSize, sort, dispatch, id]);
 
@@ -159,7 +159,7 @@ const DetailRevers = (props) => {
   }, [dataListAppHierDetail]);
 
   const matchedObjectsCriteria = data_reverse_select?.filter((obj) =>
-    keyTableForceSelected.includes(obj.receiptReconcileId)
+    keyTableForceSelected.includes(obj.receiptReconcileId),
   );
 
   // const combineAttachment = matchedObjectsCriteria?.map(
@@ -167,7 +167,7 @@ const DetailRevers = (props) => {
   // )[0];
 
   const combineAttachment = matchedObjectsCriteria?.flatMap(
-    (obj) => obj.attachmentDtoList || []
+    (obj) => obj.attachmentDtoList || [],
   );
 
   //attachment untuk approve use effect nya
@@ -358,7 +358,7 @@ const DetailRevers = (props) => {
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/receipt/upload-attachment/${elements}`,
-              body
+              body,
             );
           }
         }
@@ -372,10 +372,10 @@ const DetailRevers = (props) => {
             pageSize,
             sort,
             search: encodeURIComponent(JSON.stringify(search)),
-          })
+          }),
         );
         dispatch(
-          getTableReverseSelect({ id, boolean: showModal, page, pageSize })
+          getTableReverseSelect({ id, boolean: showModal, page, pageSize }),
         );
       })
       .catch((error) => {
@@ -402,7 +402,7 @@ const DetailRevers = (props) => {
 
     const tempData = (data_reverse_select || [])
       .filter((data) =>
-        keyTableForceSelected.includes(data?.receiptReconcileId)
+        keyTableForceSelected.includes(data?.receiptReconcileId),
       )
       ?.map((item) => {
         const dataApprov = {
@@ -434,7 +434,7 @@ const DetailRevers = (props) => {
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/receipt/upload-attachment/${elements}`,
-              body
+              body,
             );
           }
         }
@@ -449,7 +449,7 @@ const DetailRevers = (props) => {
             pageSize,
             sort,
             search: encodeURIComponent(JSON.stringify(search)),
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -662,7 +662,7 @@ const DetailRevers = (props) => {
                 searchInput,
                 searchedColumn,
                 searchText,
-                handleSearch
+                handleSearch,
               )}
               dataTable={tableForceSelected}
               listDataAttachment={listDataAttachment}

@@ -16,7 +16,7 @@ const columns = (
   searchText,
   handleSearch = () => {},
   onFilter = () => {},
-  sorter = () => {}
+  sorter = () => {},
 ) => {
   return [
     {
@@ -37,7 +37,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -53,13 +53,13 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
   ];
 };
 
-const ProductDistributionDetail = ({data_detail, openModal, closeModal}) => {
+const ProductDistributionDetail = ({ data_detail, openModal, closeModal }) => {
   // Declaration
   const searchInput = useRef(null);
 
@@ -69,18 +69,18 @@ const ProductDistributionDetail = ({data_detail, openModal, closeModal}) => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
 
-    // Function Search Column
-    const handleSearch = (selectedKeys, confirm, dataIndex) => {
-      confirm();
-      setSearchText(selectedKeys[0]);
-      const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-      if (searchedColumn !== tempSearchColumn) {
-        setPage(1);
-      }
-      setSearchedColumn(tempSearchColumn);
-    };
+  // Function Search Column
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
+    if (searchedColumn !== tempSearchColumn) {
+      setPage(1);
+    }
+    setSearchedColumn(tempSearchColumn);
+  };
 
-      // Function Change Pagination
+  // Function Change Pagination
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
@@ -113,8 +113,8 @@ const ProductDistributionDetail = ({data_detail, openModal, closeModal}) => {
 
   return (
     <ModalCustom
-    isOpen={openModal}
-    handleCancel={closeModal}
+      isOpen={openModal}
+      handleCancel={closeModal}
       type="detail"
       header="Detail Raw Material Source"
       width={800}
@@ -173,11 +173,11 @@ const ProductDistributionDetail = ({data_detail, openModal, closeModal}) => {
           searchText,
           handleSearch,
           onFilter,
-          sorter
+          sorter,
         )}
       />
     </ModalCustom>
-  )
-}
+  );
+};
 
-export default ProductDistributionDetail
+export default ProductDistributionDetail;

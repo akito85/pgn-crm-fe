@@ -19,7 +19,7 @@ const useReportCustomerAgreement = () => {
   const searchInput = useRef(null);
   const encodeSearch = useMemo(
     () => encodeURIComponent(JSON.stringify(search)),
-    [search]
+    [search],
   );
   const [downloadCustomerAgreement, { isLoading: loading }] =
     useGetCustomerAgreementDownloadMutation();
@@ -33,12 +33,12 @@ const useReportCustomerAgreement = () => {
       },
       {
         refetchOnMountOrArgChange: true,
-      }
+      },
     );
 
   const loadings = useMemo(
     () => isLoading || isFetching || loading,
-    [isFetching, isLoading, loading]
+    [isFetching, isLoading, loading],
   );
   const { bodyError } = useSelector((state) => state?.general);
 
@@ -47,7 +47,7 @@ const useReportCustomerAgreement = () => {
       setPage(pageSize !== pageSizeChange ? 1 : pageChange);
       setPageSize(pageSizeChange);
     },
-    [pageSize]
+    [pageSize],
   );
 
   const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
@@ -105,9 +105,9 @@ const useReportCustomerAgreement = () => {
         searchedColumn,
         searchText,
         search,
-        handleSearch
+        handleSearch,
       ),
-    [handleSearch, page, pageSize, searchText, searchedColumn, search]
+    [handleSearch, page, pageSize, searchText, searchedColumn, search],
   );
 
   const itemActions = useMemo(() => {

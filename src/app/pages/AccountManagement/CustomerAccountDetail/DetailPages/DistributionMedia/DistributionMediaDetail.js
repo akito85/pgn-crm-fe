@@ -7,7 +7,6 @@ import PDIProductDetail from "../../../../ProductAndPromo/Product/ProductDetail/
 import { dateFormatting } from "../../../../../../utils";
 
 const DistributionMediaDetail = ({ data_detail = {} }) => {
-
   const renderDate = (date) => {
     if (date) {
       return moment(date).format(dateFormatting.date);

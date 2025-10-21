@@ -23,7 +23,7 @@ const ContentModalConfirmLateChargeRule = ({
   dataRuleInfo = {},
 }) => {
   const [typeLateChargeRuleInfo, setTypeLateChargeRuleInfo] = useState(
-    listSectionInfo[0].value
+    listSectionInfo[0].value,
   );
   const showSection = () => {
     switch (typeLateChargeRuleInfo) {
@@ -58,10 +58,15 @@ const ContentModalConfirmLateChargeRule = ({
                 {dataRuleInfo.documentNumber}
               </DetailText>
               <DetailText label={"Late Charge Maximum Amount"}>
-                {dataRuleInfo?.maxAmount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {dataRuleInfo?.maxAmount?.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </DetailText>
               <DetailText label={"Start Date"}>
-                {dataRuleInfo.startDate ? moment(dataRuleInfo.startDate).format(dateFormatting.date) : ''}
+                {dataRuleInfo.startDate
+                  ? moment(dataRuleInfo.startDate).format(dateFormatting.date)
+                  : ""}
               </DetailText>
               <div className="col-span-3">
                 <DetailText label={"Description"}>
@@ -78,7 +83,7 @@ const ContentModalConfirmLateChargeRule = ({
               dataLateChargeRule={data}
               type={type}
             />
-            
+
             <div className="mt-6 text-primary text-xs font-bold uppercase">
               {"Late charge rule formula"}
             </div>
@@ -107,7 +112,7 @@ const ContentModalConfirmLateChargeRule = ({
               disableSelect={true}
               approvalName={
                 (dataOption || []).filter(
-                  (data) => data.value === selectedHierarchy
+                  (data) => data.value === selectedHierarchy,
                 )?.[0].name || ""
               }
               dataTable={listDataAppHierDetail}

@@ -1,5 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { setBodyError, showModalError, showModalSuccess, validateError } from "../../general_slice";
+import {
+  setBodyError,
+  showModalError,
+  showModalSuccess,
+  validateError,
+} from "../../general_slice";
 import accountManagementService from "../../../services/account_management/accountManagementService";
 
 const initialState = {
@@ -22,7 +27,7 @@ export const getAccountAdditionalInfo = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getCategoryAdditionalInfoList = createAsyncThunk(
@@ -36,13 +41,21 @@ export const getCategoryAdditionalInfoList = createAsyncThunk(
           value: item.id,
           label: item.name,
           isAnyChild: item.isAnyChild,
-        }
-      })
+        };
+      });
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error, action: "GET_CATEGORY_ADDITIONAL_INFO_LIST", back : false }));
-      return thunkAPI.rejectWithValue(error.response.data.code === 419 ? null : error.response.data);
+      thunkAPI.dispatch(
+        validateError({
+          error,
+          action: "GET_CATEGORY_ADDITIONAL_INFO_LIST",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
     }
-  }
+  },
 );
 
 export const getValueAdditionalInfoList = createAsyncThunk(
@@ -55,20 +68,29 @@ export const getValueAdditionalInfoList = createAsyncThunk(
         return {
           value: item.id,
           label: item.name,
-        }
+        };
       });
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error, action: "GET_VALUE_ADDITIONAL_INFO_LIST", back : false }));
-      return thunkAPI.rejectWithValue(error.response.data.code === 419 ? null : error.response.data);
+      thunkAPI.dispatch(
+        validateError({
+          error,
+          action: "GET_VALUE_ADDITIONAL_INFO_LIST",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
     }
-  }
+  },
 );
 
 export const createUpdateAdditionalInfo = createAsyncThunk(
   "CREATE_UPDATE_ADDITIONAL_INFO",
   async ({ body }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/account-detail/additional-information/create-update";
+      const url =
+        "/v1/dbs/api/account-detail/additional-information/create-update";
       const response = await accountManagementService.createData(url, body);
       return response.data;
     } catch (error) {
@@ -85,7 +107,7 @@ export const createUpdateAdditionalInfo = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const deleteAdditonalInfo = createAsyncThunk(
@@ -113,7 +135,7 @@ export const deleteAdditonalInfo = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "DELETE_ADDITIONAL_INFO" })
+            validateError({ error, action: "DELETE_ADDITIONAL_INFO" }),
           );
         } else {
           const errorBody = {
@@ -125,9 +147,11 @@ export const deleteAdditonalInfo = createAsyncThunk(
           thunkAPI.dispatch(showModalError(errorBody));
         }
       }
-      return thunkAPI.rejectWithValue(error.response.data.code === 419 ? null : error.response.data);
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
     }
-  }
+  },
 );
 
 const additionalInformation = createSlice({

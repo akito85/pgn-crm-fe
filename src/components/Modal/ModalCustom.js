@@ -10,7 +10,7 @@ const ModalCustom = (props) => {
     children,
     width,
     type,
-    footer = []
+    footer = [],
   } = props;
 
   const typeModal = (type) => {
@@ -31,7 +31,7 @@ const ModalCustom = (props) => {
                     color: "#4B465C",
                     fontWeight: "600",
                     fontSize: "14px",
-                    textTransform: "uppercase"
+                    textTransform: "uppercase",
                   }}
                 >
                   {header}
@@ -50,7 +50,9 @@ const ModalCustom = (props) => {
             <div className={"rounded-tl-[5px] rounded-tr-[5px] p-4"}>
               <div className={"flex gap-x-1.5 items-center"}>
                 <div className="p-2.5 modal-header-box rounded-sm"></div>
-                <span className="text-primary uppercase font-semibold">{header}</span>
+                <span className="text-primary uppercase font-semibold">
+                  {header}
+                </span>
               </div>
             </div>
 
@@ -65,7 +67,9 @@ const ModalCustom = (props) => {
             <div className={"rounded-tl-[5px] rounded-tr-[5px] p-4"}>
               <div className={"flex gap-x-1.5 items-center"}>
                 <div className="p-2.5 modal-header-box rounded-sm"></div>
-                <span className="text-primary uppercase font-semibold">{header}</span>
+                <span className="text-primary uppercase font-semibold">
+                  {header}
+                </span>
               </div>
             </div>
 
@@ -81,7 +85,9 @@ const ModalCustom = (props) => {
       onOk={handleOk}
       onCancel={handleCancel}
       footer={footer}
-      className={type === 'confirmation' ? "modal-approve-reject" : "modal-custom"}
+      className={
+        type === "confirmation" ? "modal-approve-reject" : "modal-custom"
+      }
       centered={true}
       width={width}
       maskClosable={false}

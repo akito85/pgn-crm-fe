@@ -1,13 +1,5 @@
-import {
-  DownloadOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
-import {
-  Checkbox,
-  Form,
-  Spin,
-  Tooltip,
-} from "antd";
+import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { Checkbox, Form, Spin, Tooltip } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
@@ -45,11 +37,10 @@ import TablePaginationNew from "../../../../components/TablePaginationNew";
 
 const ApprovalHierarchyPage = () => {
   const { data, data_detail, loading } = useSelector(
-    (state) => state.apphierarchy
+    (state) => state.apphierarchy,
   );
   const dispatch = useDispatch();
-  const { bodyError } = useSelector(state => state?.general);
-
+  const { bodyError } = useSelector((state) => state?.general);
 
   // use state
   const [openModal, setOpenModal] = useState(false);
@@ -72,20 +63,23 @@ const ApprovalHierarchyPage = () => {
   const searchInput2 = useRef(null);
   const [searchedColumn2, setSearchedColumn2] = useState("");
   const [searchText2, setSearchText2] = useState("");
-  const [typeColumn, setTypeColumn] = useState('string');
+  const [typeColumn, setTypeColumn] = useState("string");
 
-
-  // const handle fecth 
+  // const handle fecth
   const handleFetch = useCallback(() => {
     dispatch(
-      getApprovHierarchyPaginate({ page, pageSize, sort, search: encodeURIComponent(JSON?.stringify(search)) })
+      getApprovHierarchyPaginate({
+        page,
+        pageSize,
+        sort,
+        search: encodeURIComponent(JSON?.stringify(search)),
+      }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
-
   // use effect
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
 
   const handleDetail = async (id) => {
@@ -95,10 +89,8 @@ const ApprovalHierarchyPage = () => {
       setOpenModal(true);
     } catch (error) {
       setOpenModal(false);
-
     }
   };
-
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -119,14 +111,14 @@ const ApprovalHierarchyPage = () => {
     confirm();
     setSearchText2(selectedKeys[0]);
     switch (dataIndex) {
-      case 'createdDate':
-        setTypeColumn('datetime')
+      case "createdDate":
+        setTypeColumn("datetime");
         break;
-      case 'operation':
-        setTypeColumn('status')
+      case "operation":
+        setTypeColumn("status");
         break;
       default:
-        setTypeColumn('string')
+        setTypeColumn("string");
         break;
     }
     setSearchedColumn2(dataIndex);
@@ -167,7 +159,7 @@ const ApprovalHierarchyPage = () => {
       title: "ACTOR",
       dataIndex: "createdBy",
       align: "left",
-      sorter: (a, b) => sorterFunction('createdBy', a, b),
+      sorter: (a, b) => sorterFunction("createdBy", a, b),
       ...getColumnSearchProps(
         "createdBy",
         searchInput2,
@@ -176,14 +168,23 @@ const ApprovalHierarchyPage = () => {
         handleSearch2,
         true,
       ),
-      render: (text) => renderColumn('createdBy', searchedColumn2, searchText2, text, false, 'input', search2)
+      render: (text) =>
+        renderColumn(
+          "createdBy",
+          searchedColumn2,
+          searchText2,
+          text,
+          false,
+          "input",
+          search2,
+        ),
     },
     {
       title: "ACTION",
       dataIndex: "operation",
       align: "left",
       width: 180,
-      sorter: (a, b) => sorterFunction('operation', a, b),
+      sorter: (a, b) => sorterFunction("operation", a, b),
       ...getColumnSearchProps(
         "operation",
         searchInput2,
@@ -191,15 +192,24 @@ const ApprovalHierarchyPage = () => {
         searchText2,
         handleSearch2,
         true,
-        'status'
+        "status",
       ),
-      render: (text) => renderColumn('operation', searchedColumn2, searchText2, text, false, 'input', search2)
+      render: (text) =>
+        renderColumn(
+          "operation",
+          searchedColumn2,
+          searchText2,
+          text,
+          false,
+          "input",
+          search2,
+        ),
     },
     {
       title: "ACTION DATE",
       dataIndex: "createdDate",
       align: "center",
-      sorter: (a, b) => sorterFunction('createdDate', a, b, 'date'),
+      sorter: (a, b) => sorterFunction("createdDate", a, b, "date"),
       ...getColumnSearchProps(
         "createdDate",
         searchInput2,
@@ -207,9 +217,17 @@ const ApprovalHierarchyPage = () => {
         searchText2,
         handleSearch2,
         false,
-        'datetime'
+        "datetime",
       ),
-      render: (text) => renderDateColumn('createdDate', searchedColumn2, searchText2, text, 'datetime', search2)
+      render: (text) =>
+        renderDateColumn(
+          "createdDate",
+          searchedColumn2,
+          searchText2,
+          text,
+          "datetime",
+          search2,
+        ),
     },
     {
       title: "REMARK",
@@ -226,7 +244,16 @@ const ApprovalHierarchyPage = () => {
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('remark', searchedColumn2, searchText2, text, true, 'input', search2)
+      render: (text) =>
+        renderColumn(
+          "remark",
+          searchedColumn2,
+          searchText2,
+          text,
+          true,
+          "input",
+          search2,
+        ),
     },
   ];
 
@@ -252,9 +279,18 @@ const ApprovalHierarchyPage = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('approvalName', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "approvalName",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "TYPE",
@@ -269,9 +305,18 @@ const ApprovalHierarchyPage = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('approvalType', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "approvalType",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -286,9 +331,18 @@ const ApprovalHierarchyPage = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('desc', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "desc",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -297,15 +351,24 @@ const ApprovalHierarchyPage = () => {
       key: "status",
       sorter: true,
       width: 120,
-      fixed: 'right',
+      fixed: "right",
       ...getColumnSearchProps(
         "status",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
   ];
 
@@ -323,10 +386,10 @@ const ApprovalHierarchyPage = () => {
   // handle cancel modals
   const handleCancelModal = () => {
     form.resetFields();
-    setModalType('')
+    setModalType("");
     setOpenModal(false);
     setRecord({});
-  }
+  };
 
   // handle onfinish
   const onFinish = async (formValue, handleCancel) => {
@@ -334,17 +397,15 @@ const ApprovalHierarchyPage = () => {
       const payload = {
         id: appHierId,
         body: { ...formValue, status },
-      }
-      setBody(payload)
-      handleCancel()
-      handleCancelModal()
-      await dispatch(
-        inactiveAppHierarchy(payload)
-      )?.unwrap();
-      await handleFetch()?.unwrap()
+      };
+      setBody(payload);
+      handleCancel();
+      handleCancelModal();
+      await dispatch(inactiveAppHierarchy(payload))?.unwrap();
+      await handleFetch()?.unwrap();
     } catch (error) {
-      await handleFetch()?.unwrap()
-      handleCancelModal()
+      await handleFetch()?.unwrap();
+      handleCancelModal();
     }
   };
 
@@ -357,12 +418,12 @@ const ApprovalHierarchyPage = () => {
           page,
           pageSize,
           sort,
-        })
+        }),
       )?.unwrap();
     } catch (error) {
-      await handleFetch()?.unwrap()
+      await handleFetch()?.unwrap();
     }
-  }
+  };
 
   const onSort = (_, __, sort) => {
     const dataSort = sort.order
@@ -371,11 +432,11 @@ const ApprovalHierarchyPage = () => {
     setSort(dataSort);
   };
 
-  // item actions 
+  // item actions
   const itemActions = [
     // toolbar items
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
@@ -384,10 +445,10 @@ const ApprovalHierarchyPage = () => {
         >
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={USER_ROUTES.CREATE_APPROVAL_HIERARCHY}>
           <ButtonComponent
@@ -397,13 +458,13 @@ const ApprovalHierarchyPage = () => {
             Create Approval Hierarchy
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // column action
     {
-      action: 'View',
-      type: 'table',
+      action: "View",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
@@ -416,40 +477,65 @@ const ApprovalHierarchyPage = () => {
               <SVGIcon name="IconDetail" width={24} />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Update',
-      type: 'table',
+      action: "Update",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Update">
             <NavLink
-              to={record?.status !== "INACTIVE" && USER_ROUTES.UPDATE_APPROVAL_HIERARCHY}
+              to={
+                record?.status !== "INACTIVE" &&
+                USER_ROUTES.UPDATE_APPROVAL_HIERARCHY
+              }
               state={record?.status !== "INACTIVE" && { id: record?.appHierId }}
-              className={record?.status === "INACTIVE" && "cursor-not-allowed"}>
-              {data_length > 3 ?
+              className={record?.status === "INACTIVE" && "cursor-not-allowed"}
+            >
+              {data_length > 3 ? (
                 <ButtonComponent
-                  icon={<SVGIcon name="IconEdit" color={record?.status === "INACTIVE" ? "#C0BEC6" : "#ACC424"} width={24} className={record?.status === "INACTIVE" && "cursor-not-allowed"} />}
+                  icon={
+                    <SVGIcon
+                      name="IconEdit"
+                      color={
+                        record?.status === "INACTIVE" ? "#C0BEC6" : "#ACC424"
+                      }
+                      width={24}
+                      className={
+                        record?.status === "INACTIVE" && "cursor-not-allowed"
+                      }
+                    />
+                  }
                   border={false}
-                  disabled={record?.status === "INACTIVE" && true}>
+                  disabled={record?.status === "INACTIVE" && true}
+                >
                   <span className={"text-black"}> Update</span>
                 </ButtonComponent>
-                :
-                <SVGIcon name="IconEdit" color={record?.status === "INACTIVE" ? "#C0BEC6" : "#ACC424"} width={24} className={record?.status === "INACTIVE" && "cursor-not-allowed"} />
-              }
+              ) : (
+                <SVGIcon
+                  name="IconEdit"
+                  color={record?.status === "INACTIVE" ? "#C0BEC6" : "#ACC424"}
+                  width={24}
+                  className={
+                    record?.status === "INACTIVE" && "cursor-not-allowed"
+                  }
+                />
+              )}
             </NavLink>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Activate',
-      type: 'table',
+      action: "Activate",
+      type: "table",
       render: (record, data_length) => {
         return (
-          <Tooltip title={record?.status === 'ACTIVE' ? 'Inactivate' : 'Activate'}>
+          <Tooltip
+            title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}
+          >
             <Link>
               <div>
                 <Checkbox
@@ -458,17 +544,16 @@ const ApprovalHierarchyPage = () => {
                     setModalType("inactive");
                     setStatus(record?.status);
                     setAppHierId(record?.appHierId);
-                    setRecord(record)
+                    setRecord(record);
                   }}
                   checked={record?.status !== "ACTIVE"}
                 />
               </div>
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
-
   ];
 
   // handle retry modal error
@@ -478,17 +563,16 @@ const ApprovalHierarchyPage = () => {
       if (bodyError?.action === "INACTIVE_APPROVAL_HIERARCHY") {
         dispatch(inactiveAppHierarchy(body));
       } else if (bodyError?.action === "GET_APPROVAL_HIERARCHY_DETAIL") {
-        dispatch(detailPositionHierarchy(body))
+        dispatch(detailPositionHierarchy(body));
       } else if (bodyError?.action === "DOWNLOAD_APPROVAL") {
-        handleDownload()
+        handleDownload();
       }
-      handleCancelModal()
+      handleCancelModal();
       handleFetch();
     } catch (error) {
       handleFetch();
     }
   };
-
 
   // use hooks handle retry
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
@@ -505,7 +589,13 @@ const ApprovalHierarchyPage = () => {
               current={page}
               onChange={handleChange}
               pageSize={pageSize}
-              columns={[...columns, ...useColumnActionPermission(['view', 'activate', 'update'], itemActions)]}
+              columns={[
+                ...columns,
+                ...useColumnActionPermission(
+                  ["view", "activate", "update"],
+                  itemActions,
+                ),
+              ]}
               onSort={onSort}
               tableScrolled={{ y: 500, x: 1300 }}
             />
@@ -517,7 +607,9 @@ const ApprovalHierarchyPage = () => {
       <ModalCustom
         isOpen={openModal && modalType === "detail"}
         handleCancel={handleCancelModal}
-        header={modalType === "detail" && "Detail Approval Hierarchy Information"}
+        header={
+          modalType === "detail" && "Detail Approval Hierarchy Information"
+        }
         width={1200}
         type={modalType === "detail" && "detail"}
       >
@@ -545,17 +637,23 @@ const ApprovalHierarchyPage = () => {
                 </DetailText>
               </CardComponent>
               <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-                <DetailText label={"Record Id"}>{
-                  data_detail?.appHierId}
+                <DetailText label={"Record Id"}>
+                  {data_detail?.appHierId}
                 </DetailText>
                 <DetailText label={"Created Date"}>
-                  {isEmpty(data_detail?.createdDate) && moment(data_detail?.createdDate).format("DD MMM YYYY HH:mm:ss")}
+                  {isEmpty(data_detail?.createdDate) &&
+                    moment(data_detail?.createdDate).format(
+                      "DD MMM YYYY HH:mm:ss",
+                    )}
                 </DetailText>
                 <DetailText label={"Created By"}>
                   {data_detail?.createdBy}
                 </DetailText>
                 <DetailText label={"Updated Date"}>
-                  {isEmpty(data_detail?.updatedDate) && moment(data_detail?.updatedDate).format("DD MMM YYYY HH:mm:ss")}
+                  {isEmpty(data_detail?.updatedDate) &&
+                    moment(data_detail?.updatedDate).format(
+                      "DD MMM YYYY HH:mm:ss",
+                    )}
                 </DetailText>
                 <DetailText label={"Updated By"}>
                   {data_detail?.updatedBy}
@@ -593,10 +691,7 @@ const ApprovalHierarchyPage = () => {
           </div>
 
           <div className="flex justify-end mt-8">
-            <ButtonComponent
-              onClick={() => setOpenModal(false)}
-              border={true}
-            >
+            <ButtonComponent onClick={() => setOpenModal(false)} border={true}>
               Back
             </ButtonComponent>
           </div>
@@ -605,13 +700,11 @@ const ApprovalHierarchyPage = () => {
 
       {/* modal active inactive */}
       <ModalApproveOrReject
-        isOpen={openModal && modalType === 'inactive'}
+        isOpen={openModal && modalType === "inactive"}
         handleCloseModal={handleCancelModal}
         onFinish={onFinish}
         header={status === "INACTIVE" ? "activate" : "inactivate"}
-        approveOrReject={
-          status === "INACTIVE" ? "activate" : "inactivate"
-        }
+        approveOrReject={status === "INACTIVE" ? "activate" : "inactivate"}
         menu={"Approval Hierarchy"}
         named={record?.approvalName}
         width={800}

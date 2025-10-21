@@ -1,4 +1,4 @@
-import {  hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../components/StatusComponent";
 
@@ -9,7 +9,7 @@ export const approvalDelegation = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { },
+  handleSearch = () => {},
 ) => {
   console.log(filteredInfo);
   return [
@@ -33,9 +33,18 @@ export const approvalDelegation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('delegateFrom', searchedColumn, searchText, text, false, 'input', filteredInfo)
+      render: (text) =>
+        renderColumn(
+          "delegateFrom",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          filteredInfo,
+        ),
     },
     {
       title: "POSITION",
@@ -50,12 +59,21 @@ export const approvalDelegation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('positionFromDelegator', searchedColumn, searchText, text, true, 'input', filteredInfo)
+      render: (text) =>
+        renderColumn(
+          "positionFromDelegator",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          filteredInfo,
+        ),
     },
     {
       title: "START DATE",
@@ -72,9 +90,17 @@ export const approvalDelegation = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
-      render: (v) => renderDateColumn('startDate', hasValue(filteredInfo['startDate']), searchText, v, 'date', filteredInfo),
+      render: (v) =>
+        renderDateColumn(
+          "startDate",
+          hasValue(filteredInfo["startDate"]),
+          searchText,
+          v,
+          "date",
+          filteredInfo,
+        ),
     },
     {
       title: "END DATE",
@@ -91,9 +117,17 @@ export const approvalDelegation = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
-      render: (v) => renderDateColumn('endDate', hasValue(filteredInfo['endDate']), searchText, v, 'date', filteredInfo),
+      render: (v) =>
+        renderDateColumn(
+          "endDate",
+          hasValue(filteredInfo["endDate"]),
+          searchText,
+          v,
+          "date",
+          filteredInfo,
+        ),
     },
     {
       title: "REQUEST REMARK",
@@ -106,13 +140,22 @@ export const approvalDelegation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ellipsis: {
         showTitle: false,
       },
       sorter: true,
-      render: (text) => renderColumn('requestRemark', searchedColumn, searchText, text, true, 'input', filteredInfo)
+      render: (text) =>
+        renderColumn(
+          "requestRemark",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          filteredInfo,
+        ),
     },
     {
       title: "APPROVAL REMARK",
@@ -125,13 +168,22 @@ export const approvalDelegation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ellipsis: {
         showTitle: false,
       },
       sorter: true,
-      render: (text) => renderColumn('approvalRemark', searchedColumn, searchText, text, true, 'input', filteredInfo)
+      render: (text) =>
+        renderColumn(
+          "approvalRemark",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          filteredInfo,
+        ),
     },
     {
       title: "STATUS",
@@ -146,7 +198,7 @@ export const approvalDelegation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (index) => {
         let text;
@@ -169,5 +221,5 @@ export const approvalDelegation = (
         );
       },
     },
-  ]
+  ];
 };

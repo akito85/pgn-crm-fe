@@ -1,8 +1,8 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, { useState, useEffect, useRef } from "react";
 import TablePagination from "../../../../../../../../../components/TablePagination";
 
 const expandedRowRender = (record) => {
-  const dataExpand = record?.employeeDetail
+  const dataExpand = record?.employeeDetail;
 
   const columns = [
     {
@@ -12,9 +12,9 @@ const expandedRowRender = (record) => {
       render: (text, object, index) => index + 1,
     },
     {
-      title: 'EMPLOYEE',
-      dataIndex: 'employeeName',
-    }
+      title: "EMPLOYEE",
+      dataIndex: "employeeName",
+    },
   ];
   return (
     <div>
@@ -25,15 +25,15 @@ const expandedRowRender = (record) => {
         columns={columns}
       />
     </div>
-  )
+  );
 };
 
-const TableApproval = ({data}) => {
+const TableApproval = ({ data }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const [dataTable, setDataTable] = useState([])
+  const [dataTable, setDataTable] = useState([]);
 
   useEffect(() => {
     if (data && data?.length > 0) {
@@ -48,7 +48,6 @@ const TableApproval = ({data}) => {
       setDataTable(dataModif);
     }
   }, [data]);
-  
 
   const columns = [
     {
@@ -58,31 +57,29 @@ const TableApproval = ({data}) => {
       render: (text, object, index) => index + 1,
     },
     {
-      title: 'HIERARCHY',
-      dataIndex: 'approvalLevel',
+      title: "HIERARCHY",
+      dataIndex: "approvalLevel",
     },
     {
-      title: 'POSITION',
-      dataIndex: 'position',
-    }
+      title: "POSITION",
+      dataIndex: "position",
+    },
   ];
   return (
     <div>
-      <TablePagination 
-        dataSource={
-          dataTable && dataTable?.length === 0 ? null : dataTable
-        }
+      <TablePagination
+        dataSource={dataTable && dataTable?.length === 0 ? null : dataTable}
         columns={columns}
         pageSize={pageSize}
         current={page}
-        expandable={{expandedRowRender}}
+        expandable={{ expandedRowRender }}
         totalData={dataTable?.length}
         // onChange={handleChange}
         // onSizeChanger={handleChangeSize}
         // onSort={onSort}
       />
     </div>
-  )
-}
+  );
+};
 
-export default TableApproval
+export default TableApproval;

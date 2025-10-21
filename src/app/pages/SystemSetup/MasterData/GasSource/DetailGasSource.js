@@ -10,12 +10,21 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import DetailText from "../../../../../components/DetailText";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../utils";
 import TablePagination from "../../../../../components/TablePagination";
 import GasQualityDetail from "./GasQualityDetail/GasQualityDetail";
 import { getDetailGasSource } from "../../../../../redux/slices/account_management/MasterData/gasSourceSlice";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import { getColumnSearchProps, getColumnSearchPropsUseFilteredValue, getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchProps,
+  getColumnSearchPropsUseFilteredValue,
+  getColumnSearchPropsUseFilteredValueFE,
+} from "../../../../../utils/getColumnSearchProps";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import { clearBodyMessage } from "../../../../../redux/slices/general_slice";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -32,10 +41,8 @@ const sorter = (fieldSort, a, b) => {
 
       case "startDate":
       case "endDate":
-        return obj[fieldSort]
-          ? moment(obj[fieldSort])
-          : "";
-        // return date.toLowerCase();
+        return obj[fieldSort] ? moment(obj[fieldSort]) : "";
+      // return date.toLowerCase();
 
       default:
         return obj[fieldSort]?.toLowerCase();
@@ -59,8 +66,8 @@ const sorter = (fieldSort, a, b) => {
       default:
         return a.localeCompare(b);
     }
-  }
-    return handleCompare(fa, fb);
+  };
+  return handleCompare(fa, fb);
 };
 
 const columns = (
@@ -70,8 +77,8 @@ const columns = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { },
-  handleModalHistory
+  handleSearch = () => {},
+  handleModalHistory,
 ) => {
   return [
     {
@@ -103,7 +110,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -113,7 +120,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -148,9 +155,7 @@ const columns = (
       //   ) : (
       //     hasValue(text) && moment(text).format(dateFormatting.date)
       //   ),
-      filteredValue: search?.["startDate"]
-        ? [search?.["startDate"]]
-        : null,
+      filteredValue: search?.["startDate"] ? [search?.["startDate"]] : null,
       sorter: (a, b) => sorter("startDate", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -160,7 +165,7 @@ const columns = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -169,7 +174,7 @@ const columns = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -214,7 +219,7 @@ const columns = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -223,7 +228,7 @@ const columns = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -252,7 +257,7 @@ const columns = (
         searchText,
         handleSearch,
         true,
-        "input"
+        "input",
       ),
       render: (text) =>
         renderColumn(
@@ -262,7 +267,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
       // render: (text) =>
       //   searchedColumn === "description" ? (
@@ -309,13 +314,15 @@ const columns = (
 const DetailGasSource = () => {
   // Selector
   const { data_detail, loading } = useSelector((state) => state.gasSource);
-  const { bodyError, grant_access_detail } = useSelector(state => state?.general);
+  const { bodyError, grant_access_detail } = useSelector(
+    (state) => state?.general,
+  );
   // Declaration
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data_detail?.criteria || [];
-  const location = useLocation()
+  const location = useLocation();
   const id = location.state.id;
 
   // State
@@ -331,7 +338,7 @@ const DetailGasSource = () => {
   const [modalHistory, setModalHistory] = useState(false);
   const [dataHistory, setDataHistory] = useState({});
   console.log(search, dataSource);
-  
+
   // Use Effect
   useEffect(() => {
     if (dataSource.length > 0) {
@@ -340,15 +347,22 @@ const DetailGasSource = () => {
   }, [dataSource]);
   useEffect(() => {
     dispatch(getDetailGasSource(id));
-    dispatch(getGrantedAccessAccount('/system-setup/gas-sources-quality'))
+    dispatch(getGrantedAccessAccount("/system-setup/gas-sources-quality"));
   }, [dispatch, id]);
 
-  const hasAccessGasQuality = useMemo(() => grant_access_detail?.actionList?.map(item => item?.name?.toLowerCase()), [grant_access_detail])
+  const hasAccessGasQuality = useMemo(
+    () =>
+      grant_access_detail?.actionList?.map((item) => item?.name?.toLowerCase()),
+    [grant_access_detail],
+  );
 
   // trigger modal try again
   useEffect(() => {
-    if (bodyError?.response?.data?.code === 500 && bodyError?.action === "GET_DETAIL_GAS_SOURCE") {
-      setModalError(true)
+    if (
+      bodyError?.response?.data?.code === 500 &&
+      bodyError?.action === "GET_DETAIL_GAS_SOURCE"
+    ) {
+      setModalError(true);
     }
   }, [bodyError]);
 
@@ -446,11 +460,11 @@ const DetailGasSource = () => {
       dispatch(getDetailGasSource(id));
     }
     dispatch(clearBodyMessage());
-  }
+  };
 
   // handle retry
   const handleRetry = () => {
-    handleConfirmRetry()
+    handleConfirmRetry();
     setModalError(false);
     dispatch(clearBodyMessage());
   };
@@ -463,10 +477,9 @@ const DetailGasSource = () => {
   };
 
   const handleModalHistory = (item) => {
-    setDataHistory(item)
-    setModalHistory(true)
-  }
-
+    setDataHistory(item);
+    setModalHistory(true);
+  };
 
   return (
     <LayoutMenu>
@@ -489,20 +502,22 @@ const DetailGasSource = () => {
 
         <BaseContainer header={"History Log Information"}>
           <div className="w- full grid grid-cols-5 gap-4">
-            <DetailText label={'Record ID'}>{data_detail?.gasSourceId}</DetailText>
+            <DetailText label={"Record ID"}>
+              {data_detail?.gasSourceId}
+            </DetailText>
             <DetailText label="Created Date">
               {data_detail?.createdDate
                 ? moment(data_detail.createdDate).format(
-                  dateFormatting.dateTime
-                )
+                    dateFormatting.dateTime,
+                  )
                 : ""}
             </DetailText>
             <DetailText label="Created By">{data_detail?.createdBy}</DetailText>
             <DetailText label="Updated Date">
               {data_detail?.updatedDate
                 ? moment(data_detail.updatedDate).format(
-                  dateFormatting.dateTime
-                )
+                    dateFormatting.dateTime,
+                  )
                 : ""}
             </DetailText>
             <DetailText label="Updated By">{data_detail?.updatedBy}</DetailText>
@@ -524,17 +539,21 @@ const DetailGasSource = () => {
               searchedColumn,
               searchText,
               handleSearch,
-              handleModalHistory
+              handleModalHistory,
             )}
             onSort={onSort}
           />
         </BaseContainer>
 
         {/* Gas Quality Detail */}
-        {
-          hasAccessGasQuality?.includes('view') &&
-          <GasQualityDetail id={id} uomName={data_detail?.uomName} dataDetail={data_detail} actionList={grant_access_detail} />
-        }
+        {hasAccessGasQuality?.includes("view") && (
+          <GasQualityDetail
+            id={id}
+            uomName={data_detail?.uomName}
+            dataDetail={data_detail}
+            actionList={grant_access_detail}
+          />
+        )}
 
         <div className="flex mt-[30px]">
           <ButtonComponent
@@ -565,7 +584,9 @@ const DetailGasSource = () => {
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{bodyError?.response?.data?.message?.toString()}</p>
+          <p className="pl-[70px]">
+            {bodyError?.response?.data?.message?.toString()}
+          </p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
@@ -590,7 +611,9 @@ const DetailGasSource = () => {
         }
       >
         <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-          <DetailText label="Record ID">{dataHistory.gasSourceCriteriaId}</DetailText>
+          <DetailText label="Record ID">
+            {dataHistory.gasSourceCriteriaId}
+          </DetailText>
           <DetailText label="Created Date">
             {dataHistory?.createdDate
               ? moment(dataHistory.createdDate).format(dateFormatting.dateTime)
@@ -606,7 +629,6 @@ const DetailGasSource = () => {
         </CardComponent>
       </ModalCustom>
       {/* End Modal History Log */}
-
     </LayoutMenu>
   );
 };

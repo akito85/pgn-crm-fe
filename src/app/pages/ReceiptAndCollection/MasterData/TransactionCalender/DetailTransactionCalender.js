@@ -41,74 +41,156 @@ export const columnPeriod = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { }
+  handleSearch = () => {},
 ) => [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      dataIndex: "no",
-      editable: true,
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "PERIOD",
-      dataIndex: "period",
-      align: "center",
-      sorter: true,
-      disabled: true,
-      inputType: "text",
-      ...getColumnSearchPropsPaging(
-        "period",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "datePeriod"
+  {
+    title: "NO",
+    width: 60,
+    align: "center",
+    dataIndex: "no",
+    editable: true,
+    render: (text, object, index) => (page - 1) * pageSize + index + 1,
+  },
+  {
+    title: "PERIOD",
+    dataIndex: "period",
+    align: "center",
+    sorter: true,
+    disabled: true,
+    inputType: "text",
+    ...getColumnSearchPropsPaging(
+      "period",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "datePeriod",
+    ),
+    render: (text) =>
+      searchedColumn === "period" ? (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: "#ffc069",
+            padding: 0,
+          }}
+          searchWords={[
+            searchText
+              ? moment(searchText, "YYYY-MM").format(dateFormatting.datePeriod)
+              : "",
+          ]}
+          autoEscape
+          textToHighlight={
+            text ? moment(text).format(dateFormatting.datePeriod) : ""
+          }
+        />
+      ) : text === null ? (
+        " "
+      ) : (
+        moment(text).format(dateFormatting.datePeriod)
       ),
-      render: (text) =>
-        searchedColumn === "period" ? (
+  },
+  {
+    title: "START DATE",
+    dataIndex: "startDate",
+    align: "center",
+    sorter: true,
+    // inputType: "date",
+    ...getColumnSearchPropsPaging(
+      "startDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "dateCapital",
+    ),
+    render: (text) => {
+      const tempValue = text ? moment(text).format(dateFormatting.date) : "";
+      if (searchedColumn === "startDate") {
+        const highlight = (
           <Highlighter
             highlightStyle={{
               backgroundColor: "#ffc069",
               padding: 0,
             }}
-            searchWords={[
-              searchText
-                ? moment(searchText, "YYYY-MM").format(dateFormatting.datePeriod)
-                : "",
-            ]}
+            searchWords={[searchText]}
             autoEscape
-            textToHighlight={
-              text ? moment(text).format(dateFormatting.datePeriod) : ""
-            }
+            textToHighlight={tempValue || ""}
           />
-        ) : text === null ? (
-          " "
-        ) : (
-          moment(text).format(dateFormatting.datePeriod)
-        ),
+        );
+        if (tempValue) {
+          return highlight;
+        }
+        return highlight;
+      } else {
+        if (tempValue) {
+          return tempValue;
+        }
+        return "";
+      }
     },
-    {
-      title: "START DATE",
-      dataIndex: "startDate",
-      align: "center",
-      sorter: true,
-      // inputType: "date",
-      ...getColumnSearchPropsPaging(
-        "startDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "dateCapital"
-      ),
-      render: (text) => {
-        const tempValue = text ? moment(text).format(dateFormatting.date) : "";
-        if (searchedColumn === "startDate") {
-          const highlight = (
+  },
+  {
+    title: "END DATE",
+    dataIndex: "endDate",
+    align: "center",
+    // inputType: "date",
+    sorter: true,
+    ...getColumnSearchPropsPaging(
+      "endDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "dateCapital",
+    ),
+    render: (text) => {
+      const tempValue = text ? moment(text).format(dateFormatting.date) : "";
+      if (searchedColumn === "endDate") {
+        const highlight = (
+          <Highlighter
+            highlightStyle={{
+              backgroundColor: "#ffc069",
+              padding: 0,
+            }}
+            searchWords={[searchText]}
+            autoEscape
+            textToHighlight={tempValue || ""}
+          />
+        );
+        if (tempValue) {
+          return highlight;
+        }
+        return highlight;
+      } else {
+        if (tempValue) {
+          return tempValue;
+        }
+        return "";
+      }
+    },
+  },
+  {
+    title: "DESCRIPTION",
+    dataIndex: "description",
+    sorter: true,
+    ...getColumnSearchPropsPaging(
+      "description",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    ellipsis: {
+      showTitle: false,
+    },
+    render: (text) => {
+      if (searchedColumn === "description") {
+        return (
+          <Tooltip placement="topLeft" title={text}>
             <Highlighter
               highlightStyle={{
                 backgroundColor: "#ffc069",
@@ -116,159 +198,77 @@ export const columnPeriod = (
               }}
               searchWords={[searchText]}
               autoEscape
-              textToHighlight={tempValue || ""}
+              textToHighlight={text ? text.toString() : ""}
             />
-          );
-          if (tempValue) {
-            return highlight;
-          }
-          return highlight;
-        } else {
-          if (tempValue) {
-            return tempValue;
-          }
-          return "";
-        }
-      },
-    },
-    {
-      title: "END DATE",
-      dataIndex: "endDate",
-      align: "center",
-      // inputType: "date",
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "endDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "dateCapital"
-      ),
-      render: (text) => {
-        const tempValue = text ? moment(text).format(dateFormatting.date) : "";
-        if (searchedColumn === "endDate") {
-          const highlight = (
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={tempValue || ""}
-            />
-          );
-          if (tempValue) {
-            return highlight;
-          }
-          return highlight;
-        } else {
-          if (tempValue) {
-            return tempValue;
-          }
-          return "";
-        }
-      },
-    },
-    {
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "description",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      ellipsis: {
-        showTitle: false,
-      },
-      render: (text) => {
-        if (searchedColumn === "description") {
+          </Tooltip>
+        );
+      } else {
+        if (text) {
           return (
             <Tooltip placement="topLeft" title={text}>
-              <Highlighter
-                highlightStyle={{
-                  backgroundColor: "#ffc069",
-                  padding: 0,
-                }}
-                searchWords={[searchText]}
-                autoEscape
-                textToHighlight={text ? text.toString() : ""}
-              />
+              {text}
             </Tooltip>
           );
-        } else {
-          if (text) {
-            return (
-              <Tooltip placement="topLeft" title={text}>
-                {text}
-              </Tooltip>
-            );
-          }
-          return "";
         }
-      },
+        return "";
+      }
     },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      // render: (text) =>
-      //   searchedColumn === "status" ? (
-      //     <Highlighter
-      //       highlightStyle={{
-      //         backgroundColor: "#ffc069",
-      //         padding: 0,
-      //       }}
-      //       searchWords={[searchText]}
-      //       autoEscape
-      //       textToHighlight={text ? text.toString() : ""}
-      //     />
-      //   ) : text ? (
-      //     <div className="flex justify-center">
-      //       <StatusComponent colour={text}>{text}</StatusComponent>
-      //     </div>
-      //   ) : (
-      //     ""
-      //   ),
-      render: (index) => {
-        let text;
-        switch (index) {
-          case true:
-            text = "OPEN";
-            break;
-          case false:
-            text = "CLOSE";
-            break;
-          default:
-            text = index
-              ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-              : index;
-            break;
-        }
-        return text ? (
-          <div className="flex justify-center">
-            <StatusComponent colour={text}>{text}</StatusComponent>
-          </div>
-        ) : (
-          text
-        );
-      },
+  },
+  {
+    title: "STATUS",
+    dataIndex: "status",
+    sorter: true,
+    ...getColumnSearchPropsPaging(
+      "status",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    // render: (text) =>
+    //   searchedColumn === "status" ? (
+    //     <Highlighter
+    //       highlightStyle={{
+    //         backgroundColor: "#ffc069",
+    //         padding: 0,
+    //       }}
+    //       searchWords={[searchText]}
+    //       autoEscape
+    //       textToHighlight={text ? text.toString() : ""}
+    //     />
+    //   ) : text ? (
+    //     <div className="flex justify-center">
+    //       <StatusComponent colour={text}>{text}</StatusComponent>
+    //     </div>
+    //   ) : (
+    //     ""
+    //   ),
+    render: (index) => {
+      let text;
+      switch (index) {
+        case true:
+          text = "OPEN";
+          break;
+        case false:
+          text = "CLOSE";
+          break;
+        default:
+          text = index
+            ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
+            : index;
+          break;
+      }
+      return text ? (
+        <div className="flex justify-center">
+          <StatusComponent colour={text}>{text}</StatusComponent>
+        </div>
+      ) : (
+        text
+      );
     },
-  ];
+  },
+];
 
 const DetailTransactionCalender = ({
   data_detail,
@@ -323,7 +323,7 @@ const DetailTransactionCalender = ({
         pageSize,
         sort,
         search: tempSearch,
-      })
+      }),
     );
   }, [id, page, pageSize, sort, search, dispatch]);
 
@@ -417,7 +417,7 @@ const DetailTransactionCalender = ({
         id: chooseId,
         status: openOrClose,
         remark: remark,
-      })
+      }),
     )
       .unwrap()
       .then(() => {
@@ -457,8 +457,8 @@ const DetailTransactionCalender = ({
   return (
     <div>
       {data_req?.isApprover &&
-        data_req?.approvalType &&
-        data_req?.approvalType === "INACTIVE_TRANSACTION_CALENDAR" ? (
+      data_req?.approvalType &&
+      data_req?.approvalType === "INACTIVE_TRANSACTION_CALENDAR" ? (
         <BaseContainer header={"INACTIVE REQUEST INFORMATION"}>
           <div className="grid grid-cols-4 w-full">
             <DetailText label={"Requested Date"}>
@@ -482,8 +482,8 @@ const DetailTransactionCalender = ({
           <DetailText label="Start Date">
             {data_detail?.startDate
               ? moment(data_detail?.startDate).format(
-                dateFormatting.dateCapital
-              )
+                  dateFormatting.dateCapital,
+                )
               : ""}
           </DetailText>
           <DetailText label="End Date">
@@ -503,7 +503,7 @@ const DetailTransactionCalender = ({
           </div>
         </div>
       </BaseContainer>
-      {data_detail?.status?.toLowerCase() !== 'draft' &&
+      {data_detail?.status?.toLowerCase() !== "draft" && (
         <BaseContainer header={"PERIOD INFORMATION"}>
           <div className="w-full flex justify-end gap-[20px]">
             <ButtonComponent
@@ -536,7 +536,7 @@ const DetailTransactionCalender = ({
               searchInput,
               searchedColumn,
               searchText,
-              handleSearch
+              handleSearch,
             )}
             mode={"update"}
             showCreateButton={false}
@@ -546,8 +546,7 @@ const DetailTransactionCalender = ({
             disableDate={handleDisableDate}
           />
         </BaseContainer>
-
-      }
+      )}
 
       <BaseContainer header={"CRITERIA INFORMATION"}>
         <FunctionalTableCriteriaPayment

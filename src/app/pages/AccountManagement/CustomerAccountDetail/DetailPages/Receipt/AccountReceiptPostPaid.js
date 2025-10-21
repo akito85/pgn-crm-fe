@@ -15,9 +15,7 @@ import { useState } from "react";
 import { Fragment } from "react";
 import AccountReceiptTable from "./AccountReceiptTable";
 
-const AccountReceiptPostPaid = ({
-	handleChangeInteraction = () => {},
-}) => {
+const AccountReceiptPostPaid = ({ handleChangeInteraction = () => {} }) => {
   //   // const dispatch = useDispatch();
   //   const { data, data_detail, loading } = useSelector((state) => state.tos);
   const [page, setPage] = useState(1);
@@ -42,9 +40,11 @@ const AccountReceiptPostPaid = ({
 
   return (
     <Fragment>
-        <div className={"w-full"}>
-          <AccountReceiptTable handleChangeInteraction={handleChangeInteraction}/>
-        </div>
+      <div className={"w-full"}>
+        <AccountReceiptTable
+          handleChangeInteraction={handleChangeInteraction}
+        />
+      </div>
     </Fragment>
   );
 };

@@ -21,7 +21,7 @@ const initialState = {
   data_approval_history: [],
   data_template_type: [],
   dataListCategory: [],
-  dataConfigRBIDataGeneralTemplate : {},
+  dataConfigRBIDataGeneralTemplate: {},
 };
 
 export const getAllGeneralTemplatePaginate = createAsyncThunk(
@@ -36,14 +36,14 @@ export const getAllGeneralTemplatePaginate = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_ALL_GENERAL_PAGINATE" })
+        validateError({ error, action: "GET_ALL_GENERAL_PAGINATE" }),
       );
 
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getDetailGeneralTemplate = createAsyncThunk(
@@ -56,10 +56,10 @@ export const getDetailGeneralTemplate = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(validateError({ error, action: "GET_DETAIL_GENERAL" }));
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getDetailDraftGeneralTemplate = createAsyncThunk(
@@ -71,13 +71,13 @@ export const getDetailDraftGeneralTemplate = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_DETAIL_DRAFT_GENERAL" })
+        validateError({ error, action: "GET_DETAIL_DRAFT_GENERAL" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getApprovalHistoryGeneralTemplate = createAsyncThunk(
@@ -92,13 +92,13 @@ export const getApprovalHistoryGeneralTemplate = createAsyncThunk(
         validateError({
           error,
           action: "GET_APPROVAL_HISTORY_GENERAL_TEMPLATE",
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 //file
@@ -116,13 +116,13 @@ export const getListCategoryFile = createAsyncThunk(
       });
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_LIST_CATEGORY_FILE" })
+        validateError({ error, action: "GET_LIST_CATEGORY_FILE" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getGeneralTemplateType = createAsyncThunk(
@@ -140,13 +140,13 @@ export const getGeneralTemplateType = createAsyncThunk(
         validateError({
           error,
           action: "GET_GENERAL_TEMPLATE_LIST_TEMPLATE_TYPE",
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getApprovalList = createAsyncThunk(
@@ -161,13 +161,13 @@ export const getApprovalList = createAsyncThunk(
         validateError({
           error,
           action: "GET_GENERAL_TEMPLATE_APPROVAL_LIST",
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getApprovalListDetail = createAsyncThunk(
@@ -182,13 +182,13 @@ export const getApprovalListDetail = createAsyncThunk(
         validateError({
           error,
           action: "GET_GENERAL_TEMPLATE_APPROVAL_LIST_DETAIL",
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const createGeneralTemplate = createAsyncThunk(
@@ -199,7 +199,7 @@ export const createGeneralTemplate = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/invoice/template/create-generaltemplate`;
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
-        body
+        body,
       );
       // const successMessage = {
       //   title: "Successful",
@@ -223,7 +223,7 @@ export const createGeneralTemplate = createAsyncThunk(
             validateError({
               error,
               action: "CREATE_GENERAL_TEMPLATE",
-            })
+            }),
           );
         } else {
           const errorBody = {
@@ -236,7 +236,7 @@ export const createGeneralTemplate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateGeneralTemplate = createAsyncThunk(
@@ -246,7 +246,7 @@ export const updateGeneralTemplate = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/invoice/template/update-generaltemplate/${id}`;
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
-        body
+        body,
       );
       // const successMessage = {
       //   title: "Successful",
@@ -270,7 +270,7 @@ export const updateGeneralTemplate = createAsyncThunk(
             validateError({
               error,
               action: "UPDATE_GENERAL_TEMPLATE",
-            })
+            }),
           );
         } else {
           const errorBody = {
@@ -283,7 +283,7 @@ export const updateGeneralTemplate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approveInactiveGeneralTemplate = createAsyncThunk(
@@ -293,7 +293,7 @@ export const approveInactiveGeneralTemplate = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/invoice/template/approval-inactive`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successMessage = {
         title: "Successful",
@@ -317,7 +317,7 @@ export const approveInactiveGeneralTemplate = createAsyncThunk(
             validateError({
               error,
               action: "APPROVE_INACTIVE_GENERAL_TEMPLATE",
-            })
+            }),
           );
         } else {
           const errorBody = {
@@ -330,7 +330,7 @@ export const approveInactiveGeneralTemplate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approveGeneralTemplate = createAsyncThunk(
@@ -340,7 +340,7 @@ export const approveGeneralTemplate = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/invoice/template/approval-template`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successMessage = {
         title: "Successful",
@@ -364,7 +364,7 @@ export const approveGeneralTemplate = createAsyncThunk(
             validateError({
               error,
               action: "APPROVE_GENERAL_TEMPLATE",
-            })
+            }),
           );
         } else {
           const errorBody = {
@@ -377,7 +377,7 @@ export const approveGeneralTemplate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const activationGeneralTemplate = createAsyncThunk(
@@ -387,7 +387,7 @@ export const activationGeneralTemplate = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/invoice/template/update-status`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successMessage = {
         title: "Successful",
@@ -410,7 +410,7 @@ export const activationGeneralTemplate = createAsyncThunk(
             validateError({
               error,
               action: "ACTIVATION_GENERAL_TEMPLATE",
-            })
+            }),
           );
         } else {
           const errorBody = {
@@ -423,7 +423,7 @@ export const activationGeneralTemplate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getDownloadGeneralTemplateList = createAsyncThunk(
@@ -438,10 +438,16 @@ export const getDownloadGeneralTemplateList = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_GENERAL_TEMPLATE_LIST", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_GENERAL_TEMPLATE_LIST",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const previewGeneralTemplate = createAsyncThunk(
@@ -452,7 +458,7 @@ export const previewGeneralTemplate = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadRtfFile(
         url,
         extension,
-        filename
+        filename,
       );
       return response.data;
     } catch (error) {
@@ -469,7 +475,7 @@ export const previewGeneralTemplate = createAsyncThunk(
             validateError({
               error,
               action: "ACTIVATION_GENERAL_TEMPLATE",
-            })
+            }),
           );
         } else {
           const errorBody = {
@@ -482,12 +488,12 @@ export const previewGeneralTemplate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getConfigFileRBIDataGeneralTemplate = createAsyncThunk(
   "GET_CONFIG_FILE_RBI_DATA_GENERAL_TEMPLATE",
-  async (_,thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/rbi/config-file-generaltemplate";
       const response = await ratingBillingHttpService.getAll(url);
@@ -497,11 +503,13 @@ export const getConfigFileRBIDataGeneralTemplate = createAsyncThunk(
         validateError({
           error,
           action: "GET_CONFIG_FILE_RBI_DATA_GENERAL_TEMPLATE",
-        })
+        }),
       );
-      return thunkAPI.rejectWithValue(error.response.data.code === 419 ? null : error.response.data);
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
     }
-  }
+  },
 );
 const generalTemplateSlice = createSlice({
   name: "general_template",

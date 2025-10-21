@@ -10,11 +10,15 @@ const CustomerInfoSection = ({ data }) => {
       <DetailText label={"Account Name"}>{data?.accountName}</DetailText>
       {/* <DetailText label={"Service Agreement Class"}>{data?.serviceAgreementClass}</DetailText> */}
       <DetailText label={"Account Segment"}>{data?.accountSegment}</DetailText>
-      <DetailText label={"Account Group Type"}>{data?.accountGroupType}</DetailText>
+      <DetailText label={"Account Group Type"}>
+        {data?.accountGroupType}
+      </DetailText>
       <DetailText label={"SOR"}>{data?.sor}</DetailText>
       <DetailText label={"Cost Center Code"}>{data?.costCenterCode}</DetailText>
       <DetailText label={"Cost Center Name"}>{data?.costCenterName}</DetailText>
-      <DetailText label={"Meter Reading Code"}>{data?.meterReadingCode}</DetailText>
+      <DetailText label={"Meter Reading Code"}>
+        {data?.meterReadingCode}
+      </DetailText>
     </div>
   );
 };

@@ -7,7 +7,7 @@
       "path": null,
       "name": "Dashboard",
       "icon": "AppleOutlined",
-      "children":null
+      "children": null
     },
     {
       "path": null,
@@ -17,7 +17,7 @@
         {
           "path": "user-management/position-hierarchy",
           "name": "Position Hierarchy",
-          "icon" : null,
+          "icon": null,
           "children": null
         },
         {
@@ -44,5 +44,5 @@
         }
       ]
     }
-    ]
+  ]
 }

@@ -4,8 +4,8 @@ const SVG = ({
   style = {},
   width = "100%",
   className = "",
-  onClick = () => { },
-  color = "#0075BF"
+  onClick = () => {},
+  color = "#0075BF",
 }) => (
   <svg
     width={width}

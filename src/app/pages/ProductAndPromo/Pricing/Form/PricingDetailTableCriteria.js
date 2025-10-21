@@ -18,7 +18,10 @@ import {
   getSorList,
   getSubDistrictList,
 } from "../../../../../redux/slices/product_promo/pricing";
-import { getCustomerList, getCustomerSegmentList } from "../../../../../redux/slices/product_promo/tos";
+import {
+  getCustomerList,
+  getCustomerSegmentList,
+} from "../../../../../redux/slices/product_promo/tos";
 import InputComponent from "../../../../../components/InputComponent";
 
 const EditableCell = ({
@@ -414,7 +417,7 @@ const PricingDetailTableCriteria = ({
 
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -433,7 +436,7 @@ const PricingDetailTableCriteria = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       {
         title: "ACTION",
@@ -518,7 +521,7 @@ const PricingDetailTableCriteria = ({
     return filterCol.filter((col) =>
       col.title !== "NO" && col.title !== "ACTION"
         ? dataCriteria.includes(col.indexValue)
-        : true
+        : true,
     );
   };
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
@@ -601,7 +604,7 @@ const PricingDetailTableCriteria = ({
                   dataEditRecord: editDataRecord,
                   handleEditDataRecord: handleEditDataRecord,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],

@@ -16,7 +16,6 @@ const GasSourceActiveOrInactive = ({
   onChange = () => {},
   startDate,
 }) => {
-
   const handleDisableEndDate = (current) => {
     if (startDate !== null) {
       return moment(startDate) >= current;
@@ -62,7 +61,7 @@ const GasSourceActiveOrInactive = ({
                   (value && moment(startDate) < moment(value)) || !value
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error("End date must After Start date")
+                        new Error("End date must After Start date"),
                       ),
               },
               {
@@ -71,7 +70,7 @@ const GasSourceActiveOrInactive = ({
               },
             ]}
           >
-            <DateComponent dateDisable={handleDisableEndDate}/>
+            <DateComponent dateDisable={handleDisableEndDate} />
           </Form.Item>
 
           <Form.Item

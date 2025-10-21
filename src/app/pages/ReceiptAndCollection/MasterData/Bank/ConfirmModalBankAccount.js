@@ -32,7 +32,7 @@ const ConfirmModalBankAccount = ({
   const [valuePage, setValuePage] = useState(tabData[0].value);
   // find data criteria
   const matchedObjectsCriteria = apiCriteria?.filter((obj) =>
-    data?.criteria?.includes(obj?.Id)
+    data?.criteria?.includes(obj?.Id),
   );
   const matchedNamesCriteria = matchedObjectsCriteria
     ?.map((obj) => obj.text)
@@ -53,7 +53,7 @@ const ConfirmModalBankAccount = ({
     switch (valuePage) {
       case tabData[0].value:
         const valueEntity = (dataEntity || []).filter(
-          (item) => item.id === data.entity
+          (item) => item.id === data.entity,
         )?.[0]?.name;
         return (
           <div className="w-full">
@@ -107,7 +107,7 @@ const ConfirmModalBankAccount = ({
             disableSelect={true}
             approvalName={
               (dataOption || []).filter(
-                (data) => data.value === selectedHierarchy
+                (data) => data.value === selectedHierarchy,
               )?.[0].name || ""
             }
             dataTable={listDataAppHierDetail}

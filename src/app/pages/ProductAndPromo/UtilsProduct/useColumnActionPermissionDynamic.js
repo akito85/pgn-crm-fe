@@ -74,18 +74,20 @@ export const useColumnActionPermissionDynamic = (
   selector = "general", //for what menu
   permissionList = [],
   itemsRender = [],
-  sliceColumn = "View"
+  sliceColumn = "View",
 ) => {
   const access = useGrantAccessHooksPrecise({
     selector: selector,
     url: path,
   });
   // convert to lower case
-  const lowerCaseAccessList = access?.actions?.map((item) => item?.toLowerCase())
-  
+  const lowerCaseAccessList = access?.actions?.map((item) =>
+    item?.toLowerCase(),
+  );
+
   const lowerCasePermissionList = useMemo(
     () => permissionList?.map((item) => item?.toLowerCase()),
-    [permissionList]
+    [permissionList],
   );
   const lowerCaseItemsRender = useMemo(
     () =>
@@ -95,13 +97,13 @@ export const useColumnActionPermissionDynamic = (
           action: item?.action?.toLowerCase(),
         }))
         ?.filter((item) => item?.type === "table"),
-    [itemsRender]
+    [itemsRender],
   );
 
   // filter access by permission list
   const arrayActions = useMemo(() => {
     const arrayActions = lowerCaseAccessList?.filter((item) =>
-      lowerCasePermissionList?.includes(item)
+      lowerCasePermissionList?.includes(item),
     );
 
     return lowerCaseItemsRender
@@ -131,7 +133,7 @@ export const useColumnActionPermissionDynamic = (
               lowerCaseItemsRender,
               arrayActions?.length,
               arrayActions,
-              sliceColumn
+              sliceColumn,
             ),
         },
       ];

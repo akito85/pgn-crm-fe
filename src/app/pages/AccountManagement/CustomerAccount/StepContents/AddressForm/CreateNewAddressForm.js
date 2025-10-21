@@ -1,24 +1,23 @@
-import React,{ useState } from 'react'
-import { Checkbox, Form, Select } from 'antd';
+import React, { useState } from "react";
+import { Checkbox, Form, Select } from "antd";
 
-import ButtonComponent from '../../../../../../components/ButtonComponent';
-import ModalCustom from '../../../../../../components/Modal/ModalCustom';
-import SelectComponent from '../../../../../../components/SelectComponent';
+import ButtonComponent from "../../../../../../components/ButtonComponent";
+import ModalCustom from "../../../../../../components/Modal/ModalCustom";
+import SelectComponent from "../../../../../../components/SelectComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import InputComponent from "../../../../../../components/InputComponent";
 
-
 const CreateNewAddressForm = () => {
-  const [modalChooseAddres, setModalChooseAddres] = useState(false)
+  const [modalChooseAddres, setModalChooseAddres] = useState(false);
 
   return (
     <div>
       <ModalCustom
         isOpen={modalChooseAddres}
-        type={'confirmation'}
+        type={"confirmation"}
         header={"CHOOSE ADDRESS"}
         width={900}
-        handleCancel={()=> setModalChooseAddres(false)}
+        handleCancel={() => setModalChooseAddres(false)}
       >
         test
       </ModalCustom>
@@ -237,22 +236,40 @@ const CreateNewAddressForm = () => {
         </Form.Item>
         <div>
           <h1>Address *</h1>
-          <p>JL. ANGKASA, AA NO. 12, Y, RT 08/RW 02, 18394, GALUR, SENEN, JAKARTA PUSAT, DKI JAKARTA, INDONESIA</p>
+          <p>
+            JL. ANGKASA, AA NO. 12, Y, RT 08/RW 02, 18394, GALUR, SENEN, JAKARTA
+            PUSAT, DKI JAKARTA, INDONESIA
+          </p>
         </div>
       </div>
 
       {/* Section Checkbox */}
       <div className={"grid grid-cols-3 w-full gap-x-6 py-8"}>
-        <Form.Item name="premiseAddress" label={"Premise Address"} valuePropName="checked" noStyle>
-          <div className='flex flex-col'>
+        <Form.Item
+          name="premiseAddress"
+          label={"Premise Address"}
+          valuePropName="checked"
+          noStyle
+        >
+          <div className="flex flex-col">
             <Checkbox>Premise Address</Checkbox>
-            <span className='pl-[26px] text-[10px]'>Check premise address if this address will be the place where the product is installed/applied</span>
+            <span className="pl-[26px] text-[10px]">
+              Check premise address if this address will be the place where the
+              product is installed/applied
+            </span>
           </div>
         </Form.Item>
-        <Form.Item name="primaryAddress" label={"Primary Address"} valuePropName="checked" noStyle>
-          <div className='flex flex-col'>
+        <Form.Item
+          name="primaryAddress"
+          label={"Primary Address"}
+          valuePropName="checked"
+          noStyle
+        >
+          <div className="flex flex-col">
             <Checkbox>Primary Address</Checkbox>
-            <span className='pl-[26px] text-[10px]'>Check primary address if this address is primary addres</span>
+            <span className="pl-[26px] text-[10px]">
+              Check primary address if this address is primary addres
+            </span>
           </div>
         </Form.Item>
       </div>
@@ -299,7 +316,12 @@ const CreateNewAddressForm = () => {
               },
             ]}
           >
-            <SelectComponent mandatory label={"Business Purposes"} mode={"multiple"} defaultValue={[1, 2]}>
+            <SelectComponent
+              mandatory
+              label={"Business Purposes"}
+              mode={"multiple"}
+              defaultValue={[1, 2]}
+            >
               <Select.Option key={1} value={1}>
                 Digio
               </Select.Option>
@@ -310,9 +332,8 @@ const CreateNewAddressForm = () => {
           </Form.Item>
         </div>
       </div>
-
     </div>
-  )
-}
+  );
+};
 
-export default CreateNewAddressForm
+export default CreateNewAddressForm;

@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { Checkbox, Popover, Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
-import TablePaginationNew from '../../../../../../components/TablePaginationNew'
+import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
@@ -23,7 +23,7 @@ const columns = (
   type,
   typeUpdate,
   dataTaxImplicationRule,
-  dataTransCode
+  dataTransCode,
 ) => {
   const temp = [
     {
@@ -43,7 +43,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -57,13 +57,13 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) => {
         return (
-          <span>{dataTransCode?.find(item => item?.id === text)?.code}</span>
-        )
-      }
+          <span>{dataTransCode?.find((item) => item?.id === text)?.code}</span>
+        );
+      },
     },
     {
       title: "DESCRIPTION",
@@ -76,7 +76,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -117,13 +117,21 @@ const columns = (
         return (
           <div className="flex justify-center w-full gap-4">
             <Tooltip title="Update">
-              <div className='pt-1'>
-                <SVGIcon  onClick={()=>handleUpdateItemOverride(r)} name="IconEdit" width={24} />
+              <div className="pt-1">
+                <SVGIcon
+                  onClick={() => handleUpdateItemOverride(r)}
+                  name="IconEdit"
+                  width={24}
+                />
               </div>
             </Tooltip>
             <Tooltip title="Delete">
-              <div className='pt-1'>
-                <SVGIcon onClick={()=>handleDeleteItemOverride(r.key)} name="IconDelete" width={24} />
+              <div className="pt-1">
+                <SVGIcon
+                  onClick={() => handleDeleteItemOverride(r.key)}
+                  name="IconDelete"
+                  width={24}
+                />
               </div>
             </Tooltip>
           </div>
@@ -132,10 +140,10 @@ const columns = (
       key: "action",
     },
   ];
-  return type === "view" || (typeUpdate === "update" && 
-  dataTaxImplicationRule.status === "ACTIVE")  ?
-  temp.filter((col) => col.title !== "ACTION") :
-  temp;
+  return type === "view" ||
+    (typeUpdate === "update" && dataTaxImplicationRule.status === "ACTIVE")
+    ? temp.filter((col) => col.title !== "ACTION")
+    : temp;
 };
 
 const expandedRowRender = (record) => {
@@ -143,7 +151,7 @@ const expandedRowRender = (record) => {
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => { }
+    handleSearch = () => {},
   ) => {
     return [
       {
@@ -162,7 +170,7 @@ const expandedRowRender = (record) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -175,7 +183,7 @@ const expandedRowRender = (record) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -188,11 +196,21 @@ const expandedRowRender = (record) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
-        render:  (value, r) => {
-          return <div className={r?.conditionName === "TAX EXEMPTION SUBMISSION" ? 'text-left' : 'text-right'}>{value}</div>
-        }
+        render: (value, r) => {
+          return (
+            <div
+              className={
+                r?.conditionName === "TAX EXEMPTION SUBMISSION"
+                  ? "text-left"
+                  : "text-right"
+              }
+            >
+              {value}
+            </div>
+          );
+        },
       },
     ];
   };
@@ -213,12 +231,12 @@ const expandedRowRender = (record) => {
 };
 const TableTaxImplicationRuleOverride = ({
   data = [],
-  handleDeleteItemOverride= () => {},
-  handleUpdateItemOverride= () => {},
+  handleDeleteItemOverride = () => {},
+  handleUpdateItemOverride = () => {},
   type,
   typeUpdate,
   dataTaxImplicationRule,
-  dataTransCode
+  dataTransCode,
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -227,8 +245,8 @@ const TableTaxImplicationRuleOverride = ({
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState("");
   const searchInput = useRef(null);
-  const [dataSource, setDataSource] = useState([])
-  
+  const [dataSource, setDataSource] = useState([]);
+
   useEffect(() => {
     if (data && data?.length > 0) {
       const dataItem = data?.map((a, index) => ({
@@ -242,7 +260,7 @@ const TableTaxImplicationRuleOverride = ({
         })),
       }));
       setDataSource(dataItem);
-    }else{
+    } else {
       setDataSource([]);
     }
   }, [data]);
@@ -291,7 +309,7 @@ const TableTaxImplicationRuleOverride = ({
           type,
           typeUpdate,
           dataTaxImplicationRule,
-          dataTransCode
+          dataTransCode,
         )}
         current={page}
         pageSize={pageSize}
@@ -305,11 +323,9 @@ const TableTaxImplicationRuleOverride = ({
         expandable={{
           expandedRowRender,
         }}
-      >
-
-      </TablePaginationNew>
+      ></TablePaginationNew>
     </div>
-  )
-}
+  );
+};
 
-export default TableTaxImplicationRuleOverride
+export default TableTaxImplicationRuleOverride;

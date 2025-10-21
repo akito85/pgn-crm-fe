@@ -32,7 +32,7 @@ import {
 const ProductDistributionForm = ({ type }) => {
   // Selector
   const { loading, data_detail_history } = useSelector(
-    (state) => state.productDistribution
+    (state) => state.productDistribution,
   );
 
   // Declaration
@@ -77,7 +77,7 @@ const ProductDistributionForm = ({ type }) => {
             },
             percentage: item.percentage,
           };
-        }
+        },
       );
 
       form.setFieldsValue({
@@ -168,7 +168,7 @@ const ProductDistributionForm = ({ type }) => {
           services: accountManagementService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {

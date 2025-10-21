@@ -33,20 +33,26 @@ const ServicePoint = () => {
 
   const dispatch = useDispatch();
   const { data_detailServicePoint, loading } = useSelector(
-    (state) => state.servicePoint
+    (state) => state.servicePoint,
   );
-  const { access_account } = useSelector(
-    (state) => state.accountManagement
-    );
+  const { access_account } = useSelector((state) => state.accountManagement);
 
   // Use State
   useEffect(() => {
-    if(location?.pathname.includes('account-standard')) {
-      dispatch(getGrantedAccessAccount('/account-management/account-standard/service-point/asset'))
-    }else{
-      dispatch(getGrantedAccessAccount('/account-management/account-onetime/service-point/asset'))
+    if (location?.pathname.includes("account-standard")) {
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-standard/service-point/asset",
+        ),
+      );
+    } else {
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-onetime/service-point/asset",
+        ),
+      );
     }
-  }, [dispatch])
+  }, [dispatch]);
 
   //useEffect
   useEffect(() => {
@@ -58,7 +64,7 @@ const ServicePoint = () => {
   //getHeaderDetailId
 
   const [servicePage, setServicePointPage] = useState(
-    listServicePointPage[0].value
+    listServicePointPage[0].value,
   );
 
   const handleServicePointPage = (e) => {
@@ -114,14 +120,14 @@ const ServicePoint = () => {
         breadcrumbName: "Detail Account",
         state: {
           idAccount: id,
-        }
+        },
       },
       {
         path: "",
         breadcrumbName: "Detail Service Point",
       },
     ];
-  }
+  };
 
   return (
     <Spin spinning={loading}>

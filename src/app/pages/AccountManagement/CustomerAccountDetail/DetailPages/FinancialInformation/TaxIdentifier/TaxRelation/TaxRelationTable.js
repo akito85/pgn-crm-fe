@@ -4,20 +4,17 @@ import TablePagination from "../../../../../../../../components/TablePagination"
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import { Fragment } from "react";
 
-const TaxRelationTable = (
-	{
-    data = [],
-		handleChooseAccount = () => {},
-    handleChange = {},
-    handleChangeSize = {},
-    totalElement = {},
-    page = {},
-    pageSize = {},
-    onSort = {},
-    getColumnSearchProps = () => {},
-	}
-) => {
-
+const TaxRelationTable = ({
+  data = [],
+  handleChooseAccount = () => {},
+  handleChange = {},
+  handleChangeSize = {},
+  totalElement = {},
+  page = {},
+  pageSize = {},
+  onSort = {},
+  getColumnSearchProps = () => {},
+}) => {
   const columns = [
     {
       title: "NO",
@@ -64,18 +61,18 @@ const TaxRelationTable = (
         return (
           <div className="flex w-full justify-center gap-6">
             <Tooltip title="Choose">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconActionCreate"
-                color={"#0075bf"}
-                width={24}
-                onClick={() => {
-                  handleChooseAccount({
-                    data: r,
-                    isOpen: false,
-                  })
-                }}
-              />
+              <div className="pt-1">
+                <SVGIcon
+                  name="IconActionCreate"
+                  color={"#0075bf"}
+                  width={24}
+                  onClick={() => {
+                    handleChooseAccount({
+                      data: r,
+                      isOpen: false,
+                    });
+                  }}
+                />
               </div>
             </Tooltip>
           </div>

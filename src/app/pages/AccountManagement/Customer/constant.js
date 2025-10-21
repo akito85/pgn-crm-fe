@@ -1,1 +1,2 @@
-export const urlLink = (id) => `/v1/dbs/api/account-info/download-attachment/${id}`;
+export const urlLink = (id) =>
+  `/v1/dbs/api/account-info/download-attachment/${id}`;

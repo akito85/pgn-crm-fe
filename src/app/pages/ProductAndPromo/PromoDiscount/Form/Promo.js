@@ -85,7 +85,7 @@ const Promo = ({
             rules={formMessageRequired("Promo Name")}
           >
             <InputComponent
-            maxLength={100}
+              maxLength={100}
               disabled={status === "ACTIVE" && type === "update"}
             />
           </Form.Item>
@@ -114,8 +114,8 @@ const Promo = ({
                     ? Promise.resolve()
                     : Promise.reject(
                         new Error(
-                          "The end date must be greater than or equal to the start date!"
-                        )
+                          "The end date must be greater than or equal to the start date!",
+                        ),
                       ),
               },
               // { message: requiredMessage("End Date"), required: true },

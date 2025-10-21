@@ -14,7 +14,7 @@ const TaxCodeInfo = ({
 
   // Find Name Criteria on Modal Confirm
   const matchedObjectsCriteria = apiCriteria?.filter((obj) =>
-    data?.criteria?.includes(obj.id)
+    data?.criteria?.includes(obj.id),
   );
   const matchedNamesCriteria = matchedObjectsCriteria
     ?.map((obj) => obj.text)
@@ -44,13 +44,12 @@ const TaxCodeInfo = ({
     const tempValue = text ? (text + "").split(".") : [];
     const thousandSeparator = ",";
     const decimalSeparator = ".";
-    const descimal = tempValue[1]
-      ? `${decimalSeparator}${tempValue[1]}`
-      : ``;
+    const descimal = tempValue[1] ? `${decimalSeparator}${tempValue[1]}` : ``;
 
     const value =
       tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
-      descimal + "%";
+      descimal +
+      "%";
 
     if (value) {
       return value;
@@ -77,7 +76,9 @@ const TaxCodeInfo = ({
               : ""}
           </DetailText>
           <DetailText label={"Status"}>{labelStatus(data?.status)}</DetailText>
-          <DetailText label={"Status Approval"}>{labelStatus(data?.statusApproval)}</DetailText>
+          <DetailText label={"Status Approval"}>
+            {labelStatus(data?.statusApproval)}
+          </DetailText>
           <div className="col-span-4">
             <DetailText label={"Criteria"}>
               {criteriaName?.slice(2) || data?.criteria}
@@ -91,7 +92,9 @@ const TaxCodeInfo = ({
         <>
           <DetailText label={"Tax Code"}>{data?.taxCode}</DetailText>
           <DetailText label={"Name"}>{data?.taxCodeName}</DetailText>
-          <DetailText label={"Tax Rate (%)"}>{formatTaxRate(data?.taxRate)}</DetailText>
+          <DetailText label={"Tax Rate (%)"}>
+            {formatTaxRate(data?.taxRate)}
+          </DetailText>
           <DetailText label={"Category"}>{categoryName}</DetailText>
           <DetailText label={"GL Account"}>{data?.glAccount}</DetailText>
           <DetailText label={"Start Date"}>

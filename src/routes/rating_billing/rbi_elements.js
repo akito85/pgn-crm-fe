@@ -34,15 +34,13 @@ import TopView from "../../app/pages/RatingBillingInvoice/MasterData/TermsOfPaym
 import ListCreateForm from "../../app/pages/RatingBillingInvoice/MasterData/TermsOfPayment/Create/ListCreateForm";
 import DetailTOP from "../../app/pages/RatingBillingInvoice/MasterData/TermsOfPayment/DetailTOP";
 import ListDetailTOP from "../../app/pages/RatingBillingInvoice/MasterData/TermsOfPayment/ListDetailTOP";
-import BillingCycleView from "../../app/pages/RatingBillingInvoice/MasterData/BillingCycle/Page/BillingCycleView"
-import BillingCycleForm from "../../app/pages/RatingBillingInvoice/MasterData/BillingCycle/Page/BillingCycleForm"
-import BillingCycleDetail from "../../app/pages/RatingBillingInvoice/MasterData/BillingCycle/Page/BillingCycleDetail"
+import BillingCycleView from "../../app/pages/RatingBillingInvoice/MasterData/BillingCycle/Page/BillingCycleView";
+import BillingCycleForm from "../../app/pages/RatingBillingInvoice/MasterData/BillingCycle/Page/BillingCycleForm";
+import BillingCycleDetail from "../../app/pages/RatingBillingInvoice/MasterData/BillingCycle/Page/BillingCycleDetail";
 import DetailMonitoringUsage from "../../app/pages/RatingBillingInvoice/MonitoringUsage/Detail/DetailMonitoringUsage";
 import TaxCodeView from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode/TaxCodeView";
 import TaxCodeDetail from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode/TaxCodeDetail";
 import TaxCodeForm from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode/TaxCodeForm";
-
-
 
 export const RBI_ELEMENTS = {
   // calculation elements render
@@ -100,10 +98,10 @@ export const RBI_ELEMENTS = {
   BILLING_ITEM_UPDATE_ELEMENT: <BillingItemForm type={"update"} />,
 
   // Billing Cycle
-  BILLING_CYCLE_VIEW_ELEMENT: <BillingCycleView/>,
-  BILLING_CYCLE_DETAIL_ELEMENT: <BillingCycleDetail/>,
-  BILLING_CYCLE_CREATE_ELEMENT: <BillingCycleForm type={"create"}/>,
-  BILLING_CYCLE_UPDATE_ELEMENT: <BillingCycleForm type={"update"}/>,
+  BILLING_CYCLE_VIEW_ELEMENT: <BillingCycleView />,
+  BILLING_CYCLE_DETAIL_ELEMENT: <BillingCycleDetail />,
+  BILLING_CYCLE_CREATE_ELEMENT: <BillingCycleForm type={"create"} />,
+  BILLING_CYCLE_UPDATE_ELEMENT: <BillingCycleForm type={"update"} />,
 
   // Invoice Template
   INVOICE_TEMPLATE_VIEW_ELEMENT: <InvoiceTemplateView />,

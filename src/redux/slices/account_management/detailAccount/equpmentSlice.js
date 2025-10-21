@@ -36,11 +36,11 @@ export const getListEqupment = createAsyncThunk(
           error: error,
           action: "GET_LIST_EQUIPMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Detail Equipment
@@ -57,17 +57,17 @@ export const getDetailEquipment = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_EQUIPMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 //Create Equipment
 export const createEqupment = createAsyncThunk(
   "CREATE_EQUIPMENT",
-  async (body , thunkAPI) => {
+  async (body, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/account-detail/equipment/create-update`;
       const response = await accountManagementService.createData(url, body);
@@ -84,11 +84,11 @@ export const createEqupment = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_EQUIPMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const deleteEquipment = createAsyncThunk(
@@ -110,15 +110,12 @@ export const deleteEquipment = createAsyncThunk(
           error: error,
           action: "DELETE_EQUIPMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
-
-
-
 
 /* ================= 
 Drop Down List 
@@ -142,11 +139,11 @@ export const getDdlNameEquipment = createAsyncThunk(
           error: error,
           action: "GET_DDL_NAME_EQUIPMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Ddl Type Equipment
@@ -167,11 +164,11 @@ export const getDdlTypeEquipment = createAsyncThunk(
           error: error,
           action: "GET_DDL_TYPE_EQUIPMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Ddl Brand Equipment
@@ -192,11 +189,11 @@ export const getDdlBrandEquipment = createAsyncThunk(
           error: error,
           action: "GET_DDL_BRAND_EQUIPMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Ddl Qty Uom Equipment
@@ -217,11 +214,11 @@ export const getDdlQtyEquipment = createAsyncThunk(
           error: error,
           action: "GET_DDL_QTY_EQUIPMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Ddl Capacity Uom Equipment
@@ -242,11 +239,11 @@ export const getDdlCapacityEquipment = createAsyncThunk(
           error: error,
           action: "GET_DDL_CAPACITY_EQUIPMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Ddl Energy Uom Equipment
@@ -267,11 +264,11 @@ export const getDdlEnergyEquipment = createAsyncThunk(
           error: error,
           action: "GET_DDL_ENERGY_EQUIPMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Ddl Gas Conversion Uom Equipment
@@ -292,11 +289,11 @@ export const getDdlGasConversionEquipment = createAsyncThunk(
           error: error,
           action: "GET_DDL_GAS_CONVERSION_EQUIPMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Ddl Fuel Type Equipment
@@ -317,11 +314,11 @@ export const getDdlFuelTypeEquipment = createAsyncThunk(
           error: error,
           action: "GET_DDL_FUEL_TYPE_EQUIPMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const accountEquipmentSlice = createSlice({

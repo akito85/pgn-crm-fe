@@ -1,9 +1,17 @@
 import Highlighter from "react-highlight-words";
 import { Tooltip } from "antd";
 import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../utils";
 import SVGIcon from "../../../../assets/Icon/index";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValue,
+} from "../../../../utils/getColumnSearchProps";
 
 export const columnsRating = (
   search,
@@ -31,9 +39,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('calculationCode', hasValue(search['calculationCode']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "calculationCode",
+        hasValue(search["calculationCode"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "RATING CODE",
@@ -45,9 +62,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('ratingCode', hasValue(search['ratingCode']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "ratingCode",
+        hasValue(search["ratingCode"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CUSTOMER NUMBER",
@@ -59,9 +85,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('customerNumber', hasValue(search['customerNumber']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "customerNumber",
+        hasValue(search["customerNumber"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CUSTOMER NAME",
@@ -73,9 +108,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('customerName', hasValue(search['customerName']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "customerName",
+        hasValue(search["customerName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "ACCOUNT NUMBER",
@@ -87,9 +131,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('accountNumber', hasValue(search['accountNumber']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "accountNumber",
+        hasValue(search["accountNumber"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "ACCOUNT NAME",
@@ -101,9 +154,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('accountName', hasValue(search['accountName']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "accountName",
+        hasValue(search["accountName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "ACCOUNT GROUP TYPE",
@@ -116,9 +178,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('accGroupType', hasValue(search['accGroupType']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "accGroupType",
+        hasValue(search["accGroupType"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "SERVICE TYPE",
@@ -131,9 +202,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('serviceType', hasValue(search['serviceType']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "serviceType",
+        hasValue(search["serviceType"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "SOR",
@@ -145,9 +225,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('sor', hasValue(search['sor']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "sor",
+        hasValue(search["sor"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "COST CENTER",
@@ -159,9 +248,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('costCenter', hasValue(search['costCenter']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "costCenter",
+        hasValue(search["costCenter"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "ACCOUNT SEGMENT",
@@ -174,9 +272,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('accountSegment', hasValue(search['accountSegment']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "accountSegment",
+        hasValue(search["accountSegment"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "METER READING CODE",
@@ -188,9 +295,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('mreadingCode', hasValue(search['mreadingCode']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "mreadingCode",
+        hasValue(search["mreadingCode"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "BILLING CYCLE",
@@ -203,9 +319,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('billingCycle', hasValue(search['billingCycle']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "billingCycle",
+        hasValue(search["billingCycle"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "BILLING PERIOD",
@@ -220,9 +345,17 @@ export const columnsRating = (
       searchText,
       handleSearch,
       true,
-      'datePeriod'
+      "datePeriod",
     ),
-    render: (text) => renderDateColumn('billingPeriod', hasValue(search['billingPeriod']), searchText, text, 'datePeriod', search)
+    render: (text) =>
+      renderDateColumn(
+        "billingPeriod",
+        hasValue(search["billingPeriod"]),
+        searchText,
+        text,
+        "datePeriod",
+        search,
+      ),
   },
   {
     title: "SA NUMBER",
@@ -234,9 +367,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('saNumber', hasValue(search['saNumber']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "saNumber",
+        hasValue(search["saNumber"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "PRODUCT",
@@ -248,9 +390,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('product', hasValue(search['product']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "product",
+        hasValue(search["product"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "MIN CONTRACT",
@@ -263,9 +414,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('minContract', hasValue(search['minContract']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "minContract",
+        hasValue(search["minContract"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "MAX CONTRACT",
@@ -278,9 +438,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('maxContract', hasValue(search['maxContract']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "maxContract",
+        hasValue(search["maxContract"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "UOM",
@@ -293,9 +462,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('uom', hasValue(search['uom']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "uom",
+        hasValue(search["uom"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CONTRACT TIME UNIT",
@@ -308,9 +486,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('timeUnitContract', hasValue(search['timeUnitContract']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "timeUnitContract",
+        hasValue(search["timeUnitContract"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "USAGE",
@@ -323,9 +510,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('usage', hasValue(search['usage']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "usage",
+        hasValue(search["usage"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CONVERTED USAGE M3",
@@ -338,9 +534,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('convUsageM3', hasValue(search['convUsageM3']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "convUsageM3",
+        hasValue(search["convUsageM3"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CONVERTED USAGE MMBTU",
@@ -353,9 +558,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('convUsageMmbtu', hasValue(search['convUsageMmbtu']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "convUsageMmbtu",
+        hasValue(search["convUsageMmbtu"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "DISCOUNT USAGE",
@@ -368,9 +582,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('discountUsage', hasValue(search['discountUsage']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "discountUsage",
+        hasValue(search["discountUsage"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL USAGE",
@@ -383,9 +606,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalUsage', hasValue(search['totalUsage']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalUsage",
+        hasValue(search["totalUsage"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CONVERTED TOTAL USAGE M3",
@@ -398,9 +630,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('convTotalUsageM3', hasValue(search['convTotalUsageM3']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "convTotalUsageM3",
+        hasValue(search["convTotalUsageM3"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CONVERTED TOTAL USAGE MMBTU",
@@ -413,9 +654,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('convTotalUsageMmbtu', hasValue(search['convTotalUsageMmbtu']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "convTotalUsageMmbtu",
+        hasValue(search["convTotalUsageMmbtu"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "MINIMUM USAGE",
@@ -428,9 +678,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('minimumUsage', hasValue(search['minimumUsage']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "minimumUsage",
+        hasValue(search["minimumUsage"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CONVERTED MINIMUM USAGE M3",
@@ -443,9 +702,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('convMinimumUsageM3', hasValue(search['convMinimumUsageM3']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "convMinimumUsageM3",
+        hasValue(search["convMinimumUsageM3"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CONVERTED MINIMUM USAGE MMBTU",
@@ -458,9 +726,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('convMinimumUsageMmbtu', hasValue(search['convMinimumUsageMmbtu']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "convMinimumUsageMmbtu",
+        hasValue(search["convMinimumUsageMmbtu"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "NORMAL USAGE",
@@ -473,9 +750,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('normalUsage', hasValue(search['normalUsage']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "normalUsage",
+        hasValue(search["normalUsage"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CONVERTED NORMAL USAGE M3",
@@ -488,9 +774,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('convNormalUsageM3', hasValue(search['convNormalUsageM3']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "convNormalUsageM3",
+        hasValue(search["convNormalUsageM3"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CONVERTED NORMAL USAGE MMBTU",
@@ -503,9 +798,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('convNormalUsageMmbtu', hasValue(search['convNormalUsageMmbtu']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "convNormalUsageMmbtu",
+        hasValue(search["convNormalUsageMmbtu"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "OUP",
@@ -518,9 +822,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('oup', hasValue(search['oup']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "oup",
+        hasValue(search["oup"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CONVERTED OUP M3",
@@ -533,9 +846,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('convOupM3', hasValue(search['convOupM3']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "convOupM3",
+        hasValue(search["convOupM3"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CONVERTED OUP MMBTU",
@@ -548,9 +870,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('convOupMmbtu', hasValue(search['convOupMmbtu']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "convOupMmbtu",
+        hasValue(search["convOupMmbtu"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CALCULATED USAGE",
@@ -563,9 +894,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('calculatedUsage', hasValue(search['calculatedUsage']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "calculatedUsage",
+        hasValue(search["calculatedUsage"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CONVERTED CALCULATED USAGE M3",
@@ -578,9 +918,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('convCalculatedUsageM3', hasValue(search['convCalculatedUsageM3']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "convCalculatedUsageM3",
+        hasValue(search["convCalculatedUsageM3"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CONVERTED CALCULATED USAGE MMBTU",
@@ -593,9 +942,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('convCalculatedUsageMmbtu', hasValue(search['convCalculatedUsageMmbtu']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "convCalculatedUsageMmbtu",
+        hasValue(search["convCalculatedUsageMmbtu"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CURRENCY",
@@ -608,9 +966,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('currency', hasValue(search['currency']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "currency",
+        hasValue(search["currency"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "RATE",
@@ -623,9 +990,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('rate', hasValue(search['rate']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "rate",
+        hasValue(search["rate"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "RATE DATE",
@@ -640,9 +1016,17 @@ export const columnsRating = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
-    render: (text) => renderDateColumn('rateDate', hasValue(search['rateDate']), searchText, text, 'date', search)
+    render: (text) =>
+      renderDateColumn(
+        "rateDate",
+        hasValue(search["rateDate"]),
+        searchText,
+        text,
+        "date",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT MINIMUM IDR",
@@ -655,9 +1039,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountMinIdr', hasValue(search['totalAmountMinIdr']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountMinIdr",
+        hasValue(search["totalAmountMinIdr"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT MINIMUM USD",
@@ -670,9 +1063,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountMinUsd', hasValue(search['totalAmountMinUsd']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountMinUsd",
+        hasValue(search["totalAmountMinUsd"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT MINIMUM EQV IDR",
@@ -685,9 +1087,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountMinEqvIdr', hasValue(search['totalAmountMinEqvIdr']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountMinEqvIdr",
+        hasValue(search["totalAmountMinEqvIdr"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT MINIMUM EQV USD",
@@ -700,9 +1111,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountMinEqvUsd', hasValue(search['totalAmountMinEqvUsd']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountMinEqvUsd",
+        hasValue(search["totalAmountMinEqvUsd"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT NORMAL IDR",
@@ -715,9 +1135,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountNormalIdr', hasValue(search['totalAmountNormalIdr']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountNormalIdr",
+        hasValue(search["totalAmountNormalIdr"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT NORMAL USD",
@@ -730,9 +1159,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountNormalUsd', hasValue(search['totalAmountNormalUsd']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountNormalUsd",
+        hasValue(search["totalAmountNormalUsd"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT NORMAL EQV IDR",
@@ -745,9 +1183,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountNormalEqvIdr', hasValue(search['totalAmountNormalEqvIdr']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountNormalEqvIdr",
+        hasValue(search["totalAmountNormalEqvIdr"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT NORMAL EQV USD",
@@ -760,9 +1207,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountNormalEqvUsd', hasValue(search['totalAmountNormalEqvUsd']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountNormalEqvUsd",
+        hasValue(search["totalAmountNormalEqvUsd"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT OUP IDR",
@@ -775,9 +1231,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountOupIdr', hasValue(search['totalAmountOupIdr']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountOupIdr",
+        hasValue(search["totalAmountOupIdr"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT OUP USD",
@@ -790,9 +1255,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountOupUsd', hasValue(search['totalAmountOupUsd']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountOupUsd",
+        hasValue(search["totalAmountOupUsd"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT OUP EQV IDR",
@@ -805,9 +1279,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountOupEqvIdr', hasValue(search['totalAmountOupEqvIdr']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountOupEqvIdr",
+        hasValue(search["totalAmountOupEqvIdr"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT OUP EQV USD",
@@ -820,9 +1303,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountOupEqvUsd', hasValue(search['totalAmountOupEqvUsd']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountOupEqvUsd",
+        hasValue(search["totalAmountOupEqvUsd"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "AMOUNT IDR",
@@ -835,9 +1327,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('amountIdr', hasValue(search['amountIdr']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "amountIdr",
+        hasValue(search["amountIdr"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "AMOUNT USD",
@@ -850,9 +1351,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('amountUsd', hasValue(search['amountUsd']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "amountUsd",
+        hasValue(search["amountUsd"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "AMOUNT EQV IDR",
@@ -865,9 +1375,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('amountEqvIdr', hasValue(search['amountEqvIdr']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "amountEqvIdr",
+        hasValue(search["amountEqvIdr"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "AMOUNT EQV USD",
@@ -880,9 +1399,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('amountEqvUsd', hasValue(search['amountEqvUsd']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "amountEqvUsd",
+        hasValue(search["amountEqvUsd"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "DISCOUNT AMOUNT",
@@ -895,9 +1423,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('discountAmount', hasValue(search['discountAmount']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "discountAmount",
+        hasValue(search["discountAmount"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT IDR",
@@ -910,9 +1447,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountIdr', hasValue(search['totalAmountIdr']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountIdr",
+        hasValue(search["totalAmountIdr"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT USD",
@@ -925,9 +1471,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountUsd', hasValue(search['totalAmountUsd']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountUsd",
+        hasValue(search["totalAmountUsd"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT EQV IDR",
@@ -940,9 +1495,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountEqvIdr', hasValue(search['totalAmountEqvIdr']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountEqvIdr",
+        hasValue(search["totalAmountEqvIdr"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TOTAL AMOUNT EQV USD",
@@ -955,9 +1519,18 @@ export const columnsRating = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('totalAmountEqvUsd', hasValue(search['totalAmountEqvUsd']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "totalAmountEqvUsd",
+        hasValue(search["totalAmountEqvUsd"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TRANSACTION DATE",
@@ -972,9 +1545,17 @@ export const columnsRating = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
-    render: (text) => renderDateColumn('transactionDate', hasValue(search['transactionDate']), searchText, text, 'date', search)
+    render: (text) =>
+      renderDateColumn(
+        "transactionDate",
+        hasValue(search["transactionDate"]),
+        searchText,
+        text,
+        "date",
+        search,
+      ),
   },
   {
     title: "ACCOUNTING DATE",
@@ -989,8 +1570,16 @@ export const columnsRating = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
-    render: (text) => renderDateColumn('accountingDate', hasValue(search['accountingDate']), searchText, text, 'date', search)
+    render: (text) =>
+      renderDateColumn(
+        "accountingDate",
+        hasValue(search["accountingDate"]),
+        searchText,
+        text,
+        "date",
+        search,
+      ),
   },
 ];

@@ -1,7 +1,4 @@
-import {
-  LeftOutlined,
-  WarningOutlined,
-} from "@ant-design/icons";
+import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
 import { DatePicker, Form, Input, Select, Spin } from "antd";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
@@ -28,7 +25,11 @@ import {
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
-import { dateFormatting, formMessageRequired, hasValue } from "../../../../utils";
+import {
+  dateFormatting,
+  formMessageRequired,
+  hasValue,
+} from "../../../../utils";
 import SelectComponent from "../../../../components/SelectComponent";
 import { useCallback } from "react";
 import userHttpService from "../../../../redux/services/userHttpService";
@@ -49,9 +50,9 @@ const UserForm = (props) => {
     data_user_type,
     loading,
     data_user,
-    data_employee_id
+    data_employee_id,
   } = useSelector((state) => state.user);
-  const { bodyError, isLoading } = useSelector(state => state?.general);
+  const { bodyError, isLoading } = useSelector((state) => state?.general);
   const [openModal, setOpenModal] = useState(false);
   const [employeeType, setEmployeeType] = useState("");
   const dataDetail = data_user?.data;
@@ -63,29 +64,42 @@ const UserForm = (props) => {
   const [disableDate, setDisableDate] = useState(false);
   const [payload, setPayload] = useState({});
 
-  const assert = useCallback((data) => {
-    if (data) {
-      form.setFieldsValue({
-        username: data?.username,
-        employeeId: data?.employeeId,
-        email: data?.email,
-        phone: data?.phone !== null ? data?.phone?.substring(2) : 0,
-        startDateUser: data?.startDate === null ? moment() : moment(data?.startDate).clone(),
-        endDateUser: data?.endDate === null ? "" : moment(data?.endDate).clone(),
-        authType: data?.authTypeId,
-        userType: data?.userTypeId,
-        userLevel: data?.userLevelId,
-        description: data?.description,
-        gaId: data?.gaId,
-        startDateUserGa: hasValue(data?.startDateDetail) ? moment(data?.startDateDetail) : '',
-        endDateUserGa: hasValue(data?.endDateDetail) ? moment(data?.endDateDetail) : '',
-      });
-      setEmployeeType(data?.userTypeId);
-      setLevelId(data?.userLevelId);
-      setMandatoryFieldType(data?.employeeId ? true : false)
-      setDisableDate(moment(data?.startDateDetail) < moment().add(-1, 'days'));
-    }
-  }, [form]);
+  const assert = useCallback(
+    (data) => {
+      if (data) {
+        form.setFieldsValue({
+          username: data?.username,
+          employeeId: data?.employeeId,
+          email: data?.email,
+          phone: data?.phone !== null ? data?.phone?.substring(2) : 0,
+          startDateUser:
+            data?.startDate === null
+              ? moment()
+              : moment(data?.startDate).clone(),
+          endDateUser:
+            data?.endDate === null ? "" : moment(data?.endDate).clone(),
+          authType: data?.authTypeId,
+          userType: data?.userTypeId,
+          userLevel: data?.userLevelId,
+          description: data?.description,
+          gaId: data?.gaId,
+          startDateUserGa: hasValue(data?.startDateDetail)
+            ? moment(data?.startDateDetail)
+            : "",
+          endDateUserGa: hasValue(data?.endDateDetail)
+            ? moment(data?.endDateDetail)
+            : "",
+        });
+        setEmployeeType(data?.userTypeId);
+        setLevelId(data?.userLevelId);
+        setMandatoryFieldType(data?.employeeId ? true : false);
+        setDisableDate(
+          moment(data?.startDateDetail) < moment().add(-1, "days"),
+        );
+      }
+    },
+    [form],
+  );
 
   // useEffect
   useEffect(() => {
@@ -107,24 +121,28 @@ const UserForm = (props) => {
   // get all employee use effect
   useEffect(() => {
     if (hasValue(dataDetail?.employeeId)) {
-      dispatch(getAllEmployees(dataDetail?.employeeId))
+      dispatch(getAllEmployees(dataDetail?.employeeId));
     } else {
-      dispatch(getAllEmployees(0))
+      dispatch(getAllEmployees(0));
     }
   }, [dataDetail, dispatch]);
 
   useEffect(() => {
     if (id && levelId) {
-      dispatch(getAllGroupAccess(levelId))
+      dispatch(getAllGroupAccess(levelId));
     }
   }, [levelId, id, dispatch]);
 
   useEffect(() => {
-    if (employeeType === "NON_EMP" || employeeType === undefined || form.getFieldValue('employeeId') === undefined) {
+    if (
+      employeeType === "NON_EMP" ||
+      employeeType === undefined ||
+      form.getFieldValue("employeeId") === undefined
+    ) {
       if (id) {
-        assert(dataDetail)
+        assert(dataDetail);
       } else {
-        form.resetFields(['employeeId', 'username', 'email', 'phone'])
+        form.resetFields(["employeeId", "username", "email", "phone"]);
       }
     }
   }, [data_employee_id, employeeType, form, id, assert, dataDetail]);
@@ -132,16 +150,15 @@ const UserForm = (props) => {
   useEffect(() => {
     if (data_employee_id?.code === 200) {
       form.setFieldsValue({
-        username: data_employee_id?.data?.email?.split('@')[0],
+        username: data_employee_id?.data?.email?.split("@")[0],
         email: data_employee_id?.data?.email,
-        phone: data_employee_id?.data?.phone?.substring(2)
-      })
+        phone: data_employee_id?.data?.phone?.substring(2),
+      });
     }
-  }, [data_employee_id, form])
+  }, [data_employee_id, form]);
 
   const handleCancelConfirmation = () => {
     setOpenModal(false);
-
   };
   const routes = [
     {
@@ -168,12 +185,11 @@ const UserForm = (props) => {
     }
   };
 
-
   const onFinish = async (values) => {
     try {
       let body;
       let url;
-      if (type === 'update') {
+      if (type === "update") {
         body = {
           ...values,
           userId: data_user?.data?.userId,
@@ -181,11 +197,17 @@ const UserForm = (props) => {
           username: values?.username?.toLowerCase(),
           phone: `62${values?.phone}`,
           startDateUser: moment(values?.startDateUser).format("DD MMM YYYY"),
-          endDateUser: hasValue(values?.endDateUser) === false ? null : moment(values?.endDateUser).format("DD MMM YYYY"),
+          endDateUser:
+            hasValue(values?.endDateUser) === false
+              ? null
+              : moment(values?.endDateUser).format("DD MMM YYYY"),
           startDateGa: moment(values?.startDateUserGa).format("DD MMM YYYY"),
-          endDateGa: hasValue(values?.endDateUserGa) === false ? null : moment(values?.endDateUserGa).format("DD MMM YYYY"),
-        }
-        url = '/v1/dbs/api/mu/validate-update'
+          endDateGa:
+            hasValue(values?.endDateUserGa) === false
+              ? null
+              : moment(values?.endDateUserGa).format("DD MMM YYYY"),
+        };
+        url = "/v1/dbs/api/mu/validate-update";
       } else {
         body = {
           ...values,
@@ -193,24 +215,41 @@ const UserForm = (props) => {
           username: values?.username?.toLowerCase(),
           phone: `62${values?.phone}`,
           startDateUser: moment(values?.startDateUser).format("DD MMM YYYY"),
-          endDateUser: hasValue(values?.endDateUser) === false ? null : moment(values?.endDateUser).format("DD MMM YYYY"),
+          endDateUser:
+            hasValue(values?.endDateUser) === false
+              ? null
+              : moment(values?.endDateUser).format("DD MMM YYYY"),
           startDateGa: moment(values?.startDateUserGa).format("DD MMM YYYY"),
-          endDateGa: hasValue(values?.endDateUserGa) === false ? null : moment(values?.endDateUserGa).format("DD MMM YYYY"),
-        }
-        url = '/v1/dbs/api/mu/validate-create'
+          endDateGa:
+            hasValue(values?.endDateUserGa) === false
+              ? null
+              : moment(values?.endDateUserGa).format("DD MMM YYYY"),
+        };
+        url = "/v1/dbs/api/mu/validate-create";
       }
       setPayload({
         requestBody: body,
-        validateCreateUpdate: { body: body, services: userHttpService, endPoint: url, type }
+        validateCreateUpdate: {
+          body: body,
+          services: userHttpService,
+          endPoint: url,
+          type,
+        },
       });
 
-      await dispatch(validateCreateUpdate({ body: body, services: userHttpService, endPoint: url, type }))?.unwrap()
+      await dispatch(
+        validateCreateUpdate({
+          body: body,
+          services: userHttpService,
+          endPoint: url,
+          type,
+        }),
+      )?.unwrap();
       setOpenModal(true);
     } catch (error) {
       setOpenModal(false);
     }
   };
-
 
   const onFinishFailed = () => {
     setOpenModal(false);
@@ -224,32 +263,46 @@ const UserForm = (props) => {
   };
 
   const getName = () => {
-    const userTypeName = data_user_type?.data?.filter((item) => item?.value === formValue?.userType)[0]?.name;
-    const authTypeName = data_auth_type?.data?.filter((item) => item?.value === formValue?.authType)[0]?.name;
-    const employeeName = data_employee?.data?.filter((item) => item?.id === formValue?.employeeId)[0]?.name;
-    const userLevelName = data_user_level?.data?.filter((item) => item?.value === formValue?.userLevel)[0]?.name;
-    const gaName = data_group_access?.data?.filter((item) => item?.id === formValue?.gaId)[0]?.name;
+    const userTypeName = data_user_type?.data?.filter(
+      (item) => item?.value === formValue?.userType,
+    )[0]?.name;
+    const authTypeName = data_auth_type?.data?.filter(
+      (item) => item?.value === formValue?.authType,
+    )[0]?.name;
+    const employeeName = data_employee?.data?.filter(
+      (item) => item?.id === formValue?.employeeId,
+    )[0]?.name;
+    const userLevelName = data_user_level?.data?.filter(
+      (item) => item?.value === formValue?.userLevel,
+    )[0]?.name;
+    const gaName = data_group_access?.data?.filter(
+      (item) => item?.id === formValue?.gaId,
+    )[0]?.name;
 
     return { userTypeName, authTypeName, employeeName, userLevelName, gaName };
   };
-
 
   const RenderPreview = () => (
     <div className="w-full">
       <span className="text-primary uppercase">User Information</span>
       <div className="w-full grid grid-cols-3 gap-5 mt-5 pl-5">
         <DetailText label={"User Type"}>{getName()?.userTypeName}</DetailText>
-        <DetailText label={"Employee"}>{formValue?.employeeId === undefined ? "" : getName()?.employeeName}</DetailText>
+        <DetailText label={"Employee"}>
+          {formValue?.employeeId === undefined ? "" : getName()?.employeeName}
+        </DetailText>
         <DetailText label={"Username"}>{formValue?.username}</DetailText>
         <DetailText label={"User Level"}>{getName()?.userLevelName}</DetailText>
         <DetailText label={"Start Date"}>
           {moment(formValue?.startDateUser).format("DD MMM YYYY")}
         </DetailText>
         <DetailText label={"End Date"}>
-          {formValue?.endDateUser && moment(formValue?.endDateUser).format("DD MMM YYYY")}
+          {formValue?.endDateUser &&
+            moment(formValue?.endDateUser).format("DD MMM YYYY")}
         </DetailText>
         <DetailText label={"Email"}>{formValue?.email}</DetailText>
-        <DetailText label={"Mobile Phone"}>{`62${formValue?.phone}`}</DetailText>
+        <DetailText
+          label={"Mobile Phone"}
+        >{`62${formValue?.phone}`}</DetailText>
         <DetailText label={"Auth Type"}>{getName()?.authTypeName}</DetailText>
       </div>
       <div className="w-full pl-5">
@@ -262,7 +315,8 @@ const UserForm = (props) => {
           {moment(formValue?.startDateUserGa).format("DD MMM YYYY")}
         </DetailText>
         <DetailText label={"End Date"}>
-          {formValue?.endDateUserGa && moment(formValue?.endDateUserGa).format("DD MMM YYYY")}
+          {formValue?.endDateUserGa &&
+            moment(formValue?.endDateUserGa).format("DD MMM YYYY")}
         </DetailText>
       </div>
     </div>
@@ -271,61 +325,66 @@ const UserForm = (props) => {
   const handleChangeUserType = (value) => {
     const userTypeName = Object.assign(
       {},
-      ...data_user_type?.data?.filter((item) => item?.value === value)
+      ...data_user_type?.data?.filter((item) => item?.value === value),
     )?.value;
     setEmployeeType(userTypeName);
-    setMandatoryFieldType(value === undefined || value === "NON_EMP" ? false : true)
+    setMandatoryFieldType(
+      value === undefined || value === "NON_EMP" ? false : true,
+    );
   };
 
   // change user level
   const handleChangeUserLevel = async (id) => {
-    form.resetFields(['gaId']);
-    id !== undefined && await dispatch(getAllGroupAccess(id)).unwrap();
+    form.resetFields(["gaId"]);
+    id !== undefined && (await dispatch(getAllGroupAccess(id)).unwrap());
   };
   // handle employee id
   const handleEmployeeId = async (e) => {
-    e !== undefined && await dispatch(getEmployeeById(e)).unwrap();
+    e !== undefined && (await dispatch(getEmployeeById(e)).unwrap());
   };
 
-
   const checkDisableDate = (formValue) => {
-    if (type === 'update' && formValue < moment().add(-1, 'days')) {
-      return true
+    if (type === "update" && formValue < moment().add(-1, "days")) {
+      return true;
     } else {
-      return false
+      return false;
     }
-  }
+  };
 
   const handleChangeGroupAccess = (e) => {
-    if (type === 'update' && formValue.startDateUserGa < moment().add(-1, 'days') && e === dataDetail?.gaId) {
-      setDisableDate(true)
+    if (
+      type === "update" &&
+      formValue.startDateUserGa < moment().add(-1, "days") &&
+      e === dataDetail?.gaId
+    ) {
+      setDisableDate(true);
     } else {
-      setDisableDate(false)
+      setDisableDate(false);
     }
-  }
+  };
 
   const handleRetry = () => {
-    handleCancelTryAgain()
-    if (bodyError?.action === 'CREATE_USER') {
-      dispatch(createUser(payload?.requestBody))
-    } else if (bodyError?.action === 'UPDATE_USER') {
-      dispatch(updateUser(payload?.requestBody))
-    } else if (bodyError?.action === 'VALIDATE_CREATE_UPDATE') {
+    handleCancelTryAgain();
+    if (bodyError?.action === "CREATE_USER") {
+      dispatch(createUser(payload?.requestBody));
+    } else if (bodyError?.action === "UPDATE_USER") {
+      dispatch(updateUser(payload?.requestBody));
+    } else if (bodyError?.action === "VALIDATE_CREATE_UPDATE") {
       dispatch(validateCreateUpdate(payload?.validateCreateUpdate));
-    } else if (bodyError?.action === 'GET_DETAIL_USER' && id) {
-      dispatch(getDetailUpdateUser(id))
-    } else if (bodyError?.action === 'GET_ALL_USER_TYPE') {
-      dispatch(getAllUserType())
-    } else if (bodyError?.action === 'GET_ALL_USER_LEVEL') {
-      dispatch(getAllUserLevel())
-    } else if (bodyError?.action === 'GET_ALL_AUTH_TYPE') {
-      dispatch(getAllAuthType())
-    } else if (bodyError?.action === 'GET_ALL_GROUP_ACCES' && levelId && id) {
-      dispatch(getAllGroupAccess(levelId))
+    } else if (bodyError?.action === "GET_DETAIL_USER" && id) {
+      dispatch(getDetailUpdateUser(id));
+    } else if (bodyError?.action === "GET_ALL_USER_TYPE") {
+      dispatch(getAllUserType());
+    } else if (bodyError?.action === "GET_ALL_USER_LEVEL") {
+      dispatch(getAllUserLevel());
+    } else if (bodyError?.action === "GET_ALL_AUTH_TYPE") {
+      dispatch(getAllAuthType());
+    } else if (bodyError?.action === "GET_ALL_GROUP_ACCES" && levelId && id) {
+      dispatch(getAllGroupAccess(levelId));
     } else {
-      dispatch(getAllEmployees(dataDetail?.employeeId || 0))
+      dispatch(getAllEmployees(dataDetail?.employeeId || 0));
     }
-  }
+  };
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
@@ -346,7 +405,11 @@ const UserForm = (props) => {
                 <div className={"w-full flex flex-col gap-4"}>
                   <div className={"flex w-full gap-5"}>
                     <div className="flex flex-col w-full">
-                      <Form.Item label={"User Type"} name={"userType"} rules={formMessageRequired('user type')}>
+                      <Form.Item
+                        label={"User Type"}
+                        name={"userType"}
+                        rules={formMessageRequired("user type")}
+                      >
                         <SelectComponent
                           onChange={(value) => handleChangeUserType(value)}
                         >
@@ -355,8 +418,14 @@ const UserForm = (props) => {
                           ))}
                         </SelectComponent>
                       </Form.Item>
-                      <Form.Item label={"User Level"} name={"userLevel"} rules={formMessageRequired('user level')}>
-                        <SelectComponent onChange={(e) => handleChangeUserLevel(e)}>
+                      <Form.Item
+                        label={"User Level"}
+                        name={"userLevel"}
+                        rules={formMessageRequired("user level")}
+                      >
+                        <SelectComponent
+                          onChange={(e) => handleChangeUserLevel(e)}
+                        >
                           {data_user_level?.data?.map((item) => (
                             <Option value={item?.value}>{item?.name}</Option>
                           ))}
@@ -365,20 +434,38 @@ const UserForm = (props) => {
                       <Form.Item
                         label={"Email"}
                         name={"email"}
-                        rules={[...formMessageRequired("Email"), {
-                          type: 'email',
-                          message: 'The input is not valid E-mail!',
-                        }]}
+                        rules={[
+                          ...formMessageRequired("Email"),
+                          {
+                            type: "email",
+                            message: "The input is not valid E-mail!",
+                          },
+                        ]}
                       >
-                        <InputComponent disabled={form.getFieldValue('userType') !== "NON_EMP" || form.getFieldValue('userType') === undefined} maxLength={50} />
+                        <InputComponent
+                          disabled={
+                            form.getFieldValue("userType") !== "NON_EMP" ||
+                            form.getFieldValue("userType") === undefined
+                          }
+                          maxLength={50}
+                        />
                       </Form.Item>
                     </div>
                     <div className={"flex flex-col w-full"}>
-                      <Form.Item label={"Employee"} name={"employeeId"} rules={mandatoryFieldType ? formMessageRequired('employee') : undefined}>
+                      <Form.Item
+                        label={"Employee"}
+                        name={"employeeId"}
+                        rules={
+                          mandatoryFieldType
+                            ? formMessageRequired("employee")
+                            : undefined
+                        }
+                      >
                         <SelectComponent
                           onChange={handleEmployeeId}
                           disabled={
-                            form.getFieldValue('userType') === "NON_EMP" || form.getFieldValue('userType') === undefined
+                            form.getFieldValue("userType") === "NON_EMP" ||
+                            form.getFieldValue("userType") === undefined
                           }
                         >
                           {data_employee?.data?.map((index, key) => (
@@ -386,12 +473,18 @@ const UserForm = (props) => {
                           ))}
                         </SelectComponent>
                       </Form.Item>
-                      <Form.Item label={"Start Date"} name={"startDateUser"} rules={formMessageRequired('start date')}>
+                      <Form.Item
+                        label={"Start Date"}
+                        name={"startDateUser"}
+                        rules={formMessageRequired("start date")}
+                      >
                         <DatePicker
                           format={dateFormatting.dateCapital}
                           disabled={checkDisableDate(formValue?.startDateUser)}
                           disabledDate={(current) => {
-                            return current && current < moment().add(-1, 'days');
+                            return (
+                              current && current < moment().add(-1, "days")
+                            );
                           }}
                           className={"w-full"}
                         />
@@ -402,25 +495,61 @@ const UserForm = (props) => {
                         rules={formMessageRequired("Mobile Phone")}
                         className={"w-full"}
                       >
-                        <Input allowClear addonBefore={'62'} disabled={form.getFieldValue('userType') !== "NON_EMP" || form.getFieldValue('userType') === undefined} maxLength={11} onInput={(e) => (e.target.value = e.target.value.replace(/[^\d]|^0+/g, ''))} />
+                        <Input
+                          allowClear
+                          addonBefore={"62"}
+                          disabled={
+                            form.getFieldValue("userType") !== "NON_EMP" ||
+                            form.getFieldValue("userType") === undefined
+                          }
+                          maxLength={11}
+                          onInput={(e) =>
+                            (e.target.value = e.target.value.replace(
+                              /[^\d]|^0+/g,
+                              "",
+                            ))
+                          }
+                        />
                       </Form.Item>
                     </div>
                     <div className={"flex flex-col w-full"}>
                       <Form.Item
                         label={"Username"}
                         name={"username"}
-                        rules={[...formMessageRequired("User Name"), { pattern: /^[^\s]+$/, message: 'Username contains space' }]}
+                        rules={[
+                          ...formMessageRequired("User Name"),
+                          {
+                            pattern: /^[^\s]+$/,
+                            message: "Username contains space",
+                          },
+                        ]}
                       >
-                        <InputComponent disabled={form.getFieldValue('userType') !== "NON_EMP" || form.getFieldValue('userType') === undefined || type === "update"} />
+                        <InputComponent
+                          disabled={
+                            form.getFieldValue("userType") !== "NON_EMP" ||
+                            form.getFieldValue("userType") === undefined ||
+                            type === "update"
+                          }
+                        />
                       </Form.Item>
                       <Form.Item label={"End Date"} name={"endDateUser"}>
                         <DatePicker
                           format={dateFormatting.dateCapital}
                           disabledDate={(current) => {
-                            if (form.getFieldValue('startDateUser') === undefined || form.getFieldValue('startDateUser') === null) {
-                              return current && current < moment().add(-1, 'days');
+                            if (
+                              form.getFieldValue("startDateUser") ===
+                                undefined ||
+                              form.getFieldValue("startDateUser") === null
+                            ) {
+                              return (
+                                current && current < moment().add(-1, "days")
+                              );
                             } else {
-                              return current && current < moment(form.getFieldValue('startDateUser'));
+                              return (
+                                current &&
+                                current <
+                                  moment(form.getFieldValue("startDateUser"))
+                              );
                             }
                           }}
                           className={"w-full"}
@@ -454,7 +583,7 @@ const UserForm = (props) => {
                     label={"Group Access"}
                     name={"gaId"}
                     className={"w-full"}
-                    rules={formMessageRequired('group access')}
+                    rules={formMessageRequired("group access")}
                   >
                     <SelectComponent onChange={handleChangeGroupAccess}>
                       {data_group_access?.data?.map((item) => (
@@ -466,14 +595,13 @@ const UserForm = (props) => {
                     label={"Start Date"}
                     className={"w-full"}
                     name={"startDateUserGa"}
-                    rules={formMessageRequired('start date group access')}
+                    rules={formMessageRequired("start date group access")}
                   >
                     <DatePicker
                       format={dateFormatting.dateCapital}
                       disabled={disableDate}
                       disabledDate={(current) => {
-                        return current && current < moment().add(-1, 'days');
-
+                        return current && current < moment().add(-1, "days");
                       }}
                       className={"w-full"}
                     />
@@ -486,10 +614,17 @@ const UserForm = (props) => {
                     <DatePicker
                       format={dateFormatting.dateCapital}
                       disabledDate={(current) => {
-                        if (form.getFieldValue('startDateUserGa') === undefined || form.getFieldValue('startDateUserGa') === null) {
-                          return current && current < moment().add(-1, 'days');
+                        if (
+                          form.getFieldValue("startDateUserGa") === undefined ||
+                          form.getFieldValue("startDateUserGa") === null
+                        ) {
+                          return current && current < moment().add(-1, "days");
                         } else {
-                          return current && current < moment(form.getFieldValue('startDateUserGa'));
+                          return (
+                            current &&
+                            current <
+                              moment(form.getFieldValue("startDateUserGa"))
+                          );
                         }
                       }}
                       className={"w-full"}
@@ -579,7 +714,6 @@ const UserForm = (props) => {
           </p>
         </div>
       </ModalConfirm>
-
 
       {/* try again modal */}
       {renderModal()}

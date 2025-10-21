@@ -7,27 +7,27 @@ const initialState = {
   data: [],
   data_detail: {},
   data_choose_address: [],
-  data_country:[],
-  data_province:[],
-  data_city:[],
-  data_district:[],
-  data_subdistrict:[],
-  data_postalcode:[],
-  data_type:[],
-  data_business_purpose:[],
+  data_country: [],
+  data_province: [],
+  data_city: [],
+  data_district: [],
+  data_subdistrict: [],
+  data_postalcode: [],
+  data_type: [],
+  data_business_purpose: [],
   loading: false,
   isFailed: false,
   isSuccess: false,
   message: "",
 };
 
-// Get list pagination address 
+// Get list pagination address
 export const getListDetailAccountAddress = createAsyncThunk(
   "GET_LIST_DETAIL_ACCOUNT_ADDRESS",
   async ({ search, id, page, pageSize, sort }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? '' : search;
-			const sortParams =
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/account/address/view/${id}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await accountManagementService.getDetail(url);
@@ -35,7 +35,7 @@ export const getListDetailAccountAddress = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // get list choose address
@@ -43,8 +43,8 @@ export const getListChooseAddress = createAsyncThunk(
   "GET_LIST_CHOOSE_ACCOUNT_ADDRESS",
   async ({ id, search, page, pageSize, sort }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? '' : search;
-			const sortParams =
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/account/address/view/choose-address/${id}?search=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await accountManagementService.getPagination(url);
@@ -52,7 +52,7 @@ export const getListChooseAddress = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get detail after choose
@@ -66,7 +66,7 @@ export const getDetailAddressAfterChoose = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get detail
@@ -80,18 +80,15 @@ export const getDetailAddress = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const activationAccountAddress = createAsyncThunk(
   "ACTIVATION_ACCOUNT_ADDRESS",
-  async ({body, title}, thunkAPI) => {
+  async ({ body, title }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/account/address/active/inactive`;
-      const response = await accountManagementService.updateData(
-        url,
-        body
-      );
+      const response = await accountManagementService.updateData(url, body);
       const successBody = {
         title: `Successful`,
         description: `Your data has been ${title}.`,
@@ -106,17 +103,16 @@ export const activationAccountAddress = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-        const errorBody = { 
-          title: "Failed",
-          description: `Your data was not ${title}. ${message}. Please try again.`,
-          return: false,
-        };
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${title}. ${message}. Please try again.`,
+        return: false,
+      };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
-
 
 // ===== GET LOCATION ===== //
 
@@ -132,15 +128,18 @@ export const getCountry = createAsyncThunk("GET_COUNTRY", async (thunkAPI) => {
 });
 
 // Get Province
-export const getProvince = createAsyncThunk("GET_PROVINCE", async (id, thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/master/location/province/${id}`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getProvince = createAsyncThunk(
+  "GET_PROVINCE",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/master/location/province/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 // Get City
 export const getCity = createAsyncThunk("GET_CITY", async (id, thunkAPI) => {
@@ -154,48 +153,60 @@ export const getCity = createAsyncThunk("GET_CITY", async (id, thunkAPI) => {
 });
 
 // Get District
-export const getDistrict = createAsyncThunk("GET_DISTRICT", async (id, thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/master/location/district/${id}`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getDistrict = createAsyncThunk(
+  "GET_DISTRICT",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/master/location/district/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 // Get Subdistrict
-export const getSubDistrict = createAsyncThunk("GET_SUB_DISTRICT", async (id, thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/master/location/sub-district/${id}`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getSubDistrict = createAsyncThunk(
+  "GET_SUB_DISTRICT",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/master/location/sub-district/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 // Get Postal Code
-export const getPostalCode = createAsyncThunk("GET_POSTAL_CODE", async (id, thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/master/location/postal-code/${id}`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getPostalCode = createAsyncThunk(
+  "GET_POSTAL_CODE",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/master/location/postal-code/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 // Get Business Purpose
-export const getBusinessPurpose = createAsyncThunk("GET_BUSINESS_PURPOSE", async (thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/account/address/list/businessPurpose`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getBusinessPurpose = createAsyncThunk(
+  "GET_BUSINESS_PURPOSE",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/account/address/list/businessPurpose`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 // Get Type
 export const getType = createAsyncThunk("GET_TYPE", async (thunkAPI) => {
@@ -207,7 +218,6 @@ export const getType = createAsyncThunk("GET_TYPE", async (thunkAPI) => {
     return thunkAPI.rejectWithValue(error?.response);
   }
 });
-
 
 export const createAccountAddress = createAsyncThunk(
   "CREATE_ACCOUNT_ADDRESS",
@@ -244,7 +254,7 @@ export const createAccountAddress = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const updateAccountAddress = createAsyncThunk(
@@ -267,20 +277,18 @@ export const updateAccountAddress = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-        if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-          const errorBody = {
-            title: "Failed",
-            description: `${message}`,
-            return: false,
-          };
-          thunkAPI.dispatch(showModalError(errorBody));
-        }
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
-
-
 
 const accountAddressSlice = createSlice({
   name: "accountAddress",
@@ -371,7 +379,6 @@ const accountAddressSlice = createSlice({
       state.loading = false;
     },
 
-    
     // Get Country
     [getCountry.pending]: (state, action) => {
       state.loading = true;
@@ -385,7 +392,7 @@ const accountAddressSlice = createSlice({
       state.loading = false;
       state.data_country = action.payload;
     },
-    
+
     // Get Province
     [getProvince.pending]: (state, action) => {
       state.loading = true;
@@ -399,7 +406,7 @@ const accountAddressSlice = createSlice({
       state.loading = false;
       state.data_province = action.payload;
     },
-    
+
     // Get City
     [getCity.pending]: (state, action) => {
       state.loading = true;
@@ -413,7 +420,7 @@ const accountAddressSlice = createSlice({
       state.loading = false;
       state.data_city = action.payload;
     },
-    
+
     // Get District
     [getDistrict.pending]: (state, action) => {
       state.loading = true;
@@ -427,7 +434,7 @@ const accountAddressSlice = createSlice({
       state.loading = false;
       state.data_district = action.payload;
     },
-    
+
     // Get Sub District
     [getSubDistrict.pending]: (state, action) => {
       state.loading = true;
@@ -441,7 +448,7 @@ const accountAddressSlice = createSlice({
       state.loading = false;
       state.data_subdistrict = action.payload;
     },
-    
+
     // Get Postal Code
     [getPostalCode.pending]: (state, action) => {
       state.loading = true;
@@ -455,7 +462,7 @@ const accountAddressSlice = createSlice({
       state.loading = false;
       state.data_postalcode = action.payload;
     },
-    
+
     // Get Business Purpose
     [getBusinessPurpose.pending]: (state, action) => {
       state.loading = true;
@@ -506,8 +513,8 @@ const accountAddressSlice = createSlice({
       state.loading = false;
       state.data_type = action.payload;
     },
-  }
-})
+  },
+});
 
 const { reducer } = accountAddressSlice;
 export default reducer;

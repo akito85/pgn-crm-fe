@@ -1,9 +1,17 @@
 import Highlighter from "react-highlight-words";
 import SVGIcon from "../../../../../assets/Icon/index";
 import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../utils";
 import { Space, Tooltip } from "antd";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValueFE,
+} from "../../../../../utils/getColumnSearchProps";
 import { separatorCurrency } from "../../UtilsProduct/UtilsAllProduct";
 
 export const tableConditionPromo = (
@@ -34,9 +42,7 @@ export const tableConditionPromo = (
     title: "NAME",
     dataIndex: "name",
     // sorter: true,
-    filteredValue: search?.["name"]
-    ? [search?.["name"]]
-    : null,
+    filteredValue: search?.["name"] ? [search?.["name"]] : null,
     // onFilter: (value, record) => onFilter("name", value, record),
     sorter: (a, b) => sorter("name", a, b),
     // ...getColumnSearchPropsPaging(
@@ -55,7 +61,7 @@ export const tableConditionPromo = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -65,7 +71,7 @@ export const tableConditionPromo = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -73,9 +79,7 @@ export const tableConditionPromo = (
     dataIndex: "operator",
     // sorter: true,
     align: "center",
-    filteredValue: search?.["operator"]
-    ? [search?.["operator"]]
-    : null,
+    filteredValue: search?.["operator"] ? [search?.["operator"]] : null,
     // onFilter: (value, record) => onFilter("operator", value, record),
     sorter: (a, b) => sorter("operator", a, b),
     // ...getColumnSearchPropsPaging(
@@ -94,7 +98,7 @@ export const tableConditionPromo = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -104,7 +108,7 @@ export const tableConditionPromo = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -112,9 +116,7 @@ export const tableConditionPromo = (
     dataIndex: "dataType",
     align: "center",
     // sorter: true,
-    filteredValue: search?.["dataType"]
-    ? [search?.["dataType"]]
-    : null,
+    filteredValue: search?.["dataType"] ? [search?.["dataType"]] : null,
     // onFilter: (value, record) => onFilter("dataType", value, record),
     sorter: (a, b) => sorter("dataType", a, b),
     // ...getColumnSearchPropsPaging(
@@ -133,7 +135,7 @@ export const tableConditionPromo = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -143,7 +145,7 @@ export const tableConditionPromo = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -151,9 +153,7 @@ export const tableConditionPromo = (
     dataIndex: "value",
     // sorter: true,
     align: "right",
-    filteredValue: search?.["value"]
-    ? [search?.["value"]]
-    : null,
+    filteredValue: search?.["value"] ? [search?.["value"]] : null,
     // onFilter: (value, record) => onFilter("value", value, record),
     sorter: (a, b) => sorter("value", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
@@ -174,7 +174,7 @@ export const tableConditionPromo = (
         separatorCurrency(text),
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "value",
@@ -219,9 +219,7 @@ export const tableConditionPromo = (
     // sorter: true,
     align: "center",
     dataIndex: "startDate",
-    filteredValue: search?.["startDate"]
-    ? [search?.["startDate"]]
-    : null,
+    filteredValue: search?.["startDate"] ? [search?.["startDate"]] : null,
     sorter: (a, b) => sorter("startDate", a, b),
     // ...getColumnSearchPropsPaging(
     //   "startDate",
@@ -241,7 +239,7 @@ export const tableConditionPromo = (
       handleSearch,
       true,
       "date",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderDateColumn(
@@ -250,7 +248,7 @@ export const tableConditionPromo = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (text) =>
     //   searchedColumn === "startDate" ? (
@@ -318,7 +316,7 @@ export const tableConditionPromo = (
       handleSearch,
       true,
       "date",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderDateColumn(
@@ -327,7 +325,7 @@ export const tableConditionPromo = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -356,7 +354,7 @@ export const tableConditionPromo = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -366,7 +364,7 @@ export const tableConditionPromo = (
         text,
         true,
         "input",
-        search
+        search,
       ),
     // render: (text) =>
     //   searchedColumn === "description" ? (

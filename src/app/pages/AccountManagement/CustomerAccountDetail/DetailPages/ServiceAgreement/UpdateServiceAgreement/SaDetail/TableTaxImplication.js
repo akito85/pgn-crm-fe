@@ -168,7 +168,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -178,7 +178,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -197,7 +197,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -207,7 +207,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -226,7 +226,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -236,7 +236,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -255,7 +255,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -265,7 +265,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -282,7 +282,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "yes_or_no"
+          "yes_or_no",
         ),
         render: (text) =>
           renderColumn(
@@ -292,7 +292,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
         // render: (gunggung) => {
         //   return(
@@ -316,7 +316,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "yes_or_no"
+          "yes_or_no",
         ),
         render: (text) =>
           renderColumn(
@@ -326,7 +326,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
         // render: (vatValue) => {
         //   return(
@@ -351,7 +351,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -361,7 +361,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -380,7 +380,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -390,7 +390,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
         // ...getColumnSearchProps("segment"),
       },

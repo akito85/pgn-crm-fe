@@ -1,17 +1,17 @@
-import React,{useState, useRef, useEffect} from 'react'
-import TablePagination from '../../../../../../../../components/TablePagination';
+import React, { useState, useRef, useEffect } from "react";
+import TablePagination from "../../../../../../../../components/TablePagination";
 import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
 import { getColumnSearchProps } from "../../../../../../../../utils/getColumnSearchProps";
-import { Spin, Tooltip } from 'antd';
-import { EyeOutlined } from '@ant-design/icons';
+import { Spin, Tooltip } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
 import FileSaver from "file-saver";
-import {  useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { getBase64 } from "../../../../../../../../utils/getBase64";
 import { tokenHeader } from "../../../../../../../../utils/tokenHeader";
 import axios from "axios";
 import { configApp } from "../../../../../../../../constants/configApp";
-import accountManagementService from '../../../../../../../../redux/services/account_management/accountManagementService';
+import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 
 const columnAttachmentData = (
   page,
@@ -21,7 +21,7 @@ const columnAttachmentData = (
   searchText,
   handleSearch = () => {},
   previewFileAttachment = () => {},
-  handleShow
+  handleShow,
 ) => {
   const res = [
     {
@@ -39,7 +39,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -51,7 +51,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -63,7 +63,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -75,7 +75,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -87,7 +87,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -116,7 +116,7 @@ const columnAttachmentData = (
   return res;
 };
 
-const Attachment = ({dataSource}) => {
+const Attachment = ({ dataSource }) => {
   const searchInput = useRef(null);
   const [dataTable, setDataTable] = useState([]);
   const [page, setPage] = useState(1);
@@ -130,25 +130,26 @@ const Attachment = ({dataSource}) => {
   const [sort, setSort] = useState("");
   const [dataAttachment, setDataAttachment] = useState([]);
   const [loadingDownload, setLoadingDownload] = useState(false);
-  
-  const service = accountManagementService
-  const configApplication = configApp.ACCOUNT_SERVICE
+
+  const service = accountManagementService;
+  const configApplication = configApp.ACCOUNT_SERVICE;
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const urlLink = (id) => `/v1/dbs/api/sa/download/${id}`
-    if(dataSource){
-      setDataAttachment((dataSource || []).map((item) => ({
-        ...item,
-        createdDate: item.uploadDate,
-        fileSize: bytesConverter(item.fileSize || 0),
-        urlFile1: urlLink(item?.id),
-        dataType: "exist",
-      })));
-      setTotalElement(dataSource?.length)
+    const urlLink = (id) => `/v1/dbs/api/sa/download/${id}`;
+    if (dataSource) {
+      setDataAttachment(
+        (dataSource || []).map((item) => ({
+          ...item,
+          createdDate: item.uploadDate,
+          fileSize: bytesConverter(item.fileSize || 0),
+          urlFile1: urlLink(item?.id),
+          dataType: "exist",
+        })),
+      );
+      setTotalElement(dataSource?.length);
     }
-  },[dataSource])
-
+  }, [dataSource]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -230,7 +231,7 @@ const Attachment = ({dataSource}) => {
           pageSize={pageSize}
           current={page}
           dataSource={filterDataByPage()}
-          tableScrolled={{y: 525, x: 1600 }}
+          tableScrolled={{ y: 525, x: 1600 }}
           totalData={totalElements}
           onChange={handleChangeSize}
           onSort={onSort}
@@ -242,12 +243,12 @@ const Attachment = ({dataSource}) => {
             searchText,
             handleSearch,
             previewFileAttachment,
-            handleShow
+            handleShow,
           )}
         />
       </div>
     </Spin>
-  )
-}
+  );
+};
 
-export default Attachment
+export default Attachment;

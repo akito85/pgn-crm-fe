@@ -1,7 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import {
-  FilterOutlined,
-} from "@ant-design/icons";
+import { FilterOutlined } from "@ant-design/icons";
 import { Collapse, DatePicker, Input, Space, Spin, Switch } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
@@ -18,7 +16,7 @@ const TaxRelationChooseAccount = ({
   id = 0,
 }) => {
   const { data_choose_taxRelation, loading } = useSelector(
-    (state) => state.financialInformation
+    (state) => state.financialInformation,
   );
 
   //declare
@@ -45,7 +43,9 @@ const TaxRelationChooseAccount = ({
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
 
-    dispatch(getChooseTaxRelation({ id, page, pageSize, sort, search: tempSearch }));
+    dispatch(
+      getChooseTaxRelation({ id, page, pageSize, sort, search: tempSearch }),
+    );
   }, [id, page, pageSize, sort, search]);
 
   useEffect(() => {

@@ -4,7 +4,7 @@ import DetailText from "../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import StatusComponent from "../../../../../../components/StatusComponent";
 
-const HeaderUpdateAccount = ({ data_accountDetail = {}, data_header = []}) => {
+const HeaderUpdateAccount = ({ data_accountDetail = {}, data_header = [] }) => {
   return (
     <Fragment>
       <BaseContainer header={data_header[0]}>
@@ -37,8 +37,8 @@ const HeaderUpdateAccount = ({ data_accountDetail = {}, data_header = []}) => {
                 colour={data_accountDetail?.accountSummary?.customerStatus}
               >
                 <div className="flex justify-center px-5"> */}
-                  {data_accountDetail?.accountSummary?.customerStatus}
-                {/* </div>
+            {data_accountDetail?.accountSummary?.customerStatus}
+            {/* </div>
               </StatusComponent>
             </div> */}
           </DetailText>

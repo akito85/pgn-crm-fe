@@ -36,7 +36,7 @@ import {
   deleteDraftSa,
 } from "../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 import {
-//   dateFormatting,
+  //   dateFormatting,
   hasValue,
   renderColumn,
   renderDateColumn,
@@ -46,7 +46,7 @@ import ModalDeleteDraft from "./Modal/ModalDeleteDraft";
 import ModalHistory from "../../../../../../components/Modal/ModalHistory";
 import { getApprovalHistory } from "../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 import {
-//   getColumnSearchPropsPaging,
+  //   getColumnSearchPropsPaging,
   getColumnSearchPropsUseFilteredValue,
 } from "../../../../../../utils/getColumnSearchProps";
 // import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
@@ -65,7 +65,7 @@ export const columns = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  RenderAction = () => {}
+  RenderAction = () => {},
 ) => [
   {
     title: "NO",
@@ -83,7 +83,7 @@ export const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -93,7 +93,7 @@ export const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -106,7 +106,7 @@ export const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -116,7 +116,7 @@ export const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -129,7 +129,7 @@ export const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -139,7 +139,7 @@ export const columns = (
         text?.value,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -152,7 +152,7 @@ export const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -162,7 +162,7 @@ export const columns = (
         text?.value,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -175,7 +175,7 @@ export const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -185,7 +185,7 @@ export const columns = (
         text?.value,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -200,7 +200,7 @@ export const columns = (
       searchText,
       handleSearch,
       false,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -209,7 +209,7 @@ export const columns = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -224,7 +224,7 @@ export const columns = (
       searchText,
       handleSearch,
       false,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -233,7 +233,7 @@ export const columns = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -248,7 +248,7 @@ export const columns = (
       searchText,
       handleSearch,
       false,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -257,7 +257,7 @@ export const columns = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -272,7 +272,7 @@ export const columns = (
       searchText,
       handleSearch,
       false,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -281,7 +281,7 @@ export const columns = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -294,7 +294,7 @@ export const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -304,7 +304,7 @@ export const columns = (
         text?.value,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -318,7 +318,7 @@ export const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -328,7 +328,7 @@ export const columns = (
         text?.value,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -341,7 +341,7 @@ export const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -351,7 +351,7 @@ export const columns = (
         text?.value,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -366,7 +366,7 @@ export const columns = (
       searchText,
       handleSearch,
       false,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -375,7 +375,7 @@ export const columns = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -391,7 +391,7 @@ export const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (index) => {
       const text = index
@@ -404,7 +404,7 @@ export const columns = (
         text,
         false,
         "status",
-        search
+        search,
       );
     },
   },
@@ -420,7 +420,7 @@ export const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (index) => {
       let text;
@@ -441,7 +441,7 @@ export const columns = (
         text,
         false,
         "status",
-        search
+        search,
       );
     },
   },
@@ -475,16 +475,16 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
       actionList: access_account?.actionList?.filter(
         (action) =>
           action.path.includes(
-            "/account-management/account-standard/service-agreement/"
+            "/account-management/account-standard/service-agreement/",
           ) &&
           !action.path.includes(
-            "/account-management/account-standard/service-agreement/tos/"
-          )
+            "/account-management/account-standard/service-agreement/tos/",
+          ),
       ),
     };
   }, [access_account?.actionList]);
 
-//   const navigate = useNavigate;
+  //   const navigate = useNavigate;
   // const [id, setId] = useState("");
   // State Table
   const [page, setPage] = useState(1);
@@ -515,8 +515,8 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
   useEffect(() => {
     dispatch(
       getGrantedAccessAccount(
-        "/account-management/account-standard/service-agreement"
-      )
+        "/account-management/account-standard/service-agreement",
+      ),
     );
   }, [dispatch]);
 
@@ -537,7 +537,7 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
     // tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      getListServiceAgreement({ id, search: reqSearch, sort, page, pageSize })
+      getListServiceAgreement({ id, search: reqSearch, sort, page, pageSize }),
     );
   }, [dispatch, id, page, pageSize, search, sort]);
 
@@ -613,7 +613,7 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
             sort,
             page,
             pageSize,
-          })
+          }),
         );
         setModalActivate(false);
       })
@@ -649,7 +649,7 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
             sort,
             page,
             pageSize,
-          })
+          }),
         );
       })
       .catch((err) => {
@@ -1428,7 +1428,7 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
                       setModalActivate(true);
                       setSaId(record?.id);
                       setActiveOrInactive(
-                        record?.status === "ACTIVE" ? "Inactivate" : "Activate"
+                        record?.status === "ACTIVE" ? "Inactivate" : "Activate",
                       );
                       setNamed(record.saNumber);
                     }}
@@ -1459,7 +1459,7 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
                     setModalActivate(true);
                     setSaId(record?.id);
                     setActiveOrInactive(
-                      record?.status === "ACTIVE" ? "Inactivate" : "Activate"
+                      record?.status === "ACTIVE" ? "Inactivate" : "Activate",
                     );
                     setNamed(record.saNumber);
                   }}
@@ -1504,7 +1504,7 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
         },
       },
     ],
-    [handleApprovalHistory, id, idCustomer, type]
+    [handleApprovalHistory, id, idCustomer, type],
   );
 
   return (
@@ -1538,13 +1538,13 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
                   searchInput,
                   searchedColumn,
                   searchText,
-                  handleSearch
+                  handleSearch,
                 ),
                 ...useColumnActionPermissionAccount(
                   ["Delete", "View", "Create", "Update", "Activate", "History"],
                   itemActions,
                   filteredArray,
-                  "Delete"
+                  "Delete",
                 ),
               ]}
             />

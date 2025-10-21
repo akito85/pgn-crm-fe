@@ -44,7 +44,7 @@ export const dataDependAdvanced = (dependDataIndex, key, dataEditRecord) => {
     switch (dependDataIndex) {
       case "fromItem":
         return ![2302, 2301]?.includes(
-          dataEditRecord[key + dependDataIndex]?.value
+          dataEditRecord[key + dependDataIndex]?.value,
         ) || // spesific tiering
           !hasValue(dataEditRecord[key + dependDataIndex]?.value)
           ? true
@@ -61,18 +61,18 @@ export const dataDepended = (
   dependDataIndex = "",
   dataIndexKey = "",
   recordData = {},
-  recordDependedData = {}
+  recordDependedData = {},
 ) => {
   if (hasValue(dependDataIndex)) {
     switch (dataIndexKey.toLowerCase()) {
       case "tiering":
         return ![2302, 2301]?.includes(
-          recordDependedData[recordData?.key + dependDataIndex]?.value
+          recordDependedData[recordData?.key + dependDataIndex]?.value,
         );
 
       default:
         return !hasValue(
-          recordDependedData[recordData?.key + dependDataIndex]?.value
+          recordDependedData[recordData?.key + dependDataIndex]?.value,
         );
     }
   }
@@ -98,13 +98,13 @@ export const handleDataTypeExist = (
   dataDetail,
   dataCompare,
   idName = "idPromo",
-  idCompare = "idPromo"
+  idCompare = "idPromo",
 ) => {
   switch (status) {
     case "ACTIVE":
       if (statusApproval === "DRAFT") {
         return (dataCompare || [])?.some(
-          (item) => item[idCompare] === dataDetail[idName]
+          (item) => item[idCompare] === dataDetail[idName],
         )
           ? { dataType: "exist" }
           : null;
@@ -121,7 +121,7 @@ export const handleDataTypeExist = (
 export const handleShouldCheckedForDisabled = (
   key,
   idName = "idPromo",
-  tableColumn = []
+  tableColumn = [],
 ) => {
   return ![
     idName,
@@ -182,7 +182,7 @@ export const handleDdlDisabled = (
   status,
   statusApproval,
   dataObject, //all data include draft
-  dataCompare //detail
+  dataCompare, //detail
 ) => {
   switch (status) {
     case "ACTIVE":
@@ -227,16 +227,16 @@ export const handleDisabledEachColumnCriteria = ({
                 data: item[key],
                 key: key,
                 inputType: columnsTable?.filter(
-                  (item) => item?.dataIndex === key
+                  (item) => item?.dataIndex === key,
                 )[0]?.inputType,
                 criteriaValues: columnsTable
                   .filter((item) =>
-                    [...(criteriaValues || []), 1].includes(item?.indexValue)
+                    [...(criteriaValues || []), 1].includes(item?.indexValue),
                   )
                   ?.map((item) => item?.dataIndex),
                 tableCriteria: [
                   ...(dataListCriteria || []).map((item) =>
-                    lowerCaseCheckedCriteria(item?.name)
+                    lowerCaseCheckedCriteria(item?.name),
                   ),
                 ],
               })
@@ -251,7 +251,7 @@ export const handleDisabledEachColumnCriteria = ({
         item,
         dataCompare,
         idName,
-        idCompare
+        idCompare,
       ),
     };
   });
@@ -273,16 +273,16 @@ export const handleMappingCriteriaGeneral = ({
               data: item[key],
               key: key,
               inputType: columnsTable?.filter(
-                (item) => item?.dataIndex === key
+                (item) => item?.dataIndex === key,
               )[0]?.inputType,
               criteriaValues: columnsTable
                 .filter((item) =>
-                  [...(criteriaValues || []), 1].includes(item?.indexValue)
+                  [...(criteriaValues || []), 1].includes(item?.indexValue),
                 )
                 ?.map((item) => item?.dataIndex),
               tableCriteria: [
                 ...(dataListCriteria || []).map((item) =>
-                  lowerCaseCheckedCriteria(item?.name || item?.text)
+                  lowerCaseCheckedCriteria(item?.name || item?.text),
                 ),
               ],
               forSendData: true,
@@ -300,11 +300,11 @@ export const handleCheckCriteriaMissingValidation = (
   dataCriteria,
   listDataCriteria = [],
   setMissingColumn = () => {},
-  minimumData = 0
+  minimumData = 0,
 ) => {
   let missingColumn = [];
   const tempArray = criteriaOptions.filter((item) =>
-    dataCriteria?.includes(item.value)
+    dataCriteria?.includes(item.value),
   );
   const tempNameCriteria = tempArray.map((data) => data.code);
 

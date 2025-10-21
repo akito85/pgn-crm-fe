@@ -14,7 +14,7 @@ export const getColumnSearchPropsCriteria = (
   searchedColumn,
   searchText,
   handleSearch,
-  excludeRender = false
+  excludeRender = false,
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
@@ -213,7 +213,8 @@ const EditableCell = ({
             decimalSeparator={"."}
             type="numeric"
             disabled={
-              (dataIndex === "value" && (dataEditRecord[key + "type"]?.label || "") === "VARIABLE")
+              dataIndex === "value" &&
+              (dataEditRecord[key + "type"]?.label || "") === "VARIABLE"
             }
           />
         );
@@ -221,10 +222,13 @@ const EditableCell = ({
         return <Input.TextArea rows={1} maxLength={255} />;
       default:
         return (
-          <Input 
-            disabled={(dataIndex === "variableName" && (dataEditRecord[key + "type"]?.label || "") === "CONSTANT")} 
+          <Input
+            disabled={
+              dataIndex === "variableName" &&
+              (dataEditRecord[key + "type"]?.label || "") === "CONSTANT"
+            }
           />
-        )
+        );
     }
   };
   const inputNode = getInputNode(typeInput);
@@ -280,14 +284,14 @@ const TableLateChargeRuleFormula = ({
   const isEditing = (record) => record.key === editingKey;
   const [totalData, setTotalData] = useState(0);
   const { variableNameList = [], operationFormulaList = [] } = useSelector(
-    (state) => state.late_charge
+    (state) => state.late_charge,
   );
   const stateFormTable = useMemo(
     () =>
       (type === "update" && dataLateChargeRule.status === "ACTIVE") ||
       type === "detail" ||
       type === "preview",
-    [type, dataLateChargeRule]
+    [type, dataLateChargeRule],
   );
 
   useEffect(() => {
@@ -438,7 +442,7 @@ const TableLateChargeRuleFormula = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -464,7 +468,7 @@ const TableLateChargeRuleFormula = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -482,7 +486,7 @@ const TableLateChargeRuleFormula = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -500,20 +504,17 @@ const TableLateChargeRuleFormula = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         render: (value, record) => {
-
           const formating = (val) => {
-            return val.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 4
+            return val.toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 4,
             });
-          }
-          return (
-            <span>{value ? formating(value) : ''}</span>
-          )
-        }
+          };
+          return <span>{value ? formating(value) : ""}</span>;
+        },
       },
       {
         title: "ACTION",
@@ -559,7 +560,9 @@ const TableLateChargeRuleFormula = ({
                   <Tooltip title="Delete">
                     <div
                       className={`flex justify-center${
-                        record.typeData === "exist" || record.key === "1" || editingKey
+                        record.typeData === "exist" ||
+                        record.key === "1" ||
+                        editingKey
                           ? " cursor-not-allowed"
                           : ""
                       }`}
@@ -567,18 +570,24 @@ const TableLateChargeRuleFormula = ({
                       <SVGIcon
                         name="IconDelete"
                         color={
-                          record.typeData === "exist" || record.key === "1" || editingKey
+                          record.typeData === "exist" ||
+                          record.key === "1" ||
+                          editingKey
                             ? "#8D91A0"
                             : "#D90000"
                         }
                         width={24}
                         className={
-                          record.typeData === "exist" || record.key === "1" || editingKey
+                          record.typeData === "exist" ||
+                          record.key === "1" ||
+                          editingKey
                             ? " disabled"
                             : undefined
                         }
                         onClick={
-                          record.typeData === "exist" || record.key === "1" || editingKey
+                          record.typeData === "exist" ||
+                          record.key === "1" ||
+                          editingKey
                             ? undefined
                             : () => deleteRow(record)
                         }
@@ -677,7 +686,7 @@ const TableLateChargeRuleFormula = ({
                   dataEditRecord: editDataRecord,
                   handleEditDataRecord: handleEditDataRecord,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],

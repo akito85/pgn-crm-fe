@@ -1,17 +1,11 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 
-import TablePagination from '../../../../../../../../../../components/TablePagination'
-import DetailText from '../../../../../../../../../../components/DetailText'
+import TablePagination from "../../../../../../../../../../components/TablePagination";
+import DetailText from "../../../../../../../../../../components/DetailText";
 
-const TableCalcRule = ({
-  dataTableCalcRule,
-  saDetailObj
-}) => {
-
-  const {
-		dataListCalculationType,
-	} = useSelector((state) => state.product);
+const TableCalcRule = ({ dataTableCalcRule, saDetailObj }) => {
+  const { dataListCalculationType } = useSelector((state) => state.product);
 
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
@@ -23,18 +17,20 @@ const TableCalcRule = ({
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    setTotalElement(dataTableCalcRule?.length)
-  }, [])
+    setTotalElement(dataTableCalcRule?.length);
+  }, []);
 
   const getCalculationTypeName = (val) => {
-    const CalculationTypeName = dataListCalculationType && dataListCalculationType?.filter((item) => item?.value === val)
-    if(CalculationTypeName === undefined){
-      return ''
+    const CalculationTypeName =
+      dataListCalculationType &&
+      dataListCalculationType?.filter((item) => item?.value === val);
+    if (CalculationTypeName === undefined) {
+      return "";
     }
-    if(CalculationTypeName.length !== 0){
-      return CalculationTypeName[0].label 
-    }  
-  }
+    if (CalculationTypeName.length !== 0) {
+      return CalculationTypeName[0].label;
+    }
+  };
 
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
@@ -104,47 +100,45 @@ const TableCalcRule = ({
         render: (text, object, index) => index + 1,
       },
       {
-        title: 'NAME',
-        dataIndex: 'name',
+        title: "NAME",
+        dataIndex: "name",
         sorter: true,
-        render: (name)=>{
-          return (
-            <span>{name !== undefined ? name.label : ""}</span>
-          )
-        }
+        render: (name) => {
+          return <span>{name !== undefined ? name.label : ""}</span>;
+        },
       },
       {
-        title: 'VALUE',
-        dataIndex: 'value',
+        title: "VALUE",
+        dataIndex: "value",
         sorter: true,
       },
       {
-        title: 'UNIT',
-        dataIndex: 'unit',
+        title: "UNIT",
+        dataIndex: "unit",
         sorter: true,
-        render: (unit)=>{
-          return (
-            <span>{unit !== undefined ? unit.label : ""}</span>
-          )
-        }
+        render: (unit) => {
+          return <span>{unit !== undefined ? unit.label : ""}</span>;
+        },
       },
       {
-        title: 'DESCRIPTION',
-        dataIndex: 'description',
+        title: "DESCRIPTION",
+        dataIndex: "description",
         sorter: true,
       },
     ];
-    return result
-  }
+    return result;
+  };
 
   return (
     <div>
-      <DetailText label="Calculation Type">{getCalculationTypeName(saDetailObj?.calculationType)}</DetailText>
+      <DetailText label="Calculation Type">
+        {getCalculationTypeName(saDetailObj?.calculationType)}
+      </DetailText>
       <TablePagination
         pageSize={pageSize}
         current={page}
         dataSource={filterDataByPage()}
-        tableScrolled={{y: 525, x: 1500 }}
+        tableScrolled={{ y: 525, x: 1500 }}
         totalData={totalElement}
         onChange={handleChangeSize}
         onSort={onSort}
@@ -158,7 +152,7 @@ const TableCalcRule = ({
         })}
       />
     </div>
-  )
-}
+  );
+};
 
-export default TableCalcRule
+export default TableCalcRule;

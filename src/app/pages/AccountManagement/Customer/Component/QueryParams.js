@@ -65,8 +65,8 @@ const QueryParams = ({
           rules={[{ message: requiredMessage("column"), required: true }]}
         >
           <SelectComponent
-            // value={query.column}
-            // onChange={(value) => handleInputChange("column", value)}
+          // value={query.column}
+          // onChange={(value) => handleInputChange("column", value)}
           >
             {optionColumns?.map((data) => (
               <Select.Option key={data.id} value={data.id}>
@@ -83,8 +83,8 @@ const QueryParams = ({
           rules={[{ message: requiredMessage("operator"), required: true }]}
         >
           <SelectComponent
-            // value={query.operator}
-            // onChange={(value) => handleInputChange("operator", value)}
+          // value={query.operator}
+          // onChange={(value) => handleInputChange("operator", value)}
           >
             {optionOperator?.map((data) => (
               <Select.Option key={data.id} value={data.id}>
@@ -101,8 +101,8 @@ const QueryParams = ({
           rules={[{ message: requiredMessage("value"), required: true }]}
         >
           <InputComponent
-            // value={query.value}
-            // onChange={(event) => handleInputChange("value", event.target.value)}
+          // value={query.value}
+          // onChange={(event) => handleInputChange("value", event.target.value)}
           />
         </Form.Item>
       </div>

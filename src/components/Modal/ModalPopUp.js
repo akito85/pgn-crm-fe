@@ -4,11 +4,10 @@ import { ExclamationCircleFilled, CheckCircleFilled } from "@ant-design/icons";
 import ButtonComponent from "../ButtonComponent";
 import SVGIcon from "../../assets/Icon/index";
 
-
 const ModalConfirm = ({
   isOpen,
-  handleCancel = () => { },
-  handleOk = () => { },
+  handleCancel = () => {},
+  handleOk = () => {},
   children,
   width,
   bodyStyle,
@@ -41,8 +40,8 @@ const ModalConfirm = ({
 };
 const ModalError = ({
   isOpen,
-  handleCancel = () => { },
-  handleOk = () => { },
+  handleCancel = () => {},
+  handleOk = () => {},
   header,
   width,
   children,
@@ -79,8 +78,8 @@ const ModalError = ({
 
 const ModalSuccess = ({
   isOpen,
-  handleCancel = () => { },
-  handleOk = () => { },
+  handleCancel = () => {},
+  handleOk = () => {},
   header,
   width = 350,
   children,
@@ -110,14 +109,14 @@ const ModalSuccess = ({
 
 const ModalAttention = ({
   isOpen,
-  handleCancel = () => { },
-  handleOk = () => { },
+  handleCancel = () => {},
+  handleOk = () => {},
   header = "Attention",
   width,
   children,
   onlyBackButton = false,
   customText = "OK",
-  textList
+  textList,
 }) => {
   return (
     <Modal
@@ -146,12 +145,12 @@ const ModalAttention = ({
         <div className="w-full flex gap-[20px] justify-center items-center mt-7 mb-3">
           <SVGIcon name="IconFailed" width={48} />
           <div className="flex flex-col">
-            <span className={'font-bold text-lg'}>{header}</span>
+            <span className={"font-bold text-lg"}>{header}</span>
             <span>Please input {textList}!</span>
           </div>
         </div>
       </div>
     </Modal>
-  )
-}
+  );
+};
 export { ModalError, ModalSuccess, ModalConfirm, ModalAttention };

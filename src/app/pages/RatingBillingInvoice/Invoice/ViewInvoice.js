@@ -33,7 +33,7 @@ import { EyeOutlined } from "@ant-design/icons";
 const ViewInvoice = () => {
   // Selector
   const { data, loading, data_detail, data_format, data_billing } = useSelector(
-    (state) => state.invoice
+    (state) => state.invoice,
   );
 
   // Declaration
@@ -75,7 +75,7 @@ const ViewInvoice = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [search, page, pageSize, sort, dispatch]);
 
@@ -132,7 +132,14 @@ const ViewInvoice = () => {
 
   // Handle Download
   const handleDownload = () => {
-    dispatch(getDownloadList({ page, pageSize, sort, search: encodeURIComponent(JSON.stringify(search)) }));
+    dispatch(
+      getDownloadList({
+        page,
+        pageSize,
+        sort,
+        search: encodeURIComponent(JSON.stringify(search)),
+      }),
+    );
   };
 
   // Handle Detail
@@ -153,11 +160,11 @@ const ViewInvoice = () => {
     try {
       const response = await axios.get(
         configApp.RATING_BILLING_SERVICE +
-        `/v1/dbs/api/rbi/invoice/${record?.invoiceNumber}/preview`,
+          `/v1/dbs/api/rbi/invoice/${record?.invoiceNumber}/preview`,
         {
           headers: tokenHeader(),
           responseType: "arraybuffer",
-        }
+        },
       );
       const responseBlob = await response.data;
       const blobText =
@@ -176,7 +183,7 @@ const ViewInvoice = () => {
         // eslint-disable-next-line no-undef
         ReactDOM.render(
           <DocViewer documents={[{ uri: blobUrl, type: contentType }]} />,
-          viewerContainer
+          viewerContainer,
         );
       }
       console.log("Preview");
@@ -211,15 +218,17 @@ const ViewInvoice = () => {
         action: "REGENERATE",
         remark: res.remark,
       };
-      await dispatch(createRegenerate({ id: invoiceNumber, body: body }))?.unwrap();
-      await handleClear()
+      await dispatch(
+        createRegenerate({ id: invoiceNumber, body: body }),
+      )?.unwrap();
+      await handleClear();
       await dispatch(
         getAllInvoicePaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page,
           pageSize,
           sort,
-        })
+        }),
       )?.unwrap();
     } catch (error) {
       if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -252,9 +261,9 @@ const ViewInvoice = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
-  }
+  };
 
   const itemGrantAccess = [
     {
@@ -360,14 +369,14 @@ const ViewInvoice = () => {
                   searchInput,
                   searchedColumn,
                   searchText,
-                  handleSearch
+                  handleSearch,
                   // handlePreviewFile,
                   // handleDetail,
                   // handleReGenerate
                 ),
                 ...useColumnActionPermission(
                   ["view", "preview", "regenerate"],
-                  itemGrantAccess
+                  itemGrantAccess,
                 ),
               ]}
               current={page}
@@ -383,7 +392,10 @@ const ViewInvoice = () => {
 
         {/* Invoice Log */}
         {pageDetail === true ? (
-          <DetailInvoice detail={data_detail?.logs} invoiceNumber={invoiceNumber}/>
+          <DetailInvoice
+            detail={data_detail?.logs}
+            invoiceNumber={invoiceNumber}
+          />
         ) : null}
 
         {/* Modal Re-Generate */}

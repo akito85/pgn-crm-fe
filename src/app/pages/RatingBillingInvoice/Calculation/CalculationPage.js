@@ -14,7 +14,12 @@ import {
   getCalculationPaginate,
   getHistoryCalculationPaginate,
 } from "../../../../redux/slices/rating_billing_invoice/calculation";
-import { hasValue, renderColumn, renderDateColumn, toTitleCase } from "../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+  toTitleCase,
+} from "../../../../utils";
 import RadioTabs from "../../../../components/RadioTabs";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
@@ -25,7 +30,7 @@ const CalculationPage = () => {
   // Selector
 
   const { data: data_calculation, loading } = useSelector(
-    (state) => state.rbi_calculation
+    (state) => state.rbi_calculation,
   );
 
   // Declaration
@@ -50,7 +55,7 @@ const CalculationPage = () => {
           page,
           pageSize,
           sort,
-        })
+        }),
       );
     } else {
       dispatch(
@@ -59,7 +64,7 @@ const CalculationPage = () => {
           page,
           pageSize,
           sort,
-        })
+        }),
       );
     }
   }, [dispatch, search, page, pageSize, sort, tabHeader]);
@@ -94,1518 +99,1540 @@ const CalculationPage = () => {
     });
   };
 
-  const column = useMemo(() => [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "CALCULATION CODE",
-      dataIndex: "calculationCode",
-      sorter: true,
-      align: "left",
-      filteredValue: [search?.calculationCode] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "calculationCode",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+  const column = useMemo(
+    () => [
+      {
+        title: "NO",
+        width: 60,
+        align: "center",
+        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      },
+      {
+        title: "CALCULATION CODE",
+        dataIndex: "calculationCode",
+        sorter: true,
+        align: "left",
+        filteredValue: [search?.calculationCode] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "calculationCode",
-          hasValue(search["calculationCode"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "input",
-          search
+          handleSearch,
+          true,
         ),
-    },
-    {
-      title: "Σ CUSTOMER",
-      dataIndex: "customer",
-      align: "right",
-      sorter: true,
-      filteredValue: [search?.customer] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "customer",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderColumn(
+            "calculationCode",
+            hasValue(search["calculationCode"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        title: "Σ CUSTOMER",
+        dataIndex: "customer",
+        align: "right",
+        sorter: true,
+        filteredValue: [search?.customer] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "customer",
-          hasValue(search["customer"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "input",
-          search
+          handleSearch,
+          true,
         ),
-    },
-    {
-      title: "Σ SUCCEED",
-      dataIndex: "succeed",
-      align: "right",
-      sorter: true,
-      filteredValue: [search?.succeed] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "succeed",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderColumn(
+            "customer",
+            hasValue(search["customer"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        title: "Σ SUCCEED",
+        dataIndex: "succeed",
+        align: "right",
+        sorter: true,
+        filteredValue: [search?.succeed] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "succeed",
-          hasValue(search["succeed"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "input",
-          search
+          handleSearch,
+          true,
         ),
-    },
-    {
-      title: "Σ PROGRESS",
-      dataIndex: "progress",
-      align: "right",
-      sorter: true,
-      filteredValue: [search?.progress] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "progress",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderColumn(
+            "succeed",
+            hasValue(search["succeed"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        title: "Σ PROGRESS",
+        dataIndex: "progress",
+        align: "right",
+        sorter: true,
+        filteredValue: [search?.progress] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "progress",
-          hasValue(search["progress"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "input",
-          search
+          handleSearch,
+          true,
         ),
-    },
-    {
-      title: "Σ FAILED",
-      dataIndex: "failed",
-      align: "right",
-      sorter: true,
-      filteredValue: [search?.failed] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "failed",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderColumn(
+            "progress",
+            hasValue(search["progress"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        title: "Σ FAILED",
+        dataIndex: "failed",
+        align: "right",
+        sorter: true,
+        filteredValue: [search?.failed] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "failed",
-          hasValue(search["failed"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "input",
-          search
+          handleSearch,
+          true,
         ),
-    },
-    {
-      title: "BILLING CYCLE",
-      dataIndex: "billingCycleVal",
-      align: "center",
-      sorter: true,
-      filteredValue: [search?.billingCycleVal] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "billingCycleVal",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderColumn(
+            "failed",
+            hasValue(search["failed"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        title: "BILLING CYCLE",
+        dataIndex: "billingCycleVal",
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.billingCycleVal] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "billingCycleVal",
-          hasValue(search["billingCycleVal"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "input",
-          search
+          handleSearch,
+          true,
         ),
-    },
-    {
-      title: "BILLING PERIOD",
-      dataIndex: "billingPeriodVal",
-      align: "center",
-      sorter: true,
-      filteredValue: [search?.billingPeriodVal] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "billingPeriodVal",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "datePeriod"
-      ),
-      render: (text) =>
-        renderDateColumn(
+        render: (text) =>
+          renderColumn(
+            "billingCycleVal",
+            hasValue(search["billingCycleVal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        title: "BILLING PERIOD",
+        dataIndex: "billingPeriodVal",
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.billingPeriodVal] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "billingPeriodVal",
-          hasValue(search["billingPeriodVal"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
+          handleSearch,
+          true,
           "datePeriod",
-          search
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "billingPeriodVal",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (data) => {
-      //   const text = data ? moment(data).format(dateFormatting.datePeriod) : "";
-      //   if (searchedColumn === "endDate") {
-      //     return (
-      //       <Highlighter
-      //         highlightStyle={{
-      //           backgroundColor: "#ffc069",
-      //           padding: 0,
-      //         }}
-      //         searchWords={[searchText]}
-      //         autoEscape
-      //         textToHighlight={text ? text.toString() : ""}
-      //       />
-      //     );
-      //   } else {
-      //     return text || "";
-      //   }
-      // },
-    },
-    {
-      title: "SERVICE TYPE",
-      dataIndex: "serviceTypeVal",
-      align: "center",
-      sorter: true,
-      filteredValue: [search?.serviceTypeVal] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "serviceTypeVal",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderDateColumn(
+            "billingPeriodVal",
+            hasValue(search["billingPeriodVal"]),
+            searchText,
+            text,
+            "datePeriod",
+            search,
+          ),
+        // ...getColumnSearchPropsPaging(
+        //   "billingPeriodVal",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch,
+        //   true
+        // ),
+        // render: (data) => {
+        //   const text = data ? moment(data).format(dateFormatting.datePeriod) : "";
+        //   if (searchedColumn === "endDate") {
+        //     return (
+        //       <Highlighter
+        //         highlightStyle={{
+        //           backgroundColor: "#ffc069",
+        //           padding: 0,
+        //         }}
+        //         searchWords={[searchText]}
+        //         autoEscape
+        //         textToHighlight={text ? text.toString() : ""}
+        //       />
+        //     );
+        //   } else {
+        //     return text || "";
+        //   }
+        // },
+      },
+      {
+        title: "SERVICE TYPE",
+        dataIndex: "serviceTypeVal",
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.serviceTypeVal] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "serviceTypeVal",
-          hasValue(search["serviceTypeVal"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "input",
-          search
+          handleSearch,
+          true,
         ),
-    },
-    {
-      title: "SOR",
-      dataIndex: "sorVal",
-      align: "left",
-      sorter: true,
-      filteredValue: [search?.sorVal] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "sorVal",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderColumn(
+            "serviceTypeVal",
+            hasValue(search["serviceTypeVal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        title: "SOR",
+        dataIndex: "sorVal",
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.sorVal] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "sorVal",
-          hasValue(search["sorVal"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "input",
-          search
+          handleSearch,
+          true,
         ),
-    },
-    {
-      title: "COST CENTER",
-      dataIndex: "costCenter",
-      align: "left",
-      sorter: true,
-      filteredValue: [search?.costCenter] || null,
-      ellipsis: {
-        showTitle: false,
+        render: (text) =>
+          renderColumn(
+            "sorVal",
+            hasValue(search["sorVal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
       },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "costCenter",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+      {
+        title: "COST CENTER",
+        dataIndex: "costCenter",
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.costCenter] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "costCenter",
-          hasValue(search["costCenter"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
+          handleSearch,
           true,
-          "input",
-          search
         ),
-      // render: (text) => {
-      //   if (searchedColumn === "costCenter") {
-      //     return (
-      //       <Tooltip placement="topLeft" title={text}>
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={text ? text.toString() : ""}
-      //         />
-      //       </Tooltip>
-      //     );
-      //   } else {
-      //     if (text) {
-      //       return (
-      //         <Tooltip placement="topLeft" title={text}>
-      //           {text}
-      //         </Tooltip>
-      //       );
-      //     }
-      //     return "";
-      //   }
-      // },
-    },
-    {
-      title: "METER READING CODE",
-      dataIndex: "meterReadingCode",
-      align: "left",
-      sorter: true,
-      filteredValue: [search?.meterReadingCode] || null,
-      ellipsis: {
-        showTitle: false,
+        render: (text) =>
+          renderColumn(
+            "costCenter",
+            hasValue(search["costCenter"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
+        // render: (text) => {
+        //   if (searchedColumn === "costCenter") {
+        //     return (
+        //       <Tooltip placement="topLeft" title={text}>
+        //         <Highlighter
+        //           highlightStyle={{
+        //             backgroundColor: "#ffc069",
+        //             padding: 0,
+        //           }}
+        //           searchWords={[searchText]}
+        //           autoEscape
+        //           textToHighlight={text ? text.toString() : ""}
+        //         />
+        //       </Tooltip>
+        //     );
+        //   } else {
+        //     if (text) {
+        //       return (
+        //         <Tooltip placement="topLeft" title={text}>
+        //           {text}
+        //         </Tooltip>
+        //       );
+        //     }
+        //     return "";
+        //   }
+        // },
       },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "meterReadingCode",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+      {
+        title: "METER READING CODE",
+        dataIndex: "meterReadingCode",
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.meterReadingCode] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "meterReadingCode",
-          hasValue(search["meterReadingCode"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
+          handleSearch,
           true,
-          "input",
-          search
         ),
-      // render: (text) => {
-      //   if (searchedColumn === "meterReadingCode") {
-      //     return (
-      //       <Tooltip placement="topLeft" title={text}>
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={text ? text.toString() : ""}
-      //         />
-      //       </Tooltip>
-      //     );
-      //   } else {
-      //     if (text) {
-      //       return (
-      //         <Tooltip placement="topLeft" title={text}>
-      //           {text}
-      //         </Tooltip>
-      //       );
-      //     }
-      //     return "";
-      //   }
-      // },
-    },
-    {
-      title: "ACCOUNT SEGMENT",
-      dataIndex: "customerSegment",
-      align: "center",
-      sorter: true,
-      filteredValue: [search?.customerSegment] || null,
-      ellipsis: {
-        showTitle: false,
+        render: (text) =>
+          renderColumn(
+            "meterReadingCode",
+            hasValue(search["meterReadingCode"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
+        // render: (text) => {
+        //   if (searchedColumn === "meterReadingCode") {
+        //     return (
+        //       <Tooltip placement="topLeft" title={text}>
+        //         <Highlighter
+        //           highlightStyle={{
+        //             backgroundColor: "#ffc069",
+        //             padding: 0,
+        //           }}
+        //           searchWords={[searchText]}
+        //           autoEscape
+        //           textToHighlight={text ? text.toString() : ""}
+        //         />
+        //       </Tooltip>
+        //     );
+        //   } else {
+        //     if (text) {
+        //       return (
+        //         <Tooltip placement="topLeft" title={text}>
+        //           {text}
+        //         </Tooltip>
+        //       );
+        //     }
+        //     return "";
+        //   }
+        // },
       },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "customerSegment",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+      {
+        title: "ACCOUNT SEGMENT",
+        dataIndex: "customerSegment",
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.customerSegment] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "customerSegment",
-          hasValue(search["customerSegment"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
+          handleSearch,
           true,
-          "input",
-          search
         ),
-      // render: (text) => {
-      //   if (searchedColumn === "customerSegment") {
-      //     return (
-      //       <Tooltip placement="topLeft" title={text}>
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={text ? text.toString() : ""}
-      //         />
-      //       </Tooltip>
-      //     );
-      //   } else {
-      //     if (text) {
-      //       return (
-      //         <Tooltip placement="topLeft" title={text}>
-      //           {text}
-      //         </Tooltip>
-      //       );
-      //     }
-      //     return "";
-      //   }
-      // },
-    },
-    {
-      title: "ACCOUNT GROUP TYPE",
-      dataIndex: "accGroupType",
-      align: "center",
-      sorter: true,
-      filteredValue: [search?.accGroupType] || null,
-      ellipsis: {
-        showTitle: false,
+        render: (text) =>
+          renderColumn(
+            "customerSegment",
+            hasValue(search["customerSegment"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
+        // render: (text) => {
+        //   if (searchedColumn === "customerSegment") {
+        //     return (
+        //       <Tooltip placement="topLeft" title={text}>
+        //         <Highlighter
+        //           highlightStyle={{
+        //             backgroundColor: "#ffc069",
+        //             padding: 0,
+        //           }}
+        //           searchWords={[searchText]}
+        //           autoEscape
+        //           textToHighlight={text ? text.toString() : ""}
+        //         />
+        //       </Tooltip>
+        //     );
+        //   } else {
+        //     if (text) {
+        //       return (
+        //         <Tooltip placement="topLeft" title={text}>
+        //           {text}
+        //         </Tooltip>
+        //       );
+        //     }
+        //     return "";
+        //   }
+        // },
       },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accGroupType",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+      {
+        title: "ACCOUNT GROUP TYPE",
+        dataIndex: "accGroupType",
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.accGroupType] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "accGroupType",
-          hasValue(search["accGroupType"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
+          handleSearch,
           true,
-          "input",
-          search
         ),
-      // render: (text) => {
-      //   if (searchedColumn === "accGroupType") {
-      //     return (
-      //       <Tooltip placement="topLeft" title={text}>
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={text ? text.toString() : ""}
-      //         />
-      //       </Tooltip>
-      //     );
-      //   } else {
-      //     if (text) {
-      //       return (
-      //         <Tooltip placement="topLeft" title={text}>
-      //           {text}
-      //         </Tooltip>
-      //       );
-      //     }
-      //     return "";
-      //   }
-      // },
-    },
-    {
-      title: "SPECIFIC CUSTOMER ACCOUNT",
-      dataIndex: "custNumb",
-      align: "left",
-      sorter: true,
-      filteredValue: [search?.custNumb] || null,
-      ellipsis: {
-        showTitle: false,
+        render: (text) =>
+          renderColumn(
+            "accGroupType",
+            hasValue(search["accGroupType"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
+        // render: (text) => {
+        //   if (searchedColumn === "accGroupType") {
+        //     return (
+        //       <Tooltip placement="topLeft" title={text}>
+        //         <Highlighter
+        //           highlightStyle={{
+        //             backgroundColor: "#ffc069",
+        //             padding: 0,
+        //           }}
+        //           searchWords={[searchText]}
+        //           autoEscape
+        //           textToHighlight={text ? text.toString() : ""}
+        //         />
+        //       </Tooltip>
+        //     );
+        //   } else {
+        //     if (text) {
+        //       return (
+        //         <Tooltip placement="topLeft" title={text}>
+        //           {text}
+        //         </Tooltip>
+        //       );
+        //     }
+        //     return "";
+        //   }
+        // },
       },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "custNumb",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+      {
+        title: "SPECIFIC CUSTOMER ACCOUNT",
+        dataIndex: "custNumb",
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.custNumb] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "custNumb",
-          hasValue(search["custNumb"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
+          handleSearch,
           true,
-          "input",
-          search
         ),
-      // render: (text) =>
-      //   searchedColumn === "custNumb" ? (
-      //     <Highlighter
-      //       highlightStyle={{
-      //         backgroundColor: "#ffc069",
-      //         padding: 0,
-      //       }}
-      //       searchWords={[searchText]}
-      //       autoEscape
-      //       textToHighlight={text ? text.toString() : ""}
-      //     />
-      //   ) : text ? (
-      //     <Tooltip placement="topLeft" title={text}>
-      //       {text}
-      //     </Tooltip>
-      //   ) : (
-      //     ""
-      //   ),
-    },
-    {
-      title: "SCHEDULE TYPE",
-      dataIndex: "scheduleTypeVal",
-      align: "center",
-      sorter: true,
-      filteredValue: [search?.scheduleTypeVal] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "scheduleTypeVal",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "scheduleTypeVal",
-          hasValue(search["scheduleTypeVal"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-    },
-
-    {
-      title: "GENERATE DATE",
-      dataIndex: "generateDate",
-      align: "center",
-      sorter: true,
-      filteredValue: [search?.generateDate] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "generateDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "date"
-      ),
-      render: (text) =>
-        renderDateColumn(
-          "generateDate",
-          hasValue(search["generateDate"]),
-          searchText,
-          text,
-          "date",
-          search
-        ),
-      // ...getColumnSearchPropsPaging(
-      //   "generateDate",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   false,
-      //   "date"
-      // ),
-      // render: (data) => {
-      //   const text = data ? moment(data).format(dateFormatting.dateTime) : "";
-      //   if (searchedColumn === "generateDate") {
-      //     return (
-      //       <Highlighter
-      //         highlightStyle={{
-      //           backgroundColor: "#ffc069",
-      //           padding: 0,
-      //         }}
-      //         searchWords={[searchText]}
-      //         autoEscape
-      //         textToHighlight={text ? text.toString() : ""}
-      //       />
-      //     );
-      //   } else {
-      //     return text || "";
-      //   }
-      // },
-    },
-    {
-      title: "REMARK",
-      dataIndex: "remark",
-      align: "left",
-      sorter: true,
-      filteredValue: [search?.remark] || null,
-      ellipsis: {
-        showTitle: false,
+        render: (text) =>
+          renderColumn(
+            "custNumb",
+            hasValue(search["custNumb"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
+        // render: (text) =>
+        //   searchedColumn === "custNumb" ? (
+        //     <Highlighter
+        //       highlightStyle={{
+        //         backgroundColor: "#ffc069",
+        //         padding: 0,
+        //       }}
+        //       searchWords={[searchText]}
+        //       autoEscape
+        //       textToHighlight={text ? text.toString() : ""}
+        //     />
+        //   ) : text ? (
+        //     <Tooltip placement="topLeft" title={text}>
+        //       {text}
+        //     </Tooltip>
+        //   ) : (
+        //     ""
+        //   ),
       },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "remark",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "remark",
-          hasValue(search["remark"]),
+      {
+        title: "SCHEDULE TYPE",
+        dataIndex: "scheduleTypeVal",
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.scheduleTypeVal] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "scheduleTypeVal",
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
+          handleSearch,
           true,
-          "input",
-          search
         ),
-      // render: (text) => {
-      //   if (searchedColumn === "remark") {
-      //     return (
-      //       <Tooltip placement="topLeft" title={text}>
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={text ? text.toString() : ""}
-      //         />
-      //       </Tooltip>
-      //     );
-      //   } else {
-      //     if (text) {
-      //       return (
-      //         <Tooltip placement="topLeft" title={text}>
-      //           {text}
-      //         </Tooltip>
-      //       );
-      //     }
-      //     return "";
-      //   }
-      // },
-    },
-    {
-      title: "TYPE",
-      dataIndex: "typeVal",
-      align: "center",
-      sorter: true,
-      filteredValue: [search?.typeVal] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "typeVal",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "typeVal",
-          hasValue(search["typeVal"]),
+        render: (text) =>
+          renderColumn(
+            "scheduleTypeVal",
+            hasValue(search["scheduleTypeVal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+
+      {
+        title: "GENERATE DATE",
+        dataIndex: "generateDate",
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.generateDate] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "generateDate",
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "status",
-          search
+          handleSearch,
+          true,
+          "date",
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "typeVal",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-      // render: (index) => (
-      //   <div className={" flex justify-center"}>
-      //     <StatusComponent colour={index}>{index}</StatusComponent>
-      //   </div>
-      // ),
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      align: "center",
-      sorter: true,
-      fixed: "right",
-      width: 150,
-      filteredValue: [search?.status] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (index) => {
-        let text;
-        switch (index) {
-          case "INPROGRESS":
-            text = "In Progress";
-            break;
-          case "COMPLETE BILLING":
-            text = "Complete Billing";
-            break;
-          default:
-            text = index
-              ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-              : index;
-            break;
-        }
-        return text
-          ? renderColumn(
-            "status",
-            hasValue(search["status"]),
+        render: (text) =>
+          renderDateColumn(
+            "generateDate",
+            hasValue(search["generateDate"]),
+            searchText,
+            text,
+            "date",
+            search,
+          ),
+        // ...getColumnSearchPropsPaging(
+        //   "generateDate",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch,
+        //   false,
+        //   "date"
+        // ),
+        // render: (data) => {
+        //   const text = data ? moment(data).format(dateFormatting.dateTime) : "";
+        //   if (searchedColumn === "generateDate") {
+        //     return (
+        //       <Highlighter
+        //         highlightStyle={{
+        //           backgroundColor: "#ffc069",
+        //           padding: 0,
+        //         }}
+        //         searchWords={[searchText]}
+        //         autoEscape
+        //         textToHighlight={text ? text.toString() : ""}
+        //       />
+        //     );
+        //   } else {
+        //     return text || "";
+        //   }
+        // },
+      },
+      {
+        title: "REMARK",
+        dataIndex: "remark",
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.remark] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "remark",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+        ),
+        render: (text) =>
+          renderColumn(
+            "remark",
+            hasValue(search["remark"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
+        // render: (text) => {
+        //   if (searchedColumn === "remark") {
+        //     return (
+        //       <Tooltip placement="topLeft" title={text}>
+        //         <Highlighter
+        //           highlightStyle={{
+        //             backgroundColor: "#ffc069",
+        //             padding: 0,
+        //           }}
+        //           searchWords={[searchText]}
+        //           autoEscape
+        //           textToHighlight={text ? text.toString() : ""}
+        //         />
+        //       </Tooltip>
+        //     );
+        //   } else {
+        //     if (text) {
+        //       return (
+        //         <Tooltip placement="topLeft" title={text}>
+        //           {text}
+        //         </Tooltip>
+        //       );
+        //     }
+        //     return "";
+        //   }
+        // },
+      },
+      {
+        title: "TYPE",
+        dataIndex: "typeVal",
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.typeVal] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "typeVal",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+        ),
+        render: (text) =>
+          renderColumn(
+            "typeVal",
+            hasValue(search["typeVal"]),
             searchText,
             text,
             false,
             "status",
-            search
-          )
-          : text;
+            search,
+          ),
+        // ...getColumnSearchPropsPaging(
+        //   "typeVal",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch
+        // ),
+        // render: (index) => (
+        //   <div className={" flex justify-center"}>
+        //     <StatusComponent colour={index}>{index}</StatusComponent>
+        //   </div>
+        // ),
       },
-      // ...getColumnSearchPropsPaging(
-      //   "status",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-      // render: (index) => {
-      //   let text;
-      //   switch (index) {
-      //     case "INPROGRESS":
-      //       text = "In Progress";
-      //       break;
-      //     case "COMPLETE BILLING":
-      //       text = "Complete Billing";
-      //       break;
-      //     default:
-      //       text = index
-      //         ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-      //         : index;
-      //       break;
-      //   }
-      //   if (text) {
+      {
+        title: "STATUS",
+        dataIndex: "status",
+        align: "center",
+        sorter: true,
+        fixed: "right",
+        width: 150,
+        filteredValue: [search?.status] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "status",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+        ),
+        render: (index) => {
+          let text;
+          switch (index) {
+            case "INPROGRESS":
+              text = "In Progress";
+              break;
+            case "COMPLETE BILLING":
+              text = "Complete Billing";
+              break;
+            default:
+              text = index
+                ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
+                : index;
+              break;
+          }
+          return text
+            ? renderColumn(
+                "status",
+                hasValue(search["status"]),
+                searchText,
+                text,
+                false,
+                "status",
+                search,
+              )
+            : text;
+        },
+        // ...getColumnSearchPropsPaging(
+        //   "status",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch
+        // ),
+        // render: (index) => {
+        //   let text;
+        //   switch (index) {
+        //     case "INPROGRESS":
+        //       text = "In Progress";
+        //       break;
+        //     case "COMPLETE BILLING":
+        //       text = "Complete Billing";
+        //       break;
+        //     default:
+        //       text = index
+        //         ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
+        //         : index;
+        //       break;
+        //   }
+        //   if (text) {
+        //     return (
+        //       <div className={" flex justify-center"}>
+        //         <StatusComponent colour={text}>{text}</StatusComponent>
+        //       </div>
+        //     );
+        //   } else {
+        //     return "";
+        //   }
+        // },
+      },
+      // {
+      //   title: "ACTION",
+      //   align: "center",
+      //   fixed: "right",
+      //   key: "action",
+      //   width: 100,
+      //   render: (v, r) => {
       //     return (
-      //       <div className={" flex justify-center"}>
-      //         <StatusComponent colour={text}>{text}</StatusComponent>
-      //       </div>
+      //       <Space>
+      //         <Tooltip title="Detail">
+      //           <Link
+      //             to={RBI_ROUTES.CALCULATION_DETAIL}
+      //             state={{ id: r?.calJobId }}
+      //           >
+      //             <ButtonComponent
+      //               icon={<SVGIcon name="IconDetail" width={24} />}
+      //               border={false}
+      //             />
+      //           </Link>
+      //         </Tooltip>
+      //       </Space>
       //     );
-      //   } else {
-      //     return "";
-      //   }
+      //   },
       // },
-    },
-    // {
-    //   title: "ACTION",
-    //   align: "center",
-    //   fixed: "right",
-    //   key: "action",
-    //   width: 100,
-    //   render: (v, r) => {
-    //     return (
-    //       <Space>
-    //         <Tooltip title="Detail">
-    //           <Link
-    //             to={RBI_ROUTES.CALCULATION_DETAIL}
-    //             state={{ id: r?.calJobId }}
-    //           >
-    //             <ButtonComponent
-    //               icon={<SVGIcon name="IconDetail" width={24} />}
-    //               border={false}
-    //             />
-    //           </Link>
-    //         </Tooltip>
-    //       </Space>
-    //     );
-    //   },
-    // },
-  ], [page, pageSize, search, searchText, searchedColumn]);
+    ],
+    [page, pageSize, search, searchText, searchedColumn],
+  );
 
   // column history
-  const columnHistory = useMemo(() => [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "CALCULATION CODE",
-      dataIndex: "calCode",
-      sorter: true,
-      filteredValue: [search?.calCode] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "calCode",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+  const columnHistory = useMemo(
+    () => [
+      {
+        title: "NO",
+        width: 60,
+        align: "center",
+        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      },
+      {
+        title: "CALCULATION CODE",
+        dataIndex: "calCode",
+        sorter: true,
+        filteredValue: [search?.calCode] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "calCode",
-          hasValue(search["calCode"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "input",
-          search
+          handleSearch,
+          true,
         ),
-    },
-    {
-      title: "CUSTOMER NUMBER",
-      dataIndex: "custNumb",
-      sorter: true,
-      filteredValue: [search?.custNumb] || null,
-      ellipsis: {
-        showTitle: false,
+        render: (text) =>
+          renderColumn(
+            "calCode",
+            hasValue(search["calCode"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
       },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "custNumb",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+      {
+        title: "CUSTOMER NUMBER",
+        dataIndex: "custNumb",
+        sorter: true,
+        filteredValue: [search?.custNumb] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "custNumb",
-          hasValue(search["custNumb"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
+          handleSearch,
           true,
-          "input",
-          search
         ),
-    },
-    {
-      title: "CUSTOMER NAME",
-      dataIndex: "custName",
-      sorter: true,
-      filteredValue: [search?.custName] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "custName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderColumn(
+            "custNumb",
+            hasValue(search["custNumb"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
+      },
+      {
+        title: "CUSTOMER NAME",
+        dataIndex: "custName",
+        sorter: true,
+        filteredValue: [search?.custName] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "custName",
-          hasValue(search["custName"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "input",
-          search
+          handleSearch,
+          true,
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "custName",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-    },
-    {
-      title: "ACCOUNT NUMBER",
-      dataIndex: "accNumb",
-      sorter: true,
-      filteredValue: [search?.accNumb] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accNumb",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderColumn(
+            "custName",
+            hasValue(search["custName"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+        // ...getColumnSearchPropsPaging(
+        //   "custName",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch
+        // ),
+      },
+      {
+        title: "ACCOUNT NUMBER",
+        dataIndex: "accNumb",
+        sorter: true,
+        filteredValue: [search?.accNumb] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "accNumb",
-          hasValue(search["accNumb"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "input",
-          search
+          handleSearch,
+          true,
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "accNumb",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-    },
-    {
-      title: "ACCOUNT NAME",
-      dataIndex: "accName",
-      sorter: true,
-      filteredValue: [search?.accName] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderColumn(
+            "accNumb",
+            hasValue(search["accNumb"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+        // ...getColumnSearchPropsPaging(
+        //   "accNumb",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch
+        // ),
+      },
+      {
+        title: "ACCOUNT NAME",
+        dataIndex: "accName",
+        sorter: true,
+        filteredValue: [search?.accName] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "accName",
-          hasValue(search["accName"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "input",
-          search
+          handleSearch,
+          true,
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "accName",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-    },
-    {
-      title: "ACCOUNT GROUP TYPE",
-      dataIndex: "accGroupTypeVal",
-      sorter: true,
-      align: "center",
-      filteredValue: [search?.accGroupTypeVal] || null,
-      ellipsis: {
-        showTitle: false,
+        render: (text) =>
+          renderColumn(
+            "accName",
+            hasValue(search["accName"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+        // ...getColumnSearchPropsPaging(
+        //   "accName",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch
+        // ),
       },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accGroupTypeVal",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+      {
+        title: "ACCOUNT GROUP TYPE",
+        dataIndex: "accGroupTypeVal",
+        sorter: true,
+        align: "center",
+        filteredValue: [search?.accGroupTypeVal] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "accGroupTypeVal",
-          hasValue(search["accGroupTypeVal"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
+          handleSearch,
           true,
-          "input",
-          search
         ),
-      // render: (text) => {
-      //   if (searchedColumn === "accGroupTypeVal") {
-      //     return (
-      //       <Tooltip placement="topLeft" title={text}>
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={text ? text.toString() : ""}
-      //         />
-      //       </Tooltip>
-      //     );
-      //   } else {
-      //     if (text) {
-      //       return (
-      //         <Tooltip placement="topLeft" title={text}>
-      //           {text}
-      //         </Tooltip>
-      //       );
-      //     }
-      //     return "";
-      //   }
-      // },
-    },
-    {
-      title: "SERVICE TYPE",
-      dataIndex: "serviceTypeVal",
-      sorter: true,
-      align: "center",
-      filteredValue: [search?.serviceTypeVal] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "serviceTypeVal",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderColumn(
+            "accGroupTypeVal",
+            hasValue(search["accGroupTypeVal"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
+        // render: (text) => {
+        //   if (searchedColumn === "accGroupTypeVal") {
+        //     return (
+        //       <Tooltip placement="topLeft" title={text}>
+        //         <Highlighter
+        //           highlightStyle={{
+        //             backgroundColor: "#ffc069",
+        //             padding: 0,
+        //           }}
+        //           searchWords={[searchText]}
+        //           autoEscape
+        //           textToHighlight={text ? text.toString() : ""}
+        //         />
+        //       </Tooltip>
+        //     );
+        //   } else {
+        //     if (text) {
+        //       return (
+        //         <Tooltip placement="topLeft" title={text}>
+        //           {text}
+        //         </Tooltip>
+        //       );
+        //     }
+        //     return "";
+        //   }
+        // },
+      },
+      {
+        title: "SERVICE TYPE",
+        dataIndex: "serviceTypeVal",
+        sorter: true,
+        align: "center",
+        filteredValue: [search?.serviceTypeVal] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "serviceTypeVal",
-          hasValue(search["serviceTypeVal"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "input",
-          search
+          handleSearch,
+          true,
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "serviceTypeVal",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-    },
-    {
-      title: "SA NUMBER",
-      dataIndex: "saNumb",
-      sorter: true,
-      align: "center",
-      filteredValue: [search?.saNumb] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "saNumb",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderColumn(
+            "serviceTypeVal",
+            hasValue(search["serviceTypeVal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+        // ...getColumnSearchPropsPaging(
+        //   "serviceTypeVal",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch
+        // ),
+      },
+      {
+        title: "SA NUMBER",
+        dataIndex: "saNumb",
+        sorter: true,
+        align: "center",
+        filteredValue: [search?.saNumb] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "saNumb",
-          hasValue(search["saNumb"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "input",
-          search
+          handleSearch,
+          true,
         ),
-      // ...getColumnSearchPropsPaging(
-      //   "saNumb",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-    },
-    {
-      title: "SOR",
-      dataIndex: "sorVal",
-      sorter: true,
-      filteredValue: [search?.sorVal] || null,
-      ellipsis: {
-        showTitle: false,
+        render: (text) =>
+          renderColumn(
+            "saNumb",
+            hasValue(search["saNumb"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+        // ...getColumnSearchPropsPaging(
+        //   "saNumb",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch
+        // ),
       },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "sorVal",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+      {
+        title: "SOR",
+        dataIndex: "sorVal",
+        sorter: true,
+        filteredValue: [search?.sorVal] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "sorVal",
-          hasValue(search["sorVal"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
+          handleSearch,
           true,
-          "input",
-          search
         ),
-      // render: (text) => {
-      //   if (searchedColumn === "sorVal") {
-      //     return (
-      //       <Tooltip placement="topLeft" title={text}>
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={text ? text.toString() : ""}
-      //         />
-      //       </Tooltip>
-      //     );
-      //   } else {
-      //     if (text) {
-      //       return (
-      //         <Tooltip placement="topLeft" title={text}>
-      //           {text}
-      //         </Tooltip>
-      //       );
-      //     }
-      //     return "";
-      //   }
-      // },
-    },
-    {
-      title: "COST CENTER",
-      dataIndex: "costCenterVal",
-      sorter: true,
-      filteredValue: [search?.costCenterVal] || null,
-      ellipsis: {
-        showTitle: false,
+        render: (text) =>
+          renderColumn(
+            "sorVal",
+            hasValue(search["sorVal"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
+        // render: (text) => {
+        //   if (searchedColumn === "sorVal") {
+        //     return (
+        //       <Tooltip placement="topLeft" title={text}>
+        //         <Highlighter
+        //           highlightStyle={{
+        //             backgroundColor: "#ffc069",
+        //             padding: 0,
+        //           }}
+        //           searchWords={[searchText]}
+        //           autoEscape
+        //           textToHighlight={text ? text.toString() : ""}
+        //         />
+        //       </Tooltip>
+        //     );
+        //   } else {
+        //     if (text) {
+        //       return (
+        //         <Tooltip placement="topLeft" title={text}>
+        //           {text}
+        //         </Tooltip>
+        //       );
+        //     }
+        //     return "";
+        //   }
+        // },
       },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "costCenterVal",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+      {
+        title: "COST CENTER",
+        dataIndex: "costCenterVal",
+        sorter: true,
+        filteredValue: [search?.costCenterVal] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "costCenterVal",
-          hasValue(search["costCenterVal"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
+          handleSearch,
           true,
-          "input",
-          search
         ),
-      // render: (text) => {
-      //   if (searchedColumn === "costCenterVal") {
-      //     return (
-      //       <Tooltip placement="topLeft" title={text}>
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={text ? text.toString() : ""}
-      //         />
-      //       </Tooltip>
-      //     );
-      //   } else {
-      //     if (text) {
-      //       return (
-      //         <Tooltip placement="topLeft" title={text}>
-      //           {text}
-      //         </Tooltip>
-      //       );
-      //     }
-      //     return "";
-      //   }
-      // },
-    },
-    {
-      title: "ACCOUNT SEGMENT",
-      dataIndex: "accSegmentVal",
-      sorter: true,
-      align: "center",
-      filteredValue: [search?.accSegmentVal] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accSegmentVal",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderColumn(
+            "costCenterVal",
+            hasValue(search["costCenterVal"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
+        // render: (text) => {
+        //   if (searchedColumn === "costCenterVal") {
+        //     return (
+        //       <Tooltip placement="topLeft" title={text}>
+        //         <Highlighter
+        //           highlightStyle={{
+        //             backgroundColor: "#ffc069",
+        //             padding: 0,
+        //           }}
+        //           searchWords={[searchText]}
+        //           autoEscape
+        //           textToHighlight={text ? text.toString() : ""}
+        //         />
+        //       </Tooltip>
+        //     );
+        //   } else {
+        //     if (text) {
+        //       return (
+        //         <Tooltip placement="topLeft" title={text}>
+        //           {text}
+        //         </Tooltip>
+        //       );
+        //     }
+        //     return "";
+        //   }
+        // },
+      },
+      {
+        title: "ACCOUNT SEGMENT",
+        dataIndex: "accSegmentVal",
+        sorter: true,
+        align: "center",
+        filteredValue: [search?.accSegmentVal] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "accSegmentVal",
-          hasValue(search["accSegmentVal"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-      // ...getColumnSearchPropsPaging(
-      //   "accSegmentVal",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-    },
-    {
-      title: "METER READING CODE",
-      dataIndex: "meterReadingCodeVal",
-      sorter: true,
-      align: "center",
-      filteredValue: [search?.meterReadingCodeVal] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "meterReadingCodeVal",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "meterReadingCodeVal",
-          hasValue(search["meterReadingCodeVal"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-      // ...getColumnSearchPropsPaging(
-      //   "meterReadingCodeVal",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-    },
-    {
-      title: "BILLING CYCLE",
-      dataIndex: "billingCycVal",
-      sorter: true,
-      align: "center",
-      filteredValue: [search?.billingCycVal] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "billingCycVal",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "billingCycVal",
-          hasValue(search["billingCycVal"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-      // ...getColumnSearchPropsPaging(
-      //   "billingCycVal",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-    },
-    {
-      title: "BILLING PERIODE",
-      dataIndex: "billingPeriodVal",
-      sorter: true,
-      align: "center",
-      filteredValue: [search?.billingPeriodVal] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "billingPeriodVal",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "datePeriod"
-      ),
-      render: (text) =>
-        renderDateColumn(
-          "billingPeriodVal",
-          hasValue(search["billingPeriodVal"]),
-          searchText,
-          text,
-          "datePeriod",
-          search
-        ),
-      // ...getColumnSearchPropsPaging(
-      //   "billingPeriodVal",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-    },
-    {
-      title: "MESSAGE",
-      dataIndex: "message",
-      sorter: true,
-      align: "left",
-      filteredValue: [search?.message] || null,
-      ellipsis: {
-        showTitle: false,
-      },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "message",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "message",
-          hasValue(search["message"]),
-          searchText,
-          text,
+          handleSearch,
           true,
-          "input",
-          search
         ),
-      // render: (text) => {
-      //   if (searchedColumn === "message") {
-      //     return (
-      //       <Tooltip placement="topLeft" title={text}>
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={text ? text.toString() : ""}
-      //         />
-      //       </Tooltip>
-      //     );
-      //   } else {
-      //     if (text) {
-      //       return (
-      //         <Tooltip placement="topLeft" title={text}>
-      //           {text}
-      //         </Tooltip>
-      //       );
-      //     }
-      //     return "";
-      //   }
-      // },
-    },
-    {
-      title: "CALCULATE AT",
-      dataIndex: "calculateAt",
-      sorter: true,
-      align: "center",
-      filteredValue: [search?.calculateAt] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "calculateAt",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "datetime"
-      ),
-      render: (text) =>
-        renderDateColumn(
-          "calculateAt",
-          hasValue(search["calculateAt"]),
-          searchText,
-          text,
-          "datetime",
-          search
-        ),
-      // ...getColumnSearchPropsPaging(
-      //   "createdDate",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   false,
-      //   "date"
-      // ),
-      // render: (data) => {
-      //   const text = data ? moment(data).format(dateFormatting.dateTime) : "";
-      //   if (searchedColumn === "createdDate") {
-      //     return (
-      //       <Highlighter
-      //         highlightStyle={{
-      //           backgroundColor: "#ffc069",
-      //           padding: 0,
-      //         }}
-      //         searchWords={[searchText]}
-      //         autoEscape
-      //         textToHighlight={text ? text.toString() : ""}
-      //       />
-      //     );
-      //   } else {
-      //     return text || "";
-      //   }
-      // },
-    },
-    {
-      title: "IS TRY",
-      dataIndex: "isTry",
-      sorter: true,
-      align: "center",
-      filteredValue: [search?.isTry] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "isTry",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => {
-        return renderColumn('isTry', hasValue(search['isTry']), searchText, text?.toString(), false, 'status', search)
-      }
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      align: "center",
-      fixed: "right",
-      width: 150,
-      sorter: true,
-      filteredValue: [search?.status] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (index) => {
-        return renderColumn('status', hasValue(search['status']), searchText, toTitleCase(index), false, 'status', search)
+        render: (text) =>
+          renderColumn(
+            "accSegmentVal",
+            hasValue(search["accSegmentVal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+        // ...getColumnSearchPropsPaging(
+        //   "accSegmentVal",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch
+        // ),
       },
-      // ...getColumnSearchPropsPaging(
-      //   "status",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-      // render: (index) => {
-      //   let text;
-      //   switch (index) {
-      //     case "INPROGRESS":
-      //       text = "In Progress";
-      //       break;
-      //     case "COMPLETE BILLING":
-      //       text = "Complete Billing";
-      //       break;
-      //     case "FAILED BILLING":
-      //       text = "Failed Billing";
-      //       break;
-      //     default:
-      //       text = index
-      //         ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-      //         : index;
-      //       break;
-      //   }
-      //   if (text) {
-      //     return (
-      //       <div className={" flex justify-center"}>
-      //         <StatusComponent colour={text}>{text}</StatusComponent>
-      //       </div>
-      //     );
-      //   } else {
-      //     return "";
-      //   }
-      // },
-    },
-  ], [page, pageSize, search, searchText, searchedColumn]);
+      {
+        title: "METER READING CODE",
+        dataIndex: "meterReadingCodeVal",
+        sorter: true,
+        align: "center",
+        filteredValue: [search?.meterReadingCodeVal] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "meterReadingCodeVal",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+        ),
+        render: (text) =>
+          renderColumn(
+            "meterReadingCodeVal",
+            hasValue(search["meterReadingCodeVal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+        // ...getColumnSearchPropsPaging(
+        //   "meterReadingCodeVal",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch
+        // ),
+      },
+      {
+        title: "BILLING CYCLE",
+        dataIndex: "billingCycVal",
+        sorter: true,
+        align: "center",
+        filteredValue: [search?.billingCycVal] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "billingCycVal",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+        ),
+        render: (text) =>
+          renderColumn(
+            "billingCycVal",
+            hasValue(search["billingCycVal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+        // ...getColumnSearchPropsPaging(
+        //   "billingCycVal",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch
+        // ),
+      },
+      {
+        title: "BILLING PERIODE",
+        dataIndex: "billingPeriodVal",
+        sorter: true,
+        align: "center",
+        filteredValue: [search?.billingPeriodVal] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "billingPeriodVal",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+          "datePeriod",
+        ),
+        render: (text) =>
+          renderDateColumn(
+            "billingPeriodVal",
+            hasValue(search["billingPeriodVal"]),
+            searchText,
+            text,
+            "datePeriod",
+            search,
+          ),
+        // ...getColumnSearchPropsPaging(
+        //   "billingPeriodVal",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch
+        // ),
+      },
+      {
+        title: "MESSAGE",
+        dataIndex: "message",
+        sorter: true,
+        align: "left",
+        filteredValue: [search?.message] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "message",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+        ),
+        render: (text) =>
+          renderColumn(
+            "message",
+            hasValue(search["message"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
+        // render: (text) => {
+        //   if (searchedColumn === "message") {
+        //     return (
+        //       <Tooltip placement="topLeft" title={text}>
+        //         <Highlighter
+        //           highlightStyle={{
+        //             backgroundColor: "#ffc069",
+        //             padding: 0,
+        //           }}
+        //           searchWords={[searchText]}
+        //           autoEscape
+        //           textToHighlight={text ? text.toString() : ""}
+        //         />
+        //       </Tooltip>
+        //     );
+        //   } else {
+        //     if (text) {
+        //       return (
+        //         <Tooltip placement="topLeft" title={text}>
+        //           {text}
+        //         </Tooltip>
+        //       );
+        //     }
+        //     return "";
+        //   }
+        // },
+      },
+      {
+        title: "CALCULATE AT",
+        dataIndex: "calculateAt",
+        sorter: true,
+        align: "center",
+        filteredValue: [search?.calculateAt] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "calculateAt",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+          "datetime",
+        ),
+        render: (text) =>
+          renderDateColumn(
+            "calculateAt",
+            hasValue(search["calculateAt"]),
+            searchText,
+            text,
+            "datetime",
+            search,
+          ),
+        // ...getColumnSearchPropsPaging(
+        //   "createdDate",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch,
+        //   false,
+        //   "date"
+        // ),
+        // render: (data) => {
+        //   const text = data ? moment(data).format(dateFormatting.dateTime) : "";
+        //   if (searchedColumn === "createdDate") {
+        //     return (
+        //       <Highlighter
+        //         highlightStyle={{
+        //           backgroundColor: "#ffc069",
+        //           padding: 0,
+        //         }}
+        //         searchWords={[searchText]}
+        //         autoEscape
+        //         textToHighlight={text ? text.toString() : ""}
+        //       />
+        //     );
+        //   } else {
+        //     return text || "";
+        //   }
+        // },
+      },
+      {
+        title: "IS TRY",
+        dataIndex: "isTry",
+        sorter: true,
+        align: "center",
+        filteredValue: [search?.isTry] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "isTry",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+        ),
+        render: (text) => {
+          return renderColumn(
+            "isTry",
+            hasValue(search["isTry"]),
+            searchText,
+            text?.toString(),
+            false,
+            "status",
+            search,
+          );
+        },
+      },
+      {
+        title: "STATUS",
+        dataIndex: "status",
+        align: "center",
+        fixed: "right",
+        width: 150,
+        sorter: true,
+        filteredValue: [search?.status] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "status",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+        ),
+        render: (index) => {
+          return renderColumn(
+            "status",
+            hasValue(search["status"]),
+            searchText,
+            toTitleCase(index),
+            false,
+            "status",
+            search,
+          );
+        },
+        // ...getColumnSearchPropsPaging(
+        //   "status",
+        //   searchInput,
+        //   searchedColumn,
+        //   searchText,
+        //   handleSearch
+        // ),
+        // render: (index) => {
+        //   let text;
+        //   switch (index) {
+        //     case "INPROGRESS":
+        //       text = "In Progress";
+        //       break;
+        //     case "COMPLETE BILLING":
+        //       text = "Complete Billing";
+        //       break;
+        //     case "FAILED BILLING":
+        //       text = "Failed Billing";
+        //       break;
+        //     default:
+        //       text = index
+        //         ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
+        //         : index;
+        //       break;
+        //   }
+        //   if (text) {
+        //     return (
+        //       <div className={" flex justify-center"}>
+        //         <StatusComponent colour={text}>{text}</StatusComponent>
+        //       </div>
+        //     );
+        //   } else {
+        //     return "";
+        //   }
+        // },
+      },
+    ],
+    [page, pageSize, search, searchText, searchedColumn],
+  );
 
   // onSort
   const onSort = (_, __, sort) => {
@@ -1634,7 +1661,7 @@ const CalculationPage = () => {
           pageSize,
           sort,
           search: encodeURIComponent(JSON.stringify(search)),
-        })
+        }),
       );
     } else {
       dispatch(
@@ -1643,7 +1670,7 @@ const CalculationPage = () => {
           pageSize,
           sort,
           search: encodeURIComponent(JSON.stringify(search)),
-        })
+        }),
       );
     }
   };
@@ -1727,19 +1754,18 @@ const CalculationPage = () => {
 
   const columnActionPermission = useColumnActionPermission(
     ["view"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   const columns = useMemo(() => {
     if (tabHeader === "Calculation List") {
-      return [...column, ...columnActionPermission]
+      return [...column, ...columnActionPermission];
     } else {
       return columnHistory;
     }
+  }, [column, columnActionPermission, columnHistory, tabHeader]);
 
-  }, [column, columnActionPermission, columnHistory, tabHeader])
-
-  console.log(data_calculation, ' data calculation');
+  console.log(data_calculation, " data calculation");
 
   return (
     <Spin spinning={loading}>

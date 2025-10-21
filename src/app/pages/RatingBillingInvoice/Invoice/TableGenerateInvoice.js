@@ -1,7 +1,14 @@
 import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../utils";
-import { getColumnSearchProps, getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
-
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../utils";
+import {
+  getColumnSearchProps,
+  getColumnSearchPropsUseFilteredValueFE,
+} from "../../../../utils/getColumnSearchProps";
 
 const sorter = (fieldSort, a, b) => {
   // console.log(fieldSort, a, b, "sprter");
@@ -15,9 +22,7 @@ const sorter = (fieldSort, a, b) => {
       case "dueDate":
       case "rateDate":
       case "billingPeriodDate":
-        return obj[fieldSort]
-          ? moment(obj[fieldSort])
-          : "";
+        return obj[fieldSort] ? moment(obj[fieldSort]) : "";
       case "price":
       case "quantity":
       case "amount":
@@ -102,7 +107,7 @@ const sorter = (fieldSort, a, b) => {
       case "totalAmountEqvIdr":
       case "totalAmountEqvUsd":
         return Math.sign(
-          parseInt(a.replace(/,/g, "")) - parseInt(b.replace(/,/g, ""))
+          parseInt(a.replace(/,/g, "")) - parseInt(b.replace(/,/g, "")),
         );
       default:
         return a.localeCompare(b);
@@ -132,7 +137,9 @@ export const columnsGenerateInvoice = (
     dataIndex: "invoiceNumber",
     // sorter: true,
     sorter: (a, b) => sorter("invoiceNumber", a, b),
-    filteredValue: search?.["invoiceNumber"] ? [search?.["invoiceNumber"]] : null,
+    filteredValue: search?.["invoiceNumber"]
+      ? [search?.["invoiceNumber"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "invoiceNumber",
@@ -140,7 +147,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -150,7 +157,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -166,7 +173,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -176,18 +183,18 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     title: "BILLING PERIOD",
     dataIndex: "billingPeriod",
     // sorter: true,
-    align:"center",
+    align: "center",
     sorter: (a, b) => sorter("billingPeriod", a, b),
     filteredValue: search?.["billingPeriod"]
-    ? [search?.["billingPeriod"]]
-    : null,
+      ? [search?.["billingPeriod"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "billingPeriod",
@@ -196,7 +203,7 @@ export const columnsGenerateInvoice = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -205,7 +212,7 @@ export const columnsGenerateInvoice = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -221,7 +228,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -231,14 +238,16 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
     sorter: (a, b) => sorter("customerNumber", a, b),
-    filteredValue: search?.["customerNumber"] ? [search?.["customerNumber"]] : null,
+    filteredValue: search?.["customerNumber"]
+      ? [search?.["customerNumber"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "customerNumber",
@@ -246,7 +255,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -256,7 +265,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -272,7 +281,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -282,14 +291,16 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
     sorter: (a, b) => sorter("accountNumber", a, b),
-    filteredValue: search?.["accountNumber"] ? [search?.["accountNumber"]] : null,
+    filteredValue: search?.["accountNumber"]
+      ? [search?.["accountNumber"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "accountNumber",
@@ -297,7 +308,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -307,7 +318,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -322,7 +333,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -332,7 +343,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -341,7 +352,9 @@ export const columnsGenerateInvoice = (
     // sorter: true,
     align: "center",
     sorter: (a, b) => sorter("accountGroupType", a, b),
-    filteredValue: search?.["accountGroupType"] ? [search?.["accountGroupType"]] : null,
+    filteredValue: search?.["accountGroupType"]
+      ? [search?.["accountGroupType"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "accountGroupType",
@@ -349,7 +362,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -359,13 +372,13 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     title: "SERVICE TYPE",
     dataIndex: "serviceType",
-    align:'center',
+    align: "center",
     sorter: (a, b) => sorter("serviceType", a, b),
     filteredValue: search?.["serviceType"] ? [search?.["serviceType"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
@@ -375,7 +388,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -385,7 +398,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -401,7 +414,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -411,7 +424,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -427,7 +440,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -437,14 +450,16 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
     sorter: (a, b) => sorter("accountSegment", a, b),
-    filteredValue: search?.["accountSegment"] ? [search?.["accountSegment"]] : null,
+    filteredValue: search?.["accountSegment"]
+      ? [search?.["accountSegment"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "accountSegment",
@@ -452,7 +467,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -462,7 +477,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -470,7 +485,9 @@ export const columnsGenerateInvoice = (
     dataIndex: "meterReadingCode",
     // sorter: true,
     sorter: (a, b) => sorter("meterReadingCode", a, b),
-    filteredValue: search?.["meterReadingCode"] ? [search?.["meterReadingCode"]] : null,
+    filteredValue: search?.["meterReadingCode"]
+      ? [search?.["meterReadingCode"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "meterReadingCode",
@@ -478,7 +495,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -488,7 +505,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -515,7 +532,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -542,7 +559,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   // {
@@ -595,7 +612,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   // {
@@ -648,16 +665,18 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
- 
+
   {
     title: "WITHOLDING TAX",
     dataIndex: "withHoldingTax",
     align: "right",
     sorter: (a, b) => sorter("withHoldingTax", a, b),
-    filteredValue: search?.["withHoldingTax"] ? [search?.["withHoldingTax"]] : null,
+    filteredValue: search?.["withHoldingTax"]
+      ? [search?.["withHoldingTax"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "withHoldingTax",
@@ -675,13 +694,13 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     title: "TAX RATE TYPE",
     dataIndex: "taxRateType",
-    align:'center',
+    align: "center",
     sorter: (a, b) => sorter("taxRateType", a, b),
     filteredValue: search?.["taxRateType"] ? [search?.["taxRateType"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
@@ -701,7 +720,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -728,17 +747,15 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     title: "TAX RATE DATE",
     dataIndex: "taxRateDate",
-    align: 'center',
+    align: "center",
     sorter: (a, b) => sorter("taxRateDate", a, b),
-    filteredValue: search?.["taxRateDate"]
-    ? [search?.["taxRateDate"]]
-    : null,
+    filteredValue: search?.["taxRateDate"] ? [search?.["taxRateDate"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "taxRateDate",
@@ -747,7 +764,7 @@ export const columnsGenerateInvoice = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -756,7 +773,7 @@ export const columnsGenerateInvoice = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   // {
@@ -811,7 +828,7 @@ export const columnsGenerateInvoice = (
   //       search
   //     ),
   // },
- 
+
   {
     title: "TOTAL AMOUNT IDR",
     // sorter: true,
@@ -819,7 +836,9 @@ export const columnsGenerateInvoice = (
     dataIndex: "totalAmountIdr",
     align: "right",
     sorter: (a, b) => sorter("totalAmountIdr", a, b),
-    filteredValue: search?.["totalAmountIdr"] ? [search?.["totalAmountIdr"]] : null,
+    filteredValue: search?.["totalAmountIdr"]
+      ? [search?.["totalAmountIdr"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "totalAmountIdr",
@@ -837,7 +856,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -846,7 +865,9 @@ export const columnsGenerateInvoice = (
     align: "right",
     dataIndex: "totalAmountUsd",
     sorter: (a, b) => sorter("totalAmountUsd", a, b),
-    filteredValue: search?.["totalAmountUsd"] ? [search?.["totalAmountUsd"]] : null,
+    filteredValue: search?.["totalAmountUsd"]
+      ? [search?.["totalAmountUsd"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "totalAmountUsd",
@@ -864,7 +885,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -873,7 +894,9 @@ export const columnsGenerateInvoice = (
     // sorter: true,
     align: "center",
     sorter: (a, b) => sorter("termOfPayment", a, b),
-    filteredValue: search?.["termOfPayment"] ? [search?.["termOfPayment"]] : null,
+    filteredValue: search?.["termOfPayment"]
+      ? [search?.["termOfPayment"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "termOfPayment",
@@ -891,7 +914,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -901,8 +924,8 @@ export const columnsGenerateInvoice = (
     align: "center",
     sorter: (a, b) => sorter("transactionDate", a, b),
     filteredValue: search?.["transactionDate"]
-    ? [search?.["transactionDate"]]
-    : null,
+      ? [search?.["transactionDate"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "transactionDate",
@@ -911,7 +934,7 @@ export const columnsGenerateInvoice = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -920,7 +943,7 @@ export const columnsGenerateInvoice = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -929,9 +952,7 @@ export const columnsGenerateInvoice = (
     dataIndex: "invoiceDate",
     align: "center",
     sorter: (a, b) => sorter("invoiceDate", a, b),
-    filteredValue: search?.["invoiceDate"]
-    ? [search?.["invoiceDate"]]
-    : null,
+    filteredValue: search?.["invoiceDate"] ? [search?.["invoiceDate"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "invoiceDate",
@@ -940,7 +961,7 @@ export const columnsGenerateInvoice = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -949,7 +970,7 @@ export const columnsGenerateInvoice = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -958,9 +979,7 @@ export const columnsGenerateInvoice = (
     dataIndex: "dueDate",
     align: "center",
     sorter: (a, b) => sorter("dueDate", a, b),
-    filteredValue: search?.["dueDate"]
-    ? [search?.["dueDate"]]
-    : null,
+    filteredValue: search?.["dueDate"] ? [search?.["dueDate"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "dueDate",
@@ -969,7 +988,7 @@ export const columnsGenerateInvoice = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -978,14 +997,14 @@ export const columnsGenerateInvoice = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
     // sorter: true,
     title: "RATE TYPE",
     dataIndex: "rateType",
-    align:'center',
+    align: "center",
     sorter: (a, b) => sorter("rateType", a, b),
     filteredValue: search?.["rateType"] ? [search?.["rateType"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
@@ -1005,14 +1024,14 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     // sorter: true,
     title: "RATE",
     dataIndex: "rate",
-    align:"right",
+    align: "right",
     sorter: (a, b) => sorter("rate", a, b),
     filteredValue: search?.["rate"] ? [search?.["rate"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
@@ -1032,18 +1051,16 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     // sorter: true,
     title: "RATE DATE",
     dataIndex: "rateDate",
-    align: 'center',
+    align: "center",
     sorter: (a, b) => sorter("rateDate", a, b),
-    filteredValue: search?.["rateDate"]
-    ? [search?.["rateDate"]]
-    : null,
+    filteredValue: search?.["rateDate"] ? [search?.["rateDate"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "rateDate",
@@ -1052,7 +1069,7 @@ export const columnsGenerateInvoice = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -1061,16 +1078,18 @@ export const columnsGenerateInvoice = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
     // sorter: true,
     title: "TOTAL AMOUNT EQUIVALENT IDR",
     dataIndex: "totalAmountEqvIdr",
-    align:"right",
+    align: "right",
     sorter: (a, b) => sorter("totalAmountEqvIdr", a, b),
-    filteredValue: search?.["totalAmountEqvIdr"] ? [search?.["totalAmountEqvIdr"]] : null,
+    filteredValue: search?.["totalAmountEqvIdr"]
+      ? [search?.["totalAmountEqvIdr"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "totalAmountEqvIdr",
@@ -1088,16 +1107,18 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     // sorter: true,
     title: "TOTAL AMOUNT EQUIVALENT USD",
     dataIndex: "totalAmountEqvUsd",
-    align:"right",
+    align: "right",
     sorter: (a, b) => sorter("totalAmountEqvUsd", a, b),
-    filteredValue: search?.["totalAmountEqvUsd"] ? [search?.["totalAmountEqvUsd"]] : null,
+    filteredValue: search?.["totalAmountEqvUsd"]
+      ? [search?.["totalAmountEqvUsd"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "totalAmountEqvUsd",
@@ -1115,7 +1136,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
 ];

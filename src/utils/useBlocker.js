@@ -1,26 +1,24 @@
-import React from 'react';
-import { UNSAFE_NavigationContext } from 'react-router-dom';
-
+import React from "react";
+import { UNSAFE_NavigationContext } from "react-router-dom";
 
 export function useBlocker(blocker, when = true) {
-    const navigator = React.useContext(UNSAFE_NavigationContext)
-        .navigator;
+  const navigator = React.useContext(UNSAFE_NavigationContext).navigator;
 
-    React.useEffect(() => {
-        if (!when) return;
+  React.useEffect(() => {
+    if (!when) return;
 
-        const unblock = navigator.block(function (tx) {
-            const autoUnblockingTx = {
-                ...tx,
-                retry: function () {
-                    unblock();
-                    tx.retry();
-                },
-            };
+    const unblock = navigator.block(function (tx) {
+      const autoUnblockingTx = {
+        ...tx,
+        retry: function () {
+          unblock();
+          tx.retry();
+        },
+      };
 
-            blocker(autoUnblockingTx);
-        });
+      blocker(autoUnblockingTx);
+    });
 
-        return unblock;
-    }, [navigator, blocker, when]);
+    return unblock;
+  }, [navigator, blocker, when]);
 }

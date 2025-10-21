@@ -24,15 +24,17 @@ import {
   downloadGasSource,
   getAllGasSourcePaginate,
 } from "../../../../../redux/slices/account_management/MasterData/gasSourceSlice";
-import { dateFormatting, formMessageRequired, renderColumn } from "../../../../../utils";
+import {
+  dateFormatting,
+  formMessageRequired,
+  renderColumn,
+} from "../../../../../utils";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import { clearBodyMessage } from "../../../../../redux/slices/general_slice";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import InputComponent from "../../../../../components/InputComponent";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
-
-
 
 // Column Approval Expand
 const expandedRowRender = (record) => {
@@ -42,7 +44,7 @@ const expandedRowRender = (record) => {
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => { }
+    handleSearch = () => {},
   ) => {
     return [
       {
@@ -60,7 +62,7 @@ const expandedRowRender = (record) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -74,7 +76,7 @@ const expandedRowRender = (record) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         render: (text) =>
           searchedColumn === "startDate" ? (
@@ -106,7 +108,7 @@ const expandedRowRender = (record) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         render: (endDate) => moment(endDate).format(dateFormatting.date),
       },
@@ -119,7 +121,7 @@ const expandedRowRender = (record) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         render: (description) => (
           <Tooltip placement="topLeft" title={description}>
@@ -148,7 +150,7 @@ const expandedRowRender = (record) => {
 const ViewGasSource = () => {
   // Selector
   const { data, loading } = useSelector((state) => state.gasSource);
-  const { bodyError } = useSelector(state => state?.general);
+  const { bodyError } = useSelector((state) => state?.general);
   // Declaration
   const searchInput = useRef(null);
   const dispatch = useDispatch();
@@ -167,14 +169,19 @@ const ViewGasSource = () => {
   const [dataTable, setDataTable] = useState([]);
   const [chooseId, setChooseId] = useState();
   const [modalError, setModalError] = useState(false);
-  const [calorieName, setCalorieName] = useState('');
+  const [calorieName, setCalorieName] = useState("");
   const [form] = Form.useForm();
-
 
   // Use Effect
   useEffect(() => {
-
-    dispatch(getAllGasSourcePaginate({ search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }));
+    dispatch(
+      getAllGasSourcePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        sort,
+        page,
+        pageSize,
+      }),
+    );
   }, [search, sort, page, pageSize, dispatch]);
 
   useEffect(() => {
@@ -194,7 +201,7 @@ const ViewGasSource = () => {
   // trigger modal try again
   useEffect(() => {
     if (bodyError?.response?.data?.code === 500) {
-      setModalError(true)
+      setModalError(true);
     }
   }, [bodyError]);
 
@@ -261,30 +268,44 @@ const ViewGasSource = () => {
       activeOrInactiveGasSource({
         body: data,
         activeOrInactive: activeOrInactive,
-      })
+      }),
     )
       .unwrap()
       .then(() => {
         setRemark("");
-        dispatch(getAllGasSourcePaginate({ search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }));
-        form.resetFields()
+        dispatch(
+          getAllGasSourcePaginate({
+            search: encodeURIComponent(JSON.stringify(search)),
+            sort,
+            page,
+            pageSize,
+          }),
+        );
+        form.resetFields();
       })
       .catch(() => {
         setRemark("");
-        form.resetFields()
+        form.resetFields();
       });
   };
 
   // Handle Download
   const handleDownload = () => {
-    dispatch(downloadGasSource({ search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }));
+    dispatch(
+      downloadGasSource({
+        search: encodeURIComponent(JSON.stringify(search)),
+        sort,
+        page,
+        pageSize,
+      }),
+    );
   };
 
   // Handle Confirmation Active/Inactive
   const handleActiveOrInactive = (record) => {
     setModalActiveOrInactive(true);
     setActiveOrInactive(
-      record?.status === "ACTIVE" ? "Inactivate" : "Activate"
+      record?.status === "ACTIVE" ? "Inactivate" : "Activate",
     );
     setChooseId(record?.gasSourceId);
     setCalorieName(record?.name);
@@ -292,29 +313,45 @@ const ViewGasSource = () => {
 
   // handle confirm try
   const handleConfirmRetry = () => {
-
     if (bodyError?.action === "ACTIVE_OR_INACTIVE_GAS_SOURCE") {
       const setBodyRemark = {
         gasSourceDetailId: chooseId,
         remark: remark,
-      }
+      };
       const setStatus = {
         activeOrInactive: activeOrInactive,
-      }
-      dispatch(activeOrInactiveGasSource({ body: setBodyRemark, activeOrInactive: setStatus }))
-      dispatch(getAllGasSourcePaginate({ search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }))
+      };
+      dispatch(
+        activeOrInactiveGasSource({
+          body: setBodyRemark,
+          activeOrInactive: setStatus,
+        }),
+      );
+      dispatch(
+        getAllGasSourcePaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort,
+          page,
+          pageSize,
+        }),
+      );
     } else {
-
-      dispatch(getAllGasSourcePaginate({ search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }))
+      dispatch(
+        getAllGasSourcePaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort,
+          page,
+          pageSize,
+        }),
+      );
     }
 
     dispatch(clearBodyMessage());
-  }
-
+  };
 
   // handle retry
   const handleRetry = () => {
-    handleConfirmRetry()
+    handleConfirmRetry();
     setModalError(false);
     dispatch(clearBodyMessage());
   };
@@ -333,8 +370,8 @@ const ViewGasSource = () => {
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => { },
-    handleActiveOrInactive = () => { }
+    handleSearch = () => {},
+    handleActiveOrInactive = () => {},
   ) => {
     return [
       {
@@ -352,9 +389,18 @@ const ViewGasSource = () => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
-        render: (text) => renderColumn('calorieCode', searchedColumn, searchText, text, false, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "calorieCode",
+            searchedColumn,
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
       },
       {
         title: "NAME",
@@ -365,9 +411,18 @@ const ViewGasSource = () => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
-        render: (text) => renderColumn('name', searchedColumn, searchText, text, false, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "name",
+            searchedColumn,
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
       },
       {
         title: "UOM",
@@ -379,9 +434,18 @@ const ViewGasSource = () => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
-        render: (text) => renderColumn('uom', searchedColumn, searchText, text, false, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "uom",
+            searchedColumn,
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
       },
 
       {
@@ -393,27 +457,45 @@ const ViewGasSource = () => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         ellipsis: {
           showTitle: false,
         },
-        render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "description",
+            searchedColumn,
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
       },
       {
         title: "STATUS",
         dataIndex: "status",
         sorter: true,
         width: 120,
-        fixed: 'right',
+        fixed: "right",
         ...getColumnSearchPropsPaging(
           "status",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
-        render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+        render: (text) =>
+          renderColumn(
+            "status",
+            searchedColumn,
+            searchText,
+            text,
+            false,
+            "status",
+            search,
+          ),
       },
     ];
   };
@@ -422,7 +504,7 @@ const ViewGasSource = () => {
   const itemActions = [
     //action toolbar
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
@@ -431,11 +513,10 @@ const ViewGasSource = () => {
         >
           Download List
         </ButtonComponent>
-
-      )
+      ),
     },
     {
-      action: 'Upload',
+      action: "Upload",
       render: (
         <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.UPLOAD_GAS_SOURCE}>
           <ButtonComponent
@@ -445,11 +526,10 @@ const ViewGasSource = () => {
             Upload
           </ButtonComponent>
         </NavLink>
-
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_GAS_SOURCE}>
           <ButtonComponent
@@ -459,8 +539,7 @@ const ViewGasSource = () => {
             Create Gas Source
           </ButtonComponent>
         </NavLink>
-
-      )
+      ),
     },
 
     // Column Action Table
@@ -479,8 +558,8 @@ const ViewGasSource = () => {
               </Link>
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
 
     {
@@ -489,18 +568,35 @@ const ViewGasSource = () => {
       render: (record, data) => {
         return (
           <Tooltip title="Update">
-            <div className={`pt-1 ${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}>
+            <div
+              className={`pt-1 ${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+            >
               <Link
-                to={record?.status?.toLowerCase() !== "inactive" && ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_SOURCE}
-                state={record?.status?.toLowerCase() !== "inactive" && { id: record.gasSourceId }}
+                to={
+                  record?.status?.toLowerCase() !== "inactive" &&
+                  ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_SOURCE
+                }
+                state={
+                  record?.status?.toLowerCase() !== "inactive" && {
+                    id: record.gasSourceId,
+                  }
+                }
               >
-                <SVGIcon name="IconEdit" width={24} className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}
-                  color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#ACC424"} /> 
+                <SVGIcon
+                  name="IconEdit"
+                  width={24}
+                  className={`${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+                  color={
+                    record?.status?.toLowerCase() === "inactive"
+                      ? "#8D91A0"
+                      : "#ACC424"
+                  }
+                />
               </Link>
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
 
     {
@@ -520,10 +616,10 @@ const ViewGasSource = () => {
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
-  ]
+        );
+      },
+    },
+  ];
 
   return (
     <LayoutMenu>
@@ -549,7 +645,7 @@ const ViewGasSource = () => {
                 ),
                 ...useColumnActionPermission(
                   ["Activate", "View", "Update"],
-                  itemActions
+                  itemActions,
                 ),
               ]}
               current={page}
@@ -575,10 +671,7 @@ const ViewGasSource = () => {
           handleCancel={handleCancel}
           footer={
             <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
-              <ButtonComponent
-                onClick={handleCancel}
-                type="default"
-              >
+              <ButtonComponent onClick={handleCancel} type="default">
                 Cancel
               </ButtonComponent>
               <ButtonComponent
@@ -595,7 +688,7 @@ const ViewGasSource = () => {
             id="inactivateForm"
             form={form}
             onFinish={handleConfirm}
-            layout='vertical'
+            layout="vertical"
           >
             <div className="flex flex-col gap-6">
               <Alert
@@ -607,7 +700,7 @@ const ViewGasSource = () => {
               />
               <Form.Item
                 name={"remark"}
-                label={'Remark'}
+                label={"Remark"}
                 rules={formMessageRequired("remark")}
                 className="w-full"
               >
@@ -621,7 +714,6 @@ const ViewGasSource = () => {
             </div>
           </Form>
         </ModalCustom>
-
       </Spin>
       <ModalError
         isOpen={modalError}
@@ -634,7 +726,9 @@ const ViewGasSource = () => {
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{bodyError?.response?.data?.message?.toString()}</p>
+          <p className="pl-[70px]">
+            {bodyError?.response?.data?.message?.toString()}
+          </p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>

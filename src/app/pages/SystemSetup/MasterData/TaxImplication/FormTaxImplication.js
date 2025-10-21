@@ -4,7 +4,15 @@ import { Form, Spin, Modal } from "antd";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import { convertToSnakeCase, dateFormatting, formMessageRequired, hasValue, renderDateConverter, requiredMessage, toTitleCase } from "../../../../../utils";
+import {
+  convertToSnakeCase,
+  dateFormatting,
+  formMessageRequired,
+  hasValue,
+  renderDateConverter,
+  requiredMessage,
+  toTitleCase,
+} from "../../../../../utils";
 import InputComponent from "../../../../../components/InputComponent";
 import SelectComponent from "../../../../../components/SelectComponent";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,13 +30,33 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import { LeftOutlined } from "@ant-design/icons";
 import ModalBack from "../../../../../components/Modal/ModalBack";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import { showModalError, validateCreateUpdate } from "../../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../../redux/slices/general_slice";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import ContentModalConfirmTaxImplication from "./ContentModalConfirmTaxImplication";
 import moment from "moment";
 import accountManagementService from "../../../../../redux/services/account_management/accountManagementService";
 import { useCriteriaHooks } from "../../../../../components/Criteria/useCriteriaHooks";
-import { getAccountCategory, getAccountGroupType, getAccountNumber, getAccountSegment, getAccountType, getCity, getClassificationType, getCostCenter, getCountry, getDistrict, getProvince, getSAType, getSor, getSubDistrict, resetAllStateCriteria, setStored } from "../../../../../redux/slices/criteria_slice";
+import {
+  getAccountCategory,
+  getAccountGroupType,
+  getAccountNumber,
+  getAccountSegment,
+  getAccountType,
+  getCity,
+  getClassificationType,
+  getCostCenter,
+  getCountry,
+  getDistrict,
+  getProvince,
+  getSAType,
+  getSor,
+  getSubDistrict,
+  resetAllStateCriteria,
+  setStored,
+} from "../../../../../redux/slices/criteria_slice";
 import { params } from "./params_ddl";
 import FunctionalCriteria from "../../../../../components/Criteria/FunctionalCriteria";
 import { constantKeys } from "../../../../../components/Criteria/constantCriteriaKey";
@@ -48,14 +76,15 @@ const routes = (type) => [
   },
   {
     path: "",
-    breadcrumbName: `${type === "update" ? "Update Tax Implication" : "Create Tax Implication"
-      }`,
+    breadcrumbName: `${
+      type === "update" ? "Update Tax Implication" : "Create Tax Implication"
+    }`,
   },
 ];
 
 const FormTaxImplication = ({ type }) => {
   const [form] = Form.useForm();
-  const [formCriteria] = Form.useForm()
+  const [formCriteria] = Form.useForm();
   const formValue = form.getFieldsValue();
   const formValueCriteria = formCriteria.getFieldsValue();
   const dispatch = useDispatch();
@@ -67,7 +96,7 @@ const FormTaxImplication = ({ type }) => {
     dataListCriteriaOpt = [],
     loading = false,
     categoryList = [],
-    serviceTypeList = []
+    serviceTypeList = [],
   } = useSelector((state) => state.tax_implication);
   const {
     stored,
@@ -86,10 +115,9 @@ const FormTaxImplication = ({ type }) => {
     data_account_segment,
     data_account_type,
     data_classification_type,
-  } = useSelector(state => state?.criteria_slice)
+  } = useSelector((state) => state?.criteria_slice);
 
-
-  const { isLoading } = useSelector(state => state?.general)
+  const { isLoading } = useSelector((state) => state?.general);
   const [criteriaValues, setCriteriaValues] = useState([]);
   const [description, setDescription] = useState("");
   const [dataListCriteria, setDataListCriteria] = useState([]);
@@ -101,14 +129,13 @@ const FormTaxImplication = ({ type }) => {
   const [modalSuccessCreate, setModalSuccessCreate] = useState(false);
   const [payload, setPayload] = useState({});
   const [idCreateRule, setIdCreateRule] = useState(null);
-  const [columnCriteria, setColumnCriteria] = useState([])
-  const { setDataIndex } = useCriteriaHooks()
+  const [columnCriteria, setColumnCriteria] = useState([]);
+  const { setDataIndex } = useCriteriaHooks();
   const [dataTable, setDataTable] = useState([]);
   const [editDataRecord, setEditDataRecord] = useState({});
 
-
   useEffect(() => {
-    dispatch(setStored(false))
+    dispatch(setStored(false));
     dispatch(getSelectCriteria());
     dispatch(getCategoryList());
     dispatch(getServiceTypeList());
@@ -119,7 +146,6 @@ const FormTaxImplication = ({ type }) => {
       dispatch(getDetailTaxImplication(id));
     }
   }, [type, id, dispatch]);
-
 
   // sorter column
   const sorterColumnOption = useMemo(() => {
@@ -142,133 +168,223 @@ const FormTaxImplication = ({ type }) => {
       "accountNumber",
     ];
     if (hasValue(dataListCriteriaOpt) && Array?.isArray(dataListCriteriaOpt)) {
-      const mappingOption = dataListCriteriaOpt?.map(item => ({ ...item, code: setDataIndex(item?.code) }))
-      return [...mappingOption].sort((a, b) => orderedCodes.indexOf(a.code) - orderedCodes.indexOf(b.code));
+      const mappingOption = dataListCriteriaOpt?.map((item) => ({
+        ...item,
+        code: setDataIndex(item?.code),
+      }));
+      return [...mappingOption].sort(
+        (a, b) => orderedCodes.indexOf(a.code) - orderedCodes.indexOf(b.code),
+      );
     } else {
-      return []
+      return [];
     }
-  }, [dataListCriteriaOpt, setDataIndex])
+  }, [dataListCriteriaOpt, setDataIndex]);
   // conditional depend column
   const conditionalDependendData = useCallback((dataIndex) => {
     switch (dataIndex) {
       case "premiseProvince":
-        return "premiseCountry"
+        return "premiseCountry";
       case "premiseCity":
-        return "premiseProvince"
+        return "premiseProvince";
       case "accountGroupType":
-        return "accountSegment"
+        return "accountSegment";
       case "premiseDistrict":
         return "premiseCity";
       case "premiseSubdistrict":
         return "premiseDistrict";
       default:
-        return null
+        return null;
     }
   }, []);
 
   // conditional option
-  const conditionalOption = useCallback((dataIndex) => {
-    switch (dataIndex) {
-      case "saType":
-        return data_sa_type?.map(item => ({ value: item?.id, label: item?.text }));
-      case "wapuFlag":
-        return [
-          { label: "Yes", value: true },
-          { label: "No", value: false },
-        ];
-      case "accountNumber":
-        return data_account_number?.map(item => ({ label: item?.name, value: item?.id }));
-      case "costCenter":
-        return data_cost_center?.map(item => ({ value: item?.id, label: item?.text }));;
-      case "premiseProvince":
-        return data_province?.map(item => ({ value: item?.id, label: item?.text }));;
-      case "accountSegment":
-        return data_account_segment?.map(item => ({ value: item?.id, label: item?.text }));;
-      case "premiseCity":
-        return data_city?.map(item => ({ value: item?.id, label: item?.text }));;
-      case "premiseCountry":
-        return data_country?.map(item => ({ value: item?.id, label: item?.text }));;
-      case "corporateFlag":
-        return [
-          { label: "Yes", value: true },
-          { label: "No", value: false },
-        ];
-      case "accountType":
-        return data_account_type?.map(item => ({ value: item?.id, label: item?.text }));;
-      case "accountGroupType":
-        return data_account_group_type?.map(item => ({ value: item?.id, label: item?.name }));;
-      case "premiseSubdistrict":
-        return data_subdistrict?.map(item => ({ value: item?.id, label: item?.text }));;
-      case "premiseDistrict":
-        return data_district?.map(item => ({ value: item?.id, label: item?.text }));;
-      case "sor":
-        return data_sor?.map(item => ({ value: item?.id, label: item?.text }));;
-      case "accountCategory":
-        return data_account_category?.map(item => ({ value: item?.Id, label: item?.text }));;
-      case "classificationType":
-        return data_classification_type?.map(item => ({ value: item?.id, label: item?.name }));;
+  const conditionalOption = useCallback(
+    (dataIndex) => {
+      switch (dataIndex) {
+        case "saType":
+          return data_sa_type?.map((item) => ({
+            value: item?.id,
+            label: item?.text,
+          }));
+        case "wapuFlag":
+          return [
+            { label: "Yes", value: true },
+            { label: "No", value: false },
+          ];
+        case "accountNumber":
+          return data_account_number?.map((item) => ({
+            label: item?.name,
+            value: item?.id,
+          }));
+        case "costCenter":
+          return data_cost_center?.map((item) => ({
+            value: item?.id,
+            label: item?.text,
+          }));
+        case "premiseProvince":
+          return data_province?.map((item) => ({
+            value: item?.id,
+            label: item?.text,
+          }));
+        case "accountSegment":
+          return data_account_segment?.map((item) => ({
+            value: item?.id,
+            label: item?.text,
+          }));
+        case "premiseCity":
+          return data_city?.map((item) => ({
+            value: item?.id,
+            label: item?.text,
+          }));
+        case "premiseCountry":
+          return data_country?.map((item) => ({
+            value: item?.id,
+            label: item?.text,
+          }));
+        case "corporateFlag":
+          return [
+            { label: "Yes", value: true },
+            { label: "No", value: false },
+          ];
+        case "accountType":
+          return data_account_type?.map((item) => ({
+            value: item?.id,
+            label: item?.text,
+          }));
+        case "accountGroupType":
+          return data_account_group_type?.map((item) => ({
+            value: item?.id,
+            label: item?.name,
+          }));
+        case "premiseSubdistrict":
+          return data_subdistrict?.map((item) => ({
+            value: item?.id,
+            label: item?.text,
+          }));
+        case "premiseDistrict":
+          return data_district?.map((item) => ({
+            value: item?.id,
+            label: item?.text,
+          }));
+        case "sor":
+          return data_sor?.map((item) => ({
+            value: item?.id,
+            label: item?.text,
+          }));
+        case "accountCategory":
+          return data_account_category?.map((item) => ({
+            value: item?.Id,
+            label: item?.text,
+          }));
+        case "classificationType":
+          return data_classification_type?.map((item) => ({
+            value: item?.id,
+            label: item?.name,
+          }));
 
-      default:
-        return null
-    }
-  }, [data_account_category, data_account_group_type, data_account_number, data_account_segment, data_account_type, data_city, data_classification_type, data_cost_center, data_country, data_district, data_province, data_sa_type, data_sor, data_subdistrict]);
+        default:
+          return null;
+      }
+    },
+    [
+      data_account_category,
+      data_account_group_type,
+      data_account_number,
+      data_account_segment,
+      data_account_type,
+      data_city,
+      data_classification_type,
+      data_cost_center,
+      data_country,
+      data_district,
+      data_province,
+      data_sa_type,
+      data_sor,
+      data_subdistrict,
+    ],
+  );
 
   const conditionalDispatcher = useCallback((dataIndex) => {
     switch (dataIndex) {
       case "premiseCountry":
-        return getCountry({ services: params?.services, urls: params?.getCountry })
+        return getCountry({
+          services: params?.services,
+          urls: params?.getCountry,
+        });
       case "costCenter":
-        return getCostCenter({ services: params?.services, urls: params?.getCostCenterList })
+        return getCostCenter({
+          services: params?.services,
+          urls: params?.getCostCenterList,
+        });
       case "accountNumber":
-        return getAccountNumber({ services: params?.services, urls: params?.getAccountNumberList })
+        return getAccountNumber({
+          services: params?.services,
+          urls: params?.getAccountNumberList,
+        });
       case "classificationType":
-        return getClassificationType({ services: params?.services, urls: params?.getClassificationTypeList })
+        return getClassificationType({
+          services: params?.services,
+          urls: params?.getClassificationTypeList,
+        });
       case "accountSegment":
-        return getAccountSegment({ services: params?.services, urls: params?.getAccountSegment })
+        return getAccountSegment({
+          services: params?.services,
+          urls: params?.getAccountSegment,
+        });
       case "saType":
-        return getSAType({ services: params?.services, urls: params?.getSATypeList })
+        return getSAType({
+          services: params?.services,
+          urls: params?.getSATypeList,
+        });
       case "accountType":
-        return getAccountType({ services: params?.services, urls: params?.getAccountTypeList });
+        return getAccountType({
+          services: params?.services,
+          urls: params?.getAccountTypeList,
+        });
       case "sor":
         return getSor({ services: params?.services, urls: params?.getSor });
       case "accountCategory":
-        return getAccountCategory({ services: params?.services, urls: params?.getAccountCategory });
+        return getAccountCategory({
+          services: params?.services,
+          urls: params?.getAccountCategory,
+        });
       default:
-        return null
+        return null;
     }
-  }, [])
+  }, []);
 
-  const handleSetCriteria = useCallback((dataCriteria) => {
-    if (hasValue(dataCriteria) && Array?.isArray(dataCriteria)) {
-      setColumnCriteria(dataCriteria?.map((item, index) => (
-        {
-          required: true,
-          title: item?.label?.toUpperCase(),
-          dataIndex: item?.code,
-          indexValue: item?.value,
-          inputType: 'select',
-          url: conditionalDispatcher(item?.code),
-          dataIndexFrom: 'data_' + convertToSnakeCase(item?.code),
-          option: conditionalOption(item?.code),
-          dependDataIndex: conditionalDependendData(item?.code),
-          rules: formMessageRequired(toTitleCase(item?.label), true),
-        }
-      )))
-    }
-  }, [conditionalDependendData, conditionalDispatcher, conditionalOption]);
+  const handleSetCriteria = useCallback(
+    (dataCriteria) => {
+      if (hasValue(dataCriteria) && Array?.isArray(dataCriteria)) {
+        setColumnCriteria(
+          dataCriteria?.map((item, index) => ({
+            required: true,
+            title: item?.label?.toUpperCase(),
+            dataIndex: item?.code,
+            indexValue: item?.value,
+            inputType: "select",
+            url: conditionalDispatcher(item?.code),
+            dataIndexFrom: "data_" + convertToSnakeCase(item?.code),
+            option: conditionalOption(item?.code),
+            dependDataIndex: conditionalDependendData(item?.code),
+            rules: formMessageRequired(toTitleCase(item?.label), true),
+          })),
+        );
+      }
+    },
+    [conditionalDependendData, conditionalDispatcher, conditionalOption],
+  );
 
   useEffect(() => {
     if (sorterColumnOption) {
-      handleSetCriteria(sorterColumnOption)
+      handleSetCriteria(sorterColumnOption);
     }
-
   }, [sorterColumnOption, handleSetCriteria]);
-
 
   useEffect(() => {
     if (type === "update" && data_detail?.taxImplicationId === id) {
-      const dataIndexList = dataListCriteriaOpt.map(
-        (item) => setDataIndex(item?.code)
+      const dataIndexList = dataListCriteriaOpt.map((item) =>
+        setDataIndex(item?.code),
       );
       const criteriaData = (data_detail?.taxImplicationCriterias || [])
         .filter((data) => data?.allCriteria !== true)
@@ -276,9 +392,11 @@ const FormTaxImplication = ({ type }) => {
           let obj = { typeData: "exist", key: index + 1 };
           for (const attr in item) {
             if (dataIndexList.includes(attr)) {
-              if (attr === 'startDate' || attr === 'endDate') {
-                obj[attr] = hasValue(item[attr]) ? moment(item[attr]).format(dateFormatting.date) : null;
-              } else if (attr === 'description') {
+              if (attr === "startDate" || attr === "endDate") {
+                obj[attr] = hasValue(item[attr])
+                  ? moment(item[attr]).format(dateFormatting.date)
+                  : null;
+              } else if (attr === "description") {
                 obj[attr] = hasValue(item[attr]) ? item[attr] : null;
               } else {
                 obj[attr] = {
@@ -299,7 +417,7 @@ const FormTaxImplication = ({ type }) => {
         description: data_detail.description,
         criteria: (data_detail.criteria || []).map((item) => item.value),
       };
-      setDataTable(criteriaData)
+      setDataTable(criteriaData);
       setDataListCriteria(criteriaData);
       setDescription(obj.description);
       setCriteriaValues(obj.criteria);
@@ -307,36 +425,45 @@ const FormTaxImplication = ({ type }) => {
     }
   }, [type, id, data_detail, form, dataListCriteriaOpt, setDataIndex]);
 
-
-  const reorderedDTO = useCallback((dataTable) => {
-    if (hasValue(dataTable) && Array?.isArray(dataTable)) {
-      const filteredSelectCriteria = dataListCriteriaOpt?.filter(item => criteriaValues?.includes(item?.value))?.map(item => ({ code: item?.code }))
-      const reorderedDataDTO = dataTable.map(dto => {
-        let orderedDTO = {
-          id: hasValue(dto?.id) ? dto?.id : null,
-          startDate: hasValue(dto.startDate) ? renderDateConverter(dto?.startDate, 'date') : null,
-          endDate: hasValue(dto.endDate) ? renderDateConverter(dto?.endDate, 'date') : null,
-          description: hasValue(dto.description) ? dto?.description : null
-        };
-        dataListCriteriaOpt.forEach(({ code }) => {
-          const prop = constantKeys[code];
-          const isCriteriaSelected = filteredSelectCriteria.some(item => constantKeys[item.code] === prop);
-          if (!isCriteriaSelected || hasValue(dto[prop]) === false) {
-            orderedDTO[prop] = null;
-          } else if (typeof dto[prop] === 'object' && hasValue(dto[prop])) {
-            orderedDTO[prop] = dto[prop]?.value;
-          } else {
-            orderedDTO[prop] = dto[prop];
-          }
+  const reorderedDTO = useCallback(
+    (dataTable) => {
+      if (hasValue(dataTable) && Array?.isArray(dataTable)) {
+        const filteredSelectCriteria = dataListCriteriaOpt
+          ?.filter((item) => criteriaValues?.includes(item?.value))
+          ?.map((item) => ({ code: item?.code }));
+        const reorderedDataDTO = dataTable.map((dto) => {
+          let orderedDTO = {
+            id: hasValue(dto?.id) ? dto?.id : null,
+            startDate: hasValue(dto.startDate)
+              ? renderDateConverter(dto?.startDate, "date")
+              : null,
+            endDate: hasValue(dto.endDate)
+              ? renderDateConverter(dto?.endDate, "date")
+              : null,
+            description: hasValue(dto.description) ? dto?.description : null,
+          };
+          dataListCriteriaOpt.forEach(({ code }) => {
+            const prop = constantKeys[code];
+            const isCriteriaSelected = filteredSelectCriteria.some(
+              (item) => constantKeys[item.code] === prop,
+            );
+            if (!isCriteriaSelected || hasValue(dto[prop]) === false) {
+              orderedDTO[prop] = null;
+            } else if (typeof dto[prop] === "object" && hasValue(dto[prop])) {
+              orderedDTO[prop] = dto[prop]?.value;
+            } else {
+              orderedDTO[prop] = dto[prop];
+            }
+          });
+          return orderedDTO;
         });
-        return orderedDTO;
-      });
-      return reorderedDataDTO
-    } else {
-      return [];
-    }
-  }, [criteriaValues, dataListCriteriaOpt]);
-
+        return reorderedDataDTO;
+      } else {
+        return [];
+      }
+    },
+    [criteriaValues, dataListCriteriaOpt],
+  );
 
   const handleSelectCriteria = (value) => {
     let res = [...criteriaValues, value];
@@ -416,7 +543,7 @@ const FormTaxImplication = ({ type }) => {
             dataDefault = tempData.filter((data) => data.value === item);
           }
           const itemName = dataListCriteriaOpt.filter(
-            (criteria) => criteria.value === item
+            (criteria) => criteria.value === item,
           );
           return {
             id: dataDefault.length > 0 ? dataDefault[0].id : null,
@@ -437,28 +564,29 @@ const FormTaxImplication = ({ type }) => {
             : reorderedDTO(dataTable),
         };
 
-        setPayload(body)
-        if (type === 'update') {
+        setPayload(body);
+        if (type === "update") {
           validateValueObj = {
             body: body,
             services: accountManagementService,
-            endPoint: '/v1/dbs/api/tax-implication/validate-update-taximplication',
-            type
-          }
+            endPoint:
+              "/v1/dbs/api/tax-implication/validate-update-taximplication",
+            type,
+          };
         } else {
           validateValueObj = {
             body: body,
             services: accountManagementService,
-            endPoint: '/v1/dbs/api/tax-implication/validate-create-taximplication',
-            type
-          }
+            endPoint:
+              "/v1/dbs/api/tax-implication/validate-create-taximplication",
+            type,
+          };
         }
         await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
         setModalConfirm(true);
       }
     } catch (error) {
       setModalConfirm(false);
-
     }
   };
 
@@ -486,12 +614,12 @@ const FormTaxImplication = ({ type }) => {
       dispatch(createTaxImplication({ body: payload }))
         .unwrap()
         .then((data) => {
-          dispatch(resetAllStateCriteria())
+          dispatch(resetAllStateCriteria());
           handleCancelModalConfirm();
           handleClear();
           if (data) {
-            setIdCreateRule(data?.id)
-            setModalSuccessCreate(true)
+            setIdCreateRule(data?.id);
+            setModalSuccessCreate(true);
           }
         })
         .catch((error) => {
@@ -508,7 +636,7 @@ const FormTaxImplication = ({ type }) => {
       dispatch(updateTaxImplication({ body: payload }))
         .unwrap()
         .then(() => {
-          dispatch(resetAllStateCriteria())
+          dispatch(resetAllStateCriteria());
           handleCancelModalConfirm();
           form.resetFields();
           setCriteriaValues([]);
@@ -530,7 +658,7 @@ const FormTaxImplication = ({ type }) => {
 
   const formatCriteria = (data) => {
     const tempArray = dataListCriteriaOpt.filter((item) =>
-      data.includes(item.value)
+      data.includes(item.value),
     );
     return tempArray.map((data) => data.label);
   };
@@ -544,102 +672,199 @@ const FormTaxImplication = ({ type }) => {
     setModalError(false);
     setBodyError({});
   };
-  const conditionalDispatch = useCallback((record) => {
-    if (record?.premiseCountry && record?.premiseCountry?.value && record?.hasOwnProperty('premiseProvince')) {
-      dispatch(getProvince({ services: params?.services, urls: params?.getProvinceList, id: record?.premiseCountry?.value }));
-    }
-    if (record?.premiseProvince && record?.premiseProvince?.value && record?.hasOwnProperty('premiseCity')) {
-      dispatch(getCity({ services: params?.services, urls: params?.getCityList, id: record?.premiseProvince?.value }));
-    }
-    if (record?.premiseCity && record?.premiseCity?.value && record?.hasOwnProperty('premiseDistrict')) {
-      dispatch(getDistrict({ services: params?.services, urls: params?.getDistrictList, id: record?.premiseCity?.value }));
-    }
-    if (record?.premiseDistrict && record?.premiseDistrict?.value && record?.hasOwnProperty('premiseSubdistrict')) {
-      dispatch(getSubDistrict({ services: params?.services, urls: params?.getSubDistrictList, id: record?.premiseDistrict?.value }));
-    }
-    if (record?.accountSegment && record?.accountSegment?.value && record?.hasOwnProperty('accountGroupType')) {
-      dispatch(getAccountGroupType({ services: params?.services, urls: params?.getAccountGroupList, id: record?.accountSegment?.value }));
-    }
-  }, [dispatch]);
+  const conditionalDispatch = useCallback(
+    (record) => {
+      if (
+        record?.premiseCountry &&
+        record?.premiseCountry?.value &&
+        record?.hasOwnProperty("premiseProvince")
+      ) {
+        dispatch(
+          getProvince({
+            services: params?.services,
+            urls: params?.getProvinceList,
+            id: record?.premiseCountry?.value,
+          }),
+        );
+      }
+      if (
+        record?.premiseProvince &&
+        record?.premiseProvince?.value &&
+        record?.hasOwnProperty("premiseCity")
+      ) {
+        dispatch(
+          getCity({
+            services: params?.services,
+            urls: params?.getCityList,
+            id: record?.premiseProvince?.value,
+          }),
+        );
+      }
+      if (
+        record?.premiseCity &&
+        record?.premiseCity?.value &&
+        record?.hasOwnProperty("premiseDistrict")
+      ) {
+        dispatch(
+          getDistrict({
+            services: params?.services,
+            urls: params?.getDistrictList,
+            id: record?.premiseCity?.value,
+          }),
+        );
+      }
+      if (
+        record?.premiseDistrict &&
+        record?.premiseDistrict?.value &&
+        record?.hasOwnProperty("premiseSubdistrict")
+      ) {
+        dispatch(
+          getSubDistrict({
+            services: params?.services,
+            urls: params?.getSubDistrictList,
+            id: record?.premiseDistrict?.value,
+          }),
+        );
+      }
+      if (
+        record?.accountSegment &&
+        record?.accountSegment?.value &&
+        record?.hasOwnProperty("accountGroupType")
+      ) {
+        dispatch(
+          getAccountGroupType({
+            services: params?.services,
+            urls: params?.getAccountGroupList,
+            id: record?.accountSegment?.value,
+          }),
+        );
+      }
+    },
+    [dispatch],
+  );
 
-
-  const handleEditDataRecord = useCallback((data, key, index, record) => {
-    const keyName = key + index;
-    setEditDataRecord((prevState) => {
-      return {
-        ...prevState,
-        [keyName]: data,
-      };
-    });
-    if (index === "premiseCountry" && record?.hasOwnProperty('premiseProvince')) {
-      dispatch(getProvince({ services: params?.services, urls: params?.getProvinceList, id: data }));
-      formCriteria.resetFields([
-        "premiseProvince",
-        "premiseCity",
-        "premiseDistrict",
-        "premiseSubdistrict",
-      ]);
+  const handleEditDataRecord = useCallback(
+    (data, key, index, record) => {
+      const keyName = key + index;
       setEditDataRecord((prevState) => {
         return {
           ...prevState,
-          [key + "premiseProvince"]: undefined,
-          [key + "premiseCity"]: undefined,
-          [key + "premiseDistrict"]: undefined,
-          [key + "premiseSubdistrict"]: undefined,
+          [keyName]: data,
         };
       });
-    }
-    if (index === `premiseProvince` && record?.hasOwnProperty('premiseCity')) {
-      dispatch(getCity({ services: params?.services, urls: params?.getCityList, id: data }));
-      formCriteria.resetFields([
-        "premiseCity",
-        "premiseDistrict",
-        "premiseSubdistrict",
-      ]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "premiseCity"]: undefined,
-          [key + "premiseDistrict"]: undefined,
-          [key + "premiseSubdistrict"]: undefined,
-        };
-      });
-    }
-    if (index === `premiseCity` && record?.hasOwnProperty('premiseDistrict')) {
-      dispatch(getDistrict({ services: params?.services, urls: params?.getDistrictList, id: data }));
-      formCriteria.resetFields([
-        "premiseDistrict",
-        "premiseSubdistrict",]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "premiseDistrict"]: undefined,
-          [key + "premiseSubdistrict"]: undefined,
-        };
-      });
-    }
-    if (index === `premiseDistrict` && record?.hasOwnProperty('premiseSubdistrict')) {
-      dispatch(getSubDistrict({ services: params?.services, urls: params?.getSubDistrictList, id: data }));
-      formCriteria.resetFields(["premiseSubdistrict"]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "premiseSubdistrict"]: undefined,
-        };
-      });
-    }
-    if (index === `accountSegment` && record?.hasOwnProperty('accountGroupType')) {
-      dispatch(getAccountGroupType({ services: params?.services, urls: params?.getAccountGroupList, id: data }));
-      formCriteria.resetFields(["accountGroupType"]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "accountGroupType"]: undefined,
-        };
-      });
-    }
-  }, [dispatch, formCriteria]);
-
+      if (
+        index === "premiseCountry" &&
+        record?.hasOwnProperty("premiseProvince")
+      ) {
+        dispatch(
+          getProvince({
+            services: params?.services,
+            urls: params?.getProvinceList,
+            id: data,
+          }),
+        );
+        formCriteria.resetFields([
+          "premiseProvince",
+          "premiseCity",
+          "premiseDistrict",
+          "premiseSubdistrict",
+        ]);
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [key + "premiseProvince"]: undefined,
+            [key + "premiseCity"]: undefined,
+            [key + "premiseDistrict"]: undefined,
+            [key + "premiseSubdistrict"]: undefined,
+          };
+        });
+      }
+      if (
+        index === `premiseProvince` &&
+        record?.hasOwnProperty("premiseCity")
+      ) {
+        dispatch(
+          getCity({
+            services: params?.services,
+            urls: params?.getCityList,
+            id: data,
+          }),
+        );
+        formCriteria.resetFields([
+          "premiseCity",
+          "premiseDistrict",
+          "premiseSubdistrict",
+        ]);
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [key + "premiseCity"]: undefined,
+            [key + "premiseDistrict"]: undefined,
+            [key + "premiseSubdistrict"]: undefined,
+          };
+        });
+      }
+      if (
+        index === `premiseCity` &&
+        record?.hasOwnProperty("premiseDistrict")
+      ) {
+        dispatch(
+          getDistrict({
+            services: params?.services,
+            urls: params?.getDistrictList,
+            id: data,
+          }),
+        );
+        formCriteria.resetFields(["premiseDistrict", "premiseSubdistrict"]);
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [key + "premiseDistrict"]: undefined,
+            [key + "premiseSubdistrict"]: undefined,
+          };
+        });
+      }
+      if (
+        index === `premiseDistrict` &&
+        record?.hasOwnProperty("premiseSubdistrict")
+      ) {
+        dispatch(
+          getSubDistrict({
+            services: params?.services,
+            urls: params?.getSubDistrictList,
+            id: data,
+          }),
+        );
+        formCriteria.resetFields(["premiseSubdistrict"]);
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [key + "premiseSubdistrict"]: undefined,
+          };
+        });
+      }
+      if (
+        index === `accountSegment` &&
+        record?.hasOwnProperty("accountGroupType")
+      ) {
+        dispatch(
+          getAccountGroupType({
+            services: params?.services,
+            urls: params?.getAccountGroupList,
+            id: data,
+          }),
+        );
+        formCriteria.resetFields(["accountGroupType"]);
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [key + "accountGroupType"]: undefined,
+          };
+        });
+      }
+    },
+    [dispatch, formCriteria],
+  );
 
   return (
     <LayoutMenu>
@@ -652,7 +877,6 @@ const FormTaxImplication = ({ type }) => {
           onFinish={storedDataInline ? undefined : handleSubmitForm}
           scrollToFirstError={true}
         >
-
           {/* Form Tax Implication Name */}
           <BaseContainer header={"tax implication information"}>
             <div className="grid grid-cols-3 gap-2">
@@ -663,7 +887,7 @@ const FormTaxImplication = ({ type }) => {
                 required
                 label={"Tax Implication Name"}
               >
-                <InputComponent type="text"  disabled={type === 'update'}/>
+                <InputComponent type="text" disabled={type === "update"} />
               </Form.Item>
               <Form.Item
                 name={"category"}
@@ -674,7 +898,10 @@ const FormTaxImplication = ({ type }) => {
                 label={"Category"}
                 required
               >
-                <SelectComponent options={categoryList} disabled={type === 'update'} />
+                <SelectComponent
+                  options={categoryList}
+                  disabled={type === "update"}
+                />
               </Form.Item>
               <Form.Item
                 name={"serviceType"}
@@ -685,7 +912,10 @@ const FormTaxImplication = ({ type }) => {
                 label={"Service Type"}
                 required
               >
-                <SelectComponent options={serviceTypeList} disabled={type === 'update'} />
+                <SelectComponent
+                  options={serviceTypeList}
+                  disabled={type === "update"}
+                />
               </Form.Item>
 
               <div className="col-span-3">
@@ -743,7 +973,13 @@ const FormTaxImplication = ({ type }) => {
               setUpdateDataTable={setDataTable}
               type={type}
               startDateHeader={moment()}
-              defaultColumn={['no', 'startDate', 'endDate', 'description', 'action']}
+              defaultColumn={[
+                "no",
+                "startDate",
+                "endDate",
+                "description",
+                "action",
+              ]}
               handleEditDataRecord={handleEditDataRecord}
               setEditDataRecord={setEditDataRecord}
               editDataRecord={editDataRecord}
@@ -785,7 +1021,11 @@ const FormTaxImplication = ({ type }) => {
               >
                 {type === "update" ? "Reset" : "Clear"}
               </ButtonComponent>
-              <ButtonComponent disabled={stored} htmlType="submit" type="submit">
+              <ButtonComponent
+                disabled={stored}
+                htmlType="submit"
+                type="submit"
+              >
                 Save
               </ButtonComponent>
             </div>
@@ -844,19 +1084,20 @@ const FormTaxImplication = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${type === "update" ? "updated" : "created"
-              }. ${bodyError?.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              type === "update" ? "updated" : "created"
+            }. ${bodyError?.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
 
         {/* Modal Success create tax implication */}
-        {modalSuccessCreate ?
+        {modalSuccessCreate ? (
           <Modal
             open={modalSuccessCreate}
             onCancel={() => {
-              setModalSuccessCreate(false)
-              navigate(-1)
+              setModalSuccessCreate(false);
+              navigate(-1);
             }}
             className={"modal-custom"}
             centered={true}
@@ -866,8 +1107,8 @@ const FormTaxImplication = ({ type }) => {
               <div className="w-full flex justify-end gap-5 p-4">
                 <ButtonComponent
                   onClick={() => {
-                    setModalSuccessCreate(false)
-                    navigate(-1)
+                    setModalSuccessCreate(false);
+                    navigate(-1);
                   }}
                   type="default"
                 >
@@ -878,11 +1119,8 @@ const FormTaxImplication = ({ type }) => {
                   state={{
                     taxImplicationId: idCreateRule,
                   }}
-
                 >
-                  <ButtonComponent type="submit">
-                    YES
-                  </ButtonComponent>
+                  <ButtonComponent type="submit">YES</ButtonComponent>
                 </Link>
               </div>
             }
@@ -897,11 +1135,10 @@ const FormTaxImplication = ({ type }) => {
               </div>
             </div>
           </Modal>
-          : null}
-
+        ) : null}
       </Spin>
     </LayoutMenu>
-  )
+  );
 };
 
 export default FormTaxImplication;

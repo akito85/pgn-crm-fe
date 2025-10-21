@@ -26,7 +26,7 @@ import { useColumnActionPermission } from "../../../../components/ColumnActionPe
 const PromoDiscountView = () => {
   // Selector
   const { data, data_ApprovalHistory, loading } = useSelector(
-    (state) => state.promo
+    (state) => state.promo,
   );
 
   // Declaration
@@ -58,7 +58,7 @@ const PromoDiscountView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, search, page, pageSize, sort]);
   // Breadcrumbs
@@ -145,7 +145,7 @@ const PromoDiscountView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -188,7 +188,7 @@ const PromoDiscountView = () => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -213,7 +213,7 @@ const PromoDiscountView = () => {
           items={itemsActionView(
             handleInactive,
             handleApprovalHistory,
-            handleDownload
+            handleDownload,
           )}
         />
         {/* <div className="w-full flex justify-end gap-[20px]">
@@ -256,8 +256,8 @@ const PromoDiscountView = () => {
                   itemsActionView(
                     handleInactive,
                     handleApprovalHistory,
-                    handleDownload
-                  )
+                    handleDownload,
+                  ),
                 ),
               ]}
               current={page}

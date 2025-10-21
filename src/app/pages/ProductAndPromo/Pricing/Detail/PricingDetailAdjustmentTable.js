@@ -17,7 +17,10 @@ import {
   getListAppHierDetail,
   inactivePricingAdjust,
 } from "../../../../../redux/slices/product_promo/pricingAdjust";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValueFE,
+} from "../../../../../utils/getColumnSearchProps";
 import { PRODUCT_PROMO_ROUTES } from "../../../../../routes/product_promo/pp_routes";
 import { Link } from "react-router-dom";
 import { getPriceAdjustByIdPricingDetail } from "../../../../../redux/slices/product_promo/pricing";
@@ -47,7 +50,7 @@ const columnPriceAdjustmenttDetail = (
   handleApprovalHistory = () => {},
   handleOpenModalInactivate = () => {},
   type,
-  handleDetail = () => {}
+  handleDetail = () => {},
 ) => {
   const res = [
     {
@@ -61,8 +64,8 @@ const columnPriceAdjustmenttDetail = (
       width: 240,
       dataIndex: "pricingAdjustmentId",
       filteredValue: search?.["pricingAdjustmentId"]
-      ? [search?.["pricingAdjustmentId"]]
-      : null,
+        ? [search?.["pricingAdjustmentId"]]
+        : null,
       // onFilter: (value, record) =>
       //   onFilter("pricingAdjustmentId", value, record),
       sorter: (a, b) => sorter("pricingAdjustmentId", a, b),
@@ -81,7 +84,7 @@ const columnPriceAdjustmenttDetail = (
         searchText,
         handleSearch,
         true,
-        "input"
+        "input",
       ),
       render: (text) =>
         renderColumn(
@@ -91,16 +94,14 @@ const columnPriceAdjustmenttDetail = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
       title: "NAME",
       width: 240,
       dataIndex: "name",
-      filteredValue: search?.["name"]
-      ? [search?.["name"]]
-      : null,
+      filteredValue: search?.["name"] ? [search?.["name"]] : null,
       // onFilter: (value, record) => onFilter("name", value, record),
       sorter: (a, b) => sorter("name", a, b),
       // ...getColumnSearchPropsPaging(
@@ -118,7 +119,7 @@ const columnPriceAdjustmenttDetail = (
         searchText,
         handleSearch,
         true,
-        "input"
+        "input",
       ),
       render: (text) =>
         renderColumn(
@@ -128,16 +129,14 @@ const columnPriceAdjustmenttDetail = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
       title: "CRITERIA",
       width: 240,
       dataIndex: "criterias",
-      filteredValue: search?.["criterias"]
-      ? [search?.["criterias"]]
-      : null,
+      filteredValue: search?.["criterias"] ? [search?.["criterias"]] : null,
       // onFilter: (value, record) => onFilter("criterias", value, record),
       sorter: (a, b) => sorter("criterias", a, b),
       // ...getColumnSearchPropsPaging(
@@ -159,7 +158,7 @@ const columnPriceAdjustmenttDetail = (
         searchText,
         handleSearch,
         true,
-        "input"
+        "input",
       ),
       render: (text) =>
         renderColumn(
@@ -169,7 +168,7 @@ const columnPriceAdjustmenttDetail = (
           text,
           false,
           "input",
-          search
+          search,
         ),
       // render: (text) => {
       //   if (searchedColumn === "criterias") {
@@ -224,7 +223,7 @@ const columnPriceAdjustmenttDetail = (
         searchText,
         handleSearch,
         true,
-        "input"
+        "input",
       ),
       render: (text) =>
         renderColumn(
@@ -234,7 +233,7 @@ const columnPriceAdjustmenttDetail = (
           text,
           true,
           "input",
-          search
+          search,
         ),
       // render: (text) => {
       //   if (searchedColumn === "description") {
@@ -287,7 +286,7 @@ const columnPriceAdjustmenttDetail = (
         searchText,
         handleSearch,
         true,
-        "input"
+        "input",
       ),
       render: (index) => {
         let text;
@@ -314,7 +313,9 @@ const columnPriceAdjustmenttDetail = (
       title: "STATUS APPROVAL",
       width: 240,
       dataIndex: "statusApproval",
-      filteredValue: search?.["statusApproval"] ? [search?.["statusApproval"]] : null,
+      filteredValue: search?.["statusApproval"]
+        ? [search?.["statusApproval"]]
+        : null,
       // onFilter: (value, record) => onFilter("statusApproval", value, record),
       sorter: (a, b) => sorter("statusApproval", a, b),
       key: "statusApproval",
@@ -334,7 +335,7 @@ const columnPriceAdjustmenttDetail = (
         searchText,
         handleSearch,
         true,
-        "input"
+        "input",
       ),
       render: (index) => {
         let text;
@@ -563,7 +564,7 @@ const PricingDetailAdjustmentTable = ({
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
-    })
+    });
   };
   const handleChangeSize = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
@@ -643,7 +644,7 @@ const PricingDetailAdjustmentTable = ({
           handleApprovalHistory,
           handleOpenModalInactivate,
           type,
-          handleDetail
+          handleDetail,
         )}
       />
       <ModalHistory

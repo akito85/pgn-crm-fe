@@ -1,6 +1,5 @@
-import React, { useMemo } from 'react';
-import useGrantAccessHooksPrecise from './useGrantedAccessHooksPrecise';
-
+import React, { useMemo } from "react";
+import useGrantAccessHooksPrecise from "./useGrantedAccessHooksPrecise";
 
 const Toolbar = ({ items = [], selector, url }) => {
   const access = useGrantAccessHooksPrecise({
@@ -9,12 +8,12 @@ const Toolbar = ({ items = [], selector, url }) => {
   });
   const lowerCaseActionList = useMemo(
     () => access?.actions?.map((item) => item?.toLowerCase()),
-    [access]
+    [access],
   );
   const lowerCaseItems = useMemo(
     () =>
       items?.map((item) => ({ ...item, action: item?.action?.toLowerCase() })),
-    [items]
+    [items],
   );
 
   return (

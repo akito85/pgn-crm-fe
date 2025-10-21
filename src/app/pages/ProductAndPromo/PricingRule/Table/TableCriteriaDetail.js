@@ -4,8 +4,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { getListCriteriaDetail } from "../../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 import { columnsTableCriteria } from "./TableCriteria";
 
-const TableCriteriaDetail = ({ type, dataCriteria = [], listCriteria = [] }) => {
-
+const TableCriteriaDetail = ({
+  type,
+  dataCriteria = [],
+  listCriteria = [],
+}) => {
   // Declaration
   const dataSource = listCriteria;
   const searchInput = useRef(null);
@@ -52,7 +55,9 @@ const TableCriteriaDetail = ({ type, dataCriteria = [], listCriteria = [] }) => 
     let result = [...dataSource];
     if (searchedColumn) {
       result = result.filter((item) => {
-        return item[searchedColumn]?.label.toLowerCase().includes(searchText.toLowerCase());
+        return item[searchedColumn]?.label
+          .toLowerCase()
+          .includes(searchText.toLowerCase());
       });
       console.log(result, "1");
     }
@@ -90,7 +95,7 @@ const TableCriteriaDetail = ({ type, dataCriteria = [], listCriteria = [] }) => 
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     ];
     const filterCol =
@@ -98,7 +103,7 @@ const TableCriteriaDetail = ({ type, dataCriteria = [], listCriteria = [] }) => 
     return filterCol.filter((col) =>
       col.title !== "NO" && col.title !== "ACTION"
         ? dataCriteria.includes(col.indexValue)
-        : true
+        : true,
     );
   };
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
@@ -155,30 +160,30 @@ const TableCriteriaDetail = ({ type, dataCriteria = [], listCriteria = [] }) => 
           }
         />
       </div>
-        <Table
-          bordered
-          dataSource={filterDataByPage()}
-          columns={filterColumn(
-            columns().map((col) => ({
-              ...col,
-              onCell: (record) => ({
-                record,
-                inputType: col.inputType,
-                dataIndex: col.dataIndex,
-                title: col.title,
-                indexValue: col.indexValue,
-                dependDataIndex: col.dependDataIndex,
-              }),
-            }))
-          )}
-          scroll={{
-            x: 1500,
-            y: 300,
-          }}
-          tableLayout="auto"
-          pagination={false}
-          onChange={onSort}
-        />
+      <Table
+        bordered
+        dataSource={filterDataByPage()}
+        columns={filterColumn(
+          columns().map((col) => ({
+            ...col,
+            onCell: (record) => ({
+              record,
+              inputType: col.inputType,
+              dataIndex: col.dataIndex,
+              title: col.title,
+              indexValue: col.indexValue,
+              dependDataIndex: col.dependDataIndex,
+            }),
+          })),
+        )}
+        scroll={{
+          x: 1500,
+          y: 300,
+        }}
+        tableLayout="auto"
+        pagination={false}
+        onChange={onSort}
+      />
     </div>
   ) : null;
 };

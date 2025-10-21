@@ -138,7 +138,7 @@ const ApprovalPointOfSales = ({
     dispatch(
       action === "APPROVE"
         ? approvePOS({ body: body })
-        : rejectPOS({ body: body })
+        : rejectPOS({ body: body }),
     )
       .unwrap()
       .then(() => {
@@ -156,7 +156,7 @@ const ApprovalPointOfSales = ({
         // console.log(error, "code");
         if (
           Math.floor(
-            (error.response.code || error.response.status || 0) / 100
+            (error.response.code || error.response.status || 0) / 100,
           ) === 5
         ) {
           const message =

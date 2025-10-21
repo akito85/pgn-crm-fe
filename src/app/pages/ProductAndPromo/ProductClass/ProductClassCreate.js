@@ -71,7 +71,7 @@ const ProductClassCreate = () => {
         console.log(error);
       }
     },
-    [dispatch]
+    [dispatch],
   );
 
   // Validation Button Back
@@ -131,7 +131,7 @@ const ProductClassCreate = () => {
                 name={"name"}
                 rules={[{ required: true, message: "Please input your Name!" }]}
               >
-                <InputComponent maxLength={100}/>
+                <InputComponent maxLength={100} />
               </Form.Item>
               <div className="col-span-2">
                 <Form.Item

@@ -56,7 +56,7 @@ const FormConfirmation = ({ data }) => {
   const getGroupTypeName = (val) => {
     let mergeGroupTypeDto = list_account_group?.reduce(
       (result, current) => result?.concat(current?.dtoList),
-      []
+      [],
     );
     const groupTypeName =
       mergeGroupTypeDto &&
@@ -95,11 +95,11 @@ const FormConfirmation = ({ data }) => {
   const getMrcName = (val) => {
     let mergeMrcDto = list_meter_reading_code?.reduce(
       (result, current) => result?.concat(current?.dtoList),
-      []
+      [],
     );
     console.log(
       "🚀 ~ file: FormConfirmation.js:80 ~ getMrcName ~ mergeMrcDto:",
-      mergeMrcDto
+      mergeMrcDto,
     );
     const mrcName =
       mergeMrcDto && mergeMrcDto?.filter((item) => item?.id === val);

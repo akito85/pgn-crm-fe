@@ -1,20 +1,11 @@
-import {
-  Checkbox,
-  Form,
-  Input,
-  Spin,
-  Tooltip,
-} from "antd";
+import { Checkbox, Form, Input, Spin, Tooltip } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../components/TablePagination";
-import {
-  DownloadOutlined,
-  FilterOutlined,
-} from "@ant-design/icons";
+import { DownloadOutlined, FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import {
   disabledActionByStatus,
@@ -87,7 +78,7 @@ const ViewTransactionCalender = () => {
         pageSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
-      })
+      }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
@@ -136,7 +127,6 @@ const ViewTransactionCalender = () => {
     }
   }, [dataListAppHierDetail]);
 
-
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -166,7 +156,7 @@ const ViewTransactionCalender = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -177,13 +167,11 @@ const ViewTransactionCalender = () => {
 
   const handleApprovalHistory = async (data) => {
     try {
-      setBody(data?.idTransCalendar)
+      setBody(data?.idTransCalendar);
       await dispatch(getApprovalHistory(data.idTransCalendar))?.unwrap();
       setOpenModalHistory(true);
-      
     } catch (error) {
       setOpenModalHistory(false);
-      
     }
   };
 
@@ -206,7 +194,7 @@ const ViewTransactionCalender = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -216,7 +204,7 @@ const ViewTransactionCalender = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -230,7 +218,7 @@ const ViewTransactionCalender = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -240,7 +228,7 @@ const ViewTransactionCalender = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -253,7 +241,7 @@ const ViewTransactionCalender = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -263,7 +251,7 @@ const ViewTransactionCalender = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -278,7 +266,7 @@ const ViewTransactionCalender = () => {
         searchText,
         handleSearch,
         false,
-        "date"
+        "date",
       ),
       render: (v) =>
         renderDateColumn(
@@ -287,7 +275,7 @@ const ViewTransactionCalender = () => {
           searchText,
           v,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -302,7 +290,7 @@ const ViewTransactionCalender = () => {
         searchText,
         handleSearch,
         false,
-        "date"
+        "date",
       ),
       render: (v) =>
         renderDateColumn(
@@ -311,7 +299,7 @@ const ViewTransactionCalender = () => {
           searchText,
           v,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -328,7 +316,7 @@ const ViewTransactionCalender = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -338,7 +326,7 @@ const ViewTransactionCalender = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -354,7 +342,7 @@ const ViewTransactionCalender = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -363,7 +351,7 @@ const ViewTransactionCalender = () => {
           searchText,
           text,
           false,
-          "status"
+          "status",
         ),
     },
     {
@@ -379,7 +367,7 @@ const ViewTransactionCalender = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -388,7 +376,7 @@ const ViewTransactionCalender = () => {
           searchText,
           text,
           false,
-          "status"
+          "status",
         ),
     },
   ];
@@ -420,7 +408,12 @@ const ViewTransactionCalender = () => {
         handleClear();
         handleCancelModalInactivate();
         dispatch(
-          getPaginateCycle({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort })
+          getPaginateCycle({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page,
+            pageSize,
+            sort,
+          }),
         );
       });
   };
@@ -511,130 +504,137 @@ const ViewTransactionCalender = () => {
       type: "table",
       render: (record, data_length) => {
         const isEditable =
-        record.status === "Draft" && record.statusApproval === "Rejected" 
-        return (
-          data_length > 3 ? (
+          record.status === "Draft" && record.statusApproval === "Rejected";
+        return data_length > 3 ? (
+          <Link
+            to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_TRANSACTION_CALENDER}
+            state={{ id: record?.idTransCalendar }}
+          >
+            <ButtonComponent
+              className="gap-5 w-full"
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  width={24}
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                />
+              }
+              border={false}
+              disabled={!isEditable}
+            >
+              <span className={"text-black gap-2 text-xl text-center w-full"}>
+                Update
+              </span>
+            </ButtonComponent>
+          </Link>
+        ) : (
+          <Tooltip title="Update">
             <Link
               to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_TRANSACTION_CALENDER}
               state={{ id: record?.idTransCalendar }}
             >
-              <ButtonComponent
-                className="gap-5 w-full"
-                icon={
-                  <SVGIcon name="IconEdit" width={24} color={isEditable? "#0075bf" : "#8D91A0"}  />
-                }
-                border={false}
-                disabled={!isEditable}
-                
-              >
-                <span
-                  className={"text-black gap-2 text-xl text-center w-full"}
-                >
-                  Update
-                </span>
-              </ButtonComponent>
+              <div border={false}>
+                <SVGIcon
+                  name="IconEdit"
+                  color={!isEditable ? "#8D91A0" : "#ACC424"}
+                  width={24}
+                  className={!isEditable ? "cursor-not-allowed" : undefined}
+                />
+              </div>
             </Link>
-          ) : (
-            <Tooltip title="Update">
-              <Link
-                to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_TRANSACTION_CALENDER}
-                state={{ id: record?.idTransCalendar }}
-              >
-                <div border={false}>
-                  <SVGIcon name="IconEdit"
-                    color={!isEditable? "#8D91A0" : "#ACC424"} width={24}
-                    className={!isEditable ? "cursor-not-allowed" : undefined} />
-                </div>
-              </Link>
-            </Tooltip>
-          )
-        )
+          </Tooltip>
+        );
       },
     },
     {
       action: "Activate",
       type: "table",
       render: (record, data_length) => {
-        const statusLowerCase = record?.status?.toLowerCase()
+        const statusLowerCase = record?.status?.toLowerCase();
         const isActivateOrInactivate =
-        (record.statusApproval === "Approved" &&
-          record.status === "Active") ||
-        (record.statusApproval === "Draft" && record.status === "Active") ||
-        (record.statusApproval === "Rejected" &&
-          record.status === "Active") ||
-        (record.statusApproval === "Waiting Approval" &&
-          record.status === "Active");
-        return (
-          data_length > 3 ?
-            <ButtonComponent
+          (record.statusApproval === "Approved" &&
+            record.status === "Active") ||
+          (record.statusApproval === "Draft" && record.status === "Active") ||
+          (record.statusApproval === "Rejected" &&
+            record.status === "Active") ||
+          (record.statusApproval === "Waiting Approval" &&
+            record.status === "Active");
+        return data_length > 3 ? (
+          <ButtonComponent
+            border={false}
+            onClick={() => {
+              setDataInactivate(record?.idTransCalendar);
+              setModalActiveInactive(true);
+              setStatus(record?.status);
+              // setPaymentItemId(r?.id);
+            }}
+            disabled={
+              !isActivateOrInactivate
+              // disabledActionByStatus('activate', record?.status, record?.statusApproval)
+            }
+          >
+            <Checkbox
               border={false}
-              onClick={() => {
-                setDataInactivate(record?.idTransCalendar);
-                setModalActiveInactive(true);
-                setStatus(record?.status);
-                // setPaymentItemId(r?.id);
-              }}
-              disabled={!isActivateOrInactivate
-                // disabledActionByStatus('activate', record?.status, record?.statusApproval)
-              }
+              // onClick={() => handleInactive(record)}
+              disabled={record?.status !== "Active"}
+              checked={record?.status !== "Active"}
+              // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+            />
+            <span
+              className={"text-black ml-6 gap-2 text-xl text-center w-full"}
             >
+              {record?.status === "Active" ? "Inactivate" : "Activate"}
+            </span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip
+            title={
+              statusLowerCase === "active" || statusLowerCase === "draft"
+                ? "Inactivate"
+                : "Activate"
+            }
+          >
+            <div>
               <Checkbox
                 border={false}
-                // onClick={() => handleInactive(record)}
-                disabled={record?.status !== "Active"}
+                onClick={() => {
+                  setDataInactivate(record?.idTransCalendar);
+                  setModalActiveInactive(true);
+                  setStatus(record?.status);
+                  // setPaymentItemId(r?.id);
+                }}
                 checked={record?.status !== "Active"}
+                disabled={record?.status !== "Active"}
                 // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
               />
-              <span className={"text-black ml-6 gap-2 text-xl text-center w-full"}>
-                {record?.status === "Active" ? "Inactivate" : "Activate"}
-              </span>
-            </ButtonComponent>
-            :
-            <Tooltip title={statusLowerCase === "active" || statusLowerCase === 'draft' ? "Inactivate" : "Activate"}>
-              <div>
-                <Checkbox
-                  border={false}
-                  onClick={() => {
-                    setDataInactivate(record?.idTransCalendar);
-                    setModalActiveInactive(true);
-                    setStatus(record?.status);
-                    // setPaymentItemId(r?.id);
-                  }}
-                  checked={record?.status !== "Active"}
-                  disabled={record?.status !== "Active"}
-                  // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
-                />
-              </div>
-            </Tooltip>
-        )
+            </div>
+          </Tooltip>
+        );
       },
     },
     {
       action: "history",
       type: "table",
       render: (record, data_length) => {
-        return (
-          data_length > 3 ?
-            <ButtonComponent
-              className="gap-5"
-              icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              }
-              border={false}
-              onClick={() => handleApprovalHistory(record)}
-            >
-              <span className={"text-black gap-2 text-xl text-center"}>
-                Approval History
-              </span>
-            </ButtonComponent>
-            :
-            <Tooltip title={'Approval History'}>
-              <div border={false}
-                onClick={() => handleApprovalHistory(record)}
-              >
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              </div>
-            </Tooltip>
+        return data_length > 3 ? (
+          <ButtonComponent
+            className="gap-5"
+            icon={
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+            }
+            border={false}
+            onClick={() => handleApprovalHistory(record)}
+          >
+            <span className={"text-black gap-2 text-xl text-center"}>
+              Approval History
+            </span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip title={"Approval History"}>
+            <div border={false} onClick={() => handleApprovalHistory(record)}>
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+            </div>
+          </Tooltip>
         );
       },
     },
@@ -671,8 +671,8 @@ const ViewTransactionCalender = () => {
             columns={[
               ...columns,
               ...useColumnActionPermission(
-                ["view", "history", "update", 'activate'],
-                itemActions
+                ["view", "history", "update", "activate"],
+                itemActions,
               ),
             ]}
             current={page}

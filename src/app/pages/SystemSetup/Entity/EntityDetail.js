@@ -3,10 +3,7 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
-import {
-  Spin,
-  Image,
-} from "antd";
+import { Spin, Image } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -23,7 +20,13 @@ import {
   getDetailEntity,
   getDetailTaxEntity,
 } from "../../../../redux/slices/system_setup/entity";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn, toTitleCase } from "../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+  toTitleCase,
+} from "../../../../utils";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 import TaxIdentifierDetail from "./TaxIdentifierDetail";
@@ -35,11 +38,10 @@ import { sorterFunction } from "../../../../utils/sorterFunction";
 import { updatePagination } from "../../../../utils/updatePagination";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 
-
 const EntityDetail = () => {
   const dispatch = useDispatch();
   const { data, loading, data_detail, data_tax } = useSelector(
-    (state) => state.entity
+    (state) => state.entity,
   );
   const navigate = useNavigate();
   const location = useLocation();
@@ -67,19 +69,18 @@ const EntityDetail = () => {
     }
   }, []);
 
-
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     switch (dataIndex) {
-      case 'startDate':
-      case 'endDate':
-        setTypColumn('date')
+      case "startDate":
+      case "endDate":
+        setTypColumn("date");
         break;
-      case 'isMain':
-        setTypColumn('status')
+      case "isMain":
+        setTypColumn("status");
         break;
       default:
-        setTypColumn('string')
+        setTypColumn("string");
         break;
     }
     setSearchText(selectedKeys[0]);
@@ -95,18 +96,17 @@ const EntityDetail = () => {
     });
   };
 
-
   const handleSearch2 = (selectedKeys, confirm, dataIndex) => {
     confirm();
     switch (dataIndex) {
-      case 'createdDate':
-        setTypColumn2('date')
+      case "createdDate":
+        setTypColumn2("date");
         break;
-      case 'isMain':
-        setTypColumn2('status')
+      case "isMain":
+        setTypColumn2("status");
         break;
       default:
-        setTypColumn2('string')
+        setTypColumn2("string");
         break;
     }
     setSearchText2(selectedKeys[0]);
@@ -187,9 +187,18 @@ const EntityDetail = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('taxNumber', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "taxNumber",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "START DATE",
@@ -206,9 +215,17 @@ const EntityDetail = () => {
         searchText,
         handleSearch,
         false,
-        'date'
+        "date",
       ),
-      render: (v) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, v, 'date', search),
+      render: (v) =>
+        renderDateColumn(
+          "startDate",
+          hasValue(search["startDate"]),
+          searchText,
+          v,
+          "date",
+          search,
+        ),
     },
     {
       title: "END DATE",
@@ -225,9 +242,17 @@ const EntityDetail = () => {
         searchText,
         handleSearch,
         false,
-        'date'
+        "date",
       ),
-      render: (v) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, v, 'date', search),
+      render: (v) =>
+        renderDateColumn(
+          "endDate",
+          hasValue(search["endDate"]),
+          searchText,
+          v,
+          "date",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -240,12 +265,21 @@ const EntityDetail = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('remark', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "remark",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "PRIMARY",
@@ -259,14 +293,13 @@ const EntityDetail = () => {
         searchText,
         handleSearch,
         true,
-        'status'
+        "status",
       ),
-      sorter: (a, b) => sorterFunction('isMain', a, b),
+      sorter: (a, b) => sorterFunction("isMain", a, b),
       render: (isMain, record, index, ngasal) => {
-        const pilsColor = isMain.toLowerCase() === "primary" ? "primary" : "non-primary";
-        return (
-          <StatusComponent colour={pilsColor}>{isMain}</StatusComponent>
-        )
+        const pilsColor =
+          isMain.toLowerCase() === "primary" ? "primary" : "non-primary";
+        return <StatusComponent colour={pilsColor}>{isMain}</StatusComponent>;
       },
     },
     {
@@ -275,7 +308,7 @@ const EntityDetail = () => {
       width: 120,
       align: "center",
       fixed: "right",
-      sorter: (a, b) => sorterFunction('status', a, b),
+      sorter: (a, b) => sorterFunction("status", a, b),
       ...getColumnSearchProps(
         "status",
         searchInput,
@@ -283,9 +316,18 @@ const EntityDetail = () => {
         searchText,
         handleSearch,
         true,
-        'status'
+        "status",
       ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
     {
       title: "ACTION",
@@ -324,16 +366,25 @@ const EntityDetail = () => {
         searchInput2,
         searchedColumn2,
         searchText2,
-        handleSearch2
+        handleSearch2,
       ),
-      render: (text) => renderColumn('createdBy', searchedColumn2, searchText2, text, false, 'input', search2)
+      render: (text) =>
+        renderColumn(
+          "createdBy",
+          searchedColumn2,
+          searchText2,
+          text,
+          false,
+          "input",
+          search2,
+        ),
     },
     {
       title: "ACTION",
       dataIndex: "operation",
       align: "left",
       // width: 60,
-      sorter: (a, b) => sorterFunction('operation', a, b),
+      sorter: (a, b) => sorterFunction("operation", a, b),
       ...getColumnSearchProps(
         "operation",
         searchInput2,
@@ -341,16 +392,25 @@ const EntityDetail = () => {
         searchText2,
         handleSearch2,
         true,
-        'status'
+        "status",
       ),
-      render: (text) => renderColumn('operation', searchedColumn2, searchText2, text, false, 'input', search2)
+      render: (text) =>
+        renderColumn(
+          "operation",
+          searchedColumn2,
+          searchText2,
+          text,
+          false,
+          "input",
+          search2,
+        ),
     },
     {
       title: "ACTION DATE",
       dataIndex: "createdDate",
       align: "center",
       // width: 60,
-      sorter: (a, b) => sorterFunction('createdDate', a, b, 'date'),
+      sorter: (a, b) => sorterFunction("createdDate", a, b, "date"),
       ...getColumnSearchProps(
         "createdDate",
         searchInput2,
@@ -358,32 +418,47 @@ const EntityDetail = () => {
         searchText2,
         handleSearch2,
         true,
-        'datetime'
+        "datetime",
       ),
-      render: (v) => renderDateColumn('createdDate', hasValue(search2['createdDate']), searchText2, v, 'datetime', search2),
-
+      render: (v) =>
+        renderDateColumn(
+          "createdDate",
+          hasValue(search2["createdDate"]),
+          searchText2,
+          v,
+          "datetime",
+          search2,
+        ),
     },
     {
       title: "REMARK",
       dataIndex: "remark",
       align: "center",
       // width: 60,
-      sorter: (a, b) => sorterFunction('remark', a, b),
+      sorter: (a, b) => sorterFunction("remark", a, b),
       ...getColumnSearchProps(
         "remark",
         searchInput2,
         searchedColumn2,
         searchText2,
         handleSearch2,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('remark', searchedColumn2, searchText2, text, true, 'input', search2)
+      render: (text) =>
+        renderColumn(
+          "remark",
+          searchedColumn2,
+          searchText2,
+          text,
+          true,
+          "input",
+          search2,
+        ),
     },
   ];
-
 
   const routes = [
     {
@@ -409,7 +484,6 @@ const EntityDetail = () => {
     setSizeTax(pageSizeChange);
   };
 
-
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
@@ -423,7 +497,9 @@ const EntityDetail = () => {
               <DetailText label={"Address"}>{datas?.address}</DetailText>
               <DetailText label={"Phone Number"}>{datas?.phone}</DetailText>
               <DetailText label={"Fax Number"}>{datas?.fax}</DetailText>
-              <DetailText label={"Status"}>{toTitleCase(datas?.status)}</DetailText>
+              <DetailText label={"Status"}>
+                {toTitleCase(datas?.status)}
+              </DetailText>
             </div>
             <div className="w-full grid grid-cols-1 gap-y-2.5 pl-8">
               <div className="mr-5">
@@ -445,9 +521,7 @@ const EntityDetail = () => {
         <div className={"my-5"}>
           <BaseContainer header={"HISTORY LOG INFORMATION"}>
             <div className="grid grid-cols-5 w-full gap-y-2.5 px-8">
-              <DetailText label={"Record Id"}>
-                {datas?.entityId}
-              </DetailText>
+              <DetailText label={"Record Id"}>{datas?.entityId}</DetailText>
               <DetailText label={"Created Date"}>
                 {datas?.createdDate &&
                   moment(datas?.createdDate).format(dateFormatting.dateTime)}
@@ -466,7 +540,11 @@ const EntityDetail = () => {
             <div className="w-full">
               <TablePaginationNew
                 type="FE"
-                dataSource={datas?.taxIdentifierList?.map(item => ({ ...item, taxNumber: intToNPWP(item?.taxNumber), isMain: item?.isMain === true ? 'Primary' : 'Non Primary' }))}
+                dataSource={datas?.taxIdentifierList?.map((item) => ({
+                  ...item,
+                  taxNumber: intToNPWP(item?.taxNumber),
+                  isMain: item?.isMain === true ? "Primary" : "Non Primary",
+                }))}
                 columns={columnsTI}
                 current={currentTax}
                 pageSize={sizeTax}

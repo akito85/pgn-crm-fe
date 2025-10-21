@@ -13,7 +13,7 @@ export const reportCustomerAgreementSlice = createApi({
       queryFn: async (
         { page, pageSize, sort, search, body },
         api,
-        extraOptions
+        extraOptions,
       ) => {
         try {
           const sortParams = !sort ? "createdDate~desc" : sort;
@@ -44,7 +44,7 @@ export const reportCustomerAgreementSlice = createApi({
         { page, pageSize, sort, search, body },
         api,
         extraOptions,
-        baseQuery
+        baseQuery,
       ) {
         try {
           const sortParams = !sort ? "createdDate~desc" : sort;
@@ -59,7 +59,7 @@ export const reportCustomerAgreementSlice = createApi({
               action: "getCustomerAccountAdvancedFilter",
               back: false,
               load: false,
-            })
+            }),
           );
 
           return {

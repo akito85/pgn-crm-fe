@@ -57,7 +57,6 @@ const UpdateCustomer = () => {
   const [formUpdate] = Form.useForm();
   const id = location?.state?.id;
   // const id = 7;
-  
 
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
@@ -108,7 +107,7 @@ const UpdateCustomer = () => {
           fileSize: bytesConverter(item.fileSize || 0),
           urlFile1: `${urlLink(item?.id)}`,
           dataType: "exist",
-        }))
+        })),
       );
     }
   }, [data_customerDetailAttachment]);
@@ -150,19 +149,20 @@ const UpdateCustomer = () => {
   }, [data_customerDetail]);
 
   useEffect(() => {
-    if(customerType === 58){
-
-      setIdentificationDdlValue(data_globalIdentificationType?.filter(item => item?.id !== 1123))
+    if (customerType === 58) {
+      setIdentificationDdlValue(
+        data_globalIdentificationType?.filter((item) => item?.id !== 1123),
+      );
     } else {
-      setIdentificationDdlValue(data_globalIdentificationType)
+      setIdentificationDdlValue(data_globalIdentificationType);
     }
-  },[customerType, data_globalIdentificationType])
+  }, [customerType, data_globalIdentificationType]);
 
   useEffect(() => {
     formUpdate.setFieldsValue({
       customerName: `${firstName}${middleName ? ` ${middleName}` : ""}${lastName ? ` ${lastName}` : ""}`,
     });
-  },[firstName, middleName, lastName])
+  }, [firstName, middleName, lastName]);
 
   useEffect(() => {
     formUpdate.setFieldsValue({
@@ -184,7 +184,7 @@ const UpdateCustomer = () => {
       default:
         break;
     }
-  }
+  };
 
   //handle
   const handleSendData = (e) => {
@@ -203,7 +203,7 @@ const UpdateCustomer = () => {
         const customerId = data.customerId;
         setLoadingForm(true);
         const filterDataAttach = dataAttachment.filter(
-          (item) => item.dataType !== "exist"
+          (item) => item.dataType !== "exist",
         );
         for (let icon = 0; icon < filterDataAttach.length; icon++) {
           const element = filterDataAttach[icon];
@@ -214,7 +214,7 @@ const UpdateCustomer = () => {
 
           const response = await accountManagementService.uploadAttachment(
             `/v1/dbs/api/customer/create-customer-attachment/${customerId}`,
-            body
+            body,
           );
         }
         setLoadingForm(false);
@@ -245,17 +245,19 @@ const UpdateCustomer = () => {
     setDataConfirm({
       ...e,
       customerType: data_globalCustomerType?.find(
-        (item) => item?.id === e?.customerType
+        (item) => item?.id === e?.customerType,
       )?.value,
       identificationType: data_globalIdentificationType?.find(
-        (item) => item?.id === e?.identificationType
+        (item) => item?.id === e?.identificationType,
       )?.value,
-      ...( customerType !== 58 ? {
-        sex: data_globalSex?.find((item) => item?.id === e?.sex)?.value,
-        maritalStatus: data_globalMartialStatus?.find(
-          (item) => item?.id === e?.maritalStatus
-        )?.value,
-      } : {}),
+      ...(customerType !== 58
+        ? {
+            sex: data_globalSex?.find((item) => item?.id === e?.sex)?.value,
+            maritalStatus: data_globalMartialStatus?.find(
+              (item) => item?.id === e?.maritalStatus,
+            )?.value,
+          }
+        : {}),
     });
     setModalConfirm(true);
   };

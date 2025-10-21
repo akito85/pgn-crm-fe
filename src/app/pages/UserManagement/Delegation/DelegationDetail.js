@@ -25,7 +25,7 @@ import { hasValue, renderDateConverter, toTitleCase } from "../../../../utils";
 
 const DelegationDetail = () => {
   const { loading, detail_Delegation } = useSelector(
-    (state) => state.delegation
+    (state) => state.delegation,
   );
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -68,7 +68,7 @@ const DelegationDetail = () => {
             ? moment(item.createdDate).format("DD MMM YYYY")
             : "",
           dataType: "exist",
-        }))
+        })),
       );
     }
   }, [record, detail_Delegation]);
@@ -123,7 +123,8 @@ const DelegationDetail = () => {
                   {detail_Delegation?.delegateFrom}
                 </DetailText>
                 <DetailText label="Start Date">
-                  {hasValue(detail_Delegation?.startDate) && renderDateConverter(detail_Delegation?.startDate, 'date')}
+                  {hasValue(detail_Delegation?.startDate) &&
+                    renderDateConverter(detail_Delegation?.startDate, "date")}
                 </DetailText>
                 <DetailText label="Request Remark">
                   {detail_Delegation?.requestRemark}
@@ -134,7 +135,8 @@ const DelegationDetail = () => {
                   {detail_Delegation?.position}
                 </DetailText>
                 <DetailText label="End Date">
-                  {hasValue(detail_Delegation?.endDate) && renderDateConverter(detail_Delegation?.endDate, 'date')}
+                  {hasValue(detail_Delegation?.endDate) &&
+                    renderDateConverter(detail_Delegation?.endDate, "date")}
                 </DetailText>
                 <DetailText label="Approval Remark">
                   {detail_Delegation?.approvalRemark}
@@ -147,9 +149,7 @@ const DelegationDetail = () => {
           </BaseContainer>
           <BaseContainer header={"History Log Information"}>
             <div className="w-full grid grid-cols-5 gap-5">
-              <DetailText label="Record Id">
-                {record}
-              </DetailText>
+              <DetailText label="Record Id">{record}</DetailText>
               <DetailText label="Created Date">
                 {renderDateTime(detail_Delegation?.createdDate)}
               </DetailText>

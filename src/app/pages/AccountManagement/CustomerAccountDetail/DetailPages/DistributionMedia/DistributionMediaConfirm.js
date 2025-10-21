@@ -17,7 +17,6 @@ const DistributionMediaConfirm = ({ data = {} }) => {
         </DetailText>
         <DetailText label="Description">{data?.remark}</DetailText>
       </div>
-
     </Fragment>
   );
 };

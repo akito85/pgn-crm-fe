@@ -9,7 +9,7 @@ export const getColumnSearchPropsCriteria = (
   searchedColumn,
   searchText,
   handleSearch,
-  excludeRender = false
+  excludeRender = false,
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
@@ -96,9 +96,9 @@ const sorter = (fieldSort, a, b) => {
           ? moment(obj[fieldSort]).format("DD MMM YYYY")
           : "";
         return date.toLowerCase();
-        case "description":
-          const desc = obj[fieldSort]
-          return desc.toLowerCase();
+      case "description":
+        const desc = obj[fieldSort];
+        return desc.toLowerCase();
       default:
         return obj[fieldSort].label?.toLowerCase();
     }
@@ -113,7 +113,7 @@ export const columnsTableCriteria = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
 ) => [
   {
     title: "SA TYPE",
@@ -132,7 +132,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -155,7 +155,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -175,7 +175,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -195,7 +195,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -218,7 +218,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -238,7 +238,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -258,7 +258,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -279,7 +279,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -299,7 +299,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -319,7 +319,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -339,7 +339,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -360,7 +360,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -381,7 +381,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -402,7 +402,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -423,7 +423,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -443,7 +443,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -464,7 +464,7 @@ export const columnsTableCriteria = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (index) => {
       const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -502,7 +502,7 @@ export const columnsTableCriteria = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (index) => {
       const text = index ? moment(index).format("DD MMM YYYY") : "";

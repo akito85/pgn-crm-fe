@@ -26,7 +26,7 @@ const GeneralTemplateConfirmation = ({
     ?.find((v) => v.appHierId === dataApproval[0].value)?.approvalName;
 
   const [generalTemplateSection, setGeneralTemplateSection] = useState(
-    listGeneralTemplateSection[0].value
+    listGeneralTemplateSection[0].value,
   );
 
   const handleGeneralTemplateSection = (e) => {
@@ -77,7 +77,10 @@ const GeneralTemplateConfirmation = ({
               {"ATTACHMENT INFORMATION"}
             </div>
 
-            <GeneralTempalteAttachment dataAttachment={dataAttachment} type={"preview"} />
+            <GeneralTempalteAttachment
+              dataAttachment={dataAttachment}
+              type={"preview"}
+            />
           </>
         );
       default:

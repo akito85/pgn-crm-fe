@@ -33,20 +33,21 @@ const TermOfServiceDetail = ({ openModal, closeModal, id }) => {
     dispatch(getTosAttribute());
   }, [dispatch]);
 
-  const criteria = (data_detail?.criterias || [])?.map((item) => {
-    return {
-      id: item?.id || null,
-      idCriteria: item?.criteriaId || null,
-      idTos: item?.idTos || null,
-    };
-  })
-  ?.map((item) => item.idCriteria);
+  const criteria = (data_detail?.criterias || [])
+    ?.map((item) => {
+      return {
+        id: item?.id || null,
+        idCriteria: item?.criteriaId || null,
+        idTos: item?.idTos || null,
+      };
+    })
+    ?.map((item) => item.idCriteria);
 
   // find data attribute
   const matchedObjects = data_attribute?.data?.filter((obj) =>
     data_detail?.attributes
       ?.map((a) => a.attributeId)
-      ?.includes(obj.glbTypeValId)
+      ?.includes(obj.glbTypeValId),
   );
 
   const matchedNames = matchedObjects

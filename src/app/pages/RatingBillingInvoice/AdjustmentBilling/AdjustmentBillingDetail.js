@@ -27,7 +27,7 @@ import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrRej
 const AdjustmentBillingDetail = () => {
   // Selector
   const { loading, dataDetail, dataListType } = useSelector(
-    (state) => state.adjustmentBilling
+    (state) => state.adjustmentBilling,
   );
 
   // Declaration
@@ -69,7 +69,7 @@ const AdjustmentBillingDetail = () => {
   useEffect(() => {
     if (id && dataDetail?.id) {
       const findDataType = dataListType?.find(
-        (item) => item.id === dataDetail?.adjustmentType
+        (item) => item.id === dataDetail?.adjustmentType,
       )?.name;
 
       // Data Adjustment Billing Detail
@@ -116,7 +116,7 @@ const AdjustmentBillingDetail = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       setListDataABI(dataDetailAdjustmentBilling);
@@ -200,7 +200,7 @@ const AdjustmentBillingDetail = () => {
     dispatch(
       approveOrRejectAdjustmentBilling({
         body: data,
-      })
+      }),
     )
       .unwrap()
       .then(() => {

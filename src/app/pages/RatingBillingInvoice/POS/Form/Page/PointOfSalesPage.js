@@ -16,41 +16,42 @@ import moment from "moment";
 const PointOfSalesPage = ({
   data_dynamic = {},
   data = [],
-  setData = () => { },
+  setData = () => {},
   data_billingCycle,
-  setDataBillingCycle = () => { },
+  setDataBillingCycle = () => {},
   data_globalType = [],
   data_globalBillingCycle = [],
   data_globalBillingPeriod = [],
   data_globalCurrency = [],
-  setCurrency = () => { },
+  setCurrency = () => {},
   data_accountNumber = [],
   data_termsOfPayment = [],
-  setAccountNumber = () => { },
-  dispatch = () => { },
+  setAccountNumber = () => {},
+  dispatch = () => {},
   valueDdl = null,
-  setValueDdl = () => { },
+  setValueDdl = () => {},
   data_globalProduct = [],
   data_globalBilling = [],
   data_globalTermsOfPaymentValue = [],
-  setTransactionDate = () => { },
+  setTransactionDate = () => {},
   dataMissing = [],
   dataPriority = [],
   accountNumber,
   currency,
   transactionDate,
   idPos,
-  setRangeDisableDate = () => { },
-  rangeDisableDate
+  setRangeDisableDate = () => {},
+  rangeDisableDate,
 }) => {
-
-  const [selectedBilingPeriod, setSelectedBillingPeriod] = useState('');
+  const [selectedBilingPeriod, setSelectedBillingPeriod] = useState("");
   const [defaultPicker, setDefaultPicker] = useState("");
   const [keyPicker, setKeyPicker] = useState(0);
 
   useEffect(() => {
     if (hasValue(selectedBilingPeriod)) {
-      const findRange = data_globalBillingPeriod?.find(item => item?.id === selectedBilingPeriod);
+      const findRange = data_globalBillingPeriod?.find(
+        (item) => item?.id === selectedBilingPeriod,
+      );
 
       setRangeDisableDate(findRange);
     }
@@ -58,8 +59,8 @@ const PointOfSalesPage = ({
 
   useEffect(() => {
     if (hasValue(rangeDisableDate?.startDate)) {
-      setDefaultPicker(moment(rangeDisableDate?.startDate)?.clone())
-      setKeyPicker(prev => prev + 1)
+      setDefaultPicker(moment(rangeDisableDate?.startDate)?.clone());
+      setKeyPicker((prev) => prev + 1);
     }
   }, [rangeDisableDate?.startDate]);
 
@@ -154,16 +155,23 @@ const PointOfSalesPage = ({
     }
   };
 
+  const handleRangeDisable = useCallback(
+    (current) => {
+      return (
+        current < moment(rangeDisableDate?.startDate) ||
+        current > moment(rangeDisableDate?.endDate).add(1, "days")
+      );
+    },
+    [rangeDisableDate],
+  );
 
-  const handleRangeDisable = useCallback((current) => {
-    return current < moment(rangeDisableDate?.startDate) || current > moment(rangeDisableDate?.endDate).add(1, 'days')
-  }, [rangeDisableDate])
+  const handleRangeDisableInvoiceDate = useCallback(
+    (current) => {
+      return current < moment(rangeDisableDate?.startDate);
+    },
+    [rangeDisableDate],
+  );
 
-  const handleRangeDisableInvoiceDate = useCallback((current) => {
-    return current < moment(rangeDisableDate?.startDate);
-  }, [rangeDisableDate]);
-
-  
   return (
     <Fragment>
       <BaseContainer header={"CUSTOMER INFORMATION"}>
@@ -253,7 +261,10 @@ const PointOfSalesPage = ({
               { message: requiredMessage("Billing Period"), required: true },
             ]}
           >
-            <SelectComponent disabled={data_billingCycle ? false : true} onChange={e => setSelectedBillingPeriod(e)}>
+            <SelectComponent
+              disabled={data_billingCycle ? false : true}
+              onChange={(e) => setSelectedBillingPeriod(e)}
+            >
               {(data_globalBillingPeriod || [])?.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
                   {item.name}
@@ -284,7 +295,11 @@ const PointOfSalesPage = ({
               { message: requiredMessage("Transaction Date"), required: true },
             ]}
           >
-            <DateComponent dateDisable={handleRangeDisable} defaultPickerValue={defaultPicker} key={keyPicker} />
+            <DateComponent
+              dateDisable={handleRangeDisable}
+              defaultPickerValue={defaultPicker}
+              key={keyPicker}
+            />
           </Form.Item>
           <Form.Item
             name={"invoiceDate"}
@@ -296,7 +311,10 @@ const PointOfSalesPage = ({
             <DateComponent
               disabled={data.length > 0}
               onChange={setTransactionDate}
-              dateDisable={handleRangeDisableInvoiceDate} defaultPickerValue={defaultPicker} key={keyPicker} />
+              dateDisable={handleRangeDisableInvoiceDate}
+              defaultPickerValue={defaultPicker}
+              key={keyPicker}
+            />
           </Form.Item>
           <Form.Item
             label={

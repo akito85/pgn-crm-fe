@@ -1,4 +1,7 @@
-import { CloseCircleOutlined, ExclamationCircleFilled } from "@ant-design/icons";
+import {
+  CloseCircleOutlined,
+  ExclamationCircleFilled,
+} from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import ButtonComponent from "../ButtonComponent";
@@ -6,24 +9,29 @@ import { ModalError, ModalSuccess } from "./ModalPopUp";
 import useStatusModal from "./useStatusModal";
 
 const ModalNotification = (props) => {
-	const {
-		isFailed,
-		isSuccess,
-		typeModal,
-		handleAction = () => {},
-		status,
-	} = props;
-	const { textHead, textDesc } = useStatusModal({ isFailed, isSuccess, status, typeModal })
-	const [modalFailed, setModalFailed] = useState();
-	useEffect(() => {
-		setModalFailed(isFailed)
-	}, [isFailed])
-	const handleClose = () => {
-		setModalFailed(false)
-	}
-	return (
-		<div>
-			{/* <ModalSuccess isOpen={isSuccess} handleCancel={handleAction}>
+  const {
+    isFailed,
+    isSuccess,
+    typeModal,
+    handleAction = () => {},
+    status,
+  } = props;
+  const { textHead, textDesc } = useStatusModal({
+    isFailed,
+    isSuccess,
+    status,
+    typeModal,
+  });
+  const [modalFailed, setModalFailed] = useState();
+  useEffect(() => {
+    setModalFailed(isFailed);
+  }, [isFailed]);
+  const handleClose = () => {
+    setModalFailed(false);
+  };
+  return (
+    <div>
+      {/* <ModalSuccess isOpen={isSuccess} handleCancel={handleAction}>
 				<div className="w-full justify-center flex mt-6 mb-2 text-[#a4be37]">
 					<CloseCircleOutlined className={"text-2xl mr-3"} />
 					<span className={"text-xl text-bold text-black"}>
@@ -43,28 +51,30 @@ const ModalNotification = (props) => {
 					</ButtonComponent>
 				</div>
 			</ModalSuccess> */}
-			<ModalError isOpen={modalFailed} handleCancel={handleClose} handleOk={handleClose	}>
-				<div className={"flex px-8 py-8"}>
-					<ExclamationCircleFilled
-						style={{ fontSize: "24px", color: "#C81912" }}
-						className="my-2"
-					/>
-					<div className="w-full flex-col">
-						<div className="pl-4">
-							<span className="text-xl font-bold  text-[#C81912]">
-								{textHead}
-							</span>
-						</div>
-						<div className="pl-4 pt-4">
-							<span className={"text-l"}>
-								{textDesc}
-							</span>
-						</div>
-					</div>
-				</div>
-			</ModalError>
-		</div>
-	);
+      <ModalError
+        isOpen={modalFailed}
+        handleCancel={handleClose}
+        handleOk={handleClose}
+      >
+        <div className={"flex px-8 py-8"}>
+          <ExclamationCircleFilled
+            style={{ fontSize: "24px", color: "#C81912" }}
+            className="my-2"
+          />
+          <div className="w-full flex-col">
+            <div className="pl-4">
+              <span className="text-xl font-bold  text-[#C81912]">
+                {textHead}
+              </span>
+            </div>
+            <div className="pl-4 pt-4">
+              <span className={"text-l"}>{textDesc}</span>
+            </div>
+          </div>
+        </div>
+      </ModalError>
+    </div>
+  );
 };
 
 export default ModalNotification;

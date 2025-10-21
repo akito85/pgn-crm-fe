@@ -31,11 +31,11 @@ export const getReciptHistoriesPagging = createAsyncThunk(
           error: error,
           action: "GET_ALL_RECEIPT_HISTORIES_PAGING",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getReceiptReconcileHistoriesPaging = createAsyncThunk(
@@ -54,11 +54,11 @@ export const getReceiptReconcileHistoriesPaging = createAsyncThunk(
           error: error,
           action: "GET_ALL__RECONCILE_RECEIPT_HISTORIES_PAGING",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const downloadReconcileReceiptHistories = createAsyncThunk(
@@ -77,11 +77,11 @@ export const downloadReconcileReceiptHistories = createAsyncThunk(
           error: error,
           action: "RECEIPT_RECONCILE_HISTORY_DOWNLOAD",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const downloadReceiptHistories = createAsyncThunk(
@@ -100,11 +100,11 @@ export const downloadReceiptHistories = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_RECEIPT_HISTORY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 const receiptHistoriesReducer = createSlice({

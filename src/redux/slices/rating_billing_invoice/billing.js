@@ -57,7 +57,7 @@ export const requestedBilling = createAsyncThunk(
         return thunkAPI.rejectWithValue(response);
       }
     }
-  }
+  },
 );
 
 export const approvedBilling = createAsyncThunk(
@@ -91,7 +91,7 @@ export const approvedBilling = createAsyncThunk(
         return thunkAPI.rejectWithValue(response);
       }
     }
-  }
+  },
 );
 
 export const getAllBillingPaginate = createAsyncThunk(
@@ -121,7 +121,7 @@ export const getAllBillingPaginate = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getAllBillingRequestPaginate = createAsyncThunk(
@@ -148,7 +148,7 @@ export const getAllBillingRequestPaginate = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getAllBillingApprovePaginate = createAsyncThunk(
@@ -175,7 +175,7 @@ export const getAllBillingApprovePaginate = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getAllBillingItemPaginate = createAsyncThunk(
@@ -205,7 +205,7 @@ export const getAllBillingItemPaginate = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getAllRatingResultPaginate = createAsyncThunk(
@@ -234,7 +234,7 @@ export const getAllRatingResultPaginate = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const downloadBillingList = createAsyncThunk(
@@ -248,10 +248,16 @@ export const downloadBillingList = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_BILLING_LIST", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_BILLING_LIST",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -278,7 +284,7 @@ export const getApprovalHistory = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getPaymentBilling = createAsyncThunk(
@@ -305,7 +311,7 @@ export const getPaymentBilling = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getPrevPaymentBilling = createAsyncThunk(
@@ -332,7 +338,7 @@ export const getPrevPaymentBilling = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getPrevBilling = createAsyncThunk(
@@ -359,7 +365,7 @@ export const getPrevBilling = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getAllApprovalList = createAsyncThunk(
@@ -386,7 +392,7 @@ export const getAllApprovalList = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getListApprovalById = createAsyncThunk(
@@ -413,7 +419,7 @@ export const getListApprovalById = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 const billingSlice = createSlice({

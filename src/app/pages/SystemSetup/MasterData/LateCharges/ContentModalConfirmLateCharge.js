@@ -12,11 +12,11 @@ const ContentModalConfirmLateCharge = ({
   const { dataListCurrency = [] } = useSelector((state) => state.late_charge);
   const criteria = listCriteria.reduce(
     (current, next) => current + `, ${next}`,
-    ""
+    "",
   );
 
   const currency = (dataListCurrency || []).filter(
-    (item) => item.value === data.currency
+    (item) => item.value === data.currency,
   )?.[0]?.label;
   return (
     <div className="flex flex-col gap-4">

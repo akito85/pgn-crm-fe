@@ -9,7 +9,10 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import BaseContainer from "../../../../../components/BaseContainer";
 import TablePagination from "../../../../../components/TablePagination";
 import { useDispatch, useSelector } from "react-redux";
-import { downloadAccountOneTime, getAllAccountOneTimePaginate } from "../../../../../redux/slices/account_management/Account/accountSlice";
+import {
+  downloadAccountOneTime,
+  getAllAccountOneTimePaginate,
+} from "../../../../../redux/slices/account_management/Account/accountSlice";
 import { columnsAccountOneTime } from "./TableAccountOneTime";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../../components/Toolbar";
@@ -17,7 +20,7 @@ import Toolbar from "../../../../../components/Toolbar";
 const AccountOnetime = () => {
   // Selector
   const { data_accountOneTime, loading } = useSelector(
-    (state) => state.account
+    (state) => state.account,
   );
 
   // Declaration
@@ -35,7 +38,9 @@ const AccountOnetime = () => {
   // Use Effect
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(getAllAccountOneTimePaginate({ page, pageSize, sort, search: reqSearch }));
+    dispatch(
+      getAllAccountOneTimePaginate({ page, pageSize, sort, search: reqSearch }),
+    );
   }, [page, pageSize, sort, search, dispatch]);
 
   // Breadcrumbs
@@ -89,14 +94,15 @@ const AccountOnetime = () => {
       }
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(downloadAccountOneTime({ page, pageSize, sort, search: tempSearch }));
+    dispatch(
+      downloadAccountOneTime({ page, pageSize, sort, search: tempSearch }),
+    );
   };
-
 
   const itemActions = [
     //action toolbar
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<SVGIcon name="IconButtonDownload" width={24} />}
@@ -105,7 +111,7 @@ const AccountOnetime = () => {
         >
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     // {
     //   action: 'Upload',
@@ -122,7 +128,7 @@ const AccountOnetime = () => {
     //   )
     // },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_ACCOUNT_ONETIME}>
           <ButtonComponent
@@ -132,7 +138,7 @@ const AccountOnetime = () => {
             Create Account One Time
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // Column Action Table
@@ -144,22 +150,24 @@ const AccountOnetime = () => {
           <Tooltip title="Detail">
             <Link
               to={ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME}
-              state={{ idAccount: record?.accountId, idCustomer: record?.customerId }}
+              state={{
+                idAccount: record?.accountId,
+                idCustomer: record?.customerId,
+              }}
             >
               <SVGIcon name="IconDetail" width={24} />
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
-
-  ]
+  ];
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <Toolbar items={itemActions}/>
+        <Toolbar items={itemActions} />
 
         {/* <div className="w-full flex justify-end gap-[20px]">
           <ButtonComponent
@@ -191,12 +199,12 @@ const AccountOnetime = () => {
                   searchInput,
                   searchedColumn,
                   searchText,
-                  handleSearch
+                  handleSearch,
                 ),
                 ...useColumnActionPermission(
                   ["Activate", "View", "Update"],
-                  itemActions
-                )
+                  itemActions,
+                ),
               ]}
               current={page}
               pageSize={pageSize}

@@ -76,8 +76,6 @@ export const RenderContentActions = (
       })}
     </div>
   );
-  
-
 };
 
 // function columns
@@ -89,18 +87,20 @@ export const useColumnActionPermissionAccountInline = (
   itemsRender = [],
   save = () => {},
   cancel = () => {},
-  sliceColumn = "View"
+  sliceColumn = "View",
 ) => {
   const access = useGrantAccessAccountInline({
     selector: selector,
     url: path,
   });
   // convert to lower case
-  const lowerCaseAccessList = access?.actions?.map((item) => item?.toLowerCase())
+  const lowerCaseAccessList = access?.actions?.map((item) =>
+    item?.toLowerCase(),
+  );
 
   const lowerCasePermissionList = useMemo(
     () => permissionList?.map((item) => item?.toLowerCase()),
-    [permissionList]
+    [permissionList],
   );
   const lowerCaseItemsRender = useMemo(
     () =>
@@ -110,13 +110,13 @@ export const useColumnActionPermissionAccountInline = (
           action: item?.action?.toLowerCase(),
         }))
         ?.filter((item) => item?.type === "table"),
-    [itemsRender]
+    [itemsRender],
   );
 
   // filter access by permission list
   const arrayActions = useMemo(() => {
     const arrayActions = lowerCaseAccessList?.filter((item) =>
-      lowerCasePermissionList?.includes(item)
+      lowerCasePermissionList?.includes(item),
     );
 
     return lowerCaseItemsRender

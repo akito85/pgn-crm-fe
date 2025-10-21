@@ -1,13 +1,13 @@
 import moment from "moment";
-import {
-  hasValue,
-  renderColumn,
-} from "../../../../../../utils";
+import { hasValue, renderColumn } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import { Tooltip } from "antd";
 import SVGIcon from "../../../../../../assets/Icon/index";
-import { getCategoryAdditionalInfoList, getValueAdditionalInfoList } from "../../../../../../redux/slices/account_management/detailAccount/additionalInformation";
+import {
+  getCategoryAdditionalInfoList,
+  getValueAdditionalInfoList,
+} from "../../../../../../redux/slices/account_management/detailAccount/additionalInformation";
 
 const sorter = (fieldSort, a, b) => {
   const handleDataSort = (obj) => {
@@ -36,7 +36,7 @@ export const additionalInformationTable = (
   searchText,
   handleSearch,
   search,
-  storedData
+  storedData,
 ) => [
   {
     required: true,
@@ -61,7 +61,7 @@ export const additionalInformationTable = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -71,7 +71,7 @@ export const additionalInformationTable = (
         text?.label,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -98,7 +98,7 @@ export const additionalInformationTable = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -108,7 +108,7 @@ export const additionalInformationTable = (
         text?.label || text,
         true,
         "input",
-        search
+        search,
       ),
   },
 ];
@@ -128,21 +128,21 @@ export const itemActionViewAdditionalInfoTable = ({
     action: "Create",
     render: (
       <ButtonComponent
-      icon={<SVGIcon name="IconButtonCreate" width={24} />}
-      type="submit"
-      onClick={() => {
-        if (!storedData && (hasValue(startDate) || !checkStartDate)) {
-          addRow();
-        } else {
-          if (!hasValue(startDate)) {
-            setModalRequired(true);
+        icon={<SVGIcon name="IconButtonCreate" width={24} />}
+        type="submit"
+        onClick={() => {
+          if (!storedData && (hasValue(startDate) || !checkStartDate)) {
+            addRow();
+          } else {
+            if (!hasValue(startDate)) {
+              setModalRequired(true);
+            }
           }
-        }
-      }}
-    >
-      Create
-    </ButtonComponent>
-    )
+        }}
+      >
+        Create
+      </ButtonComponent>
+    ),
   },
 
   //table
@@ -152,14 +152,12 @@ export const itemActionViewAdditionalInfoTable = ({
     render: (record, data_length) => {
       return (data_length || 0) > 3 ? (
         <ButtonComponent
-          icon={<SVGIcon name="IconDetail"  width={24} />}
+          icon={<SVGIcon name="IconDetail" width={24} />}
           border={false}
           disabled={editingKey}
           onClick={!editingKey ? () => handleDetailHistory(record) : undefined}
         >
-          {data_length > 3 && (
-            <span className="text-black ml-3"> Detail</span>
-          )}
+          {data_length > 3 && <span className="text-black ml-3"> Detail</span>}
         </ButtonComponent>
       ) : (
         <Tooltip title="Detail">
@@ -170,9 +168,9 @@ export const itemActionViewAdditionalInfoTable = ({
             className={editingKey ? "cursor-not-allowed" : undefined}
             onClick={() => handleDetailHistory(record)}
           />
-      </Tooltip>
+        </Tooltip>
       );
-    }
+    },
   },
   {
     action: "Update",
@@ -185,9 +183,7 @@ export const itemActionViewAdditionalInfoTable = ({
           disabled={editingKey}
           onClick={!editingKey ? () => edit(record) : undefined}
         >
-          {data_length > 3 && (
-            <span className="text-black ml-3"> Update</span>
-          )}
+          {data_length > 3 && <span className="text-black ml-3"> Update</span>}
         </ButtonComponent>
       ) : (
         <Tooltip title="Update">
@@ -202,7 +198,7 @@ export const itemActionViewAdditionalInfoTable = ({
           </div>
         </Tooltip>
       );
-    }
+    },
   },
   {
     action: "delete",
@@ -214,13 +210,11 @@ export const itemActionViewAdditionalInfoTable = ({
             name="IconDelete"
             color={!editingKey ? "#D90000" : "#8D91A0"}
             width={24}
-            className={
-              !editingKey ? undefined : "disabled cursor-not-allowed"
-            }
+            className={!editingKey ? undefined : "disabled cursor-not-allowed"}
             onClick={!editingKey ? () => deleteRow(record) : undefined}
           />
         </div>
       </Tooltip>
-    )
-  }
+    ),
+  },
 ];

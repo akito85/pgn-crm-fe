@@ -3,7 +3,10 @@ import { useSelector } from "react-redux";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { dateFormatting } from "../../../../../utils";
 import moment from "moment";
-import { getAttachmentDetailPOS, getListCategoryFile } from "../../../../../redux/slices/rating_billing_invoice/PointOfSales";
+import {
+  getAttachmentDetailPOS,
+  getListCategoryFile,
+} from "../../../../../redux/slices/rating_billing_invoice/PointOfSales";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import { configApp } from "../../../../../constants/configApp";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
@@ -44,12 +47,12 @@ const PointOfSalesAttachment = ({ id = 0, dispatch = () => {} }) => {
       data={dataAttachment}
       updateData={setDataAttachment}
       dispatch={dispatch}
-			typeSelector="pointOfSales"
-			getAPICategory={getListCategoryFile}
-			service={ratingBillingHttpService}
-			configApplication={configApp.RATING_BILLING_SERVICE}
-			getAPIGuard={getConfigFileRBIData}
-			typeRBI={"data"}
+      typeSelector="pointOfSales"
+      getAPICategory={getListCategoryFile}
+      service={ratingBillingHttpService}
+      configApplication={configApp.RATING_BILLING_SERVICE}
+      getAPIGuard={getConfigFileRBIData}
+      typeRBI={"data"}
     />
   );
 };

@@ -16,7 +16,7 @@ export const columnsTableABI = (
   onFilter = () => {},
   sorter = () => {},
   handleDetail = () => {},
-  showAction
+  showAction,
 ) => [
   {
     title: "NO",
@@ -34,7 +34,7 @@ export const columnsTableABI = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -49,7 +49,7 @@ export const columnsTableABI = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => {
       if (searchedColumn === "quantity") {
@@ -85,7 +85,7 @@ export const columnsTableABI = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text, record) => {
       const tempValue = text ? (text + "").split(".") : [];
@@ -134,7 +134,7 @@ export const columnsTableABI = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -148,7 +148,7 @@ export const columnsTableABI = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -162,7 +162,7 @@ export const columnsTableABI = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) => {
       if (typeof text !== "string") {
@@ -191,7 +191,7 @@ export const columnsTableABI = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text, record) => {
       const tempValue = text ? (text + "").split(".") : [];
@@ -241,7 +241,7 @@ export const columnsTableABI = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text, record) => {
       const tempValue = text ? (text + "").split(".") : [];
@@ -291,7 +291,7 @@ export const columnsTableABI = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text, record) => {
       const tempValue = text ? (text + "").split(".") : [];
@@ -341,7 +341,7 @@ export const columnsTableABI = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text, record) => {
       const tempValue = text ? (text + "").split(".") : [];
@@ -391,7 +391,7 @@ export const columnsTableABI = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text, record) => {
       const tempValue = text ? (text.toFixed(2) + "").split(".") : [];
@@ -444,7 +444,7 @@ export const columnsTableABI = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) => {
       if (searchedColumn === "remark") {

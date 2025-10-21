@@ -1,5 +1,12 @@
-import { hasValue, renderColumn, separatorNumber } from "../../../../../../utils";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import {
+  hasValue,
+  renderColumn,
+  separatorNumber,
+} from "../../../../../../utils";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValue,
+} from "../../../../../../utils/getColumnSearchProps";
 
 export const columnsRatingResult = (
   page = 1,
@@ -8,7 +15,7 @@ export const columnsRatingResult = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  search
+  search,
 ) => [
   {
     title: "NO",
@@ -27,7 +34,7 @@ export const columnsRatingResult = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -37,7 +44,7 @@ export const columnsRatingResult = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -52,7 +59,7 @@ export const columnsRatingResult = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -62,7 +69,7 @@ export const columnsRatingResult = (
         separatorNumber(text),
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -77,7 +84,7 @@ export const columnsRatingResult = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -87,7 +94,7 @@ export const columnsRatingResult = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -102,7 +109,7 @@ export const columnsRatingResult = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -112,7 +119,7 @@ export const columnsRatingResult = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -127,7 +134,7 @@ export const columnsRatingResult = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -137,7 +144,7 @@ export const columnsRatingResult = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -152,7 +159,7 @@ export const columnsRatingResult = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -162,7 +169,7 @@ export const columnsRatingResult = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
 ];

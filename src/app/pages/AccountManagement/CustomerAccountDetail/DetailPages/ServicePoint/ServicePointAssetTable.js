@@ -13,10 +13,14 @@ import ButtonComponent from "../../../../../../components/ButtonComponent";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import { useColumnActionPermissionAccount } from "../../../ComponentAccount/ColumnActionPermissionAccount";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
 
 const ServicePointAssetTable = ({
-  handleInactive = () => { },
+  handleInactive = () => {},
   data = [],
   handleChange = {},
   handleChangeSize = {},
@@ -27,11 +31,11 @@ const ServicePointAssetTable = ({
   searchText,
   searchedColumn,
   status = false,
-  getColumnSearchProps = () => { },
+  getColumnSearchProps = () => {},
   access,
   search,
   searchInput,
-  handleSearch = () => { }
+  handleSearch = () => {},
 }) => {
   const [modalDetail, setModalDetail] = useState(false);
   const [dataDetail, setDataDetail] = useState({});
@@ -67,9 +71,18 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn('assetName', hasValue(search['assetName']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "assetName",
+          hasValue(search["assetName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "SERIAL NUMBER",
@@ -84,9 +97,18 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn('serialNumber', hasValue(search['serialNumber']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "serialNumber",
+          hasValue(search["serialNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ASSET TYPE",
@@ -101,9 +123,18 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn('type', hasValue(search['type']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "type",
+          hasValue(search["type"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "PRODUCT NAME",
@@ -118,9 +149,18 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn('productName', hasValue(search['productName']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "productName",
+          hasValue(search["productName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "BRAND",
@@ -136,9 +176,18 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn('brand', hasValue(search['brand']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "brand",
+          hasValue(search["brand"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "INSTALL DATE",
@@ -154,9 +203,17 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'date'
+        "date",
       ),
-      render: (index) => renderDateColumn('installDate', hasValue(search['installDate']), searchText, index, 'date', search)
+      render: (index) =>
+        renderDateColumn(
+          "installDate",
+          hasValue(search["installDate"]),
+          searchText,
+          index,
+          "date",
+          search,
+        ),
     },
     {
       title: "UNINSTALL DATE",
@@ -172,9 +229,17 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'date'
+        "date",
       ),
-      render: (index) => renderDateColumn('unInstallDate', hasValue(search['unInstallDate']), searchText, index, 'date', search)
+      render: (index) =>
+        renderDateColumn(
+          "unInstallDate",
+          hasValue(search["unInstallDate"]),
+          searchText,
+          index,
+          "date",
+          search,
+        ),
     },
     {
       title: "YEAR",
@@ -190,9 +255,17 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'year_only'
+        "year_only",
       ),
-      render: (index) => renderDateColumn('year', hasValue(search['year']), searchText, index?.toString(), 'year', search)
+      render: (index) =>
+        renderDateColumn(
+          "year",
+          hasValue(search["year"]),
+          searchText,
+          index?.toString(),
+          "year",
+          search,
+        ),
     },
     {
       title: "CUSTODY TRANSFER",
@@ -208,9 +281,18 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'yes_or_no'
+        "yes_or_no",
       ),
-      render: (text) => renderColumn('custodyTransfer', hasValue(search['custodyTransfer']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "custodyTransfer",
+          hasValue(search["custodyTransfer"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -225,7 +307,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
       ellipsis: {
         showTitle: false,
@@ -265,7 +347,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
     },
     {
@@ -282,7 +364,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
     },
     {
@@ -299,7 +381,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
     },
     {
@@ -316,7 +398,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
     },
     {
@@ -333,7 +415,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
     },
     {
@@ -350,7 +432,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
     },
     {
@@ -367,7 +449,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
     },
     {
@@ -384,7 +466,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
     },
     {
@@ -401,7 +483,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
     },
     {
@@ -418,7 +500,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
     },
     {
@@ -435,7 +517,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
     },
     {
@@ -452,7 +534,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
     },
     {
@@ -469,7 +551,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
     },
     {
@@ -486,7 +568,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
     },
     {
@@ -503,7 +585,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
     },
     // {
@@ -535,7 +617,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
       ellipsis: {
         showTitle: false,
@@ -581,7 +663,7 @@ const ServicePointAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
       render: (index) => {
         const text = index
@@ -617,15 +699,17 @@ const ServicePointAssetTable = ({
               />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
       action: "Activate",
       type: "table",
       render: (record, data) => {
         return (
-          <Tooltip title={`${record.status === "ACTIVE" ? "Inactive" : "Active"}`}>
+          <Tooltip
+            title={`${record.status === "ACTIVE" ? "Inactive" : "Active"}`}
+          >
             <div className="pt-1">
               <Checkbox
                 onClick={() => {
@@ -636,10 +720,10 @@ const ServicePointAssetTable = ({
               ></Checkbox>
             </div>
           </Tooltip>
-        )
-      }
-    }
-  ]
+        );
+      },
+    },
+  ];
 
   return (
     <Fragment>
@@ -657,7 +741,7 @@ const ServicePointAssetTable = ({
           ...useColumnActionPermissionAccount(
             ["Activate", "View", "Update"],
             itemActions,
-            access
+            access,
           ),
         ]}
       />

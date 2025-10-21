@@ -1,5 +1,8 @@
 import React, { useRef, useState } from "react";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValueFE,
+} from "../../../../../../utils/getColumnSearchProps";
 import { Tooltip } from "antd";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ContentModalTosPDI from "./ContentModalTosPDI";
@@ -31,7 +34,7 @@ const columns = (
   searchText,
   search,
   handleSearch,
-  handleDetail
+  handleDetail,
 ) => {
   const result = [
     {
@@ -72,7 +75,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -111,7 +114,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
       // render: (text) => {
       //   if (searchedColumn === "description") {
@@ -186,7 +189,7 @@ const PDITermOfService = ({ data = [] }) => {
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
-    })
+    });
   };
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
@@ -217,7 +220,7 @@ const PDITermOfService = ({ data = [] }) => {
           searchText,
           search,
           handleSearch,
-          handleSelectedDetail
+          handleSelectedDetail,
         )}
       />
       <ModalCustom

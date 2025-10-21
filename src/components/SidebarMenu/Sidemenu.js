@@ -65,7 +65,7 @@ const SideMenu = ({ isCollapsed }) => {
         ...(item.children ? extractPaths(item.children) : []),
         // ...(item.children ? extractPaths(item.children) : []),
       ]),
-    []
+    [],
   );
 
   // flat aray from tree data
@@ -78,7 +78,7 @@ const SideMenu = ({ isCollapsed }) => {
           ...(item.children ? extractPathsKey(item.children, uniqueKey) : []),
         ];
       }),
-    []
+    [],
   );
 
   // find specific parent
@@ -156,7 +156,7 @@ const SideMenu = ({ isCollapsed }) => {
       const findMatching = findMatchingPath(keys, getLocation);
       const parentKey = filterMenuByPath(
         mappingMenu(datas),
-        findMatching?.path
+        findMatching?.path,
       );
       const extractingKeys = extractPaths(parentKey)?.map((item) => item?.key);
       setTemporaryKeys(extractingKeys);
@@ -263,7 +263,7 @@ const SideMenu = ({ isCollapsed }) => {
         }
       });
     },
-    [active, isCollapsed, newTabCallback]
+    [active, isCollapsed, newTabCallback],
   );
 
   // render props if collapse

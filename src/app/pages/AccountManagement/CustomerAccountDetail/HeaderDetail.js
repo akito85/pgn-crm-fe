@@ -18,8 +18,8 @@ const HeaderDetail = ({
   idAccount = 0,
 }) => {
   const { data_accountDetail } = useSelector(
-    (state) => state.accountManagement
-    );
+    (state) => state.accountManagement,
+  );
 
   useEffect(() => {
     if (idAccount && idCustomer && type) {
@@ -54,7 +54,7 @@ const HeaderDetail = ({
           <DetailText label="Birth/Founded Date">
             {renderDate(
               data_accountDetail?.accountSummary?.birthFoundedDate,
-              "date"
+              "date",
             )}
           </DetailText>
           <DetailText label="Birth/Founded Place">

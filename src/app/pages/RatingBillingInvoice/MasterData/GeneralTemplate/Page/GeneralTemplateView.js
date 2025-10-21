@@ -27,7 +27,7 @@ import { useColumnActionPermission } from "../../../../../../components/ColumnAc
 const GeneralTemplateView = () => {
   // Selector
   const { data_list, data_approval_history, loading } = useSelector(
-    (state) => state.general_template
+    (state) => state.general_template,
   );
 
   // Declaration
@@ -62,7 +62,7 @@ const GeneralTemplateView = () => {
         pageSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
-      })
+      }),
     );
   }, [dispatch, page, pageSize, sort, search]);
 
@@ -106,7 +106,7 @@ const GeneralTemplateView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -194,7 +194,7 @@ const GeneralTemplateView = () => {
             pageSize,
             sort,
             search: tempSearch,
-          })
+          }),
         );
         setModalInactivate(false);
       })
@@ -292,11 +292,22 @@ const GeneralTemplateView = () => {
         const linkContent =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={isEditable ? "#0075bf" : "#8D91A0"} width={24} />}
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={24}
+                />
+              }
               border={false}
               disabled={!isEditable}
             >
-              <span className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"}`}> Update</span>
+              <span
+                className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"}`}
+              >
+                {" "}
+                Update
+              </span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
@@ -430,11 +441,11 @@ const GeneralTemplateView = () => {
                   searchInput,
                   searchedColumn,
                   searchText,
-                  handleSearch
+                  handleSearch,
                 ),
                 ...useColumnActionPermission(
                   ["view", "activate", "update", "history"],
-                  itemGrantAccess
+                  itemGrantAccess,
                 ),
               ]}
               current={page}

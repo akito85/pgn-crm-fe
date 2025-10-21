@@ -12,7 +12,7 @@ const PromoDiscountConfirmPromoSection = ({
   listDataCriteria = [],
   criteriaValues,
   listDataCondition = [],
-	listCriteria = [],
+  listCriteria = [],
 }) => {
   const [valuePage, setValuePage] = useState("Criteria");
   const [tabPagesDetail, setTabPagesDetail] = useState([

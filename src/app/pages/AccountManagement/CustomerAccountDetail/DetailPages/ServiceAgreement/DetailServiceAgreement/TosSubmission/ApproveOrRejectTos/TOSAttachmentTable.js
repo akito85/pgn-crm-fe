@@ -10,7 +10,7 @@ import { Fragment } from "react";
 import moment from "moment";
 import ModalCustom from "../../../../../../../../../components/Modal/ModalCustom";
 
-const TOSAttachmentTable = ({ 
+const TOSAttachmentTable = ({
   data = [],
   handleChange = {},
   handleChangeSize = {},
@@ -18,7 +18,8 @@ const TOSAttachmentTable = ({
   page = {},
   pageSize = {},
   onSort = {},
-  getColumnSearchProps = () => {}}) => {
+  getColumnSearchProps = () => {},
+}) => {
   // state
   const [modalDetail, setModalDetail] = useState();
   const [dataDetail, setDataDetail] = useState("");
@@ -119,8 +120,7 @@ const TOSAttachmentTable = ({
         handleCancel={() => {
           setModalDetail(false);
         }}
-      >
-      </ModalCustom>
+      ></ModalCustom>
     </Fragment>
   );
 };

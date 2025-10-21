@@ -88,9 +88,14 @@ const GroupAccessForm = (props) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
-  const { data_detail, dataMenu, dataUserLevel, loading, loading_group_access } =
-    useSelector((state) => state.groupAccess);
-  const { bodyError } = useSelector(state => state?.general);
+  const {
+    data_detail,
+    dataMenu,
+    dataUserLevel,
+    loading,
+    loading_group_access,
+  } = useSelector((state) => state.groupAccess);
+  const { bodyError } = useSelector((state) => state?.general);
   const [menu, setMenu] = useState([]);
   const [selectedKeys, setSelectedKeys] = useState([]);
   const [modalConfirm, setModalConfirm] = useState(false);
@@ -99,7 +104,7 @@ const GroupAccessForm = (props) => {
   const formValue = form.getFieldsValue();
   const [description, setDescription] = useState("");
   const id = location?.state?.id;
-  const [payload, setPayload] = useState({})
+  const [payload, setPayload] = useState({});
   useEffect(() => {
     dispatch(getAllGroupAccessMenu());
     dispatch(getAllUserLevel());
@@ -144,18 +149,18 @@ const GroupAccessForm = (props) => {
 
   const onFilterSearch = (values) => {
     if (Array.isArray(values) && values?.length > 0) {
-      const dataMenus = transformDataAllMenu(dataMenu)
-      const filteredMenu = dataMenus?.filter(item => values?.includes(item?.menuId));
-      setMenu(filteredMenu)
+      const dataMenus = transformDataAllMenu(dataMenu);
+      const filteredMenu = dataMenus?.filter((item) =>
+        values?.includes(item?.menuId),
+      );
+      setMenu(filteredMenu);
     } else {
       if (selectedKeys?.length > 0) {
-        setSelectedKeys(selectedKeys)
+        setSelectedKeys(selectedKeys);
       }
-      setMenu(transformDataAllMenu(dataMenu))
+      setMenu(transformDataAllMenu(dataMenu));
     }
   };
-
-
 
   const onFinish = async (FormValue) => {
     try {
@@ -163,12 +168,14 @@ const GroupAccessForm = (props) => {
       let validateValueObj;
       // give gaMenuId if undefined
       for (let itemArrayForm of FormValue?.mApprovalHierarchyDtl) {
-        let matchedItem = data_detail?.gaMenu.find(detailedItem => detailedItem.menuId === itemArrayForm.menuId);
+        let matchedItem = data_detail?.gaMenu.find(
+          (detailedItem) => detailedItem.menuId === itemArrayForm.menuId,
+        );
         if (matchedItem) {
           itemArrayForm.gaMenuId = matchedItem.gaMenuId;
         }
       }
-      if (type === 'update') {
+      if (type === "update") {
         body = {
           name: FormValue.name,
           description: FormValue.description,
@@ -180,9 +187,14 @@ const GroupAccessForm = (props) => {
               menuId: menu.menuId,
               actionList: menu.children.map((action) => action.id),
             };
-          })
-        }
-        validateValueObj = { body: body, services: userHttpService, endPoint: '/v1/dbs/api/ga/validate-update', type }
+          }),
+        };
+        validateValueObj = {
+          body: body,
+          services: userHttpService,
+          endPoint: "/v1/dbs/api/ga/validate-update",
+          type,
+        };
       } else {
         body = {
           name: FormValue.name,
@@ -193,15 +205,20 @@ const GroupAccessForm = (props) => {
               menuId: menu.menuId,
               actionList: menu.children.map((action) => action.id),
             };
-          })
-        }
-        validateValueObj = { body: body, services: userHttpService, endPoint: '/v1/dbs/api/ga/validate-create', type }
+          }),
+        };
+        validateValueObj = {
+          body: body,
+          services: userHttpService,
+          endPoint: "/v1/dbs/api/ga/validate-create",
+          type,
+        };
       }
       setPayload({
         body: body,
-        validateValue: validateValueObj
-      })
-      await dispatch(validateCreateUpdate(validateValueObj))?.unwrap()
+        validateValue: validateValueObj,
+      });
+      await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
       setModalConfirm(true);
     } catch (error) {
       setModalConfirm(false);
@@ -215,21 +232,21 @@ const GroupAccessForm = (props) => {
     setModalConfirm(false);
   };
 
-  
-
   const handleSave = () => {
-
     // give gaMenuId if undefined
     for (let itemArrayForm of formValue?.mApprovalHierarchyDtl) {
-      let matchedItem = data_detail?.gaMenu.find(detailedItem => detailedItem.menuId === itemArrayForm.menuId);
+      let matchedItem = data_detail?.gaMenu.find(
+        (detailedItem) => detailedItem.menuId === itemArrayForm.menuId,
+      );
       if (matchedItem) {
         itemArrayForm.gaMenuId = matchedItem.gaMenuId;
       }
     }
     const successBody = {
       title: `${type === "update" ? "Update" : "Create"} successful`,
-      description: `Your data has been ${type === "update" ? "updated" : "created"
-        }.`,
+      description: `Your data has been ${
+        type === "update" ? "updated" : "created"
+      }.`,
     };
 
     handleCancelConfirm();
@@ -238,7 +255,7 @@ const GroupAccessForm = (props) => {
         updateGroupAccess({
           body: payload?.body,
           responseSuccess: successBody,
-        })
+        }),
       )
         .unwrap()
         .then(() => {
@@ -253,7 +270,7 @@ const GroupAccessForm = (props) => {
         createGroupAccess({
           body: payload?.body,
           responseSuccess: successBody,
-        })
+        }),
       )
         .unwrap()
         .then(() => {
@@ -286,22 +303,22 @@ const GroupAccessForm = (props) => {
     },
     {
       path: "",
-      breadcrumbName: `${type === "update" ? "Update Group Access" : "Create Group Access"
-        }`,
+      breadcrumbName: `${
+        type === "update" ? "Update Group Access" : "Create Group Access"
+      }`,
     },
   ];
 
   const handleRetry = () => {
-    handleCancelTryAgain()
+    handleCancelTryAgain();
     if (bodyError?.action === "CREATE_GROUP_ACCESS") {
-      dispatch(createGroupAccess(payload))
-    } else if (bodyError?.action === 'UPDATE_GROUP_ACCESS') {
-      dispatch(updateGroupAccess(payload))
+      dispatch(createGroupAccess(payload));
+    } else if (bodyError?.action === "UPDATE_GROUP_ACCESS") {
+      dispatch(updateGroupAccess(payload));
     } else {
       dispatch(detailGroupAccess(id));
     }
   };
-
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
@@ -393,7 +410,7 @@ const GroupAccessForm = (props) => {
                     checkedKeys={selectedKeys}
                     onCheck={(key, info) => {
                       const selected = info.checkedNodes.filter(
-                        (e) => !e.children
+                        (e) => !e.children,
                       );
                       let parentList = selected
                         .map((e) => {
@@ -407,7 +424,7 @@ const GroupAccessForm = (props) => {
                         const data = menu.filter((data) => data.menuId === pl);
                         const dataForm =
                           formValue.mApprovalHierarchyDtl?.filter(
-                            (formMenu) => formMenu.menuId === data[0].menuId
+                            (formMenu) => formMenu.menuId === data[0].menuId,
                           );
                         return {
                           gaMenuId:
@@ -427,11 +444,11 @@ const GroupAccessForm = (props) => {
                         .filter((item) => item.children)
                         .map((item) => {
                           const data = menu.filter(
-                            (data) => data.menuId === item?.menuId
+                            (data) => data.menuId === item?.menuId,
                           );
                           const dataForm =
                             formValue.mApprovalHierarchyDtl?.filter(
-                              (formMenu) => formMenu.menuId === data[0].menuId
+                              (formMenu) => formMenu.menuId === data[0].menuId,
                             );
                           return {
                             gaMenuId:
@@ -452,8 +469,8 @@ const GroupAccessForm = (props) => {
                         ...selectedMenu.filter(
                           (item) =>
                             !onlyParentSelected.some(
-                              (parentItem) => parentItem.menuId === item.menuId
-                            )
+                              (parentItem) => parentItem.menuId === item.menuId,
+                            ),
                         ),
                       ];
                       setSelectedKeys(key);
@@ -546,7 +563,7 @@ const GroupAccessForm = (props) => {
                   {formValue?.userLevel &&
                     dataUserLevel &&
                     dataUserLevel.filter(
-                      (userLevel) => userLevel.value === formValue?.userLevel
+                      (userLevel) => userLevel.value === formValue?.userLevel,
                     )[0]?.name}
                 </DetailText>
                 <DetailText label={"Description"}>

@@ -85,10 +85,10 @@ const ContentModalConfirmation = ({
     }
   }, [dataPricingRuleDetail]);
   const [typeProductInfo, setTypeProductInfo] = useState(
-    listSectionInfo[0].value
+    listSectionInfo[0].value,
   );
   const [typeProductDetail, setTypeProductDetail] = useState(
-    listSectionProductDetail[0].value
+    listSectionProductDetail[0].value,
   );
   const handleProductInfo = (e) => {
     setTypeProductInfo(e.target.value);
@@ -140,7 +140,7 @@ const ContentModalConfirmation = ({
             disableSelect={true}
             approvalName={
               (dataOption || []).filter(
-                (data) => data.value === selectedHierarchy
+                (data) => data.value === selectedHierarchy,
               )?.[0].name || ""
             }
             dataTable={listDataAppHierDetail}
@@ -160,10 +160,10 @@ const ContentModalConfirmation = ({
     switch (typeProductDetail) {
       case "Product Detail":
         const labelPaymentType = (dataListPaymentType || []).filter(
-          (item) => item.value === productObj.paymentType
+          (item) => item.value === productObj.paymentType,
         );
         const labelChargingMethod = (dataListChargeMethod || []).filter(
-          (item) => item.value === productObj.chargingMethod
+          (item) => item.value === productObj.chargingMethod,
         );
         const tempDataProduct = [
           {
@@ -201,7 +201,7 @@ const ContentModalConfirmation = ({
         );
       case "Calculation Rule":
         const labelCalculationType = (dataListCalculationType || []).filter(
-          (item) => item.value === productObj.calculationType
+          (item) => item.value === productObj.calculationType,
         );
         const tempDataCalculation = [
           {
@@ -235,7 +235,7 @@ const ContentModalConfirmation = ({
             .reduce(
               (prev, current, index) =>
                 prev + (index !== 0 ? ", " : "") + current.label,
-              ""
+              "",
             );
         };
         return (
@@ -243,14 +243,14 @@ const ContentModalConfirmation = ({
             <div className="grid grid-cols-4">
               <DetailText label={"Name"}>{productObj.tasName}</DetailText>
               <div className="col-span-3">
-              <DetailText label={"Criteria"}>{valueCriteria()}</DetailText>
+                <DetailText label={"Criteria"}>{valueCriteria()}</DetailText>
               </div>
             </div>
             <div className="w-full">
-                <DetailText label={"Description"}>
-                  {productObj.tasDescription}
-                </DetailText>
-              </div>
+              <DetailText label={"Description"}>
+                {productObj.tasDescription}
+              </DetailText>
+            </div>
             <PDITargetAccountSellingForm
               data={dataTablePDITargetAccountSelling}
               productObj={productObj}

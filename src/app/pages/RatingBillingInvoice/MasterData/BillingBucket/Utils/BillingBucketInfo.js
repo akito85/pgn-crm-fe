@@ -15,16 +15,18 @@ const BillingBucketInfo = ({
 
   // Find Name Criteria on Modal Confirm
   const matchedObjectsCriteria = apiCriteria?.filter((obj) =>
-    data?.criteria?.includes(obj.id)
+    data?.criteria?.includes(obj.id),
   );
 
   const getNameCriteria = useMemo(() => {
-    const criteriaName = apiCriteria?.filter(item => data?.criteria?.includes(item?.id))?.map(item => item?.text)?.join(', ')
+    const criteriaName = apiCriteria
+      ?.filter((item) => data?.criteria?.includes(item?.id))
+      ?.map((item) => item?.text)
+      ?.join(", ");
     return criteriaName;
   }, [apiCriteria, data?.criteria]);
 
   console.log(getNameCriteria);
-  
 
   const matchedNamesCriteria = matchedObjectsCriteria
     ?.map((obj) => obj.name)
@@ -35,20 +37,20 @@ const BillingBucketInfo = ({
     ?.map((a) => a.criteriaName)
     ?.reduce((current, next) => current + `, ${next}`, "");
 
-    const labelStatus = (index) => {
-      let text;
-      switch (index) {
-        case "WAITING_APPROVAL":
-          text = "Waiting Approval";
-          break;
-        default:
-          text = index
-            ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-            : index;
-          break;
-      }
-      return text;
-    };
+  const labelStatus = (index) => {
+    let text;
+    switch (index) {
+      case "WAITING_APPROVAL":
+        text = "Waiting Approval";
+        break;
+      default:
+        text = index
+          ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
+          : index;
+        break;
+    }
+    return text;
+  };
 
   return (
     <div className="w-full grid grid-cols-3 gap-3">
@@ -71,8 +73,12 @@ const BillingBucketInfo = ({
               ? moment(data?.information?.endDate).format(dateFormatting.date)
               : ""}
           </DetailText>
-          <DetailText label={"Status"}>{labelStatus(data?.information?.status)}</DetailText>
-          <DetailText label={"Status Approval"}>{labelStatus(data?.information?.statusApproval)}</DetailText>
+          <DetailText label={"Status"}>
+            {labelStatus(data?.information?.status)}
+          </DetailText>
+          <DetailText label={"Status Approval"}>
+            {labelStatus(data?.information?.statusApproval)}
+          </DetailText>
           <div className="col-span-3">
             <DetailText label={"Criteria"}>
               {criteriaName?.slice(2) || data?.criteria}
@@ -104,9 +110,7 @@ const BillingBucketInfo = ({
               : ""}
           </DetailText>
           <div className="col-span-3">
-            <DetailText label={"Criteria"}>
-              {getNameCriteria}
-            </DetailText>
+            <DetailText label={"Criteria"}>{getNameCriteria}</DetailText>
           </div>
           <div className="col-span-3">
             <DetailText label={"Description"}>{data?.description}</DetailText>

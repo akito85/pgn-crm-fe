@@ -17,12 +17,14 @@ import ButtonComponent from "../../../../../../../../components/ButtonComponent"
 import ModalAttachment from "./ModalAttachment";
 import TablePagination from "../../../../../../../../components/TablePagination";
 // import { getSelectCategory } from "../../../../../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
-import SVGIcon from "../.././../../../../../../assets/Icon/index"
-import { getListCategoryAttachment, getGlobalPropertiesAttachment } from "../../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
+import SVGIcon from "../.././../../../../../../assets/Icon/index";
+import {
+  getListCategoryAttachment,
+  getGlobalPropertiesAttachment,
+} from "../../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 import { getColumnSearchProps } from "../../../../../../../../utils/getColumnSearchProps";
 import { configApp } from "../../../../../../../../constants/configApp";
 import accountPromoHttpService from "../../../../../../../../redux/services/account_management/accountManagementService";
-
 
 const columnAttachment = (
   searchInput,
@@ -33,7 +35,7 @@ const columnAttachment = (
   previewFileAttachment = () => {},
   previewFile = () => {},
   handleShow = () => {},
-  type
+  type,
 ) => {
   const res = [
     {
@@ -52,7 +54,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -67,7 +69,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (filename) => (
         <Tooltip placement="topLeft" title={filename}>
@@ -84,7 +86,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -96,7 +98,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -109,11 +111,10 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (fileSize, r, i) => (
-        <span>{r?.type === "new" ? fileSize : bytesConverter(fileSize)}
-        </span>
+        <span>{r?.type === "new" ? fileSize : bytesConverter(fileSize)}</span>
       ),
     },
     {
@@ -155,13 +156,12 @@ const columnAttachment = (
   return type !== "detail"
     ? res.filter(
         (column) =>
-          column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate"
+          column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate",
       )
     : res;
 };
 
 const Attachment = ({ data = [], updateData = () => {}, type }) => {
-
   // Declaration
   const searchInput = useRef(null);
   const dispatch = useDispatch();
@@ -179,7 +179,9 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
   const [loadingDownload, setLoadingDownload] = useState(false);
 
   // Selector
-  const { data_category_attachment, dataGlobalPropAttachment } = useSelector((state) => state.accountServiceAgreement);
+  const { data_category_attachment, dataGlobalPropAttachment } = useSelector(
+    (state) => state.accountServiceAgreement,
+  );
 
   // Use Effect
   useEffect(() => {
@@ -280,17 +282,19 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
   return (
     // <BaseContainer header={"Attachment Information"}>
     <div>
-      <div className="pt-8 pb-4"><h3 className="text-primary text-xs font-bold uppercase">ATTACHMENT</h3></div>
+      <div className="pt-8 pb-4">
+        <h3 className="text-primary text-xs font-bold uppercase">ATTACHMENT</h3>
+      </div>
       <div className="flex flex-col w-full gap-2">
         <div>
-        <p className="text-[13px] mb-0 text-dg-grey-dark">
-              Attach File:
-              {(
-                <span className={"pl-1"} style={{ color: "red" }}>
-                  *
-                </span>
-              )}
-            </p>
+          <p className="text-[13px] mb-0 text-dg-grey-dark">
+            Attach File:
+            {
+              <span className={"pl-1"} style={{ color: "red" }}>
+                *
+              </span>
+            }
+          </p>
           <div className="flex flex-row gap-2 items-center">
             <ButtonComponent
               fontSizeClassname="text-[11px]"
@@ -323,7 +327,7 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
               previewFileAttachment,
               previewFile,
               handleShow,
-              type
+              type,
             )}
             onSort={onSort}
           />

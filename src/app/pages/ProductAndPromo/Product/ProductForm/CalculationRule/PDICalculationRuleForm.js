@@ -189,7 +189,7 @@ const PDICalculationRuleForm = ({
   const exludeExisting =
     dataTable.length > 0 ? dataTable.map((item) => item?.name?.value) : [];
   const listName = dataListNameCalculationRule.filter(
-    (item) => ![...excludeOptionName, ...exludeExisting].includes(item.value)
+    (item) => ![...excludeOptionName, ...exludeExisting].includes(item.value),
   );
   useEffect(() => {
     setTotalData(dataTable.length);
@@ -224,7 +224,7 @@ const PDICalculationRuleForm = ({
     });
     if (index === `name`) {
       const temp = dataListNameCalculationRule.filter(
-        (item) => item.value === data?.value
+        (item) => item.value === data?.value,
       );
       if (data?.value === 212) {
         dispatch(getListUnitVAT());
@@ -259,7 +259,7 @@ const PDICalculationRuleForm = ({
     setEditingKey(record.key);
     if (record?.name && record?.name?.value) {
       const temp = dataListNameCalculationRule.filter(
-        (item) => item.value === record?.name?.value
+        (item) => item.value === record?.name?.value,
       );
       if (record?.name?.value === 212) {
         dispatch(getListUnitVAT());
@@ -322,7 +322,7 @@ const PDICalculationRuleForm = ({
 
   const deleteRow = (record) => {
     updateTable((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -350,7 +350,7 @@ const PDICalculationRuleForm = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -366,7 +366,7 @@ const PDICalculationRuleForm = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -384,7 +384,7 @@ const PDICalculationRuleForm = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -403,7 +403,7 @@ const PDICalculationRuleForm = ({
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) => {
           if (searchedColumn === "description") {
@@ -545,7 +545,12 @@ const PDICalculationRuleForm = ({
           <div className="grid grid-cols-2 gap-4 w-full">
             <Form.Item
               name={"calculationType"}
-              rules={[{ message: requiredMessage("Calculation Type"), required: true }]}
+              rules={[
+                {
+                  message: requiredMessage("Calculation Type"),
+                  required: true,
+                },
+              ]}
               className="no-margin-form w-full"
               getValueFromEvent={(e) => updateBody(e, "calculationType")}
               label={"Calculation Type"}
@@ -615,7 +620,7 @@ const PDICalculationRuleForm = ({
                   dataEditRecord: editDataRecord,
                   handleEditDataRecord: handleEditDataRecord,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],

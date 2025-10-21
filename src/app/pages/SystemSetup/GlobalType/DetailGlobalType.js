@@ -12,7 +12,13 @@ import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_route
 import BaseContainer from "../../../../components/BaseContainer";
 import DetailText from "../../../../components/DetailText";
 import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateConverter, toTitleCase } from "../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateConverter,
+  toTitleCase,
+} from "../../../../utils";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import { LeftOutlined } from "@ant-design/icons";
@@ -25,9 +31,9 @@ import TablePaginationNew from "../../../../components/TablePaginationNew";
 const DetailGlobalType = () => {
   // Selector
   const { data_detail, data_detail_value, loading } = useSelector(
-    (state) => state.globalTypes
+    (state) => state.globalTypes,
   );
-  const { bodyError } = useSelector(state => state?.general)
+  const { bodyError } = useSelector((state) => state?.general);
   // Declaration
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -65,7 +71,6 @@ const DetailGlobalType = () => {
     });
   };
 
-
   // Breadcrumbs
   const routes = [
     {
@@ -84,13 +89,13 @@ const DetailGlobalType = () => {
 
   const handleDetail = async (id) => {
     try {
-      setBody(id)
+      setBody(id);
       await dispatch(getDetailGlobalTypeValue(id))?.unwrap();
       setOpenModal(true);
     } catch {
       setOpenModal(false);
     }
-  }
+  };
 
   const columns = [
     {
@@ -114,9 +119,18 @@ const DetailGlobalType = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('name', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "name",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "VALUE",
@@ -132,9 +146,18 @@ const DetailGlobalType = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('glbValue', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "glbValue",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "ORDER",
@@ -149,9 +172,18 @@ const DetailGlobalType = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('glbOrder', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "glbOrder",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "PARENT GROUP",
@@ -168,9 +200,18 @@ const DetailGlobalType = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('parentGroupName', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "parentGroupName",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "PARENT VALUE",
@@ -187,9 +228,18 @@ const DetailGlobalType = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('parentValueName', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "parentValueName",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -205,9 +255,18 @@ const DetailGlobalType = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -223,9 +282,18 @@ const DetailGlobalType = () => {
         searchText,
         handleSearch,
         true,
-        'status'
+        "status",
       ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
     {
       title: "ACTION",
@@ -259,7 +327,7 @@ const DetailGlobalType = () => {
     }
     const fix = result.slice(
       (currentTable - 1) * pageTable,
-      currentTable * pageTable
+      currentTable * pageTable,
     );
     return typeData === "data" ? fix : result.length;
   };
@@ -273,17 +341,17 @@ const DetailGlobalType = () => {
 
   const handleRetry = () => {
     try {
-      handleCancelTryAgain()
-      if (bodyError?.action === 'GET_DETAIL_GLOBAL_TYPE_VALUE') {
-        dispatch(getDetailGlobalTypeValue(body))
+      handleCancelTryAgain();
+      if (bodyError?.action === "GET_DETAIL_GLOBAL_TYPE_VALUE") {
+        dispatch(getDetailGlobalTypeValue(body));
       }
       dispatch(getDetailGlobalTypeValue(id));
     } catch (error) {
       dispatch(getDetailGlobalTypeValue(id));
     }
-  }
+  };
 
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
@@ -308,13 +376,15 @@ const DetailGlobalType = () => {
               {data_detail?.data?.glbTypeId}
             </DetailText>
             <DetailText label="Created Date">
-              {hasValue(data_detail?.data?.createdDate) && renderDateConverter(data_detail?.data?.createdDate, 'datetime')}
+              {hasValue(data_detail?.data?.createdDate) &&
+                renderDateConverter(data_detail?.data?.createdDate, "datetime")}
             </DetailText>
             <DetailText label={"Created By"}>
               {data_detail?.data?.createdBy}
             </DetailText>
             <DetailText label={"Updated Date"}>
-              {hasValue(data_detail?.data?.updatedDate) && renderDateConverter(data_detail?.data?.updatedDate, 'datetime')}
+              {hasValue(data_detail?.data?.updatedDate) &&
+                renderDateConverter(data_detail?.data?.updatedDate, "datetime")}
             </DetailText>
             <DetailText label={"Updated By"}>
               {data_detail?.data?.updatedBy}
@@ -364,19 +434,22 @@ const DetailGlobalType = () => {
           header="Detail Global Type Value"
           width={1000}
           footer={
-            <ButtonComponent
-              border={true}
-              onClick={() => setOpenModal(false)}
-            >
+            <ButtonComponent border={true} onClick={() => setOpenModal(false)}>
               Back
             </ButtonComponent>
           }
         >
           <Spin spinning={loading}>
             <CardComponent header={"GLOBAL TYPE VALUE INFORMATION"} cols={4}>
-              <DetailText label="Display Text">{data_detail_value?.name}</DetailText>
-              <DetailText label="Value">{data_detail_value?.glbValue}</DetailText>
-              <DetailText label="Order">{data_detail_value?.glbOrder}</DetailText>
+              <DetailText label="Display Text">
+                {data_detail_value?.name}
+              </DetailText>
+              <DetailText label="Value">
+                {data_detail_value?.glbValue}
+              </DetailText>
+              <DetailText label="Order">
+                {data_detail_value?.glbOrder}
+              </DetailText>
               <DetailText label="Description">
                 {data_detail_value?.description}
               </DetailText>
@@ -386,7 +459,9 @@ const DetailGlobalType = () => {
               <DetailText label="Parent Value">
                 {data_detail_value?.parentValue}
               </DetailText>
-              <DetailText label="Status">{toTitleCase(data_detail_value?.status)}</DetailText>
+              <DetailText label="Status">
+                {toTitleCase(data_detail_value?.status)}
+              </DetailText>
             </CardComponent>
 
             <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
@@ -396,8 +471,8 @@ const DetailGlobalType = () => {
               <DetailText label="Created Date">
                 {data_detail_value?.createdDate
                   ? moment(data_detail_value.createdDate).format(
-                    dateFormatting.dateTime
-                  )
+                      dateFormatting.dateTime,
+                    )
                   : ""}
               </DetailText>
               <DetailText label="Created By">
@@ -406,8 +481,8 @@ const DetailGlobalType = () => {
               <DetailText label="Updated Date">
                 {data_detail_value?.updatedDate
                   ? moment(data_detail_value.updatedDate).format(
-                    dateFormatting.dateTime
-                  )
+                      dateFormatting.dateTime,
+                    )
                   : ""}
               </DetailText>
               <DetailText label="Updated By">

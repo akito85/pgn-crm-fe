@@ -27,30 +27,34 @@ import jsPDF from "jspdf";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 const { Option } = Select;
 const DetailDataAccessHierarchy = () => {
-  const { data_detail, loading, data } = useSelector((state) => state.data_access);
-  const { bodyError } = useSelector(state => state?.general);
+  const { data_detail, loading, data } = useSelector(
+    (state) => state.data_access,
+  );
+  const { bodyError } = useSelector((state) => state?.general);
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const id = location?.state?.id;
   const containerRefHierarchy = useRef(null);
 
-
   // use state
   const [costCenters, setCostCenters] = useState([]);
   const [selectedSearch, setSelectedSearch] = useState();
   const [modalBack, setModalBack] = useState(false);
   const [modalCostCenter, setModalCostCenter] = useState(false);
-  const [selectedData, setSelectedData] = useState({})
+  const [selectedData, setSelectedData] = useState({});
   const [body, setBody] = useState({});
   useEffect(() => {
     dispatch(getDetailDataAccess(id));
     if (data) {
       setSelectedData({
         ...data?.data,
-        id : data?.data?.rDahId,
-        sibling: data?.data?.sibling?.length > 0 ? data?.data?.sibling?.map(item => item?.sibling) : []
-      })
+        id: data?.data?.rDahId,
+        sibling:
+          data?.data?.sibling?.length > 0
+            ? data?.data?.sibling?.map((item) => item?.sibling)
+            : [],
+      });
     }
   }, [dispatch, id, data]);
 
@@ -61,7 +65,6 @@ const DetailDataAccessHierarchy = () => {
       setCostCenters([]);
     }
   }, [data_detail]);
-
 
   const transformDataToTree = (data) => {
     const nodes = {};
@@ -102,25 +105,31 @@ const DetailDataAccessHierarchy = () => {
     },
   ];
 
-  // handle detail cost center 
+  // handle detail cost center
   const handleDetailCostCenter = async (e) => {
     try {
       setBody(e);
       await dispatch(getDetailCostCenter(e))?.unwrap();
-      setModalCostCenter(true)
+      setModalCostCenter(true);
     } catch (error) {
-      await dispatch(getDetailDataAccess(id))?.unwrap()
-      setModalCostCenter(false)
+      await dispatch(getDetailDataAccess(id))?.unwrap();
+      setModalCostCenter(false);
     }
-  }
-
+  };
 
   const renderCustomNode = ({ nodeDatum, toggleNode, foreignObjectProps }) => {
     return (
       <g>
         <circle r={10} className={"bg-black"} onClick={toggleNode}></circle>
-        <foreignObject {...foreignObjectProps} >
-          <div style={{ backgroundColor: 'lightblue', textAlign: 'center', borderRadius: '5px', }} onClick={() => handleDetailCostCenter(nodeDatum?.rDahId)} >
+        <foreignObject {...foreignObjectProps}>
+          <div
+            style={{
+              backgroundColor: "lightblue",
+              textAlign: "center",
+              borderRadius: "5px",
+            }}
+            onClick={() => handleDetailCostCenter(nodeDatum?.rDahId)}
+          >
             <div className="flex justify-center rounded-lg m-2">
               <div className="flex-col items-center my-2">
                 <div className={"flex gap-3 justify-center mx-auto w-full"}>
@@ -128,17 +137,20 @@ const DetailDataAccessHierarchy = () => {
                     <p className="text-black leading-none text-[12px] text-center">
                       {nodeDatum.costCenter}
                     </p>
-                    {nodeDatum?.sibling?.length > 0 &&
+                    {nodeDatum?.sibling?.length > 0 && (
                       <div className=" text-[12px] text-center">
-                        <Tooltip placement="top" title={nodeDatum?.sibling?.map((item) => (
-                          <p className="text-white text-[12px] text-center">
-                            {item?.sibling}
-                          </p>
-                        ))}>
+                        <Tooltip
+                          placement="top"
+                          title={nodeDatum?.sibling?.map((item) => (
+                            <p className="text-white text-[12px] text-center">
+                              {item?.sibling}
+                            </p>
+                          ))}
+                        >
                           {nodeDatum?.sibling?.length + " Sibling"}
                         </Tooltip>
                       </div>
-                    }
+                    )}
                   </div>
                 </div>
               </div>
@@ -146,17 +158,16 @@ const DetailDataAccessHierarchy = () => {
           </div>
         </foreignObject>
       </g>
-    )
+    );
   };
 
   const handleDownloadPDF = () => {
     const input = containerRefHierarchy.current;
     const name = data_detail?.name;
 
-
     html2canvas(input, { scale: 2 }).then((canvas) => {
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('landscape');
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("landscape");
 
       // add title
       const pageWidth = pdf.internal.pageSize.getWidth();
@@ -168,14 +179,14 @@ const DetailDataAccessHierarchy = () => {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
       const yOffset = 20;
-      pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, pdfHeight);
+      pdf.addImage(imgData, "PNG", 0, yOffset, pdfWidth, pdfHeight);
       pdf.save(`${name}.pdf`);
     });
-  }
+  };
   const downloadDetailHierarchy = async (type) => {
     switch (type) {
-      case 'excel':
-        setBody({ id, type })
+      case "excel":
+        setBody({ id, type });
         await dispatch(downloadDetail({ id, type }))?.unwrap();
         break;
 
@@ -188,16 +199,16 @@ const DetailDataAccessHierarchy = () => {
   const handleRetry = () => {
     try {
       handleCancelTryAgain();
-      if (bodyError?.action === 'DOWNLOAD_DATA_ACCESS') {
-        dispatch(downloadDetail(body))
-      } else if (bodyError?.action ==='GET_DETAIL_COST_CENTER') {
-        dispatch(getDetailCostCenter(body))
+      if (bodyError?.action === "DOWNLOAD_DATA_ACCESS") {
+        dispatch(downloadDetail(body));
+      } else if (bodyError?.action === "GET_DETAIL_COST_CENTER") {
+        dispatch(getDetailCostCenter(body));
       }
       dispatch(getDetailDataAccess(id));
     } catch (error) {
       dispatch(getDetailDataAccess(id));
     }
-  }
+  };
 
   const { handleCancelTryAgain, renderModal } = useTryAgainHooks(handleRetry);
   return (
@@ -210,7 +221,7 @@ const DetailDataAccessHierarchy = () => {
           <BaseContainer header={"DATA ACCESS HIERARCHY"}>
             <div className={"w-full flex flex-col gap-5"}>
               <div className={"w-full flex justify-between"}>
-                <div className='w-4/12'>
+                <div className="w-4/12">
                   <SelectComponent
                     placeholder="Search Cost Center"
                     onChange={onSelectedSearch}
@@ -250,7 +261,6 @@ const DetailDataAccessHierarchy = () => {
                   </div>
                 ) : (
                   <div ref={containerRefHierarchy}>
-
                     <HierarchyComponent
                       data={transformDataToTree(costCenters)}
                       nodeWidth={150}
@@ -261,7 +271,6 @@ const DetailDataAccessHierarchy = () => {
                       renderCustomNode={renderCustomNode}
                       zoom={selectedSearch}
                       nodeSize={{ x: 165, y: 170 }}
-
                     />
                   </div>
                 )}
@@ -279,13 +288,16 @@ const DetailDataAccessHierarchy = () => {
         </div>
 
         <ModalCustom
-          header={'detail cost center'}
+          header={"detail cost center"}
           isOpen={modalCostCenter}
           handleCancel={() => setModalCostCenter(false)}
-          type={'detail'}
+          type={"detail"}
           width={1000}
           footer={
-            <ButtonComponent border={true} onClick={() => setModalCostCenter(false)}>
+            <ButtonComponent
+              border={true}
+              onClick={() => setModalCostCenter(false)}
+            >
               Back
             </ButtonComponent>
           }
@@ -293,7 +305,7 @@ const DetailDataAccessHierarchy = () => {
           <DetailCostCenterLayout
             // type={type}
             detatilCostCenter={selectedData}
-          // rDahId={id}
+            // rDahId={id}
           />
         </ModalCustom>
         {/* modal back */}

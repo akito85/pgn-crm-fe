@@ -4,7 +4,7 @@ const CronSecond = (props) => {
   const { onChangeSecond, valChecked, handleResetSecond } = props;
   console.log(
     "🚀 ~ file: CronSecond.js:5 ~ CronSecond ~ valChecked:",
-    valChecked
+    valChecked,
   );
   const valueChecked = valChecked ? valChecked.split(",") : [];
   const intValCheck = valueChecked.map((item) => {
@@ -32,7 +32,7 @@ const CronSecond = (props) => {
         setValueSecond(3);
         const valueCheck = checkSecond.reduce(
           (prev, current) => prev + `,${current}`,
-          ""
+          "",
         );
         onChangeSecond(valueCheck.slice(1));
         break;

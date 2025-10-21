@@ -15,7 +15,6 @@ const getPagination = async (url) => {
   }
 };
 
-
 const updateDataWithMethodPost = async (url, data) => {
   try {
     const response = await axios.post(configApp.REPORT_SERVICE + url, data, {
@@ -27,13 +26,12 @@ const updateDataWithMethodPost = async (url, data) => {
   }
 };
 
-
 const downloadDataAdvanced = async (url, body) => {
   try {
     const response = await axios.post(configApp.REPORT_SERVICE + url, body, {
       headers: {
         ...tokenHeader(),
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       responseType: "blob",
     });
@@ -50,7 +48,7 @@ const downloadDataAdvanced = async (url, body) => {
       // Download the file
       FileSaver.saveAs(blob, filename);
     } else {
-      return response
+      return response;
     }
   } catch (error) {
     throw error;
@@ -59,10 +57,14 @@ const downloadDataAdvanced = async (url, body) => {
 
 const downloadDataPostMethod = async (url) => {
   try {
-    const response = await axios.post(configApp.REPORT_SERVICE + url, {}, {
-      headers: tokenHeader(),
-      responseType: "blob",
-    });
+    const response = await axios.post(
+      configApp.REPORT_SERVICE + url,
+      {},
+      {
+        headers: tokenHeader(),
+        responseType: "blob",
+      },
+    );
     if (hasValue(response.headers?.get("content-disposition"))) {
       const filename = response.headers
         .get("content-disposition")
@@ -74,20 +76,19 @@ const downloadDataPostMethod = async (url) => {
       const blob = await response?.data;
       FileSaver.saveAs(blob, filename);
     } else if (errorCode(response) === 204) {
-      throw response
+      throw response;
     }
     return response;
   } catch (error) {
     throw error;
   }
-}
-
+};
 
 const reportHttpService = {
   getPagination,
   updateDataWithMethodPost,
   downloadDataAdvanced,
-  downloadDataPostMethod
-}
+  downloadDataPostMethod,
+};
 
 export default reportHttpService;

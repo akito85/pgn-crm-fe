@@ -36,7 +36,7 @@ const ProductDetailInformation = ({
   const [objTAS, setObjTAS] = useState({});
   const [objPricing, setObjPricing] = useState([]);
   const [dataTablePDITermOfService, setDataTablePDITermOfService] = useState(
-    []
+    [],
   );
   const [dataTablePDIProductBundling, setDataTablePDIProductBundling] =
     useState([]);
@@ -46,24 +46,24 @@ const ProductDetailInformation = ({
     if (dataProductDetail && dataProductDetail.id) {
       setDatatPDIProductDetail(dataProductDetail?.mproductDetail || []);
       setDataPDICalculationRule(
-        dataProductDetail?.mproductCalculationRule || []
+        dataProductDetail?.mproductCalculationRule || [],
       );
       setObjTAS(dataProductDetail?.mproductTargetAccountSelling || {});
       setCriteria(
         (
           dataProductDetail?.mproductTargetAccountSelling
             ?.mProductTargetAccountSellingCriteria || []
-        ).map((item) => (item.criteria ? parseInt(item.criteria) : 0))
+        ).map((item) => (item.criteria ? parseInt(item.criteria) : 0)),
       );
       setDataTablePDITargetAccountSelling(
-        dataProductDetail?.mproductTargetAccountSelling?.criterias || []
+        dataProductDetail?.mproductTargetAccountSelling?.criterias || [],
       );
       setObjPricing(dataProductDetail?.mproductPricing || {});
       setDataTablePDITermOfService(
-        dataProductDetail?.mproductTermOfService || []
+        dataProductDetail?.mproductTermOfService || [],
       );
       setDataTablePDIEligibilityProduct(
-        dataProductDetail?.religibilityProduct || []
+        dataProductDetail?.religibilityProduct || [],
       );
       setDataTablePDIProductBundling(dataProductDetail?.rproductBundling || []);
     }

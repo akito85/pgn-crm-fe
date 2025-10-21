@@ -1,8 +1,16 @@
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 import { Tooltip } from "antd";
-import { dateFormatting, hasValue, renderColumn, toTitleCase } from "../../../../../utils";
-import { getColumnSearchProps, getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  toTitleCase,
+} from "../../../../../utils";
+import {
+  getColumnSearchProps,
+  getColumnSearchPropsUseFilteredValue,
+} from "../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../components/StatusComponent";
 
 export const tableUsage = (
@@ -12,7 +20,7 @@ export const tableUsage = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => {
   const columns = [
     {
@@ -30,13 +38,11 @@ export const tableUsage = (
         search,
         "recordId",
         searchInput,
-        hasValue(search['recordId']),
+        hasValue(search["recordId"]),
         searchText,
         handleSearch,
-        
       ),
       // render: (text) => renderColumn('recordId', hasValue(search['recordId']), searchText, text, false, "input", search)
-      
     },
     {
       title: "BATCH ID",
@@ -49,11 +55,9 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
       // render: (text) => renderColumn('batchId', hasValue(search['batchId']), searchText, text, false, 'input', search)
-      
     },
     {
       title: "CUSTOMER NUMBER",
@@ -66,11 +70,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('customerNumber', hasValue(search['customerNumber']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "customerNumber",
+          hasValue(search["customerNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "CUSTOMER NAME",
@@ -83,30 +94,29 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
-      ),      
+        true,
+      ),
       ellipsis: {
         showTitle: false,
       },
       // render: (text) => renderColumn("customerName", hasValue(search['customerName']), searchText, text, true, 'input', search)
-        // searchedColumn === "customerName" ? (
-        //   <Highlighter
-        //     highlightStyle={{
-        //       backgroundColor: "#ffc069",
-        //       padding: 0,
-        //     }}
-        //     searchWords={[searchText]}
-        //     autoEscape
-        //     textToHighlight={text ? text.toString() : ""}
-        //   />
-        // ) : text ? (
-        //   <Tooltip placement="topLeft" title={text}>
-        //     {text}
-        //   </Tooltip>
-        // ) : (
-        //   ""
-        // ),
+      // searchedColumn === "customerName" ? (
+      //   <Highlighter
+      //     highlightStyle={{
+      //       backgroundColor: "#ffc069",
+      //       padding: 0,
+      //     }}
+      //     searchWords={[searchText]}
+      //     autoEscape
+      //     textToHighlight={text ? text.toString() : ""}
+      //   />
+      // ) : text ? (
+      //   <Tooltip placement="topLeft" title={text}>
+      //     {text}
+      //   </Tooltip>
+      // ) : (
+      //   ""
+      // ),
     },
     {
       title: "ACCOUNT NUMBER",
@@ -119,11 +129,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('accountNumber', hasValue(search['accountNumber']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "accountNumber",
+          hasValue(search["accountNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACCOUNT NAME",
@@ -136,31 +153,39 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn("accountName", hasValue(search['accountName']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "accountName",
+          hasValue(search["accountName"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
 
-        // searchedColumn === "accountName" ? (
-        //   <Highlighter
-        //     highlightStyle={{
-        //       backgroundColor: "#ffc069",
-        //       padding: 0,
-        //     }}
-        //     searchWords={[searchText]}
-        //     autoEscape
-        //     textToHighlight={text ? text.toString() : ""}
-        //   />
-        // ) : text ? (
-        //   <Tooltip placement="topLeft" title={text}>
-        //     {text}
-        //   </Tooltip>
-        // ) : (
-        //   ""
-        // ),
+      // searchedColumn === "accountName" ? (
+      //   <Highlighter
+      //     highlightStyle={{
+      //       backgroundColor: "#ffc069",
+      //       padding: 0,
+      //     }}
+      //     searchWords={[searchText]}
+      //     autoEscape
+      //     textToHighlight={text ? text.toString() : ""}
+      //   />
+      // ) : text ? (
+      //   <Tooltip placement="topLeft" title={text}>
+      //     {text}
+      //   </Tooltip>
+      // ) : (
+      //   ""
+      // ),
     },
     {
       title: "ACCOUNT SEGMENT",
@@ -174,11 +199,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('accountSegment', hasValue(search['accountSegment']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "accountSegment",
+          hasValue(search["accountSegment"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACCOUNT GROUP TYPE",
@@ -192,11 +224,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('accountGroupType', hasValue(search['accountGroupType']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "accountGroupType",
+          hasValue(search["accountGroupType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "SERVICE TYPE",
@@ -210,11 +249,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('serviceType', hasValue(search['serviceType']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "serviceType",
+          hasValue(search["serviceType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "BILLING CYCLE",
@@ -228,10 +274,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('billingCycleValue', hasValue(search['billingCycleValue']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "billingCycleValue",
+          hasValue(search["billingCycleValue"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "BILLING PERIOD",
@@ -246,7 +300,7 @@ export const tableUsage = (
         searchText,
         handleSearch,
         true,
-        'datePeriod'
+        "datePeriod",
       ),
       render: (billingPeriod) =>
         hasValue(billingPeriod) && moment(billingPeriod).format("MMM YYYY"),
@@ -263,30 +317,38 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn("sor", hasValue(search['sor']), searchText, text, true, 'input', search)
-        // searchedColumn === "sor" ? (
-        //   <Highlighter
-        //     highlightStyle={{
-        //       backgroundColor: "#ffc069",
-        //       padding: 0,
-        //     }}
-        //     searchWords={[searchText]}
-        //     autoEscape
-        //     textToHighlight={text ? text.toString() : ""}
-        //   />
-        // ) : text ? (
-        //   <Tooltip placement="topLeft" title={text}>
-        //     {text}
-        //   </Tooltip>
-        // ) : (
-        //   ""
-        // ),
+      render: (text) =>
+        renderColumn(
+          "sor",
+          hasValue(search["sor"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
+      // searchedColumn === "sor" ? (
+      //   <Highlighter
+      //     highlightStyle={{
+      //       backgroundColor: "#ffc069",
+      //       padding: 0,
+      //     }}
+      //     searchWords={[searchText]}
+      //     autoEscape
+      //     textToHighlight={text ? text.toString() : ""}
+      //   />
+      // ) : text ? (
+      //   <Tooltip placement="topLeft" title={text}>
+      //     {text}
+      //   </Tooltip>
+      // ) : (
+      //   ""
+      // ),
     },
     {
       title: "COST CENTER",
@@ -299,11 +361,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('costCenter', hasValue(search['costCenter']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "costCenter",
+          hasValue(search["costCenter"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "METER READING CODE",
@@ -316,11 +385,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('meterReadingCode', hasValue(search['meterReadingCode']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "meterReadingCode",
+          hasValue(search["meterReadingCode"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ASSET SERIAL NUMBER",
@@ -333,11 +409,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('assetSerialNumber', hasValue(search['assetSerialNumber']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "assetSerialNumber",
+          hasValue(search["assetSerialNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ASSET TYPE",
@@ -351,11 +434,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('assetType', hasValue(search['assetType']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "assetType",
+          hasValue(search["assetType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
 
     {
@@ -369,11 +459,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('ratingCode', hasValue(search['ratingCode']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "ratingCode",
+          hasValue(search["ratingCode"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
 
     {
@@ -388,11 +485,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('measDate', hasValue(search['measDate']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "measDate",
+          hasValue(search["measDate"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: " DATE",
@@ -406,11 +510,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('fdate', hasValue(search['fdate']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "fdate",
+          hasValue(search["fdate"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "HOUR",
@@ -424,11 +535,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('fhour', hasValue(search['fhour']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "fhour",
+          hasValue(search["fhour"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "STREAM ID",
@@ -441,11 +559,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('streamId', hasValue(search['streamId']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "streamId",
+          hasValue(search["streamId"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "UNCORRECTED VOL",
@@ -458,11 +583,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('uncorrectedValue', hasValue(search['uncorrectedValue']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "uncorrectedValue",
+          hasValue(search["uncorrectedValue"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "TEMPERATURE",
@@ -475,11 +607,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('temperature', hasValue(search['temperature']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "temperature",
+          hasValue(search["temperature"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "PRESSURE",
@@ -492,11 +631,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('pressure', hasValue(search['pressure']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "pressure",
+          hasValue(search["pressure"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "CORRECTION FACTOR",
@@ -509,11 +655,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('correctionFactor', hasValue(search['correctionFactor']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "correctionFactor",
+          hasValue(search["correctionFactor"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "BEGIN STAND",
@@ -527,11 +680,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-
+        true,
       ),
-      render: (text) => renderColumn('beginStand', hasValue(search['beginStand']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "beginStand",
+          hasValue(search["beginStand"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "END STAND",
@@ -545,10 +705,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('endStand', hasValue(search['endStand']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "endStand",
+          hasValue(search["endStand"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "VOLUME 27",
@@ -562,10 +730,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('volMeasured27', hasValue(search['volMeasured27']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "volMeasured27",
+          hasValue(search["volMeasured27"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "VOLUME 60",
@@ -579,10 +755,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('volMeasured60', hasValue(search['volMeasured60']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "volMeasured60",
+          hasValue(search["volMeasured60"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
 
     {
@@ -597,10 +781,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('volMscf', hasValue(search['volMscf']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "volMscf",
+          hasValue(search["volMscf"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "GHV",
@@ -614,10 +806,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('ghv', hasValue(search['ghv']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "ghv",
+          hasValue(search["ghv"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "CALORIE",
@@ -631,10 +831,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('calorie', hasValue(search['calorie']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "calorie",
+          hasValue(search["calorie"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ENG MEASURED",
@@ -648,10 +856,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('engMeasured', hasValue(search['engMeasured']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "engMeasured",
+          hasValue(search["engMeasured"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DATA SOURCE",
@@ -667,26 +883,35 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-      ),      
-      render: (text) => renderColumn("fileSource", hasValue(search['fileSource']), searchText, text, true, 'input', search)
-        // searchedColumn === "fileSource" ? (
-        //   <Highlighter
-        //     highlightStyle={{
-        //       backgroundColor: "#ffc069",
-        //       padding: 0,
-        //     }}
-        //     searchWords={[searchText]}
-        //     autoEscape
-        //     textToHighlight={text ? text.toString() : ""}
-        //   />
-        // ) : text ? (
-        //   <Tooltip placement="topLeft" title={text}>
-        //     {text}
-        //   </Tooltip>
-        // ) : (
-        //   ""
-        // ),
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "fileSource",
+          hasValue(search["fileSource"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
+      // searchedColumn === "fileSource" ? (
+      //   <Highlighter
+      //     highlightStyle={{
+      //       backgroundColor: "#ffc069",
+      //       padding: 0,
+      //     }}
+      //     searchWords={[searchText]}
+      //     autoEscape
+      //     textToHighlight={text ? text.toString() : ""}
+      //   />
+      // ) : text ? (
+      //   <Tooltip placement="topLeft" title={text}>
+      //     {text}
+      //   </Tooltip>
+      // ) : (
+      //   ""
+      // ),
     },
     {
       title: "TAXATION ROW ID",
@@ -699,10 +924,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('taxationRowId', hasValue(search['taxationRowId']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "taxationRowId",
+          hasValue(search["taxationRowId"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "CREATION DATE",
@@ -715,8 +948,8 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-      ),      
+        true,
+      ),
       render: (creationDate) =>
         hasValue(creationDate) && moment(creationDate, dateFormatting.dateTime),
     },
@@ -732,10 +965,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('source', hasValue(search['source']), searchText, text, false, 'input', search)
-      
+      render: (text) =>
+        renderColumn(
+          "source",
+          hasValue(search["source"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -748,30 +989,39 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-      ),      
+        true,
+      ),
       ellipsis: {
         showTitle: false,
       },
       sorter: true,
-      render: (text) => renderColumn("description", hasValue(search['description']), searchText, text, true, 'input', search)
-        // searchedColumn === "description" ? (
-        //   <Highlighter
-        //     highlightStyle={{
-        //       backgroundColor: "#ffc069",
-        //       padding: 0,
-        //     }}
-        //     searchWords={[searchText]}
-        //     autoEscape
-        //     textToHighlight={text ? text.toString() : ""}
-        //   />
-        // ) : text ? (
-        //   <Tooltip placement="topLeft" title={text}>
-        //     {text}
-        //   </Tooltip>
-        // ) : (
-        //   ""
-        // ),
+      render: (text) =>
+        renderColumn(
+          "description",
+          hasValue(search["description"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
+      // searchedColumn === "description" ? (
+      //   <Highlighter
+      //     highlightStyle={{
+      //       backgroundColor: "#ffc069",
+      //       padding: 0,
+      //     }}
+      //     searchWords={[searchText]}
+      //     autoEscape
+      //     textToHighlight={text ? text.toString() : ""}
+      //   />
+      // ) : text ? (
+      //   <Tooltip placement="topLeft" title={text}>
+      //     {text}
+      //   </Tooltip>
+      // ) : (
+      //   ""
+      // ),
     },
     {
       title: "STATUS",
@@ -786,9 +1036,18 @@ export const tableUsage = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
-      ),      
-      render: (text) => renderColumn("status", hasValue(search['status']), searchText, text, false, 'status', search)
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "status",
+          hasValue(search["status"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
       // render: (text) => (
       //   <div className={" flex justify-center"}>
       //     <StatusComponent colour={text}>{toTitleCase(text)}</StatusComponent>

@@ -39,7 +39,7 @@ const getDetailByIdBody = async (url, id) => {
     const response = await axios.get(
       configApp.USER_MANAGEMENT_SERVICE + url,
       { id: id },
-      { headers: tokenHeader() }
+      { headers: tokenHeader() },
     );
     return response?.data;
   } catch (error) {
@@ -64,7 +64,7 @@ const downloadData = async (url) => {
       const blob = await response?.data;
       FileSaver.saveAs(blob, filename);
     } else if (errorCode(response) === 204) {
-      throw response
+      throw response;
     }
     return response;
   } catch (error) {
@@ -79,7 +79,7 @@ const createData = async (url, body) => {
       body,
       {
         headers: tokenHeader(),
-      }
+      },
     );
     return response?.data;
   } catch (error) {
@@ -93,7 +93,7 @@ const updateData = async (url, data) => {
       data,
       {
         headers: tokenHeader(),
-      }
+      },
     );
     return response?.data;
   } catch (error) {
@@ -107,7 +107,7 @@ const deleteData = async (url) => {
       configApp.USER_MANAGEMENT_SERVICE + url,
       {
         headers: tokenHeader(),
-      }
+      },
     );
     return response?.data;
   } catch (error) {
@@ -122,7 +122,7 @@ const activationWithRemark = async (url, body) => {
       body,
       {
         headers: tokenHeader(),
-      }
+      },
     );
     return response?.data;
   } catch (error) {
@@ -166,7 +166,7 @@ const activationWithDelete = async (url) => {
       configApp.USER_MANAGEMENT_SERVICE + url,
       {
         headers: tokenHeader(),
-      }
+      },
     );
     return response?.data;
   } catch (error) {
@@ -185,10 +185,12 @@ const uploadImage = async (url, data, onProgress) => {
           "Content-Type": "multipart/form-data",
         },
         onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total,
+          );
           onProgress(percentCompleted); // Callback to update progress
         },
-      }
+      },
     );
     return response?.data;
   } catch (error) {
@@ -203,7 +205,7 @@ const terminateData = async (url, body) => {
       body,
       {
         headers: tokenHeader(),
-      }
+      },
     );
     return response?.data;
   } catch (error) {
@@ -239,7 +241,7 @@ const userHttpService = {
   removePicture,
   uploadImage,
   terminateData,
-  takeOver
+  takeOver,
 };
 
 export default userHttpService;

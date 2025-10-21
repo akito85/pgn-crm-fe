@@ -1,9 +1,7 @@
-import React from 'react'
+import React from "react";
 
 const UpdateTosSubmission = () => {
-  return (
-    <div>UpdateTosSubmission</div>
-  )
-}
+  return <div>UpdateTosSubmission</div>;
+};
 
-export default UpdateTosSubmission
+export default UpdateTosSubmission;

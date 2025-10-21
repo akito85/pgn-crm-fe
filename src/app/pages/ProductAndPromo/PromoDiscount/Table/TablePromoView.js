@@ -14,7 +14,7 @@ export const TablePromoView = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
   // handleApprovalHistory = () => {},
   // handleInactive = () => {}
 ) => [
@@ -38,7 +38,7 @@ export const TablePromoView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -48,7 +48,7 @@ export const TablePromoView = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -63,7 +63,7 @@ export const TablePromoView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -73,7 +73,7 @@ export const TablePromoView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -87,7 +87,7 @@ export const TablePromoView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -97,7 +97,7 @@ export const TablePromoView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -114,7 +114,7 @@ export const TablePromoView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -124,7 +124,7 @@ export const TablePromoView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -140,7 +140,7 @@ export const TablePromoView = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -149,7 +149,7 @@ export const TablePromoView = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -165,7 +165,7 @@ export const TablePromoView = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -174,7 +174,7 @@ export const TablePromoView = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -191,7 +191,7 @@ export const TablePromoView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -201,7 +201,7 @@ export const TablePromoView = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
 
@@ -218,7 +218,7 @@ export const TablePromoView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (index) => {
       let text;
@@ -242,7 +242,7 @@ export const TablePromoView = (
             text,
             false,
             "status",
-            search
+            search,
           )
         : text;
     },
@@ -260,7 +260,7 @@ export const TablePromoView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (statusApproval) => {
       let text;
@@ -285,7 +285,7 @@ export const TablePromoView = (
             text,
             false,
             "status",
-            search
+            search,
           )
         : text;
     },
@@ -396,7 +396,7 @@ export const TablePromoView = (
 export const itemsActionView = (
   handleInactive = () => {},
   handleApprovalHistory = () => {},
-  handleDownload = () => {}
+  handleDownload = () => {},
 ) => [
   {
     action: "Download",

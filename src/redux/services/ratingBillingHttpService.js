@@ -51,7 +51,7 @@ const getDetailByIdBody = async (url, id) => {
     const response = await axios.get(
       configApp.RATING_BILLING_SERVICE + url,
       { id: id },
-      { headers: tokenHeader() }
+      { headers: tokenHeader() },
     );
     return response?.data;
   } catch (error) {
@@ -88,7 +88,7 @@ const downloadData = async (url) => {
       const blob = await response?.data;
       FileSaver.saveAs(blob, filename);
     } else if (errorCode(response) === 204) {
-      throw response
+      throw response;
     }
     return response;
   } catch (error) {
@@ -103,7 +103,7 @@ const createData = async (url, body) => {
       body,
       {
         headers: tokenHeader(),
-      }
+      },
     );
     return response?.data;
   } catch (error) {
@@ -117,7 +117,7 @@ const updateData = async (url, data) => {
       data,
       {
         headers: tokenHeader(),
-      }
+      },
     );
     return response?.data;
   } catch (error) {
@@ -131,7 +131,7 @@ const deleteData = async (url) => {
       configApp.RATING_BILLING_SERVICE + url,
       {
         headers: tokenHeader(),
-      }
+      },
     );
     return response?.data;
   } catch (error) {
@@ -146,7 +146,7 @@ const activationWithRemark = async (url, body) => {
       body,
       {
         headers: tokenHeader(),
-      }
+      },
     );
     return response?.data;
   } catch (error) {
@@ -161,7 +161,7 @@ const activationRemarkWithPut = async (url, body) => {
       body,
       {
         headers: tokenHeader(),
-      }
+      },
     );
     return response?.data;
   } catch (error) {
@@ -179,11 +179,11 @@ const uploadAttachment = async (url, body, onProgress) => {
         headers: { ...tokenHeader(), "Content-Type": "multipart/form-data" },
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
+            (progressEvent.loaded * 100) / progressEvent.total,
           );
           onProgress(percentCompleted);
         },
-      }
+      },
     );
     return response?.data;
   } catch (error) {
@@ -248,18 +248,22 @@ const previewOrDownloadData = async (url, params) => {
       responseType: "blob",
     });
 
-    const contentDisposition = response.headers['content-disposition'];
+    const contentDisposition = response.headers["content-disposition"];
     const filename = contentDisposition
-      ? contentDisposition.split(';').find(n => n.includes('filename=')).replace('filename=', '').trim()
-      : 'downloaded_file';
+      ? contentDisposition
+          .split(";")
+          .find((n) => n.includes("filename="))
+          .replace("filename=", "")
+          .trim()
+      : "downloaded_file";
 
-    const fileType = response.headers['content-type'];
+    const fileType = response.headers["content-type"];
     const blob = response.data;
 
     if (fileType === "application/pdf") {
       // Preview the PDF file in a new tab
       const fileURL = window.URL.createObjectURL(blob);
-      window.open(fileURL, '_blank');
+      window.open(fileURL, "_blank");
     } else {
       // Download the file
       FileSaver.saveAs(blob, filename);
@@ -268,7 +272,6 @@ const previewOrDownloadData = async (url, params) => {
     throw error;
   }
 };
-
 
 const ratingBillingHttpService = {
   getAll,
@@ -285,7 +288,7 @@ const ratingBillingHttpService = {
   uploadAttachment,
   activationRemarkWithPut,
   downloadRtfFile,
-  previewOrDownloadData
+  previewOrDownloadData,
 };
 
 export default ratingBillingHttpService;

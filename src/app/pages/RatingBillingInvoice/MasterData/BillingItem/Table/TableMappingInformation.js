@@ -1,10 +1,17 @@
 import { Tooltip } from "antd";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValueFE,
+} from "../../../../../../utils/getColumnSearchProps";
 import moment from "moment";
 import { Link } from "react-router-dom";
 import Highlighter from "react-highlight-words";
 import SVGIcon from "../../../../../../assets/Icon/index";
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
 
 export const columnsMapping = (
   search,
@@ -20,7 +27,7 @@ export const columnsMapping = (
   handleDetail = () => {},
   onFilter = () => {},
   sorter = () => {},
-  dataCategoryMap = []
+  dataCategoryMap = [],
   // dataCategoryMapList = [],
 ) => {
   const res = [
@@ -35,7 +42,9 @@ export const columnsMapping = (
       title: "CATEGORY",
       dataIndex: "categoryName",
       key: "categoryName",
-      filteredValue: search?.["categoryName"] ? [search?.["categoryName"]] : null,
+      filteredValue: search?.["categoryName"]
+        ? [search?.["categoryName"]]
+        : null,
       // ...(type === "detail"
       //   ? { sorter: true }
       //   : {
@@ -63,7 +72,7 @@ export const columnsMapping = (
         handleSearch,
         true,
         "input",
-        storedData
+        storedData,
       ),
       render: (text) =>
         renderColumn(
@@ -73,7 +82,7 @@ export const columnsMapping = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -100,7 +109,7 @@ export const columnsMapping = (
         handleSearch,
         true,
         "date",
-        storedData
+        storedData,
       ),
       render: (text) =>
         renderDateColumn(
@@ -109,7 +118,7 @@ export const columnsMapping = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "startDate",
@@ -162,7 +171,7 @@ export const columnsMapping = (
         handleSearch,
         true,
         "date",
-        storedData
+        storedData,
       ),
       render: (text) =>
         renderDateColumn(
@@ -171,7 +180,7 @@ export const columnsMapping = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "endDate",
@@ -229,7 +238,7 @@ export const columnsMapping = (
         handleSearch,
         true,
         "input",
-        storedData
+        storedData,
       ),
       render: (text) =>
         renderColumn(
@@ -239,7 +248,7 @@ export const columnsMapping = (
           text,
           true,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "description",

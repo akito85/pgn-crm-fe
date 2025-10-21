@@ -44,7 +44,7 @@ export const getListRatingGasPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllCalculationUsagePaginate = createAsyncThunk(
@@ -73,7 +73,7 @@ export const getAllCalculationUsagePaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllDetailServiceAgreementPaginate = createAsyncThunk(
@@ -101,7 +101,7 @@ export const getAllDetailServiceAgreementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllCalculationRuleServiceAgreementPaginate = createAsyncThunk(
@@ -130,7 +130,7 @@ export const getAllCalculationRuleServiceAgreementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllTOSServiceAgreementPaginate = createAsyncThunk(
@@ -159,7 +159,7 @@ export const getAllTOSServiceAgreementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllServiceAgreementPaginate = createAsyncThunk(
@@ -188,7 +188,7 @@ export const getAllServiceAgreementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllUsageServiceAgreementPaginate = createAsyncThunk(
@@ -217,7 +217,7 @@ export const getAllUsageServiceAgreementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getDetailPricing = createAsyncThunk(
@@ -243,7 +243,7 @@ export const getDetailPricing = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAllPricingRuleSAPaginate = createAsyncThunk(
@@ -251,8 +251,7 @@ export const getAllPricingRuleSAPaginate = createAsyncThunk(
   async ({ id, page, pageSize, search, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "" : sort;
+      const sortParams = sort === undefined || sort === "" ? "" : sort;
       const url = `/v1/dbs/api/rating/list-sa-pricing-rule/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
@@ -272,7 +271,7 @@ export const getAllPricingRuleSAPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 // list non gas
@@ -287,7 +286,7 @@ export const getListRatingNonGasPaginate = createAsyncThunk(
       const params = { sortParams, page, pageSize, searchParams };
       const response = await ratingBillingHttpService.getListPagination(
         url,
-        params
+        params,
       );
       return response.data;
     } catch (error) {
@@ -306,7 +305,7 @@ export const getListRatingNonGasPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 // download feat
@@ -321,10 +320,12 @@ export const downloadRatingGas = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response?.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_LIST", back: false }))
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "DOWNLOAD_LIST", back: false }),
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // get detail rating gas
@@ -351,7 +352,7 @@ export const getDetailRatingGas = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 const ratingSlice = createSlice({
   name: "rating",
@@ -458,20 +459,20 @@ const ratingSlice = createSlice({
     // Get All Calculation Rule Service Agreement Pagination
     [getAllCalculationRuleServiceAgreementPaginate.pending]: (
       state,
-      action
+      action,
     ) => {
       state.loading = true;
     },
     [getAllCalculationRuleServiceAgreementPaginate.fulfilled]: (
       state,
-      action
+      action,
     ) => {
       state.loading = false;
       state.data_calculationRuleServiceAgreement = action.payload;
     },
     [getAllCalculationRuleServiceAgreementPaginate.rejected]: (
       state,
-      action
+      action,
     ) => {
       state.loading = false;
     },

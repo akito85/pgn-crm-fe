@@ -123,7 +123,7 @@ const columnInactivateData = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
 ) => {
   return [
     {
@@ -141,7 +141,7 @@ const columnInactivateData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       onFilter: (value, record) =>
         record["approvalLevel"]
@@ -158,7 +158,7 @@ const columnInactivateData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       onFilter: (value, record) =>
         record["position"]
@@ -193,7 +193,7 @@ const DataExpand = ({ list = [] }) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       onFilter: (value, record) =>
         record["employeeName"]
@@ -273,7 +273,7 @@ const ApprovalHierarchyComponent = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           )}
           expandable={{
             expandedRowRender,

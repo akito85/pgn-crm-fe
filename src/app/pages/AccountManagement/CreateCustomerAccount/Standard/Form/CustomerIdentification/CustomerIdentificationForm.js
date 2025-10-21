@@ -16,7 +16,7 @@ const CustomerIdentificationForm = ({
 }) => {
   // Selector
   const { data_customerType, data_identificationType, loading } = useSelector(
-    (state) => state.account
+    (state) => state.account,
   );
 
   // Use Effect
@@ -113,7 +113,7 @@ const CustomerIdentificationForm = ({
             handleCIObj(
               e,
               "identificationType",
-              form.resetFields(["customerIdentificationNumber"])
+              form.resetFields(["customerIdentificationNumber"]),
             )
           }
           rules={[

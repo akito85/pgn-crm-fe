@@ -9,7 +9,6 @@ const UpdateCustomerConfirmation = ({
   dataTable = [],
   customerType,
 }) => {
-
   return (
     <Fragment>
       <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">

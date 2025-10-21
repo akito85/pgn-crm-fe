@@ -87,6 +87,4 @@ export const RBI_ROUTES = {
   TAX_CODE_CREATE: "/system-setup/tax-code/create",
   TAX_CODE_UPDATE: "/system-setup/tax-code/update",
   TAX_CODE_DETAIL: "/system-setup/tax-code/view",
-
-
 };

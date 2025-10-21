@@ -9,7 +9,7 @@ const PosDetail = ({ id, dispatch = () => {} }) => {
   const listDetailPage = [
     { value: "Point Of Sales" },
     { value: "Promo", disabled: true },
-    { value: "Attachment"},
+    { value: "Attachment" },
   ];
 
   const [detailPage, setDetailPage] = useState(listDetailPage[0].value);
@@ -25,12 +25,7 @@ const PosDetail = ({ id, dispatch = () => {} }) => {
       case listDetailPage[1].value:
         return <Promo id={id} />;
       case listDetailPage[2].value:
-        return (
-          <PointOfSalesAttachment 
-            dispatch={dispatch}
-            id={id?.id}
-          />
-        );
+        return <PointOfSalesAttachment dispatch={dispatch} id={id?.id} />;
       default:
         return <PointOfSales id={id?.posNumber} dispatch={dispatch} />;
     }
@@ -53,7 +48,9 @@ const PosDetail = ({ id, dispatch = () => {} }) => {
           <p className="text-[15px] font-semibold text-text-color-semibold">
             Pos Number:
           </p>
-          <p className="text-[15px] font-semibold text-primary">{id?.posNumber}</p>
+          <p className="text-[15px] font-semibold text-primary">
+            {id?.posNumber}
+          </p>
         </div>
 
         <div className={"w-full"}>{renderSection()}</div>

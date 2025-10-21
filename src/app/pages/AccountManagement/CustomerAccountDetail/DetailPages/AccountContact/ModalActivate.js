@@ -1,10 +1,10 @@
-import React,{useState} from 'react'
-import ModalCustom from '../../../../../../components/Modal/ModalCustom'
-import { Alert, Form } from 'antd'
-import { InfoCircleOutlined } from '@ant-design/icons'
-import ButtonComponent from '../../../../../../components/ButtonComponent'
-import InputComponent from '../../../../../../components/InputComponent'
-import ModalApproveOrReject from '../../../../../../components/Modal/ModalApproveOrReject'
+import React, { useState } from "react";
+import ModalCustom from "../../../../../../components/Modal/ModalCustom";
+import { Alert, Form } from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
+import ButtonComponent from "../../../../../../components/ButtonComponent";
+import InputComponent from "../../../../../../components/InputComponent";
+import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 
 const ModalActivate = ({
   isOpen,
@@ -15,7 +15,7 @@ const ModalActivate = ({
   handleConfirmFooter = () => {},
   remark,
   onChange = () => {},
-  form
+  form,
 }) => {
   return (
     <div>
@@ -27,7 +27,7 @@ const ModalActivate = ({
         handleCancel={handleCancel}
         footer={
           <div className={"w-full flex justify-end gap-5"}>
-            <ButtonComponent type={"default"}onClick={handleCancelFooter}>
+            <ButtonComponent type={"default"} onClick={handleCancelFooter}>
               Cancel
             </ButtonComponent>
             {/* <ButtonComponent
@@ -37,7 +37,11 @@ const ModalActivate = ({
             >
               Confirm
             </ButtonComponent> */}
-            <ButtonComponent form="contactInactivateForm" type="submit" htmlType="submit">
+            <ButtonComponent
+              form="contactInactivateForm"
+              type="submit"
+              htmlType="submit"
+            >
               Confirm
             </ButtonComponent>
           </div>
@@ -47,9 +51,8 @@ const ModalActivate = ({
           id="contactInactivateForm"
           form={form}
           onFinish={handleConfirmFooter}
-          layout='vertical'
+          layout="vertical"
         >
-          
           {/* <InputComponent
             rows={1}
             type="textarea"
@@ -75,7 +78,7 @@ const ModalActivate = ({
         </Form>
       </ModalApproveOrReject>
     </div>
-  )
-}
+  );
+};
 
-export default ModalActivate
+export default ModalActivate;

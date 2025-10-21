@@ -1,5 +1,19 @@
-import { Checkbox, Form, Input, InputNumber, Select, Table, Tooltip } from "antd";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Checkbox,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Table,
+  Tooltip,
+} from "antd";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSelector } from "react-redux";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
@@ -16,7 +30,7 @@ export const getColumnSearchPropsCriteria = (
   searchedColumn,
   searchText,
   handleSearch,
-  excludeRender = false
+  excludeRender = false,
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
@@ -135,7 +149,7 @@ const EditableCell = ({
   dependDataIndex,
   dataEditRecord,
   urlIndex,
-  handleEditDataRecord = () => { },
+  handleEditDataRecord = () => {},
   ...restProps
 }) => {
   const key = record?.key || 0;
@@ -185,7 +199,8 @@ const EditableCell = ({
             labelInValue
             disabled={
               dataIndex === "operator" &&
-              ((dataEditRecord[key + "conditionName"]?.value || "") === 2245 || (dataEditRecord[key + "conditionName"]?.value || "") === 2248)
+              ((dataEditRecord[key + "conditionName"]?.value || "") === 2245 ||
+                (dataEditRecord[key + "conditionName"]?.value || "") === 2248)
             }
           >
             {options.map((option) => (
@@ -234,7 +249,7 @@ const EditableCell = ({
               filterOption={filterOption}
               labelInValue
               align="left"
-            // disabled={disable}
+              // disabled={disable}
             >
               {options.map((option) => (
                 <Select.Option key={option.value} value={option.value}>
@@ -248,7 +263,7 @@ const EditableCell = ({
           for (let i = 1; i <= 31; i++) {
             optionDay.push({
               value: String(i),
-              label: String(i)
+              label: String(i),
             });
           }
           return (
@@ -264,7 +279,7 @@ const EditableCell = ({
                 </Select.Option>
               ))}
             </Select>
-          )
+          );
         } else {
           return (
             <InputComponent
@@ -317,22 +332,21 @@ const EditableCell = ({
   );
 };
 
-
 const TableTaxImplicationRuleFormula = ({
   dataTable = [],
-  updateTable = () => { },
+  updateTable = () => {},
   dataTaxImplicationRule = {},
   storedData = false,
-  setStoredData = () => { },
+  setStoredData = () => {},
   type = "detail",
   dataTransactionCode = [],
-  setListDataDetailOverride = () => { },
+  setListDataDetailOverride = () => {},
   modalFormTaxImpliRule = false,
-  setModalFormTaxImpliRule = () => { },
-  handleAddItemOverride = () => { },
+  setModalFormTaxImpliRule = () => {},
+  handleAddItemOverride = () => {},
   formInfo,
   listDataDetailOverride,
-  isUpdateTable
+  isUpdateTable,
 }) => {
   const searchInput = useRef(null);
 
@@ -346,43 +360,49 @@ const TableTaxImplicationRuleFormula = ({
   const [statusAction, setStatusAction] = useState("");
   const isEditing = (record) => record.key === editingKey;
   const [totalData, setTotalData] = useState(0);
-  const [dataFilterImplicationType, setdataFilterImplicationType] = useState([]);
+  const [dataFilterImplicationType, setdataFilterImplicationType] = useState(
+    [],
+  );
   const [dataFilterTransCode, setdataFilterTransCode] = useState([]);
   const [selectType, setSelectType] = useState(null);
   const [ddlModalTransCode, setDdlModalTransCode] = useState([]);
 
-  const { operationConditionList = [], conditionNameList = [], dataImplicationType = [] } = useSelector(
-    (state) => state.tax_implication
-  );
+  const {
+    operationConditionList = [],
+    conditionNameList = [],
+    dataImplicationType = [],
+  } = useSelector((state) => state.tax_implication);
   const stateFormTable = useMemo(
     () =>
       (type === "update" && dataTaxImplicationRule.status === "ACTIVE") ||
       type === "detail" ||
       type === "preview",
-    [type, dataTaxImplicationRule]
+    [type, dataTaxImplicationRule],
   );
-  const tempListDataDetailOverride = listDataDetailOverride.map(item => {
+  const tempListDataDetailOverride = listDataDetailOverride.map((item) => {
     return {
       implicationTypeId: item.implicationTypeId,
-      transactionCode: item.transactionCode
-    }
-  })
+      transactionCode: item.transactionCode,
+    };
+  });
 
-  
   useEffect(() => {
     setTotalData(dataTable.length);
   }, [dataTable]);
 
   useEffect(() => {
-    const tempDdlImpliType = dataImplicationType.filter((data) => data?.value !== dataTaxImplicationRule.implicationType)
-    setdataFilterImplicationType(tempDdlImpliType)
-  }, [dataTaxImplicationRule.implicationType])
+    const tempDdlImpliType = dataImplicationType.filter(
+      (data) => data?.value !== dataTaxImplicationRule.implicationType,
+    );
+    setdataFilterImplicationType(tempDdlImpliType);
+  }, [dataTaxImplicationRule.implicationType]);
 
   useEffect(() => {
-    const tempDdlImpliCode = dataTransactionCode.filter((data) => data?.value !== dataTaxImplicationRule.transactionCode)
-    setdataFilterTransCode(tempDdlImpliCode)
-  }, [dataTaxImplicationRule.transactionCode])
-
+    const tempDdlImpliCode = dataTransactionCode.filter(
+      (data) => data?.value !== dataTaxImplicationRule.transactionCode,
+    );
+    setdataFilterTransCode(tempDdlImpliCode);
+  }, [dataTaxImplicationRule.transactionCode]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -400,11 +420,15 @@ const TableTaxImplicationRuleFormula = ({
   };
 
   const handleEditDataRecord = (data, key, index) => {
-    const tempConditionSelect = editDataRecord[key + "conditionName"]?.value || '';
+    const tempConditionSelect =
+      editDataRecord[key + "conditionName"]?.value || "";
     const keyName = key + index;
     let value = index === "value" ? data.floatValue : data;
 
-    if ((index === "value" && tempConditionSelect === 2245) || (index === "value" && tempConditionSelect === 2248)) {
+    if (
+      (index === "value" && tempConditionSelect === 2245) ||
+      (index === "value" && tempConditionSelect === 2248)
+    ) {
       value = data?.value;
     } else if (
       (index === "value" && tempConditionSelect === 2246) ||
@@ -427,10 +451,10 @@ const TableTaxImplicationRuleFormula = ({
             disabled: true,
             key: "269",
             label: "EQUALS",
-            title: '',
-            value: 269
-          }
-        })
+            title: "",
+            value: 269,
+          },
+        });
       }
       setEditDataRecord((prevState) => {
         return {
@@ -443,7 +467,6 @@ const TableTaxImplicationRuleFormula = ({
     return value;
   };
   const edit = (record, field) => {
-
     setStoredData(true);
     setStatusAction("edit");
     formTable.setFieldsValue(record);
@@ -479,12 +502,18 @@ const TableTaxImplicationRuleFormula = ({
     setStatusAction("");
   };
   const checkDuplicateData = useCallback((dataTable, row) => {
-    if (dataTable?.filter(item => item?.name?.value === row?.name?.value && item?.operator?.value === row?.operator?.value)?.length > 0) {
+    if (
+      dataTable?.filter(
+        (item) =>
+          item?.name?.value === row?.name?.value &&
+          item?.operator?.value === row?.operator?.value,
+      )?.length > 0
+    ) {
       // setisDoubleValues(true)
-      return true
+      return true;
     } else {
       // setisDoubleValues(false)
-      return false
+      return false;
     }
   }, []);
 
@@ -492,7 +521,7 @@ const TableTaxImplicationRuleFormula = ({
     try {
       const row = await formTable.validateFields();
       const newData = [...dataTable];
-      const duplicated = checkDuplicateData(newData, row)
+      const duplicated = checkDuplicateData(newData, row);
       const index = newData.findIndex((item) => key === item.key);
       if (duplicated === false) {
         if (index > -1) {
@@ -511,21 +540,23 @@ const TableTaxImplicationRuleFormula = ({
       } else {
         formTable.setFields([
           {
-            name: 'conditionName',
-            errors: [`Duplicate data found. Condition Name and Operator can't be same`],
+            name: "conditionName",
+            errors: [
+              `Duplicate data found. Condition Name and Operator can't be same`,
+            ],
           },
           {
-            name: 'operator',
-            errors: [`Duplicate data found. Condition Name and Operator can't be same`],
+            name: "operator",
+            errors: [
+              `Duplicate data found. Condition Name and Operator can't be same`,
+            ],
           },
         ]);
       }
-
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
     }
   };
-
 
   const addRow = () => {
     formTable.resetFields();
@@ -545,17 +576,15 @@ const TableTaxImplicationRuleFormula = ({
     setEditingKey(newRow.key);
   };
 
-
-
   let optionBool = [
     {
       value: "Yes",
-      label: "Yes"
+      label: "Yes",
     },
     {
       value: "No",
-      label: "No"
-    }
+      label: "No",
+    },
   ];
 
   const columns = () => {
@@ -581,7 +610,7 @@ const TableTaxImplicationRuleFormula = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -599,7 +628,7 @@ const TableTaxImplicationRuleFormula = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -618,11 +647,19 @@ const TableTaxImplicationRuleFormula = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         render: (value, r) => {
-          return <div className={r?.conditionName?.value === 2245 ? 'text-left' : 'text-right'}>{value}</div>
-        }
+          return (
+            <div
+              className={
+                r?.conditionName?.value === 2245 ? "text-left" : "text-right"
+              }
+            >
+              {value}
+            </div>
+          );
+        },
       },
       {
         title: "ACTION",
@@ -652,24 +689,28 @@ const TableTaxImplicationRuleFormula = ({
                 <>
                   <Tooltip title="Edit">
                     <div
-                      className={`flex justify-center${editingKey ? " cursor-not-allowed" : ""
-                        }`}
+                      className={`flex justify-center${
+                        editingKey ? " cursor-not-allowed" : ""
+                      }`}
                     >
                       <SVGIcon
                         name="IconEdit"
                         color={editingKey ? "#8D91A0" : "#ACC424"}
                         width={24}
                         onClick={!editingKey ? () => edit(record) : undefined}
-                        className={editingKey ? " cursor-not-allowed" : undefined}
+                        className={
+                          editingKey ? " cursor-not-allowed" : undefined
+                        }
                       />
                     </div>
                   </Tooltip>
                   <Tooltip title="Delete">
                     <div
-                      className={`flex justify-center${record.typeData === "exist" || editingKey
-                        ? " cursor-not-allowed"
-                        : ""
-                        }`}
+                      className={`flex justify-center${
+                        record.typeData === "exist" || editingKey
+                          ? " cursor-not-allowed"
+                          : ""
+                      }`}
                     >
                       <SVGIcon
                         name="IconDelete"
@@ -721,30 +762,33 @@ const TableTaxImplicationRuleFormula = ({
   };
 
   useEffect(() => {
-    const tempItem = tempListDataDetailOverride
-      .filter((item) => item.implicationTypeId === selectType)
+    const tempItem = tempListDataDetailOverride.filter(
+      (item) => item.implicationTypeId === selectType,
+    );
 
-    const temp = dataFilterTransCode
-      .filter((data) => !tempItem.some((item) => item.transactionCode === data.value))
+    const temp = dataFilterTransCode.filter(
+      (data) => !tempItem.some((item) => item.transactionCode === data.value),
+    );
     if (isUpdateTable.type) {
       setDdlModalTransCode([
         ...temp,
-        ...tempItem
-          ?.filter((data) => data?.transactionCode === isUpdateTable?.item?.transactionCode)
+        ...tempItem?.filter(
+          (data) =>
+            data?.transactionCode === isUpdateTable?.item?.transactionCode,
+        ),
       ]);
     } else {
-      setDdlModalTransCode(temp)
+      setDdlModalTransCode(temp);
     }
-  }, [selectType, tempListDataDetailOverride])
-
+  }, [selectType, tempListDataDetailOverride]);
 
   return (
     <ModalCustom
       isOpen={modalFormTaxImpliRule}
       handleCancel={() => {
-        setModalFormTaxImpliRule(false)
-        updateTable([])
-        formInfo.resetFields()
+        setModalFormTaxImpliRule(false);
+        updateTable([]);
+        formInfo.resetFields();
       }}
       header={"Create Tax Implication Rule Override"}
       width={1000}
@@ -752,30 +796,33 @@ const TableTaxImplicationRuleFormula = ({
       footer={
         <div className="w-full flex justify-end gap-5 p-4">
           <ButtonComponent
-            onClick={() => !storedData && (
-              setModalFormTaxImpliRule(false),
+            onClick={() =>
+              !storedData &&
+              (setModalFormTaxImpliRule(false),
               updateTable([]),
-              formInfo.resetFields()
-            )}
-
+              formInfo.resetFields())
+            }
             type="default"
           >
             Cancel
           </ButtonComponent>
-          <ButtonComponent
-            type="submit"
-            htmlType={"submit"}
-            form={"formInfo"}
-          >
+          <ButtonComponent type="submit" htmlType={"submit"} form={"formInfo"}>
             Save
           </ButtonComponent>
         </div>
       }
     >
       <div className="flex flex-col w-full gap-4">
-        <div className="text-primary text-xs font-bold uppercase">TAX IMPLICATION RULE OVERRIDE INFORMATION</div>
+        <div className="text-primary text-xs font-bold uppercase">
+          TAX IMPLICATION RULE OVERRIDE INFORMATION
+        </div>
         <div>
-          <Form onFinish={!storedData && handleAddItemOverride} form={formInfo} id="formInfo" layout="vertical">
+          <Form
+            onFinish={!storedData && handleAddItemOverride}
+            form={formInfo}
+            id="formInfo"
+            layout="vertical"
+          >
             <div className="grid grid-cols-2 gap-2">
               <Form.Item
                 label={"Implication Type"}
@@ -787,7 +834,10 @@ const TableTaxImplicationRuleFormula = ({
                   },
                 ]}
               >
-                <SelectComponent onChange={setSelectType} options={dataFilterImplicationType} />
+                <SelectComponent
+                  onChange={setSelectType}
+                  options={dataFilterImplicationType}
+                />
               </Form.Item>
               <Form.Item
                 label={"Transaction Code"}
@@ -810,7 +860,7 @@ const TableTaxImplicationRuleFormula = ({
               >
                 <InputComponent
                   type="textarea"
-                // value={dataTaxImplicationRule.description}
+                  // value={dataTaxImplicationRule.description}
                 />
               </Form.Item>
             </div>
@@ -829,8 +879,9 @@ const TableTaxImplicationRuleFormula = ({
         </div>
         <div className={"relative flex flex-col w-full"}>
           <div
-            className={`${totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
-              } w-1/4 flex`}
+            className={`${
+              totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
+            } w-1/4 flex`}
           >
             <Select
               mode="multiple"
@@ -877,7 +928,7 @@ const TableTaxImplicationRuleFormula = ({
                     dataEditRecord: editDataRecord,
                     handleEditDataRecord: handleEditDataRecord,
                   }),
-                }))
+                })),
               )}
               pagination={{
                 position: ["topRight"],
@@ -890,7 +941,9 @@ const TableTaxImplicationRuleFormula = ({
                 showTotal: (total, range) =>
                   `Showing ${range[0]} to ${range[1]} of ${total} records`,
               }}
-              rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
+              rowClassName={(record) =>
+                isEditing(record) ? "editable-row" : ""
+              }
               scroll={{
                 y: 300,
               }}
@@ -905,7 +958,7 @@ const TableTaxImplicationRuleFormula = ({
         </div>
       </div>
     </ModalCustom>
-  )
-}
+  );
+};
 
-export default TableTaxImplicationRuleFormula
+export default TableTaxImplicationRuleFormula;

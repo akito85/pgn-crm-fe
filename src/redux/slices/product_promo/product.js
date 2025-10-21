@@ -1,6 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import productPromoHttpService from "../../services/productPromoHttpService";
-import { grantedAccessDetail, showModalError, showModalSuccess, validateError } from "../general_slice";
+import {
+  grantedAccessDetail,
+  showModalError,
+  showModalSuccess,
+  validateError,
+} from "../general_slice";
 
 const initialState = {
   dataProduct: {},
@@ -73,16 +78,22 @@ const initialState = {
   data_customer: [],
 };
 
-export const getGrantedAccessProduct =  createAsyncThunk("CHECK_GRANTED_PRODUCT", async (body, thunkAPI) => {
-  try {
-    const data = await productPromoHttpService.checkGrantedAccessProduct(body)
-    thunkAPI.dispatch(grantedAccessDetail(body?.body))
-		return data?.data;
-	} catch (error) {
-		thunkAPI.dispatch(validateError({ error: error, action:'CHECK_GRANTED_PRODUCT'}))
-		return thunkAPI.rejectWithValue(error);
-	}
-}); 
+export const getGrantedAccessProduct = createAsyncThunk(
+  "CHECK_GRANTED_PRODUCT",
+  async (body, thunkAPI) => {
+    try {
+      const data =
+        await productPromoHttpService.checkGrantedAccessProduct(body);
+      thunkAPI.dispatch(grantedAccessDetail(body?.body));
+      return data?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "CHECK_GRANTED_PRODUCT" }),
+      );
+      return thunkAPI.rejectWithValue(error);
+    }
+  },
+);
 
 export const getGlobalPropertiesAttachment = createAsyncThunk(
   "GET_GLOBAL_PROPERTIES_ATTACHMENT",
@@ -94,7 +105,7 @@ export const getGlobalPropertiesAttachment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getAllProductPaginate = createAsyncThunk(
@@ -110,7 +121,7 @@ export const getAllProductPaginate = createAsyncThunk(
       console.log(error, " = error slice");
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getAllProductActivePaginate = createAsyncThunk(
@@ -125,7 +136,7 @@ export const getAllProductActivePaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListProductType = createAsyncThunk(
@@ -141,7 +152,7 @@ export const getListProductType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListProductClass = createAsyncThunk(
@@ -157,7 +168,7 @@ export const getListProductClass = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListServiceType = createAsyncThunk(
@@ -173,7 +184,7 @@ export const getListServiceType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListAppHier = createAsyncThunk(
@@ -189,7 +200,7 @@ export const getListAppHier = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListAppHierInactive = createAsyncThunk(
@@ -202,7 +213,7 @@ export const getListAppHierInactive = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListAppHierDetail = createAsyncThunk(
@@ -222,7 +233,7 @@ export const getListAppHierDetail = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListAppHierDetailInactive = createAsyncThunk(
@@ -235,7 +246,7 @@ export const getListAppHierDetailInactive = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListCategory = createAsyncThunk(
@@ -251,7 +262,7 @@ export const getListCategory = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListPaymentType = createAsyncThunk(
@@ -267,7 +278,7 @@ export const getListPaymentType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListChargingMethod = createAsyncThunk(
@@ -283,7 +294,7 @@ export const getListChargingMethod = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListCalculationType = createAsyncThunk(
@@ -299,7 +310,7 @@ export const getListCalculationType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getSelectCriteria = createAsyncThunk(
@@ -311,12 +322,12 @@ export const getSelectCriteria = createAsyncThunk(
       return (response?.data || []).map((item) => ({
         label: item.text,
         value: item.id,
-        code:item?.code,
+        code: item?.code,
       }));
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 /** Get List Criteria */
@@ -335,7 +346,7 @@ export const getProvinceList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCityList = createAsyncThunk(
@@ -353,7 +364,7 @@ export const getCityList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCostCenterList = createAsyncThunk(
@@ -371,7 +382,7 @@ export const getCostCenterList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSorList = createAsyncThunk("GET_SOR_LIST", async (thunkAPI) => {
@@ -404,7 +415,7 @@ export const getDistrictList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSubDistrictList = createAsyncThunk(
@@ -422,7 +433,7 @@ export const getSubDistrictList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getGsizesList = createAsyncThunk(
@@ -440,7 +451,7 @@ export const getGsizesList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getIndustrialSectorList = createAsyncThunk(
@@ -458,7 +469,7 @@ export const getIndustrialSectorList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCustomerSegment = createAsyncThunk(
@@ -476,7 +487,7 @@ export const getCustomerSegment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getServiceTypeList = createAsyncThunk(
@@ -494,7 +505,7 @@ export const getServiceTypeList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountCategoryList = createAsyncThunk(
@@ -512,7 +523,7 @@ export const getAccountCategoryList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountGroupList = createAsyncThunk(
@@ -530,7 +541,7 @@ export const getAccountGroupList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getBudgetList = createAsyncThunk(
@@ -548,7 +559,7 @@ export const getBudgetList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCustomerList = createAsyncThunk(
@@ -566,7 +577,7 @@ export const getCustomerList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getPricingRuleList = createAsyncThunk(
@@ -579,13 +590,13 @@ export const getPricingRuleList = createAsyncThunk(
       const url = `/v1/dbs/api/product/getPricingRuleList`;
       const response = await productPromoHttpService.updateDataWithMethodPost(
         url,
-        param
+        param,
       );
       return response.data || [];
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getPriceCodeList = createAsyncThunk(
@@ -598,13 +609,13 @@ export const getPriceCodeList = createAsyncThunk(
       const url = `/v1/dbs/api/product/getPricingHeaderList`;
       const response = await productPromoHttpService.updateDataWithMethodPost(
         url,
-        param
+        param,
       );
       return response.data || [];
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getTosList = createAsyncThunk(
@@ -617,13 +628,13 @@ export const getTosList = createAsyncThunk(
       const url = `/v1/dbs/api/product/getTermOfServiceList`;
       const response = await productPromoHttpService.updateDataWithMethodPost(
         url,
-        param
+        param,
       );
       return response.data || [];
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListName = createAsyncThunk(
@@ -640,7 +651,7 @@ export const getListName = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListNameProductDetail = createAsyncThunk(
@@ -657,7 +668,7 @@ export const getListNameProductDetail = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListNameCalculationRule = createAsyncThunk(
@@ -674,7 +685,7 @@ export const getListNameCalculationRule = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListUnit = createAsyncThunk(
@@ -695,7 +706,7 @@ export const getListUnit = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListUnitVAT = createAsyncThunk(
@@ -712,7 +723,7 @@ export const getListUnitVAT = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListUnitWithHoldTax = createAsyncThunk(
@@ -729,7 +740,7 @@ export const getListUnitWithHoldTax = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListUnitTOS = createAsyncThunk(
@@ -749,7 +760,7 @@ export const getListUnitTOS = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListFromItemTos = createAsyncThunk(
@@ -769,7 +780,7 @@ export const getListFromItemTos = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getPricingRuleDetail = createAsyncThunk(
@@ -782,7 +793,7 @@ export const getPricingRuleDetail = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getPricingAdjustment = createAsyncThunk(
@@ -795,7 +806,7 @@ export const getPricingAdjustment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getAttributeTos = createAsyncThunk(
@@ -812,7 +823,7 @@ export const getAttributeTos = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDiscountType = createAsyncThunk(
@@ -829,7 +840,7 @@ export const getDiscountType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadProduct = createAsyncThunk(
@@ -843,10 +854,14 @@ export const downloadProduct = createAsyncThunk(
       const response = await productPromoHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error, action: "DOWNLOAD_PRODUCT", back : false }));
-      return thunkAPI.rejectWithValue(error.response.data.code === 419 ? null : error.response.data)
+      thunkAPI.dispatch(
+        validateError({ error, action: "DOWNLOAD_PRODUCT", back: false }),
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
     }
-  }
+  },
 );
 
 export const lockProduct = createAsyncThunk(
@@ -856,7 +871,7 @@ export const lockProduct = createAsyncThunk(
       const url = `/v1/dbs/api/product/lockProduct`;
       const response = await productPromoHttpService.activationWithRemark(
         url,
-        data
+        data,
       );
       const successBody = {
         title: "Successful",
@@ -882,7 +897,7 @@ export const lockProduct = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const inactiveProduct = createAsyncThunk(
@@ -892,7 +907,7 @@ export const inactiveProduct = createAsyncThunk(
       const url = `/v1/dbs/api/product/inactiveProduct`;
       const response = await productPromoHttpService.activationWithRemark(
         url,
-        data
+        data,
       );
       const successBody = {
         title: "Successful",
@@ -914,7 +929,7 @@ export const inactiveProduct = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getApprovalHistoryProduct = createAsyncThunk(
@@ -927,7 +942,7 @@ export const getApprovalHistoryProduct = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getApprovalHistoryProductVersion = createAsyncThunk(
@@ -940,7 +955,7 @@ export const getApprovalHistoryProductVersion = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const createProductBody = createAsyncThunk(
@@ -971,7 +986,7 @@ export const createProductBody = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateProductBody = createAsyncThunk(
@@ -1002,7 +1017,7 @@ export const updateProductBody = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const createProductVersionBody = createAsyncThunk(
@@ -1033,7 +1048,7 @@ export const createProductVersionBody = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateProductVersionBody = createAsyncThunk(
@@ -1064,7 +1079,7 @@ export const updateProductVersionBody = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getDetailProduct = createAsyncThunk(
@@ -1077,7 +1092,7 @@ export const getDetailProduct = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getDetailProductVersion = createAsyncThunk(
@@ -1090,7 +1105,7 @@ export const getDetailProductVersion = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getLockHistory = createAsyncThunk(
@@ -1103,7 +1118,7 @@ export const getLockHistory = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getExtendTerminateHistory = createAsyncThunk(
@@ -1116,7 +1131,7 @@ export const getExtendTerminateHistory = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getProductVersionList = createAsyncThunk(
@@ -1129,7 +1144,7 @@ export const getProductVersionList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getPricingDetailList = createAsyncThunk(
@@ -1142,7 +1157,7 @@ export const getPricingDetailList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const releaseProduct = createAsyncThunk(
@@ -1152,7 +1167,7 @@ export const releaseProduct = createAsyncThunk(
       const url = `/v1/dbs/api/product/release-product`;
       const response = await productPromoHttpService.activationWithRemark(
         url,
-        data
+        data,
       );
       const successBody = {
         title: "Successful",
@@ -1174,7 +1189,7 @@ export const releaseProduct = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const extendProductVersion = createAsyncThunk(
@@ -1184,7 +1199,7 @@ export const extendProductVersion = createAsyncThunk(
       const url = `/v1/dbs/api/product/extend-product`;
       const response = await productPromoHttpService.activationWithRemark(
         url,
-        data
+        data,
       );
       const successBody = {
         title: "Successful",
@@ -1206,7 +1221,7 @@ export const extendProductVersion = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const terminateProductVersion = createAsyncThunk(
@@ -1216,7 +1231,7 @@ export const terminateProductVersion = createAsyncThunk(
       const url = `/v1/dbs/api/product/terminate-product`;
       const response = await productPromoHttpService.activationWithRemark(
         url,
-        data
+        data,
       );
       const successBody = {
         title: "Successful",
@@ -1238,7 +1253,7 @@ export const terminateProductVersion = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approvalInactiveProduct = createAsyncThunk(
@@ -1248,7 +1263,7 @@ export const approvalInactiveProduct = createAsyncThunk(
       const url = `/v1/dbs/api/product/approval-inactive-product`;
       const response = await productPromoHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -1278,7 +1293,7 @@ export const approvalInactiveProduct = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approvalProductVersion = createAsyncThunk(
@@ -1288,7 +1303,7 @@ export const approvalProductVersion = createAsyncThunk(
       const url = `/v1/dbs/api/product/approval-product-version`;
       const response = await productPromoHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -1318,7 +1333,7 @@ export const approvalProductVersion = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approvalExtendProductVersion = createAsyncThunk(
@@ -1328,7 +1343,7 @@ export const approvalExtendProductVersion = createAsyncThunk(
       const url = `/v1/dbs/api/product/approval-extend-product`;
       const response = await productPromoHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -1358,7 +1373,7 @@ export const approvalExtendProductVersion = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approvalTerminateProductVersion = createAsyncThunk(
@@ -1368,7 +1383,7 @@ export const approvalTerminateProductVersion = createAsyncThunk(
       const url = `/v1/dbs/api/product/approval-terminate-product`;
       const response = await productPromoHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -1398,7 +1413,7 @@ export const approvalTerminateProductVersion = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 const productSlice = createSlice({

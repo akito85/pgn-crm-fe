@@ -11,8 +11,8 @@ const ActiveAndInactiveGasQuality = ({
   handleCancelFooter = () => {},
   handleConfirmFooter = () => {},
   remark,
-  onChange = () => { },
-  documentNumber
+  onChange = () => {},
+  documentNumber,
 }) => {
   return (
     <ModalApproveOrReject

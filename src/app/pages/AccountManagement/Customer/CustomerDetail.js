@@ -28,11 +28,9 @@ const tabs = [
 const CustomerDetail = () => {
   const dispatch = useDispatch();
   const { data_customerDetail, loading, loadingAccount } = useSelector(
-    (state) => state.customerAccount
-    );
-  const { access_account } = useSelector(
-    (state) => state.accountManagement
+    (state) => state.customerAccount,
   );
+  const { access_account } = useSelector((state) => state.accountManagement);
   const isLoading = loading || loadingAccount;
 
   //declare
@@ -45,8 +43,8 @@ const CustomerDetail = () => {
   const [typeDetailSection, setTypeDetailSection] = useState(tabs[0].value);
 
   useEffect(() => {
-    dispatch(getGrantedAccessAccount('/account-management/customers'))
-}, [dispatch])
+    dispatch(getGrantedAccessAccount("/account-management/customers"));
+  }, [dispatch]);
 
   useEffect(() => {
     if (id) {
@@ -73,11 +71,11 @@ const CustomerDetail = () => {
       breadcrumbName: "Account",
     },
     {
-      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_CUSTOMER,
-      breadcrumbName:"Customers",
+      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_CUSTOMER,
+      breadcrumbName: "Customers",
     },
     {
-      path:"",
+      path: "",
       breadcrumbName: "Detail Customer",
     },
   ];
@@ -101,7 +99,9 @@ const CustomerDetail = () => {
               {data_customerDetail?.customerId}
             </DetailText>
             <DetailText label="Created Date">
-              {moment(data_customerDetail?.createdDate).format(dateFormatting.dateTime)}
+              {moment(data_customerDetail?.createdDate).format(
+                dateFormatting.dateTime,
+              )}
             </DetailText>
             <DetailText label="Created By">
               {data_customerDetail?.createdBy}

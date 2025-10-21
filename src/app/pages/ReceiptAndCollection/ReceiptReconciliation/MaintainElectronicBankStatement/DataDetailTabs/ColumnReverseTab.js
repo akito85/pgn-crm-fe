@@ -16,7 +16,7 @@ export const columnsReverseTab = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  handleApprovalHistory = () => {}
+  handleApprovalHistory = () => {},
 ) => [
   {
     title: "NO",
@@ -34,7 +34,7 @@ export const columnsReverseTab = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "receiptCode" ? (
@@ -69,7 +69,7 @@ export const columnsReverseTab = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "sor" ? (
@@ -101,7 +101,7 @@ export const columnsReverseTab = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -136,7 +136,7 @@ export const columnsReverseTab = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -171,7 +171,7 @@ export const columnsReverseTab = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -206,7 +206,7 @@ export const columnsReverseTab = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -242,7 +242,7 @@ export const columnsReverseTab = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "receiptDate" ? (
@@ -276,7 +276,7 @@ export const columnsReverseTab = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -313,7 +313,7 @@ export const columnsReverseTab = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (approvalStatus) => {
       let text;
@@ -435,8 +435,8 @@ export const columnsReverseTab = (
                             r?.status === "Active"
                               ? true
                               : false || r?.status === "Draft"
-                              ? true
-                              : null
+                                ? true
+                                : null
                           }
                           disabled={true}
                           className="gap-7"

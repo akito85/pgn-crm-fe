@@ -45,11 +45,11 @@ export const getPaginateReceipt = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_ALL_RECEIPT" })
+        validateError({ error: error, action: "GET_ALL_RECEIPT" }),
       );
       return error;
     }
-  }
+  },
 );
 
 export const getReceiptDetail = createAsyncThunk(
@@ -61,11 +61,11 @@ export const getReceiptDetail = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_RECEIPT_DETAIL" })
+        validateError({ error: error, action: "GET_RECEIPT_DETAIL" }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getAllocation = createAsyncThunk(
@@ -80,11 +80,11 @@ export const getAllocation = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "DATA_ALLOCATION" })
+        validateError({ error: error, action: "DATA_ALLOCATION" }),
       );
       return error;
     }
-  }
+  },
 );
 
 export const getDownloadReceipt = createAsyncThunk(
@@ -99,11 +99,11 @@ export const getDownloadReceipt = createAsyncThunk(
       return response.data;
     } catch (response) {
       thunkAPI.dispatch(
-        validateError({ error: response, action: "DOWNLOAD_RECEIPT" })
+        validateError({ error: response, action: "DOWNLOAD_RECEIPT" }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getCollectionAgentDDL = createAsyncThunk(
@@ -130,7 +130,7 @@ export const getCollectionAgentDDL = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAccountNumberDDL = createAsyncThunk(
@@ -157,7 +157,7 @@ export const getAccountNumberDDL = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAccountDDL = createAsyncThunk(
@@ -184,7 +184,7 @@ export const getAccountDDL = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListApprovalByIdReceipt = createAsyncThunk(
@@ -211,7 +211,7 @@ export const getListApprovalByIdReceipt = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListCategoryReceipt = createAsyncThunk(
@@ -242,7 +242,7 @@ export const getListCategoryReceipt = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getReceiptChanelDDL = createAsyncThunk(
@@ -269,7 +269,7 @@ export const getReceiptChanelDDL = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getPayMethodDDL = createAsyncThunk(
@@ -296,7 +296,7 @@ export const getPayMethodDDL = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getCusNumberDDL = createAsyncThunk(
@@ -323,7 +323,7 @@ export const getCusNumberDDL = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getPayGetwayDDL = createAsyncThunk(
@@ -350,7 +350,7 @@ export const getPayGetwayDDL = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getPayTypeDDL = createAsyncThunk(
@@ -377,7 +377,7 @@ export const getPayTypeDDL = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getPayDeliverDDL = createAsyncThunk(
@@ -404,7 +404,7 @@ export const getPayDeliverDDL = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getCurrencyDDL = createAsyncThunk(
@@ -431,7 +431,7 @@ export const getCurrencyDDL = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getBankDDL = createAsyncThunk(
@@ -458,7 +458,7 @@ export const getBankDDL = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getRateTypeDDL = createAsyncThunk(
@@ -485,7 +485,7 @@ export const getRateTypeDDL = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAllApprovalListReceipt = createAsyncThunk(
@@ -512,7 +512,7 @@ export const getAllApprovalListReceipt = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // get allocation
@@ -529,7 +529,7 @@ export const getAllocationRecomendationList = createAsyncThunk(
       currencyId,
       rateAmount,
     },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParams = search === undefined ? "" : search;
@@ -554,11 +554,15 @@ export const getAllocationRecomendationList = createAsyncThunk(
       }
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: errorBody( errorCode(error), "created", errorMessage(error) ), action: "allocation-list", back: false })
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "allocation-list",
+          back: false,
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 
 // get recommendation detail
@@ -575,11 +579,11 @@ export const getRecommendationDetailAllocation = createAsyncThunk(
           error: error,
           action: "GET_RECOMMENDATION_DETAIL",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // create receipt
@@ -598,11 +602,11 @@ export const createReceipt = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "CREATE_RECEIPT", back: false })
+        validateError({ error: error, action: "CREATE_RECEIPT", back: false }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 // create receipt
 export const createAllocation = createAsyncThunk(
@@ -624,11 +628,11 @@ export const createAllocation = createAsyncThunk(
           error: error,
           action: "CREATE_ALLOCATION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const approveOrRejectReceipt = createAsyncThunk(
@@ -666,7 +670,7 @@ export const approveOrRejectReceipt = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // get converted currency
@@ -678,7 +682,7 @@ export const getConvertedCurrency = createAsyncThunk(
         const url = "/v1/dbs/api/receipt/converted-currency/get";
         const response = await receiptCollectionHttpService.createData(
           url,
-          body
+          body,
         );
         return response?.data;
       }
@@ -688,11 +692,11 @@ export const getConvertedCurrency = createAsyncThunk(
           error: error,
           action: "GET_CONVERTED_CURRENCY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // get approval history
@@ -709,11 +713,11 @@ export const getApprovalHistory = createAsyncThunk(
           error: error,
           action: "GET_APPROVAL_HISTORY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // delete receipt
@@ -725,7 +729,7 @@ export const deleteReceipt = createAsyncThunk(
         const url = "/v1/dbs/api/receipt/delete";
         const response = await receiptCollectionHttpService.createData(
           url,
-          body
+          body,
         );
         const successBody = {
           title: `Successful`,
@@ -737,11 +741,11 @@ export const deleteReceipt = createAsyncThunk(
       }
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "DELETE_RECEIPT", back: false })
+        validateError({ error: error, action: "DELETE_RECEIPT", back: false }),
       );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 const receiptSlice = createSlice({

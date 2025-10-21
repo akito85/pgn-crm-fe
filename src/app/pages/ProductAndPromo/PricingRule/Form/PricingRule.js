@@ -43,9 +43,9 @@ const PricingRule = ({
   type,
   status = "",
   storedData = false,
-  setStoredData = () => { },
+  setStoredData = () => {},
   startDate,
-  setStartDate = () => { },
+  setStartDate = () => {},
   endDate,
   setEndDate = () => {},
 }) => {
@@ -62,7 +62,6 @@ const PricingRule = ({
     { value: "Detail", paramValue: ["priceCode"] },
     { value: "Criteria" },
   ]);
-
 
   // Use Effect
   useEffect(() => {
@@ -104,7 +103,7 @@ const PricingRule = ({
       rPricingRuleCriterias: outputArray,
     });
   };
-// console.log(criteriaValues, ' lalal');
+  // console.log(criteriaValues, ' lalal');
 
   const handleDeselectCriteria = (value) => {
     let res = criteriaValues.filter((item) => item !== value);
@@ -134,7 +133,7 @@ const PricingRule = ({
 
   // Validation Handle Start Date
   const handleStartDate = (value) => {
-    form.resetFields(["endDate"])
+    form.resetFields(["endDate"]);
     setStartDate(value);
     return value;
   };
@@ -171,7 +170,10 @@ const PricingRule = ({
               { required: true, message: "Please input your Pricing Rule!" },
             ]}
           >
-            <InputComponent disabled={(type === "update" && status === "ACTIVE")} maxLength={100}/>
+            <InputComponent
+              disabled={type === "update" && status === "ACTIVE"}
+              maxLength={100}
+            />
           </Form.Item>
           <Form.Item
             label={"Start Date"}
@@ -184,9 +186,7 @@ const PricingRule = ({
             <DateComponent
               mandatory
               dateDisable={disabledDate}
-              disabled={
-                (type === "update" && status === "ACTIVE")
-              }
+              disabled={type === "update" && status === "ACTIVE"}
             />
           </Form.Item>
           <Form.Item
@@ -198,8 +198,8 @@ const PricingRule = ({
                   (value && moment(startDate) <= moment(value)) || !value
                     ? Promise.resolve()
                     : Promise.reject(
-                      new Error("End date must before Start date")
-                    ),
+                        new Error("End date must before Start date"),
+                      ),
               },
             ]}
             getValueFromEvent={handleEndDate}

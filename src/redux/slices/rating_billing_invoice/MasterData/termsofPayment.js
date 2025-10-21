@@ -70,7 +70,7 @@ export const getTopPaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getDetailTOP = createAsyncThunk(
@@ -96,7 +96,7 @@ export const getDetailTOP = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 //get type create
@@ -123,7 +123,7 @@ export const getTopDDL = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getDetailDraftTOP = createAsyncThunk(
@@ -149,7 +149,7 @@ export const getDetailDraftTOP = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 //list approval hierarchy
@@ -176,7 +176,7 @@ export const getAllApprovalList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getListApprovalById = createAsyncThunk(
@@ -202,7 +202,7 @@ export const getListApprovalById = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getListCategory = createAsyncThunk(
@@ -231,7 +231,7 @@ export const getListCategory = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 //create
@@ -272,7 +272,7 @@ export const createTOP = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 //update
@@ -313,7 +313,7 @@ export const updateTOP = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const downloadTOPS = createAsyncThunk(
@@ -327,10 +327,16 @@ export const downloadTOPS = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_TOPS", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_TOPS",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const inactiveTOP = createAsyncThunk(
@@ -340,7 +346,7 @@ export const inactiveTOP = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/top/inactive-top`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const message = response.message;
       const successMessage = {
@@ -367,7 +373,7 @@ export const inactiveTOP = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const approveInactive = createAsyncThunk(
@@ -377,7 +383,7 @@ export const approveInactive = createAsyncThunk(
       const url = "/v1/dbs/api/rbi/top/approval-inactive";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const message = response?.message;
       const successMessage = {
@@ -409,7 +415,7 @@ export const approveInactive = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const approveCreateUpdateTOP = createAsyncThunk(
@@ -419,7 +425,7 @@ export const approveCreateUpdateTOP = createAsyncThunk(
       const url = "/v1/dbs/api/rbi/top/approval-top";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const message = response?.message;
       const successMessage = {
@@ -451,7 +457,7 @@ export const approveCreateUpdateTOP = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getApprovalHistoryTOP = createAsyncThunk(
@@ -464,7 +470,7 @@ export const getApprovalHistoryTOP = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 //criteria
@@ -479,7 +485,7 @@ export const getListCriteriaTOP = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getProvinceList = createAsyncThunk(
@@ -492,7 +498,7 @@ export const getProvinceList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCityList = createAsyncThunk(
@@ -505,7 +511,7 @@ export const getCityList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDistrictList = createAsyncThunk(
@@ -518,7 +524,7 @@ export const getDistrictList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSubDistrictList = createAsyncThunk(
@@ -531,7 +537,7 @@ export const getSubDistrictList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // export const getProductList = createAsyncThunk(
@@ -557,7 +563,7 @@ export const getBudgetList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCustomer = createAsyncThunk(
@@ -570,7 +576,7 @@ export const getCustomer = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCostCenterList = createAsyncThunk(
@@ -583,7 +589,7 @@ export const getCostCenterList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSorList = createAsyncThunk(
@@ -596,7 +602,7 @@ export const getSorList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getGsizesList = createAsyncThunk(
@@ -609,7 +615,7 @@ export const getGsizesList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCustomerSegment = createAsyncThunk(
@@ -622,7 +628,7 @@ export const getCustomerSegment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getIndustrialSectorList = createAsyncThunk(
@@ -635,7 +641,7 @@ export const getIndustrialSectorList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountCategoryList = createAsyncThunk(
@@ -648,7 +654,7 @@ export const getAccountCategoryList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountGroupList = createAsyncThunk(
@@ -661,7 +667,7 @@ export const getAccountGroupList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListCurrency = createAsyncThunk(
@@ -674,7 +680,7 @@ export const getListCurrency = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getServiceTypeList = createAsyncThunk(
@@ -687,7 +693,7 @@ export const getServiceTypeList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const termsofPaymentSlice = createSlice({

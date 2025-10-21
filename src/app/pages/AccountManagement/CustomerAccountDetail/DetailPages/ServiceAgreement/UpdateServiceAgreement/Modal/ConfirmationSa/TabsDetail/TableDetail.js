@@ -1,11 +1,8 @@
-import React, {useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../../../components/TablePagination'
-import DetailText from '../../../../../../../../../../components/DetailText'
+import React, { useState, useEffect, useRef } from "react";
+import TablePagination from "../../../../../../../../../../components/TablePagination";
+import DetailText from "../../../../../../../../../../components/DetailText";
 
-const TableDetail = ({
-  dataTableProduct,
-  saDetailObj
-}) => {
+const TableDetail = ({ dataTableProduct, saDetailObj }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -16,8 +13,8 @@ const TableDetail = ({
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    setTotalElement(dataTableProduct?.length)
-  }, [])
+    setTotalElement(dataTableProduct?.length);
+  }, []);
 
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
@@ -87,46 +84,46 @@ const TableDetail = ({
         render: (text, object, index) => index + 1,
       },
       {
-        title: 'Name',
-        dataIndex: 'name',
-        sorter:true,
-        render: (name)=>{
-          return (
-            <span>{name?.label}</span>
-          )
-        }
+        title: "Name",
+        dataIndex: "name",
+        sorter: true,
+        render: (name) => {
+          return <span>{name?.label}</span>;
+        },
       },
       {
-        title: 'VALUE',
-        dataIndex: 'value',
-        sorter:true,
+        title: "VALUE",
+        dataIndex: "value",
+        sorter: true,
       },
       {
-        title: 'UNIT',
-        dataIndex: 'unit',
-        sorter:true,
-        render: (unit)=>{
-          return (
-            <span>{unit !== undefined ? unit.label : ""}</span>
-          )
-        }
-      }
+        title: "UNIT",
+        dataIndex: "unit",
+        sorter: true,
+        render: (unit) => {
+          return <span>{unit !== undefined ? unit.label : ""}</span>;
+        },
+      },
     ];
     return result;
-  }
+  };
 
   return (
     <div>
       <div className="grid grid-cols-4 gap-5 py-[10px]">
-        <DetailText label="Payment Type">{saDetailObj?.objPaymentType?.unitName}</DetailText>
-        <DetailText label="Charging Method">{saDetailObj?.objChargingMethod?.unitName}</DetailText>
+        <DetailText label="Payment Type">
+          {saDetailObj?.objPaymentType?.unitName}
+        </DetailText>
+        <DetailText label="Charging Method">
+          {saDetailObj?.objChargingMethod?.unitName}
+        </DetailText>
       </div>
 
       <TablePagination
         pageSize={pageSize}
         current={page}
         dataSource={filterDataByPage()}
-        tableScrolled={{y: 525, x: 1500 }}
+        tableScrolled={{ y: 525, x: 1500 }}
         totalData={totalElement}
         onChange={handleChangeSize}
         onSort={onSort}
@@ -140,7 +137,7 @@ const TableDetail = ({
         })}
       />
     </div>
-  )
-}
+  );
+};
 
-export default TableDetail
+export default TableDetail;

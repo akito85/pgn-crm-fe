@@ -13,7 +13,7 @@ import { getListCustomerContact } from "../../../../../../redux/slices/account_m
 
 const CustomerContactList = ({ id = 0, dispatch = () => {} }) => {
   const { data_customerDetailContact, loading } = useSelector(
-    (state) => state.customerAccount
+    (state) => state.customerAccount,
   );
   //declare
   const searchInput = useRef(null);
@@ -42,7 +42,13 @@ const CustomerContactList = ({ id = 0, dispatch = () => {} }) => {
       }
       tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
       dispatch(
-        getListCustomerContact({ id, page, pageSize, sort, search: tempSearch })
+        getListCustomerContact({
+          id,
+          page,
+          pageSize,
+          sort,
+          search: tempSearch,
+        }),
       );
     }
   }, [dispatch, id, page, pageSize, sort, search]);
@@ -64,9 +70,9 @@ const CustomerContactList = ({ id = 0, dispatch = () => {} }) => {
               ...detail,
               key: index + 1,
               parent: indexContact + 1,
-            })
+            }),
           ),
-        })
+        }),
       );
       setDataTable(data);
     }

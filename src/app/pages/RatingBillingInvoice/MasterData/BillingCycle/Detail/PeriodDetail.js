@@ -4,8 +4,16 @@ import ButtonComponent from "../../../../../../components/ButtonComponent";
 import CardComponent from "../../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../../components/DetailText";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValue,
+} from "../../../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import Highlighter from "react-highlight-words";
 import { Tooltip } from "antd";
@@ -16,11 +24,11 @@ const PeriodDetail = ({
   data_detail,
   data_history,
   openModal,
-  closeModal = () => { },
-  idDetail
+  closeModal = () => {},
+  idDetail,
 }) => {
   const searchInput = useRef(null);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState("");
@@ -30,15 +38,14 @@ const PeriodDetail = ({
 
   useEffect(() => {
     if (openModal === false) {
-      setPage(1)
-      setPageSize(10)
-      setSearch({})
-      setSearchText("")
-      setSearchedColumn("")
-      setSort("")
+      setPage(1);
+      setPageSize(10);
+      setSearch({});
+      setSearchText("");
+      setSearchedColumn("");
+      setSort("");
     }
   }, [openModal]);
-
 
   useEffect(() => {
     dispatch(
@@ -48,10 +55,9 @@ const PeriodDetail = ({
         pageSize,
         search: encodeURIComponent(JSON.stringify(search)),
         sort,
-      })
+      }),
     );
   }, [dispatch, idDetail, page, pageSize, search, sort]);
-
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -100,9 +106,18 @@ const PeriodDetail = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) =>  renderColumn('action', hasValue(search['action']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "action",
+          hasValue(search["action"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACTOR",
@@ -115,9 +130,18 @@ const PeriodDetail = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('actor', hasValue(search['actor']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "actor",
+          hasValue(search["actor"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACTION DATE",
@@ -133,9 +157,17 @@ const PeriodDetail = ({
         searchText,
         handleSearch,
         true,
-        'datetime'
+        "datetime",
       ),
-      render: (text) => renderDateColumn('actionDate', hasValue(search['actionDate']), searchText, text, 'datetime', search)
+      render: (text) =>
+        renderDateColumn(
+          "actionDate",
+          hasValue(search["actionDate"]),
+          searchText,
+          text,
+          "datetime",
+          search,
+        ),
     },
     {
       sorter: true,
@@ -151,9 +183,18 @@ const PeriodDetail = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('remark', hasValue(search['remark']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "remark",
+          hasValue(search["remark"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
   ];
   return (
@@ -192,9 +233,7 @@ const PeriodDetail = ({
         </CardComponent>
 
         <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-          <DetailText label="Record ID">
-            {data_detail?.id}
-          </DetailText>
+          <DetailText label="Record ID">{data_detail?.id}</DetailText>
           <DetailText label="Created Date">
             {data_detail?.createdDate
               ? moment(data_detail.createdDate).format(dateFormatting.dateTime)

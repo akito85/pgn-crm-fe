@@ -11,7 +11,7 @@ const PaymentChannelForm = ({
 }) => {
   // Selector
   const { loading, data_paymentChannel = [] } = useSelector(
-    (state) => state.account
+    (state) => state.account,
   );
 
   // Use Effect
@@ -37,14 +37,14 @@ const PaymentChannelForm = ({
           getValueFromEvent={(e) => handleFIObj(e, "paymentChannelType")}
         >
           <SelectComponent>
-            {(
+            {
               // data_paymentChannel &&
-              data_paymentChannel || []
-              )?.map((ta, index) => (
+              (data_paymentChannel || [])?.map((ta, index) => (
                 <Select.Option value={ta?.id} key={index}>
                   {ta?.name}
                 </Select.Option>
-              ))}
+              ))
+            }
           </SelectComponent>
         </Form.Item>
         {fiObj.paymentChannelType === 783 ? (

@@ -133,7 +133,7 @@ const CalculationForm = ({ type }) => {
   useEffect(() => {
     let dataMrc = list_meter_reading_code?.reduce(
       (result, current) => result?.concat(current?.dtoList),
-      []
+      [],
     );
     setMergedArrayMrc(dataMrc);
   }, [dispatch, list_meter_reading_code]);
@@ -141,7 +141,7 @@ const CalculationForm = ({ type }) => {
   useEffect(() => {
     let dataGroupType = list_account_group?.reduce(
       (result, current) => result?.concat(current?.dtoList),
-      []
+      [],
     );
     setMergedArrayGroupType(dataGroupType);
   }, [dispatch, list_account_group]);
@@ -185,7 +185,7 @@ const CalculationForm = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -217,7 +217,7 @@ const CalculationForm = ({ type }) => {
             calCode: null,
             mreadingCode: id,
           };
-        }
+        },
       ),
       rRbiCalculationAccountSegment: (formValue?.accountSegment || []).map(
         (id) => {
@@ -226,7 +226,7 @@ const CalculationForm = ({ type }) => {
             calCode: null,
             accSegment: id,
           };
-        }
+        },
       ),
       rRbiCalculationAccountGroupType: (formValue?.accountGroupType || []).map(
         (id) => {
@@ -235,7 +235,7 @@ const CalculationForm = ({ type }) => {
             calCode: null,
             accGroupType: id,
           };
-        }
+        },
       ),
       rRbiCalculationSpecificCustomer: (formValue?.specificCustomer || []).map(
         (id) => {
@@ -244,7 +244,7 @@ const CalculationForm = ({ type }) => {
             calCode: null,
             custNumb: id,
           };
-        }
+        },
       ),
     });
 

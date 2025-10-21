@@ -28,8 +28,8 @@ import { ModalError } from "../../../../../../../components/Modal/ModalPopUp";
 const ContactForm = ({
   contactTable = [],
   setContactTable,
-  dispatch = () => { },
-  handleContactObj = () => { },
+  dispatch = () => {},
+  handleContactObj = () => {},
   dataAddress = [],
   prefix1,
   setPrefix1,
@@ -151,10 +151,9 @@ const ContactForm = ({
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [customerId, search, page, pageSize, sort]);
-
 
   useEffect(() => {
     if (dataContactList && dataContactList?.length > 0) {
@@ -172,7 +171,7 @@ const ContactForm = ({
 
   const validateContactAddress = (index) => {
     if (
-      contactTable[index]// &&
+      contactTable[index] // &&
       // addressObj[`businessPurpose${index + 1}`]?.length > 0
     ) {
       return true;
@@ -183,8 +182,7 @@ const ContactForm = ({
 
   // Validation Address Information
   const validateContactAddressForm = (index) => {
-
-    if ( index === 1 && contactTable.length >= 1) {
+    if (index === 1 && contactTable.length >= 1) {
       return validateContactAddress(0);
     }
     if (index === 2 && contactTable.length >= 2) {
@@ -247,14 +245,14 @@ const ContactForm = ({
       let result =
         type === "date"
           ? moment(record[dataIndex])
-            .format(dateFormatting.dateFormal)
-            ?.toString()
-            .toLowerCase()
-            .includes(value.toLowerCase())
+              .format(dateFormatting.dateFormal)
+              ?.toString()
+              .toLowerCase()
+              .includes(value.toLowerCase())
           : record[dataIndex]
-            ?.toString()
-            .toLowerCase()
-            .includes(value.toLowerCase());
+              ?.toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
       return result;
     },
     onFilterDropdownOpenChange: (visible) => {
@@ -326,7 +324,7 @@ const ContactForm = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch = () => { }
+      handleSearch = () => {},
     ) => {
       return [
         {
@@ -345,7 +343,7 @@ const ContactForm = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -358,7 +356,7 @@ const ContactForm = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
       ];
@@ -514,8 +512,10 @@ const ContactForm = ({
           if (record.inputType === 748) {
             return (
               <span>{`(${prefixName1}) (${prefixName2}) - ${tempValue} Ext. ${
-                suffix[`${keyModal}~${record.key}`] ? suffix[`${keyModal}~${record.key}`] : ""
-                }`}</span>
+                suffix[`${keyModal}~${record.key}`]
+                  ? suffix[`${keyModal}~${record.key}`]
+                  : ""
+              }`}</span>
             );
           } else {
             return <span>{`(${prefixName1}) - ${tempValue}`}</span>;
@@ -528,9 +528,13 @@ const ContactForm = ({
           return <span>{`(${prefixName1}) - ${tempValue}`}</span>;
         }
         if (record.type === 745) {
-          return <span>{`(${prefixName1}) (${prefixName2}) - ${tempValue}Ext. ${
-            suffix[`${keyModal}~${record.key}`] ? suffix[`${keyModal}~${record.key}`] : ""
-          }`}</span>;
+          return (
+            <span>{`(${prefixName1}) (${prefixName2}) - ${tempValue}Ext. ${
+              suffix[`${keyModal}~${record.key}`]
+                ? suffix[`${keyModal}~${record.key}`]
+                : ""
+            }`}</span>
+          );
         } else {
           return <span>{tempValue}</span>;
         }
@@ -589,16 +593,16 @@ const ContactForm = ({
   };
 
   const handleValidateWord = () => {
-    if(isContactNewExist){
-      return "Your contact Information has been used by other new contact. Please input another contact Information to save."
-    } else if (emptyValueValidate){
-      return "Your contact detail still has missing value. Please input the missing value to save."
-    } else if (isEditing){
-      return "Your contact detail have not been saved. Please save contact detail first." 
+    if (isContactNewExist) {
+      return "Your contact Information has been used by other new contact. Please input another contact Information to save.";
+    } else if (emptyValueValidate) {
+      return "Your contact detail still has missing value. Please input the missing value to save.";
+    } else if (isEditing) {
+      return "Your contact detail have not been saved. Please save contact detail first.";
     } else {
-      return "Your contact detail is still empty. Please fill in the contact detail first."
+      return "Your contact detail is still empty. Please fill in the contact detail first.";
     }
-  }
+  };
 
   const handleCheckContactFromOthers = (data, newObject) => {
     if (data.length > 0) {
@@ -608,15 +612,15 @@ const ContactForm = ({
           jobId: item.jobId || null,
           positionId: item.positionId || null,
         };
-  
+
         return JSON.stringify(newObject) === JSON.stringify(temp);
       });
-      if(matches.includes(true)){
+      if (matches.includes(true)) {
         setIsContactNewExist(true);
       }
       return matches.includes(true);
     }
-  
+
     return false;
   };
 
@@ -630,7 +634,7 @@ const ContactForm = ({
         type: obj.type,
         inputType: obj.inputType,
         prefix1: obj.prefix1 || null,
-        prefix2: obj.prefix2  || null,
+        prefix2: obj.prefix2 || null,
         value: obj.fullValue,
         suffix: tempSuffix ? tempSuffix.toString() : null,
       };
@@ -653,8 +657,8 @@ const ContactForm = ({
     handleContactObj(null, `contactAddress${keyModal}`);
     handleContactObj(null, `additionalNote${keyModal}`);
     handleContactObj(null, `description${keyModal}`);
-    
-    form.resetFields([`additionalNote${keyModal}`, `description${keyModal}`])
+
+    form.resetFields([`additionalNote${keyModal}`, `description${keyModal}`]);
     setContactTable(newData);
     setModalChooseContact(false);
   };
@@ -668,84 +672,87 @@ const ContactForm = ({
       jobId: formValue.jobId || null,
       positionId: formValue.positionId || null,
     };
-    if (!handleCheckContactFromOthers(contactTable, body) && dataTableDetail.length > 0 && !isEditing ) {
-        dispatch(
-          checkContactExist(body))
-            .unwrap()
-            .then((data) => {
-  
-            const modifiedArray = dataTableDetail.map((obj, index) => {
-              const tempSuffix = suffix[`${keyModal}~${index + 1}`];
-              return {
-                key: obj.key,
-                type: obj.type,
-                inputType: obj.inputType,
-                prefix1: prefix1[`${keyModal}~${index + 1}`] || null,
-                prefix2: prefix2[`${keyModal}~${index + 1}`] || null,
-                value: value[`${keyModal}~${index + 1}`],
-                suffix: tempSuffix | tempSuffix === 0? tempSuffix.toString() : null,
-              };
-            });
-  
-            const newData = [...contactTable];
-  
-            const dataValue = {
-              ...formValue,
-              contactDetail: modifiedArray,
-              contactId: null,
-              contactName: `${formValue.firstName.trim()}${
-                formValue.middleName ? ` ${formValue.middleName.trim()}` : ""
-              }${formValue.lastName ? ` ${formValue.lastName.trim()}` : ""}`,
-              key: keyModal,
-              overview: `Contact ${keyModal}`,
-              primaryFlag: keyModal === 1 ? true : false,
+    if (
+      !handleCheckContactFromOthers(contactTable, body) &&
+      dataTableDetail.length > 0 &&
+      !isEditing
+    ) {
+      dispatch(checkContactExist(body))
+        .unwrap()
+        .then((data) => {
+          const modifiedArray = dataTableDetail.map((obj, index) => {
+            const tempSuffix = suffix[`${keyModal}~${index + 1}`];
+            return {
+              key: obj.key,
+              type: obj.type,
+              inputType: obj.inputType,
+              prefix1: prefix1[`${keyModal}~${index + 1}`] || null,
+              prefix2: prefix2[`${keyModal}~${index + 1}`] || null,
+              value: value[`${keyModal}~${index + 1}`],
+              suffix:
+                tempSuffix | (tempSuffix === 0) ? tempSuffix.toString() : null,
             };
-  
-            // replace if value undefined to be null
-            const outputObject = {};
-            for (const key in dataValue) {
-              if (dataValue.hasOwnProperty(key)) {
-                if (typeof dataValue[key] === "undefined") {
-                  outputObject[key] = null;
-                } else {
-                  outputObject[key] = dataValue[key];
-                }
+          });
+
+          const newData = [...contactTable];
+
+          const dataValue = {
+            ...formValue,
+            contactDetail: modifiedArray,
+            contactId: null,
+            contactName: `${formValue.firstName.trim()}${
+              formValue.middleName ? ` ${formValue.middleName.trim()}` : ""
+            }${formValue.lastName ? ` ${formValue.lastName.trim()}` : ""}`,
+            key: keyModal,
+            overview: `Contact ${keyModal}`,
+            primaryFlag: keyModal === 1 ? true : false,
+          };
+
+          // replace if value undefined to be null
+          const outputObject = {};
+          for (const key in dataValue) {
+            if (dataValue.hasOwnProperty(key)) {
+              if (typeof dataValue[key] === "undefined") {
+                outputObject[key] = null;
+              } else {
+                outputObject[key] = dataValue[key];
               }
             }
-  
-            newData[keyModal - 1] = outputObject;
-            setContactTable(newData);
-            handleContactObj(null, `contactAddress${keyModal}`);
-            setModalCreateContact(false);
-            formContact.resetFields();
-            setDataTableDetail([]);
-            setSelectDataRecord({});
-          })
-          .catch((error) => {
-            if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-              const message =
-                (error?.response &&
-                  error?.response?.data &&
-                  error?.response?.data?.message) ||
-                error?.message ||
-                error?.toString();
-              // console.log(error);
-              setBodyError({ message, value: formValue });
-  
-              setModalError(true);
-            }
-          });
-      } else {
-        setModalValidate(true);
-      }
+          }
+
+          newData[keyModal - 1] = outputObject;
+          setContactTable(newData);
+          handleContactObj(null, `contactAddress${keyModal}`);
+          setModalCreateContact(false);
+          formContact.resetFields();
+          setDataTableDetail([]);
+          setSelectDataRecord({});
+        })
+        .catch((error) => {
+          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+            const message =
+              (error?.response &&
+                error?.response?.data &&
+                error?.response?.data?.message) ||
+              error?.message ||
+              error?.toString();
+            // console.log(error);
+            setBodyError({ message, value: formValue });
+
+            setModalError(true);
+          }
+        });
+    } else {
+      setModalValidate(true);
+    }
   };
 
   // on change country
   const getCountryZoneByIdCountryCode = (e) => {
     if (e !== undefined) {
-      dispatch(getCountryZone(e))
+      dispatch(getCountryZone(e));
     }
-  }
+  };
 
   const handleRetry = () => {
     handleAdd(bodyError?.value);
@@ -753,8 +760,8 @@ const ContactForm = ({
     setBodyError({});
   };
 
-  console.log(dataSource, ' data source');
-  console.log(data_contact?.result, ' data contact')
+  console.log(dataSource, " data source");
+  console.log(data_contact?.result, " data contact");
 
   return (
     <div>
@@ -777,7 +784,8 @@ const ContactForm = ({
           <div className="flex flex-row">
             <Input.Group compact>
               <InputComponent
-                disabled={true} value={contactTable?.map((a) => a.contactName)[0]}
+                disabled={true}
+                value={contactTable?.map((a) => a.contactName)[0]}
               />
               <Button
                 type="primary"
@@ -1103,7 +1111,7 @@ const ContactForm = ({
       </div>
 
       {/* Modal Choose Contact */}
-      {modalChooseContact ? 
+      {modalChooseContact ? (
         <ModalCustom
           isOpen={modalChooseContact}
           type="confirmation"
@@ -1157,14 +1165,13 @@ const ContactForm = ({
               }}
             />
           </div>
-        </ModalCustom> : 
-        null
-      }
+        </ModalCustom>
+      ) : null}
 
       {/* Modal Create Contact */}
       {modalCreateContact ||
-        dataTableDetail === [] ||
-        selectDataRecord === {} ? (
+      dataTableDetail === [] ||
+      selectDataRecord === {} ? (
         <ModalCustom
           isOpen={modalCreateContact}
           type="confirmation"
@@ -1296,50 +1303,50 @@ const ContactForm = ({
           </Form>
         </ModalCustom>
       ) : null}
-      { modalValidate ? <ModalError
-        isOpen={modalValidate}
-        handleOk={() => {          
-          setEmptyValueValidate(false)
-          setIsContactNewExist(false)
-          setModalValidate(false)
-        }}
-        handleCancel={() => {
-          setEmptyValueValidate(false)
-          setIsContactNewExist(false)
-          setModalValidate(false)
-        }}
-        customText={"Back"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            <SVGIcon name="IconFailed" width={48} />
-            <p className="text-[18px] font-bold">{"Failed"}</p>
+      {modalValidate ? (
+        <ModalError
+          isOpen={modalValidate}
+          handleOk={() => {
+            setEmptyValueValidate(false);
+            setIsContactNewExist(false);
+            setModalValidate(false);
+          }}
+          handleCancel={() => {
+            setEmptyValueValidate(false);
+            setIsContactNewExist(false);
+            setModalValidate(false);
+          }}
+          customText={"Back"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">{handleValidateWord()}</p>
           </div>
-          <p className="pl-[70px]">
-            {
-              handleValidateWord()
-            }
-          </p>
-        </div>
-      </ModalError> : null}
+        </ModalError>
+      ) : null}
 
-      {modalError ? <ModalError
-        isOpen={modalError}
-        handleOk={handleRetry}
-        handleCancel={() => {
-          setModalError(false);
-        }}
-        customText={"Try Again"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            <SVGIcon name="IconFailed" width={48} />
-            <p className="text-[18px] font-bold">{"Failed"}</p>
+      {modalError ? (
+        <ModalError
+          isOpen={modalError}
+          handleOk={handleRetry}
+          handleCancel={() => {
+            setModalError(false);
+          }}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">{`Your data was not created. ${bodyError?.message}`}</p>
+            <p className="pl-[70px]">Please try again.</p>
           </div>
-          <p className="pl-[70px]">{`Your data was not created. ${bodyError?.message}`}</p>
-          <p className="pl-[70px]">Please try again.</p>
-        </div>
-      </ModalError>: null}
+        </ModalError>
+      ) : null}
     </div>
   );
 };

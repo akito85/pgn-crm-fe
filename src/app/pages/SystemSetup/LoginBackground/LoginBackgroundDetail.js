@@ -19,7 +19,7 @@ import { Spin } from "antd";
 
 const LoginBackgroundDetail = () => {
   const { detail_Background, loading } = useSelector(
-    (state) => state.login_background
+    (state) => state.login_background,
   );
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ const LoginBackgroundDetail = () => {
   const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
-  const [typeColumn, setTypeColumn] = useState('string');
+  const [typeColumn, setTypeColumn] = useState("string");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [modalInactive, setModalInactive] = useState(false);
@@ -72,15 +72,15 @@ const LoginBackgroundDetail = () => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     switch (dataIndex) {
-      case 'createdDate':
-        setTypeColumn('datetime')
+      case "createdDate":
+        setTypeColumn("datetime");
         break;
-      case 'operation':
-        setTypeColumn('status')
+      case "operation":
+        setTypeColumn("status");
         break;
 
       default:
-        setTypeColumn('string')
+        setTypeColumn("string");
         break;
     }
     setSearch((prevState) => {
@@ -117,7 +117,6 @@ const LoginBackgroundDetail = () => {
     <LayoutMenu>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
-
         <BaseContainer header={"LOGIN BACKGROUND INFORMATION"}>
           <div className={"w-auto grid grid-cols-2 gap-10"}>
             <div className={"flex flex-col w-full"}>
@@ -125,18 +124,23 @@ const LoginBackgroundDetail = () => {
                 {detail_Background?.backgroundName}
               </DetailText>
               <DetailText label={"Start Date"}>
-                {hasValue(detail_Background?.startDate) && moment(detail_Background?.startDate).format(dateFormatting.date)}
+                {hasValue(detail_Background?.startDate) &&
+                  moment(detail_Background?.startDate).format(
+                    dateFormatting.date,
+                  )}
               </DetailText>
               <DetailText label={"End Date"}>
                 {detail_Background.endDate
-                  ? moment(detail_Background?.endDate).format(dateFormatting.date)
+                  ? moment(detail_Background?.endDate).format(
+                      dateFormatting.date,
+                    )
                   : ""}
               </DetailText>
               <DetailText label={"Status"}>
                 {detail_Background.status
                   ? `${detail_Background?.status
-                    .charAt(0)
-                    .toUpperCase()}${detail_Background?.status
+                      .charAt(0)
+                      .toUpperCase()}${detail_Background?.status
                       .slice(1)
                       .toLowerCase()}`
                   : ""}
@@ -174,7 +178,7 @@ const LoginBackgroundDetail = () => {
         <BaseContainer header={"ACTIVATE/INACTIVE LOG INFORMATION"}>
           <div className={"w-full"}>
             <TablePaginationNew
-              type='FE'
+              type="FE"
               dataSource={detail_Background?.activeInactiveLog}
               columns={columnsDetailLoginBackground(
                 search,
@@ -184,13 +188,21 @@ const LoginBackgroundDetail = () => {
                 searchedColumn,
                 searchText,
                 handleSearch,
-                handleInactive
+                handleInactive,
               )}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
               onSizeChanger={handleChange}
-              totalData={updatePagination(detail_Background?.activeInactiveLog, 'length', searchedColumn, searchText, page, pageSize, typeColumn)}
+              totalData={updatePagination(
+                detail_Background?.activeInactiveLog,
+                "length",
+                searchedColumn,
+                searchText,
+                page,
+                pageSize,
+                typeColumn,
+              )}
               onSort={onSort}
               tableScrolled={{ y: 525, x: 1000 }}
             />

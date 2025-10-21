@@ -12,10 +12,10 @@ const ServicePointAssetDetail = ({ data = {} }) => {
     } else {
       return "";
     }
-  };  return (
+  };
+  return (
     <Fragment>
       <CardComponent header={"ASSET ASSIGNMENT INFORMATION"}>
-
         <div className="w-full grid grid-cols-3 gap-3">
           <DetailText label="Install Date">
             {moment(data?.installDate).format(dateFormatting.dateTime)}
@@ -24,12 +24,10 @@ const ServicePointAssetDetail = ({ data = {} }) => {
             {renderDate(data?.unInstallDate)}
           </DetailText>
           <DetailText label="Remark">{data?.remark}</DetailText>
-          
         </div>
       </CardComponent>
 
       <CardComponent header={"ASSET INFORMATION"}>
-
         <div className="w-full grid grid-cols-4 gap-3">
           <DetailText label="Serial Number">{data?.serialNumber}</DetailText>
           <DetailText label="Asset Name">{data?.assetName}</DetailText>
@@ -48,7 +46,6 @@ const ServicePointAssetDetail = ({ data = {} }) => {
       </CardComponent>
 
       <CardComponent header={"ASSET ATTRIBUTE"}>
-
         <div className="w-full grid grid-cols-4 gap-3">
           <DetailText label="Inlet Diameter">{data?.inletDiameter}</DetailText>
           <DetailText label="Outlet Diameter">

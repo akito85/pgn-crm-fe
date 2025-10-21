@@ -46,7 +46,7 @@ export const useGroupAccessHooks = () => {
             return {
               title: action.actionName,
               id: action.actionId,
-              gaActionId : action?.gaActionId,
+              gaActionId: action?.gaActionId,
               parent: menu?.menuId?.toString(),
               isSelected: true,
               key: `${menu.menuId}-${action.actionId}`,
@@ -97,7 +97,7 @@ export const useGroupAccessHooks = () => {
       // });
       // return checkedKeys;
     },
-    []
+    [],
   );
 
   const transformOnCheckSelectedTreeActions = useCallback(
@@ -127,7 +127,7 @@ export const useGroupAccessHooks = () => {
       // });
       // return result;
     },
-    [treeActions]
+    [treeActions],
   );
 
   const transformBodyActions = useCallback(
@@ -161,7 +161,9 @@ export const useGroupAccessHooks = () => {
               ...child,
               parent: parseInt(child?.parent),
               actionId: child?.id,
-              gaActionId : hasValue(child?.gaActionId) ? child?.gaActionId : null,
+              gaActionId: hasValue(child?.gaActionId)
+                ? child?.gaActionId
+                : null,
               isSelected: selectedActionMap.has(child.key),
             });
           });
@@ -186,7 +188,7 @@ export const useGroupAccessHooks = () => {
 
       return [];
     },
-    [tempDetailActions]
+    [tempDetailActions],
   );
 
   const onCheckingKeys = useCallback(
@@ -213,13 +215,13 @@ export const useGroupAccessHooks = () => {
           prev.filter(
             (key) =>
               key !== infoNode?.key &&
-              !infoNode.children?.some((child) => child.key === key)
-          )
+              !infoNode.children?.some((child) => child.key === key),
+          ),
         );
       }
       return detailActions;
     },
-    [detailActions]
+    [detailActions],
   );
 
   const updatedDataActionsWhenChecking = useCallback(
@@ -243,7 +245,7 @@ export const useGroupAccessHooks = () => {
             const children = filterTree(
               node.children || [],
               keyNode,
-              keyParent
+              keyParent,
             );
             return match || children.length ? { ...node, children } : null;
           })
@@ -277,14 +279,14 @@ export const useGroupAccessHooks = () => {
       } else if (infoNode?.isChecked === true && infoNode?.node?.parent) {
         const foundNodeParent = findNodeInTree(
           tempDetailActions,
-          infoNode?.node?.parent
+          infoNode?.node?.parent,
         );
         let filteredTreeExact = [];
         if (foundNodeParent) {
           filteredTreeExact = filterTree(
             treeActions,
             infoNode?.node?.key,
-            infoNode?.node?.parent
+            infoNode?.node?.parent,
           )?.map((item) => ({
             ...item,
             gaMenuId: hasValue(foundNodeParent?.gaMenuId)
@@ -298,7 +300,7 @@ export const useGroupAccessHooks = () => {
                     isSelected: infoNode?.isChecked,
                   }))
                   ?.filter(
-                    (itemKeyChild) => itemKeyChild?.key === infoNode?.node?.key
+                    (itemKeyChild) => itemKeyChild?.key === infoNode?.node?.key,
                   )
               : [],
           }));
@@ -306,7 +308,7 @@ export const useGroupAccessHooks = () => {
           filteredTreeExact = filterTree(
             treeActions,
             infoNode?.node?.key,
-            infoNode?.node?.parent
+            infoNode?.node?.parent,
           )?.map((item) => ({
             ...item,
             isSelected: infoNode?.isChecked,
@@ -317,7 +319,7 @@ export const useGroupAccessHooks = () => {
                     isSelected: infoNode?.isChecked,
                   }))
                   ?.filter(
-                    (itemKeyChild) => itemKeyChild?.key === infoNode?.node?.key
+                    (itemKeyChild) => itemKeyChild?.key === infoNode?.node?.key,
                   )
               : [],
           }));
@@ -326,7 +328,7 @@ export const useGroupAccessHooks = () => {
           const mergedChild = [...filteredTreeExact];
           prev.forEach((sourceNode) => {
             const targetIndex = mergedChild.findIndex(
-              (item) => item.key === sourceNode.key
+              (item) => item.key === sourceNode.key,
             );
 
             if (targetIndex === -1) {
@@ -339,8 +341,8 @@ export const useGroupAccessHooks = () => {
               const newChildren = sourceNode.children.filter(
                 (child) =>
                   !existingChildren.some(
-                    (existing) => existing.key === child.key
-                  )
+                    (existing) => existing.key === child.key,
+                  ),
               );
 
               mergedChild[targetIndex].children = [
@@ -368,11 +370,11 @@ export const useGroupAccessHooks = () => {
         });
       } else if (infoNode?.isChecked === false && infoNode?.node?.children) {
         setDetailActions((prev) =>
-          prev.filter((itemPrev) => itemPrev?.key !== infoNode?.node?.key)
+          prev.filter((itemPrev) => itemPrev?.key !== infoNode?.node?.key),
         );
       }
     },
-    [tempDetailActions, treeActions]
+    [tempDetailActions, treeActions],
   );
 
   useEffect(() => {
@@ -386,7 +388,7 @@ export const useGroupAccessHooks = () => {
   const clearAllState = useCallback(() => {
     setDetailActions([]);
     setSelectedKeys(
-      transformGaMenuSelectedKeys(treeActions, tempDetailActions)
+      transformGaMenuSelectedKeys(treeActions, tempDetailActions),
     );
     setInfoNode({ isChecked: false, node: {} });
     setTempDetailActions([]);

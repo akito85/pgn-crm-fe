@@ -26,8 +26,8 @@ export const getListDetailAccountContact = createAsyncThunk(
   "GET_LIST_DETAIL_ACCOUNT_CONTACT",
   async ({ search, id, page, pageSize, sort }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? '' : search;
-			const sortParams =
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/account/contact/viewList/${id}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await accountManagementService.getDetail(url);
@@ -35,7 +35,7 @@ export const getListDetailAccountContact = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get detail account contact
@@ -50,15 +50,15 @@ export const getDetailAccountContact = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get List Choose Contact
 export const getListChooseContact = createAsyncThunk(
   "GET_LIST_CHOOSE_ACCOUNT_CONTACT",
   async ({ id, search, page, pageSize, sort }, thunkAPI) => {
-    try {      
-			const sortParams =
+    try {
+      const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/contact/account/choose/${id}?sort=${sortParams}&searchs=${search}&size=${pageSize}&page=${page}`;
       const response = await accountManagementService.getPagination(url);
@@ -66,7 +66,7 @@ export const getListChooseContact = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get detail after choose
@@ -80,20 +80,17 @@ export const getDetailContactAfterChoose = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Activation contact
 export const activationAccountContact = createAsyncThunk(
   "ACTIVATION_ACCOUNT_CONTACT",
-  async ({body, title}, thunkAPI) => {
-    console.log("🚀 ~ file: accountContactSlice.js:50 ~ body:", body)
+  async ({ body, title }, thunkAPI) => {
+    console.log("🚀 ~ file: accountContactSlice.js:50 ~ body:", body);
     try {
       const url = `/v1/dbs/api/account/contact/inactive`;
-      const response = await accountManagementService.updateData(
-        url,
-        body
-      );
+      const response = await accountManagementService.updateData(url, body);
       const successBody = {
         title: `Successful`,
         description: `Your data has been ${title}.`,
@@ -108,15 +105,15 @@ export const activationAccountContact = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-        const errorBody = { 
-          title: "Failed",
-          description: `Your data was not ${title}. ${message}. Please try again.`,
-          return: false,
-        };
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${title}. ${message}. Please try again.`,
+        return: false,
+      };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // Create Account Contact
@@ -134,26 +131,25 @@ export const createAccountContact = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response;
     } catch (error) {
-      console.log("🚀 ~ file: accountContactSlice.js:118 ~ error:", error)
+      console.log("🚀 ~ file: accountContactSlice.js:118 ~ error:", error);
       const message =
         (error.response &&
           error.response.data &&
           error.response.data.message) ||
         error.message ||
         error.toString();
-        if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-          const errorBody = {
-            title: "Failed",
-            description: `${message}`,
-            return: false,
-          };
-          thunkAPI.dispatch(showModalError(errorBody));
-        }
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
-
 
 // Get Job
 export const getJob = createAsyncThunk("GET_JOB", async (thunkAPI) => {
@@ -167,26 +163,32 @@ export const getJob = createAsyncThunk("GET_JOB", async (thunkAPI) => {
 });
 
 // Get Position
-export const getPosition = createAsyncThunk("GET_POSITION", async (thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/account/contact/getPosition`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getPosition = createAsyncThunk(
+  "GET_POSITION",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/account/contact/getPosition`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 // Get Contact Address
-export const getContactAddress = createAsyncThunk("GET_CONTACT_ADDRESS", async (id, thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/account/contact/address/${id}`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getContactAddress = createAsyncThunk(
+  "GET_CONTACT_ADDRESS",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/account/contact/address/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 export const updateAccountContact = createAsyncThunk(
   "UPDATE_ACCOUNT_CONTACT",
@@ -208,40 +210,45 @@ export const updateAccountContact = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-        if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-          const errorBody = {
-            title: "Failed",
-            description: `${message}`,
-            return: false,
-          };
-          thunkAPI.dispatch(showModalError(errorBody));
-        }
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
       // thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
+export const getContactType = createAsyncThunk(
+  "GET_CONTACT_TYPE",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/account/contact/getContactType`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
-export const getContactType = createAsyncThunk("GET_CONTACT_TYPE", async (thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/account/contact/getContactType`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
-
-export const getInputType = createAsyncThunk("GET_INPUT_TYPE", async (thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/account/contact/getInputType`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getInputType = createAsyncThunk(
+  "GET_INPUT_TYPE",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/account/contact/getInputType`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 export const getCountryCode = createAsyncThunk(
   "GET_COUNTRY_CODE",
@@ -253,7 +260,7 @@ export const getCountryCode = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCountryZone = createAsyncThunk(
@@ -266,7 +273,7 @@ export const getCountryZone = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const accountContactSlice = createSlice({
@@ -482,18 +489,17 @@ const accountContactSlice = createSlice({
       state.data_country_zone = action.payload;
     },
     [getCountryZone.fulfilled]: (state, action) => {
-      console.log("🚀 ~ action:", action)
+      console.log("🚀 ~ action:", action);
       state.loading = false;
       state.data_country_zone = action.payload;
-      state.data_temp_zone = [...state?.data_temp_zone, ...action?.payload]
-    
+      state.data_temp_zone = [...state?.data_temp_zone, ...action?.payload];
     },
     [getCountryZone.rejected]: (state, action) => {
       state.loading = false;
       // state.data_country_zone = action.payload;
     },
-  }
-})
+  },
+});
 
 const { reducer } = accountContactSlice;
 export const { resetDataDetail } = accountContactSlice.actions;

@@ -286,13 +286,13 @@ const TableInlineAllocation = ({
       if (currency === 244) {
         const totalAmount = tableData.reduce(
           (total, row) => total + row.allocationAmount,
-          0
+          0,
         );
         setUpdateTotalAmount(totalAmount);
       } else {
         const totalAmount = tableData.reduce(
           (total, row) => total + row.equivalentAmount,
-          0
+          0,
         );
         setUpdateTotalAmount(totalAmount);
       }
@@ -704,7 +704,7 @@ const TableInlineAllocation = ({
                   rules: col.rules,
                 }),
               };
-            })
+            }),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

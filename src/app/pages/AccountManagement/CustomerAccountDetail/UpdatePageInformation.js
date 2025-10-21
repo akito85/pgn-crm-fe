@@ -11,7 +11,6 @@ const UpdatePageInformation = ({
   type = {},
   handleChangeInteraction = () => {},
 }) => {
-
   const renderSection = () => {
     switch (type.section) {
       case "account":

@@ -4,20 +4,28 @@ import { index } from "./routes";
 import { motion } from "framer-motion";
 import { PrevLocProvider } from "../utils/usePrevLoc";
 
-const NotFound = lazy(() => import('../app/NotFound'));
-const LogIn = lazy(() => import('../app/pages/Authentication/LogIn'));
-const ForgotPassword = lazy(() => import('../app/pages/Authentication/ForgotPassword'));
-const PrivateRoute = lazy(() => import('../components/PrivateRoute'));
-const NewPassword = lazy(() => import('../app/pages/Authentication/NewPassword'));
-const UnderConstruction = lazy(() => import('../app/UnderConstruction'));
-const UpdateProfile = lazy(() => import('../app/pages/UpdateProfile'));
-const ChangePassword = lazy(() => import('../app/pages/ChangePassword'));
-const PublicRoute = lazy(() => import('../components/PublicRoute'));
-const SelectionPage = lazy(() => import('../app/pages/Authentication/SelectionPage'));
-const ChoosePositionRoute = lazy(() => import('../components/ChoosePositionRoute'));
-const ChooseEntityRoute = lazy(() => import('../components/ChooseEntityRoute'));
-const VerifyPage = lazy(() => import('../app/pages/Authentication/VerifyPage'));
-const SuspenseComponent = lazy(() => import('../components/SuspenseComponent'))
+const NotFound = lazy(() => import("../app/NotFound"));
+const LogIn = lazy(() => import("../app/pages/Authentication/LogIn"));
+const ForgotPassword = lazy(
+  () => import("../app/pages/Authentication/ForgotPassword"),
+);
+const PrivateRoute = lazy(() => import("../components/PrivateRoute"));
+const NewPassword = lazy(
+  () => import("../app/pages/Authentication/NewPassword"),
+);
+const UnderConstruction = lazy(() => import("../app/UnderConstruction"));
+const UpdateProfile = lazy(() => import("../app/pages/UpdateProfile"));
+const ChangePassword = lazy(() => import("../app/pages/ChangePassword"));
+const PublicRoute = lazy(() => import("../components/PublicRoute"));
+const SelectionPage = lazy(
+  () => import("../app/pages/Authentication/SelectionPage"),
+);
+const ChoosePositionRoute = lazy(
+  () => import("../components/ChoosePositionRoute"),
+);
+const ChooseEntityRoute = lazy(() => import("../components/ChooseEntityRoute"));
+const VerifyPage = lazy(() => import("../app/pages/Authentication/VerifyPage"));
+const SuspenseComponent = lazy(() => import("../components/SuspenseComponent"));
 const PageLayout = ({ children }) => children;
 const pageVariants = {
   initial: {
@@ -48,12 +56,15 @@ const AppRoutes = () => {
           variants={pageVariants}
           transition={pageTransition}
         >
-          <Suspense fallback={<SuspenseComponent/>}>
+          <Suspense fallback={<SuspenseComponent />}>
             <Routes>
               {/* Public Route */}
               <Route element={<PublicRoute />}>
                 <Route path="/login" element={<LogIn type={"enduser"} />} />
-                <Route path="/login-su" element={<LogIn type={"superuser"} />} />
+                <Route
+                  path="/login-su"
+                  element={<LogIn type={"superuser"} />}
+                />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 {/* <Route path="/generate-password/:id" element={<NewPassword/>} /> */}
                 <Route path="/maintenance" element={<UnderConstruction />} />
@@ -66,7 +77,11 @@ const AppRoutes = () => {
               <Route element={<PrivateRoute />}>
                 {index.map((menus, key) => {
                   return (
-                    <Route path={menus.path} key={key} element={menus.element} />
+                    <Route
+                      path={menus.path}
+                      key={key}
+                      element={menus.element}
+                    />
                   );
                 })}
               </Route>
@@ -105,7 +120,10 @@ const AppRoutes = () => {
               <Route path="/new-password/*" element={<NewPassword />} />
               <Route path="/create-user/*" element={<NewPassword />} />
               <Route path="*" element={<NotFound type={"not_found"} />} />
-              <Route path="/under-construction" element={<UnderConstruction />} />
+              <Route
+                path="/under-construction"
+                element={<UnderConstruction />}
+              />
             </Routes>
           </Suspense>
         </motion.div>

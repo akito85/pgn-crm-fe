@@ -233,15 +233,16 @@ const ServicePointActivityTable = () => {
                 }}
               />
             </Tooltip>
-						{r.status === "CLOSED" ? (
-            <Tooltip>
-              <Checkbox
-                // onClick={() => {
-                //   handleActiveOrInactive(record);
-                // }}
-                checked={r.status === "CLOSED" ? true : false}
-              ></Checkbox>
-            </Tooltip>) : null}
+            {r.status === "CLOSED" ? (
+              <Tooltip>
+                <Checkbox
+                  // onClick={() => {
+                  //   handleActiveOrInactive(record);
+                  // }}
+                  checked={r.status === "CLOSED" ? true : false}
+                ></Checkbox>
+              </Tooltip>
+            ) : null}
           </div>
         );
       },

@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  Spin,
-  Form,
-  Alert,
-  Checkbox,
-  Tooltip,
-} from "antd";
+import { Spin, Form, Alert, Checkbox, Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
 import { PlusOutlined, WarningOutlined } from "@ant-design/icons";
 
@@ -35,13 +35,20 @@ import {
   updateAccountContact,
 } from "../../../../../../redux/slices/account_management/detailAccount/accountContactSlice";
 import { hasValue, renderColumn } from "../../../../../../utils";
-import { getColumnSearchProps, getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchProps,
+  getColumnSearchPropsPaging,
+} from "../../../../../../utils/getColumnSearchProps";
 import ToolbarAccount from "../../../ComponentAccount/ToolbarAccount";
 import { useColumnActionPermissionAccount } from "../../../ComponentAccount/ColumnActionPermissionAccount";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 import ModalContact from "../../../../../../components/Modal/Contact/ModalContact";
 import { ModalConfirm } from "../../../../../../components/Modal/ModalPopUp";
-import { clearBodyMessage, hideModalError, validateCreateUpdate } from "../../../../../../redux/slices/general_slice";
+import {
+  clearBodyMessage,
+  hideModalError,
+  validateCreateUpdate,
+} from "../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import DetailText from "../../../../../../components/DetailText";
@@ -86,7 +93,6 @@ const expandedRowRender = (record) => {
 };
 
 const AccountContact = ({ id, idCustomer, type }) => {
-  
   const dispatch = useDispatch();
   const {
     data,
@@ -100,12 +106,8 @@ const AccountContact = ({ id, idCustomer, type }) => {
     data_inputType,
     data_country_code,
     data_country_zone = [],
-  } = useSelector(
-    (state) => state.accountContact
-  );
-  const { access_account } = useSelector(
-    (state) => state.accountManagement
-  );
+  } = useSelector((state) => state.accountContact);
+  const { access_account } = useSelector((state) => state.accountManagement);
   const [page, setPage] = useState(1);
   const [modalDetail, setModalDetail] = useState(false);
   const [modalUpdate, setModalUpdate] = useState(false);
@@ -120,144 +122,195 @@ const AccountContact = ({ id, idCustomer, type }) => {
   const [titleActiveOrInactive, setTitleActiveOrInactive] = useState("");
   const [chooseId, setChooseId] = useState();
   const [dataTable, setDataTable] = useState([]);
-  const [accountContactId, setAccountContactId] = useState('');
-  const [contactName, setContactName] = useState('');
+  const [accountContactId, setAccountContactId] = useState("");
+  const [contactName, setContactName] = useState("");
   const [form] = Form.useForm();
   const [modalCheckPrimaryExist, setModalCheckPrimaryExist] = useState(false);
   const [body, setBody] = useState({});
   const [modalConfirm, setModalConfirm] = useState(false);
-  const [typeContact, setTypeContact] = useState('default');
+  const [typeContact, setTypeContact] = useState("default");
   const [formModal] = Form.useForm();
   const [formContact] = Form.useForm();
-  const [listTableContact, setListTableContact] = useState([])
+  const [listTableContact, setListTableContact] = useState([]);
   const [tempListContact, setTempListContact] = useState([]);
   const location = useLocation();
   // state contact global
   const [openModalContact, setOpenModalContact] = useState(false);
 
-  const assertChoose = useCallback((data) => {
-    if (typeContact === 'choosed') {
-      formModal?.setFieldsValue({
-        firstName: data?.firstName,
-        middleName: data?.middleName,
-        lastName: data?.lastName,
-        jobId: data?.jobId,
-        positionId: data?.positionId,
-        isPrimary: data?.primary,
-        contactAddressId: data?.contactAddressId,
-        additionalNote: data?.additionalNote,
-        description: data?.description
-      })
-      setListTableContact(data?.contactDetail?.map((item, index) => {
-        if (hasValue(item?.prefix1)) {
-          dispatch(getCountryZone(item?.prefix1))
-        }
-        return {
-          key: (index + 1).toString(),
-          type: item?.type,
-          inputType: item?.inputType,
-          contactDetailId: item?.contactDetailId,
-          prefix_1: hasValue(item?.valueDetail?.prefix1) ? item?.valueDetail?.prefix1 : null,
-          prefix_2: hasValue(item?.valueDetail?.prefix2) ? item?.valueDetail?.prefix2 : null,
-          sufix: hasValue(item?.valueDetail?.sufix) ? item?.valueDetail?.sufix : null,
-          value: hasValue(item?.valueDetail?.value) ? item?.valueDetail?.value : null,
-          fullValue: item?.fullValue,
-          values: [
-            {
-              prefix_1: hasValue(item?.valueDetail?.prefix1) ? item?.valueDetail?.prefix1 : null,
-              prefix_2: hasValue(item?.valueDetail?.prefix2) ? item?.valueDetail?.prefix2 : null,
-              sufix: hasValue(item?.valueDetail?.sufix) ? item?.valueDetail?.sufix : null,
-              value: hasValue(item?.valueDetail?.value) ? item?.valueDetail?.value : null,
+  const assertChoose = useCallback(
+    (data) => {
+      if (typeContact === "choosed") {
+        formModal?.setFieldsValue({
+          firstName: data?.firstName,
+          middleName: data?.middleName,
+          lastName: data?.lastName,
+          jobId: data?.jobId,
+          positionId: data?.positionId,
+          isPrimary: data?.primary,
+          contactAddressId: data?.contactAddressId,
+          additionalNote: data?.additionalNote,
+          description: data?.description,
+        });
+        setListTableContact(
+          data?.contactDetail?.map((item, index) => {
+            if (hasValue(item?.prefix1)) {
+              dispatch(getCountryZone(item?.prefix1));
             }
-          ]
-        }
-      }));
-    } else {
-      formModal?.setFieldsValue({
-        firstName: data?.contact?.firstName,
-        middleName: data?.contact?.middleName,
-        lastName: data?.contact?.lastName,
-        jobId: data?.contact?.jobId,
-        positionId: data?.contact?.positionId,
-        isPrimary: data?.primaryFlag,
-        contactAddressId: data?.contactAddressId,
-        additionalNote: data?.additionalNote,
-        description: data?.description
-      })
-      setListTableContact(data?.contact?.contactDetail?.map((item, index) => {
-        if (hasValue(item?.prefix1)) {
-          dispatch(getCountryZone(item?.prefix1))
-        }
-        return {
-          key: (index + 1).toString(),
-          type: item?.type,
-          inputType: item?.inputType,
-          contactDetailId: item?.contactDetailId,
-          prefix_1: hasValue(item?.valueDetail?.prefix1) ? item?.valueDetail?.prefix1 : null,
-          prefix_2: hasValue(item?.valueDetail?.prefix2) ? item?.valueDetail?.prefix2 : null,
-          sufix: hasValue(item?.valueDetail?.sufix) ? item?.valueDetail?.sufix : null,
-          value: hasValue(item?.valueDetail?.value) ? item?.valueDetail?.value : null,
-          fullValue: item?.fullValue,
-          values: [
-            {
-              prefix_1: hasValue(item?.valueDetail?.prefix1) ? item?.valueDetail?.prefix1 : null,
-              prefix_2: hasValue(item?.valueDetail?.prefix2) ? item?.valueDetail?.prefix2 : null,
-              sufix: hasValue(item?.valueDetail?.sufix) ? item?.valueDetail?.sufix : null,
-              value: hasValue(item?.valueDetail?.value) ? item?.valueDetail?.value : null,
+            return {
+              key: (index + 1).toString(),
+              type: item?.type,
+              inputType: item?.inputType,
+              contactDetailId: item?.contactDetailId,
+              prefix_1: hasValue(item?.valueDetail?.prefix1)
+                ? item?.valueDetail?.prefix1
+                : null,
+              prefix_2: hasValue(item?.valueDetail?.prefix2)
+                ? item?.valueDetail?.prefix2
+                : null,
+              sufix: hasValue(item?.valueDetail?.sufix)
+                ? item?.valueDetail?.sufix
+                : null,
+              value: hasValue(item?.valueDetail?.value)
+                ? item?.valueDetail?.value
+                : null,
+              fullValue: item?.fullValue,
+              values: [
+                {
+                  prefix_1: hasValue(item?.valueDetail?.prefix1)
+                    ? item?.valueDetail?.prefix1
+                    : null,
+                  prefix_2: hasValue(item?.valueDetail?.prefix2)
+                    ? item?.valueDetail?.prefix2
+                    : null,
+                  sufix: hasValue(item?.valueDetail?.sufix)
+                    ? item?.valueDetail?.sufix
+                    : null,
+                  value: hasValue(item?.valueDetail?.value)
+                    ? item?.valueDetail?.value
+                    : null,
+                },
+              ],
+            };
+          }),
+        );
+      } else {
+        formModal?.setFieldsValue({
+          firstName: data?.contact?.firstName,
+          middleName: data?.contact?.middleName,
+          lastName: data?.contact?.lastName,
+          jobId: data?.contact?.jobId,
+          positionId: data?.contact?.positionId,
+          isPrimary: data?.primaryFlag,
+          contactAddressId: data?.contactAddressId,
+          additionalNote: data?.additionalNote,
+          description: data?.description,
+        });
+        setListTableContact(
+          data?.contact?.contactDetail?.map((item, index) => {
+            if (hasValue(item?.prefix1)) {
+              dispatch(getCountryZone(item?.prefix1));
             }
-          ]
-        }
-      }));
-    }
-  }, [dispatch, formModal, typeContact])
+            return {
+              key: (index + 1).toString(),
+              type: item?.type,
+              inputType: item?.inputType,
+              contactDetailId: item?.contactDetailId,
+              prefix_1: hasValue(item?.valueDetail?.prefix1)
+                ? item?.valueDetail?.prefix1
+                : null,
+              prefix_2: hasValue(item?.valueDetail?.prefix2)
+                ? item?.valueDetail?.prefix2
+                : null,
+              sufix: hasValue(item?.valueDetail?.sufix)
+                ? item?.valueDetail?.sufix
+                : null,
+              value: hasValue(item?.valueDetail?.value)
+                ? item?.valueDetail?.value
+                : null,
+              fullValue: item?.fullValue,
+              values: [
+                {
+                  prefix_1: hasValue(item?.valueDetail?.prefix1)
+                    ? item?.valueDetail?.prefix1
+                    : null,
+                  prefix_2: hasValue(item?.valueDetail?.prefix2)
+                    ? item?.valueDetail?.prefix2
+                    : null,
+                  sufix: hasValue(item?.valueDetail?.sufix)
+                    ? item?.valueDetail?.sufix
+                    : null,
+                  value: hasValue(item?.valueDetail?.value)
+                    ? item?.valueDetail?.value
+                    : null,
+                },
+              ],
+            };
+          }),
+        );
+      }
+    },
+    [dispatch, formModal, typeContact],
+  );
 
-  const assertCancelConfirmation = useCallback(data => {
-    if (hasValue(data)) {
-      formModal?.setFieldsValue({
-        firstName: data?.contact?.firstName,
-        middleName: data?.contact?.middleName,
-        lastName: data?.contact?.lastName,
-        jobId: data?.contact?.jobId,
-        positionId: data?.contact?.positionId,
-        isPrimary: data?.primaryFlag,
-        contactAddressId: data?.contactAddressId,
-        additionalNote: data?.additionalNote,
-        description: data?.description
-      })
-      setListTableContact(tempListContact)
-    }
+  const assertCancelConfirmation = useCallback(
+    (data) => {
+      if (hasValue(data)) {
+        formModal?.setFieldsValue({
+          firstName: data?.contact?.firstName,
+          middleName: data?.contact?.middleName,
+          lastName: data?.contact?.lastName,
+          jobId: data?.contact?.jobId,
+          positionId: data?.contact?.positionId,
+          isPrimary: data?.primaryFlag,
+          contactAddressId: data?.contactAddressId,
+          additionalNote: data?.additionalNote,
+          description: data?.description,
+        });
+        setListTableContact(tempListContact);
+      }
+    },
+    [formModal, tempListContact],
+  );
 
-  }, [formModal, tempListContact])
-
-
-  const conditionalChoosedByTypeContact = useCallback((typeContact) => {
-    if (typeContact === 'choosed') {
-      return data_detail?.data;
-    } else {
-      return data_detail;
-    }
-  }, [data_detail]);
-
+  const conditionalChoosedByTypeContact = useCallback(
+    (typeContact) => {
+      if (typeContact === "choosed") {
+        return data_detail?.data;
+      } else {
+        return data_detail;
+      }
+    },
+    [data_detail],
+  );
 
   useEffect(() => {
     if (modalConfirm === false) {
-      if ((typeContact === 'choosed' || typeContact === 'update')) {
-        assertChoose(conditionalChoosedByTypeContact(typeContact))
-      } else if (typeContact === 'cancel create' && hasValue(body)) {
-        assertCancelConfirmation(body)
+      if (typeContact === "choosed" || typeContact === "update") {
+        assertChoose(conditionalChoosedByTypeContact(typeContact));
+      } else if (typeContact === "cancel create" && hasValue(body)) {
+        assertCancelConfirmation(body);
       }
     }
-  }, [assertChoose, conditionalChoosedByTypeContact, typeContact, modalConfirm, body, assertCancelConfirmation])
-
-
+  }, [
+    assertChoose,
+    conditionalChoosedByTypeContact,
+    typeContact,
+    modalConfirm,
+    body,
+    assertCancelConfirmation,
+  ]);
 
   useEffect(() => {
-    if(location?.pathname.includes('account-standard')) {
-      dispatch(getGrantedAccessAccount('/account-management/account-standard/contact'))
-    }else{
-      dispatch(getGrantedAccessAccount('/account-management/account-onetime/contact'))
+    if (location?.pathname.includes("account-standard")) {
+      dispatch(
+        getGrantedAccessAccount("/account-management/account-standard/contact"),
+      );
+    } else {
+      dispatch(
+        getGrantedAccessAccount("/account-management/account-onetime/contact"),
+      );
     }
-  }, [dispatch])
+  }, [dispatch]);
 
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
@@ -268,7 +321,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
         pageSize,
         search: reqSearch,
         sort,
-      })
+      }),
     );
   }, [dispatch, id, search, sort, page, pageSize]);
 
@@ -277,9 +330,9 @@ const AccountContact = ({ id, idCustomer, type }) => {
       dispatch(getJob());
       dispatch(getPosition());
       dispatch(getContactType());
-      dispatch(getInputType())
+      dispatch(getInputType());
       dispatch(getCountryCode());
-      dispatch(getContactAddress(id))
+      dispatch(getContactAddress(id));
     }
   }, [dispatch, id]);
 
@@ -295,7 +348,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       }));
       setDataTable(dataModif);
     } else {
-      setDataTable([])
+      setDataTable([]);
     }
   }, [data]);
 
@@ -353,9 +406,9 @@ const AccountContact = ({ id, idCustomer, type }) => {
         selectedKeys[0] === "primary"
           ? "Y"
           : selectedKeys[0] === "non primary"
-          ? "N"
-          : ""; // Handle cases where selectedKeys[0] is not valid
-  
+            ? "N"
+            : ""; // Handle cases where selectedKeys[0] is not valid
+
       setSearchText(selectedKeys[0]);
       setSearchedColumn(dataIndex);
       setSearch((prevState) => {
@@ -386,12 +439,12 @@ const AccountContact = ({ id, idCustomer, type }) => {
 
   // Handle Confirmation Active/Inactive
   const handleActiveOrInactive = (record) => {
-    setContactName(record?.contactName)
+    setContactName(record?.contactName);
     setModalActivate(true);
     setTitleActiveOrInactive(
-      record?.status === "ACTIVE" ? "Inactivate" : "Activate"
+      record?.status === "ACTIVE" ? "Inactivate" : "Activate",
     );
-    setAccountContactId(record?.accountContactId)
+    setAccountContactId(record?.accountContactId);
     setChooseId(record?.contactId);
   };
 
@@ -402,19 +455,19 @@ const AccountContact = ({ id, idCustomer, type }) => {
       accountId: id,
       contactId: chooseId,
       remark: formValue.remark,
-      accountContactId: accountContactId
+      accountContactId: accountContactId,
     };
 
     dispatch(
       activationAccountContact({
         body: data,
         title: titleActiveOrInactive,
-      })
+      }),
     )
       .unwrap()
       .then(() => {
         // setRemark("");
-        handleClear()
+        handleClear();
         form.resetFields();
 
         const reqSearch = encodeURIComponent(JSON.stringify(search));
@@ -425,12 +478,12 @@ const AccountContact = ({ id, idCustomer, type }) => {
             pageSize,
             search: reqSearch,
             sort,
-          })
+          }),
         );
       })
       .catch(() => {
         // setRemark("");
-        handleClear()
+        handleClear();
         form.resetFields();
       });
   };
@@ -441,7 +494,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => { },
+    handleSearch = () => {},
   ) => {
     return [
       {
@@ -460,7 +513,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         // render: (v, r, i) => (
         //   <div className={" flex justify-center"}>
@@ -494,7 +547,6 @@ const AccountContact = ({ id, idCustomer, type }) => {
             text
           );
         },
-
       },
       {
         title: "CONTACT NAME",
@@ -506,7 +558,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -519,7 +571,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -532,7 +584,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -545,7 +597,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         ellipsis: {
           showTitle: false,
@@ -581,7 +633,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -594,7 +646,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         ellipsis: {
           showTitle: false,
@@ -631,7 +683,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         render: (index) => {
           const text = index
@@ -647,25 +699,24 @@ const AccountContact = ({ id, idCustomer, type }) => {
         },
       },
     ];
-  }
+  };
 
   const itemActions = [
     //action toolbar
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <ButtonComponent
           onClick={() => {
-            setOpenModalContact(true)
-            setTypeContact('default')
+            setOpenModalContact(true);
+            setTypeContact("default");
           }}
           icon={<PlusOutlined style={{ fontSize: "24px" }} />}
           type="submit"
         >
           Create Contact
         </ButtonComponent>
-
-      )
+      ),
     },
 
     // Column Action Table
@@ -687,8 +738,8 @@ const AccountContact = ({ id, idCustomer, type }) => {
               />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
 
     {
@@ -700,14 +751,24 @@ const AccountContact = ({ id, idCustomer, type }) => {
             <div className="pt-1">
               <SVGIcon
                 name="IconEdit"
-                color={record?.status === 'INACTIVE' ? "#8D91A0" : "#ACC424"}
-                className={record?.status === 'INACTIVE' ? "cursor-not-allowed" : undefined}
+                color={record?.status === "INACTIVE" ? "#8D91A0" : "#ACC424"}
+                className={
+                  record?.status === "INACTIVE"
+                    ? "cursor-not-allowed"
+                    : undefined
+                }
                 width={24}
-                onClick={record?.status === 'INACTIVE' ? null : () => {
-                  setOpenModalContact(true)
-                  dispatch(getDetailAccountContact(record.accountContactId));
-                  setTypeContact('update')
-                }}
+                onClick={
+                  record?.status === "INACTIVE"
+                    ? null
+                    : () => {
+                        setOpenModalContact(true);
+                        dispatch(
+                          getDetailAccountContact(record.accountContactId),
+                        );
+                        setTypeContact("update");
+                      }
+                }
               />
             </div>
           </Tooltip>
@@ -723,9 +784,8 @@ const AccountContact = ({ id, idCustomer, type }) => {
           //   border={false}
           //   disabled={record?.status === 'INACTIVE'}
           // />
-
-        )
-      }
+        );
+      },
     },
 
     {
@@ -745,98 +805,134 @@ const AccountContact = ({ id, idCustomer, type }) => {
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
-  ]
+        );
+      },
+    },
+  ];
 
-
-  const handleSaveContact = useCallback(async (formValue, tableData) => {
-    try {
-      let body;
-      let url;
-      const contactNameValue = `${formValue.firstName.trim()}${formValue.middleName ? ` ${formValue.middleName.trim()}` : ""
+  const handleSaveContact = useCallback(
+    async (formValue, tableData) => {
+      try {
+        let body;
+        let url;
+        const contactNameValue = `${formValue.firstName.trim()}${
+          formValue.middleName ? ` ${formValue.middleName.trim()}` : ""
         }${formValue.lastName ? ` ${formValue.lastName.trim()}` : ""}`;
 
-      // set contact id
-      const setContactId = (data) => {
-        if (typeContact === 'update') {
-          return data?.accountContactId
-        } else if (typeContact === 'choosed') {
-          return data?.data?.id
+        // set contact id
+        const setContactId = (data) => {
+          if (typeContact === "update") {
+            return data?.accountContactId;
+          } else if (typeContact === "choosed") {
+            return data?.data?.id;
+          } else {
+            return null;
+          }
+        };
+
+        const setAccountContactId = (data) => {
+          if (typeContact === "update") {
+            return data?.accountContactId;
+          } else {
+            return null;
+          }
+        };
+
+        if (typeContact === "update") {
+          url = "/v1/dbs/api/account/contact/validate-update";
         } else {
-          return null
+          url = "/v1/dbs/api/account/contact/validate-create";
         }
-      };
 
-      const setAccountContactId = (data) => {
-        if (typeContact === 'update') {
-          return data?.accountContactId
-        } else {
-          return null
+        body = {
+          accountId: id,
+          accountContactId: setAccountContactId(data_detail),
+          primaryFlag: hasValue(formValue?.isPrimary)
+            ? formValue?.isPrimary
+            : false,
+          needValidation: hasValue(formValue?.isPrimary)
+            ? formValue?.isPrimary
+            : false,
+          contactAddressId: hasValue(formValue?.contactAddressId)
+            ? formValue?.contactAddressId
+            : null,
+          additionalNote: hasValue(formValue?.additionalNote)
+            ? formValue?.additionalNote
+            : null,
+          description: hasValue(formValue?.description)
+            ? formValue?.description
+            : null,
+          contact: {
+            contactId: setContactId(data_detail),
+            firstName: hasValue(formValue?.firstName)
+              ? formValue?.firstName
+              : null,
+            middleName: hasValue(formValue?.middleName)
+              ? formValue?.middleName
+              : null,
+            lastName: hasValue(formValue?.lastName)
+              ? formValue?.lastName
+              : null,
+            contactName: contactNameValue,
+            jobId: hasValue(formValue?.jobId) ? formValue?.jobId : null,
+            positionId: hasValue(formValue?.positionId)
+              ? formValue?.positionId
+              : null,
+            viewDetails: tableData?.map((item, index) => {
+              return {
+                type: item?.type?.value,
+                inputType: item?.inputType?.value,
+                value: hasValue(item?.values[0]?.value)
+                  ? item?.values[0]?.value
+                  : null,
+                prefix1: hasValue(item?.values[0]?.prefix_1?.value)
+                  ? item?.values[0]?.prefix_1?.value
+                  : null,
+                prefix2: hasValue(item?.values[0]?.prefix_2?.value)
+                  ? item?.values[0]?.prefix_2?.value
+                  : null,
+                sufix: hasValue(item?.values[0]?.sufix)
+                  ? item?.values[0]?.sufix
+                  : null,
+              };
+            }),
+          },
+          tableData: tableData,
+        };
+
+        setBody(body);
+        await dispatch(
+          validateCreateUpdate({
+            body: body,
+            services: accountManagementService,
+            endPoint: url,
+            type,
+          }),
+        )?.unwrap();
+        setTempListContact(tableData);
+        setModalConfirm(true);
+      } catch (error) {
+        if (
+          error?.message ===
+          "Warning! the previous primary Account Contact will be inactived"
+        ) {
+          dispatch(hideModalError());
+          dispatch(clearBodyMessage());
+          setModalCheckPrimaryExist(true);
         }
+        setTypeContact("error");
+        setListTableContact([]);
+        formModal?.resetFields();
+        formContact?.resetFields([["values", 0]]);
       }
-
-      if (typeContact === 'update') {
-        url = "/v1/dbs/api/account/contact/validate-update"
-      } else {
-        url = "/v1/dbs/api/account/contact/validate-create"
-      }
-
-      body = {
-        accountId: id,
-        accountContactId: setAccountContactId(data_detail),
-        primaryFlag: hasValue(formValue?.isPrimary) ? formValue?.isPrimary : false,
-        needValidation: hasValue(formValue?.isPrimary) ? formValue?.isPrimary : false,
-        contactAddressId: hasValue(formValue?.contactAddressId) ? formValue?.contactAddressId : null,
-        additionalNote: hasValue(formValue?.additionalNote) ? formValue?.additionalNote : null,
-        description: hasValue(formValue?.description) ? formValue?.description : null,
-        contact: {
-          contactId: setContactId(data_detail),
-          firstName: hasValue(formValue?.firstName) ? formValue?.firstName : null,
-          middleName: hasValue(formValue?.middleName) ? formValue?.middleName : null,
-          lastName: hasValue(formValue?.lastName) ? formValue?.lastName : null,
-          contactName: contactNameValue,
-          jobId: hasValue(formValue?.jobId) ? formValue?.jobId : null,
-          positionId: hasValue(formValue?.positionId) ? formValue?.positionId : null,
-          viewDetails: tableData?.map((item, index) => {
-            return {
-              type: item?.type?.value,
-              inputType: item?.inputType?.value,
-              value: hasValue(item?.values[0]?.value) ? item?.values[0]?.value : null,
-              prefix1: hasValue(item?.values[0]?.prefix_1?.value) ? item?.values[0]?.prefix_1?.value : null,
-              prefix2: hasValue(item?.values[0]?.prefix_2?.value) ? item?.values[0]?.prefix_2?.value : null,
-              sufix: hasValue(item?.values[0]?.sufix) ? item?.values[0]?.sufix : null,
-            }
-          })
-        },
-        tableData: tableData
-      }
-
-      setBody(body)
-      await dispatch(validateCreateUpdate({ body: body, services: accountManagementService, endPoint: url, type }))?.unwrap()
-      setTempListContact(tableData)
-      setModalConfirm(true);
-    } catch (error) {
-      if (error?.message === "Warning! the previous primary Account Contact will be inactived") {
-        dispatch(hideModalError())
-        dispatch(clearBodyMessage())
-        setModalCheckPrimaryExist(true)
-      }
-      setTypeContact('error')
-      setListTableContact([])
-      formModal?.resetFields();
-      formContact?.resetFields([
-        ['values', 0]
-      ])
-    }
-  }, [data_detail, dispatch, formContact, formModal, id, type, typeContact]);
-
+    },
+    [data_detail, dispatch, formContact, formModal, id, type, typeContact],
+  );
 
   const handleConfirm = useCallback(async () => {
     try {
       const { tableData, ...bodyData } = body;
-      if (typeContact === 'update') {
+      if (typeContact === "update") {
         const bodyReq = {
           accountId: body?.id,
           primaryFlag: body?.primaryFlag,
@@ -844,18 +940,17 @@ const AccountContact = ({ id, idCustomer, type }) => {
           accountContactId: body?.accountContactId,
           description: body?.description,
           additionalNote: body?.additionalNote,
-          needValidation: false
-        }
-        await dispatch(updateAccountContact({ body: bodyReq }))?.unwrap()
+          needValidation: false,
+        };
+        await dispatch(updateAccountContact({ body: bodyReq }))?.unwrap();
       } else {
         const bodyReq = {
           ...bodyData,
-          needValidation: false
-        }
+          needValidation: false,
+        };
         await dispatch(createAccountContact({ body: bodyReq }))?.unwrap();
-
       }
-      setModalConfirm(false)
+      setModalConfirm(false);
       const reqSearch = encodeURIComponent(JSON.stringify(search));
       await dispatch(
         getListDetailAccountContact({
@@ -864,20 +959,25 @@ const AccountContact = ({ id, idCustomer, type }) => {
           pageSize,
           search: reqSearch,
           sort,
-        })
+        }),
       )?.unwrap();
-      setTypeContact('default')
+      setTypeContact("default");
       formModal?.resetFields();
-      formContact?.resetFields([
-        ['values', 0]
-      ])
-      setListTableContact([])
-    } catch (error) {
-
-    }
-  }, [body, dispatch, formContact, formModal, id, page, pageSize, search, sort, typeContact])
-
-
+      formContact?.resetFields([["values", 0]]);
+      setListTableContact([]);
+    } catch (error) {}
+  }, [
+    body,
+    dispatch,
+    formContact,
+    formModal,
+    id,
+    page,
+    pageSize,
+    search,
+    sort,
+    typeContact,
+  ]);
 
   // column contact confirmation
   const columnsConfirmation = useMemo(() => {
@@ -893,7 +993,8 @@ const AccountContact = ({ id, idCustomer, type }) => {
         title: "TYPE",
         dataIndex: "type",
         editable: true,
-        sorter: (a, b) => sorterFunction('type', a?.type?.label, b?.type?.label, 'select'),
+        sorter: (a, b) =>
+          sorterFunction("type", a?.type?.label, b?.type?.label, "select"),
         inputType: "select",
         align: "left",
         required: true,
@@ -907,15 +1008,30 @@ const AccountContact = ({ id, idCustomer, type }) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
-        render: (text) => renderColumn('type', searchedColumn, searchText, text?.label, false, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "type",
+            searchedColumn,
+            searchText,
+            text?.label,
+            false,
+            "input",
+            search,
+          ),
       },
       {
         title: "INPUT TYPE",
         dataIndex: "inputType",
         editable: true,
-        sorter: (a, b) => sorterFunction('inputType', a?.inputType?.label, b?.inputType?.label, 'select'),
+        sorter: (a, b) =>
+          sorterFunction(
+            "inputType",
+            a?.inputType?.label,
+            b?.inputType?.label,
+            "select",
+          ),
         inputType: "select",
         align: "left",
         required: true,
@@ -926,9 +1042,18 @@ const AccountContact = ({ id, idCustomer, type }) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
-        render: (text) => renderColumn('inputType', searchedColumn, searchText, text?.label, false, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "inputType",
+            searchedColumn,
+            searchText,
+            text?.label,
+            false,
+            "input",
+            search,
+          ),
       },
       {
         title: "VALUE",
@@ -951,22 +1076,32 @@ const AccountContact = ({ id, idCustomer, type }) => {
           searchText,
           handleSearch,
           true,
-          'contact'
+          "contact",
         ),
         render: (text, record, id) => {
-          return renderColumn('value', searchedColumn, searchText, record?.fullValue, true, 'input', search)
-        }
+          return renderColumn(
+            "value",
+            searchedColumn,
+            searchText,
+            record?.fullValue,
+            true,
+            "input",
+            search,
+          );
+        },
       },
-    ]
-  }, [searchedColumn, searchText, page, pageSize, search])
-
+    ];
+  }, [searchedColumn, searchText, page, pageSize, search]);
 
   return (
     <>
       <Spin spinning={loading}>
         <BaseContainer header={"ACCOUNT CONTACT LIST"}>
           <div className="flex w-full justify-end gap-3 mb-5">
-            <ToolbarAccount items={itemActions} advancedAccess={access_account} />
+            <ToolbarAccount
+              items={itemActions}
+              advancedAccess={access_account}
+            />
           </div>
           <div className={"w-full"}>
             <TablePagination
@@ -983,7 +1118,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
                 ...useColumnActionPermissionAccount(
                   ["Activate", "View", "Update"],
                   itemActions,
-                  access_account
+                  access_account,
                 ),
               ]}
               pageSize={pageSize}
@@ -1027,35 +1162,63 @@ const AccountContact = ({ id, idCustomer, type }) => {
         formModal={formModal}
         open={openModalContact}
         setOpen={setOpenModalContact}
-        module_name={'contact'}
+        module_name={"contact"}
         data_exist={{
           data_detail: data_detail,
-          id: id
+          id: id,
         }}
-        datas_option={
-          {
-            data_job: data_job?.map(item => ({ label: item?.text, value: item?.id })),
-            data_position: data_position?.map(item => ({ label: item?.text, value: item?.id })),
-            data_contact_address: data_contact_address?.map(item => ({ label: item?.fullAddress, value: item?.addressId, key: item?.addressId })),
-            data_input_type: data_inputType?.map(item => ({ label: item?.text, value: item?.id })),
-            data_contact_type: data_contactType?.map(item => ({ label: item?.text, value: item?.id, key: item?.code })),
-            data_country_code: data_country_code?.map(item => ({ label: item?.text, value: item?.id, })),
-            data_country_zone: data_country_zone?.map(item => ({ label: item?.text, value: item?.id, })),
-            data_choose_contact: data_choose_contact,
-            // data_detail_choosed: conditionalChoosedByTypeContact(typeContact)
-          }
-        }
+        datas_option={{
+          data_job: data_job?.map((item) => ({
+            label: item?.text,
+            value: item?.id,
+          })),
+          data_position: data_position?.map((item) => ({
+            label: item?.text,
+            value: item?.id,
+          })),
+          data_contact_address: data_contact_address?.map((item) => ({
+            label: item?.fullAddress,
+            value: item?.addressId,
+            key: item?.addressId,
+          })),
+          data_input_type: data_inputType?.map((item) => ({
+            label: item?.text,
+            value: item?.id,
+          })),
+          data_contact_type: data_contactType?.map((item) => ({
+            label: item?.text,
+            value: item?.id,
+            key: item?.code,
+          })),
+          data_country_code: data_country_code?.map((item) => ({
+            label: item?.text,
+            value: item?.id,
+          })),
+          data_country_zone: data_country_zone?.map((item) => ({
+            label: item?.text,
+            value: item?.id,
+          })),
+          data_choose_contact: data_choose_contact,
+          // data_detail_choosed: conditionalChoosedByTypeContact(typeContact)
+        }}
         dispatcher={{
-          dispatcherCountryZone: (id) => getCountryZone(id)
+          dispatcherCountryZone: (id) => getCountryZone(id),
         }}
-        dispatcherChooseContact={
-          {
-            disptachListChoose: (page, pageSize, sort, search) => dispatch(getListChooseContact({ id: idCustomer, search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }))?.unwrap(),
-            dispatchChooseDetail: (id) => {
-              dispatch(getDetailContactAfterChoose(id))
-            }
-          }
-        }
+        dispatcherChooseContact={{
+          disptachListChoose: (page, pageSize, sort, search) =>
+            dispatch(
+              getListChooseContact({
+                id: idCustomer,
+                search: encodeURIComponent(JSON.stringify(search)),
+                page,
+                pageSize,
+                sort,
+              }),
+            )?.unwrap(),
+          dispatchChooseDetail: (id) => {
+            dispatch(getDetailContactAfterChoose(id));
+          },
+        }}
         handleSaveContact={handleSaveContact}
         typeContact={typeContact}
         setTypeContact={setTypeContact}
@@ -1069,15 +1232,16 @@ const AccountContact = ({ id, idCustomer, type }) => {
         }}
         handleOk={() => {
           setModalCheckPrimaryExist(false);
-          setModalConfirm(true)
+          setModalConfirm(true);
         }}
         width={700}
       >
         <div className="flex justify-center gap-[20px] mt-6">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
           <p className={"text-[18px] font-bold"}>
-            {`Are you sure want to ${type === "create" ? "create" : "update"
-              } new primary contact ?`}
+            {`Are you sure want to ${
+              type === "create" ? "create" : "update"
+            } new primary contact ?`}
           </p>
         </div>
         <Alert
@@ -1094,18 +1258,18 @@ const AccountContact = ({ id, idCustomer, type }) => {
         header={"confirmation"}
         width={1000}
         handleCancel={() => {
-          if(typeContact === 'default') setTypeContact('cancel create')
-          setModalConfirm(false)
-          setOpenModalContact(true)
+          if (typeContact === "default") setTypeContact("cancel create");
+          setModalConfirm(false);
+          setOpenModalContact(true);
         }}
         footer={
           <div className={"w-full flex justify-end gap-5"}>
             <ButtonComponent
               type={"default"}
               onClick={() => {
-                if (typeContact === 'default') setTypeContact('cancel create')
-                setModalConfirm(false)
-                setOpenModalContact(true)
+                if (typeContact === "default") setTypeContact("cancel create");
+                setModalConfirm(false);
+                setOpenModalContact(true);
               }}
             >
               Cancel
@@ -1131,14 +1295,19 @@ const AccountContact = ({ id, idCustomer, type }) => {
             <DetailText label="Middle Name">
               {body?.contact?.middleName}
             </DetailText>
-            <DetailText label="Last Name">
-              {body?.contact?.lastName}
-            </DetailText>
+            <DetailText label="Last Name">{body?.contact?.lastName}</DetailText>
             <DetailText label="Job">
-              {data_job?.find(item => item?.id === body?.contact?.jobId)?.text}
+              {
+                data_job?.find((item) => item?.id === body?.contact?.jobId)
+                  ?.text
+              }
             </DetailText>
             <DetailText label="Position">
-              {data_position?.find(item => item?.id === body?.contact?.positionId)?.text}
+              {
+                data_position?.find(
+                  (item) => item?.id === body?.contact?.positionId,
+                )?.text
+              }
             </DetailText>
           </div>
 
@@ -1174,21 +1343,22 @@ const AccountContact = ({ id, idCustomer, type }) => {
               {body?.primaryFlag ? "Yes" : "No"}
             </DetailText>
             <DetailText label="Contact Address">
-              {data_contact_address?.find(item => item?.addressId === body?.contactAddressId)?.fullAddress}
+              {
+                data_contact_address?.find(
+                  (item) => item?.addressId === body?.contactAddressId,
+                )?.fullAddress
+              }
             </DetailText>
             <DetailText label="Contact Address Additional Note">
               {body?.additionalNote}
             </DetailText>
             <div className="col-span-3">
-              <DetailText label="Description">
-                {body?.description}
-              </DetailText>
+              <DetailText label="Description">{body?.description}</DetailText>
             </div>
           </div>
         </div>
       </ModalCustom>
     </>
-
   );
 };
 

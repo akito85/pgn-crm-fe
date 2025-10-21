@@ -1,7 +1,7 @@
-import React,{ useState } from 'react'
-import TablePagination from '../../../../../../../../components/TablePagination';
-import GridLayout from '../../../../../../../../components/GridLayout';
-import DetailText from '../../../../../../../../components/DetailText';
+import React, { useState } from "react";
+import TablePagination from "../../../../../../../../components/TablePagination";
+import GridLayout from "../../../../../../../../components/GridLayout";
+import DetailText from "../../../../../../../../components/DetailText";
 
 const Detail = () => {
   const [page, setPage] = useState(1);
@@ -36,7 +36,7 @@ const Detail = () => {
       dataIndex: "value",
       width: 150,
       sorter: true,
-      align: 'right'
+      align: "right",
       // ...getColumnSearchProps("value"),
     },
     {
@@ -45,7 +45,7 @@ const Detail = () => {
       width: 150,
       sorter: true,
       // ...getColumnSearchProps("unit"),
-    }
+    },
   ];
   return (
     <div>
@@ -54,12 +54,12 @@ const Detail = () => {
           pageSize={pageSize}
           current={page}
           dataSource={dataSource}
-          tableScrolled={{y: 525, x: 1500 }}
+          tableScrolled={{ y: 525, x: 1500 }}
           columns={columns}
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Detail
+export default Detail;

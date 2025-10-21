@@ -38,9 +38,9 @@ import { getListCategory } from "../../../../redux/slices/rating_billing_invoice
 const DelegationForm = ({ type }) => {
   // Selector
   const { loading, position_Delegation, delegate_To } = useSelector(
-    (state) => state.delegation
+    (state) => state.delegation,
   );
-  const { isLoading } = useSelector(state => state?.general);
+  const { isLoading } = useSelector((state) => state?.general);
 
   // Declaration
   const [form] = Form.useForm();
@@ -65,11 +65,11 @@ const DelegationForm = ({ type }) => {
         "remark",
       ],
     },
-    { value: "Attachment", paramValue: ['attachment'] }
+    { value: "Attachment", paramValue: ["attachment"] },
   ]);
   const [valuePage, setValuePage] = useState(tabData[0].value);
-  const [loadingForm, setLoadingForm] = useState(false)
-  const loadings = loading || loadingForm || isLoading
+  const [loadingForm, setLoadingForm] = useState(false);
+  const loadings = loading || loadingForm || isLoading;
   const routes = [
     {
       path: "",
@@ -111,13 +111,13 @@ const DelegationForm = ({ type }) => {
       tabData?.map((item) => {
         const { errorBadge, ...keys } = item;
         return keys;
-      })
+      }),
     );
   };
 
   const handleDelegation = (value) => {
     dispatch(getDelegateTo(value));
-    form.resetFields(['delegateTo'])
+    form.resetFields(["delegateTo"]);
   };
 
   const handleStartDate = (e) => {
@@ -151,7 +151,7 @@ const DelegationForm = ({ type }) => {
             };
             await userHttpService.uploadImage(
               `/vi/dbs/api/user-delegation/upload`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -182,26 +182,29 @@ const DelegationForm = ({ type }) => {
             "remark",
           ],
         },
-        { value: "Attachment", paramValue: ['attachment'] }
-      ])
+        { value: "Attachment", paramValue: ["attachment"] },
+      ]);
       let validateValueOBj;
       validateValueOBj = {
         body: {
           ...formValue,
-          startDate: hasValue(formValue?.startDate) ? renderDateConverter(formValue?.startDate, 'date') : null,
-          endDate: hasValue(formValue?.endDate) ? renderDateConverter(formValue?.endDate, 'date') : null
+          startDate: hasValue(formValue?.startDate)
+            ? renderDateConverter(formValue?.startDate, "date")
+            : null,
+          endDate: hasValue(formValue?.endDate)
+            ? renderDateConverter(formValue?.endDate, "date")
+            : null,
         },
         services: userHttpService,
-        endPoint: '/vi/dbs/api/user-delegation/validate-create',
-        type
-      }
+        endPoint: "/vi/dbs/api/user-delegation/validate-create",
+        type,
+      };
       await dispatch(validateCreateUpdate(validateValueOBj))?.unwrap();
       setModalConfirm(true);
-      setBodyData(
-        {
-          body: validateValueOBj?.body,
-          validateValue: validateValueOBj
-        });
+      setBodyData({
+        body: validateValueOBj?.body,
+        validateValue: validateValueOBj,
+      });
     } catch (error) {
       setModalConfirm(false);
     }
@@ -216,7 +219,7 @@ const DelegationForm = ({ type }) => {
           layout="vertical"
           onFinish={onFinish}
           onFinishFailed={handleError}
-        // scrollToFirstError={true}
+          // scrollToFirstError={true}
         >
           <BaseContainer header={"REQUEST DELEGATION"}>
             <div className="w-full mb-4">
@@ -272,10 +275,10 @@ const DelegationForm = ({ type }) => {
                         (value && moment(startDate) <= moment(value)) || !value
                           ? Promise.resolve()
                           : Promise.reject(
-                            new Error(
-                              "The end date must be greater than or equal to the start date!"
-                            )
-                          ),
+                              new Error(
+                                "The end date must be greater than or equal to the start date!",
+                              ),
+                            ),
                     },
                     {
                       message: requiredMessage("End Date"),
@@ -301,13 +304,16 @@ const DelegationForm = ({ type }) => {
             </div>
             <div className={`${valuePage !== "Attachment" ? "hidden" : ""}`}>
               <Form.Item
-                name={'attachment'}
+                name={"attachment"}
                 rules={[
                   {
-                    validator: (_, __) => listDataAttachment?.length === 0 ?
-                      Promise.reject(new Error('Please upload your attachment!')) :
-                      Promise.resolve()
-                  }
+                    validator: (_, __) =>
+                      listDataAttachment?.length === 0
+                        ? Promise.reject(
+                            new Error("Please upload your attachment!"),
+                          )
+                        : Promise.resolve(),
+                  },
                 ]}
               >
                 <AttachmentComponent
@@ -354,7 +360,9 @@ const DelegationForm = ({ type }) => {
               </ButtonComponent>
               <ButtonComponent
                 onClick={() => setFlag(1)}
-                type="submit" htmlType={"submit"}>
+                type="submit"
+                htmlType={"submit"}
+              >
                 Save
               </ButtonComponent>
             </div>

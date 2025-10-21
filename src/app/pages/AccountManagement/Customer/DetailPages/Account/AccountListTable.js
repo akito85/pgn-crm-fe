@@ -1,7 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import {
-  Tooltip,
-} from "antd";
+import { Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
 import { Link } from "react-router-dom";
 import TablePagination from "../../../../../../components/TablePagination";

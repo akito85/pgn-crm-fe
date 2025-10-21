@@ -84,7 +84,7 @@ const PricingRule = ({
                 (current.criteriaName
                   ? `${index !== 0 ? ", " : ""}${current.criteriaName}`
                   : ""),
-              ""
+              "",
             )}
           </DetailText>
         </div>

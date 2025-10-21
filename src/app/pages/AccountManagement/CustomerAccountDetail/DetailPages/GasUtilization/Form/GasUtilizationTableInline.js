@@ -1,5 +1,13 @@
-import React, {useState, useRef, useEffect} from "react";
-import { Form, Input, InputNumber, Pagination, Select, Table, Tooltip } from "antd";
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Form,
+  Input,
+  InputNumber,
+  Pagination,
+  Select,
+  Table,
+  Tooltip,
+} from "antd";
 
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { getColumnSearchProps } from "../../../../../../../utils/getColumnSearchProps";
@@ -36,7 +44,6 @@ const sorter = (fieldSort, a, b) => {
   let fb = handleDataSort(b);
   return fa.localeCompare(fb);
 };
-
 
 const EditableCell = ({
   editing,
@@ -141,16 +148,21 @@ const EditableCell = ({
           getValueFromEvent={(value) =>
             handleEditDataRecord(value, key, dataIndex)
           }
-          validateStatus={validationError && dataIndex === 'percentage' ? 'error' : undefined}
-          help={validationError && dataIndex === 'percentage' ? validationError : undefined}
+          validateStatus={
+            validationError && dataIndex === "percentage" ? "error" : undefined
+          }
+          help={
+            validationError && dataIndex === "percentage"
+              ? validationError
+              : undefined
+          }
           rules={
             inputType !== "number"
               ? rules()
               : [
                   ...rules(),
                   {
-                    validator: (_, value) =>
-                      fulFilValidator()(_, value),
+                    validator: (_, value) => fulFilValidator()(_, value),
                   },
                 ]
           }
@@ -171,7 +183,6 @@ const GasUtilizationTableInline = ({
   ddlUtilizationName,
   type = "create",
   setIsEdit = () => {},
-
 }) => {
   const searchInput = useRef(null);
   const [formTable] = Form.useForm();
@@ -181,7 +192,7 @@ const GasUtilizationTableInline = ({
   // const [totalElements, setTotalElement] = useState(0);
   const [editingKey, setEditingKey] = useState("");
   const [storedDate, setStoredData] = useState(false);
-  
+
   const isEditing = (record) => record.key === editingKey;
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -191,17 +202,18 @@ const GasUtilizationTableInline = ({
   const [statusAction, setStatusAction] = useState("");
 
   // const [fulfilPercentage, setFulfilPercentage] = useState(0);
-  const [validationError, setValidationError] = useState('');
+  const [validationError, setValidationError] = useState("");
   const [filterDdlUtilName, setFilterDdlUtilName] = useState([]);
 
   useEffect(() => {
-    const filteredListName = ddlUtilizationName?.filter(item => {
-      return !dataTableGasUtilization?.some(fix => fix?.name?.label === item?.label);
+    const filteredListName = ddlUtilizationName?.filter((item) => {
+      return !dataTableGasUtilization?.some(
+        (fix) => fix?.name?.label === item?.label,
+      );
     });
-    setFilterDdlUtilName(filteredListName)
-  }, [dataTableGasUtilization, ddlUtilizationName])
+    setFilterDdlUtilName(filteredListName);
+  }, [dataTableGasUtilization, ddlUtilizationName]);
 
-  
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -274,9 +286,12 @@ const GasUtilizationTableInline = ({
     setEditDataRecord((prevState) => {
       return {
         ...prevState,
-        [keyName]: index === "name" ? {
-          ...value,
-        }: value,
+        [keyName]:
+          index === "name"
+            ? {
+                ...value,
+              }
+            : value,
       };
     });
     return value;
@@ -284,7 +299,7 @@ const GasUtilizationTableInline = ({
 
   const edit = (record, field) => {
     setStatusAction("edit");
-    setIsEdit(true)
+    setIsEdit(true);
     formTable.setFieldsValue(record);
     const { key, ...extraProps } = record || {};
     const tempValue = { ...extraProps };
@@ -305,24 +320,25 @@ const GasUtilizationTableInline = ({
       }
     }
     setEditingKey(record.key);
-   
   };
 
   const cancel = (record) => {
     setStoredData(false);
     setEditingKey("");
-    setIsEdit(false)
+    setIsEdit(false);
     if (statusAction === "add") {
       deleteRow(record);
     }
     setStatusAction("");
   };
 
-
   const addRow = () => {
-    const totalPercentage = dataTableGasUtilization.reduce((accumulator, currentValue) => {
-      return accumulator + (currentValue.percentage || 0);
-    }, 0);
+    const totalPercentage = dataTableGasUtilization.reduce(
+      (accumulator, currentValue) => {
+        return accumulator + (currentValue.percentage || 0);
+      },
+      0,
+    );
     let errorBody = {};
     if (totalPercentage === 100) {
       errorBody = {
@@ -330,11 +346,11 @@ const GasUtilizationTableInline = ({
         description: "Total percentage is 100%, you cannot add data again.",
       };
       dispatch(showModalError(errorBody));
-    } else{
+    } else {
       formTable.resetFields();
       setStoredData(true);
       setStatusAction("add");
-      setIsEdit(true)
+      setIsEdit(true);
       const newRow = {
         key: dataTableGasUtilization
           .reduce((current, next) => {
@@ -349,7 +365,6 @@ const GasUtilizationTableInline = ({
       setEditingKey(newRow.key);
     }
   };
-
 
   // const save = async (key) => {
   //     try {
@@ -390,7 +405,7 @@ const GasUtilizationTableInline = ({
 
       const newData = [...dataTableGasUtilization];
       const index = newData.findIndex((item) => key === item.key);
-  
+
       if (index > -1) {
         // Update existing row
         const item = newData[index];
@@ -406,37 +421,36 @@ const GasUtilizationTableInline = ({
           ...row,
         });
       }
-  
+
       // Calculate the total percentage
       const totalPercentage = newData.reduce((accumulator, currentValue) => {
         return accumulator + (currentValue.percentage || 0); // Ensure currentValue.percentage is a number
       }, 0);
-  
+
       // Check if the total percentage is exactly 100%
       if (totalPercentage > 100) {
-        setValidationError('Total percentage must be exactly 100%')
-        return; 
+        setValidationError("Total percentage must be exactly 100%");
+        return;
       }
 
-      setValidationError('');
-      
+      setValidationError("");
+
       // Update the table with the new or updated data
       setDataTableGasUtilization(newData);
       setEditingKey("");
-  
+
       setStoredData(false);
-      setIsEdit(false)
+      setIsEdit(false);
       setStatusAction("");
       formTable.resetFields();
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
     }
   };
-  
 
   const deleteRow = (record) => {
     setDataTableGasUtilization((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -464,7 +478,7 @@ const GasUtilizationTableInline = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -482,7 +496,7 @@ const GasUtilizationTableInline = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -496,7 +510,10 @@ const GasUtilizationTableInline = ({
             <div className="flex w-full justify-center my-3 gap-2">
               {editable ? (
                 <>
-                  <ButtonComponent onClick={()=>cancel(record)} type="default">
+                  <ButtonComponent
+                    onClick={() => cancel(record)}
+                    type="default"
+                  >
                     Cancel
                   </ButtonComponent>
                   <ButtonComponent
@@ -509,7 +526,7 @@ const GasUtilizationTableInline = ({
               ) : (
                 <>
                   <Tooltip title="Edit">
-                    <span 
+                    <span
                       className={`flex justify-center${
                         editingKey ? " cursor-not-allowed" : ""
                       }`}
@@ -531,14 +548,10 @@ const GasUtilizationTableInline = ({
                       <SVGIcon
                         name="IconDelete"
                         width={24}
-                        className={
-                          editingKey ? "disabled" : undefined
-                        }
+                        className={editingKey ? "disabled" : undefined}
                         color={editingKey ? "#8D91A0" : "#ff2e2e"}
                         onClick={
-                          !editingKey
-                            ? () => deleteRow(record)
-                            : undefined
+                          !editingKey ? () => deleteRow(record) : undefined
                         }
                       />
                     </span>
@@ -568,117 +581,119 @@ const GasUtilizationTableInline = ({
       return !optionSelectedCol.includes(col.title);
     });
   };
-  const totalPercentage = dataTableGasUtilization.reduce((accumulator, currentValue) => {
-    return accumulator + (currentValue.percentage || 0); // Ensure currentValue.percentage is a number
-  }, 0);
+  const totalPercentage = dataTableGasUtilization.reduce(
+    (accumulator, currentValue) => {
+      return accumulator + (currentValue.percentage || 0); // Ensure currentValue.percentage is a number
+    },
+    0,
+  );
 
   return (
-      <div>
+    <div>
+      {type === "create" && (
+        <div className="flex w-full justify-end">
+          <ButtonComponent
+            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            type="submit"
+            onClick={!storedDate ? addRow : undefined}
+            disabled={editingKey && true}
+          >
+            Create
+          </ButtonComponent>
+        </div>
+      )}
+
+      {/* Start Pagination */}
+      <div className={"w-full flex justify-between py-6"}>
+        <Select
+          mode="multiple"
+          placeholder="Show All Column"
+          className={"w-2/6"}
+          maxTagCount={3}
+          onChange={handleDisplayColumn}
+        >
+          {columns()
+            .map((col) => (
+              <Select.Option
+                key={col.title}
+                value={col.title}
+                disabled={
+                  optionSelectedCol.length > 3
+                    ? optionSelectedCol.includes(col.title)
+                      ? false
+                      : true
+                    : false
+                }
+              >
+                {col.title}
+              </Select.Option>
+            ))
+            .splice(1)}
+        </Select>
+
+        <Pagination
+          total={filteredData("length")}
+          className={"pr-1"}
+          showSizeChanger
+          current={page}
+          pageSize={pageSize}
+          onChange={handleChangeSize}
+          showTotal={(total, range) =>
+            `Showing ${range[0]} to ${range[1]} of ${total} records`
+          }
+        />
+      </div>
+      {/* End Pagination */}
+
+      {/* Table */}
+      <Form form={formTable} component={false}>
+        <Table
+          dataSource={filteredData("data")}
+          columns={filterColumn(
+            columns().map((col) => ({
+              ...col,
+              onCell: (record) => ({
+                record,
+                inputType: col.inputType,
+                dataIndex: col.dataIndex,
+                title: col.title,
+                editing: isEditing(record),
+                dependDataIndex: col.dependDataIndex,
+                urlIndex: col.url,
+                options: col.options,
+                required: col.require,
+                dataEditRecord: editDataRecord,
+                handleEditDataRecord: handleEditDataRecord,
+                dataTableGasUtilization: dataTableGasUtilization,
+                rules: col.rules,
+                totalPercentage: totalPercentage,
+                formTable: formTable,
+                validationError: validationError,
+              }),
+            })),
+          )}
+          rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
+          scroll={{
+            x: 800,
+            y: 300,
+          }}
+          pagination={false}
+          components={{
+            body: {
+              cell: EditableCell,
+            },
+          }}
+          onChange={onSort}
+        />
+
         {type === "create" && (
-          <div className="flex w-full justify-end">
-            <ButtonComponent
-              icon={<SVGIcon name="IconButtonCreate" width={24} />}
-              type="submit"
-              onClick={!storedDate ? addRow : undefined}
-              disabled={editingKey && true}
-            >
-              Create
-            </ButtonComponent>
+          <div className="pt-4">
+            <p className="font-bold">Total Percentage</p>
+            <span>{totalPercentage} / 100 (%)</span>
           </div>
         )}
-
-        {/* Start Pagination */}
-        <div className={"w-full flex justify-between py-6"}>
-          <Select
-            mode="multiple"
-            placeholder="Show All Column"
-            className={"w-2/6"}
-            maxTagCount={3}
-            onChange={handleDisplayColumn}
-          >
-            {columns()
-              .map((col) => (
-                <Select.Option
-                  key={col.title}
-                  value={col.title}
-                  disabled={
-                    optionSelectedCol.length > 3
-                      ? optionSelectedCol.includes(col.title)
-                        ? false
-                        : true
-                      : false
-                  }
-                >
-                  {col.title}
-                </Select.Option>
-              ))
-              .splice(1)}
-          </Select>
-
-          <Pagination
-            total={filteredData("length")}
-            className={"pr-1"}
-            showSizeChanger
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChangeSize}
-            showTotal={(total, range) =>
-              `Showing ${range[0]} to ${range[1]} of ${total} records`
-            }
-          />
-        </div>
-        {/* End Pagination */}
-
-        {/* Table */}
-        <Form form={formTable} component={false}>
-          <Table
-            dataSource={filteredData("data")}
-            columns={filterColumn(
-              columns().map((col) => ({
-                ...col,
-                onCell: (record) => ({
-                  record,
-                  inputType: col.inputType,
-                  dataIndex: col.dataIndex,
-                  title: col.title,
-                  editing: isEditing(record),
-                  dependDataIndex: col.dependDataIndex,
-                  urlIndex: col.url,
-                  options: col.options,
-                  required: col.require,
-                  dataEditRecord: editDataRecord,
-                  handleEditDataRecord: handleEditDataRecord,
-                  dataTableGasUtilization:dataTableGasUtilization,
-                  rules: col.rules,
-                  totalPercentage:totalPercentage,
-                  formTable: formTable,
-                  validationError: validationError
-                }),
-              }))
-            )}
-            rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
-            scroll={{
-              x: 800,
-              y: 300,
-            }}
-            pagination={false}
-            components={{
-              body: {
-                cell: EditableCell,
-              },
-            }}
-            onChange={onSort}
-          />
-
-          {type === 'create' && (
-            <div className="pt-4">
-              <p className="font-bold">Total Percentage</p>
-              <span>{totalPercentage} / 100 (%)</span>
-            </div>
-          )}
-        </Form>
-        
-      </div>
+      </Form>
+    </div>
   );
 };
 

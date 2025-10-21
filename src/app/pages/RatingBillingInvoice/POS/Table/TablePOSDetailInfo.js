@@ -1,6 +1,9 @@
 import { Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValueFE,
+} from "../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { formatToTwoDecimalPlaces, separatorCurrency } from "../Utils";
 import { hasValue, renderColumn } from "../../../../../utils";
@@ -18,7 +21,7 @@ export const columnsTablePOSDetailInfo = (
   onFilter = () => {},
   sorter = () => {},
   data = [],
-  type
+  type,
 ) => {
   const column = [
     {
@@ -32,9 +35,7 @@ export const columnsTablePOSDetailInfo = (
       dataIndex: "type",
       align: "center",
       // onFilter: (value, record) => onFilter("type", value, record),
-      filteredValue: search?.["type"]
-      ? [search?.["type"]]
-      : null,
+      filteredValue: search?.["type"] ? [search?.["type"]] : null,
       sorter: (a, b) => sorter("type", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -54,7 +55,7 @@ export const columnsTablePOSDetailInfo = (
           text,
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "type",
@@ -68,9 +69,7 @@ export const columnsTablePOSDetailInfo = (
       title: "ITEM",
       dataIndex: "item",
       // onFilter: (value, record) => onFilter("item", value, record),
-      filteredValue: search?.["item"]
-      ? [search?.["item"]]
-      : null,
+      filteredValue: search?.["item"] ? [search?.["item"]] : null,
       sorter: (a, b) => sorter("item", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -90,7 +89,7 @@ export const columnsTablePOSDetailInfo = (
           text,
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "item",
@@ -105,9 +104,7 @@ export const columnsTablePOSDetailInfo = (
       dataIndex: "currency",
       align: "center",
       // onFilter: (value, record) => onFilter("currency", value, record),
-      filteredValue: search?.["currency"]
-      ? [search?.["currency"]]
-      : null,
+      filteredValue: search?.["currency"] ? [search?.["currency"]] : null,
       sorter: (a, b) => sorter("currency", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -127,7 +124,7 @@ export const columnsTablePOSDetailInfo = (
           text,
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "currency",
@@ -142,9 +139,7 @@ export const columnsTablePOSDetailInfo = (
       dataIndex: "quantity",
       align: "right",
       // onFilter: (value, record) => onFilter("quantity", value, record),
-      filteredValue: search?.["quantity"]
-      ? [search?.["quantity"]]
-      : null,
+      filteredValue: search?.["quantity"] ? [search?.["quantity"]] : null,
       sorter: (a, b) => sorter("quantity", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -164,7 +159,7 @@ export const columnsTablePOSDetailInfo = (
           text,
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "quantity",
@@ -200,9 +195,7 @@ export const columnsTablePOSDetailInfo = (
       dataIndex: "price",
       align: "right",
       // onFilter: (value, record) => onFilter("price", value, record),
-      filteredValue: search?.["price"]
-      ? [search?.["price"]]
-      : null,
+      filteredValue: search?.["price"] ? [search?.["price"]] : null,
       sorter: (a, b) => sorter("price", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -222,7 +215,7 @@ export const columnsTablePOSDetailInfo = (
           separatorCurrency(text),
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "price",
@@ -273,9 +266,7 @@ export const columnsTablePOSDetailInfo = (
       dataIndex: "amount",
       align: "right",
       // onFilter: (value, record) => onFilter("amount", value, record),
-      filteredValue: search?.["amount"]
-      ? [search?.["amount"]]
-      : null,
+      filteredValue: search?.["amount"] ? [search?.["amount"]] : null,
       sorter: (a, b) => sorter("amount", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -295,7 +286,7 @@ export const columnsTablePOSDetailInfo = (
           separatorCurrency(text),
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "amount",
@@ -376,15 +367,15 @@ export const columnsTablePOSDetailInfo = (
         //greater or less than the index on page
         const check =
           data.findIndex(
-            (item) => parseInt(item.itemId) === parseInt(r.reference)
+            (item) => parseInt(item.itemId) === parseInt(r.reference),
           ) !== -1
             ? data.findIndex(
-                (item) => parseInt(item.itemId) === parseInt(r.reference)
+                (item) => parseInt(item.itemId) === parseInt(r.reference),
               ) +
                 1 >=
                 (page - 1) * pageSize + 1 &&
               data.findIndex(
-                (item) => parseInt(item.itemId) === parseInt(r.reference)
+                (item) => parseInt(item.itemId) === parseInt(r.reference),
               ) +
                 1 <=
                 page * pageSize
@@ -394,7 +385,7 @@ export const columnsTablePOSDetailInfo = (
           //   ? r.referenceName
           //   :
           data.findIndex(
-            (item) => parseInt(item.itemId) === parseInt(r.reference)
+            (item) => parseInt(item.itemId) === parseInt(r.reference),
           ) + 1;
         if (text) {
           return text;
@@ -408,9 +399,7 @@ export const columnsTablePOSDetailInfo = (
       dataIndex: "uom",
       align: "center",
       // onFilter: (value, record) => onFilter("uom", value, record),
-      filteredValue: search?.["uom"]
-      ? [search?.["uom"]]
-      : null,
+      filteredValue: search?.["uom"] ? [search?.["uom"]] : null,
       sorter: (a, b) => sorter("uom", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -430,7 +419,7 @@ export const columnsTablePOSDetailInfo = (
           text,
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "uom",
@@ -447,8 +436,8 @@ export const columnsTablePOSDetailInfo = (
       // onFilter: (value, record) => onFilter("amountEqvIdr", value, record),
       sorter: (a, b) => sorter("amountEqvIdr", a, b),
       filteredValue: search?.["amountEqvIdr"]
-      ? [search?.["amountEqvIdr"]]
-      : null,
+        ? [search?.["amountEqvIdr"]]
+        : null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "amountEqvIdr",
@@ -467,7 +456,7 @@ export const columnsTablePOSDetailInfo = (
           separatorCurrency(text),
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "amountEqvIdr",
@@ -519,8 +508,8 @@ export const columnsTablePOSDetailInfo = (
       align: "right",
       // onFilter: (value, record) => onFilter("amountEqvUsd", value, record),
       filteredValue: search?.["amountEqvUsd"]
-      ? [search?.["amountEqvUsd"]]
-      : null,
+        ? [search?.["amountEqvUsd"]]
+        : null,
       sorter: (a, b) => sorter("amountEqvUsd", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -540,7 +529,7 @@ export const columnsTablePOSDetailInfo = (
           separatorCurrency(text),
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "amountEqvUsd",
@@ -591,9 +580,7 @@ export const columnsTablePOSDetailInfo = (
       dataIndex: "eqvIdr",
       align: "right",
       // onFilter: (value, record) => onFilter("eqvIdr", value, record),
-      filteredValue: search?.["eqvIdr"]
-      ? [search?.["eqvIdr"]]
-      : null,
+      filteredValue: search?.["eqvIdr"] ? [search?.["eqvIdr"]] : null,
       sorter: (a, b) => sorter("eqvIdr", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -613,7 +600,7 @@ export const columnsTablePOSDetailInfo = (
           separatorCurrency(text),
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "eqvIdr",
@@ -664,9 +651,7 @@ export const columnsTablePOSDetailInfo = (
       dataIndex: "discount",
       align: "right",
       // onFilter: (value, record) => onFilter("discount", value, record),
-      filteredValue: search?.["discount"]
-      ? [search?.["discount"]]
-      : null,
+      filteredValue: search?.["discount"] ? [search?.["discount"]] : null,
       sorter: (a, b) => sorter("discount", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -686,7 +671,7 @@ export const columnsTablePOSDetailInfo = (
           separatorCurrency(text),
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "discount",
@@ -737,9 +722,7 @@ export const columnsTablePOSDetailInfo = (
       dataIndex: "total",
       align: "right",
       // onFilter: (value, record) => onFilter("total", value, record),
-      filteredValue: search?.["total"]
-      ? [search?.["total"]]
-      : null,
+      filteredValue: search?.["total"] ? [search?.["total"]] : null,
       sorter: (a, b) => sorter("total", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -759,7 +742,7 @@ export const columnsTablePOSDetailInfo = (
           separatorCurrency(text),
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "total",
@@ -810,9 +793,7 @@ export const columnsTablePOSDetailInfo = (
       dataIndex: "totalEqvIdr",
       align: "right",
       // onFilter: (value, record) => onFilter("totalEqvIdr", value, record),
-      filteredValue: search?.["totalEqvIdr"]
-      ? [search?.["totalEqvIdr"]]
-      : null,
+      filteredValue: search?.["totalEqvIdr"] ? [search?.["totalEqvIdr"]] : null,
       sorter: (a, b) => sorter("totalEqvIdr", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -832,7 +813,7 @@ export const columnsTablePOSDetailInfo = (
           separatorCurrency(text),
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "totalEqvIdr",
@@ -884,9 +865,7 @@ export const columnsTablePOSDetailInfo = (
       align: "right",
       // onFilter: (value, record) => onFilter("totalEqvUsd", value, record),
       sorter: (a, b) => sorter("totalEqvUsd", a, b),
-      filteredValue: search?.["totalEqvUsd"]
-      ? [search?.["totalEqvUsd"]]
-      : null,
+      filteredValue: search?.["totalEqvUsd"] ? [search?.["totalEqvUsd"]] : null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "totalEqvUsd",
@@ -905,7 +884,7 @@ export const columnsTablePOSDetailInfo = (
           separatorCurrency(text),
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "totalEqvUsd",
@@ -995,27 +974,27 @@ export const columnsTablePOSDetailInfo = (
       //     return "";
       //   }
       // },
-    //onFilter: (value, record) => //onFilter("remark", value, record),
-    ...getColumnSearchPropsUseFilteredValueFE(
-      search,
-      "remark",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "input"
-    ),
-    render: (text) =>
-      renderColumn(
+      //onFilter: (value, record) => //onFilter("remark", value, record),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
         "remark",
-        hasValue(search["remark"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        text,
+        handleSearch,
         true,
         "input",
-        search
       ),
+      render: (text) =>
+        renderColumn(
+          "remark",
+          hasValue(search["remark"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACTION",

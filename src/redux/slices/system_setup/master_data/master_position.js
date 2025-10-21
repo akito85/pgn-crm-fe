@@ -29,11 +29,11 @@ export const getListMasterPosition = createAsyncThunk(
           error: response,
           action: "LIST_MASTER_POSITION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 export const getDetailMasterPosition = createAsyncThunk(
   "GET_DETAIL_MASTER_POSITION",
@@ -48,11 +48,11 @@ export const getDetailMasterPosition = createAsyncThunk(
           error: response,
           action: "GET_DETAIL_MASTER_POSITION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 export const createMasterPosition = createAsyncThunk(
   "CREATE_MASTER_POSITION",
@@ -72,15 +72,15 @@ export const createMasterPosition = createAsyncThunk(
           error: errorBody(
             errorCode(response),
             "created",
-            errorMessage(response)
+            errorMessage(response),
           ),
           action: "CREATE_MASTER_POSITION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const validateCreatePosition = createAsyncThunk(
@@ -96,11 +96,11 @@ export const validateCreatePosition = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "VALIDATE_CREATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const inactiveMasterPosition = createAsyncThunk(
@@ -124,11 +124,11 @@ export const inactiveMasterPosition = createAsyncThunk(
           error: errorBody(errorCode(response), status, errorMessage(response)),
           action: "INACTIVE_MASTER_POSITION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 export const deleteMasterPosition = createAsyncThunk(
   "DELETE_MASTER_POSITION",
@@ -143,15 +143,15 @@ export const deleteMasterPosition = createAsyncThunk(
           error: errorBody(
             errorCode(response),
             "deleted",
-            errorMessage(response)
+            errorMessage(response),
           ),
           action: "DELETE_MASTER_POSITION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 export const updateMasterPosition = createAsyncThunk(
   "UPDATE_MASTER_POSITION",
@@ -171,15 +171,15 @@ export const updateMasterPosition = createAsyncThunk(
           error: errorBody(
             errorCode(response),
             "updated",
-            errorMessage(response)
+            errorMessage(response),
           ),
           action: "UPDATE_MASTER_POSITION",
           back: false,
-        })
+        }),
       );
       return thunkApi.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const downloadMasterPosition = createAsyncThunk(
@@ -198,11 +198,11 @@ export const downloadMasterPosition = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_MASTER_POSITION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 export const getAllCostCenterDDL = createAsyncThunk(
   "GET_DDL_COST_CENTER",
@@ -217,11 +217,11 @@ export const getAllCostCenterDDL = createAsyncThunk(
           error: response,
           action: "GET_DDL_COST_CENTER",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 const masterPositionSlice = createSlice({
   name: "master_position",

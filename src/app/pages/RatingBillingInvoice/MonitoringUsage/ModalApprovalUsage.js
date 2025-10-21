@@ -18,7 +18,12 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 
-const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh = () => {} }) => {
+const ModalApprovalUsage = ({
+  isOpen,
+  handleCancel,
+  dataUsage,
+  handleListRefresh = () => {},
+}) => {
   // Selector
   const { data_approval } = useSelector((state) => state.monitoring_usage);
 
@@ -169,7 +174,7 @@ const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh
           usage: dataUsageCode,
           action: action,
           remarks: formValue.remark,
-        })
+        }),
       )
         .unwrap()
         .then(() => {
@@ -179,7 +184,7 @@ const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh
           setCurrent(0);
           setRemark("");
           setAction("");
-          handleListRefresh()
+          handleListRefresh();
           handleCancel();
         })
         .catch((error) => {
@@ -307,7 +312,7 @@ const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh
                   searchInput,
                   searchedColumn,
                   searchText,
-                  handleSearch
+                  handleSearch,
                 )}
                 current={page}
                 pageSize={pageSize}
@@ -351,7 +356,7 @@ const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh
                 searchInput,
                 searchedColumn,
                 searchText,
-                handleSearch
+                handleSearch,
               )}
               current={page}
               pageSize={pageSize}

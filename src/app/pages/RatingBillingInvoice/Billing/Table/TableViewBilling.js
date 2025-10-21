@@ -1,8 +1,16 @@
 import Highlighter from "react-highlight-words";
 import { Tooltip } from "antd";
 import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../utils";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValue,
+} from "../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../components/StatusComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 
@@ -41,7 +49,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -51,7 +59,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -72,7 +80,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -82,7 +90,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -103,7 +111,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -113,7 +121,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -134,7 +142,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -144,7 +152,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -166,7 +174,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -176,7 +184,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -192,7 +200,7 @@ export const columnsBilling = (
       searchText,
       handleSearch,
       true,
-      "datePeriod"
+      "datePeriod",
     ),
     render: (text) =>
       renderDateColumn(
@@ -201,7 +209,7 @@ export const columnsBilling = (
         searchText,
         text,
         "datePeriod",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "billingPeriod",
@@ -253,7 +261,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -263,7 +271,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -284,7 +292,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -294,7 +302,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -315,7 +323,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -325,7 +333,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -339,7 +347,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -349,7 +357,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "accountName",
@@ -371,7 +379,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -381,7 +389,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "accountGroupType",
@@ -410,7 +418,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -420,7 +428,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -441,7 +449,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -451,7 +459,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -472,7 +480,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -482,7 +490,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -504,7 +512,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -514,7 +522,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -535,7 +543,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -545,7 +553,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -559,7 +567,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -569,7 +577,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "product",
@@ -591,7 +599,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -601,7 +609,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "timeUnitContract",
@@ -630,7 +638,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -640,7 +648,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -662,7 +670,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -672,7 +680,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -694,7 +702,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -704,7 +712,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -719,7 +727,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -729,7 +737,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "totalUsage",
@@ -758,7 +766,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -768,7 +776,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -790,7 +798,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -800,7 +808,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -822,7 +830,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -832,7 +840,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -854,7 +862,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -864,7 +872,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -886,7 +894,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -896,7 +904,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -918,7 +926,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -928,7 +936,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -950,7 +958,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -960,7 +968,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -982,7 +990,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -992,7 +1000,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1014,7 +1022,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1024,7 +1032,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1046,7 +1054,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1056,7 +1064,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1071,7 +1079,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1081,7 +1089,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "discountAmountIdr",
@@ -1103,7 +1111,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1113,7 +1121,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "discountAmountUsd",
@@ -1135,7 +1143,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1145,7 +1153,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1160,7 +1168,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1170,7 +1178,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "taxBasicUsd",
@@ -1199,7 +1207,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1209,7 +1217,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1224,7 +1232,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1234,7 +1242,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "vatIdr",
@@ -1263,7 +1271,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1273,7 +1281,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1288,7 +1296,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1298,7 +1306,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "vatEqvIdr",
@@ -1320,7 +1328,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1330,7 +1338,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "withHoldingTax",
@@ -1360,7 +1368,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1370,7 +1378,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1392,7 +1400,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1402,7 +1410,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1424,7 +1432,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1434,7 +1442,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1450,7 +1458,7 @@ export const columnsBilling = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -1459,7 +1467,7 @@ export const columnsBilling = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "taxRateDate",
@@ -1510,7 +1518,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1520,7 +1528,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1542,7 +1550,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1552,7 +1560,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1574,7 +1582,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1584,7 +1592,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1606,7 +1614,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1616,7 +1624,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1637,7 +1645,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1647,7 +1655,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1662,7 +1670,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1672,7 +1680,7 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "rate",
@@ -1695,7 +1703,7 @@ export const columnsBilling = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -1704,7 +1712,7 @@ export const columnsBilling = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "rateDate",
@@ -1749,7 +1757,7 @@ export const columnsBilling = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -1758,7 +1766,7 @@ export const columnsBilling = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "transactionDate",
@@ -1803,7 +1811,7 @@ export const columnsBilling = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -1812,7 +1820,7 @@ export const columnsBilling = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "accountDate",
@@ -1886,7 +1894,7 @@ export const columnsBilling = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -1895,7 +1903,7 @@ export const columnsBilling = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -1911,7 +1919,7 @@ export const columnsBilling = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -1920,7 +1928,7 @@ export const columnsBilling = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "dueDate",
@@ -1966,7 +1974,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1976,7 +1984,7 @@ export const columnsBilling = (
         text,
         true,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "remark",
@@ -2015,7 +2023,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     // ...getColumnSearchPropsPaging(
     //   "paymentStatus",
@@ -2047,7 +2055,7 @@ export const columnsBilling = (
             text,
             false,
             "status",
-            search
+            search,
           )
         : text;
     },
@@ -2072,7 +2080,7 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (index) => {
       let text;
@@ -2097,7 +2105,7 @@ export const columnsBilling = (
             text,
             false,
             "status",
-            search
+            search,
           )
         : text;
     },

@@ -29,7 +29,6 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [detailCalculationItem, setDetailCalculationItem] = useState({});
 
-
   // Use Effect
   useEffect(() => {
     let tempSearch = "";
@@ -49,7 +48,7 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [ratingCodeId, search, page, pageSize, sort]);
 
@@ -84,20 +83,18 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
     setSort(dataSort);
   };
 
-
   const handleDetail = (record) => {
     setDetailCalculationItem(record);
     setIsOpen(true);
-  }
+  };
 
   const handleCloseModal = () => {
-    setDetailCalculationItem({})
+    setDetailCalculationItem({});
     setIsOpen(false);
-  }
+  };
 
   return (
     <>
-
       <BaseContainer header={"Calculation Usage Information"}>
         <div className="flex flex-row align-middle gap-2">
           <p className="text-[15px] font-semibold text-text-color-semibold">
@@ -109,7 +106,9 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
           <p className="text-[15px] font-semibold text-text-color-semibold">
             Rating Code:
           </p>
-          <p className="text-[15px] font-semibold text-primary">{ratingCodeId}</p>
+          <p className="text-[15px] font-semibold text-primary">
+            {ratingCodeId}
+          </p>
         </div>
         <div className="w-full">
           <TablePaginationNew
@@ -121,7 +120,7 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
               searchedColumn,
               searchText,
               handleSearch,
-              handleDetail
+              handleDetail,
             )}
             current={page}
             pageSize={pageSize}
@@ -134,13 +133,12 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
         </div>
       </BaseContainer>
 
-
       {/* modal history log */}
       <ModalCustom
         header={"Calculation Usage Detail"}
         isOpen={isOpen}
         handleCancel={() => {
-          handleCloseModal()
+          handleCloseModal();
         }}
         type={"detail"}
         width={1000}
@@ -148,7 +146,7 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
           <ButtonComponent
             type={"default"}
             onClick={() => {
-              handleCloseModal()
+              handleCloseModal();
             }}
           >
             Back
@@ -157,49 +155,103 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
       >
         <CardComponent header={"calculation usage INFORMATION"} cols={1}>
           <div className="w-full grid grid-cols-4">
-            <DetailText label={'Type'}>{detailCalculationItem?.type}</DetailText>
-            <DetailText label={'UOM'}>{detailCalculationItem?.uom}</DetailText>
-            <DetailText label={'Usage'}>{detailCalculationItem?.usage}</DetailText>
-            <DetailText label={'Converted Usage M3'}>{detailCalculationItem?.convUsageM3}</DetailText>
+            <DetailText label={"Type"}>
+              {detailCalculationItem?.type}
+            </DetailText>
+            <DetailText label={"UOM"}>{detailCalculationItem?.uom}</DetailText>
+            <DetailText label={"Usage"}>
+              {detailCalculationItem?.usage}
+            </DetailText>
+            <DetailText label={"Converted Usage M3"}>
+              {detailCalculationItem?.convUsageM3}
+            </DetailText>
           </div>
           <div className="w-full grid grid-cols-4">
-            <DetailText label={'Converted Usage MMBTU'}>{detailCalculationItem?.convUsageMmbtu}</DetailText>
-            <DetailText label={'Discount Usage'}>{detailCalculationItem?.discountUsage}</DetailText>
-            <DetailText label={'Discount Usage M3'}>{detailCalculationItem?.discountUsageM3}</DetailText>
-            <DetailText label={'Discount Usage MMBTU'}>{detailCalculationItem?.discountUsageMmbtu}</DetailText>
+            <DetailText label={"Converted Usage MMBTU"}>
+              {detailCalculationItem?.convUsageMmbtu}
+            </DetailText>
+            <DetailText label={"Discount Usage"}>
+              {detailCalculationItem?.discountUsage}
+            </DetailText>
+            <DetailText label={"Discount Usage M3"}>
+              {detailCalculationItem?.discountUsageM3}
+            </DetailText>
+            <DetailText label={"Discount Usage MMBTU"}>
+              {detailCalculationItem?.discountUsageMmbtu}
+            </DetailText>
           </div>
           <div className="w-full grid grid-cols-4">
-            <DetailText label={'Total Usage'}>{detailCalculationItem?.totalUsage}</DetailText>
-            <DetailText label={'Converted Total Usage M3'}>{detailCalculationItem?.convTotalUsageM3}</DetailText>
-            <DetailText label={'Converted Total Usage MMBTU'}>{detailCalculationItem?.convTotalUsageMmbtu}</DetailText>
-            <DetailText label={'Price Code'}>{detailCalculationItem?.priceCode}</DetailText>
+            <DetailText label={"Total Usage"}>
+              {detailCalculationItem?.totalUsage}
+            </DetailText>
+            <DetailText label={"Converted Total Usage M3"}>
+              {detailCalculationItem?.convTotalUsageM3}
+            </DetailText>
+            <DetailText label={"Converted Total Usage MMBTU"}>
+              {detailCalculationItem?.convTotalUsageMmbtu}
+            </DetailText>
+            <DetailText label={"Price Code"}>
+              {detailCalculationItem?.priceCode}
+            </DetailText>
           </div>
           <div className="w-full grid grid-cols-4">
-            <DetailText label={'Currency'}>{detailCalculationItem?.currency}</DetailText>
-            <DetailText label={'Price'}>{detailCalculationItem?.price}</DetailText>
-            <DetailText label={'Amount'}>{detailCalculationItem?.amount}</DetailText>
-            <DetailText label={'Amount EQV IDR'}>{detailCalculationItem?.amountEqvIdr}</DetailText>
+            <DetailText label={"Currency"}>
+              {detailCalculationItem?.currency}
+            </DetailText>
+            <DetailText label={"Price"}>
+              {detailCalculationItem?.price}
+            </DetailText>
+            <DetailText label={"Amount"}>
+              {detailCalculationItem?.amount}
+            </DetailText>
+            <DetailText label={"Amount EQV IDR"}>
+              {detailCalculationItem?.amountEqvIdr}
+            </DetailText>
           </div>
           <div className="w-full grid grid-cols-4">
-            <DetailText label={'Amount EQV USD'}>{detailCalculationItem?.amountEqvUsd}</DetailText>
-            <DetailText label={'Discount Amount'}>{detailCalculationItem?.discountAmount}</DetailText>
-            <DetailText label={'Discount Amount EQV IDR'}>{detailCalculationItem?.discountAmountEqvIdr}</DetailText>
-            <DetailText label={'Discount Amount EQV USD'}>{detailCalculationItem?.discountAmountEqvUsd}</DetailText>
+            <DetailText label={"Amount EQV USD"}>
+              {detailCalculationItem?.amountEqvUsd}
+            </DetailText>
+            <DetailText label={"Discount Amount"}>
+              {detailCalculationItem?.discountAmount}
+            </DetailText>
+            <DetailText label={"Discount Amount EQV IDR"}>
+              {detailCalculationItem?.discountAmountEqvIdr}
+            </DetailText>
+            <DetailText label={"Discount Amount EQV USD"}>
+              {detailCalculationItem?.discountAmountEqvUsd}
+            </DetailText>
           </div>
           <div className="w-full">
-            <DetailText label={'Remark'}>{detailCalculationItem?.remark}</DetailText>
+            <DetailText label={"Remark"}>
+              {detailCalculationItem?.remark}
+            </DetailText>
           </div>
         </CardComponent>
         <CardComponent header={"History log information"} cols={5}>
-          <DetailText label="Record ID">{detailCalculationItem?.idCalcUsage}</DetailText>
+          <DetailText label="Record ID">
+            {detailCalculationItem?.idCalcUsage}
+          </DetailText>
           <DetailText label="Created Date">
-            {hasValue(detailCalculationItem?.createdDate) && renderDateConverter(detailCalculationItem?.createdDate, 'datetime')}
+            {hasValue(detailCalculationItem?.createdDate) &&
+              renderDateConverter(
+                detailCalculationItem?.createdDate,
+                "datetime",
+              )}
           </DetailText>
-          <DetailText label="Created By">{detailCalculationItem?.createdBy}</DetailText>
+          <DetailText label="Created By">
+            {detailCalculationItem?.createdBy}
+          </DetailText>
           <DetailText label="Updated Date">
-            {hasValue(detailCalculationItem?.updatedDate) && renderDateConverter(detailCalculationItem?.updatedDate, 'datetime')}
+            {hasValue(detailCalculationItem?.updatedDate) &&
+              renderDateConverter(
+                detailCalculationItem?.updatedDate,
+                "datetime",
+              )}
           </DetailText>
-          <DetailText label="Updated By">{detailCalculationItem?.updatedBy}</DetailText>
+          <DetailText label="Updated By">
+            {detailCalculationItem?.updatedBy}
+          </DetailText>
         </CardComponent>
       </ModalCustom>
     </>

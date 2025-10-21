@@ -45,7 +45,7 @@ const CronDay = (props) => {
         setValueDay(5);
         const valueCheck = spekDOM.reduce(
           (prev, current) => prev + `,${current}`,
-          ""
+          "",
         );
         onChangeDay(valueCheck.slice(1), "dom");
         break;

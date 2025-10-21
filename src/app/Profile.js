@@ -70,10 +70,7 @@ const Profile = () => {
             {/* PROFILE DETAIL */}
             <div className="col-span-2">
               <div className="flex justify-end mr-6 pb-6 pr-6">
-                <NavLink
-                  to={"/update-profile"}
-                  state={{ x: 1 }}
-                >
+                <NavLink to={"/update-profile"} state={{ x: 1 }}>
                   <ButtonComponent
                     // onClick={() => setModalConfirmation(true)}
                     type={"submit"}
@@ -81,10 +78,7 @@ const Profile = () => {
                     Change Profile
                   </ButtonComponent>
                 </NavLink>
-                <NavLink
-                  to={"/update-profile"}
-                  state={{ x: 1 }}
-                >
+                <NavLink to={"/update-profile"} state={{ x: 1 }}>
                   <ButtonComponent
                     // onClick={() => setModalConfirmation(true)}
                     type={"submit"}

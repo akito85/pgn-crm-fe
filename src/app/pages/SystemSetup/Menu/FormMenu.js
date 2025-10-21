@@ -30,10 +30,9 @@ const { Option } = Select;
 const FormMenu = (props) => {
   const { type } = props;
   const { data_detail, data, data_actions, loading } = useSelector(
-    (state) => state.main_Menu
+    (state) => state.main_Menu,
   );
-  const { bodyError, isLoading} = useSelector(state => state?.general);
-
+  const { bodyError, isLoading } = useSelector((state) => state?.general);
 
   const location = useLocation();
   const dispatch = useDispatch();
@@ -62,9 +61,8 @@ const FormMenu = (props) => {
       actions: data_detail?.data?.actions.map((action) => action.actionId),
     });
     setIsPage(data_detail?.data?.isPage);
-    setTopPage(data_detail?.data?.isTopParent)
+    setTopPage(data_detail?.data?.isTopParent);
   };
-
 
   useEffect(() => {
     dispatch(getParent());
@@ -74,7 +72,7 @@ const FormMenu = (props) => {
     }
   }, [dispatch, id]);
   useEffect(() => {
-    if (type === 'update') {
+    if (type === "update") {
       assert();
     }
   }, [data_detail, form, type]);
@@ -94,18 +92,13 @@ const FormMenu = (props) => {
     },
   ];
 
-
   const saveAction = async () => {
     try {
       setOpenModal(false);
       if (type === "update") {
-        await dispatch(
-          updateMenu(payload?.body)
-        )?.unwrap();
+        await dispatch(updateMenu(payload?.body))?.unwrap();
       } else {
-        await dispatch(
-          getCreateMenu(payload?.body)
-        )?.unwrap();
+        await dispatch(getCreateMenu(payload?.body))?.unwrap();
       }
     } catch (error) {
       setOpenModal(false);
@@ -116,40 +109,58 @@ const FormMenu = (props) => {
     try {
       let body;
       let validateCreateUpdateObj = {};
-      if (type === 'update') {
+      if (type === "update") {
         body = {
           name: formValue.name,
           menuOrder: formValue.menuOrder,
           path: formValue.path,
           description: formValue.description,
-          isTopParent: hasValue(formValue?.isTopParent) ? formValue.isTopParent : false,
+          isTopParent: hasValue(formValue?.isTopParent)
+            ? formValue.isTopParent
+            : false,
           isPage: hasValue(formValue.isPage) ? formValue.isPage : false,
           parentId: formValue?.isPage === true ? formValue?.parentName : null,
           menuId: location?.state.id,
-          actions: hasValue(formValue?.actions) && Array.isArray(formValue?.actions) ? formValue?.actions : []
-        }
-        validateCreateUpdateObj = { body: body, services: userHttpService, endPoint: '/v1/dbs/api/menus/validate-update', type }
+          actions:
+            hasValue(formValue?.actions) && Array.isArray(formValue?.actions)
+              ? formValue?.actions
+              : [],
+        };
+        validateCreateUpdateObj = {
+          body: body,
+          services: userHttpService,
+          endPoint: "/v1/dbs/api/menus/validate-update",
+          type,
+        };
       } else {
         body = {
           name: formValue.name,
           menuOrder: formValue.menuOrder,
           path: formValue.path,
           description: formValue.description,
-          isTopParent: hasValue(formValue?.isTopParent) ? formValue.isTopParent : false,
+          isTopParent: hasValue(formValue?.isTopParent)
+            ? formValue.isTopParent
+            : false,
           isPage: hasValue(formValue.isPage) ? formValue.isPage : false,
           parentId: formValue?.isPage === true ? formValue?.parentName : null,
-          actions: hasValue(formValue?.actions) && Array.isArray(formValue?.actions) ? formValue?.actions : []
-        }
-        validateCreateUpdateObj = { body: body, services: userHttpService, endPoint: '/v1/dbs/api/menus/validate-create', type }
-      }
-      setPayload(
-        {
+          actions:
+            hasValue(formValue?.actions) && Array.isArray(formValue?.actions)
+              ? formValue?.actions
+              : [],
+        };
+        validateCreateUpdateObj = {
           body: body,
-          validateValue: validateCreateUpdateObj
-        }
-      )
-      await dispatch(validateCreateUpdate(validateCreateUpdateObj))?.unwrap()
-      setOpenModal(true)
+          services: userHttpService,
+          endPoint: "/v1/dbs/api/menus/validate-create",
+          type,
+        };
+      }
+      setPayload({
+        body: body,
+        validateValue: validateCreateUpdateObj,
+      });
+      await dispatch(validateCreateUpdate(validateCreateUpdateObj))?.unwrap();
+      setOpenModal(true);
     } catch (error) {
       setOpenModal(false);
     }
@@ -164,8 +175,8 @@ const FormMenu = (props) => {
 
   const handleTopPage = (e) => {
     setTopPage(e.target.checked);
-    if (form.getFieldValue('isTopParent') === true) {
-      form.resetFields(['actions', 'isPage', 'parentName']);
+    if (form.getFieldValue("isTopParent") === true) {
+      form.resetFields(["actions", "isPage", "parentName"]);
       setActions([]);
       setTopPage(true);
     } else {
@@ -175,14 +186,14 @@ const FormMenu = (props) => {
   };
   const handlePage = (e) => {
     setIsPage(e.target.checked);
-    if (form.getFieldValue('isPage') === true) {
+    if (form.getFieldValue("isPage") === true) {
       form.setFieldsValue({ isTopParent: false });
-      setActions([])
-      setTopPage(false)
+      setActions([]);
+      setTopPage(false);
     } else {
-      form.resetFields(['actions', 'parentName']);
+      form.resetFields(["actions", "parentName"]);
       form.setFieldsValue({ isTopParent: true });
-      setTopPage(true)
+      setTopPage(true);
     }
   };
   const handleClear = () => {
@@ -196,17 +207,16 @@ const FormMenu = (props) => {
     }
   };
 
-
   const handleRetry = () => {
-    handleCancelTryAgain()
-    if (bodyError?.action === 'CREATE_MENU') {
+    handleCancelTryAgain();
+    if (bodyError?.action === "CREATE_MENU") {
       dispatch(getCreateMenu(payload?.body));
-    } else if (bodyError?.action === 'UPDATE_MENU') {
-      dispatch(updateMenu(payload?.body))
-    } else if (bodyError?.action === 'GET_MENU_DETAIL') {
-      dispatch(getMenuDetail(id))
-    } else if (bodyError?.action === 'VALIDATE_CREATE_UPDATE') {
-      dispatch(validateCreateUpdate(payload?.validateValue))
+    } else if (bodyError?.action === "UPDATE_MENU") {
+      dispatch(updateMenu(payload?.body));
+    } else if (bodyError?.action === "GET_MENU_DETAIL") {
+      dispatch(getMenuDetail(id));
+    } else if (bodyError?.action === "VALIDATE_CREATE_UPDATE") {
+      dispatch(validateCreateUpdate(payload?.validateValue));
     } else {
       dispatch(getParent());
       dispatch(getActions());
@@ -246,7 +256,11 @@ const FormMenu = (props) => {
                       />
                     </Form.Item>
                     <Form.Item name={"isTopParent"} valuePropName="checked">
-                      <Checkbox onChange={handleTopPage} value={topPage} disabled={form.getFieldValue('isPage')}>
+                      <Checkbox
+                        onChange={handleTopPage}
+                        value={topPage}
+                        disabled={form.getFieldValue("isPage")}
+                      >
                         Top Parent{" "}
                       </Checkbox>
                     </Form.Item>
@@ -256,7 +270,9 @@ const FormMenu = (props) => {
                       label={"Parent Menu"}
                       name={"parentName"}
                       className="no-margin-form"
-                      rules={formValue?.isPage && formMessageRequired('Parent Menu')}
+                      rules={
+                        formValue?.isPage && formMessageRequired("Parent Menu")
+                      }
                     >
                       <SelectComponent
                         disabled={
@@ -271,7 +287,11 @@ const FormMenu = (props) => {
                       </SelectComponent>
                     </Form.Item>
                     <Form.Item name={"isPage"} valuePropName="checked">
-                      <Checkbox onChange={handlePage} value={isPage} disabled={topPage}>
+                      <Checkbox
+                        onChange={handlePage}
+                        value={isPage}
+                        disabled={topPage}
+                      >
                         {" "}
                         Page{" "}
                       </Checkbox>
@@ -283,7 +303,7 @@ const FormMenu = (props) => {
                     label={"Order"}
                     name={"menuOrder"}
                     className="w-full"
-                    rules={formMessageRequired('Order')}
+                    rules={formMessageRequired("Order")}
                   >
                     <Input
                       onInput={(e) =>
@@ -316,7 +336,11 @@ const FormMenu = (props) => {
               </div>
             </BaseContainer>
             <BaseContainer header={"ACTIONS"}>
-              <Form.Item name={"actions"} valuePropName="checked" rules={formValue?.isPage && formMessageRequired('Actions')}>
+              <Form.Item
+                name={"actions"}
+                valuePropName="checked"
+                rules={formValue?.isPage && formMessageRequired("Actions")}
+              >
                 <Checkbox.Group
                   value={formValue.actions}
                   onChange={(checkedValues) => setActions(checkedValues)}
@@ -331,7 +355,7 @@ const FormMenu = (props) => {
                       <Checkbox
                         key={item.actionId}
                         value={item.actionId}
-                      // You can disable checkboxes based on your condition
+                        // You can disable checkboxes based on your condition
                       >
                         {item.name}
                       </Checkbox>
@@ -401,20 +425,32 @@ const FormMenu = (props) => {
               <DetailText label={"Type"}>
                 {payload?.body?.isTopParent === true ? "Top Parent" : "Child"}
               </DetailText>
-              <DetailText label={"Action"}>{
-                payload?.body?.actions?.length > 0 &&
-                data_actions?.data?.filter(item => payload?.body?.actions?.includes(item?.actionId))?.map(item => item?.name)?.join(', ')
-              }</DetailText>
+              <DetailText label={"Action"}>
+                {payload?.body?.actions?.length > 0 &&
+                  data_actions?.data
+                    ?.filter((item) =>
+                      payload?.body?.actions?.includes(item?.actionId),
+                    )
+                    ?.map((item) => item?.name)
+                    ?.join(", ")}
+              </DetailText>
             </div>
             <div className={"w-full flex-col"}>
-              <DetailText label={"Parent Menu"}>{
-                hasValue(payload?.body?.parentId) && data?.data?.find(item => item?.menuId === payload?.body?.parentId)?.name
-              }</DetailText>
-              <DetailText label={"Order"}>{payload?.body?.menuOrder}</DetailText>
+              <DetailText label={"Parent Menu"}>
+                {hasValue(payload?.body?.parentId) &&
+                  data?.data?.find(
+                    (item) => item?.menuId === payload?.body?.parentId,
+                  )?.name}
+              </DetailText>
+              <DetailText label={"Order"}>
+                {payload?.body?.menuOrder}
+              </DetailText>
             </div>
           </div>
           <div className="w-full">
-            <DetailText label={"Description"}>{payload?.body?.description}</DetailText>
+            <DetailText label={"Description"}>
+              {payload?.body?.description}
+            </DetailText>
           </div>
         </div>
         <div className="flex justify-end gap-5">

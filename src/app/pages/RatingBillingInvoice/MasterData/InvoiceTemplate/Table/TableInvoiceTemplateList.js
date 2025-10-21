@@ -1,5 +1,9 @@
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
-import {  getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
 export const columnsInvoiceTemplate = (
   search,
@@ -26,9 +30,18 @@ export const columnsInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('invoiceName', hasValue(search['invoiceName']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "invoiceName",
+        hasValue(search["invoiceName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "INVOICE TYPE",
@@ -41,9 +54,18 @@ export const columnsInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('invoiceType', hasValue(search['invoiceType']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "invoiceType",
+        hasValue(search["invoiceType"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "METERAI",
@@ -56,9 +78,18 @@ export const columnsInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('meterai', hasValue(search['meterai']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "meterai",
+        hasValue(search["meterai"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "SIGNATURE",
@@ -71,9 +102,18 @@ export const columnsInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('signature', hasValue(search['signature']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "signature",
+        hasValue(search["signature"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TEMPLATE",
@@ -86,9 +126,18 @@ export const columnsInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('templateName', hasValue(search['templateName']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "templateName",
+        hasValue(search["templateName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CRITERIA",
@@ -100,12 +149,21 @@ export const columnsInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,
     },
-    render: (text) => renderColumn('criterias', hasValue(search['criterias']), searchText, text, true, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "criterias",
+        hasValue(search["criterias"]),
+        searchText,
+        text,
+        true,
+        "input",
+        search,
+      ),
   },
   {
     title: "START DATE",
@@ -120,9 +178,17 @@ export const columnsInvoiceTemplate = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
-    render: (text) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, text, 'date', search)
+    render: (text) =>
+      renderDateColumn(
+        "startDate",
+        hasValue(search["startDate"]),
+        searchText,
+        text,
+        "date",
+        search,
+      ),
   },
   {
     title: "END DATE",
@@ -137,9 +203,17 @@ export const columnsInvoiceTemplate = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
-    render: (text) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, text, 'date', search)
+    render: (text) =>
+      renderDateColumn(
+        "endDate",
+        hasValue(search["endDate"]),
+        searchText,
+        text,
+        "date",
+        search,
+      ),
   },
   {
     title: "DESCRIPTION",
@@ -151,13 +225,22 @@ export const columnsInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,
     },
     sorter: true,
-    render: (text) => renderColumn('description', hasValue(search['description']), searchText, text, true, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "description",
+        hasValue(search["description"]),
+        searchText,
+        text,
+        true,
+        "input",
+        search,
+      ),
   },
   {
     title: "STATUS",
@@ -171,9 +254,18 @@ export const columnsInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('status', hasValue(search['status']), searchText, text, false, 'status', search)
+    render: (text) =>
+      renderColumn(
+        "status",
+        hasValue(search["status"]),
+        searchText,
+        text,
+        false,
+        "status",
+        search,
+      ),
   },
   {
     title: "STATUS APPROVAL",
@@ -187,7 +279,7 @@ export const columnsInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (index) => {
       let text;
@@ -201,8 +293,15 @@ export const columnsInvoiceTemplate = (
             : index;
           break;
       }
-      return renderColumn('statusApproval', hasValue(search['statusApproval']), searchText, text, false, 'status', search)
-
+      return renderColumn(
+        "statusApproval",
+        hasValue(search["statusApproval"]),
+        searchText,
+        text,
+        false,
+        "status",
+        search,
+      );
     },
   },
 ];

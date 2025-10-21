@@ -22,7 +22,7 @@ import { getColumnSearchPropsPaging } from "../../../../utils/getColumnSearchPro
 const GlobalProperties = () => {
   // Selector
   const { data, loading } = useSelector((state) => state.globalProperties);
-  const { bodyError } = useSelector(state => state?.general)
+  const { bodyError } = useSelector((state) => state?.general);
 
   // Declaration
   const dispatch = useDispatch();
@@ -37,7 +37,6 @@ const GlobalProperties = () => {
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
 
-
   // handle fetch
   const handleFetch = useCallback(() => {
     dispatch(
@@ -46,13 +45,13 @@ const GlobalProperties = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
   // useEffect
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
 
   // Breadcrumbs
@@ -108,9 +107,18 @@ const GlobalProperties = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('gpType', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "gpType",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "PROPERTIES NAME",
@@ -121,9 +129,18 @@ const GlobalProperties = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('name', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "name",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -137,9 +154,18 @@ const GlobalProperties = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -151,11 +177,20 @@ const GlobalProperties = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       width: 120,
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
-    }
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
+    },
   ];
 
   const handleDownload = () => {
@@ -165,7 +200,7 @@ const GlobalProperties = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -180,7 +215,7 @@ const GlobalProperties = () => {
   const itemActions = [
     // toolbar items
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<SVGIcon name="IconButtonDownload" width={24} />}
@@ -201,16 +236,16 @@ const GlobalProperties = () => {
                 page,
                 pageSize,
                 sort,
-              })
+              }),
             );
           }}
         >
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_GLOBAL_PROPERTIES}>
           <ButtonComponent
@@ -220,13 +255,13 @@ const GlobalProperties = () => {
             Create Global Properties
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // column action
     {
-      action: 'View',
-      type: 'table',
+      action: "View",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
@@ -239,12 +274,12 @@ const GlobalProperties = () => {
               </div>
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Update',
-      type: 'table',
+      action: "Update",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Update">
@@ -257,9 +292,9 @@ const GlobalProperties = () => {
               </div>
             </Link>
           </Tooltip>
-        )
-      }
-    }
+        );
+      },
+    },
   ];
 
   // handle retry modal error
@@ -267,7 +302,7 @@ const GlobalProperties = () => {
     try {
       handleCancelTryAgain();
       if (bodyError?.action === "DOWNLOAD_GLOBAL_PROPERTIES_EXCEL") {
-        handleDownload()
+        handleDownload();
       }
       handleFetch();
     } catch (error) {
@@ -286,7 +321,10 @@ const GlobalProperties = () => {
           <div className="w-full">
             <TablePagination
               dataSource={dataSource}
-              columns={[...columns, ...useColumnActionPermission(['view', 'update'], itemActions)]}
+              columns={[
+                ...columns,
+                ...useColumnActionPermission(["view", "update"], itemActions),
+              ]}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}

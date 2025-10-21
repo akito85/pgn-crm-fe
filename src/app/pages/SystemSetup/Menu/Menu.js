@@ -3,11 +3,7 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
-import {
-  Spin,
-  Checkbox,
-  Tooltip,
-} from "antd";
+import { Spin, Checkbox, Tooltip } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import {
@@ -27,9 +23,7 @@ import {
 } from "../../../../redux/slices/system_setup/menu";
 import SVGIcon from "../../../../assets/Icon/index";
 import DetailMenuLayout from "./DetailMenuLayout";
-import {
-  ModalConfirm,
-} from "../../../../components/Modal/ModalPopUp";
+import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import { renderColumn } from "../../../../utils";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
@@ -39,9 +33,9 @@ import { getColumnSearchPropsPaging } from "../../../../utils/getColumnSearchPro
 const Menu = () => {
   const dispatch = useDispatch();
   const { data, data_detail, loading } = useSelector(
-    (state) => state.main_Menu
+    (state) => state.main_Menu,
   );
-  const { bodyError } = useSelector(state => state?.general);
+  const { bodyError } = useSelector((state) => state?.general);
 
   // state
   const [page, setPage] = useState(1);
@@ -61,27 +55,29 @@ const Menu = () => {
   // handle fetch
   const handleFetch = useCallback(() => {
     dispatch(
-      getAllMenuPaginate({ search: encodeURIComponent(JSON?.stringify(search)), page, pageSize, sort })
+      getAllMenuPaginate({
+        search: encodeURIComponent(JSON?.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
-
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
-
 
   // handle detail
   const handleDetail = async (id) => {
     try {
-      setBody(id)
+      setBody(id);
       await dispatch(getMenuDetail(id))?.unwrap();
       setModalDetail(true);
     } catch (error) {
       setModalDetail(false);
     }
   };
-
 
   const handleChange = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
@@ -111,8 +107,7 @@ const Menu = () => {
     setSort(dataSort);
   };
 
-
-  // handle download 
+  // handle download
   const handleDownload = () => {
     dispatch(
       downloadMenu({
@@ -120,14 +115,13 @@ const Menu = () => {
         pageSize,
         sort,
         search: encodeURIComponent(JSON?.stringify(search)),
-      })
+      }),
     );
-  }
+  };
 
   const handleCancel = () => {
     setModalInactive(false);
-
-  }
+  };
   const columns = [
     {
       title: "NO",
@@ -148,9 +142,18 @@ const Menu = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('name', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "name",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "PATH",
@@ -166,10 +169,18 @@ const Menu = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('path', searchedColumn, searchText, text, true, 'input', search)
-
+      render: (text) =>
+        renderColumn(
+          "path",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "MENU TYPE",
@@ -181,9 +192,18 @@ const Menu = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('menuType', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "menuType",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "PARENT",
@@ -198,10 +218,18 @@ const Menu = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('parentName', searchedColumn, searchText, text, true, 'input', search)
-
+      render: (text) =>
+        renderColumn(
+          "parentName",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "IS PAGE",
@@ -214,9 +242,18 @@ const Menu = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('isPage', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "isPage",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ORDER",
@@ -229,9 +266,18 @@ const Menu = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('menuOrder', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "menuOrder",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -247,9 +293,18 @@ const Menu = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('menuOrder', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "menuOrder",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -262,9 +317,18 @@ const Menu = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('menuOrder', searchedColumn, searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "menuOrder",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
   ];
 
@@ -282,13 +346,13 @@ const Menu = () => {
   const handleOk = async () => {
     try {
       const payload = { id: id, status: status };
-      setBody(payload)
-      handleCancel()
+      setBody(payload);
+      handleCancel();
       await dispatch(inactiveMenu(payload))?.unwrap();
-      await handleFetch()?.unwrap()
+      await handleFetch()?.unwrap();
     } catch (error) {
-      await handleFetch()?.unwrap()
-      handleCancel()
+      await handleFetch()?.unwrap();
+      handleCancel();
     }
   };
 
@@ -296,7 +360,7 @@ const Menu = () => {
   const itemActions = [
     // toolbar items
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
@@ -305,10 +369,10 @@ const Menu = () => {
         >
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_MENU} state={{ x: 1 }}>
           <ButtonComponent
@@ -318,13 +382,13 @@ const Menu = () => {
             Create Menu
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // column action
     {
-      action: 'View',
-      type: 'table',
+      action: "View",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
@@ -337,36 +401,50 @@ const Menu = () => {
               <SVGIcon name="IconDetail" width={24} />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Update',
-      type: 'table',
+      action: "Update",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Update">
-            <div className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}>
+            <div
+              className={`${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+            >
               <Link
-                to={record?.status?.toLowerCase() !== "inactive" && SYSTEM_SETUP_ROUTES.UPDATE_MENU}
-                state={record?.status?.toLowerCase() !== "inactive" && { id: record?.menuId }}
+                to={
+                  record?.status?.toLowerCase() !== "inactive" &&
+                  SYSTEM_SETUP_ROUTES.UPDATE_MENU
+                }
+                state={
+                  record?.status?.toLowerCase() !== "inactive" && {
+                    id: record?.menuId,
+                  }
+                }
               >
                 <div border={false}>
                   <SVGIcon
                     name="IconEdit"
                     width={24}
-                    className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}
-                    color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#ACC424"} />
+                    className={`${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+                    color={
+                      record?.status?.toLowerCase() === "inactive"
+                        ? "#8D91A0"
+                        : "#ACC424"
+                    }
+                  />
                 </div>
               </Link>
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Activate',
-      type: 'table',
+      action: "Activate",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip
@@ -384,9 +462,9 @@ const Menu = () => {
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
+        );
+      },
+    },
   ];
 
   // handle retry modal error
@@ -396,9 +474,9 @@ const Menu = () => {
       if (bodyError?.action === "INACTIVE_MENU") {
         dispatch(inactiveMenu(body));
       } else if (bodyError?.action === "GET_MENU_DETAIL") {
-        dispatch(getMenuDetail(body))
+        dispatch(getMenuDetail(body));
       } else if (bodyError?.action === "DOWNLOAD_MENU") {
-        handleDownload()
+        handleDownload();
       }
       handleFetch();
     } catch (error) {
@@ -423,7 +501,13 @@ const Menu = () => {
               pageSize={pageSize}
               onChange={handleChange}
               tableScrolled={{ y: 525, x: 1800 }}
-              columns={[...columns, ...useColumnActionPermission(['view', 'update', 'activate'], itemActions)]}
+              columns={[
+                ...columns,
+                ...useColumnActionPermission(
+                  ["view", "update", "activate"],
+                  itemActions,
+                ),
+              ]}
               onSort={onSort}
             />
           </div>
@@ -456,8 +540,9 @@ const Menu = () => {
           <div className={"w-full flex flex-row items-center px-10"}>
             <WarningOutlined style={{ color: "red" }} className={"text-4xl"} />
             <span className={"text-lg text-black font-bold h-auto mx-auto"}>
-              {`Are you sure want to ${status === "ACTIVE" ? "inactivate" : "activate"
-                }?`}
+              {`Are you sure want to ${
+                status === "ACTIVE" ? "inactivate" : "activate"
+              }?`}
             </span>
           </div>
         </div>

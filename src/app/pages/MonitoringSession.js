@@ -21,9 +21,15 @@ const MonitoringSession = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
 
-
   useEffect(() => {
-    dispatch(getMonitoringSession({search: encodeURIComponent(JSON.stringify(search)),  page, pageSize, sort }));
+    dispatch(
+      getMonitoringSession({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
+    );
   }, [search, page, pageSize, sort, dispatch]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -31,7 +37,7 @@ const MonitoringSession = () => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -56,7 +62,16 @@ const MonitoringSession = () => {
       //   searchText,
       //   handleSearch
       // ),
-      render: (text) => renderColumn('username', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "username",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       key: "no",
@@ -71,7 +86,16 @@ const MonitoringSession = () => {
       //   searchText,
       //   handleSearch
       // ),
-      render: (text) => renderColumn('lastAccessMenu', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "lastAccessMenu",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       key: "no",
@@ -87,10 +111,17 @@ const MonitoringSession = () => {
       //   false,
       //   'datetime'
       // ),
-      render: (v) => renderDateColumn('lastAccess', searchedColumn, searchText, v, 'datetime', search)
+      render: (v) =>
+        renderDateColumn(
+          "lastAccess",
+          searchedColumn,
+          searchText,
+          v,
+          "datetime",
+          search,
+        ),
     },
   ];
-
 
   const handleChange = (page, pageSize) => {
     setPage(page);

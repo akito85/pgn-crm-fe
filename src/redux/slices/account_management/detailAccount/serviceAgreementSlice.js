@@ -35,12 +35,12 @@ const initialState = {
   dataGlobalPropAttachment: {},
 };
 
-// Get list pagination SA 
+// Get list pagination SA
 export const getListServiceAgreement = createAsyncThunk(
   "GET_LIST_SERVICE_AGREEMENT",
   async ({ search, id, page, pageSize, sort }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? '' : search;
+      const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/sa/view/${id}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
@@ -49,10 +49,10 @@ export const getListServiceAgreement = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
-// Get Detail  SA 
+// Get Detail  SA
 export const getDetailServiceAgreement = createAsyncThunk(
   "GET_DETAIL_SERVICE_AGREEMENT",
   async (id, thunkAPI) => {
@@ -63,7 +63,7 @@ export const getDetailServiceAgreement = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Detail  SA DRAFT
@@ -77,7 +77,7 @@ export const getDetailServiceAgreementDraft = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Inactivate SA
@@ -109,10 +109,10 @@ export const inactiveSa = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
-// Delete Draft  SA 
+// Delete Draft  SA
 export const deleteDraftSa = createAsyncThunk(
   "DELETE_DRAFT_SA",
   async (id, thunkAPI) => {
@@ -141,7 +141,7 @@ export const deleteDraftSa = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // CREATE SA
@@ -153,7 +153,7 @@ export const createServiceAgreement = createAsyncThunk(
       const response = await accountManagementService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${body?.isDraft ? 'created' : 'submitted'}.`,
+        description: `Your data has been ${body?.isDraft ? "created" : "submitted"}.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -167,13 +167,13 @@ export const createServiceAgreement = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body?.isDraft ? 'created' : 'submitted'}. ${message}.`,
+          description: `Your data was not ${body?.isDraft ? "created" : "submitted"}. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // UPDATE SA
@@ -181,13 +181,16 @@ export const updateServiceAgreement = createAsyncThunk(
   "UPDATE_SERVICE_AGREEMENT",
   async ({ body }, thunkAPI) => {
     try {
-      console.log(body, ' body');
+      console.log(body, " body");
 
       const url = "/v1/dbs/api/sa/update";
-      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      const response = await accountManagementService.updateDataWithMethodPost(
+        url,
+        body,
+      );
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${body?.isSubmit ? 'submitted' : 'updated'}.`,
+        description: `Your data has been ${body?.isSubmit ? "submitted" : "updated"}.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -201,13 +204,13 @@ export const updateServiceAgreement = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body?.isSubmit ? 'submitted' : 'updated'}. ${message}.`,
+          description: `Your data was not ${body?.isSubmit ? "submitted" : "updated"}. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Get Detail Product SA
@@ -221,7 +224,7 @@ export const getDetailProductSa = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Detail Product By Version
@@ -235,7 +238,7 @@ export const getDetailProductByVersion = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Approval History
@@ -249,7 +252,7 @@ export const getApprovalHistory = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const approveOrRejectInactiveServiceAgreement = createAsyncThunk(
@@ -259,7 +262,7 @@ export const approveOrRejectInactiveServiceAgreement = createAsyncThunk(
       const url = "/v1/dbs/api/sa/approveInactive";
       const response = await accountManagementService.activationWithRemark(
         url,
-        body
+        body,
       );
       thunkAPI.dispatch(showModalSuccess(responseSuccess));
       return response.data;
@@ -273,15 +276,16 @@ export const approveOrRejectInactiveServiceAgreement = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+          description: `Your data was not ${
+            body.action === "APPROVE" ? "approved" : "rejected"
+          }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approveOrRejectServiceAgreement = createAsyncThunk(
@@ -291,7 +295,7 @@ export const approveOrRejectServiceAgreement = createAsyncThunk(
       const url = "/v1/dbs/api/sa/approve";
       const response = await accountManagementService.activationWithRemark(
         url,
-        body
+        body,
       );
       thunkAPI.dispatch(showModalSuccess(responseSuccess));
       return response.data;
@@ -305,40 +309,45 @@ export const approveOrRejectServiceAgreement = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+          description: `Your data was not ${
+            body.action === "APPROVE" ? "approved" : "rejected"
+          }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
-
-
 
 // ========== Dropdown List ===========
 // Get Service Type
-export const getServiceType = createAsyncThunk("GET_SERVICE_TYPE", async (thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/sa/ddl/serviceType`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getServiceType = createAsyncThunk(
+  "GET_SERVICE_TYPE",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/ddl/serviceType`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 // Get Service Agreement Type
-export const getSaType = createAsyncThunk("GET_SERVICE_AGREEMENT_TYPE", async ({ type, id }, thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/sa/ddl/saType/${type}/${id}`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getSaType = createAsyncThunk(
+  "GET_SERVICE_AGREEMENT_TYPE",
+  async ({ type, id }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/ddl/saType/${type}/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 // Get Service Agreement Type
 export const getPjbg = createAsyncThunk("GET_PJBG_TYPE", async (thunkAPI) => {
   try {
@@ -351,7 +360,8 @@ export const getPjbg = createAsyncThunk("GET_PJBG_TYPE", async (thunkAPI) => {
 });
 
 // Get List Product
-export const getListProduct = createAsyncThunk("GET_LIST_PRODUCT",
+export const getListProduct = createAsyncThunk(
+  "GET_LIST_PRODUCT",
   async ({ body }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/sa/ddl/getProduct/${body.idAccount}/${body.idProductType}/${body.serviceTypeId}`;
@@ -360,146 +370,182 @@ export const getListProduct = createAsyncThunk("GET_LIST_PRODUCT",
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  });
+  },
+);
 
 // Get List Product
-export const getApprovalList = createAsyncThunk("GET_APPROVAL_LIST", async (thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/sa/get-list-approval-hierarchies`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getApprovalList = createAsyncThunk(
+  "GET_APPROVAL_LIST",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/get-list-approval-hierarchies`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 // Get Detail Approval
-export const getDetailApproval = createAsyncThunk("GET_DETAIL_APPROVAL", async (id, thunkAPI) => {
-  if (id !== null) {
-    try {
-      const url = `/v1/dbs/api/sa/get-approval-hierarchies/${id}`;
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
+export const getDetailApproval = createAsyncThunk(
+  "GET_DETAIL_APPROVAL",
+  async (id, thunkAPI) => {
+    if (id !== null) {
+      try {
+        const url = `/v1/dbs/api/sa/get-approval-hierarchies/${id}`;
+        const response = await accountManagementService.getAll(url);
+        return response.data;
+      } catch (error) {
+        return thunkAPI.rejectWithValue(error?.response);
+      }
     }
-  }
-});
+  },
+);
 
-export const getDetailApprovalInactive = createAsyncThunk("GET_DETAIL_APPROVAL_INACTIVE", async ({ id }, thunkAPI) => {
-  if (id !== null) {
-    try {
-      const url = `/v1/dbs/api/sa/get-approval-hierarchies/${id}`;
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
+export const getDetailApprovalInactive = createAsyncThunk(
+  "GET_DETAIL_APPROVAL_INACTIVE",
+  async ({ id }, thunkAPI) => {
+    if (id !== null) {
+      try {
+        const url = `/v1/dbs/api/sa/get-approval-hierarchies/${id}`;
+        const response = await accountManagementService.getAll(url);
+        return response.data;
+      } catch (error) {
+        return thunkAPI.rejectWithValue(error?.response);
+      }
     }
-  }
-});
+  },
+);
 
 // Get List Term of Payment
-export const getListTermOfPayment = createAsyncThunk("GET_LIST_TOP", async (id , thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/sa/ddl/termOfPayment/${id}`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getListTermOfPayment = createAsyncThunk(
+  "GET_LIST_TOP",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/ddl/termOfPayment/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 // Get List Billing Cycle
-export const getListBillingCycle = createAsyncThunk("GET_LIST_BILLING_CYCLE", async (thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/sa/ddl/billingCycle`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getListBillingCycle = createAsyncThunk(
+  "GET_LIST_BILLING_CYCLE",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/ddl/billingCycle`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 // Get List Invoice Template
-export const getInvoiceTemplate = createAsyncThunk("GET_LIST_INVOICE_TEMPLATE", async (id , thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/sa/ddl/invoiceTemplate/${id}`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getInvoiceTemplate = createAsyncThunk(
+  "GET_LIST_INVOICE_TEMPLATE",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/ddl/invoiceTemplate/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 // Get List Invoice Template
-export const getTaxImplication = createAsyncThunk("GET_TAX_IMPLICATION", async ({ body }, thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/sa/ddl/getTaxImplication`;
-    const response = await accountManagementService.createData(url, body);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getTaxImplication = createAsyncThunk(
+  "GET_TAX_IMPLICATION",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/ddl/getTaxImplication`;
+      const response = await accountManagementService.createData(url, body);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 // Get List Price Code
-export const getPriceCode = createAsyncThunk("GET_LIST_PRICE_CODE", async (id, thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/sa/ddl/getListPriceCode/${id}`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getPriceCode = createAsyncThunk(
+  "GET_LIST_PRICE_CODE",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/ddl/getListPriceCode/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 // Get List Price Rule
-export const getPriceRule = createAsyncThunk("GET_LIST_PRICE_RULE", async (id, thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/sa/ddl/getListPriceRule/${id}`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getPriceRule = createAsyncThunk(
+  "GET_LIST_PRICE_RULE",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/ddl/getListPriceRule/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 // Get List Price Rule
-export const getListPriceRuleById = createAsyncThunk("GET_LIST_PRICE_RULE_BY_ID", async (id, thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/sa/ddl/getListPriceRule/detail/${id}`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getListPriceRuleById = createAsyncThunk(
+  "GET_LIST_PRICE_RULE_BY_ID",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/ddl/getListPriceRule/detail/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 // Get List Choose Those
-export const getListChooseTos = createAsyncThunk("GET_LIST_CHOOSE_TOS", async (
-  { id, search, page, pageSize, sort }, thunkAPI) => {
-  try {
-    const searchParams = search === undefined ? '' : search;
-    const sortParams =
-      sort === undefined || sort === "" ? "createdDate~desc" : sort;
-    const url = `/v1/dbs/api/sa/ddl/chooseTos/${id}?search=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getListChooseTos = createAsyncThunk(
+  "GET_LIST_CHOOSE_TOS",
+  async ({ id, search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/sa/ddl/chooseTos/${id}?search=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 // Get List Category Attachment
-export const getListCategoryAttachment = createAsyncThunk("GET_LIST_CATEGORY_ATTAHCMENT", async (thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/sa/ddl/list-category`;
-    const response = await accountManagementService.getAll(url);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getListCategoryAttachment = createAsyncThunk(
+  "GET_LIST_CATEGORY_ATTAHCMENT",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/ddl/list-category`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 export const getGlobalPropertiesAttachment = createAsyncThunk(
   "GET_GLOBAL_PROPERTIES_ATTACHMENT",
@@ -511,30 +557,35 @@ export const getGlobalPropertiesAttachment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // Get List Late Charge
-export const getListLateCharge = createAsyncThunk("GET_LIST_LATE_CHARGE", async ({ body }, thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/sa/ddl/getLatecharge`;
-    const response = await accountManagementService.createData(url, body);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
+export const getListLateCharge = createAsyncThunk(
+  "GET_LIST_LATE_CHARGE",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/ddl/getLatecharge`;
+      const response = await accountManagementService.createData(url, body);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 // Get List Late Charge
-export const checkValidateCreateSa = createAsyncThunk("CHECK_VALIDATE_CREATE_SA", async ({ body }, thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/sa/checkValidateCreateSa`;
-    const response = await accountManagementService.createData(url, body);
-    return response;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error?.response);
-  }
-});
-
+export const checkValidateCreateSa = createAsyncThunk(
+  "CHECK_VALIDATE_CREATE_SA",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/checkValidateCreateSa`;
+      const response = await accountManagementService.createData(url, body);
+      return response;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
 
 const accountServiceAgreementSlice = createSlice({
   name: "accountAgreement",
@@ -689,8 +740,6 @@ const accountServiceAgreementSlice = createSlice({
       state.data_product_detail = action.payload;
       state.loading = false;
     },
-
-
 
     // =========== Dropdown List ===========
 
@@ -1051,8 +1100,8 @@ const accountServiceAgreementSlice = createSlice({
       state.dataGlobalPropAttachment = action.payload;
       state.loadingProduct = false;
     },
-  }
-})
+  },
+});
 
 const { reducer } = accountServiceAgreementSlice;
 export const { resetDataDetail } = accountServiceAgreementSlice.actions;

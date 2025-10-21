@@ -19,9 +19,9 @@ import ModalCustom from "../../../../components/Modal/ModalCustom";
 
 const ModalApprovalBilling = ({
   isOpen,
-  handleCancel = () => { },
-  handleRefresh = () => { },
-  handleOpenModal = () => { },
+  handleCancel = () => {},
+  handleRefresh = () => {},
+  handleOpenModal = () => {},
 }) => {
   // Selector
   const { data_list_billing_approval } = useSelector((state) => state.billing);
@@ -181,7 +181,7 @@ const ModalApprovalBilling = ({
       approvedBilling({
         body: body,
         action: action === "APPROVE" ? "approved" : "rejected",
-      })
+      }),
     )
       .unwrap()
       .then(() => {
@@ -329,7 +329,7 @@ const ModalApprovalBilling = ({
                   searchInput,
                   searchedColumn,
                   searchText,
-                  handleSearch
+                  handleSearch,
                 )}
                 current={page}
                 pageSize={pageSize}
@@ -376,7 +376,7 @@ const ModalApprovalBilling = ({
                 searchInput,
                 searchedColumn,
                 searchText,
-                handleSearch
+                handleSearch,
               )}
               current={page}
               pageSize={pageSize}
@@ -409,8 +409,9 @@ const ModalApprovalBilling = ({
               : IconModal["icon_error_default"]}
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`Your data was not ${action === "APPROVE" ? "approved" : "rejected"
-            }. ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">{`Your data was not ${
+            action === "APPROVE" ? "approved" : "rejected"
+          }. ${bodyError.message}.`}</p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>

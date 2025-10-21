@@ -97,7 +97,7 @@ const sorterDetail = (fieldSort, a, b) => {
 
 const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
   const { data_billingItemCategoryDdl, data_billType } = useSelector(
-    (state) => state.billing_item
+    (state) => state.billing_item,
   );
 
   const searchInput = useRef(null);
@@ -109,8 +109,8 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
   const [detailMapping, setDetailMapping] = useState(false);
   const [category, setCategory] = useState("");
   const [dataDetailTable, setDataDetailTable] = useState([]);
-  const [subHeader, setSubHeader] = useState("")
-  
+  const [subHeader, setSubHeader] = useState("");
+
   const [pageDetail, setPageDetail] = useState(1);
   const [pageSizeDetail, setPageSizeDetail] = useState(10);
   const [searchedColumnDetail, setSearchedColumnDetail] = useState("");
@@ -175,13 +175,13 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
       setCategory(e.category);
       setSubHeader(
         dataConfirm.mappingInfo.filter(
-          (item) => item.category === e.category
-        )[0]?.categoryName
-      )
+          (item) => item.category === e.category,
+        )[0]?.categoryName,
+      );
       setDataDetailTable(
         dataConfirm?.mappingInfo?.filter(
-          (item) => item.category === e.category
-        )[0]?.detail
+          (item) => item.category === e.category,
+        )[0]?.detail,
       );
       setDetailMapping(true);
     }
@@ -197,7 +197,7 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
         <DetailText label="Billing Item Category">
           {
             (data_billingItemCategoryDdl || [])?.find(
-              (item) => item.id === dataConfirm?.billingItemCategory
+              (item) => item.id === dataConfirm?.billingItemCategory,
             )?.name
           }
         </DetailText>
@@ -205,7 +205,7 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
         <DetailText label="Bill Type">
           {
             (data_billType || [])?.find(
-              (item) => item.id === dataConfirm?.billType
+              (item) => item.id === dataConfirm?.billType,
             )?.name
           }
         </DetailText>
@@ -254,7 +254,7 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
             handleSearch,
             handleDetail,
             onFilter,
-            sorter
+            sorter,
           )}
         />
       </div>
@@ -286,7 +286,7 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
               searchTextDetail,
               handleSearchDetail,
               onFilter,
-              sorterDetail
+              sorterDetail,
             )?.filter((item) => !(item.title === "ACTION"))}
           />
         </div>

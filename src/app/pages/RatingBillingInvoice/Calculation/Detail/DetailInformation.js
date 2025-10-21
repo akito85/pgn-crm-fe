@@ -90,7 +90,7 @@ const DetailInformation = ({ data, tabHeader }) => {
           pageSize,
           sort,
           search: reqSearch,
-        })
+        }),
       );
     }
   }, [segmentedPage, dispatch, data, page, pageSize, search, sort, tabHeader]);
@@ -105,7 +105,7 @@ const DetailInformation = ({ data, tabHeader }) => {
         getDetailCalculationResultNoPaging({
           calCode: data?.calCode,
           calType: segmentedPage === "Rating Result" ? 621 : 623,
-        })
+        }),
       );
     }
   }, [dispatch, segmentedPage, data]);
@@ -139,7 +139,7 @@ const DetailInformation = ({ data, tabHeader }) => {
 
   const tempTabs = useMemo(
     () => <RadioTabs data={tabData} onChange={handleSegmentedPage} />,
-    [segmentedPage, handleSegmentedPage, tabData]
+    [segmentedPage, handleSegmentedPage, tabData],
   );
 
   const renderSection = (segmentedPage) => {
@@ -174,7 +174,7 @@ const DetailInformation = ({ data, tabHeader }) => {
                   searchedColumn,
                   searchText,
                   handleSearch,
-                  search
+                  search,
                 )}
                 dataSource={list_calculation_result?.result}
                 totalData={list_calculation_result?.page?.totalElements || 0}
@@ -217,7 +217,7 @@ const DetailInformation = ({ data, tabHeader }) => {
                   searchedColumn,
                   searchText,
                   handleSearch,
-                  search
+                  search,
                 )}
                 dataSource={list_calculation_result?.result}
                 totalData={list_calculation_result?.page?.totalElements || 0}
@@ -336,7 +336,6 @@ const DetailInformation = ({ data, tabHeader }) => {
     },
   };
 
-
   const next = () => {
     setCurrent(current + 1);
   };
@@ -364,7 +363,7 @@ const DetailInformation = ({ data, tabHeader }) => {
     setPageSizeCal(10);
     setSearchTextCal("");
     setSearchedColumnCal("");
-    handleResetFilter()
+    handleResetFilter();
   };
 
   const handleButtonNext = () => {
@@ -374,16 +373,16 @@ const DetailInformation = ({ data, tabHeader }) => {
     setPageSizeCal(10);
     setSearchTextCal("");
     setSearchedColumnCal("");
-    handleResetFilter()
+    handleResetFilter();
   };
 
   const handleResetFilter = () => {
     setPageCal(1);
     setPageSizeCal(10);
-    setSearchedColumnCal("")
+    setSearchedColumnCal("");
     setSearchTextCal("");
-    setSearchRecalculate({})
-  }
+    setSearchRecalculate({});
+  };
 
   const filterDataByPage = (data = [], type = "data") => {
     let result = [...data]?.map((item, index) => ({
@@ -394,7 +393,6 @@ const DetailInformation = ({ data, tabHeader }) => {
 
     return type === "data" ? result : result.length;
   };
-
 
   const steps = () => {
     let temp = [
@@ -410,14 +408,17 @@ const DetailInformation = ({ data, tabHeader }) => {
                 <TablePaginationNew
                   type="FE"
                   dataSource={filterDataByPage(
-                    (list_calculation_no_paging || []).filter(
-                      (item) => item.calType !== 624 && !item.isTry
-                    )?.map(item => {
-                      return Object.fromEntries(
-                        Object.entries(item).map(([key, value]) => [key, value === null ? "" : value])
-                      );
-                    }),
-                    "data"
+                    (list_calculation_no_paging || [])
+                      .filter((item) => item.calType !== 624 && !item.isTry)
+                      ?.map((item) => {
+                        return Object.fromEntries(
+                          Object.entries(item).map(([key, value]) => [
+                            key,
+                            value === null ? "" : value,
+                          ]),
+                        );
+                      }),
+                    "data",
                   )}
                   columns={columnsRecalculate(
                     pageCal,
@@ -426,15 +427,15 @@ const DetailInformation = ({ data, tabHeader }) => {
                     searchedColumnCal,
                     searchTextCal,
                     handleSearchRecalculate,
-                    searchRecalculate
+                    searchRecalculate,
                   )}
                   current={pageCal}
                   pageSize={pageSizeCal}
                   totalData={filterDataByPage(
                     (list_calculation_no_paging || []).filter(
-                      (item) => item.calType !== 624 && !item.isTry
+                      (item) => item.calType !== 624 && !item.isTry,
                     ),
-                    "length"
+                    "length",
                   )}
                   tableScrolled={{
                     x: 2500,
@@ -466,7 +467,7 @@ const DetailInformation = ({ data, tabHeader }) => {
                   searchedColumnCal,
                   searchTextCal,
                   handleSearchRecalculate,
-                  searchRecalculate
+                  searchRecalculate,
                 )}
                 current={pageCal}
                 pageSize={pageSizeCal}
@@ -498,7 +499,7 @@ const DetailInformation = ({ data, tabHeader }) => {
     setCurrent(0);
     setKeyTableSelected([]);
     setTableSelected([]);
-    handleResetFilter()
+    handleResetFilter();
   };
 
   const clearRetry = () => {
@@ -509,8 +510,6 @@ const DetailInformation = ({ data, tabHeader }) => {
   console.log(tableSelected);
 
   const handleSave = () => {
-
-
     const accNumb = tableSelected?.map((item) => {
       return item?.accNumb;
     });
@@ -520,7 +519,9 @@ const DetailInformation = ({ data, tabHeader }) => {
       calCode: data?.calCode,
       calType: segmentedPage === "Rating Result" ? 621 : 623,
       remark: forceObj?.remark,
-      resultId: tableSelected?.filter(item => keyTableSelected?.includes(item?.key))?.map(item => item?.resultId),
+      resultId: tableSelected
+        ?.filter((item) => keyTableSelected?.includes(item?.key))
+        ?.map((item) => item?.resultId),
     };
     dispatch(recalculateData(body))
       .unwrap()
@@ -534,13 +535,13 @@ const DetailInformation = ({ data, tabHeader }) => {
             pageSize,
             sort,
             search: reqSearch,
-          })
+          }),
         );
         dispatch(
           getDetailCalculationResultNoPaging({
             calCode: data?.calCode,
             calType: segmentedPage === "Rating Result" ? 621 : 623,
-          })
+          }),
         );
         handleClear();
       });
@@ -575,10 +576,10 @@ const DetailInformation = ({ data, tabHeader }) => {
             pageSize,
             sort,
             search: reqSearch,
-          })
+          }),
         );
         clearRetry();
-        handleClear()
+        handleClear();
       });
   };
 

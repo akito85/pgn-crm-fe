@@ -13,7 +13,7 @@ export const PosTableView = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  search
+  search,
   // handleApprovalHistory = () => {},
   // handleOpenDetail = () => {},
   // handleDelete = () => {}
@@ -35,7 +35,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -45,7 +45,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -59,7 +59,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -69,7 +69,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -83,7 +83,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -93,7 +93,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -107,7 +107,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -117,7 +117,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -133,7 +133,7 @@ export const PosTableView = (
       searchText,
       handleSearch,
       true,
-      "datePeriod"
+      "datePeriod",
     ),
     render: (text) =>
       renderDateColumn(
@@ -142,7 +142,7 @@ export const PosTableView = (
         searchText,
         text,
         "datePeriod",
-        search
+        search,
       ),
   },
   {
@@ -156,7 +156,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -166,7 +166,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -180,7 +180,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -190,7 +190,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -204,7 +204,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -214,7 +214,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -228,7 +228,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -238,7 +238,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -254,7 +254,7 @@ export const PosTableView = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -263,7 +263,7 @@ export const PosTableView = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
 
     // render: (index) => {
@@ -298,7 +298,7 @@ export const PosTableView = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -307,7 +307,7 @@ export const PosTableView = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (index) => {
     //   const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -341,7 +341,7 @@ export const PosTableView = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -350,7 +350,7 @@ export const PosTableView = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (index) => {
     //   const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -383,7 +383,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -393,7 +393,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -408,7 +408,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -418,7 +418,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -432,7 +432,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -442,7 +442,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -456,7 +456,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -466,7 +466,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -481,7 +481,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -491,7 +491,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -505,7 +505,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -515,7 +515,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   // {
@@ -543,7 +543,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -553,7 +553,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -568,7 +568,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -578,7 +578,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -593,7 +593,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -603,7 +603,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -618,7 +618,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -628,7 +628,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -643,7 +643,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -653,7 +653,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   // {
@@ -681,7 +681,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -691,7 +691,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -706,7 +706,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -716,7 +716,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -731,7 +731,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -741,7 +741,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -756,7 +756,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -766,7 +766,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -781,7 +781,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -791,7 +791,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -807,7 +807,7 @@ export const PosTableView = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -816,7 +816,7 @@ export const PosTableView = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (index) => {
     //   const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -849,7 +849,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -859,7 +859,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -874,7 +874,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -884,7 +884,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -899,7 +899,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -909,7 +909,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -924,7 +924,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -934,7 +934,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   // {
@@ -962,7 +962,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -972,7 +972,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -987,7 +987,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -997,7 +997,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1012,7 +1012,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1022,7 +1022,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1038,7 +1038,7 @@ export const PosTableView = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -1047,7 +1047,7 @@ export const PosTableView = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (index) => {
     //   const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -1081,7 +1081,7 @@ export const PosTableView = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -1090,7 +1090,7 @@ export const PosTableView = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (index) => {
     //   const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -1123,7 +1123,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1133,7 +1133,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1149,9 +1149,9 @@ export const PosTableView = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
-    
+
     render: (text) =>
       renderDateColumn(
         "rateDate",
@@ -1159,7 +1159,7 @@ export const PosTableView = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (index) => {
     //   const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -1192,7 +1192,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1202,7 +1202,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1217,7 +1217,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1227,7 +1227,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1242,7 +1242,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1252,7 +1252,7 @@ export const PosTableView = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1269,7 +1269,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -1279,7 +1279,7 @@ export const PosTableView = (
         text,
         true,
         "input",
-        search
+        search,
       ),
     // render: (text) => {
     //   if (searchedColumn === "remark") {
@@ -1320,7 +1320,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     // render: (index) => (
     //   <div className={" flex justify-center"}>
@@ -1335,7 +1335,7 @@ export const PosTableView = (
         text,
         false,
         "status",
-        search
+        search,
       ),
   },
   {
@@ -1352,7 +1352,7 @@ export const PosTableView = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (statusApproval) => {
       let text;
@@ -1377,7 +1377,7 @@ export const PosTableView = (
             text,
             false,
             "status",
-            search
+            search,
           )
         : text;
     },

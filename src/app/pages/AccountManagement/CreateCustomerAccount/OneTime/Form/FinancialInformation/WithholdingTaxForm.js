@@ -17,7 +17,7 @@ const WithholdingTaxForm = ({
       </span>
 
       <div className="w-full flex flex-row gap-2 pt-[30px]">
-      <Form.Item
+        <Form.Item
           name={"wapuFlag"}
           getValueFromEvent={(e) => handleWTObj(e, "wapuFlag")}
         >
@@ -51,7 +51,6 @@ const WithholdingTaxForm = ({
           <InputComponent />
         </Form.Item>
       </div>
-
     </div>
   );
 };

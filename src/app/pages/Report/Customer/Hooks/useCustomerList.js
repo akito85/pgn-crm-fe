@@ -21,12 +21,13 @@ const useCustomerList = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
-  const { isLoading, data, refetch, isFetching } = useGetCustomerAccountPaginationQuery({
-    page,
-    pageSize,
-    sort,
-    search: encodeURIComponent(JSON.stringify(search)),
-  });
+  const { isLoading, data, refetch, isFetching } =
+    useGetCustomerAccountPaginationQuery({
+      page,
+      pageSize,
+      sort,
+      search: encodeURIComponent(JSON.stringify(search)),
+    });
   const loading = useMemo(() => {
     return isLoading || loadingCustomer || isFetching;
   }, [isFetching, isLoading, loadingCustomer]);
@@ -36,7 +37,7 @@ const useCustomerList = () => {
       setPage(pageSize !== pageSizeChange ? 1 : pageChange);
       setPageSize(pageSizeChange);
     },
-    [pageSize]
+    [pageSize],
   );
 
   const handleDownload = useCallback(async () => {
@@ -74,9 +75,9 @@ const useCustomerList = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        search
+        search,
       ),
-    [page, pageSize, searchedColumn, searchText, handleSearch, search]
+    [page, pageSize, searchedColumn, searchText, handleSearch, search],
   );
 
   const handleSort = useCallback((_, __, sort) => {

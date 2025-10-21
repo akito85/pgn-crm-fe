@@ -15,7 +15,7 @@ const DetailMappingInformation = ({
   isEditabled = false,
   startDateMappping = null,
   endDateMapping = null,
-  handleValidateUpdate = () => {}
+  handleValidateUpdate = () => {},
 }) => {
   // declare
   const searchInput = useRef(null);
@@ -33,12 +33,12 @@ const DetailMappingInformation = ({
         .filter(
           (dataCategoryItem) =>
             !dataTable.some(
-              (dataTableItem) => dataTableItem.item === dataCategoryItem.id
-            )
+              (dataTableItem) => dataTableItem.item === dataCategoryItem.id,
+            ),
         )
         ?.map((item) => {
           return { value: item?.id, label: item?.name };
-        })
+        }),
     );
   }, [dataTable, dataMapDetailItemList]);
 
@@ -98,7 +98,7 @@ const DetailMappingInformation = ({
     };
     let fa = handleDataSort(a);
     let fb = handleDataSort(b);
-  
+
     const handleCompare = (a, b) => {
       switch (fieldSort) {
         case "startDate":
@@ -127,12 +127,12 @@ const DetailMappingInformation = ({
             !dataTable.some(
               (dataTableItem) =>
                 dataTableItem.item === dataCategoryItem.id &&
-                e.item !== dataCategoryItem.id
-            )
+                e.item !== dataCategoryItem.id,
+            ),
         )
         ?.map((item) => {
           return { value: item?.id, label: item?.name };
-        })
+        }),
     );
   };
 
@@ -156,7 +156,7 @@ const DetailMappingInformation = ({
           handleSearch,
           onFilter,
           sorterDetail,
-          dataMappingItem //list ddl
+          dataMappingItem, //list ddl
         )?.filter((item) => !(item.title === "ACTION"))}
         scrollTable={{ x: 1500, y: 500 }}
         usePagination={true}

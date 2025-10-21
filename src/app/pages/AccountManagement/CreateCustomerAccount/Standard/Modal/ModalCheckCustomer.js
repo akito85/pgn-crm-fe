@@ -252,9 +252,7 @@ const ModalCheckCustomer = ({
       ...getColumnSearchProps("status"),
       render: (status) => (
         <div className={"flex justify-center"}>
-          <StatusComponent colour={status}>
-            {status}
-          </StatusComponent>
+          <StatusComponent colour={status}>{status}</StatusComponent>
         </div>
       ),
     },

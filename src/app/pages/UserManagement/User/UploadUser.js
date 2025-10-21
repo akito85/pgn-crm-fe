@@ -51,30 +51,44 @@ const UploadUser = () => {
     if (data_list_upload?.code === 200) {
       setShowListUpload(true);
       setFirstStep(false);
-      setDataTable(data_list_upload?.data?.map((item, index) => {
-        return {
-          key: (index+1).toString(),
-          userName: item?.userName,
-          authType: item?.authType,
-          authTypeId: parseInt(item?.authTypeId),
-          employeeName: item?.employeeName,
-          employee: item?.employee === "" ? null : parseInt(item?.employee),
-          userType: item?.userType,
-          userTypeId: parseInt(item?.userTypeId),
-          userLevel: item?.userLevel,
-          userLevelId: item?.userLevelId,
-          email: item?.email,
-          phone: item?.phoneNumber,
-          groupAccess: item?.groupAccess,
-          groupAccessId: parseInt(item?.groupAccessId),
-          status: item?.status,
-          startDate: item?.startDate === "" || null ? moment() : moment(item?.startDate).clone(),
-          endDate: item?.endDate === "" || null ? moment() : moment(item?.endDate).clone(),
-          startDateGa: item?.startDate === "" || null ? moment() : moment(item?.startDateGa).clone(),
-          endDateGa: item?.endDate === "" || null ? moment() : moment(item?.endDateGa).clone(),
-          message: item?.message
-        }
-      }))
+      setDataTable(
+        data_list_upload?.data?.map((item, index) => {
+          return {
+            key: (index + 1).toString(),
+            userName: item?.userName,
+            authType: item?.authType,
+            authTypeId: parseInt(item?.authTypeId),
+            employeeName: item?.employeeName,
+            employee: item?.employee === "" ? null : parseInt(item?.employee),
+            userType: item?.userType,
+            userTypeId: parseInt(item?.userTypeId),
+            userLevel: item?.userLevel,
+            userLevelId: item?.userLevelId,
+            email: item?.email,
+            phone: item?.phoneNumber,
+            groupAccess: item?.groupAccess,
+            groupAccessId: parseInt(item?.groupAccessId),
+            status: item?.status,
+            startDate:
+              item?.startDate === "" || null
+                ? moment()
+                : moment(item?.startDate).clone(),
+            endDate:
+              item?.endDate === "" || null
+                ? moment()
+                : moment(item?.endDate).clone(),
+            startDateGa:
+              item?.startDate === "" || null
+                ? moment()
+                : moment(item?.startDateGa).clone(),
+            endDateGa:
+              item?.endDate === "" || null
+                ? moment()
+                : moment(item?.endDateGa).clone(),
+            message: item?.message,
+          };
+        }),
+      );
     } else {
       setFirstStep(true);
     }
@@ -106,7 +120,7 @@ const UploadUser = () => {
       return false;
     },
     onChange: handleFileChange,
-    disabled: showListUpload
+    disabled: showListUpload,
   };
 
   // routes bread crumb
@@ -134,20 +148,23 @@ const UploadUser = () => {
     });
   };
 
-  // handle upload 
+  // handle upload
   const handleUpload = async () => {
     try {
-      setFileProgress(0)
-      const body = { image: fileName, onProgress: (progress) => setFileProgress(progress) };
+      setFileProgress(0);
+      const body = {
+        image: fileName,
+        onProgress: (progress) => setFileProgress(progress),
+      };
       await dispatch(uploadUser(body)).unwrap();
     } catch (error) {
       setFileList((prevFileList) =>
         prevFileList.map((file) => {
           if (file.name === fileName.name) {
-            return { ...file, status: 'error' };
+            return { ...file, status: "error" };
           }
           return file;
-        })
+        }),
       );
     }
   };
@@ -158,8 +175,8 @@ const UploadUser = () => {
       prevFileList.map((file) => ({
         ...file,
         percent: 0,
-        status: 'uploading'
-      }))
+        status: "uploading",
+      })),
     );
     handleUpload();
   };
@@ -181,13 +198,27 @@ const UploadUser = () => {
             userLevelId: item?.userLevelId?.toString(),
             email: item?.email?.toString(),
             phoneNumber: item?.phone?.toString(),
-            groupAccess: typeof item?.groupAccess === 'number' ? item?.groupAccess?.toString() : item?.groupAccess,
-            groupAccessId: typeof item?.groupAccess === 'string' ? item?.groupAccessId?.toString() : item?.groupAccess?.toString(),
-            endDate: moment(item?.endDate).isValid() ? moment(item?.endDate).format(dateFormatting.dateFormal) : moment(),
-            startDate: moment(item?.startDate).isValid() ? moment(item?.startDate).format(dateFormatting.dateFormal) : moment(),
-            endDateGa: moment(item?.endDateGa).isValid() ? moment(item?.endDateGa).format(dateFormatting.dateFormal) : moment(),
-            startDateGa: moment(item?.endDateGa).isValid() ? moment(item?.startDateGa).format(dateFormatting.dateFormal) : moment(),
-          }
+            groupAccess:
+              typeof item?.groupAccess === "number"
+                ? item?.groupAccess?.toString()
+                : item?.groupAccess,
+            groupAccessId:
+              typeof item?.groupAccess === "string"
+                ? item?.groupAccessId?.toString()
+                : item?.groupAccess?.toString(),
+            endDate: moment(item?.endDate).isValid()
+              ? moment(item?.endDate).format(dateFormatting.dateFormal)
+              : moment(),
+            startDate: moment(item?.startDate).isValid()
+              ? moment(item?.startDate).format(dateFormatting.dateFormal)
+              : moment(),
+            endDateGa: moment(item?.endDateGa).isValid()
+              ? moment(item?.endDateGa).format(dateFormatting.dateFormal)
+              : moment(),
+            startDateGa: moment(item?.endDateGa).isValid()
+              ? moment(item?.startDateGa).format(dateFormatting.dateFormal)
+              : moment(),
+          };
         });
         await dispatch(finalUploadUser(body)).unwrap();
       }
@@ -198,7 +229,7 @@ const UploadUser = () => {
             return { ...file, status: "error" };
           }
           return file;
-        })
+        }),
       );
     }
   };
@@ -210,15 +241,15 @@ const UploadUser = () => {
 
   // hanlde upload by link
   const handleUploadLink = (e) => {
-    e.stopPropagation()
+    e.stopPropagation();
   };
 
   // handle reset upload and set default table
   const handleReset = () => {
-    dispatch(setClearData())
+    dispatch(setClearData());
     setDataTable([]);
-    setShowListUpload(false)
-    setFileList([])
+    setShowListUpload(false);
+    setFileList([]);
   };
 
   return (
@@ -226,7 +257,11 @@ const UploadUser = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className={"w-full flex justify-end"}>
-          <ButtonComponent icon={<DownloadOutlined style={{ fontSize: "24px" }} />} type={"submit"} onClick={getTemplate}>
+          <ButtonComponent
+            icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+            type={"submit"}
+            onClick={getTemplate}
+          >
             Download Template
           </ButtonComponent>
         </div>
@@ -235,10 +270,11 @@ const UploadUser = () => {
             <div className={"w-full flex flex-col gap-4"}>
               <Dragger {...props}>
                 <p className="ant-upload-drag-icon">
-                  <SVGIcon name={'IconUploadAttachment'} />
+                  <SVGIcon name={"IconUploadAttachment"} />
                 </p>
                 <p className="ant-upload-text text-bold">
-                  Drag and drop your file here or <span className="underline"> click for upload</span>
+                  Drag and drop your file here or{" "}
+                  <span className="underline"> click for upload</span>
                 </p>
                 <p className="ant-upload-hint">
                   The maximum file size is limited to 5 MB
@@ -270,7 +306,10 @@ const UploadUser = () => {
           </BaseContainer>
           {showListUpload === true ? (
             <Form.Item>
-              <ListUserFromUpload data={dataTable} onChangeData={setDataTable} />
+              <ListUserFromUpload
+                data={dataTable}
+                onChangeData={setDataTable}
+              />
             </Form.Item>
           ) : (
             fileList?.map((file, index) => (
@@ -303,7 +342,12 @@ const UploadUser = () => {
                   />
                   {file.status === "error" && (
                     <ButtonComponent border={false}>
-                      <span className={"text-green-800 mr-2"} onClick={reUploadImage}>Re-upload</span>
+                      <span
+                        className={"text-green-800 mr-2"}
+                        onClick={reUploadImage}
+                      >
+                        Re-upload
+                      </span>
                       <UndoOutlined style={{ color: "#58804D" }} />
                     </ButtonComponent>
                   )}
@@ -320,18 +364,22 @@ const UploadUser = () => {
               >
                 Back
               </ButtonComponent>
-              <div className={'w-full justify-end flex gap-2'}>
-                {firstStep === false &&
-                  <ButtonComponent type={"submit"} onClick={handleReset} icon={
-                    <SVGIcon
-                      name={`IconButtonClear`}
-                      width={24}
-                    />
-                  } disabled={firstStep}>
+              <div className={"w-full justify-end flex gap-2"}>
+                {firstStep === false && (
+                  <ButtonComponent
+                    type={"submit"}
+                    onClick={handleReset}
+                    icon={<SVGIcon name={`IconButtonClear`} width={24} />}
+                    disabled={firstStep}
+                  >
                     Clear
                   </ButtonComponent>
-                }
-                <ButtonComponent type={"submit"} htmlType={"submit"} disabled={firstStep}>
+                )}
+                <ButtonComponent
+                  type={"submit"}
+                  htmlType={"submit"}
+                  disabled={firstStep}
+                >
                   Save
                 </ButtonComponent>
               </div>
@@ -343,10 +391,9 @@ const UploadUser = () => {
           isOpen={modalBack}
           handleCancel={() => setModalBack(false)}
           handleOk={() => {
-            navigate(-1)
-            dispatch(setClearData())
-          }
-          }
+            navigate(-1);
+            dispatch(setClearData());
+          }}
           width={400}
         >
           <div className="flex justify-center mt-5 gap-[20px]">

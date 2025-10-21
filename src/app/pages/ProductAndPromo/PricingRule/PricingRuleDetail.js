@@ -30,7 +30,7 @@ import { configApp } from "../../../../constants/configApp";
 const PricingRuleDetail = () => {
   // Selector
   const { data_header, loading, message, data_detail_draft } = useSelector(
-    (state) => state.pricingRule
+    (state) => state.pricingRule,
   );
 
   // Declaration
@@ -99,7 +99,10 @@ const PricingRuleDetail = () => {
           priceCodeName: item.priceCode,
           min: item.min,
           max: item.max,
-          maximumName: item.unlimited === true || item?.max?.toString() === "0" ? "Unlimited" : item.max,
+          maximumName:
+            item.unlimited === true || item?.max?.toString() === "0"
+              ? "Unlimited"
+              : item.max,
           description: item.description,
           unlimited: item.unlimited,
           value: item.value,
@@ -133,7 +136,7 @@ const PricingRuleDetail = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria List Pricing Rule
@@ -217,7 +220,10 @@ const PricingRuleDetail = () => {
           priceCodeName: item.priceCodeName,
           min: item.min,
           max: item.max,
-          maximumName: item.unlimited === true || item?.max?.toString() === "0" ? "Unlimited" : item.max,
+          maximumName:
+            item.unlimited === true || item?.max?.toString() === "0"
+              ? "Unlimited"
+              : item.max,
           description: item.description,
           unlimited: item.unlimited,
           value: item.value,
@@ -277,7 +283,7 @@ const PricingRuleDetail = () => {
         return obj;
       });
       // console.log(dataDraftCriteriaList);
-      
+
       setDataDraft(data_detail_draft);
       setListDataDetailDraft(dataDetailDraftPricingRule);
       setListDataCriteriaDraft(dataDraftCriteriaList);
@@ -386,7 +392,7 @@ const PricingRuleDetail = () => {
           body: data,
           responseSuccess:
             approveOrReject === "Approve" ? successApprove : successReject,
-        })
+        }),
       )
         .unwrap()
         .then(() => {
@@ -404,7 +410,7 @@ const PricingRuleDetail = () => {
           body: data,
           responseSuccess:
             approveOrReject === "Approve" ? successApprove : successReject,
-        })
+        }),
       )
         .unwrap()
         .then(() => {
@@ -438,7 +444,7 @@ const PricingRuleDetail = () => {
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail.requestedDate
                       ? moment(
-                          bodyApproval.approvalDetail.requestedDate
+                          bodyApproval.approvalDetail.requestedDate,
                         ).format(dateFormat)
                       : ""}
                   </DetailText>

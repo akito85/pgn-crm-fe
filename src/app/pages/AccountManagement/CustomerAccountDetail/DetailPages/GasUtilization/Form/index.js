@@ -1,30 +1,34 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { Form, Spin } from 'antd'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
+import React, { useState, useEffect, useCallback } from "react";
+import { Form, Spin } from "antd";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
-import HeaderDetail from '../../../HeaderDetail'
-import BaseContainer from '../../../../../../../components/BaseContainer'
-import LayoutMenu from '../../../../../../../components/SidebarMenu/LayoutMenu'
-import BreadCrumbAdvanced from '../../../../../../../components/BreadCrumbAdvanced'
-import { dateFormatting, requiredMessage } from '../../../../../../../utils'
-import InputComponent from '../../../../../../../components/InputComponent'
-import DateComponent from '../../../../../../../components/DateComponent'
-import GasUtilizationTableInline from './GasUtilizationTableInline'
-import ButtonComponent from '../../../../../../../components/ButtonComponent'
+import HeaderDetail from "../../../HeaderDetail";
+import BaseContainer from "../../../../../../../components/BaseContainer";
+import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
+import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
+import { dateFormatting, requiredMessage } from "../../../../../../../utils";
+import InputComponent from "../../../../../../../components/InputComponent";
+import DateComponent from "../../../../../../../components/DateComponent";
+import GasUtilizationTableInline from "./GasUtilizationTableInline";
+import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";
-import { LeftOutlined } from '@ant-design/icons'
-import accountManagementService from '../../../../../../../redux/services/account_management/accountManagementService'
-import { validateCreateUpdate } from '../../../../../../../redux/slices/general_slice'
-import ModalCustom from '../../../../../../../components/Modal/ModalCustom'
-import DetailText from '../../../../../../../components/DetailText'
-import moment from 'moment'
-import { createUpdateGasUtilization, getDetailGasUtilization, getDdlUtilizationName } from '../../../../../../../redux/slices/account_management/detailAccount/gasUtilizationSlice'
-import ModalBack from '../../../../../../../components/Modal/ModalBack'
+import { LeftOutlined } from "@ant-design/icons";
+import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
+import { validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
+import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
+import DetailText from "../../../../../../../components/DetailText";
+import moment from "moment";
+import {
+  createUpdateGasUtilization,
+  getDetailGasUtilization,
+  getDdlUtilizationName,
+} from "../../../../../../../redux/slices/account_management/detailAccount/gasUtilizationSlice";
+import ModalBack from "../../../../../../../components/Modal/ModalBack";
 
-const GasUtilizationForm = ({type}) => {
+const GasUtilizationForm = ({ type }) => {
   const { data_detail, ddlUtilizationName } = useSelector(
-    (state) =>  state.accountGasUtilization
+    (state) => state.accountGasUtilization,
   );
 
   const dispatch = useDispatch();
@@ -40,46 +44,47 @@ const GasUtilizationForm = ({type}) => {
   const [modalBack, setModalBack] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
 
-
   const [form] = Form.useForm();
 
-
   useEffect(() => {
-    if(type === 'update'){
-      dispatch(getDetailGasUtilization({id:idUpdate}))
+    if (type === "update") {
+      dispatch(getDetailGasUtilization({ id: idUpdate }));
     }
-    dispatch(getDdlUtilizationName())
+    dispatch(getDdlUtilizationName());
   }, [dispatch, idUpdate, type]);
 
-  const assert = useCallback((data) => {
-    if (data) {
-      form.setFieldsValue({
-        effectiveDate: moment(data?.effectiveDate).clone(),
-        description: data?.description
-      })
+  const assert = useCallback(
+    (data) => {
+      if (data) {
+        form.setFieldsValue({
+          effectiveDate: moment(data?.effectiveDate).clone(),
+          description: data?.description,
+        });
 
-      const arrayTemp = data?.gasUtilsDtl?.map((item) => {
-        return {
+        const arrayTemp = data?.gasUtilsDtl?.map((item) => {
+          return {
             key: item?.nameId,
             name: {
               key: `${item?.nameId}`,
               label: item?.name.toUpperCase(),
-              value: item?.nameId
+              value: item?.nameId,
             },
-            percentage: item?.percentage
-        };
-      });
-    
-      setDataTableGasUtilization(arrayTemp)
-    }
-  }, [form])
+            percentage: item?.percentage,
+          };
+        });
+
+        setDataTableGasUtilization(arrayTemp);
+      }
+    },
+    [form],
+  );
 
   useEffect(() => {
     if (data_detail && type === "update") {
-        assert(data_detail);
+      assert(data_detail);
     }
-}, [data_detail, type, assert]);
-  
+  }, [data_detail, type, assert]);
+
   const handleSave = async (formValue) => {
     let validateValueObj;
     let body;
@@ -88,45 +93,49 @@ const GasUtilizationForm = ({type}) => {
         body = {
           accountId: accountId,
           description: formValue?.description,
-          effectiveDate: moment(formValue?.effectiveDate).format(dateFormatting.date),
+          effectiveDate: moment(formValue?.effectiveDate).format(
+            dateFormatting.date,
+          ),
           gasUtilsDtl: dataTableGasUtilization?.map((item) => {
-            return{
+            return {
               name: item?.name?.value,
-              percentage: item?.percentage
-            }
-          })
-        } 
+              percentage: item?.percentage,
+            };
+          }),
+        };
         validateValueObj = {
           body: body,
           services: accountManagementService,
           endPoint:
             "/v1/dbs/api/account-detail/gas-utilization/validate-create-update",
           type,
-        }
+        };
       } else {
         body = {
           id: data_detail?.id,
           accountId: accountId,
           description: formValue?.description,
-          effectiveDate: moment(formValue?.effectiveDate).format(dateFormatting.date),
+          effectiveDate: moment(formValue?.effectiveDate).format(
+            dateFormatting.date,
+          ),
           gasUtilsDtl: dataTableGasUtilization?.map((item) => {
-            return{
+            return {
               name: item?.name?.value,
-              percentage: item?.percentage
-            }
-          })
-        } 
+              percentage: item?.percentage,
+            };
+          }),
+        };
         validateValueObj = {
           body: body,
           services: accountManagementService,
           endPoint:
             "/v1/dbs/api/account-detail/gas-utilization/validate-create-update",
           type,
-        }
+        };
       }
 
       await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
-      setOpenConfirmation(true)
+      setOpenConfirmation(true);
       setBody({
         body: body,
         validateValue: validateValueObj,
@@ -134,38 +143,41 @@ const GasUtilizationForm = ({type}) => {
     } catch (error) {
       return;
     }
-  }
+  };
 
   const handleConfirmation = async () => {
     await dispatch(createUpdateGasUtilization(body?.body))?.unwrap();
   };
 
-
   const handleResetClear = () => {
-    if(type === 'create'){
+    if (type === "create") {
       form.resetFields();
-      setDataTableGasUtilization([])
+      setDataTableGasUtilization([]);
     } else {
-      assert(data_detail)
+      assert(data_detail);
     }
   };
-
 
   return (
     <>
       <LayoutMenu>
         <Spin spinning={false}>
-        <BreadCrumbAdvanced  />
+          <BreadCrumbAdvanced />
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}
             idAccount={accountId}
             idCustomer={customerId}
-            type={'standard'}
+            type={"standard"}
           />
 
           <BaseContainer header="GAS UTILIZATION INFORMATION">
-            <Form id={"form"} layout='vertical' form={form} onFinish={handleSave}>
+            <Form
+              id={"form"}
+              layout="vertical"
+              form={form}
+              onFinish={handleSave}
+            >
               <div className={"grid grid-cols-1 w-full gap-x-6"}>
                 <Form.Item
                   name={"effectiveDate"}
@@ -188,17 +200,17 @@ const GasUtilizationForm = ({type}) => {
                 </Form.Item>
               </div>
             </Form>
-          </BaseContainer> 
+          </BaseContainer>
 
           <BaseContainer header="GAS UTILIZATION DETAIL">
             <GasUtilizationTableInline
-              dataTableGasUtilization =  {dataTableGasUtilization}
-              setDataTableGasUtilization = {setDataTableGasUtilization}
+              dataTableGasUtilization={dataTableGasUtilization}
+              setDataTableGasUtilization={setDataTableGasUtilization}
               dispatch={dispatch}
               ddlUtilizationName={ddlUtilizationName}
               setIsEdit={setIsEdit}
             />
-          </BaseContainer> 
+          </BaseContainer>
 
           <div className={"w-full my-5 flex"}>
             <Link
@@ -236,7 +248,12 @@ const GasUtilizationForm = ({type}) => {
               >
                 {type === "update" ? "Reset" : "Clear"}
               </ButtonComponent>
-              <ButtonComponent type="submit" htmlType={"submit"} form={"form"} disabled={isEdit}>
+              <ButtonComponent
+                type="submit"
+                htmlType={"submit"}
+                form={"form"}
+                disabled={isEdit}
+              >
                 Save
               </ButtonComponent>
             </div>
@@ -254,18 +271,15 @@ const GasUtilizationForm = ({type}) => {
             footer={
               <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
                 <ButtonComponent
-                    onClick={() => {
-                      setOpenConfirmation(false);
-                    }}
-                    type="default"
+                  onClick={() => {
+                    setOpenConfirmation(false);
+                  }}
+                  type="default"
                 >
-                    Cancel
+                  Cancel
                 </ButtonComponent>
-                <ButtonComponent
-                    onClick={handleConfirmation}
-                    type={'submit'}
-                >
-                    Confirm
+                <ButtonComponent onClick={handleConfirmation} type={"submit"}>
+                  Confirm
                 </ButtonComponent>
               </div>
             }
@@ -274,16 +288,22 @@ const GasUtilizationForm = ({type}) => {
               <div className="text-primary text-xs font-bold uppercase py-4">
                 Gas Utilization Information
               </div>
-              <div className='w-full grid grid-cols-3'>
-                <DetailText label={'Effective Date'}>{moment(body?.body?.effectiveDate).format(dateFormatting.date)}</DetailText>
-                <DetailText label={'Description'}>{body?.body?.description}</DetailText>
+              <div className="w-full grid grid-cols-3">
+                <DetailText label={"Effective Date"}>
+                  {moment(body?.body?.effectiveDate).format(
+                    dateFormatting.date,
+                  )}
+                </DetailText>
+                <DetailText label={"Description"}>
+                  {body?.body?.description}
+                </DetailText>
               </div>
               <p className="text-primary text-xs font-bold uppercase pt-[30px]">
                 {"Gas Utilization Detail"}
               </p>
               <GasUtilizationTableInline
-                dataTableGasUtilization =  {dataTableGasUtilization}
-                setDataTableGasUtilization = {setDataTableGasUtilization}
+                dataTableGasUtilization={dataTableGasUtilization}
+                setDataTableGasUtilization={setDataTableGasUtilization}
                 dispatch={dispatch}
                 ddlUtilizationName={ddlUtilizationName}
                 type={"preview"}
@@ -300,7 +320,7 @@ const GasUtilizationForm = ({type}) => {
         </Spin>
       </LayoutMenu>
     </>
-  )
-}
+  );
+};
 
-export default GasUtilizationForm
+export default GasUtilizationForm;

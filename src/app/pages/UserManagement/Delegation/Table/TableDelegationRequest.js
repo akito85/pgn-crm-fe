@@ -1,6 +1,6 @@
 import { Tooltip } from "antd";
 import { dateFormatting } from "../../../../../utils";
-import {  getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 
@@ -11,7 +11,7 @@ export const delegationRequest = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -33,7 +33,7 @@ export const delegationRequest = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -49,7 +49,7 @@ export const delegationRequest = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,
@@ -88,7 +88,7 @@ export const delegationRequest = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "startDate" ? (
@@ -126,7 +126,7 @@ export const delegationRequest = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "endDate" ? (
@@ -160,7 +160,7 @@ export const delegationRequest = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,
@@ -196,7 +196,7 @@ export const delegationRequest = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,

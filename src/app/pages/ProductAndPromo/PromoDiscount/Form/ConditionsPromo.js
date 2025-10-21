@@ -136,10 +136,8 @@ const ConditionPromo = ({
 
       case "startDate":
       case "endDate":
-        return record[dataIndex]
-          ? moment(record[dataIndex])
-          : "";
-        // return date.toLowerCase().includes(fixSearchText);
+        return record[dataIndex] ? moment(record[dataIndex]) : "";
+      // return date.toLowerCase().includes(fixSearchText);
 
       default:
         return record[dataIndex]?.toLowerCase().includes(fixSearchText);
@@ -150,15 +148,13 @@ const ConditionPromo = ({
     const handleDataSort = (obj) => {
       switch (fieldSort) {
         case "value":
-          return separatorCurrency(obj[fieldSort])?.replace(/,/g, "")
-          // return format.toLowerCase();
+          return separatorCurrency(obj[fieldSort])?.replace(/,/g, "");
+        // return format.toLowerCase();
 
         case "startDate":
         case "endDate":
-          return obj[fieldSort]
-            ? moment(obj[fieldSort])
-            : "";
-          // return date.toLowerCase();
+          return obj[fieldSort] ? moment(obj[fieldSort]) : "";
+        // return date.toLowerCase();
 
         default:
           return obj[fieldSort]?.toLowerCase();
@@ -178,12 +174,12 @@ const ConditionPromo = ({
           }
           return 0; // Handle null cases if necessary
         case "value":
-          return Math.sign(parseFloat(a) - parseFloat(b))
+          return Math.sign(parseFloat(a) - parseFloat(b));
         default:
           return a.localeCompare(b);
       }
-    }
-      return handleCompare(fa, fb);
+    };
+    return handleCompare(fa, fb);
   };
 
   const handleCreate = () => {
@@ -203,9 +199,8 @@ const ConditionPromo = ({
   }, [form]);
 
   const handleDetailHistory = (record) => {
-    setModalHistory(true)
-    setDataHistory(record)
-    
+    setModalHistory(true);
+    setDataHistory(record);
   };
 
   const handleFinish = useCallback(
@@ -225,7 +220,7 @@ const ConditionPromo = ({
 
       // Check if Name is already chosen with the same Operator
       const isNameChosen = data.some(
-        (item) => item.name === value.name && item.operator === value.operator
+        (item) => item.name === value.name && item.operator === value.operator,
       );
 
       if (isNameChosen) {
@@ -251,7 +246,7 @@ const ConditionPromo = ({
       setTypeModal,
       showModalError,
       form,
-    ]
+    ],
   );
 
   const listData = (value) => {
@@ -287,7 +282,7 @@ const ConditionPromo = ({
     } else {
       updateData((prevState) => {
         const index = prevState.findIndex(
-          (detail) => detail.key === dataUpdate.key
+          (detail) => detail.key === dataUpdate.key,
         );
 
         let temp = [...prevState];
@@ -316,7 +311,7 @@ const ConditionPromo = ({
     (r) => {
       updateData((prevState) => prevState.filter((e) => e.key !== r.key));
     },
-    [data]
+    [data],
   );
 
   const handleUpdate = (r) => {
@@ -371,7 +366,7 @@ const ConditionPromo = ({
             handleDetailHistory,
             search,
             storedData,
-          )
+          ),
         )}
         tableScrolled={{
           x: 1500,
@@ -489,7 +484,7 @@ const ConditionPromo = ({
                     (value && moment(startDate) <= moment(value)) || !value
                       ? Promise.resolve()
                       : Promise.reject(
-                          new Error("End date must before Start date")
+                          new Error("End date must before Start date"),
                         ),
                 },
               ]}

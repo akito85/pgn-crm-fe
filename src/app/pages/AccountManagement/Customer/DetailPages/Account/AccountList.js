@@ -13,7 +13,7 @@ import { getListCustomerAccount } from "../../../../../../redux/slices/account_m
 
 const AccountList = ({ id = 0, dispatch = () => {} }) => {
   const { data_customerDetailAccount } = useSelector(
-    (state) => state.customerAccount
+    (state) => state.customerAccount,
   );
 
   //declare
@@ -42,7 +42,13 @@ const AccountList = ({ id = 0, dispatch = () => {} }) => {
       }
       tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
       dispatch(
-        getListCustomerAccount({ id, page, pageSize, sort, search: tempSearch })
+        getListCustomerAccount({
+          id,
+          page,
+          pageSize,
+          sort,
+          search: tempSearch,
+        }),
       );
     }
   }, [dispatch, id, page, pageSize, sort, search]);

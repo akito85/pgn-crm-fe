@@ -2,7 +2,11 @@ import React, { useState, useRef } from "react";
 import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../../../components/TablePagination";
-import { FilterOutlined, PlusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  FilterOutlined,
+  PlusCircleOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import { DatePicker, Input, Spin, Tooltip } from "antd";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
@@ -33,7 +37,7 @@ const ModalChooseAddress = ({
   setSearch,
   isIdChoose,
   setIsIdChoose,
-  loading
+  loading,
 }) => {
   const searchInput = useRef(null);
 
@@ -119,7 +123,7 @@ const ModalChooseAddress = ({
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -140,7 +144,7 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ellipsis: {
         showTitle: false,
@@ -157,14 +161,14 @@ const ModalChooseAddress = ({
       width: 150,
       sorter: true,
       ellipsis: {
-        showTitle: false
+        showTitle: false,
       },
       ...getColumnSearchProps(
         "description",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (fullAddress) => (
         <Tooltip placement="topLeft" title={fullAddress}>
@@ -182,7 +186,7 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -195,10 +199,10 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
-    
+
     {
       title: "STREET NUMBER",
       dataIndex: "streetNumber",
@@ -209,7 +213,7 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -222,7 +226,7 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -235,7 +239,7 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -248,7 +252,7 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -261,7 +265,7 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -274,7 +278,7 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -287,7 +291,7 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -300,7 +304,7 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -313,7 +317,7 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -326,7 +330,7 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -339,7 +343,7 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -352,7 +356,7 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -365,7 +369,7 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -378,10 +382,10 @@ const ModalChooseAddress = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
-    
+
     {
       title: "ACTION",
       align: "center",
@@ -395,16 +399,16 @@ const ModalChooseAddress = ({
                 onClick={() => {
                   if (
                     (r.country !== null ||
-                    r.province !== null ||
-                    r.city !== null ||
-                    r.district !== null ||
-                    r.subDistrict !== null) &&
+                      r.province !== null ||
+                      r.city !== null ||
+                      r.district !== null ||
+                      r.subDistrict !== null) &&
                     isIdChoose !== r?.address
                   ) {
                     setIsIdChoose(r.address);
                     getDetailAddressById(r?.address);
-                  } else{
-                    return ''
+                  } else {
+                    return "";
                   }
                 }}
                 style={{
@@ -437,7 +441,12 @@ const ModalChooseAddress = ({
     setPage(tempPage);
     setPageSize(pageSizeChange);
     dispatch(
-      getListChooseAddress({ idAccount, page: tempPage, pageSize: pageSizeChange, sort })
+      getListChooseAddress({
+        idAccount,
+        page: tempPage,
+        pageSize: pageSizeChange,
+        sort,
+      }),
     );
   };
 
@@ -451,7 +460,7 @@ const ModalChooseAddress = ({
 
   return (
     <div>
-      {isOpen ? 
+      {isOpen ? (
         <ModalCustom
           header={"CHOOSE ADDRESS"}
           isOpen={isOpen}
@@ -490,9 +499,8 @@ const ModalChooseAddress = ({
               columns={columns}
             />
           </Spin>
-        </ModalCustom> : 
-        null
-      }
+        </ModalCustom>
+      ) : null}
     </div>
   );
 };

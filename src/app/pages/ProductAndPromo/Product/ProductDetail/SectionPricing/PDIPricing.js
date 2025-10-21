@@ -148,7 +148,7 @@ const PDIPricing = ({ dataPricing = {}, dataDetailProduct = {} }) => {
         }
       >
         <ContentModalPricingPDI
-          dataPricing = {dataPricing}
+          dataPricing={dataPricing}
           dataDetailProduct={dataDetailProduct}
           dataDetailPriceCode={dataListPricingDetail}
           typeLog={true}
@@ -172,7 +172,7 @@ const PDIPricing = ({ dataPricing = {}, dataDetailProduct = {} }) => {
         }
       >
         <ContentModalPricingRulePDI
-          dataPricing = {dataPricing}
+          dataPricing={dataPricing}
           dataDetailProduct={dataDetailProduct}
           data={dataDetailPricingRule}
           typeLog={true}

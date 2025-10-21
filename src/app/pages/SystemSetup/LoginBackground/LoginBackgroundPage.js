@@ -23,7 +23,7 @@ import Toolbar from "../../../../components/Toolbar";
 
 const LoginBackgroundPage = () => {
   const { data_Background, loading } = useSelector(
-    (state) => state.login_background
+    (state) => state.login_background,
   );
 
   const [activeOrInactive, setActiveOrInactive] = useState(false);
@@ -41,13 +41,19 @@ const LoginBackgroundPage = () => {
   const [bodyError, setBodyError] = useState({});
 
   const handleFetch = useCallback(() => {
-    dispatch(getPagingBackground({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }))
-   }, [dispatch, page, pageSize, search, sort]);
+    dispatch(
+      getPagingBackground({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
+    );
+  }, [dispatch, page, pageSize, search, sort]);
 
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
-  
 
   const handleConfirm = (e, handleClear) => {
     const body = {
@@ -135,7 +141,7 @@ const LoginBackgroundPage = () => {
         pageSize,
         sort,
         search: tempSearch,
-      })
+      }),
     );
   };
 
@@ -189,7 +195,7 @@ const LoginBackgroundPage = () => {
     // column action
     {
       action: "View",
-      type: 'table',
+      type: "table",
       render: (record, data_length) => {
         return (
           <Link
@@ -207,7 +213,7 @@ const LoginBackgroundPage = () => {
     },
     {
       action: "Update",
-      type: 'table',
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Update">
@@ -242,7 +248,7 @@ const LoginBackgroundPage = () => {
     },
     {
       action: "Activate",
-      type: 'table',
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip
@@ -264,15 +270,14 @@ const LoginBackgroundPage = () => {
 
   const columnAction = useColumnActionPermission(
     ["view", "update", "activate"],
-    itemActions
+    itemActions,
   );
-
 
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <Toolbar  items={itemActions} />
+        <Toolbar items={itemActions} />
 
         <BaseContainer header={"LOGIN BACKGROUND LIST"}>
           <div className={"w-full"}>
@@ -287,7 +292,7 @@ const LoginBackgroundPage = () => {
                   searchedColumn,
                   searchText,
                   handleSearch,
-                  handleInactive
+                  handleInactive,
                 ),
                 ...columnAction,
               ]}

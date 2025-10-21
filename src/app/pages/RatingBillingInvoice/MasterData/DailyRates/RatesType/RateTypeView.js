@@ -5,11 +5,15 @@ import moment from "moment";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import {  getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../../../components/Card/CardComponent";
-import { dateFormatting, hasValue, renderColumn } from "../../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+} from "../../../../../../utils";
 import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
 import DetailText from "../../../../../../components/DetailText";
@@ -32,7 +36,7 @@ export const columnRateType = (
   searchText,
   handleSearch = () => {},
   handleModalDetail = () => {},
-  handleModalInactive = () => {}
+  handleModalInactive = () => {},
 ) => [
   {
     title: "NO",
@@ -52,9 +56,18 @@ export const columnRateType = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('code', hasValue(search['code']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "code",
+        hasValue(search["code"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "DESCRIPTION",
@@ -66,13 +79,22 @@ export const columnRateType = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,
     },
     sorter: true,
-    render: (text) => renderColumn('description', hasValue(search['description']), searchText, text, true, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "description",
+        hasValue(search["description"]),
+        searchText,
+        text,
+        true,
+        "input",
+        search,
+      ),
   },
   {
     title: "STATUS",
@@ -88,7 +110,7 @@ export const columnRateType = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (a) => {
       let text;
@@ -103,7 +125,15 @@ export const columnRateType = (
           text = a ? a.charAt(0).toUpperCase() + a.slice(1).toLowerCase() : a;
           break;
       }
-      return renderColumn('status', hasValue(search['status']), searchText, text, false, 'status', search)
+      return renderColumn(
+        "status",
+        hasValue(search["status"]),
+        searchText,
+        text,
+        false,
+        "status",
+        search,
+      );
     },
   },
 ];
@@ -111,7 +141,7 @@ export const columnRateType = (
 const RateTypeView = () => {
   // Selector
   const { data_list, data_detail, loading } = useSelector(
-    (state) => state.rate_type
+    (state) => state.rate_type,
   );
 
   // Declaration
@@ -141,7 +171,7 @@ const RateTypeView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [search, page, pageSize, sort, dispatch]);
 
@@ -201,7 +231,7 @@ const RateTypeView = () => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       });
   };
@@ -234,7 +264,7 @@ const RateTypeView = () => {
                 page,
                 pageSize,
                 sort,
-              })
+              }),
             );
           }}
         >
@@ -336,11 +366,11 @@ const RateTypeView = () => {
                 searchText,
                 handleSearch,
                 handleModalDetail,
-                handleModalInactive
+                handleModalInactive,
               ),
               ...useColumnActionPermission(
                 ["view", "activate", "update", "history"],
-                itemGrantAccess
+                itemGrantAccess,
               ),
             ]}
             current={page}
@@ -396,7 +426,7 @@ const RateTypeView = () => {
             <DetailText label={"Created Date"}>
               {data_detail?.createdDate !== null
                 ? moment(data_detail?.createdDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : " "}
             </DetailText>
@@ -406,7 +436,7 @@ const RateTypeView = () => {
             <DetailText label={"Updated Date"}>
               {data_detail?.updatedDate !== null
                 ? moment(data_detail?.updatedDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : " "}
             </DetailText>

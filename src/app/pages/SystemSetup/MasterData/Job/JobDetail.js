@@ -4,7 +4,12 @@ import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../components/DetailText";
 import moment from "moment";
-import { hasValue, renderColumn, renderDateColumn, toTitleCase } from "../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+  toTitleCase,
+} from "../../../../../utils";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { Spin } from "antd";
 import { useEffect } from "react";
@@ -13,7 +18,7 @@ import { sorterFunction } from "../../../../../utils/sorterFunction";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
 
 const JobDetail = (props) => {
-  const { data, openModal, closeModal = () => { } } = props;
+  const { data, openModal, closeModal = () => {} } = props;
 
   const { loading } = useSelector((state) => state.master_job);
 
@@ -26,17 +31,16 @@ const JobDetail = (props) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [dataTable, setDataTable] = useState([]);
-  const [typeColumn, setTypeColumn] = useState('string');
-  const [search, setSearch] = useState({})
+  const [typeColumn, setTypeColumn] = useState("string");
+  const [search, setSearch] = useState({});
 
   const handleResetState = useCallback(() => {
-    setPage(1)
-    setPageSize(10)
-    setSearchText("")
-    setSearchedColumn('')
-    setSearch({})
-  }, [])
-
+    setPage(1);
+    setPageSize(10);
+    setSearchText("");
+    setSearchedColumn("");
+    setSearch({});
+  }, []);
 
   useEffect(() => {
     if (data !== null) {
@@ -46,25 +50,24 @@ const JobDetail = (props) => {
 
   useEffect(() => {
     if (openModal === false) {
-      handleResetState()
+      handleResetState();
     }
   }, [openModal, handleResetState]);
-
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     switch (dataIndex) {
-      case 'operation':
-        setTypeColumn('status')
+      case "operation":
+        setTypeColumn("status");
         break;
-      case 'createdDate':
-        setTypeColumn('datetime')
+      case "createdDate":
+        setTypeColumn("datetime");
         break;
 
       default:
-        setTypeColumn('string')
+        setTypeColumn("string");
         break;
     }
     setSearchedColumn(dataIndex);
@@ -97,56 +100,84 @@ const JobDetail = (props) => {
       title: "ACTOR",
       dataIndex: "createdBy",
       width: 130,
-      sorter: (a, b) => sorterFunction('createdBy', a, b),
-      filteredValue: hasValue(search?.createdBy) ?  [search?.createdBy] : null,
+      sorter: (a, b) => sorterFunction("createdBy", a, b),
+      filteredValue: hasValue(search?.createdBy) ? [search?.createdBy] : null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        'createdBy',
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn('createdBy', searchedColumn, searchText, text, false, 'input', search)
-    },
-    {
-      title: "ACTION",
-      dataIndex: "operation",
-      width: 150,
-      align:'center',
-      sorter: (a, b) => sorterFunction('operation', a, b),
-      filteredValue: hasValue(search?.operation) ? [search?.operation] : null,
-      ...getColumnSearchPropsUseFilteredValueFE(
-        search,
-        'operation',
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true, 
-        'status'
-      ),
-      render: (text) => renderColumn('operation', searchedColumn, searchText, text, false, 'input', search)
-    },
-    {
-      title: "ACTION DATE",
-      dataIndex: "createdDate",
-      width: 250,
-      align: 'center',
-      sorter: (a, b) => sorterFunction('createdDate', a, b, 'date'),
-      filteredValue: hasValue(search?.createdDate) ? [search?.createdDate] : null,
-      ...getColumnSearchPropsUseFilteredValueFE(
-        search,
-        'createdDate',
+        "createdBy",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         true,
-        'datetime'
       ),
-      render: (value) => renderDateColumn('createdDate', searchedColumn, searchText, value, 'datetime', search)
+      render: (text) =>
+        renderColumn(
+          "createdBy",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "ACTION",
+      dataIndex: "operation",
+      width: 150,
+      align: "center",
+      sorter: (a, b) => sorterFunction("operation", a, b),
+      filteredValue: hasValue(search?.operation) ? [search?.operation] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "operation",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "status",
+      ),
+      render: (text) =>
+        renderColumn(
+          "operation",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "ACTION DATE",
+      dataIndex: "createdDate",
+      width: 250,
+      align: "center",
+      sorter: (a, b) => sorterFunction("createdDate", a, b, "date"),
+      filteredValue: hasValue(search?.createdDate)
+        ? [search?.createdDate]
+        : null,
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "createdDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "datetime",
+      ),
+      render: (value) =>
+        renderDateColumn(
+          "createdDate",
+          searchedColumn,
+          searchText,
+          value,
+          "datetime",
+          search,
+        ),
     },
     {
       title: "REMARK",
@@ -156,7 +187,7 @@ const JobDetail = (props) => {
       filteredValue: hasValue(search?.remark) ? [search?.remark] : null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        'remark',
+        "remark",
         searchInput,
         searchedColumn,
         searchText,
@@ -166,7 +197,16 @@ const JobDetail = (props) => {
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('remark', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "remark",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
   ];
 
@@ -198,11 +238,13 @@ const JobDetail = (props) => {
           <DetailText label="Record Id">{data?.jobId}</DetailText>
           <DetailText label="Created By">{data?.createdBy}</DetailText>
           <DetailText label="Created Date">
-            {hasValue(data?.createdDate) && moment(data?.createdDate).format("DD MMM YYYY HH:mm:ss")}
+            {hasValue(data?.createdDate) &&
+              moment(data?.createdDate).format("DD MMM YYYY HH:mm:ss")}
           </DetailText>
           <DetailText label="Updated By">{data?.updatedBy}</DetailText>
           <DetailText label="Updated Date">
-            {hasValue(data?.updatedDate) && moment(data?.updatedDate).format("DD MMM YYYY HH:mm:ss")}
+            {hasValue(data?.updatedDate) &&
+              moment(data?.updatedDate).format("DD MMM YYYY HH:mm:ss")}
           </DetailText>
         </CardComponent>
 

@@ -1,13 +1,10 @@
-
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  ArrowLeftOutlined,
-} from "@ant-design/icons";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import {  Form, Spin, Select } from "antd";
+import { Form, Spin, Select } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -15,7 +12,12 @@ import InputComponent from "../../../../components/InputComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import { configApp } from "../../../../constants/configApp";
 import GridLayout from "../../../../components/GridLayout";
-import { countBadgeFieldsErrorMandatory, formMessageRequired, renderColumn, renderDateColumn } from "../../../../utils";
+import {
+  countBadgeFieldsErrorMandatory,
+  formMessageRequired,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../utils";
 import DetailText from "../../../../components/DetailText";
 import {
   getPendingTask,
@@ -39,13 +41,10 @@ import ModalBack from "../../../../components/Modal/ModalBack";
 import ForwardTaskConfirm from "./ForwardTaskConfirm";
 
 const ForwardTaskForm = ({ type }) => {
-  const {
-    data_pending,
-    data_to,
-    loading,
-  } = useSelector((state) => state.employee);
+  const { data_pending, data_to, loading } = useSelector(
+    (state) => state.employee,
+  );
 
-  
   const dispatch = useDispatch();
   const location = useLocation();
   const id = location.state?.id;
@@ -69,12 +68,11 @@ const ForwardTaskForm = ({ type }) => {
       value: "Forward Task",
       paramValue: ["from", "to", "remark"],
     },
-    { value: "Attachment", paramValue: ['attachment'] },
+    { value: "Attachment", paramValue: ["attachment"] },
   ]);
   const [valuePage, setValuePage] = useState(tabForwardTask[0].value);
   const isLoading = loading || loadingForm;
 
-  
   // breadcrumbs routes
   const routes = [
     {
@@ -91,7 +89,6 @@ const ForwardTaskForm = ({ type }) => {
     },
   ];
 
-
   useEffect(() => {
     if (id) {
       dispatch(getPendingTask(id));
@@ -106,7 +103,7 @@ const ForwardTaskForm = ({ type }) => {
 
   const handleForwardTo = (value) => {
     dispatch(getTo(value));
-    form.resetFields(['to'])
+    form.resetFields(["to"]);
   };
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -133,23 +130,28 @@ const ForwardTaskForm = ({ type }) => {
   };
 
   const handleCancel = () => {
-    setModalConfirm(false)
-  }
-
+    setModalConfirm(false);
+  };
 
   const handleConfirm = () => {
-    const getPosition = data_to?.find(item => item?.uniqueId === bodyData?.to)?.positionIdForward || null;
-    const getEmployeeCodeForward = data_to?.find(item => item?.uniqueId === bodyData?.to)?.employeeCodeForward || null;
-    const approvalDTO = data_pending?.pendingTasks?.map(item => ({ tappId: item?.tappId }))
+    const getPosition =
+      data_to?.find((item) => item?.uniqueId === bodyData?.to)
+        ?.positionIdForward || null;
+    const getEmployeeCodeForward =
+      data_to?.find((item) => item?.uniqueId === bodyData?.to)
+        ?.employeeCodeForward || null;
+    const approvalDTO = data_pending?.pendingTasks?.map((item) => ({
+      tappId: item?.tappId,
+    }));
     const body = {
       positionIdFrom: bodyData?.from,
       positionIdTo: getPosition,
       employeeCode: data_pending?.employeeCode,
       employeeCodeForward: getEmployeeCodeForward,
       forwardApprovalDTOs: approvalDTO,
-      remark: bodyData?.remark
+      remark: bodyData?.remark,
     };
-    
+
     dispatch(createForwardTask(body))
       .unwrap()
       .then(async (dataForm) => {
@@ -164,26 +166,28 @@ const ForwardTaskForm = ({ type }) => {
           };
           await userHttpService.uploadImage(
             `/v1/dbs/api/forward-task/upload-attachment/${taxCodeId}`,
-            body
+            body,
           );
         }
         setLoadingForm(false);
       })
       .catch((error) => {
-        handleCancel()
+        handleCancel();
       });
   };
 
-
   const onFinishFailed = ({ values, errorFields, outOfDate }) => {
-    countBadgeFieldsErrorMandatory(setTabForwardTask, listDataAttachment, errorFields)
+    countBadgeFieldsErrorMandatory(
+      setTabForwardTask,
+      listDataAttachment,
+      errorFields,
+    );
   };
-
 
   const onFinish = (formValue) => {
     setBodyData({
       ...formValue,
-      listDataAttachment: listDataAttachment
+      listDataAttachment: listDataAttachment,
     });
     setModalConfirm(true);
   };
@@ -219,12 +223,21 @@ const ForwardTaskForm = ({ type }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('positionName', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "positionName",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "APPROVAL TYPE",
@@ -236,9 +249,18 @@ const ForwardTaskForm = ({ type }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
-      render: (text) => renderColumn('approvalType', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "approvalType",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "TASK DATE",
@@ -251,9 +273,17 @@ const ForwardTaskForm = ({ type }) => {
         searchText,
         handleSearch,
         false,
-        'datetime'
+        "datetime",
       ),
-      render: (text) => renderDateColumn('taskDate', hasValue(search['taskDate']), searchText, text, 'datetime', search)
+      render: (text) =>
+        renderDateColumn(
+          "taskDate",
+          hasValue(search["taskDate"]),
+          searchText,
+          text,
+          "datetime",
+          search,
+        ),
     },
   ];
 
@@ -280,17 +310,17 @@ const ForwardTaskForm = ({ type }) => {
                 searchText,
                 page,
                 pageSize,
-                "string"
+                "string",
               )}
-              totalData={
-                updatePagination(data_pending?.pendingTasks,
-                  "length",
-                  searchedColumn,
-                  searchText,
-                  page,
-                  pageSize,
-                  "string")
-              }
+              totalData={updatePagination(
+                data_pending?.pendingTasks,
+                "length",
+                searchedColumn,
+                searchText,
+                page,
+                pageSize,
+                "string",
+              )}
               columns={columnsPendingTask}
               current={page}
               pageSize={pageSize}
@@ -301,7 +331,12 @@ const ForwardTaskForm = ({ type }) => {
           </div>
         </BaseContainer>
 
-        <Form form={form} layout="vertical" onFinish={onFinish} onFinishFailed={onFinishFailed}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
+        >
           <BaseContainer header={"Forward Task"}>
             <div className="flex flex-col mt-[-7px]">
               <RadioTabs
@@ -317,7 +352,11 @@ const ForwardTaskForm = ({ type }) => {
               }}
             >
               <div className="w-auto grid grid-cols-2 gap-5 mt-3">
-                <Form.Item label={"From"} rules={formMessageRequired('From')} name={'from'}>
+                <Form.Item
+                  label={"From"}
+                  rules={formMessageRequired("From")}
+                  name={"from"}
+                >
                   <SelectComponent onChange={handleForwardTo}>
                     {(data_pending?.fromPosition || []).map((data, index) => (
                       <Select.Option value={data.positionIdFrom} key={index}>
@@ -326,7 +365,11 @@ const ForwardTaskForm = ({ type }) => {
                     ))}
                   </SelectComponent>
                 </Form.Item>
-                <Form.Item label={"To"} rules={formMessageRequired("To")} name={'to'}>
+                <Form.Item
+                  label={"To"}
+                  rules={formMessageRequired("To")}
+                  name={"to"}
+                >
                   <SelectComponent>
                     {(data_to || []).map((data, index) => (
                       <Select.Option value={data?.uniqueId} key={index}>
@@ -354,18 +397,17 @@ const ForwardTaskForm = ({ type }) => {
               }}
             >
               <Form.Item
-                name={'attachment'}
+                name={"attachment"}
                 rules={[
                   {
                     validator: () => {
-                      return listDataAttachment?.length > 0 ?
-                        Promise.resolve()
-                        :
-                        Promise.reject(
-                          new Error('Please upload your attachment!')
-                        )
-                    }
-                  }
+                      return listDataAttachment?.length > 0
+                        ? Promise.resolve()
+                        : Promise.reject(
+                            new Error("Please upload your attachment!"),
+                          );
+                    },
+                  },
                 ]}
               >
                 <AttachmentComponent
@@ -400,7 +442,7 @@ const ForwardTaskForm = ({ type }) => {
                     handleClear();
                   }}
                   icon={<SVGIcon name={`IconButtonClear`} width={24} />}
-                // disabled={firstStep}
+                  // disabled={firstStep}
                 >
                   Clear
                 </ButtonComponent>

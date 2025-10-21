@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from "react";
 import { Form, Input, Select, Table, Tooltip } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
@@ -22,13 +22,12 @@ import {
   getAccountGroupList,
   getAccountTypeList,
 } from "../../../../../redux/slices/account_management/MasterData/tax_implication";
-import DateComponent from '../../../../../components/DateComponent';
-import CardComponent from '../../../../../components/Card/CardComponent';
-import DetailText from '../../../../../components/DetailText';
-import { dateFormatting } from '../../../../../utils';
-import ModalCustom from '../../../../../components/Modal/ModalCustom';
-import InputComponent from '../../../../../components/InputComponent';
-
+import DateComponent from "../../../../../components/DateComponent";
+import CardComponent from "../../../../../components/Card/CardComponent";
+import DetailText from "../../../../../components/DetailText";
+import { dateFormatting } from "../../../../../utils";
+import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import InputComponent from "../../../../../components/InputComponent";
 
 const EditableCell = ({
   editing,
@@ -107,14 +106,12 @@ const EditableCell = ({
       case "endDate":
         return (
           <DateComponent
-          disabled={formTableCriteria.getFieldValue().startDate === null}
-          dateDisable={handleDisableEndDate}
+            disabled={formTableCriteria.getFieldValue().startDate === null}
+            dateDisable={handleDisableEndDate}
           />
-        ) 
-      default:
-        return (
-          <InputComponent />
         );
+      default:
+        return <InputComponent />;
     }
   };
   const inputNode = getInputNode(inputType);
@@ -152,7 +149,7 @@ const EditableCell = ({
                   {
                     validator: (_, value) =>
                       endDateValidator(
-                        formTableCriteria.getFieldValue().startDate
+                        formTableCriteria.getFieldValue().startDate,
                       )(_, value),
                   },
                 ]
@@ -189,7 +186,6 @@ const TaxImplicationTableCriteria = ({
   const [totalData, setTotalData] = useState(0);
   const [modalHistory, setModalHistory] = useState(false);
   const [dataHistory, setDataHistory] = useState(false);
-
 
   useEffect(() => {
     setTotalData(data?.length);
@@ -421,14 +417,14 @@ const TaxImplicationTableCriteria = ({
 
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
 
   const handleDetailHistory = (record) => {
-    setModalHistory(true)
-    setDataHistory(record)
+    setModalHistory(true);
+    setDataHistory(record);
   };
 
   const columns = () => {
@@ -445,7 +441,7 @@ const TaxImplicationTableCriteria = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       {
         title: "ACTION",
@@ -483,7 +479,7 @@ const TaxImplicationTableCriteria = ({
                         />
                       </div>
                     </Tooltip>
-                  ): (
+                  ) : (
                     <>
                       <Tooltip title="Edit">
                         <div
@@ -495,24 +491,32 @@ const TaxImplicationTableCriteria = ({
                             name="IconEdit"
                             color={editingKey ? "#8D91A0" : "#ACC424"}
                             width={24}
-                            onClick={!editingKey ? () => edit(record) : undefined}
+                            onClick={
+                              !editingKey ? () => edit(record) : undefined
+                            }
                           />
                         </div>
                       </Tooltip>
                       <Tooltip title="Delete">
                         <div
                           className={`flex justify-center${
-                            record.typeData === "exist" ? " cursor-not-allowed" : ""
+                            record.typeData === "exist"
+                              ? " cursor-not-allowed"
+                              : ""
                           }`}
                         >
                           <SVGIcon
                             name="IconDelete"
                             color={
-                              record.typeData !== "exist" ? "#D90000" : "#8D91A0"
+                              record.typeData !== "exist"
+                                ? "#D90000"
+                                : "#8D91A0"
                             }
                             width={24}
                             className={
-                              record.typeData === "exist" ? "disabled" : undefined
+                              record.typeData === "exist"
+                                ? "disabled"
+                                : undefined
                             }
                             onClick={
                               record.typeData !== "exist"
@@ -532,19 +536,17 @@ const TaxImplicationTableCriteria = ({
       },
     ];
     const filterCol =
-      type !== "preview"
-        ? temp
-        : temp.filter((col) => col.title !== "ACTION");
-      return filterCol.filter((col) =>
-        col.title !== "NO" &&
-        col.title !== "ACTION" &&
-        col.title !== "START DATE" &&
-        col.title !== "END DATE" &&
-        col.title !== "DESCRIPTION"
-          ? dataCriteria.includes(col.indexValue)
-          : true
-      );
-    };
+      type !== "preview" ? temp : temp.filter((col) => col.title !== "ACTION");
+    return filterCol.filter((col) =>
+      col.title !== "NO" &&
+      col.title !== "ACTION" &&
+      col.title !== "START DATE" &&
+      col.title !== "END DATE" &&
+      col.title !== "DESCRIPTION"
+        ? dataCriteria.includes(col.indexValue)
+        : true,
+    );
+  };
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
 
   const handleDisplayColumn = (value) => {
@@ -627,9 +629,9 @@ const TaxImplicationTableCriteria = ({
                   dataEditRecord: editDataRecord,
                   handleEditDataRecord: handleEditDataRecord,
                   required: col.required,
-                  formTableCriteria:formTableCriteria
+                  formTableCriteria: formTableCriteria,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],
@@ -694,9 +696,8 @@ const TaxImplicationTableCriteria = ({
         </CardComponent>
       </ModalCustom>
       {/* End Modal History Log */}
-
     </div>
   ) : null;
-}
+};
 
-export default TaxImplicationTableCriteria
+export default TaxImplicationTableCriteria;

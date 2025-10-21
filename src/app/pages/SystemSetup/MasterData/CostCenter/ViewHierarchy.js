@@ -15,14 +15,15 @@ const ViewHierarchy = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const nodeSize = { x: 150, y: 400 };
-  const { data, parentData, loading } = useSelector((state) => state.master_cost_center);
-  const dataSource = data;  
+  const { data, parentData, loading } = useSelector(
+    (state) => state.master_cost_center,
+  );
+  const dataSource = data;
 
- 
   useEffect(() => {
-    dispatch(getHierarchy())
-  }, [dispatch])
- 
+    dispatch(getHierarchy());
+  }, [dispatch]);
+
   const foreignObjectProps = {
     width: nodeSize.x,
     height: nodeSize.y,
@@ -38,8 +39,6 @@ const ViewHierarchy = () => {
     }
   }, []);
 
-
-  
   const datas = [
     {
       name: "Muhammad",
@@ -100,7 +99,7 @@ const ViewHierarchy = () => {
       ],
     },
   ];
-  const datass = []
+  const datass = [];
   const containerStyles = {
     width: "100%",
     height: "65vh",
@@ -153,9 +152,9 @@ const ViewHierarchy = () => {
   return (
     <LayoutMenu>
       <Spin spinning={loading} className="w-full top-20" tip="Loading">
-        <BreadCrumb routes={routes}/>
+        <BreadCrumb routes={routes} />
         <BaseContainer header={"VIEW HIERARCHY"}>
-          {dataSource?.[0] &&
+          {dataSource?.[0] && (
             <div style={containerStyles} ref={containerRef}>
               <Tree
                 data={dataSource?.[0]}
@@ -169,13 +168,13 @@ const ViewHierarchy = () => {
                 zoomable={true}
               />
             </div>
-          }
+          )}
         </BaseContainer>
         <div className="flex gap-5 mt-4 w-full justify-between">
           <div>
             <NavLink onClick={() => navigate(-1)}>
               <ButtonComponent
-                icon={(
+                icon={
                   <SVGIcon
                     name="IconArrowNarrowLeft"
                     width={24}
@@ -185,7 +184,7 @@ const ViewHierarchy = () => {
                       justifyItems: "center",
                     }}
                   />
-                )}
+                }
                 type={"submit"}
               >
                 Back

@@ -5,7 +5,7 @@ const SVG = ({
   width = "100%",
   className = "",
   onClick = () => {},
-  color = "0075bf"
+  color = "0075bf",
 }) => (
   <svg
     width={width}

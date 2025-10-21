@@ -1,7 +1,10 @@
 import { Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
 import StatusComponent from "../../../../../../components/StatusComponent";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValue,
+} from "../../../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn } from "../../../../../../utils";
 
 export const columnsCalculation = (
@@ -11,7 +14,7 @@ export const columnsCalculation = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  search
+  search,
 ) => [
   {
     title: "NO",
@@ -30,7 +33,7 @@ export const columnsCalculation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -40,7 +43,7 @@ export const columnsCalculation = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "custNumb",
@@ -61,7 +64,7 @@ export const columnsCalculation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -71,7 +74,7 @@ export const columnsCalculation = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "custName",
@@ -92,7 +95,7 @@ export const columnsCalculation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -102,7 +105,7 @@ export const columnsCalculation = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "accNumb",
@@ -123,7 +126,7 @@ export const columnsCalculation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -133,7 +136,7 @@ export const columnsCalculation = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "accName",
@@ -166,7 +169,7 @@ export const columnsCalculation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -176,7 +179,7 @@ export const columnsCalculation = (
         text,
         true,
         "input",
-        search
+        search,
       ),
     // render: (text) => {
     //   if (searchedColumn === "message") {
@@ -217,7 +220,7 @@ export const columnsCalculation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -227,7 +230,7 @@ export const columnsCalculation = (
         text?.toString(),
         false,
         "status",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "isTry",

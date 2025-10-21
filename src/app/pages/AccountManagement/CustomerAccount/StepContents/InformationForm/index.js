@@ -6,11 +6,7 @@ import InformationInputForm from "./InformationInputForm";
 
 const dataTabs = [{ value: "Customer Account" }, { value: "Attachment" }];
 
-const InformationForm = ({
-  type,
-  updateBody = () => {}
-}) => {
-
+const InformationForm = ({ type, updateBody = () => {} }) => {
   const [listSectionInfo, setListSectionInfo] = useState([
     { value: "Customer Account" },
     { value: "Attachment" },

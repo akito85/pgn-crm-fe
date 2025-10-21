@@ -65,10 +65,10 @@ const PricingDetail = (props) => {
     { value: "Attachment" },
   ]);
   const [typePricingInfo, setTypePricingInfo] = useState(
-    listSectionInfo[0].value
+    listSectionInfo[0].value,
   );
   const [typePricingDetail, setTypePricingDetail] = useState(
-    listSectionPricingDetail[0].value
+    listSectionPricingDetail[0].value,
   );
   const [dataDetailSelected, setDataDetailSelected] = useState({});
   const [listPricingDetailAdjustment, setListPricingDetailAdjustment] =
@@ -116,7 +116,7 @@ const PricingDetail = (props) => {
           actionDate: item.actionDate
             ? moment(item.actionDate).format(dateFormatting.dateTime)
             : "",
-        }))
+        })),
       );
     }
   }, [endDateHistoryList]);
@@ -129,14 +129,14 @@ const PricingDetail = (props) => {
     if (id && dataDetailPricingGeneral?.id === id) {
       const criteria =
         (dataDetailPricingGeneral.rPricingCriterias || []).map(
-          (item) => item.criteria
+          (item) => item.criteria,
         ) || [];
       const tempCriteria = (
         dataDetailPricingGeneral.rPricingCriterias || []
       ).reduce(
         (prev, current) =>
           prev + (current.criteriaName ? `, ${current.criteriaName}` : ""),
-        ""
+        "",
       );
       setCriteriaValues(criteria);
       setDataLogInformation({
@@ -161,7 +161,7 @@ const PricingDetail = (props) => {
             : "",
           fileSize: bytesConverter(attachData.fileSize || 0),
           dataType: "exist",
-        }))
+        })),
       );
       setListDataDetail(
         (dataDetailPricingGeneral?.mPricingDetails || []).map((priceData) => ({
@@ -170,14 +170,14 @@ const PricingDetail = (props) => {
           uom: priceData?.uomId?.label,
           currencyIds: priceData?.currencyId?.value,
           uomIds: priceData?.uomId?.value,
-          startDate: priceData?.startDate ? moment(priceData.startDate, "DD-MMM-YYYY").format(
-            "YYYY-MM-DD"
-          ): undefined,
+          startDate: priceData?.startDate
+            ? moment(priceData.startDate, "DD-MMM-YYYY").format("YYYY-MM-DD")
+            : undefined,
           endDate: priceData?.endDate
             ? moment(priceData.endDate, "DD-MMM-YYYY").format("YYYY-MM-DD")
             : undefined,
           type: "exist",
-        }))
+        })),
       );
       setListDataCriteria(
         (dataDetailPricingGeneral.criteriasValue || []).map((item, index) => {
@@ -188,7 +188,7 @@ const PricingDetail = (props) => {
               item[attr] !== null &&
               !attr?.toLowerCase()?.includes("date")
             ) {
-              obj[`${attr?.replace(/Id/, '')}`] = {
+              obj[`${attr?.replace(/Id/, "")}`] = {
                 label: item[attr]?.label || item[attr]?.name,
                 value: item[attr]?.value,
               };
@@ -196,14 +196,14 @@ const PricingDetail = (props) => {
               obj[attr] = item[attr];
             }
           }
-          Object.keys(obj).forEach(key => {
-            if (key.includes('Id')) {
+          Object.keys(obj).forEach((key) => {
+            if (key.includes("Id")) {
               delete obj[key];
             }
           });
 
           return obj;
-        })
+        }),
       );
 
       setBodyApproval({
@@ -224,14 +224,14 @@ const PricingDetail = (props) => {
     ) {
       const criteria =
         (dataDetailDraftPricingGeneral.rPricingCriterias || []).map(
-          (item) => item.criteria
+          (item) => item.criteria,
         ) || [];
       const tempCriteria = (
         dataDetailDraftPricingGeneral.rPricingCriterias || []
       ).reduce(
         (prev, current) =>
           prev + (current.criteriaName ? `, ${current.criteriaName}` : ""),
-        ""
+        "",
       );
       setCriteriaValuesDraft(criteria);
       setDataPricingDraftSection({
@@ -251,7 +251,7 @@ const PricingDetail = (props) => {
               : "",
             fileSize: bytesConverter(attachData.fileSize || 0),
             dataType: "exist",
-          })
+          }),
         ),
       ]);
       setListDataDetailDraft(
@@ -259,9 +259,11 @@ const PricingDetail = (props) => {
           (priceData) => {
             let obj = {
               ...priceData,
-              startDate: priceData?.startDate ? moment(priceData.startDate, "DD-MMM-YYYY").format(
-                "YYYY-MM-DD"
-              ) : undefined,
+              startDate: priceData?.startDate
+                ? moment(priceData.startDate, "DD-MMM-YYYY").format(
+                    "YYYY-MM-DD",
+                  )
+                : undefined,
               endDate: priceData?.endDate
                 ? moment(priceData.endDate, "DD-MMM-YYYY").format("YYYY-MM-DD")
                 : undefined,
@@ -274,8 +276,8 @@ const PricingDetail = (props) => {
             delete obj.uomName;
             delete obj.currencyName;
             return obj;
-          }
-        )
+          },
+        ),
       );
       setListDataCriteriaDraft(
         (dataDetailDraftPricingGeneral.criteriasValue || []).map(
@@ -296,8 +298,8 @@ const PricingDetail = (props) => {
               }
             }
             return obj;
-          }
-        )
+          },
+        ),
       );
       setListSectionInfo([
         { value: "Pricing" },
@@ -307,7 +309,7 @@ const PricingDetail = (props) => {
     }
   }, [id, dataDetailPricingGeneral, dataDetailDraftPricingGeneral]);
   // console.log(listDataCriteria,"test");
-  
+
   const showSection = () => {
     switch (typePricingInfo) {
       case listSectionInfo[0].value:
@@ -568,7 +570,7 @@ const PricingDetail = (props) => {
           header={`${approveOrReject}`}
           approveOrReject={approveOrReject}
           menu={"Pricing"}
-          named={`${dataDetailPricingGeneral?.priceCode|| ""}`}
+          named={`${dataDetailPricingGeneral?.priceCode || ""}`}
           // isOpen={modalConfirm}
           // header={`${approveOrReject} information`}
           // message={`Are you sure you want to ${approveOrReject} Pricing?`}
@@ -593,7 +595,7 @@ const PricingDetail = (props) => {
           //   </div>
           // }
         />
-          {/* <Form form={form} name="formApproveRejcet" onFinish={handleConfirm}>
+        {/* <Form form={form} name="formApproveRejcet" onFinish={handleConfirm}>
             <Form.Item
               name={"remark"}
               rules={[{ message: requiredMessage("Remark"), required: true }]}

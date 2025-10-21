@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import gpService from "../../services/system_setup/globalProperties";
-import {  validateError } from "../general_slice";
+import { validateError } from "../general_slice";
 import { showModalSuccess } from "../general_slice";
 import userHttpService from "../../services/userHttpService";
 import { errorBody, errorCode, errorMessage } from "../../../utils";
@@ -29,14 +29,20 @@ export const getAllGlobalPropertiesPaginate = createAsyncThunk(
         searchParams,
         page,
         pageSize,
-        sortParams
+        sortParams,
       );
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_ALL_GLOBAL_PROPERTIES_PAGINATE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_ALL_GLOBAL_PROPERTIES_PAGINATE",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getGlobalPropertiesDetail = createAsyncThunk(
@@ -46,10 +52,16 @@ export const getGlobalPropertiesDetail = createAsyncThunk(
       const response = await gpService.getGlobalPropertiesDetail(id);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_GLOBAL_PROPERTIES_DETAIL", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_GLOBAL_PROPERTIES_DETAIL",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getGlobalPropertiesDetailValue = createAsyncThunk(
@@ -63,16 +75,22 @@ export const getGlobalPropertiesDetailValue = createAsyncThunk(
       const response = await userHttpService.getPagination(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_GLOBAL_PROPERTIES_DETAIL_VALUE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_GLOBAL_PROPERTIES_DETAIL_VALUE",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const inactiveGlobalProperties = createAsyncThunk(
   "INACTIVE_GLOBAL_PROPERTIES",
   async ({ id, statusData }, thunkAPI) => {
-    let status = statusData === 'ACTIVE' ? 'inactivated' : 'activated';
+    let status = statusData === "ACTIVE" ? "inactivated" : "activated";
     try {
       const url = `/v1/dbs/api/globalproperties/inactive/detail/${id}`;
       const response = await userHttpService.deleteData(url);
@@ -85,10 +103,16 @@ export const inactiveGlobalProperties = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), status, errorMessage(error)), action: "INACTIVE_GLOBAL_PROPERTIES", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), status, errorMessage(error)),
+          action: "INACTIVE_GLOBAL_PROPERTIES",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const deleteGlobalProperties = createAsyncThunk(
@@ -98,10 +122,16 @@ export const deleteGlobalProperties = createAsyncThunk(
       const response = await gpService.deleteGlobalProperties(id);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DELETE_GLOBAL_PROPERTIES", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DELETE_GLOBAL_PROPERTIES",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const createGlobalProperties = createAsyncThunk(
@@ -113,10 +143,16 @@ export const createGlobalProperties = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(responseSuccess));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_GLOBAL_PROPERTIES", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "CREATE_GLOBAL_PROPERTIES",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateGlobalProperties = createAsyncThunk(
@@ -128,10 +164,16 @@ export const updateGlobalProperties = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(responseSuccess));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'updated', errorMessage(error)), action: "UPDATE_GLOBAL_PROPERTIES", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "updated", errorMessage(error)),
+          action: "UPDATE_GLOBAL_PROPERTIES",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getAllTypeGlobalProperties = createAsyncThunk(
@@ -141,10 +183,16 @@ export const getAllTypeGlobalProperties = createAsyncThunk(
       const response = await gpService.getAllTypeGlobalProperties();
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_ALL_GLOBAL_PROPERTIES_TYPE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_ALL_GLOBAL_PROPERTIES_TYPE",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDataType = createAsyncThunk(
@@ -154,10 +202,16 @@ export const getDataType = createAsyncThunk(
       const response = await gpService.getDataType();
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_DATA_TYPE_GLOBAL_PROPERTIES", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_DATA_TYPE_GLOBAL_PROPERTIES",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Download
@@ -172,10 +226,16 @@ export const downloadExcelGlobalProperties = createAsyncThunk(
       const response = await userHttpService.downloadData(url);
       return response;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_GLOBAL_PROPERTIES_EXCEL", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_GLOBAL_PROPERTIES_EXCEL",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const gpSlice = createSlice({

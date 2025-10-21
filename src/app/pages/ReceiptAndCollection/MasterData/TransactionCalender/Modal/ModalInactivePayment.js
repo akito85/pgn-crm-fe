@@ -213,7 +213,7 @@ const ModalInactivePayment = (props) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           )}
           expandable={{
             expandedRowRender,

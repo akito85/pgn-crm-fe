@@ -22,7 +22,7 @@ import { renderColumn } from "../../../../utils";
 const ViewGlobalType = () => {
   // Selector
   const { data, loading } = useSelector((state) => state.globalTypes);
-  const { bodyError } = useSelector(state => state?.general);
+  const { bodyError } = useSelector((state) => state?.general);
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -39,14 +39,18 @@ const ViewGlobalType = () => {
   // handle fetch
   const handleFetch = useCallback(() => {
     dispatch(
-      getAllGlobalTypesPaginate({ search: encodeURIComponent(JSON?.stringify(search)), page, pageSize, sort })
+      getAllGlobalTypesPaginate({
+        search: encodeURIComponent(JSON?.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
-
   // Use Effect
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
 
   // Breadcrumbs
@@ -60,7 +64,6 @@ const ViewGlobalType = () => {
       breadcrumbName: "Global Type",
     },
   ];
-
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -100,10 +103,19 @@ const ViewGlobalType = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       sorter: true,
-      render: (text) => renderColumn('groupName', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "groupName",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "SORT BY",
@@ -113,10 +125,19 @@ const ViewGlobalType = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       sorter: true,
-      render: (text) => renderColumn('sortBy', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "sortBy",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -126,26 +147,36 @@ const ViewGlobalType = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       sorter: true,
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
   ];
 
   // handle download
   const handleDownload = () => {
-    dispatch(downloadExcelGlobalType({
-      search: encodeURIComponent(JSON?.stringify(search)),
-      page,
-      pageSize,
-      sort,
-    }));
+    dispatch(
+      downloadExcelGlobalType({
+        search: encodeURIComponent(JSON?.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
+    );
   };
-
 
   const onSort = (_, __, sort) => {
     const dataSort =
@@ -159,7 +190,7 @@ const ViewGlobalType = () => {
   const itemActions = [
     // toolbar items
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<SVGIcon name="IconButtonDownload" width={24} />}
@@ -168,10 +199,10 @@ const ViewGlobalType = () => {
         >
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_GLOBAL_TYPE}>
           <ButtonComponent
@@ -181,13 +212,13 @@ const ViewGlobalType = () => {
             Create Global Type
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // column action
     {
-      action: 'View',
-      type: 'table',
+      action: "View",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
@@ -198,12 +229,12 @@ const ViewGlobalType = () => {
               <SVGIcon name="IconDetail" width={24} />
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Update',
-      type: 'table',
+      action: "Update",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Update">
@@ -214,9 +245,9 @@ const ViewGlobalType = () => {
               <SVGIcon name="IconEdit" width={24} />
             </Link>
           </Tooltip>
-        )
-      }
-    }
+        );
+      },
+    },
   ];
 
   // handle retry modal error
@@ -224,7 +255,7 @@ const ViewGlobalType = () => {
     try {
       handleCancelTryAgain();
       if (bodyError?.action === "DOWNLOAD_GLOBAL_PROPERTIES_EXCEL") {
-        handleDownload()
+        handleDownload();
       }
       handleFetch();
     } catch (error) {
@@ -245,7 +276,10 @@ const ViewGlobalType = () => {
             <TablePagination
               // loading={loading}
               dataSource={dataSource}
-              columns={[...columns, ...useColumnActionPermission(['update', 'view'], itemActions)]}
+              columns={[
+                ...columns,
+                ...useColumnActionPermission(["update", "view"], itemActions),
+              ]}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}

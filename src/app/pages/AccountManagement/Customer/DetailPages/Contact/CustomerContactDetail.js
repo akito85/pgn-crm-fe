@@ -3,7 +3,11 @@ import React, { useEffect, useRef } from "react";
 import DetailText from "../../../../../../components/DetailText";
 import CardComponent from "../../../../../../components/Card/CardComponent";
 import moment from "moment";
-import { dateFormatting, renderColumn, toTitleCase } from "../../../../../../utils";
+import {
+  dateFormatting,
+  renderColumn,
+  toTitleCase,
+} from "../../../../../../utils";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { sorterFunction } from "../../../../../../utils/sorterFunction";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
@@ -21,7 +25,6 @@ const CustomerContactDetail = ({ data_detail = {} }) => {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -57,41 +60,53 @@ const CustomerContactDetail = ({ data_detail = {} }) => {
       title: "TYPE",
       dataIndex: "inputTypeName",
       width: 150,
-      sorter: (a, b) => sorterFunction('inputTypeName', a, b),
+      sorter: (a, b) => sorterFunction("inputTypeName", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "inputTypeName",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) => {
-        return renderColumn('inputTypeName', searchedColumn, searchText, text, false, 'input', search)
-
-      }
+        return renderColumn(
+          "inputTypeName",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        );
+      },
     },
     {
       title: "VALUE",
       dataIndex: "fullValue",
       width: 150,
-      sorter: (a, b) => sorterFunction('fullValue', a, b),
+      sorter: (a, b) => sorterFunction("fullValue", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "fullValue",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) => {
-        return renderColumn('fullValue', searchedColumn, searchText, text, false, 'input', search)
-
-      }
+        return renderColumn(
+          "fullValue",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        );
+      },
     },
-
   ];
-
 
   const handleChangeDetail = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
@@ -109,9 +124,11 @@ const CustomerContactDetail = ({ data_detail = {} }) => {
       </CardComponent>
 
       <div className="mb-6">
-        <div className="text-primary text-xs font-semibold uppercase py-[30px]">CONTACT DETAIL INFORMATION</div>
+        <div className="text-primary text-xs font-semibold uppercase py-[30px]">
+          CONTACT DETAIL INFORMATION
+        </div>
         <TablePaginationNew
-          type='FE'
+          type="FE"
           useSelect
           pageSize={pageSize}
           current={page}
@@ -123,23 +140,36 @@ const CustomerContactDetail = ({ data_detail = {} }) => {
       </div>
 
       <CardComponent header={"CONTACT PURPOSE INFORMATION"} cols={2}>
-        <DetailText label="Contact Address">{data_detail?.contactAddress}</DetailText>
-        <DetailText label="Contact Address Additional Note">{data_detail?.additionalNote}</DetailText>
+        <DetailText label="Contact Address">
+          {data_detail?.contactAddress}
+        </DetailText>
+        <DetailText label="Contact Address Additional Note">
+          {data_detail?.additionalNote}
+        </DetailText>
         <DetailText label="Description">{data_detail?.description}</DetailText>
         <DetailText label="Primary">
           <div className="w-1/4">
-
-          <StatusComponent colour={data_detail?.primaryFlagValue ? "primary" : "non primary"}>
-          {data_detail?.primaryFlagValue ? "Primary" : "Non Primary"}
-          </StatusComponent>
+            <StatusComponent
+              colour={data_detail?.primaryFlagValue ? "primary" : "non primary"}
+            >
+              {data_detail?.primaryFlagValue ? "Primary" : "Non Primary"}
+            </StatusComponent>
           </div>
         </DetailText>
       </CardComponent>
       <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-        <DetailText label="Record ID">{data_detail?.accountContactId}</DetailText>
-        <DetailText label="Created Date">{moment(data_detail?.cretedDate).format(dateFormatting.dateTime)}</DetailText>
+        <DetailText label="Record ID">
+          {data_detail?.accountContactId}
+        </DetailText>
+        <DetailText label="Created Date">
+          {moment(data_detail?.cretedDate).format(dateFormatting.dateTime)}
+        </DetailText>
         <DetailText label="Created By">{data_detail?.createdBy}</DetailText>
-        <DetailText label="Updated Date">{data_detail?.updatedDate !== null ? moment(data_detail?.updatedDate).format(dateFormatting.dateTime) : ""}</DetailText>
+        <DetailText label="Updated Date">
+          {data_detail?.updatedDate !== null
+            ? moment(data_detail?.updatedDate).format(dateFormatting.dateTime)
+            : ""}
+        </DetailText>
         <DetailText label="Updated By">{data_detail?.updatedBy}</DetailText>
       </CardComponent>
     </Fragment>

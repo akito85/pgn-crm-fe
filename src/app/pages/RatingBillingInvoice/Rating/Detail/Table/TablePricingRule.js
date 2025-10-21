@@ -9,7 +9,7 @@ export const columnsPricingRule = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -36,7 +36,7 @@ export const columnsPricingRule = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text, row, index) => {
       let obj = {
@@ -72,7 +72,7 @@ export const columnsPricingRule = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text, row, index) => {
       let obj = {
@@ -108,7 +108,7 @@ export const columnsPricingRule = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text, row, index) => {
       let obj = {

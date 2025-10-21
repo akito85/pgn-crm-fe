@@ -44,13 +44,13 @@ const InvoiceTemplateInfo = ({
         id: id,
         extension: extension[1],
         filename: filename,
-      })
+      }),
     );
   };
 
   // Find Name Criteria on Modal Confirm
   const matchedObjectsCriteria = apiCriteria?.filter((obj) =>
-    data?.criteria?.includes(obj.id)
+    data?.criteria?.includes(obj.id),
   );
   const matchedNamesCriteria = matchedObjectsCriteria
     ?.map((obj) => obj.text)
@@ -92,14 +92,14 @@ const InvoiceTemplateInfo = ({
               ? moment(data?.endDate).format(dateFormatting.date)
               : ""}
           </DetailText>
-          <DetailText label={"Status"}>
-            {data?.status}
-          </DetailText>
+          <DetailText label={"Status"}>{data?.status}</DetailText>
           <DetailText label={"Status Approval"}>
             {data?.statusApproval}
           </DetailText>
           <div className="col-span-4">
-            <DetailText label={"Criteria"}>{criteriaName?.slice(2) || data?.criteria}</DetailText>
+            <DetailText label={"Criteria"}>
+              {criteriaName?.slice(2) || data?.criteria}
+            </DetailText>
           </div>
           <div className="col-span-4">
             <DetailText label={"Description"}>{data?.description}</DetailText>

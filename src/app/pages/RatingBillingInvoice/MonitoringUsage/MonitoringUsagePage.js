@@ -4,7 +4,10 @@ import { Link, NavLink } from "react-router-dom";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import { useMonitoringList } from "./useMonirotingList";
 import { useDispatch, useSelector } from "react-redux";
-import { getApprovalHistory, getListUsagePaginate } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
+import {
+  getApprovalHistory,
+  getListUsagePaginate,
+} from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { usePrevLocContext } from "../../../../utils/usePrevLoc";
 import BaseContainer from "../../../../components/BaseContainer";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -32,7 +35,7 @@ const dataTabs = [
 const MonitoringUsagePage = () => {
   // Selector
   const { data_approval_history } = useSelector(
-    (state) => state.monitoring_usage
+    (state) => state.monitoring_usage,
   );
 
   // Declaration
@@ -59,7 +62,7 @@ const MonitoringUsagePage = () => {
     setSearchText,
     setSearchedColumn,
     setSort,
-    sort
+    sort,
   } = useMonitoringList(tabHeader);
 
   // Use State
@@ -68,7 +71,6 @@ const MonitoringUsagePage = () => {
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataTableSelect, setDataTableSelect] = useState([]);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
-
 
   // const [dataTabs] = useState([
   //   {
@@ -118,26 +120,34 @@ const MonitoringUsagePage = () => {
     }
   };
 
-
   // onChange page
   const onChangePage = (page, sizeChange) => {
     setPage(page);
     setPageSize(sizeChange);
   };
   // onchang tabs
-  const changeTabHeader = useCallback((e) => {
-    setTabHeader(e.target.value);
-    setPage(1);
-    setPageSize(10);
-    setSearch({})
-    setSort('')
-    setSearchText("")
-    setSearchedColumn('')
-    setSearch({});
-    onSort("", "", "")
-  }, [onSort, setPage, setPageSize, setSearch, setSearchText, setSearchedColumn, setSort]);
-
-
+  const changeTabHeader = useCallback(
+    (e) => {
+      setTabHeader(e.target.value);
+      setPage(1);
+      setPageSize(10);
+      setSearch({});
+      setSort("");
+      setSearchText("");
+      setSearchedColumn("");
+      setSearch({});
+      onSort("", "", "");
+    },
+    [
+      onSort,
+      setPage,
+      setPageSize,
+      setSearch,
+      setSearchText,
+      setSearchedColumn,
+      setSort,
+    ],
+  );
 
   const routes = [
     {
@@ -253,37 +263,46 @@ const MonitoringUsagePage = () => {
 
   const columnActionUsage = useColumnActionPermission(
     ["history"],
-    grantAccessUsage
+    grantAccessUsage,
   );
 
   const columnActionBatch = useColumnActionPermission(
     ["view"],
-    grantAccessBatch
+    grantAccessBatch,
   );
-
 
   const columns = useMemo(() => {
     if (tabHeader === "Usage List") {
-      return [
-        ...columnUsage,
-        ...columnActionUsage,
-      ]
+      return [...columnUsage, ...columnActionUsage];
     } else {
       return [...batchColumns, ...columnActionBatch];
     }
-  }, [batchColumns, columnActionBatch, columnActionUsage, columnUsage, tabHeader])
-  
+  }, [
+    batchColumns,
+    columnActionBatch,
+    columnActionUsage,
+    columnUsage,
+    tabHeader,
+  ]);
+
   const handleList = (tabHeader) => {
     if (tabHeader === "Usage List") {
       return dataUsage;
     } else {
       return dataBatch;
     }
-  }
-  
-  const handleListRefresh = () =>{
-    dispatch(getListUsagePaginate({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }))
-  }
+  };
+
+  const handleListRefresh = () => {
+    dispatch(
+      getListUsagePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
+    );
+  };
 
   return (
     <Spin spinning={loading}>

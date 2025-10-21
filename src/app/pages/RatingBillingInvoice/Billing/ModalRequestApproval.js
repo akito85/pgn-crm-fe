@@ -26,9 +26,9 @@ import TablePaginationNew from "../../../../components/TablePaginationNew";
 
 const ModalRequestApproval = ({
   isOpen,
-  handleCancel = () => { },
-  handleRefresh = () => { },
-  handleOpenModal = () => { },
+  handleCancel = () => {},
+  handleRefresh = () => {},
+  handleOpenModal = () => {},
 }) => {
   // Selector
   const {
@@ -389,7 +389,7 @@ const ModalRequestApproval = ({
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
                   )}
                   current={page}
                   pageSize={pageSize}
@@ -477,7 +477,7 @@ const ModalRequestApproval = ({
                       searchInput,
                       searchedColumn,
                       searchText,
-                      handleSearch
+                      handleSearch,
                     )}
                     expandable={{
                       expandedRowRender: (record) => (
@@ -496,7 +496,7 @@ const ModalRequestApproval = ({
                               searchInput,
                               searchedColumn,
                               searchText,
-                              handleSearch
+                              handleSearch,
                             )}
                             className={"mb-4"}
                           />
@@ -537,7 +537,7 @@ const ModalRequestApproval = ({
                   searchInput,
                   searchedColumn,
                   searchText,
-                  handleSearch
+                  handleSearch,
                 )}
                 current={page}
                 pageSize={pageSize}
@@ -570,7 +570,7 @@ const ModalRequestApproval = ({
                     {
                       data_approval
                         ?.filter(
-                          (a) => a.appHierId === form.getFieldValue().apphierId
+                          (a) => a.appHierId === form.getFieldValue().apphierId,
                         )
                         ?.find((b) => b.approvalName)?.approvalName
                     }
@@ -594,7 +594,7 @@ const ModalRequestApproval = ({
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
                   )}
                   expandable={{
                     expandedRowRender: (record) => (
@@ -613,7 +613,7 @@ const ModalRequestApproval = ({
                             searchInput,
                             searchedColumn,
                             searchText,
-                            handleSearch
+                            handleSearch,
                           )}
                           className={"mb-4"}
                         />

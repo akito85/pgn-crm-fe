@@ -19,29 +19,36 @@ const ContentModalConfirm = ({
   listDataAttachment = [],
   listDataAppHierDetail = [],
   dataDetailTosSubmission = [],
-  listApproval
+  listApproval,
 }) => {
   const [typeTosSubmissionInfo, setTypeTosSubmissionInfo] = useState(
-    listSection[0].value
+    listSection[0].value,
   );
   const handleTosSubmissionInfo = (e) => {
     setTypeTosSubmissionInfo(e.target.value);
   };
-  const approvalName = useMemo(() => listApproval?.find(item => item?.value === selectedHierarchy)?.name, [listApproval, selectedHierarchy])
-  
+  const approvalName = useMemo(
+    () => listApproval?.find((item) => item?.value === selectedHierarchy)?.name,
+    [listApproval, selectedHierarchy],
+  );
+
   const showSection = () => {
     switch (typeTosSubmissionInfo) {
       case listSection[0].value:
         return (
           <div>
-            <div className="text-primary text-xs font-bold uppercase py-4">TERM OF SERVICE INFORMATION</div>
+            <div className="text-primary text-xs font-bold uppercase py-4">
+              TERM OF SERVICE INFORMATION
+            </div>
             <div className="grid grid-cols-4 w-full gap-4">
               <DetailText label={"Term of Service"}>
                 {dataTosSubmissionObj?.tosName}
               </DetailText>
             </div>
             <div className="py-4">
-              <div className="text-primary text-xs font-bold uppercase py-4">TERM OF SERVICE DETAIL</div>
+              <div className="text-primary text-xs font-bold uppercase py-4">
+                TERM OF SERVICE DETAIL
+              </div>
               <TableDetailTos
                 type={"preview"}
                 editDetail={false}
@@ -49,7 +56,9 @@ const ContentModalConfirm = ({
               />
             </div>
             <div className="py-4">
-              <div className="text-primary text-xs font-bold uppercase py-4">TERM OF SERVICE SUBMISSION INFORMATION</div>
+              <div className="text-primary text-xs font-bold uppercase py-4">
+                TERM OF SERVICE SUBMISSION INFORMATION
+              </div>
               <div className="grid grid-cols-4 w-full gap-4">
                 <DetailText label={"Start Date"}>
                   {dataTosSubmissionObj?.startDate

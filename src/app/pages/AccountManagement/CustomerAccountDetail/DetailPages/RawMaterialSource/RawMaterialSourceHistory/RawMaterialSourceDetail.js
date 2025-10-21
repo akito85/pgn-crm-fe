@@ -16,7 +16,7 @@ const columns = (
   searchText,
   handleSearch = () => {},
   onFilter = () => {},
-  sorter = () => {}
+  sorter = () => {},
 ) => {
   return [
     {
@@ -37,7 +37,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -53,7 +53,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
   ];
@@ -171,7 +171,7 @@ const RawMaterialSourceDetail = ({ data_detail, openModal, closeModal }) => {
           searchText,
           handleSearch,
           onFilter,
-          sorter
+          sorter,
         )}
       />
     </ModalCustom>

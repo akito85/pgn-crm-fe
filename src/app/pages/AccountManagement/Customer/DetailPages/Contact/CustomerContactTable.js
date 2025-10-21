@@ -47,7 +47,7 @@ const CustomerContactTable = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch = () => {}
+      handleSearch = () => {},
     ) => {
       return [
         {
@@ -65,7 +65,7 @@ const CustomerContactTable = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -77,7 +77,7 @@ const CustomerContactTable = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
       ];

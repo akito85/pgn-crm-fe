@@ -6,7 +6,7 @@ const columnsDetail = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
 ) => [
   {
     title: "NO",
@@ -26,7 +26,7 @@ const columnsDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -40,7 +40,7 @@ const columnsDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -49,10 +49,7 @@ const columnsDetail = (
     width: 198,
     fixed: "right",
     render: (v, r, i) => {
-      return (
-        <div className="flex w-full justify-center gap-6">
-        </div>
-      );
+      return <div className="flex w-full justify-center gap-6"></div>;
     },
   },
 ];

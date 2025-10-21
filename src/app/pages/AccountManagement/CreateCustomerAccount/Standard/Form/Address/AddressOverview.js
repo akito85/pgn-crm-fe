@@ -25,7 +25,7 @@ const AddressOverview = ({
   form,
   type,
   setAddressObj,
-  handleContactChangesByAddress =()=>{},
+  handleContactChangesByAddress = () => {},
 }) => {
   // Selector
   const {
@@ -111,12 +111,12 @@ const AddressOverview = ({
       setDataPostalCode((prevState) => {
         const newData = data_postalCode?.data || [];
         const uniqueIds = new Set(prevState.map((item) => item.id));
-        
+
         const uniqueData = [
           ...prevState,
-          ...newData.filter((item) => !uniqueIds.has(item.id))
+          ...newData.filter((item) => !uniqueIds.has(item.id)),
         ];
-      
+
         return uniqueData;
       });
     }
@@ -124,12 +124,12 @@ const AddressOverview = ({
       setDataSubDistrict((prevState) => {
         const newData = data_subDistrict?.data || [];
         const uniqueIds = new Set(prevState.map((item) => item.id));
-        
+
         const uniqueData = [
           ...prevState,
-          ...newData.filter((item) => !uniqueIds.has(item.id))
+          ...newData.filter((item) => !uniqueIds.has(item.id)),
         ];
-      
+
         return uniqueData;
       });
     }
@@ -137,12 +137,12 @@ const AddressOverview = ({
       setDataDistrict((prevState) => {
         const newData = data_district?.data || [];
         const uniqueIds = new Set(prevState.map((item) => item.id));
-        
+
         const uniqueData = [
           ...prevState,
-          ...newData.filter((item) => !uniqueIds.has(item.id))
+          ...newData.filter((item) => !uniqueIds.has(item.id)),
         ];
-      
+
         return uniqueData;
       });
     }
@@ -150,16 +150,16 @@ const AddressOverview = ({
       setDataCity((prevState) => {
         const newData = data_city?.data || [];
         const uniqueIds = new Set(prevState.map((item) => item.id));
-        
+
         const uniqueData = [
           ...prevState,
-          ...newData.filter((item) => !uniqueIds.has(item.id))
+          ...newData.filter((item) => !uniqueIds.has(item.id)),
         ];
-      
+
         return uniqueData;
       });
     }
-  },[data_postalCode, data_subDistrict, data_district, data_city])
+  }, [data_postalCode, data_subDistrict, data_district, data_city]);
 
   // Search Column
   const getColumnSearchProps = (dataIndex, type) => ({
@@ -393,7 +393,7 @@ const AddressOverview = ({
       dataIndex: "subDistrictId",
       sorter: true,
       ...getColumnSearchProps("subDistrictId"),
-      render: (v,r,i) => {
+      render: (v, r, i) => {
         if (typeof r.subDistrictId !== "string") {
           setPostalCode(r.subDistrictId);
 
@@ -417,7 +417,7 @@ const AddressOverview = ({
       ellipsis: {
         showTitle: false,
       },
-      render: (v,r,i) => {
+      render: (v, r, i) => {
         let name;
         if (typeof r.districtId !== "string") {
           setDistrict(r.districtId);
@@ -425,7 +425,6 @@ const AddressOverview = ({
           name = dataDistrict
             ?.filter((a) => a.id === r.districtId)
             ?.find((b) => b.id === r.districtId)?.name;
-
         }
         if (searchedColumn === "districtId") {
           return (
@@ -458,7 +457,7 @@ const AddressOverview = ({
       dataIndex: "cityId",
       sorter: true,
       ...getColumnSearchProps("cityId"),
-      render: (v,r,i) => {
+      render: (v, r, i) => {
         if (typeof r.cityId !== "string") {
           setDistrict(r.cityId);
 
@@ -501,7 +500,7 @@ const AddressOverview = ({
       sorter: true,
       align: "center",
       ...getColumnSearchProps("postalCodeId"),
-      render: (v,r,i) => {
+      render: (v, r, i) => {
         if (typeof r.postalCodeId !== "string") {
           const name = dataPostalCode
             ?.filter((a) => a.id === r.postalCodeId)
@@ -567,7 +566,9 @@ const AddressOverview = ({
       align: "center",
       ...getColumnSearchProps("premiseFlag"),
       render: (premiseFlag) => (
-        <span className="uppercase ">{premiseFlag === true ? "Yes" : "No"}</span>
+        <span className="uppercase ">
+          {premiseFlag === true ? "Yes" : "No"}
+        </span>
       ),
     },
     {
@@ -668,39 +669,47 @@ const AddressOverview = ({
     return result.slice((page - 1) * pageSize, page * pageSize);
   };
 
-
   const handleDelete = useCallback(
     (r) => {
-      handleContactChangesByAddress(r.key, addressTable.filter((e) => e.key !== r.key), type="delete");
+      handleContactChangesByAddress(
+        r.key,
+        addressTable.filter((e) => e.key !== r.key),
+        (type = "delete"),
+      );
       setAddressTable((prevState) => prevState.filter((e) => e.key !== r.key));
       const resetField = addressTable.filter((a) => a.key === r.key);
 
       for (let i = 1; i <= 4; i++) {
         if (resetField[0].key === i) {
           setAddressTable((prevState) => {
-            let tempTable =  prevState.filter((e) => e.key !== r.key);
+            let tempTable = prevState.filter((e) => e.key !== r.key);
 
             const updatedObj = {};
 
             tempTable.forEach((item, index) => {
               updatedObj[`premiseAddress${index + 1}`] = item.premiseFlag;
-              updatedObj[`businessPurpose${index + 1}`] = [...item.businessPurpose];
+              updatedObj[`businessPurpose${index + 1}`] = [
+                ...item.businessPurpose,
+              ];
             });
 
             setAddressObj((prevState) => ({
               ...prevState,
               ...updatedObj,
-              [`premiseAddress${tempTable.length + 1}`] : false,
-              [`businessPurpose${tempTable.length + 1}`] : [],
+              [`premiseAddress${tempTable.length + 1}`]: false,
+              [`businessPurpose${tempTable.length + 1}`]: [],
             }));
 
-            form.resetFields([`businessPurpose${tempTable.length+1}`, `premiseAddress${tempTable.length+1}`]);
+            form.resetFields([
+              `businessPurpose${tempTable.length + 1}`,
+              `premiseAddress${tempTable.length + 1}`,
+            ]);
 
             return tempTable.map((item, index) => {
               return {
                 ...item,
                 overview: `Address ${index + 1}`,
-                tempId: item.tempId ? `TEMP${index+1}` : null,
+                tempId: item.tempId ? `TEMP${index + 1}` : null,
                 key: index + 1,
               };
             });
@@ -709,7 +718,7 @@ const AddressOverview = ({
         }
       }
     },
-    [addressTable]
+    [addressTable],
   );
 
   return (

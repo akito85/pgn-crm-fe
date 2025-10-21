@@ -33,20 +33,18 @@ const onFilter = (dataIndex, value, record) => {
   }
 };
 
-
-// extracting size 
+// extracting size
 const extractSize = (fileSize) => {
-  if (fileSize.includes('KB')) {
-    return parseFloat(fileSize.replace(' KB', '')) * 1024;
-  } else if (fileSize.includes('MB')) {
-    return parseFloat(fileSize.replace(' MB', '')) * 1024 * 1024;
+  if (fileSize.includes("KB")) {
+    return parseFloat(fileSize.replace(" KB", "")) * 1024;
+  } else if (fileSize.includes("MB")) {
+    return parseFloat(fileSize.replace(" MB", "")) * 1024 * 1024;
   }
   return parseFloat(fileSize);
-
-}
+};
 
 const sorter = (fieldSort, a, b) => {
-  console.log(fieldSort, ' so');
+  console.log(fieldSort, " so");
   const handleDataSort = (obj) => {
     switch (fieldSort) {
       case "startDate":
@@ -63,7 +61,7 @@ const sorter = (fieldSort, a, b) => {
   };
   let fa = handleDataSort(a);
   let fb = handleDataSort(b);
-  if (fieldSort === 'fileSize') {
+  if (fieldSort === "fileSize") {
     return fa - fb;
   } else {
     return fa.localeCompare(fb);
@@ -76,10 +74,10 @@ const columnAttachmentData = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { },
-  handleDelete = () => { },
+  handleSearch = () => {},
+  handleDelete = () => {},
   type,
-  handleShow
+  handleShow,
 ) => {
   const res = [
     {
@@ -99,7 +97,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -113,7 +111,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -127,7 +125,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -142,7 +140,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -157,7 +155,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -179,8 +177,9 @@ const columnAttachmentData = (
             {type !== "detail" ? (
               <Tooltip title="Delete">
                 <span
-                  className={`flex justify-center${r.dataType === "exist" ? " cursor-not-allowed" : ""
-                    }`}
+                  className={`flex justify-center${
+                    r.dataType === "exist" ? " cursor-not-allowed" : ""
+                  }`}
                 >
                   <SVGIcon
                     name="IconDelete"
@@ -205,30 +204,29 @@ const columnAttachmentData = (
       (column) =>
         column.dataIndex !== "createdBy" &&
         column.dataIndex !== "createdDate" &&
-        column.title !== "ACTION"
+        column.title !== "ACTION",
     );
   }
   return type !== "detail"
     ? res.filter(
-      (column) =>
-        column.dataIndex !== "createdBy" && column.dataIndex !== "createdDate"
-    )
+        (column) =>
+          column.dataIndex !== "createdBy" &&
+          column.dataIndex !== "createdDate",
+      )
     : res;
 };
 const AttachmentSectionForm = ({
   data = [],
-  updateData = () => { },
+  updateData = () => {},
   type,
   typeSelector = "pricing",
-  dispatch = () => { },
-  getAPICategory = () => { },
+  dispatch = () => {},
+  getAPICategory = () => {},
   service = productPromoHttpService,
   configApplication = configApp.MASTER_MANAGEMENT,
   getAPIGuard = getGlobalPropertiesAttachment,
   mandatory = false,
 }) => {
-
-
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -237,7 +235,9 @@ const AttachmentSectionForm = ({
   const [modalUpload, setModalUpload] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [loadingDownload, setLoadingDownload] = useState(false);
-  const { dataListCategory, getConfigFile } = useSelector((state) => state[typeSelector]);
+  const { dataListCategory, getConfigFile } = useSelector(
+    (state) => state[typeSelector],
+  );
   // console.log("🚀 ~ dataListCategory:", dataListCategory)
   const { dataGlobalPropAttachment } = useSelector((state) => state.product);
 
@@ -348,7 +348,7 @@ const AttachmentSectionForm = ({
             handleSearch,
             handleDelete,
             type,
-            handleShow
+            handleShow,
           )}
         />
         <ModalAttachment

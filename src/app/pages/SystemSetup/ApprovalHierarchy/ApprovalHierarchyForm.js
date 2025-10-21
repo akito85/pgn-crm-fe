@@ -27,10 +27,12 @@ import {
 } from "../../../../redux/slices/user_management/hierarchySlice";
 import { useDispatch, useSelector } from "react-redux";
 import DetailText from "../../../../components/DetailText";
+import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import {
-  ModalConfirm,
-} from "../../../../components/Modal/ModalPopUp";
-import { convertToTitleCase, formMessageRequired, hasValue } from "../../../../utils";
+  convertToTitleCase,
+  formMessageRequired,
+  hasValue,
+} from "../../../../utils";
 import SelectComponent from "../../../../components/SelectComponent";
 import Highlighter from "react-highlight-words";
 import InputComponent from "../../../../components/InputComponent";
@@ -54,7 +56,7 @@ const transformDataDDL = (dataDDL, formValue) => {
     listFilter = listFilter.concat(Object.values(myArray));
   }
   const filterDataDDL = dataDDL?.data?.filter(
-    (item) => !listFilter.includes(item.text)
+    (item) => !listFilter.includes(item.text),
   );
   return filterDataDDL;
 };
@@ -76,7 +78,7 @@ const ApprovalHierarchyForm = (props) => {
     loading,
     data_employee,
   } = useSelector((state) => state.apphierarchy);
-  const { bodyError, isLoading } = useSelector(state => state?.general);
+  const { bodyError, isLoading } = useSelector((state) => state?.general);
 
   const location = useLocation("");
   const dispatch = useDispatch("");
@@ -114,7 +116,8 @@ const ApprovalHierarchyForm = (props) => {
   const dataAssert = useCallback(
     (data_detail) => {
       const dataFilter = data_detail?.detail?.filter(
-        (data, index) => index !== 0 && index !== data_detail?.detail.length - 1
+        (data, index) =>
+          index !== 0 && index !== data_detail?.detail.length - 1,
       );
       const dataInsert = dataFilter?.map((item, index) => {
         return {
@@ -144,7 +147,7 @@ const ApprovalHierarchyForm = (props) => {
       };
       form.setFieldsValue(boddy);
     },
-    [form]
+    [form],
   );
   useEffect(() => {
     if (
@@ -176,10 +179,11 @@ const ApprovalHierarchyForm = (props) => {
     },
     {
       path: "",
-      breadcrumbName: `${type === "update"
-        ? "Update Approval Hierarchy"
-        : "Create Approval Hierarchy"
-        }`,
+      breadcrumbName: `${
+        type === "update"
+          ? "Update Approval Hierarchy"
+          : "Create Approval Hierarchy"
+      }`,
     },
   ];
 
@@ -189,7 +193,7 @@ const ApprovalHierarchyForm = (props) => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -331,8 +335,6 @@ const ApprovalHierarchyForm = (props) => {
     }
   };
 
-
-
   const handleCancel = () => {
     setModalConfirmasi(false);
     setModalChoosePosition(false);
@@ -352,10 +354,11 @@ const ApprovalHierarchyForm = (props) => {
         finalApprover,
         ...detail
       } = formValue;
-      const dataSubmitter = data_DDL?.data?.filter((a) => a.text === submitter)[0]
-        ?.id;
+      const dataSubmitter = data_DDL?.data?.filter(
+        (a) => a.text === submitter,
+      )[0]?.id;
       const datafinalApproval = data_DDL?.data?.filter(
-        (a) => a.text === finalApprover
+        (a) => a.text === finalApprover,
       )[0]?.id;
 
       const myArray = Object.keys(detail).map((key) => ({
@@ -372,7 +375,7 @@ const ApprovalHierarchyForm = (props) => {
         });
         if (type === "update") {
           const filterId = data_detail?.detail?.filter(
-            (item) => item?.positionName === dataArray?.level
+            (item) => item?.positionName === dataArray?.level,
           );
           return {
             id: filterId[0]?.id || null,
@@ -385,7 +388,7 @@ const ApprovalHierarchyForm = (props) => {
           };
         }
       });
-      if (type === 'update') {
+      if (type === "update") {
         bodyRequest = {
           ...formValue,
           id: data_detail?.appHierId,
@@ -396,13 +399,13 @@ const ApprovalHierarchyForm = (props) => {
           finalApprover: datafinalApproval,
           detail: transformArray,
           finalApproverId: data_detail?.detail?.filter(
-            (item) => item?.positionName === "Final Approver"
+            (item) => item?.positionName === "Final Approver",
           )[0]?.id,
           submitterId: data_detail?.detail?.filter(
-            (item) => item?.positionName === "Submitter"
+            (item) => item?.positionName === "Submitter",
           )[0]?.id,
-        }
-        url = '/v1/dbs/api/apphier/validate-update'
+        };
+        url = "/v1/dbs/api/apphier/validate-update";
       } else {
         bodyRequest = {
           approvalName: formValue?.approvalName,
@@ -411,16 +414,28 @@ const ApprovalHierarchyForm = (props) => {
           submitter: dataSubmitter,
           finalApprover: datafinalApproval,
           detail: transformArray,
-        }
-        url = '/v1/dbs/api/apphier/validate-create'
+        };
+        url = "/v1/dbs/api/apphier/validate-create";
       }
 
       setPayload({
         bodyRequest: bodyRequest,
-        validateCreateUpdate : {body : bodyRequest, services : userHttpService, endPoint : url, type}
+        validateCreateUpdate: {
+          body: bodyRequest,
+          services: userHttpService,
+          endPoint: url,
+          type,
+        },
       });
 
-      await dispatch(validateCreateUpdate({ body: bodyRequest, services: userHttpService, endPoint: url, type }))?.unwrap();
+      await dispatch(
+        validateCreateUpdate({
+          body: bodyRequest,
+          services: userHttpService,
+          endPoint: url,
+          type,
+        }),
+      )?.unwrap();
       const body = {
         id,
         approvalCode,
@@ -432,21 +447,18 @@ const ApprovalHierarchyForm = (props) => {
         detail: transformArray,
       };
 
-
       const bodyUpdate = {
         ...body,
         finalApproverId: data_detail?.detail?.filter(
-          (item) => item?.positionName === "Final Approver"
+          (item) => item?.positionName === "Final Approver",
         )[0]?.id,
         submitterId: data_detail?.detail?.filter(
-          (item) => item?.positionName === "Submitter"
+          (item) => item?.positionName === "Submitter",
         )[0]?.id,
       };
       setBodyFinish(type === "create" ? body : bodyUpdate);
       setModalConfirmasi(true);
-    } catch (error) {
-
-    }
+    } catch (error) {}
   };
 
   const handleChoosePosition = (type) => {
@@ -459,7 +471,7 @@ const ApprovalHierarchyForm = (props) => {
     let valueExist = hasValue(val);
     const filterDetailList = Object.assign(
       {},
-      ...data_DDL?.data?.filter((item) => item?.text === val)
+      ...data_DDL?.data?.filter((item) => item?.text === val),
     );
     if (val) {
       dispatch(getEmployeeByIdPosition(filterDetailList?.id));
@@ -471,10 +483,10 @@ const ApprovalHierarchyForm = (props) => {
   };
 
   const posisiNameFinal = data_DDL?.data?.find(
-    (item) => item.text === formValue?.finalApprover
+    (item) => item.text === formValue?.finalApprover,
   )?.text;
   const posisiName = data_DDL?.data?.find(
-    (item) => item.text === formValue?.submitter
+    (item) => item.text === formValue?.submitter,
   )?.text;
 
   const saveApp = () => {
@@ -482,19 +494,19 @@ const ApprovalHierarchyForm = (props) => {
     if (type === "update") {
       dispatch(updateAppHier(payload?.bodyRequest));
     } else {
-      dispatch(createHierarchy(payload?.bodyRequest))
+      dispatch(createHierarchy(payload?.bodyRequest));
     }
   };
 
   const onFinishModal = (formValue) => {
-    setInsertApprover(prevState => {
+    setInsertApprover((prevState) => {
       let temp = [...prevState];
-      const index = temp?.findIndex(item => item?.name === approvers);
+      const index = temp?.findIndex((item) => item?.name === approvers);
       temp[index] = {
         approver: formValue[approvers],
         name: approvers,
-      }
-      return temp
+      };
+      return temp;
     });
     form.setFieldsValue(formValue);
     setModalChoosePosition(false);
@@ -509,38 +521,36 @@ const ApprovalHierarchyForm = (props) => {
   }, [type, form, dataAssert, data_detail]);
 
   const cancelChoosePosition = () => {
-    if (type === 'create') {
-      hasValue(formValue[approvers]) && form.resetFields([approvers])
+    if (type === "create") {
+      hasValue(formValue[approvers]) && form.resetFields([approvers]);
     } else {
-      const formattedValue = convertToTitleCase(approvers)
+      const formattedValue = convertToTitleCase(approvers);
       if (hasValue(formValue[approvers])) {
         // const filteredData = data_detail?.detail?.filter(item => item?.positionName === formattedValue)[0]?.text;
-        form.setFieldsValue({ [approvers]: formValue[approvers] })
+        form.setFieldsValue({ [approvers]: formValue[approvers] });
       } else {
-        form.resetFields([approvers])
+        form.resetFields([approvers]);
       }
     }
     setModalChoosePosition(false);
-  }
-
+  };
 
   const handleRetry = () => {
     handleCancelTryAgain();
-    if (bodyError?.action === 'CREATE_APPROVAL_HIEARARCHY') {
-      dispatch(createHierarchy(payload?.bodyRequest))
+    if (bodyError?.action === "CREATE_APPROVAL_HIEARARCHY") {
+      dispatch(createHierarchy(payload?.bodyRequest));
     } else if (bodyError?.action === "UPDATE_APPHIER") {
       dispatch(updateAppHier(payload?.bodyRequest));
-    } else if (bodyError?.action === 'GET_APPROVAL_HIERARCHY_DETAIL') {
-      dispatch(detailPositionHierarchy(id))
-    } else if (bodyError?.action === 'VALIDATE_CREATE_UPDATE') {
-      dispatch(validateCreateUpdate(payload?.validateCreateUpdate))
-    }else{
+    } else if (bodyError?.action === "GET_APPROVAL_HIERARCHY_DETAIL") {
+      dispatch(detailPositionHierarchy(id));
+    } else if (bodyError?.action === "VALIDATE_CREATE_UPDATE") {
+      dispatch(validateCreateUpdate(payload?.validateCreateUpdate));
+    } else {
       dispatch(getAppCode());
       dispatch(getAppType());
-      dispatch(getPositionDDL())
+      dispatch(getPositionDDL());
     }
   };
-
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
@@ -569,7 +579,7 @@ const ApprovalHierarchyForm = (props) => {
           form={form}
           layout={"vertical"}
           onFinish={onFinish}
-        //   onFinishFailed={onFinishFailed}
+          //   onFinishFailed={onFinishFailed}
         >
           <div className={"flex w-full gap-6"}>
             <BaseContainer header={type === "update" ? "UPDATE" : "CREATE"}>
@@ -631,7 +641,7 @@ const ApprovalHierarchyForm = (props) => {
                       label={"Submitter"}
                       name={"submitter"}
                       className="w-full"
-                      rules={formMessageRequired('Submitter')}
+                      rules={formMessageRequired("Submitter")}
                     >
                       <Input disabled></Input>
                     </Form.Item>
@@ -650,14 +660,12 @@ const ApprovalHierarchyForm = (props) => {
                         // 'Approver 1
                         name={`${item.name}`}
                         className="w-full"
-                        rules={
-                          formMessageRequired(item?.name)
-                        }
+                        rules={formMessageRequired(item?.name)}
                       >
                         <Input
                           disabled
-                        // value={selectedValue}
-                        // onChange={handleChangePosition}
+                          // value={selectedValue}
+                          // onChange={handleChangePosition}
                         />
                       </Form.Item>
                       <ButtonComponent
@@ -685,7 +693,7 @@ const ApprovalHierarchyForm = (props) => {
                       label={"Final Approver"}
                       name={"finalApprover"}
                       className="w-full"
-                      rules={formMessageRequired('Final Approver')}
+                      rules={formMessageRequired("Final Approver")}
                     >
                       <Input disabled />
                     </Form.Item>
@@ -759,7 +767,11 @@ const ApprovalHierarchyForm = (props) => {
                   {formValue?.approvalCode}
                 </DetailText> */}
                 <DetailText label={"Type"}>
-                  {data_type?.data?.filter(item => item?.value === formValue?.approvalType)[0]?.name}
+                  {
+                    data_type?.data?.filter(
+                      (item) => item?.value === formValue?.approvalType,
+                    )[0]?.name
+                  }
                 </DetailText>
                 <DetailText label={"Description"}>{formValue?.desc}</DetailText>
               </div>
@@ -824,10 +836,7 @@ const ApprovalHierarchyForm = (props) => {
               />
             </div>
             <div className="flex justify-end gap-2">
-              <ButtonComponent
-                onClick={cancelChoosePosition}
-                type="default"
-              >
+              <ButtonComponent onClick={cancelChoosePosition} type="default">
                 Cancel
               </ButtonComponent>
               <ButtonComponent htmlType="submit" type="submit" onClick>

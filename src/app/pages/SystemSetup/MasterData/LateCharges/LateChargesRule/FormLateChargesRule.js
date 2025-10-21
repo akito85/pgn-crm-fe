@@ -18,11 +18,14 @@ import {
   getOperatorConditionList,
   getVariableNameList,
   updateLateChargeRuleBody,
-  checkStartDate
+  checkStartDate,
 } from "../../../../../../redux/slices/account_management/MasterData/late_charges";
 import DetailText from "../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../components/BaseContainer";
-import { showModalError, showModalSuccess } from "../../../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  showModalSuccess,
+} from "../../../../../../redux/slices/general_slice";
 import {
   LeftCircleOutlined,
   LeftOutlined,
@@ -67,16 +70,18 @@ const routes = (type, id) => {
       breadcrumbName: "Detail Late Charge",
       state: {
         id: id,
-      }
+      },
     },
     {
       path: "",
       breadcrumbName: `${
-        type === "update" ? "Update Late Charge Rule" : "Create Late Charge Rule"
+        type === "update"
+          ? "Update Late Charge Rule"
+          : "Create Late Charge Rule"
       }`,
     },
   ];
-}
+};
 
 const listTypeSubmit = ["submit", "draft"];
 const FormLateChargesRule = ({ type }) => {
@@ -151,7 +156,7 @@ const FormLateChargesRule = ({ type }) => {
         criteriaName: (data_detail.criteria || []).reduce(
           (prev, current, index) =>
             prev + `${index === 0 ? current.label : ", " + current.label} `,
-          ""
+          "",
         ),
         createdDate: data_detail.historyLogInformation.createdDate,
         createdBy: data_detail.historyLogInformation.createdBy,
@@ -201,8 +206,8 @@ const FormLateChargesRule = ({ type }) => {
             },
             value: item.valueReal,
             typeData: "exist",
-          })
-        )
+          }),
+        ),
       );
       setListDataDetailFormula(
         (data_detail_late_charge_rule?.listRuleFormula || []).map(
@@ -228,8 +233,8 @@ const FormLateChargesRule = ({ type }) => {
             },
             value: item.valueReal,
             typeData: "exist",
-          })
-        )
+          }),
+        ),
       );
       setListDataAttachment(
         (data_detail_late_charge_rule?.attachments || []).map((attachData) => ({
@@ -239,7 +244,7 @@ const FormLateChargesRule = ({ type }) => {
             : "",
           fileSize: bytesConverter(attachData.fileSize || 0),
           dataType: "exist",
-        }))
+        })),
       );
     }
   }, [type, id, form, data_detail_late_charge_rule]);
@@ -264,16 +269,14 @@ const FormLateChargesRule = ({ type }) => {
       }));
       setSelectedHierarchy(obj.approvalHierarchy);
       setListDataAttachment(
-        (data_detail_late_charge_rule?.attachments || []).map(
-          (attachData) => ({
-            ...attachData,
-            createdDate: attachData.createdDate
-              ? moment(attachData.createdDate).format(dateFormatting.dateTime)
-              : "",
-            fileSize: bytesConverter(attachData.fileSize || 0),
-            dataType: "exist",
-          })
-        )
+        (data_detail_late_charge_rule?.attachments || []).map((attachData) => ({
+          ...attachData,
+          createdDate: attachData.createdDate
+            ? moment(attachData.createdDate).format(dateFormatting.dateTime)
+            : "",
+          fileSize: bytesConverter(attachData.fileSize || 0),
+          dataType: "exist",
+        })),
       );
     }
   }, [
@@ -357,7 +360,8 @@ const FormLateChargesRule = ({ type }) => {
         operator: item?.operator?.value || null,
         dataType: item?.dataType?.value || null,
         name: item?.name?.value || null,
-        value: typeof item.value === "string" ? parseFloat(item.value) : item.value
+        value:
+          typeof item.value === "string" ? parseFloat(item.value) : item.value,
       };
       delete obj.typeData;
       delete obj.lateChargeRuleId;
@@ -366,11 +370,13 @@ const FormLateChargesRule = ({ type }) => {
     const body = {
       lateChargeId: lateChargeId,
       lateChargeRuleId: type === "update" ? id : null,
-      documentNumber: dataLateChargeRule.documentNumber, 
+      documentNumber: dataLateChargeRule.documentNumber,
       startDate: dataLateChargeRule.startDate
         ? dataLateChargeRule.startDate.format(dateFormatting.dateForm)
         : "",
-      maxAmount: dataLateChargeRule.maxAmount ? parseFloat(dataLateChargeRule.maxAmount) : null,
+      maxAmount: dataLateChargeRule.maxAmount
+        ? parseFloat(dataLateChargeRule.maxAmount)
+        : null,
       description: dataLateChargeRule.description,
       appHierId: selectedHierarchy,
       isSubmit: typeSubmit === listTypeSubmit[0],
@@ -391,7 +397,7 @@ const FormLateChargesRule = ({ type }) => {
             };
             const response = await accountManagementService.uploadAttachment(
               `/v1/dbs/api/master/late-charge/create-attachment/${idLateChargeRule}`,
-              body
+              body,
             );
           }
           setModalSuccessCreate(true);
@@ -416,7 +422,7 @@ const FormLateChargesRule = ({ type }) => {
           const idLateChargeRule = data.id;
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon in filterDataAttach) {
             const element = filterDataAttach[icon];
@@ -426,15 +432,15 @@ const FormLateChargesRule = ({ type }) => {
             };
             const response = await accountManagementService.uploadAttachment(
               `/v1/dbs/api/master/late-charge/create-attachment/${idLateChargeRule}`,
-              body
+              body,
             );
           }
           const successBody = {
             title: `Successful`,
-            description: `Your data has been ${typeSubmit === 'draft' ? 'updated' : 'submitted'}`,
+            description: `Your data has been ${typeSubmit === "draft" ? "updated" : "submitted"}`,
           };
           // setModalSuccessCreate(true);
-          dispatch(showModalSuccess(successBody))
+          dispatch(showModalSuccess(successBody));
           setLoadingForm(false);
           handleCancelModalConfirm();
           form.resetFields();
@@ -478,42 +484,43 @@ const FormLateChargesRule = ({ type }) => {
   };
 
   const checkAllKeysHaveValue = useCallback((obj) => {
-    let emptyKeys = []
+    let emptyKeys = [];
     for (const [key, value] of Object.entries(obj)) {
       if (value === null || value === undefined || value === "") {
-        emptyKeys.push(key)
-
+        emptyKeys.push(key);
       }
     }
     return emptyKeys;
   }, []);
 
-  const errorMessage = useCallback((key) => {
-    const titleKey = (key) => {
-      if (key === 'startDate') {
-        return "Start Date"
-      } else if (key === 'documentNumber') {
-        return "Document Number"
-      } else if (key === 'implicationType') {
-        return "Implication Type"
-      } else {
-        return "Transaction Code"
+  const errorMessage = useCallback(
+    (key) => {
+      const titleKey = (key) => {
+        if (key === "startDate") {
+          return "Start Date";
+        } else if (key === "documentNumber") {
+          return "Document Number";
+        } else if (key === "implicationType") {
+          return "Implication Type";
+        } else {
+          return "Transaction Code";
+        }
+      };
+      for (const item of key) {
+        form.setFields([
+          {
+            name: item,
+            errors: [`Please input your ${titleKey(item)}!`],
+          },
+        ]);
       }
-    }
-    for (const item of key) {
-      form.setFields([
-        {
-          name: item,
-          errors: [`Please input your ${titleKey(item)}!`],
-        },
-      ])
-    }
-  }, [form]);
-
+    },
+    [form],
+  );
 
   const handleButtonNext = () => {
     const { maxAmount, description, ...requiredField } = formValue;
-    const checkEmptyValues = checkAllKeysHaveValue(requiredField)
+    const checkEmptyValues = checkAllKeysHaveValue(requiredField);
 
     let errorBody = {};
     switch (current) {
@@ -535,31 +542,33 @@ const FormLateChargesRule = ({ type }) => {
         } else {
           const body = {
             lateChargeId: lateChargeId,
-            startDate: moment(dataLateChargeRule.startDate).format(dateFormatting.dateFormal)
-          }
+            startDate: moment(dataLateChargeRule.startDate).format(
+              dateFormatting.dateFormal,
+            ),
+          };
           dispatch(checkStartDate(body))
-          .unwrap()
-          .then((res) => {
-            if(res.success){
-              next();
-              scrollRightHandler();
-            }else{
-              errorBody = {
-                title: "Failed",
-                description: res.message,
-              };
-              dispatch(showModalError(errorBody));
-            }
-          })
-          .catch((error) => {
-            if(error){
-              errorBody = {
-                title: "Failed",
-                description: error?.data?.message,
-              };
-              dispatch(showModalError(errorBody));
-            }
-          });
+            .unwrap()
+            .then((res) => {
+              if (res.success) {
+                next();
+                scrollRightHandler();
+              } else {
+                errorBody = {
+                  title: "Failed",
+                  description: res.message,
+                };
+                dispatch(showModalError(errorBody));
+              }
+            })
+            .catch((error) => {
+              if (error) {
+                errorBody = {
+                  title: "Failed",
+                  description: error?.data?.message,
+                };
+                dispatch(showModalError(errorBody));
+              }
+            });
         }
         break;
       case 1:
@@ -607,22 +616,28 @@ const FormLateChargesRule = ({ type }) => {
           <div className="flex flex-col gap-4">
             <BaseContainer header={"late charge rule"}>
               <div className="grid grid-cols-3 gap-2">
-              <Form.Item
+                <Form.Item
                   name={"documentNumber"}
                   className={"w-full no-margin-form"}
                   rules={[
-                    { message: requiredMessage("Document Number"), required: true },
+                    {
+                      message: requiredMessage("Document Number"),
+                      required: true,
+                    },
                     {
                       pattern: /^[a-zA-Z0-9\-/\.\_" "]+$/,
-                      message: "Invalid input. Only numbers, letters, (space), (_), (-), (/), and (.)",
+                      message:
+                        "Invalid input. Only numbers, letters, (space), (_), (-), (/), and (.)",
                     },
                   ]}
-                  getValueFromEvent={(e) => 
-                    handleLateChargeRuleInfoObj(e.target.value, "documentNumber")
+                  getValueFromEvent={(e) =>
+                    handleLateChargeRuleInfoObj(
+                      e.target.value,
+                      "documentNumber",
+                    )
                   }
                   label={"Document Number"}
                 >
-              
                   <InputComponent
                     maxLength={50}
                     disabled={
@@ -644,7 +659,7 @@ const FormLateChargesRule = ({ type }) => {
                   required
                 >
                   <DateComponent
-                   dateDisable={handleOpenDate}
+                    dateDisable={handleOpenDate}
                     disabled={
                       type === "update" &&
                       dataLateChargeRule.status === "ACTIVE"
@@ -654,7 +669,9 @@ const FormLateChargesRule = ({ type }) => {
                 <Form.Item
                   name={"maxAmount"}
                   className={"w-full no-margin-form"}
-                  getValueFromEvent={(e) => handleLateChargeRuleInfoObj(e.floatValue, "maxAmount")}
+                  getValueFromEvent={(e) =>
+                    handleLateChargeRuleInfoObj(e.floatValue, "maxAmount")
+                  }
                   label={"Late Charge Maximum Amount"}
                 >
                   <InputComponent
@@ -983,40 +1000,38 @@ const FormLateChargesRule = ({ type }) => {
           </ModalCustom>
         ) : null}
 
-      {modalSuccessCreate ?
-        <Modal
-          open={modalSuccessCreate}
-          onCancel={()=>setModalSuccessCreate(false)}
-          className={"modal-custom"}
-          centered={true}
-          width={400}
-          maskClosable={false}
-          footer={
-            <div className="w-full flex justify-end gap-5 p-4">
-              <Link 
-                // to={from === "create" ? ACCOUNT_MANAGEMENT_ROUTES.DETAIL_LATE_CHARGES : ACCOUNT_MANAGEMENT_ROUTES.VIEW_LATE_CHARGES}
-                // state={from === "create" ? {id:lateChargeId} : null}
-                to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_LATE_CHARGES}
-                state={{id:lateChargeId}}
-              >
-                <ButtonComponent type="submit">
-                  OK
-                </ButtonComponent>
-              </Link>
+        {modalSuccessCreate ? (
+          <Modal
+            open={modalSuccessCreate}
+            onCancel={() => setModalSuccessCreate(false)}
+            className={"modal-custom"}
+            centered={true}
+            width={400}
+            maskClosable={false}
+            footer={
+              <div className="w-full flex justify-end gap-5 p-4">
+                <Link
+                  // to={from === "create" ? ACCOUNT_MANAGEMENT_ROUTES.DETAIL_LATE_CHARGES : ACCOUNT_MANAGEMENT_ROUTES.VIEW_LATE_CHARGES}
+                  // state={from === "create" ? {id:lateChargeId} : null}
+                  to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_LATE_CHARGES}
+                  state={{ id: lateChargeId }}
+                >
+                  <ButtonComponent type="submit">OK</ButtonComponent>
+                </Link>
+              </div>
+            }
+          >
+            <div className={"flex flex-col w-full"}>
+              <div className="px-5 pt-5 pb-[10px] justify-center">
+                <div className="w-full flex gap-[20px]">
+                  <SVGIcon name="IconSuccess" width={48} />
+                  <p className="text-[18px] font-bold">Successful</p>
+                </div>
+                <p className="pl-[70px]">{`Your data has been ${typeSubmit === "draft" ? "created" : "submitted"}.`}</p>
+              </div>
             </div>
-          }
-        >
-        <div className={"flex flex-col w-full"}>
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconSuccess" width={48} />
-              <p className="text-[18px] font-bold">Successful</p>
-            </div>
-            <p className="pl-[70px]">{`Your data has been ${typeSubmit === 'draft' ? 'created' : 'submitted'}.`}</p>
-          </div>
-        </div>
-        </Modal> : null
-      }
+          </Modal>
+        ) : null}
 
         {/* Modal Back */}
         <ModalBack

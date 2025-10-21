@@ -187,7 +187,7 @@ const ModalConfirmManualReceipt = ({
             disableSelect={true}
             approvalName={
               (dataOption || []).filter(
-                (data) => data.value === selectedHierarchy
+                (data) => data.value === selectedHierarchy,
               )?.[0].name || ""
             }
             dataTable={listDataAppHierDetail}

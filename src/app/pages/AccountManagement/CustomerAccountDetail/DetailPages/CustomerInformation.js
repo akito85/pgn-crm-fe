@@ -18,7 +18,7 @@ const data_detail = {
     taxIdentificationNumber: "98761234567890",
     personalIdentificationNumber: "98761234567890",
     searchKey: "Keramk Inti Pusat",
-		description:"Keramik Inti Pusat",
+    description: "Keramik Inti Pusat",
     status: "Active",
   },
   additional: {
@@ -27,33 +27,29 @@ const data_detail = {
     industrialSector: "01234567890",
     searchKey: "Keramk Inti Pusat",
   },
-	createdBy: "Ijlal",
-	createdDate: "21 Agustus 2023 11:03:55",
-	updatedBy: "Ijlal",
-	updatedDate: "22 Agustus 2023 11:03:55",
+  createdBy: "Ijlal",
+  createdDate: "21 Agustus 2023 11:03:55",
+  updatedBy: "Ijlal",
+  updatedDate: "22 Agustus 2023 11:03:55",
 };
 
-const CustomerInformation = ({data_header=[]}) => {
+const CustomerInformation = ({ data_header = [] }) => {
   // useEffect(() => {},[]);
 
   return (
     <Fragment>
-			
-			<div className="flex w-full justify-end gap-3 mt-5">
-          {/* <NavLink to={PRODUCT_PROMO_ROUTES.VIEW_TOS_CREATE} state={{ x: 1 }}> */}
-            <ButtonComponent
-              icon={
-								<SVGIcon name="IconEdit" color={"#FFFFFF"} width={24} />
-							}
-              type="submit"
-            >
-              Update
-            </ButtonComponent>
-          {/* </NavLink> */}
-        </div>
+      <div className="flex w-full justify-end gap-3 mt-5">
+        {/* <NavLink to={PRODUCT_PROMO_ROUTES.VIEW_TOS_CREATE} state={{ x: 1 }}> */}
+        <ButtonComponent
+          icon={<SVGIcon name="IconEdit" color={"#FFFFFF"} width={24} />}
+          type="submit"
+        >
+          Update
+        </ButtonComponent>
+        {/* </NavLink> */}
+      </div>
       <BaseContainer header={data_header[0]}>
         <div className="w-full grid grid-cols-4 gap-4">
-
           {/* customer information */}
           <DetailText label="Customer Number">
             {data_detail?.customerInformation?.customerNumber}
@@ -79,9 +75,11 @@ const CustomerInformation = ({data_header=[]}) => {
           <DetailText label="Search Key">
             {data_detail?.additional?.searchKey}
           </DetailText>
-					<DetailText label="Status">
+          <DetailText label="Status">
             <div className=" flex justify-start">
-              <StatusComponent colour={data_detail?.customerInformation?.status}>
+              <StatusComponent
+                colour={data_detail?.customerInformation?.status}
+              >
                 <div className="flex justify-center px-5">
                   {data_detail?.customerInformation?.status}
                 </div>
@@ -93,40 +91,34 @@ const CustomerInformation = ({data_header=[]}) => {
           {data_header[1]}
         </div>
 
-				{/* customer additional information */}
-				
-				<div className="w-full grid grid-cols-4 gap-4">
+        {/* customer additional information */}
+
+        <div className="w-full grid grid-cols-4 gap-4">
           <DetailText label="Founded Place">
             {data_detail?.additional?.foundedPlace}
           </DetailText>
           <DetailText label="Founded Date">
-            {renderDate(data_detail?.additional?.foundedDate, 'date')}
+            {renderDate(data_detail?.additional?.foundedDate, "date")}
           </DetailText>
           <DetailText label="Industrial Sector">
             {data_detail?.additional?.industrialSector}
           </DetailText>
-         
         </div>
-				</BaseContainer>
+      </BaseContainer>
 
-				<BaseContainer header={data_header[2]}>
-
-					{/* history log information */}
-					<div className="w-full grid grid-cols-4 gap-4">
-						<DetailText label="Created Date">
-							{data_detail?.createdDate}
-						</DetailText>
-						<DetailText label="Created By">
-							{data_detail?.createdBy}
-						</DetailText>
-						<DetailText label="Updated Date">
-							{data_detail?.updatedDate}
-						</DetailText>
-						<DetailText label="Updated By">
-							{data_detail?.updatedBy}
-						</DetailText>
-					</div>
-				</BaseContainer>
+      <BaseContainer header={data_header[2]}>
+        {/* history log information */}
+        <div className="w-full grid grid-cols-4 gap-4">
+          <DetailText label="Created Date">
+            {data_detail?.createdDate}
+          </DetailText>
+          <DetailText label="Created By">{data_detail?.createdBy}</DetailText>
+          <DetailText label="Updated Date">
+            {data_detail?.updatedDate}
+          </DetailText>
+          <DetailText label="Updated By">{data_detail?.updatedBy}</DetailText>
+        </div>
+      </BaseContainer>
     </Fragment>
   );
 };

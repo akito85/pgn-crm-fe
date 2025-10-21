@@ -87,7 +87,7 @@ const TableForceFE = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       )}
       onSort={onSort}
       rowSelection={type === 1 ? rowSelection : undefined}

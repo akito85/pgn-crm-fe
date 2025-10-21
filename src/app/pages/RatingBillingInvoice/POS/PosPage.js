@@ -30,7 +30,7 @@ import { useColumnActionPermission } from "../../../../components/ColumnActionPe
 const PosPage = () => {
   // Selector
   const { data_view, data_approvalHistory, loading } = useSelector(
-    (state) => state.pointOfSales
+    (state) => state.pointOfSales,
   );
 
   // Declaration
@@ -77,7 +77,7 @@ const PosPage = () => {
         pageSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
-      })
+      }),
     );
   }, [dispatch, page, pageSize, sort, search]);
 
@@ -98,7 +98,7 @@ const PosPage = () => {
         pageSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
-      })
+      }),
     );
   };
 
@@ -162,7 +162,7 @@ const PosPage = () => {
             pageSize,
             sort,
             search: encodeURIComponent(JSON.stringify(search)),
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -242,7 +242,7 @@ const PosPage = () => {
         pageSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
-      })
+      }),
     );
   };
 
@@ -414,12 +414,12 @@ const PosPage = () => {
         return (
           <Tooltip title="Delete">
             <SVGIcon
-                name="IconDelete"
-                width={24}
-                color={isDelete ? "#D90000" : "#8D91A0"}
-                className={isDelete ? undefined : "disabled cursor-not-allowed"}
-                onClick={isDelete ? () => handleDelete(record) : undefined}
-              />
+              name="IconDelete"
+              width={24}
+              color={isDelete ? "#D90000" : "#8D91A0"}
+              className={isDelete ? undefined : "disabled cursor-not-allowed"}
+              onClick={isDelete ? () => handleDelete(record) : undefined}
+            />
           </Tooltip>
         );
       },
@@ -486,7 +486,7 @@ const PosPage = () => {
                 ...useColumnActionPermission(
                   ["view", "update", "delete", "preview", "history"],
                   itemGrantAccess,
-                  "Delete"
+                  "Delete",
                 ),
               ]}
               current={page}

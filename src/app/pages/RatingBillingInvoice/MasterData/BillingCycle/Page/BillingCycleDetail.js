@@ -42,7 +42,7 @@ const BillingCycleDetail = ({ type }) => {
   const [modalErrorServer, setModalErrorServer] = useState(false);
 
   const [modalConfirm, setModalConfirm] = useState(false);
-  
+
   const [bodyError, setBodyError] = useState({});
   const [billingCycleSection, setBillingCycleSection] = useState([
     { value: "Billing Cycle" },
@@ -57,7 +57,7 @@ const BillingCycleDetail = ({ type }) => {
   });
 
   const { dataInfoDetail, dataInfoDetailDraft, message } = useSelector(
-    (state) => state.billingCycle
+    (state) => state.billingCycle,
   );
 
   const id = location.state?.id;
@@ -93,7 +93,7 @@ const BillingCycleDetail = ({ type }) => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       setDataLogInformation({
         createdDate: dataInfoDetail.createdDate,
@@ -190,7 +190,7 @@ const BillingCycleDetail = ({ type }) => {
           })
         : approveRejectBillingCycle({
             body: data,
-          })
+          }),
     )
       .unwrap()
       .then(() => {
@@ -282,7 +282,7 @@ const BillingCycleDetail = ({ type }) => {
                 <DetailText label={"Requested Date"}>
                   {bodyApproval?.approvalDetail?.requestedDate
                     ? moment(
-                        bodyApproval?.approvalDetail?.requestedDate
+                        bodyApproval?.approvalDetail?.requestedDate,
                       ).format(dateFormatting.date)
                     : ""}
                 </DetailText>

@@ -27,7 +27,7 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 const BillingItemView = () => {
   // Selector
   const { data_view, data_ApprovalHistory, loading } = useSelector(
-    (state) => state.billing_item
+    (state) => state.billing_item,
   );
 
   // Declaration
@@ -56,7 +56,7 @@ const BillingItemView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, search, page, pageSize, sort]);
 
@@ -144,7 +144,7 @@ const BillingItemView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -186,7 +186,7 @@ const BillingItemView = () => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -244,7 +244,13 @@ const BillingItemView = () => {
         const linkContent =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={isEditable ? "#0075bf" : "#8D91A0"} width={24} />}
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={24}
+                />
+              }
               border={false}
               disabled={!isEditable}
             >
@@ -331,29 +337,30 @@ const BillingItemView = () => {
       action: "History",
       type: "table",
       render: (record, data) => {
-        const Content =  data > 3 ? (
-          <ButtonComponent
-            icon={
-              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-            }
-            border={false}
-            onClick={() => handleApprovalHistory(record.id)}
-          >
-            <span className={"text-black ml-3"}>Approval History</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title="Approval History">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={24}
-                onClick={() => handleApprovalHistory(record.id)}
-              />
-            </div>
-          </Tooltip>
-        );
-        return Content
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+              }
+              border={false}
+              onClick={() => handleApprovalHistory(record.id)}
+            >
+              <span className={"text-black ml-3"}>Approval History</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Approval History">
+              <div className="pt-1">
+                <SVGIcon
+                  name="IconLogHistory"
+                  color={"#0075bf"}
+                  width={24}
+                  onClick={() => handleApprovalHistory(record.id)}
+                />
+              </div>
+            </Tooltip>
+          );
+        return Content;
       },
     },
     {
@@ -397,11 +404,11 @@ const BillingItemView = () => {
                   searchInput,
                   searchedColumn,
                   searchText,
-                  handleSearch
+                  handleSearch,
                 ),
                 ...useColumnActionPermission(
                   ["view", "activate", "update", "history"],
-                  itemGrantAccess
+                  itemGrantAccess,
                 ),
               ]}
               current={page}

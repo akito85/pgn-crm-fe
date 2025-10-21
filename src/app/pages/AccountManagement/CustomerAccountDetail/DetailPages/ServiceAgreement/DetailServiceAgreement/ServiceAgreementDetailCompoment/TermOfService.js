@@ -1,5 +1,5 @@
-import React,{useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../components/TablePagination'
+import React, { useState, useEffect, useRef } from "react";
+import TablePagination from "../../../../../../../../components/TablePagination";
 
 const expandedRowRender = (record) => {
   const columns = [
@@ -10,13 +10,13 @@ const expandedRowRender = (record) => {
       render: (text, object, index) => index + 1,
     },
     {
-      title: 'ATTRIBUTE',
-      dataIndex: 'attribute',
+      title: "ATTRIBUTE",
+      dataIndex: "attribute",
     },
     {
-      title: 'VALUE',
-      align: 'right',
-      dataIndex: 'value',
+      title: "VALUE",
+      align: "right",
+      dataIndex: "value",
     },
     // {
     //   title: 'UNIT',
@@ -27,12 +27,10 @@ const expandedRowRender = (record) => {
     //   dataIndex: 'fromItem',
     // }
   ];
- 
+
   return (
     <div>
-      <p className="text-primary text-xs font-bold uppercase">
-        TOS DETAIL
-      </p>
+      <p className="text-primary text-xs font-bold uppercase">TOS DETAIL</p>
       <TablePagination
         useSelect={false}
         usePagination={false}
@@ -40,10 +38,10 @@ const expandedRowRender = (record) => {
         columns={columns}
       />
     </div>
-  )
+  );
 };
 
-const TermOfService = ({data}) => {
+const TermOfService = ({ data }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -65,14 +63,14 @@ const TermOfService = ({data}) => {
           key: index + 1,
         })),
       }));
-      setDataTable(dataTos)
+      setDataTable(dataTos);
     }
   }, [data?.saTOS]);
 
   useEffect(() => {
     setTotalElement(dataTable?.length);
-  }, [dataTable])
-  
+  }, [dataTable]);
+
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
@@ -141,24 +139,24 @@ const TermOfService = ({data}) => {
         render: (text, object, index) => index + 1,
       },
       {
-        title: 'TERM OF SERVICE',
-        dataIndex: 'tosName',
+        title: "TERM OF SERVICE",
+        dataIndex: "tosName",
       },
       {
-        title: 'DESCRIPTION',
-        dataIndex: 'description',
+        title: "DESCRIPTION",
+        dataIndex: "description",
       },
     ];
-    return result
-  }
+    return result;
+  };
 
   return (
-    <div className='w-full py-6'>
+    <div className="w-full py-6">
       <TablePagination
         pageSize={pageSize}
         current={page}
         dataSource={filterDataByPage()}
-        tableScrolled={{y: 525, x: 900 }}
+        tableScrolled={{ y: 525, x: 900 }}
         totalData={totalElement}
         onChange={handleChangeSize}
         onSort={onSort}
@@ -170,10 +168,10 @@ const TermOfService = ({data}) => {
           searchText,
           handleSearch,
         })}
-        expandable={{expandedRowRender}}
+        expandable={{ expandedRowRender }}
       />
     </div>
-  )
-}
+  );
+};
 
-export default TermOfService
+export default TermOfService;

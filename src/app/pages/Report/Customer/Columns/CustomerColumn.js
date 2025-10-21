@@ -5,7 +5,7 @@ function formatNPWP(npwpNumber) {
   const npwpString = npwpNumber.toString();
   const formattedNPWP = npwpString.replace(
     /(\d{2})(\d{3})(\d{3})(\d{1})(\d{3})(\d{3})/,
-    "$1.$2.$3.$4-$5.$6"
+    "$1.$2.$3.$4-$5.$6",
   );
   return formattedNPWP;
 }
@@ -17,7 +17,7 @@ const columns = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  search
+  search,
 ) => [
   {
     title: "NO",
@@ -35,7 +35,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -45,7 +45,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -59,7 +59,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -69,7 +69,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -83,7 +83,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -93,7 +93,7 @@ const columns = (
         formatNPWP(text),
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -106,7 +106,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -116,7 +116,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -130,7 +130,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -140,7 +140,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -157,7 +157,7 @@ const columns = (
       handleSearch,
       false,
       "date",
-      search
+      search,
     ),
     render: (text) =>
       renderDateColumn(
@@ -166,7 +166,7 @@ const columns = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -183,7 +183,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -193,7 +193,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -207,7 +207,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -217,7 +217,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -234,7 +234,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -244,7 +244,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -258,7 +258,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -268,7 +268,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -284,7 +284,7 @@ const columns = (
       searchText,
       handleSearch,
       false,
-      "status"
+      "status",
     ),
     render: (text) =>
       renderColumn(
@@ -294,7 +294,7 @@ const columns = (
         text,
         false,
         "status",
-        search
+        search,
       ),
   },
   {
@@ -311,7 +311,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -321,7 +321,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -336,7 +336,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -346,7 +346,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -360,7 +360,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -370,7 +370,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -384,7 +384,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -394,7 +394,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -408,7 +408,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -418,7 +418,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -432,7 +432,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -442,7 +442,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -456,7 +456,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -466,7 +466,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -484,7 +484,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -494,7 +494,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -510,7 +510,7 @@ const columns = (
       searchText,
       handleSearch,
       false,
-      "status"
+      "status",
     ),
     render: (text) =>
       renderColumn(
@@ -520,7 +520,7 @@ const columns = (
         text,
         false,
         "status",
-        search
+        search,
       ),
   },
   {
@@ -537,7 +537,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -547,7 +547,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -562,7 +562,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -572,7 +572,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -586,7 +586,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -596,7 +596,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -613,7 +613,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -623,7 +623,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -637,7 +637,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -647,7 +647,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -661,7 +661,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -671,7 +671,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -685,7 +685,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -695,7 +695,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -709,7 +709,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -719,7 +719,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -734,7 +734,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -744,7 +744,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -760,7 +760,7 @@ const columns = (
       searchText,
       handleSearch,
       false,
-      "yes_or_no"
+      "yes_or_no",
     ),
     render: (text) =>
       renderColumn(
@@ -770,7 +770,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -786,7 +786,7 @@ const columns = (
       searchText,
       handleSearch,
       false,
-      "yes_or_no"
+      "yes_or_no",
     ),
     render: (text) =>
       renderColumn(
@@ -796,7 +796,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -813,7 +813,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -823,7 +823,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -838,7 +838,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -848,7 +848,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -865,7 +865,7 @@ const columns = (
       handleSearch,
       false,
       "input",
-      search
+      search,
     ),
     render: (text) =>
       renderColumn(
@@ -875,7 +875,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -889,7 +889,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -899,7 +899,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -915,7 +915,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -925,7 +925,7 @@ const columns = (
         text?.toUpperCase(),
         true,
         "input",
-        search
+        search,
       ),
   },
 
@@ -940,7 +940,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -950,7 +950,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -963,7 +963,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -973,7 +973,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -987,7 +987,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -997,7 +997,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1010,7 +1010,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1020,7 +1020,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1036,7 +1036,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1046,7 +1046,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1059,7 +1059,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1069,7 +1069,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1083,7 +1083,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1093,7 +1093,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1107,7 +1107,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1117,7 +1117,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1131,7 +1131,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1141,7 +1141,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1155,7 +1155,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1165,7 +1165,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
 
@@ -1179,7 +1179,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1189,7 +1189,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1202,7 +1202,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1212,7 +1212,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1225,7 +1225,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1235,7 +1235,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1248,7 +1248,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1258,7 +1258,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1271,7 +1271,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1281,7 +1281,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1294,7 +1294,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1304,7 +1304,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1321,7 +1321,7 @@ const columns = (
       handleSearch,
       false,
       "yes_or_no",
-      search
+      search,
     ),
     render: (text) =>
       renderColumn(
@@ -1331,7 +1331,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1344,7 +1344,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1354,7 +1354,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1370,7 +1370,7 @@ const columns = (
       searchText,
       handleSearch,
       false,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderColumn(
@@ -1380,7 +1380,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1396,7 +1396,7 @@ const columns = (
       searchText,
       handleSearch,
       false,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderColumn(
@@ -1406,7 +1406,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1419,7 +1419,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1429,7 +1429,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1442,7 +1442,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1452,7 +1452,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1465,7 +1465,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1475,7 +1475,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1489,7 +1489,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -1499,7 +1499,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1513,7 +1513,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -1523,7 +1523,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1537,7 +1537,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -1547,7 +1547,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1561,7 +1561,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -1571,7 +1571,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1585,7 +1585,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -1595,7 +1595,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1609,7 +1609,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -1619,7 +1619,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1633,7 +1633,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -1643,7 +1643,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1658,7 +1658,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -1668,7 +1668,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1685,7 +1685,7 @@ const columns = (
       handleSearch,
       false,
       "date",
-      search
+      search,
     ),
     render: (text) =>
       renderDateColumn(
@@ -1694,7 +1694,7 @@ const columns = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -1711,7 +1711,7 @@ const columns = (
       handleSearch,
       false,
       "date",
-      search
+      search,
     ),
     render: (text) =>
       renderDateColumn(
@@ -1720,7 +1720,7 @@ const columns = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -1736,7 +1736,7 @@ const columns = (
       searchText,
       handleSearch,
       false,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -1746,7 +1746,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1760,7 +1760,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1770,7 +1770,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1784,7 +1784,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1794,7 +1794,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1811,7 +1811,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1821,7 +1821,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1837,7 +1837,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1847,7 +1847,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1860,7 +1860,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1870,7 +1870,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1883,7 +1883,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1893,7 +1893,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   // {
@@ -1931,7 +1931,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1941,7 +1941,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1955,7 +1955,7 @@ const columns = (
       searchInput,
       searchInput,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1965,7 +1965,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -1978,7 +1978,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -1988,7 +1988,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2001,7 +2001,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -2011,7 +2011,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2029,7 +2029,7 @@ const columns = (
       searchText,
       handleSearch,
       false,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -2039,7 +2039,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2053,7 +2053,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2063,7 +2063,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2077,7 +2077,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -2087,7 +2087,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2102,7 +2102,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -2112,7 +2112,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2127,7 +2127,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -2137,7 +2137,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2152,7 +2152,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2162,7 +2162,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2178,7 +2178,7 @@ const columns = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -2187,7 +2187,7 @@ const columns = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -2203,7 +2203,7 @@ const columns = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -2212,7 +2212,7 @@ const columns = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -2228,7 +2228,7 @@ const columns = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -2237,7 +2237,7 @@ const columns = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -2253,7 +2253,7 @@ const columns = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -2262,7 +2262,7 @@ const columns = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -2277,7 +2277,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2287,7 +2287,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2302,7 +2302,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -2312,7 +2312,7 @@ const columns = (
         text?.value,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2326,7 +2326,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -2336,7 +2336,7 @@ const columns = (
         text?.value,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2353,7 +2353,7 @@ const columns = (
       handleSearch,
       false,
       "date",
-      search
+      search,
     ),
     render: (text) =>
       renderDateColumn(
@@ -2362,7 +2362,7 @@ const columns = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -2378,7 +2378,7 @@ const columns = (
       searchText,
       handleSearch,
       false,
-      "yes_or_no"
+      "yes_or_no",
     ),
     render: (text) =>
       renderColumn(
@@ -2388,7 +2388,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2405,7 +2405,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2415,7 +2415,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2430,7 +2430,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2440,7 +2440,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2454,7 +2454,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2464,7 +2464,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2478,7 +2478,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2488,7 +2488,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2503,7 +2503,7 @@ const columns = (
       searchText,
       handleSearch,
       true,
-      'yes_or_no',
+      "yes_or_no",
     ),
     render: (text) =>
       renderColumn(
@@ -2513,7 +2513,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2529,7 +2529,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2539,7 +2539,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2555,7 +2555,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2565,7 +2565,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2580,7 +2580,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2590,7 +2590,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   // ref dari create account table
@@ -2606,7 +2606,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2616,7 +2616,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2631,7 +2631,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2641,7 +2641,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2656,7 +2656,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2666,7 +2666,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2684,7 +2684,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2694,7 +2694,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2709,7 +2709,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2719,7 +2719,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2733,7 +2733,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2743,7 +2743,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2757,7 +2757,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2767,7 +2767,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2784,7 +2784,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -2794,7 +2794,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2809,7 +2809,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -2819,7 +2819,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2832,7 +2832,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -2842,7 +2842,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2857,7 +2857,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -2867,7 +2867,7 @@ const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -2884,7 +2884,7 @@ const columns = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -2894,7 +2894,7 @@ const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
 ];

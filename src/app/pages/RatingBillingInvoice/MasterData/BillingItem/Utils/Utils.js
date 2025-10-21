@@ -4,7 +4,7 @@ import { dateFormatting } from "../../../../../../utils";
 export const handleMandatory = (
   setListSectionInfo = () => {},
   listDataAttachment,
-  errorFields
+  errorFields,
 ) => {
   setListSectionInfo((prevState) => {
     const res = prevState.map((item) => {
@@ -13,11 +13,11 @@ export const handleMandatory = (
           ? (errorFields || []).reduce(
               (current, next) =>
                 item.paramValue.includes(next.name[0]) ? current + 1 : current,
-              0
+              0,
             )
           : listDataAttachment.length < 1
-          ? 1
-          : 0;
+            ? 1
+            : 0;
       return {
         value: item.value,
         paramValue: item.paramValue,

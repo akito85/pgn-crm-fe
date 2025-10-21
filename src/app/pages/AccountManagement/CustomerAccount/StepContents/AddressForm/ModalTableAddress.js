@@ -1,9 +1,7 @@
-import React from 'react'
+import React from "react";
 
 const ModalTableAddress = () => {
-  return (
-    <div>ModalTableAddress</div>
-  )
-}
+  return <div>ModalTableAddress</div>;
+};
 
-export default ModalTableAddress
+export default ModalTableAddress;

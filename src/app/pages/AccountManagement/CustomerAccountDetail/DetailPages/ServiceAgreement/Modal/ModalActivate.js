@@ -1,13 +1,13 @@
-import React, {useState, useRef, useEffect} from 'react'
-import ModalCustom from '../../../../../../../components/Modal/ModalCustom'
-import { Form, Input, Select, Spin } from 'antd'
-import ButtonComponent from '../../../../../../../components/ButtonComponent'
-import SelectComponent from '../../../../../../../components/SelectComponent'
-import InputComponent from '../../../../../../../components/InputComponent'
-import TablePagination from '../../../../../../../components/TablePagination'
-import { FilterOutlined } from '@ant-design/icons'
-import Highlighter from 'react-highlight-words'
-import ModalApproveOrReject from '../../../../../../../components/Modal/ModalApproveOrReject'
+import React, { useState, useRef, useEffect } from "react";
+import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
+import { Form, Input, Select, Spin } from "antd";
+import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import SelectComponent from "../../../../../../../components/SelectComponent";
+import InputComponent from "../../../../../../../components/InputComponent";
+import TablePagination from "../../../../../../../components/TablePagination";
+import { FilterOutlined } from "@ant-design/icons";
+import Highlighter from "react-highlight-words";
+import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 
 const expandedRowRender = (record) => {
   const dataExpand = record?.employeeDetail;
@@ -47,37 +47,35 @@ const ModalActivate = ({
   dataDetailApproval = [],
   handleDetailApproval = () => {},
   handleClearInactive = () => {},
-  appHierDataDetail=[],
+  appHierDataDetail = [],
   setAppHierDataDetail,
   activeOrInactive,
-  loading
+  loading,
 }) => {
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
 
- 
-useEffect(() => {
-  if(dataDetailApproval || dataDetailApproval.length > 0){
-    const data = (dataDetailApproval || []).map((a, index) => ({
-      ...a,
-      key: index + 1,
-      employeeDetail: a.employeeDetail.map((b, index) => ({
-        ...b,
+  useEffect(() => {
+    if (dataDetailApproval || dataDetailApproval.length > 0) {
+      const data = (dataDetailApproval || []).map((a, index) => ({
+        ...a,
         key: index + 1,
-      })),
-    }));
-    setAppHierDataDetail(data);
-  }
-}, [dataDetailApproval])
-
+        employeeDetail: a.employeeDetail.map((b, index) => ({
+          ...b,
+          key: index + 1,
+        })),
+      }));
+      setAppHierDataDetail(data);
+    }
+  }, [dataDetailApproval]);
 
   const getColumnSearchProps = (
     dataIndex,
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch
+    handleSearch,
   ) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
       <div
@@ -134,7 +132,7 @@ useEffect(() => {
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch
+    handleSearch,
   ) => {
     return [
       {
@@ -151,7 +149,7 @@ useEffect(() => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -162,7 +160,7 @@ useEffect(() => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
     ];
@@ -173,7 +171,7 @@ useEffect(() => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
- 
+
   return (
     <div>
       {/* Modal Delete Draft */}
@@ -185,10 +183,7 @@ useEffect(() => {
         handleCancel={handleClearInactive}
         footer={
           <div className="w-full flex justify-end gap-5 p-4">
-            <ButtonComponent
-              onClick={handleClearInactive}
-              type="default"
-            >
+            <ButtonComponent onClick={handleClearInactive} type="default">
               Cancel
             </ButtonComponent>
             <ButtonComponent
@@ -206,48 +201,47 @@ useEffect(() => {
             id="inactivateForm"
             form={formInactivate}
             onFinish={handleSaveActivate}
-            layout='vertical'
+            layout="vertical"
           >
-          
-          <Form.Item
-            label={"Approval Hierarchy"}
-            name={"appHierId"}
-            rules={[
-              {
-                message: "This field is required",
-                required: true,
-              },
-            ]}
-            className='pb-6'
-          >
-            <SelectComponent onChange={(e)=>handleDetailApproval(e)}>
-              {dataApprovalList?.map((data, index) => (
-                <Select.Option key={index} value={data.appHierId}>
-                  {data.approvalName}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
+            <Form.Item
+              label={"Approval Hierarchy"}
+              name={"appHierId"}
+              rules={[
+                {
+                  message: "This field is required",
+                  required: true,
+                },
+              ]}
+              className="pb-6"
+            >
+              <SelectComponent onChange={(e) => handleDetailApproval(e)}>
+                {dataApprovalList?.map((data, index) => (
+                  <Select.Option key={index} value={data.appHierId}>
+                    {data.approvalName}
+                  </Select.Option>
+                ))}
+              </SelectComponent>
+            </Form.Item>
 
             {/* Table */}
-              {appHierDataDetail.length > 0  && (
-                <div className='py-3 mb-6'>
-                  <TablePagination
-                    useSelect={false}
-                    usePagination={false}
-                    dataSource={appHierDataDetail}
-                    columns={columnInactivateData(
-                      searchInput,
-                      searchedColumn,
-                      searchText,
-                      handleSearch
-                    )}
-                    expandable={{
-                      expandedRowRender,
-                    }}
-                  />
-                </div>
-              )}
+            {appHierDataDetail.length > 0 && (
+              <div className="py-3 mb-6">
+                <TablePagination
+                  useSelect={false}
+                  usePagination={false}
+                  dataSource={appHierDataDetail}
+                  columns={columnInactivateData(
+                    searchInput,
+                    searchedColumn,
+                    searchText,
+                    handleSearch,
+                  )}
+                  expandable={{
+                    expandedRowRender,
+                  }}
+                />
+              </div>
+            )}
 
             <Form.Item
               name={"remark"}
@@ -265,7 +259,7 @@ useEffect(() => {
         </Spin>
       </ModalApproveOrReject>
     </div>
-  )
-}
+  );
+};
 
-export default ModalActivate
+export default ModalActivate;

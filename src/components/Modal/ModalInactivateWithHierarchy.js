@@ -32,7 +32,7 @@ const ModalInactivateWithHierarchy = ({
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const { dataListAppHierId = [], dataListAppHierDetail = [] } = useSelector(
-    (state) => state[selector]
+    (state) => state[selector],
   );
 
   const getStartDate = () => {
@@ -171,7 +171,7 @@ const ModalInactivateWithHierarchy = ({
                     !value
                       ? Promise.resolve()
                       : Promise.reject(
-                          new Error("End date must before Start date")
+                          new Error("End date must before Start date"),
                         ),
                 },
                 { message: requiredMessage("End Date"), required: true },

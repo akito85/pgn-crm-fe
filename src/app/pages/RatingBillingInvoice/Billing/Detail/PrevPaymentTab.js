@@ -3,9 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
-import {
-  getPrevPaymentBilling,
-} from "../../../../../redux/slices/rating_billing_invoice/billing";
+import { getPrevPaymentBilling } from "../../../../../redux/slices/rating_billing_invoice/billing";
 import { columnsPayment } from "./Table/TablePayment";
 import { currencyFormatting } from "../../../../../utils/formatCurrency";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
@@ -17,7 +15,10 @@ const PrevPaymentTab = ({ billingCodeId }) => {
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = useMemo(() => data_PrevPayment?.receiptDetails || [], [data_PrevPayment?.receiptDetails]);
+  const dataSource = useMemo(
+    () => data_PrevPayment?.receiptDetails || [],
+    [data_PrevPayment?.receiptDetails],
+  );
 
   // State
   const [page, setPage] = useState(1);
@@ -142,7 +143,7 @@ const PrevPaymentTab = ({ billingCodeId }) => {
               searchedColumn,
               searchText,
               handleSearch,
-              search
+              search,
             )}
             onSort={onSort}
             tableScrolled={{ y: 525, x: 5000 }}

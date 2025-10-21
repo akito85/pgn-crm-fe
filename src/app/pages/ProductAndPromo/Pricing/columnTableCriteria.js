@@ -8,7 +8,7 @@ export const getColumnSearchPropsCriteria = (
   searchedColumn,
   searchText,
   handleSearch,
-  excludeRender = false
+  excludeRender = false,
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
@@ -87,7 +87,7 @@ export const columnsTableCriteria = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
 ) => [
   {
     title: "ACCOUNT CATEGORY",
@@ -105,7 +105,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -124,7 +124,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -143,7 +143,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -163,7 +163,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -182,7 +182,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -201,7 +201,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -220,7 +220,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -239,7 +239,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -258,7 +258,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -278,7 +278,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -298,7 +298,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -318,7 +318,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -337,7 +337,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -356,7 +356,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
 ];
@@ -365,7 +365,7 @@ export const columnsTableCriteriaDetail = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
 ) => [
   {
     title: "ACCOUNT CATEGORY",
@@ -379,7 +379,7 @@ export const columnsTableCriteriaDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -394,7 +394,7 @@ export const columnsTableCriteriaDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -409,7 +409,7 @@ export const columnsTableCriteriaDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -424,7 +424,7 @@ export const columnsTableCriteriaDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -439,7 +439,7 @@ export const columnsTableCriteriaDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -454,7 +454,7 @@ export const columnsTableCriteriaDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -469,7 +469,7 @@ export const columnsTableCriteriaDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -484,7 +484,7 @@ export const columnsTableCriteriaDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -499,7 +499,7 @@ export const columnsTableCriteriaDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -514,7 +514,7 @@ export const columnsTableCriteriaDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -529,7 +529,7 @@ export const columnsTableCriteriaDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -544,7 +544,7 @@ export const columnsTableCriteriaDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -559,7 +559,7 @@ export const columnsTableCriteriaDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -574,7 +574,7 @@ export const columnsTableCriteriaDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
 ];

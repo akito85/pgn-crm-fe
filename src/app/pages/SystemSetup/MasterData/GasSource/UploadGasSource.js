@@ -1,9 +1,7 @@
-import React from 'react'
+import React from "react";
 
 const UploadGasSource = () => {
-  return (
-    <div>UploadGasSource</div>
-  )
-}
+  return <div>UploadGasSource</div>;
+};
 
-export default UploadGasSource
+export default UploadGasSource;

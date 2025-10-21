@@ -9,31 +9,37 @@ import moment from "moment";
 import { urlLink } from "../../constant";
 import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";
 
-const AttachmentCustomer = ({type = "preview", id = [], dispatch = () => {} }) => {
-
-  const { data_customerDetailAttachment} =
-  useSelector((state) => state.customerAccount);
+const AttachmentCustomer = ({
+  type = "preview",
+  id = [],
+  dispatch = () => {},
+}) => {
+  const { data_customerDetailAttachment } = useSelector(
+    (state) => state.customerAccount,
+  );
 
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
-  
+
   useEffect(() => {
     dispatch(getCustomerAttachment({ id }));
-  },[dispatch, id])
-  
-  useEffect(() => {
-    if(data_customerDetailAttachment){
-      setDataAttachment((data_customerDetailAttachment|| []).map((item) => ({
-        ...item,
-        createdDate: moment(item.createdDate).format("DD MMM YYYY"),
-        fileSize: bytesConverter(item.fileSize || 0),
-        urlFile1: `${urlLink(item?.id)}`,
-        dataType: "exist",
-      })));
-    }
-  },[data_customerDetailAttachment])
+  }, [dispatch, id]);
 
-  console.log(dataAttachment)
+  useEffect(() => {
+    if (data_customerDetailAttachment) {
+      setDataAttachment(
+        (data_customerDetailAttachment || []).map((item) => ({
+          ...item,
+          createdDate: moment(item.createdDate).format("DD MMM YYYY"),
+          fileSize: bytesConverter(item.fileSize || 0),
+          urlFile1: `${urlLink(item?.id)}`,
+          dataType: "exist",
+        })),
+      );
+    }
+  }, [data_customerDetailAttachment]);
+
+  console.log(dataAttachment);
   return (
     <Fragment>
       <AttachmentSectionForm

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import moment from 'moment'
+import moment from "moment";
 
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
@@ -15,7 +15,12 @@ import TosSubmission from "./TosSubmission";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import { LeftOutlined } from "@ant-design/icons";
 import HeaderDetail from "../../../HeaderDetail";
-import { approveOrRejectInactiveServiceAgreement, approveOrRejectServiceAgreement, getDetailServiceAgreement, getDetailServiceAgreementDraft } from "../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
+import {
+  approveOrRejectInactiveServiceAgreement,
+  approveOrRejectServiceAgreement,
+  getDetailServiceAgreement,
+  getDetailServiceAgreementDraft,
+} from "../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 import { Spin, Form } from "antd";
 // import ModalApproveOrRejectSa from "./Modal/ModalApproveOrRejectSa";
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
@@ -31,7 +36,7 @@ const DetailServiceAgreement = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { data_detail, data_detail_draft, loading, message } = useSelector(
-    (state) => state.accountServiceAgreement
+    (state) => state.accountServiceAgreement,
   );
   //declare
   const location = useLocation();
@@ -39,7 +44,7 @@ const DetailServiceAgreement = () => {
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const type = location?.state?.type;
-  const statusSa = data_detail?.saInfo?.status
+  const statusSa = data_detail?.saInfo?.status;
 
   const optionTab = [
     { value: "Service Agreement Detail" },
@@ -48,7 +53,7 @@ const DetailServiceAgreement = () => {
     { value: "TOS Submission", disabled: statusSa !== "ACTIVE" ? true : false },
   ];
   const [typeServiceAgreementSec, setTypeServiceAgreementSec] = useState(
-    optionTab[0].value
+    optionTab[0].value,
   );
   // Tab Sa Origin/Draft
   const [valuePage, setValuePage] = useState("Service Agreement Information");
@@ -59,9 +64,9 @@ const DetailServiceAgreement = () => {
 
   // Modal Approve Or Reject SA
   const [modalError, setModalError] = useState(false);
-  const [modalApproveOrReject, setModalApproveOrReject] = useState('')
-  const [approveOrReject, setApproveOrReject] = useState('')
-  const [remark, setRemark] = useState('')
+  const [modalApproveOrReject, setModalApproveOrReject] = useState("");
+  const [approveOrReject, setApproveOrReject] = useState("");
+  const [remark, setRemark] = useState("");
   const [bodyApproval, setBodyApproval] = useState({
     isApprover: false,
     tappId: null,
@@ -70,8 +75,6 @@ const DetailServiceAgreement = () => {
   });
   const showButtonApproval =
     bodyApproval.isApprover !== null && bodyApproval.isApprover;
-
-
 
   const handleChangeOption = (e) => {
     setTypeServiceAgreementSec(e.target.value);
@@ -92,14 +95,14 @@ const DetailServiceAgreement = () => {
         breadcrumbName: "Detail Customer",
         state: {
           idAccount: item.idAccount,
-        }
+        },
       },
       {
         path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_AGREEMENT,
         breadcrumbName: "Service Agreement Detail",
       },
-    ]
-  }
+    ];
+  };
 
   const dataTabs = {
     serviceAgreementDetail: "Service Agreement Detail",
@@ -141,17 +144,22 @@ const DetailServiceAgreement = () => {
 
   useEffect(() => {
     if (
-      path && (
-        path.pathname.includes("/account-management/account-standard/service-agreement/tos/create") ||
-        path.pathname.includes("/account-management/account-standard/service-agreement/tos/view") ||
-        path.pathname.includes("/account-management/account-standard/service-agreement/tos/update")
-      )
+      path &&
+      (path.pathname.includes(
+        "/account-management/account-standard/service-agreement/tos/create",
+      ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/service-agreement/tos/view",
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/service-agreement/tos/update",
+        ))
     ) {
       setTypeServiceAgreementSec(dataTabs.tosSubmission);
     } else {
       setTypeServiceAgreementSec(dataTabs.serviceAgreementDetail);
     }
-  }, [dataTabs.serviceAgreementDetail, dataTabs.tosSubmission, path])
+  }, [dataTabs.serviceAgreementDetail, dataTabs.tosSubmission, path]);
 
   useEffect(() => {
     dispatch(getDetailServiceAgreement(idSA))
@@ -167,30 +175,29 @@ const DetailServiceAgreement = () => {
         }
       })
       .catch((error) => {
-        console.log(error)
+        console.log(error);
       });
 
     dispatch(getDetailServiceAgreementDraft(idSA))
       .unwrap()
-      .then((res) => {
-      })
+      .then((res) => {})
       .catch((error) => {
-        console.log(error)
+        console.log(error);
       });
   }, [dispatch, idSA]);
 
-
   useEffect(() => {
     if (hasValue(data_detail_draft) === false) {
-      setTabPagesSaDetail((prevState) => prevState?.filter(item => item?.value !== 'Draft'))
+      setTabPagesSaDetail((prevState) =>
+        prevState?.filter((item) => item?.value !== "Draft"),
+      );
     } else {
       setTabPagesSaDetail([
         { value: "Service Agreement Information" },
         { value: "Draft" },
-      ])
+      ]);
     }
   }, [data_detail_draft]);
-
 
   // handle confirm
   const handleConfirm = (formValue, handleClear) => {
@@ -212,17 +219,20 @@ const DetailServiceAgreement = () => {
       approvalId: bodyApproval.tappId,
       action: approveOrReject.toUpperCase(),
     };
-    if (bodyApproval.approvalType === "SERVICE_AGREEMENT" || bodyApproval.approvalType === "UPDATE_SERVICE_AGREEMENT") {
+    if (
+      bodyApproval.approvalType === "SERVICE_AGREEMENT" ||
+      bodyApproval.approvalType === "UPDATE_SERVICE_AGREEMENT"
+    ) {
       dispatch(
         approveOrRejectServiceAgreement({
           body: data,
           responseSuccess:
             approveOrReject === "Approve" ? successApprove : successReject,
-        })
+        }),
       )
         .unwrap()
         .then(() => {
-          handleClear()
+          handleClear();
         })
         .catch((error) => {
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -236,7 +246,7 @@ const DetailServiceAgreement = () => {
           body: data,
           responseSuccess:
             approveOrReject === "Approve" ? successApprove : successReject,
-        })
+        }),
       )
         .unwrap()
         .then(() => {
@@ -249,19 +259,17 @@ const DetailServiceAgreement = () => {
           }
         });
     }
-
-  }
+  };
   const handleCancel = () => {
     setModalApproveOrReject(false);
     // form.resetFields();
   };
 
-
   function convertToNormalcase(inputText) {
-    return inputText.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+    return inputText
+      .toLowerCase()
+      .replace(/\b\w/g, (char) => char.toUpperCase());
   }
-
-
 
   // Handle Change Radio Tabs
   const onChangeTabInfo = (e) => {
@@ -281,28 +289,47 @@ const DetailServiceAgreement = () => {
           />
 
           {/* Card Requested Information */}
-          {data_detail?.approvalDetail !== null && data_detail?.isApprover === true && (
-            <BaseContainer
-              header={
-                data_detail?.approvalDetail.type == 'inactive' ?
-                  'INACTIVE REQUEST INFORMATION' :
-                  data_detail?.approvalDetail.type == 'create' ?
-                    'CREATE REQUEST INFORMATION' :
-                    'UPDATE REQUEST INFORMATION'
-              }>
-              <div className="w-full grid grid-cols-4 gap-3">
-                <DetailText label={"Requested Date"}>{data_detail?.approvalDetail?.requestedDate ? moment(data_detail?.approvalDetail?.requestedDate).format(dateFormatting.dateTime) : ''}</DetailText>
-                <DetailText label={"Requested By"}>{data_detail?.approvalDetail?.requestedBy}</DetailText>
-                {data_detail?.approvalDetail.type == 'inactive' && (
-                  <DetailText label={"Remarks"}>{data_detail?.approvalDetail?.remarks}</DetailText>
-                )}
-              </div>
-            </BaseContainer>
-          )}
+          {data_detail?.approvalDetail !== null &&
+            data_detail?.isApprover === true && (
+              <BaseContainer
+                header={
+                  data_detail?.approvalDetail.type == "inactive"
+                    ? "INACTIVE REQUEST INFORMATION"
+                    : data_detail?.approvalDetail.type == "create"
+                      ? "CREATE REQUEST INFORMATION"
+                      : "UPDATE REQUEST INFORMATION"
+                }
+              >
+                <div className="w-full grid grid-cols-4 gap-3">
+                  <DetailText label={"Requested Date"}>
+                    {data_detail?.approvalDetail?.requestedDate
+                      ? moment(
+                          data_detail?.approvalDetail?.requestedDate,
+                        ).format(dateFormatting.dateTime)
+                      : ""}
+                  </DetailText>
+                  <DetailText label={"Requested By"}>
+                    {data_detail?.approvalDetail?.requestedBy}
+                  </DetailText>
+                  {data_detail?.approvalDetail.type == "inactive" && (
+                    <DetailText label={"Remarks"}>
+                      {data_detail?.approvalDetail?.remarks}
+                    </DetailText>
+                  )}
+                </div>
+              </BaseContainer>
+            )}
 
-          <BaseContainer type={"tabs"} element={<RadioTabs data={tabPagesSaDetail} onChange={onChangeTabInfo} />}>
+          <BaseContainer
+            type={"tabs"}
+            element={
+              <RadioTabs data={tabPagesSaDetail} onChange={onChangeTabInfo} />
+            }
+          >
             {/* SA INFO ORIGIN */}
-            <div className={`${valuePage !== "Service Agreement Information" ? "hidden" : ""}`}>
+            <div
+              className={`${valuePage !== "Service Agreement Information" ? "hidden" : ""}`}
+            >
               {/* {data_detail?.saInfo?.saReferenceNumber !== null &&
                 <div>
                   <div className="py-4 text-primary text-xs font-bold uppercase">
@@ -318,18 +345,63 @@ const DetailServiceAgreement = () => {
                   SERVICE AGREEMENT INFORMATION
                 </div>
                 <div className="w-full grid grid-cols-4 gap-4">
-                  <DetailText label={"Service Agreement Number"} className={"break-all whitespace-normal"}>{data_detail?.saInfo?.saNumber}</DetailText>
-                  <DetailText label={"Service Agreement Reference Number"}>{data_detail?.saInfo?.saReferenceNumber}</DetailText>
-                  <DetailText label={"Service Agreement Type"}>{data_detail?.saInfo?.saType}</DetailText>
-                  <DetailText label={"PJBG Type"}>{data_detail?.saInfo?.pjbgType}</DetailText>
-                  <DetailText label={"Service Agreement Date"}>{data_detail?.saInfo?.saDate ? moment(data_detail?.saInfo?.saDate).format(dateFormatting.date) : ''}</DetailText>
-                  <DetailText label={"Start Date"}>{data_detail?.saInfo?.startDate ? moment(data_detail?.saInfo?.startDate).format(dateFormatting.date) : ''}</DetailText>
-                  <DetailText label={"End Date"}>{data_detail?.saInfo?.endDate ? moment(data_detail?.saInfo?.endDate).format(dateFormatting.date) : ''}</DetailText>
-                  <DetailText label={"Commitment Date"}>{data_detail?.saInfo?.comitmentDate ? moment(data_detail?.saInfo?.comitmentDate).format(dateFormatting.date) : ''}</DetailText>
-                  <DetailText label={"Status"}>{data_detail?.saInfo?.status && convertToNormalcase(data_detail?.saInfo?.status)}</DetailText>
-                  <DetailText label={"Status Approval"}>{data_detail?.saHistory?.approvalStatus && convertToNormalcase(data_detail?.saHistory?.approvalStatus)}</DetailText>
+                  <DetailText
+                    label={"Service Agreement Number"}
+                    className={"break-all whitespace-normal"}
+                  >
+                    {data_detail?.saInfo?.saNumber}
+                  </DetailText>
+                  <DetailText label={"Service Agreement Reference Number"}>
+                    {data_detail?.saInfo?.saReferenceNumber}
+                  </DetailText>
+                  <DetailText label={"Service Agreement Type"}>
+                    {data_detail?.saInfo?.saType}
+                  </DetailText>
+                  <DetailText label={"PJBG Type"}>
+                    {data_detail?.saInfo?.pjbgType}
+                  </DetailText>
+                  <DetailText label={"Service Agreement Date"}>
+                    {data_detail?.saInfo?.saDate
+                      ? moment(data_detail?.saInfo?.saDate).format(
+                          dateFormatting.date,
+                        )
+                      : ""}
+                  </DetailText>
+                  <DetailText label={"Start Date"}>
+                    {data_detail?.saInfo?.startDate
+                      ? moment(data_detail?.saInfo?.startDate).format(
+                          dateFormatting.date,
+                        )
+                      : ""}
+                  </DetailText>
+                  <DetailText label={"End Date"}>
+                    {data_detail?.saInfo?.endDate
+                      ? moment(data_detail?.saInfo?.endDate).format(
+                          dateFormatting.date,
+                        )
+                      : ""}
+                  </DetailText>
+                  <DetailText label={"Commitment Date"}>
+                    {data_detail?.saInfo?.comitmentDate
+                      ? moment(data_detail?.saInfo?.comitmentDate).format(
+                          dateFormatting.date,
+                        )
+                      : ""}
+                  </DetailText>
+                  <DetailText label={"Status"}>
+                    {data_detail?.saInfo?.status &&
+                      convertToNormalcase(data_detail?.saInfo?.status)}
+                  </DetailText>
+                  <DetailText label={"Status Approval"}>
+                    {data_detail?.saHistory?.approvalStatus &&
+                      convertToNormalcase(
+                        data_detail?.saHistory?.approvalStatus,
+                      )}
+                  </DetailText>
                   <div className="col-span-4">
-                    <DetailText label={"Description"}>{data_detail?.saInfo?.description}</DetailText>
+                    <DetailText label={"Description"}>
+                      {data_detail?.saInfo?.description}
+                    </DetailText>
                   </div>
                 </div>
               </div>
@@ -338,9 +410,15 @@ const DetailServiceAgreement = () => {
                   BILING & PAYMENT INFORMATION
                 </div>
                 <div className="w-full grid grid-cols-4 gap-4">
-                  <DetailText label={"Billing Cycle"}>{data_detail?.saInfo?.billingCycle}</DetailText>
-                  <DetailText label={"Term of Payment"}>{data_detail?.saInfo?.termsOfPaymentName}</DetailText>
-                  <DetailText label={"Invoce Template"}>{data_detail?.saInfo?.invoiceTemplate}</DetailText>
+                  <DetailText label={"Billing Cycle"}>
+                    {data_detail?.saInfo?.billingCycle}
+                  </DetailText>
+                  <DetailText label={"Term of Payment"}>
+                    {data_detail?.saInfo?.termsOfPaymentName}
+                  </DetailText>
+                  <DetailText label={"Invoce Template"}>
+                    {data_detail?.saInfo?.invoiceTemplate}
+                  </DetailText>
                 </div>
               </div>
               <div>
@@ -348,8 +426,16 @@ const DetailServiceAgreement = () => {
                   GAS INFORMATION
                 </div>
                 <div className="w-full grid grid-cols-4 gap-4">
-                  <DetailText label={"Gas In Plan Date"}>{data_detail?.saInfo?.gasInPlanDate ? moment(data_detail?.saInfo?.gasInPlanDate).format(dateFormatting.date) : ''}</DetailText>
-                  <DetailText label={"Already Gas In"}>{data_detail?.saInfo?.alreadyGasIn ? 'Yes' : 'No'}</DetailText>
+                  <DetailText label={"Gas In Plan Date"}>
+                    {data_detail?.saInfo?.gasInPlanDate
+                      ? moment(data_detail?.saInfo?.gasInPlanDate).format(
+                          dateFormatting.date,
+                        )
+                      : ""}
+                  </DetailText>
+                  <DetailText label={"Already Gas In"}>
+                    {data_detail?.saInfo?.alreadyGasIn ? "Yes" : "No"}
+                  </DetailText>
                 </div>
               </div>
             </div>
@@ -409,7 +495,6 @@ const DetailServiceAgreement = () => {
                 </ButtonComponent>
               </div>
             ) : null}
-
           </div>
         </Spin>
 

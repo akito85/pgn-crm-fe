@@ -8,18 +8,10 @@ import {
   getAllEntityPaginate,
   inactiveEntity,
 } from "../../../../redux/slices/system_setup/entity";
-import {
-  Spin,
-  Checkbox,
-  Alert,
-  Form,
-  Tooltip,
-} from "antd";
+import { Spin, Checkbox, Alert, Form, Tooltip } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
-import {
-  InfoCircleOutlined,
-} from "@ant-design/icons";
+import { InfoCircleOutlined } from "@ant-design/icons";
 import { Link, NavLink } from "react-router-dom";
 import SVGIcon from "../../../../assets/Icon/index";
 import TablePagination from "../../../../components/TablePagination";
@@ -52,16 +44,21 @@ const EntityPage = () => {
   const [remark, setRemark] = useState("");
   const [record, setRecord] = useState({});
 
-
   // handle fetch
   // handle fetch
   const handleFetch = useCallback(() => {
-    dispatch(getAllEntityPaginate({ search: encodeURIComponent(JSON?.stringify(search)), page, pageSize, sort }));
+    dispatch(
+      getAllEntityPaginate({
+        search: encodeURIComponent(JSON?.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
+    );
   }, [dispatch, page, pageSize, search, sort]);
 
-
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -97,9 +94,18 @@ const EntityPage = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('entityName', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "entityName",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ENTITY CODE",
@@ -112,9 +118,18 @@ const EntityPage = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('entityCode', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "entityCode",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "EMAIL",
@@ -127,9 +142,18 @@ const EntityPage = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('email', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "email",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ADDRESS",
@@ -142,13 +166,21 @@ const EntityPage = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('address', searchedColumn, searchText, text, true, 'input', search)
-
+      render: (text) =>
+        renderColumn(
+          "address",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "TAX IDENTIFIER",
@@ -161,9 +193,18 @@ const EntityPage = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('taxIdentifier', searchedColumn, searchText, intToNPWP(text), false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "taxIdentifier",
+          searchedColumn,
+          searchText,
+          intToNPWP(text),
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "PHONE NUMBER",
@@ -177,9 +218,18 @@ const EntityPage = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('phone', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "phone",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "FAX NUMBER",
@@ -193,9 +243,18 @@ const EntityPage = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('fax', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "fax",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -210,10 +269,18 @@ const EntityPage = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
-
+      render: (text) =>
+        renderColumn(
+          "description",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -229,7 +296,16 @@ const EntityPage = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
   ];
 
@@ -238,7 +314,6 @@ const EntityPage = () => {
     setPage(tempPage);
     setPageSize(pageSizeChange);
   };
-
 
   const routes = [
     {
@@ -268,7 +343,6 @@ const EntityPage = () => {
     dispatch(downloadExcel(params));
   };
 
-
   const onSort = (_, __, sort) => {
     const dataSort =
       sort.order !== undefined
@@ -277,25 +351,30 @@ const EntityPage = () => {
     setSort(dataSort);
   };
 
-  // item actions 
+  // item actions
   const itemActions = [
     // toolbar
     {
-      action: 'download',
+      action: "download",
       render: (
         <ButtonComponent
           icon={<SVGIcon name="IconButtonDownload" width={24} />}
           type="submit"
           onClick={() => {
-            handleDownload({ page, pageSize, search: encodeURIComponent(JSON.stringify(search)), sort });
+            handleDownload({
+              page,
+              pageSize,
+              search: encodeURIComponent(JSON.stringify(search)),
+              sort,
+            });
           }}
         >
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     {
-      action: 'create',
+      action: "create",
       render: (
         <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_ENTITY}>
           <ButtonComponent
@@ -305,14 +384,13 @@ const EntityPage = () => {
             Create Entity
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
-
 
     // table
     {
-      action: 'view',
-      type: 'table',
+      action: "view",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
@@ -325,38 +403,50 @@ const EntityPage = () => {
               </div>
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'update',
-      type: 'table',
+      action: "update",
+      type: "table",
       render: (record, data_length) => (
         <Tooltip title="Update">
-          <div className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}>
-
+          <div
+            className={`${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+          >
             <Link
-              to={record?.status?.toLowerCase() !== "inactive" && SYSTEM_SETUP_ROUTES.UPDATE_ENTITY}
-              state={record?.status?.toLowerCase() !== "inactive" && { id: record?.entityId }}
+              to={
+                record?.status?.toLowerCase() !== "inactive" &&
+                SYSTEM_SETUP_ROUTES.UPDATE_ENTITY
+              }
+              state={
+                record?.status?.toLowerCase() !== "inactive" && {
+                  id: record?.entityId,
+                }
+              }
             >
               <div>
                 <SVGIcon
-                  className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}
-                  color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#ACC424"}
-                  name="IconEdit" width={24} />
+                  className={`${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+                  color={
+                    record?.status?.toLowerCase() === "inactive"
+                      ? "#8D91A0"
+                      : "#ACC424"
+                  }
+                  name="IconEdit"
+                  width={24}
+                />
               </div>
             </Link>
           </div>
         </Tooltip>
-      )
+      ),
     },
     {
-      action: 'activate',
-      type: 'table',
+      action: "activate",
+      type: "table",
       render: (record, data_length) => (
-        <Tooltip
-          title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-        >
+        <Tooltip title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}>
           <div>
             <Checkbox
               onClick={() => {
@@ -365,24 +455,25 @@ const EntityPage = () => {
                 setOpenModalConfirm(true);
                 setRecord(record);
                 setTypeModal(
-                  record.status === "ACTIVE" ? "INACTIVE" : "ACTIVE"
+                  record.status === "ACTIVE" ? "INACTIVE" : "ACTIVE",
                 );
               }}
               checked={record?.status !== "ACTIVE"}
             />
           </div>
         </Tooltip>
-      )
+      ),
     },
-
   ];
 
-  const columnActions = useColumnActionPermission(['view', 'activate', 'update'], itemActions);
+  const columnActions = useColumnActionPermission(
+    ["view", "activate", "update"],
+    itemActions,
+  );
   const handleRetry = () => {
-    handleCancelTryAgain()
+    handleCancelTryAgain();
     handleFetch();
-
-  }
+  };
 
   const { handleCancelTryAgain, renderModal } = useTryAgainHooks(handleRetry);
 
@@ -408,17 +499,15 @@ const EntityPage = () => {
       </Spin>
       <ModalCustom
         isOpen={openModalConfirm}
-        header={`${typeModal === "ACTIVE" ? "ACTIVATE" : "INACTIVATE"
-          } INFORMATION`}
+        header={`${
+          typeModal === "ACTIVE" ? "ACTIVATE" : "INACTIVATE"
+        } INFORMATION`}
         width={1000}
         type={"confirmation"}
         handleCancel={handleClear}
         footer={
           <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
-            <ButtonComponent
-              onClick={handleClear}
-              type="default"
-            >
+            <ButtonComponent onClick={handleClear} type="default">
               Cancel
             </ButtonComponent>
             <ButtonComponent
@@ -438,8 +527,9 @@ const EntityPage = () => {
         >
           <div className="flex flex-col gap-6">
             <Alert
-              message={`Are you sure want to ${typeModal === "ACTIVE" ? "activate" : "inactivate"
-                } entity named ${record?.entityName}?`}
+              message={`Are you sure want to ${
+                typeModal === "ACTIVE" ? "activate" : "inactivate"
+              } entity named ${record?.entityName}?`}
               icon={<InfoCircleOutlined />}
               type={"warning"}
               showIcon

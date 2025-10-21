@@ -8,7 +8,7 @@ const agreementColumn = (
   searchedColumn,
   searchText,
   search,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -28,7 +28,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -38,7 +38,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -52,7 +52,7 @@ const agreementColumn = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -62,7 +62,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -77,7 +77,7 @@ const agreementColumn = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -87,7 +87,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -102,7 +102,7 @@ const agreementColumn = (
       searchInput,
       searchText,
       handleSearch,
-      false
+      false,
     ),
     render: (text) =>
       renderColumn(
@@ -112,7 +112,7 @@ const agreementColumn = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -127,7 +127,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -137,7 +137,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -153,7 +153,7 @@ const agreementColumn = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -162,7 +162,7 @@ const agreementColumn = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -178,7 +178,7 @@ const agreementColumn = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -187,7 +187,7 @@ const agreementColumn = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -203,7 +203,7 @@ const agreementColumn = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -212,7 +212,7 @@ const agreementColumn = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -228,7 +228,7 @@ const agreementColumn = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -237,7 +237,7 @@ const agreementColumn = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -253,7 +253,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -263,7 +263,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -278,7 +278,7 @@ const agreementColumn = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -288,7 +288,7 @@ const agreementColumn = (
         text?.value,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -302,7 +302,7 @@ const agreementColumn = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -312,7 +312,7 @@ const agreementColumn = (
         text?.value,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -329,7 +329,7 @@ const agreementColumn = (
       handleSearch,
       false,
       "date",
-      search
+      search,
     ),
     render: (text) =>
       renderDateColumn(
@@ -338,7 +338,7 @@ const agreementColumn = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -354,7 +354,7 @@ const agreementColumn = (
       searchText,
       handleSearch,
       false,
-      "yes_or_no"
+      "yes_or_no",
     ),
     render: (text) =>
       renderColumn(
@@ -364,7 +364,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -381,7 +381,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -391,7 +391,7 @@ const agreementColumn = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -406,7 +406,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -416,7 +416,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -430,7 +430,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -440,10 +440,10 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
-   {
+  {
     title: "CREATE FORM",
     width: 200,
     sorter: true,
@@ -455,7 +455,7 @@ const agreementColumn = (
       searchText,
       handleSearch,
       true,
-      'yes_or_no',
+      "yes_or_no",
     ),
     render: (text) =>
       renderColumn(
@@ -465,7 +465,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -481,7 +481,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -491,7 +491,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -507,7 +507,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -517,7 +517,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -532,7 +532,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -542,7 +542,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   // ref dari create account table
@@ -558,7 +558,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -568,7 +568,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -583,7 +583,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -593,7 +593,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -608,7 +608,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -618,7 +618,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -633,7 +633,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -643,7 +643,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -658,7 +658,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -668,7 +668,7 @@ const agreementColumn = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -682,7 +682,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -692,7 +692,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -709,7 +709,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -719,7 +719,7 @@ const agreementColumn = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -734,7 +734,7 @@ const agreementColumn = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -744,7 +744,7 @@ const agreementColumn = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -760,7 +760,7 @@ const agreementColumn = (
       searchText,
       handleSearch,
       true,
-      "status"
+      "status",
     ),
     render: (text) =>
       renderColumn(
@@ -770,7 +770,7 @@ const agreementColumn = (
         text,
         false,
         "status",
-        search
+        search,
       ),
   },
 ];

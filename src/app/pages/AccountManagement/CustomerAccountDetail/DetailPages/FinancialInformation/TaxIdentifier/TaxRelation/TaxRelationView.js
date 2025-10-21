@@ -26,10 +26,10 @@ import { dateFormatting } from "../../../../../../../../utils";
 import Highlighter from "react-highlight-words";
 import { ModalError } from "../../../../../../../../components/Modal/ModalPopUp";
 
-const TaxRelationView = ({access, id = 0 }) => {
+const TaxRelationView = ({ access, id = 0 }) => {
   const dispatch = useDispatch();
   const { data_taxRelation } = useSelector(
-    (state) => state.financialInformation
+    (state) => state.financialInformation,
   );
   //declare
   const [formTaxRelation] = Form.useForm();
@@ -60,7 +60,7 @@ const TaxRelationView = ({access, id = 0 }) => {
   const [sort, setSort] = useState("");
   const [search, updateSearch] = useState({});
   const [startDate, setStartDate] = useState();
-  const [taxRelationName, setTaxRelationName] = useState('');
+  const [taxRelationName, setTaxRelationName] = useState("");
 
   //use effect
   useEffect(() => {
@@ -77,9 +77,7 @@ const TaxRelationView = ({access, id = 0 }) => {
       tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
       const reqSearch = encodeURIComponent(JSON.stringify(search));
 
-      dispatch(
-        getTaxRelation({ id, page, pageSize, sort, search: reqSearch })
-      );
+      dispatch(getTaxRelation({ id, page, pageSize, sort, search: reqSearch }));
     }
   }, [id, page, pageSize, sort, search]);
 
@@ -114,7 +112,7 @@ const TaxRelationView = ({access, id = 0 }) => {
     dispatch(inActiveTaxRelation({ ...data }))
       .unwrap()
       .then(() => {
-        handleClear()
+        handleClear();
         formInactive.resetFields();
         setStartDate();
         setModalInactive(false);
@@ -130,7 +128,7 @@ const TaxRelationView = ({access, id = 0 }) => {
         tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
 
         dispatch(
-          getTaxRelation({ id, page, pageSize, sort, search: tempSearch })
+          getTaxRelation({ id, page, pageSize, sort, search: tempSearch }),
         );
         // dispatch(getTaxRelation({ id, page, pageSize }));
       })
@@ -175,7 +173,7 @@ const TaxRelationView = ({access, id = 0 }) => {
         tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
 
         dispatch(
-          getTaxRelation({ id, page, pageSize, sort, search: tempSearch })
+          getTaxRelation({ id, page, pageSize, sort, search: tempSearch }),
         );
         // dispatch(getTaxRelation({ id, page, pageSize, sort, search }));
       })
@@ -338,9 +336,7 @@ const TaxRelationView = ({access, id = 0 }) => {
   };
 
   const handleCreateTaxRelation = () => {
-    dispatch(
-      getTaxRelationFirstIndex( id )
-    )
+    dispatch(getTaxRelationFirstIndex(id))
       .unwrap()
       .then((data) => {
         if (data?.result[0]?.status === "ACTIVE") {
@@ -365,7 +361,7 @@ const TaxRelationView = ({access, id = 0 }) => {
 
       <div>
         <div className={"w-full flex justify-end mb-5"}>
-          {access?.actionList?.some(action => action.name === 'Create' ) && 
+          {access?.actionList?.some((action) => action.name === "Create") && (
             <ButtonComponent
               onClick={() => {
                 handleCreateTaxRelation();
@@ -376,7 +372,7 @@ const TaxRelationView = ({access, id = 0 }) => {
             >
               Create
             </ButtonComponent>
-          }
+          )}
         </div>
         <TaxRelationTableView
           data={data_taxRelation?.result}
@@ -523,22 +519,23 @@ const TaxRelationView = ({access, id = 0 }) => {
         named={taxRelationName}
         children={
           <Form.Item
-          name={"endDate"}
-          label={"End Date"}
-          rules={[
-            {
-              validator: (_, value) =>
-                (value && moment(startDate) < moment(value)) || !value
-                  ? Promise.resolve()
-                  : Promise.reject(
-                      new Error("End date must after Start date")
-                    ),
-            },
-            { message: requiredMessage("End Date"), required: true }]}
-          className="no-margin-form"
-        >
-          <DateComponent dateDisable={handleDisableEndDate} />
-        </Form.Item>
+            name={"endDate"}
+            label={"End Date"}
+            rules={[
+              {
+                validator: (_, value) =>
+                  (value && moment(startDate) < moment(value)) || !value
+                    ? Promise.resolve()
+                    : Promise.reject(
+                        new Error("End date must after Start date"),
+                      ),
+              },
+              { message: requiredMessage("End Date"), required: true },
+            ]}
+            className="no-margin-form"
+          >
+            <DateComponent dateDisable={handleDisableEndDate} />
+          </Form.Item>
         }
       />
 
@@ -643,8 +640,8 @@ const TaxRelationView = ({access, id = 0 }) => {
 
       <ModalError
         isOpen={modalValidate}
-        handleOk={()=>setModalValidate(false)}
-        handleCancel={()=>setModalValidate(false)}
+        handleOk={() => setModalValidate(false)}
+        handleCancel={() => setModalValidate(false)}
         customText={"Back"}
       >
         <div className="px-5 pt-5 pb-[10px] justify-center">
@@ -652,7 +649,11 @@ const TaxRelationView = ({access, id = 0 }) => {
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{"You can't create tax relation. Please inactive your latest tax relation."}</p>
+          <p className="pl-[70px]">
+            {
+              "You can't create tax relation. Please inactive your latest tax relation."
+            }
+          </p>
         </div>
       </ModalError>
     </Fragment>

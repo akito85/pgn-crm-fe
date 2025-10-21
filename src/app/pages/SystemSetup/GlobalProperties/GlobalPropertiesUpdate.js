@@ -44,7 +44,9 @@ const GlobalPropertiesUpdate = () => {
     data_Type_Detail,
     data_Type = [],
   } = useSelector((state) => state.globalProperties);
-  const { bodyError: error, isLoading } = useSelector(state => state?.general);
+  const { bodyError: error, isLoading } = useSelector(
+    (state) => state?.general,
+  );
 
   // Declaration
   const dispatch = useDispatch();
@@ -91,7 +93,7 @@ const GlobalPropertiesUpdate = () => {
   const [globalPropertiesItemIsNull, setGlobalPropertiesItemIsNull] =
     useState(false);
   const [insertedTable, setInsertedTable] = useState(false);
-  const [dataType, setDataType] = useState('');
+  const [dataType, setDataType] = useState("");
   const [maxLength, setMaxLength] = useState(255);
   const [payload, setPayload] = useState({});
 
@@ -137,7 +139,7 @@ const GlobalPropertiesUpdate = () => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -163,8 +165,8 @@ const GlobalPropertiesUpdate = () => {
           onFocus={
             dataIndex !== searchedColumn
               ? () => {
-                setSelectedKeys([]);
-              }
+                  setSelectedKeys([]);
+                }
               : undefined
           }
           onChange={(e) =>
@@ -212,44 +214,42 @@ const GlobalPropertiesUpdate = () => {
   });
 
   const handleChangeDataType = (e) => {
-
-    setDataType(e)
+    setDataType(e);
     if (e === "BOOL") {
       setMaxLength(1);
     } else {
-      setMaxLength(255)
+      setMaxLength(255);
     }
   };
   const renderRules = (rule, dataIndex) => {
     if (rule === "INT") {
       return [
         ...formMessageRequired(dataIndex),
-        { pattern: /^\d+$/, message: 'value only number' }
-
-      ]
+        { pattern: /^\d+$/, message: "value only number" },
+      ];
     } else if (rule === "BOOL") {
       return [
         ...formMessageRequired(dataIndex),
-        { pattern: /[YyNn]/, message: 'Please enter with Y/N' },
-        { max: maxLength, message: `Your input not valid. Max length ${maxLength}` }
-
-      ]
+        { pattern: /[YyNn]/, message: "Please enter with Y/N" },
+        {
+          max: maxLength,
+          message: `Your input not valid. Max length ${maxLength}`,
+        },
+      ];
     } else {
-      return [
-        ...formMessageRequired(dataIndex),
-      ]
+      return [...formMessageRequired(dataIndex)];
     }
   };
 
   const renderOnInput = (type, e) => {
-    if (type === 'INT') {
-      return e.target.value = e.target.value.replace(/\D/g, "");
-    } else if (type === 'BOOL') {
-      return e.target.value = e.target.value.replace(/[^YyNn]/g, "");
+    if (type === "INT") {
+      return (e.target.value = e.target.value.replace(/\D/g, ""));
+    } else if (type === "BOOL") {
+      return (e.target.value = e.target.value.replace(/[^YyNn]/g, ""));
     } else {
-      return e.target.value
+      return e.target.value;
     }
-  }
+  };
   // Column Properties Item
   const column = [
     {
@@ -269,7 +269,7 @@ const GlobalPropertiesUpdate = () => {
       editable: true,
       required: true,
       inputType: "input_regex",
-      rules: formMessageRequired('Key'),
+      rules: formMessageRequired("Key"),
       onInput: (e) => (e.target.value = e.target.value.toUpperCase()),
       key: "keyName",
       sorter: (a, b) => a.keyName?.localeCompare(b.keyName),
@@ -283,7 +283,7 @@ const GlobalPropertiesUpdate = () => {
       key: "value",
       maxLength: maxLength,
       onInput: (e) => renderOnInput(dataType, e),
-      rules: renderRules(dataType, 'Value'),
+      rules: renderRules(dataType, "Value"),
       sorter: (a, b) => a.value?.localeCompare(b.value),
       ...getColumnSearchProps("value"),
       render: (value, values) => {
@@ -304,7 +304,7 @@ const GlobalPropertiesUpdate = () => {
       key: "dataType",
       required: true,
       onClick: (e) => handleChangeDataType(e),
-      rules: formMessageRequired('Data Type'),
+      rules: formMessageRequired("Data Type"),
       sorter: (a, b) => {
         const aName =
           (data_Type_Detail &&
@@ -346,13 +346,15 @@ const GlobalPropertiesUpdate = () => {
       title: "STATUS",
       dataIndex: "status",
       key: "status",
-      fixed: 'right',
+      fixed: "right",
       width: 120,
       sorter: (a, b) => a.status?.localeCompare(b.status),
       ...getColumnSearchProps("status"),
       render: (status) => (
         <div className={" flex justify-center"}>
-          <StatusComponent colour={status}>{toTitleCase(status)}</StatusComponent>
+          <StatusComponent colour={status}>
+            {toTitleCase(status)}
+          </StatusComponent>
         </div>
       ),
     },
@@ -376,17 +378,22 @@ const GlobalPropertiesUpdate = () => {
         ...formValue,
         keyVal: modifiedArray,
       };
-      body = dataValue
+      body = dataValue;
       setData(dataValue);
       if (tableData?.length === 0) {
         setModalConfirm(false);
         setGlobalPropertiesItemIsNull(true);
       } else {
-        validateValueObj = { body: body, services: userHttpService, endPoint: '/v1/dbs/api/globalproperties/validate-update', type: 'update' }
+        validateValueObj = {
+          body: body,
+          services: userHttpService,
+          endPoint: "/v1/dbs/api/globalproperties/validate-update",
+          type: "update",
+        };
         setPayload({
           body: body,
-          validateValue: validateValueObj
-        })
+          validateValue: validateValueObj,
+        });
         await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
         setModalConfirm(true);
       }
@@ -435,11 +442,13 @@ const GlobalPropertiesUpdate = () => {
       };
       // setPayload({ body: bodyFinal, responseSuccess: successBody })
       await dispatch(
-        updateGlobalProperties({ body: payload?.body, responseSuccess: successBody })
-      )?.unwrap()
-
+        updateGlobalProperties({
+          body: payload?.body,
+          responseSuccess: successBody,
+        }),
+      )?.unwrap();
     } catch (error) {
-      handleCloseModalError()
+      handleCloseModalError();
       setModalConfirm(false);
     }
   };
@@ -447,12 +456,17 @@ const GlobalPropertiesUpdate = () => {
   // Handle Active/Inactive Request
   const handleOk = async (record) => {
     try {
-      handleCloseModalError()
-      setPayload({ id: record.id, statusData: activeOrInactive })
-      await dispatch(inactiveGlobalProperties({ id: record.id, statusData: activeOrInactive }))?.unwrap()
+      handleCloseModalError();
+      setPayload({ id: record.id, statusData: activeOrInactive });
+      await dispatch(
+        inactiveGlobalProperties({
+          id: record.id,
+          statusData: activeOrInactive,
+        }),
+      )?.unwrap();
       await dispatch(getGlobalPropertiesDetail(id))?.unwrap();
     } catch (error) {
-      handleCloseModalError()
+      handleCloseModalError();
     }
   };
 
@@ -480,16 +494,15 @@ const GlobalPropertiesUpdate = () => {
     setModalActiveOrInactive(false);
   };
 
-
   const handleRetry = () => {
     handleCancelTryAgain();
-    handleCloseModalError()
+    handleCloseModalError();
     if (error.action === "UPDATE_GLOBAL_PROPERTIES") {
-      dispatch(updateGlobalProperties(payload))
-    } else if (error?.action === 'INACTIVE_GLOBAL_PROPERTIES') {
+      dispatch(updateGlobalProperties(payload));
+    } else if (error?.action === "INACTIVE_GLOBAL_PROPERTIES") {
       dispatch(inactiveGlobalProperties(payload));
-    } else if (error?.action === 'GET_GLOBAL_PROPERTIES_DETAIL') {
-      dispatch(getGlobalPropertiesDetail(id))
+    } else if (error?.action === "GET_GLOBAL_PROPERTIES_DETAIL") {
+      dispatch(getGlobalPropertiesDetail(id));
     } else {
       dispatch(getAllTypeGlobalProperties());
       dispatch(getDataType());
@@ -508,7 +521,10 @@ const GlobalPropertiesUpdate = () => {
         break;
       case "BOOL":
         let tempBool = tempDataValue
-          ? tempDataValue === "Y" || tempDataValue === "N" || tempDataValue === "y" || tempDataValue === "n"
+          ? tempDataValue === "Y" ||
+            tempDataValue === "N" ||
+            tempDataValue === "y" ||
+            tempDataValue === "n"
           : false;
         valid = tempBool;
         break;
@@ -539,8 +555,7 @@ const GlobalPropertiesUpdate = () => {
     return typeData === "data" ? result : result.length;
   };
 
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
-
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
     <LayoutMenu>
@@ -563,9 +578,8 @@ const GlobalPropertiesUpdate = () => {
               <Form.Item label={"Properties Name"} name={"name"}>
                 <Input
                   disabled
-                  onInput={(e) =>
-                    (e.target.value = e.target.value.trimStart())
-                  } />
+                  onInput={(e) => (e.target.value = e.target.value.trimStart())}
+                />
               </Form.Item>
               <div className="col-span-2">
                 <Form.Item
@@ -650,7 +664,11 @@ const GlobalPropertiesUpdate = () => {
                 </ButtonComponent>
               </Form.Item>
               <Form.Item>
-                <ButtonComponent type="submit" htmlType={"submit"} disabled={insertedTable}>
+                <ButtonComponent
+                  type="submit"
+                  htmlType={"submit"}
+                  disabled={insertedTable}
+                >
                   Save
                 </ButtonComponent>
               </Form.Item>
@@ -706,7 +724,7 @@ const GlobalPropertiesUpdate = () => {
                   current={pageConfirm}
                   dataSource={paginationTableConfirm(
                     pageConfirm,
-                    pageSizeConfirm
+                    pageSizeConfirm,
                   )}
                   totalData={data?.keyVal?.length}
                   onChange={handleChangeConfirm}
@@ -731,8 +749,9 @@ const GlobalPropertiesUpdate = () => {
                 className={"text-4xl"}
               />
               <span className={"text-lg text-black font-bold h-auto mx-auto"}>
-                {`Are you sure want to ${activeOrInactive === "ACTIVE" ? "inactivate" : "activate"
-                  }?`}
+                {`Are you sure want to ${
+                  activeOrInactive === "ACTIVE" ? "inactivate" : "activate"
+                }?`}
               </span>
             </div>
           </div>

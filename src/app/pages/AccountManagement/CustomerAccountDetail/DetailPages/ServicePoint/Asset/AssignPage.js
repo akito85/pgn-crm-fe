@@ -182,7 +182,6 @@ const AssignPage = ({
             </span>
           </div>
         </Form.Item>
-
       </div>
 
       <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
@@ -241,7 +240,6 @@ const AssignPage = ({
           />
         </Form.Item>
 
-
         {/* line 2 */}
         <Form.Item
           name={"maximumInletPressure"}
@@ -299,7 +297,6 @@ const AssignPage = ({
             // onChange={(e) => setDescription(e.target.value)}
           />
         </Form.Item>
-
 
         {/* line 3 */}
 
@@ -517,7 +514,7 @@ const AssignPage = ({
               ]}
               className="no-margin-form w-full"
             >
-              <DatePicker format={dateFormatting?.date} className="w-full"/>
+              <DatePicker format={dateFormatting?.date} className="w-full" />
             </Form.Item>
 
             <div className="col-span-3">

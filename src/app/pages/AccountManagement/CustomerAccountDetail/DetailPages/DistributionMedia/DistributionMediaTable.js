@@ -14,7 +14,11 @@ import { useColumnActionPermission } from "../../../../../../components/ColumnAc
 import { Link } from "react-router-dom";
 import { useColumnActionPermissionAccount } from "../../../ComponentAccount/ColumnActionPermissionAccount";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
 
 const DistributionMediaTable = ({
   search,
@@ -28,11 +32,11 @@ const DistributionMediaTable = ({
   onSort = {},
   searchText,
   searchedColumn,
-  handleInactive = () => { },
-  getColumnSearchProps = () => { },
+  handleInactive = () => {},
+  getColumnSearchProps = () => {},
   setDistributionName,
   accessAccount,
-  handleSearch = () => { }
+  handleSearch = () => {},
 }) => {
   const [modalDetail, setModalDetail] = useState(false);
   const [dataDetail, setDataDetail] = useState("");
@@ -55,7 +59,7 @@ const DistributionMediaTable = ({
           description: item.detailDescription,
         };
       }),
-    }
+    };
     setDataDetail(data);
   };
 
@@ -83,7 +87,16 @@ const DistributionMediaTable = ({
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('productName', hasValue(search['productName']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "productName",
+          hasValue(search["productName"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "START DATE",
@@ -99,9 +112,17 @@ const DistributionMediaTable = ({
         searchText,
         handleSearch,
         true,
-        'date'
+        "date",
       ),
-      render: (text) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "startDate",
+          hasValue(search["startDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "END DATE",
@@ -117,9 +138,17 @@ const DistributionMediaTable = ({
         searchText,
         handleSearch,
         true,
-        'date'
+        "date",
       ),
-      render: (text) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "endDate",
+          hasValue(search["endDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "REMARK",
@@ -138,7 +167,16 @@ const DistributionMediaTable = ({
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('remark', hasValue(search['remark']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "remark",
+          hasValue(search["remark"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -154,7 +192,16 @@ const DistributionMediaTable = ({
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('status', hasValue(search['status']), searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          hasValue(search["status"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
     // {
     //   title: "ACTIONS",
@@ -215,8 +262,8 @@ const DistributionMediaTable = ({
               />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
 
     {
@@ -224,22 +271,24 @@ const DistributionMediaTable = ({
       type: "table",
       render: (record, data) => {
         return (
-          <Tooltip title={`${record.status === "ACTIVE" ? "Inactive" : "Active"}`}>
+          <Tooltip
+            title={`${record.status === "ACTIVE" ? "Inactive" : "Active"}`}
+          >
             <div className="pt-1">
               <Checkbox
                 onClick={() => {
                   handleInactive(record);
-                  setDistributionName(record.productName)
+                  setDistributionName(record.productName);
                 }}
                 disabled={record.status === "INACTIVE" ? true : false}
                 checked={record.status === "INACTIVE" ? true : false}
               ></Checkbox>
             </div>
           </Tooltip>
-        )
-      }
-    }
-  ]
+        );
+      },
+    },
+  ];
 
   return (
     <Fragment>
@@ -257,7 +306,7 @@ const DistributionMediaTable = ({
           ...useColumnActionPermissionAccount(
             ["Activate", "View", "Update"],
             itemActions,
-            accessAccount
+            accessAccount,
           ),
         ]}
       />

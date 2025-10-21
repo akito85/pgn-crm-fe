@@ -39,7 +39,7 @@ const getDetailByIdBody = async (url, id) => {
     const response = await axios.get(
       configApp.USER_MANAGEMENT_SERVICE + url,
       { id: id },
-      { headers: tokenHeader() }
+      { headers: tokenHeader() },
     );
     return response?.data;
   } catch (error) {
@@ -147,7 +147,7 @@ const uploadBulk = async (url, data, onProgress) => {
       },
       onUploadProgress: (progressEvent) => {
         const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
+          (progressEvent.loaded * 100) / progressEvent.total,
         );
         onProgress(percentCompleted); // Callback to update progress
       },

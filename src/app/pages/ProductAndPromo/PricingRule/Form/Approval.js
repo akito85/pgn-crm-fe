@@ -13,14 +13,14 @@ const expandedRowRender = (record) => {
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => {}
+    handleSearch = () => {},
   ) => {
     return [
       ...columnsExpandApproval(
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     ];
   };
@@ -48,7 +48,7 @@ const Approval = ({
   apiApproval,
   apiApprovalList,
   boolean,
-  setBoolean
+  setBoolean,
 }) => {
   // Declaration
   const dispatch = useDispatch();
@@ -131,7 +131,7 @@ const Approval = ({
                 searchInput,
                 searchedColumn,
                 searchText,
-                handleSearch
+                handleSearch,
               )}
               expandable={{
                 expandedRowRender,

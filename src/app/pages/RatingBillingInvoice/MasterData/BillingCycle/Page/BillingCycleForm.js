@@ -142,7 +142,7 @@ const BillingCycleForm = ({ type }) => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       form.setFieldsValue({
         beginCycle: dataInfoDetailDraft.beginCycle,
@@ -184,7 +184,7 @@ const BillingCycleForm = ({ type }) => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       form.setFieldsValue({
         beginCycle: dataInfoDetail.beginCycle,
@@ -240,7 +240,7 @@ const BillingCycleForm = ({ type }) => {
   const handleMandatory = (
     setListSectionInfo = () => {},
     listDataAttachment,
-    errorFields
+    errorFields,
   ) => {
     setListSectionInfo((prevState) => {
       const res = prevState.map((item) => {
@@ -251,11 +251,11 @@ const BillingCycleForm = ({ type }) => {
                   item.paramValue.includes(next.name[0])
                     ? current + 1
                     : current,
-                0
+                0,
               )
             : listDataAttachment.length < 1
-            ? 1
-            : 0;
+              ? 1
+              : 0;
         return {
           value: item.value,
           paramValue: item.paramValue,
@@ -311,7 +311,7 @@ const BillingCycleForm = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -421,7 +421,7 @@ const BillingCycleForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/billingcycle/attachment-upload`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -446,7 +446,7 @@ const BillingCycleForm = ({ type }) => {
         .then(async (dataForm) => {
           let billingCycleId = dataForm.billingCycleId;
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           setLoadingForm(true);
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
@@ -458,7 +458,7 @@ const BillingCycleForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/billingcycle/attachment-upload`,
-              body
+              body,
             );
           }
           setLoadingForm(false);

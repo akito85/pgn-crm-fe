@@ -11,7 +11,7 @@ export const columnRecommendation = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  handleInactive = () => {}
+  handleInactive = () => {},
 ) => {
   const columns = [
     {
@@ -31,7 +31,7 @@ export const columnRecommendation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
 
@@ -45,7 +45,7 @@ export const columnRecommendation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -59,7 +59,7 @@ export const columnRecommendation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -73,7 +73,7 @@ export const columnRecommendation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -89,7 +89,7 @@ export const columnRecommendation = (
         searchText,
         handleSearch,
         false,
-        "datePeriod"
+        "datePeriod",
       ),
       render: (billingPeriod) =>
         hasValue(billingPeriod) &&
@@ -106,7 +106,7 @@ export const columnRecommendation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         text.toLocaleString("en-US", {
@@ -124,7 +124,7 @@ export const columnRecommendation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -140,7 +140,7 @@ export const columnRecommendation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         text.toLocaleString("en-US", {
@@ -159,7 +159,7 @@ export const columnRecommendation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         text.toLocaleString("en-US", {
@@ -177,7 +177,7 @@ export const columnRecommendation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       // width: 120,
       render: (index) => {
@@ -203,7 +203,7 @@ export const columnRecommendation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -217,7 +217,7 @@ export const columnRecommendation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         text.toLocaleString("en-US", {

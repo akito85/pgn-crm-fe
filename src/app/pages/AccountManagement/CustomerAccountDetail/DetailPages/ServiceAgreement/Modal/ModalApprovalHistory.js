@@ -1,18 +1,12 @@
-import React from 'react'
-import ModalCustom from '../../../../../../../components/Modal/ModalCustom'
+import React from "react";
+import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 
-const ModalApprovalHistory = ({
-  isOpen
-}) => {
+const ModalApprovalHistory = ({ isOpen }) => {
   return (
     <div>
-      <ModalCustom
-        isOpen={isOpen}
-      >
-        hsoritry
-      </ModalCustom>
+      <ModalCustom isOpen={isOpen}>hsoritry</ModalCustom>
     </div>
-  )
-}
+  );
+};
 
-export default ModalApprovalHistory
+export default ModalApprovalHistory;

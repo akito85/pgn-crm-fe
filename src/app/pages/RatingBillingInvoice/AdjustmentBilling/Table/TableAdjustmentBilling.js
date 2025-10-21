@@ -1,7 +1,12 @@
 import Highlighter from "react-highlight-words";
 import { Popover, Space, Tooltip } from "antd";
 import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../utils";
 import {
   getColumnSearchPropsPaging,
   getColumnSearchPropsUseFilteredValue,
@@ -14,7 +19,7 @@ export const columnsAdjustmentBilling = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  search
+  search,
   // handleApprovalHistory = () => {},
   // handleDelete = () => {}
 ) => [
@@ -35,7 +40,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -45,7 +50,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "referenceInvoiceNumber",
@@ -66,7 +71,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -76,7 +81,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "adjustmentNumber",
@@ -98,7 +103,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -108,7 +113,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "adjustmentTypeName",
@@ -129,7 +134,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -139,7 +144,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "billingCycleName",
@@ -162,7 +167,7 @@ export const columnsAdjustmentBilling = (
       searchText,
       handleSearch,
       true,
-      "datePeriod"
+      "datePeriod",
     ),
     render: (text) =>
       renderDateColumn(
@@ -171,7 +176,7 @@ export const columnsAdjustmentBilling = (
         searchText,
         text,
         "datePeriod",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "billingPeriodName",
@@ -192,7 +197,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -202,7 +207,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "customerNumber",
@@ -223,7 +228,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -233,7 +238,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "customerName",
@@ -254,7 +259,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -264,7 +269,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "accountNumber",
@@ -285,7 +290,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -295,7 +300,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "accountName",
@@ -317,7 +322,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -327,7 +332,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "accountGroupType",
@@ -348,7 +353,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -358,7 +363,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "sor",
@@ -379,7 +384,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -389,7 +394,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "costCenter",
@@ -411,7 +416,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -421,7 +426,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "accountSegment",
@@ -442,7 +447,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -452,7 +457,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -467,7 +472,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -477,7 +482,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -492,7 +497,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -502,7 +507,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -517,7 +522,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -527,7 +532,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -542,7 +547,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     // render: (text) =>
     //   renderColumn(
@@ -569,7 +574,11 @@ export const columnsAdjustmentBilling = (
               backgroundColor: "#ffc069",
               padding: 0,
             }}
-            searchWords={Object.values(search)?.includes(searchText) ? [search["termsOfPayment"]] : []}
+            searchWords={
+              Object.values(search)?.includes(searchText)
+                ? [search["termsOfPayment"]]
+                : []
+            }
             autoEscape
             textToHighlight={text ? text.toString() : ""}
           />
@@ -592,7 +601,7 @@ export const columnsAdjustmentBilling = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -601,7 +610,7 @@ export const columnsAdjustmentBilling = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (text) =>
     //   searchedColumn === "transactionDate" ? (
@@ -637,7 +646,7 @@ export const columnsAdjustmentBilling = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -646,7 +655,7 @@ export const columnsAdjustmentBilling = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (text) =>
     //   searchedColumn === "documentDate" ? (
@@ -681,7 +690,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -691,7 +700,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -706,7 +715,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -716,7 +725,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -731,7 +740,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -741,7 +750,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -757,7 +766,7 @@ export const columnsAdjustmentBilling = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -766,7 +775,7 @@ export const columnsAdjustmentBilling = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (text) =>
     //   searchedColumn === "rateDate" ? (
@@ -804,7 +813,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -814,7 +823,7 @@ export const columnsAdjustmentBilling = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // render: (text) =>
     //   searchedColumn === "remark" ? (
@@ -848,7 +857,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (index) => {
       let text;
@@ -863,16 +872,16 @@ export const columnsAdjustmentBilling = (
           break;
       }
       return text
-          ? renderColumn(
-              "status",
-              hasValue(search["status"]),
-              searchText,
-              text,
-              false,
-              "status",
-              search
-            )
-          : text;
+        ? renderColumn(
+            "status",
+            hasValue(search["status"]),
+            searchText,
+            text,
+            false,
+            "status",
+            search,
+          )
+        : text;
     },
   },
   {
@@ -888,7 +897,7 @@ export const columnsAdjustmentBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (index) => {
       let text;
@@ -903,16 +912,16 @@ export const columnsAdjustmentBilling = (
           break;
       }
       return text
-          ? renderColumn(
-              "statusApproval",
-              hasValue(search["statusApproval"]),
-              searchText,
-              text,
-              false,
-              "status",
-              search
-            )
-          : text;
+        ? renderColumn(
+            "statusApproval",
+            hasValue(search["statusApproval"]),
+            searchText,
+            text,
+            false,
+            "status",
+            search,
+          )
+        : text;
     },
   },
   // {

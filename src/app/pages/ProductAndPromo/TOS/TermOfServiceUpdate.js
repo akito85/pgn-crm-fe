@@ -22,8 +22,14 @@ import {
   ModalError,
 } from "../../../../components/Modal/ModalPopUp";
 import TermOfServiceConfirmation from "./Modal/TermOfServiceConfirmation";
-import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
-import { handleCheckCriteriaMissingValidation, handleMappingCriteriaGeneral } from "../UtilsProduct/UtilsAllProduct";
+import {
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../redux/slices/general_slice";
+import {
+  handleCheckCriteriaMissingValidation,
+  handleMappingCriteriaGeneral,
+} from "../UtilsProduct/UtilsAllProduct";
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
 import {
   getBudgetList,
@@ -47,7 +53,7 @@ import productPromoHttpService from "../../../../redux/services/productPromoHttp
 const TermOfServiceUpdate = () => {
   // Selector
   const { loading, data_attribute, data_detail, data_criteria } = useSelector(
-    (state) => state.tos
+    (state) => state.tos,
   );
 
   // Declaration
@@ -92,15 +98,11 @@ const TermOfServiceUpdate = () => {
         attributeId: item.attributeId,
       };
     }),
-    [data_detail]
+    [data_detail],
   );
 
   useEffect(() => {
-    if (
-      data_criteria &&
-      data_criteria &&
-      data_criteria?.length > 0
-    ) {
+    if (data_criteria && data_criteria && data_criteria?.length > 0) {
       const tempCriterias = (data_criteria || [])?.map((criteria) => ({
         name: criteria.text,
         value: criteria.id,
@@ -112,7 +114,7 @@ const TermOfServiceUpdate = () => {
 
   const mappingAttribute = useCallback(
     attributeData?.map((a) => a.attributeId),
-    [attributeData]
+    [attributeData],
   );
 
   // Data Criteria
@@ -124,12 +126,12 @@ const TermOfServiceUpdate = () => {
         criteriaId: item.criteriaId,
       };
     }),
-    [data_detail]
+    [data_detail],
   );
 
   const mappingCriteria = useCallback(
     criteriaData?.map((a) => a.criteriaId),
-    [criteriaData]
+    [criteriaData],
   );
 
   // Data Criteria List
@@ -157,11 +159,11 @@ const TermOfServiceUpdate = () => {
           customer: item.customer,
           allCriteria: item.allCriteria,
           startDate: item?.startDate ? item?.startDate : null,
-          endDate : item?.endDate ? item?.endDate : null,
+          endDate: item?.endDate ? item?.endDate : null,
           dataType: "exist",
         };
       }),
-    [data_detail]
+    [data_detail],
   );
 
   useEffect(() => {
@@ -262,118 +264,123 @@ const TermOfServiceUpdate = () => {
   };
 
   // Handle Confirmation
-  const handleSave = useCallback( async (formValue) => {
-    let errorBody = {};
-    if (
-      !formValue.rPricingRuleCriterias.includes(24) &&
-      listDataCriteria.length === 0
-    ) {
-      errorBody = {
-        title: "Failed",
-        description: `Term of Service Detail Mandatory. Please try again.`,
-      };
-      dispatch(showModalError(errorBody));
-    } else if (storedDataInline) {
-      errorBody = {
-        title: "Failed",
-        description: `Please save data table inline before submit. Please try again.`,
-      };
-      dispatch(showModalError(errorBody));
-    } else if (
-      handleCheckCriteriaMissingValidation(
-        criteriaOptions,
-        formValue?.rPricingRuleCriterias,
-        listDataCriteria,
-        () => {}
-      )
-    ) {
-      const errorBody = {
-        title: "Failed",
-        description: `There is missing values in table criteria. Please try again`,
-      };
-      dispatch(showModalError(errorBody));
-    } else {
-      const dataValue = { ...formValue };
-      setData(dataValue);
+  const handleSave = useCallback(
+    async (formValue) => {
+      let errorBody = {};
+      if (
+        !formValue.rPricingRuleCriterias.includes(24) &&
+        listDataCriteria.length === 0
+      ) {
+        errorBody = {
+          title: "Failed",
+          description: `Term of Service Detail Mandatory. Please try again.`,
+        };
+        dispatch(showModalError(errorBody));
+      } else if (storedDataInline) {
+        errorBody = {
+          title: "Failed",
+          description: `Please save data table inline before submit. Please try again.`,
+        };
+        dispatch(showModalError(errorBody));
+      } else if (
+        handleCheckCriteriaMissingValidation(
+          criteriaOptions,
+          formValue?.rPricingRuleCriterias,
+          listDataCriteria,
+          () => {},
+        )
+      ) {
+        const errorBody = {
+          title: "Failed",
+          description: `There is missing values in table criteria. Please try again`,
+        };
+        dispatch(showModalError(errorBody));
+      } else {
+        const dataValue = { ...formValue };
+        setData(dataValue);
 
-      let dataCriteriaObject = listDataCriteria.map((item, index) => 
+        let dataCriteriaObject = listDataCriteria.map((item, index) =>
+          handleMappingCriteriaGeneral({
+            item: item,
+            index: index,
+            columnsTable: columnsTableCriteriaAll(),
+            criteriaValues: criteriaValues,
+            dataListCriteria: data_criteria?.map((item) => {
+              return {
+                ...item,
+                id: item.id,
+                name: item.text,
+              };
+            }),
+          }),
+        );
+
+        // Attribute
+        const attributeArrayObject = dataValue.attribute.map((item) => {
+          const obj = attributeData?.filter((a) => a.attributeId === item);
+          return {
+            id: obj[0]?.id || null,
+            idTos: obj[0]?.idTos || null,
+            idAttr: item,
+          };
+        });
+
+        // Criteria
+        const criteriaArrayObject = dataValue.rPricingRuleCriterias.map(
+          (item) => {
+            const obj = criteriaData?.filter((a) => a.criteriaId === item);
+            return {
+              id: obj[0]?.id || null,
+              idTos: obj[0]?.idTos || null,
+              idCri: item,
+            };
+          },
+        );
+
+        const includesAll = dataValue.rPricingRuleCriterias.includes(24);
+
+        const body = {
+          id: id,
+          name: dataValue.name,
+          description: dataValue.description,
+          tosAttrDtos: attributeArrayObject,
+          tosCrtDtos: criteriaArrayObject,
+          tosMCriteriaDtos: includesAll
+            ? [{ allCriteria: true }]
+            : dataCriteriaObject,
+        };
+
+        const validateValueObj = {
+          body: body,
+          services: productPromoHttpService,
+          endPoint: "/v1/dbs/api/tos/validate-update",
+          type: "update",
+        };
+        await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
+
+        setModalConfirm(true);
+      }
+    },
+    [dispatch, storedDataInline, listDataCriteria, criteriaOptions],
+  );
+
+  // Handle Confirm
+  const handleConfirm = () => {
+    let dataCriteriaObject = listDataCriteria.map(
+      (item, index) =>
         handleMappingCriteriaGeneral({
           item: item,
           index: index,
           columnsTable: columnsTableCriteriaAll(),
           criteriaValues: criteriaValues,
-          dataListCriteria: data_criteria?.map((item) =>{
+          dataListCriteria: data_criteria?.map((item) => {
             return {
               ...item,
               id: item.id,
               name: item.text,
-            }
+            };
           }),
-        })
-    );
-  
-      // Attribute
-      const attributeArrayObject = dataValue.attribute.map((item) => {
-        const obj = attributeData?.filter((a) => a.attributeId === item);
-        return {
-          id: obj[0]?.id || null,
-          idTos: obj[0]?.idTos || null,
-          idAttr: item,
-        };
-      });
-  
-      // Criteria
-      const criteriaArrayObject = dataValue.rPricingRuleCriterias.map((item) => {
-        const obj = criteriaData?.filter((a) => a.criteriaId === item);
-        return {
-          id: obj[0]?.id || null,
-          idTos: obj[0]?.idTos || null,
-          idCri: item,
-        };
-      });
-  
-      const includesAll = dataValue.rPricingRuleCriterias.includes(24);
-      
-      const body = {
-        id: id,
-        name: dataValue.name,
-        description: dataValue.description,
-        tosAttrDtos: attributeArrayObject,
-        tosCrtDtos: criteriaArrayObject,
-        tosMCriteriaDtos: includesAll
-          ? [{ allCriteria: true }]
-          : dataCriteriaObject,
-      };
-
-      const validateValueObj = {
-        body: body,
-        services: productPromoHttpService,
-        endPoint: "/v1/dbs/api/tos/validate-update",
-        type: "update",
-      };
-      await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
-
-
-      setModalConfirm(true);
-    }
-  },[dispatch, storedDataInline, listDataCriteria, criteriaOptions]);
-
-  // Handle Confirm
-  const handleConfirm = () => {
-    let dataCriteriaObject = listDataCriteria.map((item, index) => 
-      handleMappingCriteriaGeneral({
-        item: item,
-        index: index,
-        columnsTable: columnsTableCriteriaAll(),
-        criteriaValues: criteriaValues,
-        dataListCriteria: data_criteria?.map((item) =>{
-          return {
-            ...item,
-            id: item.id,
-            name: item.text,
-          }
         }),
-      })
       // {
       //  return {
       //   id: item.id || null,
@@ -393,8 +400,8 @@ const TermOfServiceUpdate = () => {
       //   serviceType: item.serviceType?.value || null,
       //   accountCategory: item.accountCategory?.value || null,
       // };
-    // }
-  );
+      // }
+    );
 
     // Attribute
     const attributeArrayObject = formValue.attribute.map((item) => {
@@ -429,7 +436,7 @@ const TermOfServiceUpdate = () => {
     // });
 
     const includesAll = formValue.rPricingRuleCriterias.includes(24);
-    
+
     const body = {
       id: id,
       name: formValue.name,

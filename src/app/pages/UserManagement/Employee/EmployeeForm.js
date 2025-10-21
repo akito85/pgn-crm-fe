@@ -9,10 +9,7 @@ import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  LeftOutlined,
-  WarningOutlined,
-} from "@ant-design/icons";
+import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
 import {
   createEmployee,
   getEmployeeDetail,
@@ -27,11 +24,21 @@ import {
   ModalAttention,
   ModalConfirm,
 } from "../../../../components/Modal/ModalPopUp";
-import { dateFormatting, formMessageRequired, hasValue, renderColumn, renderDateColumn, renderDateConverter } from "../../../../utils";
+import {
+  dateFormatting,
+  formMessageRequired,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+  renderDateConverter,
+} from "../../../../utils";
 import InputComponent from "../../../../components/InputComponent";
 import SelectComponent from "../../../../components/SelectComponent";
 import TableInlineEmployee from "./TableInlineEmployee";
-import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../redux/slices/general_slice";
 import { getColumnSearchProps } from "../../../../utils/getColumnSearchProps";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import EmployeeConfirmation from "./EmployeeConfirmation";
@@ -42,9 +49,9 @@ const { Option } = Select;
 const EmployeeForm = (props) => {
   const { type } = props;
   const { data_detail, loading, data_emp, data_post, data_job } = useSelector(
-    (state) => state.employee
+    (state) => state.employee,
   );
-  const { bodyError, isLoading } = useSelector(state => state.general);
+  const { bodyError, isLoading } = useSelector((state) => state.general);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
@@ -82,12 +89,30 @@ const EmployeeForm = (props) => {
   const assert = () => {
     const dataTable = data_detail?.assignmenTset?.map((item, index) => {
       let jobId;
-      let positionId
+      let positionId;
       if (hasValue(data_job?.data) && hasValue(data_post?.data)) {
-        const job = data_job?.data?.find(itemjob => itemjob?.jobId === item?.jobId);
-        jobId = job ? { label: job.jobName, key: job.jobId, value: job.jobId, disabled: job.disabled } : null;
-        const position = data_post?.data?.find(itemPosition => itemPosition?.positionId === item?.positionId);
-        positionId = job ? { label: position?.name, key: position?.positionId, value: position?.positionId, disabled: position?.disabled } : null;
+        const job = data_job?.data?.find(
+          (itemjob) => itemjob?.jobId === item?.jobId,
+        );
+        jobId = job
+          ? {
+              label: job.jobName,
+              key: job.jobId,
+              value: job.jobId,
+              disabled: job.disabled,
+            }
+          : null;
+        const position = data_post?.data?.find(
+          (itemPosition) => itemPosition?.positionId === item?.positionId,
+        );
+        positionId = job
+          ? {
+              label: position?.name,
+              key: position?.positionId,
+              value: position?.positionId,
+              disabled: position?.disabled,
+            }
+          : null;
       }
       return {
         id: item?.assignId,
@@ -149,18 +174,19 @@ const EmployeeForm = (props) => {
     };
   });
 
-
   // handle confirmation
   const handleConfirmation = async (formValue) => {
     try {
       const isDuplicateTax = tableData?.map((item) => item?.positionId?.value);
-      const tableAssignmentMap = tableData?.map(item => (
-        {
-          ...item,
-          startDate: hasValue(item?.startDate) ? renderDateConverter(item?.startDate, 'date') : null,
-          endDate: hasValue(item?.endDate) ? renderDateConverter(item?.endDate, 'date') : null,
-        }
-      ));
+      const tableAssignmentMap = tableData?.map((item) => ({
+        ...item,
+        startDate: hasValue(item?.startDate)
+          ? renderDateConverter(item?.startDate, "date")
+          : null,
+        endDate: hasValue(item?.endDate)
+          ? renderDateConverter(item?.endDate, "date")
+          : null,
+      }));
 
       let message = "";
       if (tableData.length === 0) {
@@ -176,13 +202,17 @@ const EmployeeForm = (props) => {
           return isDuplicateTax.indexOf(item) !== idx;
         })
       ) {
-        let findRow = isDuplicateTax.filter((item, index) => {
-          let ind = isDuplicateTax.findIndex(
-            (item2) => item?.positionId === item2?.positionId
-          );
-          return index === ind;
-        })?.toString();
-        const positionNameFiltered = dataPost.filter((a) => a.value === findRow)
+        let findRow = isDuplicateTax
+          .filter((item, index) => {
+            let ind = isDuplicateTax.findIndex(
+              (item2) => item?.positionId === item2?.positionId,
+            );
+            return index === ind;
+          })
+          ?.toString();
+        const positionNameFiltered = dataPost.filter(
+          (a) => a.value === findRow,
+        );
         message = `Position is already exist`;
       }
       if (message || tableData?.length === 0) {
@@ -198,51 +228,60 @@ const EmployeeForm = (props) => {
           ...formValue,
           email: formValue?.email?.toLowerCase(),
           phone: `62${formValue?.phone}`,
-          startDate: hasValue(formValue?.startDate) ? renderDateConverter(formValue?.startDate, 'date') : null,
-          endDate: hasValue(formValue?.endDate) ? renderDateConverter(formValue?.endDate, 'date') : null,
-        }
-        setData(
-          {
-            ...request,
-            assignment: tableAssignmentMap
-          }
-        );
+          startDate: hasValue(formValue?.startDate)
+            ? renderDateConverter(formValue?.startDate, "date")
+            : null,
+          endDate: hasValue(formValue?.endDate)
+            ? renderDateConverter(formValue?.endDate, "date")
+            : null,
+        };
+        setData({
+          ...request,
+          assignment: tableAssignmentMap,
+        });
 
         // check double value
-        if (type === 'update') {
+        if (type === "update") {
           body = {
             ...request,
             employeeId: data_detail?.employeeId,
-            assignment: tableAssignmentMap?.map(item => (
-              {
-                ...item,
-                positionId: item?.positionId?.value,
-                jobId: item?.jobId?.value,
-              }
-            ))
-          }
-          url = '/v1/dbs/api/employees/validate-update'
+            assignment: tableAssignmentMap?.map((item) => ({
+              ...item,
+              positionId: item?.positionId?.value,
+              jobId: item?.jobId?.value,
+            })),
+          };
+          url = "/v1/dbs/api/employees/validate-update";
         } else {
           body = {
             ...request,
-            assignment: tableAssignmentMap?.map(item => (
-              {
-                ...item,
-                positionId: item?.positionId?.value,
-                jobId: item?.jobId?.value,
-              }
-            ))
-          }
-          url = '/v1/dbs/api/employees/validate-create'
+            assignment: tableAssignmentMap?.map((item) => ({
+              ...item,
+              positionId: item?.positionId?.value,
+              jobId: item?.jobId?.value,
+            })),
+          };
+          url = "/v1/dbs/api/employees/validate-create";
         }
 
         setPayload({
           requesBody: body,
-          validateCreateUpdate: { body: body, services: userHttpService, endPoint: url, type: type }
+          validateCreateUpdate: {
+            body: body,
+            services: userHttpService,
+            endPoint: url,
+            type: type,
+          },
         });
 
-
-        await dispatch(validateCreateUpdate({ body: body, services: userHttpService, endPoint: url, type: type }))?.unwrap()
+        await dispatch(
+          validateCreateUpdate({
+            body: body,
+            services: userHttpService,
+            endPoint: url,
+            type: type,
+          }),
+        )?.unwrap();
         setModalConfirmasi(true);
       }
     } catch (error) {
@@ -292,10 +331,19 @@ const EmployeeForm = (props) => {
       ellipsis: {
         showTitle: false,
       },
-      sorter: (a, b) => sorterFunction('jobId', a?.jobId?.label, b?.jobId?.label, 'select'),
+      sorter: (a, b) =>
+        sorterFunction("jobId", a?.jobId?.label, b?.jobId?.label, "select"),
       options: dataJob,
-      render: (text) => renderColumn('jobId', searchedColumn, searchText, text?.label, true, 'input', search)
-
+      render: (text) =>
+        renderColumn(
+          "jobId",
+          searchedColumn,
+          searchText,
+          text?.label,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "POSITION",
@@ -316,9 +364,24 @@ const EmployeeForm = (props) => {
       ellipsis: {
         showTitle: false,
       },
-      sorter: (a, b) => sorterFunction('positionId', a?.positionId?.label, b?.positionId?.label, 'select'),
+      sorter: (a, b) =>
+        sorterFunction(
+          "positionId",
+          a?.positionId?.label,
+          b?.positionId?.label,
+          "select",
+        ),
       options: dataPost,
-      render: (text) => renderColumn('positionId', searchedColumn, searchText, text?.label, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "positionId",
+          searchedColumn,
+          searchText,
+          text?.label,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "START DATE",
@@ -336,10 +399,18 @@ const EmployeeForm = (props) => {
         searchText,
         handleSearch,
         true,
-        'date'
+        "date",
       ),
-      sorter: (a, b) => sorterFunction('startDate', a, b, 'date'),
-      render: (v) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, v, 'date', search),
+      sorter: (a, b) => sorterFunction("startDate", a, b, "date"),
+      render: (v) =>
+        renderDateColumn(
+          "startDate",
+          hasValue(search["startDate"]),
+          searchText,
+          v,
+          "date",
+          search,
+        ),
     },
     {
       title: "END DATE",
@@ -355,10 +426,18 @@ const EmployeeForm = (props) => {
         searchText,
         handleSearch,
         true,
-        'date'
+        "date",
       ),
-      sorter: (a, b) => sorterFunction('endDate', a, b, 'date'),
-      render: (v) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, v, 'date', search),
+      sorter: (a, b) => sorterFunction("endDate", a, b, "date"),
+      render: (v) =>
+        renderDateColumn(
+          "endDate",
+          hasValue(search["endDate"]),
+          searchText,
+          v,
+          "date",
+          search,
+        ),
     },
     {
       title: "PRIMARY",
@@ -372,15 +451,13 @@ const EmployeeForm = (props) => {
         searchText,
         handleSearch,
         true,
-        'boolean'
+        "boolean",
       ),
       sorter: true,
       inputType: "checkbox",
       width: 150,
       render: (isMain) => {
-        return (
-          <Checkbox checked={isMain} defaultChecked={false} />
-        );
+        return <Checkbox checked={isMain} defaultChecked={false} />;
       },
     },
   ];
@@ -406,7 +483,6 @@ const EmployeeForm = (props) => {
     setModalConfirmasi(false);
   };
 
-
   // handle save
   const saveEmployee = async () => {
     try {
@@ -421,11 +497,9 @@ const EmployeeForm = (props) => {
     }
   };
 
-
   const handleDisableDate = (current) => {
     return moment() >= current;
   };
-
 
   const handleClear = () => {
     if (type === "create") {
@@ -435,7 +509,6 @@ const EmployeeForm = (props) => {
       assert();
     }
   };
-
 
   const handleChangePage = (page, pageSize) => {
     setPage(page);
@@ -449,22 +522,21 @@ const EmployeeForm = (props) => {
     console.log(id);
   };
 
-
-  // handle retry 
+  // handle retry
   const handleRetry = () => {
-    handleCancelTryAgain()
-    if (bodyError?.action === 'CREATE_EMPLOYEE') {
-      dispatch(createEmployee(payload?.requesBody))
-    } else if (bodyError?.action === 'UPDATE_EMPLOYEE') {
-      dispatch(updateEmployee(payload?.requesBody))
-    } else if (bodyError?.action === 'GET_LIST_EMPLOYEE_TYPE') {
-      dispatch(getListEmpType())
-    } else if (bodyError?.action === 'GET_LIST_EMPLOYEE_JOB') {
-      dispatch(getListJob())
-    } else if (bodyError?.action === 'GET_LIST_EMPLOYEE_Position') {
+    handleCancelTryAgain();
+    if (bodyError?.action === "CREATE_EMPLOYEE") {
+      dispatch(createEmployee(payload?.requesBody));
+    } else if (bodyError?.action === "UPDATE_EMPLOYEE") {
+      dispatch(updateEmployee(payload?.requesBody));
+    } else if (bodyError?.action === "GET_LIST_EMPLOYEE_TYPE") {
+      dispatch(getListEmpType());
+    } else if (bodyError?.action === "GET_LIST_EMPLOYEE_JOB") {
+      dispatch(getListJob());
+    } else if (bodyError?.action === "GET_LIST_EMPLOYEE_Position") {
       dispatch(getListPosition());
-    } else if (bodyError?.action === 'VALIDATE_CREATE_UPDATE') {
-      dispatch(validateCreateUpdate(payload?.validateCreateUpdate))
+    } else if (bodyError?.action === "VALIDATE_CREATE_UPDATE") {
+      dispatch(validateCreateUpdate(payload?.validateCreateUpdate));
     }
   };
 
@@ -521,17 +593,20 @@ const EmployeeForm = (props) => {
                   addonBefore={"62"}
                   maxLength={11}
                   onInput={(e) =>
-                    (e.target.value = e.target.value.replace(/[^\d]|^0+/g, ''))
+                    (e.target.value = e.target.value.replace(/[^\d]|^0+/g, ""))
                   }
                 />
               </Form.Item>
               <Form.Item
                 label={"Email"}
                 name={"email"}
-                rules={[...formMessageRequired("Email"), {
-                  type: 'email',
-                  message: 'The input is not valid E-mail!',
-                },]}
+                rules={[
+                  ...formMessageRequired("Email"),
+                  {
+                    type: "email",
+                    message: "The input is not valid E-mail!",
+                  },
+                ]}
               >
                 <InputComponent maxLength={50} />
               </Form.Item>
@@ -551,7 +626,7 @@ const EmployeeForm = (props) => {
               <Form.Item
                 label={"End Date"}
                 name={"endDate"}
-              // rules={formMessageRequired("End Date")}
+                // rules={formMessageRequired("End Date")}
               >
                 <DatePicker
                   format={dateFormatting?.dateCapital}
@@ -629,7 +704,11 @@ const EmployeeForm = (props) => {
               >
                 {type === "update" ? "Reset" : "Clear"}
               </ButtonComponent>
-              <ButtonComponent type="submit" htmlType={"submit"} disabled={disabledButton}>
+              <ButtonComponent
+                type="submit"
+                htmlType={"submit"}
+                disabled={disabledButton}
+              >
                 Save
               </ButtonComponent>
             </div>
@@ -642,8 +721,7 @@ const EmployeeForm = (props) => {
           header={"CONFIRMATION"}
           handleCancel={handleCancel}
           width={1000}
-          footer=
-          {
+          footer={
             <div className={"w-full flex justify-end gap-5"}>
               <ButtonComponent type={"default"} onClick={handleCancel}>
                 Cancel

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { useDispatch} from "react-redux";
+import { useDispatch } from "react-redux";
 import moment from "moment";
-import { Form, Input, Select, Table} from "antd";
+import { Form, Input, Select, Table } from "antd";
 import { dateFormatting, hasValue } from "../../../../../../utils";
 import DateComponent from "../../../../../../components/DateComponent";
 import { NumericFormat } from "react-number-format";
@@ -197,7 +197,7 @@ const EditableCell = ({
                     validator: (_, value) =>
                       endDateValidator(formTable.getFieldValue().startDate)(
                         _,
-                        value
+                        value,
                       ),
                   },
                 ]
@@ -237,10 +237,9 @@ const FunctionalTableInlineAccount = ({
   headerInformation = "",
   detailView,
 }) => {
-
   // Declaration
   const dispatch = useDispatch();
-  
+
   const searchInput = useRef(null);
   const isEditing = (record) => record.key === editingKey;
 
@@ -251,34 +250,35 @@ const FunctionalTableInlineAccount = ({
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  
+
   const [modalHistory, setModalHistory] = useState(false);
   const [modalRequired, setModalRequired] = useState(false);
   const [dataHistory, setDataHistory] = useState(false);
-  
+
   // Use Effect
   useEffect(() => {
     setTotalData(data.length || 0);
   }, [data]);
-  
+
   useEffect(() => {
     if (editingKey !== "") {
-        const dispatchedUrls = new Set();
-        [...columnsTable()]?.forEach((element) => {
-            if (
-                hasValue(element?.url) && !hasValue(element?.dependDataIndex) &&
-                (!hasValue(element?.option) || element?.option?.length < 1)
-            ) {
-                if (dispatchedUrls.has(element?.url)) {
-                    dispatchedUrls.add(element?.url);
-                } else {
-                    dispatch(element?.url);
-                }
-            }
-        });
+      const dispatchedUrls = new Set();
+      [...columnsTable()]?.forEach((element) => {
+        if (
+          hasValue(element?.url) &&
+          !hasValue(element?.dependDataIndex) &&
+          (!hasValue(element?.option) || element?.option?.length < 1)
+        ) {
+          if (dispatchedUrls.has(element?.url)) {
+            dispatchedUrls.add(element?.url);
+          } else {
+            dispatch(element?.url);
+          }
+        }
+      });
     }
-}, [columnsTable, dispatch, editingKey])
-  
+  }, [columnsTable, dispatch, editingKey]);
+
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -302,27 +302,29 @@ const FunctionalTableInlineAccount = ({
     setPageSize(pageSizeChange);
   };
 
-    // Function Delete Row
-    const deleteRow = (record) => {
-      updateData((prevState) =>
-        prevState.filter((item) => item.key !== record.key)
-      );
-      setStoredData(false);
-    };
+  // Function Delete Row
+  const deleteRow = (record) => {
+    updateData((prevState) =>
+      prevState.filter((item) => item.key !== record.key),
+    );
+    setStoredData(false);
+  };
 
   // Function Cancel Data
-  const cancel = useCallback((record) => {
-    setEditingKey("");
-    if (statusAction === "add") {
+  const cancel = useCallback(
+    (record) => {
+      setEditingKey("");
+      if (statusAction === "add") {
         deleteRow(record);
-    }
-    setStatusAction("");
-    setStoredData(false);
-}, [deleteRow, setStoredData, statusAction]);
-  
+      }
+      setStatusAction("");
+      setStoredData(false);
+    },
+    [deleteRow, setStoredData, statusAction],
+  );
+
   // Function Add Row Data
   const addRow = () => {
-    
     setSearch({});
     formTable.resetFields();
     setStoredData(true);
@@ -363,7 +365,7 @@ const FunctionalTableInlineAccount = ({
         searchText,
         handleSearch,
         search,
-        storedData
+        storedData,
       ),
     ];
     return temp;
@@ -477,7 +479,7 @@ const FunctionalTableInlineAccount = ({
                     handleEditDataRecord: handleEditDataRecord,
                     required: col.required,
                   }),
-                }))
+                })),
               ),
               ...useColumnActionPermissionAccountInline(
                 editingKey,
@@ -497,7 +499,7 @@ const FunctionalTableInlineAccount = ({
                 }),
                 save,
                 cancel,
-                "delete"
+                "delete",
               ),
             ]}
             pagination={{
@@ -550,7 +552,7 @@ const FunctionalTableInlineAccount = ({
             <DetailText label="Created Date">
               {dataHistory?.createdDate
                 ? moment(dataHistory.createdDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : ""}
             </DetailText>
@@ -558,7 +560,7 @@ const FunctionalTableInlineAccount = ({
             <DetailText label="Updated Date">
               {dataHistory?.updatedDate
                 ? moment(dataHistory.updatedDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : ""}
             </DetailText>

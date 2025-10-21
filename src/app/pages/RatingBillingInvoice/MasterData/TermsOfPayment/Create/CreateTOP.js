@@ -34,8 +34,8 @@ const CreateTOP = ({
   startDate,
   endDate,
   handleStartDate = () => {},
-  handleEndDate = () => { },
-  disbaledDate
+  handleEndDate = () => {},
+  disbaledDate,
 }) => {
   // Dependency Data Criteria
   const handleSelectCriteria = (value) => {
@@ -116,7 +116,10 @@ const CreateTOP = ({
             name={"name"}
             rules={formMessageRequired("Name")}
           >
-            <InputComponent disabled={status === "Active" ? true : false} maxLength={100}/>
+            <InputComponent
+              disabled={status === "Active" ? true : false}
+              maxLength={100}
+            />
           </Form.Item>
 
           <Form.Item
@@ -140,7 +143,7 @@ const CreateTOP = ({
                   (value && moment(startDate) <= moment(value)) || !value
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error("End date must before Start date")
+                        new Error("End date must before Start date"),
                       ),
               },
             ]}

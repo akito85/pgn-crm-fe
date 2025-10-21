@@ -1,9 +1,7 @@
-import React from 'react'
+import React from "react";
 
 const CriteriaPromo = () => {
-  return (
-    <div>CriteriaPromo</div>
-  )
-}
+  return <div>CriteriaPromo</div>;
+};
 
-export default CriteriaPromo
+export default CriteriaPromo;

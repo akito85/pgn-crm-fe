@@ -193,7 +193,7 @@ const ListCreateForm = ({ type }) => {
   const handleMandatory = (
     setListSectionInfo = () => {},
     listDataAttachment,
-    errorFields
+    errorFields,
   ) => {
     setListSectionInfo((prevState) => {
       const res = prevState.map((item) => {
@@ -204,11 +204,11 @@ const ListCreateForm = ({ type }) => {
                   item.paramValue.includes(next.name[0])
                     ? current + 1
                     : current,
-                0
+                0,
               )
             : listDataAttachment.length < 1
-            ? 1
-            : 0;
+              ? 1
+              : 0;
         return {
           value: item.value,
           paramValue: item.paramValue,
@@ -256,7 +256,7 @@ const ListCreateForm = ({ type }) => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       setListDataAttachment(dataAttachment);
       form.setFieldsValue({
@@ -292,10 +292,10 @@ const ListCreateForm = ({ type }) => {
               }
             }
             return obj;
-          })
+          }),
       );
     },
-    [form]
+    [form],
   );
 
   const asserDataDraft = useCallback(
@@ -328,7 +328,7 @@ const ListCreateForm = ({ type }) => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       setListDataAttachment(dataDraftAttachment);
       form.setFieldsValue({
@@ -364,10 +364,10 @@ const ListCreateForm = ({ type }) => {
               }
             }
             return obj;
-          })
+          }),
       );
     },
-    [form]
+    [form],
   );
 
   useEffect(() => {
@@ -443,7 +443,7 @@ const ListCreateForm = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -508,14 +508,14 @@ const ListCreateForm = ({ type }) => {
     dataCriteria,
     listDataCriteria = [],
     setMissingColumn = () => {},
-    minimumData = 0
+    minimumData = 0,
   ) => {
     console.log(listDataCriteria);
     console.log(criteriaValues);
 
     let missingColumn = [];
     const tempArray = criteriaValues.filter((item) =>
-      dataCriteria?.includes(item.value)
+      dataCriteria?.includes(item.value),
     );
     const tempNameCriteria = tempArray.map((data) => data.name);
     listDataCriteria?.map((item) => {
@@ -544,19 +544,21 @@ const ListCreateForm = ({ type }) => {
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
     // if (hasValue(formHeader?.endDate)) {
-    dataTable?.forEach(item => {
-      if (moment(item?.startDate) < moment(formHeader?.startDate) || moment(item?.endDate) > moment(formHeader?.endDate)) {
-        dataOverlap?.push(item)
+    dataTable?.forEach((item) => {
+      if (
+        moment(item?.startDate) < moment(formHeader?.startDate) ||
+        moment(item?.endDate) > moment(formHeader?.endDate)
+      ) {
+        dataOverlap?.push(item);
       }
     });
 
     if (dataOverlap?.length > 0) {
-      return true
+      return true;
     } else {
-      return false
+      return false;
     }
     // }
-
   }, []);
 
   //handle submit setelah muncul modal
@@ -565,7 +567,10 @@ const ListCreateForm = ({ type }) => {
     if (listDataAttachment.length === 0) {
       handleMandatory(setTabData, listDataAttachment);
     } else {
-      const isOverlapping = checkOverlappingData({startDate: formValue?.startDate, endDate: formValue?.endDate}, list)
+      const isOverlapping = checkOverlappingData(
+        { startDate: formValue?.startDate, endDate: formValue?.endDate },
+        list,
+      );
       // It seems like handleMandatory is called regardless of the condition
       handleMandatory(setTabData, listDataAttachment);
       if (list.length === 0 && !formValue.criteria.includes(24)) {
@@ -587,7 +592,7 @@ const ListCreateForm = ({ type }) => {
           formValue?.criteria,
           list,
           () => {},
-          0
+          0,
         )
       ) {
         const errorBody = {
@@ -601,7 +606,7 @@ const ListCreateForm = ({ type }) => {
           description: `You can't add Criteria. Start date and end date can't be overlap`,
         };
         dispatch(showModalError(errorBody));
-       } else {
+      } else {
         // Assuming dispatch and setModalConfirm are defined somewhere
 
         let Object = list.map((item) => {
@@ -651,7 +656,7 @@ const ListCreateForm = ({ type }) => {
         const filteredCriteria = columnsTableCriteriaTOP().filter(
           (item) =>
             !formValue.criteria?.includes(item.indexValue) &&
-            formValue.criteria.includes(item.indexValue) === 1
+            formValue.criteria.includes(item.indexValue) === 1,
         );
 
         //Modifying Object based on filtered criteria
@@ -734,7 +739,7 @@ const ListCreateForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/rbi/top/create-attachment`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -761,7 +766,7 @@ const ListCreateForm = ({ type }) => {
         .then(async () => {
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
@@ -772,7 +777,7 @@ const ListCreateForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/rbi/top/create-attachment`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -806,15 +811,20 @@ const ListCreateForm = ({ type }) => {
     return value;
   };
 
-
   const isDisabledDate = useMemo(() => {
-    if (hasValue(form?.getFieldsValue()?.endDate) === true && list?.map(item => ({ startDate: item?.startDate, endDate: item?.endDate }))?.length > 0) {
+    if (
+      hasValue(form?.getFieldsValue()?.endDate) === true &&
+      list?.map((item) => ({
+        startDate: item?.startDate,
+        endDate: item?.endDate,
+      }))?.length > 0
+    ) {
       return true;
     } else {
-      return false
+      return false;
     }
   }, [form, list]);
-  
+
   return (
     <LayoutMenu>
       <BreadCrumb routes={routes} />

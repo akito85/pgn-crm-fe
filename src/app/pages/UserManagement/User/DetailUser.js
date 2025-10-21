@@ -19,11 +19,15 @@ import {
 } from "../../../../redux/slices/user_management/user";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
 import moment from "moment";
-import {
-  ModalConfirm,
-} from "../../../../components/Modal/ModalPopUp";
+import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import DetailGroupAccessLayout from "./DetailGroupAccessLayout";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn, toTitleCase } from "../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+  toTitleCase,
+} from "../../../../utils";
 import { useRef } from "react";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import { getColumnSearchProps } from "../../../../utils/getColumnSearchProps";
@@ -37,7 +41,7 @@ const DetailUser = () => {
   const [openModal, setOpenModal] = useState(false);
   const dispatch = useDispatch();
   const { data_user, loading, data_detail } = useSelector(
-    (state) => state.user
+    (state) => state.user,
   );
   const location = useLocation();
   const datas = data_user?.data;
@@ -55,15 +59,15 @@ const DetailUser = () => {
   const [searchedColumnChangeAuth, setSearchedColumnChangeAuth] = useState("");
   const [searchedColumnGenerate, setSearchedColumnGenerate] = useState("");
   const searchInput = useRef(null);
-  const searchInputChangeAuth= useRef(null);
-  const searchInputGenerate= useRef(null);
+  const searchInputChangeAuth = useRef(null);
+  const searchInputGenerate = useRef(null);
   const [search, setSearch] = useState({});
   const [searchChangeAuth, setSearchChangeAuth] = useState({});
   const [searchGenerate, setSearchGenerate] = useState({});
   const [body, setBody] = useState({});
-  const [typeColumn, setTypeColumn] = useState('string');
-  const [typeColumnChangeAuth, setTypeColumnChangeAuth] = useState('string');
-  const [typeColumnGenerate, setTypeColumnGenerate] = useState('string');
+  const [typeColumn, setTypeColumn] = useState("string");
+  const [typeColumnChangeAuth, setTypeColumnChangeAuth] = useState("string");
+  const [typeColumnGenerate, setTypeColumnGenerate] = useState("string");
 
   useEffect(() => {
     if (hasValue(location.state.id)) {
@@ -76,7 +80,6 @@ const DetailUser = () => {
     setOpenModal(false);
   };
 
-
   const handleDataPagination = (pageChange, pageSizeChange) => {
     setCurrentTax(sizeTax !== pageSizeChange ? 1 : pageChange);
     setSizeTax(pageSizeChange);
@@ -84,10 +87,14 @@ const DetailUser = () => {
   const handleDataPaginationGenerate = (currentTax, sizeTax) => {
     setCurrentChangeAuth(sizeChangeAuth !== sizeTax ? 1 : currentTax);
     setSizeChangeAuth(sizeTax);
-   
   };
-  const handleDataPaginationChangeAuth = (currentChangeAuthChange, sizeChangeAuthChange) => {
-    setCurrentChangeAuth(sizeChangeAuth !== sizeChangeAuthChange ? 1 : currentChangeAuthChange);
+  const handleDataPaginationChangeAuth = (
+    currentChangeAuthChange,
+    sizeChangeAuthChange,
+  ) => {
+    setCurrentChangeAuth(
+      sizeChangeAuth !== sizeChangeAuthChange ? 1 : currentChangeAuthChange,
+    );
     setSizeChangeAuth(sizeChangeAuthChange);
   };
 
@@ -98,25 +105,24 @@ const DetailUser = () => {
       await dispatch(getDetailGroupAccess(object?.gaId))?.unwrap();
       setOpenModal(true);
     } catch (error) {
-      handleCancel()
+      handleCancel();
     }
   };
-
 
   // handle search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     switch (dataIndex) {
-      case 'startDate':
-      case 'endDate':
-        setTypeColumn('dateCapital')
+      case "startDate":
+      case "endDate":
+        setTypeColumn("dateCapital");
         break;
-      case 'operation':
-        setTypeColumn('status')
+      case "operation":
+        setTypeColumn("status");
         break;
       default:
-        setTypeColumn('string')
+        setTypeColumn("string");
         break;
     }
     setSearchedColumn(dataIndex);
@@ -134,11 +140,11 @@ const DetailUser = () => {
     confirm();
     setSearchTextChangeAuth(selectedKeys[0]);
     switch (dataIndex) {
-      case 'createdDate':
-        setTypeColumnChangeAuth('date')
+      case "createdDate":
+        setTypeColumnChangeAuth("date");
         break;
       default:
-        setTypeColumnChangeAuth('string')
+        setTypeColumnChangeAuth("string");
         break;
     }
     setSearchedColumnChangeAuth(dataIndex);
@@ -156,15 +162,15 @@ const DetailUser = () => {
     confirm();
     setSearchTextGenerate(selectedKeys[0]);
     switch (dataIndex) {
-      case 'startDate':
-      case 'endDate':
-        setTypeColumnGenerate('dateCapital')
+      case "startDate":
+      case "endDate":
+        setTypeColumnGenerate("dateCapital");
         break;
-      case 'operation':
-        setTypeColumnGenerate('status')
+      case "operation":
+        setTypeColumnGenerate("status");
         break;
       default:
-        setTypeColumnGenerate('string')
+        setTypeColumnGenerate("string");
         break;
     }
     setSearchedColumnGenerate(dataIndex);
@@ -193,23 +199,32 @@ const DetailUser = () => {
       dataIndex: "groupAccess",
       key: "groupAccess",
       width: 350,
-      sorter: (a, b) => sorterFunction('groupAccess', a, b),
+      sorter: (a, b) => sorterFunction("groupAccess", a, b),
       ...getColumnSearchProps(
         "groupAccess",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
-      render: (text) => renderColumn('groupAccess', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "groupAccess",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "START DATE",
       dataIndex: "startDate",
       align: "center",
       width: 150,
-      sorter: (a, b) => sorterFunction('startDate', a, b, 'date'),
+      sorter: (a, b) => sorterFunction("startDate", a, b, "date"),
       ...getColumnSearchProps(
         "startDate",
         searchInput,
@@ -217,17 +232,24 @@ const DetailUser = () => {
         searchText,
         handleSearch,
         true,
-        'dateCapital'
+        "dateCapital",
       ),
-      render: (text) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, text, 'dateCapital', search)
-
+      render: (text) =>
+        renderDateColumn(
+          "startDate",
+          hasValue(search["startDate"]),
+          searchText,
+          text,
+          "dateCapital",
+          search,
+        ),
     },
     {
       title: "END DATE",
       dataIndex: "endDate",
       align: "center",
       width: 150,
-      sorter: (a, b) => sorterFunction('endDate', a, b, 'date'),
+      sorter: (a, b) => sorterFunction("endDate", a, b, "date"),
       ...getColumnSearchProps(
         "endDate",
         searchInput,
@@ -235,9 +257,17 @@ const DetailUser = () => {
         searchText,
         handleSearch,
         true,
-        'dateCapital'
+        "dateCapital",
       ),
-      render: (v) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, v, 'dateCapital', search),
+      render: (v) =>
+        renderDateColumn(
+          "endDate",
+          hasValue(search["endDate"]),
+          searchText,
+          v,
+          "dateCapital",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -245,7 +275,7 @@ const DetailUser = () => {
       key: "status",
       width: 120,
       align: "center",
-      sorter: (a, b) => sorterFunction('status', a, b),
+      sorter: (a, b) => sorterFunction("status", a, b),
       ...getColumnSearchProps(
         "status",
         searchInput,
@@ -253,22 +283,31 @@ const DetailUser = () => {
         searchText,
         handleSearch,
         false,
-        'status'
+        "status",
       ),
-      fixed: 'right',
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+      fixed: "right",
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
     {
       title: "ACTION",
       dataIndex: "action",
       key: "action",
       width: 100,
-      fixed: 'right',
+      fixed: "right",
       render: (v, r) => {
         return (
           <div className={"w-full flex justify-center"}>
             <ButtonComponent
-              icon={<UnorderedListOutlined style={{fontSize: 24}}/>}
+              icon={<UnorderedListOutlined style={{ fontSize: 24 }} />}
               border={false}
               onClick={() => {
                 handleDetail(r);
@@ -279,7 +318,6 @@ const DetailUser = () => {
       },
     },
   ];
-
 
   const routes = [
     {
@@ -299,12 +337,11 @@ const DetailUser = () => {
     navigate(USER_ROUTES.VIEW_USER);
   };
 
-
-  // handle retry 
+  // handle retry
   const handleRetry = () => {
-    handleCancelTryAgain()
-    dispatch(getDetailUser(location.state.id))
-  }
+    handleCancelTryAgain();
+    dispatch(getDetailUser(location.state.id));
+  };
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
@@ -324,9 +361,12 @@ const DetailUser = () => {
                 {moment(datas?.startDate).format(dateFormatting.dateCapital)}
               </DetailText>
               <DetailText label={"End Date"}>
-                {datas?.endDate && moment(datas?.endDate).format(dateFormatting.dateCapital)}
+                {datas?.endDate &&
+                  moment(datas?.endDate).format(dateFormatting.dateCapital)}
               </DetailText>
-              <DetailText label={"Status"}>{toTitleCase(datas?.status)}</DetailText>
+              <DetailText label={"Status"}>
+                {toTitleCase(datas?.status)}
+              </DetailText>
               <DetailText label={"Auth Type"}>{datas?.authType}</DetailText>
               <DetailText label={"Description"}>
                 {datas?.description}
@@ -335,15 +375,15 @@ const DetailUser = () => {
           </BaseContainer>
           <BaseContainer header={"HISTORY LOG INFORMATION"}>
             <div className={"w-full grid grid-cols-5"}>
-              <DetailText label={"Record Id"}>
-                {datas?.userId}
-              </DetailText>
+              <DetailText label={"Record Id"}>{datas?.userId}</DetailText>
               <DetailText label={"Created Date"}>
-                {hasValue(datas?.createdDate) && moment(datas?.createdDate).format(dateFormatting.dateTime)}
+                {hasValue(datas?.createdDate) &&
+                  moment(datas?.createdDate).format(dateFormatting.dateTime)}
               </DetailText>
               <DetailText label={"Created By"}>{datas?.createdBy}</DetailText>
               <DetailText label={"Updated Date "}>
-                {hasValue(datas?.updatedDate) && moment(datas?.updatedDate).format(dateFormatting.dateTime)}
+                {hasValue(datas?.updatedDate) &&
+                  moment(datas?.updatedDate).format(dateFormatting.dateTime)}
               </DetailText>
               <DetailText label={"Updated By"}>{datas?.updatedBy}</DetailText>
             </div>
@@ -359,7 +399,6 @@ const DetailUser = () => {
               onShowSizeChange={handleDataPagination}
               tableScrolled={{ x: 1200, y: 550 }}
             />
-
           </BaseContainer>
           <BaseContainer header={"GENERATE LINK PASSWORD HISTORY"}>
             <TablePaginationNew
@@ -372,7 +411,7 @@ const DetailUser = () => {
                 searchInputGenerate,
                 searchedColumnGenerate,
                 searchTextGenerate,
-                handleSearchGenerate
+                handleSearchGenerate,
               )}
               current={currentGenerate}
               pageSize={sizeGenerate}
@@ -391,7 +430,7 @@ const DetailUser = () => {
                 searchInputChangeAuth,
                 searchedColumnChangeAuth,
                 searchTextChangeAuth,
-                handleSearchChangeAuth
+                handleSearchChangeAuth,
               )}
               current={currentChangeAuth}
               pageSize={sizeChangeAuth}

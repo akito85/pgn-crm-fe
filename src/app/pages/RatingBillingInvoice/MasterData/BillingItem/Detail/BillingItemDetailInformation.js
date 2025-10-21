@@ -33,11 +33,11 @@ const BillingItemDetailInformation = ({
   const [searchDetail, setSearchDetail] = useState({});
 
   const [category, setCategory] = useState("");
-  const [dataHistory, setDataHistory] = useState({})
+  const [dataHistory, setDataHistory] = useState({});
   const [dataDetailTable, setDataDetailTable] = useState([]);
 
   const [subHeader, setSubHeader] = useState("");
-  const [modalHistory, setModalHistory] = useState(false)
+  const [modalHistory, setModalHistory] = useState(false);
   const [isDetailMapShown, setIsDetailMapShown] = useState(false);
 
   const handleChange = (pageChange, pageSizeChange) => {
@@ -48,7 +48,7 @@ const BillingItemDetailInformation = ({
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    
+
     const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
     if (searchedColumn !== tempSearchColumn) {
       setPage(1);
@@ -96,13 +96,13 @@ const BillingItemDetailInformation = ({
     } else {
       setSubHeader(
         dataBillingItem.mappingInformation.filter(
-          (item) => item.categoryId === e.categoryId
-        )[0]?.category
+          (item) => item.categoryId === e.categoryId,
+        )[0]?.category,
       );
       setCategory(e.categoryId);
       if (dataBillingItem) {
         const detailMappingInfo = dataBillingItem?.mappingInformation?.filter(
-          (item) => item.categoryId === e.categoryId
+          (item) => item.categoryId === e.categoryId,
         )[0]?.detailMappingInfo;
         setDataDetailTable(detailMappingInfo);
         setIsDetailMapShown(true);
@@ -143,7 +143,7 @@ const BillingItemDetailInformation = ({
     };
     let fa = handleDataSort(a);
     let fb = handleDataSort(b);
-  
+
     const handleCompare = (a, b) => {
       switch (fieldSort) {
         case "startDate":
@@ -177,7 +177,7 @@ const BillingItemDetailInformation = ({
     };
     let fa = handleDataSort(a);
     let fb = handleDataSort(b);
-  
+
     const handleCompare = (a, b) => {
       switch (fieldSort) {
         case "startDate":
@@ -216,7 +216,7 @@ const BillingItemDetailInformation = ({
 
   const handleDetailHistory = (r) => {
     // console.log(r);
-    setModalHistory(true)
+    setModalHistory(true);
     setDataHistory({
       recordId: r?.rMappingId,
       createdDate: r?.createdDate,
@@ -224,12 +224,11 @@ const BillingItemDetailInformation = ({
       updatedDate: r?.updatedDate,
       updatedBy: r?.updatedBy,
     });
-  }
+  };
 
   const closeModalHistory = () => {
-    setModalHistory(false)
-
-  }
+    setModalHistory(false);
+  };
 
   return (
     <Fragment>
@@ -302,7 +301,7 @@ const BillingItemDetailInformation = ({
               handleSearch,
               handleDetail,
               onFilter,
-              sorter
+              sorter,
               // handleApprovalHistory,
               // handleOpenModalInactivate
             )}
@@ -338,7 +337,7 @@ const BillingItemDetailInformation = ({
                 onFilter,
                 sorterDetail,
                 [],
-                handleDetailHistory
+                handleDetailHistory,
                 // handleApprovalHistory,
                 // handleOpenModalInactivate
               )}
@@ -384,9 +383,7 @@ const BillingItemDetailInformation = ({
         }
       >
         <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-          <DetailText label="Record ID">
-            {dataHistory.recordId}
-          </DetailText>
+          <DetailText label="Record ID">{dataHistory.recordId}</DetailText>
           <DetailText label="Created Date">
             {dataHistory?.createdDate
               ? moment(dataHistory.createdDate).format(dateFormatting.dateTime)

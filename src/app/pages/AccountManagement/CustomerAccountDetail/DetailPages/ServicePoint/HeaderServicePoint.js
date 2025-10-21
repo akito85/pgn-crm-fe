@@ -15,12 +15,14 @@ import { Fragment } from "react";
 import DetailText from "../../../../../../components/DetailText";
 import MiniBaseContainer from "../../../../../../components/MiniBaseContainer";
 
-const HeaderServicePoint = ({data = {}}) => {
+const HeaderServicePoint = ({ data = {} }) => {
   return (
     <Fragment>
       <MiniBaseContainer header={"Premise Information"}>
         <div className="w-full">
-          <DetailText label="Premise Address">{data?.premiseAddress}</DetailText>
+          <DetailText label="Premise Address">
+            {data?.premiseAddress}
+          </DetailText>
         </div>
 
         <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">

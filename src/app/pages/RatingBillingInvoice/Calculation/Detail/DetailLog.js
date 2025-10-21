@@ -2,13 +2,21 @@ import React, { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { getDetailCalculationLog } from "../../../../../redux/slices/rating_billing_invoice/calculation";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../utils";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValue,
+} from "../../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
 
 const DetailLog = ({ data, tabHeader }) => {
   const { list_calculation_result, loading } = useSelector(
-    (state) => state.rbi_calculation
+    (state) => state.rbi_calculation,
   );
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -41,7 +49,7 @@ const DetailLog = ({ data, tabHeader }) => {
           page,
           pageSize,
           search: encodeURIComponent(JSON.stringify(search)),
-        })
+        }),
       );
     }
   }, [
@@ -106,7 +114,7 @@ const DetailLog = ({ data, tabHeader }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -116,7 +124,7 @@ const DetailLog = ({ data, tabHeader }) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -137,7 +145,7 @@ const DetailLog = ({ data, tabHeader }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -147,7 +155,7 @@ const DetailLog = ({ data, tabHeader }) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -163,7 +171,7 @@ const DetailLog = ({ data, tabHeader }) => {
         searchText,
         handleSearch,
         true,
-        "datetime"
+        "datetime",
       ),
       render: (text) =>
         renderDateColumn(
@@ -172,7 +180,7 @@ const DetailLog = ({ data, tabHeader }) => {
           searchText,
           text,
           "datetime",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "createdDate",
@@ -220,7 +228,7 @@ const DetailLog = ({ data, tabHeader }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -230,7 +238,7 @@ const DetailLog = ({ data, tabHeader }) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -255,7 +263,7 @@ const DetailLog = ({ data, tabHeader }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -265,7 +273,7 @@ const DetailLog = ({ data, tabHeader }) => {
           text,
           true,
           "input",
-          search
+          search,
         ),
       // render: (text) => {
       //   if (searchedColumn === "remark") {

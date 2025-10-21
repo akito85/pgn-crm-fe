@@ -57,7 +57,7 @@ const routes = [
 const CustomerList = () => {
   const dispatch = useDispatch();
   const { data_customer, loading } = useSelector(
-    (state) => state.customerAccount
+    (state) => state.customerAccount,
   );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -111,7 +111,7 @@ const CustomerList = () => {
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
         body: { inputFields: tempInputFields },
-      })
+      }),
     );
   }, [dispatch, page, pageSize, sort, search, tempInputFields]);
 
@@ -131,7 +131,7 @@ const CustomerList = () => {
             key: index + 1,
             parent: indexCustomer + 1,
           })),
-        })
+        }),
       );
       setDataTable(data);
     }
@@ -266,7 +266,7 @@ const CustomerList = () => {
         formInactive.resetFields();
         setDataInactive({});
         setModalInactive(false);
-        setTypeActivation(false)
+        setTypeActivation(false);
         handleClear();
         let tempSearch = "";
 
@@ -286,7 +286,7 @@ const CustomerList = () => {
             sort,
             search: tempSearch,
             body: { inputFields: tempInputFields },
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -304,7 +304,7 @@ const CustomerList = () => {
         formInactive.resetFields();
         setDataInactive({});
         setModalInactive(false);
-        setTypeActivation(false)
+        setTypeActivation(false);
         handleClear();
       });
   };
@@ -315,7 +315,6 @@ const CustomerList = () => {
     setDataInactive(e);
     setModalInactive(true);
   };
-
 
   // const handleAddQuery = () => {
   //   const newInput = { condition: "", column: "", operator: "", value: "" };
@@ -400,9 +399,9 @@ const CustomerList = () => {
         sort,
         search: tempSearch,
         body: { inputFields: e?.query },
-      })
+      }),
     );
-    setPage(1)
+    setPage(1);
     setModalQuery(false);
     // }
   };
@@ -426,7 +425,7 @@ const CustomerList = () => {
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
         body: { inputFields: tempInputFields },
-      })
+      }),
     );
   };
 
@@ -449,7 +448,7 @@ const CustomerList = () => {
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch = () => { }
+      handleSearch = () => {},
     ) => {
       return [
         {
@@ -468,7 +467,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -481,7 +480,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -494,7 +493,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -507,7 +506,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -520,7 +519,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -533,7 +532,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -546,7 +545,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -559,7 +558,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -572,7 +571,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -585,7 +584,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -598,7 +597,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -611,7 +610,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -624,7 +623,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -637,7 +636,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -650,7 +649,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -663,7 +662,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -676,7 +675,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -689,7 +688,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -702,7 +701,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -715,7 +714,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -731,7 +730,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
           render: (accountDescription) => (
             <Tooltip placement="topLeft" title={accountDescription}>
@@ -748,7 +747,7 @@ const CustomerList = () => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
           render: (accountStatus) => (
             <div className={"flex justify-center"}>
@@ -818,7 +817,7 @@ const CustomerList = () => {
     const npwpString = npwpNumber.toString();
     const formattedNPWP = npwpString.replace(
       /(\d{2})(\d{3})(\d{3})(\d{1})(\d{3})(\d{3})/,
-      "$1.$2.$3.$4-$5.$6"
+      "$1.$2.$3.$4-$5.$6",
     );
     return formattedNPWP;
   }
@@ -854,7 +853,7 @@ const CustomerList = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -867,7 +866,7 @@ const CustomerList = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -880,7 +879,7 @@ const CustomerList = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -1011,7 +1010,7 @@ const CustomerList = () => {
   const itemActions = [
     //action toolbar
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
@@ -1020,8 +1019,7 @@ const CustomerList = () => {
         >
           Download List
         </ButtonComponent>
-
-      )
+      ),
     },
 
     // Column Action Table
@@ -1044,8 +1042,8 @@ const CustomerList = () => {
               ></ButtonComponent>
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
 
     {
@@ -1062,7 +1060,7 @@ const CustomerList = () => {
                   onClick={() => {
                     setTypeActivation(true);
                     handleInactive(record);
-                    setNameNumber(record)
+                    setNameNumber(record);
                   }}
                 />
               ) : (
@@ -1076,10 +1074,10 @@ const CustomerList = () => {
               {/* </ButtonComponent> */}
             </div>
           </Tooltip>
-        )
-      }
-    }
-  ]
+        );
+      },
+    },
+  ];
 
   return (
     <LayoutMenu>
@@ -1131,7 +1129,7 @@ const CustomerList = () => {
               ...columns,
               ...useColumnActionPermission(
                 ["Activate", "View", "Update"],
-                itemActions
+                itemActions,
               ),
             ]}
           />
@@ -1146,41 +1144,41 @@ const CustomerList = () => {
           handleCancel={() => {
             handleCancelAdvanced();
           }}
-        // footer={
-        //   <div className={"w-full flex justify-between mt-5"}>
-        //     <div>
-        //       <ButtonComponent
-        //         type={"submit"}
-        //         onClick={() => handleAddQuery()}
-        //         disabled={inputFields.length > 4}
-        //       >
-        //         Add
-        //       </ButtonComponent>
-        //     </div>
-        //     <div className={"flex gap-3"}>
-        //       <Form.Item>
-        //         <ButtonComponent
-        //           type="default"
-        //           onClick={() => {
-        //             handleCancelAdvanced();
-        //           }}
-        //         >
-        //           Cancel
-        //         </ButtonComponent>
-        //       </Form.Item>
-        //       <Form.Item>
-        //         <ButtonComponent
-        //           type="submit"
-        //           htmlType={"submit"}
-        //           form={"formQuery"}
-        //           disabled={btnQuery || loading}
-        //         >
-        //           Save
-        //         </ButtonComponent>
-        //       </Form.Item>
-        //     </div>
-        //   </div>
-        // }
+          // footer={
+          //   <div className={"w-full flex justify-between mt-5"}>
+          //     <div>
+          //       <ButtonComponent
+          //         type={"submit"}
+          //         onClick={() => handleAddQuery()}
+          //         disabled={inputFields.length > 4}
+          //       >
+          //         Add
+          //       </ButtonComponent>
+          //     </div>
+          //     <div className={"flex gap-3"}>
+          //       <Form.Item>
+          //         <ButtonComponent
+          //           type="default"
+          //           onClick={() => {
+          //             handleCancelAdvanced();
+          //           }}
+          //         >
+          //           Cancel
+          //         </ButtonComponent>
+          //       </Form.Item>
+          //       <Form.Item>
+          //         <ButtonComponent
+          //           type="submit"
+          //           htmlType={"submit"}
+          //           form={"formQuery"}
+          //           disabled={btnQuery || loading}
+          //         >
+          //           Save
+          //         </ButtonComponent>
+          //       </Form.Item>
+          //     </div>
+          //   </div>
+          // }
         >
           <Form
             id="formQuery"
@@ -1258,11 +1256,18 @@ const CustomerList = () => {
           isOpen={modalInactive}
           handleCloseModal={() => setModalInactive(false)}
           onFinish={onFinishInactive}
-          header={dataInactive?.status?.toLowerCase() === 'active' ? 'Inactivate' : "Activate"}
-          approveOrReject={dataInactive?.status?.toLowerCase() === 'active' ? 'Inactivate' : "Activate"}
+          header={
+            dataInactive?.status?.toLowerCase() === "active"
+              ? "Inactivate"
+              : "Activate"
+          }
+          approveOrReject={
+            dataInactive?.status?.toLowerCase() === "active"
+              ? "Inactivate"
+              : "Activate"
+          }
           // menu={"Customer"}
-          customMessage={`Are you sure you want to ${dataInactive?.status?.toLowerCase() === 'active' ? 'Inactivate' : "Activate"} Customer ${dataInactive.customerNumber} - ${dataInactive.customerName}?`}
-
+          customMessage={`Are you sure you want to ${dataInactive?.status?.toLowerCase() === "active" ? "Inactivate" : "Activate"} Customer ${dataInactive.customerNumber} - ${dataInactive.customerName}?`}
         />
         {/** Modal Retry */}
         <ModalError
@@ -1278,8 +1283,9 @@ const CustomerList = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${typeActivation ? "Inactive" : "Created"
-              }`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              typeActivation ? "Inactive" : "Created"
+            }`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

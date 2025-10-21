@@ -45,7 +45,7 @@ const columns = (
   handleApprovalHistory = () => {},
   handleOpenModalInactivate = () => {},
   handleOpenModalLock = () => {},
-  dataUser = {}
+  dataUser = {},
 ) => {
   return [
     {
@@ -67,7 +67,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -77,7 +77,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -95,7 +95,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -105,7 +105,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -120,7 +120,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -130,7 +130,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -148,7 +148,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -158,7 +158,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -176,7 +176,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -186,7 +186,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -204,7 +204,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -214,7 +214,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -229,7 +229,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -239,7 +239,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -257,7 +257,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -267,7 +267,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -284,7 +284,7 @@ const columns = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -293,7 +293,7 @@ const columns = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -310,7 +310,7 @@ const columns = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -319,7 +319,7 @@ const columns = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -337,7 +337,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -347,7 +347,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -364,7 +364,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         let text;
@@ -388,7 +388,7 @@ const columns = (
               text,
               false,
               "status",
-              search
+              search,
             )
           : text;
       },
@@ -407,7 +407,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (approvalStatus) => {
         let text;
@@ -433,7 +433,7 @@ const columns = (
               text,
               false,
               "status",
-              search
+              search,
             )
           : text;
       },
@@ -622,7 +622,7 @@ const itemsActionView = (
       const isEditable =
         record.status !== "INACTIVE" &&
         (!record.lockedBy || record.lockedBy === dataUser?.data?.username);
-      
+
       return (
         <ButtonComponent
           icon={
@@ -755,7 +755,7 @@ const Product = () => {
         pageSize,
         search: encodeURIComponent(JSON.stringify(search)),
         sort,
-      })
+      }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
@@ -841,7 +841,7 @@ const Product = () => {
             pageSize,
             sort,
             search: encodeURIComponent(JSON.stringify(search)),
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -899,7 +899,7 @@ const Product = () => {
             pageSize,
             sort,
             search: encodeURIComponent(JSON.stringify(search)),
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -965,7 +965,7 @@ const Product = () => {
         pageSize,
         search: encodeURIComponent(JSON.stringify(search)),
         sort,
-      })
+      }),
     );
   };
 
@@ -1035,28 +1035,31 @@ const Product = () => {
               tableScrolled={{ y: 525, x: 2300 }}
               onChange={handleChangeSize}
               onSort={onSort}
-              columns={[...columns(
-                search,
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                handleApprovalHistory,
-                handleOpenModalInactivate,
-                handleOpenModalLock,
-                dataUser
-              ), ...useColumnActionPermission(
-                ["view", "Lock", "Activate", "History"],
-                itemsActionView(
-                  handleOpenModalInactivate,
+              columns={[
+                ...columns(
+                  search,
+                  page,
+                  pageSize,
+                  searchInput,
+                  searchedColumn,
+                  searchText,
+                  handleSearch,
                   handleApprovalHistory,
+                  handleOpenModalInactivate,
                   handleOpenModalLock,
-                  handleDownload,
                   dataUser,
-                )
-              )]}
+                ),
+                ...useColumnActionPermission(
+                  ["view", "Lock", "Activate", "History"],
+                  itemsActionView(
+                    handleOpenModalInactivate,
+                    handleApprovalHistory,
+                    handleOpenModalLock,
+                    handleDownload,
+                    dataUser,
+                  ),
+                ),
+              ]}
             />
           </BaseContainer>
         </div>

@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import masterCostCenterService from "../../../services/system_setup/master_data/master_cost_center";
 import userHttpService from "../../../services/userHttpService";
-import {  showModalSuccess, validateError } from "../../general_slice";
+import { showModalSuccess, validateError } from "../../general_slice";
 import { errorBody, errorCode, errorMessage } from "../../../../utils";
 
 const initialState = {
@@ -20,16 +20,23 @@ export const getAllCostCenter = createAsyncThunk(
   async ({ search, page, pageSize, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
-      const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/costcenter/paging?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await userHttpService.getPagination(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_ALL_MASTER_COST_CENTER", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_ALL_MASTER_COST_CENTER",
+          back: false,
+        }),
+      );
 
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 // get update data cost center
 export const getUpdateCostCenter = createAsyncThunk(
@@ -40,10 +47,16 @@ export const getUpdateCostCenter = createAsyncThunk(
       const response = await masterCostCenterService.getUpdateCostCenter(id);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_UPDATE_COST_CENTER", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_UPDATE_COST_CENTER",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // create data cost center
@@ -60,10 +73,16 @@ export const createCostCenter = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_COST_CENTER", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "CREATE_COST_CENTER",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // update data cost center
@@ -80,25 +99,35 @@ export const updateCostCenter = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'updated', errorMessage(error)), action: "UPDATE_COST_CENTER", back: false }))
-     
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "updated", errorMessage(error)),
+          action: "UPDATE_COST_CENTER",
+          back: false,
+        }),
+      );
+
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
-
 // get Hierarchy
-export const getHierarchy = createAsyncThunk("GET_HIERARCHY", async (thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/costcenter/getHierarchy`;
-    const response = await userHttpService.getAll(url);
-    return response.data;
-  } catch (error) {
-    thunkAPI.dispatch(validateError({ error: error, action: "GET_HIERARCHY", back: false }))
-    return thunkAPI.rejectWithValue(error.response);
-  }
-});
+export const getHierarchy = createAsyncThunk(
+  "GET_HIERARCHY",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/costcenter/getHierarchy`;
+      const response = await userHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_HIERARCHY", back: false }),
+      );
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  },
+);
 
 // get Parent Hierarchy
 export const getParent = createAsyncThunk("GET_PARENT", async (thunkAPI) => {
@@ -107,7 +136,9 @@ export const getParent = createAsyncThunk("GET_PARENT", async (thunkAPI) => {
     const response = await userHttpService.getAll(url);
     return response.data;
   } catch (error) {
-    thunkAPI.dispatch(validateError({ error: error, action: "GET_PARENT", back: false }))
+    thunkAPI.dispatch(
+      validateError({ error: error, action: "GET_PARENT", back: false }),
+    );
     return thunkAPI.rejectWithValue(error.response);
   }
 });
@@ -119,7 +150,9 @@ export const getType = createAsyncThunk("GET_TYPE", async (thunkAPI) => {
     const data = await userHttpService.getAll(url);
     return data;
   } catch (error) {
-    thunkAPI.dispatch(validateError({ error: error, action: "GET_TYPE", back: false }))
+    thunkAPI.dispatch(
+      validateError({ error: error, action: "GET_TYPE", back: false }),
+    );
     return thunkAPI.rejectWithValue(error.response);
   }
 });
@@ -133,10 +166,16 @@ export const getSiblingByParent = createAsyncThunk(
       const response = await userHttpService.getDetail(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_SIBLINGS_BY_PARENT_ID", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_SIBLINGS_BY_PARENT_ID",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // slices get detail cost center
@@ -148,10 +187,16 @@ export const getCostCenterDetail = createAsyncThunk(
       const data = await userHttpService.getDetail(url);
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_COST_CENTER_DETAIL", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_COST_CENTER_DETAIL",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // slices get detail sibling
@@ -162,17 +207,23 @@ export const getSiblingDetail = createAsyncThunk(
       const response = await masterCostCenterService.getSiblingDetail(obj);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_SIBLINGS_DETAIL", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_SIBLINGS_DETAIL",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // activate cost center slices
 export const activateCostCenter = createAsyncThunk(
   "ACTIVATE_COST_CENTER",
   async (body, thunkAPI) => {
-    let status = body?.status === 'Activate' ? 'activated' : 'inactivated';
+    let status = body?.status === "Activate" ? "activated" : "inactivated";
     try {
       const url = `/v1/dbs/api/costcenter/inactive/active`;
       const response = await userHttpService.activationWithRemark(url, body);
@@ -185,10 +236,16 @@ export const activateCostCenter = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(response), status, errorMessage(response)), action: "INACTIVE_MASTER_JOB", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(response), status, errorMessage(response)),
+          action: "INACTIVE_MASTER_JOB",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 // delete cost center
@@ -200,10 +257,16 @@ export const deleteCostCenter = createAsyncThunk(
       const response = await userHttpService.deleteData(url);
       return response.status;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DELETE_GLOBAL_TYPE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DELETE_GLOBAL_TYPE",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadMasterCostCenter = createAsyncThunk(
@@ -217,10 +280,16 @@ export const downloadMasterCostCenter = createAsyncThunk(
       const response = await userHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_MASTER_COST_CENTER", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_MASTER_COST_CENTER",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 const masterCostCenterSlice = createSlice({
   name: "master_cost_center",

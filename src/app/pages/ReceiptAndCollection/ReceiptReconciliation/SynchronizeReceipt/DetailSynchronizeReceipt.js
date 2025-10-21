@@ -115,7 +115,7 @@ const DetailSynchronizeReceipt = () => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -234,13 +234,17 @@ const DetailSynchronizeReceipt = () => {
       <BaseContainer header={"SYNCHRONIZE INFORMATION"}>
         <div className="w-full grid grid-cols-3 gap-3">
           <DetailText label="Sync Id">{data_detail?.syncId}</DetailText>
-          <DetailText label="Sync Date Time">{data_detail?.syncDateTime
+          <DetailText label="Sync Date Time">
+            {data_detail?.syncDateTime
               ? moment(data_detail.syncDateTime).format(dateFormat)
-              : "-"}</DetailText>
-          <DetailText label="Total Receipt">{data_detail?.totalReceipt}</DetailText>
+              : "-"}
+          </DetailText>
+          <DetailText label="Total Receipt">
+            {data_detail?.totalReceipt}
+          </DetailText>
           <DetailText label="Currency">{data_detail?.currency}</DetailText>
           <DetailText label="Total Amount">
-          <NumericFormat
+            <NumericFormat
               displayType="text"
               value={data_detail?.totalAmount}
               className="text-right"

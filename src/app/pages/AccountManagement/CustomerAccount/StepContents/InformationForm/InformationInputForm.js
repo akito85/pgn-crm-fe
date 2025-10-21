@@ -4,9 +4,7 @@ import { Checkbox, DatePicker, Form, Select } from "antd";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import InputComponent from "../../../../../../components/InputComponent";
 
-const InformationInputForm = ({
-  updateBody = () => {}
-}) => {
+const InformationInputForm = ({ updateBody = () => {} }) => {
   return (
     <div>
       {/* SECTION CUSTOMER TYPPE */}
@@ -303,7 +301,11 @@ const InformationInputForm = ({
             },
           ]}
         >
-          <InputComponent mandatory label={"Account Registration Number"} type="text" />
+          <InputComponent
+            mandatory
+            label={"Account Registration Number"}
+            type="text"
+          />
         </Form.Item>
         <Form.Item
           name={"accountName"}
@@ -353,8 +355,16 @@ const InformationInputForm = ({
         </h1>
       </div>
       <div className={"grid grid-cols-3 w-full gap-x-6"}>
-        <Form.Item name="differentNpwp" label={"Use Account Tax Identification Number"} valuePropName="checked" noStyle>
-          <Checkbox>Check if account has different tax identification number with customer</Checkbox>
+        <Form.Item
+          name="differentNpwp"
+          label={"Use Account Tax Identification Number"}
+          valuePropName="checked"
+          noStyle
+        >
+          <Checkbox>
+            Check if account has different tax identification number with
+            customer
+          </Checkbox>
         </Form.Item>
         <Form.Item
           name={"npwp"}
@@ -365,10 +375,13 @@ const InformationInputForm = ({
             },
           ]}
         >
-          <InputComponent mandatory label={"Tax Identification Number(NPWP)"} type="text" />
+          <InputComponent
+            mandatory
+            label={"Tax Identification Number(NPWP)"}
+            type="text"
+          />
         </Form.Item>
       </div>
-      
 
       {/* SECTION ACCOUNT SEGMENT INFORMATION */}
       <div className="pt-8 pb-4">
@@ -449,10 +462,17 @@ const InformationInputForm = ({
             </Select.Option>
           </SelectComponent>
         </Form.Item>
-        <Form.Item name="coorporateCustomer" label={"Coorporate Customer"} valuePropName="checked" noStyle>
-          <div className='flex flex-col'>
+        <Form.Item
+          name="coorporateCustomer"
+          label={"Coorporate Customer"}
+          valuePropName="checked"
+          noStyle
+        >
+          <div className="flex flex-col">
             <h3 className="text-[14px]">Coorporate Customer</h3>
-            <Checkbox label={"Coorporate Customer"}>Check if coorporate customer</Checkbox>
+            <Checkbox label={"Coorporate Customer"}>
+              Check if coorporate customer
+            </Checkbox>
           </div>
         </Form.Item>
       </div>

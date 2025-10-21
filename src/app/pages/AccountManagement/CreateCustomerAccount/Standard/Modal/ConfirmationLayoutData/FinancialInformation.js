@@ -78,7 +78,11 @@ const FinancialInformation = ({
     ?.find((b) => b.text)?.text;
 
   const name = addressTable
-    ?.filter((a) => !isNaN(dataTI?.taxAddress) ? a.addressId === parseInt(dataTI?.taxAddress) : a.tempId === dataTI?.taxAddress)
+    ?.filter((a) =>
+      !isNaN(dataTI?.taxAddress)
+        ? a.addressId === parseInt(dataTI?.taxAddress)
+        : a.tempId === dataTI?.taxAddress,
+    )
     ?.find((b) => b.fullAddress)?.fullAddress;
 
   const financialList = [
@@ -135,8 +139,12 @@ const FinancialInformation = ({
             <DetailText label={"Account Number"}>
               {dataForm?.relatedAccountId}
             </DetailText>
-            <DetailText label={"Customer Name"}>{dataForm.customerNameTI}</DetailText>
-            <DetailText label={"Account Name"}>{dataForm?.accountNameTI}</DetailText>
+            <DetailText label={"Customer Name"}>
+              {dataForm.customerNameTI}
+            </DetailText>
+            <DetailText label={"Account Name"}>
+              {dataForm?.accountNameTI}
+            </DetailText>
             <DetailText label={"Related Account Tax Identifier Type"}>
               {dataForm?.ratit}
             </DetailText>

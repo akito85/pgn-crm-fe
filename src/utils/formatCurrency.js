@@ -33,10 +33,6 @@ export const currencyFormatting = (value, type) => {
 
 export const numberFormatting = (value) => {
   return (
-    <NumericFormat
-      value={value}
-      displayType="text"
-      thousandSeparator={","}
-    />
-  )
+    <NumericFormat value={value} displayType="text" thousandSeparator={","} />
+  );
 };

@@ -1,10 +1,10 @@
-import React, {useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../../../components/TablePagination'
-import { Tooltip } from 'antd';
-import TablePaginationNew from '../../../../../../../../../../components/TablePaginationNew';
-import { hasValue, renderColumn } from '../../../../../../../../../../utils';
-import { getColumnSearchPropsUseFilteredValueFE } from '../../../../../../../../../../utils/getColumnSearchProps';
-import moment from 'moment';
+import React, { useState, useEffect, useRef } from "react";
+import TablePagination from "../../../../../../../../../../components/TablePagination";
+import { Tooltip } from "antd";
+import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
+import { hasValue, renderColumn } from "../../../../../../../../../../utils";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../../../../../utils/getColumnSearchProps";
+import moment from "moment";
 
 const sorter = (fieldSort, a, b) => {
   const handleDataSort = (obj) => {
@@ -169,7 +169,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -179,7 +179,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -198,7 +198,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -208,7 +208,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -227,7 +227,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -237,7 +237,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -256,7 +256,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -266,7 +266,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -283,7 +283,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "yes_or_no"
+          "yes_or_no",
         ),
         render: (text) =>
           renderColumn(
@@ -293,7 +293,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
         // render: (gunggung) => {
         //   return(
@@ -317,7 +317,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "yes_or_no"
+          "yes_or_no",
         ),
         render: (text) =>
           renderColumn(
@@ -327,7 +327,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
         // render: (vatValue) => {
         //   return(
@@ -352,7 +352,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -362,7 +362,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -381,7 +381,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -391,7 +391,7 @@ const TableTaxImplication = ({ dataTaxImplication, setDataTaxImplication }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
         // ...getColumnSearchProps("segment"),
       },

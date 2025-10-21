@@ -29,9 +29,7 @@ const DetailSection = ({
 
       <BaseContainer header={"history log information"}>
         <div className="w-full grid grid-cols-5 gap-3">
-          <DetailText label="Record ID">
-            {dataHistory?.recordId}
-          </DetailText>
+          <DetailText label="Record ID">{dataHistory?.recordId}</DetailText>
           <DetailText label="Created Date">
             {dataHistory?.createdDate
               ? moment(dataHistory.createdDate).format(dateFormatting.dateTime)

@@ -41,7 +41,7 @@ const UpdateAccountInformation = () => {
   const [form] = Form.useForm();
   const dispatch = useDispatch();
   const { data_accountDetail, loading } = useSelector(
-    (state) => state.accountManagement
+    (state) => state.accountManagement,
   );
 
   const {
@@ -116,14 +116,14 @@ const UpdateAccountInformation = () => {
       data_accountDetail.accountInformation
     ) {
       dispatch(
-        getAccountGroupType(data_accountDetail?.accountInformation?.segmentId)
+        getAccountGroupType(data_accountDetail?.accountInformation?.segmentId),
       ); //dependen based by value segment
     }
   }, [data_accountSegment, data_accountDetail]);
 
   //handle dependent
   useEffect(() => {
-    if(segment){
+    if (segment) {
       dispatch(getAccountGroupType(segment));
     } else {
       setListGroupType([]);
@@ -132,18 +132,18 @@ const UpdateAccountInformation = () => {
   }, [segment]);
 
   useEffect(() => {
-    if(data_accountGroupType){
+    if (data_accountGroupType) {
       setListGroupType(data_accountGroupType);
     }
-  },[data_accountGroupType])
+  }, [data_accountGroupType]);
 
   useEffect(() => {
     if (data_accountDetail && data_accountDetail.accountInformation) {
       setCheckedRating(
-        data_accountDetail?.accountInformation?.ratingAndBillingException
+        data_accountDetail?.accountInformation?.ratingAndBillingException,
       );
       setCheckedCorporate(
-        data_accountDetail?.accountInformation?.corporateCustomer
+        data_accountDetail?.accountInformation?.corporateCustomer,
       );
       form.setFieldsValue({
         ...data_accountDetail?.accountInformation,
@@ -173,15 +173,15 @@ const UpdateAccountInformation = () => {
       category: data_accountCategory?.find((item) => item?.id === e?.category)
         ?.name,
       accountSegment: data_accountSegment?.find(
-        (item) => item?.id === e?.segment
+        (item) => item?.id === e?.segment,
       )?.name,
       accountGroupType: data_accountGroupType?.find(
-        (item) => item?.id === e?.accountGroupType
+        (item) => item?.id === e?.accountGroupType,
       )?.name,
       accountType: data_accountType?.find((item) => item?.id === e?.accountType)
         ?.name,
       classificationType: data_classificationType?.find(
-        (item) => item?.id === e?.classificationType
+        (item) => item?.id === e?.classificationType,
       )?.name,
       priority: data_priority?.find((item) => item?.id === e?.priority)?.name,
       industrialSector: data_industrialSector?.reduce((result, item) => {
@@ -190,7 +190,7 @@ const UpdateAccountInformation = () => {
           item.children.find((child) => child.value === e?.industrialSector)
         ) {
           result = item.children.find(
-            (child) => child.value === e?.industrialSector
+            (child) => child.value === e?.industrialSector,
           ).title;
         }
         return result;
@@ -289,15 +289,15 @@ const UpdateAccountInformation = () => {
             : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
         breadcrumbName: "Detail Account",
         state: {
-					idAccount: id,
-				}
+          idAccount: id,
+        },
       },
       {
         path: "",
         breadcrumbName: "Update Account",
       },
     ];
-  }
+  };
 
   return (
     <LayoutMenu>

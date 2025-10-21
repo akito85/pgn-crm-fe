@@ -182,7 +182,7 @@ const AdjustmentBillingForm = ({ type }) => {
         (dataDetail?.mAttachmentLists || []).map((attachData) => ({
           ...attachData,
           dataType: "exist",
-        }))
+        })),
       );
       setListDataABI(
         (dataDetail?.tAdjustmentBillingDetail || []).map((data, index) => {
@@ -198,10 +198,10 @@ const AdjustmentBillingForm = ({ type }) => {
           delete obj.updatedDate;
           delete obj.updatedBy;
           return obj;
-        })
+        }),
       );
     },
-    [form]
+    [form],
   );
 
   useEffect(() => {
@@ -250,7 +250,7 @@ const AdjustmentBillingForm = ({ type }) => {
       setDataInvoice({});
       setIdInvoice();
       setCycleId();
-      setRangeDisableDate({})
+      setRangeDisableDate({});
     } else {
       dataUpdate(dataDetail);
     }
@@ -324,7 +324,7 @@ const AdjustmentBillingForm = ({ type }) => {
       .map((a) => a.adjustmentAmount);
     const sumIDR = dataIDR.reduce(
       (accumulator, currentValue) => accumulator + currentValue,
-      0
+      0,
     );
 
     // Sum Total Adjustment USD
@@ -333,7 +333,7 @@ const AdjustmentBillingForm = ({ type }) => {
       .map((a) => a.adjustmentAmount);
     const sumUSD = dataUSD.reduce(
       (accumulator, currentValue) => accumulator + currentValue,
-      0
+      0,
     );
 
     delete bodyData?.accountNumberWithName;
@@ -345,13 +345,13 @@ const AdjustmentBillingForm = ({ type }) => {
       adjustmentBillingDetails: modifiedArray,
       submit: flag === 1 ? false : true,
       documentDate: moment(bodyData?.documentDate).format(
-        dateFormatting.dateFormal
+        dateFormatting.dateFormal,
       ),
       accountingDate: moment(bodyData?.accountingDate).format(
-        dateFormatting.dateFormal
+        dateFormatting.dateFormal,
       ),
       transactionDate: moment(bodyData?.transactionDate).format(
-        dateFormatting.dateFormal
+        dateFormatting.dateFormal,
       ),
       rateType: dataInvoice?.rateType,
       rate: dataInvoice?.rate,
@@ -387,7 +387,7 @@ const AdjustmentBillingForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/rbi/adjustment/uploadAttachment/${idAdjustment}`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -414,7 +414,7 @@ const AdjustmentBillingForm = ({ type }) => {
           setLoadingForm(true);
           const idAdjustment = data.id;
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
@@ -424,7 +424,7 @@ const AdjustmentBillingForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/rbi/adjustment/uploadAttachment/${idAdjustment}`,
-              body
+              body,
             );
           }
           loadingForm(false);
@@ -449,7 +449,7 @@ const AdjustmentBillingForm = ({ type }) => {
   const handleMandatory = (
     setListSectionInfo = () => {},
     listDataAttachment,
-    errorFields
+    errorFields,
   ) => {
     setListSectionInfo((prevState) => {
       const res = prevState.map((item) => {
@@ -460,11 +460,11 @@ const AdjustmentBillingForm = ({ type }) => {
                   item.paramValue.includes(next.name[0])
                     ? current + 1
                     : current,
-                0
+                0,
               )
             : listDataAttachment.length < 1
-            ? 1
-            : 0;
+              ? 1
+              : 0;
         return {
           value: item.value,
           paramValue: item.paramValue,

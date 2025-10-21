@@ -11,7 +11,7 @@ export const RenderContentActions = (
   itemRender = [],
   totalLength,
   permissions = [],
-  sliceColumn = "View"
+  sliceColumn = "View",
 ) => {
   if (totalLength > 3) {
     return (
@@ -26,7 +26,7 @@ export const RenderContentActions = (
                 ?.map((item) => {
                   if (permissions?.includes(item?.action)) {
                     return item?.render(record, totalLength);
-                  }else {
+                  } else {
                     return null;
                   }
                 })}
@@ -52,7 +52,7 @@ export const RenderContentActions = (
                 item?.action === sliceColumn?.toLowerCase()
               ) {
                 return item?.render(record, totalLength);
-              }else {
+              } else {
                 return null;
               }
             })}
@@ -65,7 +65,7 @@ export const RenderContentActions = (
         {itemRender?.map((item) => {
           if (permissions?.includes(item?.action)) {
             return item?.render(record, totalLength);
-          }else {
+          } else {
             return null;
           }
         })}
@@ -79,17 +79,17 @@ export const useColumnActionPermission = (
   permissionList = [],
   itemsRender = [],
   sliceColumn = "View",
-  type = 'page'
+  type = "page",
 ) => {
-  const access = useGrantAccessHooks(type)
+  const access = useGrantAccessHooks(type);
   // convert to lower case
   const lowerCaseAccessList = useMemo(
     () => access?.actions?.map((item) => item?.toLowerCase()),
-    [access]
+    [access],
   );
   const lowerCasePermissionList = useMemo(
     () => permissionList?.map((item) => item?.toLowerCase()),
-    [permissionList]
+    [permissionList],
   );
   const lowerCaseItemsRender = useMemo(
     () =>
@@ -99,13 +99,13 @@ export const useColumnActionPermission = (
           action: item?.action?.toLowerCase(),
         }))
         ?.filter((item) => item?.type === "table"),
-    [itemsRender]
+    [itemsRender],
   );
 
   // filter access by permission list
   const arrayActions = useMemo(() => {
     const arrayActions = lowerCaseAccessList?.filter((item) =>
-      lowerCasePermissionList?.includes(item)
+      lowerCasePermissionList?.includes(item),
     );
 
     return lowerCaseItemsRender
@@ -135,7 +135,7 @@ export const useColumnActionPermission = (
               lowerCaseItemsRender,
               arrayActions?.length,
               arrayActions,
-              sliceColumn
+              sliceColumn,
             ),
         },
       ];

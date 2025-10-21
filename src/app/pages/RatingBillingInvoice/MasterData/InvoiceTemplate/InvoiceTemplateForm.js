@@ -166,7 +166,7 @@ const InvoiceTemplateForm = ({ type }) => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Draft Information
@@ -254,7 +254,7 @@ const InvoiceTemplateForm = ({ type }) => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Information
@@ -418,7 +418,7 @@ const InvoiceTemplateForm = ({ type }) => {
       bodyData,
       id,
       data_detail,
-      data_detail_draft
+      data_detail_draft,
     ) => {
       return bodyData?.criteria.map((item) => {
         const tempData =
@@ -437,12 +437,12 @@ const InvoiceTemplateForm = ({ type }) => {
     // Helper function to filter criteria
     const getFilteredCriteria = (
       bodyData,
-      columnsTableCriteriaInvoiceTemplate
+      columnsTableCriteriaInvoiceTemplate,
     ) => {
       return columnsTableCriteriaInvoiceTemplate().filter(
         (item) =>
           !bodyData.criteria.includes(item.indexValue) &&
-          bodyData.criteria.includes(item.indexValue) === 1
+          bodyData.criteria.includes(item.indexValue) === 1,
       );
     };
 
@@ -459,21 +459,21 @@ const InvoiceTemplateForm = ({ type }) => {
 
     const dataCriteriaObject = mapListDataCriteria(
       listDataCriteria,
-      dateFormatting
+      dateFormatting,
     );
     const criteriaArrayObject = mapCriteriaArrayObject(
       bodyData,
       id,
       data_detail,
-      data_detail_draft
+      data_detail_draft,
     );
     const filteredCriteria = getFilteredCriteria(
       bodyData,
-      columnsTableCriteriaInvoiceTemplate
+      columnsTableCriteriaInvoiceTemplate,
     );
     const updatedDataCriteriaObject = updateDataCriteriaObject(
       dataCriteriaObject,
-      filteredCriteria
+      filteredCriteria,
     );
 
     const includesAll = bodyData.criteria.includes(24);
@@ -527,7 +527,7 @@ const InvoiceTemplateForm = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -592,11 +592,11 @@ const InvoiceTemplateForm = ({ type }) => {
     dataCriteria,
     listDataCriteria = [],
     setMissingColumn = () => {},
-    minimumData = 0
+    minimumData = 0,
   ) => {
     let missingColumn = [];
     const tempArray = criteriaValues.filter((item) =>
-      dataCriteria?.includes(item.value)
+      dataCriteria?.includes(item.value),
     );
     const tempNameCriteria = tempArray.map((data) => data.name);
     listDataCriteria?.map((item) => {
@@ -646,7 +646,7 @@ const InvoiceTemplateForm = ({ type }) => {
 
     const hasOverlapping = checkOverlappingData(
       { startDate: formValue?.startDate, endDate: formValue?.endDate },
-      listDataCriteria
+      listDataCriteria,
     );
 
     if (listDataAttachment.length === 0) {
@@ -671,7 +671,7 @@ const InvoiceTemplateForm = ({ type }) => {
           formValue?.criteria,
           listDataCriteria,
           () => {},
-          0
+          0,
         )
       ) {
         const errorBody = {
@@ -779,7 +779,7 @@ const InvoiceTemplateForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/invoice-template/attachment-upload`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -804,7 +804,7 @@ const InvoiceTemplateForm = ({ type }) => {
         .then(async (dataForm) => {
           const idInvoiceTemplate = dataForm.id;
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           setLoadingForm(true);
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
@@ -816,7 +816,7 @@ const InvoiceTemplateForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/invoice-template/attachment-upload`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -841,7 +841,7 @@ const InvoiceTemplateForm = ({ type }) => {
   const handleMandatory = (
     setListSectionInfo = () => {},
     listDataAttachment,
-    errorFields
+    errorFields,
   ) => {
     setListSectionInfo((prevState) => {
       const res = prevState.map((item) => {
@@ -852,11 +852,11 @@ const InvoiceTemplateForm = ({ type }) => {
                   item.paramValue.includes(next.name[0])
                     ? current + 1
                     : current,
-                0
+                0,
               )
             : listDataAttachment.length < 1
-            ? 1
-            : 0;
+              ? 1
+              : 0;
         return {
           value: item.value,
           paramValue: item.paramValue,

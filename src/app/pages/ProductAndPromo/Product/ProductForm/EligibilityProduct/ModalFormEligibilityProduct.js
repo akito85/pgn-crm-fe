@@ -37,7 +37,7 @@ const columns = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
 ) => {
   return [
     {
@@ -61,7 +61,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) => {
         if (searchedColumn === "productName") {
@@ -105,7 +105,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) => {
         if (searchedColumn === "productTypeName") {
@@ -149,7 +149,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) => {
         if (searchedColumn === "productClassName") {
@@ -193,7 +193,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) => {
         if (searchedColumn === "serviceTypeName") {
@@ -233,7 +233,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -247,7 +247,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
   ];
@@ -277,7 +277,7 @@ const ModalFormEligibilityProduct = ({
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState();
   const { dataActiveProduct = [], loadingProduct } = useSelector(
-    (state) => state.product
+    (state) => state.product,
   );
 
   useEffect(() => {
@@ -301,7 +301,7 @@ const ModalFormEligibilityProduct = ({
           type !== "create" || prevPage !== "table-product"
             ? idParent
             : undefined,
-      })
+      }),
     );
   }, [dispatch, type, prevPage, idParent]);
 
@@ -317,7 +317,7 @@ const ModalFormEligibilityProduct = ({
             ? moment(item.endDate).format("DD MMM YYYY")
             : "",
           key: item.id,
-        }))
+        })),
       );
     }
   }, [openModal, dataActiveProduct]);
@@ -374,7 +374,7 @@ const ModalFormEligibilityProduct = ({
     let fixData = [];
     if (typeForm === "create") {
       const filterSelected = dataTable.filter((item) =>
-        selectedKeyDataTable.includes(item.id)
+        selectedKeyDataTable.includes(item.id),
       );
       fixData = filterSelected.map((item) => ({
         productId: item.id,
@@ -392,7 +392,7 @@ const ModalFormEligibilityProduct = ({
           ...obj,
         };
         const index = prevState.findIndex(
-          (detail) => detail.productId === dataFormObj.productId
+          (detail) => detail.productId === dataFormObj.productId,
         );
         let temp = [...prevState];
         temp[index] = {
@@ -464,7 +464,7 @@ const ModalFormEligibilityProduct = ({
                 searchInput,
                 searchedColumn,
                 searchText,
-                handleSearch
+                handleSearch,
               )}
               rowSelection={rowSelection}
             />
@@ -511,7 +511,7 @@ const ModalFormEligibilityProduct = ({
                       !value
                         ? Promise.resolve()
                         : Promise.reject(
-                            new Error("End date must before Start date")
+                            new Error("End date must before Start date"),
                           ),
                   },
                 ]}

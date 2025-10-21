@@ -14,7 +14,7 @@ import TablePaginationNew from "../../../../../components/TablePaginationNew";
 const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
   // Selector
   const { data_billingItem, data_ratingResult } = useSelector(
-    (state) => state.billing
+    (state) => state.billing,
   );
 
   // Declaration
@@ -59,13 +59,12 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
         page: page,
         pageSize: pageSize,
         sort: sort,
-      })
+      }),
     );
   }, [dispatch, ratingCodeId, search, page, pageSize, sort]);
 
   // Use Effect
   useEffect(() => {
-   
     dispatch(
       getAllBillingItemPaginate({
         billingCodeId,
@@ -73,7 +72,7 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
         pageBI,
         pageSizeBI,
         sortBI,
-      })
+      }),
     );
   }, [dispatch, billingCodeId, searchBI, pageBI, pageSizeBI, sortBI]);
 
@@ -165,7 +164,7 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
                   searchedColumn,
                   searchText,
                   handleSearch,
-                  search
+                  search,
                 )}
                 current={page}
                 pageSize={pageSize}
@@ -192,7 +191,7 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
                   searchInput,
                   searchedColumn,
                   searchText,
-                  handleSearch
+                  handleSearch,
                 )}
                 current={page}
                 pageSize={pageSize}
@@ -235,7 +234,7 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
               searchedColumnBI,
               searchTextBI,
               handleSearchBI,
-              searchBI
+              searchBI,
             )}
             current={pageBI}
             pageSize={pageSizeBI}

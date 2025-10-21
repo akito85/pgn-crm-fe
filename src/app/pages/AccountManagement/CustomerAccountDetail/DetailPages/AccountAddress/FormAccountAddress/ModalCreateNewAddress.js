@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 import { Form, Select } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
@@ -11,8 +17,8 @@ import Maps from "../../../../../../../components/Maps";
 
 const ModalCreateNewAddress = ({
   isOpen,
-  closeModalCreateNew = () => { },
-  modalChooseAddress = () => { },
+  closeModalCreateNew = () => {},
+  modalChooseAddress = () => {},
   dispatch,
   dataCountry,
   dataProvince,
@@ -35,75 +41,95 @@ const ModalCreateNewAddress = ({
     lng: 106.844298,
   });
   const [showTextFullAddress, setShowTextFullAddress] = useState("");
-  const [selectedMaps, setSelectedMaps] = useState('');
+  const [selectedMaps, setSelectedMaps] = useState("");
   const [formModal] = Form.useForm();
   const formValue = formModal.getFieldsValue();
 
-
   // prepared for check id & name to confirmation ui <<<<<<<<
-  const getCountryName = useCallback((val) => {
-    const countryName = dataCountry?.data?.filter((item) => item?.id === val);
-    if (countryName === undefined) {
-      return "";
-    }
-    if (countryName.length !== 0) {
-      return countryName[0].name;
-    }
-  }, [dataCountry?.data]);
-  const getProvinceName = useCallback((val) => {
-    const provinceName = dataProvince?.data?.filter((item) => item?.id === val);
-    if (provinceName === undefined) {
-      return "";
-    }
-    if (provinceName.length !== 0) {
-      return provinceName[0].name;
-    }
-  }, [dataProvince?.data]);
+  const getCountryName = useCallback(
+    (val) => {
+      const countryName = dataCountry?.data?.filter((item) => item?.id === val);
+      if (countryName === undefined) {
+        return "";
+      }
+      if (countryName.length !== 0) {
+        return countryName[0].name;
+      }
+    },
+    [dataCountry?.data],
+  );
+  const getProvinceName = useCallback(
+    (val) => {
+      const provinceName = dataProvince?.data?.filter(
+        (item) => item?.id === val,
+      );
+      if (provinceName === undefined) {
+        return "";
+      }
+      if (provinceName.length !== 0) {
+        return provinceName[0].name;
+      }
+    },
+    [dataProvince?.data],
+  );
 
-  const getCityName = useCallback((val) => {
-    const cityName = dataCity?.data?.filter((item) => item?.id === val);
-    if (cityName === undefined) {
-      return "";
-    }
-    if (cityName.length !== 0) {
-      return cityName[0].name;
-    }
-  }, [dataCity?.data]);
+  const getCityName = useCallback(
+    (val) => {
+      const cityName = dataCity?.data?.filter((item) => item?.id === val);
+      if (cityName === undefined) {
+        return "";
+      }
+      if (cityName.length !== 0) {
+        return cityName[0].name;
+      }
+    },
+    [dataCity?.data],
+  );
 
-  const getDistrictName = useCallback((val) => {
-    const districtName = dataDistrict?.data?.filter((item) => item?.id === val);
-    if (districtName === undefined) {
-      return "";
-    }
-    if (districtName.length !== 0) {
-      return districtName[0].name;
-    }
-  }, [dataDistrict?.data]);
+  const getDistrictName = useCallback(
+    (val) => {
+      const districtName = dataDistrict?.data?.filter(
+        (item) => item?.id === val,
+      );
+      if (districtName === undefined) {
+        return "";
+      }
+      if (districtName.length !== 0) {
+        return districtName[0].name;
+      }
+    },
+    [dataDistrict?.data],
+  );
 
-  const getSubDistrictName = useCallback((val) => {
-    const subDistrictName = dataSubdistrict?.data?.filter(
-      (item) => item?.id === val
-    );
-    if (subDistrictName === undefined) {
-      return "";
-    }
-    if (subDistrictName.length !== 0) {
-      return subDistrictName[0].name;
-    }
-  }, [dataSubdistrict?.data]);
+  const getSubDistrictName = useCallback(
+    (val) => {
+      const subDistrictName = dataSubdistrict?.data?.filter(
+        (item) => item?.id === val,
+      );
+      if (subDistrictName === undefined) {
+        return "";
+      }
+      if (subDistrictName.length !== 0) {
+        return subDistrictName[0].name;
+      }
+    },
+    [dataSubdistrict?.data],
+  );
 
-  const getPostalCodeName = useCallback((val) => {
-    const postalCodeName = dataPostalcode?.data?.filter(
-      (item) => item?.id === val
-    );
-    if (postalCodeName === undefined) {
-      return "";
-    }
-    if (postalCodeName.length !== 0) {
-      return postalCodeName[0].name;
-    }
-  }, [dataPostalcode?.data]);
-
+  const getPostalCodeName = useCallback(
+    (val) => {
+      const postalCodeName = dataPostalcode?.data?.filter(
+        (item) => item?.id === val,
+      );
+      if (postalCodeName === undefined) {
+        return "";
+      }
+      if (postalCodeName.length !== 0) {
+        return postalCodeName[0].name;
+      }
+    },
+    [dataPostalcode?.data],
+  );
 
   const getTypeName = (val) => {
     const typeName = dataType?.filter((item) => item?.id === val);
@@ -115,28 +141,25 @@ const ModalCreateNewAddress = ({
     }
   };
 
-  const replaceStreetName = useCallback(
-    (val) => {
-      if (val) {
-        const result = val.replace(
-          // /Jalan|Jalan.|jln|jl|Jl.|jl.|jln.|Jl/gi,
-          /JL\.|JLN\.|JLN|JALAN\.|JALAN|JL|Jaln/ig, "",
-          // function (x) {
-          //   return (x = "JL. ");
-          // }
-        );
-        return result;
-      }
-      return "";
-    },
-    []
-  );
-
+  const replaceStreetName = useCallback((val) => {
+    if (val) {
+      const result = val.replace(
+        // /Jalan|Jalan.|jln|jl|Jl.|jl.|jln.|Jl/gi,
+        /JL\.|JLN\.|JLN|JALAN\.|JALAN|JL|Jaln/gi,
+        "",
+        // function (x) {
+        //   return (x = "JL. ");
+        // }
+      );
+      return result;
+    }
+    return "";
+  }, []);
 
   // Use Effect
   useEffect(() => {
     if (formValue) {
-      let textFull = `${hasValue(formValue.building) ? `GEDUNG ${formValue?.building}` : ''}, ${hasValue(formValue?.floor) ? `LANTAI ${formValue.floor}` : ''}, ${formValue.houseName}, ${hasValue(formValue.streetName) ? 'JL.' : ''} ${replaceStreetName(formValue.streetName)}, ${hasValue(formValue.block) ? `BLOCK ${formValue?.block}` : ''}, ${formValue.houseNumber && `NO. ${formValue.houseNumber}`}, ${formValue.rt && `RT. ${formValue.rt}`}, ${formValue.rw && `RW. ${formValue.rw}`}, ${hasValue(formValue?.additionalInfo) ? `${formValue?.additionalInfo},  ` : ', '}, ${getSubDistrictName(formValue.subdistrict)}, ${getDistrictName(formValue.district)}, ${getCityName(formValue.city)}, ${getProvinceName(formValue.province)}, ${getCountryName(formValue?.country)}, ${getPostalCodeName(formValue.postalCode)}`;
+      let textFull = `${hasValue(formValue.building) ? `GEDUNG ${formValue?.building}` : ""}, ${hasValue(formValue?.floor) ? `LANTAI ${formValue.floor}` : ""}, ${formValue.houseName}, ${hasValue(formValue.streetName) ? "JL." : ""} ${replaceStreetName(formValue.streetName)}, ${hasValue(formValue.block) ? `BLOCK ${formValue?.block}` : ""}, ${formValue.houseNumber && `NO. ${formValue.houseNumber}`}, ${formValue.rt && `RT. ${formValue.rt}`}, ${formValue.rw && `RW. ${formValue.rw}`}, ${hasValue(formValue?.additionalInfo) ? `${formValue?.additionalInfo},  ` : ", "}, ${getSubDistrictName(formValue.subdistrict)}, ${getDistrictName(formValue.district)}, ${getCityName(formValue.city)}, ${getProvinceName(formValue.province)}, ${getCountryName(formValue?.country)}, ${getPostalCodeName(formValue.postalCode)}`;
 
       let cleanedText = textFull
         .split(",")
@@ -146,7 +169,16 @@ const ModalCreateNewAddress = ({
       setShowTextFullAddress(cleanedText);
       // setFullAddressMain(cleanedText);
     }
-  }, [formValue, getCityName, getCountryName, getDistrictName, getPostalCodeName, getProvinceName, getSubDistrictName, replaceStreetName]);
+  }, [
+    formValue,
+    getCityName,
+    getCountryName,
+    getDistrictName,
+    getPostalCodeName,
+    getProvinceName,
+    getSubDistrictName,
+    replaceStreetName,
+  ]);
 
   useEffect(() => {
     if (
@@ -171,13 +203,11 @@ const ModalCreateNewAddress = ({
     setShowTextFullAddress("");
     formModal.resetFields();
     closeModalCreateNew(false);
-    setSelectedMaps('');
+    setSelectedMaps("");
   };
   const handleOpenModalChooseAddress = () => {
     modalChooseAddress(true);
   };
-
-
 
   const handleToMainForm = (e) => {
     if (e) {
@@ -196,10 +226,9 @@ const ModalCreateNewAddress = ({
       formModal.resetFields();
       handleCloseModalCreateNew();
       modalChooseAddress(false);
-      setSelectedMaps('');
+      setSelectedMaps("");
     }
   };
-
 
   // ===== Function Create New Address ===== //
 
@@ -238,9 +267,8 @@ const ModalCreateNewAddress = ({
       dispatch(getDistrict(e));
       formModal.resetFields(["district", "subdistrict", "postalCode"]);
       return e;
-    }
-    else {
-      formModal.resetFields(["district", "subdistrict", "postalCode"])
+    } else {
+      formModal.resetFields(["district", "subdistrict", "postalCode"]);
     }
   };
   const handleOnChangeDistrict = (e) => {
@@ -264,32 +292,33 @@ const ModalCreateNewAddress = ({
 
   // ======= Start Function Google Maps API ======= //
 
-  const onMapClick = useCallback(
-    (event) => {
-      setSelectedLocationCreateNew({
-        lat: event.latLng.lat(),
-        lng: event.latLng.lng(),
-      });
-    },
-    []
-  );
+  const onMapClick = useCallback((event) => {
+    setSelectedLocationCreateNew({
+      lat: event.latLng.lat(),
+      lng: event.latLng.lng(),
+    });
+  }, []);
 
   // ======= End Function Google Maps API ======= //
 
   const RenderMaps = useMemo(() => {
     if (hasValue(selectedMaps)) {
-      if (selectedMaps?.toLowerCase() === 'google maps') {
-        return <Maps keyword={showTextFullAddress} setSelectedLocationFront={setSelectedLocationCreateNew} />
+      if (selectedMaps?.toLowerCase() === "google maps") {
+        return (
+          <Maps
+            keyword={showTextFullAddress}
+            setSelectedLocationFront={setSelectedLocationCreateNew}
+          />
+        );
       }
     } else {
-      return <></>
+      return <></>;
     }
   }, [showTextFullAddress, selectedMaps]);
 
-
   return (
     <div>
-      {isOpen ?
+      {isOpen ? (
         <ModalCustom
           header={"CREATE NEW ADDRESS"}
           isOpen={isOpen}
@@ -428,7 +457,9 @@ const ModalCreateNewAddress = ({
                 ]}
               >
                 <SelectComponent
-                  disabled={!formModal.getFieldValue().subdistrict ? true : false}
+                  disabled={
+                    !formModal.getFieldValue().subdistrict ? true : false
+                  }
                   onChange={(e) => handleInputChange(e, "postalCode")}
                 >
                   {dataPostalcode?.data &&
@@ -443,7 +474,9 @@ const ModalCreateNewAddress = ({
                 <InputComponent
                   onInput={onInputUpperCase}
                   type="text"
-                  onChange={(e) => handleInputChange(e.target.value, "building")}
+                  onChange={(e) =>
+                    handleInputChange(e.target.value, "building")
+                  }
                 />
               </Form.Item>
               <Form.Item name={"floor"} label={"Floor"}>
@@ -459,7 +492,9 @@ const ModalCreateNewAddress = ({
                 <InputComponent
                   type="text"
                   onInput={onInputUpperCase}
-                  onChange={(e) => handleInputChange(e.target.value, "houseName")}
+                  onChange={(e) =>
+                    handleInputChange(e.target.value, "houseName")
+                  }
                 />
               </Form.Item>
               <Form.Item
@@ -577,7 +612,7 @@ const ModalCreateNewAddress = ({
                   ]}
                   // initialValue={'Google Maps'}
                 >
-                  <SelectComponent onChange={e => setSelectedMaps(e)}>
+                  <SelectComponent onChange={(e) => setSelectedMaps(e)}>
                     <Select.Option key={1} value={"Google Maps"}>
                       Google Maps
                     </Select.Option>
@@ -612,9 +647,11 @@ const ModalCreateNewAddress = ({
                 </Form.Item>
               </div>
               <div className={"w-full grid grid-cols-1 gap-2"}>
-                <span className="text-primary">Pinpoint address coordinate</span>
+                <span className="text-primary">
+                  Pinpoint address coordinate
+                </span>
                 <div className="w-full">
-                  {selectedMaps !== '' && RenderMaps}
+                  {selectedMaps !== "" && RenderMaps}
                 </div>
               </div>
             </div>
@@ -633,9 +670,8 @@ const ModalCreateNewAddress = ({
               </ButtonComponent>
             </div>
           </Form>
-        </ModalCustom> :
-        null
-      }
+        </ModalCustom>
+      ) : null}
     </div>
   );
 };

@@ -42,9 +42,8 @@ import { IconModal } from "../../../../../utils/Icon";
 
 const StandardForm = () => {
   // Selector
-  const { data, data_financialInfo, loading, data_create, isPremiseAlready } = useSelector(
-    (state) => state.account
-  );
+  const { data, data_financialInfo, loading, data_create, isPremiseAlready } =
+    useSelector((state) => state.account);
 
   // Declaration
   const containerRef = useRef(null);
@@ -88,8 +87,8 @@ const StandardForm = () => {
   const [bodyError, setBodyError] = useState({});
   const [loadingForm, setLoadingForm] = useState(false);
 
-  const [modalPrevLostData, setModalPrevLostData] = useState(false)
-  const [modalAlreadyPremise, setModalAlreadyPremise] = useState(false)
+  const [modalPrevLostData, setModalPrevLostData] = useState(false);
+  const [modalAlreadyPremise, setModalAlreadyPremise] = useState(false);
 
   const isLoading = loading || loadingForm;
   const [modalValidate, setModalValidate] = useState(false);
@@ -122,13 +121,15 @@ const StandardForm = () => {
         "accountType",
         "classificationType",
         "accountRegistrationNumber",
-        "firstName"
+        "firstName",
       ],
     },
     { value: "Attachment" },
-  ])
-  
-  const [valuePageSectionCAI, setValuePageSectionCAI] = useState(tabPagesSectionCAI[0].value);
+  ]);
+
+  const [valuePageSectionCAI, setValuePageSectionCAI] = useState(
+    tabPagesSectionCAI[0].value,
+  );
 
   useEffect(() => {
     form.setFieldsValue({
@@ -182,10 +183,10 @@ const StandardForm = () => {
         form.setFieldsValue({
           customerIdentificationNumberNpwp: `${result.slice(
             0,
-            3
+            3,
           )}.${result.slice(3, 6)}.${result.slice(6, 9)}.${result.slice(
             9,
-            10
+            10,
           )}-${result.slice(10, 13)}.${result.slice(13)}`,
         });
       } else {
@@ -228,31 +229,34 @@ const StandardForm = () => {
         accountGroupType: null,
       }));
       form.resetFields(["accountGroupType"]);
-    } 
-    else if(type === "firstName" || type === "middleName" || type === "lastName" || type === "customerName"){
+    } else if (
+      type === "firstName" ||
+      type === "middleName" ||
+      type === "lastName" ||
+      type === "customerName"
+    ) {
       const newValue = form.getFieldsValue();
       const temp = {
         ...newValue,
-        [type]: result.toUpperCase()
-      }
+        [type]: result.toUpperCase(),
+      };
       form.setFieldsValue({
         accountName: temp?.customerName
-        ? (temp?.customerName || "").toUpperCase()
-        : `${(temp?.firstName || "").toUpperCase()} ${(
-            temp?.middleName || ""
-          ).toUpperCase()} ${(temp?.lastName || "").toUpperCase()}` || null
+          ? (temp?.customerName || "").toUpperCase()
+          : `${(temp?.firstName || "").toUpperCase()} ${(
+              temp?.middleName || ""
+            ).toUpperCase()} ${(temp?.lastName || "").toUpperCase()}` || null,
       });
       setCAIObj((prevState) => ({
         ...prevState,
         [type]: result.toUpperCase(),
         accountName: temp?.customerName
-        ? (temp?.customerName || "").toUpperCase()
-        : `${(temp?.firstName || "").toUpperCase()} ${(
-            temp?.middleName || ""
-          ).toUpperCase()} ${(temp?.lastName || "").toUpperCase()}` || null
+          ? (temp?.customerName || "").toUpperCase()
+          : `${(temp?.firstName || "").toUpperCase()} ${(
+              temp?.middleName || ""
+            ).toUpperCase()} ${(temp?.lastName || "").toUpperCase()}` || null,
       }));
-    }
-    else {
+    } else {
       setCAIObj((prevState) => ({
         ...prevState,
         [type]: result,
@@ -294,9 +298,8 @@ const StandardForm = () => {
       // If you choose ship to, you will run a premise check
       if (index >= 1 && index <= 4) {
         if (type === `businessPurpose${index}`) {
-
           // check if businessPurpose empty atau businessPurpose not ship to
-          if(result.length === 0 || !result.includes(166)){
+          if (result.length === 0 || !result.includes(166)) {
             setAddressObj((prevState) => ({
               ...prevState,
               [`premiseAddress${index}`]: false,
@@ -310,7 +313,7 @@ const StandardForm = () => {
               checkIsPremiseAlready({
                 premiseFlag: true,
                 addressId: addressTable[index - 1]?.addressId,
-              })
+              }),
             )
               .unwrap()
               .then(async (data) => {
@@ -320,26 +323,26 @@ const StandardForm = () => {
                     ...prevState,
                     [`premiseAddress${index}`]: true,
                   }));
-                }else{
-                  setModalAlreadyPremise(true)
+                } else {
+                  setModalAlreadyPremise(true);
                   setAddressObj((prevState) => ({
                     ...prevState,
                     [`businessPurpose${index}`]: prevState[
                       `businessPurpose${index}`
                     ].filter((id) => id !== 166),
                     [`premiseAddress${index}`]: false,
-                  }))
+                  }));
                   setAddressTable((prevState) => {
                     const tempTable = [...prevState];
-                  
-                    tempTable[index-1] = {
-                      ...tempTable[index-1],
+
+                    tempTable[index - 1] = {
+                      ...tempTable[index - 1],
                       premiseFlag: false,
-                      businessPurpose: tempTable[index-1]?.businessPurpose?.filter(
-                        (id) => id !== 166
-                      ),
+                      businessPurpose: tempTable[
+                        index - 1
+                      ]?.businessPurpose?.filter((id) => id !== 166),
                     };
-                  
+
                     return tempTable;
                   });
                 }
@@ -396,18 +399,15 @@ const StandardForm = () => {
     //   });
     // }
     if (indexPremise !== -1) {
-
-
-      
       if (indexPremise >= 0 && indexPremise <= 3) {
-        if(type === `premiseAddress${indexPremise+1}` && result === true){
+        if (type === `premiseAddress${indexPremise + 1}` && result === true) {
           console.log(addressTable, "apaan");
-            dispatch(
-              checkIsPremiseAlready({
-                premiseFlag: true,
-                addressId: addressTable[indexPremise]?.addressId,
-              })
-            )
+          dispatch(
+            checkIsPremiseAlready({
+              premiseFlag: true,
+              addressId: addressTable[indexPremise]?.addressId,
+            }),
+          )
             .unwrap()
             .then(async (data) => {
               if (data && data.success === true) {
@@ -416,7 +416,7 @@ const StandardForm = () => {
 
                   // Check if premiseFlag is being set to false
                   const obj = result ? true : false;
-        
+
                   tempTable[indexPremise] = {
                     ...tempTable[indexPremise],
                     businessPurpose: [
@@ -435,38 +435,40 @@ const StandardForm = () => {
                   }));
                   return tempTable;
                 });
-              }else{
+              } else {
                 setAddressTable((prevState) => {
                   const tempTable = [...prevState];
                   const businessPurposeKey = `businessPurpose${indexPremise + 1}`;
-                
+
                   tempTable[indexPremise] = {
                     ...tempTable[indexPremise],
                     premiseFlag: false,
-                    businessPurpose: tempTable[indexPremise]?.businessPurpose?.filter(
-                      (id) => id !== 166
-                    ),
+                    businessPurpose: tempTable[
+                      indexPremise
+                    ]?.businessPurpose?.filter((id) => id !== 166),
                   };
-                
+
                   setAddressObj((prevObj) => ({
                     ...prevObj,
                     [businessPurposeKey]:
                       prevObj && prevObj[businessPurposeKey]
-                        ? prevObj[businessPurposeKey]?.filter((id) => id !== 166)
+                        ? prevObj[businessPurposeKey]?.filter(
+                            (id) => id !== 166,
+                          )
                         : [],
                     [`premiseAddress${indexPremise + 1}`]: false,
                   }));
-                
+
                   return tempTable;
                 });
-                
-                setModalAlreadyPremise(true)
+
+                setModalAlreadyPremise(true);
               }
             })
             .catch((error) => {
               console.log(error);
             });
-        } else{
+        } else {
           setAddressTable((prevState) => {
             let tempTable = [...prevState];
 
@@ -476,9 +478,9 @@ const StandardForm = () => {
               tempTable[indexPremise] = {
                 ...tempTable[indexPremise],
                 premiseFlag: false,
-                businessPurpose: tempTable[indexPremise]?.businessPurpose.filter(
-                  (id) => id !== 166
-                ),
+                businessPurpose: tempTable[
+                  indexPremise
+                ]?.businessPurpose.filter((id) => id !== 166),
               };
               setAddressObj((prevObj) => ({
                 ...prevObj,
@@ -625,70 +627,96 @@ const StandardForm = () => {
   //handle reset
   const handleContactChangesByAddress = (keyModal, table, type) => {
     Object.keys(contactObj)
-    .filter(key => key.startsWith('contactAddress'))
-    .forEach((key, i) => {
-      if(contactObj[`contactAddress${i + 1}`] !== null){
-        
-      let temp = (table || []).find((itemB, indexB) => (itemB.addressId ? itemB.addressId === contactObj[`contactAddress${i + 1}`] : itemB.tempId === contactObj[`contactAddress${i + 1}`]));
-      // console.log("masuk",`contactAddress${i + 1}`);
-      // console.log(temp,"masuk temp")
-      if(type === "delete"){
-        if (!temp || contactObj[`contactAddress${i + 1}`] === `TEMP${keyModal || 0}`) {
-          // console.log("masuk if pertama",`contactAddress${i + 1}`);
-          form.resetFields([`contactAddress${i + 1}`]);
-          setContactObj((prevState) => ({
-            ...prevState,
-            [`contactAddress${i + 1}`]: null,
-          }));
-          setContactTable((prevState) => {
-            let tempTable = [...prevState];
-            tempTable[i] = {
-              ...tempTable[i],
-              contactAddress: null,
-            };
-            return tempTable;
-          });
-        } else if (isNaN(contactObj[`contactAddress${i+1}`])){
-          // console.log("masuk if kedua",`contactAddress${i + 1}`);
-          form.setFieldsValue({
-            [`contactAddress${i + 1}`]: parseInt(contactObj[`contactAddress${i + 1}`].replace('TEMP', ''), 10) <= 1 ? null : `TEMP${parseInt(contactObj[`contactAddress${i + 1}`].replace('TEMP', ''), 10) - 1}` 
-          });
-          setContactObj((prevState) => ({
-            ...prevState,
-            [`contactAddress${i + 1}`]: parseInt(contactObj[`contactAddress${i + 1}`].replace('TEMP', ''), 10) <= 1 ? null : `TEMP${parseInt(contactObj[`contactAddress${i + 1}`].replace('TEMP', ''), 10) - 1}`
-          }));
-          setContactTable((prevState) => {
-            let tempTable = [...prevState];
-            tempTable[i] = {
-              ...tempTable[i],
-              contactAddress: parseInt(contactObj[`contactAddress${i + 1}`].replace('TEMP', ''), 10) <= 1 ? null : `TEMP${parseInt(contactObj[`contactAddress${i + 1}`].replace('TEMP', ''), 10) - 1}`
-            };
-            return tempTable;
-          });
+      .filter((key) => key.startsWith("contactAddress"))
+      .forEach((key, i) => {
+        if (contactObj[`contactAddress${i + 1}`] !== null) {
+          let temp = (table || []).find((itemB, indexB) =>
+            itemB.addressId
+              ? itemB.addressId === contactObj[`contactAddress${i + 1}`]
+              : itemB.tempId === contactObj[`contactAddress${i + 1}`],
+          );
+          // console.log("masuk",`contactAddress${i + 1}`);
+          // console.log(temp,"masuk temp")
+          if (type === "delete") {
+            if (
+              !temp ||
+              contactObj[`contactAddress${i + 1}`] === `TEMP${keyModal || 0}`
+            ) {
+              // console.log("masuk if pertama",`contactAddress${i + 1}`);
+              form.resetFields([`contactAddress${i + 1}`]);
+              setContactObj((prevState) => ({
+                ...prevState,
+                [`contactAddress${i + 1}`]: null,
+              }));
+              setContactTable((prevState) => {
+                let tempTable = [...prevState];
+                tempTable[i] = {
+                  ...tempTable[i],
+                  contactAddress: null,
+                };
+                return tempTable;
+              });
+            } else if (isNaN(contactObj[`contactAddress${i + 1}`])) {
+              // console.log("masuk if kedua",`contactAddress${i + 1}`);
+              form.setFieldsValue({
+                [`contactAddress${i + 1}`]:
+                  parseInt(
+                    contactObj[`contactAddress${i + 1}`].replace("TEMP", ""),
+                    10,
+                  ) <= 1
+                    ? null
+                    : `TEMP${parseInt(contactObj[`contactAddress${i + 1}`].replace("TEMP", ""), 10) - 1}`,
+              });
+              setContactObj((prevState) => ({
+                ...prevState,
+                [`contactAddress${i + 1}`]:
+                  parseInt(
+                    contactObj[`contactAddress${i + 1}`].replace("TEMP", ""),
+                    10,
+                  ) <= 1
+                    ? null
+                    : `TEMP${parseInt(contactObj[`contactAddress${i + 1}`].replace("TEMP", ""), 10) - 1}`,
+              }));
+              setContactTable((prevState) => {
+                let tempTable = [...prevState];
+                tempTable[i] = {
+                  ...tempTable[i],
+                  contactAddress:
+                    parseInt(
+                      contactObj[`contactAddress${i + 1}`].replace("TEMP", ""),
+                      10,
+                    ) <= 1
+                      ? null
+                      : `TEMP${parseInt(contactObj[`contactAddress${i + 1}`].replace("TEMP", ""), 10) - 1}`,
+                };
+                return tempTable;
+              });
+            }
+          } else {
+            //create new , reset the same id or no id found
+            // console.log("masuk else ",`contactAddress${i + 1}`);
+            if (
+              !temp ||
+              contactObj[`contactAddress${i + 1}`] === `TEMP${keyModal || 0}`
+            ) {
+              form.resetFields([`contactAddress${i + 1}`]);
+              setContactObj((prevState) => ({
+                ...prevState,
+                [`contactAddress${i + 1}`]: null,
+              }));
+              setContactTable((prevState) => {
+                let tempTable = [...prevState];
+                tempTable[i] = {
+                  ...tempTable[i],
+                  contactAddress: null,
+                };
+                return tempTable;
+              });
+            }
+          }
         }
-      } else {
-        //create new , reset the same id or no id found
-        // console.log("masuk else ",`contactAddress${i + 1}`);
-        if (!temp || contactObj[`contactAddress${i + 1}`] === `TEMP${keyModal || 0}`) {
-          form.resetFields([`contactAddress${i + 1}`]);
-          setContactObj((prevState) => ({
-            ...prevState,
-            [`contactAddress${i + 1}`]: null,
-          }));
-          setContactTable((prevState) => {
-            let tempTable = [...prevState];
-            tempTable[i] = {
-              ...tempTable[i],
-              contactAddress: null,
-            };
-            return tempTable;
-          });
-        }
-      }
-
-      }
-    });
-  }
+      });
+  };
 
   // useEffect(() => {
 
@@ -722,8 +750,8 @@ const StandardForm = () => {
       [type]: result,
     }));
 
-    if(result === null){
-      form.resetFields([type])
+    if (result === null) {
+      form.resetFields([type]);
     }
 
     const index = type?.includes("description")
@@ -884,7 +912,7 @@ const StandardForm = () => {
 
   // Validation Address Information
   const validateAddress = (index) => {
-    if ( index === 1 && addressTable.length >= 1) {
+    if (index === 1 && addressTable.length >= 1) {
       return validateBusinessPurpose(0);
     }
     if (index === 2 && addressTable.length >= 2) {
@@ -927,29 +955,32 @@ const StandardForm = () => {
   //   }
   // };
 
-  const dataContactAddress = (obj) =>{
+  const dataContactAddress = (obj) => {
     for (const key in obj) {
       if (obj[key] === undefined || obj[key] === null) {
         return true;
       }
     }
     return false;
-  }
+  };
 
   // console.log(caiObj,"caiObj")
   const validateAccountRegistrationNumber = () => {
-    if(caiObj.accountRegistrationNumber){
-      if(caiObj.accountRegistrationNumber.length > 0 && caiObj.accountRegistrationNumber.length < 11){
+    if (caiObj.accountRegistrationNumber) {
+      if (
+        caiObj.accountRegistrationNumber.length > 0 &&
+        caiObj.accountRegistrationNumber.length < 11
+      ) {
         return true;
       } else {
-        return false
+        return false;
       }
     } else {
       return false;
     }
-  }
-//   console.log(contactTable, ' contact');
-// console.log(addressTable, ' lalal');
+  };
+  //   console.log(contactTable, ' contact');
+  // console.log(addressTable, ' lalal');
 
   // Step
   const steps = [
@@ -963,8 +994,8 @@ const StandardForm = () => {
           form={form}
         />
       ),
-      disabled: false
-        // !ciObj.customerType || !ciObj.identificationType || !validationCI(),
+      disabled: false,
+      // !ciObj.customerType || !ciObj.identificationType || !validationCI(),
     },
     {
       title: "ACCOUNT INFORMATION",
@@ -984,15 +1015,15 @@ const StandardForm = () => {
           tabPages={tabPagesSectionCAI}
         />
       ),
-      disabled: false
-        // !validationReadyAI() ||
-        // !caiObj.meterReadingCode ||
-        // !caiObj.category ||
-        // !caiObj.accountSegment ||
-        // !caiObj.accountGroupType ||
-        // !caiObj.accountType ||
-        // !caiObj.classificationType ||
-        // validateAccountRegistrationNumber(),
+      disabled: false,
+      // !validationReadyAI() ||
+      // !caiObj.meterReadingCode ||
+      // !caiObj.category ||
+      // !caiObj.accountSegment ||
+      // !caiObj.accountGroupType ||
+      // !caiObj.accountType ||
+      // !caiObj.classificationType ||
+      // validateAccountRegistrationNumber(),
     },
     {
       title: "ADDRESS",
@@ -1090,19 +1121,19 @@ const StandardForm = () => {
   };
 
   const handleOkLostData = () => {
-    setCAIObj({})
-    setListDataAttachment([])
-    setAddressObj({})
-    setAddressTable([])
-    setContactObj({})
-    setContactTable([])
-    setFiObj({})
-    setTiObj({})
-    setDmArray([])
-    setWtObj({})
-    form.resetFields()
+    setCAIObj({});
+    setListDataAttachment([]);
+    setAddressObj({});
+    setAddressTable([]);
+    setContactObj({});
+    setContactTable([]);
+    setFiObj({});
+    setTiObj({});
+    setDmArray([]);
+    setWtObj({});
+    form.resetFields();
     setCurrent(current - 1);
-    setModalPrevLostData(false)
+    setModalPrevLostData(false);
     setTabPagesSectionCAI([
       {
         value: "Customer/Account Information",
@@ -1116,19 +1147,19 @@ const StandardForm = () => {
           "accountType",
           "classificationType",
           "accountRegistrationNumber",
-          "firstName"
+          "firstName",
         ],
       },
       { value: "Attachment" },
-    ])
-    setValuePageSectionCAI(tabPagesSectionCAI[0].value)
-  }
+    ]);
+    setValuePageSectionCAI(tabPagesSectionCAI[0].value);
+  };
 
   // Button Previous
   const prev = () => {
-    if(current === 1){
-      setModalPrevLostData(true)
-    }else{
+    if (current === 1) {
+      setModalPrevLostData(true);
+    } else {
       setCurrent(current - 1);
     }
   };
@@ -1154,14 +1185,25 @@ const StandardForm = () => {
     }
   };
 
-  const handleMandatory = (setTabPagesSectionCAI = () => {}, listDataAttachment, errorFields) => {
+  const handleMandatory = (
+    setTabPagesSectionCAI = () => {},
+    listDataAttachment,
+    errorFields,
+  ) => {
     setTabPagesSectionCAI((prevState) => {
       const res = prevState.map((item) => {
-        const errorBadge = item.value !== "Attachment" ? (errorFields || []).reduce(
-          (current, next) =>
-            item.paramValue.includes(next.name[0]) ? current + 1 : current,
-          0
-        ) : listDataAttachment.length < 1 ? 1 : 0;
+        const errorBadge =
+          item.value !== "Attachment"
+            ? (errorFields || []).reduce(
+                (current, next) =>
+                  item.paramValue.includes(next.name[0])
+                    ? current + 1
+                    : current,
+                0,
+              )
+            : listDataAttachment.length < 1
+              ? 1
+              : 0;
         return {
           value: item.value,
           paramValue: item.paramValue,
@@ -1170,51 +1212,65 @@ const StandardForm = () => {
       });
       return res;
     });
-  }
-  
+  };
+
   const FunctionCheckValidateAccount = () => {
-    form.validateFields()
-    .then((values) => {
-      handleMandatory(setTabPagesSectionCAI, listDataAttachment);
-      const body = {
-        registrationNumber: caiObj?.accountRegistrationNumber || "",
-      };
-      dispatch(
-        checkRegistrationNumber(body))
-        .unwrap()
-        .then((res) => {
-          if(listDataAttachment.length > 0 && data?.registered === false){
-            if (tiObj.taxIdentifierType === 922 || tiObj.taxIdentifierType === 921) {
-              setTiObj((prevState) => ({
-                ...prevState,
-                taxIdentifierName: data?.registered ? data?.customerInformation?.customerName : caiObj?.customerName ||
-                  `${caiObj?.firstName} ${caiObj?.middleName || ""} ${
-                    caiObj?.lastName || ""
-                  }`,
-              }));
+    form
+      .validateFields()
+      .then((values) => {
+        handleMandatory(setTabPagesSectionCAI, listDataAttachment);
+        const body = {
+          registrationNumber: caiObj?.accountRegistrationNumber || "",
+        };
+        dispatch(checkRegistrationNumber(body))
+          .unwrap()
+          .then((res) => {
+            if (listDataAttachment.length > 0 && data?.registered === false) {
+              if (
+                tiObj.taxIdentifierType === 922 ||
+                tiObj.taxIdentifierType === 921
+              ) {
+                setTiObj((prevState) => ({
+                  ...prevState,
+                  taxIdentifierName: data?.registered
+                    ? data?.customerInformation?.customerName
+                    : caiObj?.customerName ||
+                      `${caiObj?.firstName} ${caiObj?.middleName || ""} ${
+                        caiObj?.lastName || ""
+                      }`,
+                }));
+              }
+              next();
+              scrollRightHandler();
+            } else if (data?.registered === true) {
+              if (
+                tiObj.taxIdentifierType === 922 ||
+                tiObj.taxIdentifierType === 921
+              ) {
+                setTiObj((prevState) => ({
+                  ...prevState,
+                  taxIdentifierName: data?.registered
+                    ? data?.customerInformation?.customerName
+                    : caiObj?.customerName ||
+                      `${caiObj?.firstName} ${caiObj?.middleName || ""} ${
+                        caiObj?.lastName || ""
+                      }`,
+                }));
+              }
+              next();
+              scrollRightHandler();
             }
-            next();
-            scrollRightHandler();
-          }else if(data?.registered === true){
-            if (tiObj.taxIdentifierType === 922 || tiObj.taxIdentifierType === 921) {
-              setTiObj((prevState) => ({
-                ...prevState,
-                taxIdentifierName: data?.registered ? data?.customerInformation?.customerName : caiObj?.customerName ||
-                  `${caiObj?.firstName} ${caiObj?.middleName || ""} ${
-                    caiObj?.lastName || ""
-                  }`,
-              }));
-            }
-            next();
-            scrollRightHandler();
-          }
-        })
-    })
-    .catch((error) => {
-      console.error("Validation failed:", error);
-      handleMandatory(setTabPagesSectionCAI, listDataAttachment, error.errorFields);
-    });
-  }
+          });
+      })
+      .catch((error) => {
+        console.error("Validation failed:", error);
+        handleMandatory(
+          setTabPagesSectionCAI,
+          listDataAttachment,
+          error.errorFields,
+        );
+      });
+  };
 
   const FunctionCheckValidateAddress = () => {
     form
@@ -1231,7 +1287,7 @@ const StandardForm = () => {
       .catch((error) => {
         console.error("Validation failed:", error);
       });
-  }
+  };
 
   const FunctionCheckValidateContact = () => {
     form
@@ -1248,7 +1304,7 @@ const StandardForm = () => {
       .catch((error) => {
         console.error("Validation failed:", error);
       });
-  }
+  };
 
   // Handle Next
   const handleButtonNext = () => {
@@ -1383,240 +1439,253 @@ const StandardForm = () => {
 
   // Handle Confirmation
   const handleSave = (formValue) => {
-    form.validateFields([        
-      "taxIdentifierType",
-      "taxIdentifierNumber",
-      "taxIdentifierName",
-      "taxAddress"
-    ])
-    .then((validatedValues) => {
-      // Handle validation success if needed
-      if(
-        validatedValues.taxIdentifierType !== undefined && 
-        validatedValues.taxIdentifierNumber !== undefined &&
-        validatedValues.taxIdentifierName !== undefined &&
-        validatedValues.taxAddress !== undefined
-      ){
-        const mappingBillingBucket = data_financialInfo?.billingBucket?.map(
-          (a) => a.billingBucketCode
-        );
-    
-        const mappingTaxImplication = data_financialInfo?.taxImpli?.map(
-          (a) => a.id
-        );
-    
-        const bodyCustomerInformation = {
-          customerIdentificationNumber: ciObj?.customerIdentificationNumber,
-          customerType: ciObj?.customerType,
-          identificationType: ciObj?.identificationType,
-          customerId: null,
-          firstName: (caiObj?.firstName || "").toUpperCase() || null,
-          middleName: (caiObj?.middleName || "").toUpperCase() || null,
-          lastName: (caiObj?.lastName || "").toUpperCase() || null,
-          customerName: caiObj?.customerName
-            ? (caiObj?.customerName || "").toUpperCase()
-            : `${(caiObj?.firstName || "").toUpperCase()} ${(
-                caiObj?.middleName || ""
-              ).toUpperCase()} ${(caiObj?.lastName || "").toUpperCase()}` || null,
-          foundedBirthDate2: caiObj?.birthDate ?
-            moment(caiObj?.birthDate).format(dateFormatting.date) || null : null,
-          foundedBirthPlace: caiObj?.birthPlace || null,
-          sex: caiObj?.sex || null,
-          maritalStatus: caiObj?.maritalStatus || null,
-          searchKey: caiObj?.search_Key || null,
-          description: caiObj?.description || null,
-        };
-    
-        const bodyAccountInformation = {
-          customerId: null,
-          accountId: null,
-          accountGroup: data?.accountGroup?.id || null,
-          customerManagement: data?.customerManagement?.id || null,
-          sor: data?.sor?.id || null,
-          costCenter: data?.cc?.id || null,
-          meterReadingCode: caiObj?.meterReadingCode || null,
-          accountName: (caiObj?.accountName || "").toUpperCase() || null,
-          registrationNumber: caiObj?.accountRegistrationNumber || null,
-          accountCategory: caiObj?.category || null,
-          description: caiObj?.descriptionAI || null,
-          accountSegment: caiObj?.accountSegment || null,
-          accountGroupType: caiObj?.accountGroupType || null,
-          accountType: caiObj?.accountType || null,
-          accountRuleId: caiObj?.classificationType || null,
-          priority: caiObj?.priority || null,
-          corporateFlag:
-            caiObj.corporateCustomer === undefined
-              ? false
-              : caiObj.corporateCustomer,
-          exceptionFlag: caiObj.rb === undefined ? false : caiObj.rb,
-          industrialSector: caiObj?.industrialSector || null,
-          budgetYear: caiObj?.budgetYear || null,
-          budget: caiObj?.budget || null,
-          teritory: caiObj?.teritory || null,
-        };
-    
-        const address1 = addressTable[0];
-        const address2 = addressTable.length >= 2 ? addressTable[1] : null;
-        const address3 = addressTable.length >= 3 ? addressTable[2] : null;
-        const address4 = addressTable.length >= 4 ? addressTable[3] : null;
-    
-        const bodyAddress = {
-          address1: {
-            ...address1,
-            businessPurpose: addressObj?.businessPurpose1 || [],
-            premiseFlag: addressObj?.premiseAddress1 || false,
-          },
-          address2:
-            address2 !== null
-              ? {
-                  ...address2,
-                  businessPurpose: addressObj?.businessPurpose2 || [],
-                  premiseFlag: addressObj?.premiseAddress2 || false,
-                }
-              : null,
-          address3:
-            address3 !== null
-              ? {
-                  ...address3,
-                  businessPurpose: addressObj?.businessPurpose3 || [],
-                  premiseFlag: addressObj?.premiseAddress3 || false,
-                }
-              : null,
-          address4:
-            address4 !== null
-              ? {
-                  ...address4,
-                  businessPurpose: addressObj?.businessPurpose4 || [],
-                  premiseFlag: addressObj?.premiseAddress4 || false,
-                }
-              : null,
-        };
-    
-        const contact1 = contactTable[0];
-        const contact2 = contactTable.length >= 2 ? contactTable[1] : null;
-        const contact3 = contactTable.length >= 3 ? contactTable[2] : null;
-        const contact4 = contactTable.length >= 4 ? contactTable[3] : null;
-    
-        const bodyContact = {
-          contact1:
-            contact1 !== null
-              ? {
-                  ...contact1,
-                  description: contactObj?.description1 || null,
-                  contactAddress:
-                    typeof contactObj !== "undefined" && contactObj.contactAddress1
-                      ? typeof contactObj.contactAddress1 !== "string"
-                        ? contactObj.contactAddress1.toString()
-                        : contactObj.contactAddress1
-                      : null,
-                  additionalNote: contactObj?.additionalNote1 || null,
-                }
-              : null,
-          contact2:
-            contact2 !== null
-              ? {
-                  ...contact2,
-                  description: contactObj?.description2 || null,
-                  contactAddress:
-                    typeof contactObj !== "undefined" && contactObj.contactAddress2
-                      ? typeof contactObj.contactAddress2 !== "string"
-                        ? contactObj.contactAddress2.toString()
-                        : contactObj.contactAddress2
-                      : null,
-                  additionalNote: contactObj?.additionalNote2 || null,
-                }
-              : null,
-          contact3:
-            contact3 !== null
-              ? {
-                  ...contact3,
-                  description: contactObj?.description3 || null,
-                  contactAddress:
-                    typeof contactObj !== "undefined" && contactObj.contactAddress3
-                      ? typeof contactObj.contactAddress3 !== "string"
-                        ? contactObj.contactAddress3.toString()
-                        : contactObj.contactAddress3
-                      : null,
-                  additionalNote: contactObj?.additionalNote3 || null,
-                }
-              : null,
-          contact4:
-            contact4 !== null
-              ? {
-                  ...contact4,
-                  description: contactObj?.description4 || null,
-                  contactAddress:
-                    typeof contactObj !== "undefined" && contactObj.contactAddress4
-                      ? typeof contactObj.contactAddress4 !== "string"
-                        ? contactObj.contactAddress4.toString()
-                        : contactObj.contactAddress4
-                      : null,
-                  additionalNote: contactObj?.additionalNote4 || null,
-                }
-              : null,
-        };
-    
-        const bodyRelationTax = {
-          relatedAccountId: tiObj?.accountId || null,
-          startDate: formValue.startDateTI ? moment(formValue.startDateTI).format(dateFormatting.date) || null : null,
-          description: formValue.descriptionTI || null,
-        };
-        delete tiObj.accountId;
+    form
+      .validateFields([
+        "taxIdentifierType",
+        "taxIdentifierNumber",
+        "taxIdentifierName",
+        "taxAddress",
+      ])
+      .then((validatedValues) => {
+        // Handle validation success if needed
+        if (
+          validatedValues.taxIdentifierType !== undefined &&
+          validatedValues.taxIdentifierNumber !== undefined &&
+          validatedValues.taxIdentifierName !== undefined &&
+          validatedValues.taxAddress !== undefined
+        ) {
+          const mappingBillingBucket = data_financialInfo?.billingBucket?.map(
+            (a) => a.billingBucketCode,
+          );
 
-        const bodyData = {
-          customerInformation: bodyCustomerInformation,
-          accountInformation: bodyAccountInformation,
-          accountAddress: bodyAddress,
-          accountContact: bodyContact,
-          distributionMedia: dmArray,
-          financialInformation: {
-            paymentChannel: {
-              ...fiObj,
-              virtualAccount:
-                fiObj.generateVA === undefined ? false : fiObj.generateVA,
-            },
-            taxIdentifier: {
-              ...tiObj,
-              taxAddress:
-                typeof tiObj?.taxAddress !== "string"
-                  ? tiObj?.taxAddress?.toString()
-                  : tiObj?.taxAddress,
-            },
-            // taxRelation: {
-            //   relatedAccountId: tiObj?.accountId || null,
-            //   startDate: formValue.startDateTI ? moment(formValue.startDateTI).format(dateFormatting.date) || null : null,
-            //   description: formValue.descriptionTI || null,
-            // },
-            taxRelation: bodyRelationTax,
-            wapu: {
-              startDate:formValue.startDateWT ?
-                moment(formValue.startDateWT).format(dateFormatting.date) || null : null,
-              wapuFlag: wtObj.wapuFlag === undefined ? false : wtObj.wapuFlag,
-              description: formValue.descriptionWT || null,
-            },
-            billingBucket: mappingBillingBucket || [],
-            taxImplication: mappingTaxImplication || [],
-          },
-          registered: data?.registered,
-          customerId:
-            data?.customerInformation !== null
-              ? data?.customerInformation?.customerId
-              : null,
-          tempForm : formValue,
-        };
+          const mappingTaxImplication = data_financialInfo?.taxImpli?.map(
+            (a) => a.id,
+          );
 
-        setDataConfirm(bodyData);
-        setModalConfirm(true);
-      }
-    })
-    .catch((errorInfo) => {
-      // Handle validation errors if needed
-      console.log(errorInfo);
-    });
+          const bodyCustomerInformation = {
+            customerIdentificationNumber: ciObj?.customerIdentificationNumber,
+            customerType: ciObj?.customerType,
+            identificationType: ciObj?.identificationType,
+            customerId: null,
+            firstName: (caiObj?.firstName || "").toUpperCase() || null,
+            middleName: (caiObj?.middleName || "").toUpperCase() || null,
+            lastName: (caiObj?.lastName || "").toUpperCase() || null,
+            customerName: caiObj?.customerName
+              ? (caiObj?.customerName || "").toUpperCase()
+              : `${(caiObj?.firstName || "").toUpperCase()} ${(
+                  caiObj?.middleName || ""
+                ).toUpperCase()} ${(caiObj?.lastName || "").toUpperCase()}` ||
+                null,
+            foundedBirthDate2: caiObj?.birthDate
+              ? moment(caiObj?.birthDate).format(dateFormatting.date) || null
+              : null,
+            foundedBirthPlace: caiObj?.birthPlace || null,
+            sex: caiObj?.sex || null,
+            maritalStatus: caiObj?.maritalStatus || null,
+            searchKey: caiObj?.search_Key || null,
+            description: caiObj?.description || null,
+          };
+
+          const bodyAccountInformation = {
+            customerId: null,
+            accountId: null,
+            accountGroup: data?.accountGroup?.id || null,
+            customerManagement: data?.customerManagement?.id || null,
+            sor: data?.sor?.id || null,
+            costCenter: data?.cc?.id || null,
+            meterReadingCode: caiObj?.meterReadingCode || null,
+            accountName: (caiObj?.accountName || "").toUpperCase() || null,
+            registrationNumber: caiObj?.accountRegistrationNumber || null,
+            accountCategory: caiObj?.category || null,
+            description: caiObj?.descriptionAI || null,
+            accountSegment: caiObj?.accountSegment || null,
+            accountGroupType: caiObj?.accountGroupType || null,
+            accountType: caiObj?.accountType || null,
+            accountRuleId: caiObj?.classificationType || null,
+            priority: caiObj?.priority || null,
+            corporateFlag:
+              caiObj.corporateCustomer === undefined
+                ? false
+                : caiObj.corporateCustomer,
+            exceptionFlag: caiObj.rb === undefined ? false : caiObj.rb,
+            industrialSector: caiObj?.industrialSector || null,
+            budgetYear: caiObj?.budgetYear || null,
+            budget: caiObj?.budget || null,
+            teritory: caiObj?.teritory || null,
+          };
+
+          const address1 = addressTable[0];
+          const address2 = addressTable.length >= 2 ? addressTable[1] : null;
+          const address3 = addressTable.length >= 3 ? addressTable[2] : null;
+          const address4 = addressTable.length >= 4 ? addressTable[3] : null;
+
+          const bodyAddress = {
+            address1: {
+              ...address1,
+              businessPurpose: addressObj?.businessPurpose1 || [],
+              premiseFlag: addressObj?.premiseAddress1 || false,
+            },
+            address2:
+              address2 !== null
+                ? {
+                    ...address2,
+                    businessPurpose: addressObj?.businessPurpose2 || [],
+                    premiseFlag: addressObj?.premiseAddress2 || false,
+                  }
+                : null,
+            address3:
+              address3 !== null
+                ? {
+                    ...address3,
+                    businessPurpose: addressObj?.businessPurpose3 || [],
+                    premiseFlag: addressObj?.premiseAddress3 || false,
+                  }
+                : null,
+            address4:
+              address4 !== null
+                ? {
+                    ...address4,
+                    businessPurpose: addressObj?.businessPurpose4 || [],
+                    premiseFlag: addressObj?.premiseAddress4 || false,
+                  }
+                : null,
+          };
+
+          const contact1 = contactTable[0];
+          const contact2 = contactTable.length >= 2 ? contactTable[1] : null;
+          const contact3 = contactTable.length >= 3 ? contactTable[2] : null;
+          const contact4 = contactTable.length >= 4 ? contactTable[3] : null;
+
+          const bodyContact = {
+            contact1:
+              contact1 !== null
+                ? {
+                    ...contact1,
+                    description: contactObj?.description1 || null,
+                    contactAddress:
+                      typeof contactObj !== "undefined" &&
+                      contactObj.contactAddress1
+                        ? typeof contactObj.contactAddress1 !== "string"
+                          ? contactObj.contactAddress1.toString()
+                          : contactObj.contactAddress1
+                        : null,
+                    additionalNote: contactObj?.additionalNote1 || null,
+                  }
+                : null,
+            contact2:
+              contact2 !== null
+                ? {
+                    ...contact2,
+                    description: contactObj?.description2 || null,
+                    contactAddress:
+                      typeof contactObj !== "undefined" &&
+                      contactObj.contactAddress2
+                        ? typeof contactObj.contactAddress2 !== "string"
+                          ? contactObj.contactAddress2.toString()
+                          : contactObj.contactAddress2
+                        : null,
+                    additionalNote: contactObj?.additionalNote2 || null,
+                  }
+                : null,
+            contact3:
+              contact3 !== null
+                ? {
+                    ...contact3,
+                    description: contactObj?.description3 || null,
+                    contactAddress:
+                      typeof contactObj !== "undefined" &&
+                      contactObj.contactAddress3
+                        ? typeof contactObj.contactAddress3 !== "string"
+                          ? contactObj.contactAddress3.toString()
+                          : contactObj.contactAddress3
+                        : null,
+                    additionalNote: contactObj?.additionalNote3 || null,
+                  }
+                : null,
+            contact4:
+              contact4 !== null
+                ? {
+                    ...contact4,
+                    description: contactObj?.description4 || null,
+                    contactAddress:
+                      typeof contactObj !== "undefined" &&
+                      contactObj.contactAddress4
+                        ? typeof contactObj.contactAddress4 !== "string"
+                          ? contactObj.contactAddress4.toString()
+                          : contactObj.contactAddress4
+                        : null,
+                    additionalNote: contactObj?.additionalNote4 || null,
+                  }
+                : null,
+          };
+
+          const bodyRelationTax = {
+            relatedAccountId: tiObj?.accountId || null,
+            startDate: formValue.startDateTI
+              ? moment(formValue.startDateTI).format(dateFormatting.date) ||
+                null
+              : null,
+            description: formValue.descriptionTI || null,
+          };
+          delete tiObj.accountId;
+
+          const bodyData = {
+            customerInformation: bodyCustomerInformation,
+            accountInformation: bodyAccountInformation,
+            accountAddress: bodyAddress,
+            accountContact: bodyContact,
+            distributionMedia: dmArray,
+            financialInformation: {
+              paymentChannel: {
+                ...fiObj,
+                virtualAccount:
+                  fiObj.generateVA === undefined ? false : fiObj.generateVA,
+              },
+              taxIdentifier: {
+                ...tiObj,
+                taxAddress:
+                  typeof tiObj?.taxAddress !== "string"
+                    ? tiObj?.taxAddress?.toString()
+                    : tiObj?.taxAddress,
+              },
+              // taxRelation: {
+              //   relatedAccountId: tiObj?.accountId || null,
+              //   startDate: formValue.startDateTI ? moment(formValue.startDateTI).format(dateFormatting.date) || null : null,
+              //   description: formValue.descriptionTI || null,
+              // },
+              taxRelation: bodyRelationTax,
+              wapu: {
+                startDate: formValue.startDateWT
+                  ? moment(formValue.startDateWT).format(dateFormatting.date) ||
+                    null
+                  : null,
+                wapuFlag: wtObj.wapuFlag === undefined ? false : wtObj.wapuFlag,
+                description: formValue.descriptionWT || null,
+              },
+              billingBucket: mappingBillingBucket || [],
+              taxImplication: mappingTaxImplication || [],
+            },
+            registered: data?.registered,
+            customerId:
+              data?.customerInformation !== null
+                ? data?.customerInformation?.customerId
+                : null,
+            tempForm: formValue,
+          };
+
+          setDataConfirm(bodyData);
+          setModalConfirm(true);
+        }
+      })
+      .catch((errorInfo) => {
+        // Handle validation errors if needed
+        console.log(errorInfo);
+      });
   };
 
   const FunctionCheckCustomer = () => {
-    form.validateFields()
+    form
+      .validateFields()
       .then((values) => {
         const body = {
           customerType: ciObj.customerType,
@@ -1624,7 +1693,7 @@ const StandardForm = () => {
           identificationNumber: ciObj.customerIdentificationNumber.toString(),
           accountGroup: "STANDARD",
         };
-    
+
         dispatch(checkCustomer({ body: body }))
           .unwrap()
           .then((data) => {
@@ -1634,7 +1703,7 @@ const StandardForm = () => {
           })
           .catch(() => {
             handleButtonNext();
-          });  
+          });
       })
       .catch((error) => {
         console.error("Validation failed:", error);
@@ -1652,8 +1721,8 @@ const StandardForm = () => {
     //       }`,
     //   }));
     // }
-    if(dmArray?.length === 0){
-      setModalValidate(true)
+    if (dmArray?.length === 0) {
+      setModalValidate(true);
     } else {
       const mappingAddress = addressTable?.map((item) => {
         return {
@@ -1663,10 +1732,11 @@ const StandardForm = () => {
           cityId: item.cityId,
           districtId: item.districtId,
           subDistrictId: item.subDistrictId,
-          premiseFlag: item.premiseFlag === undefined ? false : item.premiseFlag,
+          premiseFlag:
+            item.premiseFlag === undefined ? false : item.premiseFlag,
         };
       });
-  
+
       const body = {
         accountInformation: {
           accountSegment: caiObj?.accountSegment,
@@ -1685,7 +1755,7 @@ const StandardForm = () => {
         },
         accountAddress: mappingAddress,
       };
-  
+
       dispatch(getFinancialInfo({ body: body }))
         .unwrap()
         .then(() => {
@@ -1748,7 +1818,7 @@ const StandardForm = () => {
     dataConfirm.distributionMedia?.map((a) => delete a.key);
 
     //delete form temp
-    delete dataConfirm.tempForm
+    delete dataConfirm.tempForm;
 
     dispatch(createAccount({ body: dataConfirm }))
       .unwrap()
@@ -1763,7 +1833,7 @@ const StandardForm = () => {
           };
           await accountManagementService.uploadAttachment(
             `/v1/dbs/api/customer/create-customer-attachment/${customerId}`,
-            body
+            body,
           );
         }
         setLoadingForm(false);
@@ -1830,10 +1900,10 @@ const StandardForm = () => {
               </DetailText>
               <DetailText label={"Birth/Founded Date"}>
                 {moment(data?.customerInformation?.dateOfBirth).format(
-                  dateFormatting.date
+                  dateFormatting.date,
                 )
                   ? moment(data?.customerInformation?.dateOfBirth).format(
-                      dateFormatting.date
+                      dateFormatting.date,
                     )
                   : "-"}
               </DetailText>
@@ -2060,53 +2130,48 @@ const StandardForm = () => {
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">
-              {
-                "Please Input at least one or more distribution media!"
-              }
+              {"Please Input at least one or more distribution media!"}
             </p>
           </div>
         </ModalError>
 
         {/* Modal Warning Lost Data */}
-        {
-          modalPrevLostData ? (
-            // <ModalConfirm
-            //   isOpen={modalPrevLostData}
-            //   handleCancel={() => setModalPrevLostData(false)}
-            //   handleOk={handleOkLostData}
-            //   width={400}
-            // >
-            //   <div className="flex justify-center mt-5 gap-[20px]">
-            //     <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            //     <p className="text-[18px] font-bold">
-            //     Are you sure you want to go to previous step? your data will be lost!
-            //     </p>
-            //   </div>
-            // </ModalConfirm>
-            <ModalConfirm
-              isOpen={modalPrevLostData}
-              handleCancel={() => setModalPrevLostData(false)}
-              handleOk={handleOkLostData}
-              width={500}
-            >
-              <div className="flex justify-center gap-[20px] mt-6">
-                <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-                <p className={"text-[18px] font-bold"}>
-                  Are you sure want to go back?
-                </p>
-              </div>
-              <Alert
-                message="
+        {modalPrevLostData ? (
+          // <ModalConfirm
+          //   isOpen={modalPrevLostData}
+          //   handleCancel={() => setModalPrevLostData(false)}
+          //   handleOk={handleOkLostData}
+          //   width={400}
+          // >
+          //   <div className="flex justify-center mt-5 gap-[20px]">
+          //     <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+          //     <p className="text-[18px] font-bold">
+          //     Are you sure you want to go to previous step? your data will be lost!
+          //     </p>
+          //   </div>
+          // </ModalConfirm>
+          <ModalConfirm
+            isOpen={modalPrevLostData}
+            handleCancel={() => setModalPrevLostData(false)}
+            handleOk={handleOkLostData}
+            width={500}
+          >
+            <div className="flex justify-center gap-[20px] mt-6">
+              <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+              <p className={"text-[18px] font-bold"}>
+                Are you sure want to go back?
+              </p>
+            </div>
+            <Alert
+              message="
                 If you go to previous step, your data will be lost!"
-                type={"error"}
-              />
-            </ModalConfirm>
-          )
-          : null 
-        }
+              type={"error"}
+            />
+          </ModalConfirm>
+        ) : null}
 
-         {/* Modal premise already use */}
-         {modalAlreadyPremise ? 
+        {/* Modal premise already use */}
+        {modalAlreadyPremise ? (
           <ModalError
             isOpen={modalAlreadyPremise}
             handleOk={() => setModalAlreadyPremise(false)}
@@ -2117,14 +2182,10 @@ const StandardForm = () => {
                 {IconModal["icon_error_default"]}
                 <p className="text-[18px] font-bold">{"Failed"}</p>
               </div>
-              <p className="pl-[70px]">
-                {isPremiseAlready?.message}
-              </p>
+              <p className="pl-[70px]">{isPremiseAlready?.message}</p>
             </div>
           </ModalError>
-          : null 
-        }
-
+        ) : null}
       </Spin>
     </LayoutMenu>
   );

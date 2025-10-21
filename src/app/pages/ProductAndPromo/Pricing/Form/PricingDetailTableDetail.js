@@ -20,7 +20,12 @@ import {
   getListUom,
 } from "../../../../../redux/slices/product_promo/pricing";
 import { showModalError } from "../../../../../redux/slices/general_slice";
-import { hasValue, renderColumn, renderDateColumn, requiredMessage } from "../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+  requiredMessage,
+} from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import { separatorCurrency } from "../../UtilsProduct/UtilsAllProduct";
@@ -79,13 +84,11 @@ const sorter = (fieldSort, a, b) => {
         //     ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
         //       descimal
         //     : "";
-            return separatorCurrency(obj[fieldSort])?.replace(/,/g, "");
+        return separatorCurrency(obj[fieldSort])?.replace(/,/g, "");
       case "startDate":
       case "endDate":
-        return obj[fieldSort]
-          ? moment(obj[fieldSort])
-          : "";
-        // return date.toLowerCase();
+        return obj[fieldSort] ? moment(obj[fieldSort]) : "";
+      // return date.toLowerCase();
       case "status":
         const endDate = obj?.endDate;
         const value = endDate
@@ -116,8 +119,8 @@ const sorter = (fieldSort, a, b) => {
       default:
         return a.localeCompare(b);
     }
-  }
-    return handleCompare(fa, fb);
+  };
+  return handleCompare(fa, fb);
 };
 
 const columns = (
@@ -134,7 +137,7 @@ const columns = (
   handleDelete,
   updateSelectedData,
   updateHistoryEndDate,
-  selectPriceCodeAdjust
+  selectPriceCodeAdjust,
 ) => {
   const result = [
     {
@@ -160,7 +163,7 @@ const columns = (
         handleSearch,
         true,
         "input",
-        storedData
+        storedData,
       ),
       render: (text) =>
         renderColumn(
@@ -170,7 +173,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "currency",
@@ -205,7 +208,7 @@ const columns = (
         handleSearch,
         true,
         "currency",
-        storedData
+        storedData,
       ),
       render: (text) =>
         renderColumn(
@@ -215,7 +218,7 @@ const columns = (
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
 
       // render: (text, record) => {
@@ -287,7 +290,7 @@ const columns = (
         handleSearch,
         true,
         "input",
-        storedData
+        storedData,
       ),
       render: (text) =>
         renderColumn(
@@ -297,7 +300,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -325,7 +328,7 @@ const columns = (
         handleSearch,
         true,
         "date",
-        storedData
+        storedData,
       ),
       render: (text) =>
         renderDateColumn(
@@ -334,7 +337,7 @@ const columns = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
       // render: (index) => {
       //   const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -380,7 +383,7 @@ const columns = (
         handleSearch,
         true,
         "date",
-        storedData
+        storedData,
       ),
       render: (text) =>
         renderDateColumn(
@@ -389,7 +392,7 @@ const columns = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
       // render: (index) => {
       //   const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -431,7 +434,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index, record) => {
         const valueStatus = () => {
@@ -458,7 +461,7 @@ const columns = (
           value,
           false,
           "status",
-          search
+          search,
         );
       },
       // render: (index, record) => {
@@ -513,7 +516,7 @@ const columns = (
         handleSearch,
         true,
         "input",
-        storedData
+        storedData,
       ),
       render: (text) =>
         renderColumn(
@@ -523,7 +526,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
       // render: (text) => {
       //   if (searchedColumn === "description") {
@@ -662,7 +665,7 @@ const columns = (
 
   if (type === "preview") {
     return result.filter(
-      (col) => col.title !== "STATUS" && col.title !== "ACTION"
+      (col) => col.title !== "STATUS" && col.title !== "ACTION",
     );
   }
 
@@ -697,7 +700,7 @@ const PricingDetailTableDetail = ({
   const [uomOptions, setUomOptions] = useState([]);
   const [startDate, setStartDate] = useState();
   const { dataListCurrency, dataListUom } = useSelector(
-    (state) => state.pricing
+    (state) => state.pricing,
   );
   useEffect(() => {
     if (dataListCurrency && dataListCurrency.length > 0) {
@@ -768,7 +771,7 @@ const PricingDetailTableDetail = ({
           : undefined,
       };
       const filteredDataFormat = dataFormatted.filter(
-        (item) => item.key === valueFormatted.key
+        (item) => item.key === valueFormatted.key,
       );
       filteredDataFormat.forEach((item) => {
         const startData = moment(item.startDate);
@@ -802,7 +805,7 @@ const PricingDetailTableDetail = ({
       });
       return valid;
     },
-    [data, typeForm, dataEdit]
+    [data, typeForm, dataEdit],
   );
   const handleSaveModalPricingForm = useCallback(
     (value) => {
@@ -833,7 +836,7 @@ const PricingDetailTableDetail = ({
         } else {
           updateData((prevState) => {
             const index = prevState.findIndex(
-              (detail) => detail.key === dataEdit.key
+              (detail) => detail.key === dataEdit.key,
             );
             let temp = [...prevState];
             temp[index] = {
@@ -870,7 +873,7 @@ const PricingDetailTableDetail = ({
       handleCancelModalForm,
       safetyConflictDate,
       updateData,
-    ]
+    ],
   );
   const handleCreate = () => {
     setTypeForm(typeFormList[0]);
@@ -904,7 +907,7 @@ const PricingDetailTableDetail = ({
 
   const handleStartDate = (value) => {
     setStartDate(value);
-    form.resetFields(["endDate"])
+    form.resetFields(["endDate"]);
     return value;
   };
 
@@ -956,7 +959,7 @@ const PricingDetailTableDetail = ({
           handleDelete,
           updateSelectedData,
           updateHistoryEndDate,
-          selectPriceCodeAdjust
+          selectPriceCodeAdjust,
         )}
       />
       <ModalCustom
@@ -1095,7 +1098,7 @@ const PricingDetailTableDetail = ({
                       !value
                         ? Promise.resolve()
                         : Promise.reject(
-                            new Error("End date must before Start date")
+                            new Error("End date must before Start date"),
                           ),
                   },
                 ]}

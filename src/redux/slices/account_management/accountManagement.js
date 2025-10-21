@@ -1,6 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import accountManagementService from "../../services/account_management/accountManagementService";
-import { grantedAccessDetail, showModalError, showModalSuccess, validateError } from "../general_slice";
+import {
+  grantedAccessDetail,
+  showModalError,
+  showModalSuccess,
+  validateError,
+} from "../general_slice";
 
 const initialState = {
   data: [],
@@ -8,8 +13,8 @@ const initialState = {
   data_withHoldingTax: [],
   data_accountDetail: {},
   data_ServiceAggrementTOS: {},
-  access_account:{},
-  access_account_extend:{}
+  access_account: {},
+  access_account_extend: {},
 };
 
 export const getAccountDetail = createAsyncThunk(
@@ -22,7 +27,7 @@ export const getAccountDetail = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAccountStandardDetail = createAsyncThunk(
@@ -35,7 +40,7 @@ export const getAccountStandardDetail = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAccountOneTimeDetail = createAsyncThunk(
@@ -48,7 +53,7 @@ export const getAccountOneTimeDetail = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const updateAccount = createAsyncThunk(
@@ -56,7 +61,10 @@ export const updateAccount = createAsyncThunk(
   async (body, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/account-info/update-account`;
-      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      const response = await accountManagementService.updateDataWithMethodPost(
+        url,
+        body,
+      );
       const successMessage = {
         title: "Successful",
         description: "Your data has been updated.",
@@ -80,7 +88,7 @@ export const updateAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 //Needs to be moved
@@ -94,30 +102,45 @@ export const getServiceAggrementTOS = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // Access for account detail
-export const getGrantedAccessAccount = createAsyncThunk("CHECK_GRANTED_ACCESS_ACCOUNT", async (body, thunkAPI) => {
-  try {
-    const data = await accountManagementService.checkGrantedAccessAccount(body)
-    thunkAPI.dispatch(grantedAccessDetail(data?.data))
-		return data?.data;
-	} catch (error) {
-		thunkAPI.dispatch(validateError({ error: error, action:'CHECK_GRANTED_ACCESS_ACCOUNT'}))
-		return thunkAPI.rejectWithValue(error);
-	}
-});
-export const getGrantedAccessAccountExtend = createAsyncThunk("CHECK_GRANTED_ACCESS_ACCOUNT_EXTEND", async (body, thunkAPI) => {
-  try {
-    const data = await accountManagementService.checkGrantedAccessAccount(body)
-    thunkAPI.dispatch(grantedAccessDetail(data?.data))
-		return data?.data;
-	} catch (error) {
-		thunkAPI.dispatch(validateError({ error: error, action:'CHECK_GRANTED_ACCESS_ACCOUNT_EXTEND'}))
-		return thunkAPI.rejectWithValue(error);
-	}
-});
+export const getGrantedAccessAccount = createAsyncThunk(
+  "CHECK_GRANTED_ACCESS_ACCOUNT",
+  async (body, thunkAPI) => {
+    try {
+      const data =
+        await accountManagementService.checkGrantedAccessAccount(body);
+      thunkAPI.dispatch(grantedAccessDetail(data?.data));
+      return data?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "CHECK_GRANTED_ACCESS_ACCOUNT" }),
+      );
+      return thunkAPI.rejectWithValue(error);
+    }
+  },
+);
+export const getGrantedAccessAccountExtend = createAsyncThunk(
+  "CHECK_GRANTED_ACCESS_ACCOUNT_EXTEND",
+  async (body, thunkAPI) => {
+    try {
+      const data =
+        await accountManagementService.checkGrantedAccessAccount(body);
+      thunkAPI.dispatch(grantedAccessDetail(data?.data));
+      return data?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "CHECK_GRANTED_ACCESS_ACCOUNT_EXTEND",
+        }),
+      );
+      return thunkAPI.rejectWithValue(error);
+    }
+  },
+);
 
 const accountSlice = createSlice({
   name: "accountManagement",

@@ -73,7 +73,7 @@ const AttachmentTable = ({
       sorter: true,
       ...getColumnSearchProps("uploadBy"),
     },
-		{
+    {
       title: "UPLOADED DATE",
       dataIndex: "uploadDate",
       width: 150,
@@ -81,7 +81,7 @@ const AttachmentTable = ({
       ...getColumnSearchProps("uploadDate"),
       render: (endDate) => renderDate(endDate),
     },
-		{
+    {
       title: "FILE SIZE",
       dataIndex: "fileSize",
       width: 150,

@@ -200,7 +200,7 @@ const GroupAccessForm = (props) => {
     // give gaMenuId if undefined
     for (let itemArrayForm of formValue?.mApprovalHierarchyDtl) {
       let matchedItem = data_detail?.gaMenu.find(
-        (detailedItem) => detailedItem.menuId === itemArrayForm.menuId
+        (detailedItem) => detailedItem.menuId === itemArrayForm.menuId,
       );
       if (matchedItem) {
         itemArrayForm.gaMenuId = matchedItem.gaMenuId;
@@ -219,7 +219,7 @@ const GroupAccessForm = (props) => {
         updateGroupAccess({
           body: payload?.body,
           responseSuccess: successBody,
-        })
+        }),
       )
         .unwrap()
         .then(() => {
@@ -234,7 +234,7 @@ const GroupAccessForm = (props) => {
         createGroupAccess({
           body: payload?.body,
           responseSuccess: successBody,
-        })
+        }),
       )
         .unwrap()
         .then(() => {
@@ -370,7 +370,7 @@ const GroupAccessForm = (props) => {
                       validator: () => {
                         if (detailActions?.length === 0) {
                           return Promise.reject(
-                            "Please input your Menu Access!"
+                            "Please input your Menu Access!",
                           );
                         }
                         return Promise.resolve();
@@ -472,7 +472,7 @@ const GroupAccessForm = (props) => {
                   {formValue?.userLevel &&
                     dataUserLevel &&
                     dataUserLevel.filter(
-                      (userLevel) => userLevel.value === formValue?.userLevel
+                      (userLevel) => userLevel.value === formValue?.userLevel,
                     )[0]?.name}
                 </DetailText>
                 <DetailText label={"Description"}>

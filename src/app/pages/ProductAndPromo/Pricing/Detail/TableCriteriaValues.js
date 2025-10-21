@@ -10,7 +10,7 @@ const columns = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  dataCriteria = []
+  dataCriteria = [],
 ) => {
   const temp = [
     {
@@ -24,11 +24,11 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   ];
   return temp.filter((col) =>
-    col.title !== "NO" ? dataCriteria.includes(col.indexValue) : true
+    col.title !== "NO" ? dataCriteria.includes(col.indexValue) : true,
   );
 };
 const TableCriteriaValues = ({
@@ -111,7 +111,7 @@ const TableCriteriaValues = ({
           searchedColumn,
           searchText,
           handleSearch,
-          dataCriteria
+          dataCriteria,
         )}
       />
     </div>

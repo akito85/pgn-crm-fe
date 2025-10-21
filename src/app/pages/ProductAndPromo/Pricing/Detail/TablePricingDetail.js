@@ -20,7 +20,7 @@ const columns = (
   searchText,
   handleSearch = () => {},
   updateSelectedData = () => {},
-  selectPriceCodeAdjust
+  selectPriceCodeAdjust,
 ) => {
   const result = [
     {
@@ -39,7 +39,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -53,7 +53,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -66,7 +66,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -80,7 +80,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -94,7 +94,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -125,7 +125,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -305,7 +305,7 @@ const TablePricingDetail = ({
           searchText,
           handleSearch,
           updateSelectedData,
-          selectPriceCodeAdjust
+          selectPriceCodeAdjust,
         )}
       />
     </div>

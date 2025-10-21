@@ -17,13 +17,12 @@ const BillingBucketTable = ({
   searchText,
   getColumnSearchProps = () => {},
 }) => {
-
   const expandedRowRender = (record) => {
     const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch = () => {}
+      handleSearch = () => {},
     ) => {
       return [
         {
@@ -41,7 +40,7 @@ const BillingBucketTable = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -53,7 +52,7 @@ const BillingBucketTable = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -65,7 +64,7 @@ const BillingBucketTable = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
           render: (text) => {
             const tempText = text === "Y" ? "YES" : "NO";
@@ -95,7 +94,7 @@ const BillingBucketTable = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -107,7 +106,7 @@ const BillingBucketTable = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
       ];
@@ -141,7 +140,7 @@ const BillingBucketTable = ({
       title: "BILLING BUCKET CODE",
       dataIndex: "billingBucketCode",
       width: 150,
-      sorter:true,
+      sorter: true,
       ...getColumnSearchProps("billingBucketCode"),
     },
     {

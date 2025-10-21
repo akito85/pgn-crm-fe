@@ -192,7 +192,7 @@ const EditableCell = ({
                   {
                     validator: (_, value) =>
                       endDateValidator(
-                        formTableCriteria.getFieldValue().startDate
+                        formTableCriteria.getFieldValue().startDate,
                       )(_, value),
                   },
                 ]
@@ -544,7 +544,7 @@ const FunctionalCriteriaInvoiceTemplate = ({
       const index = newData.findIndex((item) => key === item.key);
       const isOverlappingDate = checkOverlappingDate(
         { startDate: validStartDate, endDate: validEndDate },
-        row
+        row,
       );
 
       if (isOverlappingDate) {
@@ -594,13 +594,12 @@ const FunctionalCriteriaInvoiceTemplate = ({
     }
     // }
   }, []);
-  
 
   // Function Add Row Data
   const addRow = () => {
     const overlappingData = checkOverlappingData(
       { startDate: validStartDate, endDate: validEndDate },
-      data
+      data,
     );
 
     if (overlappingData) {
@@ -627,7 +626,7 @@ const FunctionalCriteriaInvoiceTemplate = ({
   // Function Delete Row
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -647,7 +646,7 @@ const FunctionalCriteriaInvoiceTemplate = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       {
         title: "ACTION",
@@ -747,7 +746,7 @@ const FunctionalCriteriaInvoiceTemplate = ({
       col.title !== "START DATE" &&
       col.title !== "END DATE"
         ? dataCriteria.includes(col.indexValue)
-        : true
+        : true,
     );
   };
 
@@ -857,7 +856,7 @@ const FunctionalCriteriaInvoiceTemplate = ({
                   validateStartDate: validStartDate,
                   validateEndDate: validEndDate,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],

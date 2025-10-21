@@ -39,7 +39,7 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [ratingCodeId, search, page, pageSize, sort, dispatch]);
 
@@ -147,7 +147,7 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
               searchedColumn,
               searchText,
               handleSearch,
-              handleDetail
+              handleDetail,
             )}
             current={page}
             pageSize={pageSize}

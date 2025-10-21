@@ -78,7 +78,7 @@ const TransactionCalenderInfromation = ({
   const [formCriteria] = Form.useForm();
   const dataString = useMemo(
     () => endBeginDDL?.map((index) => String(index)),
-    [endBeginDDL]
+    [endBeginDDL],
   );
   const { setDataIndex } = useCriteriaHooks();
   const [columnCriteria, setColumnCriteria] = useState([]);
@@ -89,7 +89,6 @@ const TransactionCalenderInfromation = ({
   });
 
   console.log(formValue);
-  
 
   const sorterColumnOption = useMemo(() => {
     const orderedCodes = [
@@ -109,7 +108,7 @@ const TransactionCalenderInfromation = ({
         code: setDataIndex(item?.code),
       }));
       return [...mappingOption].sort(
-        (a, b) => orderedCodes.indexOf(a.code) - orderedCodes.indexOf(b.code)
+        (a, b) => orderedCodes.indexOf(a.code) - orderedCodes.indexOf(b.code),
       );
     } else {
       return [];
@@ -121,11 +120,11 @@ const TransactionCalenderInfromation = ({
   };
 
   const handleDisableEndDate = (current) => {
-      if (updateDate?.startDate !== null) {
-        return formValue?.startDate > current;
-      }
-      return moment().add(-1, "days") >= current;
-    };
+    if (updateDate?.startDate !== null) {
+      return formValue?.startDate > current;
+    }
+    return moment().add(-1, "days") >= current;
+  };
 
   //dependensi kriteria
   const handleSelectCriteria = useCallback(
@@ -144,7 +143,7 @@ const TransactionCalenderInfromation = ({
         res.push(19);
       }
       let outputArray = res.filter(
-        (item, index) => res.indexOf(item) === index
+        (item, index) => res.indexOf(item) === index,
       );
       outputArray = outputArray.includes(24) ? [24] : outputArray;
       setCriteriaValues(outputArray);
@@ -152,7 +151,7 @@ const TransactionCalenderInfromation = ({
         criteria: outputArray,
       });
     },
-    [criteriaValues, form, setCriteriaValues]
+    [criteriaValues, form, setCriteriaValues],
   );
 
   const handleDeselectCriteria = useCallback(
@@ -171,7 +170,7 @@ const TransactionCalenderInfromation = ({
         res = res.filter((item) => item !== 20);
       }
       let outputArray = res.filter(
-        (item, index) => res.indexOf(item) === index
+        (item, index) => res.indexOf(item) === index,
       );
       outputArray = outputArray.includes(24) ? [24] : outputArray;
       setCriteriaValues(outputArray);
@@ -179,7 +178,7 @@ const TransactionCalenderInfromation = ({
         criteria: outputArray,
       });
     },
-    [criteriaValues, form, setCriteriaValues]
+    [criteriaValues, form, setCriteriaValues],
   );
 
   const handleClearCriteria = () => {
@@ -295,7 +294,7 @@ const TransactionCalenderInfromation = ({
       data_serivce_type,
       data_sor,
       data_subdistrict,
-    ]
+    ],
   );
 
   const conditionalDispatcher = useCallback((dataIndex) => {
@@ -367,11 +366,11 @@ const TransactionCalenderInfromation = ({
             option: conditionalOption(item?.code),
             dependDataIndex: conditionalDependendData(item?.code),
             rules: formMessageRequired(toTitleCase(item?.text), true),
-          }))
+          })),
         );
       }
     },
-    [conditionalDependendData, conditionalDispatcher, conditionalOption]
+    [conditionalDependendData, conditionalDispatcher, conditionalOption],
   );
 
   useEffect(() => {
@@ -396,7 +395,7 @@ const TransactionCalenderInfromation = ({
             services: params?.services,
             urls: params?.getCityList,
             id: data,
-          })
+          }),
         );
         formCriteria.resetFields(["city", "district", "subDistrict"]);
         setEditDataRecord((prevState) => {
@@ -414,7 +413,7 @@ const TransactionCalenderInfromation = ({
             services: params?.services,
             urls: params?.getDistrictList,
             id: data,
-          })
+          }),
         );
         formCriteria.resetFields(["district", "subDistrict"]);
         setEditDataRecord((prevState) => {
@@ -431,7 +430,7 @@ const TransactionCalenderInfromation = ({
             services: params?.services,
             urls: params?.getSubDistrictList,
             id: data,
-          })
+          }),
         );
         formCriteria.resetFields(["subDistrict"]);
         setEditDataRecord((prevState) => {
@@ -450,7 +449,7 @@ const TransactionCalenderInfromation = ({
             services: params?.services,
             urls: params?.getAccountGroupTypeList,
             id: data,
-          })
+          }),
         );
         formCriteria.resetFields(["accountGroupType"]);
         setEditDataRecord((prevState) => {
@@ -461,7 +460,7 @@ const TransactionCalenderInfromation = ({
         });
       }
     },
-    [dispatch, formCriteria]
+    [dispatch, formCriteria],
   );
 
   const handleStartDate = (value) => {
@@ -470,19 +469,19 @@ const TransactionCalenderInfromation = ({
     return value;
   };
 
-    const isDisabledDate = useMemo(() => {
-      if (
-        hasValue(form?.getFieldsValue()?.endDate) === true &&
-        listDataCriteria?.map((item) => ({
-          startDate: item?.startDate,
-          endDate: item?.endDate,
-        }))?.length > 0
-      ) {
-        return true;
-      } else {
-        return false;
-      }
-    }, [form, listDataCriteria]);
+  const isDisabledDate = useMemo(() => {
+    if (
+      hasValue(form?.getFieldsValue()?.endDate) === true &&
+      listDataCriteria?.map((item) => ({
+        startDate: item?.startDate,
+        endDate: item?.endDate,
+      }))?.length > 0
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }, [form, listDataCriteria]);
 
   return (
     <div className="w-full">
@@ -571,7 +570,7 @@ const TransactionCalenderInfromation = ({
                   !value
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error("End date must before Start date")
+                        new Error("End date must before Start date"),
                       ),
               },
             ]}

@@ -110,15 +110,17 @@ const CreateAndUpdatePOSDetail = ({
           //     ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
           //       descimal
           //     : "";
-          return obj[fieldSort] ? (obj[fieldSort] || 0)?.toString()?.toLowerCase() : "0" ;
+          return obj[fieldSort]
+            ? (obj[fieldSort] || 0)?.toString()?.toLowerCase()
+            : "0";
         default:
           return obj[fieldSort]?.toLowerCase();
       }
     };
-  
+
     let fa = handleDataSort(a);
     let fb = handleDataSort(b);
-  
+
     const handleCompare = (a, b) => {
       switch (fieldSort) {
         case "price":
@@ -131,12 +133,12 @@ const CreateAndUpdatePOSDetail = ({
         case "total":
         case "totalEqvIdr":
         case "totalEqvUsd":
-          return Math.sign(parseInt(a) - parseInt(b))
+          return Math.sign(parseInt(a) - parseInt(b));
         default:
           return a.localeCompare(b);
       }
-    }
-  
+    };
+
     return handleCompare(fa, fb);
   };
 
@@ -394,7 +396,7 @@ const CreateAndUpdatePOSDetail = ({
                 searchText,
                 handleSearch,
                 onFilter,
-                sorter
+                sorter,
               ).filter((item) => item.title !== "ACTION")}
             />
           </div>

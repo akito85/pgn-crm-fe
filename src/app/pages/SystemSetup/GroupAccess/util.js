@@ -1,4 +1,3 @@
-
 /** process GA Menu from data detail for form value or Tree data value */
 export const transformGaMenuDetail = (data_detail) => {
   const gaMenu = data_detail?.gaMenu || [];

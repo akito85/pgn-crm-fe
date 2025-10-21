@@ -12,7 +12,7 @@ import { bytesConverter } from "../../../../../utils/bytesConverter";
 const Attachment = ({ id }) => {
   // Selector
   const { data_attachment, loading } = useSelector(
-    (state) => state.pricingRule
+    (state) => state.pricingRule,
   );
 
   // Declaration
@@ -31,7 +31,7 @@ const Attachment = ({ id }) => {
   // Use Effect
   useEffect(() => {
     dispatch(
-      getAttachmentListDetailPricingRule({ id, page, pageSize, sort, search })
+      getAttachmentListDetailPricingRule({ id, page, pageSize, sort, search }),
     );
   }, [id, page, pageSize, sort, search]);
 
@@ -154,7 +154,7 @@ const Attachment = ({ id }) => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 

@@ -130,7 +130,6 @@ const PosForm = ({ type }) => {
   const [tabHeader, setTabHeader] = useState(dataTabs[0].value);
   const [rangeDisableDate, setRangeDisableDate] = useState({});
 
-
   //useEffect
   useEffect(() => {
     if (data_rate === null || data_rate?.success === false) {
@@ -149,13 +148,13 @@ const PosForm = ({ type }) => {
         getRateTax({
           invoiceDate: moment(invoiceDate).format(dateFormatting.dateFormal),
           currency,
-        })
+        }),
       );
       dispatch(
         getRate({
           invoiceDate: moment(invoiceDate).format(dateFormatting.dateFormal),
           currency,
-        })
+        }),
       );
     }
   }, [dispatch, invoiceDate, currency]);
@@ -222,10 +221,11 @@ const PosForm = ({ type }) => {
     }
   }, [dispatch, type]);
 
-
   useEffect(() => {
     if (hasValue(accountNumber)) {
-      const getAccountId = data_globalAccountNumber?.find(item => item?.accountNumber === accountNumber)?.accountId;
+      const getAccountId = data_globalAccountNumber?.find(
+        (item) => item?.accountNumber === accountNumber,
+      )?.accountId;
       dispatch(getGlobalTermsOfPaymentData(getAccountId));
     }
   }, [accountNumber, data_globalAccountNumber, dispatch]);
@@ -240,7 +240,7 @@ const PosForm = ({ type }) => {
         // },
         ...data_detailPos,
         currency: data_globalCurrency?.find(
-          (item) => item.text === data_detailPos?.currency
+          (item) => item.text === data_detailPos?.currency,
         )?.Id,
         apphierId: data_detailPos?.appHierId,
         transactionDate: moment(data_detailPos?.transactionDate),
@@ -252,7 +252,7 @@ const PosForm = ({ type }) => {
         // },
       });
     },
-    [form]
+    [form],
   );
 
   useEffect(() => {
@@ -272,18 +272,18 @@ const PosForm = ({ type }) => {
       handleSetFormUpdate(data_detailPos, data_globalCurrency);
       setCurrency(
         data_globalCurrency?.find(
-          (item) => item.text === data_detailPos?.currency
-        )?.Id
+          (item) => item.text === data_detailPos?.currency,
+        )?.Id,
       );
       setAccountNumber(data_detailPos?.accountNumber);
       setInvoiceDate(
-        moment(data_detailPos?.invoiceDate)
+        moment(data_detailPos?.invoiceDate),
         // .format(dateFormatting.dateFormal)
       );
       setDataBillingCycle(
         data_globalBillingCycle?.find(
-          (item) => item.name === data_detailPos?.billingCycle
-        )?.id
+          (item) => item.name === data_detailPos?.billingCycle,
+        )?.id,
       );
       setDataDynamic({
         ...dataDynamic,
@@ -322,13 +322,13 @@ const PosForm = ({ type }) => {
           //   };
           // }
           return temp;
-        })
+        }),
       );
       setDataAttachment(
         (data_detailPos?.mattachments || []).map((item) => ({
           ...item,
           dataType: "exist",
-        }))
+        })),
       );
     }
   }, [
@@ -366,11 +366,11 @@ const PosForm = ({ type }) => {
     if (data) {
       let dataMaterai =
         data.filter(
-          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297
+          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
         )[0] || {};
       const newDataDynamic = data
         .filter(
-          (item) => item.item !== "Meterai" || parseInt(item.itemId) !== 297
+          (item) => item.item !== "Meterai" || parseInt(item.itemId) !== 297,
         )
         .reduce(
           (sums, item) => {
@@ -379,7 +379,7 @@ const PosForm = ({ type }) => {
               /* yang punya tax ( dari product )*/
               item.typeId === 2144 &&
               data.some(
-                (dataItem) => dataItem.reference === parseInt(item.itemId)
+                (dataItem) => dataItem.reference === parseInt(item.itemId),
               )
             ) {
               // tempSum.taxBasis += item.total || 0;
@@ -390,7 +390,10 @@ const PosForm = ({ type }) => {
                 tempSum.taxBasisIdr += item.total || 0;
               }
             }
-            if (item.typeId === 2342 || item?.typeValueName?.toLowerCase()?.includes("ppn")) {
+            if (
+              item.typeId === 2342 ||
+              item?.typeValueName?.toLowerCase()?.includes("ppn")
+            ) {
               /* Tax PPN saja type Id*/
               // tempSum.vat += item.total || 0;
               tempSum.vatEqvIdr += item.eqvIdr || 0;
@@ -400,7 +403,10 @@ const PosForm = ({ type }) => {
                 tempSum.vatIdr += item.total || 0;
               }
             }
-            if (item.typeId === 2343 || item?.typeValueName?.toLowerCase()?.includes("pph")) {
+            if (
+              item.typeId === 2343 ||
+              item?.typeValueName?.toLowerCase()?.includes("pph")
+            ) {
               /*tax pph saja*/
               tempSum.withholdingTax += item.totalEqvIdr || 0;
             }
@@ -409,22 +415,42 @@ const PosForm = ({ type }) => {
             // console.log(item, "item")
             if (item.currency === "USD") {
               tempSum.totalAmountUsd +=
-                item.typeId !== 2343 || !item?.typeValueName?.toLowerCase()?.includes("pph") ? item.total || 0 : 0;
-              tempSum.amountUsd += item.typeId !== 2343 || !item?.typeValueName?.toLowerCase()?.includes("pph") ? item.amount || 0 : 0;
+                item.typeId !== 2343 ||
+                !item?.typeValueName?.toLowerCase()?.includes("pph")
+                  ? item.total || 0
+                  : 0;
+              tempSum.amountUsd +=
+                item.typeId !== 2343 ||
+                !item?.typeValueName?.toLowerCase()?.includes("pph")
+                  ? item.amount || 0
+                  : 0;
               tempSum.discountAmountUsd += item.discount || 0;
               //new Vat USD , tax basis USD
             } else if (item.currency === "IDR") {
               tempSum.totalAmountIdr +=
-                item.typeId !== 2343 || !item?.typeValueName?.toLowerCase()?.includes("pph") ? item.total || 0 : 0;
-              tempSum.amountIdr += item.typeId !== 2343 || !item?.typeValueName?.toLowerCase()?.includes("pph") ? item.amount || 0 : 0;
+                item.typeId !== 2343 ||
+                !item?.typeValueName?.toLowerCase()?.includes("pph")
+                  ? item.total || 0
+                  : 0;
+              tempSum.amountIdr +=
+                item.typeId !== 2343 ||
+                !item?.typeValueName?.toLowerCase()?.includes("pph")
+                  ? item.amount || 0
+                  : 0;
               tempSum.discountAmountIdr += item.discount || 0;
               //new Vat IDR , tax basis IDR
             }
             //netral ( except pph )
             tempSum.totalEqvIdr +=
-              item.typeId !== 2343 || !item?.typeValueName?.toLowerCase()?.includes("pph") ? item.totalEqvIdr || 0 : 0;
+              item.typeId !== 2343 ||
+              !item?.typeValueName?.toLowerCase()?.includes("pph")
+                ? item.totalEqvIdr || 0
+                : 0;
             tempSum.totalEqvUsd +=
-              item.typeId !== 2343 || !item?.typeValueName?.toLowerCase()?.includes("pph") ? item.totalEqvUsd || 0 : 0;
+              item.typeId !== 2343 ||
+              !item?.typeValueName?.toLowerCase()?.includes("pph")
+                ? item.totalEqvUsd || 0
+                : 0;
             return tempSum;
           },
           {
@@ -445,12 +471,12 @@ const PosForm = ({ type }) => {
             withholdingTax: 0,
             totalEqvIdr: 0, //for materai
             totalEqvUsd: 0,
-          }
+          },
         );
       if (
         newDataDynamic.totalEqvIdr >= 5000000 &&
         !data.some(
-          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297
+          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
         )
       ) {
         // console.log(newDataDynamic.totalEqvIdr, "totalEqvIdr");
@@ -458,9 +484,9 @@ const PosForm = ({ type }) => {
         dispatch(
           getMaterai({
             transactionDate: moment(invoiceDate).format(
-              dateFormatting.dateFormal
+              dateFormatting.dateFormal,
             ),
-          })
+          }),
         )
           .unwrap()
           .then((dataRes) => {
@@ -494,7 +520,7 @@ const PosForm = ({ type }) => {
                   ...items,
                   lineNumber: index + 1,
                 };
-              })
+              }),
             );
           });
       } else if (
@@ -506,14 +532,15 @@ const PosForm = ({ type }) => {
         setData(
           data
             .filter(
-              (item) => item.item !== "Meterai" || parseInt(item.itemId) !== 297
+              (item) =>
+                item.item !== "Meterai" || parseInt(item.itemId) !== 297,
             )
             .map((items, index) => {
               return {
                 ...items,
                 lineNumber: index + 1,
               };
-            })
+            }),
         );
       } else {
         // console.log(data,"data akhir")
@@ -610,8 +637,8 @@ const PosForm = ({ type }) => {
     if (accountNumber) {
       setDataAccount(
         data_globalAccountNumber?.find(
-          (item) => item.accountNumber === accountNumber
-        )
+          (item) => item.accountNumber === accountNumber,
+        ),
       );
     }
   }, [accountNumber]);
@@ -632,25 +659,25 @@ const PosForm = ({ type }) => {
     } else {
       return "TOP";
     }
-  }
+  };
 
   const handleSetFormTypeValueDdl = useCallback(
     (value, data_detailPos) => {
       form.setFieldsValue({
         ...(value?.action === "setData"
           ? {
-            termType: {
-              termValueDdl: handleValueDdlSet(data_detailPos?.termsOfPayment),
-            },
-          }
+              termType: {
+                termValueDdl: handleValueDdlSet(data_detailPos?.termsOfPayment),
+              },
+            }
           : {
-            termType: {
-              termValueDdl: handleValueDdlSet(value.value),
-            },
-          }),
+              termType: {
+                termValueDdl: handleValueDdlSet(value.value),
+              },
+            }),
       });
     },
-    [form]
+    [form],
   );
 
   const handleValue = (e) => {
@@ -665,21 +692,21 @@ const PosForm = ({ type }) => {
         form.setFieldsValue({
           ...(value?.action === "setData"
             ? {
-              termType: {
-                termValue: handleValue(data_detailPos?.termsOfPayment),
-              },
-            }
+                termType: {
+                  termValue: handleValue(data_detailPos?.termsOfPayment),
+                },
+              }
             : {
-              termType: {
-                termValue: isDateString(value?.value)
-                  ? moment(value?.value)
-                  : value?.value,
-              },
-            }),
+                termType: {
+                  termValue: isDateString(value?.value)
+                    ? moment(value?.value)
+                    : value?.value,
+                },
+              }),
         });
       }
     },
-    [form]
+    [form],
   );
 
   //handling non moment to moment date ( error date.clone )
@@ -725,8 +752,9 @@ const PosForm = ({ type }) => {
     },
     {
       path: "",
-      breadcrumbName: `${type === "create" ? "Create" : "Update"
-        } Point of Sales`,
+      breadcrumbName: `${
+        type === "create" ? "Create" : "Update"
+      } Point of Sales`,
     },
   ];
 
@@ -734,19 +762,21 @@ const PosForm = ({ type }) => {
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
     // if (hasValue(formHeader?.endDate)) {
-    dataTable?.forEach(item => {
-      if (moment(item?.startDate) < moment(formHeader?.startDate) || moment(item?.endDate) > moment(formHeader?.endDate)) {
-        dataOverlap?.push(item)
+    dataTable?.forEach((item) => {
+      if (
+        moment(item?.startDate) < moment(formHeader?.startDate) ||
+        moment(item?.endDate) > moment(formHeader?.endDate)
+      ) {
+        dataOverlap?.push(item);
       }
     });
 
     if (dataOverlap?.length > 0) {
-      return true
+      return true;
     } else {
-      return false
+      return false;
     }
   }, []);
-
 
   //handleAction
   const onFinish = (e) => {
@@ -776,11 +806,11 @@ const PosForm = ({ type }) => {
         dispatch(showModalError(errorBody));
       } else {
         const findBillingCycle = data_globalBillingCycle?.find(
-          (item) => item.id === e?.billingCycle
+          (item) => item.id === e?.billingCycle,
         )?.name;
 
         const findBillingPeriod = data_globalBillingPeriod?.find(
-          (item) => item.id === e?.billingPeriod
+          (item) => item.id === e?.billingPeriod,
         )?.name;
 
         setDataSend({
@@ -794,14 +824,14 @@ const PosForm = ({ type }) => {
           currency: data_globalCurrency?.find((item) => item.Id === e?.currency)
             ?.text,
           transactionDate: moment(e?.transactionDate).format(
-            dateFormatting.date
+            dateFormatting.date,
           ),
           invoiceDate: moment(e?.invoiceDate).format(dateFormatting.date),
           termsOfPayment: moment.isMoment(e?.termType?.termValue)
             ? moment(e?.termType?.termValue).format(dateFormatting.date)
             : data_globalTermsOfPaymentValue?.find(
-              (item) => item.Id === e?.termType?.termValue
-            )?.text,
+                (item) => item.Id === e?.termType?.termValue,
+              )?.text,
           remark: e?.remark,
           submit: typeSubmit,
           topId: e.termType.termValueDdl,
@@ -836,26 +866,26 @@ const PosForm = ({ type }) => {
     const calculateAmount = data.map((a) => a.amount);
     const sumAmount = calculateAmount.reduce(
       (accumulator, currentValue) => accumulator + currentValue,
-      0
+      0,
     );
 
     // Summary Discount
     const calculateDiscount = data.map((a) => a.discount);
     const sumDiscount = calculateDiscount.reduce(
       (accumulator, currentValue) => accumulator + currentValue,
-      0
+      0,
     );
 
     // Find topDataType
     const dataTypeTOP = data_globalTermsOfPaymentValue?.find(
-      (item) => item.Id === e.termType.termValue
+      (item) => item.Id === e.termType.termValue,
     );
 
     // Check Date String
     const isDateString = moment(
       e?.termsOfPayment,
       dateFormatting.date,
-      true
+      true,
     ).isValid();
 
     //code
@@ -870,7 +900,7 @@ const PosForm = ({ type }) => {
           : e?.termsOfPayment,
       ...dataDynamic,
       appHierId: dataApprovalId,
-      rate: parseFloat(dataDynamic?.rate.replace(/,/g, '')) || 0,
+      rate: parseFloat(dataDynamic?.rate.replace(/,/g, "")) || 0,
       // rateType: dataDynamic?.rateType || null,
       rateDate: renderDate(dataDynamic?.rateDate) || null,
       amount: sumAmount,
@@ -879,7 +909,7 @@ const PosForm = ({ type }) => {
       // taxBasisEqvUsd: 0,
       // vatIdr: 0,
       // vatUsd: 0,
-      taxRate: parseFloat(dataDynamic?.taxRate.replace(/,/g, '')) || 0,
+      taxRate: parseFloat(dataDynamic?.taxRate.replace(/,/g, "")) || 0,
       taxRateDate: renderDate(dataDynamic?.taxRateDate) || null,
       // taxRateType: dataDynamic?.rateType || null,
       discountAmount: sumDiscount,
@@ -930,7 +960,7 @@ const PosForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/pos/upload-attachment`,
-              body
+              body,
             );
           }
           form.resetFields();
@@ -964,7 +994,7 @@ const PosForm = ({ type }) => {
           setLoadingForm(true);
           const id = idUpdate;
           const filterDataAttach = dataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
@@ -975,7 +1005,7 @@ const PosForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/pos/upload-attachment`,
-              body
+              body,
             );
           }
           form.resetFields();
@@ -1071,22 +1101,22 @@ const PosForm = ({ type }) => {
             //   };
             // }
             return temp;
-          })
+          }),
         );
         setCurrency(
           data_globalCurrency?.find(
-            (item) => item.text === data_detailPos?.currency
-          )?.Id
+            (item) => item.text === data_detailPos?.currency,
+          )?.Id,
         );
         setAccountNumber(data_detailPos?.accountNumber);
         setInvoiceDate(
-          moment(data_detailPos?.invoiceDate)
+          moment(data_detailPos?.invoiceDate),
           // .format(dateFormatting.dateFormal)
         );
         setDataBillingCycle(
           data_globalBillingCycle?.find(
-            (item) => item.name === data_detailPos?.billingCycle
-          )?.id
+            (item) => item.name === data_detailPos?.billingCycle,
+          )?.id,
         );
         setDataAttachment(
           (data_detailPos?.mattachments || []).map((item) => ({
@@ -1094,13 +1124,13 @@ const PosForm = ({ type }) => {
             // createdDate: moment(item.createdDate).format("DD MMM YYYY"),
             // fileSize: bytesConverter(item.fileSize || 0),
             dataType: "exist",
-          }))
+          })),
         );
         setDataApprovalId(data_detailPos?.appHierId);
         // setDataApproval(data_detailPos?.appHierId);
       }
     } else {
-      setRangeDisableDate({})
+      setRangeDisableDate({});
       form.resetFields();
       setData([]);
       setAccountNumber();
@@ -1330,8 +1360,9 @@ const PosForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${type === "create" ? "Created." : "Updated."
-              } ${bodyError?.message}`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              type === "create" ? "Created." : "Updated."
+            } ${bodyError?.message}`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
@@ -1341,7 +1372,7 @@ const PosForm = ({ type }) => {
           isOpen={modalDailyRate}
           handleOk={() => setModalDailyRate(false)}
           handleCancel={() => setModalDailyRate(false)}
-        // customText={"Try Again"}
+          // customText={"Try Again"}
         >
           <div className="px-5 pt-5 pb-[10px] justify-center">
             <div className="w-full flex gap-[20px]">

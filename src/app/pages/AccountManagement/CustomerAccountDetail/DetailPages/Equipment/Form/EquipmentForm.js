@@ -34,7 +34,7 @@ const EquipmentForm = ({
   handleSave,
   openConfirmation,
   setOpenConfirmation,
-  form
+  form,
 }) => {
   const {
     ddlNameEquipment,
@@ -45,10 +45,10 @@ const EquipmentForm = ({
     ddlEnergyEquipment,
     ddlGasConversionEquipment,
     ddlFuelTypeEquipment,
-    data_detail
+    data_detail,
   } = useSelector((state) => state.accountEquipment);
   const [isDualFuel, setIsDualFuel] = useState(false);
-  
+
   useEffect(() => {
     dispatch(getDdlNameEquipment());
     dispatch(getDdlTypeEquipment());
@@ -59,46 +59,63 @@ const EquipmentForm = ({
     dispatch(getDdlGasConversionEquipment());
     dispatch(getDdlFuelTypeEquipment());
   }, [dispatch]);
-  
-  const assert = useCallback((data) => {
-    if (data) {
-      form.setFieldsValue({
-        name: ddlNameEquipment?.filter(item => item?.label === data?.name)[0]?.value,
-        typeEquipment: ddlTypeEquipment?.filter(item => item?.label === data?.typeEquipment)[0]?.value,
-        brand: ddlBrandEquipment?.filter(item => item?.label === data?.brand)[0]?.value,
-        quantity: {
-          value: data?.qty,
-          id: ddlQtyEquipment?.filter(item => item?.label === data?.qtyUom)[0]?.value
-        },
-        capacity: {
-          value: data?.cap,
-          id: ddlCapacityEquipment?.filter(item => item?.label === data?.capUom)[0]?.value
-        },
-        energy: {
-          value: data?.con,
-          id: ddlEnergyEquipment?.filter(item => item?.label === data?.conUom)[0]?.value
-        },
-        gasConversion:{
-          value: data?.gasConv,
-          id: ddlGasConversionEquipment?.filter(item => item?.label === data?.gasConvUom)[0]?.value
-        },
-        noh: parseInt(data?.noh),
-        nod: parseInt(data?.nod),
-        isDualFuel: data?.isDualFuel === "No" ? false : true,
-        fuelType1: data?.fuelType1Id,
-        fuelType2: data?.fuelType2Id,
-        description: data?.description
-      });
-      setIsDualFuel(data?.isDualFuel === "No" ? false : true)
-    }
-  }, [form, data_detail])
+
+  const assert = useCallback(
+    (data) => {
+      if (data) {
+        form.setFieldsValue({
+          name: ddlNameEquipment?.filter(
+            (item) => item?.label === data?.name,
+          )[0]?.value,
+          typeEquipment: ddlTypeEquipment?.filter(
+            (item) => item?.label === data?.typeEquipment,
+          )[0]?.value,
+          brand: ddlBrandEquipment?.filter(
+            (item) => item?.label === data?.brand,
+          )[0]?.value,
+          quantity: {
+            value: data?.qty,
+            id: ddlQtyEquipment?.filter(
+              (item) => item?.label === data?.qtyUom,
+            )[0]?.value,
+          },
+          capacity: {
+            value: data?.cap,
+            id: ddlCapacityEquipment?.filter(
+              (item) => item?.label === data?.capUom,
+            )[0]?.value,
+          },
+          energy: {
+            value: data?.con,
+            id: ddlEnergyEquipment?.filter(
+              (item) => item?.label === data?.conUom,
+            )[0]?.value,
+          },
+          gasConversion: {
+            value: data?.gasConv,
+            id: ddlGasConversionEquipment?.filter(
+              (item) => item?.label === data?.gasConvUom,
+            )[0]?.value,
+          },
+          noh: parseInt(data?.noh),
+          nod: parseInt(data?.nod),
+          isDualFuel: data?.isDualFuel === "No" ? false : true,
+          fuelType1: data?.fuelType1Id,
+          fuelType2: data?.fuelType2Id,
+          description: data?.description,
+        });
+        setIsDualFuel(data?.isDualFuel === "No" ? false : true);
+      }
+    },
+    [form, data_detail],
+  );
 
   useEffect(() => {
     if (data_detail && type === "update") {
-        assert(data_detail)
+      assert(data_detail);
     }
-  }, [assert, data_detail, type])
-  
+  }, [assert, data_detail, type]);
+
   const handleReset = () => {
     if (type === "create") {
       form.resetFields();
@@ -128,7 +145,9 @@ const EquipmentForm = ({
           isDualFuel: formValue?.isDualFuel,
           noh: parseInt(formValue?.noh),
           nod: parseInt(formValue?.nod),
-          fuelType2: hasValue(formValue?.fuelType2) ? formValue?.fuelType2 : null
+          fuelType2: hasValue(formValue?.fuelType2)
+            ? formValue?.fuelType2
+            : null,
         };
 
         validateValueObj = {
@@ -156,7 +175,9 @@ const EquipmentForm = ({
             : false,
           noh: parseInt(formValue?.noh),
           nod: parseInt(formValue?.nod),
-          fuelType2: hasValue(formValue?.fuelType2) ? formValue?.fuelType2 : null
+          fuelType2: hasValue(formValue?.fuelType2)
+            ? formValue?.fuelType2
+            : null,
         };
 
         validateValueObj = {
@@ -173,8 +194,8 @@ const EquipmentForm = ({
       delete body.quantity;
 
       await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
-      setIsOpen(false)
-      setOpenConfirmation(true)
+      setIsOpen(false);
+      setOpenConfirmation(true);
       setBody({
         body: body,
         validateValue: validateValueObj,
@@ -419,7 +440,10 @@ const EquipmentForm = ({
                     },
                   ]}
                 >
-                  <SelectComponent width={80} options={ddlGasConversionEquipment} />
+                  <SelectComponent
+                    width={80}
+                    options={ddlGasConversionEquipment}
+                  />
                 </Form.Item>
               </Input.Group>
             </Form.Item>
@@ -454,7 +478,7 @@ const EquipmentForm = ({
               label={"Dual Fuel"}
               // initialValue={isCheckPremise}
               valuePropName="checked"
-              >
+            >
               <div className="flex flex-col">
                 <Checkbox
                   checked={isDualFuel}
@@ -513,64 +537,113 @@ const EquipmentForm = ({
         type={"confirmation"}
         handleCancel={() => {
           setOpenConfirmation(false);
-          setIsOpen(true)
+          setIsOpen(true);
         }}
         width={900}
         footer={
           <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
             <ButtonComponent
-                onClick={() => {
-                  setOpenConfirmation(false);
-                  setIsOpen(true)
-                }}
-                type="default"
+              onClick={() => {
+                setOpenConfirmation(false);
+                setIsOpen(true);
+              }}
+              type="default"
             >
-                Cancel
+              Cancel
             </ButtonComponent>
-            <ButtonComponent
-                onClick={handleSave}
-                type={'submit'}
-            >
-                Confirm
+            <ButtonComponent onClick={handleSave} type={"submit"}>
+              Confirm
             </ButtonComponent>
           </div>
         }
       >
-         <div>
-            <div className="text-primary text-xs font-bold uppercase py-4">
-              Equipment Information
-            </div>
-            <div className='w-full grid grid-cols-3'>
-              <DetailText label={'Name'}>
-                {ddlNameEquipment?.filter(item => item?.value === body?.body?.name)[0]?.label}
-              </DetailText>
-              <DetailText label={'Type'}>
-                {ddlTypeEquipment?.filter(item => item?.value === body?.body?.typeEquipment)[0]?.label}
-              </DetailText>
-              <DetailText label={'Brand'}>
-                {ddlBrandEquipment?.filter(item => item?.value === body?.body?.brand)[0]?.label}
-              </DetailText>
-              <DetailText label={'Quantity'}>
-                {body?.body?.qty} {ddlQtyEquipment?.filter(item => item?.value === body?.body?.qtyUom)[0]?.label}
-              </DetailText>
-              <DetailText label={'Capacity'}>
-                {body?.body?.cap} {ddlCapacityEquipment?.filter(item => item?.value === body?.body?.capUom)[0]?.label}
-              </DetailText>
-              <DetailText label={'Energy Consumption'}>
-                {body?.body?.con} {ddlEnergyEquipment?.filter(item => item?.value === body?.body?.conUom)[0]?.label}
-                </DetailText>
-              <DetailText label={'Gas Conversion/Month'}>
-                {body?.body?.gasConv} {ddlGasConversionEquipment?.filter(item => item?.value === body?.body?.gasConvUom)[0]?.label}
-              </DetailText>
-              <DetailText label={'Operating Hours/Day'}>{body?.body?.noh}</DetailText>
-              <DetailText label={'Operating Days/Week'}>{body?.body?.nod}</DetailText>
-              <DetailText label={'Dual Fuel'}>{body?.body?.isDualFuel ? "Yes" : "No"}</DetailText>
-              <DetailText label={'Fuel Type 1'}>{ddlFuelTypeEquipment?.filter(item => item?.value === body?.body?.fuelType1)[0]?.label}</DetailText>
-              <DetailText label={'Fuel Type 2'}>{ddlFuelTypeEquipment?.filter(item => item?.value === body?.body?.fuelType2)[0]?.label}</DetailText>
-            </div>
-            <div className='w-full'>
-                <DetailText label={'Description'}>{body?.body?.description}</DetailText>
-            </div>
+        <div>
+          <div className="text-primary text-xs font-bold uppercase py-4">
+            Equipment Information
+          </div>
+          <div className="w-full grid grid-cols-3">
+            <DetailText label={"Name"}>
+              {
+                ddlNameEquipment?.filter(
+                  (item) => item?.value === body?.body?.name,
+                )[0]?.label
+              }
+            </DetailText>
+            <DetailText label={"Type"}>
+              {
+                ddlTypeEquipment?.filter(
+                  (item) => item?.value === body?.body?.typeEquipment,
+                )[0]?.label
+              }
+            </DetailText>
+            <DetailText label={"Brand"}>
+              {
+                ddlBrandEquipment?.filter(
+                  (item) => item?.value === body?.body?.brand,
+                )[0]?.label
+              }
+            </DetailText>
+            <DetailText label={"Quantity"}>
+              {body?.body?.qty}{" "}
+              {
+                ddlQtyEquipment?.filter(
+                  (item) => item?.value === body?.body?.qtyUom,
+                )[0]?.label
+              }
+            </DetailText>
+            <DetailText label={"Capacity"}>
+              {body?.body?.cap}{" "}
+              {
+                ddlCapacityEquipment?.filter(
+                  (item) => item?.value === body?.body?.capUom,
+                )[0]?.label
+              }
+            </DetailText>
+            <DetailText label={"Energy Consumption"}>
+              {body?.body?.con}{" "}
+              {
+                ddlEnergyEquipment?.filter(
+                  (item) => item?.value === body?.body?.conUom,
+                )[0]?.label
+              }
+            </DetailText>
+            <DetailText label={"Gas Conversion/Month"}>
+              {body?.body?.gasConv}{" "}
+              {
+                ddlGasConversionEquipment?.filter(
+                  (item) => item?.value === body?.body?.gasConvUom,
+                )[0]?.label
+              }
+            </DetailText>
+            <DetailText label={"Operating Hours/Day"}>
+              {body?.body?.noh}
+            </DetailText>
+            <DetailText label={"Operating Days/Week"}>
+              {body?.body?.nod}
+            </DetailText>
+            <DetailText label={"Dual Fuel"}>
+              {body?.body?.isDualFuel ? "Yes" : "No"}
+            </DetailText>
+            <DetailText label={"Fuel Type 1"}>
+              {
+                ddlFuelTypeEquipment?.filter(
+                  (item) => item?.value === body?.body?.fuelType1,
+                )[0]?.label
+              }
+            </DetailText>
+            <DetailText label={"Fuel Type 2"}>
+              {
+                ddlFuelTypeEquipment?.filter(
+                  (item) => item?.value === body?.body?.fuelType2,
+                )[0]?.label
+              }
+            </DetailText>
+          </div>
+          <div className="w-full">
+            <DetailText label={"Description"}>
+              {body?.body?.description}
+            </DetailText>
+          </div>
         </div>
       </ModalCustom>
     </>

@@ -23,7 +23,7 @@ const TosInformation = ({
   updateDataDetail = () => {},
   saMainStartDate,
   saMainEndDate,
-  form
+  form,
 }) => {
   const [modalSelectTos, setModalSelectTos] = useState(false);
   const handleDisableEndDate = (current) => {
@@ -33,25 +33,41 @@ const TosInformation = ({
     //     : moment(tosSubmissionObj.startDate) > current;
     // }
     // return moment().add(-1, "days") >= current;
-    if(type === "create"){
-      return current && (moment(tosSubmissionObj.startDate) >= current || current > moment(saMainEndDate).add(1, "days"));
-    }else{
-      return current && (moment(tosSubmissionObj.startDate) >= current || current > moment(saMainEndDate));
+    if (type === "create") {
+      return (
+        current &&
+        (moment(tosSubmissionObj.startDate) >= current ||
+          current > moment(saMainEndDate).add(1, "days"))
+      );
+    } else {
+      return (
+        current &&
+        (moment(tosSubmissionObj.startDate) >= current ||
+          current > moment(saMainEndDate))
+      );
     }
   };
 
   const disabledDate = (current) => {
     // return false;
-    if(moment(saMainStartDate).diff(moment(), 'days') < 30){
-      return current && (current < moment(saMainStartDate) || current > moment(saMainEndDate).add(1, "days"));
-    }else{
-      return current && (current <= moment().subtract(1, "months") || current > moment(saMainEndDate).add(1, "days"))    
+    if (moment(saMainStartDate).diff(moment(), "days") < 30) {
+      return (
+        current &&
+        (current < moment(saMainStartDate) ||
+          current > moment(saMainEndDate).add(1, "days"))
+      );
+    } else {
+      return (
+        current &&
+        (current <= moment().subtract(1, "months") ||
+          current > moment(saMainEndDate).add(1, "days"))
+      );
     }
   };
 
   const resetEndDate = () => {
     form.resetFields(["endDate"]);
-  }
+  };
   return (
     <div className="drop-shadow-lg bg-white rounded-lg w-full mt-[30px] p-[20px]">
       {/* SECTION CHOOSE TERM OF SERVICE */}
@@ -113,7 +129,7 @@ const TosInformation = ({
       {/* SECTION TERM OF SERVICE SUBMISSION INFORMATION */}
       <div className="pt-8 pb-4">
         <h3 className="text-primary text-xs font-bold uppercase">
-        TERM OF SERVICE SUBMISSION INFORMATION
+          TERM OF SERVICE SUBMISSION INFORMATION
         </h3>
       </div>
       <div className="flex flex-col gap-4 w-full">
@@ -126,7 +142,7 @@ const TosInformation = ({
             label="Start Date"
             required
           >
-            <DateComponent dateDisable={disabledDate} onChange={resetEndDate}/>
+            <DateComponent dateDisable={disabledDate} onChange={resetEndDate} />
           </Form.Item>
           <Form.Item
             name={"endDate"}
@@ -143,7 +159,7 @@ const TosInformation = ({
                   !value
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error("End date must before Start date")
+                        new Error("End date must before Start date"),
                       ),
               },
               { message: requiredMessage("End Date"), required: true },

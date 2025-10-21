@@ -241,7 +241,7 @@ const TableDetailTos = ({
 
   const deleteRow = (record) => {
     updateTable((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
   };
 
@@ -269,7 +269,7 @@ const TableDetailTos = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -286,7 +286,7 @@ const TableDetailTos = ({
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           searchedColumn === "value" ? (
@@ -317,7 +317,7 @@ const TableDetailTos = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -333,7 +333,7 @@ const TableDetailTos = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -481,7 +481,7 @@ const TableDetailTos = ({
                 disabled: col.disabled,
                 handleEditDataRecord: handleEditDataRecord,
               }),
-            }))
+            })),
           )}
           pagination={{
             position: ["topRight"],

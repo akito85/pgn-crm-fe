@@ -53,11 +53,7 @@ const NotFound = ({ type }) => {
     }
   };
 
-  return (
-    <>
-      {renderPage(type)}
-    </>
-  );
+  return <>{renderPage(type)}</>;
 };
 
 export default NotFound;

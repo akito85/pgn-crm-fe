@@ -1,3 +1,3 @@
-const ExtensionFile = ".jpg, .jpeg, .pdf, .docx, .png, .xlsx"
+const ExtensionFile = ".jpg, .jpeg, .pdf, .docx, .png, .xlsx";
 
-export default ExtensionFile
+export default ExtensionFile;

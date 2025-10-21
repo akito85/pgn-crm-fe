@@ -16,7 +16,7 @@ const columnAttachmentData = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  previewFileAttachment = () => {}
+  previewFileAttachment = () => {},
 ) => {
   const res = [
     {
@@ -34,7 +34,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -46,7 +46,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -58,7 +58,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -70,7 +70,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -82,7 +82,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -184,7 +184,7 @@ const TableAttachment = ({
           searchedColumn,
           searchText,
           handleSearch,
-          previewFileAttachment
+          previewFileAttachment,
         )}
       />
     </div>

@@ -1,11 +1,11 @@
-import React,{ useState, useEffect, useRef } from 'react'
-import GridLayout from '../../../../../../../../components/GridLayout'
-import DetailText from '../../../../../../../../components/DetailText'
-import TablePagination from '../../../../../../../../components/TablePagination';
-import moment from 'moment';
-import TablePaginationNew from '../../../../../../../../components/TablePaginationNew';
-import { getColumnSearchPropsUseFilteredValueFE } from '../../../../../../../../utils/getColumnSearchProps';
-import { hasValue, renderColumn } from '../../../../../../../../utils';
+import React, { useState, useEffect, useRef } from "react";
+import GridLayout from "../../../../../../../../components/GridLayout";
+import DetailText from "../../../../../../../../components/DetailText";
+import TablePagination from "../../../../../../../../components/TablePagination";
+import moment from "moment";
+import TablePaginationNew from "../../../../../../../../components/TablePaginationNew";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../../../utils/getColumnSearchProps";
+import { hasValue, renderColumn } from "../../../../../../../../utils";
 
 const sorter = (fieldSort, a, b) => {
   const handleDataSort = (obj) => {
@@ -63,7 +63,7 @@ const sorter = (fieldSort, a, b) => {
   return handleCompare(fa, fb);
 };
 
-const TaxImplication = ({data}) => {
+const TaxImplication = ({ data }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -76,21 +76,23 @@ const TaxImplication = ({data}) => {
   const [search, setSearch] = useState({});
 
   useEffect(() => {
-    if(data?.saTaxImplication || data?.saTaxImplication !== null){
-      const dataArrayTaxImplication = Object.keys(data?.saTaxImplication).map(key => data?.saTaxImplication[key]);
-      const filteredDataTaxImplication = dataArrayTaxImplication.filter(item => item !== null);
-      setDataTaxImpli(filteredDataTaxImplication)
-    }else{
-      setDataTaxImpli([])
+    if (data?.saTaxImplication || data?.saTaxImplication !== null) {
+      const dataArrayTaxImplication = Object.keys(data?.saTaxImplication).map(
+        (key) => data?.saTaxImplication[key],
+      );
+      const filteredDataTaxImplication = dataArrayTaxImplication.filter(
+        (item) => item !== null,
+      );
+      setDataTaxImpli(filteredDataTaxImplication);
+    } else {
+      setDataTaxImpli([]);
     }
-  }, [])
-  
+  }, []);
 
   useEffect(() => {
-    setTotalElement(dataTaxImpli?.length)
-  }, [dataTaxImpli])
-  
-  
+    setTotalElement(dataTaxImpli?.length);
+  }, [dataTaxImpli]);
+
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
@@ -183,7 +185,7 @@ const TaxImplication = ({data}) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -193,7 +195,7 @@ const TaxImplication = ({data}) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -214,7 +216,7 @@ const TaxImplication = ({data}) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -224,7 +226,7 @@ const TaxImplication = ({data}) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -245,7 +247,7 @@ const TaxImplication = ({data}) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -255,7 +257,7 @@ const TaxImplication = ({data}) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -276,7 +278,7 @@ const TaxImplication = ({data}) => {
           searchText,
           handleSearch,
           true,
-          "input"
+          "input",
         ),
         render: (text) =>
           renderColumn(
@@ -286,7 +288,7 @@ const TaxImplication = ({data}) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -308,7 +310,7 @@ const TaxImplication = ({data}) => {
           searchText,
           handleSearch,
           true,
-          "yes_or_no"
+          "yes_or_no",
         ),
         render: (text) =>
           renderColumn(
@@ -318,12 +320,12 @@ const TaxImplication = ({data}) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
     ];
-    return result
-  }
+    return result;
+  };
 
   return (
     <div>
@@ -332,7 +334,7 @@ const TaxImplication = ({data}) => {
           pageSize={pageSize}
           current={page}
           dataSource={filterDataByPage()}
-          tableScrolled={{y: 525, x: 1500 }}
+          tableScrolled={{ y: 525, x: 1500 }}
           totalData={totalElement}
           onChange={handleChangeSize}
           // onSort={onSort}
@@ -348,7 +350,7 @@ const TaxImplication = ({data}) => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default TaxImplication
+export default TaxImplication;

@@ -13,7 +13,7 @@ import { getListCustomerAddress } from "../../../../../../redux/slices/account_m
 
 const CustomerAddressList = ({ id = 0, dispatch = () => {} }) => {
   const { data_customerDetailAddress } = useSelector(
-    (state) => state.customerAccount
+    (state) => state.customerAccount,
   );
 
   //declare
@@ -42,7 +42,13 @@ const CustomerAddressList = ({ id = 0, dispatch = () => {} }) => {
       }
       tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
       dispatch(
-        getListCustomerAddress({ id, page, pageSize, sort, search: tempSearch })
+        getListCustomerAddress({
+          id,
+          page,
+          pageSize,
+          sort,
+          search: tempSearch,
+        }),
       );
     }
   }, [dispatch, id, page, pageSize, sort, search]);
@@ -78,8 +84,8 @@ const CustomerAddressList = ({ id = 0, dispatch = () => {} }) => {
         selectedKeys[0] === "primary"
           ? "Y"
           : selectedKeys[0] === "non primary"
-          ? "N"
-          : "";
+            ? "N"
+            : "";
       setSearchText(selectedKeys[0]);
       setSearchedColumn(dataIndex);
       updateSearch((prevState) => {

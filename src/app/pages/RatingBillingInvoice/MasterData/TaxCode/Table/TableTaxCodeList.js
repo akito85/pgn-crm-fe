@@ -1,6 +1,9 @@
-import {  hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
-
 
 export const columnsTaxCodeList = (
   search,
@@ -27,9 +30,18 @@ export const columnsTaxCodeList = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('taxCode', hasValue(search['taxCode']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "taxCode",
+        hasValue(search["taxCode"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "NAME",
@@ -41,9 +53,18 @@ export const columnsTaxCodeList = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('taxCodeName', hasValue(search['taxCodeName']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "taxCodeName",
+        hasValue(search["taxCodeName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CATEGORY",
@@ -56,9 +77,18 @@ export const columnsTaxCodeList = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('categoryName', hasValue(search['categoryName']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "categoryName",
+        hasValue(search["categoryName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TAX RATE (%)",
@@ -71,9 +101,18 @@ export const columnsTaxCodeList = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('taxRate', hasValue(search['taxRate']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "taxRate",
+        hasValue(search["taxRate"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "GL ACCOUNT",
@@ -86,9 +125,18 @@ export const columnsTaxCodeList = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('glAccount', hasValue(search['glAccount']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "glAccount",
+        hasValue(search["glAccount"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CRITERIA",
@@ -100,30 +148,39 @@ export const columnsTaxCodeList = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,
     },
-    render: (text) => renderColumn('criterias', hasValue(search['criterias']), searchText, text, true, 'input', search)
-      
-      // searchedColumn === "criterias" ? (
-      //   <Highlighter
-      //     highlightStyle={{
-      //       backgroundColor: "#ffc069",
-      //       padding: 0,
-      //     }}
-      //     searchWords={[searchText]}
-      //     autoEscape
-      //     textToHighlight={text ? text.toString() : ""}
-      //   />
-      // ) : text ? (
-      //   <Tooltip placement="topLeft" title={text}>
-      //     {text}
-      //   </Tooltip>
-      // ) : (
-      //   ""
-      // ),
+    render: (text) =>
+      renderColumn(
+        "criterias",
+        hasValue(search["criterias"]),
+        searchText,
+        text,
+        true,
+        "input",
+        search,
+      ),
+
+    // searchedColumn === "criterias" ? (
+    //   <Highlighter
+    //     highlightStyle={{
+    //       backgroundColor: "#ffc069",
+    //       padding: 0,
+    //     }}
+    //     searchWords={[searchText]}
+    //     autoEscape
+    //     textToHighlight={text ? text.toString() : ""}
+    //   />
+    // ) : text ? (
+    //   <Tooltip placement="topLeft" title={text}>
+    //     {text}
+    //   </Tooltip>
+    // ) : (
+    //   ""
+    // ),
   },
   {
     title: "START DATE",
@@ -134,13 +191,21 @@ export const columnsTaxCodeList = (
       search,
       "startDate",
       searchInput,
-      hasValue(search['startDate']),
+      hasValue(search["startDate"]),
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
-    render: (text) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, text, 'date', search)
+    render: (text) =>
+      renderDateColumn(
+        "startDate",
+        hasValue(search["startDate"]),
+        searchText,
+        text,
+        "date",
+        search,
+      ),
   },
   {
     title: "END DATE",
@@ -151,13 +216,21 @@ export const columnsTaxCodeList = (
       search,
       "endDate",
       searchInput,
-      hasValue(search['endDate']),
+      hasValue(search["endDate"]),
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
-    render: (text) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, text, 'date', search)
+    render: (text) =>
+      renderDateColumn(
+        "endDate",
+        hasValue(search["endDate"]),
+        searchText,
+        text,
+        "date",
+        search,
+      ),
   },
   {
     title: "DESCRIPTION",
@@ -169,13 +242,22 @@ export const columnsTaxCodeList = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,
     },
     sorter: true,
-    render: (text) => renderColumn('description', hasValue(search['description']), searchText, text, true, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "description",
+        hasValue(search["description"]),
+        searchText,
+        text,
+        true,
+        "input",
+        search,
+      ),
   },
   {
     title: "STATUS",
@@ -189,7 +271,7 @@ export const columnsTaxCodeList = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (index) => {
       let text;
@@ -203,7 +285,15 @@ export const columnsTaxCodeList = (
             : index;
           break;
       }
-      return renderColumn('status', hasValue(search['status']), searchText, text, false, 'status', search)
+      return renderColumn(
+        "status",
+        hasValue(search["status"]),
+        searchText,
+        text,
+        false,
+        "status",
+        search,
+      );
     },
   },
   {
@@ -220,7 +310,7 @@ export const columnsTaxCodeList = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (index) => {
       let text;
@@ -234,7 +324,15 @@ export const columnsTaxCodeList = (
             : index;
           break;
       }
-      return renderColumn('statusApproval', hasValue(search['statusApproval']), searchText, text, false, 'status', search)
+      return renderColumn(
+        "statusApproval",
+        hasValue(search["statusApproval"]),
+        searchText,
+        text,
+        false,
+        "status",
+        search,
+      );
     },
   },
 ];

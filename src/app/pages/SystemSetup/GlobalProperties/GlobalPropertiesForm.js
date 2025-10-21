@@ -38,9 +38,11 @@ import { validateCreateUpdate } from "../../../../redux/slices/general_slice";
 const GlobalPropertiesForm = () => {
   // Selector
   const { loading, data_Type, data_Type_Detail } = useSelector(
-    (state) => state.globalProperties
+    (state) => state.globalProperties,
   );
-  const { bodyError: error, isLoading } = useSelector(state => state?.general);
+  const { bodyError: error, isLoading } = useSelector(
+    (state) => state?.general,
+  );
 
   // Declaration
   const dispatch = useDispatch();
@@ -70,7 +72,7 @@ const GlobalPropertiesForm = () => {
     useState(false);
   // const [bodyError, setBodyError] = useState({});
   const [insertedTable, setInsertedTable] = useState(false);
-  const [dataType, setDataType] = useState('');
+  const [dataType, setDataType] = useState("");
   const [maxLength, setMaxLength] = useState(255);
   const [payload, setPayload] = useState({});
   // useEffect
@@ -101,7 +103,7 @@ const GlobalPropertiesForm = () => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -127,8 +129,8 @@ const GlobalPropertiesForm = () => {
           onFocus={
             dataIndex !== searchedColumn
               ? () => {
-                setSelectedKeys([]);
-              }
+                  setSelectedKeys([]);
+                }
               : undefined
           }
           onChange={(e) =>
@@ -189,46 +191,47 @@ const GlobalPropertiesForm = () => {
       ),
   });
 
-
   const handleChangeDataType = (e) => {
-    setDataType(e)
+    setDataType(e);
     if (e === "BOOL") {
       setMaxLength(1);
     } else {
-      setMaxLength(255)
+      setMaxLength(255);
     }
   };
 
   const renderRules = (rule, dataIndex) => {
     if (rule === "INT") {
       return [
-        ...formMessageRequired('value'),
-        { pattern: /^\d+$/, message: 'value only number' }
-
-      ]
+        ...formMessageRequired("value"),
+        { pattern: /^\d+$/, message: "value only number" },
+      ];
     } else if (rule === "BOOL") {
       return [
-        ...formMessageRequired('value'),
-        { pattern: /[YyNn]/, message: 'Please enter with Y/N' },
-        { max: maxLength, message: `Your input not valid. Max length ${maxLength}` }
-      ]
+        ...formMessageRequired("value"),
+        { pattern: /[YyNn]/, message: "Please enter with Y/N" },
+        {
+          max: maxLength,
+          message: `Your input not valid. Max length ${maxLength}`,
+        },
+      ];
     } else {
       return [
-        ...formMessageRequired('value'),
-        { pattern: /^[^\s]+$/, message: 'Username contains space' }
-      ]
+        ...formMessageRequired("value"),
+        { pattern: /^[^\s]+$/, message: "Username contains space" },
+      ];
     }
-  }
+  };
 
   const renderOnInput = (type, e) => {
-    if (type === 'INT') {
-      return e.target.value = e.target.value.replace(/\D/g, "");
-    } else if (type === 'BOOL') {
-      return e.target.value = e.target.value.replace(/[^YyNn]/g, "");
+    if (type === "INT") {
+      return (e.target.value = e.target.value.replace(/\D/g, ""));
+    } else if (type === "BOOL") {
+      return (e.target.value = e.target.value.replace(/[^YyNn]/g, ""));
     } else {
-      return e.target.value
+      return e.target.value;
     }
-  }
+  };
   // Column Properties Item
   const column = [
     {
@@ -250,7 +253,7 @@ const GlobalPropertiesForm = () => {
       editable: true,
       key: "keyName",
       required: true,
-      rules: formMessageRequired('Key'),
+      rules: formMessageRequired("Key"),
       sorter: (a, b) => a.keyName?.localeCompare(b.keyName),
       ...getColumnSearchProps("keyName"),
     },
@@ -262,7 +265,7 @@ const GlobalPropertiesForm = () => {
       key: "value",
       maxLength: maxLength,
       onInput: (e) => renderOnInput(dataType, e),
-      rules: renderRules(dataType, 'Value'),
+      rules: renderRules(dataType, "Value"),
       sorter: (a, b) => a.value?.localeCompare(b.value),
       ...getColumnSearchProps("value"),
       render: (value, values) => {
@@ -283,7 +286,7 @@ const GlobalPropertiesForm = () => {
       key: "dataType",
       required: true,
       onClick: (e) => handleChangeDataType(e),
-      rules: formMessageRequired('Data Type'),
+      rules: formMessageRequired("Data Type"),
       sorter: (a, b) => {
         const aName =
           (data_Type_Detail &&
@@ -330,14 +333,16 @@ const GlobalPropertiesForm = () => {
         title: `Successful`,
         description: "Your data has been created.",
       };
-      setPayload({ body: data, responseSuccess: successBody })
+      setPayload({ body: data, responseSuccess: successBody });
       await dispatch(
-        createGlobalProperties({ body: payload?.body, responseSuccess: successBody })
-      )?.unwrap()
+        createGlobalProperties({
+          body: payload?.body,
+          responseSuccess: successBody,
+        }),
+      )?.unwrap();
     } catch (error) {
-      handleCloseModalError()
+      handleCloseModalError();
     }
-
   };
 
   // Handle Confirmation
@@ -355,15 +360,20 @@ const GlobalPropertiesForm = () => {
       } else {
         body = {
           ...formValue,
-          keyVal: modifiedArray
-        }
-        validateValueObj = { body: body, services: userHttpService, endPoint: '/v1/dbs/api/globalproperties/validate-create', type: 'create' }
+          keyVal: modifiedArray,
+        };
+        validateValueObj = {
+          body: body,
+          services: userHttpService,
+          endPoint: "/v1/dbs/api/globalproperties/validate-create",
+          type: "create",
+        };
         setPayload({
           body: body,
-          validateValue: validateValueObj
-        })
+          validateValue: validateValueObj,
+        });
         setData(body);
-        await dispatch(validateCreateUpdate(validateValueObj))?.unwrap()
+        await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
         setModalConfirm(true);
       }
     } catch (error) {
@@ -372,8 +382,7 @@ const GlobalPropertiesForm = () => {
   };
 
   // Find data from data type
-  const TypeConf = data_Type
-    ?.filter((a) => a.value === data.type)[0]?.name
+  const TypeConf = data_Type?.filter((a) => a.value === data.type)[0]?.name;
 
   // Validation Button Back
   const handleBack = () => {
@@ -407,13 +416,12 @@ const GlobalPropertiesForm = () => {
     setModalConfirm(false);
   };
 
-
   const handleRetry = () => {
-    handleCancelTryAgain()
+    handleCancelTryAgain();
     if (error?.action === "CREATE_GLOBAL_PROPERTIES") {
-      dispatch(createGlobalProperties(payload?.body))
+      dispatch(createGlobalProperties(payload?.body));
     } else {
-      dispatch(validateCreateUpdate(payload?.validateValue))
+      dispatch(validateCreateUpdate(payload?.validateValue));
     }
   };
 
@@ -428,7 +436,10 @@ const GlobalPropertiesForm = () => {
         break;
       case "BOOL":
         let tempBool = tempDataValue
-          ? tempDataValue === "Y" || tempDataValue === "N" || tempDataValue === "y" || tempDataValue === "n"
+          ? tempDataValue === "Y" ||
+            tempDataValue === "N" ||
+            tempDataValue === "y" ||
+            tempDataValue === "n"
           : false;
         valid = tempBool;
         break;
@@ -459,8 +470,7 @@ const GlobalPropertiesForm = () => {
     return typeData === "data" ? result : result.length;
   };
 
-
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
     <LayoutMenu>
@@ -495,9 +505,7 @@ const GlobalPropertiesForm = () => {
                 ]}
               >
                 <Input
-                  onInput={(e) =>
-                    (e.target.value = e.target.value.trimStart())
-                  }
+                  onInput={(e) => (e.target.value = e.target.value.trimStart())}
                 />
               </Form.Item>
               <div className="col-span-2">
@@ -582,7 +590,11 @@ const GlobalPropertiesForm = () => {
                 </ButtonComponent>
               </Form.Item>
               <Form.Item>
-                <ButtonComponent type="submit" htmlType={"submit"} disabled={insertedTable}>
+                <ButtonComponent
+                  type="submit"
+                  htmlType={"submit"}
+                  disabled={insertedTable}
+                >
                   Save
                 </ButtonComponent>
               </Form.Item>
@@ -638,7 +650,7 @@ const GlobalPropertiesForm = () => {
                   current={pageConfirm}
                   dataSource={paginationTableConfirm(
                     pageConfirm,
-                    pageSizeConfirm
+                    pageSizeConfirm,
                   )}
                   totalData={data?.keyVal?.length}
                   onChange={handleChangeConfirm}

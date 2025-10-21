@@ -62,7 +62,7 @@ export const getEceletricBankPaging = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getBankDDLMaintain = createAsyncThunk(
@@ -89,7 +89,7 @@ export const getBankDDLMaintain = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getElectronicDetail = createAsyncThunk(
@@ -116,7 +116,7 @@ export const getElectronicDetail = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListBank = createAsyncThunk(
@@ -143,7 +143,7 @@ export const getListBank = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListType = createAsyncThunk(
@@ -170,7 +170,7 @@ export const getListType = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getCustomerInfo = createAsyncThunk(
@@ -186,7 +186,7 @@ export const getCustomerInfo = createAsyncThunk(
     } catch (error) {
       return error;
     }
-  }
+  },
 );
 
 export const getTableMatch = createAsyncThunk(
@@ -202,7 +202,7 @@ export const getTableMatch = createAsyncThunk(
     } catch (error) {
       return error;
     }
-  }
+  },
 );
 export const getTableForce = createAsyncThunk(
   "GET_ALL_TABLE_FORCE",
@@ -218,7 +218,7 @@ export const getTableForce = createAsyncThunk(
     } catch (error) {
       return error;
     }
-  }
+  },
 );
 export const getTableSundry = createAsyncThunk(
   "GET_ALL_TABLE_SUNDRY",
@@ -233,7 +233,7 @@ export const getTableSundry = createAsyncThunk(
     } catch (error) {
       return error;
     }
-  }
+  },
 );
 export const getTableReverse = createAsyncThunk(
   "GET_ALL_TABLE_REVERSE",
@@ -248,7 +248,7 @@ export const getTableReverse = createAsyncThunk(
     } catch (error) {
       return error;
     }
-  }
+  },
 );
 export const getTableParsing = createAsyncThunk(
   "GET_ALL_TABLE_PARSING",
@@ -277,7 +277,7 @@ export const getTableParsing = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const uploadBank = createAsyncThunk(
@@ -306,7 +306,7 @@ export const uploadBank = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(e?.response);
     }
-  }
+  },
 );
 // export const getDownloadReceipt = createAsyncThunk(
 //   "DOWNLOAD_RECEIPT",
@@ -347,7 +347,7 @@ export const getAllApprovalList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // export const approveOrRejectStatment = createAsyncThunk(
@@ -413,11 +413,11 @@ export const requestApprove = createAsyncThunk(
           error: error,
           action: "APPROVE_OR_REJECT_STATEMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const requestModal = createAsyncThunk(
@@ -443,7 +443,7 @@ export const requestModal = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getListApprovalById = createAsyncThunk(
@@ -470,7 +470,7 @@ export const getListApprovalById = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const getListCategory = createAsyncThunk(
   "GET_LIST_CATEGORY_BANK",
@@ -500,7 +500,7 @@ export const getListCategory = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getTableForceSelect = createAsyncThunk(
@@ -516,7 +516,7 @@ export const getTableForceSelect = createAsyncThunk(
     } catch (error) {
       return error;
     }
-  }
+  },
 );
 
 export const getTableReverseSelect = createAsyncThunk(
@@ -532,7 +532,7 @@ export const getTableReverseSelect = createAsyncThunk(
     } catch (error) {
       return error;
     }
-  }
+  },
 );
 
 export const getTableSundrySelect = createAsyncThunk(
@@ -548,7 +548,7 @@ export const getTableSundrySelect = createAsyncThunk(
     } catch (error) {
       return error;
     }
-  }
+  },
 );
 
 const electronicSlice = createSlice({

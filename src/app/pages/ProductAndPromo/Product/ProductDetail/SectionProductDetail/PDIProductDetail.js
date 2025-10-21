@@ -1,5 +1,8 @@
 import React, { Fragment, useRef, useState } from "react";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValueFE,
+} from "../../../../../../utils/getColumnSearchProps";
 import Highlighter from "react-highlight-words";
 import { Tooltip } from "antd";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
@@ -7,7 +10,11 @@ import SVGIcon from "../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import CardComponent from "../../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../../components/DetailText";
-import { dateFormatting, hasValue, renderColumn } from "../../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+} from "../../../../../../utils";
 import moment from "moment";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 
@@ -33,7 +40,7 @@ const columns = (
   searchText,
   handleSearch,
   search,
-  handleDetailHistory
+  handleDetailHistory,
 ) => {
   const result = [
     {
@@ -74,7 +81,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -110,7 +117,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -146,7 +153,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -185,7 +192,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
       // render: (text) => {
       //   if (searchedColumn === "description") {
@@ -263,9 +270,8 @@ const PDIProductDetail = ({ data = [] }) => {
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
-    })
+    });
   };
-  
 
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
@@ -295,7 +301,7 @@ const PDIProductDetail = ({ data = [] }) => {
           searchText,
           handleSearch,
           search,
-          handleDetailHistory
+          handleDetailHistory,
         )}
       />
 
@@ -325,7 +331,7 @@ const PDIProductDetail = ({ data = [] }) => {
             <DetailText label="Created Date">
               {dataHistory?.createdDate
                 ? moment(dataHistory.createdDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : ""}
             </DetailText>
@@ -333,7 +339,7 @@ const PDIProductDetail = ({ data = [] }) => {
             <DetailText label="Updated Date">
               {dataHistory?.updatedDate
                 ? moment(dataHistory.updatedDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : ""}
             </DetailText>

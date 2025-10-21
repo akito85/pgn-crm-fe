@@ -7,8 +7,8 @@ const getAllCostCenter = async (page, pageSize) => {
   try {
     const response = await axios.get(
       configApp.USER_MANAGEMENT_SERVICE +
-      `/v1/dbs/api/costcenter/paging?page=${page}&size=${pageSize}`,
-      { headers: tokenHeader() }
+        `/v1/dbs/api/costcenter/paging?page=${page}&size=${pageSize}`,
+      { headers: tokenHeader() },
     );
     return response.data;
   } catch (error) {
@@ -20,7 +20,7 @@ const createCostCenter = async (body) => {
   const response = await axios.post(
     configApp.USER_MANAGEMENT_SERVICE + `/v1/dbs/api/costcenter/`,
     body,
-    { headers: tokenHeader() }
+    { headers: tokenHeader() },
   );
   return response.data;
 };
@@ -29,34 +29,36 @@ const updateCostCenter = async (body) => {
   const response = await axios.put(
     configApp.USER_MANAGEMENT_SERVICE + `/v1/dbs/api/costcenter/`,
     body,
-    { headers: tokenHeader() })
+    { headers: tokenHeader() },
+  );
   return response.data;
 };
 const getParent = async () => {
   try {
     const response = await axios.get(
       configApp.USER_MANAGEMENT_SERVICE +
-      `/v1/dbs/api/costcenter/getParentCostCenter`,
-      { headers: tokenHeader() }
+        `/v1/dbs/api/costcenter/getParentCostCenter`,
+      { headers: tokenHeader() },
     );
     return response?.data;
   } catch (error) {
-    return error
+    return error;
   }
 };
 const getType = async () => {
   const response = await axios.get(
     configApp.USER_MANAGEMENT_SERVICE +
-    `/v1/dbs/api/costcenter/getTypeCostCenter`,
-    { headers: tokenHeader() })
+      `/v1/dbs/api/costcenter/getTypeCostCenter`,
+    { headers: tokenHeader() },
+  );
   return response.data;
 };
 const getSiblingByParent = async (id) => {
   try {
     const response = await axios.get(
       configApp.USER_MANAGEMENT_SERVICE +
-      `/v1/dbs/api/costcenter/create/${id}/getSiblings`,
-      { headers: tokenHeader() }
+        `/v1/dbs/api/costcenter/create/${id}/getSiblings`,
+      { headers: tokenHeader() },
     );
     return response.data;
   } catch (error) {
@@ -68,7 +70,7 @@ const getHierarchy = async () => {
   try {
     const response = await axios.get(
       configApp.USER_MANAGEMENT_SERVICE + `/v1/dbs/api/costcenter/getHierarchy`,
-      { headers: tokenHeader() }
+      { headers: tokenHeader() },
     );
     return response.data;
   } catch (error) {
@@ -79,8 +81,9 @@ const getHierarchy = async () => {
 const activateCostCenter = async (body) => {
   const response = await axios.post(
     configApp.USER_MANAGEMENT_SERVICE +
-    `/v1/dbs/api/costcenter/inactive/active`, body,
-    { headers: tokenHeader() }
+      `/v1/dbs/api/costcenter/inactive/active`,
+    body,
+    { headers: tokenHeader() },
   );
   return response?.data;
 };
@@ -88,18 +91,22 @@ const activateCostCenter = async (body) => {
 const getCostCenterDetail = async (id) => {
   const response = await axios.get(
     configApp.USER_MANAGEMENT_SERVICE +
-    `/v1/dbs/api/costcenter/${id}/getDetail`,
-    { headers: tokenHeader() })
+      `/v1/dbs/api/costcenter/${id}/getDetail`,
+    { headers: tokenHeader() },
+  );
   return response.data;
 };
 
 const getSiblingDetail = async (obj) => {
-  console.log("🚀 ~ file: master_cost_center.js:134 ~ getSiblingDetail ~ obj", obj)
+  console.log(
+    "🚀 ~ file: master_cost_center.js:134 ~ getSiblingDetail ~ obj",
+    obj,
+  );
   try {
     const response = await axios.get(
       configApp.USER_MANAGEMENT_SERVICE +
-      `/v1/dbs/api/costcenter/${obj.id}/getDetailSibling?search=&page=${obj.page}&size=${obj.pageSize}&sort=createdDate~asc`,
-      { headers: tokenHeader() }
+        `/v1/dbs/api/costcenter/${obj.id}/getDetailSibling?search=&page=${obj.page}&size=${obj.pageSize}&sort=createdDate~asc`,
+      { headers: tokenHeader() },
     );
     return response?.data;
   } catch (error) {
@@ -110,7 +117,7 @@ const deleteCostCenter = async (id) => {
   try {
     const response = await axios.delete(
       configApp.USER_MANAGEMENT_SERVICE + `/v1/dbs/api/costcenter/${id}/delete`,
-      { headers: tokenHeader() }
+      { headers: tokenHeader() },
     );
     return response?.data;
   } catch (error) {
@@ -119,7 +126,10 @@ const deleteCostCenter = async (id) => {
 };
 
 const downloadMasterCostCenter = async () => {
-  const response = await axios.get(configApp.USER_MANAGEMENT_SERVICE + '/v1/dbs/api/costcenter/download', { headers: tokenHeader(), responseType: 'blob' });
+  const response = await axios.get(
+    configApp.USER_MANAGEMENT_SERVICE + "/v1/dbs/api/costcenter/download",
+    { headers: tokenHeader(), responseType: "blob" },
+  );
   const filename = response.headers
     .get("content-disposition")
     .split(";")
@@ -131,7 +141,7 @@ const downloadMasterCostCenter = async () => {
 
   // Download the file
   FileSaver.saveAs(blob, filename);
-}
+};
 
 const masterCostCenterService = {
   getAllCostCenter,
@@ -145,7 +155,7 @@ const masterCostCenterService = {
   getSiblingByParent,
   createCostCenter,
   updateCostCenter,
-  downloadMasterCostCenter
+  downloadMasterCostCenter,
 };
 
 export default masterCostCenterService;

@@ -18,7 +18,11 @@ import {
 } from "../../../../../../../components/Modal/ModalPopUp";
 import { useColumnActionPermissionAccount } from "../../../../ComponentAccount/ColumnActionPermissionAccount";
 import ProductDistributionDetail from "./ProductDistributionDetail";
-import { deletePD, getAllPDHistoryPaginate, getDetailPDHistory } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
+import {
+  deletePD,
+  getAllPDHistoryPaginate,
+  getDetailPDHistory,
+} from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
 
 const columns = (
   page = 1,
@@ -26,7 +30,7 @@ const columns = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => {
   return [
     {
@@ -47,7 +51,7 @@ const columns = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) => {
         const tempValue = text ? moment(text).format(dateFormatting.date) : "";
@@ -85,7 +89,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -98,7 +102,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -110,7 +114,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ellipsis: {
         showTitle: false,
@@ -142,7 +146,7 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
   // Selector
   const { access_account } = useSelector((state) => state.accountManagement);
   const { data, data_detail_history } = useSelector(
-    (state) => state.productDistribution
+    (state) => state.productDistribution,
   );
 
   // Declaration
@@ -169,12 +173,20 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
   // Use Effect
 
   useEffect(() => {
-    if(location?.pathname.includes('account-standard')) {
-      dispatch(getGrantedAccessAccount('/account-management/account-standard/product-distribution'))
-    }else{
-      dispatch(getGrantedAccessAccount('/account-management/account-onetime/product-distribution'))
+    if (location?.pathname.includes("account-standard")) {
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-standard/product-distribution",
+        ),
+      );
+    } else {
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-onetime/product-distribution",
+        ),
+      );
     }
-  }, [dispatch])
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(
@@ -184,7 +196,7 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, id, search, page, pageSize, sort]);
 
@@ -324,7 +336,7 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -383,12 +395,12 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
             searchText,
             handleSearch,
             handleDetail,
-            handleDelete
+            handleDelete,
           ),
           ...useColumnActionPermissionAccount(
             ["View", "Update", "Delete"],
             itemGrantAccess,
-            access_account
+            access_account,
           ),
         ]}
       />
@@ -412,7 +424,7 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
           <SVGIcon name="IconAlertTriangle" width={48} />
           <p className={"text-[18px] font-bold"}>
             {`Are you sure you want to delete Raw Material Source with effective date ${moment(
-              effectiveData
+              effectiveData,
             ).format(dateFormatting.date)}?`}
           </p>
         </div>

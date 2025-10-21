@@ -1,10 +1,10 @@
-import React, {useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../components/TablePagination'
+import React, { useState, useEffect, useRef } from "react";
+import TablePagination from "../../../../../../../../components/TablePagination";
 import { getColumnSearchProps } from "../../../../../../../../utils/getColumnSearchProps";
-import DetailText from '../../../../../../../../components/DetailText';
-import GridLayout from '../../../../../../../../components/GridLayout';
+import DetailText from "../../../../../../../../components/DetailText";
+import GridLayout from "../../../../../../../../components/GridLayout";
 
-const CalculationRule = ({data}) => {
+const CalculationRule = ({ data }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -16,18 +16,18 @@ const CalculationRule = ({data}) => {
   const [dataTable, setDataTable] = useState([]);
 
   useEffect(() => {
-    if(data?.saCalcRule){
-      setTotalElement(data?.saCalcRule?.length)
-      let modifyData = data?.saCalcRule.map(item=> {
+    if (data?.saCalcRule) {
+      setTotalElement(data?.saCalcRule?.length);
+      let modifyData = data?.saCalcRule.map((item) => {
         return {
           ...item,
-          value: item.value !== null ? item.value.toString() : ''
-        }
-      })
-      setDataTable(modifyData)
+          value: item.value !== null ? item.value.toString() : "",
+        };
+      });
+      setDataTable(modifyData);
     }
-  }, [data?.saCalcRule])
-  
+  }, [data?.saCalcRule]);
+
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
@@ -54,7 +54,9 @@ const CalculationRule = ({data}) => {
   };
 
   const filterDataByPage = () => {
-  const tempCalcRuleWithoutCalcType = dataTable.filter(item => ![687].includes(item.nameId))
+    const tempCalcRuleWithoutCalcType = dataTable.filter(
+      (item) => ![687].includes(item.nameId),
+    );
     let result = [...tempCalcRuleWithoutCalcType];
     if (searchedColumn) {
       const fixSearchText = searchText.toLowerCase();
@@ -106,7 +108,7 @@ const CalculationRule = ({data}) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -114,7 +116,7 @@ const CalculationRule = ({data}) => {
         dataIndex: "value",
         width: 150,
         sorter: true,
-        align: 'right',
+        align: "right",
         // render: (value) => (
         //   // <span>{value.toString()}</span>
         // ),
@@ -123,7 +125,7 @@ const CalculationRule = ({data}) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -136,7 +138,7 @@ const CalculationRule = ({data}) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -149,16 +151,18 @@ const CalculationRule = ({data}) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
     ];
-    return result
-  }
+    return result;
+  };
 
   // Start Ddl Calc Rule - Calc Type
   const calculationTypeId = 687;
-  const hasIdCalcTypeId = dataTable?.filter(item => item?.nameId === calculationTypeId);
+  const hasIdCalcTypeId = dataTable?.filter(
+    (item) => item?.nameId === calculationTypeId,
+  );
   // End Ddl Calc Rule - Calc Type
 
   return (
@@ -166,17 +170,19 @@ const CalculationRule = ({data}) => {
       <div className={"w-full py-6"}>
         <GridLayout cols={2}>
           <div>
-            <div className='text-primary text-xs font-bold uppercase pb-6'>
+            <div className="text-primary text-xs font-bold uppercase pb-6">
               Calculation Type
             </div>
-            <DetailText label={"Calculation Type"}>{hasIdCalcTypeId[0]?.unit}</DetailText>
+            <DetailText label={"Calculation Type"}>
+              {hasIdCalcTypeId[0]?.unit}
+            </DetailText>
           </div>
         </GridLayout>
         <TablePagination
           pageSize={pageSize}
           current={page}
           dataSource={filterDataByPage()}
-          tableScrolled={{y: 525, x: 1500 }}
+          tableScrolled={{ y: 525, x: 1500 }}
           totalData={totalElement}
           onChange={handleChangeSize}
           onSort={onSort}
@@ -191,7 +197,7 @@ const CalculationRule = ({data}) => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CalculationRule
+export default CalculationRule;

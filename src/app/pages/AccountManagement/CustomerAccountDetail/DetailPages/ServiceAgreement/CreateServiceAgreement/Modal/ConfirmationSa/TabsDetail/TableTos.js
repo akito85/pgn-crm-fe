@@ -1,10 +1,9 @@
-import React, {useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../../../components/TablePagination'
-import { Tooltip } from 'antd';
-
+import React, { useState, useEffect, useRef } from "react";
+import TablePagination from "../../../../../../../../../../components/TablePagination";
+import { Tooltip } from "antd";
 
 const expandedRowRender = (record) => {
-  const dataExpand = record?.tosDetail
+  const dataExpand = record?.tosDetail;
 
   const columns = [
     {
@@ -14,20 +13,18 @@ const expandedRowRender = (record) => {
       render: (text, object, index) => index + 1,
     },
     {
-      title: 'ATTRIBUTE',
-      dataIndex: 'attributeName',
+      title: "ATTRIBUTE",
+      dataIndex: "attributeName",
     },
     {
-      title: 'VALUE',
-      dataIndex: 'value',
-      render: (text) => (<span>{text?.toString()}</span>)
-    }
+      title: "VALUE",
+      dataIndex: "value",
+      render: (text) => <span>{text?.toString()}</span>,
+    },
   ];
   return (
     <div>
-      <p className="text-primary text-xs font-bold uppercase">
-        TOS DETAIL
-      </p>
+      <p className="text-primary text-xs font-bold uppercase">TOS DETAIL</p>
       <TablePagination
         useSelect={false}
         usePagination={false}
@@ -35,12 +32,10 @@ const expandedRowRender = (record) => {
         columns={columns}
       />
     </div>
-  )
+  );
 };
 
-const TableTos = ({
-  dataTermOfService
-}) => {
+const TableTos = ({ dataTermOfService }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -49,8 +44,7 @@ const TableTos = ({
   const [orderSort, setOrderSort] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [dataTermOfServices, setDataTermOfServices] = useState([])
-
+  const [dataTermOfServices, setDataTermOfServices] = useState([]);
 
   useEffect(() => {
     if (dataTermOfService?.length > 0) {
@@ -63,15 +57,14 @@ const TableTos = ({
         })),
       }));
       setDataTermOfServices(dataModif);
-    }else{
-      setDataTermOfServices([])
+    } else {
+      setDataTermOfServices([]);
     }
-  }, [dataTermOfService])
+  }, [dataTermOfService]);
 
   useEffect(() => {
-    setTotalElement(dataTermOfService?.length)
-  }, [])
-  
+    setTotalElement(dataTermOfService?.length);
+  }, []);
 
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
@@ -141,16 +134,16 @@ const TableTos = ({
         render: (text, object, index) => index + 1,
       },
       {
-        title: 'TERMS OF SERVICE NAME',
-        dataIndex: 'tosName',
-        sorter:true,
+        title: "TERMS OF SERVICE NAME",
+        dataIndex: "tosName",
+        sorter: true,
       },
       {
-        title: 'DESCRIPTION',
-        dataIndex: 'description',
+        title: "DESCRIPTION",
+        dataIndex: "description",
         sorter: true,
         ellipsis: {
-          showTitle: false
+          showTitle: false,
         },
         render: (description) => (
           <Tooltip placement="topLeft" title={description}>
@@ -160,14 +153,14 @@ const TableTos = ({
       },
     ];
     return result;
-  }
+  };
   return (
     <div>
       <TablePagination
         pageSize={pageSize}
         current={page}
         dataSource={filterDataByPage()}
-        tableScrolled={{y: 525 }}
+        tableScrolled={{ y: 525 }}
         totalData={totalElement}
         onChange={handleChangeSize}
         onSort={onSort}
@@ -179,10 +172,10 @@ const TableTos = ({
           searchText,
           handleSearch,
         })}
-        expandable={{expandedRowRender}}
+        expandable={{ expandedRowRender }}
       />
     </div>
-  )
-}
+  );
+};
 
-export default TableTos
+export default TableTos;

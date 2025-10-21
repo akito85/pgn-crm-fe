@@ -20,7 +20,7 @@ import {
   getListNameCalculationRule,
   getListUnit,
   getListUnitVAT,
-  getListUnitWithHoldTax
+  getListUnitWithHoldTax,
 } from "../../../../../../../../../redux/slices/product_promo/product";
 import { getColumnSearchPropsCriteria } from "../TableCalcRule/columnTableCriteria";
 import { hasValue } from "../../../../../../../../../utils";
@@ -63,11 +63,11 @@ const EditableCell = ({
     option.props.children.toLowerCase().includes(input.toLowerCase());
 
   const dependentData = () => {
-		if (options.length === 0) {
-		  return true;
-		}
-		return !dataDepend;
-	  };
+    if (options.length === 0) {
+      return true;
+    }
+    return !dataDepend;
+  };
 
   const getInputNode = (inputType) => {
     switch (inputType) {
@@ -155,7 +155,7 @@ const TableCalcRule = ({
   data = [],
   handleSaDetailObj = () => {},
   setSaDetailObj,
-	saDetailObj
+  saDetailObj,
 }) => {
   const searchInput = useRef(null);
   const [formTable] = Form.useForm();
@@ -179,7 +179,7 @@ const TableCalcRule = ({
   const exludeExisting =
     dataTable.length > 0 ? dataTable.map((item) => item?.name?.value) : [];
   const listName = dataListNameCalculationRule.filter(
-    (item) => ![...excludeOptionName, ...exludeExisting].includes(item.value)
+    (item) => ![...excludeOptionName, ...exludeExisting].includes(item.value),
   );
 
   // useEffect(() => {
@@ -187,7 +187,7 @@ const TableCalcRule = ({
   //     updateTable(data)
   //   }
   // }, [])
-  
+
   // useEffect(() => {
   //   if (dataTable.length > 0) {
   //     setTotalElement(dataTable.length);
@@ -198,22 +198,22 @@ const TableCalcRule = ({
     dispatch(getListCalculationType());
     dispatch(getListNameCalculationRule());
   }, [dispatch]);
-  
-	useEffect(() => {
-		if(isProduct === 2){
-      const selectedCalculationType = dataListCalculationType?.filter(item => item?.value === saDetailObj?.calculationType)[0]
-			setSaDetailObj((prevState) => ({
-				...prevState,
-				objCaclucationType: {
-					name: 687,
-					unit: `${selectedCalculationType?.value}`,
-					value: null,
-				},
-			}))
-		}
-		
-	}, [saDetailObj.calculationType])
-	
+
+  useEffect(() => {
+    if (isProduct === 2) {
+      const selectedCalculationType = dataListCalculationType?.filter(
+        (item) => item?.value === saDetailObj?.calculationType,
+      )[0];
+      setSaDetailObj((prevState) => ({
+        ...prevState,
+        objCaclucationType: {
+          name: 687,
+          unit: `${selectedCalculationType?.value}`,
+          value: null,
+        },
+      }));
+    }
+  }, [saDetailObj.calculationType]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -297,7 +297,9 @@ const TableCalcRule = ({
       //   dispatch(getListUnit({ id: temp[0].code }));
       //   formTable.resetFields(["unit"]);
       // }
-      const temp = dataListNameCalculationRule.filter((item) => item.value === data?.value);
+      const temp = dataListNameCalculationRule.filter(
+        (item) => item.value === data?.value,
+      );
       if (data?.value === 212) {
         dispatch(getListUnitVAT());
         formTable.resetFields(["unit"]);
@@ -316,18 +318,18 @@ const TableCalcRule = ({
     formTable.setFieldsValue(record);
     setEditingKey(record.key);
     const { key, ...extraProps } = record || {};
-		const tempValue = { ...extraProps };
+    const tempValue = { ...extraProps };
     for (const attribute in tempValue) {
-		  if (Object.hasOwnProperty.call(tempValue, attribute)) {
-			const tempData = tempValue[attribute];
-			setEditDataRecord((prevState) => {
-			  return {
-				...prevState,
-				[`${key}${attribute}`]: tempData,
-			  };
-			});
-		  }
-		}
+      if (Object.hasOwnProperty.call(tempValue, attribute)) {
+        const tempData = tempValue[attribute];
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [`${key}${attribute}`]: tempData,
+          };
+        });
+      }
+    }
     if (record?.name && record?.name?.value) {
       // const temp = listName.filter(
       //   (item) => item.value === record?.name?.value
@@ -336,7 +338,7 @@ const TableCalcRule = ({
       //   dispatch(getListUnit({ id: temp[0].code }));
       // }
       const temp = dataListNameCalculationRule.filter(
-        (item) => item.value === record?.name?.value
+        (item) => item.value === record?.name?.value,
       );
       if (record?.name?.value === 212) {
         dispatch(getListUnitVAT());
@@ -393,14 +395,14 @@ const TableCalcRule = ({
         .toString(),
     };
     updateTable((prevData) => {
-      return [...prevData, newRow]
+      return [...prevData, newRow];
     });
     setEditingKey(newRow.key);
   };
 
   const deleteRow = (record) => {
     updateTable((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -427,7 +429,7 @@ const TableCalcRule = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -442,7 +444,7 @@ const TableCalcRule = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -458,7 +460,7 @@ const TableCalcRule = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -476,7 +478,7 @@ const TableCalcRule = ({
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           searchedColumn === "description" ? (
@@ -523,8 +525,7 @@ const TableCalcRule = ({
                 </>
               ) : (
                 <>
-                  
-                    <Tooltip title="Edit">
+                  <Tooltip title="Edit">
                     <span className="flex justify-center">
                       <SVGIcon
                         name="IconEdit"
@@ -535,29 +536,35 @@ const TableCalcRule = ({
                   </Tooltip>
                   {isProduct === 2 && (
                     <>
-                    <Tooltip title="Delete">
-                      <span
-                        className={`flex justify-center${
-                          record.typeData === "exist" ? " cursor-not-allowed" : ""
-                        }`}
-                      >
-                        <SVGIcon
-                          name="IconDelete"
-                          color={
-                            record.typeData !== "exist" ? "#D90000" : "#8D91A0"
-                          }
-                          width={24}
-                          className={
-                            record.typeData === "exist" ? "disabled" : undefined
-                          }
-                          onClick={
-                            record.typeData !== "exist"
-                              ? () => deleteRow(record)
-                              : undefined
-                          }
-                        />
-                      </span>
-                    </Tooltip>
+                      <Tooltip title="Delete">
+                        <span
+                          className={`flex justify-center${
+                            record.typeData === "exist"
+                              ? " cursor-not-allowed"
+                              : ""
+                          }`}
+                        >
+                          <SVGIcon
+                            name="IconDelete"
+                            color={
+                              record.typeData !== "exist"
+                                ? "#D90000"
+                                : "#8D91A0"
+                            }
+                            width={24}
+                            className={
+                              record.typeData === "exist"
+                                ? "disabled"
+                                : undefined
+                            }
+                            onClick={
+                              record.typeData !== "exist"
+                                ? () => deleteRow(record)
+                                : undefined
+                            }
+                          />
+                        </span>
+                      </Tooltip>
                     </>
                   )}
                 </>
@@ -568,11 +575,11 @@ const TableCalcRule = ({
       },
     ];
     // return temp
-    return temp
+    return temp;
     // isProduct === 2
-      // ? 
-      // temp
-      // : temp.filter((col) => col.title !== "ACTION");
+    // ?
+    // temp
+    // : temp.filter((col) => col.title !== "ACTION");
   };
 
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
@@ -604,7 +611,9 @@ const TableCalcRule = ({
       <div className="grid gap-4 w-full">
         <Form.Item
           name={"calculationType"}
-          rules={[{ message: "Please input your Calculation Type", required: true }]}
+          rules={[
+            { message: "Please input your Calculation Type", required: true },
+          ]}
           className="no-margin-form w-full"
           getValueFromEvent={(e) => handleSaDetailObj(e, "calculationType")}
           label={"Calculation Type"}
@@ -680,7 +689,7 @@ const TableCalcRule = ({
                 isProduct: isProduct,
                 handleEditDataRecord: handleEditDataRecord,
               }),
-            }))
+            })),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           scroll={{

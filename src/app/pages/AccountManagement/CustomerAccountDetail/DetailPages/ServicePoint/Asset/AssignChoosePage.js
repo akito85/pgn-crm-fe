@@ -1,8 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import {
-  PlusOutlined,
-  FilterOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, FilterOutlined } from "@ant-design/icons";
 import { Spin, DatePicker, Input } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
@@ -20,7 +17,7 @@ const AssignChoosePage = ({
   dispatch = () => {},
 }) => {
   const { data_choose_asset, loading } = useSelector(
-    (state) => state.servicePoint
+    (state) => state.servicePoint,
   );
   //declare
   const searchInput = useRef(null);
@@ -38,7 +35,14 @@ const AssignChoosePage = ({
 
   //useEffect
   useEffect(() => {
-    dispatch(getChooseAsset({ page, pageSize, sort, search: encodeURIComponent(JSON.stringify(search)) }));
+    dispatch(
+      getChooseAsset({
+        page,
+        pageSize,
+        sort,
+        search: encodeURIComponent(JSON.stringify(search)),
+      }),
+    );
   }, [dispatch, page, pageSize, sort, search]);
 
   useEffect(() => {
@@ -71,7 +75,7 @@ const AssignChoosePage = ({
             gsize: item?.gsize?.value,
             gsizeValue: item?.gsize?.name,
           };
-        })
+        }),
       );
     }
   }, [data_choose_asset?.result]);
@@ -149,17 +153,17 @@ const AssignChoosePage = ({
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     // if (dataIndex !== "custodyTransfer") {
-      setSearchText(selectedKeys[0]);
-      setSearchedColumn(dataIndex);
-      setSearch((prevState) => {
-        if (prevState[dataIndex] !== selectedKeys[0]) {
-          setPage(1);
-        }
-        return {
-          ...prevState,
-          [dataIndex]: selectedKeys[0],
-        };
-      });
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(1);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
     // } else {
     //   const tempSearchedText = "YES".includes(selectedKeys[0] || "")
     //     ? "Y"

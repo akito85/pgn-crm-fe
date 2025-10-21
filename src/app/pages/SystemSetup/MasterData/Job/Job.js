@@ -1,6 +1,4 @@
-import {
-  DownloadOutlined,
-} from "@ant-design/icons";
+import { DownloadOutlined } from "@ant-design/icons";
 import { Checkbox, Form, Spin, Tooltip } from "antd";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Link, NavLink } from "react-router-dom";
@@ -28,14 +26,13 @@ import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearch
 
 const Job = () => {
   const { data, loading, data_detail } = useSelector(
-    (state) => state.master_job
+    (state) => state.master_job,
   );
-  const { bodyError } = useSelector(state => state?.general);
+  const { bodyError } = useSelector((state) => state?.general);
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data?.result;
   const [form] = Form.useForm();
-
 
   // use state
   const [page, setPage] = useState(1);
@@ -53,13 +50,19 @@ const Job = () => {
 
   // handle fetch
   const handleFetch = useCallback(() => {
-    dispatch(getListMasterJob({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }));
+    dispatch(
+      getListMasterJob({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
+    );
   }, [dispatch, page, pageSize, search, sort]);
-
 
   // use effect
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
 
   // handle search
@@ -77,7 +80,6 @@ const Job = () => {
       };
     });
   };
-
 
   // columns
   const columns = [
@@ -98,9 +100,18 @@ const Job = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('jobName', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "jobName",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -116,24 +127,42 @@ const Job = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
       dataIndex: "status",
       width: 120,
       sorter: true,
-      fixed: 'right',
+      fixed: "right",
       ...getColumnSearchPropsPaging(
         "status",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
   ];
 
@@ -159,17 +188,22 @@ const Job = () => {
   // handle cancel modals
   const handleCancelModal = () => {
     setModalConfirm(false);
-    setModalDetail(false)
-    form.resetFields()
-    handleCancelTryAgain()
-    setRecord({})
+    setModalDetail(false);
+    form.resetFields();
+    handleCancelTryAgain();
+    setRecord({});
   };
 
   const handleDowload = () => {
     dispatch(
-      downloadMasterJob({ page, pageSize, sort, search: encodeURIComponent(JSON.stringify(search)) })
+      downloadMasterJob({
+        page,
+        pageSize,
+        sort,
+        search: encodeURIComponent(JSON.stringify(search)),
+      }),
     );
-  }
+  };
   // handle detail
   const handleDetail = async (id) => {
     try {
@@ -185,7 +219,7 @@ const Job = () => {
   const onClick = (r) => {
     setJobId1(r?.jobId);
     setModalConfirm(true);
-    setRecord(r)
+    setRecord(r);
     if (r?.status === "ACTIVE") {
       setActiveOrInactive("Inactivate");
     }
@@ -199,18 +233,19 @@ const Job = () => {
     try {
       const data = {
         remark: formValue?.remark,
-        status: activeOrInactive
+        status: activeOrInactive,
       };
       setBody({
         id: jobId,
-        body: data
-      })
+        body: data,
+      });
       handleCancel();
       handleCancelModal();
-      await dispatch(inactiveMasterJob({
-        id: jobId,
-        body: data,
-      })
+      await dispatch(
+        inactiveMasterJob({
+          id: jobId,
+          body: data,
+        }),
       )?.unwrap();
       await handleFetch()?.unwrap();
     } catch (error) {
@@ -227,30 +262,29 @@ const Job = () => {
     setSort(dataSort);
   };
 
-
   // handle retry
   const handleRetry = () => {
     try {
       if (bodyError?.action === "INACTIVE_MASTER_JOB") {
-        dispatch(inactiveMasterJob(body))
+        dispatch(inactiveMasterJob(body));
       } else if (bodyError?.action === "DOWNLOAD_MASTER_JOB") {
         handleDowload();
       } else {
-        dispatch(getDetailMasterJob(body))
+        dispatch(getDetailMasterJob(body));
       }
       handleCancelModal();
-      handleFetch()
+      handleFetch();
     } catch (error) {
-      handleFetch()
+      handleFetch();
     }
   };
 
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   // item actions
   const itemActions = [
     // toolbar items
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
@@ -259,10 +293,10 @@ const Job = () => {
         >
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={SYSTEM_SETUP_ROUTES?.CREATE_JOB}>
           <ButtonComponent
@@ -272,13 +306,13 @@ const Job = () => {
             Create Job
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // column action
     {
-      action: 'View',
-      type: 'table',
+      action: "View",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
@@ -290,35 +324,48 @@ const Job = () => {
               <SVGIcon name="IconDetail" width={24} />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Update',
-      type: 'table',
+      action: "Update",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Update">
-            <div className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}>
-
+            <div
+              className={`${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+            >
               <Link
-                to={record?.status?.toLowerCase() !== "inactive" && SYSTEM_SETUP_ROUTES.UPDATE_JOB}
-                state={record?.status?.toLowerCase() !== "inactive" && { id: record?.jobId }}
+                to={
+                  record?.status?.toLowerCase() !== "inactive" &&
+                  SYSTEM_SETUP_ROUTES.UPDATE_JOB
+                }
+                state={
+                  record?.status?.toLowerCase() !== "inactive" && {
+                    id: record?.jobId,
+                  }
+                }
               >
                 <SVGIcon
                   name="IconEdit"
-                  className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}
-                  color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#ACC424"}
-                  width={24} />
+                  className={`${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+                  color={
+                    record?.status?.toLowerCase() === "inactive"
+                      ? "#8D91A0"
+                      : "#ACC424"
+                  }
+                  width={24}
+                />
               </Link>
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Activate',
-      type: 'table',
+      action: "Activate",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip
@@ -333,9 +380,9 @@ const Job = () => {
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
+        );
+      },
+    },
   ];
   return (
     <LayoutMenu>
@@ -347,7 +394,13 @@ const Job = () => {
           <div className={"w-full"}>
             <TablePagination
               dataSource={dataSource}
-              columns={[...columns, ...useColumnActionPermission(['view', 'update', 'activate'], itemActions)]}
+              columns={[
+                ...columns,
+                ...useColumnActionPermission(
+                  ["view", "update", "activate"],
+                  itemActions,
+                ),
+              ]}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}

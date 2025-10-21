@@ -41,7 +41,7 @@ const TaxIdentifierCreate = ({
         temp2
           ? ""
           : ` ${temp.length > 0 ? "and" : ""} Input number must be 16 digits`
-      }`
+      }`,
     );
   };
 
@@ -57,7 +57,7 @@ const TaxIdentifierCreate = ({
         temp2
           ? ""
           : ` ${temp.length > 0 ? "and" : ""} Input number must be 16 digits`
-      }`
+      }`,
     );
   };
 

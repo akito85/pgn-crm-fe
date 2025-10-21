@@ -48,7 +48,7 @@ const RatingPage = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [search, page, pageSize, sort, dispatch]);
 
@@ -129,7 +129,7 @@ const RatingPage = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -198,7 +198,7 @@ const RatingPage = () => {
                 searchInput,
                 searchedColumn,
                 searchText,
-                handleSearch
+                handleSearch,
                 // handleDetail
               ),
               ...useColumnActionPermission(["view"], itemGrantAccess),

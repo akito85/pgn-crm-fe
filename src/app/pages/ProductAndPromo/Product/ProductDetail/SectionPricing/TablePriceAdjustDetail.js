@@ -29,7 +29,7 @@ const columns = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       ],
     },
@@ -44,7 +44,7 @@ const columns = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -57,7 +57,7 @@ const columns = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -72,7 +72,7 @@ const columns = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -105,7 +105,7 @@ const columns = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -136,7 +136,7 @@ const columns = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
   ];
@@ -190,7 +190,7 @@ const TablePriceAdjustDetail = ({ data = [], dataObj = {} }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         )}
       />
     </div>

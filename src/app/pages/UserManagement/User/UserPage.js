@@ -4,13 +4,7 @@ import {
   LinkOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import {
-  Alert,
-  Checkbox,
-  Form,
-  Spin,
-  Tooltip,
-} from "antd";
+import { Alert, Checkbox, Form, Spin, Tooltip } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
@@ -36,17 +30,17 @@ import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import { getColumnSearchPropsPaging } from "../../../../utils/getColumnSearchProps";
-import { clearBodyMessage, hideModalError } from "../../../../redux/slices/general_slice";
-
+import {
+  clearBodyMessage,
+  hideModalError,
+} from "../../../../redux/slices/general_slice";
 
 const UserPage = () => {
   const [openModal, setOpenModal] = useState(false);
   const [openModalError, setOpenModalError] = useState(false);
   const dispatch = useDispatch();
-  const { data, loading, data_status } = useSelector(
-    (state) => state.user
-  );
-  const { bodyError } = useSelector(state => state?.general);
+  const { data, loading, data_status } = useSelector((state) => state.user);
+  const { bodyError } = useSelector((state) => state?.general);
 
   // state
   const [userId, setUserId] = useState("");
@@ -64,12 +58,18 @@ const UserPage = () => {
 
   // handle fetch
   const handleFetch = useCallback(() => {
-    dispatch(getAllUserPaginate({ search: encodeURIComponent(JSON?.stringify(search)), page, pageSize, sort }));
+    dispatch(
+      getAllUserPaginate({
+        search: encodeURIComponent(JSON?.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
+    );
   }, [dispatch, page, pageSize, search, sort]);
 
-
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -87,7 +87,6 @@ const UserPage = () => {
     });
   };
 
-
   // handle cancel modals
   const handleCancel = async () => {
     setOpenModal(false);
@@ -95,8 +94,7 @@ const UserPage = () => {
     form.resetFields();
   };
 
-
-  // handle download 
+  // handle download
   const handleDownload = () => {
     dispatch(
       donwloadedExcel({
@@ -104,8 +102,9 @@ const UserPage = () => {
         page,
         pageSize,
         sort,
-      }))
-  }
+      }),
+    );
+  };
 
   // columns
   const columns = [
@@ -130,7 +129,16 @@ const UserPage = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('username', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "username",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "USER TYPE",
@@ -147,7 +155,16 @@ const UserPage = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('userType', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "userType",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "EMPLOYEE",
@@ -167,7 +184,16 @@ const UserPage = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('employeeName', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "employeeName",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "USER LEVEL",
@@ -184,7 +210,16 @@ const UserPage = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('userLevel', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "userLevel",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "EMAIL",
@@ -201,7 +236,16 @@ const UserPage = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('email', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "email",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "MOBILE PHONE",
@@ -218,7 +262,16 @@ const UserPage = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('phone', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "phone",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
 
     {
@@ -236,7 +289,16 @@ const UserPage = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('authType', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "authType",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "GROUP ACCESS",
@@ -256,7 +318,16 @@ const UserPage = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('groupAccess', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "groupAccess",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -276,7 +347,16 @@ const UserPage = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -293,8 +373,17 @@ const UserPage = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
-    }
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
+    },
   ];
 
   const handleChange = (pageChange, pageSizeChange) => {
@@ -319,7 +408,7 @@ const UserPage = () => {
       const body = {
         userId,
         ...formValue,
-        activate
+        activate,
       };
       setBody(body);
       handleCancel();
@@ -327,13 +416,12 @@ const UserPage = () => {
       await handleFetch()?.unwrap();
     } catch (error) {
       if (hasValue(error?.code) && error?.data?.length !== 0) {
-        dispatch(clearBodyMessage())
-        dispatch(hideModalError())
-        setActivate('INACTIVE')
+        dispatch(clearBodyMessage());
+        dispatch(hideModalError());
+        setActivate("INACTIVE");
         setOpenModalError(true);
       }
     }
-
   };
 
   const onSort = (_, __, sort) => {
@@ -344,7 +432,6 @@ const UserPage = () => {
     setSort(dataSort);
   };
 
-
   // array items action
   const itemActions = [
     // toolbar items
@@ -354,16 +441,16 @@ const UserPage = () => {
         <NavLink to={USER_ROUTES?.CHANGE_AUTH}>
           <ButtonComponent
             type={"submit"}
-            icon={<SVGIcon name={"IconRevers"} width={24} color={'#FFFFFF'} />}
+            icon={<SVGIcon name={"IconRevers"} width={24} color={"#FFFFFF"} />}
           >
             {" "}
             Change Auth Type
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
@@ -372,10 +459,10 @@ const UserPage = () => {
         >
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     {
-      action: 'Upload',
+      action: "Upload",
       render: (
         <NavLink to={USER_ROUTES?.UPLOAD_USER}>
           <ButtonComponent
@@ -385,10 +472,10 @@ const UserPage = () => {
             Upload
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={USER_ROUTES?.CREATE_USER}>
           <ButtonComponent
@@ -398,31 +485,28 @@ const UserPage = () => {
             Create User
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // column action
     {
-      action: 'View',
-      type: 'table',
+      action: "View",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title={"Detail"}>
-            <Link
-              to={USER_ROUTES.DETAIL_USER}
-              state={{ id: record?.userCode }}
-            >
+            <Link to={USER_ROUTES.DETAIL_USER} state={{ id: record?.userCode }}>
               <div className="pt-1">
                 <SVGIcon name="IconDetail" width={24} />
               </div>
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Update',
-      type: 'table',
+      action: "Update",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title={"Update"}>
@@ -430,35 +514,53 @@ const UserPage = () => {
               to={record?.status === "ACTIVE" && USER_ROUTES.UPDATE_USER}
               state={record?.status === "ACTIVE" && { id: record?.userCode }}
             >
-              <div className={`flex items-center ${record?.status?.toLowerCase() === 'inactive' && 'cursor-not-allowed'}`}>
+              <div
+                className={`flex items-center ${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+              >
                 <ButtonComponent
                   icon={
                     <SVGIcon
                       name="IconEdit"
-                      color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#0075bf"}
+                      color={
+                        record?.status?.toLowerCase() === "inactive"
+                          ? "#8D91A0"
+                          : "#0075bf"
+                      }
                       width={24}
                     />
                   }
                   border={false}
                   disabled={record?.status === "ACTIVE" ? false : true}
                 >
-                  {data_length > 3 && <span className={record?.status?.toLowerCase() === 'inactive' ? "text-[#8D91A0]" : "text-black ml-3"}> Update</span>}
+                  {data_length > 3 && (
+                    <span
+                      className={
+                        record?.status?.toLowerCase() === "inactive"
+                          ? "text-[#8D91A0]"
+                          : "text-black ml-3"
+                      }
+                    >
+                      {" "}
+                      Update
+                    </span>
+                  )}
                 </ButtonComponent>
               </div>
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Generate',
-      type: 'table',
+      action: "Generate",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title={"Generate Link Password"}>
             <Link
               to={record?.status === "ACTIVE" && USER_ROUTES.GENERATE_PASSWORD}
-              state={record?.status === "ACTIVE" && { id: record?.userId }}>
+              state={record?.status === "ACTIVE" && { id: record?.userId }}
+            >
               <div className="flex items-center cursor-not-allowed">
                 <ButtonComponent
                   icon={
@@ -470,26 +572,29 @@ const UserPage = () => {
                     />
                   }
                   border={false}
-                  disabled={record?.status === "ACTIVE" && record.authType !== "LDAP" ? false : true}
+                  disabled={
+                    record?.status === "ACTIVE" && record.authType !== "LDAP"
+                      ? false
+                      : true
+                  }
                 >
-                  {data_length > 3 && <span className="text-black ml-3"> Generate Link</span>}
+                  {data_length > 3 && (
+                    <span className="text-black ml-3"> Generate Link</span>
+                  )}
                 </ButtonComponent>
               </div>
             </Link>
           </Tooltip>
-        )
-
-      }
+        );
+      },
     },
     {
-      action: 'Activate',
-      type: 'table',
+      action: "Activate",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip
-            title={
-              record.status === "ACTIVE" ? "Inactivate" : "Activate"
-            }
+            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
           >
             <ButtonComponent
               icon={
@@ -498,7 +603,7 @@ const UserPage = () => {
                     setOpenModal(true);
                     setUserId(record?.userId);
                     setActivate(record?.status);
-                    setRecord(record)
+                    setRecord(record);
                   }}
                   checked={record?.status !== "ACTIVE"}
                 />
@@ -508,34 +613,32 @@ const UserPage = () => {
                 setOpenModal(true);
                 setUserId(record?.userId);
                 setActivate(record?.status);
-                setRecord(record)
+                setRecord(record);
               }}
             >
-              {
-                data_length > 3 &&
+              {data_length > 3 && (
                 <span className="text-black ml-5">
-                  {record.status !== "ACTIVE"
-                    ? "Activate"
-                    : "Inactivate"}
+                  {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
                 </span>
-              }
+              )}
             </ButtonComponent>
             <div></div>
-          </Tooltip>)
-      }
-    }
+          </Tooltip>
+        );
+      },
+    },
   ];
 
   // handle retry
   const handleRetry = () => {
-    handleCancelTryAgain()
+    handleCancelTryAgain();
     if (bodyError?.action === "GET_ALL_EMPLOYEE_PAGINATE") {
       handleFetch();
     } else if (bodyError?.action === "DOWNLOAD_USER_EXCEL") {
       handleDownload();
       handleFetch();
     } else if (bodyError?.action === "FORWARD_TASK_USER") {
-      dispatch(forwardTaskUser(body))
+      dispatch(forwardTaskUser(body));
     } else {
       dispatch(inactiveUser(body));
       handleFetch();
@@ -558,7 +661,11 @@ const UserPage = () => {
             onChange={handleChange}
             onSizeChanger={handleChange}
             columns={[
-              ...columns, ...useColumnActionPermission(['view', 'Update', 'Activate', 'Generate'], itemActions)
+              ...columns,
+              ...useColumnActionPermission(
+                ["view", "Update", "Activate", "Generate"],
+                itemActions,
+              ),
             ]}
             onSort={onSort}
           />
@@ -582,8 +689,9 @@ const UserPage = () => {
                 style={{ fontSize: "24px", color: "#65481C" }}
               />
             }
-            message={`Are you sure you want to ${activate === "INACTIVE" ? "activate" : "inactivate"
-              } user named ${record?.username}?`}
+            message={`Are you sure you want to ${
+              activate === "INACTIVE" ? "activate" : "inactivate"
+            } user named ${record?.username}?`}
             type={"warning"}
             showIcon
             className={"alert-icon"}
@@ -595,7 +703,11 @@ const UserPage = () => {
               className="mt-3"
               onFinish={onFinish}
             >
-              <Form.Item name={"remark"} rules={formMessageRequired("remark")} label={'Remark'}>
+              <Form.Item
+                name={"remark"}
+                rules={formMessageRequired("remark")}
+                label={"Remark"}
+              >
                 <InputComponent
                   type={"textarea"}
                   rows={1}
@@ -638,17 +750,30 @@ const UserPage = () => {
         width={1000}
         footer={
           <div className="w-full flex justify-end gap-2">
-            <Link to={USER_ROUTES.FORWARD_TASK} state={Array.isArray(data_status?.data) && { id: data_status?.data[0]?.employeeCode }}>
-              <ButtonComponent type={'submit'}>Forward Task</ButtonComponent>
+            <Link
+              to={USER_ROUTES.FORWARD_TASK}
+              state={
+                Array.isArray(data_status?.data) && {
+                  id: data_status?.data[0]?.employeeCode,
+                }
+              }
+            >
+              <ButtonComponent type={"submit"}>Forward Task</ButtonComponent>
             </Link>
-            <ButtonComponent type={'default'} onClick={handleCancel} border={true}>Cancel</ButtonComponent>
+            <ButtonComponent
+              type={"default"}
+              onClick={handleCancel}
+              border={true}
+            >
+              Cancel
+            </ButtonComponent>
           </div>
         }
       >
         <PendingTaskLayout
-          typeLayout='pending'
+          typeLayout="pending"
           data={{
-            dataTable: data_status?.data
+            dataTable: data_status?.data,
           }}
           isOpen={openModalError}
         />

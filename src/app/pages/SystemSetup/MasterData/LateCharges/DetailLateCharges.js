@@ -40,11 +40,12 @@ const DetailLateCharges = () => {
   const { data_detail, loading } = useSelector((state) => state.late_charge);
   const { access_account } = useSelector((state) => state.accountManagement);
   const filteredArray = {
-    actionList: access_account?.actionList?.filter(action =>
-      action.path.includes("/system-setup/late-charges-rule/") &&
-      !action.path.includes("/system-setup/late-charges/")
-    )
-  }
+    actionList: access_account?.actionList?.filter(
+      (action) =>
+        action.path.includes("/system-setup/late-charges-rule/") &&
+        !action.path.includes("/system-setup/late-charges/"),
+    ),
+  };
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -55,8 +56,8 @@ const DetailLateCharges = () => {
   const [dataListCriteria, setDataListCriteria] = useState([]);
 
   useEffect(() => {
-    dispatch(getGrantedAccessAccount('/system-setup/late-charges-rule'))
-  }, [dispatch])
+    dispatch(getGrantedAccessAccount("/system-setup/late-charges-rule"));
+  }, [dispatch]);
 
   useEffect(() => {
     if (id) {
@@ -67,7 +68,7 @@ const DetailLateCharges = () => {
   useEffect(() => {
     if (data_detail?.lateChargeId === id) {
       const dataIndexList = columnsTableCriteria().map(
-        (item) => item.dataIndex
+        (item) => item.dataIndex,
       );
       const criteriaData = (data_detail?.lateChargeCriterias || [])
         .filter((data) => data?.allCriteria !== true)
@@ -75,9 +76,11 @@ const DetailLateCharges = () => {
           let obj = {};
           for (const attr in item) {
             if (dataIndexList.includes(attr)) {
-              if (attr === 'startDate' || attr === 'endDate') {
-                obj[attr] = hasValue(item[attr]) ? moment(item[attr]).format(dateFormatting.date) : null
-              } else if (attr === 'description') {
+              if (attr === "startDate" || attr === "endDate") {
+                obj[attr] = hasValue(item[attr])
+                  ? moment(item[attr]).format(dateFormatting.date)
+                  : null;
+              } else if (attr === "description") {
                 obj[attr] = hasValue(item[attr]) ? item[attr] : null;
               } else {
                 obj[attr] = {
@@ -101,7 +104,7 @@ const DetailLateCharges = () => {
         criteriaName: (data_detail.criteria || []).reduce(
           (prev, current, index) =>
             prev + `${index === 0 ? current.label : ", " + current.label} `,
-          ""
+          "",
         ),
         isRuleActive: data_detail.isRuleActive,
         createdDate: data_detail.historyLogInformation.createdDate,
@@ -129,7 +132,8 @@ const DetailLateCharges = () => {
                 {dataLateCharge.currency}
               </DetailText>
               <DetailText label={"Status"} classTextAdditional="capitalize">
-                {dataLateCharge?.status?.charAt(0).toUpperCase() + dataLateCharge?.status?.slice(1).toLowerCase()}
+                {dataLateCharge?.status?.charAt(0).toUpperCase() +
+                  dataLateCharge?.status?.slice(1).toLowerCase()}
               </DetailText>
               <div className="col-span-3">
                 <DetailText label={"Criteria"}>
@@ -154,7 +158,9 @@ const DetailLateCharges = () => {
           </BaseContainer>
           <BaseContainer header={"history log information"}>
             <div className="grid grid-cols-5 w-full">
-              <DetailText label={'Record ID'}>{data_detail?.lateChargeId}</DetailText>
+              <DetailText label={"Record ID"}>
+                {data_detail?.lateChargeId}
+              </DetailText>
               <DetailText label={"Created Date"}>
                 {dataLateCharge.createdDate}
               </DetailText>
@@ -169,8 +175,7 @@ const DetailLateCharges = () => {
               </DetailText>
             </div>
           </BaseContainer>
-          {
-            Array?.isArray(access_account?.actionList) &&
+          {Array?.isArray(access_account?.actionList) && (
             <BaseContainer header={"late charge rule"}>
               <LateChargesRuleTable
                 id={id}
@@ -178,12 +183,14 @@ const DetailLateCharges = () => {
                 access={filteredArray}
               />
             </BaseContainer>
-          }
+          )}
         </div>
         <div className={`flex w-full align-middle my-3`}>
           <ButtonComponent
             type={"submit"}
-            onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_LATE_CHARGES)}
+            onClick={() =>
+              navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_LATE_CHARGES)
+            }
             icon={
               <LeftOutlined
                 style={{

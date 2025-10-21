@@ -1,14 +1,14 @@
-import React, { useState, useEffect,  useRef } from 'react'
-import moment from 'moment'
+import React, { useState, useEffect, useRef } from "react";
+import moment from "moment";
 import Highlighter from "react-highlight-words";
 
-import ModalCustom from '../../../../../../../../../components/Modal/ModalCustom'
-import ButtonComponent from '../../../../../../../../../components/ButtonComponent'
-import DetailText from '../../../../../../../../../components/DetailText'
-import { dateFormatting } from '../../../../../../../../../utils';
-import { Input } from 'antd';
-import { FilterOutlined } from '@ant-design/icons';
-import TableInlineTos from './TableInlineTos';
+import ModalCustom from "../../../../../../../../../components/Modal/ModalCustom";
+import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
+import DetailText from "../../../../../../../../../components/DetailText";
+import { dateFormatting } from "../../../../../../../../../utils";
+import { Input } from "antd";
+import { FilterOutlined } from "@ant-design/icons";
+import TableInlineTos from "./TableInlineTos";
 
 const ModalForm = ({
   modalFormTos,
@@ -20,7 +20,7 @@ const ModalForm = ({
   resetTableTosUpdate,
   dataTableTos,
   setDataTableTos,
-  setModalFormTos
+  setModalFormTos,
 }) => {
   const searchInput = useRef(null);
   // State
@@ -34,9 +34,9 @@ const ModalForm = ({
   const [disabledButton, setDisabledButton] = useState(false);
 
   useEffect(() => {
-    setDataTableTos(dataFormTosModal?.tosDetail)
-  }, [dataFormTosModal?.tosdetail, tempDataUpdateTos])
-  
+    setDataTableTos(dataFormTosModal?.tosDetail);
+  }, [dataFormTosModal?.tosdetail, tempDataUpdateTos]);
+
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -85,7 +85,7 @@ const ModalForm = ({
     return result.slice((page - 1) * pageSize, page * pageSize);
   };
 
-    // Search Column Table
+  // Search Column Table
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
       const onDataChange = (value, dateString) => {
@@ -172,9 +172,9 @@ const ModalForm = ({
       width: 150,
       sorter: true,
       ...getColumnSearchProps("value"),
-      render: (text) => (<span>{text?.toString() }</span>)
+      render: (text) => <span>{text?.toString()}</span>,
     },
-  ]
+  ];
 
   const onSort = (_, __, sort) => {
     if (sort.order) {
@@ -190,24 +190,24 @@ const ModalForm = ({
     let newData = {
       description: dataFormTosModal.description,
       tosDetail: dataTableTos,
-      termOfService: dataFormTosModal.termOfService
-    }
-    const updatedData = dataTermOfService.map(item => {
+      termOfService: dataFormTosModal.termOfService,
+    };
+    const updatedData = dataTermOfService.map((item) => {
       if (item.key === id) {
         return { ...item, ...newData };
       }
       return item;
     });
     setDataTermOfService(updatedData);
-    setModalFormTos(false)
-  }
+    setModalFormTos(false);
+  };
 
   return (
     <div>
       <ModalCustom
         header={"UPDATE TERM OF SERVICE VALUE"}
         isOpen={modalFormTos}
-        type={"confirmation"} 
+        type={"confirmation"}
         handleCancel={closeModalFormTos}
         width={900}
         footer={
@@ -221,7 +221,7 @@ const ModalForm = ({
             </ButtonComponent>
             <ButtonComponent
               disabled={disabledButton}
-              onClick={()=>updateDataTos(dataFormTosModal?.key)}
+              onClick={() => updateDataTos(dataFormTosModal?.key)}
               type="submit"
             >
               Save
@@ -234,8 +234,12 @@ const ModalForm = ({
             TERM OF SERVICE INFORMATION
           </span>
           <div className="grid grid-cols-2 gap-5 pt-[30px]">
-            <DetailText label="Term of Service">{dataFormTosModal.tosName}</DetailText>
-            <DetailText label="Description">{dataFormTosModal.description}</DetailText>
+            <DetailText label="Term of Service">
+              {dataFormTosModal.tosName}
+            </DetailText>
+            <DetailText label="Description">
+              {dataFormTosModal.description}
+            </DetailText>
           </div>
 
           <TableInlineTos
@@ -257,7 +261,7 @@ const ModalForm = ({
         </div>
       </ModalCustom>
     </div>
-  )
-}
+  );
+};
 
-export default ModalForm
+export default ModalForm;

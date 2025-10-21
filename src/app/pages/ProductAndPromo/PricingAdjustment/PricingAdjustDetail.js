@@ -107,7 +107,7 @@ const PricingAdjustDetail = () => {
       ).reduce(
         (prev, current) =>
           prev + (current.criteriaName ? `, ${current.criteriaName}` : ""),
-        ""
+        "",
       );
       setDataLogInformation({
         recordId: dataDetailPricingAdjustGeneral.id,
@@ -134,14 +134,14 @@ const PricingAdjustDetail = () => {
               : "",
             fileSize: bytesConverter(attachData.fileSize || 0),
             dataType: "exist",
-          })
-        )
+          }),
+        ),
       );
       setListDataPriceAdjust(
         (dataDetailPricingAdjustGeneral?.mpricingAdjustmentDetails || []).map(
           (adjustData, index) => {
             const listIndex = columnsTableCriteria().map(
-              (item) => item.dataIndex
+              (item) => item.dataIndex,
             );
             let obj = {
               adjustmentType: {
@@ -166,8 +166,8 @@ const PricingAdjustDetail = () => {
               };
             });
             return obj;
-          }
-        )
+          },
+        ),
       );
       setBodyApproval({
         isApprover: dataDetailPricingAdjustGeneral.isApprover,
@@ -196,7 +196,7 @@ const PricingAdjustDetail = () => {
       ).reduce(
         (prev, current) =>
           prev + (current.criteriaName ? `, ${current.criteriaName}` : ""),
-        ""
+        "",
       );
       setBodyDraft({
         adjustmentId: dataDetailDraftPricingAdjustGeneral.pricingAdjustmentId,
@@ -226,7 +226,7 @@ const PricingAdjustDetail = () => {
           dataDetailDraftPricingAdjustGeneral?.mpricingAdjustmentDetails || []
         ).map((adjustData, index) => {
           const listIndex = columnsTableCriteria().map(
-            (item) => item.dataIndex
+            (item) => item.dataIndex,
           );
           let obj = {
             adjustmentType: {
@@ -251,7 +251,7 @@ const PricingAdjustDetail = () => {
             };
           });
           return obj;
-        })
+        }),
       );
       setListSectionInfo([
         { value: "Price Adjustment" },
@@ -468,7 +468,7 @@ const PricingAdjustDetail = () => {
           header={`${approveOrReject} information`}
           approveOrReject={approveOrReject}
           menu={"Pricing Adjustment"}
-          named={`${dataDetailPricingAdjustGeneral?.name|| ""}`}
+          named={`${dataDetailPricingAdjustGeneral?.name || ""}`}
           // isOpen={modalConfirm}
           // header={`${approveOrReject} information`}
           // message={`Are you sure you want to ${approveOrReject} Price Adjustment?`}
@@ -493,7 +493,7 @@ const PricingAdjustDetail = () => {
           //   </div>
           // }
         />
-          {/* <Form form={form} name="formApproveRejcet" onFinish={handleConfirm}>
+        {/* <Form form={form} name="formApproveRejcet" onFinish={handleConfirm}>
             <Form.Item
               name={"remark"}
               rules={[{ message: requiredMessage("Remark"), required: true }]}

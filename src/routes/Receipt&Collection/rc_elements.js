@@ -74,5 +74,5 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
 
   //late Charge
   VIEW_LATE_CHARGE: <ViewLateCharge />,
-  DETAIL_LATE_CHARGE: <ListDetailLateCharge />
+  DETAIL_LATE_CHARGE: <ListDetailLateCharge />,
 };

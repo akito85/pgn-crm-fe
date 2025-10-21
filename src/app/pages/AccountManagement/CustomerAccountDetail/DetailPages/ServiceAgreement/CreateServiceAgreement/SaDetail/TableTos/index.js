@@ -1,19 +1,18 @@
-import React,{useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../../components/TablePagination'
+import React, { useState, useEffect, useRef } from "react";
+import TablePagination from "../../../../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
-import { Tooltip } from 'antd';
-import ModalCustom from '../../../../../../../../../components/Modal/ModalCustom';
-import ButtonComponent from '../../../../../../../../../components/ButtonComponent';
+import { Tooltip } from "antd";
+import ModalCustom from "../../../../../../../../../components/Modal/ModalCustom";
+import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 
 const TableTos = ({
-  isProduct, 
-  dataTermOfService = [], 
-  setDataTermOfService, 
+  isProduct,
+  dataTermOfService = [],
+  setDataTermOfService,
   openModalFormTos,
   setModalChooseTos,
   dataTosFromProductVersion,
 }) => {
-  
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -23,35 +22,32 @@ const TableTos = ({
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
 
-  const [modalUpdateTos, setModalUpdateTos] = useState(false)
-  const [dataUpdate, setdataUpdate] = useState([])
+  const [modalUpdateTos, setModalUpdateTos] = useState(false);
+  const [dataUpdate, setdataUpdate] = useState([]);
 
-  
-// useEffect(() => {
-//   if (dataTermOfService?.length > 0) {
-//     const dataModif = dataTermOfService.map((a, index) => ({
-//       ...a,
-//       key: index + 1,
-//       tosDetail: a.tosDetail?.map((b, index) => ({
-//         ...b,
-//         key: index + 1,
-//       })),
-//     }));
-//     setDataTermOfService(dataModif);
-//   }else{
-//     setDataTermOfService([])
-//   }
-// }, [dataTosFromProductVersion, setDataTermOfService])
+  // useEffect(() => {
+  //   if (dataTermOfService?.length > 0) {
+  //     const dataModif = dataTermOfService.map((a, index) => ({
+  //       ...a,
+  //       key: index + 1,
+  //       tosDetail: a.tosDetail?.map((b, index) => ({
+  //         ...b,
+  //         key: index + 1,
+  //       })),
+  //     }));
+  //     setDataTermOfService(dataModif);
+  //   }else{
+  //     setDataTermOfService([])
+  //   }
+  // }, [dataTosFromProductVersion, setDataTermOfService])
 
-
-  
-useEffect(() => {
-  setTotalElement(dataTermOfService?.length);
-}, [dataTermOfService])
+  useEffect(() => {
+    setTotalElement(dataTermOfService?.length);
+  }, [dataTermOfService]);
 
   const deleteRow = (record) => {
     setDataTermOfService((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
   };
 
@@ -148,9 +144,9 @@ useEffect(() => {
   //         <div className="flex justify-center align-middle gap-2">
   //           <Tooltip title="Edit">
   //             <span className="flex justify-center">
-  //               <SVGIcon 
-  //                 name="IconEdit" 
-  //                 width={24} 
+  //               <SVGIcon
+  //                 name="IconEdit"
+  //                 width={24}
   //                 onClick={()=>{
   //                   setdataUpdate(record)
   //                   openModalFormTos(record)
@@ -176,7 +172,6 @@ useEffect(() => {
   //   },
   // ];
 
-  
   const columns = ({
     page = 1,
     pageSize = 10,
@@ -226,39 +221,39 @@ useEffect(() => {
             <div className="flex justify-center align-middle gap-2">
               <Tooltip title="Edit">
                 <span className="flex justify-center">
-                  <SVGIcon 
-                    name="IconEdit" 
-                    width={24} 
-                    onClick={()=>{
-                      setdataUpdate(record)
-                      openModalFormTos(record)
+                  <SVGIcon
+                    name="IconEdit"
+                    width={24}
+                    onClick={() => {
+                      setdataUpdate(record);
+                      openModalFormTos(record);
                     }}
                   />
                 </span>
               </Tooltip>
-             {isProduct === 2 && (
+              {isProduct === 2 && (
                 <Tooltip title="Delete">
                   <SVGIcon
                     name="IconDelete"
                     color={"#be3036"}
                     width={24}
                     onClick={() => {
-                      deleteRow(record)
+                      deleteRow(record);
                     }}
                   />
                 </Tooltip>
-             )}
+              )}
             </div>
           );
         },
       },
     ];
-    return result
-  }
+    return result;
+  };
 
   const expandedRowRender = (record) => {
-    const dataExpand = record?.tosDetail
-  
+    const dataExpand = record?.tosDetail;
+
     const columns = [
       {
         title: "NO",
@@ -267,13 +262,13 @@ useEffect(() => {
         render: (text, object, index) => index + 1,
       },
       {
-        title: 'ATTRIBUTE',
-        dataIndex: 'attributeName',
+        title: "ATTRIBUTE",
+        dataIndex: "attributeName",
       },
       {
-        title: 'VALUE',
-        dataIndex: 'value',
-      }
+        title: "VALUE",
+        dataIndex: "value",
+      },
     ];
     return (
       <div>
@@ -288,9 +283,9 @@ useEffect(() => {
           className={"mb-4"}
         />
       </div>
-    )
+    );
   };
-  
+
   return (
     <div>
       {isProduct === 2 && (
@@ -298,7 +293,7 @@ useEffect(() => {
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
-            onClick={()=>setModalChooseTos(true)}
+            onClick={() => setModalChooseTos(true)}
           >
             Choose Term of Service
           </ButtonComponent>
@@ -308,7 +303,7 @@ useEffect(() => {
         pageSize={pageSize}
         current={page}
         dataSource={filterDataByPage()}
-        tableScrolled={{y: 525, x: 1000 }}
+        tableScrolled={{ y: 525, x: 1000 }}
         totalData={totalElement}
         onChange={handleChangeSize}
         onSort={onSort}
@@ -320,18 +315,16 @@ useEffect(() => {
           searchText,
           handleSearch,
         })}
-        expandable={{expandedRowRender}}
+        expandable={{ expandedRowRender }}
       />
 
       <ModalCustom
         isOpen={modalUpdateTos}
-        handleCancel={()=>setModalUpdateTos(false)}
+        handleCancel={() => setModalUpdateTos(false)}
         handleOk
-      >
-
-      </ModalCustom>
+      ></ModalCustom>
     </div>
-  )
-}
+  );
+};
 
-export default TableTos
+export default TableTos;

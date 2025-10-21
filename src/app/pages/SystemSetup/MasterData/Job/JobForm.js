@@ -25,7 +25,7 @@ import userHttpService from "../../../../../redux/services/userHttpService";
 
 const JobForm = (props) => {
   const { type } = props;
-  const { bodyError, isLoading } = useSelector(state => state?.general);
+  const { bodyError, isLoading } = useSelector((state) => state?.general);
   const { data_detail, loading } = useSelector((state) => state.master_job);
 
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ const JobForm = (props) => {
   const [openModal, setOpenModal] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [description, setDescription] = useState("");
-  const [payload, setPayload] = useState({})
+  const [payload, setPayload] = useState({});
 
   useEffect(() => {
     if (id) {
@@ -57,15 +57,14 @@ const JobForm = (props) => {
 
   const saveAction = async () => {
     try {
-      handleCancel()
+      handleCancel();
       if (type === "update") {
         await dispatch(updateMasterJob(payload?.requestBody))?.unwrap();
       } else {
         await dispatch(createMasterJob(payload?.requestBody))?.unwrap();
       }
     } catch (error) {
-      handleCancel()
-
+      handleCancel();
     }
   };
 
@@ -87,23 +86,34 @@ const JobForm = (props) => {
     },
   ];
 
-
   const onFinish = async (values) => {
     try {
       let url;
       let body;
-      if (type === 'update') {
-        body = { ...values, jobId: location?.state?.id }
-        url = '/v1/dbs/api/job/validate-update'
+      if (type === "update") {
+        body = { ...values, jobId: location?.state?.id };
+        url = "/v1/dbs/api/job/validate-update";
       } else {
-        body = values
-        url = '/v1/dbs/api/job/validate-create'
+        body = values;
+        url = "/v1/dbs/api/job/validate-create";
       }
       setPayload({
         requestBody: body,
-        validateCreateUpdate: { body: body, services: userHttpService, endPoint: url, type}
-      })
-      await dispatch(validateCreateUpdate({ body: body, services: userHttpService, endPoint: url, type }))?.unwrap()
+        validateCreateUpdate: {
+          body: body,
+          services: userHttpService,
+          endPoint: url,
+          type,
+        },
+      });
+      await dispatch(
+        validateCreateUpdate({
+          body: body,
+          services: userHttpService,
+          endPoint: url,
+          type,
+        }),
+      )?.unwrap();
       setOpenModal(true);
     } catch (error) {
       setOpenModal(false);
@@ -122,21 +132,20 @@ const JobForm = (props) => {
   };
 
   const handleRetry = () => {
-    handleCancelTryAgain()
-    handleCancel()
-    if (bodyError?.action === 'CREATE_MASTER_JOB') {
-      dispatch(createMasterJob(payload?.requestBody))
-    } else if (bodyError?.action === 'UPDATE_MASTER_JOB') {
-      dispatch(updateMasterJob(payload?.requestBody))
-    } else if (bodyError?.action ==='VALIDATE_CREATE_UPDATE') {
-      dispatch(validateCreateUpdate(payload?.validateCreateUpdate))
-    } else{
-      dispatch(getDetailMasterJob(id))
+    handleCancelTryAgain();
+    handleCancel();
+    if (bodyError?.action === "CREATE_MASTER_JOB") {
+      dispatch(createMasterJob(payload?.requestBody));
+    } else if (bodyError?.action === "UPDATE_MASTER_JOB") {
+      dispatch(updateMasterJob(payload?.requestBody));
+    } else if (bodyError?.action === "VALIDATE_CREATE_UPDATE") {
+      dispatch(validateCreateUpdate(payload?.validateCreateUpdate));
+    } else {
+      dispatch(getDetailMasterJob(id));
     }
-  }
+  };
 
-
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
     <LayoutMenu>
       <Spin spinning={loading || isLoading}>
@@ -157,9 +166,10 @@ const JobForm = (props) => {
                 label={"Job Name"}
                 rules={formMessageRequired("Job Name")}
               >
-                <InputComponent disabled={type === "update"} onInput={(e) =>
-                  (e.target.value = e.target.value.trimStart())
-                } />
+                <InputComponent
+                  disabled={type === "update"}
+                  onInput={(e) => (e.target.value = e.target.value.trimStart())}
+                />
               </Form.Item>
               <Form.Item
                 className={"w-full"}

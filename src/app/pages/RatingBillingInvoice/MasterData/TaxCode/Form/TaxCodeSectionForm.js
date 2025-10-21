@@ -27,12 +27,12 @@ const TaxCodeSectionForm = ({
   status,
   statusApproval,
   handleStartDate = () => {},
-  handleEndDate = () => { },
-  disabledDate = false
+  handleEndDate = () => {},
+  disabledDate = false,
 }) => {
   // Selector
   const { data_category, data_criteria } = useSelector(
-    (state) => state.tax_code
+    (state) => state.tax_code,
   );
 
   // Declaration
@@ -118,7 +118,7 @@ const TaxCodeSectionForm = ({
       return Promise.resolve();
     }
     return Promise.reject(
-      new Error("Length must be between 1 and 10 characters")
+      new Error("Length must be between 1 and 10 characters"),
     );
   };
 
@@ -241,7 +241,7 @@ const TaxCodeSectionForm = ({
                   (value && moment(startDate) <= moment(value)) || !value
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error("End Date must be after Start date")
+                        new Error("End Date must be after Start date"),
                       ),
               },
             ]}

@@ -44,7 +44,7 @@ const TosSection = ({ SAId }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [SAId, search, page, pageSize, sort]);
 
@@ -107,7 +107,7 @@ const TosSection = ({ SAId }) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           )}
           current={page}
           pageSize={pageSize}
@@ -132,7 +132,7 @@ const TosSection = ({ SAId }) => {
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
                   )}
                   className={"mb-4"}
                 />

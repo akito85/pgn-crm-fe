@@ -28,10 +28,16 @@ import {
 import ConfirmationLayout from "./Modal/ConfirmationLayout";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
 import { columnsTableCriteria } from "./Table/TableCriteria";
-import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../redux/slices/general_slice";
 import AttachmentSectionForm from "../Pricing/Form/AttachmentSectionForm";
 import BaseContainer from "../../../../components/BaseContainer";
-import { handleCheckCriteriaMissingValidation, handleDisabledEachColumnCriteria } from "../UtilsProduct/UtilsAllProduct";
+import {
+  handleCheckCriteriaMissingValidation,
+  handleDisabledEachColumnCriteria,
+} from "../UtilsProduct/UtilsAllProduct";
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
 import { dateFormatting, hasValue } from "../../../../utils";
 
@@ -84,7 +90,7 @@ const PricingRuleUpdate = () => {
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
   const [criteriaOptions, setCriteriaOptions] = useState([]);
-  
+
   // Use Effect
   useEffect(() => {
     dispatch(getSelectCriteria());
@@ -97,10 +103,7 @@ const PricingRuleUpdate = () => {
   }, [dispatch, id]);
 
   useEffect(() => {
-    if (
-      data_select_criteria &&
-      data_select_criteria?.length > 0
-    ) {
+    if (data_select_criteria && data_select_criteria?.length > 0) {
       const tempCriterias = (data_select_criteria || [])?.map((criteria) => ({
         name: criteria.text,
         value: criteria.id,
@@ -135,7 +138,10 @@ const PricingRuleUpdate = () => {
           priceCodeName: item.priceCodeName,
           min: item.min,
           max: parseInt(item.max),
-          maximumName: item.unlimited === true || item?.max?.toString() === "0" ? "Unlimited" : item.max,
+          maximumName:
+            item.unlimited === true || item?.max?.toString() === "0"
+              ? "Unlimited"
+              : item.max,
           description: item.description,
           unlimited: item.unlimited,
           value: item.value,
@@ -164,14 +170,15 @@ const PricingRuleUpdate = () => {
           dataType: "exist",
         };
       });
-      setEndDate(data_header?.endDate ? moment(data_header?.endDate) : null)
+      setEndDate(data_header?.endDate ? moment(data_header?.endDate) : null);
       // Data Criteria List Pricing Rule
       const dataDraftCriteriaList = (
         data_detail_draft?.rPricingRuleCriteriaDatas || []
       ).map((item, index) => {
         let obj = { key: index + 1 };
         for (const attr in item) {
-          if ( hasValue(item[attr]) && 
+          if (
+            hasValue(item[attr]) &&
             typeof item[attr] === "object" &&
             attr !== "id" &&
             attr !== "idPricingRule" &&
@@ -211,7 +218,7 @@ const PricingRuleUpdate = () => {
           serviceType: item.serviceType,
           customer: item.customer,
           startDate: item?.startDate ? item?.startDate : null,
-          endDate : item?.endDate ? item?.endDate : null,
+          endDate: item?.endDate ? item?.endDate : null,
           key: index + 1,
         };
       });
@@ -252,24 +259,25 @@ const PricingRuleUpdate = () => {
       setListDataCriteria(
         handleDisabledEachColumnCriteria({
           dataDetail: dataDraftCriteriaList.filter(
-            (data) => data?.allCriteria !== true
+            (data) => data?.allCriteria !== true,
           ),
           dataCompare: dataCriteriaList.filter(
-            (data) => data?.allCriteria !== true
+            (data) => data?.allCriteria !== true,
           ),
           idName: "id",
           idCompare: "id",
           status: data_header?.status,
           statusApproval: data_header?.approvalStatus,
           columnsTable: columnsTableCriteriaAll(),
-          dataListCriteria: data_select_criteria?.map((item) =>{
+          dataListCriteria: data_select_criteria?.map((item) => {
             return {
               ...item,
               id: item.id,
               name: item.text,
-            }
+            };
           }),
-        }));
+        }),
+      );
     } else if (
       id &&
       !data_detail_draft?.id &&
@@ -296,7 +304,10 @@ const PricingRuleUpdate = () => {
           priceCodeName: item.priceCode,
           min: item.min,
           max: parseInt(item.max),
-          maximumName: item.unlimited === true || item?.max?.toString() === "0" ?  "Unlimited" : item.max,
+          maximumName:
+            item.unlimited === true || item?.max?.toString() === "0"
+              ? "Unlimited"
+              : item.max,
           description: item.description,
           unlimited: item.unlimited,
           value: item.value,
@@ -323,10 +334,10 @@ const PricingRuleUpdate = () => {
             urlFile2: item.urlFile2,
             dataType: "exist",
           };
-        }
+        },
       );
 
-      setEndDate(data_header?.endDate ? moment(data_header?.endDate) : null)
+      setEndDate(data_header?.endDate ? moment(data_header?.endDate) : null);
       // Data Criteria List Pricing Rule
       const dataCriteriaList = (
         data_header?.rpricingRuleCriteriaDatas || []
@@ -351,7 +362,7 @@ const PricingRuleUpdate = () => {
           serviceType: item.serviceType,
           customer: item.customer,
           startDate: item?.startDate ? item?.startDate : null,
-          endDate : item?.endDate ? item?.endDate : null,
+          endDate: item?.endDate ? item?.endDate : null,
           key: index + 1,
         };
       });
@@ -373,7 +384,7 @@ const PricingRuleUpdate = () => {
       setListDataCriteria(
         handleDisabledEachColumnCriteria({
           dataDetail: dataCriteriaList.filter(
-            (data) => data?.allCriteria !== true
+            (data) => data?.allCriteria !== true,
           ),
           dataCompare: [],
           idName: "id",
@@ -381,14 +392,14 @@ const PricingRuleUpdate = () => {
           status: data_header?.status,
           statusApproval: data_header?.approvalStatus,
           columnsTable: columnsTableCriteriaAll(),
-          dataListCriteria: data_select_criteria?.map((item) =>{
+          dataListCriteria: data_select_criteria?.map((item) => {
             return {
               ...item,
               id: item.Id,
               name: item.text,
-            }
+            };
           }),
-        })
+        }),
       );
     }
   }, [id, form, data_header, data_detail_draft]);
@@ -443,7 +454,7 @@ const PricingRuleUpdate = () => {
             criteriaOptions,
             formValue?.rPricingRuleCriterias,
             listDataCriteria,
-            () => {}
+            () => {},
           )
         ) {
           const errorBody = {
@@ -465,7 +476,7 @@ const PricingRuleUpdate = () => {
                   : data_header?.rpricingRuleCriterias || [];
               const temp = tempData?.filter((a) => item === a.criteria);
               const itemName = data_select_criteria.filter(
-                (criteria) => criteria.id === item
+                (criteria) => criteria.id === item,
               );
               return {
                 id: temp[0]?.id || null,
@@ -476,7 +487,7 @@ const PricingRuleUpdate = () => {
                     ? itemName[0]?.text
                     : undefined,
               };
-            }
+            },
           );
 
           let dataCriteriaObject = listDataCriteria.map((item) => {
@@ -506,13 +517,13 @@ const PricingRuleUpdate = () => {
             (item) =>
               !(
                 [...formValue.rPricingRuleCriterias, 1, 2, 3, 4, 5] || []
-              ).includes(item.indexValue)
+              ).includes(item.indexValue),
           );
           // console.log(filteredCriteria, "filteredCriteria");
           const filteredCriteria2 = columnsTableCriteriaAll().filter((item) =>
             ([...formValue.rPricingRuleCriterias, 1] || []).includes(
-              item.indexValue
-            )
+              item.indexValue,
+            ),
           );
           // console.log(filteredCriteria2, "filteredCriteria2");
           dataCriteriaObject = dataCriteriaObject.map((item) => {
@@ -599,7 +610,7 @@ const PricingRuleUpdate = () => {
       listDataCriteria,
       storedDataInline,
       id,
-    ]
+    ],
   );
 
   // Handle Error Form
@@ -615,7 +626,7 @@ const PricingRuleUpdate = () => {
         const errorBadge = errorFields.reduce(
           (current, next) =>
             item.paramValue.includes(next.name[0]) ? current + 1 : current,
-          0
+          0,
         );
         return {
           value: item.value,
@@ -668,7 +679,7 @@ const PricingRuleUpdate = () => {
     const getUniqueListBy = (arr) => {
       return [
         ...new Map(
-          arr.map((item) => [`${item["priceCode"]}~${item["min"]}`, item])
+          arr.map((item) => [`${item["priceCode"]}~${item["min"]}`, item]),
         ).values(),
       ];
     };
@@ -689,7 +700,7 @@ const PricingRuleUpdate = () => {
         setLoadingForm(true);
         const idPricingRule = data.pricingRuleId;
         const filterDataAttach = listDataAttachment.filter(
-          (item) => item.dataType !== "exist"
+          (item) => item.dataType !== "exist",
         );
         for (let icon = 0; icon < filterDataAttach.length; icon++) {
           const element = filterDataAttach[icon];
@@ -699,7 +710,7 @@ const PricingRuleUpdate = () => {
           };
           await productPromoHttpService.uploadAttachment(
             `/v1/dbs/api/pricingRule/uploadAttachment/${idPricingRule}`,
-            body
+            body,
           );
         }
         loadingForm(false);

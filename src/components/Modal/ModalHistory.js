@@ -52,25 +52,24 @@ const defaultValueHistory = [
 
 const styleBackgroundAvatar = (dataApprover) => {
   const dataBackground = defaultValueHistory.filter((valueHistory) =>
-    dataApprover?.status?.includes(valueHistory.type)
+    dataApprover?.status?.includes(valueHistory.type),
   );
   return dataBackground.length > 0 ? dataBackground[0].style : undefined;
 };
 
 const handleIconAvatar = (dataApprover) => {
   const dataIcon = defaultValueHistory.filter((valueHistory) =>
-    dataApprover?.status?.includes(valueHistory.type)
+    dataApprover?.status?.includes(valueHistory.type),
   );
   return dataIcon.length > 0 ? dataIcon[0].icon : undefined;
 };
 
 const handleTextColor = (dataHistory) => {
   const dataIcon = defaultValueHistory.filter((valueHistory) =>
-    dataHistory?.status?.includes(valueHistory.type)
+    dataHistory?.status?.includes(valueHistory.type),
   );
   return dataIcon.length > 0 ? dataIcon[0].textColor : "white";
 };
-
 
 // const tabOptions = ["Create", "Inactive"];
 
@@ -224,7 +223,7 @@ const ModalHistory = (props) => {
                           {`Task : ${
                             item.taskDate
                               ? moment(item.taskDate).format(
-                                  dateFormatting.dateTime
+                                  dateFormatting.dateTime,
                                 )
                               : "-"
                           }`}
@@ -233,7 +232,7 @@ const ModalHistory = (props) => {
                           {`Action : ${
                             item.actionDate
                               ? moment(item.actionDate).format(
-                                  dateFormatting.dateTime
+                                  dateFormatting.dateTime,
                                 )
                               : "-"
                           }`}

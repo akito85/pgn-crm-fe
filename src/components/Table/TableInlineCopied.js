@@ -75,8 +75,8 @@ const EditableCell = ({
                     - No Space
                     <br />
                     - Upper case letter
-                    <br />
-                    - Non-alphanumeric characters, such as !, @, #, $, %, ^, &, *, etc.
+                    <br />- Non-alphanumeric characters, such as !, @, #, $, %,
+                    ^, &, *, etc.
                   </span>
                 }
               >
@@ -178,7 +178,7 @@ const TableInlineCopied = (props) => {
   useEffect(() => {
     if (mode === "update") {
       setData(
-        tableData?.map((row, index) => ({ ...row, key: index.toString() }))
+        tableData?.map((row, index) => ({ ...row, key: index.toString() })),
       );
     }
   }, [mode, tableData]);

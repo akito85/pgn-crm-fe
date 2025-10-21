@@ -1,6 +1,5 @@
-import React, { useMemo } from 'react';
-import useGrantAccessAccountInline from './useGrantedAccessAccountInline';
-
+import React, { useMemo } from "react";
+import useGrantAccessAccountInline from "./useGrantedAccessAccountInline";
 
 const ToolbarAccountInline = ({ items = [], selector, url }) => {
   const access = useGrantAccessAccountInline({
@@ -9,12 +8,12 @@ const ToolbarAccountInline = ({ items = [], selector, url }) => {
   });
   const lowerCaseActionList = useMemo(
     () => access?.actions?.map((item) => item?.toLowerCase()),
-    [access]
+    [access],
   );
   const lowerCaseItems = useMemo(
     () =>
       items?.map((item) => ({ ...item, action: item?.action?.toLowerCase() })),
-    [items]
+    [items],
   );
 
   return (

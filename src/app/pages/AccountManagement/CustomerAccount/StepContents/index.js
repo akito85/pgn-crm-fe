@@ -5,7 +5,7 @@ import ContactForm from "./ContactForm";
 const StepContents = {
   InformationForm,
   AddressForm,
-  ContactForm
+  ContactForm,
 };
 
 export default StepContents;

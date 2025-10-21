@@ -1,11 +1,5 @@
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import {
-  Spin,
-  Tree,
-  Alert,
-  Tooltip,
-  Checkbox,
-} from "antd";
+import { Spin, Tree, Alert, Tooltip, Checkbox } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -13,7 +7,6 @@ import {
   DownloadOutlined,
   PlusOutlined,
   WarningOutlined,
-
 } from "@ant-design/icons";
 import { Link, NavLink } from "react-router-dom";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -48,7 +41,7 @@ const GroupAccess = () => {
     loading,
     data_detail,
   } = useSelector((state) => state.groupAccess);
-  const { bodyError } = useSelector(state => state?.general);
+  const { bodyError } = useSelector((state) => state?.general);
   const dispatch = useDispatch();
 
   // use state
@@ -70,13 +63,18 @@ const GroupAccess = () => {
   // handle fetch
   const handleFetch = useCallback(() => {
     dispatch(
-      getAllGroupAccessPaginate({ search: encodeURIComponent(JSON?.stringify(search)), page, pageSize, sort })
+      getAllGroupAccessPaginate({
+        search: encodeURIComponent(JSON?.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
     );
-  }, [dispatch, page, pageSize, search, sort])
+  }, [dispatch, page, pageSize, search, sort]);
 
   // use effect
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
 
   // Search Column Table
@@ -108,17 +106,25 @@ const GroupAccess = () => {
       dataIndex: "name",
       sorter: true,
       ellipsis: {
-        showTitle: false
+        showTitle: false,
       },
       ...getColumnSearchPropsPaging(
         "name",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('name', searchedColumn, searchText, text, true, 'input', search)
-
+      render: (text) =>
+        renderColumn(
+          "name",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "USER LEVEL",
@@ -131,9 +137,18 @@ const GroupAccess = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('userLevel', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "userLevel",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -148,10 +163,18 @@ const GroupAccess = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
-
+      render: (text) =>
+        renderColumn(
+          "description",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -164,9 +187,18 @@ const GroupAccess = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
   ];
 
@@ -188,10 +220,9 @@ const GroupAccess = () => {
         pageSize,
         sort,
         search: encodeURIComponent(JSON?.stringify(search)),
-      })
+      }),
     );
-  }
-
+  };
 
   // handle detail
   const handleDetail = async (id) => {
@@ -214,7 +245,7 @@ const GroupAccess = () => {
       await handleFetch()?.unwrap();
     } catch (error) {
       await handleFetch()?.unwrap();
-      handleCancel()
+      handleCancel();
     }
   };
 
@@ -238,12 +269,11 @@ const GroupAccess = () => {
     },
   ];
 
-
   // item actions
   const itemActions = [
     // toolbar items
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           type={"submit"}
@@ -252,15 +282,12 @@ const GroupAccess = () => {
         >
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
-        <NavLink
-          to={SYSTEM_SETUP_ROUTES.CREATE_GROUP_ACCESS}
-          state={{ x: 1 }}
-        >
+        <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_GROUP_ACCESS} state={{ x: 1 }}>
           <ButtonComponent
             icon={<PlusOutlined style={{ fontSize: "24px" }} />}
             type="submit"
@@ -268,13 +295,13 @@ const GroupAccess = () => {
             Create Group Access
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // column action
     {
-      action: 'View',
-      type: 'table',
+      action: "View",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
@@ -286,35 +313,50 @@ const GroupAccess = () => {
               <SVGIcon name="IconDetail" width={24} />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Update',
-      type: 'table',
+      action: "Update",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Update">
-            <div className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}>
+            <div
+              className={`${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+            >
               <Link
-                to={record?.status?.toLowerCase() !== "inactive" && SYSTEM_SETUP_ROUTES.UPDATE_GROUP_ACCESS}
-                state={record?.status?.toLowerCase() !== "inactive" && { id: record?.gaId }}
+                to={
+                  record?.status?.toLowerCase() !== "inactive" &&
+                  SYSTEM_SETUP_ROUTES.UPDATE_GROUP_ACCESS
+                }
+                state={
+                  record?.status?.toLowerCase() !== "inactive" && {
+                    id: record?.gaId,
+                  }
+                }
               >
                 <div>
                   <SVGIcon
-                    className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}
-                    color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#ACC424"}
-                    name="IconEdit" width={24} />
+                    className={`${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+                    color={
+                      record?.status?.toLowerCase() === "inactive"
+                        ? "#8D91A0"
+                        : "#ACC424"
+                    }
+                    name="IconEdit"
+                    width={24}
+                  />
                 </div>
               </Link>
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Activate',
-      type: 'table',
+      action: "Activate",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip
@@ -331,9 +373,9 @@ const GroupAccess = () => {
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
+        );
+      },
+    },
   ];
 
   // handle retry modal error
@@ -343,9 +385,9 @@ const GroupAccess = () => {
       if (bodyError?.action === "ACTIVE_GROUP_ACCESS") {
         dispatch(activeAndInactiveGroupAccess(body));
       } else if (bodyError?.action === "GET_GROUP_ACCESS_DETAIL") {
-        dispatch(detailGroupAccess(body))
+        dispatch(detailGroupAccess(body));
       } else if (bodyError?.action === "DOWNLOAD_ACTION") {
-        handleDownload()
+        handleDownload();
       }
       handleFetch();
     } catch (error) {
@@ -369,7 +411,13 @@ const GroupAccess = () => {
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
-              columns={[...columns, ...useColumnActionPermission(['view', 'update', 'activate'], itemActions)]}
+              columns={[
+                ...columns,
+                ...useColumnActionPermission(
+                  ["view", "update", "activate"],
+                  itemActions,
+                ),
+              ]}
               onSort={onSort}
               tableScrolled={{
                 x: 1200,
@@ -410,15 +458,15 @@ const GroupAccess = () => {
         </CardComponent>
 
         <CardComponent header={" HISTORY LOG INFORMATION"} cols={5}>
-          <DetailText label={"Record Id"}>
-            {data_detail?.gaId}
-          </DetailText>
+          <DetailText label={"Record Id"}>{data_detail?.gaId}</DetailText>
           <DetailText label={"Created Date"}>
-            {hasValue(data_detail?.createdDate) && moment(data_detail?.createdDate).format("DD MMM YYYY HH:mm:ss")}
+            {hasValue(data_detail?.createdDate) &&
+              moment(data_detail?.createdDate).format("DD MMM YYYY HH:mm:ss")}
           </DetailText>
           <DetailText label={"Created By"}>{data_detail?.createdBy}</DetailText>
           <DetailText label={"Updated Date"}>
-            {hasValue(data_detail?.updatedDate) && moment(data_detail?.updatedDate).format("DD MMM YYYY HH:mm:ss")}
+            {hasValue(data_detail?.updatedDate) &&
+              moment(data_detail?.updatedDate).format("DD MMM YYYY HH:mm:ss")}
           </DetailText>
           <DetailText label={"Updated By"}>{data_detail?.updatedBy}</DetailText>
         </CardComponent>
@@ -445,13 +493,11 @@ const GroupAccess = () => {
       >
         <div className="w-full flex flex-col mt-10 justify-end">
           <div className={"w-full flex flex-row items-center px-10"}>
-            <WarningOutlined
-              style={{ color: "red" }}
-              className={"text-4xl"}
-            />
+            <WarningOutlined style={{ color: "red" }} className={"text-4xl"} />
             <span className={"text-lg text-black font-bold h-auto mx-auto"}>
-              {`Are you sure want to ${status === "ACTIVE" ? "inactivate" : "activate"
-                }?`}
+              {`Are you sure want to ${
+                status === "ACTIVE" ? "inactivate" : "activate"
+              }?`}
             </span>
           </div>
         </div>

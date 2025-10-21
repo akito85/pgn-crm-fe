@@ -12,8 +12,8 @@ const ActiveAndInactiveGasSource = ({
   handleCancelFooter = () => {},
   handleConfirmFooter = () => {},
   remark,
-  onChange = () => { },
-  calorieName
+  onChange = () => {},
+  calorieName,
 }) => {
   return (
     <ModalApproveOrReject
@@ -39,7 +39,7 @@ const ActiveAndInactiveGasSource = ({
     >
       <InputComponent
         rows={1}
-        label = {"Remark"}
+        label={"Remark"}
         type="textarea"
         value={remark}
         onChange={onChange}

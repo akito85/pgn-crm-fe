@@ -9,7 +9,7 @@ export const columnsDetailLoginBackground = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -22,22 +22,31 @@ export const columnsDetailLoginBackground = (
     title: "ACTOR",
     dataIndex: "createdBy",
     key: "createdBy",
-    sorter: (a, b) => sorterFunction('createdBy', a, b),
+    sorter: (a, b) => sorterFunction("createdBy", a, b),
     align: "left",
     ...getColumnSearchProps(
       "createdBy",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('createdBy', searchedColumn, searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "createdBy",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "ACTION",
     dataIndex: "operation",
     key: "operation",
-    sorter: (a, b) => sorterFunction('operation', a, b),
+    sorter: (a, b) => sorterFunction("operation", a, b),
     align: "center",
     ...getColumnSearchProps(
       "operation",
@@ -46,15 +55,24 @@ export const columnsDetailLoginBackground = (
       searchText,
       handleSearch,
       false,
-      'status'
+      "status",
     ),
-    render: (text) => renderColumn('operation', searchedColumn, searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "operation",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "ACTION DATE",
     dataIndex: "createdDate",
     key: "createdDate",
-    sorter: (a, b) => sorterFunction('createdDate', a,b ,'date'),
+    sorter: (a, b) => sorterFunction("createdDate", a, b, "date"),
     align: "center",
     ...getColumnSearchProps(
       "createdDate",
@@ -63,9 +81,17 @@ export const columnsDetailLoginBackground = (
       searchText,
       handleSearch,
       true,
-      "datetime"
+      "datetime",
     ),
-    render:(text) => renderDateColumn('createdDate', hasValue(search['createdDate']), searchText, text, 'datetime', search)
+    render: (text) =>
+      renderDateColumn(
+        "createdDate",
+        hasValue(search["createdDate"]),
+        searchText,
+        text,
+        "datetime",
+        search,
+      ),
   },
   {
     title: "REMARK",
@@ -76,13 +102,21 @@ export const columnsDetailLoginBackground = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,
     },
-    sorter: (a, b) => sorterFunction('remark', a, b),
-    render: (text) => renderColumn('remark', searchedColumn, searchText, text, true, 'input', search)
-
+    sorter: (a, b) => sorterFunction("remark", a, b),
+    render: (text) =>
+      renderColumn(
+        "remark",
+        searchedColumn,
+        searchText,
+        text,
+        true,
+        "input",
+        search,
+      ),
   },
 ];

@@ -1,13 +1,13 @@
-import React, {useState, useEffect, useRef} from 'react'
-import moment from 'moment'
-import { FilterOutlined, PlusCircleOutlined } from '@ant-design/icons'
-import Highlighter from 'react-highlight-words'
-import { DatePicker, Input, Tooltip } from 'antd'
+import React, { useState, useEffect, useRef } from "react";
+import moment from "moment";
+import { FilterOutlined, PlusCircleOutlined } from "@ant-design/icons";
+import Highlighter from "react-highlight-words";
+import { DatePicker, Input, Tooltip } from "antd";
 
-import ModalCustom from '../../../../../../../../components/Modal/ModalCustom'
-import ButtonComponent from '../../../../../../../../components/ButtonComponent'
-import TablePagination from '../../../../../../../../components/TablePagination'
-import { dateFormatting } from '../../../../../../../../utils'
+import ModalCustom from "../../../../../../../../components/Modal/ModalCustom";
+import ButtonComponent from "../../../../../../../../components/ButtonComponent";
+import TablePagination from "../../../../../../../../components/TablePagination";
+import { dateFormatting } from "../../../../../../../../utils";
 
 const ModalChooseProduct = ({
   modalChooseProduct,
@@ -18,9 +18,8 @@ const ModalChooseProduct = ({
   idAccount,
   serviceType,
   dispatch,
-  isMain
+  isMain,
 }) => {
-
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState("");
@@ -36,10 +35,10 @@ const ModalChooseProduct = ({
     const body = {
       idAccount: idAccount,
       serviceTypeId: serviceType,
-      idProductType: isMain === "Y" ? 245 : 287
-    }
-    dispatch(getListProduct({body:body}))
-  }, [serviceType])
+      idProductType: isMain === "Y" ? 245 : 287,
+    };
+    dispatch(getListProduct({ body: body }));
+  }, [serviceType]);
 
   // Search Column Table
   const getColumnSearchProps = (dataIndex, type) => ({
@@ -134,11 +133,11 @@ const ModalChooseProduct = ({
       width: 150,
       sorter: true,
       ...getColumnSearchProps(
-        'productName',
+        "productName",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -147,11 +146,11 @@ const ModalChooseProduct = ({
       width: 150,
       sorter: true,
       ...getColumnSearchProps(
-        'productType',
+        "productType",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -160,11 +159,11 @@ const ModalChooseProduct = ({
       width: 150,
       sorter: true,
       ...getColumnSearchProps(
-        'serviceType',
+        "serviceType",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -173,11 +172,11 @@ const ModalChooseProduct = ({
       width: 150,
       sorter: true,
       ...getColumnSearchProps(
-        'productClass',
+        "productClass",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -189,20 +188,21 @@ const ModalChooseProduct = ({
         return (
           <div className="flex justify-center align-middle gap-2">
             <Tooltip title="Choose">
-              <PlusCircleOutlined onClick={()=>getProductDetailById(r?.id)} style={{color: "#0075BF", cursor: "pointer"}}/>
+              <PlusCircleOutlined
+                onClick={() => getProductDetailById(r?.id)}
+                style={{ color: "#0075BF", cursor: "pointer" }}
+              />
             </Tooltip>
           </div>
         );
       },
     },
-  ]
-
+  ];
 
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
   };
-
 
   const onSort = (_, __, sort) => {
     if (sort.order) {
@@ -297,7 +297,7 @@ const ModalChooseProduct = ({
         </div>
       </ModalCustom>
     </div>
-  )
-}
+  );
+};
 
-export default ModalChooseProduct
+export default ModalChooseProduct;

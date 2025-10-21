@@ -41,7 +41,7 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [ratingCodeId, search, page, pageSize, sort]);
 
@@ -78,20 +78,18 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
 
   return (
     <BaseContainer header={"Usage Information"}>
-       <div className="flex flex-row align-middle gap-2">
-          <p className="text-[15px] font-semibold text-text-color-semibold">
-            Calculation Code:
-          </p>
-          <p className="text-[15px] font-semibold text-primary">
-            {calculationCode}
-          </p>
-          <p className="text-[15px] font-semibold text-text-color-semibold">
-            Rating Code:
-          </p>
-          <p className="text-[15px] font-semibold text-primary">
-            {ratingCodeId}
-          </p>
-        </div>
+      <div className="flex flex-row align-middle gap-2">
+        <p className="text-[15px] font-semibold text-text-color-semibold">
+          Calculation Code:
+        </p>
+        <p className="text-[15px] font-semibold text-primary">
+          {calculationCode}
+        </p>
+        <p className="text-[15px] font-semibold text-text-color-semibold">
+          Rating Code:
+        </p>
+        <p className="text-[15px] font-semibold text-primary">{ratingCodeId}</p>
+      </div>
       <div className="w-full">
         <TablePaginationNew
           dataSource={dataSource}
@@ -102,7 +100,7 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           )?.filter((item) => item?.title !== "APPROVED BY")}
           current={page}
           pageSize={pageSize}

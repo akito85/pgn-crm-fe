@@ -26,7 +26,7 @@ const TaxIdentifierForm = ({
 }) => {
   // Selector
   const { loading, data_taxIdentifierType, data_account } = useSelector(
-    (state) => state.account
+    (state) => state.account,
   );
 
   // Declaration
@@ -51,8 +51,8 @@ const TaxIdentifierForm = ({
   }, []);
 
   useEffect(() => {
-    form.resetFields(["taxAddress"])
-  }, [dataAddress])
+    form.resetFields(["taxAddress"]);
+  }, [dataAddress]);
 
   useEffect(() => {
     if (dataAccount !== 0) {
@@ -80,11 +80,11 @@ const TaxIdentifierForm = ({
         ?.filter((a) => a.accountId === dataAccount)
         ?.find((b) => b.taxIdentifierAddressValue)?.taxIdentifierAddressValue;
 
-        setAccountNumber(
-          dataSource
-            ?.filter((a) => a.accountId === dataAccount)
-            ?.find((b) => b.accountName)?.accountNumber
-        );
+      setAccountNumber(
+        dataSource
+          ?.filter((a) => a.accountId === dataAccount)
+          ?.find((b) => b.accountName)?.accountNumber,
+      );
 
       form.setFieldsValue({
         relatedAccountId: dataSource
@@ -97,7 +97,7 @@ const TaxIdentifierForm = ({
         ratin2: findTaxName,
         ratia: findTaxAddress,
       });
-      handleTIObj(dataAccount,"accountId")
+      handleTIObj(dataAccount, "accountId");
     }
   }, [dataAccount]);
 
@@ -105,7 +105,7 @@ const TaxIdentifierForm = ({
     if (e === "" || e === undefined) {
       setDataAccount();
       setAccountNumber("");
-      handleTIObj(e,"accountId")
+      handleTIObj(e, "accountId");
       form.resetFields([
         "relatedAccountId",
         "customerNameTI",
@@ -119,7 +119,7 @@ const TaxIdentifierForm = ({
       ]);
     }
   };
-  
+
   // Use Effect
   useEffect(() => {
     dispatch(getAllAccountPaginate({ search, sort, page, pageSize }));
@@ -200,7 +200,7 @@ const TaxIdentifierForm = ({
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -317,7 +317,7 @@ const TaxIdentifierForm = ({
       } else {
         callback();
       }
-    } 
+    }
     if (tiObj.taxIdentifierType === 921) {
       if (value && value.toString().length !== 16) {
         callback("Input number must be 16 digits!");
@@ -351,7 +351,7 @@ const TaxIdentifierForm = ({
               "taxIdentifierType",
               form.resetFields(["taxIdentifierName"]),
               form.resetFields(["taxIdentifierNumber"]),
-              form.resetFields(["taxAddress"])
+              form.resetFields(["taxAddress"]),
             )
           }
         >
@@ -395,7 +395,10 @@ const TaxIdentifierForm = ({
           ]}
           getValueFromEvent={(e) => handleTIObj(e, "taxIdentifierName")}
         >
-          <InputComponent disabled={!tiObj?.taxIdentifierType ? true : false} onInput={onInputUpperCase}/>
+          <InputComponent
+            disabled={!tiObj?.taxIdentifierType ? true : false}
+            onInput={onInputUpperCase}
+          />
         </Form.Item>
 
         <div className="col-span-3">

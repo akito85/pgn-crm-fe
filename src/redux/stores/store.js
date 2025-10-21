@@ -14,7 +14,7 @@ import masterJobReducer from "../slices/system_setup/master_data/master_job";
 import loginBackgroundReducer from "../slices/system_setup/login_background";
 import announcementReducer from "../slices/system_setup/announcement";
 import maintenanceModeReducer from "../slices/system_setup/maintenanceMode";
-import delegationReducer from "../slices/user_management/delegation"
+import delegationReducer from "../slices/user_management/delegation";
 import userLevelReducer from "../slices/user_management/user_level_slice";
 import dataReducer from "../slices/data_slice";
 import profileReducer from "../slices/user_management/profile";
@@ -76,16 +76,16 @@ import invoiceTemplateReducer from "../slices/rating_billing_invoice/MasterData/
 import termsofPaymentReducer from "../slices/rating_billing_invoice/MasterData/termsofPayment";
 import taxCodeReducer from "../slices/rating_billing_invoice/MasterData/taxCode";
 import promoReducer from "../slices/product_promo/promoSlice";
-import positionHierarchyReducer from '../slices/user_management/position_hirarchy';
-import rawMaterialSourceReducer from "../slices/account_management/detailAccount/RawMaterialDistributionSlice"
-import productDistributionReducer from "../slices/account_management/detailAccount/ProductDistributionSlice"
-import accountGasUtilizationReducer from '../slices/account_management/detailAccount/gasUtilizationSlice';
+import positionHierarchyReducer from "../slices/user_management/position_hirarchy";
+import rawMaterialSourceReducer from "../slices/account_management/detailAccount/RawMaterialDistributionSlice";
+import productDistributionReducer from "../slices/account_management/detailAccount/ProductDistributionSlice";
+import accountGasUtilizationReducer from "../slices/account_management/detailAccount/gasUtilizationSlice";
 import additionalInfoReducer from "../slices/account_management/detailAccount/additionalInformation";
 import equpmentReducer from "../slices/account_management/detailAccount/equpmentSlice";
-import criteriaReducer from '../slices/criteria_slice';
+import criteriaReducer from "../slices/criteria_slice";
 import { reportCustomerSlice } from "../slices/report/report_customer_slice";
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
-import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement"; 
+import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement";
 
 const reducer = combineReducers({
   auth: authReducer,
@@ -195,8 +195,8 @@ const reducer = combineReducers({
 
   // report
   [reportCustomerSlice.reducerPath]: reportCustomerSlice.reducer,
-  [reportCustomerAgreementSlice.reducerPath] : reportCustomerAgreementSlice.reducer
-
+  [reportCustomerAgreementSlice.reducerPath]:
+    reportCustomerAgreementSlice.reducer,
 });
 
 // add throttle middlewares
@@ -209,5 +209,5 @@ const store = configureStore({
     getDefaultMiddleware().concat(reportCustomerSlice.middleware),
 });
 
-setupListeners(store.dispatch)
+setupListeners(store.dispatch);
 export default store;

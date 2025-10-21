@@ -63,11 +63,11 @@ export const SYSTEM_SETUP_ROUTES = {
   UPDATE_MASTER_POSITION: "/system-setup/master-data/position/update",
 
   // ASSETS
-  VIEW_MASTER_ASSETS:'/system-setup/assets',
-  CREATE_MASTER_ASSETS:'/system-setup/assets/create',
-  UPDATE_MASTER_ASSETS:'/system-setup/assets/update',
-  DETAIL_MASTER_ASSETS: '/system-setup/assets/view',
-  UPLOAD_MASTER_ASSETS:'/system-setup/assets/upload',
+  VIEW_MASTER_ASSETS: "/system-setup/assets",
+  CREATE_MASTER_ASSETS: "/system-setup/assets/create",
+  UPDATE_MASTER_ASSETS: "/system-setup/assets/update",
+  DETAIL_MASTER_ASSETS: "/system-setup/assets/view",
+  UPLOAD_MASTER_ASSETS: "/system-setup/assets/upload",
 
   // MAINTENANCE MODE
   VIEW_MAINTENANCE_MODE: "/system-setup/maintenance-mode",

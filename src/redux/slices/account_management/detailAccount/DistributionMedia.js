@@ -18,7 +18,7 @@ export const getDistributionMedia = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const createDistributionMedia = createAsyncThunk(
@@ -52,7 +52,7 @@ export const createDistributionMedia = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const inActiveDistributionMedia = createAsyncThunk(
@@ -86,9 +86,8 @@ export const inActiveDistributionMedia = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
-
 
 //external
 export const getProductDetail = createAsyncThunk(
@@ -101,9 +100,8 @@ export const getProductDetail = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
-
 
 const distributionMediaSlice = createSlice({
   name: "distributionMedia",

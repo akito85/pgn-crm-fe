@@ -25,10 +25,16 @@ import {
   getSelectCategory,
 } from "../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
-import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../redux/slices/general_slice";
 import AttachmentSectionForm from "../Pricing/Form/AttachmentSectionForm";
 import BaseContainer from "../../../../components/BaseContainer";
-import { handleCheckCriteriaMissingValidation, handleMappingCriteriaGeneral } from "../UtilsProduct/UtilsAllProduct";
+import {
+  handleCheckCriteriaMissingValidation,
+  handleMappingCriteriaGeneral,
+} from "../UtilsProduct/UtilsAllProduct";
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
 
 const PricingRuleCreate = () => {
@@ -131,7 +137,7 @@ const PricingRuleCreate = () => {
   // Handle Save for Modal Confirmation
   const handleSave = useCallback(
     async (formValue) => {
-      try{
+      try {
         let errorBody = {};
         if (data.length === 0) {
           errorBody = {
@@ -150,7 +156,7 @@ const PricingRuleCreate = () => {
             criteriaOptions,
             formValue?.rPricingRuleCriterias,
             listDataCriteria,
-            () => {}
+            () => {},
           )
         ) {
           const errorBody = {
@@ -163,15 +169,15 @@ const PricingRuleCreate = () => {
             const { key, ...rest } = obj;
             return rest;
           });
-  
+
           const criteriaArrayObject = formValue.rPricingRuleCriterias.map(
             (item) => {
               return {
                 criteria: item,
               };
-            }
+            },
           );
-  
+
           let dataCriteriaObject = listDataCriteria.map(
             (item, index) =>
               handleMappingCriteriaGeneral({
@@ -186,8 +192,8 @@ const PricingRuleCreate = () => {
                     name: item.text,
                   };
                 }),
-              })
-  
+              }),
+
             // return {
             //   budget: item.budget?.value || null,
             //   subDistrict: item.subDistrict?.value || null,
@@ -207,11 +213,11 @@ const PricingRuleCreate = () => {
             //   customer: item.customer?.value || null,
             // };
           );
-  
+
           // const filteredCriteria = columnsTableCriteria().filter(
           //   (item) => !formValue.rPricingRuleCriterias.includes(item.indexValue)
           // );
-  
+
           // dataCriteriaObject = dataCriteriaObject?.map((item) => {
           //   let obj = { ...item };
           //   filteredCriteria.forEach((criteria) => {
@@ -219,9 +225,9 @@ const PricingRuleCreate = () => {
           //   });
           //   return obj;
           // });
-  
+
           const includesAll = formValue.rPricingRuleCriterias.includes(24);
-  
+
           const dataValue = {
             name: formValue.name,
             description: formValue.description,
@@ -235,7 +241,7 @@ const PricingRuleCreate = () => {
               ? [{ allCriteria: true }]
               : dataCriteriaObject,
           };
-  
+
           setBodyData(dataValue);
           setTabPagesEmployee([
             {
@@ -245,7 +251,7 @@ const PricingRuleCreate = () => {
             { value: "Approval", paramValue: ["apphierId"] },
             { value: "Attachment" },
           ]);
-  
+
           const validateValueObj = {
             body: dataValue,
             services: productPromoHttpService,
@@ -253,10 +259,10 @@ const PricingRuleCreate = () => {
             type: "create",
           };
           await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
-  
+
           setModalConfirm(true);
-      }
-      }  catch (error) {
+        }
+      } catch (error) {
         console.log(error);
       }
     },
@@ -269,7 +275,7 @@ const PricingRuleCreate = () => {
       flag,
       listDataCriteria,
       storedDataInline,
-    ]
+    ],
   );
 
   // Validation Button Back
@@ -304,7 +310,7 @@ const PricingRuleCreate = () => {
     const getUniqueListBy = (arr) => {
       return [
         ...new Map(
-          arr.map((item) => [`${item["priceCode"]}~${item["min"]}`, item])
+          arr.map((item) => [`${item["priceCode"]}~${item["min"]}`, item]),
         ).values(),
       ];
     };
@@ -327,7 +333,7 @@ const PricingRuleCreate = () => {
           };
           await productPromoHttpService.uploadAttachment(
             `/v1/dbs/api/pricingRule/uploadAttachment/${idPricingRule}`,
-            body
+            body,
           );
         }
         setLoadingForm(false);
@@ -361,7 +367,7 @@ const PricingRuleCreate = () => {
         const errorBadge = errorFields.reduce(
           (current, next) =>
             item.paramValue.includes(next.name[0]) ? current + 1 : current,
-          0
+          0,
         );
         return {
           value: item.value,

@@ -23,7 +23,7 @@ function filterData(array, filters) {
         const fixSearchText =
           key === "min" || key === "maximumName"
             ? filters[key]?.replace(/,/g, "")?.toLowerCase()
-            : filters[key]?.toLowerCase();        
+            : filters[key]?.toLowerCase();
         if (key === "value") {
           let temp;
           if (typeof item[key] === "number") {
@@ -62,7 +62,7 @@ const Detail = ({
   const [formDetail] = Form.useForm();
   const minimums = new Set();
   const dispatch = useDispatch();
-  
+
   // State
   const [dataTable, setDataTable] = useState([]);
   const [totalElement, setTotalElement] = useState(0);
@@ -85,7 +85,7 @@ const Detail = ({
 
   // Use Effect
   useEffect(() => {
-    if(data_price_code?.length === 0 || data_price_code === null) {
+    if (data_price_code?.length === 0 || data_price_code === null) {
       dispatch(getListPriceCode());
     }
   }, [data_price_code, dispatch]);
@@ -129,7 +129,7 @@ const Detail = ({
     for (let item of result) {
       map.set(
         `${item["priceCodeName"]}~${item["min"]}~${item["maximumName"]}`,
-        item
+        item,
       );
     }
     let iteratorValues = map.values();
@@ -139,12 +139,12 @@ const Detail = ({
       .slice((page - 1) * pageSize, page * pageSize)
       .map(
         (item) =>
-          `${item["priceCodeName"]}~${item["min"]}~${item["maximumName"]}`
+          `${item["priceCodeName"]}~${item["min"]}~${item["maximumName"]}`,
       );
     const dataFix = result.filter((item) =>
       dataFilter.includes(
-        `${item["priceCodeName"]}~${item["min"]}~${item["maximumName"]}`
-      )
+        `${item["priceCodeName"]}~${item["min"]}~${item["maximumName"]}`,
+      ),
     );
 
     /** Function Merge Table */
@@ -159,7 +159,7 @@ const Detail = ({
       }
       if (
         uniquePriceCode2.has(
-          `${rowData.priceCode}~${rowData.min}~${rowData.maximumName}`
+          `${rowData.priceCode}~${rowData.min}~${rowData.maximumName}`,
         )
       ) {
         updatedRowsData.rowSpan = 0;
@@ -168,12 +168,12 @@ const Detail = ({
           (data) =>
             data.priceCode === rowData.priceCode &&
             data.min === rowData.min &&
-            data.maximumName === rowData.maximumName
+            data.maximumName === rowData.maximumName,
         ).length;
         updatedRowsData.rowSpan = Math.min(pageSize, occurCount);
         updatedRowsData.number = pageNumber;
         uniquePriceCode2.add(
-          `${rowData.priceCode}~${rowData.min}~${rowData.maximumName}`
+          `${rowData.priceCode}~${rowData.min}~${rowData.maximumName}`,
         );
         pageNumber++;
       }
@@ -190,7 +190,7 @@ const Detail = ({
         ?.mpricingDetails.reduce(
           (current, next) =>
             current + `, ${next.value}/${next.currencyName}/${next.uomName}`,
-          ""
+          "",
         );
       formDetail.setFieldsValue({
         priceDetail: findPriceDetail?.slice(2),
@@ -205,7 +205,7 @@ const Detail = ({
         ?.mpricingDetails.reduce(
           (current, next) =>
             current + `, ${next.value}/${next.currency}/${next.uom}`,
-          ""
+          "",
         );
 
       setPDselect(dataUpdate.priceCode);
@@ -243,7 +243,7 @@ const Detail = ({
       return tempData;
     });
   };
-  
+
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
@@ -265,7 +265,7 @@ const Detail = ({
       tempData = tempData.filter(
         (item) =>
           `${item["priceCodeName"]}~${item["min"]}~${item["maximumName"]}` !==
-          `${dataUpdate["priceCodeName"]}~${dataUpdate["min"]}~${dataUpdate["maximumName"]}`
+          `${dataUpdate["priceCodeName"]}~${dataUpdate["min"]}~${dataUpdate["maximumName"]}`,
       );
     }
     tempData.forEach((item) => {
@@ -336,7 +336,7 @@ const Detail = ({
           const obj = data?.findIndex(
             (a) =>
               `${a["priceCodeName"]}~${a["min"]}~${a["maximumName"]}` ===
-              `${dataUpdate["priceCodeName"]}~${dataUpdate["min"]}~${dataUpdate["maximumName"]}`
+              `${dataUpdate["priceCodeName"]}~${dataUpdate["min"]}~${dataUpdate["maximumName"]}`,
           );
           let indexArray = [obj];
           if (
@@ -370,7 +370,7 @@ const Detail = ({
           temp = temp.filter(
             (a) =>
               `${a["priceCodeName"]}~${a["min"]}~${a["maximumName"]}` !==
-              `${dataUpdate["priceCodeName"]}~${dataUpdate["min"]}~${dataUpdate["maximumName"]}`
+              `${dataUpdate["priceCodeName"]}~${dataUpdate["min"]}~${dataUpdate["maximumName"]}`,
           );
           let dataLength = temp.length;
           const obj = data_price_code?.filter((a) => a.id === PDselect)[0];
@@ -416,11 +416,11 @@ const Detail = ({
     (r) => {
       setData((prevState) =>
         prevState.filter(
-          (e) => `${e["priceCodeName"]}~${e["min"]}~${e["maximumName"]}` !== r
-        )
+          (e) => `${e["priceCodeName"]}~${e["min"]}~${e["maximumName"]}` !== r,
+        ),
       );
     },
-    [data]
+    [data],
   );
 
   // handle two Price Detail
@@ -533,8 +533,8 @@ const Detail = ({
               handleDetailHistory,
               type,
               data,
-              minimums
-            )
+              minimums,
+            ),
           )}
           tableScrolled={{
             x: 1500,
@@ -613,11 +613,11 @@ const Detail = ({
                           if (value < minimum) {
                             // value = currentValue of this field. with that we can do validations with other values in form fields
                             return Promise.reject(
-                              "Maximum must be greater than Minimum"
+                              "Maximum must be greater than Minimum",
                             ); // The validator should always return a promise on both success and error
                           } else if (value === minimum) {
                             return Promise.reject(
-                              "Maximmum cannot be same as Minimum"
+                              "Maximmum cannot be same as Minimum",
                             );
                           } else {
                             return Promise.resolve();
@@ -692,7 +692,9 @@ const Detail = ({
         }
       >
         <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-          <DetailText label="Record ID">{dataHistory.pricingRuleDetailId}</DetailText>
+          <DetailText label="Record ID">
+            {dataHistory.pricingRuleDetailId}
+          </DetailText>
           <DetailText label="Created Date">
             {dataHistory?.createdDate
               ? moment(dataHistory.createdDate).format(dateFormatting.dateTime)

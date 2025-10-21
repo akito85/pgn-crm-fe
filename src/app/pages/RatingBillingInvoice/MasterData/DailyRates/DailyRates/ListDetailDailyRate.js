@@ -26,7 +26,7 @@ import DetailDailyRate from "./DetailDailyRate";
 
 const ListDetailDailyRate = () => {
   const { data_detail, data_detail_draft } = useSelector(
-    (state) => state.daily_rate
+    (state) => state.daily_rate,
   );
   const dispatch = useDispatch();
   const location = useLocation();
@@ -118,8 +118,7 @@ const ListDetailDailyRate = () => {
       };
       setModalConfirm(false);
       dispatch(approveCreate({ body: data }));
-      handleClear()
-
+      handleClear();
     } else {
       const data = {
         id: id,
@@ -129,7 +128,7 @@ const ListDetailDailyRate = () => {
       };
       setModalConfirm(false);
       dispatch(approveRejectInactive({ body: data }));
-     handleClear()
+      handleClear();
     }
   };
 
@@ -139,7 +138,7 @@ const ListDetailDailyRate = () => {
   const descimal = tempValue[1]
     ? `${decimalSeparator}${tempValue[1]}`
     : `${decimalSeparator}00`;
-    
+
   const convertedRate =
     tempValue.length > 0
       ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
@@ -265,14 +264,14 @@ const ListDetailDailyRate = () => {
 
       {/* Modal Approve/Reject*/}
       <ModalApproveOrReject
-          isOpen={modalConfirm}
-          handleCloseModal={handleCancel}
-          onFinish={handleConfirm}
-          header={approveOrReject}
-          approveOrReject={approveOrReject}
-          menu={"Daily Rate"}
-          named={data_detail?.rateType}
-        />
+        isOpen={modalConfirm}
+        handleCloseModal={handleCancel}
+        onFinish={handleConfirm}
+        header={approveOrReject}
+        approveOrReject={approveOrReject}
+        menu={"Daily Rate"}
+        named={data_detail?.rateType}
+      />
       {/* <ModalApproveOrReject
         key={modalConfirm ? true : false}
         isOpen={modalConfirm}

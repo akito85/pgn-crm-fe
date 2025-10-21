@@ -38,13 +38,13 @@ const PDIPricingForm = ({
   const priceCodeDescription = priceCodeObj.priceDescription || "";
   const priceCodeDetails = priceCodeObj.mpricingDetails || [];
   const tempProductType = (dataListProductType || []).filter(
-    (item) => item.value === (productObj.productType || 0)
+    (item) => item.value === (productObj.productType || 0),
   );
   const tempProductClass = (dataListProductClass || []).filter(
-    (item) => item.value === (productObj.productClass || 0)
+    (item) => item.value === (productObj.productClass || 0),
   );
   const tempServiceType = (dataListServiceType || []).filter(
-    (item) => item.value === (productObj.serviceType || 0)
+    (item) => item.value === (productObj.serviceType || 0),
   );
   const dataDetailProduct = {
     productName: productObj.productName,

@@ -16,7 +16,7 @@ const ABDInfoSection = ({ data, listDataABI = [] }) => {
     .map((a) => a.adjustmentAmount);
   const sumIDR = dataIDR.reduce(
     (accumulator, currentValue) => accumulator + currentValue,
-    0
+    0,
   );
 
   // Sum Total Adjustment USD
@@ -25,7 +25,7 @@ const ABDInfoSection = ({ data, listDataABI = [] }) => {
     .map((a) => a.adjustmentAmount);
   const sumUSD = dataUSD.reduce(
     (accumulator, currentValue) => accumulator + currentValue,
-    0
+    0,
   );
 
   return (
@@ -66,9 +66,7 @@ const ABDInfoSection = ({ data, listDataABI = [] }) => {
 
       <BaseContainer header={"HISTORY LOG INFORMATION"}>
         <div className="w-full grid grid-cols-5 gap-3">
-          <DetailText label="Record ID">
-            {data?.id}
-          </DetailText>
+          <DetailText label="Record ID">{data?.id}</DetailText>
           <DetailText label="Created Date">
             {data?.createdDate
               ? moment(data.createdDate).format(dateFormatting.dateTime)

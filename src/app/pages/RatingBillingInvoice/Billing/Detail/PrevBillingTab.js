@@ -18,10 +18,9 @@ import TablePaginationNew from "../../../../../components/TablePaginationNew";
 const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
   // Selector
   const { data_prevBilling, data_billingItem } = useSelector(
-    (state) => state.billing
+    (state) => state.billing,
   );
 
-  
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -42,7 +41,7 @@ const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
         idBillingCode: billingCodeId,
         idAccountNumber: accountNumberId,
         idSaNumber: saNumberId,
-      })
+      }),
     );
   }, [accountNumberId, billingCodeId, dispatch, saNumberId]);
 
@@ -54,7 +53,7 @@ const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
         pageBI: page,
         pageSizeBI: pageSize,
         sortBI: sort,
-      })
+      }),
     );
   }, [dispatch, billingCodeId, search, page, pageSize, sort]);
 
@@ -96,7 +95,7 @@ const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
           <DetailText label={"Transaction Date"}>
             {data_prevBilling?.transactionDate
               ? moment(data_prevBilling?.transactionDate).format(
-                  dateFormatting.date
+                  dateFormatting.date,
                 )
               : "-"}
           </DetailText>
@@ -129,10 +128,13 @@ const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
             {currencyFormatting(data_prevBilling?.otherBillUsd, "usd")}
           </DetailText>
           <DetailText label={"Withholding Tax"}>
-            {currencyFormatting(data_prevBilling?.withHoldingTax?.toString(), 'idr')}
+            {currencyFormatting(
+              data_prevBilling?.withHoldingTax?.toString(),
+              "idr",
+            )}
           </DetailText>
           <DetailText label={"Prev Withholding Tax"}>
-            {currencyFormatting(data_prevBilling?.prevWithHoldingTax, 'idr')}
+            {currencyFormatting(data_prevBilling?.prevWithHoldingTax, "idr")}
           </DetailText>
           <DetailText label={"Discount IDR"}>
             {currencyFormatting(data_prevBilling?.discountAmountIdr, "idr")}
@@ -172,7 +174,7 @@ const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
               searchedColumn,
               searchText,
               handleSearch,
-              search
+              search,
             )}
             current={page}
             pageSize={pageSize}

@@ -31,16 +31,15 @@ const data = [
   { value: "Compensation", disabled: true },
   { value: "Promo", disabled: true },
   { value: "Multi Destination", disabled: true },
-  { value: "Additional Information", disabled: true  },
-  { value: "Gas Utilization", disabled: true  },
-  { value: "Equipment", disabled: true  },
-  { value: "Raw Material Source", disabled: true  },
-  { value: "Product Distribution", disabled: true  },
+  { value: "Additional Information", disabled: true },
+  { value: "Gas Utilization", disabled: true },
+  { value: "Equipment", disabled: true },
+  { value: "Raw Material Source", disabled: true },
+  { value: "Product Distribution", disabled: true },
   { value: "User Access", disabled: true },
 ];
 
 const CustomerAccountDetail = ({ type = "standard" }) => {
-
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.accountManagement);
   //declare
@@ -68,8 +67,8 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
             item.value === "Receipt" ||
             item.value === "Account Statement" ||
             item.value === "Promo" ||
-            item.value === "User Access"
-        )
+            item.value === "User Access",
+        ),
       );
     } else {
       setTabs(data);
@@ -129,7 +128,7 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
               idCustomer={idCustomer}
               type={type}
               setTypeAccountInfoDetailSection={setTypeAccountInfoDetailSection}
-              dispatch = {dispatch}
+              dispatch={dispatch}
               // handleChangeInteraction={handleSetType}
             />
             <div className="my-5 flex">

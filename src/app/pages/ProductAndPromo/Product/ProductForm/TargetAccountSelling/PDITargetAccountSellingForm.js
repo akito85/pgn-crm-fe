@@ -247,7 +247,7 @@ const PDITargetAccountSellingForm = ({
   //     dispatch(getBudgetList());
   //     dispatch(getProvinceList());
   //     dispatch(getIndustrialSectorList());
-      // dispatch(getAccountCategoryList());
+  // dispatch(getAccountCategoryList());
   //     dispatch(getServiceTypeList());
   //     // dispatch(getAccountGroupList());
   //     dispatch(getCustomerList());

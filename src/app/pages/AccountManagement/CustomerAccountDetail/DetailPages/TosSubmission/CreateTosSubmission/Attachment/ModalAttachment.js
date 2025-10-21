@@ -35,7 +35,6 @@ const ModalAttachment = ({
   const [urlLink, setUrlLink] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-
   // Use Effect
   useEffect(() => {
     dispatch(getSelectCategory());
@@ -91,7 +90,7 @@ const ModalAttachment = ({
         setSubmit(true);
         return false;
       },
-      [category]
+      [category],
     ),
   };
 
@@ -105,7 +104,7 @@ const ModalAttachment = ({
               ? parseInt(current) + 1
               : parseInt(nextKey) + 1;
           },
-          [1]
+          [1],
         );
         let newData = fileList.map((file) => {
           return {
@@ -127,7 +126,7 @@ const ModalAttachment = ({
               ? parseInt(current) + 1
               : parseInt(nextKey) + 1;
           },
-          [1]
+          [1],
         );
 
         const data = {

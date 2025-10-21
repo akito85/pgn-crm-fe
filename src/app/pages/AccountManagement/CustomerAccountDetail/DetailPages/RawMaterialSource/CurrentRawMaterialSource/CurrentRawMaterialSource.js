@@ -4,7 +4,11 @@ import { useDispatch, useSelector } from "react-redux";
 import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
 import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
 import { getCurrentRaw } from "../../../../../../../redux/slices/account_management/detailAccount/RawMaterialDistributionSlice";
-import { dateFormatting, hasValue, renderColumn } from "../../../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+} from "../../../../../../../utils";
 import moment from "moment";
 
 const columns = (
@@ -16,7 +20,7 @@ const columns = (
   searchText,
   handleSearch = () => {},
   onFilter = () => {},
-  sorter = () => {}
+  sorter = () => {},
 ) => {
   return [
     {
@@ -37,9 +41,18 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('country', hasValue(search['country']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "country",
+          hasValue(search["country"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "PERCENTAGE (%)",
@@ -54,9 +67,18 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('percentage', hasValue(search['percentage']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "percentage",
+          hasValue(search["percentage"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
   ];
 };
@@ -168,7 +190,7 @@ const CurrentRawMaterialSource = ({ id, idCustomer }) => {
           searchText,
           handleSearch,
           onFilter,
-          sorter
+          sorter,
         )}
       />
     </Fragment>

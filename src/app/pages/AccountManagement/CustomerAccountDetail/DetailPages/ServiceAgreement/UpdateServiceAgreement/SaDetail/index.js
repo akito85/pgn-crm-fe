@@ -1,7 +1,16 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { Button, Form, Input, InputNumber, Select, Tooltip, Pagination, Table } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Tooltip,
+  Pagination,
+  Table,
+} from "antd";
 import SelectComponent from "../../../../../../../../components/SelectComponent";
 import InputComponent from "../../../../../../../../components/InputComponent";
 import ModalCustom from "../../../../../../../../components/Modal/ModalCustom";
@@ -18,7 +27,15 @@ import TableProduct from "./TableProductDetail";
 import TableTos from "./TableTos";
 import ModalForm from "./TableTos/ModalForm";
 import ModalChooseTos from "./TableTos/ModalChooseTos";
-import { getDetailProductSa, getListPriceRuleById, getListLateCharge, getListProduct, getPriceCode, getPriceRule, resetDataDetail } from "../../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
+import {
+  getDetailProductSa,
+  getListPriceRuleById,
+  getListLateCharge,
+  getListProduct,
+  getPriceCode,
+  getPriceRule,
+  resetDataDetail,
+} from "../../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 import ModalChooseProduct from "./ModalChoose";
 
 const SaDetail = ({
@@ -68,27 +85,25 @@ const SaDetail = ({
   setSendLateCharge,
   setPriceAdjustment,
   priceAdjustment,
-  priceAdjustmentSelect = '',
+  priceAdjustmentSelect = "",
   setPriceAdjustmentSelect,
   priceAdjustmentSelectId,
   setPriceAdjustmentSelectId,
   valuePage,
   setValuePage,
   tabPagesSaDetail,
-  setTabPagesSaDetail
+  setTabPagesSaDetail,
 }) => {
   const dispatch = useDispatch();
-  const {
-    data_product,
-    loading,
-    data_price_code,
-    data_price_rule,
-  } = useSelector((state) => state.accountServiceAgreement);
+  const { data_product, loading, data_price_code, data_price_rule } =
+    useSelector((state) => state.accountServiceAgreement);
 
-  const [isIdChoose, setIsIdChoose] = useState([])
+  const [isIdChoose, setIsIdChoose] = useState([]);
 
   // Define Data From API
-  const dataDetailPricing = (dataTableDetailProduct?.product?.productPricing?.priceRuleTiering || []).map((item, index) => {
+  const dataDetailPricing = (
+    dataTableDetailProduct?.product?.productPricing?.priceRuleTiering || []
+  ).map((item, index) => {
     return {
       currency: item.currencyName,
       currencyId: item.currency,
@@ -107,49 +122,53 @@ const SaDetail = ({
       unlimited: item.isUnlim,
       uom: item.uom,
       uomName: item.uomName,
-      value: item.value
-    }
-  })
-  const calculationRule = (dataTableDetailProduct?.product?.productCalcRule || []).map((item) => {
+      value: item.value,
+    };
+  });
+  const calculationRule = (
+    dataTableDetailProduct?.product?.productCalcRule || []
+  ).map((item) => {
     return {
       key: `${item?.id}`,
       id: item?.id,
       name: {
         value: item?.nameId,
         label: item?.name,
-        key: `${item?.nameId}`
+        key: `${item?.nameId}`,
       },
       value: item?.value,
       unit: {
         value: parseInt(item?.uom),
         key: item?.uom,
-        label: item?.uomName
+        label: item?.uomName,
       },
-      description: item?.description
-    }
-  })
-  const productDetail = (dataTableDetailProduct?.product?.productDetail || []).map((item) => {
+      description: item?.description,
+    };
+  });
+  const productDetail = (
+    dataTableDetailProduct?.product?.productDetail || []
+  ).map((item) => {
     return {
       key: item?.id,
       id: item?.id,
       name: {
         value: item?.nameId,
-        label: item?.name
+        label: item?.name,
       },
       value: item?.value,
       unit: {
         key: item?.uom,
         value: parseInt(item?.uom),
-        label: item?.unitName
+        label: item?.unitName,
       },
-      description: item?.description
-    }
-  })
-  const termOfServiceFromProductVersion = dataTableDetailProduct?.product?.productTos
-
+      description: item?.description,
+    };
+  });
+  const termOfServiceFromProductVersion =
+    dataTableDetailProduct?.product?.productTos;
 
   // Tabs Use State
-  const [isCustomTiering, setIsCustomTiering] = useState(false)
+  const [isCustomTiering, setIsCustomTiering] = useState(false);
   // const [valuePage, setValuePage] = useState("Pricing");
   // const [tabPagesSaDetail, setTabPagesSaDetail] = useState([
   //   { value: "Pricing" },
@@ -159,9 +178,8 @@ const SaDetail = ({
   //   { value: "Tax Implication" },
   // ]);
 
-  const [idProduct, setIdProduct] = useState('');
+  const [idProduct, setIdProduct] = useState("");
   const [idCreateFrom, setIdCreateFrom] = useState(1);
-
 
   const [modalFormTos, setModalFormTos] = useState(false);
   const [dataFormTosModal, setDataFormTosModal] = useState({});
@@ -171,28 +189,37 @@ const SaDetail = ({
 
   useEffect(() => {
     if (Object.keys(dataDetailProduct).length !== 0) {
-      setDataTableDetailProduct(dataDetailProduct)
+      setDataTableDetailProduct(dataDetailProduct);
     }
-  }, [dataDetailProduct])
+  }, [dataDetailProduct]);
 
   useEffect(() => {
-    saDetailObj.pricingRule === -1 ? setIsCustomTiering(true) : setIsCustomTiering(false)
-  }, [saDetailObj.pricingRule])
+    saDetailObj.pricingRule === -1
+      ? setIsCustomTiering(true)
+      : setIsCustomTiering(false);
+  }, [saDetailObj.pricingRule]);
 
   useEffect(() => {
     // if (saDetailObj.createFrom === 2) {
-      const selectedPriceCode = data_price_code?.filter(item => item.id === saDetailObj?.priceCode)[0]
-      const selectedPriceRule = data_price_rule?.filter(item => item.pricingRuleId === saDetailObj?.pricingRule)[0]
+    const selectedPriceCode = data_price_code?.filter(
+      (item) => item.id === saDetailObj?.priceCode,
+    )[0];
+    const selectedPriceRule = data_price_rule?.filter(
+      (item) => item.pricingRuleId === saDetailObj?.pricingRule,
+    )[0];
 
-      setSaDetailObj((prevState) => ({
-        ...prevState,
-        priceCodeText: `${selectedPriceCode?.priceCode}${selectedPriceCode?.mpricingDetail?.map(item =>
-          `/${item.currency}/${item.value}/${item.uomName}`
-        ).join('')}`.replace(/\n/g, ''),
-        pricingRuleText: hasValue(selectedPriceRule) ? selectedPriceRule?.name : "Cstom Tiering"
-      }))
+    setSaDetailObj((prevState) => ({
+      ...prevState,
+      priceCodeText:
+        `${selectedPriceCode?.priceCode}${selectedPriceCode?.mpricingDetail
+          ?.map((item) => `/${item.currency}/${item.value}/${item.uomName}`)
+          .join("")}`.replace(/\n/g, ""),
+      pricingRuleText: hasValue(selectedPriceRule)
+        ? selectedPriceRule?.name
+        : "Cstom Tiering",
+    }));
     // }
-  }, [saDetailObj.priceCode, saDetailObj.pricingRule])
+  }, [saDetailObj.priceCode, saDetailObj.pricingRule]);
 
   // Handle Change Radio Tabs
   const onChange = (e) => {
@@ -201,22 +228,22 @@ const SaDetail = ({
 
   // Handle Tos
   const closeModalFormTos = () => {
-    setModalFormTos(false)
-    setDataFormTosModal({})
-    setTempDataUpdateTos({})
-  }
+    setModalFormTos(false);
+    setDataFormTosModal({});
+    setTempDataUpdateTos({});
+  };
   const openModalFormTos = (e) => {
-    setDataFormTosModal(e)
-    setModalFormTos(true)
-    setTempDataUpdateTos(e)
-  }
+    setDataFormTosModal(e);
+    setModalFormTos(true);
+    setTempDataUpdateTos(e);
+  };
   const resetTableTosUpdate = () => {
-    setDataFormTosModal(tempDataUpdateTos)
-    setDataTableTos(dataFormTosModal?.tosDetail)
-  }
+    setDataFormTosModal(tempDataUpdateTos);
+    setDataTableTos(dataFormTosModal?.tosDetail);
+  };
 
   const handleShowHideTable = (e) => {
-    setIdCreateFrom(e)
+    setIdCreateFrom(e);
     form.resetFields([
       "productType",
       "serviceTypeProduct",
@@ -245,8 +272,7 @@ const SaDetail = ({
       { value: "Term of Service" },
       { value: "Late Charge" },
       { value: "Tax Implication" },
-    ]
-    )
+    ]);
     if (e === 2) {
       form.resetFields(["priceCode", "pricingRule"]);
 
@@ -276,39 +302,51 @@ const SaDetail = ({
           console.log("error");
         });
     }
-  }
+  };
 
   // Show Hide Section Detial By Create From Id (1 or 2)
   const isCreateFromTwo = saDetailObj.createFrom === 2;
-  const isCreateFromOneWithData = saDetailObj.createFrom === 1 && Object.keys(dataTableDetailProduct).length !== 0;
-  const dataDetail = data_detail !== undefined
+  const isCreateFromOneWithData =
+    saDetailObj.createFrom === 1 &&
+    Object.keys(dataTableDetailProduct).length !== 0;
+  const dataDetail = data_detail !== undefined;
 
   const getLateCharge = (priceCodeId) => {
     const body = {
       accountId: idAccount,
-      productVersionId: Object.keys(dataDetailProduct).length > 0 ? saDetailObj.productVersionId : null,
-      priceCode: [priceCodeId]
-    }
+      productVersionId:
+        Object.keys(dataDetailProduct).length > 0
+          ? saDetailObj.productVersionId
+          : null,
+      priceCode: [priceCodeId],
+    };
     if (priceCodeId !== 0) {
       dispatch(getListLateCharge({ body }))
         .unwrap()
         .then((data) => {
           if (data) {
-            const dataArrayLateCharge = Object.keys(data).map(key => data[key]);
-            const filteredDataLateCharge = dataArrayLateCharge.filter(item => item !== null);
-            setDataTableLateCharge(filteredDataLateCharge)
-            setSendLateCharge(data)
+            const dataArrayLateCharge = Object.keys(data).map(
+              (key) => data[key],
+            );
+            const filteredDataLateCharge = dataArrayLateCharge.filter(
+              (item) => item !== null,
+            );
+            setDataTableLateCharge(filteredDataLateCharge);
+            setSendLateCharge(data);
           }
         })
         .catch(() => {
           console.log("error");
         });
     }
-  }
+  };
 
   // Select TOS
   const handleSelectTos = (e) => {
-    const lastKey = dataTermOfService.length > 0 ? dataTermOfService[dataTermOfService.length - 1].key : 0;
+    const lastKey =
+      dataTermOfService.length > 0
+        ? dataTermOfService[dataTermOfService.length - 1].key
+        : 0;
     const newData = {
       tosName: e.name,
       tosId: e.id,
@@ -319,14 +357,14 @@ const SaDetail = ({
           attribute: item.attributeId,
           attributeName: item.attributeName,
           value: null,
-          key: idx + 1
-        }
-      })
-    }
-    setDataTermOfService([...dataTermOfService, newData])
-    setIsIdChoose([...isIdChoose, newData.tosId])
-    setModalChooseTos(false)
-  }
+          key: idx + 1,
+        };
+      }),
+    };
+    setDataTermOfService([...dataTermOfService, newData]);
+    setIsIdChoose([...isIdChoose, newData.tosId]);
+    setModalChooseTos(false);
+  };
   const handleGetDetailPricing = (id) => {
     if (id !== -1) {
       dispatch(getListPriceRuleById(id))
@@ -353,16 +391,19 @@ const SaDetail = ({
                 unlimited: item.isUnlim,
                 uom: item.uom,
                 uomName: item.uom,
-                value: item.value
-              }
-            })
-            setDataPricing(res)
-            let arrPriceId = data.map(item => item.priceCodeId);
+                value: item.value,
+              };
+            });
+            setDataPricing(res);
+            let arrPriceId = data.map((item) => item.priceCodeId);
             const body = {
               accountId: idAccount,
-              productVersionId: Object.keys(dataDetailProduct).length > 0 ? saDetailObj.productVersionId : null,
-              priceCode: arrPriceId
-            }
+              productVersionId:
+                Object.keys(dataDetailProduct).length > 0
+                  ? saDetailObj.productVersionId
+                  : null,
+              priceCode: arrPriceId,
+            };
             dispatch(getListLateCharge({ body }))
               .unwrap()
               .then((data) => {
@@ -380,7 +421,7 @@ const SaDetail = ({
                     formula: item.formula,
                     description: item.description,
                   }));
-                  setDataTableLateCharge(resultArray)
+                  setDataTableLateCharge(resultArray);
                 }
               })
               .catch(() => {
@@ -392,34 +433,31 @@ const SaDetail = ({
           console.log("error");
         });
     }
-  }
+  };
 
   useEffect(() => {
     const findPriceDetail = ddlPriceCode
       ?.filter((a) => a.id === priceAdjustment)?.[0]
-      ?.mpricingDetail?.map(
-        (item) =>
-          item
-      );
+      ?.mpricingDetail?.map((item) => item);
     if (findPriceDetail) {
-      const adjustmentOne = findPriceDetail[0]?.adjustment
-      const adjustmentTwo = findPriceDetail[1]?.adjustment
-      const mergedAdjustmentText = `${adjustmentOne?.adjustmentText || ''} - ${adjustmentTwo?.adjustmentText || ''}`.trim();
-      const cleanedString = mergedAdjustmentText.replace(/-+$/, '');
-      setPriceAdjustmentSelect(cleanedString)
+      const adjustmentOne = findPriceDetail[0]?.adjustment;
+      const adjustmentTwo = findPriceDetail[1]?.adjustment;
+      const mergedAdjustmentText =
+        `${adjustmentOne?.adjustmentText || ""} - ${adjustmentTwo?.adjustmentText || ""}`.trim();
+      const cleanedString = mergedAdjustmentText.replace(/-+$/, "");
+      setPriceAdjustmentSelect(cleanedString);
 
       const mergePriceAdjustmentId = [
         adjustmentOne?.priceAdjustmentDetailId || null,
         adjustmentTwo?.priceAdjustmentDetailId || null,
       ].filter(Boolean);
-      setPriceAdjustmentSelectId(mergePriceAdjustmentId)
+      setPriceAdjustmentSelectId(mergePriceAdjustmentId);
     }
-  }, [priceAdjustment])
-
+  }, [priceAdjustment]);
 
   const handleLabelAdjustment = (e) => {
-    setPriceAdjustment(e)
-  }
+    setPriceAdjustment(e);
+  };
 
   return (
     <div>

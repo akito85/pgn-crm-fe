@@ -37,19 +37,28 @@ const initialState = {
   dataDetailPricing: {},
   dataListCategory: [],
   message: "",
-  data_grant_access:{},
+  data_grant_access: {},
 };
 
-export const getGrantedAccessPriceAdjust = createAsyncThunk("CHECK_GRANTED_PRICE_ADJUSTMENT", async (body, thunkAPI) => {
-  try {
-    const data = await productPromoHttpService.checkGrantedAccessProduct(body)
-    thunkAPI.dispatch(grantedAccessDetail(body?.body))
-		return data?.data;
-	} catch (error) {
-		thunkAPI.dispatch(validateError({ error: error, action:'CHECK_GRANTED_PRICE_ADJUSTMENT'}))
-		return thunkAPI.rejectWithValue(error);
-	}
-}); 
+export const getGrantedAccessPriceAdjust = createAsyncThunk(
+  "CHECK_GRANTED_PRICE_ADJUSTMENT",
+  async (body, thunkAPI) => {
+    try {
+      const data =
+        await productPromoHttpService.checkGrantedAccessProduct(body);
+      thunkAPI.dispatch(grantedAccessDetail(body?.body));
+      return data?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "CHECK_GRANTED_PRICE_ADJUSTMENT",
+        }),
+      );
+      return thunkAPI.rejectWithValue(error);
+    }
+  },
+);
 
 export const getAllPricingAdjustPaginate = createAsyncThunk(
   "GET_ALL_PRICING_ADJUST_PAGINATE",
@@ -68,7 +77,7 @@ export const getAllPricingAdjustPaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getDetailPricingAdjustGeneral = createAsyncThunk(
@@ -85,7 +94,7 @@ export const getDetailPricingAdjustGeneral = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getDetailDraftPricingAdjustGeneral = createAsyncThunk(
@@ -101,7 +110,7 @@ export const getDetailDraftPricingAdjustGeneral = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const inactivePricingAdjust = createAsyncThunk(
@@ -111,7 +120,7 @@ export const inactivePricingAdjust = createAsyncThunk(
       const url = `/v1/dbs/api/price-adjustment/inactivate`;
       const response = await productPromoHttpService.activationWithRemark(
         url,
-        data
+        data,
       );
       const successBody = {
         title: "Successful",
@@ -141,7 +150,7 @@ export const inactivePricingAdjust = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getListAppHier = createAsyncThunk(
@@ -157,7 +166,7 @@ export const getListAppHier = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListAppHierDetail = createAsyncThunk(
@@ -173,7 +182,7 @@ export const getListAppHierDetail = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -189,7 +198,7 @@ export const getApprovalHistory = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadPriceAdjust = createAsyncThunk(
@@ -203,10 +212,14 @@ export const downloadPriceAdjust = createAsyncThunk(
       const response = await productPromoHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error, action: "DOWNLOAD_PRICE_ADJUST", back : false }));
-      return thunkAPI.rejectWithValue(error.response.data.code === 419 ? null : error.response.data)
+      thunkAPI.dispatch(
+        validateError({ error, action: "DOWNLOAD_PRICE_ADJUST", back: false }),
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data,
+      );
     }
-  }
+  },
 );
 
 export const getAllPricingDetailActive = createAsyncThunk(
@@ -222,7 +235,7 @@ export const getAllPricingDetailActive = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListCriteria = createAsyncThunk(
@@ -232,7 +245,7 @@ export const getListCriteria = createAsyncThunk(
       const url = "/v1/dbs/api/price-adjustment/list-criteria";
       const response = await productPromoHttpService.getAll(url);
       return (response.data.data || []).filter(
-        (item) => item.glbTypeValId !== 24
+        (item) => item.glbTypeValId !== 24,
       );
     } catch (error) {
       if (error.response.data.code === 419) {
@@ -240,7 +253,7 @@ export const getListCriteria = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getProvinceList = createAsyncThunk(
@@ -261,7 +274,7 @@ export const getProvinceList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCityList = createAsyncThunk(
@@ -282,7 +295,7 @@ export const getCityList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCostCenterList = createAsyncThunk(
@@ -303,7 +316,7 @@ export const getCostCenterList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSorList = createAsyncThunk(
@@ -324,7 +337,7 @@ export const getSorList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDistrictList = createAsyncThunk(
@@ -345,7 +358,7 @@ export const getDistrictList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSubDistrictList = createAsyncThunk(
@@ -366,7 +379,7 @@ export const getSubDistrictList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getGsizesList = createAsyncThunk(
@@ -387,7 +400,7 @@ export const getGsizesList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getIndustrialSectorList = createAsyncThunk(
@@ -408,7 +421,7 @@ export const getIndustrialSectorList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getServiceTypeList = createAsyncThunk(
@@ -429,7 +442,7 @@ export const getServiceTypeList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountCategoryList = createAsyncThunk(
@@ -450,7 +463,7 @@ export const getAccountCategoryList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountGroupList = createAsyncThunk(
@@ -471,7 +484,7 @@ export const getAccountGroupList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getBudgetList = createAsyncThunk(
@@ -492,7 +505,7 @@ export const getBudgetList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCustomerSegmentList = createAsyncThunk(
@@ -513,7 +526,7 @@ export const getCustomerSegmentList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCustomerList = createAsyncThunk(
@@ -534,7 +547,7 @@ export const getCustomerList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAdjustmentTypeList = createAsyncThunk(
@@ -555,7 +568,7 @@ export const getAdjustmentTypeList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailPricing = createAsyncThunk(
@@ -571,7 +584,7 @@ export const getDetailPricing = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListCategory = createAsyncThunk(
@@ -590,7 +603,7 @@ export const getListCategory = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const createPriceAdjustBody = createAsyncThunk(
@@ -622,7 +635,7 @@ export const createPriceAdjustBody = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updatePriceAdjustBody = createAsyncThunk(
@@ -654,7 +667,7 @@ export const updatePriceAdjustBody = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approvalCreatePriceAdjust = createAsyncThunk(
@@ -664,7 +677,7 @@ export const approvalCreatePriceAdjust = createAsyncThunk(
       const url = `/v1/dbs/api/price-adjustment/approve-pricing-adjustment`;
       const response = await productPromoHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -702,7 +715,7 @@ export const approvalCreatePriceAdjust = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approvalInactivePriceAdjust = createAsyncThunk(
@@ -712,7 +725,7 @@ export const approvalInactivePriceAdjust = createAsyncThunk(
       const url = `/v1/dbs/api/price-adjustment/approve-inactive-pricing-adjustment`;
       const response = await productPromoHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -750,7 +763,7 @@ export const approvalInactivePriceAdjust = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 const pricingAdjustSlice = createSlice({

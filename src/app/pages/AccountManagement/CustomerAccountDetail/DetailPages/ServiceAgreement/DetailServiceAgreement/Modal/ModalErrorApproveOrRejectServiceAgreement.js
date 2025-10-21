@@ -1,5 +1,5 @@
-import React from 'react'
-import { ModalError } from '../../../../../../../../components/Modal/ModalPopUp';
+import React from "react";
+import { ModalError } from "../../../../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 
 const ModalErrorApproveOrRejectServiceAgreement = ({
@@ -26,4 +26,4 @@ const ModalErrorApproveOrRejectServiceAgreement = ({
   );
 };
 
-export default ModalErrorApproveOrRejectServiceAgreement
+export default ModalErrorApproveOrRejectServiceAgreement;

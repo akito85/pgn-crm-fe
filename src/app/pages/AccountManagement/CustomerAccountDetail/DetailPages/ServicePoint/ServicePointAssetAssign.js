@@ -48,7 +48,7 @@ import { validateCreateUpdate } from "../../../../../../redux/slices/general_sli
 import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";
 import { dateFormatting } from "../../../../../../utils";
 
-const ServicePointAssetAssign = ({ }) => {
+const ServicePointAssetAssign = ({}) => {
   const dispatch = useDispatch();
   const {
     data_detailServicePoint,
@@ -137,27 +137,36 @@ const ServicePointAssetAssign = ({ }) => {
   };
 
   const onFinishPrimary = async (e) => {
-    setDataAsset(prevState => ({
+    setDataAsset((prevState) => ({
       ...prevState,
       installDate: e?.installDate,
       remark: e?.remarks,
       premiseAddress: e.premiseAddress,
       servicePoint: e.servicePoint,
-    }))
+    }));
 
     //code
     let url;
-    const data = handleDataSend({
-      ...dataAsset,
-      installDate: e?.installDate,
-      remark: e?.remarks,
-      premiseAddress: e.premiseAddress,
-      servicePoint: e.servicePoint,
-    }, typeDuplicate);
-
+    const data = handleDataSend(
+      {
+        ...dataAsset,
+        installDate: e?.installDate,
+        remark: e?.remarks,
+        premiseAddress: e.premiseAddress,
+        servicePoint: e.servicePoint,
+      },
+      typeDuplicate,
+    );
 
     url = "/v1/dbs/api/premise/servicePoint/assets/validate-assign";
-    await dispatch(validateCreateUpdate({ body: data, services: accountManagementService, endPoint: url, type }))?.unwrap();
+    await dispatch(
+      validateCreateUpdate({
+        body: data,
+        services: accountManagementService,
+        endPoint: url,
+        type,
+      }),
+    )?.unwrap();
 
     setType(false);
     setModalConfirm(true);
@@ -200,7 +209,6 @@ const ServicePointAssetAssign = ({ }) => {
     setModalChooseAsset(value);
   };
 
-
   const handleChooseAsset = (value) => {
     setIsUpdate(false);
     setAssetName(value?.assetName);
@@ -241,7 +249,6 @@ const ServicePointAssetAssign = ({ }) => {
     });
     setCheckedCustody(value?.custodyTransfer);
     setModalChooseAsset(false);
-
   };
 
   useEffect(() => {
@@ -256,31 +263,41 @@ const ServicePointAssetAssign = ({ }) => {
       } else {
         setDataConfirm({
           gsizeValue: data_globalTypeListGsize?.find(
-            (item) => item?.Id === dataAsset?.gsize
+            (item) => item?.Id === dataAsset?.gsize,
           )?.text,
           ansiValue: data_globalTypeListAnsi?.find(
-            (item) => item?.id === dataAsset?.ansi
+            (item) => item?.id === dataAsset?.ansi,
           )?.name,
           brandValue: data_globalTypeListBrand?.find(
-            (item) => item?.glbTypeValId === dataAsset?.brand
+            (item) => item?.glbTypeValId === dataAsset?.brand,
           )?.name,
           typeValue: data_globalTypeListType?.find(
-            (item) => item?.glbTypeValId === dataAsset?.type
+            (item) => item?.glbTypeValId === dataAsset?.type,
           )?.name,
           productNameValue: data_globalTypeListProductName?.find(
-            (item) => item?.id === dataAsset?.productVersion
+            (item) => item?.id === dataAsset?.productVersion,
           )?.productName,
           serviceTypeValue: data_globalTypeListServiceType?.find(
-            (item) => item?.glbTypeValId === dataAsset?.serviceType
+            (item) => item?.glbTypeValId === dataAsset?.serviceType,
           )?.name,
           assetNameValue: data_globalTypeAssetName?.find(
-            (item) => item?.glbTypeValId === dataAsset?.assetName
+            (item) => item?.glbTypeValId === dataAsset?.assetName,
           )?.name,
           ...dataAsset,
         });
       }
     }
-  }, [dataAsset, data_globalTypeAssetName, data_globalTypeListAnsi, data_globalTypeListBrand, data_globalTypeListGsize, data_globalTypeListProductName, data_globalTypeListServiceType, data_globalTypeListType, formPrimary]);
+  }, [
+    dataAsset,
+    data_globalTypeAssetName,
+    data_globalTypeListAnsi,
+    data_globalTypeListBrand,
+    data_globalTypeListGsize,
+    data_globalTypeListProductName,
+    data_globalTypeListServiceType,
+    data_globalTypeListType,
+    formPrimary,
+  ]);
 
   const handleModalUpdateAsset = (value) => {
     // formCreate.setFieldsValue({
@@ -298,9 +315,7 @@ const ServicePointAssetAssign = ({ }) => {
   };
 
   const handleDataSend = (dataAsset, type) => {
-
     if (dataAsset.assetId && dataAsset.assetId !== undefined) {
-
       return {
         assetId: dataAsset.assetId,
         servicePointId: data_detailServicePoint.servicePointId,
@@ -309,7 +324,6 @@ const ServicePointAssetAssign = ({ }) => {
         isDuplicate: type,
       };
     } else {
-
       return {
         ...dataAsset,
         installDate: moment(dataAsset?.installDate).format("YYYY-MM-DD"),
@@ -387,22 +401,21 @@ const ServicePointAssetAssign = ({ }) => {
         breadcrumbName: "Detail Account",
         state: {
           idAccount: idAccount,
-        }
+        },
       },
       {
         path: ACCOUNT_MANAGEMENT_ROUTES.DETAIL_SERVICE_POINT,
         breadcrumbName: "Detail Service Point",
         state: {
           id: id,
-        }
+        },
       },
       {
         path: "",
         breadcrumbName: "Create Asset Assignment",
       },
     ];
-  }
-
+  };
 
   return (
     <LayoutMenu>

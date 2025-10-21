@@ -41,10 +41,10 @@ const ServicePointAsset = ({
   idCustomer = 0,
   type = "",
   status,
-  access
+  access,
 }) => {
   const { data_assetAssignment, data_detailServicePoint } = useSelector(
-    (state) => state.servicePoint
+    (state) => state.servicePoint,
   );
   //codeDetailUser
 
@@ -77,7 +77,13 @@ const ServicePointAsset = ({
   useEffect(() => {
     if (id && id !== 0 && id !== undefined) {
       dispatch(
-        getAssetAssignment({ id, page, pageSize, sort, search: encodeURIComponent(JSON.stringify(search)) })
+        getAssetAssignment({
+          id,
+          page,
+          pageSize,
+          sort,
+          search: encodeURIComponent(JSON.stringify(search)),
+        }),
       );
     }
   }, [dispatch, id, page, pageSize, sort, search]);
@@ -110,7 +116,6 @@ const ServicePointAsset = ({
     }
     return moment().add(-1, "days") >= current;
   };
-
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -151,7 +156,7 @@ const ServicePointAsset = ({
     setDataInactive(value);
     setStartDate(moment(value?.installDate));
     setTitleActiveOrInactive(
-      value?.status === "ACTIVE" ? "Inactivate" : "Activate"
+      value?.status === "ACTIVE" ? "Inactivate" : "Activate",
     );
     setModalInactive(true);
     setAssetName(value?.assetName);
@@ -178,7 +183,7 @@ const ServicePointAsset = ({
         formInactive.resetFields();
         setDataInactive({});
         setModalInactive(false);
-        handleClear()
+        handleClear();
         // dispatch(getAssetAssignment({ id, page, pageSize, sort, search }));
         let tempSearch = "";
         for (const dataIndex in search) {
@@ -191,7 +196,7 @@ const ServicePointAsset = ({
         }
         tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
         dispatch(
-          getAssetAssignment({ id, page, pageSize, sort, search: tempSearch })
+          getAssetAssignment({ id, page, pageSize, sort, search: tempSearch }),
         );
       })
       .catch((error) => {
@@ -217,7 +222,7 @@ const ServicePointAsset = ({
   const itemActions = [
     //action toolbar
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <Link
           to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_ASSET_POINT}
@@ -236,17 +241,16 @@ const ServicePointAsset = ({
             Assign Asset
           </ButtonComponent>
         </Link>
-
-      )
-    }
-  ]
+      ),
+    },
+  ];
 
   return (
     <Fragment>
       <BaseContainer header={"ASSET ASSIGNMENT"}>
         <div className={"w-full"}>
           <div className="w-full flex justify-end mb-[30px]">
-            <ToolbarAccount items={itemActions} advancedAccess={access}/>
+            <ToolbarAccount items={itemActions} advancedAccess={access} />
           </div>
 
           <ServicePointAssetTable
@@ -277,7 +281,7 @@ const ServicePointAsset = ({
           </DetailText>
           <DetailText label="Created Date">
             {moment(data_detailServicePoint?.createdDate).format(
-              dateFormatting.dateTime
+              dateFormatting.dateTime,
             )}
           </DetailText>
           <DetailText label="Created By">
@@ -311,21 +315,20 @@ const ServicePointAsset = ({
                   (value && moment(startDate) < moment(value)) || !value
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error("Uninstall date must After Install date")
+                        new Error("Uninstall date must After Install date"),
                       ),
               },
               {
                 message: requiredMessage("Uninstall Date"),
                 required: true,
-              }
+              },
             ]}
             className="no-margin-form"
           >
-          <DateComponent dateDisable={handleDisableEndDate} />
-        </Form.Item>
+            <DateComponent dateDisable={handleDisableEndDate} />
+          </Form.Item>
         }
       />
-
 
       {/** Modal Retry */}
       <ModalError

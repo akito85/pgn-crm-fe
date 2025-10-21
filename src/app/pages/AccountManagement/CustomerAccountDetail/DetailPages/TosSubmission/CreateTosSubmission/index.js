@@ -25,7 +25,7 @@ import {
   getListAppHierDetail,
   getListCategory,
   updateTosSubmissionBody,
-  validateOverlapTos
+  validateOverlapTos,
 } from "../../../../../../../redux/slices/account_management/detailAccount/tosSubmissionSlice";
 import moment from "moment";
 import { bytesConverter } from "../../../../../../../utils/bytesConverter";
@@ -51,26 +51,26 @@ const routes = (item) => {
     {
       path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
       breadcrumbName: "Detail Account",
-      state:{
+      state: {
         idAccount: item.idAccount,
-      }
+      },
     },
     {
       path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_AGREEMENT,
       breadcrumbName: "Detail Service Agreement",
-      state:{
-        idSA : item.idSA,
-        idAccount : item.idAccount,
-        idCustomer : item.idCustomer,
-        type : item.type
-      }
+      state: {
+        idSA: item.idSA,
+        idAccount: item.idAccount,
+        idCustomer: item.idCustomer,
+        type: item.type,
+      },
     },
     {
       path: "",
       breadcrumbName: "Create Term Of Service",
     },
-  ]
-}
+  ];
+};
 
 const CreateTosSubmission = ({ typeForm }) => {
   const dispatch = useDispatch();
@@ -89,18 +89,26 @@ const CreateTosSubmission = ({ typeForm }) => {
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [editDetail, setEditDetail] = useState(true);
   const [modalValidateOverlap, setModalValidateOverlap] = useState(false);
-  const [messageValidateOverlap, setMessageValidateOverlap] = useState('');
+  const [messageValidateOverlap, setMessageValidateOverlap] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const { idAccount, idCustomer, type, id, idSA, saMainStartDate, saMainEndDate } = location?.state || {};
+  const {
+    idAccount,
+    idCustomer,
+    type,
+    id,
+    idSA,
+    saMainStartDate,
+    saMainEndDate,
+  } = location?.state || {};
   const {
     loading = false,
     dataListAppHierIdForm = [],
     dataListAppHierDetailForm = [],
     dataDetail = {},
-    dataOverlap= {}
+    dataOverlap = {},
   } = useSelector((state) => state.tosSubmission);
-  
+
   const isLoading = loading || loadingForm;
 
   const asserData = useCallback(
@@ -113,9 +121,7 @@ const CreateTosSubmission = ({ typeForm }) => {
         startDate: dataDetail?.startDate
           ? moment(dataDetail.startDate)
           : undefined,
-        endDate: dataDetail?.endDate
-          ? moment(dataDetail.endDate)
-          : undefined,
+        endDate: dataDetail?.endDate ? moment(dataDetail.endDate) : undefined,
         remark: dataDetail?.remark,
         approvalHierarchy,
       };
@@ -147,7 +153,7 @@ const CreateTosSubmission = ({ typeForm }) => {
                   }
                 : null,
           };
-        })
+        }),
       );
       setTosSubmissionObj(body);
       form.setFieldsValue(body);
@@ -157,10 +163,10 @@ const CreateTosSubmission = ({ typeForm }) => {
           key: index + 1,
           fileSize: bytesConverter(attachData.fileSize || 0),
           dataType: "exist",
-        }))
+        })),
       );
     },
-    [form]
+    [form],
   );
 
   useEffect(() => {
@@ -177,7 +183,7 @@ const CreateTosSubmission = ({ typeForm }) => {
 
   useEffect(() => {
     const temp = dataDetailTosSubmission.some(
-      (item) => item?.attribute?.value === 112
+      (item) => item?.attribute?.value === 112,
     );
     setEditDetail(!!temp);
   }, [dataDetailTosSubmission]);
@@ -266,25 +272,31 @@ const CreateTosSubmission = ({ typeForm }) => {
   ];
 
   const next = () => {
-    if(current === 0) {
+    if (current === 0) {
       const body = {
         saId: idSA,
         saTosId: tosSubmissionObj.tosId,
-        startDate: moment(tosSubmissionObj.startDate).format(dateFormatting.dateCapital),
-        endDate: moment(tosSubmissionObj.endDate).format(dateFormatting.dateCapital)
-      }
+        startDate: moment(tosSubmissionObj.startDate).format(
+          dateFormatting.dateCapital,
+        ),
+        endDate: moment(tosSubmissionObj.endDate).format(
+          dateFormatting.dateCapital,
+        ),
+      };
       dispatch(validateOverlapTos(body))
-      .unwrap()
-      .then((data)=>{
-        data.success === true ? setCurrent(current + 1) : setCurrent(current = 0);
-      })
-      .catch((er)=>{
-        console.log(er);
-        setMessageValidateOverlap(er.data.message)
-        setModalValidateOverlap(true)
-        er.data.succes === false && setCurrent(current = 0);
-      })
-    }else{
+        .unwrap()
+        .then((data) => {
+          data.success === true
+            ? setCurrent(current + 1)
+            : setCurrent((current = 0));
+        })
+        .catch((er) => {
+          console.log(er);
+          setMessageValidateOverlap(er.data.message);
+          setModalValidateOverlap(true);
+          er.data.succes === false && setCurrent((current = 0));
+        });
+    } else {
       setCurrent(current + 1);
     }
   };
@@ -366,7 +378,7 @@ const CreateTosSubmission = ({ typeForm }) => {
             };
             const response = await accountManagementService.uploadAttachment(
               `/v1/dbs/api/tossubmission/uploadAttachment/${idTosSubmission}`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -389,7 +401,7 @@ const CreateTosSubmission = ({ typeForm }) => {
         .then(async () => {
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let element of filterDataAttach) {
             const body = {
@@ -398,7 +410,7 @@ const CreateTosSubmission = ({ typeForm }) => {
             };
             const response = await accountManagementService.uploadAttachment(
               `/v1/dbs/api/tossubmission/uploadAttachment/${id}`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -626,19 +638,19 @@ const CreateTosSubmission = ({ typeForm }) => {
         </ModalError>
 
         <ModalError
-        isOpen={modalValidateOverlap}
-        handleOk={()=>setModalValidateOverlap(false)}
-        handleCancel={()=>setModalValidateOverlap(false)}
-        customText={"Ok"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            <SVGIcon name="IconFailed" width={48} />
-            <p className="text-[18px] font-bold">{"Failed"}</p>
+          isOpen={modalValidateOverlap}
+          handleOk={() => setModalValidateOverlap(false)}
+          handleCancel={() => setModalValidateOverlap(false)}
+          customText={"Ok"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">{messageValidateOverlap}</p>
           </div>
-          <p className="pl-[70px]">{messageValidateOverlap}</p>
-        </div>
-      </ModalError>
+        </ModalError>
       </Spin>
     </LayoutMenu>
   );

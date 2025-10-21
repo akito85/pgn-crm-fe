@@ -5,7 +5,10 @@ import BaseContainer from "../../../../../../../../components/BaseContainer";
 import TablePagination from "../../../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import StatusComponent from "../../../../../../../../components/StatusComponent";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValue,
+} from "../../../../../../../../utils/getColumnSearchProps";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { Link, NavLink } from "react-router-dom";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
@@ -30,11 +33,16 @@ import { MoreOutlined, WarningOutlined } from "@ant-design/icons";
 import { getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import ToolbarAccount from "../../../../../ComponentAccount/ToolbarAccount";
 import { useColumnActionPermissionAccount } from "../../../../../ComponentAccount/ColumnActionPermissionAccount";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../../../utils";
 
 const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
-  const saMainStartDate = dataDetailSA?.saInfo?.saMainStartDate
-  const saMainEndDate = dataDetailSA?.saInfo?.saMainEndDate
+  const saMainStartDate = dataDetailSA?.saInfo?.saMainStartDate;
+  const saMainEndDate = dataDetailSA?.saInfo?.saMainEndDate;
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const [dataTable, setDataTable] = useState([]);
@@ -54,18 +62,24 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
   const [bodyError, setBodyError] = useState({});
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const { data, loading, dataApprovalHistory } = useSelector(
-    (state) => state.tosSubmission
+    (state) => state.tosSubmission,
   );
   const { access_account } = useSelector((state) => state.accountManagement);
   const filteredArray = {
-    actionList: access_account?.actionList?.filter(action =>
-      action.path.includes("/account-management/account-standard/service-agreement/tos/")
-    )
-  }
+    actionList: access_account?.actionList?.filter((action) =>
+      action.path.includes(
+        "/account-management/account-standard/service-agreement/tos/",
+      ),
+    ),
+  };
   useEffect(() => {
-    dispatch(getGrantedAccessAccount('/account-management/account-standard/service-agreement/tos/'))
-  }, [dispatch])
-  
+    dispatch(
+      getGrantedAccessAccount(
+        "/account-management/account-standard/service-agreement/tos/",
+      ),
+    );
+  }, [dispatch]);
+
   useEffect(() => {
     if (dataApprovalHistory?.dataApprover && dataApprovalHistory?.dataHistory) {
       const temp = {
@@ -101,7 +115,7 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
         pageSize,
         search: encodeURIComponent(JSON.stringify(search)),
         sort,
-      })
+      }),
     );
   }, [dispatch, idSA, page, pageSize, search, sort]);
 
@@ -174,7 +188,7 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
             pageSize,
             search: tempSearch,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -206,9 +220,18 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('tosName', hasValue(search['tosName']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "tosName",
+          hasValue(search["tosName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "REMARK",
@@ -222,12 +245,21 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('remark', hasValue(search['remark']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "remark",
+          hasValue(search["remark"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "START DATE",
@@ -243,9 +275,17 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
-      render: (text) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "startDate",
+          hasValue(search["startDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "END DATE",
@@ -261,9 +301,17 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
-      render: (text) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "endDate",
+          hasValue(search["endDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "APPLIED DATE",
@@ -279,9 +327,17 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
-      render: (text) => renderDateColumn('appliedDate', hasValue(search['appliedDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "appliedDate",
+          hasValue(search["appliedDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -289,7 +345,7 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
       sorter: true,
       dataIndex: "status",
       key: "status",
-      fixed:'right',
+      fixed: "right",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "status",
@@ -297,9 +353,18 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('status', hasValue(search['status']), searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          hasValue(search["status"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
     {
       title: "STATUS APPROVAL",
@@ -307,7 +372,7 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
       sorter: true,
       dataIndex: "statusApproval",
       key: "statusApproval",
-      fixed: 'right',
+      fixed: "right",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "statusApproval",
@@ -315,21 +380,36 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('statusApproval', hasValue(search['statusApproval']), searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "statusApproval",
+          hasValue(search["statusApproval"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
   ];
-
 
   const itemActions = [
     //action toolbar
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink
           to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_TOS_SUBMISSION}
-          state={{ idAccount, idCustomer, type, idSA, saMainStartDate, saMainEndDate }}
+          state={{
+            idAccount,
+            idCustomer,
+            type,
+            idSA,
+            saMainStartDate,
+            saMainEndDate,
+          }}
         >
           <ButtonComponent
             disabled={moment(dataDetailSA?.saInfo?.endDate) < moment()}
@@ -339,8 +419,7 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
             Create
           </ButtonComponent>
         </NavLink>
-
-      )
+      ),
     },
 
     // Action Table
@@ -348,26 +427,21 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
       action: "View",
       type: "table",
       render: (record, data) => {
-        const renderAction = data > 3 ? (
-          <ButtonComponent
-            icon={
-              <SVGIcon
-                name="IconDetail"
-                color={"#0075bf"}
-                width={24}
-              />
-            }
-            border={false}
-          >
-            <span className={"text-black"}>Detail</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title="Detail">
-            <div className="">
-              <SVGIcon name="IconDetail" width={24} />
-            </div>
-          </Tooltip>
-        )
+        const renderAction =
+          data > 3 ? (
+            <ButtonComponent
+              icon={<SVGIcon name="IconDetail" color={"#0075bf"} width={24} />}
+              border={false}
+            >
+              <span className={"text-black"}>Detail</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Detail">
+              <div className="">
+                <SVGIcon name="IconDetail" width={24} />
+              </div>
+            </Tooltip>
+          );
         return (
           <Link
             to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_TOS_SUBMISSION}
@@ -381,56 +455,20 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
           >
             {renderAction}
           </Link>
-        )
-      }
+        );
+      },
     },
 
     {
       action: "Update",
       type: "table",
       render: (record, data) => {
-        const isUpdate = record.status === "DRAFT" && record.statusApproval !== "WAITING APPROVAL";
-        const renderAction = data > 3 ? (
-          isUpdate ? (
-            <Link
-              to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_TOS_SUBMISSION}
-              state={{
-                id: record?.id,
-                idAccount,
-                idCustomer,
-                type,
-                idSA,
-                saMainStartDate,
-                saMainEndDate
-              }}
-            >
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name="IconEdit"
-                    color={"#0075bf"}
-                    width={24}
-                  />
-                }
-                border={false}
-              >
-                <span className={"text-black"}>Update</span>
-              </ButtonComponent>
-            </Link>
-          ) : (
-            <ButtonComponent
-              icon={
-                <SVGIcon name="IconEdit" color={"#8D91A0"} width={24} />
-              }
-              border={false}
-              disabled={true}
-            >
-              <span className={"text-black"}>Update</span>
-            </ButtonComponent>
-          )
-        ) : (
-          <Tooltip title="Update">
-            {isUpdate ? (
+        const isUpdate =
+          record.status === "DRAFT" &&
+          record.statusApproval !== "WAITING APPROVAL";
+        const renderAction =
+          data > 3 ? (
+            isUpdate ? (
               <Link
                 to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_TOS_SUBMISSION}
                 state={{
@@ -440,90 +478,124 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
                   type,
                   idSA,
                   saMainStartDate,
-                  saMainEndDate
+                  saMainEndDate,
                 }}
               >
-                <div>
-                  <SVGIcon name="IconEdit" width={24} />
-                </div>
+                <ButtonComponent
+                  icon={
+                    <SVGIcon name="IconEdit" color={"#0075bf"} width={24} />
+                  }
+                  border={false}
+                >
+                  <span className={"text-black"}>Update</span>
+                </ButtonComponent>
               </Link>
             ) : (
-              <div className={"cursor-not-allowed"}>
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  color={"#C0BEC6"}
-                  className={"cursor-not-allowed"}
-                />
-              </div>
-            )}
-          </Tooltip>
-        )
+              <ButtonComponent
+                icon={<SVGIcon name="IconEdit" color={"#8D91A0"} width={24} />}
+                border={false}
+                disabled={true}
+              >
+                <span className={"text-black"}>Update</span>
+              </ButtonComponent>
+            )
+          ) : (
+            <Tooltip title="Update">
+              {isUpdate ? (
+                <Link
+                  to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_TOS_SUBMISSION}
+                  state={{
+                    id: record?.id,
+                    idAccount,
+                    idCustomer,
+                    type,
+                    idSA,
+                    saMainStartDate,
+                    saMainEndDate,
+                  }}
+                >
+                  <div>
+                    <SVGIcon name="IconEdit" width={24} />
+                  </div>
+                </Link>
+              ) : (
+                <div className={"cursor-not-allowed"}>
+                  <SVGIcon
+                    name="IconEdit"
+                    width={24}
+                    color={"#C0BEC6"}
+                    className={"cursor-not-allowed"}
+                  />
+                </div>
+              )}
+            </Tooltip>
+          );
         return renderAction;
-      }
+      },
     },
 
     {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const renderAction = data > 3 ? (
-          <ButtonComponent
-            icon={
-              <Checkbox
-                className="inactive-check"
-                checked={!(record.status === "ACTIVE")}
-                disabled={
-                  !(
-                    record.status === "ACTIVE" &&
-                    record.approvalStatus !== "WAITING APPROVAL"
-                  )
-                }
-              />
-            }
-            border={false}
-            disabled={
-              !(
+        const renderAction =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <Checkbox
+                  className="inactive-check"
+                  checked={!(record.status === "ACTIVE")}
+                  disabled={
+                    !(
+                      record.status === "ACTIVE" &&
+                      record.approvalStatus !== "WAITING APPROVAL"
+                    )
+                  }
+                />
+              }
+              border={false}
+              disabled={
+                !(
+                  record.status === "ACTIVE" &&
+                  record.approvalStatus !== "WAITING APPROVAL"
+                )
+              }
+              onClick={
                 record.status === "ACTIVE" &&
                 record.approvalStatus !== "WAITING APPROVAL"
-              )
-            }
-            onClick={
-              record.status === "ACTIVE" &&
-                record.approvalStatus !== "WAITING APPROVAL"
-                ? () => handleOpenModalInactivate(record)
-                : undefined
-            }
-          >
-            <span className={"text-black"}>
-              {record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-            </span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip
-            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div>
-              <Checkbox
-                onClick={
-                  record.status === "ACTIVE" &&
-                    record.approvalStatus !== "WAITING APPROVAL"
-                    ? () => handleOpenModalInactivate(record)
-                    : undefined
-                }
-                checked={record?.status === "INACTIVE"}
-                disabled={
-                  !(
+                  ? () => handleOpenModalInactivate(record)
+                  : undefined
+              }
+            >
+              <span className={"text-black"}>
+                {record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+            >
+              <div>
+                <Checkbox
+                  onClick={
                     record.status === "ACTIVE" &&
                     record.approvalStatus !== "WAITING APPROVAL"
-                  )
-                }
-              />
-            </div>
-          </Tooltip>
-        )
+                      ? () => handleOpenModalInactivate(record)
+                      : undefined
+                  }
+                  checked={record?.status === "INACTIVE"}
+                  disabled={
+                    !(
+                      record.status === "ACTIVE" &&
+                      record.approvalStatus !== "WAITING APPROVAL"
+                    )
+                  }
+                />
+              </div>
+            </Tooltip>
+          );
         return renderAction;
-      }
+      },
     },
 
     {
@@ -533,77 +605,77 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
         return (
           <Tooltip title="Delete">
             <span
-              className={`flex justify-center${(record.status === "DRAFT" && record.statusApproval) !== "WAITING APPROVAL"
+              className={`flex justify-center${
+                (record.status === "DRAFT" && record.statusApproval) !==
+                "WAITING APPROVAL"
                   ? " cursor-pointer"
                   : " cursor-not-allowed"
-                }`}
+              }`}
             >
               <SVGIcon
                 name="IconDelete"
                 color={
                   record.status === "DRAFT" &&
-                    record.statusApproval !== "WAITING APPROVAL"
+                  record.statusApproval !== "WAITING APPROVAL"
                     ? "#D90000"
                     : "#8D91A0"
                 }
-                className={`flex justify-center${(record.status === "DRAFT" && record.statusApproval) !== "WAITING APPROVAL"
+                className={`flex justify-center${
+                  (record.status === "DRAFT" && record.statusApproval) !==
+                  "WAITING APPROVAL"
                     ? " cursor-pointer"
                     : " cursor-not-allowed"
-                  }`}
+                }`}
                 width={24}
                 onClick={
                   record.status === "DRAFT" &&
-                    record.statusApproval !== "WAITING APPROVAL"
+                  record.statusApproval !== "WAITING APPROVAL"
                     ? () => handleDelete(record)
                     : undefined
                 }
               />
             </span>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
 
     {
       action: "History",
       type: "table",
       render: (record, data) => {
-        const renderAction = data > 3 ? (
-          <ButtonComponent
-            icon={
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={24}
-              />
-            }
-            border={false}
-            onClick={() => handleApprovalHistory(record)}
-          >
-            <span className={"text-black"}>Approval History</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title="Approval History">
-            <span>
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name="IconLogHistory"
-                    color={"#0075bf"}
-                    width={24}
-                  />
-                }
-                border={false}
-                onClick={() => handleApprovalHistory(record)}
-              >
-              </ButtonComponent>
-            </span>
-          </Tooltip>
-        )
+        const renderAction =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+              }
+              border={false}
+              onClick={() => handleApprovalHistory(record)}
+            >
+              <span className={"text-black"}>Approval History</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Approval History">
+              <span>
+                <ButtonComponent
+                  icon={
+                    <SVGIcon
+                      name="IconLogHistory"
+                      color={"#0075bf"}
+                      width={24}
+                    />
+                  }
+                  border={false}
+                  onClick={() => handleApprovalHistory(record)}
+                ></ButtonComponent>
+              </span>
+            </Tooltip>
+          );
         return renderAction;
-      }
-    }
-  ]
+      },
+    },
+  ];
 
   const handleOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
@@ -640,7 +712,7 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
             pageSize,
             search: tempSearch,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -678,7 +750,10 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
         <BaseContainer header={"TERM OF SERVICE SUBMISSION INFORMATION"}>
           <div className={"flex flex-col w-full gap-4"}>
             <div className="flex w-full justify-end">
-              <ToolbarAccount items={itemActions} advancedAccess={filteredArray} />
+              <ToolbarAccount
+                items={itemActions}
+                advancedAccess={filteredArray}
+              />
               {/* <NavLink
                 to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_TOS_SUBMISSION}
                 state={{ idAccount, idCustomer, type, idSA, saMainStartDate, saMainEndDate }}
@@ -704,7 +779,7 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
                   ["Delete", "Activate", "View", "Update", "History"],
                   itemActions,
                   filteredArray,
-                  "Delete"
+                  "Delete",
                 ),
               ]}
               onSort={onSort}
@@ -725,8 +800,9 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
           getAPIOption={getListAppHierInactive}
           getAPIDetail={getListAppHierDetailInactive}
           selector="tosSubmission"
-          alertMessage={`Are you sure you want to inactivate TOS Submission ${dataInactivate?.termOfServiceName || ""
-            }?`}
+          alertMessage={`Are you sure you want to inactivate TOS Submission ${
+            dataInactivate?.termOfServiceName || ""
+          }?`}
           openModalInactivate={openModalInactivate}
           handleCloseModalInactivate={handleCancelModalInactivate}
           onFinish={handleSubmitModalInactivate}
@@ -762,8 +838,9 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${bodyError.type === "inactive" ? "inactivate" : "deleted"
-              }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              bodyError.type === "inactive" ? "inactivate" : "deleted"
+            }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

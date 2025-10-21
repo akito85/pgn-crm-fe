@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import PosDetailTableView from "../Table/PosDetailTableView";
 import { getDetailListPointOfSales } from "../../../../../redux/slices/rating_billing_invoice/PointOfSales";
@@ -39,7 +39,7 @@ const PointOfSales = ({ id = 0, dispatch = () => {} }) => {
           pageSize,
           sort,
           search: encodeURIComponent(JSON.stringify(search)),
-        })
+        }),
       );
     }
   }, [dispatch, id, page, pageSize, sort, search]);
@@ -80,7 +80,7 @@ const PointOfSales = ({ id = 0, dispatch = () => {} }) => {
         : "";
     setSort(dataSort);
   };
-// console.log(data_viewDetail)
+  // console.log(data_viewDetail)
   return (
     <div className="mt-5">
       <PosDetailTableView

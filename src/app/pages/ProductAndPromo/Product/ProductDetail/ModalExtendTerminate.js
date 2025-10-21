@@ -35,7 +35,7 @@ const ModalExtendTerminate = ({
     { value: "Approval", paramValue: ["approvalHierarchy"] },
   ]);
   const [typeProductInfo, setTypeProductInfo] = useState(
-    listSectionInfo[0].value
+    listSectionInfo[0].value,
   );
   const [remark, setRemark] = useState("");
   const [selectedHierarchy, setSelectedHierarchy] = useState("");
@@ -114,7 +114,7 @@ const ModalExtendTerminate = ({
         const errorBadge = errorFields.reduce(
           (current, next) =>
             item.paramValue.includes(next.name[0]) ? current + 1 : current,
-          0
+          0,
         );
         return {
           value: item.value,
@@ -223,7 +223,7 @@ const ModalExtendTerminate = ({
                       !value
                         ? Promise.resolve()
                         : Promise.reject(
-                            new Error("End date must before Start date")
+                            new Error("End date must before Start date"),
                           ),
                   },
                   { message: requiredMessage("End Date"), required: true },

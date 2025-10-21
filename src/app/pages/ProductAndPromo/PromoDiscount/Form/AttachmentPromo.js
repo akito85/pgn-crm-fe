@@ -14,7 +14,7 @@ const getColumnSearchProps = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
 ) => ({
   filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
     <div
@@ -74,7 +74,7 @@ const columnAttachment = (
   searchText,
   handleSearch = () => {},
   handleDelete = () => {},
-  type
+  type,
 ) => {
   const res = [
     {
@@ -92,7 +92,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -103,7 +103,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -114,7 +114,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -125,7 +125,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -136,7 +136,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -179,7 +179,7 @@ const columnAttachment = (
   return type !== "detail"
     ? res.filter(
         (column) =>
-          column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate"
+          column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate",
       )
     : res;
 };
@@ -254,7 +254,7 @@ const AttachmentPromo = (props) => {
               searchText,
               handleSearch,
               handleDelete,
-              type
+              type,
             )}
           />
         </div>

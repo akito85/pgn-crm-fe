@@ -45,26 +45,26 @@ const routes = (item) => {
     {
       path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
       breadcrumbName: "Detail Account",
-      state:{
+      state: {
         idAccount: item.idAccount,
-      }
+      },
     },
     {
       path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_AGREEMENT,
       breadcrumbName: "Detail Service Agreement",
-      state:{
-        idSA : item.idSA,
-        idAccount : item.idAccount,
-        idCustomer : item.idCustomer,
-        type : item.type
-      }
+      state: {
+        idSA: item.idSA,
+        idAccount: item.idAccount,
+        idCustomer: item.idCustomer,
+        type: item.type,
+      },
     },
     {
       path: "",
       breadcrumbName: "Detail TOS",
     },
-  ]
-}
+  ];
+};
 
 const ApproveOrRejectTOS = () => {
   //declare
@@ -149,7 +149,7 @@ const ApproveOrRejectTOS = () => {
                   }
                 : null,
           };
-        })
+        }),
       );
       setTosSubmissionObj(body);
       setListDataAttachment(
@@ -161,7 +161,7 @@ const ApproveOrRejectTOS = () => {
             : "",
           fileSize: bytesConverter(attachData.fileSize || 0),
           dataType: "exist",
-        }))
+        })),
       );
       setBodyApproval({
         isApprover: dataDetail.isApprover,
@@ -198,7 +198,7 @@ const ApproveOrRejectTOS = () => {
       dispatch(approvalInactiveTosSubmission(obj))
         .unwrap()
         .then((res) => {
-          handleClear()
+          handleClear();
           handleCloseModalApproveReject();
         })
         .catch((error) => {
@@ -239,12 +239,12 @@ const ApproveOrRejectTOS = () => {
     setModalError(false);
     setBodyError({});
   };
-console.log('lll');
+  console.log("lll");
 
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
-      <BreadCrumbAdvanced routes={routes(location?.state)} />
+        <BreadCrumbAdvanced routes={routes(location?.state)} />
         <div className="w-full">
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
@@ -277,18 +277,27 @@ console.log('lll');
             </div>
             <div className="w-full grid grid-cols-4 gap-4">
               <DetailText label="Start Date">
-                {moment(tosSubmissionObj?.startDate).format(dateFormatting.date)}
+                {moment(tosSubmissionObj?.startDate).format(
+                  dateFormatting.date,
+                )}
               </DetailText>
               <DetailText label="End Date">
                 {moment(tosSubmissionObj?.endDate).format(dateFormatting.date)}
               </DetailText>
               <DetailText label="Applied Date">
-                {tosSubmissionObj?.appliedDate && moment(tosSubmissionObj?.appliedDate).format(dateFormatting.date)}
+                {tosSubmissionObj?.appliedDate &&
+                  moment(tosSubmissionObj?.appliedDate).format(
+                    dateFormatting.date,
+                  )}
               </DetailText>
               <DetailText label="Status">{tosSubmissionObj?.status}</DetailText>
-              <DetailText label="Status Approval">{tosSubmissionObj?.approvalStatus}</DetailText>
+              <DetailText label="Status Approval">
+                {tosSubmissionObj?.approvalStatus}
+              </DetailText>
               <div className="col-span-4">
-                <DetailText label="Remark">{tosSubmissionObj?.remark}</DetailText>
+                <DetailText label="Remark">
+                  {tosSubmissionObj?.remark}
+                </DetailText>
               </div>
             </div>
             <div className="py-4">

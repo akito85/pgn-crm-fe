@@ -15,14 +15,14 @@ const expandedRowRender = (record) => {
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => {}
+    handleSearch = () => {},
   ) => {
     return [
       ...columnsExpandApprovalPromo(
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     ];
   };
@@ -128,7 +128,7 @@ const Approval = (props) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           )}
           expandable={{
             expandedRowRender,

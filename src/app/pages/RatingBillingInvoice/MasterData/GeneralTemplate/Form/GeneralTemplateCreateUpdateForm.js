@@ -23,7 +23,6 @@ const GeneralTempalteCreateUpdateForm = ({
   setBase64Image = () => {},
   setFileList = () => {},
 }) => {
-  
   const handleDisableEndDate = (current) => {
     if (startDate !== null) {
       return moment(startDate) > current;
@@ -46,7 +45,9 @@ const GeneralTempalteCreateUpdateForm = ({
           >
             <InputComponent
               maxLength={100}
-              disabled={type === "update" && statusType !== "DRAFT" ? true : false}
+              disabled={
+                type === "update" && statusType !== "DRAFT" ? true : false
+              }
               // onChange={(e) => setDescription(e.target.value)}
             />
           </Form.Item>
@@ -59,7 +60,9 @@ const GeneralTempalteCreateUpdateForm = ({
           >
             <SelectComponent
               mandatory
-              disabled={type === "update" && statusType !== "DRAFT" ? true : false}
+              disabled={
+                type === "update" && statusType !== "DRAFT" ? true : false
+              }
               // onChange={(e) => handleProduct(e)}
             >
               {(optionTemplateType || [])?.map((data) => (
@@ -78,7 +81,9 @@ const GeneralTempalteCreateUpdateForm = ({
             <DateComponent
               mandatory
               dateDisable={disabledDate}
-              disabled={type === "update" && statusType !== "DRAFT" ? true : false}
+              disabled={
+                type === "update" && statusType !== "DRAFT" ? true : false
+              }
               onChange={(e) => handleStartDate(e)}
             />
           </Form.Item>
@@ -91,7 +96,9 @@ const GeneralTempalteCreateUpdateForm = ({
                   (value && moment(startDate) <= moment(value)) || !value
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error("The end date must be later than the start date")
+                        new Error(
+                          "The end date must be later than the start date",
+                        ),
                       ),
               },
               // { message: requiredMessage("End Date"), required: true },

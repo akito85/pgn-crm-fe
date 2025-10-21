@@ -3,7 +3,10 @@ import { Link, NavLink } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import { MoreOutlined, PlusOutlined, WarningOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
-import { ModalConfirm, ModalError } from "../../../../../../components/Modal/ModalPopUp";
+import {
+  ModalConfirm,
+  ModalError,
+} from "../../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../../utils/Icon";
 import {
   getApprovalHistory,
@@ -11,7 +14,7 @@ import {
   getListAppHier,
   getListAppHierDetail,
   inactiveLateChargeRule,
-  deleteLateChargeRule
+  deleteLateChargeRule,
 } from "../../../../../../redux/slices/account_management/MasterData/late_charges";
 import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 import { Alert, Checkbox, Popover, Tooltip } from "antd";
@@ -41,7 +44,7 @@ const columns = (
   openModalDeleteRule = () => {},
   isUpdate,
   isInactive,
-  isDelete
+  isDelete,
 ) => {
   return [
     {
@@ -75,7 +78,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -89,7 +92,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -105,7 +108,7 @@ const columns = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) => {
         const tempValue = text ? moment(text).format(dateFormatting.date) : "";
@@ -146,7 +149,7 @@ const columns = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) => {
         const tempValue = text ? moment(text).format(dateFormatting.date) : "";
@@ -185,7 +188,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -230,7 +233,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         let text;
@@ -266,7 +269,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         let text;
@@ -319,8 +322,8 @@ const columns = (
     //                 </ButtonComponent>
     //               </Link>
     //               {
-    //                 r.approvalStatus !== "WAITING_APPROVAL" && r.status !== "INACTIVE" 
-    //                 ? (!isUpdate ? 
+    //                 r.approvalStatus !== "WAITING_APPROVAL" && r.status !== "INACTIVE"
+    //                 ? (!isUpdate ?
     //                   <Link
     //                     to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_LATE_CHARGES_RULE}
     //                     state={{
@@ -351,7 +354,7 @@ const columns = (
     //                   >
     //                     <span className={"text-black"}>Update</span>
     //                   </ButtonComponent>
-    //                   ) 
+    //                   )
     //                  ) : (
     //                   <ButtonComponent
     //                     icon={
@@ -419,18 +422,18 @@ const columns = (
     //           <ButtonComponent icon={<MoreOutlined />} border={false} />
     //         </Popover>
     //         <Tooltip title="Delete">
-    //           <span   
+    //           <span
     //             className={`flex justify-center ${(r.approvalStatus === "DRAFT" && r.status === "DRAFT") ? (!isDelete ? "" : "cursor-not-allowed") : "cursor-not-allowed"}`}
     //           >
-    //             <SVGIcon 
-    //               name="IconDelete" 
+    //             <SVGIcon
+    //               name="IconDelete"
     //               className={
-    //                 (r.approvalStatus === "DRAFT" && r.status === "DRAFT") 
+    //                 (r.approvalStatus === "DRAFT" && r.status === "DRAFT")
     //                 ? "" : " disabled"}
-    //               width={24} 
-    //               onClick={ 
-    //                 (r.approvalStatus === "DRAFT" && r.status === "DRAFT") 
-    //                 ? () => openModalDeleteRule(r?.id)  
+    //               width={24}
+    //               onClick={
+    //                 (r.approvalStatus === "DRAFT" && r.status === "DRAFT")
+    //                 ? () => openModalDeleteRule(r?.id)
     //                 : undefined
     //               }
     //             />
@@ -446,16 +449,18 @@ const columns = (
 
 const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
   const { data_late_charge_rule, dataApprovalHistory = {} } = useSelector(
-    (state) => state.late_charge
+    (state) => state.late_charge,
   );
   const { user } = useSelector((state) => state.auth);
   // Access Action Menu
-  const dataArr = user?.data?.actionList
-  const isUpdate = dataArr?.some(element => element.name == "Update");
-  const isInactive = dataArr?.some(element => element.name == "Inactivate");
-  const isCreate = dataArr?.some(element => element.name == "Create");
-  const isDelete = dataArr?.some(element => element.name == "Hapus" || element.name == "Delete");
-  
+  const dataArr = user?.data?.actionList;
+  const isUpdate = dataArr?.some((element) => element.name == "Update");
+  const isInactive = dataArr?.some((element) => element.name == "Inactivate");
+  const isCreate = dataArr?.some((element) => element.name == "Create");
+  const isDelete = dataArr?.some(
+    (element) => element.name == "Hapus" || element.name == "Delete",
+  );
+
   const dispatch = useDispatch();
   // Use State
   const [page, setPage] = useState(1);
@@ -512,7 +517,7 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
         sort,
         page,
         pageSize,
-      })
+      }),
     );
   }, [dispatch, id, page, pageSize, search, sort]);
 
@@ -598,7 +603,7 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
             pageSize,
             sort,
             search: tempSearch,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -630,50 +635,49 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
   };
 
   const openModalDeleteRule = (id) => {
-    setModalDeleteRule(true)
-    setIdDeleteRule(id)
-  }
+    setModalDeleteRule(true);
+    setIdDeleteRule(id);
+  };
   const handleDeleteRule = () => {
     dispatch(deleteLateChargeRule(idDeleteRule))
-    .unwrap()
-    .then(async (data) => {
-      if(data?.code === 200){
-        setModalDeleteRule(false)
-        setIdDeleteRule("")
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
+      .unwrap()
+      .then(async (data) => {
+        if (data?.code === 200) {
+          setModalDeleteRule(false);
+          setIdDeleteRule("");
+          let tempSearch = "";
+          for (const dataIndex in search) {
+            if (Object.hasOwnProperty.call(search, dataIndex)) {
+              const tempSearchText = search[dataIndex];
+              if (tempSearchText) {
+                tempSearch += `${dataIndex}~${tempSearchText},`;
+              }
             }
           }
+          tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+          dispatch(
+            getLateChargeRulePaginate({
+              id,
+              search: tempSearch,
+              sort,
+              page,
+              pageSize,
+            }),
+          );
         }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-        dispatch(
-          getLateChargeRulePaginate({
-            id,
-            search: tempSearch,
-            sort,
-            page,
-            pageSize,
-          })
-        );
-      }
-    })
-    .catch((error) => {
-    });
-  }
+      })
+      .catch((error) => {});
+  };
   const itemActions = [
     //action toolbar
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink
           to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_LATE_CHARGES_RULE}
           state={{
             lateChargeId: id,
-            from:"create"
+            from: "create",
           }}
         >
           <ButtonComponent
@@ -683,8 +687,7 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
             Create
           </ButtonComponent>
         </NavLink>
-
-      )
+      ),
     },
 
     // Action Table
@@ -692,26 +695,21 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
       action: "View",
       type: "table",
       render: (record, data) => {
-        const renderAction = data > 3 ? (
-          <ButtonComponent
-            icon={
-              <SVGIcon
-                name="IconDetail"
-                color={"#0075bf"}
-                width={24}
-              />
-            }
-            border={false}
-          >
-            <span className={"text-black ml-2"}>Detail</span>
-          </ButtonComponent>
-        ) : (
-					<Tooltip title="Detail">
-						<div className="pt-1">
-							<SVGIcon name="IconDetail" width={24} />
-						</div>
-					</Tooltip>
-        )
+        const renderAction =
+          data > 3 ? (
+            <ButtonComponent
+              icon={<SVGIcon name="IconDetail" color={"#0075bf"} width={24} />}
+              border={false}
+            >
+              <span className={"text-black ml-2"}>Detail</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Detail">
+              <div className="pt-1">
+                <SVGIcon name="IconDetail" width={24} />
+              </div>
+            </Tooltip>
+          );
         return (
           <Link
             to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_LATE_CHARGES_RULE}
@@ -719,15 +717,18 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
           >
             {renderAction}
           </Link>
-        )
-      }
+        );
+      },
     },
     {
       action: "Update",
       type: "table",
       render: (record, data) => {
-        const isUpdate = record.approvalStatus !== "WAITING_APPROVAL" && record.status !== "INACTIVE" 
-        const renderAction = data > 3 ? (
+        const isUpdate =
+          record.approvalStatus !== "WAITING_APPROVAL" &&
+          record.status !== "INACTIVE";
+        const renderAction =
+          data > 3 ? (
             isUpdate ? (
               <Link
                 to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_LATE_CHARGES_RULE}
@@ -738,11 +739,7 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
               >
                 <ButtonComponent
                   icon={
-                    <SVGIcon
-                      name="IconEdit"
-                      color={"#0075bf"}
-                      width={24}
-                    />
+                    <SVGIcon name="IconEdit" color={"#0075bf"} width={24} />
                   }
                   border={false}
                 >
@@ -751,106 +748,105 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
               </Link>
             ) : (
               <ButtonComponent
-                icon={
-                  <SVGIcon name="IconEdit" color={"#8D91A0"} width={24} />
-                }
+                icon={<SVGIcon name="IconEdit" color={"#8D91A0"} width={24} />}
                 border={false}
                 disabled={true}
               >
                 <span className={"text-black ml-2"}>Update</span>
               </ButtonComponent>
-            )  
-        ) : (
-          <Tooltip title="Update">
-            {isUpdate ? (
-              <Link
-                to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_LATE_CHARGES_RULE}
-                state={{
-                  id: record?.id,
-                  lateChargeId: id,
-                }}
-              >
-                <div className="pt-1">
-                  <SVGIcon name="IconEdit" width={24} />
+            )
+          ) : (
+            <Tooltip title="Update">
+              {isUpdate ? (
+                <Link
+                  to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_LATE_CHARGES_RULE}
+                  state={{
+                    id: record?.id,
+                    lateChargeId: id,
+                  }}
+                >
+                  <div className="pt-1">
+                    <SVGIcon name="IconEdit" width={24} />
+                  </div>
+                </Link>
+              ) : (
+                <div className={"cursor-not-allowed pt-1"}>
+                  <SVGIcon
+                    name="IconEdit"
+                    width={24}
+                    color={"#C0BEC6"}
+                    className={"cursor-not-allowed"}
+                  />
                 </div>
-              </Link>
-            ) : (
-              <div className={"cursor-not-allowed pt-1"}>
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  color={"#C0BEC6"}
-                  className={"cursor-not-allowed"}
-                />
-              </div>
-            )}
-          </Tooltip>
-        )
+              )}
+            </Tooltip>
+          );
         return renderAction;
-      }
+      },
     },
     {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivate = record.status === "ACTIVE"; 
-        const renderAction = data > 3 ? (
-          <ButtonComponent
-            icon={
-              <Checkbox
-                className="inactive-check"
-                checked={!(record.status === "ACTIVE")}
-                disabled={
-                  !(
-                    record.status === "ACTIVE" &&
-                    record.approvalStatus !== "WAITING_APPROVAL"
-                  )
-                }
-              />
-            }
-            border={false}
-            disabled={
-              !(
-                record.status === "ACTIVE" &&
-                record.approvalStatus !== "WAITING_APPROVAL"
-              )
-            }
-            onClick={
-              record.status === "ACTIVE" &&
-              record.approvalStatus !== "WAITING_APPROVAL"
-                ? () => handleOpenModalInactivate(record)
-                : undefined
-            }
-          >
-            <span className={"text-black ml-3"}>
-              {record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-            </span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip
-            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div className="pt-1">
-              <Checkbox
-                onClick={
+        const isActivate = record.status === "ACTIVE";
+        const renderAction =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <Checkbox
+                  className="inactive-check"
+                  checked={!(record.status === "ACTIVE")}
+                  disabled={
+                    !(
+                      record.status === "ACTIVE" &&
+                      record.approvalStatus !== "WAITING_APPROVAL"
+                    )
+                  }
+                />
+              }
+              border={false}
+              disabled={
+                !(
                   record.status === "ACTIVE" &&
                   record.approvalStatus !== "WAITING_APPROVAL"
-                    ? () => handleOpenModalInactivate(record)
-                    : undefined
-                }
-                checked={record?.status === "INACTIVE"}
-                disabled={
-                  !(
+                )
+              }
+              onClick={
+                record.status === "ACTIVE" &&
+                record.approvalStatus !== "WAITING_APPROVAL"
+                  ? () => handleOpenModalInactivate(record)
+                  : undefined
+              }
+            >
+              <span className={"text-black ml-3"}>
+                {record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+            >
+              <div className="pt-1">
+                <Checkbox
+                  onClick={
                     record.status === "ACTIVE" &&
                     record.approvalStatus !== "WAITING_APPROVAL"
-                  )
-                }
-              />
-            </div>
-          </Tooltip>
-        )
+                      ? () => handleOpenModalInactivate(record)
+                      : undefined
+                  }
+                  checked={record?.status === "INACTIVE"}
+                  disabled={
+                    !(
+                      record.status === "ACTIVE" &&
+                      record.approvalStatus !== "WAITING_APPROVAL"
+                    )
+                  }
+                />
+              </div>
+            </Tooltip>
+          );
         return renderAction;
-      }
+      },
     },
     {
       action: "Delete",
@@ -858,68 +854,71 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
       render: (record, data) => {
         return (
           <Tooltip title="Delete">
-            <div   
-              className={`pt-1 ${(record.approvalStatus === "DRAFT" && record.status === "DRAFT") ? (!isDelete ? "" : "cursor-not-allowed") : "cursor-not-allowed"}`}
+            <div
+              className={`pt-1 ${record.approvalStatus === "DRAFT" && record.status === "DRAFT" ? (!isDelete ? "" : "cursor-not-allowed") : "cursor-not-allowed"}`}
             >
-              <SVGIcon 
-                name="IconDelete" 
+              <SVGIcon
+                name="IconDelete"
                 className={
-                  (record.approvalStatus === "DRAFT" && record.status === "DRAFT") 
-                  ? "" : "disabled cursor-not-allowed"}
-                width={24} 
-                color={record.approvalStatus === "DRAFT" && record.status === "DRAFT" ? "#FF2E2E" : "#8d91a0"}
-                onClick={ 
-                  (record.approvalStatus === "DRAFT" && record.status === "DRAFT") 
-                  ? () => openModalDeleteRule(record?.id)  
-                  : undefined
+                  record.approvalStatus === "DRAFT" && record.status === "DRAFT"
+                    ? ""
+                    : "disabled cursor-not-allowed"
+                }
+                width={24}
+                color={
+                  record.approvalStatus === "DRAFT" && record.status === "DRAFT"
+                    ? "#FF2E2E"
+                    : "#8d91a0"
+                }
+                onClick={
+                  record.approvalStatus === "DRAFT" && record.status === "DRAFT"
+                    ? () => openModalDeleteRule(record?.id)
+                    : undefined
                 }
               />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
       action: "History",
       type: "table",
       render: (record, data) => {
-        const renderAction = data > 3 ? (
-          <ButtonComponent
-            icon={
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={24}
-              />
-            }
-            border={false}
-            onClick={() => handleApprovalHistory(record)}
-          >
-            <span className={"text-black ml-2"}>Approval History</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title="Approval History">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={24}
-                onClick={() => handleApprovalHistory(record)}
-              />
-            </div>
-          </Tooltip>
-        )
+        const renderAction =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+              }
+              border={false}
+              onClick={() => handleApprovalHistory(record)}
+            >
+              <span className={"text-black ml-2"}>Approval History</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Approval History">
+              <div className="pt-1">
+                <SVGIcon
+                  name="IconLogHistory"
+                  color={"#0075bf"}
+                  width={24}
+                  onClick={() => handleApprovalHistory(record)}
+                />
+              </div>
+            </Tooltip>
+          );
         return renderAction;
-      }
-    }
-  ]
+      },
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex w-full justify-end">
-        <ToolbarAccount items={itemActions} advancedAccess={access}/>
+        <ToolbarAccount items={itemActions} advancedAccess={access} />
       </div>
-     
+
       <div className="w-full">
         <TablePaginationNew
           dataSource={data_late_charge_rule?.result || []}
@@ -934,13 +933,13 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
               handleApprovalHistory,
               handleOpenModalInactivate,
               id,
-              openModalDeleteRule
+              openModalDeleteRule,
             ),
             ...useColumnActionPermissionAccount(
               ["Delete", "Activate", "View", "Update", "History"],
               itemActions,
               access,
-              "Delete"
+              "Delete",
             ),
           ]}
           current={page}
@@ -994,7 +993,7 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
         </div>
       </ModalError>
 
-        {/* Modal Delete Late Charge Rule */}
+      {/* Modal Delete Late Charge Rule */}
       <ModalConfirm
         isOpen={modalDeleteRule}
         handleCancel={() => setModalDeleteRule(false)}
@@ -1010,7 +1009,7 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
               {`Are you sure want to delete late charge rule?`}
             </span>
           </div>
-            {/* <div className={"w-full justify-center my-4 flex text-sm"}>
+          {/* <div className={"w-full justify-center my-4 flex text-sm"}>
               <Alert
                 message={
                   <span className="text-sm">

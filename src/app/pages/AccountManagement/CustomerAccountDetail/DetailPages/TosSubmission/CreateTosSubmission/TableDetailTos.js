@@ -29,7 +29,7 @@ const EditableCell = ({
   dependDataIndex,
   dataEditRecord,
   urlIndex,
-  handleEditDataRecord = () => { },
+  handleEditDataRecord = () => {},
   ...restProps
 }) => {
   const key = record?.key || 0;
@@ -127,7 +127,7 @@ const TableDetailTos = ({
   editDetail = true,
   type,
   dataTable = [],
-  updateTable = () => { },
+  updateTable = () => {},
 }) => {
   const searchInput = useRef(null);
   const [formTable] = Form.useForm();
@@ -267,7 +267,7 @@ const TableDetailTos = ({
 
   const deleteRow = (record) => {
     updateTable((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
   };
 
@@ -294,7 +294,7 @@ const TableDetailTos = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -309,9 +309,9 @@ const TableDetailTos = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
-        render: (text) => (<span>{text?.toString()}</span>)
+        render: (text) => <span>{text?.toString()}</span>,
       },
       {
         title: "UNIT",
@@ -326,7 +326,7 @@ const TableDetailTos = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -341,7 +341,7 @@ const TableDetailTos = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -371,13 +371,30 @@ const TableDetailTos = ({
               ) : (
                 <Tooltip title="Edit">
                   <span
-                    className={`flex justify-center${!editDetail ? record?.attribute?.label === "Configurable" ? " cursor-not-allowed" : "" : ""
-                      }`}
-                    onClick={editDetail ? record?.attribute?.label !== "Configurable" ? () => edit(record) : undefined : undefined}
+                    className={`flex justify-center${
+                      !editDetail
+                        ? record?.attribute?.label === "Configurable"
+                          ? " cursor-not-allowed"
+                          : ""
+                        : ""
+                    }`}
+                    onClick={
+                      editDetail
+                        ? record?.attribute?.label !== "Configurable"
+                          ? () => edit(record)
+                          : undefined
+                        : undefined
+                    }
                   >
                     <SVGIcon
                       name="IconEdit"
-                      color={editDetail ? record?.attribute?.label !== "Configurable" ? "#ACC424" : "#8D91A0" : "#8D91A0"}
+                      color={
+                        editDetail
+                          ? record?.attribute?.label !== "Configurable"
+                            ? "#ACC424"
+                            : "#8D91A0"
+                          : "#8D91A0"
+                      }
                       width={24}
                     />
                   </span>
@@ -467,7 +484,7 @@ const TableDetailTos = ({
                 disabled: col.disabled,
                 handleEditDataRecord: handleEditDataRecord,
               }),
-            }))
+            })),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           scroll={{

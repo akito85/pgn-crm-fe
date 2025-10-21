@@ -6,14 +6,9 @@ import BaseContainer from "../../../../../../components/BaseContainer";
 import RadioTabs from "../../../../../../components/RadioTabs";
 import AccountReceiptPostPaid from "./AccountReceiptPostPaid";
 
-const listReceiptPage = [
-  { value: "Postpaid" },
-  { value: "Prepaid" },
-];
+const listReceiptPage = [{ value: "Postpaid" }, { value: "Prepaid" }];
 
-const AccountReceipt = ({
-  handleChangeInteraction = () => {},
-}) => {
+const AccountReceipt = ({ handleChangeInteraction = () => {} }) => {
   // const dispatch = useDispatch();
 
   // useEffect(() => {
@@ -29,10 +24,8 @@ const AccountReceipt = ({
   //     dispatch(getAllTosNewsPaginate({page, pageSize}))
   //     setModalInactive(false);
   // };
-  
-  const [receiptPage, setReceiptPage] = useState(
-    listReceiptPage[0].value
-  );
+
+  const [receiptPage, setReceiptPage] = useState(listReceiptPage[0].value);
 
   const handleReceiptPage = (e) => {
     setReceiptPage(e.target.value);
@@ -41,9 +34,13 @@ const AccountReceipt = ({
   const renderSection = () => {
     switch (receiptPage) {
       case listReceiptPage[0].value:
-        return <AccountReceiptPostPaid handleChangeInteraction={handleChangeInteraction}/>;
+        return (
+          <AccountReceiptPostPaid
+            handleChangeInteraction={handleChangeInteraction}
+          />
+        );
       case listReceiptPage[1].value:
-        return <p>prepaid</p>
+        return <p>prepaid</p>;
       default:
         return <></>;
     }
@@ -52,14 +49,12 @@ const AccountReceipt = ({
   return (
     <Fragment>
       {/* <Spin spinning={loading} className={"w-full top-20"} tip={"Loading..."}> */}
-        <BaseContainer header={"RECEIPT LIST"}>
-            
+      <BaseContainer header={"RECEIPT LIST"}>
         <div>
           <RadioTabs data={listReceiptPage} onChange={handleReceiptPage} />
         </div>
 
         <div className={"w-full mt-5"}>{renderSection()}</div>
-          
       </BaseContainer>
       {/* </Spin> */}
     </Fragment>

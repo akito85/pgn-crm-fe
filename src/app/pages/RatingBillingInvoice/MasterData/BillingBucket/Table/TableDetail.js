@@ -3,7 +3,12 @@ import Highlighter from "react-highlight-words";
 import moment from "moment";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
 import { FilterOutlined } from "@ant-design/icons";
 import { render } from "@testing-library/react";
 
@@ -16,7 +21,7 @@ const getColumnSearchPropsUseFilteredValueFE = (
   handleSearch,
   excludeRender = false,
   typeFilter = "input",
-  storedData = false
+  storedData = false,
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
@@ -33,21 +38,57 @@ const getColumnSearchPropsUseFilteredValueFE = (
           onKeyDown={(e) => e.stopPropagation()}
         >
           {typeFilter === "date" ? (
-            <DatePicker onChange={onDataChange} format={dateFormatting.date} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              format={dateFormatting.date}
+              ref={searchInput}
+              value={
+                hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()
+              }
+            />
           ) : null}
           {typeFilter === "dateCapital" ? (
-            <DatePicker onChange={onDataChange} format={dateFormatting.dateCapital} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              format={dateFormatting.dateCapital}
+              ref={searchInput}
+              value={
+                hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()
+              }
+            />
           ) : null}
           {typeFilter === "datetime" ? (
-            <DatePicker onChange={onDataChange} showTime={true} format={dateFormatting.dateTime} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              showTime={true}
+              format={dateFormatting.dateTime}
+              ref={searchInput}
+              value={
+                hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()
+              }
+            />
           ) : null}
           {typeFilter === "datePeriod" ? (
-            <DatePicker onChange={onDataChange} picker="month" format={dateFormatting.datePeriod} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              picker="month"
+              format={dateFormatting.datePeriod}
+              ref={searchInput}
+              value={
+                hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()
+              }
+            />
           ) : null}
           {typeFilter === "hour" ? (
-            <TimePicker format={dateFormatting?.hour_format} onChange={onDataChange} />
+            <TimePicker
+              format={dateFormatting?.hour_format}
+              onChange={onDataChange}
+            />
           ) : null}
-          {typeFilter === "input" || typeFilter === 'status' || typeFilter === 'select' || typeFilter === 'currency' ? (
+          {typeFilter === "input" ||
+          typeFilter === "status" ||
+          typeFilter === "select" ||
+          typeFilter === "currency" ? (
             <Input
               ref={searchInput}
               placeholder={`Search`}
@@ -64,7 +105,7 @@ const getColumnSearchPropsUseFilteredValueFE = (
               }}
             />
           ) : null}
-          {typeFilter === 'boolean' ? (
+          {typeFilter === "boolean" ? (
             <Input
               ref={searchInput}
               placeholder={`Search (Y/N/y/n)`}
@@ -73,9 +114,10 @@ const getColumnSearchPropsUseFilteredValueFE = (
                 setSelectedKeys(e.target.value ? [e.target.value] : [])
               }
               onInput={(e) => {
-                e.target.value = e.target.value.replace(/[^YyNn]/g, "")?.charAt(0)
-              }
-              }
+                e.target.value = e.target.value
+                  .replace(/[^YyNn]/g, "")
+                  ?.charAt(0);
+              }}
               onPressEnter={() =>
                 handleSearch(selectedKeys, confirm, dataIndex)
               }
@@ -86,7 +128,7 @@ const getColumnSearchPropsUseFilteredValueFE = (
               maxLength={1}
             />
           ) : null}
-           {typeFilter === 'yes_or_no' ? (
+          {typeFilter === "yes_or_no" ? (
             <Input
               ref={searchInput}
               placeholder={`Search (Yes/No)`}
@@ -96,8 +138,7 @@ const getColumnSearchPropsUseFilteredValueFE = (
               }
               onInput={(e) => {
                 e.target.value = e.target.value.replace(/[^yesnoYESNO]/g, "");
-              }
-              }
+              }}
               onPressEnter={() =>
                 handleSearch(selectedKeys, confirm, dataIndex)
               }
@@ -114,7 +155,10 @@ const getColumnSearchPropsUseFilteredValueFE = (
     filterIcon: (filtered) => (
       <FilterOutlined
         style={{
-          color: filtered && hasValue(search[dataIndex]) === true ? "#1890ff" : undefined,
+          color:
+            filtered && hasValue(search[dataIndex]) === true
+              ? "#1890ff"
+              : undefined,
         }}
       />
     ),
@@ -206,7 +250,7 @@ export const columnsDetail = (
   status,
   statusApproval,
   handleDetail = () => {},
-  showAction
+  showAction,
 ) => [
   {
     title: "NO",
@@ -225,7 +269,7 @@ export const columnsDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text, record) => {
       const itemName = dataBillingItem
@@ -241,7 +285,7 @@ export const columnsDetail = (
             itemName,
             false,
             "input",
-            search
+            search,
           )
         : itemName;
       // if (searchedColumn === "billingItem") {
@@ -280,7 +324,7 @@ export const columnsDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text, record) => {
       const itemName = dataCurrency
@@ -296,7 +340,7 @@ export const columnsDetail = (
             itemName,
             false,
             "input",
-            search
+            search,
           )
         : itemName;
       // if (searchedColumn === "currency") {
@@ -336,7 +380,7 @@ export const columnsDetail = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text, record) =>
       renderColumn(
@@ -346,7 +390,7 @@ export const columnsDetail = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -363,7 +407,7 @@ export const columnsDetail = (
       searchText,
       handleSearch,
       true,
-      "dateCapital"
+      "dateCapital",
     ),
     render: (text) =>
       renderDateColumn(
@@ -372,7 +416,7 @@ export const columnsDetail = (
         searchText,
         text,
         "dateCapital",
-        search
+        search,
       ),
     // render: (text) =>
     //   searchedColumn === "startDate" ? (
@@ -409,7 +453,7 @@ export const columnsDetail = (
       searchText,
       handleSearch,
       true,
-      "dateCapital"
+      "dateCapital",
     ),
     render: (text) =>
       renderDateColumn(
@@ -418,7 +462,7 @@ export const columnsDetail = (
         searchText,
         text,
         "dateCapital",
-        search
+        search,
       ),
     // render: (text) =>
     //   searchedColumn === "endDate" ? (
@@ -453,21 +497,23 @@ export const columnsDetail = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) => {
       const tempValue = text === true ? "Yes" : "No";
-      
-      return tempValue ? renderColumn(
-        "priority",
-        hasValue(search["priority"]),
-        searchText,
-        tempValue,
-        false,
-        "input",
-        search
-      ) : tempValue;
-    }
+
+      return tempValue
+        ? renderColumn(
+            "priority",
+            hasValue(search["priority"]),
+            searchText,
+            tempValue,
+            false,
+            "input",
+            search,
+          )
+        : tempValue;
+    },
     // render: (text) => {
     //   const tempValue = text === true ? "Yes" : "No";
     //   if (searchedColumn === "priority") {
@@ -509,7 +555,7 @@ export const columnsDetail = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -519,7 +565,7 @@ export const columnsDetail = (
         text,
         true,
         "input",
-        search
+        search,
       ),
     // render: (text) =>
     //   searchedColumn === "description" ? (

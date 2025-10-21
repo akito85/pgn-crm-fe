@@ -26,7 +26,7 @@ const CronYear = (props) => {
         setValueYear(3);
         const valueCheck = checkYear.reduce(
           (prev, current) => prev + `,${current}`,
-          ""
+          "",
         );
         onChangeYear(valueCheck.slice(1));
         break;

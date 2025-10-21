@@ -134,8 +134,12 @@ const FinancialInformation = ({
             <DetailText label={"Account Number"}>
               {dataForm?.relatedAccountId}
             </DetailText>
-            <DetailText label={"Customer Name"}>{dataForm.customerNameTI}</DetailText>
-            <DetailText label={"Account Name"}>{dataForm?.accountNameTI}</DetailText>
+            <DetailText label={"Customer Name"}>
+              {dataForm.customerNameTI}
+            </DetailText>
+            <DetailText label={"Account Name"}>
+              {dataForm?.accountNameTI}
+            </DetailText>
             <DetailText label={"Related Account Tax Identifier Type"}>
               {dataForm?.ratit}
             </DetailText>

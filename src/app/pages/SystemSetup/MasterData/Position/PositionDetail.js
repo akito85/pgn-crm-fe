@@ -1,6 +1,11 @@
 import React, { useCallback, useRef, useState } from "react";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import { hasValue, renderColumn, renderDateColumn, toTitleCase } from "../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+  toTitleCase,
+} from "../../../../../utils";
 import moment from "moment";
 import CardComponent from "../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../components/DetailText";
@@ -13,7 +18,7 @@ import { sorterFunction } from "../../../../../utils/sorterFunction";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 
 export default function PositionDetail(props) {
-  const { data, onClick = () => { }, isOpen } = props;
+  const { data, onClick = () => {}, isOpen } = props;
 
   const searchInput = useRef(null);
   const { loading } = useSelector((state) => state.master_position);
@@ -27,12 +32,12 @@ export default function PositionDetail(props) {
   const [dataTable, setDataTable] = useState([]);
 
   const handleResetState = useCallback(() => {
-    setPage(1)
-    setPageSize(10)
-    setSearchText("")
-    setSearchedColumn('')
-    setSearch({})
-  }, [])
+    setPage(1);
+    setPageSize(10);
+    setSearchText("");
+    setSearchedColumn("");
+    setSearch({});
+  }, []);
 
   useEffect(() => {
     if (data !== null) {
@@ -42,7 +47,7 @@ export default function PositionDetail(props) {
 
   useEffect(() => {
     if (isOpen === false) {
-      handleResetState()
+      handleResetState();
     }
   }, [isOpen, handleResetState]);
 
@@ -82,55 +87,81 @@ export default function PositionDetail(props) {
       title: "ACTOR",
       dataIndex: "createdBy",
       width: 130,
-      sorter: (a, b) => sorterFunction('createdBy', a, b),
+      sorter: (a, b) => sorterFunction("createdBy", a, b),
       filteredValue: search.createdBy ? [search.createdBy] : null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        'createdBy',
+        "createdBy",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('createdBy', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "createdBy",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACTION",
       dataIndex: "operation",
       width: 150,
-      sorter: (a, b) => sorterFunction('operation', a, b),
+      sorter: (a, b) => sorterFunction("operation", a, b),
       filteredValue: search.operation ? [search.operation] : null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        'operation',
+        "operation",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         true,
-        'status'
+        "status",
       ),
-      render: (text) => renderColumn('operation', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "operation",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACTION DATE",
       dataIndex: "createdDate",
       width: 250,
-      align: 'center',
-      sorter: (a, b) => sorterFunction('createdDate', a, b, 'date'),
+      align: "center",
+      sorter: (a, b) => sorterFunction("createdDate", a, b, "date"),
       filteredValue: search.createdDate ? [search.createdDate] : null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        'createdDate',
+        "createdDate",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         true,
-        'datetime'
+        "datetime",
       ),
-      render: (value) => renderDateColumn('createdDate', searchedColumn, searchText, value, 'datetime', search)
+      render: (value) =>
+        renderDateColumn(
+          "createdDate",
+          searchedColumn,
+          searchText,
+          value,
+          "datetime",
+          search,
+        ),
     },
     {
       title: "REMARK",
@@ -140,7 +171,7 @@ export default function PositionDetail(props) {
       filteredValue: search.remark ? [search.remark] : null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        'remark',
+        "remark",
         searchInput,
         searchedColumn,
         searchText,
@@ -150,7 +181,16 @@ export default function PositionDetail(props) {
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('remark', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "remark",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
   ];
 
@@ -172,14 +212,14 @@ export default function PositionDetail(props) {
           <CardComponent cols={2} header={"POSITION INFORMATION"}>
             <DetailText label={"Position"}>{data?.name}</DetailText>
             <DetailText label={"Cost Center"}>{data?.costCenter}</DetailText>
-            <DetailText label={"Status"}>{toTitleCase(data?.status)}</DetailText>
+            <DetailText label={"Status"}>
+              {toTitleCase(data?.status)}
+            </DetailText>
             <DetailText label={"Description"}>{data?.description}</DetailText>
           </CardComponent>
 
           <CardComponent cols={5} header={"HISTORY LOG INFORMATION"}>
-            <DetailText label={"Record Id"}>
-              {data?.id}
-            </DetailText>
+            <DetailText label={"Record Id"}>{data?.id}</DetailText>
             <DetailText label={"Created Date"}>
               {hasValue(data?.createdDate) &&
                 moment(data?.createdDate).format("DD MMM YYYY HH:mm:ss")}
@@ -215,7 +255,6 @@ export default function PositionDetail(props) {
             />
           </div>
         </div>
-
       </Spin>
     </ModalCustom>
   );

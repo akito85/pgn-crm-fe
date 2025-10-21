@@ -14,9 +14,7 @@ import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../components/TablePagination";
-import {
-  DownloadOutlined,
-} from "@ant-design/icons";
+import { DownloadOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import {
   disabledActionByStatus,
@@ -45,7 +43,7 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 const ViewPaymentItem = () => {
   // Selector
   const { loading, data, dataApprovalHistory } = useSelector(
-    (state) => state.item
+    (state) => state.item,
   );
   const { bodyError } = useSelector((state) => state?.general);
 
@@ -80,7 +78,7 @@ const ViewPaymentItem = () => {
         pageSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
-      })
+      }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
@@ -169,12 +167,10 @@ const ViewPaymentItem = () => {
   const handleApprovalHistory = async (data) => {
     try {
       setBody(data);
-     await dispatch(getApprovalHistory(data))?.unwrap();
+      await dispatch(getApprovalHistory(data))?.unwrap();
       setOpenModalHistory(true);
-      
     } catch (error) {
       setOpenModalHistory(false);
-      
     }
   };
 
@@ -195,7 +191,7 @@ const ViewPaymentItem = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -205,7 +201,7 @@ const ViewPaymentItem = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -220,7 +216,7 @@ const ViewPaymentItem = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -230,7 +226,7 @@ const ViewPaymentItem = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -245,7 +241,7 @@ const ViewPaymentItem = () => {
         searchText,
         handleSearch,
         false,
-        "date"
+        "date",
       ),
       render: (v) =>
         renderDateColumn(
@@ -254,7 +250,7 @@ const ViewPaymentItem = () => {
           searchText,
           v,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -269,7 +265,7 @@ const ViewPaymentItem = () => {
         searchText,
         handleSearch,
         false,
-        "date"
+        "date",
       ),
       render: (v) =>
         renderDateColumn(
@@ -278,7 +274,7 @@ const ViewPaymentItem = () => {
           searchText,
           v,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -321,7 +317,7 @@ const ViewPaymentItem = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -331,7 +327,7 @@ const ViewPaymentItem = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -347,7 +343,7 @@ const ViewPaymentItem = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -356,7 +352,7 @@ const ViewPaymentItem = () => {
           searchText,
           text,
           false,
-          "status"
+          "status",
         ),
     },
     {
@@ -372,7 +368,7 @@ const ViewPaymentItem = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -381,7 +377,7 @@ const ViewPaymentItem = () => {
           searchText,
           text,
           false,
-          "status"
+          "status",
         ),
     },
   ];
@@ -435,7 +431,7 @@ const ViewPaymentItem = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -495,46 +491,48 @@ const ViewPaymentItem = () => {
       type: "table",
       render: (record, data_length) => {
         const isEditable =
-        record.status === "Draft" && record.statusApproval === "Rejected" 
-          // (record.statusApproval === "Waiting Approval" && record.status === "Draft") ||
-          // (record.status !== "Active" && record.statusApproval !== "Approved") 
+          record.status === "Draft" && record.statusApproval === "Rejected";
+        // (record.statusApproval === "Waiting Approval" && record.status === "Draft") ||
+        // (record.status !== "Active" && record.statusApproval !== "Approved")
 
-        return (
-          data_length > 3 ? (
+        return data_length > 3 ? (
+          <Link
+            to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PAYMENT_ITEM}
+            state={{ id: record?.id }}
+          >
+            <ButtonComponent
+              className="gap-5 w-full"
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  width={24}
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                />
+              }
+              border={false}
+              disabled={!isEditable}
+            >
+              <span className={"text-black gap-2 text-xl text-center w-full"}>
+                Update
+              </span>
+            </ButtonComponent>
+          </Link>
+        ) : (
+          <Tooltip title="Update">
             <Link
               to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PAYMENT_ITEM}
               state={{ id: record?.id }}
             >
-              <ButtonComponent
-                className="gap-5 w-full"
-                icon={
-                  <SVGIcon name="IconEdit" width={24} color={isEditable? "#0075bf" : "#8D91A0"} />
-                }
-                border={false}
-                disabled={!isEditable}
-
-              >
-                <span
-                  className={"text-black gap-2 text-xl text-center w-full"}
-                >
-                  Update
-                </span>
-              </ButtonComponent>
+              <div border={false}>
+                <SVGIcon
+                  name="IconEdit"
+                  color={!isEditable ? "#8D91A0" : "#ACC424"}
+                  width={24}
+                  className={!isEditable ? "cursor-not-allowed" : undefined}
+                />
+              </div>
             </Link>
-          ) : (
-            <Tooltip title="Update" >
-              <Link
-                to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PAYMENT_ITEM}
-                state={{ id: record?.id }}
-              >
-                <div border={false}>
-                  <SVGIcon name="IconEdit"
-                    color={!isEditable ? "#8D91A0" : "#ACC424"} width={24}
-                    className={!isEditable ? "cursor-not-allowed" : undefined} />
-                </div>
-              </Link>
-            </Tooltip>
-          )
+          </Tooltip>
         );
       },
     },
@@ -542,18 +540,32 @@ const ViewPaymentItem = () => {
       action: "Activate",
       type: "table",
       render: (record, data_length) => {
-        const statusLowerCase = record?.status?.toLowerCase()
+        const statusLowerCase = record?.status?.toLowerCase();
         const isActivateOrInactivate =
-        (record.statusApproval === "Approved" &&
-          record.status === "Active") ||
-        (record.statusApproval === "Draft" && record.status === "Active") ||
-        (record.statusApproval === "Rejected" &&
-          record.status === "Active") ||
-        (record.statusApproval === "Waiting Approval" &&
-          record.status === "Active");
-        return (
-          data_length > 3 ?
-            <ButtonComponent
+          (record.statusApproval === "Approved" &&
+            record.status === "Active") ||
+          (record.statusApproval === "Draft" && record.status === "Active") ||
+          (record.statusApproval === "Rejected" &&
+            record.status === "Active") ||
+          (record.statusApproval === "Waiting Approval" &&
+            record.status === "Active");
+        return data_length > 3 ? (
+          <ButtonComponent
+            border={false}
+            onClick={() => {
+              setOpenModalInactivate(true);
+              setStatus(record?.status);
+              setPaymentItemId(record?.id);
+              setPaymentItemName(record?.name);
+              setAppHierID(record?.appHierId);
+              setRemark(record?.remark);
+            }}
+            disabled={
+              !isActivateOrInactivate
+              // disabledActionByStatus('paymentActivate', record?.status, record?.statusApproval)
+            }
+          >
+            <Checkbox
               border={false}
               onClick={() => {
                 setOpenModalInactivate(true);
@@ -563,11 +575,25 @@ const ViewPaymentItem = () => {
                 setAppHierID(record?.appHierId);
                 setRemark(record?.remark);
               }}
+              checked={record?.status !== "Active"}
               disabled={
-                !isActivateOrInactivate
+                record?.status !== "Active"
                 // disabledActionByStatus('paymentActivate', record?.status, record?.statusApproval)
               }
-            >
+            />
+            <span className={"text-black ml-6 gap-2 text-xl text-center"}>
+              {record?.status === "Active" ? "Inactivate" : "Activate"}
+            </span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip
+            title={
+              statusLowerCase === "active" || statusLowerCase === "draft"
+                ? "Inactivate"
+                : "Activate"
+            }
+          >
+            <div>
               <Checkbox
                 border={false}
                 onClick={() => {
@@ -579,33 +605,11 @@ const ViewPaymentItem = () => {
                   setRemark(record?.remark);
                 }}
                 checked={record?.status !== "Active"}
-                disabled={record?.status !== "Active"
-                  // disabledActionByStatus('paymentActivate', record?.status, record?.statusApproval)
-                }
+                disabled={record?.status !== "Active"}
+                // disabled={disabledActionByStatus('paymentActivate', record?.status, record?.statusApproval)}
               />
-              <span className={"text-black ml-6 gap-2 text-xl text-center"}>
-                {record?.status === "Active" ? "Inactivate" : "Activate"}
-              </span>
-            </ButtonComponent>
-            :
-            <Tooltip title={statusLowerCase === "active" || statusLowerCase === 'draft' ? "Inactivate" : "Activate"}>
-              <div >
-                <Checkbox
-                  border={false}
-                  onClick={() => {
-                    setOpenModalInactivate(true);
-                    setStatus(record?.status);
-                    setPaymentItemId(record?.id);
-                    setPaymentItemName(record?.name);
-                    setAppHierID(record?.appHierId);
-                    setRemark(record?.remark);
-                  }}
-                  checked={record?.status !== "Active"}
-                  disabled={record?.status !== "Active"}
-                  // disabled={disabledActionByStatus('paymentActivate', record?.status, record?.statusApproval)}
-                />
-              </div>
-            </Tooltip>
+            </div>
+          </Tooltip>
         );
       },
     },
@@ -613,28 +617,28 @@ const ViewPaymentItem = () => {
       action: "history",
       type: "table",
       render: (record, data_length) => {
-        return (
-          data_length > 3 ?
-            <ButtonComponent
-              className="gap-5"
-              icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              }
+        return data_length > 3 ? (
+          <ButtonComponent
+            className="gap-5"
+            icon={
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+            }
+            border={false}
+            onClick={() => handleApprovalHistory(record?.id)}
+          >
+            <span className={"text-black gap-2 text-xl text-center"}>
+              Approval History
+            </span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip title={"Approval History"}>
+            <div
               border={false}
               onClick={() => handleApprovalHistory(record?.id)}
             >
-              <span className={"text-black gap-2 text-xl text-center"}>
-                Approval History
-              </span>
-            </ButtonComponent>
-            :
-            <Tooltip title={'Approval History'}>
-              <div border={false}
-                onClick={() => handleApprovalHistory(record?.id)}
-              >
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              </div>
-            </Tooltip>
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+            </div>
+          </Tooltip>
         );
       },
     },
@@ -672,8 +676,8 @@ const ViewPaymentItem = () => {
             columns={[
               ...columns,
               ...useColumnActionPermission(
-                ["view", "history", "update", 'activate'],
-                itemActions
+                ["view", "history", "update", "activate"],
+                itemActions,
               ),
             ]}
             current={page}
@@ -693,8 +697,9 @@ const ViewPaymentItem = () => {
           getAPIOption={getAllApprovalList}
           getAPIDetail={getListApprovalById}
           selector={"item"}
-          alertMessage={`Are you sure you want to inactivate this Payment Item with the name ${paymentItemName || ""
-            }?`}
+          alertMessage={`Are you sure you want to inactivate this Payment Item with the name ${
+            paymentItemName || ""
+          }?`}
           openModalInactivate={openModalInactivate}
           handleCloseModalInactivate={handleCancelModalInactivate}
           onFinish={handleSubmitModalInactivate}

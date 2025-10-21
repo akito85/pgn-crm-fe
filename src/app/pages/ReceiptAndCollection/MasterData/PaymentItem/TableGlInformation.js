@@ -19,7 +19,7 @@ const TableGlInformation = ({
   data_bank,
   data_GLAccount,
   onSort,
-  formValueHeader
+  formValueHeader,
 }) => {
   // const { data_bank, data_GLAccount } = useSelector((state) => state.item);
   const searchInput = useRef(null);
@@ -29,9 +29,8 @@ const TableGlInformation = ({
   const [searchedColumn, setSearchedColumn] = useState("");
   const dispatch = useDispatch();
 
+  console.log(formValueHeader);
 
-console.log(formValueHeader);
-  
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -62,7 +61,7 @@ console.log(formValueHeader);
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => {}
+    handleSearch = () => {},
   ) => [
     {
       title: "NO",
@@ -83,7 +82,7 @@ console.log(formValueHeader);
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       //   const bankName = text;
       //   console.log("🚀 ~ bankName:", bankName);
@@ -158,7 +157,7 @@ console.log(formValueHeader);
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         searchedColumn === "glAccount" ? (
@@ -193,7 +192,7 @@ console.log(formValueHeader);
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (index) => {
         const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -232,7 +231,7 @@ console.log(formValueHeader);
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (index) => {
         const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -323,7 +322,7 @@ console.log(formValueHeader);
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         )}
         mode={type}
         showCreateButton={true}

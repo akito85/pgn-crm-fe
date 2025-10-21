@@ -19,7 +19,7 @@ export const columns = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  handlePreview = () => {}
+  handlePreview = () => {},
 ) => [
   {
     title: "NO",
@@ -38,7 +38,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -48,7 +48,7 @@ export const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -62,7 +62,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -72,7 +72,7 @@ export const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -86,7 +86,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -96,7 +96,7 @@ export const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -111,7 +111,7 @@ export const columns = (
       searchedColumn,
       searchText,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -120,7 +120,7 @@ export const columns = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -134,7 +134,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -144,7 +144,7 @@ export const columns = (
         text,
         false,
         "status",
-        search
+        search,
       ),
   },
   {
@@ -161,7 +161,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -171,7 +171,7 @@ export const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -257,7 +257,7 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
         {
           headers: tokenHeader(),
           responseType: "arraybuffer",
-        }
+        },
       );
       const responseBlob = await response.data;
       const blobText =
@@ -276,7 +276,7 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
         // eslint-disable-next-line no-undef
         ReactDOM.render(
           <DocViewer documents={[{ uri: blobUrl, type: contentType }]} />,
-          viewerContainer
+          viewerContainer,
         );
       }
       console.log("Preview");
@@ -307,7 +307,7 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
             searchedColumn,
             searchText,
             handleSearch,
-            handlePreviewFile
+            handlePreviewFile,
           )}
           current={page}
           pageSize={pageSize}

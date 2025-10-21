@@ -1,14 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  Checkbox,
-  Form,
-  Spin,
-  Tooltip,
-} from "antd";
-import {
-  PlusOutlined,
-  DownloadOutlined,
-} from "@ant-design/icons";
+import { Checkbox, Form, Spin, Tooltip } from "antd";
+import { PlusOutlined, DownloadOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -34,12 +26,10 @@ import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOr
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 const PositionPage = () => {
   const dispatch = useDispatch();
-  const {
-    data,
-    data_detail,
-    loading,
-  } = useSelector((state) => state.master_position);
-  const { bodyError } = useSelector(state => state?.general);
+  const { data, data_detail, loading } = useSelector(
+    (state) => state.master_position,
+  );
+  const { bodyError } = useSelector((state) => state?.general);
 
   // use state
   const [page, setPage] = useState(1);
@@ -60,13 +50,19 @@ const PositionPage = () => {
 
   // handle fetch
   const handleFetch = useCallback(() => {
-    dispatch(getListMasterPosition({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }))
+    dispatch(
+      getListMasterPosition({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
+    );
   }, [page, pageSize, search, sort, dispatch]);
-
 
   // use effect
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
 
   // handle search
@@ -93,7 +89,6 @@ const PositionPage = () => {
       setOpenModal(true);
     } catch (error) {
       setOpenModal(false);
-
     }
   };
 
@@ -108,11 +103,11 @@ const PositionPage = () => {
   // handle retry
   const handleRetry = () => {
     if (bodyError?.action === "INACTIVE_MASTER_POSITION") {
-      dispatch(inactiveMasterPosition(body))
+      dispatch(inactiveMasterPosition(body));
     } else if (bodyError?.action === "DOWNLOAD_MASTER_POSITION") {
       handleDownlaod();
-    } else if (bodyError?.action === 'GET_DETAIL_MASTER_POSITION') {
-      dispatch(getDetailMasterPosition(body))
+    } else if (bodyError?.action === "GET_DETAIL_MASTER_POSITION") {
+      dispatch(getDetailMasterPosition(body));
     }
     handleCancelModal();
     handleFetch();
@@ -143,7 +138,16 @@ const PositionPage = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('name', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "name",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "COST CENTER",
@@ -162,7 +166,16 @@ const PositionPage = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('costcenter', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "costcenter",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -181,7 +194,16 @@ const PositionPage = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -199,9 +221,17 @@ const PositionPage = () => {
         true,
       ),
       align: "center",
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
-
-    }
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
+    },
   ];
 
   // handle change pagination
@@ -242,7 +272,7 @@ const PositionPage = () => {
     setSort(dataSort);
   };
 
-  // handle download 
+  // handle download
   const handleDownlaod = () => {
     dispatch(
       downloadMasterPosition({
@@ -250,14 +280,15 @@ const PositionPage = () => {
         page,
         pageSize,
         sort,
-      }))
-  }
+      }),
+    );
+  };
 
   // item toolbar
   const itemActions = [
     // toolbar items
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
@@ -266,10 +297,10 @@ const PositionPage = () => {
         >
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_MASTER_POSITION}>
           <ButtonComponent
@@ -279,13 +310,13 @@ const PositionPage = () => {
             Create Position
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // column action
     {
-      action: 'View',
-      type: 'table',
+      action: "View",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
@@ -298,34 +329,48 @@ const PositionPage = () => {
               <SVGIcon name="IconDetail" width={24} />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Update',
-      type: 'table',
+      action: "Update",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Update">
-            <div className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}>
+            <div
+              className={`${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+            >
               <Link
-                to={record?.status?.toLowerCase() !== "inactive" && SYSTEM_SETUP_ROUTES.UPDATE_MASTER_POSITION}
-                state={record?.status?.toLowerCase() !== "inactive" && { id: record?.positionId }}
+                to={
+                  record?.status?.toLowerCase() !== "inactive" &&
+                  SYSTEM_SETUP_ROUTES.UPDATE_MASTER_POSITION
+                }
+                state={
+                  record?.status?.toLowerCase() !== "inactive" && {
+                    id: record?.positionId,
+                  }
+                }
               >
                 <SVGIcon
                   name="IconEdit"
                   width={24}
-                  className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}
-                  color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#ACC424"} />
+                  className={`${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+                  color={
+                    record?.status?.toLowerCase() === "inactive"
+                      ? "#8D91A0"
+                      : "#ACC424"
+                  }
+                />
               </Link>
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Activate',
-      type: 'table',
+      action: "Activate",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title={record.status}>
@@ -341,23 +386,28 @@ const PositionPage = () => {
               <Checkbox checked={record.status !== "ACTIVE"} />
             </div>
           </Tooltip>
-        )
-      }
-    }
+        );
+      },
+    },
   ];
 
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
-
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
         <BaseContainer>
           <div className={"flex flex-col w-full"}>
             <TablePagination
               dataSource={data?.result}
-              columns={[...columns, ...useColumnActionPermission(['view', 'update', 'Activate'], itemActions)]}
+              columns={[
+                ...columns,
+                ...useColumnActionPermission(
+                  ["view", "update", "Activate"],
+                  itemActions,
+                ),
+              ]}
               current={page}
               pageSize={pageSize}
               totalData={data?.page?.totalElements}
@@ -369,7 +419,6 @@ const PositionPage = () => {
         </BaseContainer>
       </Spin>
 
-
       {/* modal detail or activation */}
       <PositionDetail
         data={data_detail}
@@ -377,17 +426,13 @@ const PositionPage = () => {
         onClick={handleCancelModal}
       />
 
-
-
       {/* Modal Active/Inactive */}
       <ModalApproveOrReject
         isOpen={openDelete}
         handleCloseModal={handleCancelModal}
         onFinish={onFinish}
         header={statusData === "INACTIVE" ? "activate" : "inactivate"}
-        approveOrReject={
-          statusData === "INACTIVE" ? "activate" : "inactivate"
-        }
+        approveOrReject={statusData === "INACTIVE" ? "activate" : "inactivate"}
         menu={"Position"}
         named={record?.name}
         width={800}

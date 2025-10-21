@@ -107,7 +107,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
       });
       setDataApprovalId(data_detail.approvalHierarchy);
     },
-    [form]
+    [form],
   );
 
   const handleFormSetUpdate = useCallback(
@@ -152,7 +152,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
         }),
       ]);
     },
-    [form]
+    [form],
   );
 
   // useEffect start
@@ -301,7 +301,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -370,7 +370,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
       };
       dispatch(showModalSuccess(successMessage));
     },
-    [dispatch]
+    [dispatch],
   );
 
   const handleSendDataFile = async (data) => {
@@ -381,11 +381,11 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
       };
       await ratingBillingHttpService.uploadAttachment(
         `/v1/dbs/api/rbi/invoice/template/upload-file`,
-        body_upload
+        body_upload,
       );
     }
     const filterDataAttach = dataAttachment.filter(
-      (item) => item.dataType !== "exist"
+      (item) => item.dataType !== "exist",
     );
     for (let icon = 0; icon < filterDataAttach.length; icon++) {
       const element = filterDataAttach[icon];
@@ -396,7 +396,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
       };
       await ratingBillingHttpService.uploadAttachment(
         `/v1/dbs/api/rbi/invoice/template/upload-attachment`,
-        body
+        body,
       );
     }
   };
@@ -421,7 +421,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
     dispatch(
       type === "update"
         ? updateGeneralTemplate({ body, id })
-        : createGeneralTemplate(body)
+        : createGeneralTemplate(body),
     )
       .unwrap()
       .then(async (data) => {

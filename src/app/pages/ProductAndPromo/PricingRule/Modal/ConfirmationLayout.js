@@ -19,7 +19,7 @@ const expandedRowRender = (record) => {
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => {}
+    handleSearch = () => {},
   ) => {
     return [
       ...columnsExpandApproval(
@@ -27,7 +27,7 @@ const expandedRowRender = (record) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     ];
   };
@@ -94,7 +94,7 @@ const ConfirmationLayout = ({
 
   // find data criteria
   const matchedObjects = apiCriteria?.filter((obj) =>
-    data?.rPricingRuleCriterias?.map((a) => a.criteria)?.includes(obj.id)
+    data?.rPricingRuleCriterias?.map((a) => a.criteria)?.includes(obj.id),
   );
   const matchedNames = matchedObjects
     ?.map((obj) => obj.text)
@@ -103,7 +103,7 @@ const ConfirmationLayout = ({
   // find data approval hierarchy
   const approvalDetail =
     apiApproval?.filter(
-      (a) => a.appHierId === data?.apphierId || a.appHierId === data?.appHierId
+      (a) => a.appHierId === data?.apphierId || a.appHierId === data?.appHierId,
     )?.[0]?.approvalName || "";
 
   // Function Search Column
@@ -139,7 +139,11 @@ const ConfirmationLayout = ({
         uniquePriceCode.clear();
         pageNo += 1;
       }
-      if (uniquePriceCode.has(`${rowData.priceCode}~${rowData.min}~${rowData.maximumName}`)) {
+      if (
+        uniquePriceCode.has(
+          `${rowData.priceCode}~${rowData.min}~${rowData.maximumName}`,
+        )
+      ) {
         updatedRowsData.rowSpan = 0;
       } else {
         // const occurCount = rowsData
@@ -149,11 +153,13 @@ const ConfirmationLayout = ({
           (data) =>
             data.priceCode === rowData.priceCode &&
             data.min === rowData.min &&
-            data.maximumName === rowData.maximumName
+            data.maximumName === rowData.maximumName,
         ).length;
         updatedRowsData.rowSpan = Math.min(pageSize, occurCount);
         updatedRowsData.number = pageNumber;
-        uniquePriceCode.add(`${rowData.priceCode}~${rowData.min}~${rowData.maximumName}`);
+        uniquePriceCode.add(
+          `${rowData.priceCode}~${rowData.min}~${rowData.maximumName}`,
+        );
         pageNumber++;
       }
       return updatedRowsData;
@@ -234,7 +240,7 @@ const ConfirmationLayout = ({
                 searchText,
                 handleSearch,
                 data,
-                minimums
+                minimums,
               ).filter((a) => {
                 return a?.dataIndex !== "key";
               })}
@@ -285,7 +291,7 @@ const ConfirmationLayout = ({
                   searchInput,
                   searchedColumn,
                   searchText,
-                  handleSearch
+                  handleSearch,
                 )}
                 dataSource={
                   apiApprovalList && apiApprovalList.length === 0
@@ -314,7 +320,7 @@ const ConfirmationLayout = ({
             <TablePagination
               dataSource={updatePaginationAttachment(
                 currentAttachment,
-                sizeAttachment
+                sizeAttachment,
               )}
               totalData={dataAttachment?.length}
               current={currentAttachment}
@@ -325,7 +331,7 @@ const ConfirmationLayout = ({
                 searchInput,
                 searchedColumn,
                 searchText,
-                handleSearch
+                handleSearch,
               ).filter((a) => {
                 return (
                   a.dataIndex !== "action" &&

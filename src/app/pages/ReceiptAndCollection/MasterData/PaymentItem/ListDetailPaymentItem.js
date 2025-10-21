@@ -54,7 +54,7 @@ const ListDetailPaymentItem = () => {
   ]);
 
   const { loading, data_detail, data_GL, data_detail_draft } = useSelector(
-    (state) => state.item
+    (state) => state.item,
   );
   const [segmentedPage, setSegmentedPage] = useState(tabData[0].value);
   // const [disabled, setdisabled] = useState((disabled = true));
@@ -76,7 +76,7 @@ const ListDetailPaymentItem = () => {
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
-      getGLInformation({ search: tempSearch, page, pageSize, sort, id })
+      getGLInformation({ search: tempSearch, page, pageSize, sort, id }),
     );
     dispatch(getDetailItem(id));
     dispatch(getDetailDraftItem(id));
@@ -142,7 +142,7 @@ const ListDetailPaymentItem = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       setListDataAttachment(dataAttachment);
       setDataGL(dataTable);
@@ -174,7 +174,7 @@ const ListDetailPaymentItem = () => {
                   ? moment()
                   : moment(item?.endDate).clone(),
             };
-          }
+          },
         );
       const dataAttachment = (data_detail_draft?.attachmentDtoList || []).map(
         (item) => {
@@ -195,7 +195,7 @@ const ListDetailPaymentItem = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       setListDataAttachmentDraft(dataAttachment);
       setDataGLDraft(dataTable);

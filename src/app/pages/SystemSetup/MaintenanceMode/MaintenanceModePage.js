@@ -16,7 +16,7 @@ import SVGIcon from "../../../../assets/Icon/index";
 const MaintenanceModePage = () => {
   // Selector
   const { loading, data_MaintenanceMode } = useSelector(
-    (state) => state.maintenanceMode
+    (state) => state.maintenanceMode,
   );
 
   // Declaration
@@ -56,7 +56,7 @@ const MaintenanceModePage = () => {
 
   useEffect(() => {
     const hasActiveData = data_MaintenanceMode?.result?.some(
-      (item) => item?.status === "ACTIVE"
+      (item) => item?.status === "ACTIVE",
     );
     setSwitchValue(hasActiveData);
   }, [data_MaintenanceMode]);
@@ -95,7 +95,7 @@ const MaintenanceModePage = () => {
       setBodyData(
         data_MaintenanceMode?.result
           ?.filter((item) => item?.status === "ACTIVE")
-          ?.map((item) => ({ ...item, value: value }))[0]
+          ?.map((item) => ({ ...item, value: value }))[0],
       );
     } else {
       setBodyData({ value: value });
@@ -139,7 +139,7 @@ const MaintenanceModePage = () => {
     // column action
     {
       action: "View",
-      type: 'table',
+      type: "table",
       render: (record, data_length) => {
         return (
           <div onClick={() => handleOpenDetail(record)}>
@@ -170,7 +170,7 @@ const MaintenanceModePage = () => {
                   searchInput,
                   searchedColumn,
                   searchText,
-                  handleSearch
+                  handleSearch,
                 ),
                 ...useColumnActionPermission(["view"], itemActions),
               ]}
@@ -185,14 +185,12 @@ const MaintenanceModePage = () => {
           </div>
         </BaseContainer>
 
-
         {/* Modal Confirmation */}
         <ModalDetailMaintenanceMode
           isOpen={modalConfirm}
           data={bodyData}
           handleCancel={() => setModalConfirm(false)}
         />
-
 
         {/* Modal Confirmation Turn On/Turn Off */}
         <ModalConfirmationTurnOnOff
@@ -204,8 +202,6 @@ const MaintenanceModePage = () => {
           setBodyData={setBodyData}
           setSwitchValue={setSwitchValue}
         />
-
-
       </Spin>
     </LayoutMenu>
   );

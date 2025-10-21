@@ -212,7 +212,7 @@ const TableInlineCreateAndUpdate = (props) => {
     usePagination = true,
     showCreateButton = true,
     scrollTable = {},
-    disableDate
+    disableDate,
   } = props;
 
   // Declaration
@@ -235,10 +235,10 @@ const TableInlineCreateAndUpdate = (props) => {
   useEffect(() => {
     if (mode === "update") {
       setData(
-        tableData?.map((row, index) => ({ ...row, key: index.toString() }))
+        tableData?.map((row, index) => ({ ...row, key: index.toString() })),
       );
     }
-    setData(tableData)
+    setData(tableData);
   }, [mode, tableData]);
 
   const edit = (record, field) => {
@@ -463,9 +463,9 @@ const TableInlineCreateAndUpdate = (props) => {
                 handlePassword: handleVisiblePassword,
                 regex: regex,
                 required: required,
-                disableDate
+                disableDate,
               }),
-            }))
+            })),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

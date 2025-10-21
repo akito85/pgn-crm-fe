@@ -46,7 +46,10 @@ import moment from "moment";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import { bytesConverter } from "../../../../utils/bytesConverter";
-import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../redux/slices/general_slice";
 import { handleMandatory } from "./utils";
 import { handleCheckCriteriaMissingValidation } from "../UtilsProduct/UtilsAllProduct";
 
@@ -94,7 +97,7 @@ const ProductForm = (props) => {
   ]);
   const [typeProductDetail, setTypeProductDetail] = useState(245);
   const [typeProductInfo, setTypeProductInfo] = useState(
-    listSectionInfo[0].value
+    listSectionInfo[0].value,
   );
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [listDataAttachment, setListDataAttachment] = useState([]);
@@ -102,7 +105,7 @@ const ProductForm = (props) => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [typeSubmit, setTypeSubmit] = useState(listTypeSubmit[0]);
   const [dataTablePDIProductDetail, setDataTablePDIProductDetail] = useState(
-    []
+    [],
   );
   const [dataTablePDICalculationRule, setDataTablePDICalculationRule] =
     useState([]);
@@ -111,7 +114,7 @@ const ProductForm = (props) => {
     setDataTablePDITargetAccountSelling,
   ] = useState([]);
   const [dataTablePDITermOfService, setDataTablePDITermOfService] = useState(
-    []
+    [],
   );
   const [dataTablePDIProductBundling, setDataTablePDIProductBundling] =
     useState([]);
@@ -147,7 +150,6 @@ const ProductForm = (props) => {
   const [versionUpdate, setVersionUpdate] = useState();
   const isLoading = loadingProduct || loadingForm;
 
-
   useEffect(() => {
     if (
       dataListSelectCriteria &&
@@ -182,7 +184,7 @@ const ProductForm = (props) => {
             obj[item] = criteria[item]?.value || null;
           });
           return obj;
-        })
+        }),
       );
     }
     // form.resetFields(["pricingPriceCode", "pricingPricingRule"]);
@@ -318,7 +320,7 @@ const ProductForm = (props) => {
         description:
           dataDetailProductVersion?.mproductPricing?.pricingRuleDescription ||
           "",
-          name: dataDetailProductVersion?.mproductPricing?.pricingRuleName
+        name: dataDetailProductVersion?.mproductPricing?.pricingRuleName,
       };
       dispatch(getPricingDetailList({ id: tempBodyPriceCode.id }));
       setBodyPriceCode(tempBodyPriceCode);
@@ -354,7 +356,7 @@ const ProductForm = (props) => {
                 fromItem: null,
                 typeData: version !== 1 ? "exist" : undefined,
               };
-            }
+            },
           ),
           typeData: version !== 1 ? "exist" : undefined,
         };
@@ -380,8 +382,8 @@ const ProductForm = (props) => {
               discountTypeName: item.discountTypeName,
               typeData: version !== 1 ? "exist" : undefined,
             };
-          }
-        )
+          },
+        ),
       );
       setDataTablePDIEligibilityProduct(
         (dataDetailProductVersion?.religibilityProduct || []).map(
@@ -400,8 +402,8 @@ const ProductForm = (props) => {
               description: item.description,
               typeData: version !== 1 ? "exist" : undefined,
             };
-          }
-        )
+          },
+        ),
       );
       const obj = {
         productName: dataDetailProduct.productName,
@@ -454,11 +456,11 @@ const ProductForm = (props) => {
             key: index + 1,
             fileSize: bytesConverter(attachData.fileSize || 0),
             dataType: "exist",
-          })
-        )
+          }),
+        ),
       );
     },
-    [dispatch, form, type, prevPage]
+    [dispatch, form, type, prevPage],
   );
 
   useEffect(() => {
@@ -499,13 +501,13 @@ const ProductForm = (props) => {
     switch (type) {
       case "pricingPricingRule":
         const obj1 = (dataListPricingRule || []).filter(
-          (item) => item.pricingRuleId === result
+          (item) => item.pricingRuleId === result,
         );
         setBodyPricingRule(obj1[0] || {});
         break;
       case "pricingPriceCode":
         const obj2 = (dataListPriceCode || []).filter(
-          (item) => item.id === result
+          (item) => item.id === result,
         );
         setBodyPriceCode(obj2[0] || {});
         break;
@@ -516,14 +518,14 @@ const ProductForm = (props) => {
         setTypeProductDetail(result);
         break;
       case "startDate":
-        form.resetFields(["endDate"])
+        form.resetFields(["endDate"]);
       default:
         break;
     }
     setProductInfoObj((prevState) => ({
       ...prevState,
       [type]: result,
-      ...(type === "startDate" ? {["endDate"]: null} : {})
+      ...(type === "startDate" ? { endDate: null } : {}),
     }));
     return result;
   };
@@ -544,11 +546,11 @@ const ProductForm = (props) => {
           />
         ),
         disabled: false,
-          // !productInfoObj.paymentType ||
-          // !productInfoObj.chargingMethod ||
-          // dataTablePDIProductDetail.length === 0 ||
-          // dataTablePDIProductDetail.some((item) => !item?.name) ||
-          // storedData,
+        // !productInfoObj.paymentType ||
+        // !productInfoObj.chargingMethod ||
+        // dataTablePDIProductDetail.length === 0 ||
+        // dataTablePDIProductDetail.some((item) => !item?.name) ||
+        // storedData,
       },
       {
         title: "Calculation Rule",
@@ -564,10 +566,10 @@ const ProductForm = (props) => {
           />
         ),
         disabled: false,
-          // !productInfoObj.calculationType ||
-          // dataTablePDICalculationRule.length === 0 ||
-          // dataTablePDICalculationRule.some((item) => !item?.name) ||
-          // storedData,
+        // !productInfoObj.calculationType ||
+        // dataTablePDICalculationRule.length === 0 ||
+        // dataTablePDICalculationRule.some((item) => !item?.name) ||
+        // storedData,
       },
       {
         title: "Target Account Selling",
@@ -587,15 +589,15 @@ const ProductForm = (props) => {
           />
         ),
         disabled: false,
-          // !productInfoObj.tasName ||
-          // !productInfoObj.tasCriteria ||
-          // (!(productInfoObj.tasCriteria || []).includes(24) &&
-          //   dataTablePDITargetAccountSelling.length === 0) ||
-          // (!(productInfoObj.tasCriteria || []).includes(24) &&
-          //   dataTablePDITargetAccountSelling.every(
-          //     (item) => !item.startDate
-          //   )) ||
-          // storedData, 
+        // !productInfoObj.tasName ||
+        // !productInfoObj.tasCriteria ||
+        // (!(productInfoObj.tasCriteria || []).includes(24) &&
+        //   dataTablePDITargetAccountSelling.length === 0) ||
+        // (!(productInfoObj.tasCriteria || []).includes(24) &&
+        //   dataTablePDITargetAccountSelling.every(
+        //     (item) => !item.startDate
+        //   )) ||
+        // storedData,
       },
       {
         title: "Pricing",
@@ -664,9 +666,9 @@ const ProductForm = (props) => {
             />
           ),
         disabled: false,
-          // typeProductDetail === 286
-          //   ? dataTablePDIProductBundling.length === 0
-          //   : dataTablePDIEligibilityProduct.length === 0,
+        // typeProductDetail === 286
+        //   ? dataTablePDIProductBundling.length === 0
+        //   : dataTablePDIEligibilityProduct.length === 0,
       },
     ];
     return data;
@@ -721,10 +723,10 @@ const ProductForm = (props) => {
             ).slice(0, 2);
           }
           const labelPaymentType = (dataListPaymentType || []).filter(
-            (item) => item.value === productInfoObj.paymentType
+            (item) => item.value === productInfoObj.paymentType,
           );
           const labelChargingMethod = (dataListChargeMethod || []).filter(
-            (item) => item.value === productInfoObj.chargingMethod
+            (item) => item.value === productInfoObj.chargingMethod,
           );
           const tempDataProduct = [
             {
@@ -785,7 +787,7 @@ const ProductForm = (props) => {
             ).slice(0, 1);
           }
           const labelCalculationType = (dataListCalculationType || []).filter(
-            (item) => item.value === productInfoObj.calculationType
+            (item) => item.value === productInfoObj.calculationType,
           );
           const tempDataCalculation = [
             {
@@ -844,7 +846,7 @@ const ProductForm = (props) => {
                 id: dataDefault.length > 0 ? dataDefault[0].id : undefined,
                 criteria: item,
               };
-            }
+            },
           );
           let productTasCriteriaDataDto = dataTablePDITargetAccountSelling.map(
             (item) => {
@@ -868,15 +870,15 @@ const ProductForm = (props) => {
               delete obj.createdDate;
               delete obj.dataType;
               return obj;
-            }
+            },
           );
           const filteredCriteria = columnsTableCriteria().filter(
             (item) =>
-              !(productInfoObj.tasCriteria || []).includes(item.indexValue)
+              !(productInfoObj.tasCriteria || []).includes(item.indexValue),
           );
 
           const filteredCriteria2 = columnsTableCriteria().filter((item) =>
-            (productInfoObj.tasCriteria || []).includes(item.indexValue)
+            (productInfoObj.tasCriteria || []).includes(item.indexValue),
           );
 
           productTasCriteriaDataDto = productTasCriteriaDataDto.map((item) => {
@@ -945,7 +947,7 @@ const ProductForm = (props) => {
                     fromItem: detailTos.fromItem?.label || null,
                     fromItemId: detailTos.fromItem?.value || null,
                   };
-                }
+                },
               ),
             })),
           };
@@ -994,7 +996,7 @@ const ProductForm = (props) => {
                     : null,
                   description: item.description || null,
                 };
-              }
+              },
             ),
           };
           break;
@@ -1017,7 +1019,7 @@ const ProductForm = (props) => {
             };
             const response = await productPromoHttpService.uploadAttachment(
               `/v1/dbs/api/product/uploadAttachment/${idProduct}`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -1044,7 +1046,7 @@ const ProductForm = (props) => {
           const idProduct = data?.idVersion || 0;
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
@@ -1054,7 +1056,7 @@ const ProductForm = (props) => {
             };
             const response = await productPromoHttpService.uploadAttachment(
               `/v1/dbs/api/product/uploadAttachment/${idProduct}`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -1081,7 +1083,7 @@ const ProductForm = (props) => {
           const idProduct = data?.currentProductVersion?.id || 0;
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
@@ -1091,7 +1093,7 @@ const ProductForm = (props) => {
             };
             const response = await productPromoHttpService.uploadAttachment(
               `/v1/dbs/api/product/uploadAttachment/${idProduct}`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -1118,7 +1120,7 @@ const ProductForm = (props) => {
           const idProduct = id || 0;
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
@@ -1128,7 +1130,7 @@ const ProductForm = (props) => {
             };
             const response = await productPromoHttpService.uploadAttachment(
               `/v1/dbs/api/product/uploadAttachment/${idProduct}`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -1150,17 +1152,20 @@ const ProductForm = (props) => {
     }
   };
 
-  const handleEndpointValidation = useCallback( (type, prevPage, versionUpdate) => {
-    if(type === "create" && prevPage === "table-product"){
-      return "/v1/dbs/api/product/validate-create"
-    } else if(type === "create" && prevPage === "detail-product"){
-      return "/v1/dbs/api/product/validate-create-product-version"
-    } else if(type === "update" && versionUpdate === 1){
-      return `/v1/dbs/api/product/validate-update/${idParent}`
-    } else {
-      return `/v1/dbs/api/product/validate-update-product-version/${id}`
-    }
-  },[id, idParent])
+  const handleEndpointValidation = useCallback(
+    (type, prevPage, versionUpdate) => {
+      if (type === "create" && prevPage === "table-product") {
+        return "/v1/dbs/api/product/validate-create";
+      } else if (type === "create" && prevPage === "detail-product") {
+        return "/v1/dbs/api/product/validate-create-product-version";
+      } else if (type === "update" && versionUpdate === 1) {
+        return `/v1/dbs/api/product/validate-update/${idParent}`;
+      } else {
+        return `/v1/dbs/api/product/validate-update-product-version/${id}`;
+      }
+    },
+    [id, idParent],
+  );
 
   const handleSubmitForm = useCallback(
     async (value) => {
@@ -1178,22 +1183,25 @@ const ProductForm = (props) => {
         } else if (
           dataTablePDIProductDetail?.length < 1 ||
           dataTablePDICalculationRule?.length < 1 ||
-          (!(productInfoObj?.tasCriteria?.includes(24)) && dataTablePDITargetAccountSelling?.length < 1) ||
-          (productInfoObj?.productType === 287 && dataTablePDIEligibilityProduct?.length < 1  ) ||
-          (productInfoObj?.productType === 286 && dataTablePDIProductBundling?.length < 1  )
+          (!productInfoObj?.tasCriteria?.includes(24) &&
+            dataTablePDITargetAccountSelling?.length < 1) ||
+          (productInfoObj?.productType === 287 &&
+            dataTablePDIEligibilityProduct?.length < 1) ||
+          (productInfoObj?.productType === 286 &&
+            dataTablePDIProductBundling?.length < 1)
         ) {
           const errorBody = {
             title: "Failed",
             description: `Detail data is Mandatory. Please try again.`,
             return: false,
           };
-          dispatch(showModalError(errorBody))
+          dispatch(showModalError(errorBody));
         } else if (
           handleCheckCriteriaMissingValidation(
             criteriaOptions,
             productInfoObj?.criteria,
             dataTablePDICalculationRule,
-            () => {}
+            () => {},
           )
         ) {
           const errorBody = {
@@ -1205,7 +1213,7 @@ const ProductForm = (props) => {
           let tempAttachment = [...listDataAttachment];
           if (type === "create" && prevPage === "detail-product") {
             tempAttachment = tempAttachment.filter(
-              (item) => item.dataType !== "exist"
+              (item) => item.dataType !== "exist",
             );
           }
           if (tempAttachment.length === 0) {
@@ -1262,12 +1270,12 @@ const ProductForm = (props) => {
                     ).slice(0, 2);
                   }
                   const labelPaymentType = (dataListPaymentType || []).filter(
-                    (item) => item.value === productInfoObj.paymentType
+                    (item) => item.value === productInfoObj.paymentType,
                   );
                   const labelChargingMethod = (
                     dataListChargeMethod || []
                   ).filter(
-                    (item) => item.value === productInfoObj.chargingMethod
+                    (item) => item.value === productInfoObj.chargingMethod,
                   );
                   const tempDataProduct = [
                     {
@@ -1333,7 +1341,7 @@ const ProductForm = (props) => {
                   const labelCalculationType = (
                     dataListCalculationType || []
                   ).filter(
-                    (item) => item.value === productInfoObj.calculationType
+                    (item) => item.value === productInfoObj.calculationType,
                   );
                   const tempDataCalculation = [
                     {
@@ -1423,15 +1431,15 @@ const ProductForm = (props) => {
                   const filteredCriteria = columnsTableCriteria().filter(
                     (item) =>
                       !(productInfoObj.tasCriteria || []).includes(
-                        item.indexValue
-                      )
+                        item.indexValue,
+                      ),
                   );
 
                   const filteredCriteria2 = columnsTableCriteria().filter(
                     (item) =>
                       (productInfoObj.tasCriteria || []).includes(
-                        item.indexValue
-                      )
+                        item.indexValue,
+                      ),
                   );
 
                   productTasCriteriaDataDto = productTasCriteriaDataDto.map(
@@ -1456,7 +1464,7 @@ const ProductForm = (props) => {
                       });
                       delete obj.key;
                       return obj;
-                    }
+                    },
                   );
                   const includesAll = (
                     productInfoObj.tasCriteria || []
@@ -1509,7 +1517,7 @@ const ProductForm = (props) => {
                             fromItemId: detailTos.fromItem?.value || null,
                           };
                         }),
-                      })
+                      }),
                     ),
                   };
                   break;
@@ -1531,17 +1539,17 @@ const ProductForm = (props) => {
                               : item?.discountAmount || null,
                           startDate: item.startDate
                             ? moment(item.startDate, "DD MMM YYYY").format(
-                                "YYYY-MM-DD"
+                                "YYYY-MM-DD",
                               )
                             : null,
                           endDate: item.endDate
                             ? moment(item.endDate, "DD MMM YYYY").format(
-                                "YYYY-MM-DD"
+                                "YYYY-MM-DD",
                               )
                             : null,
                           description: item.description || null,
                         };
-                      }
+                      },
                     ),
                   };
                   break;
@@ -1557,17 +1565,17 @@ const ProductForm = (props) => {
                           productIdGenerate: item.productIdGenerate || null,
                           startDate: item.startDate
                             ? moment(item.startDate, "DD MMM YYYY").format(
-                                "YYYY-MM-DD"
+                                "YYYY-MM-DD",
                               )
                             : null,
                           endDate: item.endDate
                             ? moment(item.endDate, "DD MMM YYYY").format(
-                                "YYYY-MM-DD"
+                                "YYYY-MM-DD",
                               )
                             : null,
                           description: item.description || null,
                         };
-                      }
+                      },
                     ),
                   };
                   break;
@@ -1613,8 +1621,8 @@ const ProductForm = (props) => {
       dataTablePDITermOfService,
       dataTablePDIProductBundling,
       dataTablePDIEligibilityProduct,
-      bodyPricingRule
-    ]
+      bodyPricingRule,
+    ],
   );
 
   const handleErrorSubmit = ({ values, errorFields, outOfDate }) => {
@@ -1639,7 +1647,7 @@ const ProductForm = (props) => {
     //   });
     //   return res;
     // });
-    handleMandatory(setListSectionInfo, listDataAttachment, errorFields)
+    handleMandatory(setListSectionInfo, listDataAttachment, errorFields);
   };
   const handleClear = () => {
     if (type === "create") {
@@ -1700,146 +1708,156 @@ const ProductForm = (props) => {
     }
   };
 
-      const checkOverlappingData = useCallback((formHeader, dataTable) => {
-        const dataOverlap = [];
-        
-        // if (hasValue(formHeader?.endDate)) {
-        dataTable?.forEach((item) => {
-          if (
-            moment(item?.startDate).startOf("day") <
-              moment(formHeader?.startDate).startOf("day") ||
-            moment(item?.endDate).startOf("day") >
-              moment(formHeader?.endDate).startOf("day")
-          ) {
-            dataOverlap?.push(item);
-          }
-        });
+  const checkOverlappingData = useCallback((formHeader, dataTable) => {
+    const dataOverlap = [];
 
-        if (dataOverlap?.length > 0) {
-          return true;
-        } else {
-          return false;
-        }
-        // }
-      }, []);
+    // if (hasValue(formHeader?.endDate)) {
+    dataTable?.forEach((item) => {
+      if (
+        moment(item?.startDate).startOf("day") <
+          moment(formHeader?.startDate).startOf("day") ||
+        moment(item?.endDate).startOf("day") >
+          moment(formHeader?.endDate).startOf("day")
+      ) {
+        dataOverlap?.push(item);
+      }
+    });
+
+    if (dataOverlap?.length > 0) {
+      return true;
+    } else {
+      return false;
+    }
+    // }
+  }, []);
 
   const handleButtonNext = () => {
-    if(current === 0){
-      form.validateFields(["paymentType","chargingMethod"])
-      .then((values) => {
-        if(storedData) {
-          const errorBody = {
-            title: "Failed",
-            description: `Please save data table inline before submit. Please try again.`,
-          };
-          dispatch(showModalError(errorBody));
-        }
-        else if(dataTablePDIProductDetail?.length < 1 || dataTablePDIProductDetail.some((item) => !item?.name)){
-          const errorBody = {
-            title: "Failed",
-            description: `Please input at least 1 or more product detail. Please try again.`,
-          };
-          dispatch(showModalError(errorBody));
-        } else {
-          next();
-          scrollRightHandler();
-        }
-      })
-      .catch((error) => {
-        console.error("Validation failed:", error);
-        // Handle the rejected result here
-      });
-    } else if (current === 1){
-      form.validateFields(["calculationType"])
-      .then((values) => {
-        if(storedData) {
-          const errorBody = {
-            title: "Failed",
-            description: `Please save data table inline before submit. Please try again.`,
-          };
-          dispatch(showModalError(errorBody));
-        }
-        else if(dataTablePDICalculationRule?.length < 1 || dataTablePDICalculationRule.some((item) => !item?.name)){
-          const errorBody = {
-            title: "Failed",
-            description: `Please input at least 1 or more pricing rule. Please try again.`,
-          };
-          dispatch(showModalError(errorBody));
-        } else {
-          next();
-          scrollRightHandler();
-        }
-      })
-      .catch((error) => {
-        console.error("Validation failed:", error);
-        // Handle the rejected result here
-      });
-    }
-    else if (current === 2) { //target account selling
-      form.validateFields(["tasName","tasCriteria"])
-      .then((values) => {
-        if(storedData) {
-          const errorBody = {
-            title: "Failed",
-            description: `Please save data table inline before submit. Please try again.`,
-          };
-          dispatch(showModalError(errorBody));
-        }
-        else if(!(productInfoObj?.tasCriteria || [])?.includes(24)){ //not all
-          if(dataTablePDITargetAccountSelling?.length < 1){
+    if (current === 0) {
+      form
+        .validateFields(["paymentType", "chargingMethod"])
+        .then((values) => {
+          if (storedData) {
             const errorBody = {
               title: "Failed",
-              description: `Please input at least 1 or more criteria. Please try again.`,
-            };
-            dispatch(showModalError(errorBody));
-          }
-          else if (
-            handleCheckCriteriaMissingValidation(
-              criteriaOptions,
-              productInfoObj.tasCriteria,
-              dataTablePDITargetAccountSelling,
-              () => {},
-            )
-          ) {
-            const errorBody = {
-              title: "Failed",
-              description: `There is missing values in table criteria. Please try again`,
+              description: `Please save data table inline before submit. Please try again.`,
             };
             dispatch(showModalError(errorBody));
           } else if (
-            checkOverlappingData(
-              { startDate: productInfoObj?.startDate , endDate: productInfoObj?.endDate },
-              dataTablePDITargetAccountSelling
-            )
+            dataTablePDIProductDetail?.length < 1 ||
+            dataTablePDIProductDetail.some((item) => !item?.name)
           ) {
             const errorBody = {
               title: "Failed",
-              description: `Please input Start date and End date can't be overlap at criteria.`,
+              description: `Please input at least 1 or more product detail. Please try again.`,
             };
             dispatch(showModalError(errorBody));
           } else {
             next();
             scrollRightHandler();
           }
-        } else {
-          next();
-          scrollRightHandler();
-        }
-      })
-      .catch((error) => {
-        console.error("Validation failed:", error);
-        // Handle the rejected result here
-      });
+        })
+        .catch((error) => {
+          console.error("Validation failed:", error);
+          // Handle the rejected result here
+        });
+    } else if (current === 1) {
+      form
+        .validateFields(["calculationType"])
+        .then((values) => {
+          if (storedData) {
+            const errorBody = {
+              title: "Failed",
+              description: `Please save data table inline before submit. Please try again.`,
+            };
+            dispatch(showModalError(errorBody));
+          } else if (
+            dataTablePDICalculationRule?.length < 1 ||
+            dataTablePDICalculationRule.some((item) => !item?.name)
+          ) {
+            const errorBody = {
+              title: "Failed",
+              description: `Please input at least 1 or more pricing rule. Please try again.`,
+            };
+            dispatch(showModalError(errorBody));
+          } else {
+            next();
+            scrollRightHandler();
+          }
+        })
+        .catch((error) => {
+          console.error("Validation failed:", error);
+          // Handle the rejected result here
+        });
+    } else if (current === 2) {
+      //target account selling
+      form
+        .validateFields(["tasName", "tasCriteria"])
+        .then((values) => {
+          if (storedData) {
+            const errorBody = {
+              title: "Failed",
+              description: `Please save data table inline before submit. Please try again.`,
+            };
+            dispatch(showModalError(errorBody));
+          } else if (!(productInfoObj?.tasCriteria || [])?.includes(24)) {
+            //not all
+            if (dataTablePDITargetAccountSelling?.length < 1) {
+              const errorBody = {
+                title: "Failed",
+                description: `Please input at least 1 or more criteria. Please try again.`,
+              };
+              dispatch(showModalError(errorBody));
+            } else if (
+              handleCheckCriteriaMissingValidation(
+                criteriaOptions,
+                productInfoObj.tasCriteria,
+                dataTablePDITargetAccountSelling,
+                () => {},
+              )
+            ) {
+              const errorBody = {
+                title: "Failed",
+                description: `There is missing values in table criteria. Please try again`,
+              };
+              dispatch(showModalError(errorBody));
+            } else if (
+              checkOverlappingData(
+                {
+                  startDate: productInfoObj?.startDate,
+                  endDate: productInfoObj?.endDate,
+                },
+                dataTablePDITargetAccountSelling,
+              )
+            ) {
+              const errorBody = {
+                title: "Failed",
+                description: `Please input Start date and End date can't be overlap at criteria.`,
+              };
+              dispatch(showModalError(errorBody));
+            } else {
+              next();
+              scrollRightHandler();
+            }
+          } else {
+            next();
+            scrollRightHandler();
+          }
+        })
+        .catch((error) => {
+          console.error("Validation failed:", error);
+          // Handle the rejected result here
+        });
     } else if (current === 3) {
-      form.validateFields(["pricingPriceCode"])
-      .then((values) => {
+      form
+        .validateFields(["pricingPriceCode"])
+        .then((values) => {
           next();
           scrollRightHandler();
-      })
-      .catch((error) => {
-        console.error("Validation failed:", error);
-        // Handle the rejected result here
-      });
+        })
+        .catch((error) => {
+          console.error("Validation failed:", error);
+          // Handle the rejected result here
+        });
     } else {
       next();
       scrollRightHandler();
@@ -1858,13 +1876,13 @@ const ProductForm = (props) => {
   };
 
   const tempProductType = (dataListProductType || []).filter(
-    (item) => item.value === (productInfoObj.productType || 0)
+    (item) => item.value === (productInfoObj.productType || 0),
   );
   const tempProductClass = (dataListProductClass || []).filter(
-    (item) => item.value === (productInfoObj.productClass || 0)
+    (item) => item.value === (productInfoObj.productClass || 0),
   );
   const tempServiceType = (dataListServiceType || []).filter(
-    (item) => item.value === (productInfoObj.serviceType || 0)
+    (item) => item.value === (productInfoObj.serviceType || 0),
   );
 
   const dataDetailProductInfo = {
@@ -1918,8 +1936,8 @@ const ProductForm = (props) => {
                   type === "create" && prevPage !== "detail-product"
                     ? "create"
                     : versionUpdate === 1
-                    ? "create"
-                    : "update"
+                      ? "create"
+                      : "update"
                 }
                 dispatch={dispatch}
                 handleProductObj={handleProductInfoObj}

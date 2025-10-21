@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   Form,
   Select,
@@ -29,7 +35,7 @@ import {
   getProvince,
   getSubDistrict,
   getType,
-  checkIsPremiseAlready
+  checkIsPremiseAlready,
 } from "../../../../../../../redux/slices/account_management/Account/accountSlice";
 import GoogleMapsCustom from "../../../../CustomerAccountDetail/DetailPages/AccountAddress/GoogleMapsCustom";
 import { onInputUpperCase } from "../../../../Utils";
@@ -39,14 +45,14 @@ const AddressForm = ({
   addressTable = [],
   setAddressTable,
   addressObj = {},
-  dispatch = () => { },
-  handleAddressObj = () => { },
+  dispatch = () => {},
+  handleAddressObj = () => {},
   customerId,
   form,
-  handleContactChangesByAddress =()=>{},
+  handleContactChangesByAddress = () => {},
   setAddressObj,
   setTiObj,
-  tiObj
+  tiObj,
 }) => {
   // Selector
   const {
@@ -60,7 +66,7 @@ const AddressForm = ({
     data_postalCode,
     data_type,
     data_businessPurpose,
-    isPremiseAlready
+    isPremiseAlready,
   } = useSelector((state) => state.account);
 
   // Declaration
@@ -88,12 +94,12 @@ const AddressForm = ({
     districtId: null,
     subDistrictId: null,
     postalCodeId: null,
-  })
+  });
   const [selectedLocationCreateNew, setSelectedLocationCreateNew] = useState({
     lat: -6.184395,
     lng: 106.844298,
   });
-const [selectedMaps, setSelectedMaps] = useState('');
+  const [selectedMaps, setSelectedMaps] = useState("");
 
   const formAddressValues = formAddress.getFieldsValue();
 
@@ -124,13 +130,13 @@ const [selectedMaps, setSelectedMaps] = useState('');
           /JALAN|JALAN.|jLN|JL|JL.|JL.|JLN.|JL/gi,
           function (x) {
             return (x = "");
-          }
+          },
         );
         return result;
       }
       return "";
     },
-    [formValue]
+    [formValue],
   );
   const fullAddress = `
   ${building ? `GEDUNG ${building}, ` : ""}
@@ -142,43 +148,49 @@ const [selectedMaps, setSelectedMaps] = useState('');
   ${rt ? "RT. " + rt + ", " : ""}
   ${rw ? "RW. " + rw + ", " : ""}
   ${additionalNote ? additionalNote + ", " : ""}
-  ${postalCodeId
+  ${
+    postalCodeId
       ? data_postalCode?.data
-        ?.filter((a) => a.id === postalCodeId)
-        ?.find((b) => b.name)?.name
+          ?.filter((a) => a.id === postalCodeId)
+          ?.find((b) => b.name)?.name
       : ""
-    }
-  ${subDistrictId
+  }
+  ${
+    subDistrictId
       ? ", " +
-      data_subDistrict?.data
-        ?.filter((a) => a.id === subDistrictId)
-        ?.find((b) => b.name)?.name +
-      ", "
+        data_subDistrict?.data
+          ?.filter((a) => a.id === subDistrictId)
+          ?.find((b) => b.name)?.name +
+        ", "
       : ""
-    }
-  ${districtId
+  }
+  ${
+    districtId
       ? data_district?.data
-        ?.filter((a) => a.id === districtId)
-        ?.find((b) => b.name)?.name + ", "
+          ?.filter((a) => a.id === districtId)
+          ?.find((b) => b.name)?.name + ", "
       : ""
-    }
-  ${cityId
+  }
+  ${
+    cityId
       ? data_city?.data?.filter((a) => a.id === cityId)?.find((b) => b.name)
-        ?.name + ", "
+          ?.name + ", "
       : ""
-    }
-  ${provinceId
+  }
+  ${
+    provinceId
       ? data_province?.data
-        ?.filter((a) => a.id === provinceId)
-        ?.find((b) => b.name)?.name + ", "
+          ?.filter((a) => a.id === provinceId)
+          ?.find((b) => b.name)?.name + ", "
       : ""
-    }
-  ${countryId
+  }
+  ${
+    countryId
       ? data_country?.data
-        ?.filter((a) => a.id === countryId)
-        ?.find((b) => b.name)?.name
+          ?.filter((a) => a.id === countryId)
+          ?.find((b) => b.name)?.name
       : ""
-    }
+  }
     `.trim();
 
   const [dataBusinessPurpose, setDataBusinessPurpose] = useState([]);
@@ -192,7 +204,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
 
   useEffect(() => {
     setDataBusinessPurpose(
-      data_businessPurpose?.filter((item) => item.id !== 162)
+      data_businessPurpose?.filter((item) => item.id !== 162),
     );
   }, [data_businessPurpose]);
 
@@ -214,13 +226,13 @@ const [selectedMaps, setSelectedMaps] = useState('');
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [customerId, search, page, pageSize, sort]);
 
   const validateBusinessPurpose = (index) => {
     if (
-      addressTable[index] 
+      addressTable[index]
       // &&
       // addressObj[`businessPurpose${index + 1}`]?.length > 0
     ) {
@@ -232,8 +244,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
 
   // Validation Address Information
   const validateAddress = (index) => {
-
-    if ( index === 1 && addressTable.length >= 1) {
+    if (index === 1 && addressTable.length >= 1) {
       return validateBusinessPurpose(0);
     }
     if (index === 2 && addressTable.length >= 2) {
@@ -308,14 +319,14 @@ const [selectedMaps, setSelectedMaps] = useState('');
       let result =
         type === "date"
           ? moment(record[dataIndex])
-            .format(dateFormatting.dateFormal)
-            ?.toString()
-            .toLowerCase()
-            .includes(value.toLowerCase())
+              .format(dateFormatting.dateFormal)
+              ?.toString()
+              .toLowerCase()
+              .includes(value.toLowerCase())
           : record[dataIndex]
-            ?.toString()
-            .toLowerCase()
-            .includes(value.toLowerCase());
+              ?.toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
       return result;
     },
     onFilterDropdownOpenChange: (visible) => {
@@ -577,10 +588,12 @@ const [selectedMaps, setSelectedMaps] = useState('');
             <Tooltip title="Choose">
               <PlusCircleOutlined
                 onClick={
-                  !disabledPlus(r) ? () => {
-                    handleChooseAddress(r)
-                    businessPurposeReset()
-                  } : undefined
+                  !disabledPlus(r)
+                    ? () => {
+                        handleChooseAddress(r);
+                        businessPurposeReset();
+                      }
+                    : undefined
                 }
                 style={{
                   color: !disabledPlus(r) ? "#0075BF" : "#8D91A0",
@@ -620,7 +633,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
         districtId: null,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
       dispatch(getProvince(e));
       return e;
     } else {
@@ -631,7 +644,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
         districtId: null,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
     }
   };
 
@@ -650,7 +663,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
         districtId: null,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
       dispatch(getCity(e));
       return e;
     } else {
@@ -661,7 +674,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
         districtId: null,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
     }
   };
 
@@ -674,7 +687,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
         districtId: null,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
       dispatch(getDistrict(e));
       return e;
     } else {
@@ -684,7 +697,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
         districtId: null,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
     }
   };
 
@@ -696,7 +709,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
         districtId: e,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
       dispatch(getSubDistrict(e));
       return e;
     } else {
@@ -705,7 +718,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
         districtId: null,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
     }
   };
 
@@ -716,15 +729,15 @@ const [selectedMaps, setSelectedMaps] = useState('');
         ...inputAddress,
         subDistrictId: e,
         postalCodeId: null,
-      })
+      });
       dispatch(getPostalCode(e));
       return e;
-    }else {
+    } else {
       setInputAddress({
         ...inputAddress,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
     }
   };
 
@@ -737,7 +750,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
       districtId: null,
       subDistrictId: null,
       postalCodeId: null,
-    })
+    });
   };
 
   const handleChooseAddress = (record) => {
@@ -771,7 +784,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
     }
 
     newData[keyModal - 1] = outputObject;
-    handleContactChangesByAddress(keyModal, newData)
+    handleContactChangesByAddress(keyModal, newData);
     setAddressTable(newData);
     setModalChooseAddress(false);
   };
@@ -802,22 +815,22 @@ const [selectedMaps, setSelectedMaps] = useState('');
   //       premiseAddress4: false
   //     })
   //   }
-  // } 
+  // }
   const businessPurposeReset = () => {
     setTiObj({
       ...tiObj,
-      taxAddress: null
-    })
+      taxAddress: null,
+    });
     const key = `businessPurpose${keyModal}`;
     const premiseKey = `premiseAddress${keyModal}`;
-  
+
     setAddressObj({
       ...addressObj,
       [key]: null,
-      [premiseKey]: false
+      [premiseKey]: false,
     });
-  }
-  
+  };
+
   // Handle Add Value to Array
   const handleAdd = (formValue) => {
     const newData = [...addressTable];
@@ -845,7 +858,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
     }
 
     newData[keyModal - 1] = outputObject;
-    handleContactChangesByAddress(keyModal, newData)
+    handleContactChangesByAddress(keyModal, newData);
     setAddressTable(newData);
     setModalCreateAddress(false);
     setInputAddress({
@@ -855,11 +868,11 @@ const [selectedMaps, setSelectedMaps] = useState('');
       districtId: null,
       subDistrictId: null,
       postalCodeId: null,
-    })
+    });
     formAddress.resetFields();
     setTiObj({
-      taxAddress: null
-    })
+      taxAddress: null,
+    });
   };
 
   // Handle Function Maps
@@ -870,7 +883,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
         lng: event.latLng.lng(),
       });
     },
-    [selectedLocationCreateNew]
+    [selectedLocationCreateNew],
   );
 
   const handleInputChange = (value, name) => {
@@ -921,11 +934,16 @@ const [selectedMaps, setSelectedMaps] = useState('');
 
   const RenderMaps = useMemo(() => {
     if (hasValue(selectedMaps)) {
-      if (selectedMaps?.toLowerCase() === 'google maps') {
-        return <Maps keyword={fullAddress} setSelectedLocationFront={setSelectedLocationCreateNew} />
+      if (selectedMaps?.toLowerCase() === "google maps") {
+        return (
+          <Maps
+            keyword={fullAddress}
+            setSelectedLocationFront={setSelectedLocationCreateNew}
+          />
+        );
       }
     } else {
-      return <></>
+      return <></>;
     }
   }, [fullAddress, selectedMaps]);
 
@@ -1232,7 +1250,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
       </div>
 
       {/* Modal Choose Address */}
-      {modalChooseAddress ? 
+      {modalChooseAddress ? (
         <ModalCustom
           isOpen={modalChooseAddress}
           type="confirmation"
@@ -1284,12 +1302,11 @@ const [selectedMaps, setSelectedMaps] = useState('');
               }}
             />
           </div>
-        </ModalCustom> : 
-        null
-      }
+        </ModalCustom>
+      ) : null}
 
       {/* Modal Create Address */}
-      {modalCreateAddress ? 
+      {modalCreateAddress ? (
         <ModalCustom
           isOpen={modalCreateAddress}
           type="confirmation"
@@ -1307,7 +1324,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
               districtId: null,
               subDistrictId: null,
               postalCodeId: null,
-            })
+            });
           }}
           footer={
             <div className={"w-full flex justify-end gap-5"}>
@@ -1325,7 +1342,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
                       districtId: null,
                       subDistrictId: null,
                       postalCodeId: null,
-                    })
+                    });
                   }}
                 >
                   Cancel
@@ -1411,9 +1428,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
                 getValueFromEvent={handleOnChangeCity}
               >
                 <SelectComponent
-                  disabled={
-                    !inputAddress?.provinceId ? true : false
-                  }
+                  disabled={!inputAddress?.provinceId ? true : false}
                 >
                   {data_city?.data &&
                     data_city?.data?.map((data) => (
@@ -1435,7 +1450,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
                 getValueFromEvent={handleOnChangeDistrict}
               >
                 <SelectComponent
-                  disabled={!inputAddress?.cityId  ? true : false}
+                  disabled={!inputAddress?.cityId ? true : false}
                 >
                   {data_district?.data &&
                     data_district?.data?.map((data) => (
@@ -1457,9 +1472,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
                 getValueFromEvent={handleOnChangeSubDistrict}
               >
                 <SelectComponent
-                  disabled={
-                    !inputAddress?.districtId ? true : false
-                  }
+                  disabled={!inputAddress?.districtId ? true : false}
                 >
                   {data_subDistrict?.data &&
                     data_subDistrict?.data?.map((data) => (
@@ -1480,9 +1493,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
                 ]}
               >
                 <SelectComponent
-                  disabled={
-                    !inputAddress?.subDistrictId ? true : false
-                  }
+                  disabled={!inputAddress?.subDistrictId ? true : false}
                 >
                   {data_postalCode?.data &&
                     data_postalCode?.data?.map((data) => (
@@ -1494,7 +1505,9 @@ const [selectedMaps, setSelectedMaps] = useState('');
               </Form.Item>
               <Form.Item label="Building" name="building">
                 <InputComponent
-                  onChange={(e) => handleInputChange(e.target.value, "building")}
+                  onChange={(e) =>
+                    handleInputChange(e.target.value, "building")
+                  }
                   onInput={onInputUpperCase}
                 />
               </Form.Item>
@@ -1628,7 +1641,7 @@ const [selectedMaps, setSelectedMaps] = useState('');
                   },
                 ]}
               >
-                <SelectComponent onChange={e => setSelectedMaps(e)}>
+                <SelectComponent onChange={(e) => setSelectedMaps(e)}>
                   {/* {data_productName &&
                     data_productName?.map((data) => (
                       <Select.Option key={data.id} value={data.id}>
@@ -1670,12 +1683,10 @@ const [selectedMaps, setSelectedMaps] = useState('');
             </div>
             <div className={"w-full grid grid-cols-1 gap-2"}>
               <span className="text-primary">Pinpoint address coordinate</span>
-              <div className="w-full">
-                {RenderMaps}
-              </div>
+              <div className="w-full">{RenderMaps}</div>
             </div>
 
-{/*             
+            {/*             
             <div className={"w-full grid grid-cols-1 gap-2"}>
               <span className="text-primary">Pinpoint address coordinate</span>
               <div className="w-full">
@@ -1687,9 +1698,8 @@ const [selectedMaps, setSelectedMaps] = useState('');
               </div>
             </div> */}
           </Form>
-        </ModalCustom> : 
-        null
-      }
+        </ModalCustom>
+      ) : null}
     </div>
   );
 };

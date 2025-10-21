@@ -12,12 +12,12 @@ export const onInputUpperCase = (e) => {
 };
 
 export const handleDate = (date) => {
-  if(date === null || date === "" || date === undefined){
-    return ""
-  }else {
+  if (date === null || date === "" || date === undefined) {
+    return "";
+  } else {
     return `${moment(date).format(dateFormatting.date)}`;
   }
-}
+};
 
 export const dataDependAdvanced = (dependDataIndex, key, dataEditRecord) => {
   if (dependDataIndex) {

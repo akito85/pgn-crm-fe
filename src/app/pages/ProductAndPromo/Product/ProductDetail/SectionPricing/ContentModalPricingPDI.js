@@ -57,7 +57,7 @@ const ContentModalPricingPDI = ({
           };
         });
         return obj;
-      })
+      }),
     );
   };
   const handleSelectedPriceDetail = (e) => {
@@ -83,19 +83,19 @@ const ContentModalPricingPDI = ({
             name: item.name,
             description: item.description,
             criteria: (item.rcriteriaPricingAdjustments || []).map(
-              (item) => item.criteria
+              (item) => item.criteria,
             ),
             criterias: (item.rcriteriaPricingAdjustments || [])
               .map((item) => item.criteriaName)
               .reduce(
                 (current, next, index) =>
                   current + (index !== 0 ? `, ${next}` : next),
-                ""
+                "",
               ),
             mpricingAdjustmentDetails: item.mpricingAdjustmentDetails || [],
           };
           return data;
-        })
+        }),
       );
     } else {
       setDataListAdjustment([]);
@@ -161,7 +161,7 @@ const ContentModalPricingPDI = ({
           />
         </div>
       ) : null}
-      
+
       {typeLog ? (
         <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
           <DetailText label="Record ID">{dataPricing?.id}</DetailText>

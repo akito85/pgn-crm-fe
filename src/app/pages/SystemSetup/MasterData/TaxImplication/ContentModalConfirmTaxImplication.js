@@ -9,30 +9,31 @@ const ContentModalConfirmTaxImplication = ({
   criteriaValues = [],
   listCriteria = [],
 }) => {
-  const { 
-    categoryList = [],
-    serviceTypeList = []
-  } = useSelector((state) => state.tax_implication);
+  const { categoryList = [], serviceTypeList = [] } = useSelector(
+    (state) => state.tax_implication,
+  );
   const criteria = listCriteria.reduce(
     (current, next) => current + `, ${next}`,
-    ""
-    );
+    "",
+  );
 
   const category = (categoryList || []).filter(
-    (item) => item.value === data.category
+    (item) => item.value === data.category,
   )?.[0]?.label;
 
   const serviceType = (serviceTypeList || []).filter(
-    (item) => item.value === data.serviceType
+    (item) => item.value === data.serviceType,
   )?.[0]?.label;
-  
+
   return (
     <div className="flex flex-col gap-4">
       <div className="text-primary text-xs font-bold uppercase">
         {`TAX IMPLICATION INFORMATION`}
       </div>
       <div className="grid grid-cols-3 w-full">
-        <DetailText label={"Tax Implication Name"}>{data.taxImplicationName}</DetailText>
+        <DetailText label={"Tax Implication Name"}>
+          {data.taxImplicationName}
+        </DetailText>
         <DetailText label={"Category"}>{category}</DetailText>
         <DetailText label={"Service Type"}>{serviceType}</DetailText>
         <div className="col-span-3">
@@ -56,4 +57,4 @@ const ContentModalConfirmTaxImplication = ({
   );
 };
 
-export default ContentModalConfirmTaxImplication
+export default ContentModalConfirmTaxImplication;

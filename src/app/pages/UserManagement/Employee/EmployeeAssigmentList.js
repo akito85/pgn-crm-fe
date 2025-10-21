@@ -75,9 +75,9 @@ const EmployeeAssigmentList = ({
       align: "left",
       editable: true,
       sorter: true,
-      inputType: 'date',
+      inputType: "date",
       // ...getColumnSearchProps('startDate', 'date'),
-      render: (endDate) => moment(endDate).format("YYYY-MM-DD")
+      render: (endDate) => moment(endDate).format("YYYY-MM-DD"),
     },
     {
       title: "END DATE",
@@ -85,9 +85,9 @@ const EmployeeAssigmentList = ({
       align: "left",
       editable: true,
       sorter: true,
-      inputType: 'date',
+      inputType: "date",
       // ...getColumnSearchProps('endDate', 'date'),
-      render: (endDate) => moment(endDate).format("YYYY-MM-DD")
+      render: (endDate) => moment(endDate).format("YYYY-MM-DD"),
     },
     {
       title: "isMain",
@@ -117,9 +117,9 @@ const EmployeeAssigmentList = ({
   ];
 
   const handleChangePage = (page, pageSize) => {
-    setPage(page)
-    setPage(pageSize)
-  }
+    setPage(page);
+    setPage(pageSize);
+  };
 
   return (
     <div className={"w-full"}>

@@ -4,7 +4,10 @@ import { Form, Image, Spin, Upload } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../redux/slices/general_slice";
 import {
   createHtmlAnnouncement,
   getAnnouncementDetail,
@@ -12,7 +15,11 @@ import {
   updateHtmlAnnouncement,
 } from "../../../../redux/slices/system_setup/announcement";
 import { getBase64 } from "../../../../utils/getBase64";
-import { dateFormatting, formMessageRequired, hasValue } from "../../../../utils";
+import {
+  dateFormatting,
+  formMessageRequired,
+  hasValue,
+} from "../../../../utils";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -30,10 +37,9 @@ import userHttpService from "../../../../redux/services/userHttpService";
 const AnnouncementForm = ({ type }) => {
   //Selector
   const { loading, detail_Announcement, allow_file } = useSelector(
-    (state) => state.announcement
+    (state) => state.announcement,
   );
-  const { bodyError } = useSelector(state => state?.general);
-
+  const { bodyError } = useSelector((state) => state?.general);
 
   //Declaration
   const [form] = Form.useForm();
@@ -43,7 +49,6 @@ const AnnouncementForm = ({ type }) => {
   const id = location?.state?.id;
   const formValue = form.getFieldsValue();
 
-  
   //Use State
   const [listSectionInfo, setListSectionInfo] = useState([
     { value: "HTML" },
@@ -63,7 +68,7 @@ const AnnouncementForm = ({ type }) => {
 
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
-  const [payload, setPayload] = useState({})
+  const [payload, setPayload] = useState({});
 
   const routes = [
     {
@@ -76,8 +81,9 @@ const AnnouncementForm = ({ type }) => {
     },
     {
       path: "",
-      breadcrumbName: `${type === "create" ? "Create Announcement" : "Update Announcement"
-        }`,
+      breadcrumbName: `${
+        type === "create" ? "Create Announcement" : "Update Announcement"
+      }`,
     },
   ];
 
@@ -112,7 +118,7 @@ const AnnouncementForm = ({ type }) => {
         ?.toLowerCase()
         ?.split(",")
         ?.map((item) => `.${item}`)
-        ?.join(", ")
+        ?.join(", "),
     );
     setStartDate(moment(detail_Announcement?.startDate));
     setFileList([]);
@@ -133,38 +139,58 @@ const AnnouncementForm = ({ type }) => {
       let url;
       let bodyRequest;
       let image = base64Image.split(",")[1];
-      if (type === 'update') {
+      if (type === "update") {
         bodyRequest = {
           announcementId: id,
-          startDate: hasValue(formValue?.startDate) ? moment(formValue?.startDate).format(dateFormatting.date) : null,
-          endDate: hasValue(formValue?.endDate) ? moment(formValue?.endDate).format(dateFormatting.date) : null,
+          startDate: hasValue(formValue?.startDate)
+            ? moment(formValue?.startDate).format(dateFormatting.date)
+            : null,
+          endDate: hasValue(formValue?.endDate)
+            ? moment(formValue?.endDate).format(dateFormatting.date)
+            : null,
           annName: formValue.announcementName,
           description: formValue.description,
           contentType: valuePage,
           annContent: valuePage === "HTML" ? formValue.annContent : fileName,
           image: valuePage === "IMAGE" ? image : undefined,
           urlImage: formValue.urlImage,
-        }
-        url = '/v1/dbs/api/announcement/validate-update'
+        };
+        url = "/v1/dbs/api/announcement/validate-update";
       } else {
         bodyRequest = {
-          startDate: hasValue(formValue?.startDate) ? moment(formValue?.startDate).format(dateFormatting.date) : null,
-          endDate: hasValue(formValue?.endDate) ? moment(formValue?.endDate).format(dateFormatting.date) : null,
+          startDate: hasValue(formValue?.startDate)
+            ? moment(formValue?.startDate).format(dateFormatting.date)
+            : null,
+          endDate: hasValue(formValue?.endDate)
+            ? moment(formValue?.endDate).format(dateFormatting.date)
+            : null,
           annName: formValue.announcementName,
           description: formValue.description,
           contentType: valuePage,
           annContent: valuePage === "HTML" ? formValue.annContent : fileName,
           image: valuePage === "IMAGE" ? image : undefined,
           urlImage: formValue.urlImage,
-        }
-        url = '/v1/dbs/api/announcement/validate-create'
+        };
+        url = "/v1/dbs/api/announcement/validate-create";
       }
       setPayload({
         body: bodyRequest,
-        validateCreateUpdate: { body: bodyRequest, services: userHttpService, endPoint: url, type }
-      })
+        validateCreateUpdate: {
+          body: bodyRequest,
+          services: userHttpService,
+          endPoint: url,
+          type,
+        },
+      });
 
-      await dispatch(validateCreateUpdate({ body: bodyRequest, services: userHttpService, endPoint: url, type }))?.unwrap();
+      await dispatch(
+        validateCreateUpdate({
+          body: bodyRequest,
+          services: userHttpService,
+          endPoint: url,
+          type,
+        }),
+      )?.unwrap();
       setModalConfirm(true);
     } catch (error) {
       setModalConfirm(false);
@@ -220,15 +246,15 @@ const AnnouncementForm = ({ type }) => {
 
   const handleConfirm = async () => {
     try {
-      handleCloseModalError()
+      handleCloseModalError();
       if (type === "create") {
-        await dispatch(createHtmlAnnouncement(payload?.body))?.unwrap()
+        await dispatch(createHtmlAnnouncement(payload?.body))?.unwrap();
       } else {
-        await dispatch(updateHtmlAnnouncement(payload?.body))?.unwrap()
+        await dispatch(updateHtmlAnnouncement(payload?.body))?.unwrap();
       }
-      handleClear()
+      handleClear();
     } catch (error) {
-      handleCloseModalError()
+      handleCloseModalError();
     }
   };
 
@@ -248,18 +274,18 @@ const AnnouncementForm = ({ type }) => {
   };
 
   const handleRetry = () => {
-    handleCancelTryAgain()
-    if (bodyError?.action === 'CREATE_HTML_ANNOUNCEMENT') {
-      dispatch(createHtmlAnnouncement(payload))
-    } else if (bodyError?.action === 'UPDATE_HTML_ANNOUNCEMENT') {
-      dispatch(updateHtmlAnnouncement(payload))
+    handleCancelTryAgain();
+    if (bodyError?.action === "CREATE_HTML_ANNOUNCEMENT") {
+      dispatch(createHtmlAnnouncement(payload));
+    } else if (bodyError?.action === "UPDATE_HTML_ANNOUNCEMENT") {
+      dispatch(updateHtmlAnnouncement(payload));
     } else {
-      dispatch(getAnnouncementDetail(id))
+      dispatch(getAnnouncementDetail(id));
     }
-    handleCloseModalError()
+    handleCloseModalError();
   };
 
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
     <LayoutMenu>
@@ -300,10 +326,10 @@ const AnnouncementForm = ({ type }) => {
                         (value && moment(startDate) <= moment(value)) || !value
                           ? Promise.resolve()
                           : Promise.reject(
-                            new Error(
-                              "The end date must be greater than or equal to the start date!"
-                            )
-                          ),
+                              new Error(
+                                "The end date must be greater than or equal to the start date!",
+                              ),
+                            ),
                     },
                   ]}
                 >
@@ -435,7 +461,7 @@ const AnnouncementForm = ({ type }) => {
                           </ButtonComponent>
                         </div>
                         {fileList.length === 0 &&
-                          detail_Announcement?.annContent === null ? (
+                        detail_Announcement?.annContent === null ? (
                           <p className="text-[11px] text-dg-grey-dark mb-0">
                             No file choosen
                           </p>
@@ -489,7 +515,7 @@ const AnnouncementForm = ({ type }) => {
                 onClick={() => {
                   handleClear();
                 }}
-              //disabled={isEditable}
+                //disabled={isEditable}
               >
                 {type === "update" ? "Reset" : "Clear"}
               </ButtonComponent>

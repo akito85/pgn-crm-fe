@@ -10,7 +10,7 @@ export const columnsTermOfService = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -29,7 +29,7 @@ export const columnsTermOfService = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -44,7 +44,7 @@ export const columnsTermOfService = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "startDate" ? (
@@ -79,7 +79,7 @@ export const columnsTermOfService = (
       searchText,
       handleSearch,
       true,
-      "endDate"
+      "endDate",
     ),
     render: (text) =>
       searchedColumn === "endDate" ? (
@@ -137,7 +137,7 @@ export const columnsDetailTermOfService = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -156,7 +156,7 @@ export const columnsDetailTermOfService = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -169,7 +169,7 @@ export const columnsDetailTermOfService = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
 ];

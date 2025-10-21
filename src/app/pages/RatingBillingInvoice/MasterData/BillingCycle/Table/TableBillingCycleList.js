@@ -1,4 +1,8 @@
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
 export const columnsBillingCycleList = (
@@ -28,9 +32,18 @@ export const columnsBillingCycleList = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('beginCycle', hasValue(search['beginCycle']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "beginCycle",
+          hasValue(search["beginCycle"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "END CYCLE",
@@ -43,9 +56,18 @@ export const columnsBillingCycleList = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('endCycle', hasValue(search['endCycle']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "endCycle",
+          hasValue(search["endCycle"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "TIME UNIT",
@@ -58,9 +80,18 @@ export const columnsBillingCycleList = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('timeUnit', hasValue(search['timeUnit']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "timeUnit",
+          hasValue(search["timeUnit"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "INVOICE DATE",
@@ -73,10 +104,18 @@ export const columnsBillingCycleList = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('invoiceDate', hasValue(search['invoiceDate']), searchText, text, false, 'input', search)
-
+      render: (text) =>
+        renderColumn(
+          "invoiceDate",
+          hasValue(search["invoiceDate"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "START DATE",
@@ -91,10 +130,17 @@ export const columnsBillingCycleList = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
-      render: (text) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, text, 'date', search)
-
+      render: (text) =>
+        renderDateColumn(
+          "startDate",
+          hasValue(search["startDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "END DATE",
@@ -109,9 +155,17 @@ export const columnsBillingCycleList = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
-      render: (text) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "endDate",
+          hasValue(search["endDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -123,13 +177,22 @@ export const columnsBillingCycleList = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ellipsis: {
         showTitle: false,
       },
       sorter: true,
-      render: (text) => renderColumn('description', hasValue(search['description']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          hasValue(search["description"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -145,7 +208,7 @@ export const columnsBillingCycleList = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         let text;
@@ -159,8 +222,15 @@ export const columnsBillingCycleList = (
               : index;
             break;
         }
-        return renderColumn('status', hasValue(search['status']), searchText, text, false, 'status', search)
-
+        return renderColumn(
+          "status",
+          hasValue(search["status"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        );
       },
     },
     {
@@ -177,7 +247,7 @@ export const columnsBillingCycleList = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         let text;
@@ -191,7 +261,15 @@ export const columnsBillingCycleList = (
               : index;
             break;
         }
-        return renderColumn('statusApproval', hasValue(search['statusApproval']), searchText, text, false, 'status', search)
+        return renderColumn(
+          "statusApproval",
+          hasValue(search["statusApproval"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        );
       },
     },
   ];

@@ -39,7 +39,7 @@ const UploadTemplate = ({
 }) => {
   // Selector
   const { dataConfigRBIDataGeneralTemplate } = useSelector(
-    (state) => state.general_template
+    (state) => state.general_template,
   );
 
   // console.log("UploadTemplate", dataConfigRBIDataGeneralTemplate);
@@ -96,16 +96,13 @@ const UploadTemplate = ({
               url: r.urlFile1,
               extension: extension[1],
               filename: filename,
-            })
+            }),
           );
         } else {
-          const response = await axios.get(
-            configApplication + r.urlFile1,
-            {
-              headers: tokenHeader(),
-              responseType: "blob",
-            }
-          );
+          const response = await axios.get(configApplication + r.urlFile1, {
+            headers: tokenHeader(),
+            responseType: "blob",
+          });
           // console.log(response);
           const base64 = await getBase64(response.data);
           // console.log(base64);

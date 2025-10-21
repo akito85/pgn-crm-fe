@@ -12,7 +12,7 @@ const DateComponent = ({
   disabled = false,
   placeholder,
   defaultPickerValue,
-  key
+  key,
 }) => {
   const wrapper = "flex flex-col";
   const style = {

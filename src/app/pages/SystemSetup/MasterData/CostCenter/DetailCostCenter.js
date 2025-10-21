@@ -2,7 +2,13 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { sorterFunction } from "../../../../../utils/sorterFunction";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
-import { hasValue, renderColumn, renderDateColumn, renderDateConverter, toTitleCase } from "../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+  renderDateConverter,
+  toTitleCase,
+} from "../../../../../utils";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { Spin } from "antd";
@@ -10,9 +16,8 @@ import CardComponent from "../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../components/DetailText";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
 
-
 const DetailCostCenter = (props) => {
-  const { data, openModal, closeModal = () => { } } = props;
+  const { data, openModal, closeModal = () => {} } = props;
 
   const { loading } = useSelector((state) => state.master_cost_center);
 
@@ -26,18 +31,17 @@ const DetailCostCenter = (props) => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState("");
 
-
   const handleResetState = useCallback(() => {
-    setCurrentLog(1)
-    setSizeLog(10)
-    setSearchText("")
-    setSearchedColumn('')
-    setSearch({})
-  }, [])
+    setCurrentLog(1);
+    setSizeLog(10);
+    setSearchText("");
+    setSearchedColumn("");
+    setSearch({});
+  }, []);
 
   useEffect(() => {
     if (openModal === false) {
-      handleResetState()
+      handleResetState();
     }
   }, [openModal, handleResetState]);
 
@@ -73,56 +77,84 @@ const DetailCostCenter = (props) => {
       title: "ACTOR",
       dataIndex: "createdBy",
       width: 130,
-      sorter: (a, b) => sorterFunction('createdBy', a, b),
+      sorter: (a, b) => sorterFunction("createdBy", a, b),
       filteredValue: hasValue(search?.createdBy) ? [search?.createdBy] : null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        'createdBy',
+        "createdBy",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('createdBy', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "createdBy",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACTION",
       dataIndex: "operation",
       width: 150,
-      align:'center',
-      sorter: (a, b) => sorterFunction('operation', a, b),
+      align: "center",
+      sorter: (a, b) => sorterFunction("operation", a, b),
       filteredValue: hasValue(search?.operation) ? [search?.operation] : null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        'operation',
+        "operation",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         true,
-        'status'
+        "status",
       ),
-      render: (text) => renderColumn('operation', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "operation",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACTION DATE",
       dataIndex: "createdDate",
       width: 250,
-      align: 'center',
-      sorter: (a, b) => sorterFunction('createdDate', a, b, 'date'),
-      filteredValue: hasValue(search?.createdDate) ? [search?.createdDate] : null,
+      align: "center",
+      sorter: (a, b) => sorterFunction("createdDate", a, b, "date"),
+      filteredValue: hasValue(search?.createdDate)
+        ? [search?.createdDate]
+        : null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        'createdDate',
+        "createdDate",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         true,
-        'datetime'
+        "datetime",
       ),
-      render: (value) => renderDateColumn('createdDate', searchedColumn, searchText, value, 'datetime', search)
+      render: (value) =>
+        renderDateColumn(
+          "createdDate",
+          searchedColumn,
+          searchText,
+          value,
+          "datetime",
+          search,
+        ),
     },
     {
       title: "REMARK",
@@ -132,7 +164,7 @@ const DetailCostCenter = (props) => {
       filteredValue: hasValue(search?.remark) ? [search?.remark] : null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        'remark',
+        "remark",
         searchInput,
         searchedColumn,
         searchText,
@@ -142,7 +174,16 @@ const DetailCostCenter = (props) => {
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('remark', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "remark",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
   ];
 
@@ -171,17 +212,15 @@ const DetailCostCenter = (props) => {
         </CardComponent>
 
         <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-          <DetailText label="Record Id">
-            {data?.id}
-          </DetailText>
+          <DetailText label="Record Id">{data?.id}</DetailText>
           <DetailText label="Created Date">
             {data?.createdDate &&
-              renderDateConverter(data?.createdDate, 'datetime')}
+              renderDateConverter(data?.createdDate, "datetime")}
           </DetailText>
           <DetailText label="Created By">{data?.createdBy}</DetailText>
           <DetailText label="Updated Date">
             {data?.updatedDate &&
-              renderDateConverter(data?.updatedDate, 'datetime')}
+              renderDateConverter(data?.updatedDate, "datetime")}
           </DetailText>
           <DetailText label="Updated By">{data?.updatedBy}</DetailText>
         </CardComponent>

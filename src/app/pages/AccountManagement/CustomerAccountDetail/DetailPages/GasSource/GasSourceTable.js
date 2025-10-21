@@ -9,10 +9,20 @@ import StatusComponent from "../../../../../../components/StatusComponent";
 import TablePagination from "../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import GasSourceDetail from "./GasSourceDetail";
-import { dateFormatting, formMessageRequired, hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import {
+  dateFormatting,
+  formMessageRequired,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
 import GasSourceActiveOrInactive from "./GasSourceActiveOrInactive";
 import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
-import { getColumnSearchPropsPaging, getColumnSearchProps, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchProps,
+  getColumnSearchPropsUseFilteredValue,
+} from "../../../../../../utils/getColumnSearchProps";
 import {
   getAllAccountGasSourcePaginate,
   getDetailAccountGasSource,
@@ -30,8 +40,8 @@ const columnsDetail = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { },
-  search
+  handleSearch = () => {},
+  search,
 ) => {
   return [
     {
@@ -49,7 +59,7 @@ const columnsDetail = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -64,7 +74,7 @@ const columnsDetail = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         searchedColumn === "startDate" ? (
@@ -99,7 +109,7 @@ const columnsDetail = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         searchedColumn === "endDate" ? (
@@ -118,8 +128,10 @@ const columnsDetail = (
               text ? moment(text).format(dateFormatting.date) : ""
             }
           />
+        ) : hasValue(text) ? (
+          moment(text).format(dateFormatting.date)
         ) : (
-          hasValue(text) ? moment(text).format(dateFormatting.date) : ""
+          ""
         ),
     },
     {
@@ -132,7 +144,7 @@ const columnsDetail = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -145,7 +157,7 @@ const columnsDetail = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -158,7 +170,7 @@ const columnsDetail = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -171,7 +183,7 @@ const columnsDetail = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -184,7 +196,7 @@ const columnsDetail = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -196,7 +208,7 @@ const columnsDetail = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (status) => (
         <div className={" flex justify-center"}>
@@ -214,7 +226,7 @@ const columnsDetail = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -248,10 +260,10 @@ const columns = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { },
-  handleDetail = () => { },
-  handleActiveOrInactive = () => { },
-  handleStartDate = () => { }
+  handleSearch = () => {},
+  handleDetail = () => {},
+  handleActiveOrInactive = () => {},
+  handleStartDate = () => {},
 ) => {
   return [
     {
@@ -273,9 +285,18 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn("calorieType", hasValue(search['calorieType']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "calorieType",
+          hasValue(search["calorieType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "START DATE",
@@ -290,9 +311,17 @@ const columns = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
-      render: (text) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "startDate",
+          hasValue(search["startDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "END DATE",
@@ -307,9 +336,17 @@ const columns = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
-      render: (text) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "endDate",
+          hasValue(search["endDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "REMARK",
@@ -321,12 +358,21 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ellipsis: {
-        showTitle: false
+        showTitle: false,
       },
-      render: (text) => renderColumn("remark", hasValue(search['remark']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "remark",
+          hasValue(search["remark"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "CALORIE CODE",
@@ -338,9 +384,18 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn("calorieCode", hasValue(search['calorieCode']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "calorieCode",
+          hasValue(search["calorieCode"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "GAS SOURCE NAME",
@@ -352,9 +407,18 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn("name", hasValue(search['name']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "name",
+          hasValue(search["name"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       sorter: true,
@@ -366,12 +430,21 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn("description", hasValue(search['description']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          hasValue(search["description"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -385,9 +458,18 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn("status", hasValue(search['status']), searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          hasValue(search["status"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
   ];
 };
@@ -395,7 +477,7 @@ const columns = (
 const GasSourceTable = ({ type, dataNoApi = [], accessAccount }) => {
   // Selector
   const { data, loading, data_detail } = useSelector(
-    (state) => state.accountGasSource
+    (state) => state.accountGasSource,
   );
 
   // Declaration
@@ -419,7 +501,7 @@ const GasSourceTable = ({ type, dataNoApi = [], accessAccount }) => {
   const [chooseId, setChooseId] = useState();
   const [modalDetail, setModalDetail] = useState(false);
   const [modalActiveOrInactive, setModalActiveOrInactive] = useState(false);
-  const [gasSourceRecord, setGasSourceRecord] = useState('');
+  const [gasSourceRecord, setGasSourceRecord] = useState("");
   const [startDate, setStartDate] = useState();
 
   const [formActivation] = Form.useForm();
@@ -427,7 +509,13 @@ const GasSourceTable = ({ type, dataNoApi = [], accessAccount }) => {
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      getAllAccountGasSourcePaginate({ id, search: reqSearch, sort, page, pageSize })
+      getAllAccountGasSourcePaginate({
+        id,
+        search: reqSearch,
+        sort,
+        page,
+        pageSize,
+      }),
     );
   }, [search, sort, page, pageSize, dispatch, id]);
 
@@ -491,16 +579,20 @@ const GasSourceTable = ({ type, dataNoApi = [], accessAccount }) => {
   };
 
   // Handle Confirmation Active/Inactive
-  const handleActiveOrInactive = useCallback((record) => {
-    setModalActiveOrInactive(true);
-    setChooseId(record?.id);
-    setGasSourceRecord(record)
-    formActivation?.setFieldsValue({
-      endDate: hasValue(record?.endDate) ? moment(record?.endDate) : undefined,
-      remark: undefined
-    })
-  }, [formActivation]);
-
+  const handleActiveOrInactive = useCallback(
+    (record) => {
+      setModalActiveOrInactive(true);
+      setChooseId(record?.id);
+      setGasSourceRecord(record);
+      formActivation?.setFieldsValue({
+        endDate: hasValue(record?.endDate)
+          ? moment(record?.endDate)
+          : undefined,
+        remark: undefined,
+      });
+    },
+    [formActivation],
+  );
 
   // Handle Confirm Modal Active/Inactive
   const handleConfirmActiveOrInactive = async (formValue, handleClear) => {
@@ -510,163 +602,173 @@ const GasSourceTable = ({ type, dataNoApi = [], accessAccount }) => {
         endDate: moment(formValue.endDate).format(dateFormatting.date),
         remark: formValue.remark,
       };
-      await dispatch(InactiveAccountGasSource({ body: data }))?.unwrap()
-      await dispatch(getAllAccountGasSourcePaginate({ id, search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }))?.unwrap()
+      await dispatch(InactiveAccountGasSource({ body: data }))?.unwrap();
+      await dispatch(
+        getAllAccountGasSourcePaginate({
+          id,
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort,
+          page,
+          pageSize,
+        }),
+      )?.unwrap();
       setModalActiveOrInactive(false);
-      handleClear()
+      handleClear();
     } catch (error) {
       form.resetFields();
-      formActivation?.resetFields()
+      formActivation?.resetFields();
     }
   };
 
-const filterDataByPage = () => {
-  let result = [...dataNoApi];
-  if (searchedColumn) {
-    result = result.filter((item) => {
-      return item[searchedColumn]
-        ?.toString()
-        ?.toLowerCase()
-        ?.includes(searchText.toLowerCase());
-    });
-  }
-  const handleDataSort = (obj) => {
-    switch (fieldSort) {
-      case "startDate":
-      case "endDate":
-        const date = obj[fieldSort]
-          ? moment(obj[fieldSort]).format("DD MMM YYYY")
-          : "";
-        return date.toString().toLowerCase();
-      default:
-        return obj[fieldSort]?.toString().toLowerCase();
+  const filterDataByPage = () => {
+    let result = [...dataNoApi];
+    if (searchedColumn) {
+      result = result.filter((item) => {
+        return item[searchedColumn]
+          ?.toString()
+          ?.toLowerCase()
+          ?.includes(searchText.toLowerCase());
+      });
     }
+    const handleDataSort = (obj) => {
+      switch (fieldSort) {
+        case "startDate":
+        case "endDate":
+          const date = obj[fieldSort]
+            ? moment(obj[fieldSort]).format("DD MMM YYYY")
+            : "";
+          return date.toString().toLowerCase();
+        default:
+          return obj[fieldSort]?.toString().toLowerCase();
+      }
+    };
+    if (fieldSort) {
+      result.sort((a, b) => {
+        let fa = handleDataSort(a);
+        let fb = handleDataSort(b);
+        if (fa < fb) {
+          return orderSort === "asc" ? -1 : 1;
+        }
+        if (fa > fb) {
+          return orderSort === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return result.slice((page - 1) * pageSize, page * pageSize);
   };
-  if (fieldSort) {
-    result.sort((a, b) => {
-      let fa = handleDataSort(a);
-      let fb = handleDataSort(b);
-      if (fa < fb) {
-        return orderSort === "asc" ? -1 : 1;
-      }
-      if (fa > fb) {
-        return orderSort === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
-  }
-  return result.slice((page - 1) * pageSize, page * pageSize);
-};
 
-// Handle Cancel Modal Active/Inactive
-const handleCancelActiveOrInactive = () => {
-  setGasSourceRecord({})
-  setModalActiveOrInactive(false);
-  form.resetFields();
-  formActivation?.resetFields()
-};
+  // Handle Cancel Modal Active/Inactive
+  const handleCancelActiveOrInactive = () => {
+    setGasSourceRecord({});
+    setModalActiveOrInactive(false);
+    form.resetFields();
+    formActivation?.resetFields();
+  };
 
-const handleStartDate = (date) => {
-  setStartDate(moment(date));
-}
+  const handleStartDate = (date) => {
+    setStartDate(moment(date));
+  };
 
-const handleDisableEndDate = (current) => {
-  if (startDate !== null) {
-    return moment(startDate) >= current;
-  }
-  return moment().add(-1, "days") >= current;
-};
-
-const itemActions = [
-  // Column Action Table
-  {
-    action: "View",
-    type: "table",
-    render: (record, data) => {
-      return (
-        <Tooltip title="Detail">
-          <div className="pt-1">
-            <SVGIcon
-              name="IconDetail"
-              width={24}
-              onClick={() => handleDetail(record.id)}
-            />
-          </div>
-        </Tooltip>
-      )
+  const handleDisableEndDate = (current) => {
+    if (startDate !== null) {
+      return moment(startDate) >= current;
     }
-  },
+    return moment().add(-1, "days") >= current;
+  };
 
-  {
-    action: "Activate",
-    type: "table",
-    render: (record, data) => {
-      return (
-        <Tooltip title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}>
-          <div className="pt-1">
-            <Checkbox
-              onClick={() => {
-                handleActiveOrInactive(record);
-                handleStartDate(record.startDate);
-              }}
-              checked={record.status === "INACTIVE" ? true : false}
-              disabled={record.status === "ACTIVE" ? false : true}
-            />
-          </div>
-        </Tooltip>
-      )
-    }
-  }
-]
-const columnActionPermissions = useColumnActionPermissionAccount(
-  ["Activate", "View", "Update"],
-  itemActions,
-  accessAccount
-);
+  const itemActions = [
+    // Column Action Table
+    {
+      action: "View",
+      type: "table",
+      render: (record, data) => {
+        return (
+          <Tooltip title="Detail">
+            <div className="pt-1">
+              <SVGIcon
+                name="IconDetail"
+                width={24}
+                onClick={() => handleDetail(record.id)}
+              />
+            </div>
+          </Tooltip>
+        );
+      },
+    },
 
-return (
-  <Fragment>
-    <TablePagination
-      dataSource={type === "detail" ? filterDataByPage() : data?.result}
-      columns={
-        type === "detail"
-          ? columnsDetail(
-            page,
-            pageSize,
-            searchInput,
-            searchedColumn,
-            searchText,
-            handleSearchNoApi
-          )
-          : [
-            ...columns(
-              search,
-              page,
-              pageSize,
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearchApi,
-              handleDetail,
-              handleActiveOrInactive,
-              handleStartDate
-            ),
-            ...columnActionPermissions
-          ]
-      }
-      current={page}
-      pageSize={pageSize}
-      onChange={handleChange}
-      onSizeChanger={handleChange}
-      totalData={
-        type === "detail" ? dataNoApi?.length : data?.page?.totalElements
-      }
-      onSort={type === "detail" ? onSortNoApi : onSortApi}
-      tableScrolled={{ y: 525, x: 2300 }}
-    />
+    {
+      action: "Activate",
+      type: "table",
+      render: (record, data) => {
+        return (
+          <Tooltip
+            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+          >
+            <div className="pt-1">
+              <Checkbox
+                onClick={() => {
+                  handleActiveOrInactive(record);
+                  handleStartDate(record.startDate);
+                }}
+                checked={record.status === "INACTIVE" ? true : false}
+                disabled={record.status === "ACTIVE" ? false : true}
+              />
+            </div>
+          </Tooltip>
+        );
+      },
+    },
+  ];
+  const columnActionPermissions = useColumnActionPermissionAccount(
+    ["Activate", "View", "Update"],
+    itemActions,
+    accessAccount,
+  );
 
-    {/* Modal Active/Inactive */}
-    {/* <ModalApproveOrReject
+  return (
+    <Fragment>
+      <TablePagination
+        dataSource={type === "detail" ? filterDataByPage() : data?.result}
+        columns={
+          type === "detail"
+            ? columnsDetail(
+                page,
+                pageSize,
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearchNoApi,
+              )
+            : [
+                ...columns(
+                  search,
+                  page,
+                  pageSize,
+                  searchInput,
+                  searchedColumn,
+                  searchText,
+                  handleSearchApi,
+                  handleDetail,
+                  handleActiveOrInactive,
+                  handleStartDate,
+                ),
+                ...columnActionPermissions,
+              ]
+        }
+        current={page}
+        pageSize={pageSize}
+        onChange={handleChange}
+        onSizeChanger={handleChange}
+        totalData={
+          type === "detail" ? dataNoApi?.length : data?.page?.totalElements
+        }
+        onSort={type === "detail" ? onSortNoApi : onSortApi}
+        tableScrolled={{ y: 525, x: 2300 }}
+      />
+
+      {/* Modal Active/Inactive */}
+      {/* <ModalApproveOrReject
         isOpen={modalActiveOrInactive}
         handleCloseModal={handleCancelActiveOrInactive}
         onFinish={handleConfirmActiveOrInactive}
@@ -709,55 +811,58 @@ return (
         }
       /> */}
 
-    <ModalActivationDynamic
-      form={formActivation}
-      isOpen={modalActiveOrInactive}
-      handleCloseModal={handleCancelActiveOrInactive}
-      onFinish={handleConfirmActiveOrInactive}
-      header={"Inactivate"}
-      approveOrReject={"Inactivate"}
-      menu={"Gas Source"}
-      named={gasSourceRecord?.name}>
-      <>
-        <Form.Item
-          label={"End Date"}
-          name={"endDate"}
-          rules={[
-            {
-              validator: (_, value) =>
-                (value && moment(startDate) < moment(value)) || !value
-                  ? Promise.resolve()
-                  : Promise.reject(
-                    new Error("End date must After Start date")
-                  ),
-            },
-            {
-              required: true,
-              message: "Please input your End Date!",
-            },
-          ]}
-        >
-          <DateComponent dateDisable={handleDisableEndDate} disabled={hasValue(gasSourceRecord?.endDate)} />
-        </Form.Item>
-        <Form.Item
-          name={"remark"}
-          label={"Remark"}
-          rules={formMessageRequired('Remark')}
-          className="w-full"
-        >
-          <InputComponent
-            group
-            rows={1}
-            type="textarea"
-            value={remark}
-            placeholder={"Type your remark"}
-            onChange={(e) => setRemark(e.target.value)}
-          />
-        </Form.Item>
-      </>
-
-    </ModalActivationDynamic>
-    {/* <GasSourceActiveOrInactive
+      <ModalActivationDynamic
+        form={formActivation}
+        isOpen={modalActiveOrInactive}
+        handleCloseModal={handleCancelActiveOrInactive}
+        onFinish={handleConfirmActiveOrInactive}
+        header={"Inactivate"}
+        approveOrReject={"Inactivate"}
+        menu={"Gas Source"}
+        named={gasSourceRecord?.name}
+      >
+        <>
+          <Form.Item
+            label={"End Date"}
+            name={"endDate"}
+            rules={[
+              {
+                validator: (_, value) =>
+                  (value && moment(startDate) < moment(value)) || !value
+                    ? Promise.resolve()
+                    : Promise.reject(
+                        new Error("End date must After Start date"),
+                      ),
+              },
+              {
+                required: true,
+                message: "Please input your End Date!",
+              },
+            ]}
+          >
+            <DateComponent
+              dateDisable={handleDisableEndDate}
+              disabled={hasValue(gasSourceRecord?.endDate)}
+            />
+          </Form.Item>
+          <Form.Item
+            name={"remark"}
+            label={"Remark"}
+            rules={formMessageRequired("Remark")}
+            className="w-full"
+          >
+            <InputComponent
+              group
+              rows={1}
+              type="textarea"
+              value={remark}
+              placeholder={"Type your remark"}
+              onChange={(e) => setRemark(e.target.value)}
+            />
+          </Form.Item>
+        </>
+      </ModalActivationDynamic>
+      {/* <GasSourceActiveOrInactive
         isOpen={modalActiveOrInactive}
         handleCancel={() => handleCancelActiveOrInactive()}
         handleCancelFooter={() => handleCancelActiveOrInactive()}
@@ -768,14 +873,14 @@ return (
         startDate={startDate}
       /> */}
 
-    {/* Modal Detail */}
-    <GasSourceDetail
-      data={data_detail}
-      isOpen={modalDetail}
-      handleCancel={() => setModalDetail(false)}
-    />
-  </Fragment>
-);
+      {/* Modal Detail */}
+      <GasSourceDetail
+        data={data_detail}
+        isOpen={modalDetail}
+        handleCancel={() => setModalDetail(false)}
+      />
+    </Fragment>
+  );
 };
 
 export default GasSourceTable;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
-import {Checkbox, Spin, Tooltip } from "antd";
+import { Checkbox, Spin, Tooltip } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import {
@@ -20,16 +20,13 @@ import {
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../assets/Icon/index";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
-import {
-  ModalError,
-} from "../../../../../components/Modal/ModalPopUp";
+import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../utils/Icon";
-import {  renderColumn } from '../../../../../utils';
+import { renderColumn } from "../../../../../utils";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import { getGrantedAccessAccount } from "../../../../../redux/slices/account_management/accountManagement";
 import ToolbarAccount from "../../../AccountManagement/ComponentAccount/ToolbarAccount";
 import { useColumnActionPermissionAccount } from "../../../AccountManagement/ComponentAccount/ColumnActionPermissionAccount";
-
 
 // Breadcrumbs
 const routes = [
@@ -52,16 +49,17 @@ const ViewLateCharges = () => {
   const { user } = useSelector((state) => state.auth);
   const { access_account } = useSelector((state) => state.accountManagement);
   const filteredArray = {
-    actionList: access_account?.actionList?.filter(action =>
-      action.path.includes("/system-setup/late-charges/") &&
-      !action.path.includes("/system-setup/late-charges-rule/")
-    )
-  }
+    actionList: access_account?.actionList?.filter(
+      (action) =>
+        action.path.includes("/system-setup/late-charges/") &&
+        !action.path.includes("/system-setup/late-charges-rule/"),
+    ),
+  };
   // Access Action Menu
-  const dataArr = user?.data?.actionList
-  const isUpdate = dataArr?.some(element => element.name === "Update");
-  const isInactive = dataArr?.some(element => element.name === "Inactivate");
-  const isCreate = dataArr?.some(element => element.name === "Create");
+  const dataArr = user?.data?.actionList;
+  const isUpdate = dataArr?.some((element) => element.name === "Update");
+  const isInactive = dataArr?.some((element) => element.name === "Inactivate");
+  const isCreate = dataArr?.some((element) => element.name === "Create");
 
   const dispatch = useDispatch();
   // const [form] = Form.useForm();
@@ -79,14 +77,14 @@ const ViewLateCharges = () => {
   const [bodyError, setBodyError] = useState({});
 
   useEffect(() => {
-    dispatch(getGrantedAccessAccount('/system-setup/late-charges'))
-  }, [dispatch])
+    dispatch(getGrantedAccessAccount("/system-setup/late-charges"));
+  }, [dispatch]);
 
   // use effect
   useEffect(() => {
-    const reqSearch = encodeURIComponent(JSON.stringify(search))
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      getLateChargePaginate({ search: reqSearch, sort, page, pageSize })
+      getLateChargePaginate({ search: reqSearch, sort, page, pageSize }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
@@ -131,10 +129,10 @@ const ViewLateCharges = () => {
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => { },
-    handleActiveOrInactive = () => { },
+    handleSearch = () => {},
+    handleActiveOrInactive = () => {},
     isInactive,
-    isUpdate
+    isUpdate,
   ) => {
     return [
       {
@@ -156,9 +154,18 @@ const ViewLateCharges = () => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
-        render: (text) => renderColumn('name', searchedColumn, searchText, text, true, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "name",
+            searchedColumn,
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
       },
       {
         title: "CURRENCY",
@@ -171,9 +178,18 @@ const ViewLateCharges = () => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
-        render: (text) => renderColumn('currency', searchedColumn, searchText, text, false, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "currency",
+            searchedColumn,
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
       },
       {
         title: "CRITERIA",
@@ -189,9 +205,18 @@ const ViewLateCharges = () => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
-        render: (text) => renderColumn('criteria', searchedColumn, searchText, text, true, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "criteria",
+            searchedColumn,
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
       },
       {
         title: "LATE CHARGE MAXIMUM AMOUNT",
@@ -204,9 +229,18 @@ const ViewLateCharges = () => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
-        render: (text) => renderColumn('maxAmount', searchedColumn, searchText, text, true, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "maxAmount",
+            searchedColumn,
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
       },
       {
         title: "LATE CHARGE RULE FORMULA",
@@ -221,9 +255,18 @@ const ViewLateCharges = () => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
-        render: (text) => renderColumn('formula', searchedColumn, searchText, text, true, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "formula",
+            searchedColumn,
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
       },
       {
         title: "DESCRIPTION",
@@ -238,9 +281,18 @@ const ViewLateCharges = () => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
-        render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
+        render: (text) =>
+          renderColumn(
+            "description",
+            searchedColumn,
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
       },
       {
         title: "STATUS",
@@ -253,18 +305,26 @@ const ViewLateCharges = () => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
-        render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+        render: (text) =>
+          renderColumn(
+            "status",
+            searchedColumn,
+            searchText,
+            text,
+            false,
+            "status",
+            search,
+          ),
       },
     ];
   };
 
-
   const handleOk = (formValue, handleClear) => {
     const body = {
       lateChargeId: dataActivate.lateChargeId,
-      remark: formValue.remark
+      remark: formValue.remark,
     };
     const activeOrInactive =
       dataActivate.status === "ACTIVE" ? "inactivate" : "activate";
@@ -274,9 +334,9 @@ const ViewLateCharges = () => {
         handleClear();
         setDataActivate({});
         setModalActive(false);
-        const reqSearch = encodeURIComponent(JSON.stringify(search))
+        const reqSearch = encodeURIComponent(JSON.stringify(search));
         dispatch(
-          getLateChargePaginate({ search: reqSearch, sort, page, pageSize })
+          getLateChargePaginate({ search: reqSearch, sort, page, pageSize }),
         );
       })
       .catch((error) => {
@@ -311,7 +371,14 @@ const ViewLateCharges = () => {
       }
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(downloadLateCharge({ search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }));
+    dispatch(
+      downloadLateCharge({
+        search: encodeURIComponent(JSON.stringify(search)),
+        sort,
+        page,
+        pageSize,
+      }),
+    );
   };
 
   const handleClose = () => {
@@ -321,7 +388,7 @@ const ViewLateCharges = () => {
   const itemActions = [
     //action toolbar
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
@@ -330,11 +397,10 @@ const ViewLateCharges = () => {
         >
           Download List
         </ButtonComponent>
-
-      )
+      ),
     },
     {
-      action: 'Upload',
+      action: "Upload",
       render: (
         <NavLink to={""}>
           <ButtonComponent
@@ -344,11 +410,10 @@ const ViewLateCharges = () => {
             Upload
           </ButtonComponent>
         </NavLink>
-
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_LATE_CHARGES}>
           <ButtonComponent
@@ -358,7 +423,7 @@ const ViewLateCharges = () => {
             Create Late Charge
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // Column Action Table
@@ -377,8 +442,8 @@ const ViewLateCharges = () => {
               </div>
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
 
     {
@@ -407,8 +472,8 @@ const ViewLateCharges = () => {
               </Link>
             )}
           </Tooltip>
-        )
-      }
+        );
+      },
     },
 
     {
@@ -428,11 +493,10 @@ const ViewLateCharges = () => {
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
-
-  ]
+        );
+      },
+    },
+  ];
 
   return (
     <LayoutMenu>
@@ -458,7 +522,7 @@ const ViewLateCharges = () => {
                 ...useColumnActionPermissionAccount(
                   ["Activate", "View", "Update"],
                   itemActions,
-                  filteredArray
+                  filteredArray,
                 ),
               ]}
               current={page}

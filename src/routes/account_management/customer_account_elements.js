@@ -126,13 +126,13 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   DETAIL_TOS_SUBMISSION_PAGE: <ApproveOrRejectTOS />,
 
   // RAW MATERIAL SOURCE
-  CREATE_RAW_MATERIAL_SOURCE_PAGE: <RawMaterialSourceForm type={"create"}/>,
-  UPDATE_RAW_MATERIAL_SOURCE_PAGE: <RawMaterialSourceForm type={"update"}/>,
-  
+  CREATE_RAW_MATERIAL_SOURCE_PAGE: <RawMaterialSourceForm type={"create"} />,
+  UPDATE_RAW_MATERIAL_SOURCE_PAGE: <RawMaterialSourceForm type={"update"} />,
+
   // RAW MATERIAL SOURCE
-  CREATE_PRODUCT_DISTRIBUTION_PAGE: <ProductDistributionForm type={"create"}/>,
-  UPDATE_PRODUCT_DISTRIBUTION_PAGE: <ProductDistributionForm type={"update"}/>,
-  
+  CREATE_PRODUCT_DISTRIBUTION_PAGE: <ProductDistributionForm type={"create"} />,
+  UPDATE_PRODUCT_DISTRIBUTION_PAGE: <ProductDistributionForm type={"update"} />,
+
   // MASTER DATA
 
   // METER READING CODES
@@ -187,15 +187,15 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   DETAIL_TAX_IMPLICATION_PAGE: <DetailTaxImplication />,
 
   // TAX IMPLICATION RULE
-  CREATE_TAX_IMPLICATION_RULE_PAGE: <FormTaxImplicationRule type={"create"}/>,
+  CREATE_TAX_IMPLICATION_RULE_PAGE: <FormTaxImplicationRule type={"create"} />,
   UPDATE_TAX_IMPLICATION_RULE_PAGE: <FormTaxImplicationRule type={"update"} />,
   DETAIL_TAX_IMPLICATION_RULE_PAGE: <DetailTaxImplicationRule />,
-  
+
   // GAS UTILIZATION
-  CREATE_GAS_UTILIZATION_PAGE: <GasUtilizationForm type={"create"}/>,
+  CREATE_GAS_UTILIZATION_PAGE: <GasUtilizationForm type={"create"} />,
   UPDATE_GAS_UTILIZATION_PAGE: <GasUtilizationForm type={"update"} />,
-  
+
   // EQUIPMENT
-  CREATE_EQUIPMENT_PAGE: <EquipmentForm type={"create"}/>,
+  CREATE_EQUIPMENT_PAGE: <EquipmentForm type={"create"} />,
   UPDATE_EQUIPMENT_PAGE: <EquipmentForm type={"update"} />,
 };

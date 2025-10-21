@@ -25,18 +25,22 @@ import UtilsDate from "../ServicePoint/Asset/UtilsDate";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 import ToolbarAccount from "../../../ComponentAccount/ToolbarAccount";
 import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";
-import { clearBodyMessage, hideModalError, validateCreateUpdate } from "../../../../../../redux/slices/general_slice";
+import {
+  clearBodyMessage,
+  hideModalError,
+  validateCreateUpdate,
+} from "../../../../../../redux/slices/general_slice";
 
 const GasSourceInformation = () => {
   // Selector
-  const { data_ags, data_calorie_type, loading, } = useSelector(
-    (state) => state.accountGasSource
+  const { data_ags, data_calorie_type, loading } = useSelector(
+    (state) => state.accountGasSource,
   );
-  const { access_account } = useSelector(
-    (state) => state.accountManagement
-  );
+  const { access_account } = useSelector((state) => state.accountManagement);
 
-  const { data_accountDetail } = useSelector((state) => state.accountManagement);
+  const { data_accountDetail } = useSelector(
+    (state) => state.accountManagement,
+  );
   // Declaration
   const [form] = Form.useForm();
   const dispatch = useDispatch();
@@ -55,19 +59,26 @@ const GasSourceInformation = () => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [bodyData, setBodyData] = useState("");
   const [modalFailed, setModalFailed] = useState("");
-  const [messageFailed, setMessageFailed] = useState('')
+  const [messageFailed, setMessageFailed] = useState("");
   const [flag, setFlag] = useState(0);
 
   // Use Effect
 
   useEffect(() => {
-    if (location?.pathname.includes('account-standard')) {
-      dispatch(getGrantedAccessAccount('/account-management/account-standard/gas-source'))
+    if (location?.pathname.includes("account-standard")) {
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-standard/gas-source",
+        ),
+      );
     } else {
-      dispatch(getGrantedAccessAccount('/account-management/account-onetime/gas-source'))
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-onetime/gas-source",
+        ),
+      );
     }
-  }, [dispatch])
-
+  }, [dispatch]);
 
   useEffect(() => {
     if (dataAGS !== 0) {
@@ -90,11 +101,11 @@ const GasSourceInformation = () => {
   };
 
   const handleCancelForm = () => {
-    setModalConfirm(false)
+    setModalConfirm(false);
     form.resetFields();
     setModalAssign(false);
     setDataTableGasQuality([]);
-    setFlag(0)
+    setFlag(0);
   };
 
   const handleConfirm = async (value) => {
@@ -108,21 +119,30 @@ const GasSourceInformation = () => {
         startDate: moment(value.startDate).format(dateFormatting.date),
         remark: value.remark,
         needValidation: flag === 0 ? true : false,
-      };;
+      };
       setBodyData(bodyRequest);
       url = "/v1/dbs/api/gas-source/validate-assign";
-      await dispatch(validateCreateUpdate({ body: bodyRequest, services: accountManagementService, endPoint: url, type: "create" }))?.unwrap();
+      await dispatch(
+        validateCreateUpdate({
+          body: bodyRequest,
+          services: accountManagementService,
+          endPoint: url,
+          type: "create",
+        }),
+      )?.unwrap();
       setModalAssign(false);
       setModalConfirm(true);
     } catch (error) {
-      if (error?.message === "Warning! The previous gas source end date will be set to H-1 from new start date") {
-        dispatch(hideModalError())
-        dispatch(clearBodyMessage())
-        setModalFailed(true)
-        setMessageFailed(error?.message)
-        setFlag(1)
+      if (
+        error?.message ===
+        "Warning! The previous gas source end date will be set to H-1 from new start date"
+      ) {
+        dispatch(hideModalError());
+        dispatch(clearBodyMessage());
+        setModalFailed(true);
+        setMessageFailed(error?.message);
+        setFlag(1);
       }
-
     }
   };
 
@@ -132,10 +152,18 @@ const GasSourceInformation = () => {
         ...bodyData,
         needValidation: flag === 0 ? true : false,
       };
-      setModalFailed(false)
-      await dispatch(assignGasSource({ body: body }))?.unwrap()
-      handleCancelForm()
-      await dispatch(getAllAccountGasSourcePaginate({ id, search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }))?.unwrap();
+      setModalFailed(false);
+      await dispatch(assignGasSource({ body: body }))?.unwrap();
+      handleCancelForm();
+      await dispatch(
+        getAllAccountGasSourcePaginate({
+          id,
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort,
+          page,
+          pageSize,
+        }),
+      )?.unwrap();
     } catch (error) {
       setModalConfirm(false);
       setModalFailed(false);
@@ -146,11 +174,10 @@ const GasSourceInformation = () => {
     }
   };
 
-
   const itemActions = [
     //action toolbar
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <div className="w-full flex justify-end mb-[30px]">
           <ButtonComponent
@@ -158,8 +185,12 @@ const GasSourceInformation = () => {
             onClick={async () => {
               form.resetFields();
               setDataTableGasQuality([]);
-              await dispatch(getCalorieType())?.unwrap()
-              await dispatch(getAccountGasSource(data_accountDetail?.accountInformation?.costCenterId))?.unwrap();
+              await dispatch(getCalorieType())?.unwrap();
+              await dispatch(
+                getAccountGasSource(
+                  data_accountDetail?.accountInformation?.costCenterId,
+                ),
+              )?.unwrap();
               setModalAssign(true);
             }}
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
@@ -167,16 +198,19 @@ const GasSourceInformation = () => {
             Create Gas Source
           </ButtonComponent>
         </div>
-      )
-    }
-  ]
+      ),
+    },
+  ];
 
   return (
     <Fragment>
       <BaseContainer header={"GAS SOURCE LIST"}>
         <Spin spinning={loading}>
           <div className="w-full flex justify-end mb-[30px]">
-            <ToolbarAccount items={itemActions} advancedAccess={access_account} />
+            <ToolbarAccount
+              items={itemActions}
+              advancedAccess={access_account}
+            />
           </div>
           {/* <div className="w-full flex justify-end mb-[30px]">
             <ButtonComponent
@@ -191,7 +225,10 @@ const GasSourceInformation = () => {
           </div> */}
 
           <div className={"w-full"}>
-            <GasSourceTable type={"information"} accessAccount={access_account} />
+            <GasSourceTable
+              type={"information"}
+              accessAccount={access_account}
+            />
           </div>
 
           {/* Modal Assign */}
@@ -371,10 +408,7 @@ const GasSourceInformation = () => {
                 Are you sure want to assign new gas source?
               </p>
             </div>
-            <Alert
-              message={messageFailed}
-              type={"error"}
-            />
+            <Alert message={messageFailed} type={"error"} />
           </ModalConfirm>
         </Spin>
       </BaseContainer>

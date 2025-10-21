@@ -16,19 +16,19 @@ const GeneralTemplateDetailDraft = ({
 }) => {
   const handleStatusCase = (index) => {
     let text;
-      switch (index) {
-        case "WAITING APPROVAL":
-        case "WAITING_APPROVAL":
-          text = "Waiting Approval";
-          break;
-        default:
-          text = index
-            ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-            : index;
-          break;
-      }
-      return text
-  }
+    switch (index) {
+      case "WAITING APPROVAL":
+      case "WAITING_APPROVAL":
+        text = "Waiting Approval";
+        break;
+      default:
+        text = index
+          ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
+          : index;
+        break;
+    }
+    return text;
+  };
   return (
     <Fragment>
       <BaseContainer header={"GENERAL TEMPLATE INFORMATION"}>
@@ -42,8 +42,8 @@ const GeneralTemplateDetailDraft = ({
           </DetailText>
           <DetailText label="End Date">{handleDate(data?.endDate)}</DetailText>
           <DetailText label="Status">
-                {handleStatusCase(data?.status)}
-              </DetailText>
+            {handleStatusCase(data?.status)}
+          </DetailText>
           <DetailText label="Status Approval">
             {handleStatusCase(data?.statusApproval)}
           </DetailText>
@@ -69,9 +69,7 @@ const GeneralTemplateDetailDraft = ({
 
       <BaseContainer header={"History Log Information"}>
         <div className="w-full grid grid-cols-5 gap-5">
-          <DetailText label="Record ID">
-            {data?.templateId}
-          </DetailText>
+          <DetailText label="Record ID">{data?.templateId}</DetailText>
           <DetailText label="Created Date">
             {renderDateTime(data?.createdDate)}
           </DetailText>

@@ -33,7 +33,7 @@ import { renderDateTime } from "../Utils/Utils";
 const GeneralTemplateDetail = () => {
   // Selector
   const { data_detail, data_detail_draft, loading } = useSelector(
-    (state) => state.general_template
+    (state) => state.general_template,
   );
 
   //declare
@@ -72,7 +72,7 @@ const GeneralTemplateDetail = () => {
 
   //state header
   const [tabHeader, setTabHeader] = useState(
-    generalTemplateDetailPage[0].value
+    generalTemplateDetailPage[0].value,
   );
 
   const handleSetData = useCallback((data) => {
@@ -94,11 +94,11 @@ const GeneralTemplateDetail = () => {
   useEffect(() => {
     if (id && data_detail && id === data_detail.templateId) {
       handleSetData(data_detail);
-       if (
+      if (
         data_detail_draft &&
         data_detail_draft.templateId &&
         data_detail.templateId === data_detail_draft.templateId &&
-        (data_detail?.statusApproval !== "APPROVED")
+        data_detail?.statusApproval !== "APPROVED"
       ) {
         setGeneralTemplateDetailPage([
           { value: "General Template" },
@@ -191,7 +191,7 @@ const GeneralTemplateDetail = () => {
     dispatch(
       data_detail?.inactiveApproval?.isInactive
         ? approveInactiveGeneralTemplate(data)
-        : approveGeneralTemplate(data)
+        : approveGeneralTemplate(data),
     )
       .unwrap()
       .then(async (data) => {
@@ -352,26 +352,26 @@ const GeneralTemplateDetail = () => {
             //   </div>
             // }
           />
-          //   <Form
-          //     id={"form"}
-          //     layout={"vertical"}
-          //     form={form}
-          //     onFinish={onFinish}
-          //   >
-          //     <Form.Item
-          //       name={"remark"}
-          //       label={"Remark"}
-          //       rules={[{ message: requiredMessage("Remark"), required: true }]}
-          //     >
-          //       <InputComponent
-          //         rows={1}
-          //         placeholder="Type your remark"
-          //         type="textarea"
-          //       />
-          //     </Form.Item>
-          //   </Form>
-          // </ModalApproveOrReject>
-        ) : null}
+        ) : //   <Form
+        //     id={"form"}
+        //     layout={"vertical"}
+        //     form={form}
+        //     onFinish={onFinish}
+        //   >
+        //     <Form.Item
+        //       name={"remark"}
+        //       label={"Remark"}
+        //       rules={[{ message: requiredMessage("Remark"), required: true }]}
+        //     >
+        //       <InputComponent
+        //         rows={1}
+        //         placeholder="Type your remark"
+        //         type="textarea"
+        //       />
+        //     </Form.Item>
+        //   </Form>
+        // </ModalApproveOrReject>
+        null}
 
         {/* Modal Retry */}
         {modalError ? (

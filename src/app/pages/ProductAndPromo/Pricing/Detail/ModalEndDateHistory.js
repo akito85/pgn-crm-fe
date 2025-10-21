@@ -14,7 +14,7 @@ const columns = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
 ) => {
   const result = [
     {
@@ -33,7 +33,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -47,7 +47,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -81,7 +81,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -94,7 +94,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
   ];
@@ -199,7 +199,7 @@ const ModalEndDateHistory = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           )}
           onSort={onSort}
         />

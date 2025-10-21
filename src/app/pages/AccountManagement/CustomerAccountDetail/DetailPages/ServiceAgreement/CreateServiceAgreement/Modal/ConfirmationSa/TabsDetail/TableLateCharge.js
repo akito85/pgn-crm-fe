@@ -1,10 +1,8 @@
-import React, {useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../../../components/TablePagination'
-import { Tooltip } from 'antd';
+import React, { useState, useEffect, useRef } from "react";
+import TablePagination from "../../../../../../../../../../components/TablePagination";
+import { Tooltip } from "antd";
 
-const TableLateCharge = ({
-  dataTableLateCharge
-}) => {
+const TableLateCharge = ({ dataTableLateCharge }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -14,11 +12,10 @@ const TableLateCharge = ({
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
 
-
   useEffect(() => {
-    setTotalElement(dataTableLateCharge?.length)
-  }, [])
-  
+    setTotalElement(dataTableLateCharge?.length);
+  }, []);
+
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
@@ -87,8 +84,8 @@ const TableLateCharge = ({
         render: (text, object, index) => index + 1,
       },
       {
-        title: 'LATE CHARGE NAME',
-        dataIndex: 'lateChargeName',
+        title: "LATE CHARGE NAME",
+        dataIndex: "lateChargeName",
         sorter: true,
         // render: (name)=>{
         //   return (
@@ -97,27 +94,27 @@ const TableLateCharge = ({
         // }
       },
       {
-        title: 'CURRENCY',
-        dataIndex: 'currency',
+        title: "CURRENCY",
+        dataIndex: "currency",
         sorter: true,
       },
       {
-        title: 'LATE CHARGE MAXIMUM AMOUNT',
-        dataIndex: 'maxAmount',
+        title: "LATE CHARGE MAXIMUM AMOUNT",
+        dataIndex: "maxAmount",
         align: "right",
         sorter: true,
       },
       {
-        title: 'LATE CHARGE RULE FORMULA',
-        dataIndex: 'formula',
+        title: "LATE CHARGE RULE FORMULA",
+        dataIndex: "formula",
         sorter: true,
       },
       {
-        title: 'DESCRIPTION',
-        dataIndex: 'description',
+        title: "DESCRIPTION",
+        dataIndex: "description",
         sorter: true,
         ellipsis: {
-          showTitle: false
+          showTitle: false,
         },
         render: (description) => (
           <Tooltip placement="topLeft" title={description}>
@@ -127,7 +124,7 @@ const TableLateCharge = ({
       },
     ];
     return result;
-  }
+  };
 
   return (
     <div>
@@ -135,7 +132,7 @@ const TableLateCharge = ({
         pageSize={pageSize}
         current={page}
         dataSource={filterDataByPage()}
-        tableScrolled={{y: 525, x: 1500 }}
+        tableScrolled={{ y: 525, x: 1500 }}
         totalData={totalElement}
         onChange={handleChangeSize}
         onSort={onSort}
@@ -146,10 +143,10 @@ const TableLateCharge = ({
           searchedColumn,
           searchText,
           handleSearch,
-        })} 
+        })}
       />
     </div>
-  )
-}
+  );
+};
 
-export default TableLateCharge
+export default TableLateCharge;

@@ -50,13 +50,13 @@ export const PRODUCT_PROMO_ELEMENTS = {
   DETAIL_PRICING_RULE: <PricingRuleDetail />,
 
   // Term Of Service
-	VIEW_TERM_OF_SERVICE: <TermOfServiceView />,
-	CREATE_TERM_OF_SERVICE: <TermOfServiceCreate />,
-	UPDATE_TERM_OF_SERVICE: <TermOfServiceUpdate />,
+  VIEW_TERM_OF_SERVICE: <TermOfServiceView />,
+  CREATE_TERM_OF_SERVICE: <TermOfServiceCreate />,
+  UPDATE_TERM_OF_SERVICE: <TermOfServiceUpdate />,
 
   // Promo Discount
   VIEW_PROMO_DISCOUNT: <PromoDiscountView />,
   CREATE_PROMO_DISCOUNT: <PromoDiscountCreateAndUpdate type={"create"} />,
-  UPDATE_PROMO_DISCOUNT: <PromoDiscountCreateAndUpdate type={"update"}/>,
+  UPDATE_PROMO_DISCOUNT: <PromoDiscountCreateAndUpdate type={"update"} />,
   DETAIL_PROMO_DISCOUNT: <PromoDiscountDetail />,
 };

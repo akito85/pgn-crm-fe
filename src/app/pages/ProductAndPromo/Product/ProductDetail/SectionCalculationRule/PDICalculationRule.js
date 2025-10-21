@@ -1,5 +1,8 @@
 import React, { Fragment, useRef, useState } from "react";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValueFE,
+} from "../../../../../../utils/getColumnSearchProps";
 import { Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
@@ -8,7 +11,11 @@ import ButtonComponent from "../../../../../../components/ButtonComponent";
 import CardComponent from "../../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../../components/DetailText";
 import moment from "moment";
-import { dateFormatting, hasValue, renderColumn } from "../../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+} from "../../../../../../utils";
 import SVGIcon from "../../../../../../assets/Icon/index";
 
 const onFilter = (dataIndex, value, record) => {
@@ -33,7 +40,7 @@ const columns = (
   searchText,
   handleSearch,
   search,
-  handleDetailHistory
+  handleDetailHistory,
 ) => {
   const result = [
     {
@@ -74,7 +81,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -110,7 +117,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -146,7 +153,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -177,7 +184,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "description",
@@ -217,7 +224,7 @@ const columns = (
       //   }
       // },
     },
-    
+
     {
       title: "ACTION",
       fixed: "right",
@@ -267,7 +274,7 @@ const PDICalculationRule = ({ data = [] }) => {
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
-    })
+    });
   };
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
@@ -297,7 +304,7 @@ const PDICalculationRule = ({ data = [] }) => {
           searchText,
           handleSearch,
           search,
-          handleDetailHistory
+          handleDetailHistory,
         )}
       />
       {/* Modal History Log */}
@@ -326,7 +333,7 @@ const PDICalculationRule = ({ data = [] }) => {
             <DetailText label="Created Date">
               {dataHistory?.createdDate
                 ? moment(dataHistory.createdDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : ""}
             </DetailText>
@@ -334,7 +341,7 @@ const PDICalculationRule = ({ data = [] }) => {
             <DetailText label="Updated Date">
               {dataHistory?.updatedDate
                 ? moment(dataHistory.updatedDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : ""}
             </DetailText>

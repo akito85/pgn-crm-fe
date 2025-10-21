@@ -9,15 +9,7 @@ import {
 } from "@ant-design/icons";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import BaseContainer from "../../../../components/BaseContainer";
-import {
-  Alert,
-  Checkbox,
-  DatePicker,
-  Form,
-  Input,
-  Spin,
-  Tooltip,
-} from "antd";
+import { Alert, Checkbox, DatePicker, Form, Input, Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import TablePagination from "../../../../components/TablePagination";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
@@ -34,7 +26,12 @@ import moment from "moment";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import { useRef } from "react";
 import SVGIcon from "../../../../assets/Icon/index";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../utils";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
@@ -42,8 +39,7 @@ import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColum
 const DataAccessHierarchyView = () => {
   const dispatch = useDispatch();
   const { data, loading } = useSelector((state) => state.data_access);
-  const { bodyError } = useSelector(state => state?.general);
-
+  const { bodyError } = useSelector((state) => state?.general);
 
   // state
   const [page, setPage] = useState(1);
@@ -62,13 +58,17 @@ const DataAccessHierarchyView = () => {
   // handle fetch
   const handleFetch = useCallback(() => {
     dispatch(
-      getDataAccessPaginate({ search: encodeURIComponent(JSON?.stringify(search)), page, pageSize, sort })
+      getDataAccessPaginate({
+        search: encodeURIComponent(JSON?.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
-
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -111,7 +111,16 @@ const DataAccessHierarchyView = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('name', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "name",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "START DATE",
@@ -127,8 +136,17 @@ const DataAccessHierarchyView = () => {
         searchText,
         handleSearch,
         false,
-        "date"),
-      render: (v) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, v, 'date', search),
+        "date",
+      ),
+      render: (v) =>
+        renderDateColumn(
+          "startDate",
+          hasValue(search["startDate"]),
+          searchText,
+          v,
+          "date",
+          search,
+        ),
     },
     {
       title: "END DATE",
@@ -144,8 +162,17 @@ const DataAccessHierarchyView = () => {
         searchText,
         handleSearch,
         false,
-        "date"),
-      render: (v) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, v, 'date', search),
+        "date",
+      ),
+      render: (v) =>
+        renderDateColumn(
+          "endDate",
+          hasValue(search["endDate"]),
+          searchText,
+          v,
+          "date",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -163,7 +190,16 @@ const DataAccessHierarchyView = () => {
         handleSearch,
         false,
       ),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -171,7 +207,7 @@ const DataAccessHierarchyView = () => {
       sorter: true,
       align: "center",
       width: 120,
-      fixed: 'right',
+      fixed: "right",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "status",
@@ -181,8 +217,16 @@ const DataAccessHierarchyView = () => {
         handleSearch,
         false,
       ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status')
-    }
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+        ),
+    },
   ];
   const routes = [
     {
@@ -200,8 +244,7 @@ const DataAccessHierarchyView = () => {
     setPageSize(pageSizeChange);
   };
 
-
-  // handle cancel 
+  // handle cancel
   const handleCancel = () => {
     form.resetFields();
     setOpenModal(false);
@@ -211,7 +254,7 @@ const DataAccessHierarchyView = () => {
   const onDuplication = async (formValue) => {
     try {
       const body = { ...formValue, id: dahId };
-      setBody(body)
+      setBody(body);
       handleCancel();
       await dispatch(dupliacateDataAccess(body))?.unwrap();
       await handleFetch()?.unwrap();
@@ -224,11 +267,14 @@ const DataAccessHierarchyView = () => {
   const onActivation = async (formValue) => {
     try {
       const endDateFormat = moment(formValue.endDate).format(
-        dateFormatting.dateCapital
+        dateFormatting.dateCapital,
       );
-      const body = { endDate: endDateFormat === 'Invalid date' ? null : endDateFormat, id: dahId };
-      setBody(body)
-      handleCancel()
+      const body = {
+        endDate: endDateFormat === "Invalid date" ? null : endDateFormat,
+        id: dahId,
+      };
+      setBody(body);
+      handleCancel();
       await dispatch(activationDataAccess(body))?.unwrap();
       await handleFetch()?.unwrap();
     } catch (error) {
@@ -236,7 +282,7 @@ const DataAccessHierarchyView = () => {
     }
   };
 
-  // handle download 
+  // handle download
   const handleDownload = () => {
     dispatch(
       downloadDataAccess({
@@ -244,9 +290,9 @@ const DataAccessHierarchyView = () => {
         pageSize,
         sort,
         search: encodeURIComponent(JSON?.stringify(search)),
-      })
+      }),
     );
-  }
+  };
 
   const onSort = (_, __, sort) => {
     const dataSort =
@@ -256,11 +302,10 @@ const DataAccessHierarchyView = () => {
     setSort(dataSort);
   };
 
-
   const itemActions = [
     // toolbar items
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           onClick={handleDownload}
@@ -271,10 +316,10 @@ const DataAccessHierarchyView = () => {
           {" "}
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={USER_ROUTES.CREATE_DATA_ACCESS}>
           <ButtonComponent
@@ -285,13 +330,13 @@ const DataAccessHierarchyView = () => {
             Create Data Access Hierarchy
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // column action
     {
-      action: 'View',
-      type: 'table',
+      action: "View",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title={"Detail"}>
@@ -304,20 +349,19 @@ const DataAccessHierarchyView = () => {
               </div>
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Activate',
-      type: 'table',
+      action: "Activate",
+      type: "table",
       render: (record, data_length) => {
         return (
           <>
-            {data_length > 3 ?
+            {data_length > 3 ? (
               <ButtonComponent
                 onClick={() => {
-                  record?.status === "DRAFT" &&
-                    setOpenModal(true);
+                  record?.status === "DRAFT" && setOpenModal(true);
                   setDahId(record.dahId);
                   form.setFieldsValue({
                     startDate:
@@ -330,24 +374,32 @@ const DataAccessHierarchyView = () => {
                         : moment(record.endDate).clone("YYYY-MM-DD "),
                   });
                   setModalType("activation");
-
                 }}
                 border={false}
-                disabled={record?.status === "ACTIVE" || record?.status === "INACTIVE"}
-
+                disabled={
+                  record?.status === "ACTIVE" || record?.status === "INACTIVE"
+                }
               >
-                <Checkbox
-                  checked={record?.status === "INACTIVE"}
-                />
+                <Checkbox checked={record?.status === "INACTIVE"} />
 
-                <span className={"text-black"}>{record?.status?.toLowerCase() === 'active' ? 'Inactivate Draft' : 'Activate Draft'}</span>
+                <span className={"text-black"}>
+                  {record?.status?.toLowerCase() === "active"
+                    ? "Inactivate Draft"
+                    : "Activate Draft"}
+                </span>
               </ButtonComponent>
-              :
-              <Tooltip title={record?.status === 'ACTIVE' ? 'Inactivate' : 'Activate'}>
-                <div className={record?.status !== "ACTIVE" ? 'cursor-not-allowed' : 'cursor-pointer'}
+            ) : (
+              <Tooltip
+                title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}
+              >
+                <div
+                  className={
+                    record?.status !== "ACTIVE"
+                      ? "cursor-not-allowed"
+                      : "cursor-pointer"
+                  }
                   onClick={() => {
-                    record?.status === "DRAFT" &&
-                      setOpenModal(true);
+                    record?.status === "DRAFT" && setOpenModal(true);
                     setDahId(record.dahId);
                     form.setFieldsValue({
                       startDate:
@@ -359,49 +411,91 @@ const DataAccessHierarchyView = () => {
                           ? null
                           : moment(record.endDate).clone("YYYY-MM-DD "),
                     });
-                    setModalType("activation")
-                  }}>
-                  <Checkbox checked={record.status === "INACTIVE"} className={record?.status !== "DRAFT" ? 'cursor-not-allowed' : 'cursor-pointer'} disabled={record?.status === "ACTIVE" || record?.status === "INACTIVE"} />
+                    setModalType("activation");
+                  }}
+                >
+                  <Checkbox
+                    checked={record.status === "INACTIVE"}
+                    className={
+                      record?.status !== "DRAFT"
+                        ? "cursor-not-allowed"
+                        : "cursor-pointer"
+                    }
+                    disabled={
+                      record?.status === "ACTIVE" ||
+                      record?.status === "INACTIVE"
+                    }
+                  />
                 </div>
               </Tooltip>
-            }
-
+            )}
           </>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Update',
-      type: 'table',
+      action: "Update",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Update">
             <NavLink
-              to={record?.status !== "INACTIVE" && USER_ROUTES.UPDATE_DATA_ACCESS}
-              state={record?.status !== "INACTIVE" && { id: record?.dahId }}
-              className={record?.status === "INACTIVE" && "cursor-not-allowed"}>
-              {data_length > 3 ?
-                <ButtonComponent
-                  icon={<SVGIcon name="IconEdit" color={record?.status === "INACTIVE" ? "#8D91A0" : "#0075bf"} width={24} className={record?.status === "INACTIVE" && "cursor-not-allowed"} />}
-                  border={false}
-                  disabled={record?.status === "INACTIVE"}>
-                  <span className={record?.status?.toLowerCase() === 'inactive' ? "text-[#8D91A0]" : "text-black"}> Update</span>
-                </ButtonComponent>
-                :
-                <SVGIcon name="IconEdit" color={record?.status === "INACTIVE" ? "#C0BEC6" : "#ACC424"} width={24} className={record?.status === "INACTIVE" && "cursor-not-allowed"} />
+              to={
+                record?.status !== "INACTIVE" && USER_ROUTES.UPDATE_DATA_ACCESS
               }
+              state={record?.status !== "INACTIVE" && { id: record?.dahId }}
+              className={record?.status === "INACTIVE" && "cursor-not-allowed"}
+            >
+              {data_length > 3 ? (
+                <ButtonComponent
+                  icon={
+                    <SVGIcon
+                      name="IconEdit"
+                      color={
+                        record?.status === "INACTIVE" ? "#8D91A0" : "#0075bf"
+                      }
+                      width={24}
+                      className={
+                        record?.status === "INACTIVE" && "cursor-not-allowed"
+                      }
+                    />
+                  }
+                  border={false}
+                  disabled={record?.status === "INACTIVE"}
+                >
+                  <span
+                    className={
+                      record?.status?.toLowerCase() === "inactive"
+                        ? "text-[#8D91A0]"
+                        : "text-black"
+                    }
+                  >
+                    {" "}
+                    Update
+                  </span>
+                </ButtonComponent>
+              ) : (
+                <SVGIcon
+                  name="IconEdit"
+                  color={record?.status === "INACTIVE" ? "#C0BEC6" : "#ACC424"}
+                  width={24}
+                  className={
+                    record?.status === "INACTIVE" && "cursor-not-allowed"
+                  }
+                />
+              )}
             </NavLink>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'duplicate',
-      type: 'table',
+      action: "duplicate",
+      type: "table",
       render: (record, data_length) => {
         return (
           <>
-            {data_length > 3 ?
+            {data_length > 3 ? (
               <ButtonComponent
                 icon={<CopyOutlined style={{ fontSize: "24px" }} />}
                 border={false}
@@ -410,28 +504,32 @@ const DataAccessHierarchyView = () => {
                   setDahId(record?.dahId);
                   form.setFieldsValue({ name: record?.name + " Copy" });
                   setModalType("duplication");
-                }}>
-                {data_length > 3 &&
-                  <span className={'text-black'}> Duplicate</span>
-
-                }
+                }}
+              >
+                {data_length > 3 && (
+                  <span className={"text-black"}> Duplicate</span>
+                )}
               </ButtonComponent>
-              :
+            ) : (
               <Tooltip title="Duplicate">
-                <div className={`cursor-pointer`}
+                <div
+                  className={`cursor-pointer`}
                   onClick={() => {
                     setOpenModal(true);
                     setDahId(record?.dahId);
                     form.setFieldsValue({ name: record?.name + " Copy" });
                     setModalType("duplication");
-                  }}>
-                  <CopyOutlined style={{ fontSize: "24px", color: "var(--primary)" }} />
+                  }}
+                >
+                  <CopyOutlined
+                    style={{ fontSize: "24px", color: "var(--primary)" }}
+                  />
                 </div>
               </Tooltip>
-            }
+            )}
           </>
-        )
-      }
+        );
+      },
     },
   ];
 
@@ -444,7 +542,7 @@ const DataAccessHierarchyView = () => {
       } else if (bodyError?.action === "DUPLICATION_DATA_ACCESS") {
         dispatch(dupliacateDataAccess(body));
       } else if (bodyError?.action === "DOWNLOAD_DATA_ACCESS_VIEW") {
-        handleDownload()
+        handleDownload();
       }
       handleFetch();
     } catch (error) {
@@ -463,7 +561,13 @@ const DataAccessHierarchyView = () => {
           <BaseContainer header={"DATA ACCESS HIERARCHY LIST"}>
             <TablePagination
               dataSource={data?.data?.result}
-              columns={[...column, ...useColumnActionPermission(['view', 'duplicate', 'update', 'activate'], itemActions)]}
+              columns={[
+                ...column,
+                ...useColumnActionPermission(
+                  ["view", "duplicate", "update", "activate"],
+                  itemActions,
+                ),
+              ]}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}

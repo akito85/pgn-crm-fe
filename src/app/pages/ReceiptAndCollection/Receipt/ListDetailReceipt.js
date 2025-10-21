@@ -84,7 +84,7 @@ const ListDetailReceipt = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       setListDataAttachment(dataAttachment);
     }
@@ -278,7 +278,7 @@ const ListDetailReceipt = () => {
               </ButtonComponent>
             </div>
             {dataAllocation?.filter(
-              (item) => hasValue(item?.allocationNumber) === false
+              (item) => hasValue(item?.allocationNumber) === false,
             )?.length > 0 && (
               <div className="flex align-middle gap-5">
                 <ButtonComponent

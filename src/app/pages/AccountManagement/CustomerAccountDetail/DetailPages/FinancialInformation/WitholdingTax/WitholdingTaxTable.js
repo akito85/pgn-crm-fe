@@ -12,7 +12,11 @@ import Highlighter from "react-highlight-words";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import { useColumnActionPermissionAccount } from "../../../../ComponentAccount/ColumnActionPermissionAccount";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../../utils";
 
 const WitholdingTaxTable = ({
   data = [],
@@ -24,11 +28,11 @@ const WitholdingTaxTable = ({
   searchText,
   searchedColumn,
   onSort = {},
-  getColumnSearchProps = () => { },
+  getColumnSearchProps = () => {},
   searchInput,
   search,
-  handleSearch = () => { },
-  access
+  handleSearch = () => {},
+  access,
 }) => {
   const [modalDetail, setModalDetail] = useState(false);
   const [dataDetail, setDataDetail] = useState("");
@@ -66,9 +70,17 @@ const WitholdingTaxTable = ({
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
-      render: (index) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, index, 'date', search)
+      render: (index) =>
+        renderDateColumn(
+          "startDate",
+          hasValue(search["startDate"]),
+          searchText,
+          index,
+          "date",
+          search,
+        ),
     },
     {
       title: "END DATE",
@@ -84,9 +96,17 @@ const WitholdingTaxTable = ({
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
-      render: (index) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, index, 'date', search)
+      render: (index) =>
+        renderDateColumn(
+          "endDate",
+          hasValue(search["endDate"]),
+          searchText,
+          index,
+          "date",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -105,9 +125,17 @@ const WitholdingTaxTable = ({
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('description', hasValue(search['description']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          hasValue(search["description"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
-  
   ];
   const itemActions = [
     // Column Action Table
@@ -129,10 +157,10 @@ const WitholdingTaxTable = ({
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
-  ]
+        );
+      },
+    },
+  ];
   return (
     <Fragment>
       <TablePagination
@@ -149,8 +177,8 @@ const WitholdingTaxTable = ({
           ...useColumnActionPermissionAccount(
             ["Activate", "View", "Update"],
             itemActions,
-            access
-          )
+            access,
+          ),
         ]}
       />
 

@@ -27,13 +27,13 @@ export const getAnnouncementList = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_ANNOUNCEMENT_LIST" })
+        validateError({ error, action: "GET_ANNOUNCEMENT_LIST" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getAnnouncementDetail = createAsyncThunk(
@@ -45,13 +45,13 @@ export const getAnnouncementDetail = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_ANNOUNCEMENT_DETAIL" })
+        validateError({ error, action: "GET_ANNOUNCEMENT_DETAIL" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const inactiveAnnouncement = createAsyncThunk(
@@ -63,17 +63,24 @@ export const inactiveAnnouncement = createAsyncThunk(
       const response = await userHttpService.activationWithRemark(url, body);
       const successBody = {
         title: "Successful",
-        description: `Your data has been ${action === "INACTIVE" ? "activated" : "inactivated"
-          }`,
+        description: `Your data has been ${
+          action === "INACTIVE" ? "activated" : "inactivated"
+        }`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), status, errorMessage(error)), action: "INACTIVE_ANNOUNCEMENT", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), status, errorMessage(error)),
+          action: "INACTIVE_ANNOUNCEMENT",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const createHtmlAnnouncement = createAsyncThunk(
@@ -89,10 +96,16 @@ export const createHtmlAnnouncement = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_HTML_ANNOUNCEMENT", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "CREATE_HTML_ANNOUNCEMENT",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const createImageAnnouncement = createAsyncThunk(
@@ -120,13 +133,14 @@ export const createImageAnnouncement = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "CREATE_IMAGE_ANNOUNCEMENT" })
+            validateError({ error, action: "CREATE_IMAGE_ANNOUNCEMENT" }),
           );
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${body.isSubmit ? "created" : "submitted"
-              }. ${message}.`,
+            description: `Your data was not ${
+              body.isSubmit ? "created" : "submitted"
+            }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -134,7 +148,7 @@ export const createImageAnnouncement = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateHtmlAnnouncement = createAsyncThunk(
@@ -159,7 +173,7 @@ export const updateHtmlAnnouncement = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "UPDATE_HTML_ANNOUNCEMENT" })
+            validateError({ error, action: "UPDATE_HTML_ANNOUNCEMENT" }),
           );
         } else {
           const errorBody = {
@@ -171,7 +185,7 @@ export const updateHtmlAnnouncement = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateImageAnnouncement = createAsyncThunk(
@@ -199,13 +213,14 @@ export const updateImageAnnouncement = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "UPDATE_IMAGE_ANNOUNCEMENT" })
+            validateError({ error, action: "UPDATE_IMAGE_ANNOUNCEMENT" }),
           );
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${body.isSubmit ? "updated" : "submitted"
-              }. ${message}.`,
+            description: `Your data was not ${
+              body.isSubmit ? "updated" : "submitted"
+            }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -213,10 +228,11 @@ export const updateImageAnnouncement = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
-export const checkAllowingFile = createAsyncThunk("CHECK_ALLOWING_FILE",
+export const checkAllowingFile = createAsyncThunk(
+  "CHECK_ALLOWING_FILE",
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/announcement/config-file`;
@@ -224,10 +240,15 @@ export const checkAllowingFile = createAsyncThunk("CHECK_ALLOWING_FILE",
       return data;
     } catch (error) {
       const message =
-        (error.response && error.response.data && error.response.data.message) ||
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
         error.message ||
         error.toString();
-      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
         const errorBody = {
@@ -238,8 +259,8 @@ export const checkAllowingFile = createAsyncThunk("CHECK_ALLOWING_FILE",
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
-)
+  },
+);
 
 export const downloadAnnouncement = createAsyncThunk(
   "DOWNLOAD_ANNOUNCEMENT",
@@ -253,13 +274,13 @@ export const downloadAnnouncement = createAsyncThunk(
       return response.data;
     } catch (response) {
       thunkAPI.dispatch(
-        validateError({ response, action: "DOWNLOAD_ANNOUNCEMENT" })
+        validateError({ response, action: "DOWNLOAD_ANNOUNCEMENT" }),
       );
       return thunkAPI.rejectWithValue(
-        response.response.data.code === 419 ? null : response.response.data
+        response.response.data.code === 419 ? null : response.response.data,
       );
     }
-  }
+  },
 );
 
 const announcementSlice = createSlice({
@@ -290,7 +311,7 @@ const announcementSlice = createSlice({
       state.loading = false;
     },
 
-    //CREATE ANNOUNCEMENT 
+    //CREATE ANNOUNCEMENT
     [createHtmlAnnouncement.pending]: (state, action) => {
       state.loading = true;
     },
@@ -302,7 +323,7 @@ const announcementSlice = createSlice({
       state.loading = false;
     },
 
-    //UPDATE ANNOUNCEMENT 
+    //UPDATE ANNOUNCEMENT
     [updateHtmlAnnouncement.pending]: (state, action) => {
       state.loading = true;
     },

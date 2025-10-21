@@ -49,7 +49,7 @@ const CronMonth = (props) => {
         setValueMonth(3);
         const valueCheck = checkMonth.reduce(
           (prev, current) => prev + `,${current}`,
-          ""
+          "",
         );
         onChangeMonth(valueCheck.slice(1));
         break;

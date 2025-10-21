@@ -29,7 +29,7 @@ const DetailDailyRate = ({ data_detail }) => {
             <DetailText label={"Requested Date"}>
               {data_detail?.approvalDetail?.requestedDate
                 ? moment(data_detail?.approvalDetail?.requestedDate).format(
-                    "DD MMM YYYY HH:mm:ss"
+                    "DD MMM YYYY HH:mm:ss",
                   )
                 : ""}
             </DetailText>

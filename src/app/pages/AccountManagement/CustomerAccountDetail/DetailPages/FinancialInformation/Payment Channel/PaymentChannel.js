@@ -27,7 +27,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { ModalError } from "../../../../../../../components/Modal/ModalPopUp";
 
-const PaymentChannel = ({access, id = 0 }) => {
+const PaymentChannel = ({ access, id = 0 }) => {
   const dispatch = useDispatch();
   const { data_paymentChannel, data_globalTypePaymentChannel, loading } =
     useSelector((state) => state.financialInformation);
@@ -53,7 +53,7 @@ const PaymentChannel = ({access, id = 0 }) => {
       // data_globalTypePaymentChannel.length > 0
     ) {
       const temp = data_globalTypePaymentChannel.filter(
-        (item) => item.id !== data_paymentChannel.paymentChannel
+        (item) => item.id !== data_paymentChannel.paymentChannel,
       );
       setOptions(temp);
       // setVaIsEnable();
@@ -76,7 +76,7 @@ const PaymentChannel = ({access, id = 0 }) => {
 
   const onFinish = (value) => {
     const temp = data_globalTypePaymentChannel.filter(
-      (item) => item.id === value?.paymentChannel
+      (item) => item.id === value?.paymentChannel,
     );
     setDataAccount(temp[0]);
     setBtnType(true);
@@ -127,7 +127,7 @@ const PaymentChannel = ({access, id = 0 }) => {
     <Fragment>
       <Spin spinning={loading}>
         <div className="flex flex-row w-full justify-end">
-          {access?.actionList?.some(action => action.name === 'Update' ) && 
+          {access?.actionList?.some((action) => action.name === "Update") && (
             <ButtonComponent
               icon={<SVGIcon name="IconEdit" color={"#FFFFFF"} width={24} />}
               type="submit"
@@ -137,7 +137,7 @@ const PaymentChannel = ({access, id = 0 }) => {
             >
               Update
             </ButtonComponent>
-          }
+          )}
         </div>
 
         <div className="text-primary text-xs font-bold uppercase mb-5">

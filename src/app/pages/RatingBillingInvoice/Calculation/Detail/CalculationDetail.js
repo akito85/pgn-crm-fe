@@ -17,7 +17,7 @@ import { getDetailCalculationJob } from "../../../../../redux/slices/rating_bill
 const CalculationDetail = () => {
   // Selector
   const { detail_calculation_job, loading } = useSelector(
-    (state) => state.rbi_calculation
+    (state) => state.rbi_calculation,
   );
 
   // Declaration

@@ -21,7 +21,7 @@ export const getPremise = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const getListAddressPremise = createAsyncThunk(
   "GET_LIST_ADDRESS_PREMISE",
@@ -33,7 +33,7 @@ export const getListAddressPremise = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const createServicePoint = createAsyncThunk(
@@ -67,7 +67,7 @@ export const createServicePoint = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const inActiveServicePoint = createAsyncThunk(
@@ -101,7 +101,7 @@ export const inActiveServicePoint = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateServicePoint = createAsyncThunk(
@@ -135,7 +135,7 @@ export const updateServicePoint = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getGlobalTypeListServicePoint = createAsyncThunk(
@@ -148,7 +148,7 @@ export const getGlobalTypeListServicePoint = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getPremiseDetail = createAsyncThunk(
@@ -161,7 +161,7 @@ export const getPremiseDetail = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const premiseSlice = createSlice({

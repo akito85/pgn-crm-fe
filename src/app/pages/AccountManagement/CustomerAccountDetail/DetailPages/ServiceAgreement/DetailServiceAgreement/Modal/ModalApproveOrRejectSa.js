@@ -1,10 +1,9 @@
-import React from 'react'
+import React from "react";
 
-
-import ModalApproveOrReject from '../../../../../../../../components/Modal/ModalApproveOrReject'
-import ButtonComponent from '../../../../../../../../components/ButtonComponent'
-import InputComponent from '../../../../../../../../components/InputComponent'
-import { Form } from 'antd'
+import ModalApproveOrReject from "../../../../../../../../components/Modal/ModalApproveOrReject";
+import ButtonComponent from "../../../../../../../../components/ButtonComponent";
+import InputComponent from "../../../../../../../../components/InputComponent";
+import { Form } from "antd";
 
 const ModalApproveOrRejectSa = ({
   isOpen,
@@ -15,7 +14,7 @@ const ModalApproveOrRejectSa = ({
   handleConfirmFooter = () => {},
   remark,
   onChange = () => {},
-  form
+  form,
 }) => {
   return (
     <div>
@@ -45,7 +44,7 @@ const ModalApproveOrRejectSa = ({
           id="saApproveRejectForm"
           form={form}
           onFinish={handleConfirmFooter}
-          layout='vertical'
+          layout="vertical"
         >
           <Form.Item
             name={"remark"}
@@ -53,7 +52,6 @@ const ModalApproveOrRejectSa = ({
             className="w-full"
             label={"Remark"}
           >
-
             <InputComponent
               rows={1}
               type="textarea"
@@ -65,7 +63,7 @@ const ModalApproveOrRejectSa = ({
         </Form>
       </ModalApproveOrReject>
     </div>
-  )
-}
+  );
+};
 
-export default ModalApproveOrRejectSa
+export default ModalApproveOrRejectSa;

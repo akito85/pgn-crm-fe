@@ -39,7 +39,7 @@ const getDetailByIdBody = async (url, id) => {
     const response = await axios.get(
       configApp.MASTER_MANAGEMENT + url,
       { id: id },
-      { headers: tokenHeader() }
+      { headers: tokenHeader() },
     );
     return response?.data;
   } catch (error) {
@@ -63,7 +63,7 @@ const downloadData = async (url) => {
       const blob = await response?.data;
       FileSaver.saveAs(blob, filename);
     } else if (errorCode(response) === 204) {
-      throw response
+      throw response;
     }
     return response;
   } catch (error) {
@@ -148,13 +148,18 @@ const uploadAttachment = async (url, body) => {
 };
 
 const checkGrantedAccessProduct = async (body) => {
-	try {
-		const response = await axios.post(configApp.USER_MANAGEMENT_SERVICE + '/v1/dbs/api/auth/check-granted-access', { pathUrl: body }, { headers: tokenHeader() });
-		return response.data;
-	} catch (error) {
-		throw error;
-	}
-}
+  try {
+    const response = await axios.post(
+      configApp.USER_MANAGEMENT_SERVICE +
+        "/v1/dbs/api/auth/check-granted-access",
+      { pathUrl: body },
+      { headers: tokenHeader() },
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
 const productPromoHttpService = {
   getAll,

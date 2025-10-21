@@ -30,10 +30,7 @@ import {
 } from "../../../../redux/slices/system_setup/globalTypes";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
-import {
-  LeftOutlined,
-  MoreOutlined,
-} from "@ant-design/icons";
+import { LeftOutlined, MoreOutlined } from "@ant-design/icons";
 import ConfirmationLayout from "./ConfirmationLayout";
 import DetailGlobalTypeValue from "./DetailGlobalTypeValue";
 import {
@@ -47,14 +44,16 @@ import { setData } from "../../../../redux/slices/data_slice";
 import InputComponent from "../../../../components/InputComponent";
 import StatusComponent from "../../../../components/StatusComponent";
 import SelectComponent from "../../../../components/SelectComponent";
-import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../redux/slices/general_slice";
 import ModalBack from "../../../../components/Modal/ModalBack";
 import { formMessageRequired, toTitleCase } from "../../../../utils/index.js";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks.js";
 import userHttpService from "../../../../redux/services/userHttpService.js";
 import TablePaginationNew from "../../../../components/TablePaginationNew.js";
 import { getColumnSearchProps } from "../../../../utils/getColumnSearchProps.js";
-
 
 const GlobalTypeForm = (props) => {
   const { type } = props;
@@ -66,7 +65,7 @@ const GlobalTypeForm = (props) => {
     global_detail,
   } = useSelector((state) => state.globalTypes);
 
-  const { bodyError: error } = useSelector(state => state?.general);
+  const { bodyError: error } = useSelector((state) => state?.general);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -95,10 +94,9 @@ const GlobalTypeForm = (props) => {
   // const [modalError, setModalError] = useState(false);
   // const [bodyError, setBodyError] = useState({});
   const [modalBack, setModalBack] = useState(false);
-  const [sortBySelected, setSortBySelected] = useState('CUSTOM_ORDER');
+  const [sortBySelected, setSortBySelected] = useState("CUSTOM_ORDER");
   const id = location?.state?.id;
-  const [payload, setPayload] = useState({})
-
+  const [payload, setPayload] = useState({});
 
   const glbValueData =
     global_detail?.data?.vwRGlobaltypeValue?.map((item) => {
@@ -130,7 +128,7 @@ const GlobalTypeForm = (props) => {
   useEffect(() => {
     if (type === "update" && dataParentAndGroup) {
       setDataParentGroup(
-        dataParentAndGroup?.filter((item) => item?.glbTypeId !== id)
+        dataParentAndGroup?.filter((item) => item?.glbTypeId !== id),
       );
     } else {
       setDataParentGroup(dataParentAndGroup);
@@ -144,7 +142,7 @@ const GlobalTypeForm = (props) => {
         sortBy: global_detail?.data?.sortByValue,
         desc: global_detail?.data?.desc,
       });
-      setSortBySelected(global_detail?.data?.sortBy)
+      setSortBySelected(global_detail?.data?.sortBy);
       setDatas(glbValueData);
     }
   }, [id, globalTypeForm, global_detail]);
@@ -173,7 +171,7 @@ const GlobalTypeForm = (props) => {
     (r) => {
       setDatas((prevState) => prevState.filter((e) => e.key !== r));
     },
-    [datas]
+    [datas],
   );
 
   // handle search
@@ -196,13 +194,12 @@ const GlobalTypeForm = (props) => {
     });
   };
 
-
   const ActionRender = (props) => {
     const {
       record,
-      handleDelete = () => { },
-      handleUpdate = () => { },
-      handleDetail = () => { },
+      handleDelete = () => {},
+      handleUpdate = () => {},
+      handleDetail = () => {},
     } = props;
     return (
       <>
@@ -271,19 +268,22 @@ const GlobalTypeForm = (props) => {
                     }
                   >
                     <span className={"text-black"}>
-                      {
-                        record?.status === "ACTIVE" ? "Inactivate" : "Activate"
-                      }</span>
+                      {record?.status === "ACTIVE" ? "Inactivate" : "Activate"}
+                    </span>
                   </ButtonComponent>
                 </Space>
               }
             >
-              <ButtonComponent icon={<MoreOutlined width={24} />} border={false} />
+              <ButtonComponent
+                icon={<MoreOutlined width={24} />}
+                border={false}
+              />
             </Popover>
             <Tooltip title="Delete">
               <span
-                className={`flex justify-center ${!record?.id ? "cursor-not-allowed" : "cursor-no-drop"
-                  }`}
+                className={`flex justify-center ${
+                  !record?.id ? "cursor-not-allowed" : "cursor-no-drop"
+                }`}
                 onClick={() => {
                   !record?.id && handleDelete();
                 }}
@@ -386,18 +386,22 @@ const GlobalTypeForm = (props) => {
       key: "parentValue",
       sorter: (a, b) => {
         const matchingEntryA = dataParentAndGroup?.find((entry) =>
-          entry.parentValue.some((item) => item.glbTypeValId === a?.parentValue)
+          entry.parentValue.some(
+            (item) => item.glbTypeValId === a?.parentValue,
+          ),
         );
         const textA =
           matchingEntryA?.parentValue.find(
-            (item) => item.glbTypeValId === a?.parentValue
+            (item) => item.glbTypeValId === a?.parentValue,
           ).text || "";
         const matchingEntryB = dataParentAndGroup?.find((entry) =>
-          entry.parentValue.some((item) => item.glbTypeValId === b?.parentValue)
+          entry.parentValue.some(
+            (item) => item.glbTypeValId === b?.parentValue,
+          ),
         );
         const textB =
           matchingEntryB?.parentValue.find(
-            (item) => item.glbTypeValId === b?.parentValue
+            (item) => item.glbTypeValId === b?.parentValue,
           ).text || "";
         return textA.localeCompare(textB);
       },
@@ -410,10 +414,10 @@ const GlobalTypeForm = (props) => {
       ),
       render: (parentValue) => {
         const matchingEntry = dataParentAndGroup?.find((entry) =>
-          entry.parentValue.some((item) => item.glbTypeValId === parentValue)
+          entry.parentValue.some((item) => item.glbTypeValId === parentValue),
         );
         const text = matchingEntry?.parentValue.find(
-          (item) => item.glbTypeValId === parentValue
+          (item) => item.glbTypeValId === parentValue,
         ).text;
         return <span>{text}</span>;
       },
@@ -464,7 +468,7 @@ const GlobalTypeForm = (props) => {
       title: "STATUS",
       dataIndex: "status",
       key: "status",
-      fixed: 'right',
+      fixed: "right",
       ...getColumnSearchProps(
         "status",
         searchInput,
@@ -472,7 +476,7 @@ const GlobalTypeForm = (props) => {
         searchText,
         handleSearch,
         false,
-        'status'
+        "status",
       ),
       render: (text) => (
         <div className={" flex justify-center"}>
@@ -504,7 +508,7 @@ const GlobalTypeForm = (props) => {
     setDisplayColumn(() =>
       columns.filter((col) => {
         return !value.includes(col.title);
-      })
+      }),
     );
     setOptionSelectedCol(value);
   };
@@ -523,7 +527,7 @@ const GlobalTypeForm = (props) => {
     return tempData.every(
       (item) =>
         item?.value.toLowerCase() !== form?.value?.toLowerCase() &&
-        item?.displayText.toLowerCase() !== form?.displayText?.toLowerCase()
+        item?.displayText.toLowerCase() !== form?.displayText?.toLowerCase(),
     );
   };
 
@@ -542,7 +546,7 @@ const GlobalTypeForm = (props) => {
       } else {
         const dataValue = { ...form, key: selectedData?.key };
         const findIndex = datas.findIndex(
-          (item) => item?.key === selectedData?.key
+          (item) => item?.key === selectedData?.key,
         );
         const item = newDatas[findIndex];
         const updatedRow = { ...item, ...dataValue };
@@ -565,7 +569,7 @@ const GlobalTypeForm = (props) => {
   const handleChangeParentGroup = (e) => {
     const parentSelected = Object.assign(
       {},
-      ...dataParentAndGroup?.filter((item) => item?.glbTypeId === e)
+      ...dataParentAndGroup?.filter((item) => item?.glbTypeId === e),
     );
     setParentValues(parentSelected?.parentValue || []);
     if (!e) {
@@ -582,8 +586,8 @@ const GlobalTypeForm = (props) => {
       parentSelected = Object.assign(
         {},
         ...dataParentAndGroup?.filter(
-          (item) => item?.glbTypeId === record.parentGroup
-        )
+          (item) => item?.glbTypeId === record.parentGroup,
+        ),
       );
     }
     setParentValues(parentSelected?.parentValue || []);
@@ -612,44 +616,51 @@ const GlobalTypeForm = (props) => {
         const { key, groupName, ...rest } = obj;
         return rest;
       });
-      if (type === 'update') {
+      if (type === "update") {
         body = {
           ...formValue,
           id: id,
           globalTypeValue: setGlobalTypeValue,
         };
-        validateValueObj = { body: body, services: userHttpService, endPoint: '/v1/dbs/api/globaltype/validate-update', type }
+        validateValueObj = {
+          body: body,
+          services: userHttpService,
+          endPoint: "/v1/dbs/api/globaltype/validate-update",
+          type,
+        };
       } else {
         body = {
           ...formValue,
           globalTypeValue: setGlobalTypeValue,
         };
-        validateValueObj = { body: body, services: userHttpService, endPoint: '/v1/dbs/api/globaltype/validate-create', type }
+        validateValueObj = {
+          body: body,
+          services: userHttpService,
+          endPoint: "/v1/dbs/api/globaltype/validate-create",
+          type,
+        };
       }
 
       setPayload({
         body: body,
-        validateValue: validateValueObj
-      })
+        validateValue: validateValueObj,
+      });
       await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
       setOpenConfirmation(true);
     } catch (error) {
-      setOpenConfirmation(false)
+      setOpenConfirmation(false);
     }
   };
 
   const handleConfirm = async () => {
     try {
-      handleCloseModalError()
+      handleCloseModalError();
       if (type === "create") {
-        await dispatch(createGlobalType(payload?.body))?.unwrap()
+        await dispatch(createGlobalType(payload?.body))?.unwrap();
       } else {
-        await dispatch(updateGlobalType(payload?.body))?.unwrap()
+        await dispatch(updateGlobalType(payload?.body))?.unwrap();
       }
-
-    } catch (error) {
-
-    }
+    } catch (error) {}
   };
 
   const handleDetail = async (id) => {
@@ -658,7 +669,7 @@ const GlobalTypeForm = (props) => {
   };
   const handleActiveOrInactive = async (record) => {
     try {
-      handleCloseModalError()
+      handleCloseModalError();
       const updatedTableData = datas.map((item) => {
         if (item.key === record.key) {
           return {
@@ -669,11 +680,13 @@ const GlobalTypeForm = (props) => {
         return item;
       });
       setDatas(updatedTableData);
-      setPayload({ id: record.id, statusData: record?.status })
-      await dispatch(inactiveGlobalType({ id: record.id, statusData: record?.status }))?.unwrap()
-      await dispatch(getDetailGlobalType(id))?.unwrap()
+      setPayload({ id: record.id, statusData: record?.status });
+      await dispatch(
+        inactiveGlobalType({ id: record.id, statusData: record?.status }),
+      )?.unwrap();
+      await dispatch(getDetailGlobalType(id))?.unwrap();
     } catch (error) {
-      handleCloseModalError()
+      handleCloseModalError();
     }
   };
 
@@ -705,11 +718,11 @@ const GlobalTypeForm = (props) => {
         if (searchedColumn === "parentValue") {
           const data = item[searchedColumn] || 0;
           const matchingEntryA = dataParentAndGroup?.find((entry) =>
-            entry.parentValue.some((item) => item.glbTypeValId === data)
+            entry.parentValue.some((item) => item.glbTypeValId === data),
           );
           const textA =
             matchingEntryA?.parentValue.find(
-              (item) => item.glbTypeValId === data
+              (item) => item.glbTypeValId === data,
             ).text || "";
           return (textA || "").toLowerCase().includes(fixSearchText);
         }
@@ -732,31 +745,30 @@ const GlobalTypeForm = (props) => {
     setOpenActivation(false);
   };
 
-
   const handleRetry = () => {
-    handleCancelTryAgain()
+    handleCancelTryAgain();
     if (error?.action === "CREATE_GLOBAL_TYPE") {
-      dispatch(createGlobalType(payload?.body))
-    } else if (error?.action === 'UPDATE_GLOBAL_TYPE') {
-      dispatch(updateGlobalType(payload?.body))
-    } else if (error?.action === 'VALIDATE_CREATE_UPDATE') {
-      dispatch(validateCreateUpdate(payload?.validateValue))
-    } else if (error?.action === 'INACTIVE_GLOBAL_TYPE') {
-      dispatch(inactiveGlobalType(payload))
-    } else if (error?.action === 'GET_DETAIL_GLOBAL_TYPE') {
-      dispatch(getDetailGlobalType(id))
+      dispatch(createGlobalType(payload?.body));
+    } else if (error?.action === "UPDATE_GLOBAL_TYPE") {
+      dispatch(updateGlobalType(payload?.body));
+    } else if (error?.action === "VALIDATE_CREATE_UPDATE") {
+      dispatch(validateCreateUpdate(payload?.validateValue));
+    } else if (error?.action === "INACTIVE_GLOBAL_TYPE") {
+      dispatch(inactiveGlobalType(payload));
+    } else if (error?.action === "GET_DETAIL_GLOBAL_TYPE") {
+      dispatch(getDetailGlobalType(id));
     } else {
-      dispatch(getParentAndGroup())
-      dispatch(getSortBy())
+      dispatch(getParentAndGroup());
+      dispatch(getSortBy());
     }
-  }
+  };
 
   // handle change sort by
   const handleChangeSortBy = (e) => {
     setSortBySelected(e);
   };
 
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
@@ -774,9 +786,11 @@ const GlobalTypeForm = (props) => {
                   },
                 ]}
               >
-                <Input allowClear disabled={type === "update"} onInput={(e) =>
-                  (e.target.value = e.target.value.trimStart())
-                } />
+                <Input
+                  allowClear
+                  disabled={type === "update"}
+                  onInput={(e) => (e.target.value = e.target.value.trimStart())}
+                />
               </Form.Item>
               <Form.Item
                 label="Sort By"
@@ -881,7 +895,7 @@ const GlobalTypeForm = (props) => {
               onSizeChanger={handleChangePage}
               // totalData={paginationTable("length")}
               tableScrolled={{ x: 1500, y: 500 }}
-            // onSort={onSort}
+              // onSort={onSort}
             />
           </BaseContainer>
           <div className="mt-[30px] flex">
@@ -937,7 +951,7 @@ const GlobalTypeForm = (props) => {
             setParentValues([]);
             globalListValue.setFields([{ name: "parentValue", errors: [] }]);
             globalListValue.resetFields();
-            setModalType('');
+            setModalType("");
             setOpenModal(false);
           }}
         >
@@ -974,15 +988,24 @@ const GlobalTypeForm = (props) => {
                     message: "Please input your Value!",
                   },
                   {
-                    pattern: /^(?:[a-zA-Z]+(?:[A-Z][a-z]*)*|[a-zA-Z]+(?:_[a-zA-Z]+)*)$/,
-                    message: 'Value must be in snake_case or camelCase!',
-                  }
-
+                    pattern:
+                      /^(?:[a-zA-Z]+(?:[A-Z][a-z]*)*|[a-zA-Z]+(?:_[a-zA-Z]+)*)$/,
+                    message: "Value must be in snake_case or camelCase!",
+                  },
                 ]}
               >
-                <Input disabled={type === 'update' && modalType === 'update_list'} />
+                <Input
+                  disabled={type === "update" && modalType === "update_list"}
+                />
               </Form.Item>
-              <Form.Item label="Order" name="order" rules={sortBySelected === 'CUSTOM_ORDER' && formMessageRequired('order')}>
+              <Form.Item
+                label="Order"
+                name="order"
+                rules={
+                  sortBySelected === "CUSTOM_ORDER" &&
+                  formMessageRequired("order")
+                }
+              >
                 <InputComponent
                   controls={false}
                   type="number"
@@ -990,7 +1013,7 @@ const GlobalTypeForm = (props) => {
                     width: "100%",
                   }}
                   onInput={(e) =>
-                    (e.target.value = e.target.value.replace(/[^\d]|^0+/g, ''))
+                    (e.target.value = e.target.value.replace(/[^\d]|^0+/g, ""))
                   }
                 />
               </Form.Item>
@@ -998,10 +1021,10 @@ const GlobalTypeForm = (props) => {
                 <SelectComponent onChange={(e) => handleChangeParentGroup(e)}>
                   {dataParentGroup?.length
                     ? dataParentGroup.map((ta, index) => (
-                      <Select.Option value={ta.glbTypeId} key={index}>
-                        {ta.groupName}
-                      </Select.Option>
-                    ))
+                        <Select.Option value={ta.glbTypeId} key={index}>
+                          {ta.groupName}
+                        </Select.Option>
+                      ))
                     : null}
                 </SelectComponent>
               </Form.Item>
@@ -1043,7 +1066,7 @@ const GlobalTypeForm = (props) => {
                     ]);
                     globalListValue.resetFields();
                     setOpenModal(false);
-                    setModalType('')
+                    setModalType("");
                   }}
                 >
                   Cancel
@@ -1096,11 +1119,11 @@ const GlobalTypeForm = (props) => {
           width={1000}
           handleCancel={() => {
             setOpenConfirmation(false);
-            setOpenDetail(false)
+            setOpenDetail(false);
           }}
           handleOk={() => {
-            setOpenConfirmation(false)
-            setOpenDetail(false)
+            setOpenConfirmation(false);
+            setOpenDetail(false);
           }}
           footer={
             <div className={"w-full flex justify-end gap-5"}>

@@ -1,9 +1,7 @@
-import React, {useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../../../components/TablePagination'
+import React, { useState, useEffect, useRef } from "react";
+import TablePagination from "../../../../../../../../../../components/TablePagination";
 
-const TableTaxImplication = ({
-  dataTaxImplication
-}) => {
+const TableTaxImplication = ({ dataTaxImplication }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -15,8 +13,8 @@ const TableTaxImplication = ({
 
   useEffect(() => {
     setTotalElement(dataTaxImplication?.length);
-  }, [])
-  
+  }, []);
+
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
@@ -85,9 +83,9 @@ const TableTaxImplication = ({
         render: (text, object, index) => index + 1,
       },
       {
-        title: 'CATEGORY',
-        dataIndex: 'category',
-        sorter:true
+        title: "CATEGORY",
+        dataIndex: "category",
+        sorter: true,
         // render: (name)=>{
         //   return (
         //     <span>{name.label}</span>
@@ -95,60 +93,56 @@ const TableTaxImplication = ({
         // }
       },
       {
-        title: 'TAX IMPLICATION NAME',
-        dataIndex: 'taxImplicationName',
-        sorter:true
+        title: "TAX IMPLICATION NAME",
+        dataIndex: "taxImplicationName",
+        sorter: true,
       },
       {
-        title: 'SERVICE TYPE',
-        dataIndex: 'serviceType',
-        sorter:true,
+        title: "SERVICE TYPE",
+        dataIndex: "serviceType",
+        sorter: true,
       },
       {
-        title: 'IMPLICATION TYPE',
-        dataIndex: 'implicationType',
-        sorter:true,
+        title: "IMPLICATION TYPE",
+        dataIndex: "implicationType",
+        sorter: true,
       },
       {
-        title: 'GUNGGUNG',
-        dataIndex: 'gunggung',
-        sorter:true,
-        render: (value)=>{
-          return (
-            <span>{value === "N" ? "No" : "Yes"}</span>
-          )
-        }
+        title: "GUNGGUNG",
+        dataIndex: "gunggung",
+        sorter: true,
+        render: (value) => {
+          return <span>{value === "N" ? "No" : "Yes"}</span>;
+        },
       },
       {
-        title: 'VAT INVOICE',
-        dataIndex: 'vatInvoiceIssuance',
-        sorter:true,
-        render: (value)=>{
-          return (
-            <span>{value === "N" ? "No" : "Yes"}</span>
-          )
-        }
+        title: "VAT INVOICE",
+        dataIndex: "vatInvoiceIssuance",
+        sorter: true,
+        render: (value) => {
+          return <span>{value === "N" ? "No" : "Yes"}</span>;
+        },
       },
       {
-        title: 'TRANSACTION CODE',
-        dataIndex: 'transactionCode',
-        sorter:true,
+        title: "TRANSACTION CODE",
+        dataIndex: "transactionCode",
+        sorter: true,
       },
       {
-        title: 'DESCRIPTION',
-        dataIndex: 'description',
-        sorter:true
+        title: "DESCRIPTION",
+        dataIndex: "description",
+        sorter: true,
       },
     ];
     return result;
-  }
+  };
   return (
     <div>
       <TablePagination
         pageSize={pageSize}
         current={page}
         dataSource={filterDataByPage()}
-        tableScrolled={{y: 525, x: 1500 }}
+        tableScrolled={{ y: 525, x: 1500 }}
         totalData={totalElement}
         onChange={handleChangeSize}
         onSort={onSort}
@@ -162,7 +156,7 @@ const TableTaxImplication = ({
         })}
       />
     </div>
-  )
-}
+  );
+};
 
-export default TableTaxImplication
+export default TableTaxImplication;

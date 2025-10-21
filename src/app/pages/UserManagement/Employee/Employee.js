@@ -1,9 +1,4 @@
-import {
-  Alert,
-  Form,
-  Spin,
-  Tooltip,
-} from "antd";
+import { Alert, Form, Spin, Tooltip } from "antd";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -40,13 +35,15 @@ import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
-import { clearBodyMessage, hideModalError } from "../../../../redux/slices/general_slice";
+import {
+  clearBodyMessage,
+  hideModalError,
+} from "../../../../redux/slices/general_slice";
 
 const Employee = () => {
   const dispatch = useDispatch();
-  const { data, loading, data_status } =
-    useSelector((state) => state.employee);
-  const { bodyError } = useSelector(state => state?.general);
+  const { data, loading, data_status } = useSelector((state) => state.employee);
+  const { bodyError } = useSelector((state) => state?.general);
   const [modalTerm, setModalTerm] = useState(false);
   const [empId, setEmpId] = useState("");
   const [page, setPage] = useState(1);
@@ -61,18 +58,22 @@ const Employee = () => {
   const [openPending, setOpenPending] = useState(false);
   const [body, setBody] = useState({});
 
-
   // handle fetch
   const handleFetch = useCallback(() => {
-    dispatch(getAllEmployeePaginate({ search: encodeURIComponent(JSON?.stringify(search)), page, pageSize, sort }));
+    dispatch(
+      getAllEmployeePaginate({
+        search: encodeURIComponent(JSON?.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
+    );
   }, [dispatch, page, pageSize, search, sort]);
 
   // use effect
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
-
-
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -97,9 +98,9 @@ const Employee = () => {
         page,
         pageSize,
         sort,
-      }))
-  }
-
+      }),
+    );
+  };
 
   // columns
   const columns = [
@@ -122,8 +123,16 @@ const Employee = () => {
         true,
       ),
       sorter: true,
-      render: (text) => renderColumn('empNumber', searchedColumn, searchText, text, false, 'input', search)
-
+      render: (text) =>
+        renderColumn(
+          "empNumber",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "FIRST NAME",
@@ -139,7 +148,16 @@ const Employee = () => {
         true,
       ),
       sorter: true,
-      render: (text) => renderColumn('firstName', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "firstName",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "LAST NAME",
@@ -155,7 +173,16 @@ const Employee = () => {
         true,
       ),
       sorter: true,
-      render: (text) => renderColumn('lastName', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "lastName",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "EMPLOYEE TYPE",
@@ -172,7 +199,16 @@ const Employee = () => {
         true,
       ),
       sorter: true,
-      render: (text) => renderColumn('empType', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "empType",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "MOBILE PHONE",
@@ -188,7 +224,16 @@ const Employee = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('phone', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "phone",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "EMAIL",
@@ -203,7 +248,16 @@ const Employee = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('email', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "email",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "JOB",
@@ -218,7 +272,16 @@ const Employee = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('jobName', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "jobName",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "POSITION",
@@ -236,7 +299,16 @@ const Employee = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('positionName', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "positionName",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "START DATE",
@@ -252,9 +324,17 @@ const Employee = () => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
-      render: (v) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, v, 'date', search),
+      render: (v) =>
+        renderDateColumn(
+          "startDate",
+          hasValue(search["startDate"]),
+          searchText,
+          v,
+          "date",
+          search,
+        ),
     },
     {
       title: "END DATE",
@@ -270,9 +350,17 @@ const Employee = () => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
-      render: (v) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, v, 'date', search),
+      render: (v) =>
+        renderDateColumn(
+          "endDate",
+          hasValue(search["endDate"]),
+          searchText,
+          v,
+          "date",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -291,7 +379,16 @@ const Employee = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -309,7 +406,16 @@ const Employee = () => {
         handleSearch,
         true,
       ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
   ];
 
@@ -344,11 +450,11 @@ const Employee = () => {
     };
 
     setBody(body);
-    handleCancel()
+    handleCancel();
     await dispatch(terminateEmployee(body))
       .unwrap()
       .then(() => {
-        handleFetch()
+        handleFetch();
       })
       .catch((e) => {
         if (hasValue(e?.data) && e?.data?.data?.length > 0) {
@@ -374,7 +480,7 @@ const Employee = () => {
   // handle retry
   const handleRetry = () => {
     try {
-      handleCancelTryAgain()
+      handleCancelTryAgain();
       if (bodyError?.action === "GET_ALL_EMPLOYEE_PAGINATE") {
         handleFetch();
       } else if (bodyError?.action === "DOWNLOAD_ACTION") {
@@ -435,7 +541,7 @@ const Employee = () => {
     // column action
     {
       action: "View",
-      type: 'table',
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title={"Detail"}>
@@ -453,7 +559,7 @@ const Employee = () => {
     },
     {
       action: "Update",
-      type: 'table',
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Update">
@@ -501,7 +607,7 @@ const Employee = () => {
     },
     {
       action: "forward",
-      type: 'table',
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title={"Forward Task"}>
@@ -548,7 +654,7 @@ const Employee = () => {
     },
     {
       action: "terminate",
-      type: 'table',
+      type: "table",
       render: (r, data_length) => {
         return (
           <Tooltip title={"Terminate"}>
@@ -611,7 +717,7 @@ const Employee = () => {
                 ...useColumnActionPermission(
                   ["forward", "view", "update", "terminate"],
                   itemActions,
-                  "view"
+                  "view",
                 ),
               ]}
               onSort={onSort}
@@ -651,7 +757,7 @@ const Employee = () => {
             layout="vertical"
             className="mt-3"
             onFinish={onFinish}
-          // onFinishFailed={onFinishFailed}
+            // onFinishFailed={onFinishFailed}
           >
             <Form.Item
               label={"Remark"}
@@ -693,16 +799,27 @@ const Employee = () => {
             <Link
               to={USER_ROUTES.FORWARD_TASK}
               state={
-              Array?.isArray(data_status?.data?.data) &&
-              { id: data_status?.data?.data[0]?.employeeCode }}>
-              <ButtonComponent type={'submit'} border={true}>Forward Task</ButtonComponent>
+                Array?.isArray(data_status?.data?.data) && {
+                  id: data_status?.data?.data[0]?.employeeCode,
+                }
+              }
+            >
+              <ButtonComponent type={"submit"} border={true}>
+                Forward Task
+              </ButtonComponent>
             </Link>
-            <ButtonComponent type={'default'} onClick={handleCloseForwardTask} border={true}>Cancel</ButtonComponent>
+            <ButtonComponent
+              type={"default"}
+              onClick={handleCloseForwardTask}
+              border={true}
+            >
+              Cancel
+            </ButtonComponent>
           </div>
         }
       >
         <PendingTaskLayout
-          typeLayout={'pending'}
+          typeLayout={"pending"}
           data={{ dataTable: data_status?.data?.data }}
         />
       </ModalCustom>

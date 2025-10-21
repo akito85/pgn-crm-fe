@@ -28,9 +28,9 @@ export const PRODUCT_PROMO_ROUTES = {
   DETAIL_PRICING_RULE: "/product-promo/pricing-rule/view",
 
   //Term Of Service
-	VIEW_TERM_OF_SERVICE:"/product-promo/tos",
-	CREATE_TERM_OF_SERVICE:"/product-promo/tos/create",
-	UPDATE_TERM_OF_SERVICE:"/product-promo/tos/update",
+  VIEW_TERM_OF_SERVICE: "/product-promo/tos",
+  CREATE_TERM_OF_SERVICE: "/product-promo/tos/create",
+  UPDATE_TERM_OF_SERVICE: "/product-promo/tos/update",
 
   // Promo Discount
   VIEW_PROMO_DISCOUNT: "/product-promo/promo-discount",

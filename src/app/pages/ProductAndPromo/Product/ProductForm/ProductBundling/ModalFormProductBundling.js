@@ -41,7 +41,7 @@ const columns = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
 ) => {
   return [
     {
@@ -65,7 +65,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) => {
         if (searchedColumn === "productName") {
@@ -109,7 +109,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) => {
         if (searchedColumn === "productTypeName") {
@@ -153,7 +153,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) => {
         if (searchedColumn === "productClassName") {
@@ -197,7 +197,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) => {
         if (searchedColumn === "serviceTypeName") {
@@ -237,7 +237,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -251,7 +251,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
   ];
@@ -261,10 +261,10 @@ const ModalFormProductBundling = ({
   typeForm = "create",
   dataObj = {},
   dataFormObj = {},
-  updateTable = () => { },
+  updateTable = () => {},
   existData = [],
   openModal = false,
-  closeModal = () => { },
+  closeModal = () => {},
   type,
   prevPage,
   idParent,
@@ -316,7 +316,7 @@ const ModalFormProductBundling = ({
           type !== "create" || prevPage !== "table-product"
             ? idParent
             : undefined,
-      })
+      }),
     );
   }, [dispatch, type, prevPage, idParent]);
 
@@ -332,7 +332,7 @@ const ModalFormProductBundling = ({
             ? moment(item.endDate).format("DD MMM YYYY")
             : "",
           key: item.id,
-        }))
+        })),
       );
     }
   }, [openModal, dataActiveProduct]);
@@ -392,7 +392,7 @@ const ModalFormProductBundling = ({
     let fixData = [];
     if (typeForm === "create") {
       const filterSelected = dataTable.filter((item) =>
-        selectedKeyDataTable.includes(item.id)
+        selectedKeyDataTable.includes(item.id),
       );
       fixData = filterSelected.map((item) => ({
         productId: item.id,
@@ -410,7 +410,7 @@ const ModalFormProductBundling = ({
           ...obj,
         };
         const index = prevState.findIndex(
-          (detail) => detail.productId === dataFormObj.productId
+          (detail) => detail.productId === dataFormObj.productId,
         );
         let temp = [...prevState];
         temp[index] = {
@@ -480,7 +480,7 @@ const ModalFormProductBundling = ({
                 searchInput,
                 searchedColumn,
                 searchText,
-                handleSearch
+                handleSearch,
               )}
               rowSelection={rowSelection}
             />
@@ -524,11 +524,11 @@ const ModalFormProductBundling = ({
                           moment(startDate) < moment(value)) ||
                           (typeForm === "update" &&
                             moment(startDate) <= moment(value)))) ||
-                        !value
+                      !value
                         ? Promise.resolve()
                         : Promise.reject(
-                          new Error("End date must before Start date")
-                        ),
+                            new Error("End date must before Start date"),
+                          ),
                   },
                 ]}
                 label="End Date"
@@ -559,7 +559,10 @@ const ModalFormProductBundling = ({
               <Form.Item
                 name={"discountValue"}
                 rules={[
-                  { message: requiredMessage("Discount Value"), required: true },
+                  {
+                    message: requiredMessage("Discount Value"),
+                    required: true,
+                  },
                 ]}
                 className={"w-full no-margin-form"}
                 label={"Discount Value"}

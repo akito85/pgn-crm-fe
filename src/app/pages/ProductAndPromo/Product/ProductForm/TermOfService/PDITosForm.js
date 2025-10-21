@@ -16,7 +16,11 @@ import TableDetailTos from "./TableDetailTos";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import Highlighter from "react-highlight-words";
 import SelectComponent from "../../../../../../components/SelectComponent";
-import { hasValue, renderColumn, requiredMessage } from "../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  requiredMessage,
+} from "../../../../../../utils";
 import { getColumnSearchPropsCriteria } from "../../columnTableCriteria";
 import SectionInfoProductDetail from "../../ProductDetail/SectionPricing/SectionInfoProductDetail";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
@@ -70,7 +74,7 @@ const columns = ({
         searchText,
         handleSearch,
         true,
-        "input"
+        "input",
       ),
       render: (text) =>
         renderColumn(
@@ -80,7 +84,7 @@ const columns = ({
           text?.label,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -100,7 +104,7 @@ const columns = ({
         searchText,
         handleSearch,
         true,
-        "input"
+        "input",
       ),
       render: (text) =>
         renderColumn(
@@ -110,7 +114,7 @@ const columns = ({
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -204,7 +208,7 @@ const PDITosForm = ({
   const [modalForm, setModalForm] = useState(false);
   const [modalDetail, setModalDetail] = useState(false);
   const [description, setDescription] = useState(false);
-  const [search, setSearch] = useState({})
+  const [search, setSearch] = useState({});
   const {
     dataListProductType = [],
     dataListProductClass = [],
@@ -212,7 +216,7 @@ const PDITosForm = ({
     dataListTos = [],
   } = useSelector((state) => state.product);
   console.log(data, "test");
-  
+
   useEffect(() => {
     if (type === "form") {
       dispatch(getTosList(dataArrayFilter));
@@ -223,13 +227,13 @@ const PDITosForm = ({
   }, [type, dispatch, dataArrayFilter]);
 
   const tempProductType = (dataListProductType || []).filter(
-    (item) => item.value === (productObj.productType || 0)
+    (item) => item.value === (productObj.productType || 0),
   );
   const tempProductClass = (dataListProductClass || []).filter(
-    (item) => item.value === (productObj.productClass || 0)
+    (item) => item.value === (productObj.productClass || 0),
   );
   const tempServiceType = (dataListServiceType || []).filter(
-    (item) => item.value === (productObj.serviceType || 0)
+    (item) => item.value === (productObj.serviceType || 0),
   );
   const dataDetailProduct = {
     productName: productObj.productName,
@@ -254,7 +258,7 @@ const PDITosForm = ({
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
-      }
+      };
     });
     setSearchedColumn(dataIndex);
   };
@@ -284,13 +288,13 @@ const PDITosForm = ({
       (record.productTosDetailDtos || []).map((item) => ({
         ...item,
         typeData: record.typeData || undefined,
-      }))
+      })),
     );
     setModalForm(true);
   };
   const handleDelete = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
   };
   const handleCancelModalDetail = () => {
@@ -315,7 +319,7 @@ const PDITosForm = ({
     if (typeForm === typeFormList[1]) {
       updateData((prevState) => {
         const index = prevState.findIndex(
-          (detail) => detail.key === selectedData.key
+          (detail) => detail.key === selectedData.key,
         );
         let temp = [...prevState];
         temp[index] = { ...temp[index], ...obj };
@@ -443,7 +447,7 @@ const PDITosForm = ({
               disabled={
                 dataTableDetail.length === 0 ||
                 dataTableDetail.some(
-                  (item) => !item.value && item.value !== 0
+                  (item) => !item.value && item.value !== 0,
                 ) ||
                 storedData
               }

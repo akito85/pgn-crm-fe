@@ -23,7 +23,7 @@ const UtilsDate = (props) => {
 
   const disabledDate = (current) => {
     // Can not select days before today and today
-    return moment().add(-1, "days") >= current
+    return moment().add(-1, "days") >= current;
   };
 
   return (

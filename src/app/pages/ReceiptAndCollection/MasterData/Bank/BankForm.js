@@ -233,7 +233,7 @@ const BankForm = ({ type }) => {
     }
     setSearchedColumn(tempSearchColumn);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -403,7 +403,7 @@ const BankForm = ({ type }) => {
           ...attachData,
           fileSize: bytesConverter(attachData.fileSize || 0),
           dataType: "exist",
-        }))
+        })),
       );
       form.setFieldsValue(formValues);
       if (
@@ -584,7 +584,7 @@ const BankForm = ({ type }) => {
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => {}
+    handleSearch = () => {},
   ) => [
     {
       title: "NO",
@@ -602,7 +602,7 @@ const BankForm = ({ type }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         searchedColumn === "contactName" ? (
@@ -632,7 +632,7 @@ const BankForm = ({ type }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         searchedColumn === "jobId" ? (
@@ -671,7 +671,7 @@ const BankForm = ({ type }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         searchedColumn === "positionId" ? (
@@ -753,7 +753,7 @@ const BankForm = ({ type }) => {
             if (record.inputType === 748) {
               return (
                 <span>{`${getCountryCodeName(
-                  record?.prefix1
+                  record?.prefix1,
                 )} ${getCountryZoneName(record?.prefix2)} - ${record.value}
                 ${
                   record.suffix ? "Ext " + record.suffix : ""
@@ -791,7 +791,7 @@ const BankForm = ({ type }) => {
                 }`}</span>
               ) : (
                 <span>{`${getCountryCodeName(
-                  record?.prefix1
+                  record?.prefix1,
                 )} ${getCountryZoneName(record?.prefix2)} - ${record.value}
                 ${
                   record.suffix ? "Ext " + record.suffix : ""
@@ -832,7 +832,7 @@ const BankForm = ({ type }) => {
         const errorBadge = errorFields.reduce(
           (current, next) =>
             item.paramValue.includes(next.name[0]) ? current + 1 : current,
-          0
+          0,
         );
         return {
           value: item.value,
@@ -927,7 +927,7 @@ const BankForm = ({ type }) => {
   };
 
   console.log(kirimBody);
-  
+
   const handleProcessModalConfirm = async () => {
     const successMessageCreate = {
       title: "Successful",
@@ -970,7 +970,7 @@ const BankForm = ({ type }) => {
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -1004,7 +1004,7 @@ const BankForm = ({ type }) => {
         .then(async () => {
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
@@ -1016,7 +1016,7 @@ const BankForm = ({ type }) => {
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -1056,7 +1056,7 @@ const BankForm = ({ type }) => {
   };
 
   console.log(data_inputType);
-  
+
   return (
     <LayoutMenu>
       <BreadCrumb routes={routes} />
@@ -1221,7 +1221,7 @@ const BankForm = ({ type }) => {
               </ButtonComponent>
               <ButtonComponent
                 type="submit"
-                onClick={() =>handleProcessModalConfirm()}
+                onClick={() => handleProcessModalConfirm()}
               >
                 Confirm
               </ButtonComponent>
@@ -1245,7 +1245,7 @@ const BankForm = ({ type }) => {
               searchInput,
               searchedColumn,
               searchText,
-              handleSearch
+              handleSearch,
             )}
             expandedRowRender={expandedRowRender}
             current={page}

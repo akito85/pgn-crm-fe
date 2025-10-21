@@ -26,7 +26,7 @@ import { useColumnActionPermission } from "../../../../components/ColumnActionPe
 const BillingPage = () => {
   // Selector
   const { data, loading, data_approval_history } = useSelector(
-    (state) => state.billing
+    (state) => state.billing,
   );
 
   // Declaration
@@ -62,7 +62,7 @@ const BillingPage = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [search, page, pageSize, sort, dispatch]);
 
@@ -157,7 +157,7 @@ const BillingPage = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -196,7 +196,7 @@ const BillingPage = () => {
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      getAllBillingPaginate({ search: reqSearch, page, pageSize, sort })
+      getAllBillingPaginate({ search: reqSearch, page, pageSize, sort }),
     );
     dispatch(getAllBillingRequestPaginate());
     dispatch(getAllBillingApprovePaginate());
@@ -318,7 +318,7 @@ const BillingPage = () => {
                 ),
                 ...useColumnActionPermission(
                   ["view", "history"],
-                  itemGrantAccess
+                  itemGrantAccess,
                 ),
               ]}
               current={page}

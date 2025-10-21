@@ -1,12 +1,12 @@
-import React from 'react'
-import { WarningOutlined } from '@ant-design/icons'
-import { ModalConfirm } from '../../../../../../../components/Modal/ModalPopUp'
-import { Alert } from 'antd'
+import React from "react";
+import { WarningOutlined } from "@ant-design/icons";
+import { ModalConfirm } from "../../../../../../../components/Modal/ModalPopUp";
+import { Alert } from "antd";
 
 const ModalDeleteDraft = ({
   modalDeleteDraft,
   handleClearDeleteDraft,
-  handleOk
+  handleOk,
 }) => {
   return (
     <ModalConfirm
@@ -16,10 +16,12 @@ const ModalDeleteDraft = ({
       handleOk={handleOk}
       useOk={true}
     >
-    {/* content section */}
+      {/* content section */}
       <div className="flex justify-center mt-5 gap-[20px]">
         <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-        <p className="text-[18px] font-bold">Are you sure you want delete it ?</p>
+        <p className="text-[18px] font-bold">
+          Are you sure you want delete it ?
+        </p>
       </div>
       {/* <div className='m-auto block w-full'>
         <Alert 
@@ -28,7 +30,7 @@ const ModalDeleteDraft = ({
         />
       </div> */}
     </ModalConfirm>
-  )
-}
+  );
+};
 
-export default ModalDeleteDraft
+export default ModalDeleteDraft;

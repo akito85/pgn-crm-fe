@@ -9,9 +9,7 @@ import BaseContainer from "../../../../components/BaseContainer";
 import { useDispatch, useSelector } from "react-redux";
 import SVGIcon from "../../../../assets/Icon/index";
 import { useEffect } from "react";
-import {
-  downloadPricing,
-} from "../../../../redux/slices/product_promo/pricing";
+import { downloadPricing } from "../../../../redux/slices/product_promo/pricing";
 import PricingTable from "./PricingTable";
 import RadioTabs from "../../../../components/RadioTabs";
 import PricingAdjustTable from "../PricingAdjustment/PricingAdjustTable";
@@ -78,7 +76,7 @@ const Pricing = () => {
       setSearchedColumnPriceAdjust("");
       setTotalElementPriceAdjust(0);
     } else {
-      dispatch(getGrantedAccessPriceAdjust("/product-promo/pricing-adjust"))
+      dispatch(getGrantedAccessPriceAdjust("/product-promo/pricing-adjust"));
       setPagePricing(1);
       setPageSizePricing(10);
       setSearchPricing({});
@@ -110,7 +108,7 @@ const Pricing = () => {
           pageSize: pageSizePricing,
           search: encodeURIComponent(JSON.stringify(searchPricing)),
           sort: sortPricing,
-        })
+        }),
       );
     } else {
       // let tempSearch = "";
@@ -129,7 +127,7 @@ const Pricing = () => {
           pageSize: pageSizePriceAdjust,
           search: encodeURIComponent(JSON.stringify(searchPriceAdjust)),
           sort: sortPriceAdjust,
-        })
+        }),
       );
     }
   };
@@ -148,7 +146,7 @@ const Pricing = () => {
           </ButtonComponent>
         ),
       },
-      (page === listSegmentedPage[0].value
+      page === listSegmentedPage[0].value
         ? {
             action: "Create",
             render: (
@@ -162,9 +160,9 @@ const Pricing = () => {
               </NavLink>
             ),
           }
-        : null),
+        : null,
     ];
-  }
+  };
 
   return (
     <LayoutMenu>

@@ -35,7 +35,7 @@ const columnAttachment = (
   previewFileAttachment = () => {},
   previewFile = () => {},
   handleShow = () => {},
-  type
+  type,
 ) => {
   const res = [
     {
@@ -54,7 +54,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -69,7 +69,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (filename) => (
         <Tooltip placement="topLeft" title={filename}>
@@ -86,7 +86,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -98,7 +98,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -111,7 +111,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (fileSize, r, i) => (
         <span>{r?.type === "new" ? fileSize : bytesConverter(fileSize)}</span>
@@ -156,7 +156,7 @@ const columnAttachment = (
   return type !== "detail"
     ? res.filter(
         (column) =>
-          column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate"
+          column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate",
       )
     : res;
 };
@@ -180,7 +180,7 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
 
   // Selector
   const { data_category_attachment, dataGlobalPropAttachment } = useSelector(
-    (state) => state.accountServiceAgreement
+    (state) => state.accountServiceAgreement,
   );
 
   // Use Effect
@@ -326,7 +326,7 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
               previewFileAttachment,
               previewFile,
               handleShow,
-              type
+              type,
             )}
             onSort={onSort}
           />

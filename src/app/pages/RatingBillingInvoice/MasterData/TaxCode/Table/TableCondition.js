@@ -22,7 +22,7 @@ export const columnsCondition = (
   showAction,
   data_condition_name,
   data_condition_operator,
-  data_condition_type
+  data_condition_type,
 ) => [
   {
     title: "NO",
@@ -41,7 +41,7 @@ export const columnsCondition = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) => {
       const itemName = data_condition_name
@@ -66,7 +66,7 @@ export const columnsCondition = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) => {
       const operatorName = data_condition_operator
@@ -91,7 +91,7 @@ export const columnsCondition = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) => {
       const dataTypeName = data_condition_type
@@ -116,7 +116,7 @@ export const columnsCondition = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text, record) => {
       const tempValue = text ? (text + "").split(".") : [];
@@ -161,7 +161,7 @@ export const columnsCondition = (
       searchText,
       handleSearch,
       true,
-      "dateCapital"
+      "dateCapital",
     ),
     render: (text) =>
       searchedColumn === "startDate" ? (
@@ -196,7 +196,7 @@ export const columnsCondition = (
       searchText,
       handleSearch,
       true,
-      "dateCapital"
+      "dateCapital",
     ),
     render: (text) =>
       searchedColumn === "endDate" ? (
@@ -230,7 +230,7 @@ export const columnsCondition = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,

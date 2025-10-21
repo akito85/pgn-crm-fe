@@ -1,5 +1,5 @@
-import {  hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
-import {  getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 
 export const columnsLoginBackground = (
   search,
@@ -9,7 +9,7 @@ export const columnsLoginBackground = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  handleInactive = () => {}
+  handleInactive = () => {},
 ) => [
   {
     title: "NO",
@@ -29,9 +29,18 @@ export const columnsLoginBackground = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
-    render: (text) => renderColumn('backgroundName', hasValue(search["backgroundName"]), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "backgroundName",
+        hasValue(search["backgroundName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "START DATE",
@@ -47,9 +56,17 @@ export const columnsLoginBackground = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
-    render: (v) => renderDateColumn('startDate', hasValue(search["startDate"]), searchText, v, 'date', search),
+    render: (v) =>
+      renderDateColumn(
+        "startDate",
+        hasValue(search["startDate"]),
+        searchText,
+        v,
+        "date",
+        search,
+      ),
   },
   {
     title: "END DATE",
@@ -65,9 +82,17 @@ export const columnsLoginBackground = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
-    render: (v) => renderDateColumn('endDate', hasValue(search["endDate"]), searchText, v, 'date', search),
+    render: (v) =>
+      renderDateColumn(
+        "endDate",
+        hasValue(search["endDate"]),
+        searchText,
+        v,
+        "date",
+        search,
+      ),
   },
   {
     title: "DESCRIPTION",
@@ -80,13 +105,22 @@ export const columnsLoginBackground = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
     },
     sorter: true,
-    render: (text) => renderColumn('description',hasValue(search["description"]), searchText, text, true, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "description",
+        hasValue(search["description"]),
+        searchText,
+        text,
+        true,
+        "input",
+        search,
+      ),
   },
   {
     title: "STATUS",
@@ -100,8 +134,17 @@ export const columnsLoginBackground = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('status', hasValue(search["status"]), searchText, text, false, 'status', search)
+    render: (text) =>
+      renderColumn(
+        "status",
+        hasValue(search["status"]),
+        searchText,
+        text,
+        false,
+        "status",
+        search,
+      ),
   },
 ];

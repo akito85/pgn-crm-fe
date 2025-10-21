@@ -15,7 +15,7 @@ const ModalApproveOrRejectBillingCycle = ({
   handleConfirm = () => {},
   onChange = () => {},
 }) => {
-  const [form] = Form.useForm()
+  const [form] = Form.useForm();
 
   return (
     <ModalApproveOrReject
@@ -24,15 +24,18 @@ const ModalApproveOrRejectBillingCycle = ({
       message={`Are you sure you want to ${approveOrReject} Billing Cycle?`}
       width={1000}
       handleCancel={() => {
-        handleCancel()
+        handleCancel();
         form.resetFields();
       }}
       footer={
         <div className={"w-full flex justify-end gap-5"}>
-          <ButtonComponent type={"default"} onClick={() => {
-            handleCancel()
-            form.resetFields();
-          }}>
+          <ButtonComponent
+            type={"default"}
+            onClick={() => {
+              handleCancel();
+              form.resetFields();
+            }}
+          >
             Cancel
           </ButtonComponent>
           <ButtonComponent
@@ -46,7 +49,12 @@ const ModalApproveOrRejectBillingCycle = ({
         </div>
       }
     >
-      <Form id="approveOrReject" form={form} layout="vertical" onFinish={handleConfirm}>
+      <Form
+        id="approveOrReject"
+        form={form}
+        layout="vertical"
+        onFinish={handleConfirm}
+      >
         <Form.Item
           name={"remark"}
           rules={[

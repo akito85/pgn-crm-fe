@@ -4,7 +4,10 @@ import { LeftOutlined } from "@ant-design/icons";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import DetailText from "../../../../../../components/DetailText";
 
-const ServicePointInformation = ({ data_serviceP = {}, handleChangeInteraction = () => {} }) => {
+const ServicePointInformation = ({
+  data_serviceP = {},
+  handleChangeInteraction = () => {},
+}) => {
   return (
     <Fragment>
       <BaseContainer header={"Service Point Information"}>
@@ -12,7 +15,9 @@ const ServicePointInformation = ({ data_serviceP = {}, handleChangeInteraction =
           <DetailText label="Service Point Name">
             {data_serviceP?.spName}
           </DetailText>
-          <DetailText label="Description">{data_serviceP?.description}</DetailText>
+          <DetailText label="Description">
+            {data_serviceP?.description}
+          </DetailText>
         </div>
       </BaseContainer>
 

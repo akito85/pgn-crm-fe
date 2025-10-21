@@ -5,8 +5,8 @@ import { useState } from "react";
 import ServicePointActivityTable from "./ServicePointActivityTable";
 
 const ServicePointActivity = () => {
-//   // const dispatch = useDispatch();
-//   const { data, data_detail, loading } = useSelector((state) => state.tos);
+  //   // const dispatch = useDispatch();
+  //   const { data, data_detail, loading } = useSelector((state) => state.tos);
   const [page, setPage] = useState(1);
   const navigate = useNavigate;
   const [pageSize, setPageSize] = useState(10);
@@ -26,13 +26,13 @@ const ServicePointActivity = () => {
   //     dispatch(getAllTosNewsPaginate({page, pageSize}))
   //     setModalInactive(false);
   // };
-  
+
   return (
-        <BaseContainer header={"ACTIVITY HISTORY LIST"}>
-          <div className={"w-full"}>
-            <ServicePointActivityTable />
-          </div>
-        </BaseContainer>
+    <BaseContainer header={"ACTIVITY HISTORY LIST"}>
+      <div className={"w-full"}>
+        <ServicePointActivityTable />
+      </div>
+    </BaseContainer>
   );
 };
 

@@ -28,7 +28,9 @@ const TaxIdentifierConfirm = ({ data = {}, filterTax = [] }) => {
         </div>
       </div>
       <div className="w-full grid grid-cols-2 gap-2">
-        <DetailText label="Start Date">{moment(data?.startDate).format("DD MMM YYYY")}</DetailText>
+        <DetailText label="Start Date">
+          {moment(data?.startDate).format("DD MMM YYYY")}
+        </DetailText>
         <DetailText label="Description">{data?.description}</DetailText>
       </div>
     </Fragment>

@@ -75,7 +75,9 @@ const sorter = (fieldSort, a, b) => {
         //     ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
         //       descimal
         //     : "";
-        return obj[fieldSort] ? (obj[fieldSort] || 0)?.toString()?.toLowerCase() : "0" ;
+        return obj[fieldSort]
+          ? (obj[fieldSort] || 0)?.toString()?.toLowerCase()
+          : "0";
       default:
         return obj[fieldSort]?.toLowerCase();
     }
@@ -96,11 +98,11 @@ const sorter = (fieldSort, a, b) => {
       case "total":
       case "totalEqvIdr":
       case "totalEqvUsd":
-        return Math.sign(parseInt(a) - parseInt(b))
+        return Math.sign(parseInt(a) - parseInt(b));
       default:
         return a.localeCompare(b);
     }
-  }
+  };
 
   return handleCompare(fa, fb);
 };
@@ -221,7 +223,7 @@ const PointOfSalesConfirmation = ({
                 () => {}, // handleDelete,
                 onFilter,
                 sorter,
-                data
+                data,
               )}
             />
           </div>

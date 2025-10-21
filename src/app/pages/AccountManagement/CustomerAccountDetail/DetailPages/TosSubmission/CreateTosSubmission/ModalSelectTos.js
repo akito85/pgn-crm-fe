@@ -81,7 +81,7 @@ const ModalSelectTos = ({
             };
           }),
         };
-      })
+      }),
     );
     setTotalElement(dataSelect?.page?.totalElements || 0);
   }, [dataSelect]);
@@ -94,7 +94,7 @@ const ModalSelectTos = ({
         pageSize,
         search,
         sort,
-      })
+      }),
     );
   }, [dispatch, idSA, page, pageSize, search, sort]);
 
@@ -118,7 +118,10 @@ const ModalSelectTos = ({
                 }
               : null,
           // value: parseInt(item?.value || ""),
-          value: typeof item?.value  === "string" ? parseInt(item?.value) : item?.value,
+          value:
+            typeof item?.value === "string"
+              ? parseInt(item?.value)
+              : item?.value,
           unit:
             item?.unitName && item?.unitId
               ? {
@@ -134,7 +137,7 @@ const ModalSelectTos = ({
                 }
               : null,
         };
-      })
+      }),
     );
     handleCancel();
   };
@@ -175,7 +178,7 @@ const ModalSelectTos = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -189,7 +192,7 @@ const ModalSelectTos = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,

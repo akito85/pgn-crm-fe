@@ -32,7 +32,7 @@ import { ModalError } from "../../../../../../../components/Modal/ModalPopUp";
 const RawMaterialSourceForm = ({ type }) => {
   // Selector
   const { loading, data_detail_history } = useSelector(
-    (state) => state.rawMaterialSource
+    (state) => state.rawMaterialSource,
   );
 
   // Declaration
@@ -77,7 +77,7 @@ const RawMaterialSourceForm = ({ type }) => {
             },
             percentage: item.percentage,
           };
-        }
+        },
       );
 
       form.setFieldsValue({
@@ -168,7 +168,7 @@ const RawMaterialSourceForm = ({ type }) => {
           services: accountManagementService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {

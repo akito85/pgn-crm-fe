@@ -79,7 +79,7 @@ const CreateReceiptForm = ({
     form.resetFields(["convertedCurrency"]);
     setDataTable([]);
     setFilteredConvertedDDL(
-      currencyDDL?.data?.filter((item) => item?.id !== e)
+      currencyDDL?.data?.filter((item) => item?.id !== e),
     );
     setRequestBodyConverted((prevState) => ({ ...prevState, fromCurrency: e }));
   };
@@ -320,7 +320,7 @@ const CreateReceiptForm = ({
               value={value}
               onChange={handleChangeAmount}
               onInput={(e) => {
-                let value = e.target.value;            
+                let value = e.target.value;
                 value = value.replace(/[^\d,]/g, "");
                 let [integer, decimal] = value.split(",");
                 integer = integer.substring(0, 12);
@@ -395,11 +395,7 @@ const CreateReceiptForm = ({
             name={"eqAmount"}
             rules={formMessageRequired("Equivalent Amount")}
           >
-            <Input
-              allowClear
-              maxLength={5}
-              disabled
-            />
+            <Input allowClear maxLength={5} disabled />
             {/* <InputComponent disabled={true} /> */}
           </Form.Item>
         </div>

@@ -53,7 +53,7 @@ export const getAllTosPaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCriteriaPaging = createAsyncThunk(
@@ -72,12 +72,12 @@ export const getCriteriaPaging = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getTosCriteria = createAsyncThunk(
   "GET_TOS_CRITERIA",
-  async (_,thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/tos/get-criteria`;
       const response = await productPromoHttpService.getAll(url);
@@ -88,12 +88,12 @@ export const getTosCriteria = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(null);
     }
-  }
+  },
 );
 
 export const getTosAttribute = createAsyncThunk(
   "GET_TOS_ATTRIBUTE",
-  async (_,thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/tos/get-attribute`;
       const response = await productPromoHttpService.getAll(url);
@@ -104,7 +104,7 @@ export const getTosAttribute = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(null);
     }
-  }
+  },
 );
 
 export const getTosDetail = createAsyncThunk(
@@ -120,7 +120,7 @@ export const getTosDetail = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const createTOS = createAsyncThunk(
@@ -151,7 +151,7 @@ export const createTOS = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const updateTOS = createAsyncThunk(
@@ -182,7 +182,7 @@ export const updateTOS = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const inactiveTos = createAsyncThunk(
@@ -217,7 +217,7 @@ export const inactiveTos = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(response);
     }
-  }
+  },
 );
 
 export const downloadTOS = createAsyncThunk(
@@ -231,13 +231,15 @@ export const downloadTOS = createAsyncThunk(
       const response = await productPromoHttpService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response , action: "DOWNLOAD_TOS", back : false }));
+      thunkAPI.dispatch(
+        validateError({ error: response, action: "DOWNLOAD_TOS", back: false }),
+      );
       if (response.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(response));
       }
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 // List Criteria
@@ -253,14 +255,14 @@ export const getBudgetList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSubDistrictList = createAsyncThunk(
@@ -274,14 +276,14 @@ export const getSubDistrictList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(null);
     }
-  }
+  },
 );
 
 export const getDistrictList = createAsyncThunk(
@@ -295,14 +297,14 @@ export const getDistrictList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(null);
     }
-  }
+  },
 );
 
 export const getCityList = createAsyncThunk(
@@ -316,14 +318,14 @@ export const getCityList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(null);
     }
-  }
+  },
 );
 
 export const getProvinceList = createAsyncThunk(
@@ -337,14 +339,14 @@ export const getProvinceList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCostCenterList = createAsyncThunk(
@@ -358,14 +360,14 @@ export const getCostCenterList = createAsyncThunk(
           value: item.Id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSorList = createAsyncThunk(
@@ -379,14 +381,14 @@ export const getSorList = createAsyncThunk(
           value: item.Id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getProductList = createAsyncThunk(
@@ -402,7 +404,7 @@ export const getProductList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getIndustrialSectorList = createAsyncThunk(
@@ -416,14 +418,14 @@ export const getIndustrialSectorList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getGsizesList = createAsyncThunk(
@@ -437,14 +439,14 @@ export const getGsizesList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCustomerSegmentList = createAsyncThunk(
@@ -458,14 +460,14 @@ export const getCustomerSegmentList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountGroupList = createAsyncThunk(
@@ -479,14 +481,14 @@ export const getAccountGroupList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(null);
     }
-  }
+  },
 );
 
 export const getAccountCategoryList = createAsyncThunk(
@@ -500,14 +502,14 @@ export const getAccountCategoryList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getServiceTypeList = createAsyncThunk(
@@ -521,14 +523,14 @@ export const getServiceTypeList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCustomerList = createAsyncThunk(
@@ -542,19 +544,19 @@ export const getCustomerList = createAsyncThunk(
           value: item.Id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSelectCriteria = createAsyncThunk(
   "GET_SELECT_CRITERIA_TOS",
-  async (_,thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/tos/get-criteria`;
       const response = await productPromoHttpService.getAll(url);
@@ -565,7 +567,7 @@ export const getSelectCriteria = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(null);
     }
-  }
+  },
 );
 
 const tosSlice = createSlice({

@@ -18,11 +18,14 @@ import {
   getConditionNameList,
   updateTaxImplicationRuleBody,
   checkStartDate,
-  getTransactionCode
+  getTransactionCode,
 } from "../../../../../../redux/slices/account_management/MasterData/tax_implication";
 import DetailText from "../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../components/BaseContainer";
-import { showModalError, showModalSuccess } from "../../../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  showModalSuccess,
+} from "../../../../../../redux/slices/general_slice";
 import {
   LeftCircleOutlined,
   LeftOutlined,
@@ -68,12 +71,15 @@ const routes = (type, id) => [
     breadcrumbName: "Detail Tax Implication",
     state: {
       id: id,
-    }
+    },
   },
   {
     path: "",
-    breadcrumbName: `${type === "update" ? "Update Tax Implication Rule" : "Create Tax Implication Rule"
-      }`,
+    breadcrumbName: `${
+      type === "update"
+        ? "Update Tax Implication Rule"
+        : "Create Tax Implication Rule"
+    }`,
   },
 ];
 
@@ -97,7 +103,7 @@ const FormTaxImplicationRule = ({ type }) => {
     dataImplicationType = [],
     conditionNameList = [],
     operationConditionList = [],
-    transactionCodeData
+    transactionCodeData,
   } = useSelector((state) => state.tax_implication);
 
   const [current, setCurrent] = useState(0);
@@ -121,15 +127,15 @@ const FormTaxImplicationRule = ({ type }) => {
   const [tempObjDetailOverride, setempObjDetailOverride] = useState({});
   const [editingKeyOverride, setEditingKeyOverride] = useState(false);
   const [modalOverrideWarning, setModalOverrideWarning] = useState(false);
-  const [modalFormTaxImpliRuleError, setModalFormTaxImpliRuleError] = useState(false);
+  const [modalFormTaxImpliRuleError, setModalFormTaxImpliRuleError] =
+    useState(false);
   const [modalSuccessCreate, setModalSuccessCreate] = useState(false);
   const [isUpdateTable, setIsUpdateTable] = useState({
     type: false,
-    item: null
+    item: null,
   });
   const isLoading = loading || loadingForm;
   const containerRef = useRef(null);
-
 
   useEffect(() => {
     dispatch(getListAppHier());
@@ -170,7 +176,7 @@ const FormTaxImplicationRule = ({ type }) => {
         criteriaName: (data_detail?.criteria || []).reduce(
           (prev, current, index) =>
             prev + `${index === 0 ? current.label : ", " + current.label} `,
-          ""
+          "",
         ),
         createdDate: data_detail?.historyLog.createdDate,
         createdBy: data_detail?.historyLog.createdBy,
@@ -190,14 +196,19 @@ const FormTaxImplicationRule = ({ type }) => {
       const obj = {
         status: data_detail_tax_implication_rule?.status,
         documentNumber: data_detail_tax_implication_rule?.documentNumber,
-        gunggung: data_detail_tax_implication_rule?.isGunggung === "Y" ? true : false,
-        vatInvoiceIssuance: data_detail_tax_implication_rule?.isVatInv === "Y" ? true : false,
+        gunggung:
+          data_detail_tax_implication_rule?.isGunggung === "Y" ? true : false,
+        vatInvoiceIssuance:
+          data_detail_tax_implication_rule?.isVatInv === "Y" ? true : false,
         approvalStatus: data_detail_tax_implication_rule?.approvalStatus,
         implicationType: data_detail_tax_implication_rule?.implicationType.id,
         transactionCode: data_detail_tax_implication_rule?.transCodeName,
         description: data_detail_tax_implication_rule?.description,
         startDate: data_detail_tax_implication_rule?.startDate
-          ? moment(data_detail_tax_implication_rule?.startDate, dateFormatting.date)
+          ? moment(
+              data_detail_tax_implication_rule?.startDate,
+              dateFormatting.date,
+            )
           : "",
         maxAmount: data_detail_tax_implication_rule?.maxAmount,
         approvalHierarchy: data_detail_tax_implication_rule?.apphierId,
@@ -215,7 +226,7 @@ const FormTaxImplicationRule = ({ type }) => {
             implicationTypeId: item.implicationType.id,
             description: item.description,
             transactionCode: item.transCodeName,
-            dataDetail: item.listRuleOverrideCondition.map(itemSecond => {
+            dataDetail: item.listRuleOverrideCondition.map((itemSecond) => {
               return {
                 id: itemSecond.id,
                 conditionName: {
@@ -230,8 +241,8 @@ const FormTaxImplicationRule = ({ type }) => {
                   title: itemSecond.operator.name,
                   value: itemSecond.operator.id,
                 },
-                value: itemSecond.value
-              }
+                value: itemSecond.value,
+              };
             }),
             // taxImplicationRuleId: item.taxImplicationRuleId,
             // name: {
@@ -248,18 +259,20 @@ const FormTaxImplicationRule = ({ type }) => {
             // },
             // value: item.value,
             typeData: "exist",
-          })
-        )
+          }),
+        ),
       );
       setListDataAttachment(
-        (data_detail_tax_implication_rule?.attachments || []).map((attachData) => ({
-          ...attachData,
-          createdDate: attachData.createdDate
-            ? moment(attachData.createdDate).format(dateFormatting.dateTime)
-            : "",
-          fileSize: bytesConverter(attachData.fileSize || 0),
-          dataType: "exist",
-        }))
+        (data_detail_tax_implication_rule?.attachments || []).map(
+          (attachData) => ({
+            ...attachData,
+            createdDate: attachData.createdDate
+              ? moment(attachData.createdDate).format(dateFormatting.dateTime)
+              : "",
+            fileSize: bytesConverter(attachData.fileSize || 0),
+            dataType: "exist",
+          }),
+        ),
       );
     }
   }, [type, id, form, data_detail_tax_implication_rule]);
@@ -272,7 +285,7 @@ const FormTaxImplicationRule = ({ type }) => {
       data_detail_draft_tax_implication_rule?.taxImplicationRuleId === id &&
       data_detail_tax_implication_rule &&
       data_detail_draft_tax_implication_rule?.taxImplicationRuleId ===
-      data_detail_tax_implication_rule?.taxImplicationRuleId
+        data_detail_tax_implication_rule?.taxImplicationRuleId
     ) {
       const obj = {
         description: data_detail_draft_tax_implication_rule.description,
@@ -293,8 +306,8 @@ const FormTaxImplicationRule = ({ type }) => {
               : "",
             fileSize: bytesConverter(attachData.fileSize || 0),
             dataType: "exist",
-          })
-        )
+          }),
+        ),
       );
     }
   }, [
@@ -331,7 +344,6 @@ const FormTaxImplicationRule = ({ type }) => {
     }
   }, [dataListAppHierDetail]);
 
-
   const handleTaxImplicationRuleInfoObj = (e, type) => {
     let result;
     switch (type) {
@@ -353,8 +365,8 @@ const FormTaxImplicationRule = ({ type }) => {
     setModalConfirm(false);
     setIsUpdateTable({
       type: false,
-      item: null
-    })
+      item: null,
+    });
   };
 
   const handleSubmitForm = (value) => {
@@ -381,23 +393,22 @@ const FormTaxImplicationRule = ({ type }) => {
   };
 
   const handleProcessModalConfirm = async () => {
-
-    const tempListOverride = listDataDetailOverride.map(item => {
+    const tempListOverride = listDataDetailOverride.map((item) => {
       return {
         id: item.id ? item.id : null,
         implicationType: item.implicationTypeId,
         transCode: item.transactionCode,
         description: item.description,
-        listRuleOverrideCondition: item.dataDetail.map(itemSecond => {
+        listRuleOverrideCondition: item.dataDetail.map((itemSecond) => {
           return {
             id: itemSecond.id ? itemSecond.id : null,
             name: itemSecond.conditionName.value,
             operator: itemSecond.operator.value,
-            value: itemSecond.value
-          }
-        })
-      }
-    })
+            value: itemSecond.value,
+          };
+        }),
+      };
+    });
 
     const body = {
       taxImplicationId: taxImplicationId,
@@ -436,7 +447,7 @@ const FormTaxImplicationRule = ({ type }) => {
             };
             const response = await accountManagementService.uploadAttachment(
               `/v1/dbs/api/tax-implication/create-taximplication-rule-attachment/${idTaxImplicationRule}`,
-              body
+              body,
             );
           }
           setModalSuccessCreate(true);
@@ -461,7 +472,7 @@ const FormTaxImplicationRule = ({ type }) => {
           const idTaxImplicationRule = data.id;
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon in filterDataAttach) {
             const element = filterDataAttach[icon];
@@ -471,15 +482,15 @@ const FormTaxImplicationRule = ({ type }) => {
             };
             const response = await accountManagementService.uploadAttachment(
               `/v1/dbs/api/tax-implication/create-taximplication-rule-attachment/${idTaxImplicationRule}`,
-              body
+              body,
             );
           }
           const successBody = {
             title: `Successful`,
-            description: `Your data has been ${typeSubmit == 'draft' ? 'updated' : 'submitted'}.`,
+            description: `Your data has been ${typeSubmit == "draft" ? "updated" : "submitted"}.`,
           };
           // setModalSuccessCreate(true);
-          dispatch(showModalSuccess(successBody))
+          dispatch(showModalSuccess(successBody));
           // setModalSuccessCreate(true);
           setLoadingForm(false);
           handleCancelModalConfirm();
@@ -524,41 +535,44 @@ const FormTaxImplicationRule = ({ type }) => {
   };
 
   const checkAllKeysHaveValue = useCallback((obj) => {
-    let emptyKeys = []
+    let emptyKeys = [];
     for (const [key, value] of Object.entries(obj)) {
       if (value === null || value === undefined || value === "") {
-        emptyKeys.push(key)
-
+        emptyKeys.push(key);
       }
     }
     return emptyKeys;
   }, []);
 
-  const errorMessage = useCallback((key) => {
-    const titleKey = (key) => {
-      if (key ==='startDate') {
-        return "Start Date"
-      } else if (key ==='documentNumber') {
-        return "Document Number"
-      } else if (key === 'implicationType') {
-        return "Implication Type"
-      } else {
-        return "Transaction Code"
-      } 
-    }
-    for (const item of key) {
+  const errorMessage = useCallback(
+    (key) => {
+      const titleKey = (key) => {
+        if (key === "startDate") {
+          return "Start Date";
+        } else if (key === "documentNumber") {
+          return "Document Number";
+        } else if (key === "implicationType") {
+          return "Implication Type";
+        } else {
+          return "Transaction Code";
+        }
+      };
+      for (const item of key) {
         form.setFields([
           {
             name: item,
             errors: [`Please input your ${titleKey(item)}!`],
           },
-        ])
+        ]);
       }
-  },[form])
+    },
+    [form],
+  );
 
   const handleButtonNext = () => {
-    const { gunggung, description, vatInvoiceIssuance, ...requiredField } = formValue;
-    const checkEmptyValues = checkAllKeysHaveValue(requiredField)
+    const { gunggung, description, vatInvoiceIssuance, ...requiredField } =
+      formValue;
+    const checkEmptyValues = checkAllKeysHaveValue(requiredField);
 
     let errorBody = {};
     switch (current) {
@@ -568,8 +582,10 @@ const FormTaxImplicationRule = ({ type }) => {
         } else {
           const body = {
             taxImplicationId: taxImplicationId,
-            startDate: moment(dataTaxImplicationRule.startDate).format(dateFormatting.dateFormal)
-          }
+            startDate: moment(dataTaxImplicationRule.startDate).format(
+              dateFormatting.dateFormal,
+            ),
+          };
           dispatch(checkStartDate(body))
             .unwrap()
             .then((res) => {
@@ -618,25 +634,26 @@ const FormTaxImplicationRule = ({ type }) => {
   for (let i = 1; i <= 7; i++) {
     dataTransactionCode.push({
       value: `0${i}`,
-      label: `0${i}`
+      label: `0${i}`,
     });
   }
 
   const handleAddItemOverride = (r) => {
-
     if (listDataDetailFormula.length === 0) {
-      setModalOverrideWarning(true)
+      setModalOverrideWarning(true);
     } else {
       const dataForm = formInfo.getFieldsValue();
       const getImplicationType = (val) => {
-        const implicationName = dataImplicationType && dataImplicationType?.filter((item) => item?.value === val)
+        const implicationName =
+          dataImplicationType &&
+          dataImplicationType?.filter((item) => item?.value === val);
         if (implicationName === undefined) {
-          return ''
+          return "";
         }
         if (implicationName.length !== 0) {
-          return implicationName[0].label
+          return implicationName[0].label;
         }
-      }
+      };
       if (editingKeyOverride) {
         const newData = {
           description: dataForm.descriptionOverride,
@@ -644,11 +661,11 @@ const FormTaxImplicationRule = ({ type }) => {
           implicationTypeId: dataForm.implicationTypeOverride,
           transactionCode: dataForm.transactionCodeOverride,
           dataDetail: listDataDetailFormula,
-        }
-        const updatedData = listDataDetailOverride.map(item =>
-          item.key === editingKeyOverride ? { ...item, ...newData } : item
+        };
+        const updatedData = listDataDetailOverride.map((item) =>
+          item.key === editingKeyOverride ? { ...item, ...newData } : item,
         );
-        setListDataDetailOverride(updatedData)
+        setListDataDetailOverride(updatedData);
       } else {
         setListDataDetailOverride((prevState) => {
           let newData = {
@@ -657,53 +674,55 @@ const FormTaxImplicationRule = ({ type }) => {
             transactionCode: r?.transactionCodeOverride,
             description: r?.descriptionOverride,
             dataDetail: listDataDetailFormula,
-            key: listDataDetailOverride.length + 1
-          }
-          return [
-            ...prevState, newData
-          ]
+            key: listDataDetailOverride.length + 1,
+          };
+          return [...prevState, newData];
         });
       }
-      setEditingKeyOverride(false)
-      setListDataDetailFormula([])
+      setEditingKeyOverride(false);
+      setListDataDetailFormula([]);
       formInfo.resetFields();
       setModalFormTaxImpliRule(false);
       setIsUpdateTable({
         type: false,
-        item: null
-      })
+        item: null,
+      });
     }
-  }
+  };
   const handleDeleteItemOverride = (idToDelete) => {
-    setListDataDetailOverride((prevData) => prevData.filter((item) => item.key !== idToDelete));
+    setListDataDetailOverride((prevData) =>
+      prevData.filter((item) => item.key !== idToDelete),
+    );
   };
 
-
   const handleUpdateItemOverride = (dataUpdate) => {
-
     setIsUpdateTable({
       type: true,
-      item: dataUpdate
-    })
+      item: dataUpdate,
+    });
     setModalFormTaxImpliRule(true);
-    setEditingKeyOverride(dataUpdate?.key)
+    setEditingKeyOverride(dataUpdate?.key);
     const getConditionId = (val) => {
-      const conditionId = conditionNameList && conditionNameList?.filter((item) => item?.label === val)
+      const conditionId =
+        conditionNameList &&
+        conditionNameList?.filter((item) => item?.label === val);
       if (conditionId.length !== 0) {
-        return conditionId[0].value
+        return conditionId[0].value;
       }
-    }
+    };
     const getOperatorId = (val) => {
-      const operatorId = operationConditionList && operationConditionList?.filter((item) => item?.label === val)
+      const operatorId =
+        operationConditionList &&
+        operationConditionList?.filter((item) => item?.label === val);
       if (operatorId.length !== 0) {
-        return operatorId[0].value
+        return operatorId[0].value;
       }
-    }
+    };
     formInfo.setFieldsValue({
       implicationTypeOverride: dataUpdate?.implicationTypeId,
       transactionCodeOverride: dataUpdate?.transactionCode,
-      descriptionOverride: dataUpdate?.description
-    })
+      descriptionOverride: dataUpdate?.description,
+    });
     const tempDetail = dataUpdate?.dataDetail.map((item) => {
       return {
         key: item.key,
@@ -719,16 +738,16 @@ const FormTaxImplicationRule = ({ type }) => {
           title: item.operator,
           value: getOperatorId(item.operator),
         },
-        value: item?.value
-      }
-    })
-    setListDataDetailFormula(tempDetail)
+        value: item?.value,
+      };
+    });
+    setListDataDetailFormula(tempDetail);
   };
   const handleOpenDate = (current) => {
     return false;
   };
 
-  console.log(dataTaxImplicationRule, ' implication trule');
+  console.log(dataTaxImplicationRule, " implication trule");
 
   const steps = () => {
     let data = [
@@ -742,18 +761,24 @@ const FormTaxImplicationRule = ({ type }) => {
                   name={"documentNumber"}
                   className={"w-full no-margin-form"}
                   rules={[
-                    { message: requiredMessage("Document Number"), required: true },
+                    {
+                      message: requiredMessage("Document Number"),
+                      required: true,
+                    },
                     {
                       pattern: /^[a-zA-Z0-9\-/\.\_" "]+$/,
-                      message: "Invalid input. Only numbers, letters, (space), (_), (-), (/), and (.)",
+                      message:
+                        "Invalid input. Only numbers, letters, (space), (_), (-), (/), and (.)",
                     },
                   ]}
                   getValueFromEvent={(e) =>
-                    handleTaxImplicationRuleInfoObj(e.target.value, "documentNumber")
+                    handleTaxImplicationRuleInfoObj(
+                      e.target.value,
+                      "documentNumber",
+                    )
                   }
                   label={"Document Number"}
                 >
-
                   <InputComponent
                     maxLength={50}
                     disabled={
@@ -767,7 +792,10 @@ const FormTaxImplicationRule = ({ type }) => {
                   className="pt-[30px]"
                   name={"vatInvoiceIssuance"}
                   getValueFromEvent={(e) =>
-                    handleTaxImplicationRuleInfoObj(e.target.checked, "vatInvoiceIssuance")
+                    handleTaxImplicationRuleInfoObj(
+                      e.target.checked,
+                      "vatInvoiceIssuance",
+                    )
                   }
                 >
                   <div className="pt-[30px]">
@@ -778,8 +806,12 @@ const FormTaxImplicationRule = ({ type }) => {
                         dataTaxImplicationRule.status === "ACTIVE"
                       }
                     >
-                      <span className="text-[14px]">VAT Invoice Issuance</span><br />
-                      <span className="text-[11px]">Check if this implication issue the value-added tax invoice (e-faktur)</span>
+                      <span className="text-[14px]">VAT Invoice Issuance</span>
+                      <br />
+                      <span className="text-[11px]">
+                        Check if this implication issue the value-added tax
+                        invoice (e-faktur)
+                      </span>
                     </Checkbox>
                   </div>
                 </Form.Item>
@@ -788,7 +820,10 @@ const FormTaxImplicationRule = ({ type }) => {
                   className="pt-[30px]"
                   name={"gunggung"}
                   getValueFromEvent={(e) =>
-                    handleTaxImplicationRuleInfoObj(e.target.checked, "gunggung")
+                    handleTaxImplicationRuleInfoObj(
+                      e.target.checked,
+                      "gunggung",
+                    )
                   }
                 >
                   <div className="pt-[30px]">
@@ -799,14 +834,21 @@ const FormTaxImplicationRule = ({ type }) => {
                         dataTaxImplicationRule.status === "ACTIVE"
                       }
                     >
-                      <span className="text-[14px]">Gunggung</span><br />
-                      <span className="text-[11px]">Check if this implication value-added tax invoice (e-faktur) is gunggung</span>
+                      <span className="text-[14px]">Gunggung</span>
+                      <br />
+                      <span className="text-[11px]">
+                        Check if this implication value-added tax invoice
+                        (e-faktur) is gunggung
+                      </span>
                     </Checkbox>
                   </div>
                 </Form.Item>
                 <Form.Item
                   rules={[
-                    { message: requiredMessage("Implication Type"), required: true },
+                    {
+                      message: requiredMessage("Implication Type"),
+                      required: true,
+                    },
                   ]}
                   label={"Implication Type"}
                   name={"implicationType"}
@@ -817,8 +859,8 @@ const FormTaxImplicationRule = ({ type }) => {
                   <SelectComponent
                     options={dataImplicationType}
                     disabled={
-                      type === "update" &&
-                      dataTaxImplicationRule.status === "ACTIVE" ||
+                      (type === "update" &&
+                        dataTaxImplicationRule.status === "ACTIVE") ||
                       listDataDetailOverride.length > 0
                     }
                   />
@@ -830,14 +872,20 @@ const FormTaxImplicationRule = ({ type }) => {
                     handleTaxImplicationRuleInfoObj(e, "transactionCode")
                   }
                   rules={[
-                    { message: requiredMessage("Transaction Code"), required: true },
+                    {
+                      message: requiredMessage("Transaction Code"),
+                      required: true,
+                    },
                   ]}
                 >
                   <SelectComponent
-                    options={transactionCodeData?.map(item => ({ label: item?.code, value: item?.id }))}
+                    options={transactionCodeData?.map((item) => ({
+                      label: item?.code,
+                      value: item?.id,
+                    }))}
                     disabled={
-                      type === "update" &&
-                      dataTaxImplicationRule.status === "ACTIVE" ||
+                      (type === "update" &&
+                        dataTaxImplicationRule.status === "ACTIVE") ||
                       listDataDetailOverride.length > 0
                     }
                   />
@@ -885,21 +933,22 @@ const FormTaxImplicationRule = ({ type }) => {
                   {"tax implication rule override"}
                 </div>
                 {/* Modal Create/Update Tax implication rule */}
-                {
-                  (dataTaxImplicationRule.status !== "ACTIVE") &&
+                {dataTaxImplicationRule.status !== "ACTIVE" && (
                   <div className="flex w-full justify-end">
                     <ButtonComponent
                       icon={<SVGIcon name="IconButtonCreate" width={24} />}
                       type="submit"
                       onClick={
                         dataTaxImplicationRule.implicationType &&
-                          dataTaxImplicationRule.transactionCode ?
-                          () => setModalFormTaxImpliRule(true) : () => setModalFormTaxImpliRuleError(true)}
+                        dataTaxImplicationRule.transactionCode
+                          ? () => setModalFormTaxImpliRule(true)
+                          : () => setModalFormTaxImpliRuleError(true)
+                      }
                     >
                       Create
                     </ButtonComponent>
                   </div>
-                }
+                )}
                 <TableTaxImplicationRuleOverride
                   data={listDataDetailOverride}
                   handleDeleteItemOverride={handleDeleteItemOverride}
@@ -918,7 +967,10 @@ const FormTaxImplicationRule = ({ type }) => {
                     storedData={storedDataInline}
                     setStoredData={setStoredDataInline}
                     type={type}
-                    dataTransactionCode={transactionCodeData?.map(item => ({ label: item?.code, value: item?.id }))}
+                    dataTransactionCode={transactionCodeData?.map((item) => ({
+                      label: item?.code,
+                      value: item?.id,
+                    }))}
                     setListDataDetailOverride={setListDataDetailOverride}
                     listDataDetailOverride={listDataDetailOverride}
                     modalFormTaxImpliRule={modalFormTaxImpliRule}
@@ -987,7 +1039,7 @@ const FormTaxImplicationRule = ({ type }) => {
       setListDataDetailCondition([]);
       setListDataDetailFormula([]);
       setSelectedHierarchy(undefined);
-      setListDataDetailOverride([])
+      setListDataDetailOverride([]);
     } else {
       form.resetFields();
       dispatch(getDetailTaxImplicationRule(id));
@@ -1202,7 +1254,7 @@ const FormTaxImplicationRule = ({ type }) => {
           </ModalCustom>
         ) : null}
 
-        {modalSuccessCreate ?
+        {modalSuccessCreate ? (
           <Modal
             open={modalSuccessCreate}
             onCancel={() => setModalSuccessCreate(false)}
@@ -1218,9 +1270,7 @@ const FormTaxImplicationRule = ({ type }) => {
                   to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_TAX_IMPLICATION}
                   state={{ id: taxImplicationId }}
                 >
-                  <ButtonComponent type="submit">
-                    OK
-                  </ButtonComponent>
+                  <ButtonComponent type="submit">OK</ButtonComponent>
                 </Link>
               </div>
             }
@@ -1231,11 +1281,11 @@ const FormTaxImplicationRule = ({ type }) => {
                   <SVGIcon name="IconSuccess" width={48} />
                   <p className="text-[18px] font-bold">Successful</p>
                 </div>
-                <p className="pl-[70px]">{`Your data has been ${typeSubmit == 'draft' ? 'created' : 'submitted'}.`}</p>
+                <p className="pl-[70px]">{`Your data has been ${typeSubmit == "draft" ? "created" : "submitted"}.`}</p>
               </div>
             </div>
-          </Modal> : null
-        }
+          </Modal>
+        ) : null}
 
         {/* Modal Back */}
         <ModalBack
@@ -1270,7 +1320,10 @@ const FormTaxImplicationRule = ({ type }) => {
               {IconModal.icon_error_default}
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">You can't create Tax Implication Rule Override. Please fill out the Implication Type and Transaction Code field first.</p>
+            <p className="pl-[70px]">
+              You can't create Tax Implication Rule Override. Please fill out
+              the Implication Type and Transaction Code field first.
+            </p>
           </div>
         </ModalError>
 
@@ -1286,14 +1339,15 @@ const FormTaxImplicationRule = ({ type }) => {
               {IconModal.icon_error_default}
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${type === "update" ? "updated" : "created"
-              }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              type === "update" ? "updated" : "created"
+            }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
       </Spin>
     </LayoutMenu>
-  )
-}
+  );
+};
 
-export default FormTaxImplicationRule
+export default FormTaxImplicationRule;

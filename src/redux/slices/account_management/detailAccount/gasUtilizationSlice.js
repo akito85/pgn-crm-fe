@@ -13,7 +13,7 @@ const initialState = {
   ddlUtilizationName: [],
 };
 
-// Get list pagination address 
+// Get list pagination address
 export const getListGasUtilizationHistory = createAsyncThunk(
   "GET_LIST_GAS_UTILIZATION",
   async ({ id, page, pageSize, search, sort }, thunkAPI) => {
@@ -25,13 +25,19 @@ export const getListGasUtilizationHistory = createAsyncThunk(
       const response = await accountManagementService.getPagination(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_LIST_GAS_UTILIZATION", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_LIST_GAS_UTILIZATION",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
-// Get list pagination address 
+// Get list pagination address
 export const getCurrentGasUtilization = createAsyncThunk(
   "GET_CURRENT_GAS_UTILIZATION",
   async ({ id }, thunkAPI) => {
@@ -40,13 +46,19 @@ export const getCurrentGasUtilization = createAsyncThunk(
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_CURRENT_GAS_UTILIZATION", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_CURRENT_GAS_UTILIZATION",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
-// Get list pagination address 
+// Get list pagination address
 export const getDetailGasUtilization = createAsyncThunk(
   "GET_DETAIL_GAS_UTILIZATION",
   async ({ id }, thunkAPI) => {
@@ -55,17 +67,22 @@ export const getDetailGasUtilization = createAsyncThunk(
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_DETAIL_GAS_UTILIZATION", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_DETAIL_GAS_UTILIZATION",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
-
 
 // Create Gas Utilization
 export const createUpdateGasUtilization = createAsyncThunk(
   "CREATE_UPDATE_EQUIPMENT",
-  async (body , thunkAPI) => {
+  async (body, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/account-detail/gas-utilization/create-update`;
       const response = await accountManagementService.createData(url, body);
@@ -82,13 +99,12 @@ export const createUpdateGasUtilization = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_UPDATE_EQUIPMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
-
 
 // Get Ddl Fuel Type Equipment
 export const getDdlUtilizationName = createAsyncThunk(
@@ -108,11 +124,11 @@ export const getDdlUtilizationName = createAsyncThunk(
           error: error,
           action: "GET_DDL_UTILIZATION_NAME",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Delete
@@ -135,11 +151,11 @@ export const deleteGasUtilization = createAsyncThunk(
           error: error,
           action: "DELETE_GAS_UTILIZATION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const accountGasUtilizationSlice = createSlice({
@@ -157,7 +173,7 @@ const accountGasUtilizationSlice = createSlice({
       state.data = action.payload;
       state.loading = false;
     },
-    
+
     // Get Current
     [getCurrentGasUtilization.pending]: (state, action) => {
       state.loading = true;
@@ -169,7 +185,7 @@ const accountGasUtilizationSlice = createSlice({
       state.data_current = action.payload;
       state.loading = false;
     },
-    
+
     // Get Detail Gas Utilization History
     [getDetailGasUtilization.pending]: (state, action) => {
       state.loading = true;
@@ -215,7 +231,7 @@ const accountGasUtilizationSlice = createSlice({
     [deleteGasUtilization.fulfilled]: (state, action) => {
       state.loading = false;
     },
-  }
+  },
 });
 
 const { reducer } = accountGasUtilizationSlice;

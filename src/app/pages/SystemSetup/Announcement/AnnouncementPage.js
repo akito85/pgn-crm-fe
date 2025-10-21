@@ -24,9 +24,9 @@ import Toolbar from "../../../../components/Toolbar";
 const AnnouncementPage = () => {
   // Selector
   const { loading, data_Announcement } = useSelector(
-    (state) => state.announcement
+    (state) => state.announcement,
   );
-  const { bodyError } = useSelector(state => state?.general)
+  const { bodyError } = useSelector((state) => state?.general);
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -55,15 +55,13 @@ const AnnouncementPage = () => {
     },
   ];
 
-
   const handleFetch = useCallback(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(getAnnouncementList({ search: reqSearch, page, pageSize, sort }));
   }, [dispatch, page, pageSize, search, sort]);
 
-
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
 
   const onSort = (_, __, sort) => {
@@ -98,12 +96,14 @@ const AnnouncementPage = () => {
   const handleRetry = () => {
     try {
       handleCancelTryAgain();
-      if (bodyError?.action === 'INACTIVE_ANNOUNCEMENT') {
-        dispatch(inactiveAnnouncement({ body: body?.body, action: body?.action }))
-      } else if (bodyError?.action === 'DOWNLOAD_ANNOUNCEMENT') {
-        handleDownload()
+      if (bodyError?.action === "INACTIVE_ANNOUNCEMENT") {
+        dispatch(
+          inactiveAnnouncement({ body: body?.body, action: body?.action }),
+        );
+      } else if (bodyError?.action === "DOWNLOAD_ANNOUNCEMENT") {
+        handleDownload();
       }
-      handleFetch()
+      handleFetch();
     } catch (error) {
       handleFetch();
     }
@@ -126,8 +126,10 @@ const AnnouncementPage = () => {
         id: chooseId?.announcementId,
         remark: e?.remark,
       };
-      setBody({ body: body, action: chooseId?.status })
-      await dispatch(inactiveAnnouncement({ body: body, action: chooseId?.status }))?.unwrap()
+      setBody({ body: body, action: chooseId?.status });
+      await dispatch(
+        inactiveAnnouncement({ body: body, action: chooseId?.status }),
+      )?.unwrap();
       await handleFetch()?.unwrap();
       handleClear();
       handleCancel();
@@ -144,7 +146,7 @@ const AnnouncementPage = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -176,7 +178,7 @@ const AnnouncementPage = () => {
     },
     {
       action: "View",
-      type: 'table',
+      type: "table",
       render: (record) => (
         <Link
           to={SYSTEM_SETUP_ROUTES.DETAIL_ANNOUNCEMENT}
@@ -192,7 +194,7 @@ const AnnouncementPage = () => {
     },
     {
       action: "Update",
-      type: 'table',
+      type: "table",
       render: (record) => (
         <Tooltip title="Update">
           {record.status === "ACTIVE" ? (
@@ -223,7 +225,7 @@ const AnnouncementPage = () => {
     },
     {
       action: "Activate",
-      type: 'table',
+      type: "table",
       render: (record) => (
         <Tooltip title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}>
           <div className="pt-1">
@@ -239,16 +241,15 @@ const AnnouncementPage = () => {
 
   const columnAction = useColumnActionPermission(
     ["view", "update", "activate"],
-    itemActions
+    itemActions,
   );
 
-
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <Toolbar items={itemActions}/>
+        <Toolbar items={itemActions} />
         <BaseContainer header={"ANNOUNCEMENT LIST"}>
           <div className={"w-full"}>
             <TablePagination

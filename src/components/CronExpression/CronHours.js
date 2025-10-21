@@ -24,7 +24,7 @@ const CronHours = (props) => {
         setValueHours(3);
         const valueCheck = checkHours.reduce(
           (prev, current) => prev + `,${current}`,
-          ""
+          "",
         );
         onChangeHours(valueCheck.slice(1));
         break;

@@ -1,16 +1,18 @@
 import { lazy } from "react";
 
-const CustomerReport = lazy(() =>
-  import("../../app/pages/Report/Customer/CustomerReportList")
+const CustomerReport = lazy(
+  () => import("../../app/pages/Report/Customer/CustomerReportList"),
 );
-const CustomerAggrementReport = lazy(() =>
-  import("../../app/pages/Report/CustomerAgreement/CustomerAgreementReport")
+const CustomerAggrementReport = lazy(
+  () =>
+    import("../../app/pages/Report/CustomerAgreement/CustomerAgreementReport"),
 );
-const CustomerAssetReport = lazy(() =>
-  import("../../app/pages/Report/CustomerAsset/CustomerAssetReport")
+const CustomerAssetReport = lazy(
+  () => import("../../app/pages/Report/CustomerAsset/CustomerAssetReport"),
 );
-const CustomerWarrantyReport = lazy(() =>
-  import("../../app/pages/Report/CustomerWarranty/CustomerWarrantyReport")
+const CustomerWarrantyReport = lazy(
+  () =>
+    import("../../app/pages/Report/CustomerWarranty/CustomerWarrantyReport"),
 );
 
 const REPORT_ELEMENTS = {

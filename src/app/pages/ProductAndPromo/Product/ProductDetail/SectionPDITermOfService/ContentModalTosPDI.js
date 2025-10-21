@@ -1,12 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import TablePagination from "../../../../../../components/TablePagination";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValueFE,
+} from "../../../../../../utils/getColumnSearchProps";
 import CardComponent from "../../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../../components/DetailText";
 import Highlighter from "react-highlight-words";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import moment from "moment";
-import { dateFormatting, hasValue, renderColumn } from "../../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+} from "../../../../../../utils";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -42,7 +49,9 @@ const columns = (
       title: "ATTRIBUTE",
       width: 240,
       dataIndex: "attributeName",
-      filteredValue: search?.["attributeName"] ? [search?.["attributeName"]] : null,
+      filteredValue: search?.["attributeName"]
+        ? [search?.["attributeName"]]
+        : null,
       // onFilter: (value, record) => onFilter("attributeName", value, record),
       sorter: (a, b) => sorter("attributeName", a, b),
       // ...getColumnSearchPropsPaging(
@@ -70,7 +79,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -98,7 +107,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "value",
@@ -148,7 +157,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "unit",
@@ -173,7 +182,7 @@ const columns = (
         searchText,
         handleSearch,
         true,
-        "input"
+        "input",
       ),
       render: (text) =>
         renderColumn(
@@ -183,7 +192,7 @@ const columns = (
           text?.label,
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "fromItem",
@@ -231,7 +240,7 @@ const ContentModalTosPDI = ({ data = [], dataObj = {} }) => {
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
-    })
+    });
   };
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
@@ -261,7 +270,7 @@ const ContentModalTosPDI = ({ data = [], dataObj = {} }) => {
           searchedColumn,
           searchText,
           handleSearch,
-          search
+          search,
         )}
       />
       <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>

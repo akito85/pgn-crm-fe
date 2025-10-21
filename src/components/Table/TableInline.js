@@ -96,7 +96,13 @@ const EditableCell = ({
           />
         );
       case "number":
-        return <InputNumber type={"number"} style={{ width: "100%" }} controls={false} />;
+        return (
+          <InputNumber
+            type={"number"}
+            style={{ width: "100%" }}
+            controls={false}
+          />
+        );
       case "select":
         return (
           <Select onChange={onCellClicked}>
@@ -122,7 +128,11 @@ const EditableCell = ({
         );
       case "date":
         return (
-          <DatePicker format={"YYYY-MM-DD"} disabledDate={handleDisableDate} style={{ width: "100%" }} />
+          <DatePicker
+            format={"YYYY-MM-DD"}
+            disabledDate={handleDisableDate}
+            style={{ width: "100%" }}
+          />
         );
       case "input_password":
         return <Input type={showPassword[key] ? "password" : "text"} />;
@@ -156,7 +166,7 @@ const EditableCell = ({
           }}
           valuePropName={inputType === "checkbox" ? "checked" : "value"}
           rules={inputType !== "checkbox" ? rules() : undefined}
-          className={'w-full'}
+          className={"w-full"}
         >
           {inputNode}
         </Form.Item>
@@ -182,8 +192,8 @@ const TableInline = (props) => {
     action,
     useSelect = false,
     usePagination = false,
-    onChangePage = () => { },
-    onSizeChanger = () => { },
+    onChangePage = () => {},
+    onSizeChanger = () => {},
     pageSize,
     current,
     totalData,
@@ -201,10 +211,10 @@ const TableInline = (props) => {
   useEffect(() => {
     if (mode === "update") {
       setData(
-        tableData?.map((row, index) => ({ ...row, key: index.toString() }))
+        tableData?.map((row, index) => ({ ...row, key: index.toString() })),
       );
     } else {
-      setData(tableData)
+      setData(tableData);
     }
   }, [mode, tableData]);
   const edit = (record, field) => {
@@ -447,8 +457,8 @@ const TableInline = (props) => {
                     required: required,
                     disableDate,
                   }),
-                }
-              })
+                };
+              }),
             )}
             rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
             components={{
@@ -459,7 +469,6 @@ const TableInline = (props) => {
             scroll={scrollTable}
             tableLayout="fixed"
             bordered
-
           />
         </Form>
       </div>

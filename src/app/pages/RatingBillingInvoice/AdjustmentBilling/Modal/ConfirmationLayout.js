@@ -85,7 +85,7 @@ const ConfirmationLayout = ({
               data={dataInvoice}
               type={"detail"}
             />
-            
+
             <p className="text-primary text-xs font-bold uppercase pt-[30px]">
               {"ADJUSTMENT BILLING INFORMATION"}
             </p>
@@ -120,7 +120,7 @@ const ConfirmationLayout = ({
               disableSelect={true}
               approvalName={
                 (dataOption || []).filter(
-                  (data) => data.value === selectedHierarchy
+                  (data) => data.value === selectedHierarchy,
                 )?.[0].name || ""
               }
               dataTable={listDataAppHierDetail}
@@ -196,7 +196,7 @@ const ConfirmationLayout = ({
     .map((a) => a.adjustmentAmount);
   const sumIDR = dataIDR.reduce(
     (accumulator, currentValue) => accumulator + currentValue,
-    0
+    0,
   );
 
   // Sum Total Adjustment USD
@@ -205,7 +205,7 @@ const ConfirmationLayout = ({
     .map((a) => a.adjustmentAmount);
   const sumUSD = dataUSD.reduce(
     (accumulator, currentValue) => accumulator + currentValue,
-    0
+    0,
   );
 
   return (

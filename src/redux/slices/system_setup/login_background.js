@@ -33,13 +33,13 @@ export const getPagingBackground = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_PAGING_LOGIN_BACKGROUND" })
+        validateError({ error, action: "GET_PAGING_LOGIN_BACKGROUND" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const inactiveBackground = createAsyncThunk(
@@ -67,7 +67,7 @@ export const inactiveBackground = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "INACTIVE_BACKGROUND" })
+            validateError({ error, action: "INACTIVE_BACKGROUND" }),
           );
         } else {
           const errorBody = {
@@ -82,7 +82,7 @@ export const inactiveBackground = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getDetailBackground = createAsyncThunk(
@@ -110,7 +110,7 @@ export const getDetailBackground = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const createBackground = createAsyncThunk(
@@ -126,10 +126,16 @@ export const createBackground = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(error, 'created', errorMessage(error)), action:"CREATE_BACKGROUND", back : false}))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(error, "created", errorMessage(error)),
+          action: "CREATE_BACKGROUND",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const updateBackground = createAsyncThunk(
@@ -145,10 +151,16 @@ export const updateBackground = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(error, 'updated', errorMessage(error)), action: "UPDATE_BACKGROUND", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(error, "updated", errorMessage(error)),
+          action: "UPDATE_BACKGROUND",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const downloadLoginBackground = createAsyncThunk(
@@ -167,11 +179,11 @@ export const downloadLoginBackground = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_LOGIN_BACKGROUND",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // check login backgroun on login page
@@ -188,11 +200,11 @@ export const checkLoginBackground = createAsyncThunk(
           error: error,
           action: "CHECK_LOGIN_BACKGROUN",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const loginBackgroundSlice = createSlice({

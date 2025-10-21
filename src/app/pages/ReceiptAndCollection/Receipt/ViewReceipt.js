@@ -17,9 +17,7 @@ import { columnsReceipt } from "./ColumnReceiptView";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 import { Link, NavLink } from "react-router-dom";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
-import {
-  ModalConfirm,
-} from "../../../../components/Modal/ModalPopUp";
+import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import { DownloadOutlined, WarningOutlined } from "@ant-design/icons";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import Toolbar from "../../../../components/Toolbar";
@@ -68,7 +66,7 @@ const ViewReceipt = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
@@ -87,16 +85,19 @@ const ViewReceipt = () => {
         setPage(1);
       }
 
-      if (hasValue(selectedKeys[0]) && (dataIndex === 'isMisc' || dataIndex === 'isReconciled')) {
-        if (selectedKeys[0]?.toLowerCase() === 'true') {
+      if (
+        hasValue(selectedKeys[0]) &&
+        (dataIndex === "isMisc" || dataIndex === "isReconciled")
+      ) {
+        if (selectedKeys[0]?.toLowerCase() === "true") {
           changeSelectedKeys = [true];
-        } else if (selectedKeys[0]?.toLowerCase() === 'false') {
-          changeSelectedKeys = [false]
+        } else if (selectedKeys[0]?.toLowerCase() === "false") {
+          changeSelectedKeys = [false];
         } else {
-          changeSelectedKeys = selectedKeys[0]
+          changeSelectedKeys = selectedKeys[0];
         }
       } else {
-        changeSelectedKeys = selectedKeys
+        changeSelectedKeys = selectedKeys;
       }
       return {
         ...prevState,
@@ -159,7 +160,6 @@ const ViewReceipt = () => {
       setOpenModalApproval(true);
     } catch (error) {
       setOpenModalApproval(false);
-
     }
   };
 
@@ -174,7 +174,7 @@ const ViewReceipt = () => {
     dispatch(deleteReceipt({ id: id, appHierId: appHierId }));
     const searchRequest = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      getPaginateReceipt({ search: searchRequest, sort, page, pageSize })
+      getPaginateReceipt({ search: searchRequest, sort, page, pageSize }),
     );
     setOpenModalDelete(false);
     setRecordSelected({});
@@ -193,7 +193,7 @@ const ViewReceipt = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -344,7 +344,6 @@ const ViewReceipt = () => {
       action: "Reverse",
       type: "table",
       render: (r, data_length) => {
-
         return (
           <Tooltip title={"Reverse"}>
             <ButtonComponent
@@ -365,7 +364,6 @@ const ViewReceipt = () => {
       action: "Refund",
       type: "table",
       render: (r, data_length) => {
-
         return (
           <Tooltip title={"Refund"}>
             <ButtonComponent
@@ -386,7 +384,6 @@ const ViewReceipt = () => {
       action: "Hold",
       type: "table",
       render: (r, data_length) => {
-
         return (
           <Tooltip title={"Hold"}>
             <ButtonComponent
@@ -490,7 +487,7 @@ const ViewReceipt = () => {
                   searchText,
                   handleSearch,
                   handleModalApprovalHistory,
-                  handleDeleteReceipt
+                  handleDeleteReceipt,
                 ),
                 ...useColumnActionPermission(
                   [
@@ -503,7 +500,7 @@ const ViewReceipt = () => {
                     "refund",
                     "reverse",
                   ],
-                  itemActions
+                  itemActions,
                 ),
               ]}
               current={page}

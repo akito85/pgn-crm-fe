@@ -6,7 +6,7 @@ import { NumericFormat } from "react-number-format";
 const InputComponent = ({
   label,
   mandatory,
-  onChange = () => { },
+  onChange = () => {},
   type,
   typeNumber,
   maxLength = 255,
@@ -18,7 +18,7 @@ const InputComponent = ({
   disabled,
   rows,
   styleGroup,
-  onClick = () => { },
+  onClick = () => {},
   onInput = (e) => (e.target.value = e.target.value.trimStart()),
   thousandSeparator = ".",
   decimalSeparator = ",",
@@ -27,7 +27,7 @@ const InputComponent = ({
   allowNegative = false,
   numericFormatType,
   ref,
-  onPressEnter = () => { }
+  onPressEnter = () => {},
 }) => {
   const style = {
     borderRadius: "6px",

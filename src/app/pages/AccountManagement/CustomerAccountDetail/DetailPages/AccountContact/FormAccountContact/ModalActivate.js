@@ -1,22 +1,18 @@
-import React, {useState} from 'react'
-import { Alert, Form } from 'antd';
-import { InfoCircleOutlined } from '@ant-design/icons';
-import ModalCustom from '../../../../../../../components/Modal/ModalCustom';
-import ButtonComponent from '../../../../../../../components/ButtonComponent';
-import InputComponent from '../../../../../../../components/InputComponent';
+import React, { useState } from "react";
+import { Alert, Form } from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
+import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
+import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import InputComponent from "../../../../../../../components/InputComponent";
 
-const ModalActivateContact = ({
-  isOpen,
-  typeModal,
-  closeModal = () => {}
-}) => {
+const ModalActivateContact = ({ isOpen, typeModal, closeModal = () => {} }) => {
   const [form] = Form.useForm();
   const [remark, setRemark] = useState("");
-  
-  const handleCloseModal = () =>{
-    closeModal((prevState) => prevState = false)
+
+  const handleCloseModal = () => {
+    closeModal((prevState) => (prevState = false));
     handleClear();
-  }
+  };
 
   const handleClear = () => {
     setRemark("");
@@ -41,14 +37,11 @@ const ModalActivateContact = ({
         isOpen={isOpen}
         type={"confirmation"}
         handleCancel={() => {
-          handleCloseModal()
+          handleCloseModal();
         }}
         footer={
           <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
-            <ButtonComponent
-              onClick={handleCloseModal}
-              type="default"
-            >
+            <ButtonComponent onClick={handleCloseModal} type="default">
               Cancel
             </ButtonComponent>
             <ButtonComponent
@@ -61,7 +54,7 @@ const ModalActivateContact = ({
           </div>
         }
       >
-      <Form
+        <Form
           id="contactInactivateForm"
           form={form}
           onFinish={handleSaveModalInactivateFinal}
@@ -94,7 +87,7 @@ const ModalActivateContact = ({
         </Form>
       </ModalCustom>
     </div>
-  )
-}
+  );
+};
 
-export default ModalActivateContact
+export default ModalActivateContact;

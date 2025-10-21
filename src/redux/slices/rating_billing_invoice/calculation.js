@@ -56,7 +56,7 @@ export const getCalculationPaginate = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 // pagination history
 export const getHistoryCalculationPaginate = createAsyncThunk(
@@ -85,7 +85,7 @@ export const getHistoryCalculationPaginate = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 // downlaod slice
@@ -99,10 +99,16 @@ export const donwloadedExcel = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_CALCULATION_EXCEL", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_CALCULATION_EXCEL",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const donwloadedHistoryExcel = createAsyncThunk(
@@ -115,10 +121,16 @@ export const donwloadedHistoryExcel = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_CALCULATION_HISTORY_EXCEL", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_CALCULATION_HISTORY_EXCEL",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // get lov slice
@@ -169,7 +181,7 @@ export const getListServiceType = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 export const getListAccountGroup = createAsyncThunk(
   "GET_LIST_ACCOUNT_GROUP",
@@ -178,7 +190,7 @@ export const getListAccountGroup = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/calculation/accountgrouptype`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       return response.data;
     } catch (error) {
@@ -198,7 +210,7 @@ export const getListAccountGroup = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 export const getListCustomerSegment = createAsyncThunk(
   "GET_LIST_CUSTOMER_SEGMENT",
@@ -224,7 +236,7 @@ export const getListCustomerSegment = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 export const getListCalculationType = createAsyncThunk(
   "GET_LIST_CALCULATION_TYPE",
@@ -250,7 +262,7 @@ export const getListCalculationType = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 export const getListSchedulerType = createAsyncThunk(
   "GET_LIST_SCHEDULER_TYPE",
@@ -276,7 +288,7 @@ export const getListSchedulerType = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 export const getListCostCenter = createAsyncThunk(
   "GET_LIST_COST_CENTER",
@@ -302,7 +314,7 @@ export const getListCostCenter = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 export const getListMeterReadingCode = createAsyncThunk(
   "GET_LIST_METER_READING_CODE",
@@ -311,7 +323,7 @@ export const getListMeterReadingCode = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/calculation/meterreadingcode`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       return response.data;
     } catch (error) {
@@ -331,7 +343,7 @@ export const getListMeterReadingCode = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 export const getListSpecificCustomer = createAsyncThunk(
   "GET_LIST_SPECIFIC_CUSTOMER",
@@ -340,7 +352,7 @@ export const getListSpecificCustomer = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/calculation/speccustacc`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       return response.data;
     } catch (error) {
@@ -360,7 +372,7 @@ export const getListSpecificCustomer = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 export const getListBillingCycle = createAsyncThunk(
   "GET_LIST_BILLING_CYCLE",
@@ -386,7 +398,7 @@ export const getListBillingCycle = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 export const getListBillingPeriod = createAsyncThunk(
   "GET_LIST_BILLING_PERIOD",
@@ -412,7 +424,7 @@ export const getListBillingPeriod = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getUserDetailCalculation = createAsyncThunk(
@@ -439,7 +451,7 @@ export const getUserDetailCalculation = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 // create calculation slice
@@ -470,7 +482,7 @@ export const createCalculation = createAsyncThunk(
         return thunkAPI.rejectWithValue(error.response.data);
       }
     }
-  }
+  },
 );
 
 // detail calulation slice
@@ -498,7 +510,7 @@ export const getDetailCalculationJob = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // detail calculation log
@@ -529,7 +541,7 @@ export const getDetailCalculationLog = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // detail calcultaion result
@@ -560,7 +572,7 @@ export const getDetailCalculationResult = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // detail calcultaion result no paging
@@ -572,7 +584,7 @@ export const getDetailCalculationResultNoPaging = createAsyncThunk(
       const params = { calCode, calType };
       const response = await ratingBillingHttpService.getListPagination(
         url,
-        params
+        params,
       );
       return response.data;
     } catch (error) {
@@ -592,7 +604,7 @@ export const getDetailCalculationResultNoPaging = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 //recalculate di detail
@@ -630,7 +642,7 @@ export const recalculateData = createAsyncThunk(
         return thunkAPI.rejectWithValue(error.response.data);
       }
     }
-  }
+  },
 );
 
 //retry data calculate
@@ -668,7 +680,7 @@ export const retryData = createAsyncThunk(
         return thunkAPI.rejectWithValue(error.response.data);
       }
     }
-  }
+  },
 );
 
 const calculationSlice = createSlice({

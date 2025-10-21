@@ -56,7 +56,7 @@ const ListDetailTransactionCalender = () => {
   ]);
 
   const { loading, data_detail, data_period, data_detail_draft } = useSelector(
-    (state) => state.cycle
+    (state) => state.cycle,
   );
 
   useEffect(() => {
@@ -129,7 +129,7 @@ const ListDetailTransactionCalender = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       setNameDetailCriteria(nameCrit);
       setListDataAttachment(dataAttachment);
@@ -200,7 +200,7 @@ const ListDetailTransactionCalender = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       setNameDetailCriteriaDraft(nameCrit);
       setListDataAttachmentDraft(dataAttachment);
@@ -299,7 +299,10 @@ const ListDetailTransactionCalender = () => {
 
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
-    if (data_detail?.tApprovalDto?.approvalType === "INACTIVE_TRANSACTION_CALENDAR") {
+    if (
+      data_detail?.tApprovalDto?.approvalType ===
+      "INACTIVE_TRANSACTION_CALENDAR"
+    ) {
       const body = {
         id: id,
         remark: res.remark,
@@ -330,7 +333,6 @@ const ListDetailTransactionCalender = () => {
     setModalConfirm(false);
     setRemark("");
   };
-
 
   return (
     <LayoutMenu>

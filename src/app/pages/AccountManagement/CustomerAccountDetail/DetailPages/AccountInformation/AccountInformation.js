@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getAccountOneTimeDetail,
   getAccountStandardDetail,
-  getGrantedAccessAccount
+  getGrantedAccessAccount,
 } from "../../../../../../redux/slices/account_management/accountManagement";
 import moment from "moment";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
@@ -26,26 +26,34 @@ const AccountInformation = ({
 }) => {
   const dispatch = useDispatch();
   const { data_accountDetail, access_account } = useSelector(
-    (state) => state.accountManagement
-    );
+    (state) => state.accountManagement,
+  );
 
-  const [modalIsEdit, setModalIsEdit] = useState(false)
+  const [modalIsEdit, setModalIsEdit] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    if(location?.pathname.includes('account-standard')) {
-      dispatch(getGrantedAccessAccount('/account-management/account-standard/account-information'))
-    }else{
-      dispatch(getGrantedAccessAccount('/account-management/account-onetime/account-information'))
+    if (location?.pathname.includes("account-standard")) {
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-standard/account-information",
+        ),
+      );
+    } else {
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-onetime/account-information",
+        ),
+      );
     }
-  }, [dispatch])
-  
+  }, [dispatch]);
+
   useEffect(() => {
     if (id && idCustomer && type) {
       if (type === "standard") {
         dispatch(getAccountStandardDetail({ idCustomer, idAccount: id }));
       } else {
-        dispatch(getAccountOneTimeDetail({ idCustomer, idAccount: id}));
+        dispatch(getAccountOneTimeDetail({ idCustomer, idAccount: id }));
       }
     }
   }, [dispatch, id, idCustomer, type]);
@@ -64,35 +72,37 @@ const AccountInformation = ({
     {
       action: "Update",
       render: (
-          <NavLink
-            to={
-              data_accountDetail?.accountInformation?.isEditor ? 
-              type === "standard" ? 
-              ACCOUNT_MANAGEMENT_ROUTES.UPDATE_ACCOUNT_STANDARD : ACCOUNT_MANAGEMENT_ROUTES.UPDATE_ACCOUNT_ONETIME 
-              : ''}
-            state={{ idAccount: id, idCustomer: idCustomer, type: type }}
+        <NavLink
+          to={
+            data_accountDetail?.accountInformation?.isEditor
+              ? type === "standard"
+                ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_ACCOUNT_STANDARD
+                : ACCOUNT_MANAGEMENT_ROUTES.UPDATE_ACCOUNT_ONETIME
+              : ""
+          }
+          state={{ idAccount: id, idCustomer: idCustomer, type: type }}
+        >
+          <ButtonComponent
+            icon={<SVGIcon name="IconEdit" color={"#FFFFFF"} width={24} />}
+            type="submit"
+            // onClick={() =>
+            //   handleChangeInteraction({ action: "", section: "account" })
+            // }
+            onClick={() =>
+              setModalIsEdit(!data_accountDetail?.accountInformation?.isEditor)
+            }
           >
-            <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={"#FFFFFF"} width={24} />}
-              type="submit"
-              // onClick={() =>
-              //   handleChangeInteraction({ action: "", section: "account" })
-              // }
-              onClick={() => setModalIsEdit(!data_accountDetail?.accountInformation?.isEditor)}
-              
-            >
-              Update
-            </ButtonComponent>
-          </NavLink>
-        )
+            Update
+          </ButtonComponent>
+        </NavLink>
+      ),
     },
-
-  ]
+  ];
 
   return (
     <Fragment>
-      <ToolbarAccount items={itemActions} advancedAccess={access_account}/>
-     
+      <ToolbarAccount items={itemActions} advancedAccess={access_account} />
+
       {/* <div className="flex w-full justify-end gap-3 mt-5">
         <NavLink
           to={
@@ -115,7 +125,7 @@ const AccountInformation = ({
           </ButtonComponent>
         </NavLink>
       </div> */}
-     
+
       <BaseContainer header={data_header[0]}>
         <div className="w-full grid grid-cols-3 gap-3">
           {/* Account information */}
@@ -130,7 +140,7 @@ const AccountInformation = ({
             {data_accountDetail?.accountInformation?.customerManagement}
           </DetailText>
           <DetailText label="Status">
-            {data_accountDetail?.accountInformation?.status}   
+            {data_accountDetail?.accountInformation?.status}
           </DetailText>
           <div className="col-span-3">
             <DetailText label="Description">
@@ -199,10 +209,14 @@ const AccountInformation = ({
             {data_accountDetail?.accountInformation?.priority}
           </DetailText>
           <DetailText label="Corporate Customer">
-            {data_accountDetail?.accountInformation?.corporateCustomer ? "Yes ": "No"}
+            {data_accountDetail?.accountInformation?.corporateCustomer
+              ? "Yes "
+              : "No"}
           </DetailText>
           <DetailText label="Rating & Billing Exception">
-            {data_accountDetail?.accountInformation?.ratingAndBillingException ? "Yes ": "No"}
+            {data_accountDetail?.accountInformation?.ratingAndBillingException
+              ? "Yes "
+              : "No"}
           </DetailText>
         </div>
 
@@ -228,7 +242,9 @@ const AccountInformation = ({
           <DetailText label="Budget Year">
             {data_accountDetail?.accountInformation?.budgetYear}
           </DetailText>
-          <DetailText label="Budget">{data_accountDetail?.accountInformation?.budget}</DetailText>
+          <DetailText label="Budget">
+            {data_accountDetail?.accountInformation?.budget}
+          </DetailText>
           <DetailText label="Teritory">
             {data_accountDetail?.accountInformation?.teritory}
           </DetailText>
@@ -238,22 +254,30 @@ const AccountInformation = ({
       <BaseContainer header={data_header[6]}>
         {/* history log information */}
         <div className="w-full grid grid-cols-5 gap-4">
-          <DetailText label="Record ID">{data_accountDetail?.accountInformation?.accountId}</DetailText>
-          <DetailText label="Created Date">
-            {moment(data_accountDetail?.accountInformation?.createdDate).format(dateFormatting.dateTime)}
+          <DetailText label="Record ID">
+            {data_accountDetail?.accountInformation?.accountId}
           </DetailText>
-          <DetailText label="Created By">{data_accountDetail?.accountInformation?.createdBy}</DetailText>
+          <DetailText label="Created Date">
+            {moment(data_accountDetail?.accountInformation?.createdDate).format(
+              dateFormatting.dateTime,
+            )}
+          </DetailText>
+          <DetailText label="Created By">
+            {data_accountDetail?.accountInformation?.createdBy}
+          </DetailText>
           <DetailText label="Updated Date">
             {renderDate(data_accountDetail?.accountInformation?.updatedDate)}
           </DetailText>
-          <DetailText label="Updated By">{data_accountDetail?.accountInformation?.updatedBy}</DetailText>
+          <DetailText label="Updated By">
+            {data_accountDetail?.accountInformation?.updatedBy}
+          </DetailText>
         </div>
       </BaseContainer>
 
       <ModalError
         isOpen={modalIsEdit}
-        handleOk={()=>setModalIsEdit(false)}
-        handleCancel={()=>setModalIsEdit(false)}
+        handleOk={() => setModalIsEdit(false)}
+        handleCancel={() => setModalIsEdit(false)}
         customText={"Back"}
       >
         <div className="px-5 pt-5 pb-[10px] justify-center">
@@ -261,7 +285,11 @@ const AccountInformation = ({
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{"You cannot update this account because your position is not registered in this account customer management"}</p>
+          <p className="pl-[70px]">
+            {
+              "You cannot update this account because your position is not registered in this account customer management"
+            }
+          </p>
         </div>
       </ModalError>
     </Fragment>

@@ -12,7 +12,7 @@ import { columnsPricingRule } from "../Table/TablePricingRule";
 const PricingSection = ({ SAId }) => {
   // Selector
   const { data_pricing, data_pricingRule } = useSelector(
-    (state) => state.rating
+    (state) => state.rating,
   );
 
   // Declaration
@@ -49,7 +49,7 @@ const PricingSection = ({ SAId }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, SAId, search, page, pageSize, sort]);
 
@@ -71,7 +71,7 @@ const PricingSection = ({ SAId }) => {
       .slice((page - 1) * pageSize, page * pageSize)
       .map((item) => item.priceCode);
     const dataFix = result.filter((item) =>
-      dataFilter.includes(item.priceCode)
+      dataFilter.includes(item.priceCode),
     );
 
     /** Function Merge Table */
@@ -124,7 +124,7 @@ const PricingSection = ({ SAId }) => {
 
   // Sort Table
   const onSortApi = (_, __, sort) => {
-    if (sort?.field === "min" || sort?.field ==="max") {
+    if (sort?.field === "min" || sort?.field === "max") {
       const dataSort =
         sort.order !== undefined
           ? `lineNumber~${sort.order === "ascend" ? "asc" : "desc"}`
@@ -135,11 +135,11 @@ const PricingSection = ({ SAId }) => {
         sort.order !== undefined
           ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
           : "";
-      setSort(dataSort); 
+      setSort(dataSort);
     }
   };
   // console.log("data_pricing", data_pricing);
-  
+
   return (
     <BaseContainer header={"Pricing Information"}>
       <div className={"w-full grid grid-cols-2 gap-3"}>
@@ -152,7 +152,9 @@ const PricingSection = ({ SAId }) => {
           <p className={"font-bold text text-primary uppercase"}>
             Price Adjustment
           </p>
-          <DetailText label={"Price Adjustment"}>{data_pricing?.pricingAdjustment}</DetailText>
+          <DetailText label={"Price Adjustment"}>
+            {data_pricing?.pricingAdjustment}
+          </DetailText>
         </div>
 
         <div>
@@ -163,7 +165,6 @@ const PricingSection = ({ SAId }) => {
             {pricingRuleName ? pricingRuleName : ""}
           </DetailText>
         </div>
-
       </div>
       <div className="w-full mt-[30px]">
         <TablePaginationNew
@@ -174,7 +175,7 @@ const PricingSection = ({ SAId }) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           )}
           current={page}
           pageSize={pageSize}

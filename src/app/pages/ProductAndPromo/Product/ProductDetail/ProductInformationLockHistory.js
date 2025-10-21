@@ -25,7 +25,7 @@ const columns = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
 ) => {
   const result = [
     {
@@ -46,7 +46,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -61,7 +61,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -76,7 +76,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -91,7 +91,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -175,7 +175,7 @@ const ProductInformationLockHistory = ({ data = [] }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         )}
       />
     </div>

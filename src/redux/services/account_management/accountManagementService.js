@@ -39,7 +39,7 @@ const getDetailByIdBody = async (url, id) => {
     const response = await axios.get(
       configApp.ACCOUNT_SERVICE + url,
       { id: id },
-      { headers: tokenHeader() }
+      { headers: tokenHeader() },
     );
     return response?.data;
   } catch (error) {
@@ -52,22 +52,22 @@ const downloadData = async (url) => {
       headers: tokenHeader(),
       responseType: "blob",
     });
-    if(hasValue(response.headers?.get("content-disposition"))){
+    if (hasValue(response.headers?.get("content-disposition"))) {
       const filename = response.headers
         .get("content-disposition")
         .split(";")
         .find((n) => n.includes("filename="))
         .replace("filename=", "")
         .trim();
-    
+
       const blob = await response.data;
-    
+
       // Download the file
       FileSaver.saveAs(blob, filename);
-    }else if(errorCode(response) === 204){
-      throw response
+    } else if (errorCode(response) === 204) {
+      throw response;
     }
-      
+
     return response;
   } catch (error) {
     throw error;
@@ -158,24 +158,24 @@ const downloadDataAdvanced = async (url, body) => {
     const response = await axios.post(configApp.ACCOUNT_SERVICE + url, body, {
       headers: {
         ...tokenHeader(),
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       responseType: "blob",
     });
-    if(hasValue(response.headers?.get("content-disposition"))){
+    if (hasValue(response.headers?.get("content-disposition"))) {
       const filename = response.headers
         .get("content-disposition")
         .split(";")
         .find((n) => n.includes("filename="))
         .replace("filename=", "")
         .trim();
-  
+
       const blob = await response.data;
-  
+
       // Download the file
       FileSaver.saveAs(blob, filename);
     } else {
-      return response
+      return response;
     }
   } catch (error) {
     throw error;
@@ -183,13 +183,18 @@ const downloadDataAdvanced = async (url, body) => {
 };
 
 const checkGrantedAccessAccount = async (body) => {
-	try {
-		const response = await axios.post(configApp.USER_MANAGEMENT_SERVICE + '/v1/dbs/api/auth/check-granted-access', { pathUrl: body }, { headers: tokenHeader() });
-		return response.data;
-	} catch (error) {
-		throw error;
-	}
-}
+  try {
+    const response = await axios.post(
+      configApp.USER_MANAGEMENT_SERVICE +
+        "/v1/dbs/api/auth/check-granted-access",
+      { pathUrl: body },
+      { headers: tokenHeader() },
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
 const accountManagementService = {
   getAll,
@@ -205,7 +210,7 @@ const accountManagementService = {
   updateDataWithMethodPost,
   uploadAttachment,
   downloadDataAdvanced,
-  checkGrantedAccessAccount
+  checkGrantedAccessAccount,
 };
 
 export default accountManagementService;

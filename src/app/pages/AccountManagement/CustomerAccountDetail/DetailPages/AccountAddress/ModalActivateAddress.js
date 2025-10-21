@@ -1,10 +1,10 @@
-import React, {useState} from 'react'
-import ModalCustom from '../../../../../../components/Modal/ModalCustom';
-import { Alert, Form } from 'antd';
-import ButtonComponent from '../../../../../../components/ButtonComponent';
-import { InfoCircleOutlined } from '@ant-design/icons';
-import InputComponent from '../../../../../../components/InputComponent';
-import ModalApproveOrReject from '../../../../../../components/Modal/ModalApproveOrReject';
+import React, { useState } from "react";
+import ModalCustom from "../../../../../../components/Modal/ModalCustom";
+import { Alert, Form } from "antd";
+import ButtonComponent from "../../../../../../components/ButtonComponent";
+import { InfoCircleOutlined } from "@ant-design/icons";
+import InputComponent from "../../../../../../components/InputComponent";
+import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 
 const ModalActivateAddress = ({
   form,
@@ -15,9 +15,6 @@ const ModalActivateAddress = ({
   handleCancelFooter = () => {},
   handleConfirmFooter = () => {},
 }) => {
-
-
-
   return (
     <div>
       <ModalApproveOrReject
@@ -31,7 +28,11 @@ const ModalActivateAddress = ({
             <ButtonComponent onClick={handleCancelFooter} type="default">
               Cancel
             </ButtonComponent>
-            <ButtonComponent form="contactInactivateForm" type="submit" htmlType="submit">
+            <ButtonComponent
+              form="contactInactivateForm"
+              type="submit"
+              htmlType="submit"
+            >
               Confirm
             </ButtonComponent>
           </div>
@@ -41,7 +42,7 @@ const ModalActivateAddress = ({
           id="contactInactivateForm"
           form={form}
           onFinish={handleConfirmFooter}
-          layout='vertical'
+          layout="vertical"
         >
           <div className="flex flex-col gap-6">
             <Form.Item
@@ -121,7 +122,7 @@ const ModalActivateAddress = ({
         </Form>
       </ModalCustom> */}
     </div>
-  )
-}
+  );
+};
 
-export default ModalActivateAddress
+export default ModalActivateAddress;

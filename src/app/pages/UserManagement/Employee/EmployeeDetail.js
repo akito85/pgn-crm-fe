@@ -7,10 +7,7 @@ import { Tooltip, Spin } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { useLocation, useNavigate } from "react-router-dom";
 import GridLayout from "../../../../components/GridLayout";
-import {
-  LeftOutlined,
-  WarningOutlined,
-} from "@ant-design/icons";
+import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import DetailText from "../../../../components/DetailText";
 import {
@@ -19,14 +16,18 @@ import {
   getForwardTaskDetail,
 } from "../../../../redux/slices/user_management/employee";
 import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn, toTitleCase } from "../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+  toTitleCase,
+} from "../../../../utils";
 
 import SVGIcon from "../../../../assets/Icon/index";
 import CardComponent from "../../../../components/Card/CardComponent";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
-import {
-  ModalConfirm,
-} from "../../../../components/Modal/ModalPopUp";
+import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import { getColumnSearchProps } from "../../../../utils/getColumnSearchProps";
 import { sorterFunction } from "../../../../utils/sorterFunction";
@@ -35,7 +36,7 @@ import ForwardTasksDetail from "./ForwardTasksDetail";
 
 const EmployeeDetail = () => {
   const { data_ass, data_info, data_detail, loading } = useSelector(
-    (state) => state.employee
+    (state) => state.employee,
   );
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -54,7 +55,8 @@ const EmployeeDetail = () => {
   const [search, setSearch] = useState({});
   // forward tasks search
   const searchInputForwardTasks = useRef(null);
-  const [searchedColumnForwardTasks, setSearchedColumnForwardTasks] = useState("");
+  const [searchedColumnForwardTasks, setSearchedColumnForwardTasks] =
+    useState("");
   const [searchTextForwardTasks, setSearchTextForwardTasks] = useState("");
   const [searchForwardTasks, setSearchForwardTasks] = useState({});
 
@@ -63,7 +65,6 @@ const EmployeeDetail = () => {
       dispatch(getEmployeeDetail(id));
     }
   }, [dispatch, id]);
-
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -77,7 +78,7 @@ const EmployeeDetail = () => {
         [dataIndex]: selectedKeys[0],
       };
     });
-    setSearchedColumn(dataIndex)
+    setSearchedColumn(dataIndex);
     const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
     if (searchedColumn !== tempSearchColumn) {
       setPageDetail(1);
@@ -95,7 +96,7 @@ const EmployeeDetail = () => {
         [dataIndex]: selectedKeys[0],
       };
     });
-    setSearchedColumnForwardTasks(dataIndex)
+    setSearchedColumnForwardTasks(dataIndex);
     const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
     if (searchedColumn !== tempSearchColumn) {
       setPage(1);
@@ -109,7 +110,7 @@ const EmployeeDetail = () => {
     } catch (error) {
       setOpenModal(false);
     }
-  }
+  };
 
   const columns = [
     {
@@ -122,42 +123,60 @@ const EmployeeDetail = () => {
     {
       title: "JOB",
       dataIndex: "jobName",
-      sorter: (a, b) => sorterFunction('jobName', a, b),
+      sorter: (a, b) => sorterFunction("jobName", a, b),
       ...getColumnSearchProps(
         "jobName",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('jobName', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "jobName",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "POSITION",
       dataIndex: "positionName",
-      sorter: (a, b) => sorterFunction('positionName', a, b),
+      sorter: (a, b) => sorterFunction("positionName", a, b),
       ...getColumnSearchProps(
         "positionName",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('positionName', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "positionName",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "START DATE",
       dataIndex: "startDate",
       align: "center",
-      sorter: (a, b) => sorterFunction('startDate', a, b, 'date'),
+      sorter: (a, b) => sorterFunction("startDate", a, b, "date"),
       ...getColumnSearchProps(
         "startDate",
         searchInput,
@@ -165,15 +184,23 @@ const EmployeeDetail = () => {
         searchText,
         handleSearch,
         false,
-        'date'
+        "date",
       ),
-      render: (v) => renderDateColumn('startDate', searchedColumn, searchText, v, 'date', search)
+      render: (v) =>
+        renderDateColumn(
+          "startDate",
+          searchedColumn,
+          searchText,
+          v,
+          "date",
+          search,
+        ),
     },
     {
       title: "END DATE",
       dataIndex: "endDate",
       align: "center",
-      sorter: (a, b) => sorterFunction('endDate', a, b, 'date'),
+      sorter: (a, b) => sorterFunction("endDate", a, b, "date"),
       ...getColumnSearchProps(
         "endDate",
         searchInput,
@@ -181,9 +208,17 @@ const EmployeeDetail = () => {
         searchText,
         handleSearch,
         false,
-        'date'
+        "date",
       ),
-      render: (v) => renderDateColumn('endDate', searchedColumn, searchText, v, 'date', search)
+      render: (v) =>
+        renderDateColumn(
+          "endDate",
+          searchedColumn,
+          searchText,
+          v,
+          "date",
+          search,
+        ),
     },
     {
       title: "PRIMARY",
@@ -191,7 +226,7 @@ const EmployeeDetail = () => {
       editable: true,
       align: "left",
       width: 150,
-      sorter: (a, b) => sorterFunction('isMain', a, b),
+      sorter: (a, b) => sorterFunction("isMain", a, b),
       ...getColumnSearchProps(
         "isMain",
         searchInput,
@@ -199,17 +234,26 @@ const EmployeeDetail = () => {
         searchText,
         handleSearch,
         false,
-        'status'
+        "status",
       ),
-      render: (text) => renderColumn('isMain', searchedColumn, searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "isMain",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
     {
       title: "STATUS",
       dataIndex: "status",
       key: "status",
       width: 120,
-      fixed: 'right',
-      sorter: (a, b) => sorterFunction('status', a, b),
+      fixed: "right",
+      sorter: (a, b) => sorterFunction("status", a, b),
       ...getColumnSearchProps(
         "status",
         searchInput,
@@ -217,15 +261,24 @@ const EmployeeDetail = () => {
         searchText,
         handleSearch,
         false,
-        'status'
+        "status",
       ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
     {
       title: "ACTION",
       align: "center",
       width: 100,
-      fixed: 'right',
+      fixed: "right",
       render: (v, r, i) => {
         return (
           <div className="flex justify-center gap-4">
@@ -247,7 +300,6 @@ const EmployeeDetail = () => {
     },
   ];
 
-
   const columnForwardTasks = [
     {
       title: "NO",
@@ -259,59 +311,86 @@ const EmployeeDetail = () => {
     {
       title: "POSITION",
       dataIndex: "positionIdFromName",
-      sorter: (a, b) => sorterFunction('jobName', a, b),
+      sorter: (a, b) => sorterFunction("jobName", a, b),
       ...getColumnSearchProps(
         "positionIdFromName",
         searchInputForwardTasks,
         searchedColumnForwardTasks,
         searchTextForwardTasks,
         handleSearchForwardTasks,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('positionIdFromName', searchedColumnForwardTasks, searchTextForwardTasks, text, true, 'input', searchForwardTasks)
+      render: (text) =>
+        renderColumn(
+          "positionIdFromName",
+          searchedColumnForwardTasks,
+          searchTextForwardTasks,
+          text,
+          true,
+          "input",
+          searchForwardTasks,
+        ),
     },
     {
       title: "FORWARD TO",
       dataIndex: "employeeCodeForwardName",
-      sorter: (a, b) => sorterFunction('employeeCodeForwardName', a, b),
+      sorter: (a, b) => sorterFunction("employeeCodeForwardName", a, b),
       ...getColumnSearchProps(
         "employeeCodeForwardName",
         searchInputForwardTasks,
         searchedColumnForwardTasks,
         searchTextForwardTasks,
         handleSearchForwardTasks,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('employeeCodeForwardName', searchedColumnForwardTasks, searchTextForwardTasks, text, true, 'input', searchForwardTasks)
+      render: (text) =>
+        renderColumn(
+          "employeeCodeForwardName",
+          searchedColumnForwardTasks,
+          searchTextForwardTasks,
+          text,
+          true,
+          "input",
+          searchForwardTasks,
+        ),
     },
     {
       title: "FORWARD BY",
       dataIndex: "createdBy",
-      sorter: (a, b) => sorterFunction('createdBy', a, b),
+      sorter: (a, b) => sorterFunction("createdBy", a, b),
       ...getColumnSearchProps(
         "createdBy",
         searchInputForwardTasks,
         searchedColumnForwardTasks,
         searchTextForwardTasks,
         handleSearchForwardTasks,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('createdBy', searchedColumnForwardTasks, searchTextForwardTasks, text, true, 'input', searchForwardTasks)
+      render: (text) =>
+        renderColumn(
+          "createdBy",
+          searchedColumnForwardTasks,
+          searchTextForwardTasks,
+          text,
+          true,
+          "input",
+          searchForwardTasks,
+        ),
     },
     {
       title: "FORWARD DATE",
       dataIndex: "createdDate",
-      sorter: (a, b) => sorterFunction('createdDate', a, b, 'date'),
-      align: 'center',
+      sorter: (a, b) => sorterFunction("createdDate", a, b, "date"),
+      align: "center",
       ...getColumnSearchProps(
         "createdDate",
         searchInputForwardTasks,
@@ -319,15 +398,23 @@ const EmployeeDetail = () => {
         searchTextForwardTasks,
         handleSearchForwardTasks,
         true,
-        'datetime'
+        "datetime",
       ),
-      render: (text) => renderDateColumn('', hasValue(searchForwardTasks['createdDate']), searchTextForwardTasks, text, 'datetime', searchForwardTasks)
+      render: (text) =>
+        renderDateColumn(
+          "",
+          hasValue(searchForwardTasks["createdDate"]),
+          searchTextForwardTasks,
+          text,
+          "datetime",
+          searchForwardTasks,
+        ),
     },
     {
       title: "ACTION",
       align: "center",
       width: 100,
-      fixed: 'right',
+      fixed: "right",
       render: (v, r, i) => {
         return (
           <div className="flex justify-center gap-4">
@@ -344,7 +431,7 @@ const EmployeeDetail = () => {
       },
       key: "action",
     },
-  ]
+  ];
 
   const handleCancel = () => {
     setOpenModal(false);
@@ -361,17 +448,19 @@ const EmployeeDetail = () => {
 
   const handleRetry = () => {
     handleCancelTryAgain();
-    dispatch(getEmployeeDetail(id))
+    dispatch(getEmployeeDetail(id));
   };
 
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   const EmployeeInformation = (
     <>
       <GridLayout cols={4}>
         <DetailText label={"Employee Number"}>
           {data_detail?.empNumber}
         </DetailText>
-        <DetailText label={"Employee Type"}>{data_detail?.empTypeName}</DetailText>
+        <DetailText label={"Employee Type"}>
+          {data_detail?.empTypeName}
+        </DetailText>
         <DetailText label={"First Name"}>{data_detail?.firstName}</DetailText>
         <DetailText label={"Last Name"}>{data_detail?.lastName}</DetailText>
         <DetailText label={"Email"}>{data_detail?.email}</DetailText>
@@ -386,7 +475,9 @@ const EmployeeDetail = () => {
             ? moment(data_detail?.endDate).format(dateFormatting.dateCapital)
             : ""}
         </DetailText>
-        <DetailText label={"Status"}>{toTitleCase(data_detail?.status)}</DetailText>
+        <DetailText label={"Status"}>
+          {toTitleCase(data_detail?.status)}
+        </DetailText>
         <DetailText label={"Description"}>
           {data_detail?.description}
         </DetailText>
@@ -396,9 +487,7 @@ const EmployeeDetail = () => {
   const HistoryLogInformation = (
     <>
       <GridLayout cols={5}>
-        <DetailText label={"Record Id"}>
-          {data_detail?.employeeId}
-        </DetailText>
+        <DetailText label={"Record Id"}>{data_detail?.employeeId}</DetailText>
         <DetailText label={"Created Date"}>
           {data_detail?.createdDate
             ? moment(data_detail?.createdDate).format("DD MMM YYYY HH:mm:ss")
@@ -437,7 +526,10 @@ const EmployeeDetail = () => {
       <div className={"w-full"}>
         <TablePaginationNew
           type="FE"
-          dataSource={data_detail?.assignmenTset?.map(item => ({ ...item, isMain: item?.isMain === true ? 'primary' : 'non primary' }))}
+          dataSource={data_detail?.assignmenTset?.map((item) => ({
+            ...item,
+            isMain: item?.isMain === true ? "primary" : "non primary",
+          }))}
           current={pageDetail}
           pageSize={pageSizeDetail}
           onChange={handleChangeDetail}
@@ -488,7 +580,6 @@ const EmployeeDetail = () => {
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
-
         <div className="gap-5 w-full flex flex-col">
           <BreadCrumb routes={routes} />
           <BaseContainer header={"EMPLOYEE INFORMATION"}>
@@ -507,7 +598,7 @@ const EmployeeDetail = () => {
             {EmployeeAssignmentHistory}
           </BaseContainer>
           <ButtonComponent
-            className={'my-5'}
+            className={"my-5"}
             type={"submit"}
             onClick={() => navigate(-1)}
             icon={
@@ -533,7 +624,9 @@ const EmployeeDetail = () => {
           <CardComponent header={"EMPLOYEE ASSIGNMENT HISTORY"}>
             <GridLayout cols={4}>
               <DetailText label={"Job"}>{data_ass?.jobName}</DetailText>
-              <DetailText label={"Position"}>{data_ass?.positionName}</DetailText>
+              <DetailText label={"Position"}>
+                {data_ass?.positionName}
+              </DetailText>
               <DetailText label={"Start Date"}>
                 {data_ass?.startDate
                   ? moment(data_ass?.startDate).format("DD MMM YYYY")
@@ -544,7 +637,9 @@ const EmployeeDetail = () => {
                   ? moment(data_ass?.endDate).format("DD MMM YYYY")
                   : ""}
               </DetailText>
-              <DetailText label={"Status"}>{toTitleCase(data_ass?.status)}</DetailText>
+              <DetailText label={"Status"}>
+                {toTitleCase(data_ass?.status)}
+              </DetailText>
             </GridLayout>
           </CardComponent>
           <CardComponent header={"HISTORY LOG INFORMATION"}>
@@ -557,18 +652,21 @@ const EmployeeDetail = () => {
                   ? moment(data_ass?.createdDate).format("DD MMM YYYY HH:mm:ss")
                   : ""}
               </DetailText>
-              <DetailText label={"Created By"}>{data_ass?.createdBy}</DetailText>
+              <DetailText label={"Created By"}>
+                {data_ass?.createdBy}
+              </DetailText>
               <DetailText label={"Update Date"}>
                 {data_ass?.updatedDate
                   ? moment(data_ass?.updatedDate).format("DD MMM YYYY HH:mm:ss")
                   : ""}
               </DetailText>
-              <DetailText label={"Updated By"}>{data_ass?.updatedBy}</DetailText>
+              <DetailText label={"Updated By"}>
+                {data_ass?.updatedBy}
+              </DetailText>
             </GridLayout>
           </CardComponent>
           <div className="flex justify-end">
             <ButtonComponent
-              
               // icon={<PlusCircleFilled style={{ fontSize: "16px" }} />}
               onClick={() => setDetailAH(false)}
               border={true}
@@ -579,16 +677,13 @@ const EmployeeDetail = () => {
         </ModalCustom>
 
         <ModalCustom
-          type={'detail'}
+          type={"detail"}
           isOpen={openModal}
           handleCancel={handleCancel}
           width={1000}
-          header={'Forward Task Detail'}
+          header={"Forward Task Detail"}
           footer={
-            <ButtonComponent
-              onClick={handleCancel}
-              border={true}
-            >
+            <ButtonComponent onClick={handleCancel} border={true}>
               Back
             </ButtonComponent>
           }
@@ -614,7 +709,6 @@ const EmployeeDetail = () => {
         {/* modal try again */}
         {renderModal()}
       </Spin>
-
     </LayoutMenu>
   );
 };

@@ -1,10 +1,10 @@
-import React,{ useEffect, useState, useRef} from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React, { useEffect, useState, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
-import TablePaginationNew from '../../../../../../components/TablePaginationNew'
-import { getColumnSearchPropsPaging } from '../../../../../../utils/getColumnSearchProps'
-import { getCurrentGasUtilization } from '../../../../../../redux/slices/account_management/detailAccount/gasUtilizationSlice'
-import DetailText from '../../../../../../components/DetailText'
+import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
+import { getCurrentGasUtilization } from "../../../../../../redux/slices/account_management/detailAccount/gasUtilizationSlice";
+import DetailText from "../../../../../../components/DetailText";
 
 const columns = (
   page = 1,
@@ -14,8 +14,8 @@ const columns = (
   searchText,
   handleSearch = () => {},
   onFilter = () => {},
-  sorter = () => {}
-) => { 
+  sorter = () => {},
+) => {
   return [
     {
       title: "NO",
@@ -34,7 +34,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -48,17 +48,15 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-    }
-  ]
-}
+    },
+  ];
+};
 
-const TableGasUtilCurrent = ({idAccount}) => {
+const TableGasUtilCurrent = ({ idAccount }) => {
   const dispatch = useDispatch();
-  const { data_current } = useSelector(
-    (state) =>  state.accountGasUtilization
-  );
+  const { data_current } = useSelector((state) => state.accountGasUtilization);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -67,9 +65,8 @@ const TableGasUtilCurrent = ({idAccount}) => {
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    dispatch(getCurrentGasUtilization({id: idAccount}))
-  }, [dispatch, idAccount])
-  
+    dispatch(getCurrentGasUtilization({ id: idAccount }));
+  }, [dispatch, idAccount]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -110,12 +107,20 @@ const TableGasUtilCurrent = ({idAccount}) => {
 
   return (
     <>
-      <div className="text-primary text-xs font-bold uppercase py-4">GAS UTILIZATION</div>
-      <div className="grid grid-cols-4 w-full">
-        <DetailText label={"Effective Date"}>{data_current?.effectiveDate}</DetailText>
-        <DetailText label={"Description"}>{data_current?.description}</DetailText>
+      <div className="text-primary text-xs font-bold uppercase py-4">
+        GAS UTILIZATION
       </div>
-      <div className="text-primary text-xs font-bold uppercase py-4">GAS UTILIZATION DETAIL LIST</div>
+      <div className="grid grid-cols-4 w-full">
+        <DetailText label={"Effective Date"}>
+          {data_current?.effectiveDate}
+        </DetailText>
+        <DetailText label={"Description"}>
+          {data_current?.description}
+        </DetailText>
+      </div>
+      <div className="text-primary text-xs font-bold uppercase py-4">
+        GAS UTILIZATION DETAIL LIST
+      </div>
       <TablePaginationNew
         dataSource={data_current?.gasUtilsDtl}
         totalData={data_current?.gasUtilsDtl?.length}
@@ -132,11 +137,11 @@ const TableGasUtilCurrent = ({idAccount}) => {
           searchText,
           handleSearch,
           onFilter,
-          sorter
+          sorter,
         )}
       />
     </>
-  )
-}
+  );
+};
 
-export default TableGasUtilCurrent
+export default TableGasUtilCurrent;

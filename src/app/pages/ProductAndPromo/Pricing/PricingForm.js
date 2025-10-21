@@ -47,9 +47,15 @@ import { columnsTableCriteria } from "./columnTableCriteria";
 import { bytesConverter } from "../../../../utils/bytesConverter";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import ModalBack from "../../../../components/Modal/ModalBack";
-import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../redux/slices/general_slice";
 import { handleMandatory } from "../Product/utils";
-import { handleCheckCriteriaMissingValidation, handleDisabledEachColumnCriteria } from "../UtilsProduct/UtilsAllProduct";
+import {
+  handleCheckCriteriaMissingValidation,
+  handleDisabledEachColumnCriteria,
+} from "../UtilsProduct/UtilsAllProduct";
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
 import FunctionalCriteriaProduct from "../UtilsProduct/FunctionalCriteriaProduct";
 import { dateFormatting, hasValue } from "../../../../utils";
@@ -97,10 +103,10 @@ const PricingForm = (props) => {
   ]);
   const formValue = form.getFieldsValue();
   const [typePricingInfo, setTypePricingInfo] = useState(
-    listSectionInfo[0].value
+    listSectionInfo[0].value,
   );
   const [typePricingDetail, setTypePricingDetail] = useState(
-    listSectionPricingDetail[0].value
+    listSectionPricingDetail[0].value,
   );
   const [criteriaOptions, setCriteriaOptions] = useState([]);
   const [appHierOptions, setAppHierOptions] = useState([]);
@@ -164,7 +170,7 @@ const PricingForm = (props) => {
   const asserData = useCallback(
     (dataDetailPricingGeneral) => {
       const criteria = (dataDetailPricingGeneral?.rPricingCriterias || []).map(
-        (item) => item.criteria
+        (item) => item.criteria,
       );
       const appHier = dataDetailPricingGeneral?.appHierId || 1;
       const obj = {
@@ -182,9 +188,9 @@ const PricingForm = (props) => {
           ...attachData,
           fileSize: bytesConverter(attachData.fileSize || 0),
           dataType: "exist",
-        }))
+        })),
       );
-      
+
       setListDataDetail(
         (dataDetailPricingGeneral?.mPricingDetails || []).map(
           (priceData, index) => ({
@@ -194,15 +200,17 @@ const PricingForm = (props) => {
             uom: priceData?.uomId?.label,
             currencyIds: priceData?.currencyId?.value,
             uomIds: priceData?.uomId?.value,
-            startDate: priceData?.startDate ? moment(priceData.startDate, "DD-MMM-YYYY").format("YYYY-MM-DD") : undefined,
+            startDate: priceData?.startDate
+              ? moment(priceData.startDate, "DD-MMM-YYYY").format("YYYY-MM-DD")
+              : undefined,
             endDate: priceData?.endDate
               ? moment(priceData.endDate, "DD-MMM-YYYY").format("YYYY-MM-DD")
               : undefined,
             type: "exist",
             uomId: undefined,
             currencyId: undefined,
-          })
-        )
+          }),
+        ),
       );
 
       const dataCriteriaList = (dataDetailPricingGeneral.criteriasValue || [])
@@ -211,12 +219,12 @@ const PricingForm = (props) => {
           let obj = { key: index + 1 };
           for (const attr in item) {
             if (
-              hasValue(item[attr]) && 
+              hasValue(item[attr]) &&
               typeof item[`${attr}`] === "object" &&
               item[attr] !== null &&
               !attr?.toLowerCase()?.includes("date")
             ) {
-              obj[`${attr?.replace(/Id/, '')}`] = {
+              obj[`${attr?.replace(/Id/, "")}`] = {
                 label: item[attr]?.label || item[attr]?.name,
                 value: item[attr]?.value,
               };
@@ -224,20 +232,20 @@ const PricingForm = (props) => {
               obj[attr] = item[attr];
             }
           }
-          Object.keys(obj).forEach(key => {
-            if (key.includes('Id')) {
+          Object.keys(obj).forEach((key) => {
+            if (key.includes("Id")) {
               delete obj[key];
             }
           });
-          
+
           return obj;
         });
-        // console.log(dataCriteriaList,"test biasa");
-        
+      // console.log(dataCriteriaList,"test biasa");
+
       setListDataCriteria(
         handleDisabledEachColumnCriteria({
           dataDetail: dataCriteriaList.filter(
-            (data) => data?.allCriteria !== true
+            (data) => data?.allCriteria !== true,
           ),
           dataCompare: [],
           idName: "idPricing",
@@ -245,17 +253,17 @@ const PricingForm = (props) => {
           status: dataDetailPricingGeneral?.status,
           statusApproval: dataDetailPricingGeneral?.statusApproval,
           columnsTable: columnsTableCriteriaAll(),
-          dataListCriteria: dataListCriteria?.map((item) =>{
+          dataListCriteria: dataListCriteria?.map((item) => {
             return {
               ...item,
               id: item.glbTypeValId,
               name: item.name,
-            }
+            };
           }),
-        })
+        }),
       );
     },
-    [form]
+    [form],
   );
 
   const asserDataDraft = useCallback(
@@ -280,8 +288,8 @@ const PricingForm = (props) => {
             ...attachData,
             fileSize: bytesConverter(attachData.fileSize || 0),
             dataType: "exist",
-          })
-        )
+          }),
+        ),
       );
       setListDataDetail(
         (dataDetailDraftPricingGeneral?.mPricingDetails || []).map(
@@ -289,7 +297,11 @@ const PricingForm = (props) => {
             let obj = {
               ...priceData,
               key: index + 1,
-              startDate: priceData?.startDate ? moment(priceData.startDate, "DD-MMM-YYYY").format("YYYY-MM-DD") : undefined,
+              startDate: priceData?.startDate
+                ? moment(priceData.startDate, "DD-MMM-YYYY").format(
+                    "YYYY-MM-DD",
+                  )
+                : undefined,
               endDate: priceData.endDate
                 ? moment(priceData.endDate, "DD-MMM-YYYY").format("YYYY-MM-DD")
                 : undefined,
@@ -302,8 +314,8 @@ const PricingForm = (props) => {
             delete obj.uomName;
             delete obj.currencyName;
             return obj;
-          }
-        )
+          },
+        ),
       );
 
       const dataCriteriaList = (dataDetailPricingGeneral.criteriasValue || [])
@@ -312,21 +324,21 @@ const PricingForm = (props) => {
           let obj = { key: index + 1 };
           for (const attr in item) {
             if (
-              hasValue(item[attr]) && 
+              hasValue(item[attr]) &&
               typeof item[attr] === "object" &&
               item[attr] !== null &&
               !attr?.toLowerCase()?.includes("date")
             ) {
-              obj[`${attr?.replace(/Id/, '')}`] = {
+              obj[`${attr?.replace(/Id/, "")}`] = {
                 label: item[attr]?.label || item[attr]?.name,
                 value: item[attr]?.value,
-              }
+              };
             } else {
               obj[attr] = item[attr];
             }
           }
-          Object.keys(obj).forEach(key => {
-            if (key.includes('Id')) {
+          Object.keys(obj).forEach((key) => {
+            if (key.includes("Id")) {
               delete obj[key];
             }
           });
@@ -342,7 +354,7 @@ const PricingForm = (props) => {
           let obj = { key: index + 1 };
           for (const attr in item) {
             if (
-              hasValue(item[attr]) && 
+              hasValue(item[attr]) &&
               typeof item[attr] === "object" &&
               attr !== "id" &&
               attr !== "idPricing" &&
@@ -358,36 +370,41 @@ const PricingForm = (props) => {
           }
           return obj;
         });
-        // console.log(dataCriteriaList,"test draft");
+      // console.log(dataCriteriaList,"test draft");
       setListDataCriteria(
         handleDisabledEachColumnCriteria({
           dataDetail: dataDraftCriteriaList.filter(
-            (data) => data?.allCriteria !== true
+            (data) => data?.allCriteria !== true,
           ),
           dataCompare: dataCriteriaList.filter(
-            (data) => data?.allCriteria !== true
+            (data) => data?.allCriteria !== true,
           ),
           idName: "idPricing",
           idCompare: "idPricing",
           status: dataDetailPricingGeneral?.status,
           statusApproval: dataDetailPricingGeneral?.statusApproval,
           columnsTable: columnsTableCriteriaAll(),
-          dataListCriteria: dataListCriteria?.map((item) =>{
+          dataListCriteria: dataListCriteria?.map((item) => {
             return {
               ...item,
               id: item.glbTypeValId,
               name: item.name,
-            }
+            };
           }),
-        })
+        }),
       );
     },
-    [form]
+    [form],
   );
 
   useEffect(() => {
-    if (id && type === "update" && dataDetailPricingGeneral && dataDetailDraftPricingGeneral?.id === id) {
-      asserDataDraft( dataDetailPricingGeneral, {
+    if (
+      id &&
+      type === "update" &&
+      dataDetailPricingGeneral &&
+      dataDetailDraftPricingGeneral?.id === id
+    ) {
+      asserDataDraft(dataDetailPricingGeneral, {
         ...dataDetailDraftPricingGeneral,
         mAttachments: [
           ...(dataDetailDraftPricingGeneral?.mAttachments || []),
@@ -532,7 +549,7 @@ const PricingForm = (props) => {
               criteriaOptions,
               formValue?.criteria,
               listDataCriteria,
-              () => {}
+              () => {},
             )
           ) {
             const errorBody = {
@@ -588,11 +605,11 @@ const PricingForm = (props) => {
                     ? dataDetailDraftPricingGeneral
                     : dataDetailPricingGeneral;
                 dataDefault = (tempData?.rPricingCriterias || []).filter(
-                  (data) => data.criteria === item
+                  (data) => data.criteria === item,
                 );
               }
               const itemName = criteriaOptions.filter(
-                (criteria) => criteria.value === item
+                (criteria) => criteria.value === item,
               );
               return {
                 idPricing:
@@ -628,12 +645,12 @@ const PricingForm = (props) => {
             const filteredCriteria = columnsTableCriteriaAll().filter(
               (item) =>
                 !([...formValue.criteria, 1, 2, 3, 4, 5] || []).includes(
-                  item.indexValue
-                )
+                  item.indexValue,
+                ),
             );
 
             const filteredCriteria2 = columnsTableCriteriaAll().filter((item) =>
-              [...formValue.criteria, 1].includes(item.indexValue)
+              [...formValue.criteria, 1].includes(item.indexValue),
             );
 
             tempCriteriasValue = tempCriteriasValue.map((item) => {
@@ -668,8 +685,8 @@ const PricingForm = (props) => {
                 type !== "update"
                   ? "DRAFT"
                   : id && dataDetailDraftPricingGeneral?.id === id
-                  ? dataDetailDraftPricingGeneral.status
-                  : dataDetailPricingGeneral.status,
+                    ? dataDetailDraftPricingGeneral.status
+                    : dataDetailPricingGeneral.status,
               priceDescription: formValue.priceDescription || null,
               // ccid: null,
               criteriasValue: includesAll
@@ -713,9 +730,9 @@ const PricingForm = (props) => {
       storedDataInline,
       type,
       typeSubmit,
-    ]
+    ],
   );
-  
+
   const handleClear = () => {
     if (type === "create") {
       form.resetFields();
@@ -724,8 +741,12 @@ const PricingForm = (props) => {
       setListDataDetail([]);
       setListDataAttachment([]);
     } else {
-      if (id && dataDetailPricingGeneral && dataDetailDraftPricingGeneral?.id === id) {
-        asserDataDraft(dataDetailPricingGeneral,{
+      if (
+        id &&
+        dataDetailPricingGeneral &&
+        dataDetailDraftPricingGeneral?.id === id
+      ) {
+        asserDataDraft(dataDetailPricingGeneral, {
           ...dataDetailDraftPricingGeneral,
           mAttachments: [
             ...(dataDetailDraftPricingGeneral?.mAttachments || []),
@@ -791,11 +812,11 @@ const PricingForm = (props) => {
             ? dataDetailDraftPricingGeneral
             : dataDetailPricingGeneral;
         dataDefault = (tempData?.rPricingCriterias || []).filter(
-          (data) => data.criteria === item
+          (data) => data.criteria === item,
         );
       }
       const itemName = criteriaOptions.filter(
-        (criteria) => criteria.value === item
+        (criteria) => criteria.value === item,
       );
       return {
         idPricing:
@@ -810,8 +831,8 @@ const PricingForm = (props) => {
       for (const attr in item) {
         if (typeof item[attr] === "object" && item[attr] !== null) {
           obj[attr] = isMoment(item[attr])
-          ? moment(item[attr]).format(dateFormatting.date)
-          : item[attr].value;
+            ? moment(item[attr]).format(dateFormatting.date)
+            : item[attr].value;
           if (statusPricing === "ACTIVE") {
             obj[`${attr}Name`] = item[attr].label;
           }
@@ -828,11 +849,14 @@ const PricingForm = (props) => {
     });
 
     const filteredCriteria = columnsTableCriteriaAll().filter(
-      (item) => !([...formValue.criteria, 1,2,3,4,5] || []).includes(item.indexValue)
+      (item) =>
+        !([...formValue.criteria, 1, 2, 3, 4, 5] || []).includes(
+          item.indexValue,
+        ),
     );
 
     const filteredCriteria2 = columnsTableCriteriaAll().filter((item) =>
-      ([...formValue.criteria, 1]).includes(item.indexValue)
+      [...formValue.criteria, 1].includes(item.indexValue),
     );
 
     tempCriteriasValue = tempCriteriasValue.map((item) => {
@@ -844,10 +868,7 @@ const PricingForm = (props) => {
         obj[criteria2.dataIndex] = item[criteria2.dataIndex];
         if (
           statusPricing === "ACTIVE" &&
-          !criteria2?.dataIndex
-            ?.toString()
-            ?.toLowerCase()
-            ?.includes("date")
+          !criteria2?.dataIndex?.toString()?.toLowerCase()?.includes("date")
         ) {
           obj[`${criteria2.dataIndex}Name`] =
             item[`${criteria2.dataIndex}Name`];
@@ -867,8 +888,8 @@ const PricingForm = (props) => {
         type !== "update"
           ? "DRAFT"
           : id && dataDetailDraftPricingGeneral?.id === id
-          ? dataDetailDraftPricingGeneral.status
-          : dataDetailPricingGeneral.status,
+            ? dataDetailDraftPricingGeneral.status
+            : dataDetailPricingGeneral.status,
       priceDescription: formValue.priceDescription || null,
       // ccid: null,
       criteriasValue: includesAll
@@ -907,7 +928,7 @@ const PricingForm = (props) => {
             };
             const response = await productPromoHttpService.uploadAttachment(
               `/v1/dbs/api/maintain-pricing/uploadAttachment/${idPricing}`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -935,7 +956,7 @@ const PricingForm = (props) => {
           const idPricing = data.id;
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
@@ -945,7 +966,7 @@ const PricingForm = (props) => {
             };
             const response = await productPromoHttpService.uploadAttachment(
               `/v1/dbs/api/maintain-pricing/uploadAttachment/${idPricing}`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -994,11 +1015,11 @@ const PricingForm = (props) => {
     //   });
     //   return res;
     // });
-    handleMandatory( setListSectionInfo, listDataAttachment, errorFields );
+    handleMandatory(setListSectionInfo, listDataAttachment, errorFields);
   };
   const formatCriteria = (data = []) => {
     const tempArray = criteriaOptions.filter((item) =>
-      data.includes(item.value)
+      data.includes(item.value),
     );
     return tempArray.map((data) => data.name);
   };
@@ -1111,33 +1132,33 @@ const PricingForm = (props) => {
                 />
               ) : (
                 <FunctionalCriteriaProduct
-                type={type}
-                data={listDataCriteria || []} //data
-                dataCriteria={criteriaValues || []} //ddl
-                updateData={setListDataCriteria}
-                setStoredData={setStoredDataInline}
-                storedData={storedDataInline}
-                // startDate={startDate ? moment(startDate) : undefined}
-                selector="pricing"
-                getApi={{
-                  getBudgetList,
-                  getProvinceList,
-                  getIndustrialSectorList,
-                  getAccountCategoryList,
-                  getServiceTypeList,
-                  getSorList,
-                  getCostCenterList,
-                  getGsizesList,
-                  getCustomerSegmentList,
-                  getCustomerList,
-                  getCityList,
-                  getSubDistrictList,
-                  getAccountGroupList,
-                  getDistrictList,
-                }}
-                columnsTable={columnsTableCriteriaAll}
-                checkStartDate={false}
-              />
+                  type={type}
+                  data={listDataCriteria || []} //data
+                  dataCriteria={criteriaValues || []} //ddl
+                  updateData={setListDataCriteria}
+                  setStoredData={setStoredDataInline}
+                  storedData={storedDataInline}
+                  // startDate={startDate ? moment(startDate) : undefined}
+                  selector="pricing"
+                  getApi={{
+                    getBudgetList,
+                    getProvinceList,
+                    getIndustrialSectorList,
+                    getAccountCategoryList,
+                    getServiceTypeList,
+                    getSorList,
+                    getCostCenterList,
+                    getGsizesList,
+                    getCustomerSegmentList,
+                    getCustomerList,
+                    getCityList,
+                    getSubDistrictList,
+                    getAccountGroupList,
+                    getDistrictList,
+                  }}
+                  columnsTable={columnsTableCriteriaAll}
+                  checkStartDate={false}
+                />
                 // <PricingDetailTableCriteria
                 //   type={type}
                 //   data={listDataCriteria}

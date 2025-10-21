@@ -12,7 +12,7 @@ const getColumnSearchProps = (
   searchedColumn,
   searchText,
   handleSearch,
-  excludeRender = false
+  excludeRender = false,
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
@@ -78,7 +78,7 @@ const columns = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  handleDetail = () => {}
+  handleDetail = () => {},
 ) => {
   const result = [
     {
@@ -96,7 +96,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -108,7 +108,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -120,7 +120,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -159,7 +159,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         let text;
@@ -203,7 +203,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -273,7 +273,7 @@ const TablePriceAdjust = ({
           searchedColumn,
           searchText,
           handleSearch,
-          handleDetail
+          handleDetail,
         )}
       />
     </div>

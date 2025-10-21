@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react'
-import ModalCustom from '../../../../../../../../../components/Modal/ModalCustom'
-import TablePagination from '../../../../../../../../../components/TablePagination'
-import { DatePicker, Input, Space, Tooltip } from 'antd';
-import { FilterOutlined, PlusCircleOutlined } from '@ant-design/icons';
-import ButtonComponent from '../../../../../../../../../components/ButtonComponent';
-import Highlighter from 'react-highlight-words';
+import React, { useState, useEffect, useRef } from "react";
+import ModalCustom from "../../../../../../../../../components/Modal/ModalCustom";
+import TablePagination from "../../../../../../../../../components/TablePagination";
+import { DatePicker, Input, Space, Tooltip } from "antd";
+import { FilterOutlined, PlusCircleOutlined } from "@ant-design/icons";
+import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
+import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../../../utils";
 
 const expandedRowRender = (record) => {
-  const contactDetail = record?.rtosAttributes
+  const contactDetail = record?.rtosAttributes;
   const columns = [
     {
       title: "NO",
@@ -18,28 +18,26 @@ const expandedRowRender = (record) => {
       render: (text, object, index) => index + 1,
     },
     {
-      title: 'ATTRIBUTE',
-      dataIndex: 'attributeName',
+      title: "ATTRIBUTE",
+      dataIndex: "attributeName",
     },
     {
-      title: 'VALUE',
-      dataIndex: 'value',
+      title: "VALUE",
+      dataIndex: "value",
     },
     {
-      title: 'UNIT',
-      dataIndex: 'unit',
+      title: "UNIT",
+      dataIndex: "unit",
     },
     {
-      title: 'FROM ITEM',
-      dataIndex: 'fromItem',
-    }
+      title: "FROM ITEM",
+      dataIndex: "fromItem",
+    },
   ];
 
   return (
     <div>
-      <p className="text-primary text-xs font-bold uppercase">
-        TOS DETAL
-      </p>
+      <p className="text-primary text-xs font-bold uppercase">TOS DETAL</p>
       <TablePagination
         useSelect={false}
         usePagination={false}
@@ -48,11 +46,11 @@ const expandedRowRender = (record) => {
         columns={columns}
         tableScrolled={{
           x: 1000,
-          y: 300
+          y: 300,
         }}
       />
     </div>
-  )
+  );
 };
 
 const ModalChooseTos = ({
@@ -63,7 +61,7 @@ const ModalChooseTos = ({
   idAccount,
   dataListChooseTos,
   handleSelectTos = () => {},
-  isIdChoose = []
+  isIdChoose = [],
 }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
@@ -75,9 +73,8 @@ const ModalChooseTos = ({
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    dispatch(getListChooseTos({id:idAccount, page, pageSize, sort, search}))
-  }, [dispatch, idAccount, page, pageSize, sort, search])
-  
+    dispatch(getListChooseTos({ id: idAccount, page, pageSize, sort, search }));
+  }, [dispatch, idAccount, page, pageSize, sort, search]);
 
   useEffect(() => {
     if (dataListChooseTos && dataListChooseTos?.result?.length > 0) {
@@ -119,12 +116,13 @@ const ModalChooseTos = ({
         return (
           <Space>
             <Tooltip title="Choose">
-              <PlusCircleOutlined 
-              
-                onClick={!isIdChoose.includes(r.id) ? ()=>handleSelectTos(r) : ''}
+              <PlusCircleOutlined
+                onClick={
+                  !isIdChoose.includes(r.id) ? () => handleSelectTos(r) : ""
+                }
                 style={{
-                  color: "#0075BF", 
-                  cursor: isIdChoose.includes(r.id) ? "not-allowed" : "pointer"
+                  color: "#0075BF",
+                  cursor: isIdChoose.includes(r.id) ? "not-allowed" : "pointer",
                 }}
               />
             </Tooltip>
@@ -143,7 +141,7 @@ const ModalChooseTos = ({
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
     setPage(tempPage);
     setPageSize(pageSizeChange);
-    dispatch(getListChooseTos({id:idAccount, page, pageSize, sort, search}))
+    dispatch(getListChooseTos({ id: idAccount, page, pageSize, sort, search }));
   };
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -151,7 +149,7 @@ const ModalChooseTos = ({
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -233,19 +231,18 @@ const ModalChooseTos = ({
     setSort(dataSort);
   };
 
-
   return (
     <div>
-      <ModalCustom 
+      <ModalCustom
         isOpen={isOpen}
         header={"CHOOSE TERM OF SERVICE"}
-        type={"confirmation"} 
-        handleCancel={()=>setModalChooseTos(false)}
+        type={"confirmation"}
+        handleCancel={() => setModalChooseTos(false)}
         width={1000}
         footer={
           <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
             <ButtonComponent
-              onClick={()=>setModalChooseTos(false)}
+              onClick={() => setModalChooseTos(false)}
               type="default"
             >
               Back
@@ -253,14 +250,13 @@ const ModalChooseTos = ({
           </div>
         }
       >
-        
         <div className={"w-full"}>
           <TablePagination
             dataSource={dataTable}
             columns={columns}
             pageSize={pageSize}
             current={page}
-            expandable={{expandedRowRender}}
+            expandable={{ expandedRowRender }}
             totalData={dataListChooseTos?.page?.totalElements}
             onChange={handleChange}
             onSizeChanger={handleChangeSize}
@@ -270,7 +266,7 @@ const ModalChooseTos = ({
         </div>
       </ModalCustom>
     </div>
-  )
-}
+  );
+};
 
-export default ModalChooseTos
+export default ModalChooseTos;

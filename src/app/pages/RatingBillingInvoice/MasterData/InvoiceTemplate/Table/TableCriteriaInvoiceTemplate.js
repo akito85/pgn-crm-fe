@@ -10,7 +10,7 @@ const getColumnSearchProps = (
   searchText,
   handleSearch,
   excludeRender = false,
-  typeFilter = "input"
+  typeFilter = "input",
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
@@ -26,7 +26,7 @@ const getColumnSearchProps = (
           onKeyDown={(e) => e.stopPropagation()}
         >
           {typeFilter === "date" ? (
-            <DatePicker onChange={onDataChange} format={"DD MMM YYYY"}/>
+            <DatePicker onChange={onDataChange} format={"DD MMM YYYY"} />
           ) : null}
           {typeFilter === "datetime" ? (
             <DatePicker onChange={onDataChange} showTime={true} />
@@ -129,7 +129,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
 ) => [
   {
     required: true,
@@ -148,7 +148,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -168,7 +168,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -188,7 +188,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -209,7 +209,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -229,7 +229,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -249,7 +249,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -269,7 +269,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -289,7 +289,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -309,7 +309,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -330,7 +330,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -351,7 +351,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -372,7 +372,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -392,7 +392,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -412,7 +412,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -433,7 +433,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (index) => {
       const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -471,7 +471,7 @@ export const columnsTableCriteriaInvoiceTemplate = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (index) => {
       const text = index ? moment(index).format("DD MMM YYYY") : "";

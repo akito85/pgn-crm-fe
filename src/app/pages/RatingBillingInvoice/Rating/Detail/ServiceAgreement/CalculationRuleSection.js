@@ -11,7 +11,7 @@ export const columnsCalculationRuleServiceAgreement = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -29,7 +29,7 @@ export const columnsCalculationRuleServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -42,7 +42,7 @@ export const columnsCalculationRuleServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -55,7 +55,7 @@ export const columnsCalculationRuleServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
 ];
@@ -63,7 +63,7 @@ export const columnsCalculationRuleServiceAgreement = (
 const CalculationRuleSection = ({ SAId }) => {
   // Selector
   const { data_calculationRuleServiceAgreement } = useSelector(
-    (state) => state.rating
+    (state) => state.rating,
   );
 
   // Declaration
@@ -98,7 +98,7 @@ const CalculationRuleSection = ({ SAId }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [SAId, search, page, pageSize, sort]);
 
@@ -144,13 +144,15 @@ const CalculationRuleSection = ({ SAId }) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           )}
           current={page}
           pageSize={pageSize}
           onChange={handleChange}
           onSizeChanger={handleChange}
-          totalData={data_calculationRuleServiceAgreement?.page?.totalElements || 0}
+          totalData={
+            data_calculationRuleServiceAgreement?.page?.totalElements || 0
+          }
           onSort={onSortApi}
           tableScrolled={{ y: 525, x: 800 }}
         />

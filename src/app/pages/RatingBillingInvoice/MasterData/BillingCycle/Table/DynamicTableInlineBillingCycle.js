@@ -283,20 +283,20 @@ const DynamicTableInlineBillingCycle = ({
 
   const lowerCaseAccessList = useMemo(
     () => actionsFilter?.map((item) => item?.toLowerCase()),
-    [actionsFilter]
+    [actionsFilter],
   );
 
   const lowerCasePermissionList = useMemo(
     () => permissionList.map((item) => item?.toLowerCase()),
-    [permissionList]
+    [permissionList],
   );
 
   const arrayActions = useMemo(
     () =>
       lowerCaseAccessList?.filter((item) =>
-        lowerCasePermissionList?.includes(item)
+        lowerCasePermissionList?.includes(item),
       ),
-    [lowerCaseAccessList, lowerCasePermissionList]
+    [lowerCaseAccessList, lowerCasePermissionList],
   );
 
   const [data, setData] = useState([]);
@@ -317,7 +317,7 @@ const DynamicTableInlineBillingCycle = ({
   useEffect(() => {
     if (mode === "update") {
       setData(
-        tableData?.map((row, index) => ({ ...row, key: index.toString() }))
+        tableData?.map((row, index) => ({ ...row, key: index.toString() })),
       );
     } else {
       setData(tableData);
@@ -350,7 +350,10 @@ const DynamicTableInlineBillingCycle = ({
     setIsInsert(true);
   };
   const cancel = (key) => {
-    if(parseInt(editingKey) > 10 && editingKey?.[editingKey?.length - 1] === "1"){
+    if (
+      parseInt(editingKey) > 10 &&
+      editingKey?.[editingKey?.length - 1] === "1"
+    ) {
       setPage(parseInt(editingKey?.[0]));
     }
     if (statusAction === "add") {
@@ -418,7 +421,7 @@ const DynamicTableInlineBillingCycle = ({
               page: current,
               pageSize: pageSize,
             }),
-          })
+          }),
         )
           .unwrap()
           .then(() => {
@@ -429,7 +432,7 @@ const DynamicTableInlineBillingCycle = ({
                 sort: sort,
                 page: current,
                 pageSize: pageSize,
-              })
+              }),
             );
           })
           .catch((error) => {
@@ -455,7 +458,7 @@ const DynamicTableInlineBillingCycle = ({
               page: current,
               pageSize: pageSize,
             }),
-          })
+          }),
         )
           .unwrap()
           .then(() => {
@@ -466,12 +469,15 @@ const DynamicTableInlineBillingCycle = ({
                 sort: sort,
                 page: current,
                 pageSize: pageSize,
-              })
+              }),
             );
           })
           .catch((error) => {
             console.log(error.response, "error");
-            if(parseInt(editingKey) > 10 && editingKey?.[editingKey?.length - 1] === "1"){
+            if (
+              parseInt(editingKey) > 10 &&
+              editingKey?.[editingKey?.length - 1] === "1"
+            ) {
               setPage(parseInt(editingKey?.[0]));
               tableData.pop();
             }
@@ -484,7 +490,6 @@ const DynamicTableInlineBillingCycle = ({
                 error.toString();
               setBodyError({ message });
               setModalError(true);
-              
             }
           });
       }
@@ -503,10 +508,16 @@ const DynamicTableInlineBillingCycle = ({
       // status: "CLOSE",
     };
     onDataChange((prevData) => [...prevData, newRow]);
-    if(parseInt(newRow["key"]) > 10 && newRow["key"]?.[newRow["key"]?.length - 1] === "1"){
+    if (
+      parseInt(newRow["key"]) > 10 &&
+      newRow["key"]?.[newRow["key"]?.length - 1] === "1"
+    ) {
       console.log(tableData, "tableData");
-      console.log(parseInt(newRow["key"]?.[0]) + 1, "parseInt(newRow['key']?.[0]) + 1");
-      
+      console.log(
+        parseInt(newRow["key"]?.[0]) + 1,
+        "parseInt(newRow['key']?.[0]) + 1",
+      );
+
       setPage(parseInt(newRow["key"]?.[0]) + 1);
     }
     setEditingKey(newRow.key);
@@ -833,7 +844,7 @@ const DynamicTableInlineBillingCycle = ({
             page: current,
             pageSize: pageSize,
           }),
-        })
+        }),
       )
         .unwrap()
         .then(() => {
@@ -844,7 +855,7 @@ const DynamicTableInlineBillingCycle = ({
               sort: sort,
               page: current,
               pageSize: pageSize,
-            })
+            }),
           );
         })
         .catch((error) => {
@@ -870,7 +881,7 @@ const DynamicTableInlineBillingCycle = ({
             page: current,
             pageSize: pageSize,
           }),
-        })
+        }),
       )
         .unwrap()
         .then(() => {
@@ -881,7 +892,7 @@ const DynamicTableInlineBillingCycle = ({
               sort: sort,
               page: current,
               pageSize: pageSize,
-            })
+            }),
           );
         })
         .catch((error) => {
@@ -985,7 +996,7 @@ const DynamicTableInlineBillingCycle = ({
                     disabled: col.disabled || false,
                   }),
                 };
-              })
+              }),
             )}
             pagination={{
               position: ["topRight"],
@@ -1120,7 +1131,7 @@ const DynamicTableInlineBillingCycle = ({
                   maxLength: col.maxLength,
                 }),
               };
-            })
+            }),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

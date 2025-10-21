@@ -21,7 +21,7 @@ export const getConfigFileMaster = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // RBI Data (excel, png)
@@ -35,7 +35,7 @@ export const getConfigFileRBIData = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // RBI
@@ -49,7 +49,7 @@ export const getConfigFileRBIInvoice = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // RBI MASTER GENERAL TEMPLATE
@@ -63,7 +63,7 @@ export const getConfigFileRBIGeneralTemplate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 const attachmentSlice = createSlice({

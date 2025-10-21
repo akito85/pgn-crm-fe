@@ -6,17 +6,10 @@ import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
-import {
-  DownloadOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
+import { DownloadOutlined, UploadOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import {
-  hasValue,
-  renderColumn,
-  renderDateColumn,
-} from "../../../../../utils";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import { getEceletricBankPaging } from "../../../../../redux/slices/receipt_collection/electrionicBank";
 // import { getColumnSearchProps } from "../../../../../utils/getColumnSearchPropsPaging";
 import { getDownloadBankStatement } from "../../../../../redux/slices/receipt_collection/bankSlice";
@@ -80,7 +73,7 @@ const ViewMaintainElectronicBankStatement = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -90,7 +83,7 @@ const ViewMaintainElectronicBankStatement = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -108,7 +101,7 @@ const ViewMaintainElectronicBankStatement = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -118,7 +111,7 @@ const ViewMaintainElectronicBankStatement = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -136,7 +129,7 @@ const ViewMaintainElectronicBankStatement = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -146,7 +139,7 @@ const ViewMaintainElectronicBankStatement = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -164,7 +157,7 @@ const ViewMaintainElectronicBankStatement = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -174,7 +167,7 @@ const ViewMaintainElectronicBankStatement = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -190,7 +183,7 @@ const ViewMaintainElectronicBankStatement = () => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (v) =>
         renderDateColumn(
@@ -199,7 +192,7 @@ const ViewMaintainElectronicBankStatement = () => {
           searchText,
           v,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -215,10 +208,17 @@ const ViewMaintainElectronicBankStatement = () => {
         searchText,
         handleSearch,
         true,
-        "datetime"
+        "datetime",
       ),
-      render: (text) => renderDateColumn('uploadDate', hasValue(search['uploadDate']), searchText, text, 'datetime', search)
-
+      render: (text) =>
+        renderDateColumn(
+          "uploadDate",
+          hasValue(search["uploadDate"]),
+          searchText,
+          text,
+          "datetime",
+          search,
+        ),
     },
     {
       title: "FILENAME",
@@ -235,7 +235,7 @@ const ViewMaintainElectronicBankStatement = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -245,7 +245,7 @@ const ViewMaintainElectronicBankStatement = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -263,7 +263,7 @@ const ViewMaintainElectronicBankStatement = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -273,7 +273,7 @@ const ViewMaintainElectronicBankStatement = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -291,7 +291,7 @@ const ViewMaintainElectronicBankStatement = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -301,7 +301,7 @@ const ViewMaintainElectronicBankStatement = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -316,7 +316,7 @@ const ViewMaintainElectronicBankStatement = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -329,7 +329,7 @@ const ViewMaintainElectronicBankStatement = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -344,7 +344,7 @@ const ViewMaintainElectronicBankStatement = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -354,7 +354,7 @@ const ViewMaintainElectronicBankStatement = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -369,7 +369,7 @@ const ViewMaintainElectronicBankStatement = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -379,7 +379,7 @@ const ViewMaintainElectronicBankStatement = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -394,7 +394,7 @@ const ViewMaintainElectronicBankStatement = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -407,7 +407,7 @@ const ViewMaintainElectronicBankStatement = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -425,7 +425,7 @@ const ViewMaintainElectronicBankStatement = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -435,7 +435,7 @@ const ViewMaintainElectronicBankStatement = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
 
@@ -451,7 +451,7 @@ const ViewMaintainElectronicBankStatement = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -464,7 +464,7 @@ const ViewMaintainElectronicBankStatement = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -481,7 +481,7 @@ const ViewMaintainElectronicBankStatement = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -490,7 +490,7 @@ const ViewMaintainElectronicBankStatement = () => {
           searchText,
           text,
           false,
-          "status"
+          "status",
         ),
     },
   ];
@@ -503,7 +503,7 @@ const ViewMaintainElectronicBankStatement = () => {
         pageSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
-      })
+      }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
@@ -548,7 +548,7 @@ const ViewMaintainElectronicBankStatement = () => {
         page: page,
         pageSize: pageSize,
         sort: sort,
-      })
+      }),
     );
   };
 
@@ -671,10 +671,7 @@ const ViewMaintainElectronicBankStatement = () => {
             dataSource={data?.result}
             columns={[
               ...columnsStatement,
-              ...useColumnActionPermission(
-                ["view"],
-                itemActions
-              ),
+              ...useColumnActionPermission(["view"], itemActions),
             ]}
             current={page}
             pageSize={pageSize}

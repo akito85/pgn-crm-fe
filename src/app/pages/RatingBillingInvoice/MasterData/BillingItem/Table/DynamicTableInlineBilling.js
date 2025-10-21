@@ -65,19 +65,36 @@ const EditableCell = ({
   };
 
   const handleDisableDate = (current) => {
-    if (dataIndex === 'endDate') {
-        if (hasValue(startDateLock) && hasValue(endDateLock) && hasValue(form.getFieldValue('startDate')) === false) {
-            return current < moment(startDateLock) || current > moment(endDateLock).add(1, "days")
-        } else if (hasValue(form.getFieldValue('startDate')) && hasValue(endDateLock)) {
-            return current && (moment(form.getFieldValue('startDate')) > current || current > moment(endDateLock).add(1, "days"));
-        } else if (hasValue(form.getFieldValue('startDate'))) {
-            return moment(form.getFieldValue().startDate) > current
-        } else {
-            return null;
-        }
+    if (dataIndex === "endDate") {
+      if (
+        hasValue(startDateLock) &&
+        hasValue(endDateLock) &&
+        hasValue(form.getFieldValue("startDate")) === false
+      ) {
+        return (
+          current < moment(startDateLock) ||
+          current > moment(endDateLock).add(1, "days")
+        );
+      } else if (
+        hasValue(form.getFieldValue("startDate")) &&
+        hasValue(endDateLock)
+      ) {
+        return (
+          current &&
+          (moment(form.getFieldValue("startDate")) > current ||
+            current > moment(endDateLock).add(1, "days"))
+        );
+      } else if (hasValue(form.getFieldValue("startDate"))) {
+        return moment(form.getFieldValue().startDate) > current;
+      } else {
+        return null;
+      }
     } else if (dataIndex === "startDate") {
-      if(hasValue(endDateLock)){
-        return moment(startDateLock) >= current || current > moment(endDateLock).add(1, "days")
+      if (hasValue(endDateLock)) {
+        return (
+          moment(startDateLock) >= current ||
+          current > moment(endDateLock).add(1, "days")
+        );
       } else {
         return moment(startDateLock) > current;
       }
@@ -87,12 +104,12 @@ const EditableCell = ({
   };
 
   const handleDisabledColumn = (dataIndex, record = null) => {
-    if(dataIndex === "categoryName" || dataIndex === "itemName"){
+    if (dataIndex === "categoryName" || dataIndex === "itemName") {
       return record?.dataType === "exist" ? true : false;
     } else {
-      return false
+      return false;
     }
-  }
+  };
 
   const getInputNode = (inputType, options) => {
     switch (inputType) {
@@ -271,7 +288,7 @@ const DynamicTableInlineBilling = ({
   startDateLock = null,
   endDateLock = null,
   setModalRequired = () => {},
-  handleValidateUpdate = () => {}
+  handleValidateUpdate = () => {},
 }) => {
   const [form] = Form.useForm();
   // const [data, setData] = useState([]);
@@ -345,7 +362,15 @@ const DynamicTableInlineBilling = ({
         dataValid = handleValidate(row, statusAction);
       }
       if (dataValid) {
-        if (checkInputBy === undefined && handleValidateUpdate([...tableData], {...row, key:key}, statusAction, header?.includes("DETAIL"))) {
+        if (
+          checkInputBy === undefined &&
+          handleValidateUpdate(
+            [...tableData],
+            { ...row, key: key },
+            statusAction,
+            header?.includes("DETAIL"),
+          )
+        ) {
           const item = newData[index];
           const updatedRow = {
             ...item,
@@ -366,14 +391,14 @@ const DynamicTableInlineBilling = ({
           setStatusAction("");
           form.resetFields();
           setIsValid(true);
-        } 
+        }
         // else if (
         //   newData.filter((item) => item[checkInputBy] === row[checkInputBy])
         //     .length > 0 &&
         //   statusAction === "add"
         // ) {
         //   // setIsSame(true);
-        // } 
+        // }
         // else {
         //   //new data
         //   if (index > -1) {
@@ -398,7 +423,7 @@ const DynamicTableInlineBilling = ({
         //   setIsValid(true);
         // }
         setIsInsert(false);
-      } 
+      }
       // else {
       //   setIsValid(false);
       // }
@@ -615,34 +640,32 @@ const DynamicTableInlineBilling = ({
                   <Tooltip title="Update">
                     <div
                       className={`flex justify-center${
-                        editingKey !== "" || isDynamicEditable 
-                        // || record?.dataType === "exist"
-                          ? " cursor-not-allowed"
+                        editingKey !== "" || isDynamicEditable
+                          ? // || record?.dataType === "exist"
+                            " cursor-not-allowed"
                           : ""
                       }`}
                     >
                       <SVGIcon
                         name="IconEdit"
                         color={
-                          editingKey !== "" ||
-                          isDynamicEditable 
-                          // ||record?.dataType === "exist"
-                            ? "#8D91A0"
+                          editingKey !== "" || isDynamicEditable
+                            ? // ||record?.dataType === "exist"
+                              "#8D91A0"
                             : "#ACC424"
                         }
                         className={
-                          editingKey !== "" ||
-                          isDynamicEditable 
-                          // ||record?.dataType === "exist"
-                            ? "disabled"
+                          editingKey !== "" || isDynamicEditable
+                            ? // ||record?.dataType === "exist"
+                              "disabled"
                             : undefined
                         }
                         width={24}
                         onClick={
                           editingKey === "" || !isDynamicEditable
-                          // (editingKey === "" || !isDynamicEditable) 
-                          // && record?.dataType !== "exist"
-                            ? () => edit(record)
+                            ? // (editingKey === "" || !isDynamicEditable)
+                              // && record?.dataType !== "exist"
+                              () => edit(record)
                             : undefined
                         }
                       />
@@ -844,10 +867,10 @@ const DynamicTableInlineBilling = ({
                     onInput: col.onInput,
                     maxLength: col.maxLength,
                     startDateLock,
-                    endDateLock
+                    endDateLock,
                   }),
                 };
-              })
+              }),
             )}
             rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
             components={{
@@ -964,7 +987,7 @@ const DynamicTableInlineBilling = ({
                   startDateLock,
                 }),
               };
-            })
+            }),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

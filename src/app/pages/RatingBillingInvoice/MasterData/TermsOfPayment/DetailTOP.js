@@ -21,20 +21,20 @@ const DetailTOP = ({
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(", ");
 
-    const labelStatus = (index) => {
-      let text;
-      switch (index) {
-        case "WAITING_APPROVAL":
-          text = "Waiting Approval";
-          break;
-        default:
-          text = index
-            ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-            : index;
-          break;
-      }
-      return text;
-    };
+  const labelStatus = (index) => {
+    let text;
+    switch (index) {
+      case "WAITING_APPROVAL":
+        text = "Waiting Approval";
+        break;
+      default:
+        text = index
+          ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
+          : index;
+        break;
+    }
+    return text;
+  };
 
   return (
     <div>
@@ -107,9 +107,7 @@ const DetailTOP = ({
 
       <BaseContainer header={"HISTORY LOG INFORMATION"}>
         <div className="w-full grid grid-cols-5">
-          <DetailText label={"Record ID"}>
-            {dataLog.recordId}
-          </DetailText>
+          <DetailText label={"Record ID"}>{dataLog.recordId}</DetailText>
           <DetailText label={"Created Date"}>
             {dataLog.createdDate !== null
               ? moment(dataLog.createdDate).format(dateFormatting.dateTime)

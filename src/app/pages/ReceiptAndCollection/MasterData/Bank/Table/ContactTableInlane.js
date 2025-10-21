@@ -129,7 +129,7 @@ const EditableCell = ({
   };
 
   const getInputNode = (inputType, options, optionsAdditional) => {
-    console.log(selectDataRecord, ' selected');
+    console.log(selectDataRecord, " selected");
     switch (inputType) {
       case "text":
         return <InputComponent />;
@@ -1011,7 +1011,7 @@ const ContactTableInlane = ({
         Object.values(row).some(
           (value) =>
             value === undefined ||
-            !checkValidationInside(selectDataRecord[`${key}type`], key)
+            !checkValidationInside(selectDataRecord[`${key}type`], key),
         )
       ) {
         setEmptyValueValidate(true);
@@ -1633,7 +1633,7 @@ const ContactTableInlane = ({
                   dispatch: dispatch,
                 }),
               };
-            })
+            }),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

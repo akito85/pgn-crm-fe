@@ -60,7 +60,7 @@ const BillingItemSectionForm = ({
             <InputComponent
               type="text"
               disabled={type === "update" && statusDetail}
-               maxLength={100}
+              maxLength={100}
             />
           </Form.Item>
           <Form.Item
@@ -99,8 +99,8 @@ const BillingItemSectionForm = ({
                     ? Promise.resolve()
                     : Promise.reject(
                         new Error(
-                          "The end date must be greater than or equal to the start date!"
-                        )
+                          "The end date must be greater than or equal to the start date!",
+                        ),
                       ),
               },
               // { message: requiredMessage("End Date"), required: true },

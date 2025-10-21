@@ -94,7 +94,7 @@ const DetailForce = (props) => {
   const [approveOrReject, setApproveOrReject] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [listDataAttachmentApprove, setListDataAttachmentApprove] = useState(
-    []
+    [],
   );
 
   //dispatch
@@ -116,7 +116,7 @@ const DetailForce = (props) => {
         pageSize,
         sort,
         id,
-      })
+      }),
     );
   }, [search, page, pageSize, sort, dispatch, id]);
 
@@ -140,7 +140,7 @@ const DetailForce = (props) => {
         boolean: showModal,
         page,
         pageSize,
-      })
+      }),
     );
   }, [search, page, pageSize, sort, dispatch, id, showModal]);
 
@@ -179,7 +179,7 @@ const DetailForce = (props) => {
   }, [dataListAppHierDetail]);
 
   const matchedObjectsCriteria = data_force_select?.filter((obj) =>
-    keyTableForceSelected.includes(obj.receiptReconcileId)
+    keyTableForceSelected.includes(obj.receiptReconcileId),
   );
 
   // const combineAttachment = matchedObjectsCriteria?.map(
@@ -187,7 +187,7 @@ const DetailForce = (props) => {
   // )[0];
 
   const combineAttachment = matchedObjectsCriteria?.flatMap(
-    (obj) => obj.attachmentDtoList || []
+    (obj) => obj.attachmentDtoList || [],
   );
 
   //attachment untuk approve use effect nya
@@ -488,7 +488,7 @@ const DetailForce = (props) => {
                 searchInput,
                 searchedColumn,
                 searchText,
-                handleSearch
+                handleSearch,
               )}
               dataTable={tableForceSelected}
               listDataAttachment={listDataAttachment}
@@ -558,7 +558,7 @@ const DetailForce = (props) => {
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/receipt/upload-attachment/${elements}`,
-              body
+              body,
             );
           }
         }
@@ -572,7 +572,7 @@ const DetailForce = (props) => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -599,7 +599,7 @@ const DetailForce = (props) => {
 
     const tempData = (data_force_select || [])
       .filter((data) =>
-        keyTableForceSelected.includes(data?.receiptReconcileId)
+        keyTableForceSelected.includes(data?.receiptReconcileId),
       )
       ?.map((item) => {
         const dataApprov = {
@@ -631,7 +631,7 @@ const DetailForce = (props) => {
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/receipt/upload-attachment/${elements}`,
-              body
+              body,
             );
           }
         }
@@ -646,7 +646,7 @@ const DetailForce = (props) => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -699,7 +699,7 @@ const DetailForce = (props) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           )}
           current={page}
           pageSize={pageSize}

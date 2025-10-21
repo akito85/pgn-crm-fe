@@ -1,21 +1,21 @@
-import React, {useState} from 'react'
-import { GoogleMap, LoadScript, MarkerF, useJsApiLoader } from '@react-google-maps/api'
+import React, { useState } from "react";
+import {
+  GoogleMap,
+  LoadScript,
+  MarkerF,
+  useJsApiLoader,
+} from "@react-google-maps/api";
 
-const GoogleMapsCustom = ({
-  zoom,
-  selectedLocation,
-  onMapClick,
-}) => {
-
+const GoogleMapsCustom = ({ zoom, selectedLocation, onMapClick }) => {
   const mapStyles = {
-    height: '400px',
-    width: '100%'
+    height: "400px",
+    width: "100%",
   };
-  
+
   const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: "AIzaSyCbN9h2LsBeVQOs1dST4wqu0uhBB1SCedw"
-  })
+    id: "google-map-script",
+    googleMapsApiKey: "AIzaSyCbN9h2LsBeVQOs1dST4wqu0uhBB1SCedw",
+  });
 
   return isLoaded ? (
     <GoogleMap
@@ -24,14 +24,11 @@ const GoogleMapsCustom = ({
       center={selectedLocation}
       onClick={onMapClick}
     >
-      {selectedLocation && (
-        <MarkerF
-          position={selectedLocation}
-        />
-      )}
+      {selectedLocation && <MarkerF position={selectedLocation} />}
     </GoogleMap>
-    ) :
-  <></>
-}
+  ) : (
+    <></>
+  );
+};
 
-export default GoogleMapsCustom
+export default GoogleMapsCustom;

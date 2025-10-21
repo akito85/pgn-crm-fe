@@ -1,5 +1,8 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValueFE,
+} from "../../../../../../utils/getColumnSearchProps";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 import StatusComponent from "../../../../../../components/StatusComponent";
@@ -9,7 +12,12 @@ import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../../components/DetailText";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
 import SVGIcon from "../../../../../../assets/Icon/index";
 
 const onFilter = (dataIndex, value, record) => {
@@ -69,7 +77,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -77,7 +85,9 @@ const columns = (
       width: 160,
       dataIndex: "discountTypeName",
       // onFilter: (value, record) => onFilter("discountTypeName", value, record),
-      filteredValue: search?.["discountTypeName"] ? [search?.["discountTypeName"]] : null,
+      filteredValue: search?.["discountTypeName"]
+        ? [search?.["discountTypeName"]]
+        : null,
       sorter: (a, b) => sorter("discountTypeName", a, b),
       // ...getColumnSearchPropsPaging(
       //   "discountTypeName",
@@ -104,7 +114,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -112,7 +122,9 @@ const columns = (
       width: 180,
       align: "right",
       dataIndex: "discountAmount",
-      filteredValue: search?.["discountAmount"] ? [search?.["discountAmount"]] : null,
+      filteredValue: search?.["discountAmount"]
+        ? [search?.["discountAmount"]]
+        : null,
       // onFilter: (value, record) => onFilter("discountAmount", value, record),
       sorter: (a, b) => sorter("discountAmount", a, b),
       // ...getColumnSearchPropsPaging(
@@ -155,7 +167,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -190,7 +202,7 @@ const columns = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -225,7 +237,7 @@ const columns = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -264,7 +276,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
       // render: (text) => {
       //   if (searchedColumn === "description") {
@@ -316,7 +328,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         if (index) {
@@ -411,7 +423,7 @@ const PDIProductBundling = ({ data = [] }) => {
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
-    })
+    });
   };
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
@@ -441,7 +453,7 @@ const PDIProductBundling = ({ data = [] }) => {
           searchText,
           search,
           handleSearch,
-          handleSelectedDetail
+          handleSelectedDetail,
         )}
       />
 
@@ -472,7 +484,7 @@ const PDIProductBundling = ({ data = [] }) => {
             <DetailText label="Created Date">
               {selectedData?.createdDate
                 ? moment(selectedData.createdDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : ""}
             </DetailText>
@@ -482,7 +494,7 @@ const PDIProductBundling = ({ data = [] }) => {
             <DetailText label="Updated Date">
               {selectedData?.updatedDate
                 ? moment(selectedData.updatedDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : ""}
             </DetailText>

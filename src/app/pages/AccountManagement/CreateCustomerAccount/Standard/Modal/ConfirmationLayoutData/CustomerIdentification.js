@@ -10,7 +10,7 @@ import {
 const CustomerIdentification = ({ data, dispatch = () => {} }) => {
   // Selector
   const { data_customerType, data_identificationType, loading } = useSelector(
-    (state) => state.account
+    (state) => state.account,
   );
 
   // Use Effect

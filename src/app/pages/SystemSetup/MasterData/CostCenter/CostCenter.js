@@ -28,10 +28,9 @@ const CostCenter = () => {
   const dispatch = useDispatch();
   const [form] = Form.useForm();
   const { data, loading, data_detail } = useSelector(
-    (state) => state.master_cost_center
+    (state) => state.master_cost_center,
   );
-  const { bodyError } = useSelector(state => state?.general);
-
+  const { bodyError } = useSelector((state) => state?.general);
 
   // use state
   const searchInput = useRef(null);
@@ -51,15 +50,20 @@ const CostCenter = () => {
 
   // handle fetch
   const handleFetch = useCallback(() => {
-    dispatch(getAllCostCenter({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }));
+    dispatch(
+      getAllCostCenter({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
+    );
   }, [dispatch, page, pageSize, search, sort]);
-
 
   // use effect
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
-
 
   // handle search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -98,9 +102,18 @@ const CostCenter = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('code', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "code",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "COST CENTER NAME",
@@ -114,9 +127,18 @@ const CostCenter = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('name', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "name",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "TYPE",
@@ -130,9 +152,18 @@ const CostCenter = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('ccType', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "ccType",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "VALUE NAME",
@@ -149,9 +180,18 @@ const CostCenter = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('valName', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "valName",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "VALUE CODE",
@@ -165,9 +205,18 @@ const CostCenter = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('valCode', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "valCode",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -184,9 +233,18 @@ const CostCenter = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -200,10 +258,19 @@ const CostCenter = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
-    }
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
+    },
   ];
 
   // breadcrumb routes
@@ -239,7 +306,7 @@ const CostCenter = () => {
     }
     setModalConfirm(true);
     setCostCenterId(r?.ccId);
-    setRecord(r)
+    setRecord(r);
   };
 
   // handle cancel modals
@@ -247,24 +314,22 @@ const CostCenter = () => {
     setModalConfirm(false);
     setModalDetail(false);
     form.resetFields();
-    handleCancelTryAgain()
-    setRecord({})
+    handleCancelTryAgain();
+    setRecord({});
   };
-
 
   // handle confirm activation
   const handleConfirm = async (formValue, handleCancel) => {
     try {
-
       const data = {
         id: costCenterId,
         remark: formValue?.remark,
-        status: activeOrInactive
+        status: activeOrInactive,
       };
       setBody(body);
       handleCancel();
-      handleCancelModal()
-      await dispatch(activateCostCenter(data))?.unwrap()
+      handleCancelModal();
+      await dispatch(activateCostCenter(data))?.unwrap();
       await handleFetch()?.unwrap();
     } catch (error) {
       await handleFetch()?.unwrap();
@@ -274,15 +339,13 @@ const CostCenter = () => {
   // handle detail
   const handleDetail = async (id) => {
     try {
-      setBody(id)
+      setBody(id);
       await dispatch(getCostCenterDetail(id))?.unwrap();
       setModalDetail(true);
     } catch (error) {
       setModalDetail(false);
     }
   };
-
-
 
   // sorting
   const onSort = (_, __, sort) => {
@@ -301,10 +364,9 @@ const CostCenter = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     )?.unwrap();
   };
-
 
   // handle retry modal error
   const handleRetry = () => {
@@ -314,22 +376,22 @@ const CostCenter = () => {
       } else if (bodyError?.action === "DOWNLOAD_MASTER_COST_CENTER") {
         handleDownlaod();
       } else {
-        dispatch(getCostCenterDetail(body))
+        dispatch(getCostCenterDetail(body));
       }
-      handleFetch()
+      handleFetch();
       handleCancelModal();
     } catch (error) {
-      handleFetch()
+      handleFetch();
     }
   };
 
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   // item action
   const itemActions = [
     // toolbar items
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
@@ -338,10 +400,10 @@ const CostCenter = () => {
         >
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_COST_CENTER}>
           <ButtonComponent
@@ -351,13 +413,13 @@ const CostCenter = () => {
             Create Cost Center
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // column action
     {
-      action: 'View',
-      type: 'table',
+      action: "View",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
@@ -369,36 +431,50 @@ const CostCenter = () => {
               <SVGIcon name="IconDetail" width={24} />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Update',
-      type: 'table',
+      action: "Update",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Update">
-            <div className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}>
+            <div
+              className={`${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+            >
               <Link
-                to={record?.status?.toLowerCase() !== "inactive" && SYSTEM_SETUP_ROUTES.UPDATE_COST_CENTER}
-                state={record?.status?.toLowerCase() !== "inactive" && { id: record?.ccId }}
+                to={
+                  record?.status?.toLowerCase() !== "inactive" &&
+                  SYSTEM_SETUP_ROUTES.UPDATE_COST_CENTER
+                }
+                state={
+                  record?.status?.toLowerCase() !== "inactive" && {
+                    id: record?.ccId,
+                  }
+                }
               >
                 <div>
                   <SVGIcon
                     name="IconEdit"
-                    className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}
-                    color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#ACC424"}
-                    width={24} />
+                    className={`${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+                    color={
+                      record?.status?.toLowerCase() === "inactive"
+                        ? "#8D91A0"
+                        : "#ACC424"
+                    }
+                    width={24}
+                  />
                 </div>
               </Link>
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Activate',
-      type: 'table',
+      action: "Activate",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip
@@ -413,9 +489,9 @@ const CostCenter = () => {
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
+        );
+      },
+    },
   ];
 
   return (
@@ -427,7 +503,13 @@ const CostCenter = () => {
           <div className={"w-full"}>
             <TablePagination
               dataSource={dataSource}
-              columns={[...columns, ...useColumnActionPermission(['view', 'update', 'activate'], itemActions)]}
+              columns={[
+                ...columns,
+                ...useColumnActionPermission(
+                  ["view", "update", "activate"],
+                  itemActions,
+                ),
+              ]}
               current={page}
               pageSize={pageSize}
               totalData={data?.page?.totalElements}
@@ -437,7 +519,6 @@ const CostCenter = () => {
             />
           </div>
         </BaseContainer>
-
       </Spin>
       {/* Modal Detail */}
       <DetailCostCenter

@@ -10,7 +10,10 @@ import SVGIcon from "../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../../../components/TablePagination";
 import ModalDetailAccountOnetime from "../../Modal/ModalDetailAccountOnetime";
-import { getAllCustomerOneTimePaginate, getDetailCustomerOneTime } from "../../../../../../../redux/slices/account_management/Account/accountSlice";
+import {
+  getAllCustomerOneTimePaginate,
+  getDetailCustomerOneTime,
+} from "../../../../../../../redux/slices/account_management/Account/accountSlice";
 
 const CustomerIdentificationForm = ({
   handleNext = () => {},
@@ -19,9 +22,8 @@ const CustomerIdentificationForm = ({
   setCreateOrChoose,
 }) => {
   // Selector
-  const { loading, data_customerOneTime, data_detailCustomerOnetime } = useSelector(
-    (state) => state.account
-  );
+  const { loading, data_customerOneTime, data_detailCustomerOnetime } =
+    useSelector((state) => state.account);
 
   // Declaration
   const searchInput = useRef(null);
@@ -137,7 +139,7 @@ const CustomerIdentificationForm = ({
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -160,7 +162,7 @@ const CustomerIdentificationForm = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch = () => {}
+      handleSearch = () => {},
     ) => {
       return [
         {
@@ -177,7 +179,7 @@ const CustomerIdentificationForm = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -188,7 +190,7 @@ const CustomerIdentificationForm = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -200,7 +202,7 @@ const CustomerIdentificationForm = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -212,7 +214,7 @@ const CustomerIdentificationForm = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
       ];
@@ -312,7 +314,7 @@ const CustomerIdentificationForm = ({
                       identificationTypeId: record?.identificationTypeId,
                       identificationNumber: record?.identificationNumber,
                     });
-                    setIdOneTime(id)
+                    setIdOneTime(id);
                   }}
                 />
               </div>
@@ -324,7 +326,7 @@ const CustomerIdentificationForm = ({
   ];
 
   const handleDetail = (id) => {
-    dispatch(getDetailCustomerOneTime(id))
+    dispatch(getDetailCustomerOneTime(id));
     setModalDetail(true);
   };
 

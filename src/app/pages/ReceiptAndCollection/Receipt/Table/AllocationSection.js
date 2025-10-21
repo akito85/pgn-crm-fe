@@ -23,12 +23,12 @@ import { updatePagination } from "../../../../../utils/updatePagination";
 
 const AllocationSection = ({
   dataTable,
-  setDataTable = () => { },
-  setIsInsert = () => { },
+  setDataTable = () => {},
+  setIsInsert = () => {},
   isInsert,
   amount,
   totalAllocationAmount,
-  setTotalAllocationAmount = () => { },
+  setTotalAllocationAmount = () => {},
   accountNumberSelected,
   rateAmountValue,
   formValues,
@@ -65,7 +65,6 @@ const AllocationSection = ({
   const balance = amount - totalAllocationAmount;
   // use effec
 
-
   useEffect(() => {
     if (data_recomendation_allocation) {
       if (dataTable?.length > 0) {
@@ -83,8 +82,8 @@ const AllocationSection = ({
         // setDataRecomendation(updatedDataRecomendation);
         setDataRecomendation(
           dataRecomendation.filter(
-            (item) => !dataTable.some((obj) => obj.key === item.key)
-          )
+            (item) => !dataTable.some((obj) => obj.key === item.key),
+          ),
         );
       } else {
         setDataRecomendation(
@@ -92,12 +91,12 @@ const AllocationSection = ({
             ...item,
             key: item?.id,
             billingPeriod: moment(item?.billingPeriod)?.format(
-              dateFormatting?.datePeriod
+              dateFormatting?.datePeriod,
             ),
             createdDate: moment(item.createdDate).format(
-              dateFormatting?.dateTime
+              dateFormatting?.dateTime,
             ),
-          }))
+          })),
         );
       }
     }
@@ -109,7 +108,7 @@ const AllocationSection = ({
       setSelectedRowKeys(
         dataRecomendation
           ?.filter((item) => item?.allocationAmount !== 0)
-          ?.map((item) => item?.key)
+          ?.map((item) => item?.key),
       );
     }
   }, [dataRecomendation]);
@@ -126,8 +125,8 @@ const AllocationSection = ({
     if (openModalAllocation) {
       setSelectDataTable(
         dataRecomendation?.filter((item) =>
-          selectedRowKeys?.includes(item?.key)
-        )
+          selectedRowKeys?.includes(item?.key),
+        ),
       );
     }
   }, [selectedRowKeys, openModalAllocation, dataRecomendation]);
@@ -145,13 +144,13 @@ const AllocationSection = ({
       case "createdDate":
         setTypeColumn("datetime");
         setSearchText(
-          moment(selectedKeys[0])?.format(dateFormatting?.dateTime)
+          moment(selectedKeys[0])?.format(dateFormatting?.dateTime),
         );
         break;
       case "billingPeriod":
         setTypeColumn("datePeriod");
         setSearchText(
-          moment(selectedKeys[0])?.format(dateFormatting?.datePeriod)
+          moment(selectedKeys[0])?.format(dateFormatting?.datePeriod),
         );
         break;
       default:
@@ -185,13 +184,13 @@ const AllocationSection = ({
       case "createdDate":
         setTypeColumn("datetime");
         setSearchTextChoose(
-          moment(selectedKeys[0])?.format(dateFormatting?.dateTime)
+          moment(selectedKeys[0])?.format(dateFormatting?.dateTime),
         );
         break;
       case "billingPeriod":
         setTypeColumn("datePeriod");
         setSearchTextChoose(
-          moment(selectedKeys[0])?.format(dateFormatting?.datePeriod)
+          moment(selectedKeys[0])?.format(dateFormatting?.datePeriod),
         );
         break;
       default:
@@ -219,16 +218,16 @@ const AllocationSection = ({
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch
+    handleSearch,
   )?.filter(
     (item) =>
       item?.dataIndex !== "allocationCode" &&
       item?.dataIndex !== "allocationNumber" &&
-      item?.dataIndex !== "allocationDate"
+      item?.dataIndex !== "allocationDate",
   );
 
   // handle open modal allocation
-  const handleOpen = () => { };
+  const handleOpen = () => {};
 
   // handle close modal allocation
   const handleCancel = () => {
@@ -298,7 +297,7 @@ const AllocationSection = ({
     try {
       const { apphierId, receiptCode, refrence, isMisc, ...keys } =
         form?.getFieldsValue();
-  
+
       const checkValues = Object.values(keys).every((value) => {
         return value !== undefined && value !== null && value !== "";
       });
@@ -318,7 +317,7 @@ const AllocationSection = ({
         };
         dispatch(showModalError(errorBody));
       } else {
-       await dispatch(
+        await dispatch(
           getAllocationRecomendationList({
             search: encodeURIComponent(JSON?.stringify(search)),
             pageChoose,
@@ -328,13 +327,12 @@ const AllocationSection = ({
             balance: amount - totalAllocationAmount,
             currencyId: formValues?.currency,
             rateAmount: rateAmountValue,
-          })
+          }),
         )?.unwrap();
         setOpenModalAllocation(true);
       }
     } catch (error) {
       setOpenModalAllocation(false);
-      
     }
   };
 
@@ -365,7 +363,7 @@ const AllocationSection = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           )}
           current={page}
           pageSize={pageSize}
@@ -378,7 +376,7 @@ const AllocationSection = ({
             searchText,
             pageChoose,
             pageSizeChoose,
-            typeColumn
+            typeColumn,
           )}
           setInserted={setIsInsert}
           onDataChange={setDataTable}
@@ -389,15 +387,15 @@ const AllocationSection = ({
             searchText,
             pageChoose,
             pageSizeChoose,
-            typeColumn
+            typeColumn,
           )}
           setUpdateSelectDataTable={setSelectDataTable}
           setUpdateSelectRowKeys={setSelectedRowKeys}
           setUpdateTotalAmount={setTotalAllocationAmount}
           rateAmount={rateAmountValue}
           currency={currencyId}
-        // onSort={onSort}
-        // dispatcher={dispatch}
+          // onSort={onSort}
+          // dispatcher={dispatch}
         />
       </div>
       <div className="w-full flex flex-col">
@@ -421,9 +419,9 @@ const AllocationSection = ({
           {balance === 0
             ? 0
             : balance?.toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}{" "}
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{" "}
         </span>
       </div>
       <ModalCustom
@@ -461,7 +459,7 @@ const AllocationSection = ({
               searchInput,
               searchedColumnChoose,
               searchTextChoose,
-              handleSearchModal
+              handleSearchModal,
             )}
             current={pageChoose}
             pageSize={pageSizeChoose}
@@ -472,7 +470,7 @@ const AllocationSection = ({
               searchTextChoose,
               pageChoose,
               pageSizeChoose,
-              typeColumn
+              typeColumn,
             )}
             totalData={updatePagination(
               dataRecomendation,
@@ -481,13 +479,13 @@ const AllocationSection = ({
               searchTextChoose,
               pageChoose,
               pageSizeChoose,
-              typeColumn
+              typeColumn,
             )}
             tableScrolled={{ x: 3500, y: 500 }}
             onChange={handleChange}
             rowSelection={rowSelection}
             onSizeChanger={handleChange}
-          // onSort={onSort}
+            // onSort={onSort}
           />
         </Spin>
         {totalAllocationAmount > amount && (

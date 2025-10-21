@@ -1,7 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 
 import { Steps, Button, message, Form } from "antd";
-import { LeftCircleOutlined, RightCircleOutlined, RightOutlined, WarningOutlined } from "@ant-design/icons";
+import {
+  LeftCircleOutlined,
+  RightCircleOutlined,
+  RightOutlined,
+  WarningOutlined,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -36,9 +41,7 @@ const CreateCustomerAccount = (props) => {
   const { type } = props;
   const [productInfoObj, setProductInfoObj] = useState({});
 
-  useEffect(() => {
-  }, [productInfoObj])
-
+  useEffect(() => {}, [productInfoObj]);
 
   const handleProductInfoObj = (e, type) => {
     let result;
@@ -55,7 +58,7 @@ const CreateCustomerAccount = (props) => {
       ...prevState,
       [type]: result,
     }));
-    console.log(type, "<<<<<<<<<<")
+    console.log(type, "<<<<<<<<<<");
     return result;
   };
 
@@ -63,20 +66,19 @@ const CreateCustomerAccount = (props) => {
     {
       title: "Customer & Account Information",
       content: <InformationForm updateBody={handleProductInfoObj} />,
-      disabled: false
+      disabled: false,
     },
     {
       title: "Address",
       content: <AddressForm />,
-      disabled: false
+      disabled: false,
     },
     {
       title: "Contact",
       content: <ContactForm />,
-      disabled: false
-    }
+      disabled: false,
+    },
   ];
-  
 
   const navigate = useNavigate();
   const next = () => {
@@ -92,9 +94,9 @@ const CreateCustomerAccount = (props) => {
   };
   const handleButtonNext = () => {
     next();
-    scrollRightHandler()
-  }
-  
+    scrollRightHandler();
+  };
+
   const items = steps.map((item) => ({
     key: item.title,
     title: item.title,
@@ -131,24 +133,40 @@ const CreateCustomerAccount = (props) => {
         <BaseContainer>
           <div className="flex flex-row gap-x-6 justify-center">
             <span className="mt-[10px]">
-              <LeftCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollLeftHandler}/>
+              <LeftCircleOutlined
+                style={{ fontSize: "24px", color: "#0075bf" }}
+                onClick={scrollLeftHandler}
+              />
             </span>
-            <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
-              <Steps current={current} items={items} labelPlacement="vertical" />
+            <div
+              onScroll={handleScroll}
+              ref={containerRef}
+              className="overflow-x-scroll scrollStepsCstm"
+            >
+              <Steps
+                current={current}
+                items={items}
+                labelPlacement="vertical"
+              />
             </div>
             <span className="mt-[10px]">
-              <RightCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollRightHandler}/>
+              <RightCircleOutlined
+                style={{ fontSize: "24px", color: "#0075bf" }}
+                onClick={scrollRightHandler}
+              />
             </span>
           </div>
           <div className="steps-content my-6">{steps[current].content}</div>
         </BaseContainer>
-        
+
         {/* Section Action Steps */}
         <div className="steps-action my-8 flex w-full justify-between gap-x-2">
           <ButtonComponent
             type={"submit"}
             icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-            onClick={()=>{setModalBack(true)}}
+            onClick={() => {
+              setModalBack(true);
+            }}
           >
             Back
           </ButtonComponent>
@@ -195,7 +213,6 @@ const CreateCustomerAccount = (props) => {
           </div>
         </div>
       </Form>
-
 
       {/* Modal Back */}
       <ModalConfirm

@@ -3,7 +3,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import DistributionMediaForm from "../../Form/DistributionMedia/DistributionMediaForm";
 
-const DistributionMedia = ({dataDM = []}) => {
+const DistributionMedia = ({ dataDM = [] }) => {
   // Selector
   const { loading } = useSelector((state) => state.account);
   return (
@@ -14,11 +14,11 @@ const DistributionMedia = ({dataDM = []}) => {
         </p>
 
         <div className="pt-[30px]">
-          <DistributionMediaForm type={"confirmation"} data={dataDM}/>
+          <DistributionMediaForm type={"confirmation"} data={dataDM} />
         </div>
       </div>
     </Spin>
-  )
-}
+  );
+};
 
-export default DistributionMedia
+export default DistributionMedia;

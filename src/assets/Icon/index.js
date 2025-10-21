@@ -61,7 +61,7 @@ import IconPaymentClose from "./IconPaymentClose";
 import IconActiveSuccess from "./IconActiveSuccess";
 import IconReGenerate from "./IconReGenerate";
 import IconRatingRecalculate from "./IconRatingRecalculate";
-import IconMonitoring from './IconMonitoring';
+import IconMonitoring from "./IconMonitoring";
 import { FileOutlined } from "@ant-design/icons";
 
 const Icon = (props) => {

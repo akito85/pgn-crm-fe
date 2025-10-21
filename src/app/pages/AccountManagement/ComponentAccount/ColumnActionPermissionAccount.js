@@ -73,17 +73,17 @@ export const useColumnActionPermissionAccount = (
   permissionList = [],
   itemsRender = [],
   accessAccount,
-  sliceColumn = "View"
+  sliceColumn = "View",
 ) => {
-  const access = accessAccount
+  const access = accessAccount;
   // convert to lower case
   const lowerCaseAccessList = useMemo(
     () => access?.actionList?.map((item) => item?.name?.toLowerCase()),
-    [access]
+    [access],
   );
   const lowerCasePermissionList = useMemo(
     () => permissionList?.map((item) => item?.toLowerCase()),
-    [permissionList]
+    [permissionList],
   );
   const lowerCaseItemsRender = useMemo(
     () =>
@@ -93,13 +93,13 @@ export const useColumnActionPermissionAccount = (
           action: item?.action?.toLowerCase(),
         }))
         ?.filter((item) => item?.type === "table"),
-    [itemsRender]
+    [itemsRender],
   );
 
   // filter access by permission list
   const arrayActions = useMemo(() => {
     const arrayActions = lowerCaseAccessList?.filter((item) =>
-      lowerCasePermissionList?.includes(item)
+      lowerCasePermissionList?.includes(item),
     );
 
     return lowerCaseItemsRender

@@ -30,11 +30,11 @@ export const getAllGroupAccessPaginate = createAsyncThunk(
           error: error,
           action: "GET_ALL_GROUP_ACCESS_MENU",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAllGroupAccessMenu = createAsyncThunk(
@@ -51,11 +51,11 @@ export const getAllGroupAccessMenu = createAsyncThunk(
           error: response,
           action: "GET_ALL_GROUP_ACCESS_MENU",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getAllUserLevel = createAsyncThunk(
@@ -71,11 +71,11 @@ export const getAllUserLevel = createAsyncThunk(
           error: response,
           action: "GET_ALL_USER_LEVEL_MENU",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const activeAndInactiveGroupAccess = createAsyncThunk(
@@ -99,15 +99,15 @@ export const activeAndInactiveGroupAccess = createAsyncThunk(
           error: errorBody(
             errorCode(response),
             statusData,
-            errorMessage(response)
+            errorMessage(response),
           ),
           action: "ACTIVE_GROUP_ACCESS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const downloadGroupAccess = createAsyncThunk(
@@ -125,11 +125,11 @@ export const downloadGroupAccess = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_ACTION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const createGroupAccess = createAsyncThunk(
@@ -150,11 +150,11 @@ export const createGroupAccess = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_GROUP_ACCESS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const updateGroupAccess = createAsyncThunk(
@@ -175,11 +175,11 @@ export const updateGroupAccess = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_GROUP_ACCESS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const detailGroupAccess = createAsyncThunk(
@@ -195,11 +195,11 @@ export const detailGroupAccess = createAsyncThunk(
           error: error,
           action: "GET_GROUP_ACCESS_DETAIL",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 const groupAccessSlice = createSlice({

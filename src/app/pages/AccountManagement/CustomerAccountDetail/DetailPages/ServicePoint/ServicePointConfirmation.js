@@ -13,9 +13,9 @@ const ServicePointConfirm = ({ data = {} }) => {
 
       <div className="w-full grid grid-cols-2 gap-2">
         <div className="col-span-2">
-        <DetailText label="Premise Address">
-          {data?.accountAddressId}
-        </DetailText>
+          <DetailText label="Premise Address">
+            {data?.accountAddressId}
+          </DetailText>
         </div>
         <DetailText label="Service Point Name">
           {data?.servicePointName}

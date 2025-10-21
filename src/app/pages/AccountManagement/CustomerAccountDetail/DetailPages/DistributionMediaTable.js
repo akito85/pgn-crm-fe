@@ -184,7 +184,7 @@ const DistributionMediaTable = ({
 
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -203,7 +203,7 @@ const DistributionMediaTable = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       {
         title: "ACTIONS",
@@ -267,7 +267,7 @@ const DistributionMediaTable = ({
     return filterCol.filter((col) =>
       col.title !== "NO" && col.title !== "ACTIONS"
         ? dataCriteria.includes(col.indexValue)
-        : true
+        : true,
     );
   };
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
@@ -352,7 +352,7 @@ const DistributionMediaTable = ({
                 dataEditRecord: editDataRecord,
                 handleEditDataRecord: handleEditDataRecord,
               }),
-            }))
+            })),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           scroll={{ y: 525, x: true }}

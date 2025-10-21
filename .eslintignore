@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Production builds
+build/
+dist/
+out/
+
+# Generated files
+*.min.js
+*.bundle.js
+
+# Config files
+config-overrides.js
+webpack.config.js
+
+# Public folder
+public/
+
+# Service worker
+public/sw.js
+public/workbox-*
+
+# Test coverage
+coverage/
+
+# Logs
+*.log

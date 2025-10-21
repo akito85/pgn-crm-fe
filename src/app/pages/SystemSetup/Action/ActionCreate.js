@@ -25,9 +25,7 @@ import userHttpService from "../../../../redux/services/userHttpService";
 
 const ActionCreate = (props) => {
   const { type } = props;
-  const { data_detail, loading } = useSelector(
-    (state) => state.action
-  );
+  const { data_detail, loading } = useSelector((state) => state.action);
   const { bodyError, isLoading } = useSelector((state) => state?.general);
   const navigate = useNavigate();
   const location = useLocation();
@@ -64,26 +62,39 @@ const ActionCreate = (props) => {
     },
     {
       path: "",
-      breadcrumbName: `${type === "update" ? "Update Action" : "Create Action"
-        }`,
+      breadcrumbName: `${
+        type === "update" ? "Update Action" : "Create Action"
+      }`,
     },
   ];
   const onFinish = async (formValue) => {
     try {
       let body;
       let url;
-      if (type === 'update') {
+      if (type === "update") {
         body = { ...formValue, actionId: location?.state?.id };
-        url = '/v1/dbs/api/action/validate-update'
+        url = "/v1/dbs/api/action/validate-update";
       } else {
-        body = formValue
-        url = '/v1/dbs/api/action/validate-create'
+        body = formValue;
+        url = "/v1/dbs/api/action/validate-create";
       }
       setPayload({
         requestBody: body,
-        validateCreateUpdate: { body: body, services: userHttpService, endPoint: url, type }
-      })
-      await dispatch(validateCreateUpdate({ body: body, services: userHttpService, endPoint: url, type }))?.unwrap();
+        validateCreateUpdate: {
+          body: body,
+          services: userHttpService,
+          endPoint: url,
+          type,
+        },
+      });
+      await dispatch(
+        validateCreateUpdate({
+          body: body,
+          services: userHttpService,
+          endPoint: url,
+          type,
+        }),
+      )?.unwrap();
       setFormValues(formValue);
       setOpenModal(true);
     } catch (error) {
@@ -105,7 +116,6 @@ const ActionCreate = (props) => {
       setOpenModal(false);
     } catch (error) {
       setOpenModal(false);
-
     }
   };
 
@@ -121,17 +131,17 @@ const ActionCreate = (props) => {
   };
 
   const handleRetry = () => {
-    handleCancelTryAgain()
-    if (bodyError?.action === 'CREATE_ACTION') {
+    handleCancelTryAgain();
+    if (bodyError?.action === "CREATE_ACTION") {
       dispatch(createAction(payload?.requestBody));
-    } else if (bodyError?.action === 'UPDATE_ACTION') {
-      dispatch(updateAction(payload?.requestBody))
-    } else if (bodyError?.action === 'VALIDATE_CREATE_UPDATE') {
-      dispatch(validateCreateUpdate(payload?.validateCreateUpdate))
+    } else if (bodyError?.action === "UPDATE_ACTION") {
+      dispatch(updateAction(payload?.requestBody));
+    } else if (bodyError?.action === "VALIDATE_CREATE_UPDATE") {
+      dispatch(validateCreateUpdate(payload?.validateCreateUpdate));
     } else {
       dispatch(getDetailAction(location?.state?.id));
     }
-  }
+  };
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
@@ -154,9 +164,9 @@ const ActionCreate = (props) => {
                 rules={formMessageRequired("Name")}
                 className="max-w-md"
               >
-                <InputComponent onInput={(e) =>
-                  (e.target.value = e.target.value.trimStart())
-                } />
+                <InputComponent
+                  onInput={(e) => (e.target.value = e.target.value.trimStart())}
+                />
               </Form.Item>
               <div></div>
               <Form.Item

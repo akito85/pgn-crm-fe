@@ -59,9 +59,7 @@ const EditableCell = ({
 }) => {
   // const [form] = Form.useForm();
   // const [visiblePassword, setVisiblePassword] = useState(false);
-  const {
-    data_country_zone,
-  } = useSelector((state) => state.accountContact);
+  const { data_country_zone } = useSelector((state) => state.accountContact);
   const key = record?.key || 0;
   const encrypt = record?.encrypt;
   const rules = () => {
@@ -128,7 +126,7 @@ const EditableCell = ({
     }
     return moment().add(-1, "days") >= current;
   };
-  
+
   const getInputNode = (inputType, options, optionsAdditional) => {
     switch (inputType) {
       case "text":
@@ -140,15 +138,14 @@ const EditableCell = ({
               <div className="w-full flex flex-row">
                 <Select
                   onChange={(e) => {
-                    getCountryZone(e)
+                    getCountryZone(e);
                     setPrefix1((prevState) => {
                       return {
                         ...prevState,
                         [`${key}`]: e,
                       };
-                    })
-                  }
-                  }
+                    });
+                  }}
                   value={prefix1[`${key}`]}
                   showSearch
                   optionFilterProp="children"
@@ -231,7 +228,9 @@ const EditableCell = ({
                       setSuffix((prevState) => {
                         return {
                           ...prevState,
-                          [`${key}`]: hasValue(e.target.value) ? e.target.value : null,
+                          [`${key}`]: hasValue(e.target.value)
+                            ? e.target.value
+                            : null,
                         };
                       });
                     }}
@@ -325,7 +324,7 @@ const EditableCell = ({
         }
         if (selectDataRecord[`${record.key}type`] === 743) {
           return (
-            <InputComponent 
+            <InputComponent
               onChange={(e) =>
                 setValue((prevState) => {
                   return {
@@ -336,11 +335,11 @@ const EditableCell = ({
               }
               value={value[`${key}`]}
             />
-          )
+          );
         }
         if (selectDataRecord[`${record.key}type`] === 742) {
           return (
-            <InputComponent 
+            <InputComponent
               onChange={(e) =>
                 setValue((prevState) => {
                   return {
@@ -351,7 +350,7 @@ const EditableCell = ({
               }
               value={value[`${key}`]}
             />
-          ) 
+          );
         }
         if (selectDataRecord[`${record.key}type`] === 746) {
           return (
@@ -485,16 +484,15 @@ const EditableCell = ({
           return (
             <div className="w-full flex flex-row">
               <Select
-                onChange={(e) =>{
-                  getCountryZone(e)
+                onChange={(e) => {
+                  getCountryZone(e);
                   setPrefix1((prevState) => {
                     return {
                       ...prevState,
                       [`${key}`]: e,
                     };
-                  })
-                }
-                }
+                  });
+                }}
                 value={prefix1[`${key}`]}
                 showSearch
                 optionFilterProp="children"
@@ -560,7 +558,9 @@ const EditableCell = ({
                     setSuffix((prevState) => {
                       return {
                         ...prevState,
-                        [`${key}`]: hasValue(e.target.value) ? e.target.value : null,
+                        [`${key}`]: hasValue(e.target.value)
+                          ? e.target.value
+                          : null,
                       };
                     });
                   }}
@@ -813,15 +813,14 @@ const TableInlineContact = ({
   const [tempUpdate, setTempUpdate] = useState({});
 
   useEffect(() => {
-    if(dataTableDetail)
-    setData(dataTableDetail)
-  }, [dataTableDetail])
+    if (dataTableDetail) setData(dataTableDetail);
+  }, [dataTableDetail]);
 
   useEffect(() => {
-    if(editingKey !== null){
-      setIsEditing(editingKey !== "" ? true : false)
+    if (editingKey !== null) {
+      setIsEditing(editingKey !== "" ? true : false);
     }
-  },[editingKey])
+  }, [editingKey]);
 
   const edit = (record, field) => {
     form.setFieldsValue(record);
@@ -842,28 +841,28 @@ const TableInlineContact = ({
       const newData = data.filter((item) => item.key !== key);
       setData(newData);
       onDataChange(newData);
-    }else{
+    } else {
       setPrefix1((prevState) => {
         return {
           ...prevState,
           [`${key}`]: tempUpdate.prefix1, // Reset the value for changes
         };
       });
-  
+
       setPrefix2((prevState) => {
         return {
           ...prevState,
           [`${key}`]: tempUpdate.prefix2, // Reset the value for changes
         };
       });
-  
+
       setSuffix((prevState) => {
         return {
           ...prevState,
           [`${key}`]: tempUpdate.suffix, // Reset the value for changes
         };
       });
-  
+
       setValue((prevState) => {
         return {
           ...prevState,
@@ -908,7 +907,11 @@ const TableInlineContact = ({
   const checkValidationInside = (data, key) => {
     switch (data) {
       case 741: // phone
-        return  hasValue(prefix1[`${key}`]) && hasValue(value[`${key}`]) && hasValue(prefix2[`${key}`]);
+        return (
+          hasValue(prefix1[`${key}`]) &&
+          hasValue(value[`${key}`]) &&
+          hasValue(prefix2[`${key}`])
+        );
       case 746: // Whatsapp
       case 747: // pgn mobile
         return hasValue(prefix1[`${key}`]) && hasValue(value[`${key}`]);
@@ -916,13 +919,17 @@ const TableInlineContact = ({
       case 743: // email
         return hasValue(value[`${key}`]);
       case 745: // fax
-        return hasValue(prefix1[`${key}`]) && hasValue(value[`${key}`]) && hasValue(prefix2[`${key}`]);
+        return (
+          hasValue(prefix1[`${key}`]) &&
+          hasValue(value[`${key}`]) &&
+          hasValue(prefix2[`${key}`])
+        );
       case 744: // url
         return hasValue(value[`${key}`]);
       default:
         return true; // Or any other default value
     }
-  }
+  };
 
   const handleSelectDataRecord = (data, key, index) => {
     const keyName = key + index;
@@ -938,7 +945,7 @@ const TableInlineContact = ({
         return {
           ...prevState,
           // [keyName]: value,
-          [`${key}inputType`] : typeValue(value),
+          [`${key}inputType`]: typeValue(value),
         };
       });
       form.setFieldsValue({
@@ -949,19 +956,19 @@ const TableInlineContact = ({
           ...prevState,
           [`${key}`]: "", // Reset the value for changes
         };
-      })
+      });
       setPrefix2((prevState) => {
         return {
           ...prevState,
           [`${key}`]: "", // Reset the value for changes
         };
-      })
+      });
       setSuffix((prevState) => {
         return {
           ...prevState,
           [`${key}`]: "", // Reset the value for changes
         };
-      })
+      });
       setValue((prevState) => {
         return {
           ...prevState,
@@ -969,8 +976,9 @@ const TableInlineContact = ({
         };
       });
       form.resetFields([
-        // "inputType", 
-        "value"]);
+        // "inputType",
+        "value",
+      ]);
     }
     return value;
   };
@@ -995,28 +1003,34 @@ const TableInlineContact = ({
   const save = async (key) => {
     try {
       const row = await form.validateFields();
-      if(Object.values(row).some(value => value === undefined || !checkValidationInside(selectDataRecord[`${key}type`], key))){
+      if (
+        Object.values(row).some(
+          (value) =>
+            value === undefined ||
+            !checkValidationInside(selectDataRecord[`${key}type`], key),
+        )
+      ) {
         setEmptyValueValidate(true);
         setModalValidate(true);
       } else {
-      const newData = [...data];
-      const index = newData.findIndex((item) => key === item.key);
-      if (index > -1) {
-        const item = newData[index];
-        const updatedRow = { ...item, ...row };
-        newData.splice(index, 1, updatedRow);
-        setData(newData);
-        setEditingKey("");
-      } else {
-        newData.push(row);
-        setData(newData);
-        setEditingKey("");
+        const newData = [...data];
+        const index = newData.findIndex((item) => key === item.key);
+        if (index > -1) {
+          const item = newData[index];
+          const updatedRow = { ...item, ...row };
+          newData.splice(index, 1, updatedRow);
+          setData(newData);
+          setEditingKey("");
+        } else {
+          newData.push(row);
+          setData(newData);
+          setEditingKey("");
+        }
+        setStoredData(false);
+        onDataChange([...newData]);
+        form.resetFields();
+        setStatusAction("");
       }
-      setStoredData(false);
-      onDataChange([...newData]);
-      form.resetFields();
-      setStatusAction("");
-    }
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
     }
@@ -1062,16 +1076,18 @@ const TableInlineContact = ({
 
   const deleteRow = (key) => {
     // const newData = data.filter((item) => item.key !== key);
-    const newData = data.filter((item) => item.key !== key).map((item) => {
-      const currentKey = parseInt(item.key, 10);
-    
-      // Update the key only if it comes after the deleted key
-      if (currentKey > key) {
-        item.key = (currentKey - 1).toString();
-      }
-    
-      return item;
-    });
+    const newData = data
+      .filter((item) => item.key !== key)
+      .map((item) => {
+        const currentKey = parseInt(item.key, 10);
+
+        // Update the key only if it comes after the deleted key
+        if (currentKey > key) {
+          item.key = (currentKey - 1).toString();
+        }
+
+        return item;
+      });
 
     // const index = (dataTableDetail || []).length + 1;
     setData(newData);
@@ -1094,19 +1110,19 @@ const TableInlineContact = ({
     setPrefix1((prevState) => {
       let temp = { ...prevState };
       delete temp[`${key}`];
-    
+
       // Iterate over the remaining keys and update their values
       Object.keys(temp).forEach((existingKey) => {
         const existingKeyNumber = parseInt(existingKey, 10);
-    
+
         // Update the key only if it comes after the deleted key
         if (existingKeyNumber > key) {
-            const newKey = existingKeyNumber - 1;
-            temp[newKey] = temp[existingKey];
-            delete temp[existingKey];
+          const newKey = existingKeyNumber - 1;
+          temp[newKey] = temp[existingKey];
+          delete temp[existingKey];
         }
       });
-    
+
       return temp;
     });
 
@@ -1119,19 +1135,19 @@ const TableInlineContact = ({
     setPrefix2((prevState) => {
       let temp = { ...prevState };
       delete temp[`${key}`];
-    
+
       // Iterate over the remaining keys and update their values
       Object.keys(temp).forEach((existingKey) => {
         const existingKeyNumber = parseInt(existingKey, 10);
-    
+
         // Update the key only if it comes after the deleted key
         if (existingKeyNumber > key) {
-            const newKey = existingKeyNumber - 1;
-            temp[newKey] = temp[existingKey];
-            delete temp[existingKey];
+          const newKey = existingKeyNumber - 1;
+          temp[newKey] = temp[existingKey];
+          delete temp[existingKey];
         }
       });
-    
+
       return temp;
     });
 
@@ -1144,19 +1160,19 @@ const TableInlineContact = ({
     setSuffix((prevState) => {
       let temp = { ...prevState };
       delete temp[`${key}`];
-    
+
       // Iterate over the remaining keys and update their values
       Object.keys(temp).forEach((existingKey) => {
         const existingKeyNumber = parseInt(existingKey, 10);
-    
+
         // Update the key only if it comes after the deleted key
         if (existingKeyNumber > key) {
-            const newKey = existingKeyNumber - 1;
-            temp[newKey] = temp[existingKey];
-            delete temp[existingKey];
+          const newKey = existingKeyNumber - 1;
+          temp[newKey] = temp[existingKey];
+          delete temp[existingKey];
         }
       });
-    
+
       return temp;
     });
 
@@ -1169,19 +1185,19 @@ const TableInlineContact = ({
     setValue((prevState) => {
       let temp = { ...prevState };
       delete temp[`${key}`];
-    
+
       // Iterate over the remaining keys and update their values
       Object.keys(temp).forEach((existingKey) => {
         const existingKeyNumber = parseInt(existingKey, 10);
-    
+
         // Update the key only if it comes after the deleted key
         if (existingKeyNumber > key) {
-            const newKey = existingKeyNumber - 1;
-            temp[newKey] = temp[existingKey];
-            delete temp[existingKey];
+          const newKey = existingKeyNumber - 1;
+          temp[newKey] = temp[existingKey];
+          delete temp[existingKey];
         }
       });
-    
+
       return temp;
     });
   };
@@ -1197,13 +1213,7 @@ const TableInlineContact = ({
       <ButtonComponent
         onClick={() => deleteRow(record.key)}
         disabled={editingKey !== ""}
-        icon={                      
-          <SVGIcon
-            name="IconDelete"
-            color={"#D90000"}
-            width={24}
-          />
-        }
+        icon={<SVGIcon name="IconDelete" color={"#D90000"} width={24} />}
         border={false}
       />
     );
@@ -1281,22 +1291,14 @@ const TableInlineContact = ({
                 {record.status === "ACTIVE" || record.status === "INACTIVE" ? (
                   <ButtonComponent
                     disabled
-                    icon={
-                      <SVGIcon
-                      name="IconDelete"
-                      color={"#8D91A0"}/>
-                    }
+                    icon={<SVGIcon name="IconDelete" color={"#8D91A0"} />}
                     border={false}
                   />
                 ) : (
                   <ButtonComponent
                     onClick={() => deleteRow(record.key)}
                     disabled={editingKey !== ""}
-                    icon={
-                      <SVGIcon
-                      name="IconDelete"
-                      color={"#8D91A0"}/>
-                    }
+                    icon={<SVGIcon name="IconDelete" color={"#8D91A0"} />}
                     border={false}
                   />
                 )}
@@ -1444,12 +1446,12 @@ const TableInlineContact = ({
                   value: value,
                   keyModal: keyModal,
                   handleSelectDataRecord: handleSelectDataRecord,
-                  dispatch:dispatch,
-                  getCountryZone:getCountryZone,
+                  dispatch: dispatch,
+                  getCountryZone: getCountryZone,
                   form: form,
                 }),
               };
-            })
+            }),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

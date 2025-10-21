@@ -1,15 +1,13 @@
 import { Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
-import {
-    getColumnSearchPropsPaging,
-  } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 export const columnAdjusmentList = (
   page = 1,
   pageSize = 10,
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -29,7 +27,7 @@ export const columnAdjusmentList = (
       searchText,
       handleSearch,
       true,
-      "period"
+      "period",
     ),
   },
   {

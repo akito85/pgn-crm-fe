@@ -29,7 +29,7 @@ import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOr
 const InvoiceTemplateDetail = () => {
   // Selector
   const { loading, data_detail, data_detail_draft } = useSelector(
-    (state) => state.invoice_template
+    (state) => state.invoice_template,
   );
 
   // Declaration
@@ -109,7 +109,7 @@ const InvoiceTemplateDetail = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Information
@@ -180,7 +180,7 @@ const InvoiceTemplateDetail = () => {
             id: item.id,
             criteria: item.criteria,
           };
-        }
+        },
       );
 
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
@@ -345,11 +345,11 @@ const InvoiceTemplateDetail = () => {
           })
         : approveOrRejectInvoiceTemplate({
             body: data,
-          })
+          }),
     )
       .unwrap()
       .then(() => {
-        handleClear()
+        handleClear();
         dispatch(getDetailDraftInvoiceTemplate(id));
         dispatch(getDetailInvoiceTemplate(id));
       })
@@ -382,7 +382,7 @@ const InvoiceTemplateDetail = () => {
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail.requestedDate
                       ? moment(
-                          bodyApproval.approvalDetail.requestedDate
+                          bodyApproval.approvalDetail.requestedDate,
                         ).format(dateFormatting.dateTime)
                       : ""}
                   </DetailText>
@@ -446,15 +446,14 @@ const InvoiceTemplateDetail = () => {
 
         {/* Modal Approve/Reject */}
         <ModalApproveOrReject
-         isOpen={modalConfirm}
-         handleCloseModal={handleCancel}
-         onFinish={handleConfirm}
-         header={approveOrReject}
-         approveOrReject={approveOrReject}
-         menu={"Invoice Template"}
-         named={dataDetail?.invoiceName}
+          isOpen={modalConfirm}
+          handleCloseModal={handleCancel}
+          onFinish={handleConfirm}
+          header={approveOrReject}
+          approveOrReject={approveOrReject}
+          menu={"Invoice Template"}
+          named={dataDetail?.invoiceName}
         />
-       
 
         {/* Modal Retry */}
         <ModalError

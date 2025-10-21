@@ -1,7 +1,4 @@
-import {
-  LeftOutlined,
-  CopyOutlined,
-} from "@ant-design/icons";
+import { LeftOutlined, CopyOutlined } from "@ant-design/icons";
 import { Form, InputNumber, Radio, Spin, Tooltip } from "antd";
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -26,7 +23,7 @@ const GeneratePasswordPage = () => {
   const [modalBack, setModalBack] = useState(false);
   const location = useLocation();
   const id = location?.state?.id;
-  const dataSplit = hasValue(data?.url) && data?.url?.split('/')
+  const dataSplit = hasValue(data?.url) && data?.url?.split("/");
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [form] = Form.useForm();
@@ -116,7 +113,7 @@ const GeneratePasswordPage = () => {
               <Form.Item
                 label={"Remark"}
                 name={"remark"}
-                rules={formMessageRequired('Remark')}
+                rules={formMessageRequired("Remark")}
               >
                 <InputComponent />
               </Form.Item>
@@ -126,7 +123,7 @@ const GeneratePasswordPage = () => {
                   <Form.Item
                     className={"flex-1"}
                     name={"expTime"}
-                    rules={formMessageRequired('Set Expiration Time')}
+                    rules={formMessageRequired("Set Expiration Time")}
                   >
                     <Radio.Group onChange={handleChangeExpired}>
                       <Radio value={1}> 1 Min </Radio>
@@ -206,9 +203,7 @@ const GeneratePasswordPage = () => {
               <span className="font-bold text-[18px]">
                 Generate link successful
               </span>
-              <span>
-                Your password link has been generated.
-              </span>
+              <span>Your password link has been generated.</span>
             </div>
           </div>
           <div className="flex items-center rounded-md bg-[#E6F1F9] py-3 px-5 my-5">
@@ -222,16 +217,14 @@ const GeneratePasswordPage = () => {
             </Link>
             <CopyOutlined
               style={{
-                color: 'var(--primary)',
+                color: "var(--primary)",
                 fontSize: 24,
               }}
               onClick={copyToClipboard}
             />
           </div>
           {copied && (
-            <p className="text-primary mt-2 ml-5">
-              Link copied to clipboard!
-            </p>
+            <p className="text-primary mt-2 ml-5">Link copied to clipboard!</p>
           )}
         </div>
       </ModalSuccess>

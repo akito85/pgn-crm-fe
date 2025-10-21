@@ -37,7 +37,9 @@ export const previewFileAttachment = (base64) => {
       newWindow.document.close();
     } else {
       // Handle popup blocker or inability to open new window
-      console.error("Unable to open preview window. Please check your popup blocker settings.");
+      console.error(
+        "Unable to open preview window. Please check your popup blocker settings.",
+      );
     }
   } else {
     console.error("Base64 content is missing.");

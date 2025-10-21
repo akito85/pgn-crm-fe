@@ -1,12 +1,20 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import TablePagination from "../../../../../../components/TablePagination";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import {
+  getColumnSearchPropsPaging,
+  getColumnSearchPropsUseFilteredValueFE,
+} from "../../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../../components/StatusComponent";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 import { Tooltip } from "antd";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
@@ -70,7 +78,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -105,7 +113,7 @@ const columns = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -140,7 +148,7 @@ const columns = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -179,7 +187,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
       // render: (text) => {
       //   if (searchedColumn === "description") {
@@ -215,15 +223,15 @@ const columns = (
       // onFilter: (value, record) => onFilter("status", value, record),
       sorter: (a, b) => sorter("status", a, b),
       key: "status",
-    ...getColumnSearchPropsUseFilteredValueFE(
-      search,
-      "statusApproval",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "statusApproval",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
       // ...getColumnSearchPropsPaging(
       //   "status",
       //   searchInput,
@@ -322,7 +330,7 @@ const PDIEligibilityProduct = ({ data = [] }) => {
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
-    })
+    });
   };
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
@@ -351,7 +359,7 @@ const PDIEligibilityProduct = ({ data = [] }) => {
           searchText,
           search,
           handleSearch,
-          handleSelectedDetail
+          handleSelectedDetail,
         )}
       />
 

@@ -1,15 +1,11 @@
-import React from 'react'
+import React from "react";
 import { getListCategory } from "../../../../../../redux/slices/account_management/MasterData/late_charges";
 import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";
-import BaseContainer from '../../../../../../components/BaseContainer';
+import BaseContainer from "../../../../../../components/BaseContainer";
 import AttachmentSectionForm from "../../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
-import { configApp } from '../../../../../../constants/configApp';
+import { configApp } from "../../../../../../constants/configApp";
 
-export const AttachmentDetail = ({
-  type,
-  listDataAttachment,
-  dispatch,
-}) => {
+export const AttachmentDetail = ({ type, listDataAttachment, dispatch }) => {
   return (
     <BaseContainer header={"Attachment Information"}>
       <AttachmentSectionForm
@@ -23,5 +19,5 @@ export const AttachmentDetail = ({
         typeSelector={"late_charge"}
       />
     </BaseContainer>
-  )
-}
+  );
+};

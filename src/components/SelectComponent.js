@@ -5,7 +5,7 @@ import InputLabel from "./InputLabel";
 const SelectComponent = ({
   label,
   mandatory,
-  onChange = () => { },
+  onChange = () => {},
   value,
   children,
   options,
@@ -17,10 +17,10 @@ const SelectComponent = ({
   disabled,
   width,
   labelInValue = false,
-  onSelect = () => { },
-  onDeselect = () => { },
-  onClear = () => { },
-  onPopupScroll = () => { }
+  onSelect = () => {},
+  onDeselect = () => {},
+  onClear = () => {},
+  onPopupScroll = () => {},
 }) => {
   const wrapper = "flex flex-col";
   const style = {
@@ -34,7 +34,10 @@ const SelectComponent = ({
     if (options) {
       return option?.label?.toLowerCase()?.includes(input?.toLowerCase());
     } else if (Array?.isArray(option?.children)) {
-      return option?.children?.join(' ')?.toLowerCase()?.includes(input?.toLowerCase())
+      return option?.children
+        ?.join(" ")
+        ?.toLowerCase()
+        ?.includes(input?.toLowerCase());
     }
     return option?.props?.children
       ?.toLowerCase()

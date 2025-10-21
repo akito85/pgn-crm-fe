@@ -11,7 +11,7 @@ const initialState = {
   message: "",
   data_detail: null,
   data_format: null,
-  data_billing: null
+  data_billing: null,
 };
 
 export const getAllInvoicePaginate = createAsyncThunk(
@@ -27,7 +27,7 @@ export const getAllInvoicePaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getDetailInvoice = createAsyncThunk(
   "GET_DETAIL_INVOICE",
@@ -39,7 +39,7 @@ export const getDetailInvoice = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getFormatType = createAsyncThunk(
   "GET_FORMAT_TYPE",
@@ -51,7 +51,7 @@ export const getFormatType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getBillingApproval = createAsyncThunk(
   "GET_BILLING_APPROVAL",
@@ -63,18 +63,18 @@ export const getBillingApproval = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const createRegenerate = createAsyncThunk(
   "CREATE_REGENRATE",
-  async ({id, body}, thunkAPI) => {
+  async ({ id, body }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/invoice/${id}/regenerate`;
       const response = await ratingBillingHttpService.createData(url, body);
       const successMessage = {
         title: "Successful",
         description: "Your data has been created",
-        return: false
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response;
@@ -92,7 +92,7 @@ export const createRegenerate = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const createGenerate = createAsyncThunk(
   "CREATE_GENERATE",
@@ -103,7 +103,7 @@ export const createGenerate = createAsyncThunk(
       const successMessage = {
         title: "Successful",
         description: "Your data has been created",
-        return : false
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response;
@@ -121,7 +121,7 @@ export const createGenerate = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDownloadList = createAsyncThunk(
@@ -135,10 +135,16 @@ export const getDownloadList = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_INVOICE_LIST", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_INVOICE_LIST",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 const invoiceSlice = createSlice({
   name: "invoice",

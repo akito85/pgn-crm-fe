@@ -1,25 +1,26 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { getSelectedApproval } from "../../../../../../redux/slices/rating_billing_invoice/billingItem";
 import ApprovalComponentGeneral from "../../../../../../components/Approval/ApprovalComponentGeneral";
 
-const BillingCycleApprovalHistory = ({ type }) => {
+const BillingItemApprovalHistory = ({ type }) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const dispatch = useDispatch();
-  const { list_approval_hierarchy, data_SelectedApproval } = useSelector(
-    (state) => state.billingCycle
+  const { dataListAppHierId, dataListAppHierDetail } = useSelector(
+    (state) => state.billing_item,
   );
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
-      dispatch(get(selectedHierarchy));
+      dispatch(getSelectedApproval({ id: selectedHierarchy }));
     }
   }, [dispatch, selectedHierarchy]);
 
   useEffect(() => {
-    if (data_SelectedApproval && data_SelectedApproval.length > 0) {
-      const data = data_SelectedApproval.map((a, index) => ({
+    if (dataListAppHierDetail && dataListAppHierDetail.length > 0) {
+      const data = dataListAppHierDetail.map((a, index) => ({
         ...a,
         key: index + 1,
         employeeDetail: a.employeeDetail.map((b, index) => ({
@@ -31,17 +32,17 @@ const BillingCycleApprovalHistory = ({ type }) => {
     } else {
       setAppHierDataDetail([]);
     }
-  }, [data_SelectedApproval]);
+  }, [dataListAppHierDetail]);
 
   useEffect(() => {
-    if (list_approval_hierarchy && list_approval_hierarchy.length > 0) {
-      const tempAppHier = list_approval_hierarchy.map((appHier) => ({
+    if (dataListAppHierId && dataListAppHierId.length > 0) {
+      const tempAppHier = dataListAppHierId.map((appHier) => ({
         name: appHier.approvalName,
         value: appHier.appHierId,
       }));
       setAppHierOptions(tempAppHier);
     }
-  }, [list_approval_hierarchy]);
+  }, [dataListAppHierId]);
 
   return (
     <div>
@@ -55,4 +56,4 @@ const BillingCycleApprovalHistory = ({ type }) => {
     </div>
   );
 };
-export default BillingCycleApprovalHistory;
+export default BillingItemApprovalHistory;

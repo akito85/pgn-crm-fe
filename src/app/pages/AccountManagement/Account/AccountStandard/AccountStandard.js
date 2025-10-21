@@ -9,7 +9,10 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import BaseContainer from "../../../../../components/BaseContainer";
 import TablePagination from "../../../../../components/TablePagination";
 import { useDispatch, useSelector } from "react-redux";
-import { downloadAccountStandard, getAllAccountStandardPaginate } from "../../../../../redux/slices/account_management/Account/accountSlice";
+import {
+  downloadAccountStandard,
+  getAllAccountStandardPaginate,
+} from "../../../../../redux/slices/account_management/Account/accountSlice";
 import { columnsAccountStandard } from "./TableAccountStandard";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../../components/Toolbar";
@@ -17,7 +20,7 @@ import Toolbar from "../../../../../components/Toolbar";
 const AccountStandard = () => {
   // Selector
   const { data_accountStandard, loading } = useSelector(
-    (state) => state.account
+    (state) => state.account,
   );
 
   // Declaration
@@ -35,7 +38,14 @@ const AccountStandard = () => {
   // Use Effect
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(getAllAccountStandardPaginate({ page, pageSize, sort, search: reqSearch }));
+    dispatch(
+      getAllAccountStandardPaginate({
+        page,
+        pageSize,
+        sort,
+        search: reqSearch,
+      }),
+    );
   }, [page, pageSize, sort, search, dispatch]);
 
   const handleDownload = () => {
@@ -49,7 +59,9 @@ const AccountStandard = () => {
       }
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(downloadAccountStandard({ page, pageSize, sort, search: tempSearch }));
+    dispatch(
+      downloadAccountStandard({ page, pageSize, sort, search: tempSearch }),
+    );
   };
 
   // Breadcrumbs
@@ -95,7 +107,7 @@ const AccountStandard = () => {
   const itemActions = [
     //action toolbar
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<SVGIcon name="IconButtonDownload" width={24} />}
@@ -104,7 +116,7 @@ const AccountStandard = () => {
         >
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     // {
     //   action: 'Upload',
@@ -121,7 +133,7 @@ const AccountStandard = () => {
     //   )
     // },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_ACCOUNT_STANDARD}>
           <ButtonComponent
@@ -131,7 +143,7 @@ const AccountStandard = () => {
             Create Account Standard
           </ButtonComponent>
         </Link>
-      )
+      ),
     },
 
     // Column Action Table
@@ -143,23 +155,25 @@ const AccountStandard = () => {
           <Tooltip title="Detail">
             <Link
               to={ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD}
-              state={{ idAccount: record?.accountId, idCustomer: record?.customerId }}
+              state={{
+                idAccount: record?.accountId,
+                idCustomer: record?.customerId,
+              }}
             >
               <SVGIcon name="IconDetail" width={24} />
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
-
-  ]
+  ];
 
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <Toolbar items={itemActions}/>
+        <Toolbar items={itemActions} />
         {/* <div className="w-full flex justify-end gap-[20px]">
           <ButtonComponent
             icon={<SVGIcon name="IconButtonDownload" width={24} />}
@@ -194,7 +208,7 @@ const AccountStandard = () => {
                 ),
                 ...useColumnActionPermission(
                   ["Activate", "View", "Update"],
-                  itemActions
+                  itemActions,
                 ),
               ]}
               current={page}

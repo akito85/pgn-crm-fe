@@ -22,7 +22,7 @@ const getColumnSearchProps = (
   handleSearch,
   excludeRender = false,
   onFilter = (value, record) =>
-    record[dataIndex]?.toString()?.toLowerCase()?.includes(value.toLowerCase())
+    record[dataIndex]?.toString()?.toLowerCase()?.includes(value.toLowerCase()),
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
@@ -89,7 +89,7 @@ const columnAttachment = (
   handleDelete = () => {},
   previewFileAttachment = () => {},
   previewFile = () => {},
-  type
+  type,
 ) => {
   const res = [
     {
@@ -108,7 +108,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -123,7 +123,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (filename) => (
         <Tooltip placement="topLeft" title={filename}>
@@ -140,7 +140,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -152,7 +152,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -165,11 +165,10 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (fileSize, r, i) => (
-        <span>{r?.type === "new" ? fileSize : bytesConverter(fileSize)}
-        </span>
+        <span>{r?.type === "new" ? fileSize : bytesConverter(fileSize)}</span>
       ),
     },
     // {
@@ -210,7 +209,7 @@ const columnAttachment = (
   return type !== "detail"
     ? res.filter(
         (column) =>
-          column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate"
+          column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate",
       )
     : res;
 };
@@ -342,7 +341,7 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
               // handleDelete,
               previewFileAttachment,
               previewFile,
-              type
+              type,
             )}
             onSort={onSort}
           />

@@ -12,9 +12,9 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode }) => {
 
   // Use Effect
   useEffect(() => {
-   if (ratingCodeId) {
-    setTabSection("Calculation Usage")
-   }
+    if (ratingCodeId) {
+      setTabSection("Calculation Usage");
+    }
   }, [ratingCodeId]);
 
   // Value Tab
@@ -47,17 +47,37 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode }) => {
   const renderSection = (tabName) => {
     switch (tabName) {
       case "Calculation Usage":
-        return <CalculationUsageSection calculationCode={calculationCode} ratingCodeId={ratingCodeId} />;
+        return (
+          <CalculationUsageSection
+            calculationCode={calculationCode}
+            ratingCodeId={ratingCodeId}
+          />
+        );
       case "Service Agreement":
-        return <ServiceAgreementSection calculationCode={calculationCode} ratingCodeId={ratingCodeId}/>;
+        return (
+          <ServiceAgreementSection
+            calculationCode={calculationCode}
+            ratingCodeId={ratingCodeId}
+          />
+        );
       case "Promo":
         return <PromoSection />;
       case "Usage":
-        return <UsageSection calculationCode={calculationCode} ratingCodeId={ratingCodeId}/>;
+        return (
+          <UsageSection
+            calculationCode={calculationCode}
+            ratingCodeId={ratingCodeId}
+          />
+        );
       case "Multi Destination":
         return <MuldestSection />;
       default:
-        return <CalculationUsageSection calculationCode={calculationCode} ratingCodeId={ratingCodeId}/>;
+        return (
+          <CalculationUsageSection
+            calculationCode={calculationCode}
+            ratingCodeId={ratingCodeId}
+          />
+        );
     }
   };
   // onchang tabs

@@ -3,11 +3,7 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
-import {
-  Spin,
-  Tooltip,
-  Checkbox,
-} from "antd";
+import { Spin, Tooltip, Checkbox } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import {
@@ -41,10 +37,8 @@ import { getColumnSearchPropsPaging } from "../../../../utils/getColumnSearchPro
 
 const Action = () => {
   const dispatch = useDispatch();
-  const { data, data_detail, loading } = useSelector(
-    (state) => state.action
-  );
-  const { bodyError } = useSelector(state => state?.general);
+  const { data, data_detail, loading } = useSelector((state) => state.action);
+  const { bodyError } = useSelector((state) => state?.general);
 
   // state
   const [page, setPage] = useState(1);
@@ -64,7 +58,12 @@ const Action = () => {
   // handle fetch
   const handleFetch = useCallback(() => {
     dispatch(
-      getAllActionPaginate({ search: encodeURIComponent(JSON?.stringify(search)), page, pageSize, sort })
+      getAllActionPaginate({
+        search: encodeURIComponent(JSON?.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
@@ -106,9 +105,18 @@ const Action = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('name', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "name",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -123,10 +131,18 @@ const Action = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
-
+      render: (text) =>
+        renderColumn(
+          "description",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -138,9 +154,18 @@ const Action = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
   ];
 
@@ -165,9 +190,7 @@ const Action = () => {
   const handleCancel = () => {
     setModalDetail(false);
     setModalActive(false);
-
   };
-
 
   // handle detail
   const handleDetail = async (id) => {
@@ -184,7 +207,7 @@ const Action = () => {
   const handleOk = async () => {
     try {
       const payload = { id: actId, status };
-      setBody(payload)
+      setBody(payload);
       handleCancel();
       await dispatch(inactiveAction(payload))?.unwrap();
       await handleFetch()?.unwrap();
@@ -197,12 +220,17 @@ const Action = () => {
   const handleDownload = async () => {
     try {
       await dispatch(
-        downloadAction({ search: encodeURIComponent(JSON?.stringify(search)), page, pageSize, sort })
+        downloadAction({
+          search: encodeURIComponent(JSON?.stringify(search)),
+          page,
+          pageSize,
+          sort,
+        }),
       )?.unwrap();
     } catch (error) {
       await handleFetch()?.unwrap();
     }
-  }
+  };
 
   const onSort = (_, __, sort) => {
     const dataSort = sort.order
@@ -211,11 +239,10 @@ const Action = () => {
     setSort(dataSort);
   };
 
-
   const itemActions = [
     // toolbar items
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
@@ -224,10 +251,10 @@ const Action = () => {
         >
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_ACTION}>
           <ButtonComponent
@@ -237,13 +264,13 @@ const Action = () => {
             Create Action
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // column action
     {
-      action: 'View',
-      type: 'table',
+      action: "View",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
@@ -255,33 +282,48 @@ const Action = () => {
               }}
             />
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Update',
-      type: 'table',
+      action: "Update",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip title="Update">
-            <div className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}>
+            <div
+              className={`${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+            >
               <Link
-                to={record?.status?.toLowerCase() !== "inactive" && SYSTEM_SETUP_ROUTES.UPDATE_ACTION}
-                state={record?.status?.toLowerCase() !== "inactive" && { id: record?.actionId }}
+                to={
+                  record?.status?.toLowerCase() !== "inactive" &&
+                  SYSTEM_SETUP_ROUTES.UPDATE_ACTION
+                }
+                state={
+                  record?.status?.toLowerCase() !== "inactive" && {
+                    id: record?.actionId,
+                  }
+                }
               >
                 <SVGIcon
-                  className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}
-                  color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#ACC424"}
-                  name="IconEdit" width={24} />
+                  className={`${record?.status?.toLowerCase() === "inactive" && "cursor-not-allowed"}`}
+                  color={
+                    record?.status?.toLowerCase() === "inactive"
+                      ? "#8D91A0"
+                      : "#ACC424"
+                  }
+                  name="IconEdit"
+                  width={24}
+                />
               </Link>
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Activate',
-      type: 'table',
+      action: "Activate",
+      type: "table",
       render: (record, data_length) => {
         return (
           <Tooltip
@@ -299,9 +341,9 @@ const Action = () => {
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
+        );
+      },
+    },
   ];
 
   // handle retry modal error
@@ -309,11 +351,11 @@ const Action = () => {
     try {
       handleCancelTryAgain();
       if (bodyError?.action === "INACTIVE_ACTION") {
-        dispatch(inactiveAction(body))
+        dispatch(inactiveAction(body));
       } else if (bodyError?.action === "GET_DETAIL_ACTION") {
-        dispatch(getDetailAction(body))
+        dispatch(getDetailAction(body));
       } else if (bodyError?.action === "DOWNLOAD_ACTION") {
-        handleDownload()
+        handleDownload();
       }
       handleFetch();
     } catch (error) {
@@ -338,7 +380,13 @@ const Action = () => {
                   current={page}
                   pageSize={pageSize}
                   onChange={handleChange}
-                  columns={[...columns, ...useColumnActionPermission(['view', 'update', 'activate'], itemActions)]}
+                  columns={[
+                    ...columns,
+                    ...useColumnActionPermission(
+                      ["view", "update", "activate"],
+                      itemActions,
+                    ),
+                  ]}
                   onSort={onSort}
                   tableScrolled={{ y: 500, x: 800 }}
                 />
@@ -362,8 +410,9 @@ const Action = () => {
                   className={"text-4xl"}
                 />
                 <span className={"text-lg text-black font-bold h-auto mx-auto"}>
-                  {`Are you sure want to ${status === "ACTIVE" ? "inactivate" : "activate"
-                    }?`}
+                  {`Are you sure want to ${
+                    status === "ACTIVE" ? "inactivate" : "activate"
+                  }?`}
                 </span>
               </div>
             </div>
@@ -396,10 +445,9 @@ const Action = () => {
                 {data_detail?.actionId}
               </DetailText>
               <DetailText label={"Created Date"}>
-                {
-
-                  hasValue(data_detail?.createdDate) && moment(data_detail?.createdDate).format(
-                    "DD MMM YYYY HH:mm:ss"
+                {hasValue(data_detail?.createdDate) &&
+                  moment(data_detail?.createdDate).format(
+                    "DD MMM YYYY HH:mm:ss",
                   )}
               </DetailText>
 
@@ -407,11 +455,10 @@ const Action = () => {
                 {data_detail?.createdBy}
               </DetailText>
               <DetailText label={"Updated Date"}>
-                {
-                  hasValue(data_detail?.updatedDate) && moment(data_detail?.updatedDate).format(
-                    "DD MMM YYYY HH:mm:ss"
-                  )
-                }
+                {hasValue(data_detail?.updatedDate) &&
+                  moment(data_detail?.updatedDate).format(
+                    "DD MMM YYYY HH:mm:ss",
+                  )}
               </DetailText>
               <DetailText label={"Updated By"}>
                 {data_detail?.updatedBy}

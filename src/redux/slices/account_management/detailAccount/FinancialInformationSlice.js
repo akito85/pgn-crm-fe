@@ -16,10 +16,10 @@ const initialState = {
   data_globalTypeTaxIdentifier: [],
   data_firstIndexIdentifier: [],
   data_taxRelationFirstIndex: [],
-  detail_taxImplication: {}
+  detail_taxImplication: {},
 };
 
-export const getGlobalTypeTaxIdentifier= createAsyncThunk(
+export const getGlobalTypeTaxIdentifier = createAsyncThunk(
   "GET_GLOBAL_TYPE_TAX_IDENTIFIER",
   async (thunkAPI) => {
     try {
@@ -29,7 +29,7 @@ export const getGlobalTypeTaxIdentifier= createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getWithHoldingTax = createAsyncThunk(
@@ -45,9 +45,8 @@ export const getWithHoldingTax = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
-
 
 export const getWithHoldingTaxFirstIndex = createAsyncThunk(
   "GET_WITHHOLDING_TAX_FIRST_INDEX",
@@ -59,7 +58,7 @@ export const getWithHoldingTaxFirstIndex = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getTaxRelationFirstIndex = createAsyncThunk(
@@ -72,7 +71,7 @@ export const getTaxRelationFirstIndex = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const createWitholdingTax = createAsyncThunk(
@@ -106,7 +105,7 @@ export const createWitholdingTax = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const inActiveWitholdingTax = createAsyncThunk(
@@ -140,7 +139,7 @@ export const inActiveWitholdingTax = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 //tax identifier
@@ -157,7 +156,7 @@ export const getTaxIdentifier = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const createTaxIdentifier = createAsyncThunk(
@@ -191,7 +190,7 @@ export const createTaxIdentifier = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // external
@@ -205,7 +204,7 @@ export const getListDetailAccountAddress = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 //payment Channel
@@ -220,7 +219,7 @@ export const getPaymentChannel = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const updatePaymentChannel = createAsyncThunk(
@@ -254,7 +253,7 @@ export const updatePaymentChannel = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getGlobalTypePaymentChannel = createAsyncThunk(
@@ -267,7 +266,7 @@ export const getGlobalTypePaymentChannel = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 //tax relation
@@ -283,7 +282,7 @@ export const getTaxRelation = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getChooseTaxRelation = createAsyncThunk(
@@ -298,7 +297,7 @@ export const getChooseTaxRelation = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const createTaxRelation = createAsyncThunk(
@@ -332,7 +331,7 @@ export const createTaxRelation = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const inActiveTaxRelation = createAsyncThunk(
@@ -366,12 +365,12 @@ export const inActiveTaxRelation = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getTaxImplication = createAsyncThunk(
   "GET_TAX_IMPLICATION",
-  async ({id, page, pageSize, sort, search }, thunkAPI) => {
+  async ({ id, page, pageSize, sort, search }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/tax-implication/list/${id}?page=${page}&size=${pageSize}${
         sort ? `&sort=${sort}` : ""
@@ -381,7 +380,7 @@ export const getTaxImplication = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailTaxImplication = createAsyncThunk(
@@ -394,7 +393,7 @@ export const getDetailTaxImplication = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getBillingBucket = createAsyncThunk(
@@ -409,7 +408,7 @@ export const getBillingBucket = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAccountingRule = createAsyncThunk(
@@ -422,7 +421,7 @@ export const getAccountingRule = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const financialInformationSlice = createSlice({
@@ -456,7 +455,6 @@ const financialInformationSlice = createSlice({
       state.loading = false;
     },
 
-    
     [getTaxRelationFirstIndex.pending]: (state, action) => {
       state.data_taxRelationFirstIndex = action.payload;
       state.loading = true;

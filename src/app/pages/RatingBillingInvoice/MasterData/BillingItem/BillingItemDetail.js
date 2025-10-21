@@ -66,11 +66,15 @@ const BillingItemDetail = () => {
   }, [dispatch, dataRecord]);
 
   useEffect(() => {
-    if (dataRecord && data_BillingItemDetail && data_BillingItemDetail?.billingItemCode === dataRecord) {
+    if (
+      dataRecord &&
+      data_BillingItemDetail &&
+      data_BillingItemDetail?.billingItemCode === dataRecord
+    ) {
       setShowButtonApproval(
         (data_BillingItemDetail.statusApproval === "WAITING APPROVAL" ||
           data_BillingItemDetail.statusApproval === "WAITING_APPROVAL") &&
-          data_BillingItemDetail?.approvalDto?.isApprover
+          data_BillingItemDetail?.approvalDto?.isApprover,
       );
 
       // Mapping Information
@@ -83,7 +87,7 @@ const BillingItemDetail = () => {
             endDate: item.endDate ? moment(item.endDate) : "",
             dataType: "exist",
           };
-        })
+        }),
       );
 
       // Attachment Information
@@ -96,16 +100,17 @@ const BillingItemDetail = () => {
               : "",
             dataType: "exist",
           };
-        })
+        }),
       );
 
       if (
         // dataRecord &&
         // data_BillingItemDetail &&
         data_detailDraft &&
-        data_detailDraft?.billingItemCode === data_BillingItemDetail?.billingItemCode &&
+        data_detailDraft?.billingItemCode ===
+          data_BillingItemDetail?.billingItemCode &&
         data_detailDraft?.billingItemCode === dataRecord &&
-        (data_BillingItemDetail?.statusApproval !== "APPROVED")
+        data_BillingItemDetail?.statusApproval !== "APPROVED"
         //   data_BillingItemDetail?.approvalDto?.approvalType !== "INACTIVE_BILLING_ITEM")
       ) {
         // Mapping Information
@@ -137,8 +142,8 @@ const BillingItemDetail = () => {
             createdDate: data_BillingItemDetail.createdDate,
             updatedBy: data_BillingItemDetail.updatedBy,
             updatedDate: data_BillingItemDetail.updatedDate,
-            status: data_BillingItemDetail?.status,// for detail draft from detail
-            statusApproval: data_BillingItemDetail?.statusApproval,// for detail draft from detail
+            status: data_BillingItemDetail?.status, // for detail draft from detail
+            statusApproval: data_BillingItemDetail?.statusApproval, // for detail draft from detail
             mappingInformation: data_detailDraft?.mappingInformation?.map(
               (item) => {
                 return {
@@ -146,7 +151,7 @@ const BillingItemDetail = () => {
                   categoryId: item.categoryId,
                   // detailMappingInfo : item.detailMappingInfo
                 };
-              }
+              },
             ),
           };
         });
@@ -208,7 +213,7 @@ const BillingItemDetail = () => {
     dispatch(
       data_BillingItemDetail?.approvalDto?.approvalType?.includes("INACTIVE")
         ? approvalInactiveBillingItem(body)
-        : approvalRejectBillingItem(body)
+        : approvalRejectBillingItem(body),
     )
       .unwrap()
       .then(async (data) => {
@@ -271,14 +276,14 @@ const BillingItemDetail = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         {data_BillingItemDetail?.approvalDto?.approvalType?.includes(
-          "INACTIVE"
+          "INACTIVE",
         ) && data_BillingItemDetail?.approvalDto?.isApprover ? (
           <div className="mt-5">
             <BaseContainer header={"Inactive Request Information"}>
               <div className="w-full grid grid-cols-4 gap-5">
                 <DetailText label="Requested Date">
                   {renderDateTime(
-                    data_BillingItemDetail?.approvalDto?.requestedDate
+                    data_BillingItemDetail?.approvalDto?.requestedDate,
                   )}
                 </DetailText>
                 <DetailText label="Requested By">

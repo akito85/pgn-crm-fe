@@ -63,13 +63,28 @@ const DelegationPage = () => {
   ];
 
   const handleFetch = useCallback(() => {
-    const reqSearch = encodeURIComponent(JSON.stringify(valuePage === 'Approval Delegation' ? search : searchRequest));
-    const sortValue = valuePage === 'Approval Delegation' ? sort : sortRequest
-    dispatch(getDelegationList({ search: reqSearch, page, pageSize, sortValue }));
-  }, [dispatch, page, pageSize, search, searchRequest, sort, sortRequest, valuePage])
+    const reqSearch = encodeURIComponent(
+      JSON.stringify(
+        valuePage === "Approval Delegation" ? search : searchRequest,
+      ),
+    );
+    const sortValue = valuePage === "Approval Delegation" ? sort : sortRequest;
+    dispatch(
+      getDelegationList({ search: reqSearch, page, pageSize, sortValue }),
+    );
+  }, [
+    dispatch,
+    page,
+    pageSize,
+    search,
+    searchRequest,
+    sort,
+    sortRequest,
+    valuePage,
+  ]);
 
   useEffect(() => {
-    handleFetch()
+    handleFetch();
   }, [handleFetch]);
 
   const onSort = (_, __, sort) => {
@@ -90,16 +105,16 @@ const DelegationPage = () => {
   const onChange = (e) => {
     setPage(1);
     setPageSize(10);
-    setSearch({})
-    setSort('')
-    setSearchText("")
-    setSearchedColumn('')
+    setSearch({});
+    setSort("");
+    setSearchText("");
+    setSearchedColumn("");
     setPageRequest(1);
     setPageSizeRequest(10);
-    setSearchRequest({})
-    setSortRequest('')
-    setSearchTextRequest("")
-    setSearchedColumn('')
+    setSearchRequest({});
+    setSortRequest("");
+    setSearchTextRequest("");
+    setSearchedColumn("");
     setValuePage(e.target.value);
   };
 
@@ -132,7 +147,6 @@ const DelegationPage = () => {
     });
   };
 
-
   const handleChange = (page, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : page;
     setPage(tempPage);
@@ -163,7 +177,7 @@ const DelegationPage = () => {
     // column action
     {
       action: "View",
-      type: 'table',
+      type: "table",
       render: (record, data_length) => {
         return (
           <Link to={USER_ROUTES.DETAIL_DELEGATION} state={{ id: record?.id }}>
@@ -179,15 +193,11 @@ const DelegationPage = () => {
   ];
 
   // hooks column action
-  const columnAction = useColumnActionPermission(
-    ["view"],
-    itemActions
-  );
+  const columnAction = useColumnActionPermission(["view"], itemActions);
 
   const handleRetry = () => {
     handleCancelTryAgain();
-
-  }
+  };
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
@@ -199,9 +209,7 @@ const DelegationPage = () => {
           onChange={onChange}
           currentPosition={valuePage}
         />
-        {valuePage === "Delegation Request" && (
-          <Toolbar items={itemActions} />
-        )}
+        {valuePage === "Delegation Request" && <Toolbar items={itemActions} />}
         <BaseContainer header={valuePage + " list"}>
           {valuePage === "Approval Delegation" ? (
             <div className={"w-full"}>
@@ -215,7 +223,7 @@ const DelegationPage = () => {
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
                   ),
                   ...columnAction,
                 ]}
@@ -240,7 +248,7 @@ const DelegationPage = () => {
                     searchInputRequest,
                     searchedColumnRequest,
                     searchTextRequest,
-                    handleSearchRequest
+                    handleSearchRequest,
                   ),
                 ]}
                 current={pageRequest}

@@ -166,7 +166,7 @@ const TaxCodeForm = ({ type }) => {
             taxCodeId: item.taxCodeId,
             criteria: item.criteria,
           };
-        }
+        },
       );
 
       // Mapping for get data Select Criteria Draft
@@ -192,7 +192,7 @@ const TaxCodeForm = ({ type }) => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Draft Information
@@ -271,7 +271,7 @@ const TaxCodeForm = ({ type }) => {
             description: item.description,
             type: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Select
@@ -486,7 +486,7 @@ const TaxCodeForm = ({ type }) => {
       bodyData,
       id,
       data_detail,
-      data_detail_draft
+      data_detail_draft,
     ) => {
       return bodyData?.criteria.map((item) => {
         const tempData =
@@ -507,7 +507,7 @@ const TaxCodeForm = ({ type }) => {
       return columnsTableCriteriaTaxCode().filter(
         (item) =>
           !bodyData.criteria.includes(item.indexValue) &&
-          bodyData.criteria.includes(item.indexValue) === 1
+          bodyData.criteria.includes(item.indexValue) === 1,
       );
     };
 
@@ -524,7 +524,7 @@ const TaxCodeForm = ({ type }) => {
 
     const dataCriteriaObject = mapListDataCriteria(
       listDataCriteria,
-      dateFormatting
+      dateFormatting,
     );
 
     const dataCondition = mapListDataDetail(listDataDetail, dateFormatting);
@@ -533,17 +533,17 @@ const TaxCodeForm = ({ type }) => {
       bodyData,
       id,
       data_detail,
-      data_detail_draft
+      data_detail_draft,
     );
 
     const filteredCriteria = getFilteredCriteria(
       bodyData,
-      columnsTableCriteriaTaxCode
+      columnsTableCriteriaTaxCode,
     );
 
     const updatedDataCriteriaObject = updateDataCriteriaObject(
       dataCriteriaObject,
-      filteredCriteria
+      filteredCriteria,
     );
 
     const includesAll = bodyData.criteria.includes(24);
@@ -599,7 +599,7 @@ const TaxCodeForm = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -664,11 +664,11 @@ const TaxCodeForm = ({ type }) => {
     dataCriteria,
     listDataCriteria = [],
     setMissingColumn = () => {},
-    minimumData = 0
+    minimumData = 0,
   ) => {
     let missingColumn = [];
     const tempArray = criteriaValues.filter((item) =>
-      dataCriteria?.includes(item.value)
+      dataCriteria?.includes(item.value),
     );
     const tempNameCriteria = tempArray.map((data) => data.name);
     listDataCriteria?.map((item) => {
@@ -718,11 +718,11 @@ const TaxCodeForm = ({ type }) => {
     let errorBody = {};
     const hasOverlapping = checkOverlappingData(
       { startDate: formValue?.startDate, endDate: formValue?.endDate },
-      listDataCriteria
+      listDataCriteria,
     );
     const hasOverlappingCondition = checkOverlappingData(
       { startDate: formValue?.startDate, endDate: formValue?.endDate },
-      listDataDetail
+      listDataDetail,
     );
     if (listDataAttachment.length === 0) {
       handleMandatory(setTabPages, listDataAttachment);
@@ -746,7 +746,7 @@ const TaxCodeForm = ({ type }) => {
           formValue?.criteria,
           listDataCriteria,
           () => {},
-          0
+          0,
         )
       ) {
         const errorBody = {
@@ -827,7 +827,7 @@ const TaxCodeForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/tax-code/upload-attachment/${taxCodeId}`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -851,7 +851,7 @@ const TaxCodeForm = ({ type }) => {
         .unwrap()
         .then(async () => {
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           setLoadingForm(true);
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
@@ -862,7 +862,7 @@ const TaxCodeForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/tax-code/upload-attachment/${id}`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -887,7 +887,7 @@ const TaxCodeForm = ({ type }) => {
   const handleMandatory = (
     setListSectionInfo = () => {},
     listDataAttachment,
-    errorFields
+    errorFields,
   ) => {
     setListSectionInfo((prevState) => {
       const res = prevState.map((item) => {
@@ -898,11 +898,11 @@ const TaxCodeForm = ({ type }) => {
                   item.paramValue.includes(next.name[0])
                     ? current + 1
                     : current,
-                0
+                0,
               )
             : listDataAttachment.length < 1
-            ? 1
-            : 0;
+              ? 1
+              : 0;
         return {
           value: item.value,
           paramValue: item.paramValue,
