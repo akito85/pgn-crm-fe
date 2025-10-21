@@ -1,0 +1,1274 @@
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { Form, Modal, Spin, Select, DatePicker } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import moment from "moment"; // Changed from dayjs to moment
+import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
+import BreadCrumb from "../../../../components/BreadCrumb";
+import BaseContainer from "../../../../components/BaseContainer";
+import ButtonComponent from "../../../../components/ButtonComponent";
+import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import SVGIcon from "../../../../assets/Icon/index";
+import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
+import ModalCustom from "../../../../components/Modal/ModalCustom";
+import FormConfirmation from "./FormConfirmation";
+import SelectComponent from "../../../../components/SelectComponent";
+import { formMessageRequired } from "../../../../utils";
+import InputComponent from "../../../../components/InputComponent";
+import {
+  ModalConfirm,
+  ModalError,
+} from "../../../../components/Modal/ModalPopUp";
+import {
+  getListAccountGroup,
+  getListBillingCycle,
+  getListBillingPeriod,
+  getListCalculationType,
+  getListCostCenter,
+  getListCustomerSegment,
+  getListMeterReadingCode,
+  getListSchedulerType,
+  getListServiceType,
+  getListSor,
+  getListSpecificCustomer,
+  createPrabilling,
+  getUserDetailCalculation,
+  getUserProfile,
+} from "../../../../redux/slices/rating_billing_invoice/praBilling";
+import { IconModal } from "../../../../utils/Icon";
+
+const PrabillingForm = ({ type }) => {
+  const {
+    loading,
+    list_sor,
+    list_account_group,
+    list_customer_segment,
+    list_cost_center,
+    list_meter_reading_code,
+    list_scheduler_type,
+    list_specific_customer,
+    loading_specific_customer,
+    specific_customer_message,
+    list_billing_cycle,
+    list_billing_period,
+    data_user_calculation,
+    user_profile,
+    loading_user_profile,
+  } = useSelector((state) => state.rbi_prabilling);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const [openModal, setOpenModal] = useState(false);
+  const [openBack, setOpenBack] = useState(false);
+  const [billingCycle, setBillingCycle] = useState();
+  const [selectedScheduleType, setSelectedScheduleType] = useState(null);
+  const [form] = Form.useForm();
+  const formValue = form.getFieldsValue();
+
+  const DEFAULT_SEARCH_LIMIT = 50;
+  const FETCH_ALL_LIMIT = 99999;
+  const MAX_SEARCH_LENGTH = 50;
+
+  const [dataSpecificCustomer, setDataSpecificCustomer] = useState({
+    sorId: null,
+    costCenterId: [],
+    meterReadingCodeId: [],
+    accountSegmentId: [],
+    accountGroupTypeId: [],
+    search: "",
+    limit: DEFAULT_SEARCH_LIMIT,
+  });
+
+  const [remark, setRemark] = useState("");
+  const [mergedArrayMrc, setMergedArrayMrc] = useState([]);
+  const [dataFinal, setDataFinal] = useState({});
+  const [modalSuccess, setModalSuccess] = useState(false);
+  const [modalError, setModalError] = useState(false);
+  const [bodyError, setBodyError] = useState({});
+  const [defaultData, setDefaultData] = useState({});
+
+  const [searchCustomerValue, setSearchCustomerValue] = useState("");
+  const [filteredCustomerList, setFilteredCustomerList] = useState([]);
+  const searchTimeoutRef = useRef(null);
+
+  const [allCustomersList, setAllCustomersList] = useState([]);
+  const [loadingAllCustomers, setLoadingAllCustomers] = useState(false);
+
+  useEffect(() => {
+    dispatch(getListSor());
+    dispatch(getListServiceType());
+    dispatch(getListCustomerSegment());
+    dispatch(getListCalculationType());
+    dispatch(getListSchedulerType());
+    dispatch(getListCostCenter());
+    dispatch(getListBillingCycle());
+    dispatch(getUserDetailCalculation());
+    dispatch(getUserProfile());
+  }, [dispatch]);
+
+  useEffect(() => {
+    const tempBody = {
+      sor: data_user_calculation.sorId || null,
+      costCenter:
+        data_user_calculation.ccId && data_user_calculation.ccId !== null
+          ? typeof data_user_calculation.ccId === "number"
+            ? [data_user_calculation.ccId]
+            : data_user_calculation.ccId
+          : [],
+    };
+    setDefaultData(tempBody);
+    form.setFieldsValue(tempBody);
+    setDataSpecificCustomer((prevState) => {
+      return {
+        ...prevState,
+        sorId: data_user_calculation.sorId || null,
+        costCenterId: data_user_calculation.ccId || null,
+        limit: DEFAULT_SEARCH_LIMIT,
+      };
+    });
+    if (tempBody.costCenter) {
+      const body = {
+        ccIds: (tempBody.costCenter || []).map((data) => {
+          return {
+            ccId: data,
+          };
+        }),
+      };
+      dispatch(getListMeterReadingCode(body));
+    }
+  }, [data_user_calculation]);
+
+  useEffect(() => {
+    if (
+      dataSpecificCustomer?.sorId &&
+      dataSpecificCustomer?.search &&
+      dataSpecificCustomer.search.length >= 3
+    ) {
+      console.log("Calling API with search:", dataSpecificCustomer.search);
+      dispatch(getListSpecificCustomer(dataSpecificCustomer));
+    }
+  }, [
+    dispatch,
+    dataSpecificCustomer.sorId,
+    dataSpecificCustomer.costCenterId,
+    dataSpecificCustomer.meterReadingCodeId,
+    dataSpecificCustomer.accountSegmentId,
+    dataSpecificCustomer.accountGroupTypeId,
+    dataSpecificCustomer.search,
+    dataSpecificCustomer.limit,
+  ]);
+
+  useEffect(() => {
+    if (searchCustomerValue.length >= 3 && list_specific_customer) {
+      setFilteredCustomerList(list_specific_customer);
+    } else {
+      setFilteredCustomerList([]);
+    }
+  }, [list_specific_customer, searchCustomerValue]);
+
+  useEffect(() => {
+    let dataMrc = list_meter_reading_code?.reduce(
+      (result, current) => result?.concat(current?.dtoList),
+      []
+    );
+    setMergedArrayMrc(dataMrc);
+  }, [dispatch, list_meter_reading_code]);
+
+  const handleSearchCustomer = useCallback((value) => {
+    const trimmedValue = value.slice(0, MAX_SEARCH_LENGTH);
+
+    setSearchCustomerValue(trimmedValue);
+
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      if (trimmedValue && trimmedValue.length >= 3) {
+        setDataSpecificCustomer((prevState) => ({
+          ...prevState,
+          search: trimmedValue,
+          limit: DEFAULT_SEARCH_LIMIT,
+        }));
+      } else {
+        setDataSpecificCustomer((prevState) => ({
+          ...prevState,
+          search: "",
+          limit: DEFAULT_SEARCH_LIMIT,
+        }));
+        setFilteredCustomerList([]);
+      }
+    }, 500);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleReset = () => {
+    let tempData = [
+      "billing_cycle",
+      "billing_period",
+      "calculation_type",
+      "serviceType",
+      "sor",
+      "costCenter",
+      "meterReading",
+      "accountSegment",
+      "accountGroupType",
+      "specificCustomer",
+      "type",
+      "scheduleDateTime",
+      "remark",
+    ];
+    if (defaultData?.costCenter.length > 0) {
+      tempData = tempData.filter((item) => item !== "costCenter");
+    }
+    if (defaultData?.sor.length > 0) {
+      tempData = tempData.filter((item) => item !== "sor");
+    }
+    form.resetFields(tempData);
+    setSelectedScheduleType(null);
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
+    setAllCustomersList([]);
+  };
+
+  const [openWarningPopulate, setOpenWarningPopulate] = useState(false);
+  const [pendingDataFinal, setPendingDataFinal] = useState(null);
+
+  const onFinish = async (formValue) => {
+    const tempDataFinal = {
+      billingCycle: formValue?.billing_cycle,
+      billingPeriod: formValue?.billing_period,
+      serviceType: formValue?.serviceType,
+      sor: formValue?.sor,
+      scheduleType: formValue?.type,
+      scheduleDateTime: formValue?.scheduleDateTime 
+        ? moment(formValue.scheduleDateTime).format('YYYY-MM-DD HH:mm:ss') // Changed from dayjs to moment
+        : null,
+      calculationType: formValue?.calculation_type,
+      remark: formValue?.remark,
+      rRbiCalculationCostCenter: (formValue?.costCenter || []).map((id) => {
+        return {
+          id: null,
+          calCode: null,
+          costCenter: id,
+        };
+      }),
+      rRbiCalculationMeterReadingCode: (formValue?.meterReading || []).map(
+        (id) => {
+          return {
+            id: null,
+            calCode: null,
+            mreadingCode: id,
+          };
+        }
+      ),
+      rRbiCalculationAccountSegment: (formValue?.accountSegment || []).map(
+        (id) => {
+          return {
+            id: null,
+            calCode: null,
+            accSegment: id,
+          };
+        }
+      ),
+      rRbiCalculationAccountGroupType: (formValue?.accountGroupType || []).map(
+        (id) => {
+          return {
+            id: null,
+            calCode: null,
+            accGroupType: id,
+          };
+        }
+      ),
+      rRbiCalculationSpecificCustomer: (formValue?.specificCustomer || []).map(
+        (id) => {
+          return {
+            id: null,
+            calCode: null,
+            custNumb: id,
+          };
+        }
+      ),
+    };
+
+    const hasSpecificCustomer = (formValue?.specificCustomer || []).length > 0;
+
+    if (!hasSpecificCustomer) {
+      setPendingDataFinal(tempDataFinal);
+      setOpenWarningPopulate(true);
+    } else {
+      setDataFinal(tempDataFinal);
+      setOpenModal(true);
+    }
+  };
+
+  const fetchAllCustomers = async () => {
+    setLoadingAllCustomers(true);
+    try {
+      const fetchAllParams = {
+        ...dataSpecificCustomer,
+        search: "",
+        limit: FETCH_ALL_LIMIT,
+      };
+
+      const result = await dispatch(
+        getListSpecificCustomer(fetchAllParams)
+      ).unwrap();
+
+      setAllCustomersList(result || []);
+      return result || [];
+    } catch (error) {
+      console.error("Error fetching all customers:", error);
+      setAllCustomersList([]);
+      return [];
+    } finally {
+      setLoadingAllCustomers(false);
+    }
+  };
+
+  const handleConfirmPopulateAll = async () => {
+    setOpenWarningPopulate(false);
+
+    const allCustomers = await fetchAllCustomers();
+
+    const updatedDataFinal = {
+      ...pendingDataFinal,
+      rRbiCalculationSpecificCustomer: allCustomers.map((customer) => ({
+        id: null,
+        calCode: null,
+        custNumb: customer.accountNumber,
+      })),
+      fetchedAllCustomers: true,
+      totalCustomersFetched: allCustomers.length,
+    };
+
+    setDataFinal(updatedDataFinal);
+    setOpenModal(true);
+  };
+
+  const handleCancelPopulateAll = () => {
+    setOpenWarningPopulate(false);
+    setPendingDataFinal(null);
+  };
+
+  const handleSave = async () => {
+    const selectedBillingCycle = list_billing_cycle?.data?.find(
+      (item) => item.id === dataFinal?.billingCycle
+    );
+
+    const selectedBillingPeriod = list_billing_period?.data?.find(
+      (item) => item.id === dataFinal?.billingPeriod
+    );
+
+    const selectedSor = list_sor?.data?.find(
+      (item) => item.id === dataFinal?.sor
+    );
+
+    if (!user_profile) {
+      console.error("User profile not loaded");
+      setBodyError({
+        message: "User profile is not loaded. Please refresh the page.",
+      });
+      setModalError(true);
+      return;
+    }
+    let finalSpecificAccounts = [];
+
+    if (dataFinal?.fetchedAllCustomers) {
+      finalSpecificAccounts = (
+        dataFinal?.rRbiCalculationSpecificCustomer || []
+      ).map((item) => item.custNumb);
+    } else {
+      const selectedSpecificAccounts = (
+        dataFinal?.rRbiCalculationSpecificCustomer || []
+      )
+        .filter((item) => item.custNumb)
+        .map((item) => item.custNumb);
+
+      finalSpecificAccounts =
+        selectedSpecificAccounts.length > 0
+          ? selectedSpecificAccounts
+          : (list_specific_customer || []).map((item) => item.accountNumber);
+    }
+
+    const tempBody = {
+      billingCycle:
+        selectedBillingCycle?.name || selectedBillingCycle?.code || "",
+      billPeriod:
+        selectedBillingPeriod?.name || selectedBillingPeriod?.code || "",
+      sor: selectedSor?.name || "",
+      costCenter: (dataFinal?.rRbiCalculationCostCenter || []).map(
+        (item) => item.costCenter
+      ),
+      meterReadingCode: (dataFinal?.rRbiCalculationMeterReadingCode || []).map(
+        (item) => item.mreadingCode
+      ),
+      accountSegment: (dataFinal?.rRbiCalculationAccountSegment || []).map(
+        (item) => item.accSegment
+      ),
+      accountGroupType: (dataFinal?.rRbiCalculationAccountGroupType || []).map(
+        (item) => item.accGroupType
+      ),
+      specificAccount: finalSpecificAccounts,
+
+      billingCycleId: dataFinal?.billingCycle,
+      billPeriodId: dataFinal?.billingPeriod,
+      scheduleTypeId: dataFinal?.scheduleType || 1,
+      scheduleDateTime: dataFinal?.scheduleDateTime || null,
+
+      serviceTypeId: dataFinal?.serviceType,
+      sorId: dataFinal?.sor,
+      calculationTypeId: dataFinal?.calculationType,
+      remark: dataFinal?.remark,
+      createdBy: user_profile.username || "",
+    };
+
+    dispatch(createPrabilling({ body: tempBody }))
+      .unwrap()
+      .then((data) => {
+        if (data) {
+          setModalSuccess(true);
+        }
+      })
+      .catch((error) => {
+        if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
+          const message =
+            error?.response?.data?.message ||
+            error?.message ||
+            error?.toString();
+          setBodyError({ message });
+          setModalError(true);
+        }
+      });
+  };
+
+  const handleBackPage = () => {
+    if (Object.values(formValue).length > 0) {
+      setOpenBack(true);
+    } else {
+      setOpenBack(false);
+      navigate(-1);
+    }
+  };
+
+  const routes = [
+    {
+      path: "",
+      breadcrumbName: "Rating Billing",
+    },
+    {
+      path: RBI_ROUTES.PRABILLING_VIEW,
+      breadcrumbName: "Prabilling",
+    },
+    {
+      path: "",
+      breadcrumbName: "Create Prabilling",
+    },
+  ];
+
+  const handleChangeBillingCycle = (e) => {
+    setBillingCycle(e);
+    dispatch(getListBillingPeriod(e));
+  };
+
+  const handleChangeSOR = (e) => {
+    setDataSpecificCustomer((prevState) => {
+      return {
+        ...prevState,
+        sorId: e,
+        search: "",
+        limit: DEFAULT_SEARCH_LIMIT,
+      };
+    });
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
+    setAllCustomersList([]);
+    form.resetFields(["specificCustomer"]);
+  };
+
+  const handleChangeCostCenter = (e) => {
+    setDataSpecificCustomer((prevState) => {
+      return {
+        ...prevState,
+        costCenterId: e || [],
+        meterReadingCodeId: [],
+        search: "",
+        limit: DEFAULT_SEARCH_LIMIT,
+      };
+    });
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
+    setAllCustomersList([]);
+
+    const body = {
+      ccIds: (e || []).map((data) => {
+        return {
+          ccId: data,
+        };
+      }),
+    };
+    dispatch(getListMeterReadingCode(body));
+    form.resetFields(["meterReading", "specificCustomer"]);
+  };
+
+  const handleMeterReadingRoute = (e) => {
+    setDataSpecificCustomer((prevState) => {
+      return {
+        ...prevState,
+        meterReadingCodeId: e || [],
+        search: "",
+        limit: DEFAULT_SEARCH_LIMIT,
+      };
+    });
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
+    setAllCustomersList([]);
+    form.resetFields(["specificCustomer"]);
+  };
+
+  const handleAccountGroup = (e) => {
+    setDataSpecificCustomer((prevState) => {
+      return {
+        ...prevState,
+        accountGroupTypeId: e || [],
+        search: "",
+        limit: DEFAULT_SEARCH_LIMIT,
+      };
+    });
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
+    setAllCustomersList([]);
+    form.resetFields(["specificCustomer"]);
+  };
+
+  const handleAccountSegment = (e) => {
+    setDataSpecificCustomer((prevState) => {
+      return {
+        ...prevState,
+        accountSegmentId: e || [],
+        accountGroupTypeId: [],
+        search: "",
+        limit: DEFAULT_SEARCH_LIMIT,
+      };
+    });
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
+    setAllCustomersList([]);
+
+    if (e && e.length > 0) {
+      dispatch(getListAccountGroup(e));
+    }
+
+    form.resetFields(["accountGroupType", "specificCustomer"]);
+  };
+
+  const handleScheduleTypeChange = (value) => {
+    setSelectedScheduleType(value);
+    // Reset scheduleDateTime jika bukan schedule
+    const selectedType = list_scheduler_type?.find(item => item.id === value);
+    if (selectedType?.name?.toLowerCase() !== 'schedule') {
+      form.setFieldValue('scheduleDateTime', null);
+    }
+  };
+
+  const handleCreateNew = () => {
+    let tempData = [
+      "costCenter",
+      "meterReading",
+      "accountSegment",
+      "accountGroupType",
+      "specificCustomer",
+      "type",
+      "scheduleDateTime",
+      "remark",
+    ];
+    if (defaultData?.costCenter) {
+      tempData = tempData.filter((item) => item !== "costCenter");
+    }
+    form.resetFields(tempData);
+    setSelectedScheduleType(null);
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
+    setAllCustomersList([]);
+    setModalSuccess(false);
+    setOpenModal(false);
+  };
+
+  const handleCloseModalError = () => {
+    setModalError(false);
+    setBodyError({});
+  };
+
+  const handleRetry = () => {
+    handleSave();
+    setModalError(false);
+    setBodyError({});
+  };
+
+  return (
+    <LayoutMenu>
+      <BreadCrumb routes={routes} />
+      <Spin spinning={loading}>
+        <Form layout={"vertical"} form={form} onFinish={onFinish}>
+          <BaseContainer header={"BIlling Cycle Information"}>
+            <div className={"w-full grid grid-cols-2 gap-2"}>
+              <Form.Item
+                label={"Billing Cycle"}
+                name={"billing_cycle"}
+                rules={formMessageRequired("Billing Cycle")}
+              >
+                <SelectComponent
+                  onChange={handleChangeBillingCycle}
+                  options={list_billing_cycle?.data?.map((item) => {
+                    return {
+                      label: item?.name,
+                      value: item?.id,
+                    };
+                  })}
+                />
+              </Form.Item>
+              <Form.Item
+                label={"Billing Period"}
+                name={"billing_period"}
+                rules={formMessageRequired("Billing Period")}
+              >
+                <SelectComponent
+                  disabled={!billingCycle}
+                  options={
+                    billingCycle
+                      ? list_billing_period?.data?.map((item) => {
+                          return {
+                            label: item?.name,
+                            value: item?.id,
+                          };
+                        })
+                      : []
+                  }
+                />
+              </Form.Item>
+            </div>
+          </BaseContainer>
+          <BaseContainer header={"Input Parameter Information"}>
+            <div className={"w-full grid grid-cols-2 gap-2"}>
+              <div className="col-span-2">
+                <Form.Item
+                  label={"SOR"}
+                  name={"sor"}
+                  rules={formMessageRequired("SOR")}
+                >
+                  <SelectComponent
+                    onChange={handleChangeSOR}
+                    options={list_sor?.data?.map((item) => {
+                      return {
+                        label: item?.name,
+                        value: item?.id,
+                      };
+                    })}
+                    disabled={defaultData?.sor}
+                  />
+                </Form.Item>
+              </div>
+              <Form.Item label={"Cost Center"} name={"costCenter"}>
+                <SelectComponent
+                  mode={"multiple"}
+                  onChange={handleChangeCostCenter}
+                  disabled={defaultData?.costCenter?.length !== 0}
+                  options={list_cost_center?.data?.map((item) => {
+                    return {
+                      label: item?.name,
+                      value: item?.id,
+                    };
+                  })}
+                />
+              </Form.Item>
+              <Form.Item label={"Meter Reading Code"} name={"meterReading"}>
+                <SelectComponent
+                  mode={"multiple"}
+                  onChange={handleMeterReadingRoute}
+                  disabled={
+                    !dataSpecificCustomer?.costCenterId ||
+                    dataSpecificCustomer?.costCenterId?.length === 0
+                  }
+                  options={mergedArrayMrc?.map((item) => {
+                    return {
+                      label: item?.name,
+                      value: item?.id,
+                    };
+                  })}
+                />
+              </Form.Item>
+              <Form.Item label={"Account Segment"} name={"accountSegment"}>
+                <SelectComponent
+                  mode={"multiple"}
+                  onChange={handleAccountSegment}
+                  options={(list_customer_segment?.Data || []).map((item) => {
+                    return {
+                      label: item?.name,
+                      value: item?.id,
+                    };
+                  })}
+                />
+              </Form.Item>
+              <Form.Item label={"Account Group Type"} name={"accountGroupType"}>
+                <SelectComponent
+                  mode={"multiple"}
+                  onChange={handleAccountGroup}
+                  disabled={
+                    !dataSpecificCustomer?.accountSegmentId ||
+                    dataSpecificCustomer?.accountSegmentId?.length === 0
+                  }
+                  options={(list_account_group || [])?.map((item) => {
+                    return {
+                      label: item?.glb_VALUE || item?.name,
+                      value: item?.glb_TYPE_VAL_ID,
+                    };
+                  })}
+                />
+              </Form.Item>
+              <div className="col-span-2">
+                <Form.Item
+                  label={"Specific Customer Account"}
+                  name={"specificCustomer"}
+                  help={
+                    specific_customer_message && (
+                      <span className="text-blue-600 text-xs">
+                        {specific_customer_message}
+                      </span>
+                    )
+                  }
+                >
+                  <Select
+                    mode={"multiple"}
+                    disabled={!dataSpecificCustomer?.sorId}
+                    loading={loading_specific_customer}
+                    showSearch
+                    filterOption={false}
+                    onSearch={handleSearchCustomer}
+                    searchValue={searchCustomerValue}
+                    maxLength={MAX_SEARCH_LENGTH}
+                    onClear={() => {
+                      setSearchCustomerValue("");
+                      setFilteredCustomerList([]);
+                      setDataSpecificCustomer((prevState) => ({
+                        ...prevState,
+                        search: "",
+                        limit: DEFAULT_SEARCH_LIMIT,
+                      }));
+                    }}
+                    allowClear
+                    placeholder={`Type at least 3 characters to search (max ${MAX_SEARCH_LENGTH} chars)...`}
+                    notFoundContent={
+                      loading_specific_customer ? (
+                        <div className="flex justify-center py-4">
+                          <Spin size="small" />
+                        </div>
+                      ) : searchCustomerValue.length > 0 &&
+                        searchCustomerValue.length < 3 ? (
+                        <div className="text-center py-4 text-gray-500">
+                          Please enter at least 3 characters
+                        </div>
+                      ) : (
+                        "No data"
+                      )
+                    }
+                    dropdownRender={(menu) => (
+                      <>
+                        {menu}
+                        {specific_customer_message && (
+                          <div className="px-2 py-2 border-t text-xs text-gray-500">
+                            {specific_customer_message}
+                          </div>
+                        )}
+                        {searchCustomerValue.length > 0 && (
+                          <div className="px-2 py-1 border-t text-xs text-right">
+                            <span
+                              className={
+                                searchCustomerValue.length >= MAX_SEARCH_LENGTH
+                                  ? "text-red-500 font-semibold"
+                                  : "text-gray-500"
+                              }
+                            >
+                              {searchCustomerValue.length}/{MAX_SEARCH_LENGTH}{" "}
+                              characters
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  >
+                    {(filteredCustomerList || []).map((item) => (
+                      <Select.Option
+                        key={item.accountNumber}
+                        value={item.accountNumber}
+                      >
+                        {item.accountName} - {item.accountNumber}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </div>
+            </div>
+          </BaseContainer>
+          <BaseContainer header={"Scheduler Information"}>
+            <Form.Item
+              label={"Type"}
+              name={"type"}
+              rules={formMessageRequired("Type")}
+            >
+              <SelectComponent
+                onChange={handleScheduleTypeChange}
+                options={(list_scheduler_type || []).map((item) => {
+                  return {
+                    label: item?.name,
+                    value: item?.id,
+                  };
+                })}
+              />
+            </Form.Item>
+            
+            {/* Conditional Schedule DateTime Field */}
+            {selectedScheduleType && 
+             list_scheduler_type?.find(item => item.id === selectedScheduleType)?.name?.toLowerCase() === 'scheduler' && (
+              <Form.Item
+                label={"Schedule"}
+                name={"scheduleDateTime"}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select schedule date and time",
+                  },
+                ]}
+              >
+                <DatePicker
+                  showTime
+                  format="DD MMM YYYY HH:mm:ss"
+                  placeholder="Select date and time"
+                  className="w-full"
+                  disabledDate={(current) => {
+                    // Changed from dayjs to moment
+                    return current && current < moment().startOf('day');
+                  }}
+                />
+              </Form.Item>
+            )}
+            
+            <Form.Item label={"Remark"} name={"remark"}>
+              <InputComponent
+                type="textarea"
+                value={remark}
+                onChange={(e) => setRemark(e.target.value)}
+              />
+            </Form.Item>
+          </BaseContainer>
+          <div className={"w-full flex mt-5"}>
+            <div className={"w-full justify-start"}>
+              <Form.Item>
+                <ButtonComponent
+                  type={"submit"}
+                  icon={
+                    <LeftOutlined
+                      style={{
+                        color: "#fff",
+                        fontSize: 16,
+                        justifyItems: "left",
+                      }}
+                    />
+                  }
+                  onClick={handleBackPage}
+                >
+                  Back
+                </ButtonComponent>
+              </Form.Item>
+            </div>
+            <div className={"w-full justify-end flex gap-2"}>
+              <ButtonComponent
+                type={"submit"}
+                icon={
+                  <SVGIcon
+                    name={
+                      type === "update" ? `IconButtonReset` : `IconButtonClear`
+                    }
+                    width={24}
+                  />
+                }
+                onClick={handleReset}
+              >
+                {type === "create" ? "Clear" : "Reset"}
+              </ButtonComponent>
+              <Form.Item>
+                <ButtonComponent type={"submit"} htmlType={"submit"}>
+                  Save
+                </ButtonComponent>
+              </Form.Item>
+            </div>
+          </div>
+        </Form>
+      </Spin>
+
+      <ModalConfirm
+        isOpen={openBack}
+        handleCancel={() => setOpenBack(false)}
+        handleOk={() => navigate(-1)}
+        width={400}
+      >
+        <div className="flex justify-center mt-5 gap-[20px]">
+          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+          <p className="text-[18px] font-bold">
+            Are you sure you want to back?
+          </p>
+        </div>
+      </ModalConfirm>
+
+      <ModalConfirm
+        isOpen={openWarningPopulate}
+        handleCancel={handleCancelPopulateAll}
+        handleOk={handleConfirmPopulateAll}
+        width={650}
+        confirmLoading={loadingAllCustomers}
+      >
+        <div className="flex flex-col justify-center mt-5 gap-[20px] px-4">
+          <div className="flex items-start gap-[20px]">
+            <WarningOutlined
+              style={{
+                fontSize: "32px",
+                color: "#FF9800",
+                marginTop: "4px",
+              }}
+            />
+            <div className="flex-1">
+              <p className="text-[18px] font-bold text-gray-800">
+                No Specific Customer Selected
+              </p>
+              <p className="text-[14px] text-gray-600 mt-3">
+                You have not selected any specific customer account.
+              </p>
+              <div className="mt-3 p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
+                <p className="text-[14px] font-semibold text-orange-800">
+                  ⚠️ This will fetch and process{" "}
+                  <span className="text-[16px] font-bold">ALL customers</span>{" "}
+                  matching your filter criteria
+                </p>
+              </div>
+
+              <div className="mt-4 p-3 bg-gray-50 rounded border border-gray-200 max-h-[400px] overflow-y-auto">
+                <p className="text-[13px] font-semibold text-gray-700 mb-3">
+                  Current Filter Criteria:
+                </p>
+
+                <div className="mb-3 pb-3 border-b border-gray-200">
+                  <div className="flex items-start gap-2">
+                    <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
+                      SOR:
+                    </span>
+                    <span className="text-[13px] text-gray-600">
+                      {list_sor?.data?.find(
+                        (item) => item.id === pendingDataFinal?.sor
+                      )?.name || "All"}
+                    </span>
+                  </div>
+                </div>
+
+                {pendingDataFinal?.rRbiCalculationCostCenter?.length > 0 && (
+                  <div className="mb-3 pb-3 border-b border-gray-200">
+                    <div className="flex items-start gap-2">
+                      <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
+                        Cost Center:
+                      </span>
+                      <div className="flex-1">
+                        <span className="text-[12px] text-blue-600 font-medium">
+                          {pendingDataFinal.rRbiCalculationCostCenter.length}{" "}
+                          selected
+                        </span>
+                        <ul className="mt-2 space-y-1">
+                          {pendingDataFinal.rRbiCalculationCostCenter.map(
+                            (item, idx) => {
+                              const ccName = list_cost_center?.data?.find(
+                                (cc) => cc.id === item.costCenter
+                              )?.name;
+                              return (
+                                <li
+                                  key={idx}
+                                  className="text-[12px] text-gray-600 flex items-start"
+                                >
+                                  <span className="text-blue-500 mr-1">•</span>
+                                  <span>
+                                    {ccName || `ID: ${item.costCenter}`}
+                                  </span>
+                                </li>
+                              );
+                            }
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {pendingDataFinal?.rRbiCalculationMeterReadingCode?.length >
+                  0 && (
+                  <div className="mb-3 pb-3 border-b border-gray-200">
+                    <div className="flex items-start gap-2">
+                      <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
+                        Meter Reading Code:
+                      </span>
+                      <div className="flex-1">
+                        <span className="text-[12px] text-blue-600 font-medium">
+                          {
+                            pendingDataFinal.rRbiCalculationMeterReadingCode
+                              .length
+                          }{" "}
+                          selected
+                        </span>
+                        <ul className="mt-2 space-y-1">
+                          {pendingDataFinal.rRbiCalculationMeterReadingCode.map(
+                            (item, idx) => {
+                              const mergedMrc = list_meter_reading_code?.reduce(
+                                (result, current) =>
+                                  result?.concat(current?.dtoList),
+                                []
+                              );
+                              const mrcName = mergedMrc?.find(
+                                (mrc) => mrc.id === item.mreadingCode
+                              )?.name;
+                              return (
+                                <li
+                                  key={idx}
+                                  className="text-[12px] text-gray-600 flex items-start"
+                                >
+                                  <span className="text-blue-500 mr-1">•</span>
+                                  <span>
+                                    {mrcName || `ID: ${item.mreadingCode}`}
+                                  </span>
+                                </li>
+                              );
+                            }
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {pendingDataFinal?.rRbiCalculationAccountSegment?.length >
+                  0 && (
+                  <div className="mb-3 pb-3 border-b border-gray-200">
+                    <div className="flex items-start gap-2">
+                      <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
+                        Account Segment:
+                      </span>
+                      <div className="flex-1">
+                        <span className="text-[12px] text-blue-600 font-medium">
+                          {
+                            pendingDataFinal.rRbiCalculationAccountSegment
+                              .length
+                          }{" "}
+                          selected
+                        </span>
+                        <ul className="mt-2 space-y-1">
+                          {pendingDataFinal.rRbiCalculationAccountSegment.map(
+                            (item, idx) => {
+                              const segmentName =
+                                list_customer_segment?.Data?.find(
+                                  (seg) => seg.id === item.accSegment
+                                )?.name;
+                              return (
+                                <li
+                                  key={idx}
+                                  className="text-[12px] text-gray-600 flex items-start"
+                                >
+                                  <span className="text-blue-500 mr-1">•</span>
+                                  <span>
+                                    {segmentName || `ID: ${item.accSegment}`}
+                                  </span>
+                                </li>
+                              );
+                            }
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {pendingDataFinal?.rRbiCalculationAccountGroupType?.length >
+                  0 && (
+                  <div className="mb-3">
+                    <div className="flex items-start gap-2">
+                      <span className="font-semibold text-[13px] text-gray-700 min-w-[140px]">
+                        Account Group Type:
+                      </span>
+                      <div className="flex-1">
+                        <span className="text-[12px] text-blue-600 font-medium">
+                          {
+                            pendingDataFinal.rRbiCalculationAccountGroupType
+                              .length
+                          }{" "}
+                          selected
+                        </span>
+                        <ul className="mt-2 space-y-1">
+                          {pendingDataFinal.rRbiCalculationAccountGroupType.map(
+                            (item, idx) => {
+                              const groupName =
+                                list_account_group?.find(
+                                  (group) =>
+                                    group.glb_TYPE_VAL_ID === item.accGroupType
+                                )?.glb_VALUE ||
+                                list_account_group?.find(
+                                  (group) =>
+                                    group.glb_TYPE_VAL_ID === item.accGroupType
+                                )?.name;
+                              return (
+                                <li
+                                  key={idx}
+                                  className="text-[12px] text-gray-600 flex items-start"
+                                >
+                                  <span className="text-blue-500 mr-1">•</span>
+                                  <span>
+                                    {groupName || `ID: ${item.accGroupType}`}
+                                  </span>
+                                </li>
+                              );
+                            }
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
+                <p className="text-[13px] text-blue-800">
+                  <strong>Note:</strong> When you click "OK", the system will:
+                </p>
+                <ol className="text-[13px] text-blue-700 mt-2 ml-4 space-y-1 list-decimal">
+                  <li>Fetch ALL customers from backend (limit: -1)</li>
+                  <li>Display the total count in confirmation modal</li>
+                  <li>Process all fetched customers for prabilling</li>
+                </ol>
+              </div>
+
+              <p className="text-[14px] text-gray-700 font-medium mt-4">
+                Are you sure you want to continue?
+              </p>
+            </div>
+          </div>
+        </div>
+      </ModalConfirm>
+
+      <ModalCustom
+        isOpen={openModal}
+        handleCancel={() => setOpenModal(false)}
+        header={"CONFIRMATION"}
+        width={900}
+        type={"confirmation"}
+        footer={
+          <div className={"flex w-full justify-end gap-2 mb-5"}>
+            <ButtonComponent onClick={() => setOpenModal(false)}>
+              Cancel
+            </ButtonComponent>
+            <ButtonComponent type={"submit"} onClick={handleSave}>
+              Confirm
+            </ButtonComponent>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          {dataFinal?.fetchedAllCustomers && (
+            <div className="p-4 bg-green-50 border-l-4 border-green-500 rounded">
+              <div className="flex items-start gap-3">
+                <svg
+                  className="w-5 h-5 text-green-600 mt-0.5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <div>
+                  <p className="text-[14px] font-semibold text-green-800">
+                    All Customers Fetched Successfully
+                  </p>
+                  <p className="text-[13px] text-green-700 mt-1">
+                    Total customers to be processed:{" "}
+                    <span className="font-bold text-[15px]">
+                      {dataFinal?.totalCustomersFetched || 0}
+                    </span>{" "}
+                    accounts
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <FormConfirmation data={dataFinal} />
+        </div>
+      </ModalCustom>
+
+      <Modal
+        open={modalSuccess}
+        onOk={() => navigate(-1)}
+        onCancel={() => navigate(-1)}
+        footer={
+          <div className="flex justify-end gap-4">
+            <ButtonComponent
+              type={"submit"}
+              onClick={handleCreateNew}
+              border={false}
+            >
+              Create New
+            </ButtonComponent>
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => navigate(-1)}
+              border={false}
+            >
+              OK
+            </ButtonComponent>
+          </div>
+        }
+        className={"modal-custom"}
+        centered={true}
+        width={500}
+        maskClosable={false}
+      >
+        <div className="px-8 py-8 justify-center">
+          <div className="w-full flex gap-[20px]">
+            {IconModal["icon_success_default"]}
+            <p className="text-[18px] font-bold">{"Successful"}</p>
+          </div>
+          <p className="pl-[70px]">{"Your data has been created."}</p>
+        </div>
+      </Modal>
+
+      <ModalError
+        isOpen={modalError}
+        handleOk={handleRetry}
+        handleCancel={handleCloseModalError}
+        customText={"Try Again"}
+      >
+        <div className="px-5 pt-5 pb-[10px] justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconFailed" width={48} />
+            <p className="text-[18px] font-bold">{"Failed"}</p>
+          </div>
+          <p className="pl-[70px]">{`Your data was not created. ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">Please try again.</p>
+        </div>
+      </ModalError>
+    </LayoutMenu>
+  );
+};
+
+export default PrabillingForm;
