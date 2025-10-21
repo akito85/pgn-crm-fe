@@ -4,7 +4,7 @@ import { showModalError, validateError } from "../general_slice";
 import { showModalSuccess } from "../general_slice";
 import axios from "axios";
 
-const BASE_URL = "https://d28a5698909b.ngrok-free.app/api/v1/invoices";
+const BASE_URL = process.env.REACT_APP_BASE_URL_NGROK;
 
 const initialState = {
   data: [],
@@ -23,11 +23,14 @@ export const getAllInvoicePaginate = createAsyncThunk(
     try {
       const sortParams =
         sort === undefined || sort === "" ? "createdDate,desc" : sort;
-      const url = `${BASE_URL}?page=0&size=${pageSize}&sort=${sortParams}&search=${
+
+      // sort belum di atur jeremia
+      const url = `${BASE_URL}/api/invoices?page=0&size=${pageSize}&search=${
         search || ""
       }`;
       const response = await axios.get(url, {
         headers: {
+          // "Access-Control-Allow-Origin": "http://localhost:3000",
           "ngrok-skip-browser-warning": "true",
         },
       });
@@ -42,7 +45,7 @@ export const getDetailInvoice = createAsyncThunk(
   "GET_DETAIL_INVOICE",
   async (invoiceNumber, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/${invoiceNumber}`;
+      const url = `${BASE_URL}/api/v1/invoices/${invoiceNumber}`;
       const response = await axios.get(url, {
         headers: {
           "ngrok-skip-browser-warning": "true",
@@ -142,7 +145,7 @@ export const getDownloadList = createAsyncThunk(
   "DOWNLOAD_INVOICE",
   async (invoiceNumber, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/download/${invoiceNumber}`;
+      const url = `${BASE_URL}/api/v1/invoices/download/${invoiceNumber}`;
       const response = await axios.get(url, { responseType: "blob" });
       return response.data;
     } catch (error) {

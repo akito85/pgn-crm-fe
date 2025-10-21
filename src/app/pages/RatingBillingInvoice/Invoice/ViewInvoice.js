@@ -41,9 +41,9 @@ const ViewInvoice = () => {
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  // const dataSource = data?.content || [];
+  const dataSource = data?.content || [];
   // console.log("data", data?.content);
-  const dataSource = InvoiceDummy();
+  // const dataSource = InvoiceDummy();
 
   // State
   const [page, setPage] = useState(1);
