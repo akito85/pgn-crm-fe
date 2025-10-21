@@ -32,6 +32,9 @@ import pricingAdjustReducer from "../slices/product_promo/pricingAdjust";
 import tosReducer from "../slices/product_promo/tos";
 import acccountManagerReducer from "../slices/account_management/accountManagement";
 import calculationReducer from "../slices/rating_billing_invoice/calculation";
+import prabillingReducer from "../slices/rating_billing_invoice/praBilling";
+import monitoringReducer from "../slices/rating_billing_invoice/monitoringSlice";
+import efakturReducer from "../slices/rating_billing_invoice/efakturSlice";
 import receiptReducer from "../slices/receipt_collection/receipt";
 import acccountAddressReducer from "../slices/account_management/detailAccount/accountAddressSlice";
 import accountGasSourceReducer from "../slices/account_management/detailAccount/accountGasSource";
@@ -85,9 +88,15 @@ import equpmentReducer from "../slices/account_management/detailAccount/equpment
 import criteriaReducer from '../slices/criteria_slice';
 import { reportCustomerSlice } from "../slices/report/report_customer_slice";
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
-import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement"; 
+import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement";
+import prabillingLogReducer from "../slices/rating_billing_invoice/prabillingLog";
+import jobSlice from "../slices/system_setup/jobSlice";
+import loggingReducer from "../slices/system_setup/logging";
+
 
 const reducer = combineReducers({
+  job: jobSlice,
+  logging: loggingReducer,
   auth: authReducer,
   message: messageReducer,
   entity: entityReducer,
@@ -160,7 +169,11 @@ const reducer = combineReducers({
   assets: assetsReducer,
 
   // RBI reducer
+  prabillingLog: prabillingLogReducer,
   rbi_calculation: calculationReducer,
+  rbi_prabilling: prabillingReducer,
+  monitoring: monitoringReducer,
+  efaktur: efakturReducer,
   monitoring_usage: monitoringUsageReducer,
   billing: billingReducer,
   adjustmentBilling: adjustmentBillingReducer,

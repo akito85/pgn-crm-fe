@@ -145,6 +145,7 @@ export const getListSor = createAsyncThunk("GET_LIST_SOR", async (thunkAPI) => {
     return error;
   }
 });
+
 export const getListServiceType = createAsyncThunk(
   "GET_LIST_SERVICE_TYPE",
   async (thunkAPI) => {
@@ -171,6 +172,7 @@ export const getListServiceType = createAsyncThunk(
     }
   }
 );
+
 export const getListAccountGroup = createAsyncThunk(
   "GET_LIST_ACCOUNT_GROUP",
   async (body, thunkAPI) => {
@@ -180,7 +182,7 @@ export const getListAccountGroup = createAsyncThunk(
         url,
         body
       );
-      return response.data;
+      return response.Data;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();

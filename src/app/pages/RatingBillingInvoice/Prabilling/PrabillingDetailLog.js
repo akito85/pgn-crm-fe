@@ -104,6 +104,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
   const columns = useMemo(
     () => [
       {
+        key: "no",
         title: "NO",
         width: 60,
         align: "center",
@@ -111,6 +112,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
       {
+        key: "seq",
         title: "SEQUENCE",
         dataIndex: "seq",
         width: 100,
@@ -138,6 +140,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
           ),
       },
       {
+        key: "processName",
         title: "PROCESS NAME",
         dataIndex: "processName",
         width: 250,
@@ -164,6 +167,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
           ),
       },
       {
+        key: "activityName",
         title: "ACTIVITY NAME",
         dataIndex: "activityName",
         width: 250,
@@ -190,6 +194,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
           ),
       },
       {
+        key: "status",
         title: "STATUS",
         dataIndex: "status",
         width: 120,
@@ -198,6 +203,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         // render: (status) => renderStatus(status),
       },
       {
+        key: "message",
         title: "MESSAGE",
         dataIndex: "message",
         width: 350,
@@ -227,6 +233,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
           ),
       },
       {
+        key: "createdDtm",
         title: "CREATED DATE",
         dataIndex: "createdDtm",
         width: 180,
@@ -254,6 +261,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
           ),
       },
       {
+        key: "createdBy",
         title: "CREATED BY",
         dataIndex: "createdBy",
         width: 150,

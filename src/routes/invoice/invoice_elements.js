@@ -4,6 +4,8 @@ import GenerateInvoicePage from "../../app/pages/RatingBillingInvoice/Invoice/Ge
 import GenerateProformaInvoicePage from "../../app/pages/RatingBillingInvoice/Invoice/GenerateProformaInvoicePage";
 import EMeteraiManagement from "../../app/pages/RatingBillingInvoice/Invoice/EMeteraiManagement";
 import ManagementDeliveryInvoice from "../../app/pages/RatingBillingInvoice/Invoice/ManagementDeliveryInvoice";
+import ViewFaktur from "../../app/pages/RatingBillingInvoice/Management E-Faktur/ViewFaktur";
+import DetailEFaktur from "../../app/pages/RatingBillingInvoice/Management E-Faktur/DetailEFaktur";
 
 export const INVOICE_ELEMENTS = {
   // Generate Invoice List (main page)
@@ -18,4 +20,7 @@ export const INVOICE_ELEMENTS = {
   E_METERAI_MANAGEMENT_PAGE: <EMeteraiManagement />,
   // Management Delivery Invoice
   MANAGEMENT_DELIVERY_INVOICE_PAGE: <ManagementDeliveryInvoice />,
+  //manajemen e-faktur
+  EFAKTUR_VIEW_PAGE: <ViewFaktur />,
+  EFAKTUR_DETAIL_PAGE: <DetailEFaktur />,
 };

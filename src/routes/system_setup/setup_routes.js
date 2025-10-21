@@ -1,4 +1,17 @@
 export const SYSTEM_SETUP_ROUTES = {
+  
+
+  // job routes
+  LOGGING_VIEW_MENU: "/system-setup/logging",
+
+   // job routes
+  JOB_VIEW_MENU: "/system-setup/job-management",
+  JOB_CREATE_MENU : "/system-setup/job-management/create",
+  JOB_DETAIL_MENU : "/system-setup/job-management/view",
+
+  // job control
+  JOB_CONTROL_VIEW_MENU: "/system-setup/job-control",
+  
   // menus routes
   VIEW_MENU: "/system-setup/menu",
   CREATE_MENU: "/system-setup/menu/create",
