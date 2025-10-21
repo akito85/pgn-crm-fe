@@ -53,6 +53,11 @@ const LayoutMenu = ({ children }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
+
+  const publicPaths = ['/rating-billing/pra-billing/customer/view'];
+  const isPublicPath = publicPaths.some(path => location.pathname.includes(path));
+
+
   const { user, remember, data_switch } = useSelector(
     (state) => state.auth
   );
@@ -550,11 +555,11 @@ const LayoutMenu = ({ children }) => {
                   </div>
                 </ModalError>
               ) : null}
-              {data_grant_access?.response?.data?.data?.isGranted === false ? (
-                <NotFound type={"unauthorized"} />
-              ) : (
-                <div className="mt-[30px]">{children}</div>
-              )}
+              {data_grant_access?.response?.data?.data?.isGranted === false && !isPublicPath ? (
+              <NotFound type={"unauthorized"} />
+                ) : (
+                  <div className="mt-[30px]">{children}</div>
+                )}
               {/* <div className="mt-[30px]">{children}</div> */}
             </Content>
 

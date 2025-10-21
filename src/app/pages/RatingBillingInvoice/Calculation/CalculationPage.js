@@ -96,12 +96,14 @@ const CalculationPage = () => {
 
   const column = useMemo(() => [
     {
+      key: "no",
       title: "NO",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
+      key: "calculationCode",
       title: "CALCULATION CODE",
       dataIndex: "calculationCode",
       sorter: true,
@@ -128,6 +130,7 @@ const CalculationPage = () => {
         ),
     },
     {
+      key: "customer",
       title: "Σ CUSTOMER",
       dataIndex: "customer",
       align: "right",
@@ -154,6 +157,7 @@ const CalculationPage = () => {
         ),
     },
     {
+      key: "succeed",
       title: "Σ SUCCEED",
       dataIndex: "succeed",
       align: "right",
@@ -180,6 +184,7 @@ const CalculationPage = () => {
         ),
     },
     {
+      key: "progress",
       title: "Σ PROGRESS",
       dataIndex: "progress",
       align: "right",
@@ -206,6 +211,7 @@ const CalculationPage = () => {
         ),
     },
     {
+      key: "failed",
       title: "Σ FAILED",
       dataIndex: "failed",
       align: "right",
@@ -232,6 +238,7 @@ const CalculationPage = () => {
         ),
     },
     {
+      key: "billingCycleVal",
       title: "BILLING CYCLE",
       dataIndex: "billingCycleVal",
       align: "center",
@@ -258,6 +265,7 @@ const CalculationPage = () => {
         ),
     },
     {
+      key: "billingPeriodVal",
       title: "BILLING PERIOD",
       dataIndex: "billingPeriodVal",
       align: "center",
@@ -310,6 +318,7 @@ const CalculationPage = () => {
       // },
     },
     {
+      key: "serviceTypeVal",
       title: "SERVICE TYPE",
       dataIndex: "serviceTypeVal",
       align: "center",
@@ -336,6 +345,7 @@ const CalculationPage = () => {
         ),
     },
     {
+      key: "sorVal",
       title: "SOR",
       dataIndex: "sorVal",
       align: "left",
@@ -362,6 +372,7 @@ const CalculationPage = () => {
         ),
     },
     {
+      key: "costCenter",
       title: "COST CENTER",
       dataIndex: "costCenter",
       align: "left",
@@ -417,6 +428,7 @@ const CalculationPage = () => {
       // },
     },
     {
+      key: "meterReadingCode",
       title: "METER READING CODE",
       dataIndex: "meterReadingCode",
       align: "left",
@@ -472,6 +484,7 @@ const CalculationPage = () => {
       // },
     },
     {
+      key: "customerSegment",
       title: "ACCOUNT SEGMENT",
       dataIndex: "customerSegment",
       align: "center",
@@ -527,6 +540,7 @@ const CalculationPage = () => {
       // },
     },
     {
+      key: "no",
       title: "ACCOUNT GROUP TYPE",
       dataIndex: "accGroupType",
       align: "center",
@@ -582,6 +596,7 @@ const CalculationPage = () => {
       // },
     },
     {
+      key: "no",
       title: "SPECIFIC CUSTOMER ACCOUNT",
       dataIndex: "custNumb",
       align: "left",
@@ -629,6 +644,7 @@ const CalculationPage = () => {
       //   ),
     },
     {
+      key: "no",
       title: "SCHEDULE TYPE",
       dataIndex: "scheduleTypeVal",
       align: "center",
@@ -656,6 +672,7 @@ const CalculationPage = () => {
     },
 
     {
+      key: "no",
       title: "GENERATE DATE",
       dataIndex: "generateDate",
       align: "center",
@@ -709,6 +726,7 @@ const CalculationPage = () => {
       // },
     },
     {
+      key: "no",
       title: "REMARK",
       dataIndex: "remark",
       align: "left",
@@ -764,6 +782,7 @@ const CalculationPage = () => {
       // },
     },
     {
+      key: "no",
       title: "TYPE",
       dataIndex: "typeVal",
       align: "center",
@@ -802,6 +821,7 @@ const CalculationPage = () => {
       // ),
     },
     {
+      key: "no",
       title: "STATUS",
       dataIndex: "status",
       align: "center",
@@ -907,12 +927,14 @@ const CalculationPage = () => {
   // column history
   const columnHistory = useMemo(() => [
     {
+      key: "no",
       title: "NO",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
+      key: "no",
       title: "CALCULATION CODE",
       dataIndex: "calCode",
       sorter: true,
@@ -938,6 +960,7 @@ const CalculationPage = () => {
         ),
     },
     {
+      key: "no",
       title: "CUSTOMER NUMBER",
       dataIndex: "custNumb",
       sorter: true,
@@ -966,6 +989,7 @@ const CalculationPage = () => {
         ),
     },
     {
+      key: "no",
       title: "CUSTOMER NAME",
       dataIndex: "custName",
       sorter: true,
@@ -998,6 +1022,7 @@ const CalculationPage = () => {
       // ),
     },
     {
+      key: "no",
       title: "ACCOUNT NUMBER",
       dataIndex: "accNumb",
       sorter: true,
@@ -1030,6 +1055,7 @@ const CalculationPage = () => {
       // ),
     },
     {
+      key: "no",
       title: "ACCOUNT NAME",
       dataIndex: "accName",
       sorter: true,
@@ -1062,6 +1088,7 @@ const CalculationPage = () => {
       // ),
     },
     {
+      key: "no",
       title: "ACCOUNT GROUP TYPE",
       dataIndex: "accGroupTypeVal",
       sorter: true,
@@ -1117,6 +1144,7 @@ const CalculationPage = () => {
       // },
     },
     {
+      key: "no",
       title: "SERVICE TYPE",
       dataIndex: "serviceTypeVal",
       sorter: true,
@@ -1150,6 +1178,7 @@ const CalculationPage = () => {
       // ),
     },
     {
+      key: "no",
       title: "SA NUMBER",
       dataIndex: "saNumb",
       sorter: true,
@@ -1183,6 +1212,7 @@ const CalculationPage = () => {
       // ),
     },
     {
+      key: "no",
       title: "SOR",
       dataIndex: "sorVal",
       sorter: true,
@@ -1237,6 +1267,7 @@ const CalculationPage = () => {
       // },
     },
     {
+      key: "no",
       title: "COST CENTER",
       dataIndex: "costCenterVal",
       sorter: true,
@@ -1291,6 +1322,7 @@ const CalculationPage = () => {
       // },
     },
     {
+      key: "no",
       title: "ACCOUNT SEGMENT",
       dataIndex: "accSegmentVal",
       sorter: true,
@@ -1324,6 +1356,7 @@ const CalculationPage = () => {
       // ),
     },
     {
+      key: "no",
       title: "METER READING CODE",
       dataIndex: "meterReadingCodeVal",
       sorter: true,
@@ -1357,6 +1390,7 @@ const CalculationPage = () => {
       // ),
     },
     {
+      key: "no",
       title: "BILLING CYCLE",
       dataIndex: "billingCycVal",
       sorter: true,
@@ -1390,6 +1424,7 @@ const CalculationPage = () => {
       // ),
     },
     {
+      key: "no",
       title: "BILLING PERIODE",
       dataIndex: "billingPeriodVal",
       sorter: true,
@@ -1423,6 +1458,7 @@ const CalculationPage = () => {
       // ),
     },
     {
+      key: "no",
       title: "MESSAGE",
       dataIndex: "message",
       sorter: true,
@@ -1478,6 +1514,7 @@ const CalculationPage = () => {
       // },
     },
     {
+      key: "no",
       title: "CALCULATE AT",
       dataIndex: "calculateAt",
       sorter: true,
@@ -1531,6 +1568,7 @@ const CalculationPage = () => {
       // },
     },
     {
+      key: "no",
       title: "IS TRY",
       dataIndex: "isTry",
       sorter: true,
@@ -1550,6 +1588,7 @@ const CalculationPage = () => {
       }
     },
     {
+      key: "no",
       title: "STATUS",
       dataIndex: "status",
       align: "center",

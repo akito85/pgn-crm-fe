@@ -108,6 +108,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const resultColumns = useMemo(
   () => [
     {
+      key: "no",
       title: "NO",
       width: 60,
       align: "center",
@@ -115,6 +116,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
+      key: "customerNumber",
       title: "CUSTOMER NUMBER",
       dataIndex: "customerNumber",
       width: 150,
@@ -142,6 +144,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         ),
     },
     {
+      key: "customerName",
       title: "CUSTOMER NAME",
       dataIndex: "customerName",
       width: 200,
@@ -168,6 +171,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         ),
     },
     {
+      key: "no",
       title: "CUSTOMER TYPE ID",
       dataIndex: "customerTypeId",
       width: 150,
@@ -175,6 +179,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       sorter: true,
     },
     {
+      key: "billingCycle",
       title: "BILLING CYCLE",
       dataIndex: "billingCycle",
       width: 150,
@@ -202,6 +207,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         ),
     },
     {
+      key: "billPeriod",
       title: "BILLING PERIOD",
       dataIndex: "billPeriod",
       width: 120,
@@ -209,6 +215,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       sorter: true,
     },
     {
+      key: "accountNumber",
       title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
       width: 150,
@@ -235,6 +242,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         ),
     },
     {
+      key: "accountName",
       title: "ACCOUNT NAME",
       dataIndex: "accountName",
       width: 200,
@@ -261,12 +269,14 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         ),
     },
     {
+      key: "accountGroup",
       title: "ACCOUNT GROUP",
       dataIndex: "accountGroup",
       width: 120,
       sorter: true,
     },
     {
+      key: "accountType",
       title: "ACCOUNT TYPE",
       dataIndex: "accountType",
       width: 100,
@@ -274,36 +284,42 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       sorter: true,
     },
     {
+      key: "costCenter",
       title: "COST CENTER",
       dataIndex: "costCenter",
       width: 200,
       sorter: true,
     },
     {
+      key: "meterReadingCode",
       title: "METER READING CODE",
       dataIndex: "meterReadingCode",
       width: 150,
       sorter: true,
     },
     {
+      key: "sor",
       title: "SOR",
       dataIndex: "sor",
       width: 200,
       sorter: true,
     },
     {
+      key: "accountGroupType",
       title: "ACCOUNT GROUP TYPE",
       dataIndex: "accountGroupType",
       width: 150,
       sorter: true,
     },
     {
+      key: "saNumber",
       title: "SA NUMBER",
       dataIndex: "saNumber",
       width: 150,
       sorter: true,
     },
     {
+      key: "pjbgType",
       title: "PJBG TYPE",
       dataIndex: "pjbgType",
       width: 100,
@@ -311,6 +327,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       sorter: true,
     },
     {
+      key: "saServiceType",
       title: "SA SERVICE TYPE",
       dataIndex: "saServiceType",
       width: 120,
@@ -318,6 +335,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       sorter: true,
     },
     {
+      key: "saType",
       title: "SA TYPE",
       dataIndex: "saType",
       width: 120,
@@ -325,18 +343,21 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       sorter: true,
     },
     {
+      key: "termOfPayment",
       title: "TERM OF PAYMENT",
       dataIndex: "termOfPayment",
       width: 150,
       sorter: true,
     },
     {
+      key: "fullPriceCode",
       title: "FULL PRICE CODE",
       dataIndex: "fullPriceCode",
       width: 250,
       sorter: true,
     },
     {
+      key: "minUsage",
       title: "MIN USAGE",
       dataIndex: "minUsage",
       width: 120,
@@ -345,6 +366,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       render: (text) => text?.toLocaleString() || "-",
     },
     {
+      key: "maxUsage",
       title: "MAX USAGE",
       dataIndex: "maxUsage",
       width: 120,
@@ -353,6 +375,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       render: (text) => text?.toLocaleString() || "-",
     },
     {
+      key: "timeUnit",
       title: "TIME UNIT",
       dataIndex: "timeUnit",
       width: 100,
@@ -360,6 +383,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       sorter: true,
     },
     {
+      key: "unitMeasure",
       title: "UNIT MEASURE",
       dataIndex: "unitMeasure",
       width: 120,
@@ -367,6 +391,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       sorter: true,
     },
     {
+      key: "currency",
       title: "CURRENCY",
       dataIndex: "currency",
       width: 100,
@@ -374,6 +399,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       sorter: true,
     },
     {
+      key: "paymentType",
       title: "PAYMENT TYPE",
       dataIndex: "paymentType",
       width: 120,
@@ -381,6 +407,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       sorter: true,
     },
     {
+      key: "chargingMethod",
       title: "CHARGING METHOD",
       dataIndex: "chargingMethod",
       width: 150,
@@ -388,6 +415,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       sorter: true,
     },
     {
+      key: "avgCalorie",
       title: "AVG CALORIE",
       dataIndex: "avgCalorie",
       width: 120,
@@ -396,6 +424,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       render: (text) => text?.toFixed(4) || "-",
     },
     {
+      key: "firstMeasDate",
       title: "FIRST MEAS DATE",
       dataIndex: "firstMeasDate",
       width: 150,
@@ -404,6 +433,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       render: (text) => text ? moment(text).format("DD MMM YYYY") : "-",
     },
     {
+      key: "lastMeasDate",
       title: "LAST MEAS DATE",
       dataIndex: "lastMeasDate",
       width: 150,
@@ -412,6 +442,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       render: (text) => text ? moment(text).format("DD MMM YYYY") : "-",
     },
     {
+      key: "totalVol27",
       title: "TOTAL VOL 27",
       dataIndex: "totalVol27",
       width: 150,
@@ -420,6 +451,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       render: (text) => text?.toLocaleString() || "-",
     },
     {
+      key: "totalVol60",
       title: "TOTAL VOL 60",
       dataIndex: "totalVol60",
       width: 150,
@@ -428,6 +460,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       render: (text) => text?.toLocaleString() || "-",
     },
     {
+      key: "mpricingCode",
       title: "MPRICING CODE",
       dataIndex: "mpricingCode",
       width: 150,
