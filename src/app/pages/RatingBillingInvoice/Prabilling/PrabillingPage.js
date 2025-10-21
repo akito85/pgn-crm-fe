@@ -677,21 +677,25 @@ const PrabillingPage = () => {
         <BreadCrumb routes={routes} />
 
         <div className="w-full justify-end flex gap-2">
-          <Dropdown
-            overlay={columnFixMenu}
-            trigger={["click"]}
-            visible={columnFixDropdownVisible}
-            onVisibleChange={setColumnFixDropdownVisible}
-            placement="bottomRight"
-          >
-            <Button icon={<SettingOutlined />}>
-              Fix Columns ({Object.keys(fixedColumns).length})
-            </Button>
-          </Dropdown>
           <Toolbar items={itemGrantAccess} />
         </div>
 
         <BaseContainer header={"PRABILLING JOB LIST"}>
+          {/* Fix Columns Button di dalam container */}
+          <div className="w-full flex justify-end mb-3">
+            <Dropdown
+              overlay={columnFixMenu}
+              trigger={["click"]}
+              visible={columnFixDropdownVisible}
+              onVisibleChange={setColumnFixDropdownVisible}
+              placement="bottomRight"
+            >
+              <Button icon={<SettingOutlined />}>
+                Fix Columns ({Object.keys(fixedColumns).length})
+              </Button>
+            </Dropdown>
+          </div>
+
           <div className="my-5">
             <TablePaginationNew
               columns={columns}
