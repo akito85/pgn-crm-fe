@@ -2,16 +2,22 @@ import React from "react";
 
 const BaseContainer = ({ header, subHeader, children, type, element }) => {
   return (
-    <div className="drop-shadow-lg bg-white rounded-lg w-full my-5">
+    <div className="drop-shadow-lg bg-white rounded-lg w-full mt-[30px] p-[20px]">
       {type === "profile" || type === "tab" ? (
         <>
           <div className="p-4">{element}</div>
         </>
       ) : (
-        <div className="flex flex-col bg-[#F9F9F9] p-4 border-b rounded-t-lg uppercase">
-          <div className="text-[22px] font-bold">{header}</div>
-          <div className="text-primary text-xs font-bold">{subHeader}</div>
-        </div>
+        <>
+          <div className="p-4">
+            <div className="text-primary text-xs font-bold uppercase">
+              {header}
+            </div>
+            <div className="text-primary text-xs font-bold mt-3">
+              {subHeader}
+            </div>
+          </div>
+        </>
       )}
       {type === "tabs" && <div className="p-4">{element}</div>}
       <div className="p-4">{children}</div>

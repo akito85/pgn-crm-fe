@@ -10,8 +10,7 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
-import BaseContainer from "../../../../components/BaseContainer";
-import TablePagination from "../../../../components/TablePagination";
+import TableRBI from "../../../../components/TableRBI";
 import { columnsInvoice } from "./TableViewInvoice";
 import DetailInvoice from "./DetailInvoice";
 import ModalGenerateInvoice from "./ModalGenerateInvoice";
@@ -35,6 +34,7 @@ import {
   ReloadOutlined,
 } from "@ant-design/icons";
 import { InvoiceDummy } from "./dummyInvoiceData";
+import CardContainer from "../../../../components/CardContainer";
 
 const ProformaInvoice = () => {
   // Selector
@@ -369,7 +369,7 @@ const ProformaInvoice = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <BaseContainer
+        <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">Proforma Invoice List</p>
@@ -390,7 +390,7 @@ const ProformaInvoice = () => {
           }
         >
           <div className="w-full">
-            <TablePagination
+            <TableRBI
               dataSource={dataSource}
               columns={[
                 ...columnsInvoice(
@@ -421,7 +421,7 @@ const ProformaInvoice = () => {
               handleDownload={handleDownload}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         {/* Invoice Log */}
         {pageDetail === true ? (

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import BaseContainer from "../../../../components/BaseContainer";
+import CardContainer from "../../../../components/CardContainer";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import InvoiceProcessingTable from "./_components/InvoiceProcessingTable";
 import StampingRequestModal from "./_components/StampingRequestModal";
@@ -207,7 +207,7 @@ const EMeteraiManagement = () => {
       <LayoutMenu>
         <BreadCrumb routes={routes} />
 
-        <BaseContainer
+        <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">E-Meterai Management</p>
@@ -224,7 +224,7 @@ const EMeteraiManagement = () => {
               onProcessStamping={handleProcessStamping}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         {/* Modals */}
         <InvoiceDetailModal

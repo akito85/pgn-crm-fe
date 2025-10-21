@@ -10,11 +10,8 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
-import BaseContainer from "../../../../components/BaseContainer";
-import TablePagination from "../../../../components/TablePagination";
 import { columnsInvoice } from "./TableViewInvoice";
 import DetailInvoice from "./DetailInvoice";
-import ModalGenerateInvoice from "./ModalGenerateInvoice";
 import {
   createRegenerate,
   getAllInvoicePaginate,
@@ -23,11 +20,8 @@ import {
   getDownloadList,
   getFormatType,
 } from "../../../../redux/slices/rating_billing_invoice/invoice";
-import { configApp } from "../../../../constants/configApp";
-import { tokenHeader } from "../../../../utils/tokenHeader";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
-import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import {
   DownloadOutlined,
@@ -35,6 +29,8 @@ import {
   ReloadOutlined,
 } from "@ant-design/icons";
 import { InvoiceDummy } from "./dummyInvoiceData";
+import CardContainer from "../../../../components/CardContainer";
+import TableRBI from "../../../../components/TableRBI";
 
 const ViewInvoice = () => {
   // Selector
@@ -410,7 +406,7 @@ const ViewInvoice = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <BaseContainer
+        <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">Invoice List</p>
@@ -431,7 +427,7 @@ const ViewInvoice = () => {
           }
         >
           <div className="w-full">
-            <TablePagination
+            <TableRBI
               dataSource={dataSource}
               columns={[
                 ...columnsInvoice(
@@ -462,7 +458,7 @@ const ViewInvoice = () => {
               handleDownload={handleDownload}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         {/* Invoice Log */}
         {pageDetail === true && data_detail ? (

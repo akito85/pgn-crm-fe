@@ -13,11 +13,10 @@ import {
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import moment from "moment";
-import SelectComponent from "../../../../components/SelectComponent";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import BaseContainer from "../../../../components/BaseContainer";
-import TablePagination from "../../../../components/TablePagination";
+import TableRBI from "../../../../components/TableRBI";
 import { columnsGenerateInvoice } from "./TableGenerateInvoice";
+import CardContainer from "../../../../components/CardContainer";
 
 const { TextArea } = Input;
 
@@ -655,16 +654,16 @@ const GenerateInvoicePage = () => {
   return (
     <LayoutMenu>
       <Form layout="vertical" form={form}>
-        <BaseContainer header="GENERATE INFORMATION">
+        <CardContainer header="GENERATE INFORMATION">
           <Form.Item label="Export Format" required>
             <Select value={exportFormat} onChange={setExportFormat}>
               <Select.Option value="PDF">PDF</Select.Option>
               <Select.Option value="Excel">Excel</Select.Option>
             </Select>
           </Form.Item>
-        </BaseContainer>
+        </CardContainer>
 
-        <BaseContainer header="SCHEDULE INFORMATION">
+        <CardContainer header="SCHEDULE INFORMATION">
           <Form.Item label="Type" required>
             <Select value={scheduleType} onChange={setScheduleType}>
               <Select.Option value="Immediate">Immediate</Select.Option>
@@ -687,11 +686,11 @@ const GenerateInvoicePage = () => {
           {scheduleType === "Recurring" && (
             <ScheduleRecurring remark={remark} setRemark={setRemark} />
           )}
-        </BaseContainer>
+        </CardContainer>
 
-        <BaseContainer header="Select billing">
+        <CardContainer header="Select billing">
           <div className="w-full">
-            <TablePagination
+            <TableRBI
               dataSource={dataTable}
               totalData={dataTable.length}
               current={page}
@@ -713,7 +712,7 @@ const GenerateInvoicePage = () => {
               handleDownload={handleDownload}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         <div className="my-6 pb-5 flex justify-between gap-4">
           <Button type="default" onClick={() => window.history.back()}>
