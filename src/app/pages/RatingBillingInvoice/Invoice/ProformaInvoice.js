@@ -1,4 +1,4 @@
-// ViewInvoice.js
+// ProformaInvoice.js
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Form, Select, Tooltip } from "antd";
@@ -10,8 +10,10 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
+import TableRBI from "../../../../components/TableRBI";
 import { columnsInvoice } from "./TableViewInvoice";
 import DetailInvoice from "./DetailInvoice";
+import ModalGenerateInvoice from "./ModalGenerateInvoice";
 import {
   createRegenerate,
   getAllInvoicePaginate,
@@ -20,8 +22,11 @@ import {
   getDownloadList,
   getFormatType,
 } from "../../../../redux/slices/rating_billing_invoice/invoice";
+import { configApp } from "../../../../constants/configApp";
+import { tokenHeader } from "../../../../utils/tokenHeader";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
+import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import {
   DownloadOutlined,
@@ -30,9 +35,8 @@ import {
 } from "@ant-design/icons";
 import { InvoiceDummy } from "./dummyInvoiceData";
 import CardContainer from "../../../../components/CardContainer";
-import TableRBI from "../../../../components/TableRBI";
 
-const ViewInvoice = () => {
+const ProformaInvoice = () => {
   // Selector
   const { data, loading, data_detail, data_format, data_billing } = useSelector(
     (state) => state.invoice
@@ -41,8 +45,7 @@ const ViewInvoice = () => {
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  // const dataSource = data?.content || [];
-  // console.log("data", data?.content);
+  // const dataSource = data?.result;
   const dataSource = InvoiceDummy();
 
   // State
@@ -73,15 +76,9 @@ const ViewInvoice = () => {
       }
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-
-    let searchParam = undefined;
-    if (tempSearch) {
-      // Hanya kirim search jika ada nilai
-      searchParam = encodeURIComponent(JSON.stringify(search));
-    }
     dispatch(
       getAllInvoicePaginate({
-        search: searchParam,
+        search: encodeURIComponent(JSON.stringify(search)),
         page,
         pageSize,
         sort,
@@ -104,8 +101,8 @@ const ViewInvoice = () => {
       breadcrumbName: "Invoice",
     },
     {
-      path: INVOICE_ROUTES.GENERATE_INVOICE_VIEW,
-      breadcrumbName: "Invoice",
+      path: INVOICE_ROUTES.PROFORMA_INVOICE_VIEW,
+      breadcrumbName: "Proforma Invoice",
     },
   ];
 
@@ -153,42 +150,10 @@ const ViewInvoice = () => {
   };
 
   // Handle Detail
-  const handleDetail = async (record) => {
-    console.log("=== START handleDetail ===");
-    console.log("Record:", record);
-    console.log("Invoice Number:", record?.invoiceNumber);
-
-    try {
-      setPageDetail(true);
-
-      // Gunakan .unwrap() untuk mendapatkan actual response atau error
-      const result = await dispatch(
-        getDetailInvoice(record?.invoiceNumber)
-      ).unwrap();
-
-      console.log("✅ Success - Detail loaded:", result);
-      setInvoiceNumber(record?.invoiceNumber);
-
-      // Scroll ke detail section
-      setTimeout(
-        () =>
-          window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: "smooth",
-          }),
-        100
-      );
-    } catch (error) {
-      console.error("❌ ERROR in handleDetail ===");
-      console.error("Error object:", error);
-      console.error("Error message:", error?.message);
-      console.error("Error response:", error?.response);
-      console.error("Error data:", error?.response?.data);
-      console.error("Full error:", JSON.stringify(error, null, 2));
-
-      // Reset state karena gagal
-      setPageDetail(false);
-    }
+  const handleDetail = (record) => {
+    setPageDetail(true);
+    dispatch(getDetailInvoice(record?.invoiceNumber));
+    setInvoiceNumber(record?.invoiceNumber);
   };
 
   // Handle Re Generate
@@ -201,12 +166,10 @@ const ViewInvoice = () => {
   const handlePreviewFile = async (record) => {
     try {
       const response = await axios.get(
-        `https://d28a5698909b.ngrok-free.app/api/v1/invoices/download/${record?.invoiceNumber}`,
+        configApp.RATING_BILLING_SERVICE +
+          `/v1/dbs/api/rbi/invoice/${record?.invoiceNumber}/preview`,
         {
-          headers: {
-            // tokenHeader(),
-            "ngrok-skip-browser-warning": "true",
-          },
+          headers: tokenHeader(),
           responseType: "arraybuffer",
         }
       );
@@ -332,10 +295,10 @@ const ViewInvoice = () => {
           onClick={() => {
             // Open new page instead of modal
             window.location.href =
-              "/invoice/generate-invoice/generate-form-invoice";
+              INVOICE_ROUTES.GENERATE_PROFORMA_INVOICE_FORM;
           }}
         >
-          Generate Invoice
+          Generate Proforma Invoice
         </ButtonComponent>
       ),
     },
@@ -368,7 +331,7 @@ const ViewInvoice = () => {
       },
     },
     {
-      action: "Regenerate",
+      action: "Preview",
       type: "table",
       render: (record) => {
         return (
@@ -384,7 +347,7 @@ const ViewInvoice = () => {
       },
     },
     {
-      action: "Preview",
+      action: "Regenerate",
       type: "table",
       render: (record) => {
         return (
@@ -409,7 +372,7 @@ const ViewInvoice = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">Invoice List</p>
+              <p className="mt-[15px] font-bold">Proforma Invoice List</p>
               <div>
                 <ButtonComponent
                   icon={<SVGIcon name="IconButtonCreate" width={24} />}
@@ -417,10 +380,10 @@ const ViewInvoice = () => {
                   onClick={() => {
                     // Open new page instead of modal
                     window.location.href =
-                      "/invoice/generate-invoice/generate-form-invoice";
+                      INVOICE_ROUTES.GENERATE_PROFORMA_INVOICE_FORM;
                   }}
                 >
-                  Generate Invoice
+                  Generate Proforma Invoice
                 </ButtonComponent>
               </div>
             </div>
@@ -461,9 +424,9 @@ const ViewInvoice = () => {
         </CardContainer>
 
         {/* Invoice Log */}
-        {pageDetail === true && data_detail ? (
+        {pageDetail === true ? (
           <DetailInvoice
-            detail={data_detail || []}
+            detail={data_detail?.logs}
             invoiceNumber={invoiceNumber}
           />
         ) : null}
@@ -530,4 +493,4 @@ const ViewInvoice = () => {
   );
 };
 
-export default ViewInvoice;
+export default ProformaInvoice;

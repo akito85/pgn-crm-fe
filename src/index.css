@@ -76,7 +76,7 @@ tr:nth-child(even) > td.ant-table-cell-fix-right,
   font-size: 13px;
   background: transparent;
   padding: 5px 10px !important;
-  color: #fff !important;
+  /* color: #fff !important; */
 }
 
 input[type="text"] {
@@ -299,7 +299,7 @@ span.anticon anticon-delete {
 
 .ant-radio-button-wrapper-disabled {
   color: #4b465c !important;
-  background-color: #8D91A0 !important;
+  background-color: #8d91a0 !important;
 }
 /* Chrome, Edge, and Safari */
 /* *::-webkit-scrollbar {
@@ -538,10 +538,10 @@ td.ant-table-column-sort {
   background: #a4be37;
 }
 .status-active {
-  background: #14a38b;
+  background: #388e3c;
 }
 .status-inactive {
-  background: #be3036;
+  background: #d32f2f;
 }
 .status-waiting {
   background: #c6d681;
@@ -595,10 +595,10 @@ td.ant-table-column-sort {
 .ant-alert-error {
   border: 1 !important;
   border-color: rgba(234, 84, 85, 0.16) !important;
-  background-color: #FCEBEC !important;
+  background-color: #fcebec !important;
 }
 .ant-alert-error .ant-alert-message {
-  color: #BE3036;
+  color: #be3036;
 }
 
 .ant-select:not(.ant-select-customize-input) .ant-select-selector {
@@ -923,7 +923,7 @@ span.ant-tree-title {
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
 }
 
-.ant-picker-cell-disabled:before{
+.ant-picker-cell-disabled:before {
   background: #8382824d !important;
 }
 
@@ -932,37 +932,36 @@ span.ant-tree-title {
 }
 
 /* handle button expand table */
-.ant-table-row-level-0{
+.ant-table-row-level-0 {
   position: relative;
   z-index: 9;
 }
 
-.custom-focus:focus-visible{
+.custom-focus:focus-visible {
   border-color: #40a9ff !important;
   outline-offset: none;
   outline: none;
 }
-.custom-focus:hover{
+.custom-focus:hover {
   border-color: #40a9ff !important;
 }
- .ant-upload-list{
+.ant-upload-list {
   width: 100% !important;
- }
+}
 
-
- .card-login .ant-card-body{
+.card-login .ant-card-body {
   height: 100% !important;
-  position:  relative !important;
-  display: flex  !important;
+  position: relative !important;
+  display: flex !important;
   justify-content: space-around !important;
   flex-direction: column !important;
- }
+}
 
- .card-login .ant-card-body::after{
-  display: none  !important;
+.card-login .ant-card-body::after {
+  display: none !important;
   height: 100% !important;
- }
- .card-login .ant-card-body::before{
-  display: none  !important;
+}
+.card-login .ant-card-body::before {
+  display: none !important;
   height: 100% !important;
- }
+}

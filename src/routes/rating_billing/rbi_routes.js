@@ -104,5 +104,9 @@ export const RBI_ROUTES = {
   TAX_CODE_UPDATE: "/system-setup/tax-code/update",
   TAX_CODE_DETAIL: "/system-setup/tax-code/view",
 
-
+  // MANAGEMENT BILLING INSTALLMENT
+  MANAGEMENT_BILLING_INSTALLMENT_VIEW:
+    "/rating-billing/management-billing-installment",
+  MANAGEMENT_BILLING_INSTALLMENT_CREATE:
+    "/rating-billing/management-billing-installment/create",
 };

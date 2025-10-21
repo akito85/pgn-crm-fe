@@ -98,7 +98,7 @@ export function convertToTitleCase(inputString) {
     });
 }
 
-export const renderDateConverter = (data, type = 'date') => {
+export const renderDateConverter = (data, type = "date") => {
   switch (type) {
     case "datetime":
       return moment(data)?.format(dateFormatting?.dateTime);
@@ -110,8 +110,8 @@ export const renderDateConverter = (data, type = 'date') => {
       return moment(data)?.format(dateFormatting?.year_only);
     case "month":
       return moment(data)?.format(dateFormatting?.month);
-    case 'hour':
-      return moment(data)?.format(dateFormatting?.hour_format)
+    case "hour":
+      return moment(data)?.format(dateFormatting?.hour_format);
     default:
       return moment(data)?.format(dateFormatting?.date);
   }
@@ -123,36 +123,47 @@ export function roundToTwoDecimal(num) {
 
 export const errorMessage = (error) => {
   let dataError;
-  if (hasValue(error?.response?.data?.data)
-    && typeof error?.response?.data?.data === 'string'
-    && error?.response?.data?.data !== "BAD_REQUEST") {
-    dataError = error?.response?.data?.data
+  if (
+    hasValue(error?.response?.data?.data) &&
+    typeof error?.response?.data?.data === "string" &&
+    error?.response?.data?.data !== "BAD_REQUEST"
+  ) {
+    dataError = error?.response?.data?.data;
   } else {
-    dataError = null
+    dataError = null;
   }
 
   let message =
     dataError ||
     error?.response?.data?.message ||
     error?.response?.data?.error ||
-    error?.message || error?.description || error?.toString()
+    error?.message ||
+    error?.description ||
+    error?.toString();
   return message;
 };
 export const errorCode = (error) => {
   let code =
-    error?.response?.data?.code || error?.response?.status || error?.code || error?.status;
+    error?.response?.data?.code ||
+    error?.response?.status ||
+    error?.code ||
+    error?.status;
   return code;
 };
 
-export const errorBody = (code, status, message) => (
-  {
-    code: code,
-    message: `Your data was not ${status}. ${errorMessage(message)}.`
-  }
-);
+export const errorBody = (code, status, message) => ({
+  code: code,
+  message: `Your data was not ${status}. ${errorMessage(message)}.`,
+});
 
-
-export const renderDateColumn = (dataIndex, searchedColumn, searchText, text, typeDate = 'date', search) => {
+export const renderDateColumn = (
+  dataIndex,
+  searchedColumn,
+  searchText,
+  text,
+  typeDate = "date",
+  search
+) => {
   if (searchedColumn) {
     return (
       <Highlighter
@@ -170,49 +181,65 @@ export const renderDateColumn = (dataIndex, searchedColumn, searchText, text, ty
           hasValue(text) ? renderDateConverter(text, typeDate) : ""
         }
       />
-    )
+    );
   } else {
-    return hasValue(text) && renderDateConverter(text, typeDate)
+    return hasValue(text) && renderDateConverter(text, typeDate);
   }
-}
+};
 
-
-export const renderColumn = (dataIndex, searchedColumn, searchText, text, useTooltip = false, type, search = {}) => {
-
+export const renderColumn = (
+  dataIndex,
+  searchedColumn,
+  searchText,
+  text,
+  useTooltip = false,
+  type,
+  search = {}
+) => {
   // console.log(dataIndex, ' data index');
-  
+
   if (searchedColumn) {
-    if (type === 'status') {
+    if (type === "status") {
       return (
-        <div className={" flex justify-center"}>
+        <div className={"flex"}>
           <StatusComponent colour={text}>{toTitleCase(text)}</StatusComponent>
         </div>
-      )
-    } else if (useTooltip && type !== 'status') {
+      );
+    } else if (useTooltip && type !== "status") {
       return (
-        <Tooltip placement="topLeft"
+        <Tooltip
+          placement="topLeft"
           title={
             <Highlighter
               highlightStyle={{
                 backgroundColor: "#ffc069",
                 padding: 0,
               }}
-              searchWords={Object.values(search)?.includes(searchText) ? [search[dataIndex]] : []}
+              searchWords={
+                Object.values(search)?.includes(searchText)
+                  ? [search[dataIndex]]
+                  : []
+              }
               autoEscape
               textToHighlight={text ? text.toString() : ""}
             />
-          }>
+          }
+        >
           <Highlighter
             highlightStyle={{
               backgroundColor: "#ffc069",
               padding: 0,
             }}
-            searchWords={Object.values(search)?.includes(searchText) ? [search[dataIndex]] : []}
+            searchWords={
+              Object.values(search)?.includes(searchText)
+                ? [search[dataIndex]]
+                : []
+            }
             autoEscape
             textToHighlight={text ? text.toString() : ""}
           />
         </Tooltip>
-      )
+      );
     } else {
       return (
         <Highlighter
@@ -220,11 +247,15 @@ export const renderColumn = (dataIndex, searchedColumn, searchText, text, useToo
             backgroundColor: "#ffc069",
             padding: 0,
           }}
-          searchWords={Object.values(search)?.includes(searchText) ? [search[dataIndex]] : []}
+          searchWords={
+            Object.values(search)?.includes(searchText)
+              ? [search[dataIndex]]
+              : []
+          }
           autoEscape
           textToHighlight={text ? text.toString() : ""}
         />
-      )
+      );
     }
   } else {
     if (useTooltip) {
@@ -232,22 +263,21 @@ export const renderColumn = (dataIndex, searchedColumn, searchText, text, useToo
         <Tooltip placement="topLeft" title={text}>
           {text}
         </Tooltip>
-      )
-    } else if (type === 'status') {
+      );
+    } else if (type === "status") {
       return (
         <div className={" flex justify-center"}>
           <StatusComponent colour={text}>{toTitleCase(text)}</StatusComponent>
         </div>
-      )
+      );
     } else {
-      return text
+      return text;
     }
   }
 };
 
-
 export const deletePrefixNumber = (numb, prefix) => {
-  let regex = new RegExp(prefix, 'g');
+  let regex = new RegExp(prefix, "g");
   let numbWithout62 = numb?.replace(regex, "");
   let result = parseInt(numbWithout62);
   return result;
@@ -258,25 +288,28 @@ export const disabledActionByStatus = (action, status, statusApproval) => {
   const lowerStatus = status?.toLowerCase();
   const lowerAction = action?.toLowerCase();
   switch (lowerAction) {
-    case 'activate':
-      if (lowerStatusApproval === 'waiting approval' || lowerStatus === 'inactive' || lowerStatus === 'draft') {
-        return true
+    case "activate":
+      if (
+        lowerStatusApproval === "waiting approval" ||
+        lowerStatus === "inactive" ||
+        lowerStatus === "draft"
+      ) {
+        return true;
       } else {
-        return false
+        return false;
       }
 
     default:
-      if (lowerStatusApproval === 'waiting approval') {
-        return true
+      if (lowerStatusApproval === "waiting approval") {
+        return true;
       } else {
-        return false
+        return false;
       }
   }
-}
-
+};
 
 export const countBadgeFieldsErrorMandatory = (
-  setListSectionInfo = () => { },
+  setListSectionInfo = () => {},
   listDataAttachment,
   errorFields
 ) => {
@@ -285,13 +318,13 @@ export const countBadgeFieldsErrorMandatory = (
       const errorBadge =
         item.value !== "Attachment"
           ? (errorFields || []).reduce(
-            (current, next) =>
-              item.paramValue.includes(next.name[0]) ? current + 1 : current,
-            0
-          )
+              (current, next) =>
+                item.paramValue.includes(next.name[0]) ? current + 1 : current,
+              0
+            )
           : listDataAttachment.length < 1
-            ? 1
-            : 0;
+          ? 1
+          : 0;
       return {
         value: item.value,
         paramValue: item.paramValue,
@@ -306,25 +339,22 @@ export const convertToCamelCase = (str) => {
   return str
     .toLowerCase()
     .replace(/[^a-zA-Z0-9]+(.)/g, (match, chr) => chr.toUpperCase());
-}
+};
 
 export const convertToPascalCase = (str) => {
   return str
     .toLowerCase()
     .replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, (match, index) =>
-      match.toUpperCase().replace(/\s+/g, '')
+      match.toUpperCase().replace(/\s+/g, "")
     );
-}
+};
 export const convertToSnakeCase = (str) => {
-  return str
-    .toLowerCase()
-    .replace(/\s+/g, '_');
-}
-
+  return str.toLowerCase().replace(/\s+/g, "_");
+};
 
 export const separatorNumber = (text) => {
   const thousandSeparator = ",";
   return text?.toString()?.length > 0
     ? text?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator)
     : "";
-}
+};
