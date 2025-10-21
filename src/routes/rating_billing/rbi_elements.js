@@ -37,24 +37,24 @@ import TopView from "../../app/pages/RatingBillingInvoice/MasterData/TermsOfPaym
 import ListCreateForm from "../../app/pages/RatingBillingInvoice/MasterData/TermsOfPayment/Create/ListCreateForm";
 import DetailTOP from "../../app/pages/RatingBillingInvoice/MasterData/TermsOfPayment/DetailTOP";
 import ListDetailTOP from "../../app/pages/RatingBillingInvoice/MasterData/TermsOfPayment/ListDetailTOP";
-import BillingCycleView from "../../app/pages/RatingBillingInvoice/MasterData/BillingCycle/Page/BillingCycleView"
-import BillingCycleForm from "../../app/pages/RatingBillingInvoice/MasterData/BillingCycle/Page/BillingCycleForm"
-import BillingCycleDetail from "../../app/pages/RatingBillingInvoice/MasterData/BillingCycle/Page/BillingCycleDetail"
+import BillingCycleView from "../../app/pages/RatingBillingInvoice/MasterData/BillingCycle/Page/BillingCycleView";
+import BillingCycleForm from "../../app/pages/RatingBillingInvoice/MasterData/BillingCycle/Page/BillingCycleForm";
+import BillingCycleDetail from "../../app/pages/RatingBillingInvoice/MasterData/BillingCycle/Page/BillingCycleDetail";
 import DetailMonitoringUsage from "../../app/pages/RatingBillingInvoice/MonitoringUsage/Detail/DetailMonitoringUsage";
 import TaxCodeView from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode/TaxCodeView";
 import TaxCodeDetail from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode/TaxCodeDetail";
 import TaxCodeForm from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode/TaxCodeForm";
+import ManagementBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/ManagementBillingInstallmentPage";
+import CreateBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/CreateBillingInstallmentPage";
 import PrabillingDetail from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingDetail";
-import MonitoringCustomerPage from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/MonitoringCustomerPage";
+// import MonitoringCustomerPage from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/MonitoringCustomerPage";
 import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/prabillCustomer/AccountDetailPage";
 
-
-
 export const RBI_ELEMENTS = {
-   // prabilling elements render
+  // prabilling elements render
   PRABILLING_VIEW_ELEMENTS: <PrabillingPage />,
   PRABILLING_CREATE_ELEMENTS: <PrabillingForm type={"create"} />,
-  PRABILLOG_VIEW_ELEMENTS: <PrabillingDetailLog/>,
+  PRABILLOG_VIEW_ELEMENTS: <PrabillingDetailLog />,
   PRABILLING_DETAIL_ELEMENTS: <PrabillingDetail />,
   PRABILLCUS_DETAIL_ELEMENTS: <AccountDetailPage />,
 
@@ -71,7 +71,7 @@ export const RBI_ELEMENTS = {
   BILLING_VIEW_PAGE: <BillingPage />,
 
   // monitoring usage
-  MONITORING_CUSTOMER_VIEW_ELEMENTS: <MonitoringCustomerPage />,
+  // MONITORING_CUSTOMER_VIEW_ELEMENTS: <MonitoringCustomerPage />,
 
   // monitoring usage
   MONITORING_USAGE_VIEW_ELEMENTS: <MonitoringUsagePage />,
@@ -116,10 +116,10 @@ export const RBI_ELEMENTS = {
   BILLING_ITEM_UPDATE_ELEMENT: <BillingItemForm type={"update"} />,
 
   // Billing Cycle
-  BILLING_CYCLE_VIEW_ELEMENT: <BillingCycleView/>,
-  BILLING_CYCLE_DETAIL_ELEMENT: <BillingCycleDetail/>,
-  BILLING_CYCLE_CREATE_ELEMENT: <BillingCycleForm type={"create"}/>,
-  BILLING_CYCLE_UPDATE_ELEMENT: <BillingCycleForm type={"update"}/>,
+  BILLING_CYCLE_VIEW_ELEMENT: <BillingCycleView />,
+  BILLING_CYCLE_DETAIL_ELEMENT: <BillingCycleDetail />,
+  BILLING_CYCLE_CREATE_ELEMENT: <BillingCycleForm type={"create"} />,
+  BILLING_CYCLE_UPDATE_ELEMENT: <BillingCycleForm type={"update"} />,
 
   // Invoice Template
   INVOICE_TEMPLATE_VIEW_ELEMENT: <InvoiceTemplateView />,
@@ -147,4 +147,12 @@ export const RBI_ELEMENTS = {
   TAX_CODE_DETAIL_ELEMENT: <TaxCodeDetail />,
   TAX_CODE_CREATE_ELEMENT: <TaxCodeForm type={"create"} />,
   TAX_CODE_UPDATE_ELEMENT: <TaxCodeForm type={"update"} />,
+
+  // Management Billing Installment
+  MANAGEMENT_BILLING_INSTALLMENT_VIEW_ELEMENT: (
+    <ManagementBillingInstallmentPage />
+  ),
+  MANAGEMENT_BILLING_INSTALLMENT_CREATE_ELEMENT: (
+    <CreateBillingInstallmentPage />
+  ),
 };

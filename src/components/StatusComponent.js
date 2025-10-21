@@ -1,3 +1,10 @@
+import {
+  CheckCircleFilled,
+  CheckCircleOutlined,
+  CloseCircleFilled,
+  CloseCircleOutlined,
+  Loading3QuartersOutlined,
+} from "@ant-design/icons";
 import React, { useState } from "react";
 import { useEffect } from "react";
 
@@ -110,6 +117,9 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         case "partially paid":
           setBgColor("bg-[#C6D681]");
           break;
+        case "generating":
+          setBgColor("bg-[#F57C00]");
+          break;
         default:
           setBgColor("bg-slate-600");
           break;
@@ -117,15 +127,28 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
     }
   }, [colour]);
 
+  const renderIconStatus = () => {
+    switch (colour.toLowerCase()) {
+      case "completed":
+        return <CheckCircleFilled style={{ fontSize: "20px" }} />;
+      case "generating":
+        return <Loading3QuartersOutlined style={{ fontSize: "20px" }} />;
+      case "failed":
+        return <CloseCircleFilled style={{ fontSize: "20px" }} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <p
-      // className={`text-white ${bg} mx-8 my-0 p-1 rounded-2xl text-center w-40`}
       className={
         type === "status"
-          ? `text-white ${bgcolor} my-0 py-1 px-2 rounded-2xl text-center w-auto`
+          ? `flex gap-2 items-center text-white ${bgcolor} px-4 py-1 mt-3 rounded-3xl text-center w-fit`
           : `${color} font-semibold`
       }
     >
+      {renderIconStatus()}
       {children}
     </p>
   );

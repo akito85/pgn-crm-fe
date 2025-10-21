@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { Tooltip } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
-import BaseContainer from "../../../../components/BaseContainer";
+import BaseContainer from "../../../../components/CardContainer";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
 import axios from "axios";
 import { configApp } from "../../../../constants/configApp";
@@ -10,10 +10,11 @@ import { tokenHeader } from "../../../../utils/tokenHeader";
 import DocViewer from "react-doc-viewer";
 import { sorterFunction } from "../../../../utils/sorterFunction";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
+import TablePagination from "../../../../components/TableRBI";
 
 export const columns = (
   search,
-  page = 1,
+  page = 0,
   pageSize = 10,
   searchInput,
   searchedColumn,
@@ -285,6 +286,8 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
     }
   };
 
+  console.log("detailPage: ", detail);
+
   return (
     <BaseContainer header={"Invoice Log Information"}>
       <div className="flex flex-row align-middle gap-2">
@@ -296,27 +299,29 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
         </p>
       </div>
       <div>
-        <TablePaginationNew
-          type="FE"
-          dataSource={detail}
-          columns={columns(
-            search,
-            page,
-            pageSize,
-            searchInput,
-            searchedColumn,
-            searchText,
-            handleSearch,
-            handlePreviewFile
-          )}
-          current={page}
-          pageSize={pageSize}
-          onChange={handleChange}
-          // onSizeChanger={handleChange}
-          totalData={detail?.length}
-          onSort={onSort}
-          tableScrolled={{ y: 525, x: 1400 }}
-        />
+        {detail && (
+          <TablePaginationNew
+            type="FE"
+            dataSource={detail || []}
+            columns={columns(
+              search,
+              page,
+              pageSize,
+              searchInput,
+              searchedColumn,
+              searchText,
+              handleSearch,
+              handlePreviewFile
+            )}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChange}
+            // onSizeChanger={handleChange}
+            totalData={detail?.length || 0}
+            onSort={onSort}
+            tableScrolled={{ y: 525, x: 1400 }}
+          />
+        )}
       </div>
     </BaseContainer>
   );
