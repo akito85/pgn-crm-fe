@@ -102,8 +102,8 @@ prebuild-pgnbill-fe:
   stage: pre-build
   extends: .prebuild-node
   variables:
-    - LEGACY_PEER_ENABLED: true
-    - IMAGE_NAME: node:18-alpine
+    LEGACY_PEER_ENABLED: true
+    IMAGE_NAME: node:18-alpine
   tags: !reference [.runner-tag, neuron]
   needs: ['prepare-version']
 
