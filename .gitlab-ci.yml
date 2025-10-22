@@ -101,6 +101,7 @@ prepare-version:
 prebuild-pgnbill-fe:
   stage: pre-build
   extends: .prebuild-node
+  image: node:18-alpine
   variables:
     LEGACY_PEER_ENABLED: "true"
     IMAGE_NAME: "node:18-alpine"
