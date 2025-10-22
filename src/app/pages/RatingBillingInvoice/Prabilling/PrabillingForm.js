@@ -238,72 +238,73 @@ const PrabillingForm = ({ type }) => {
   };
 
   const onFinish = async (formValue) => {
-    const tempDataFinal = {
-      billingCycle: formValue?.billing_cycle,
-      billingPeriod: formValue?.billing_period,
-      serviceType: formValue?.serviceType,
-      sor: formValue?.sor,
-      scheduleType: formValue?.type,
-      scheduleDateTime: formValue?.scheduleDateTime 
-        ? moment(formValue.scheduleDateTime).format('YYYY-MM-DD HH:mm:ss')
-        : null,
-      calculationType: formValue?.calculation_type,
-      remark: formValue?.remark,
-      rRbiCalculationCostCenter: (formValue?.costCenter || []).map((id) => {
+  const tempDataFinal = {
+    billingCycle: formValue?.billing_cycle,
+    billingPeriod: formValue?.billing_period,
+    serviceType: formValue?.serviceType,
+    sor: formValue?.sor,
+    scheduleType: formValue?.type,
+    // FIX: Pastikan format lengkap dengan time, atau kirim null jika tidak ada
+    scheduleDateTime: formValue?.scheduleDateTime 
+      ? moment(formValue.scheduleDateTime).format('YYYY-MM-DD HH:mm:ss')
+      : null,
+    calculationType: formValue?.calculation_type,
+    remark: formValue?.remark,
+    rRbiCalculationCostCenter: (formValue?.costCenter || []).map((id) => {
+      return {
+        id: null,
+        calCode: null,
+        costCenter: id,
+      };
+    }),
+    rRbiCalculationMeterReadingCode: (formValue?.meterReading || []).map(
+      (id) => {
         return {
           id: null,
           calCode: null,
-          costCenter: id,
+          mreadingCode: id,
         };
-      }),
-      rRbiCalculationMeterReadingCode: (formValue?.meterReading || []).map(
-        (id) => {
-          return {
-            id: null,
-            calCode: null,
-            mreadingCode: id,
-          };
-        }
-      ),
-      rRbiCalculationAccountSegment: (formValue?.accountSegment || []).map(
-        (id) => {
-          return {
-            id: null,
-            calCode: null,
-            accSegment: id,
-          };
-        }
-      ),
-      rRbiCalculationAccountGroupType: (formValue?.accountGroupType || []).map(
-        (id) => {
-          return {
-            id: null,
-            calCode: null,
-            accGroupType: id,
-          };
-        }
-      ),
-      rRbiCalculationSpecificCustomer: (formValue?.specificCustomer || []).map(
-        (id) => {
-          return {
-            id: null,
-            calCode: null,
-            custNumb: id,
-          };
-        }
-      ),
-    };
-
-    const hasSpecificCustomer = (formValue?.specificCustomer || []).length > 0;
-
-    if (!hasSpecificCustomer) {
-      setPendingDataFinal(tempDataFinal);
-      setOpenWarningPopulate(true);
-    } else {
-      setDataFinal(tempDataFinal);
-      setOpenModal(true);
-    }
+      }
+    ),
+    rRbiCalculationAccountSegment: (formValue?.accountSegment || []).map(
+      (id) => {
+        return {
+          id: null,
+          calCode: null,
+          accSegment: id,
+        };
+      }
+    ),
+    rRbiCalculationAccountGroupType: (formValue?.accountGroupType || []).map(
+      (id) => {
+        return {
+          id: null,
+          calCode: null,
+          accGroupType: id,
+        };
+      }
+    ),
+    rRbiCalculationSpecificCustomer: (formValue?.specificCustomer || []).map(
+      (id) => {
+        return {
+          id: null,
+          calCode: null,
+          custNumb: id,
+        };
+      }
+    ),
   };
+
+  const hasSpecificCustomer = (formValue?.specificCustomer || []).length > 0;
+
+  if (!hasSpecificCustomer) {
+    setPendingDataFinal(tempDataFinal);
+    setOpenWarningPopulate(true);
+  } else {
+    setDataFinal(tempDataFinal);
+    setOpenModal(true);
+  }
+};
 
   const handleConfirmPopulateAll = () => {
     setOpenWarningPopulate(false);
@@ -316,84 +317,96 @@ const PrabillingForm = ({ type }) => {
     setPendingDataFinal(null);
   };
 
-  const handleSave = async () => {
-    const selectedBillingCycle = list_billing_cycle?.data?.find(
-      (item) => item.id === dataFinal?.billingCycle
-    );
+ const handleSave = async () => {
+  const selectedBillingCycle = list_billing_cycle?.data?.find(
+    (item) => item.id === dataFinal?.billingCycle
+  );
 
-    const selectedBillingPeriod = list_billing_period?.data?.find(
-      (item) => item.id === dataFinal?.billingPeriod
-    );
+  const selectedBillingPeriod = list_billing_period?.data?.find(
+    (item) => item.id === dataFinal?.billingPeriod
+  );
 
-    const selectedSor = list_sor?.data?.find(
-      (item) => item.id === dataFinal?.sor
-    );
+  const selectedSor = list_sor?.data?.find(
+    (item) => item.id === dataFinal?.sor
+  );
 
-    if (!user_profile) {
-      console.error("User profile not loaded");
-      setBodyError({
-        message: "User profile is not loaded. Please refresh the page.",
-      });
-      setModalError(true);
-      return;
-    }
+  // Get schedule type name (string)
+  const selectedScheduleType = list_scheduler_type?.find(
+    (item) => item.id === dataFinal?.scheduleType
+  );
 
-    const finalSpecificAccounts = (
-      dataFinal?.rRbiCalculationSpecificCustomer || []
-    )
-      .filter((item) => item.custNumb)
-      .map((item) => item.custNumb);
+  if (!user_profile) {
+    console.error("User profile not loaded");
+    setBodyError({
+      message: "User profile is not loaded. Please refresh the page.",
+    });
+    setModalError(true);
+    return;
+  }
 
-    const tempBody = {
-      billingCycle:
-        selectedBillingCycle?.name || selectedBillingCycle?.code || "",
-      billPeriod:
-        selectedBillingPeriod?.name || selectedBillingPeriod?.code || "",
-      sor: selectedSor?.name || "",
-      costCenter: (dataFinal?.rRbiCalculationCostCenter || []).map(
-        (item) => item.costCenter
-      ),
-      meterReadingCode: (dataFinal?.rRbiCalculationMeterReadingCode || []).map(
-        (item) => item.mreadingCode
-      ),
-      accountSegment: (dataFinal?.rRbiCalculationAccountSegment || []).map(
-        (item) => item.accSegment
-      ),
-      accountGroupType: (dataFinal?.rRbiCalculationAccountGroupType || []).map(
-        (item) => item.accGroupType
-      ),
-      specificAccount: finalSpecificAccounts,
+  const finalSpecificAccounts = (
+    dataFinal?.rRbiCalculationSpecificCustomer || []
+  )
+    .filter((item) => item.custNumb)
+    .map((item) => item.custNumb);
 
-      billingCycleId: dataFinal?.billingCycle,
-      billPeriodId: dataFinal?.billingPeriod,
-      scheduleTypeId: dataFinal?.scheduleType || 1,
-      scheduleDateTime: dataFinal?.scheduleDateTime || null,
+  const tempBody = {
+    // String values untuk display
+    billingCycle: selectedBillingCycle?.name || selectedBillingCycle?.code || "",
+    billPeriod: selectedBillingPeriod?.name || selectedBillingPeriod?.code || "",
+    sor: selectedSor?.name || "",
+    
+    // Array values
+    costCenter: (dataFinal?.rRbiCalculationCostCenter || []).map(
+      (item) => item.costCenter
+    ),
+    meterReadingCode: (dataFinal?.rRbiCalculationMeterReadingCode || []).map(
+      (item) => item.mreadingCode
+    ),
+    accountSegment: (dataFinal?.rRbiCalculationAccountSegment || []).map(
+      (item) => item.accSegment
+    ),
+    accountGroupType: (dataFinal?.rRbiCalculationAccountGroupType || []).map(
+      (item) => item.accGroupType
+    ),
+    specificAccount: finalSpecificAccounts,
 
-      serviceTypeId: dataFinal?.serviceType,
-      sorId: dataFinal?.sor,
-      calculationTypeId: dataFinal?.calculationType,
-      remark: dataFinal?.remark,
-      createdBy: user_profile.username || "",
-    };
-
-    dispatch(createPrabilling({ body: tempBody }))
-      .unwrap()
-      .then((data) => {
-        if (data) {
-          setModalSuccess(true);
-        }
-      })
-      .catch((error) => {
-        if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
-          const message =
-            error?.response?.data?.message ||
-            error?.message ||
-            error?.toString();
-          setBodyError({ message });
-          setModalError(true);
-        }
-      });
+    // ID values
+    initCode: dataFinal?.calculationType || null,
+    billingCycleId: dataFinal?.billingCycle,
+    sorId: dataFinal?.sor,
+    billPeriodId: dataFinal?.billingPeriod,
+    
+    // Schedule type as STRING (bukan ID)
+    scheduleType: selectedScheduleType?.name || "",
+    
+    // Other fields
+    createdBy: user_profile.username || "",
+    remark: dataFinal?.remark || "",
+    
+    // schedulerTime: kirim string dengan format lengkap atau null
+    // PENTING: Jangan kirim empty string, tapi null jika tidak ada
+    schedulerTime: dataFinal?.scheduleDateTime || null,
   };
+
+  dispatch(createPrabilling({ body: tempBody }))
+    .unwrap()
+    .then((data) => {
+      if (data) {
+        setModalSuccess(true);
+      }
+    })
+    .catch((error) => {
+      if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          error?.toString();
+        setBodyError({ message });
+        setModalError(true);
+      }
+    });
+};
 
   const handleBackPage = () => {
     if (Object.values(formValue).length > 0) {
@@ -512,9 +525,9 @@ const PrabillingForm = ({ type }) => {
 
   const handleScheduleTypeChange = (value) => {
     setSelectedScheduleType(value);
-    const selectedType = list_scheduler_type?.find(item => item.id === value);
-    if (selectedType?.name?.toLowerCase() !== 'schedule') {
-      form.setFieldValue('scheduleDateTime', null);
+    const selectedType = list_scheduler_type?.find((item) => item.id === value);
+    if (selectedType?.name?.toLowerCase() !== "schedule") {
+      form.setFieldValue("scheduleDateTime", null);
     }
   };
 
@@ -771,31 +784,33 @@ const PrabillingForm = ({ type }) => {
                 })}
               />
             </Form.Item>
-            
-            {selectedScheduleType && 
-             list_scheduler_type?.find(item => item.id === selectedScheduleType)?.name?.toLowerCase() === 'scheduler' && (
-              <Form.Item
-                label={"Schedule"}
-                name={"scheduleDateTime"}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select schedule date and time",
-                  },
-                ]}
-              >
-                <DatePicker
-                  showTime
-                  format="DD MMM YYYY HH:mm:ss"
-                  placeholder="Select date and time"
-                  className="w-full"
-                  disabledDate={(current) => {
-                    return current && current < moment().startOf('day');
-                  }}
-                />
-              </Form.Item>
-            )}
-            
+
+            {selectedScheduleType &&
+              list_scheduler_type
+                ?.find((item) => item.id === selectedScheduleType)
+                ?.name?.toLowerCase() === "scheduler" && (
+                <Form.Item
+                  label={"Schedule"}
+                  name={"scheduleDateTime"}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select schedule date and time",
+                    },
+                  ]}
+                >
+                  <DatePicker
+                    showTime
+                    format="DD MMM YYYY HH:mm:ss"
+                    placeholder="Select date and time"
+                    className="w-full"
+                    disabledDate={(current) => {
+                      return current && current < moment().startOf("day");
+                    }}
+                  />
+                </Form.Item>
+              )}
+
             <Form.Item label={"Remark"} name={"remark"}>
               <InputComponent
                 type="textarea"
