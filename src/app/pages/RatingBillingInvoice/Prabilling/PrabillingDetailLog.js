@@ -320,6 +320,10 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
             tableScrolled={{ x: 1800, y: 600 }}
             onSort={onSort}
             rowKey={(record) => record.id}
+            useFixColumn={true}
+              defaultFixedColumns={{
+                no: "left",
+              }}
           />
         </div>
       </BaseContainer>
