@@ -58,7 +58,6 @@ variables:
       variables:
         ENV_SERVER: "production"
 
-
 .ci_rules:
   rules:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /(?i)^new-dev$/ && $CI_PIPELINE_SOURCE == "merge_request_event"'
