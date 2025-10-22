@@ -90,6 +90,13 @@ prepare-version:
   stage: pre-build
   extends: .prepare-version
   tags: !reference [.runner-tag, neuron]
+  rules:
+    - !reference [.dev_rules, rules]
+    - !reference [.staging_rules, rules]
+    - !reference [.release_rules, rules]
+    - !reference [.preprod_rules, rules]
+    - !reference [.multibranch_rules, rules]
+    - !reference [.ci_rules, rules]
 
 prebuild-pgnbill-fe:
   stage: pre-build
