@@ -111,6 +111,9 @@ prebuild-pgnbill-fe:
 build-pgnbill-fe:
   stage: build
   extends: .build-node
+  image: node:18-alpine
+  variables:
+    IMAGE_NAME: "node:18-alpine"
   tags: !reference [.runner-tag, neuron]
   needs: ['prepare-version', 'prebuild-pgnbill-fe']
 
