@@ -22,7 +22,6 @@ variables:
   SQ_CHECK_IMAGE: 'registry.neuron.id/pub/tools-testing:reportingTools-latest'
   IMAGE_DEPDENCY_CHECK: 'registry.gitlab.com/gitlab-ci-utils/docker-dependency-check:latest'
   PROJECT_OPS: 'devops/ops-repository'
-  image: node:18-alpine
 
 
 # ---------------------------------------------- Rules Pipeline -----------------------------------------------------
@@ -102,6 +101,9 @@ prepare-version:
 prebuild-pgnbill-fe:
   stage: pre-build
   extends: .prebuild-node
+  variables:
+    - LEGACY_PEER_ENABLED: true
+    - IMAGE_NAME: node:18-alpine
   tags: !reference [.runner-tag, neuron]
   needs: ['prepare-version']
 
