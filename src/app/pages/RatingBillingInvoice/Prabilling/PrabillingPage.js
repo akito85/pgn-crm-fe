@@ -1,6 +1,14 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Tooltip, Button, Dropdown, Checkbox, Radio, Divider } from "antd";
+import {
+  Spin,
+  Tooltip,
+  Button,
+  Dropdown,
+  Checkbox,
+  Radio,
+  Divider,
+} from "antd";
 import { Link, NavLink } from "react-router-dom";
 import { SettingOutlined, PushpinOutlined } from "@ant-design/icons";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -24,15 +32,16 @@ const PrabillingPage = () => {
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  
+
   // Column fixing state
   const [fixedColumns, setFixedColumns] = useState({
     no: "left",
     initCode: "left",
-    status: "right"
+    status: "right",
   });
-  const [columnFixDropdownVisible, setColumnFixDropdownVisible] = useState(false);
-  
+  const [columnFixDropdownVisible, setColumnFixDropdownVisible] =
+    useState(false);
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchs, setSearchs] = useState({});
@@ -63,7 +72,7 @@ const PrabillingPage = () => {
       getListPrabillingInitPopulate({
         search: searchString,
         page: backendPage,
-        pageSize: pageSize,
+        size: pageSize,
         sort: sort,
       })
     );

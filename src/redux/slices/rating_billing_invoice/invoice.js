@@ -30,7 +30,6 @@ export const getAllInvoicePaginate = createAsyncThunk(
       }`;
       const response = await axios.get(url, {
         headers: {
-          // "Access-Control-Allow-Origin": "http://localhost:3000",
           "ngrok-skip-browser-warning": "true",
         },
       });
