@@ -60,7 +60,7 @@ variables:
 
 .ci_rules:
   rules:
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /(?i)^new-dev$/ && $CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /(?i)^testing-rbip$/ && $CI_PIPELINE_SOURCE == "merge_request_event"'
       variables:
         ENV_SERVER: "development"
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /(?i)^staging-qa$/ && $CI_PIPELINE_SOURCE == "merge_request_event"'
