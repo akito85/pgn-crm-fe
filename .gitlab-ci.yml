@@ -22,6 +22,58 @@ variables:
   IMAGE_DEPDENCY_CHECK: 'registry.gitlab.com/gitlab-ci-utils/docker-dependency-check:latest'
   PROJECT_OPS: 'devops/ops-repository'
 
+
+# ---------------------------------------------- Rules Pipeline -----------------------------------------------------
+.dev_rules:
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /(?i)^testing-rbip$/ && ($CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "web")'
+      variables:
+        ENV_SERVER: "development"
+
+
+.demo_rules:
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /(?i)^demo$/ && ($CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "web")'
+      variables:
+        ENV_SERVER: "demo"
+
+
+.staging_rules:
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /(?i)^staging-qa$/ && ($CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "web")'
+      variables:
+        ENV_SERVER: "staging"
+
+
+.preprod_rules:
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /(?i)^pre-production$/ && ($CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "web")'
+      variables:
+        ENV_SERVER: "pre-production"
+
+
+.release_rules:
+  rules:
+    - if: '($CI_COMMIT_TAG =~ /^v.*$/) || ($CI_COMMIT_BRANCH == "000-tempolary" && ($CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "web"))'
+      variables:
+        ENV_SERVER: "production"
+
+
+.ci_rules:
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /(?i)^new-dev$/ && $CI_PIPELINE_SOURCE == "merge_request_event"'
+      variables:
+        ENV_SERVER: "development"
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /(?i)^staging-qa$/ && $CI_PIPELINE_SOURCE == "merge_request_event"'
+      variables:
+        ENV_SERVER: "staging"
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /(?i)^main$/ || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" && $CI_PIPELINE_SOURCE == "merge_request_event"'
+      variables:
+        ENV_SERVER: "to-prod"
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /(?i)^pre-production$/ && $CI_PIPELINE_SOURCE == "merge_request_event"'
+      variables:
+        ENV_SERVER: "pre-production"
+
 # ------------------------------------------------ Template -------------------------------------------------------
 include:
   - project: template/devops
