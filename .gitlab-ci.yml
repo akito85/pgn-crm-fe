@@ -117,6 +117,11 @@ build-pgnbill-fe:
     ESLINT_NO_DEV_ERRORS: "true"
   tags: !reference [.runner-tag, neuron]
   needs: ['prepare-version', 'prebuild-pgnbill-fe']
+  artifacts:
+    paths:
+      - build/
+    reports:
+      dotenv: build.env
 
 publish-pgnbill-fe:
   stage: publish
