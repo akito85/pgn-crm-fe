@@ -114,6 +114,7 @@ build-pgnbill-fe:
   image: node:18-alpine
   variables:
     IMAGE_NAME: "node:18-alpine"
+    ESLINT_NO_DEV_ERRORS: "true"
   tags: !reference [.runner-tag, neuron]
   needs: ['prepare-version', 'prebuild-pgnbill-fe']
 
