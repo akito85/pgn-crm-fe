@@ -1,0 +1,100 @@
+.runner-tag:
+  neuron:
+    - docker
+    - internal
+
+stages:
+  - pre-build
+  - sq-check
+  - validate
+  - build
+  - deploy
+
+variables:
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+  GIT_DEPTH: "0"
+  SONAR_HOST_URL: "https://sonar.neuronworks.co.id"
+  SONAR_SOURCES: "./"
+  SCAN_SOURCES: "./"
+  APP_NAME: 'pgn-billing-fe-services'
+  RP_HOST_URL: 'https://qualiview.neuron.id'
+  SQ_CHECK_IMAGE: 'registry.neuron.id/pub/tools-testing:reportingTools-latest'
+  IMAGE_DEPDENCY_CHECK: 'registry.gitlab.com/gitlab-ci-utils/docker-dependency-check:latest'
+  PROJECT_OPS: 'devops/ops-repository'
+
+# ------------------------------------------------ Template -------------------------------------------------------
+include:
+  - project: template/devops
+    ref: main
+    file:
+      - continuous-integration.yaml
+      - prebuild-stage.yaml
+      - publish-stage.yaml 
+      - rules.yaml
+      - trigger.yaml
+
+# ----------------------------------------------- Sq Check --------------------------------------------------------
+sonarqube-check:
+  stage: sq-check
+  extends: .scan-sonar
+  tags: !reference [.runner-tag, neuron]
+
+dependency-check:
+  stage: sq-check
+  extends: .depedency-check
+  tags: !reference [.runner-tag, compile]
+  allow_failure: true
+
+
+# -------------------------------------------- Validate SQ Check ------------------------------------------------
+validate-sonarqube-check:
+  stage: validate
+  extends: .validate-sonar-scan
+  needs:
+    - sonarqube-check
+  tags: !reference [.runner-tag, neuron]
+
+validate-dependency-check:
+  stage: validate
+  before_script:
+    - cp ./dependency-check-report.xml ./dependency-check-junit.xml
+  extends: .validate-dependency-check
+  needs:
+    - dependency-check
+  tags: !reference [.runner-tag, neuron]
+
+# ----------------------------------------- Pre Build --------------------------------------------------------------
+prepare-version:
+  stage: pre-build
+  extends: .prepare-version
+  tags: !reference [.runner-tag, neuron]
+
+prebuild-pgnbill-fe:
+  stage: pre-build
+  extends: .prebuild-node
+  tags: !reference [.runner-tag, neuron]
+  needs: ['prepare-version']
+
+# ----------------------------------------- Build ------------------------------------------------------------------
+build-pgnbill-fe:
+  stage: build
+  extends: .build-node
+  tags: !reference [.runner-tag, neuron]
+  needs: ['prepare-version', 'prebuild-pgnbill-fe']
+
+publish-pgnbill-fe:
+  stage: publish
+  extends: .build-app-gitlab
+  variables:
+    DOCKERFILE_NAME: Dockerfile
+  needs: ['prepare-version', 'prebuild-pgnbill-fe', 'build-pgnbill-fe']
+  tags: !reference [.runner-tag, neuron]
+
+# ------------------------------------------- Trigger Deploy -------------------------------------------------------
+deploy-pgnbill-fe:
+  variables:
+    APP_VERSION : $APP_VERSION
+  stage: deploy
+  needs:
+    ['prepare-version', 'prebuild-pgnbill-fe', 'build-pgnbill-fe', 'publish-pgnbill-fe']
+  extends: .trigger-project
