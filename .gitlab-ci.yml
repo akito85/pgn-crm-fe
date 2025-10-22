@@ -84,36 +84,6 @@ include:
       - rules.yaml
       - trigger.yaml
 
-# ----------------------------------------------- Sq Check --------------------------------------------------------
-sonarqube-check:
-  stage: sq-check
-  extends: .scan-sonar
-  tags: !reference [.runner-tag, neuron]
-
-dependency-check:
-  stage: sq-check
-  extends: .depedency-check
-  tags: !reference [.runner-tag, compile]
-  allow_failure: true
-
-
-# -------------------------------------------- Validate SQ Check ------------------------------------------------
-validate-sonarqube-check:
-  stage: validate
-  extends: .validate-sonar-scan
-  needs:
-    - sonarqube-check
-  tags: !reference [.runner-tag, neuron]
-
-validate-dependency-check:
-  stage: validate
-  before_script:
-    - cp ./dependency-check-report.xml ./dependency-check-junit.xml
-  extends: .validate-dependency-check
-  needs:
-    - dependency-check
-  tags: !reference [.runner-tag, neuron]
-
 # ----------------------------------------- Pre Build --------------------------------------------------------------
 prepare-version:
   stage: pre-build
