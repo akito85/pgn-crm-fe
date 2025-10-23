@@ -1,0 +1,88 @@
+---
+# Source: pgn-frontend/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgn-frontend
+  namespace: energy-development
+  labels:
+    helm.sh/chart: pgn-frontend-0.1.0
+    app.kubernetes.io/name: pgn-frontend
+    app.kubernetes.io/instance: pgn-frontend
+    app.kubernetes.io/version: latest
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pgn-frontend
+      app.kubernetes.io/instance: pgn-frontend
+  template:
+    metadata:
+      annotations:
+        meta.helm.sh/release-name: pgn-frontend
+        rollout-timestamp: "2025-07-25 11:16:17.5443132 +0700 +07 m=+0.083775001"
+        meta.helm.sh/release-namespace: "energy-development"
+        vault.hashicorp.com/auth-path: "auth/energy-development-kubernetes"
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-status: "update"
+        vault.hashicorp.com/agent-inject-secret-db-access.properties: "energy-development/data/db_access"
+        vault.hashicorp.com/agent-inject-template-db-access.properties: | 
+          {{- with secret "energy-development/db_access" -}}
+          spring.crm-datasource.userName={{ .Data.data.username }} 
+          spring.crm-datasource.password={{ .Data.data.password }}
+          {{- end }}
+        vault.hashicorp.com/role: "energy"
+      labels:
+        helm.sh/chart: pgn-frontend-0.1.0
+        app.kubernetes.io/name: pgn-frontend
+        app.kubernetes.io/instance: pgn-frontend
+        app.kubernetes.io/version: latest
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      imagePullSecrets:
+        - name: pgnregcred
+      serviceAccountName: energy-vault
+      securityContext:
+        {}
+      containers:
+        - name: pgn-frontend
+          securityContext:
+            {}
+          image: "imagePath:1.0.0-alpha"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "file:/vault/secrets/db-access.properties"
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 240
+            periodSeconds: 15
+            timeoutSeconds: 10
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 240
+            periodSeconds: 15
+            timeoutSeconds: 10
+            successThreshold: 1
+            failureThreshold: 5
+          resources:
+            limits:
+              cpu: "0.25"
+              memory: 1Gi
+            requests:
+              cpu: "0.25"
+              memory: 512Mi

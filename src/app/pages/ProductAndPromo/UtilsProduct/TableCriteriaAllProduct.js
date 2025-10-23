@@ -1,0 +1,1024 @@
+import { FilterOutlined } from "@ant-design/icons";
+import { Input, DatePicker, Tooltip } from "antd";
+import Highlighter from "react-highlight-words";
+import moment from "moment";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../utils";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
+import { separatorCurrency } from "./UtilsAllProduct";
+
+
+const onFilter = (dataIndex, value, record) => {
+  const fixSearchText = value?.toLowerCase();
+  switch (dataIndex) {
+    case "description":
+    case "maxValueUom":
+    case "adjustmentValue":
+      return record[dataIndex]
+        ?.toString()
+        ?.toLowerCase()
+        .includes(fixSearchText);
+    case "startDate":
+    case "endDate":
+      const date = record[dataIndex]
+        ? moment(record[dataIndex]).format("DD MMM YYYY")
+        : "";
+      return date.toLowerCase().includes(fixSearchText);
+    default:
+      return record[dataIndex]?.label?.toLowerCase().includes(fixSearchText);
+  }
+};
+
+const sorter = (fieldSort, a, b) => {
+  const handleDataSort = (obj) => {
+    switch (fieldSort) {
+      case "maxValueUom":
+      case "adjustmentValue":
+        return separatorCurrency(obj[fieldSort])?.replace(/,/g, "");
+      case "adjustmentType":
+        return obj[fieldSort]?.label.toLowerCase();
+      case "startDate":
+      case "endDate":
+        return obj[fieldSort] ? moment(obj[fieldSort]) : "";
+      // return date.toLowerCase();
+      default:
+        return obj[fieldSort].label?.toLowerCase();
+    }
+  };
+  let fa = handleDataSort(a);
+  let fb = handleDataSort(b);
+  const handleCompare = (a, b) => {
+    switch (fieldSort) {
+      case "startDate":
+      case "endDate":
+        if (a === null && b === null) return 0; // Both are null, consider equal
+        if (a === null) return 1; // `a` is null, place it as greater (bottom)
+        if (b === null) return -1; // `b` is null, place it as greater (bottom)
+        if (a && b) {
+          if (a.isBefore(b)) return -1;
+          if (a.isAfter(b)) return 1;
+          return 0;
+        }
+        return 0; // Handle null cases if necessary
+      case "maxValueUom":
+      case "adjustmentValue":
+        return Math.sign(parseFloat(a) - parseFloat(b));
+      default:
+        return a.localeCompare(b);
+    }
+  }
+    return handleCompare(fa, fb);
+};
+
+export const columnsTableCriteriaAll = (
+  listOption = {},
+  searchInput,
+  searchedColumn,
+  searchText,
+  handleSearch,
+  search,
+  storedData
+) => [
+  {
+    required: true,
+    title: "ACCOUNT CATEGORY",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("accountCategory", value, record),
+    sorter: (a, b) => sorter("accountCategory", a, b),
+    dataIndex: "accountCategory",
+    dataIndexForm: "data_account_Category",
+    indexValue: 22,
+    inputType: "select",
+    filteredValue: search?.["accountCategory"]
+      ? [search?.["accountCategory"]]
+      : null,
+    option: listOption["data_account_Category"],
+    url: "getAccountCategoryList",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "accountCategory",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "accountCategory",
+        hasValue(search["accountCategory"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "SERVICE TYPE",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("serviceType", value, record),
+    sorter: (a, b) => sorter("serviceType", a, b),
+    dataIndex: "serviceType",
+    dataIndexForm: "data_service_type",
+    indexValue: 21,
+    inputType: "select",
+    filteredValue: search?.["serviceType"] ? [search?.["serviceType"]] : null,
+    option: listOption["data_service_type"],
+    url: "getServiceTypeList",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "serviceType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "serviceType",
+        hasValue(search["serviceType"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "CUSTOMER SEGMENT",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("customerSegment", value, record),
+    sorter: (a, b) => sorter("customerSegment", a, b),
+    dataIndex: "customerSegment",
+    dataIndexForm: "data_customerSegment",
+    indexValue: 19,
+    inputType: "select",
+    filteredValue: search?.["customerSegment"]
+      ? [search?.["customerSegment"]]
+      : null,
+    option: listOption["data_customerSegment"],
+    url: "getCustomerSegmentList",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "customerSegment",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "customerSegment",
+        hasValue(search["customerSegment"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "ACCOUNT GROUP",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("accountGroup", value, record),
+    sorter: (a, b) => sorter("accountGroup", a, b),
+    dataIndex: "accountGroup",
+    dataIndexForm: "data_account_group",
+    indexValue: 20,
+    inputType: "select",
+    filteredValue: search?.["accountGroup"] ? [search?.["accountGroup"]] : null,
+    option: listOption["data_account_group"],
+    url: "getAccountGroupList",
+    dependDataIndex: "customerSegment",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "accountGroup",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "accountGroup",
+        hasValue(search["accountGroup"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "INDUSTRIAL SECTOR",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("industrialSector", value, record),
+    sorter: (a, b) => sorter("industrialSector", a, b),
+    dataIndex: "industrialSector",
+    dataIndexForm: "data_industrial_sector",
+    indexValue: 18,
+    inputType: "select",
+    filteredValue: search?.["industrialSector"]
+      ? [search?.["industrialSector"]]
+      : null,
+    option: listOption["data_industrial_sector"],
+    url: "getIndustrialSectorList",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "industrialSector",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "industrialSector",
+        hasValue(search["industrialSector"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "BUDGET",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("budget", value, record),
+    sorter: (a, b) => sorter("budget", a, b),
+    dataIndex: "budget",
+    dataIndexForm: "data_budget",
+    indexValue: 17,
+    inputType: "select",
+    filteredValue: search?.["budget"] ? [search?.["budget"]] : null,
+    option: listOption["data_budget"],
+    url: "getBudgetList",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "budget",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "budget",
+        hasValue(search["budget"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "SOR",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("sor", value, record),
+    sorter: (a, b) => sorter("sor", a, b),
+    dataIndex: "sor",
+    dataIndexForm: "data_sor",
+    indexValue: 11,
+    inputType: "select",
+    filteredValue: search?.["sor"] ? [search?.["sor"]] : null,
+    option: listOption["data_sor"],
+    url: "getSorList",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "sor",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "sor",
+        hasValue(search["sor"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "COST CENTER",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("area", value, record),
+    sorter: (a, b) => sorter("area", a, b),
+    dataIndex: "area",
+    dataIndexForm: "data_cost_center",
+    indexValue: 16,
+    inputType: "select",
+    filteredValue: search?.["area"] ? [search?.["area"]] : null,
+    option: listOption["data_cost_center"],
+    url: "getCostCenterList",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "area",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "area",
+        hasValue(search["area"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "PROVINCE",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("province", value, record),
+    sorter: (a, b) => sorter("province", a, b),
+    dataIndex: "province",
+    dataIndexForm: "data_province",
+    indexValue: 15,
+    inputType: "select",
+    filteredValue: search?.["province"] ? [search?.["province"]] : null,
+    option: listOption["data_province"],
+    url: "getProvinceList",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "province",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "province",
+        hasValue(search["province"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "CITY",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("city", value, record),
+    sorter: (a, b) => sorter("city", a, b),
+    dataIndex: "city",
+    dataIndexForm: "data_city",
+    indexValue: 39,
+    inputType: "select",
+    filteredValue: search?.["city"] ? [search?.["city"]] : null,
+    option: listOption["data_city"],
+    url: "getCityList",
+    dependDataIndex: "province",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "city",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "city",
+        hasValue(search["city"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "DISTRICT",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("district", value, record),
+    sorter: (a, b) => sorter("district", a, b),
+    dataIndex: "district",
+    dataIndexForm: "data_district",
+    indexValue: 14,
+    inputType: "select",
+    filteredValue: search?.["district"] ? [search?.["district"]] : null,
+    option: listOption["data_district"],
+    url: "getDistrictList",
+    dependDataIndex: "city",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "district",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "district",
+        hasValue(search["district"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "SUB-DISTRICT",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("subDistrict", value, record),
+    sorter: (a, b) => sorter("subDistrict", a, b),
+    dataIndex: "subDistrict",
+    dataIndexForm: "data_sub_district",
+    indexValue: 13,
+    inputType: "select",
+    filteredValue: search?.["subDistrict"] ? [search?.["subDistrict"]] : null,
+    option: listOption["data_sub_district"],
+    url: "getSubDistrictList",
+    dependDataIndex: "district",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "subDistrict",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "subDistrict",
+        hasValue(search["subDistrict"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "ACCOUNT",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("customer", value, record),
+    sorter: (a, b) => sorter("customer", a, b),
+    dataIndex: "customer",
+    dataIndexForm: "data_customer",
+    indexValue: 12,
+    inputType: "select",
+    filteredValue: search?.["customer"] ? [search?.["customer"]] : null,
+    option: listOption["data_customer"],
+    url: "getCustomerList",
+    ellipsis: {
+      showTitle: false,
+    },
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "customer",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "customer",
+        hasValue(search["customer"]),
+        searchText,
+        text?.label,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "G-SIZES",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("gsizes", value, record),
+    sorter: (a, b) => sorter("gsizes", a, b),
+    dataIndex: "gsizes",
+    dataIndexForm: "data_Gsizes",
+    indexValue: 23,
+    inputType: "select",
+    filteredValue: search?.["gsizes"] ? [search?.["gsizes"]] : null,
+    option: listOption["data_Gsizes"],
+    url: "getGsizesList",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "gsizes",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "gsizes",
+        hasValue(search["gsizes"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "ADJUSTMENT TYPE",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("adjustmentType", value, record),
+    sorter: (a, b) => sorter("adjustmentType", a, b),
+    dataIndex: "adjustmentType",
+    dataIndexForm: "data_adjustment_type",
+    indexValue: 3,
+    inputType: "select",
+    filteredValue: search?.["adjustmentType"]
+      ? [search?.["adjustmentType"]]
+      : null,
+    option: listOption["data_adjustment_type"],
+    url: "getAdjustmentTypeList",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "adjustmentType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "adjustmentType",
+        hasValue(search["adjustmentType"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "ADJUSTMENT VALUE",
+    width: 240,
+    dataIndex: "adjustmentValue",
+    indexValue: 3,
+    //onFilter: (value, record) => //onFilter("adjustmentValue", value, record),
+    sorter: (a, b) => sorter("adjustmentValue", a, b),
+    inputType: "number",
+    filteredValue: search?.["adjustmentValue"]
+      ? [search?.["adjustmentValue"]]
+      : null,
+    align: "right",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "adjustmentValue",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "currency",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "adjustmentValue",
+        hasValue(search["adjustmentValue"]),
+        searchText,
+        separatorCurrency(text),
+        true,
+        "input",
+        search
+      ),
+    // ellipsis: {
+    //   showTitle: false,
+    // },
+    // render: (text) => {
+    //   if (searchedColumn === "adjustmentValue") {
+    //     return (
+    //       <Tooltip placement="topLeft" title={text}>
+    //         <Highlighter
+    //           highlightStyle={{
+    //             backgroundColor: "#ffc069",
+    //             padding: 0,
+    //           }}
+    //           searchWords={[searchText]}
+    //           autoEscape
+    //           textToHighlight={text ? text.toString() : ""}
+    //         />
+    //       </Tooltip>
+    //     );
+    //   } else {
+    //     if (text) {
+    //       return (
+    //         <Tooltip placement="topLeft" title={text}>
+    //           {text}
+    //         </Tooltip>
+    //       );
+    //     }
+    //     return "";
+    //   }
+    // },
+  },
+  {
+    required: true,
+    title: "UOM",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("uom", value, record),
+    sorter: (a, b) => sorter("uom", a, b),
+    dataIndex: "uom",
+    dataIndexForm: "data_uom",
+    indexValue: 4,
+    inputType: "select",
+    filteredValue: search?.["uom"] ? [search?.["uom"]] : null,
+    option: listOption["data_uom"],
+    url: "getUomList",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "uom",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "uom",
+        hasValue(search["uom"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
+    title: "MAX VALUE UOM",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("maxValueUom", value, record),
+    sorter: (a, b) => sorter("maxValueUom", a, b),
+    dataIndex: "maxValueUom",
+    indexValue: 4,
+    inputType: "number",
+    filteredValue: search?.["maxValueUom"] ? [search?.["maxValueUom"]] : null,
+    align: "right",
+    // option: listOption["maxValueUom"],
+    // url: "get",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "maxValueUom",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "currency",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "maxValueUom",
+        hasValue(search["maxValueUom"]),
+        searchText,
+        separatorCurrency(text),
+        false,
+        "input",
+        search
+      ),
+    // ellipsis: {
+    //   showTitle: false,
+    // },
+    // render: (text) => {
+    //   if (searchedColumn === "maxValueUom") {
+    //     return (
+    //       <Tooltip placement="topLeft" title={text}>
+    //         <Highlighter
+    //           highlightStyle={{
+    //             backgroundColor: "#ffc069",
+    //             padding: 0,
+    //           }}
+    //           searchWords={[searchText]}
+    //           autoEscape
+    //           textToHighlight={text ? text.toString() : ""}
+    //         />
+    //       </Tooltip>
+    //     );
+    //   } else {
+    //     if (text) {
+    //       return (
+    //         <Tooltip placement="topLeft" title={text}>
+    //           {text}
+    //         </Tooltip>
+    //       );
+    //     }
+    //     return "";
+    //   }
+    // },
+  },
+  {
+    required: true,
+    title: "FROM ITEM",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("fromItem", value, record),
+    sorter: (a, b) => sorter("fromItem", a, b),
+    dataIndex: "fromItem",
+    dataIndexForm: "data_from_item",
+    indexValue: 5,
+    inputType: "select",
+    filteredValue: search?.["fromItem"] ? [search?.["fromItem"]] : null,
+    option: listOption["data_from_item"],
+    url: "getFromItemList",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "fromItem",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "fromItem",
+        hasValue(search["fromItem"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "TIERING",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("tiering", value, record),
+    sorter: (a, b) => sorter("tiering", a, b),
+    dataIndex: "tiering",
+    dataIndexForm: "data_tiering",
+    inputType: "select",
+    indexValue: 5,
+    filteredValue: search?.["tiering"] ? [search?.["tiering"]] : null,
+    option: listOption["data_tiering"],
+    url: "getTieringList",
+    dependDataIndex: "fromItem",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "tiering",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "tiering",
+        hasValue(search["tiering"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "START DATE",
+    dataIndex: "startDate",
+    dataIndexForm: "startDate",
+    indexValue: 1,
+    inputType: "startDate",
+    align: "center",
+    required: true,
+    filteredValue: search?.["startDate"] ? [search?.["startDate"]] : null,
+    width: 240,
+    //onFilter: (value, record) => //onFilter("startDate", value, record),
+    sorter: (a, b) => sorter("startDate", a, b),
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "startDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date",
+      storedData
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "startDate",
+        hasValue(search["startDate"]),
+        searchText,
+        text,
+        "date",
+        search
+      ),
+    // render: (index) => {
+    //   const text = index ? moment(index).format("DD MMM YYYY") : "";
+    //   if (searchedColumn === "startDate") {
+    //     return (
+    //       <Highlighter
+    //         highlightStyle={{
+    //           backgroundColor: "#ffc069",
+    //           padding: 0,
+    //         }}
+    //         searchWords={[searchText]}
+    //         autoEscape
+    //         textToHighlight={text ? text.toString() : ""}
+    //       />
+    //     );
+    //   } else {
+    //     return text || "";
+    //   }
+    // },
+  },
+  {
+    title: "END DATE",
+    dataIndex: "endDate",
+    dataIndexForm: "endDate",
+    inputType: "endDate",
+    align: "center",
+    indexValue: 1,
+    filteredValue: search?.["endDate"] ? [search?.["endDate"]] : null,
+    width: 240,
+    //onFilter: (value, record) => //onFilter("endDate", value, record),
+    sorter: (a, b) => sorter("endDate", a, b),
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "endDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date",
+      storedData
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "endDate",
+        hasValue(search["endDate"]),
+        searchText,
+        text,
+        "date",
+        search
+      ),
+    // render: (index) => {
+    //   const text = index ? moment(index).format("DD MMM YYYY") : "";
+    //   if (searchedColumn === "endDate") {
+    //     return (
+    //       <Highlighter
+    //         highlightStyle={{
+    //           backgroundColor: "#ffc069",
+    //           padding: 0,
+    //         }}
+    //         searchWords={[searchText]}
+    //         autoEscape
+    //         textToHighlight={text ? text.toString() : ""}
+    //       />
+    //     );
+    //   } else {
+    //     return text || "";
+    //   }
+    // },
+  },
+  {
+    title: "DESCRIPTION",
+    width: 240,
+    inputType: "textarea",
+    dataIndex: "description",
+    dataIndexForm: "description",
+    filteredValue: search?.["description"] ? [search?.["description"]] : null,
+    indexValue: 2,
+    //onFilter: (value, record) => //onFilter("description", value, record),
+    sorter: (a, b) => sorter("description", a, b),
+    ellipsis: {
+      showTitle: false,
+    },
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "description",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "description",
+        hasValue(search["description"]),
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+    // ellipsis: {
+    //   showTitle: false,
+    // },
+    // render: (text) => {
+    //   if (searchedColumn === "description") {
+    //     return (
+    //       <Tooltip placement="topLeft" title={text}>
+    //         <Highlighter
+    //           highlightStyle={{
+    //             backgroundColor: "#ffc069",
+    //             padding: 0,
+    //           }}
+    //           searchWords={[searchText]}
+    //           autoEscape
+    //           textToHighlight={text ? text.toString() : ""}
+    //         />
+    //       </Tooltip>
+    //     );
+    //   } else {
+    //     if (text) {
+    //       return (
+    //         <Tooltip placement="topLeft" title={text}>
+    //           {text}
+    //         </Tooltip>
+    //       );
+    //     }
+    //     return "";
+    //   }
+    // },
+  },
+];

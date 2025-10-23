@@ -1,0 +1,778 @@
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
+
+const agreementColumn = (
+  page,
+  pageSize,
+  searchInput,
+  searchedColumn,
+  searchText,
+  search,
+  handleSearch = () => {}
+) => [
+  {
+    title: "NO",
+    dataIndex: "",
+    align: "center",
+    width: 60,
+    render: (text, object, index) => (page - 1) * pageSize + index + 1,
+  },
+  {
+    title: "SA NUMBER",
+    dataIndex: "saNumber",
+    sorter: true,
+    width: 250,
+    ...getColumnSearchPropsPaging(
+      "saNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "saNumber",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "SA REFERENCE NUMBER",
+    dataIndex: "saReferenceNum",
+    sorter: true,
+    width: 250,
+    ...getColumnSearchPropsPaging(
+      search,
+      "saReferenceNum",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "saReferenceNum",
+        hasValue(search["saReferenceNum"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "SERVICE TYPE",
+    dataIndex: "serviceType",
+    sorter: true,
+    align: "center",
+    width: 180,
+    ...getColumnSearchPropsPaging(
+      "serviceType",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "serviceType",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "SA TYPE",
+    dataIndex: "saType",
+    sorter: true,
+    width: 220,
+    align: "center",
+    ...getColumnSearchPropsPaging(
+      "saType",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false
+    ),
+    render: (text) =>
+      renderColumn(
+        "saType",
+        searchedColumn,
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PJBG TYPE",
+    dataIndex: "pjbgType",
+    align: "center",
+    sorter: true,
+    width: 160,
+    ...getColumnSearchPropsPaging(
+      "pjbgType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "pjbgType",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "SA DATE",
+    dataIndex: "saDate",
+    align: "center",
+    sorter: true,
+    width: 160,
+    ...getColumnSearchPropsPaging(
+      "saDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date"
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "saDate",
+        searchedColumn,
+        searchText,
+        text,
+        "date",
+        search
+      ),
+  },
+  {
+    title: "START DATE",
+    dataIndex: "startDateSa",
+    align: "center",
+    sorter: true,
+    width: 160,
+    ...getColumnSearchPropsPaging(
+      "startDateSa",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date"
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "startDateSa",
+        searchedColumn,
+        searchText,
+        text,
+        "date",
+        search
+      ),
+  },
+  {
+    title: "END DATE",
+    dataIndex: "endDateSa",
+    align: "center",
+    sorter: true,
+    width: 160,
+    ...getColumnSearchPropsPaging(
+      "endDateSa",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date"
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "endDateSa",
+        searchedColumn,
+        searchText,
+        text,
+        "date",
+        search
+      ),
+  },
+  {
+    title: "COMMITMENT DATE",
+    dataIndex: "comitmentDate",
+    align: "center",
+    sorter: true,
+    width: 220,
+    ...getColumnSearchPropsPaging(
+      "comitmentDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date"
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "comitmentDate",
+        searchedColumn,
+        searchText,
+        text,
+        "date",
+        search
+      ),
+  },
+  {
+    title: "BILLING CYCLE",
+    dataIndex: "billingCycle",
+    align: "center",
+    sorter: true,
+    width: 280,
+    aling: "center",
+    ...getColumnSearchPropsPaging(
+      "billingCycle",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "billingCycle",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "TERM OF PAYMENT",
+    dataIndex: "termsOfPaymentName",
+    align: "center",
+    sorter: true,
+    width: 280,
+    ...getColumnSearchPropsPaging(
+      search,
+      "termsOfPaymentName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "termsOfPaymentName",
+        hasValue(search["termsOfPaymentName"]),
+        searchText,
+        text?.value,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "INVOICE TEMPLATE",
+    dataIndex: "invoiceTemplate",
+    sorter: true,
+    width: 280,
+    ...getColumnSearchPropsPaging(
+      search,
+      "invoiceTemplate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "invoiceTemplate",
+        hasValue(search["invoiceTemplate"]),
+        searchText,
+        text?.value,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "GAS IN PLAN DATE",
+    dataIndex: "gasInPlanDate",
+    align: "center",
+    sorter: true,
+    width: 200,
+    ...getColumnSearchPropsPaging(
+      "gasInPlanDate",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false,
+      "date",
+      search
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "gasInPlanDate",
+        searchedColumn,
+        searchText,
+        text,
+        "date",
+        search
+      ),
+  },
+  {
+    title: "ALREADY GAS IN",
+    dataIndex: "alreadyGasIn",
+    align: "center",
+    sorter: true,
+    width: 220,
+    ...getColumnSearchPropsPaging(
+      "alreadyGasIn",
+      searchInput,
+      searchInput,
+      searchText,
+      handleSearch,
+      false,
+      "yes_or_no"
+    ),
+    render: (text) =>
+      renderColumn(
+        "alreadyGasIn",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRODUCT",
+    width: 240,
+    sorter: true,
+    dataIndex: "product",
+    ellipsis: {
+      showTitle: false,
+    },
+    ...getColumnSearchPropsPaging(
+      "product",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "product",
+        hasValue(search["product"]),
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRODUCT TYPE",
+    width: 240,
+    sorter: true,
+    dataIndex: "productType",
+    align: "center",
+    ...getColumnSearchPropsPaging(
+      "productType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "productType",
+        hasValue(search["productType"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRODUCT VERSION",
+    width: 240,
+    sorter: true,
+    dataIndex: "productVersionId",
+    ...getColumnSearchPropsPaging(
+      "productVersionId",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "productVersionId",
+        hasValue(search["productVersionId"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+   {
+    title: "CREATE FORM",
+    width: 200,
+    sorter: true,
+    dataIndex: "createForm",
+    ...getColumnSearchPropsPaging(
+      "createForm",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      'yes_or_no',
+    ),
+    render: (text) =>
+      renderColumn(
+        "createForm",
+        hasValue(search["createForm"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PAYMENT TYPE",
+    dataIndex: "paymentType",
+    key: "paymentType",
+    sorter: true,
+    width: 180,
+    align: "center",
+    ...getColumnSearchPropsPaging(
+      "paymentType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "paymentType",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "CHARGING METHOD",
+    dataIndex: "chargingMethod",
+    key: "chargingMethod",
+    sorter: true,
+    width: 200,
+    align: "center",
+    ...getColumnSearchPropsPaging(
+      "chargingMethod",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "chargingMethod",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "UOM",
+    dataIndex: "uom",
+    align: "center",
+    sorter: true,
+    width: 150,
+    ...getColumnSearchPropsPaging(
+      "uom",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "uom",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  // ref dari create account table
+  {
+    title: "MINIMUM",
+    dataIndex: "min",
+    align: "left",
+    sorter: true,
+    width: 190,
+    ...getColumnSearchPropsPaging(
+      "min",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "min",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "MAXIMUM",
+    dataIndex: "max",
+    align: "left",
+    sorter: true,
+    width: 190,
+    ...getColumnSearchPropsPaging(
+      "max",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "max",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRESSURE",
+    dataIndex: "pressure",
+    align: "",
+    sorter: true,
+    width: 190,
+    ...getColumnSearchPropsPaging(
+      "pressure",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "pressure",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRESSURE CONTRACT",
+    dataIndex: "pressureContract",
+    align: "",
+    sorter: true,
+    width: 280,
+    ...getColumnSearchPropsPaging(
+      "pressureContract",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "pressureContract",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRICE CODE",
+    sorter: true,
+    dataIndex: "priceCode",
+    width: 280,
+    ellipsis: { showTitle: false },
+    ...getColumnSearchPropsPaging(
+      "priceCode",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "priceCode",
+        searchedColumn,
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRICE ADJUSTMENT",
+    sorter: true,
+    dataIndex: "priceAd",
+    width: 200,
+    ...getColumnSearchPropsPaging(
+      "priceAd",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "priceAd",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "PRICING RULE",
+    sorter: true,
+    dataIndex: "pricingRule",
+    width: 280,
+    ellipsis: {
+      showTitle: false,
+    },
+    ...getColumnSearchPropsPaging(
+      "pricingRule",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "pricingRule",
+        searchedColumn,
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "TIME UNIT",
+    sorter: true,
+    dataIndex: "timeUnit",
+    width: 180,
+    align: "center",
+    ...getColumnSearchPropsPaging(
+      "timeUnit",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "timeUnit",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "STATUS",
+    dataIndex: "status",
+    fixed: "right",
+    sorter: true,
+    width: 160,
+    ...getColumnSearchPropsPaging(
+      "status",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "status"
+    ),
+    render: (text) =>
+      renderColumn(
+        "status",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "status",
+        search
+      ),
+  },
+];
+
+export default agreementColumn;

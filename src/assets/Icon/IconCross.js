@@ -1,0 +1,36 @@
+import React from "react";
+
+const SVG = ({
+  style = {},
+  width = "100%",
+  className = "",
+  onClick = () => {},
+}) => (
+  <svg
+    width={width}
+    style={style}
+    height={width}
+    className={`cursor-pointer${className}`}
+    onClick={onClick}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M18 6L6 18"
+      stroke={style && style.color ? style.color : "#4B465C"}
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M6 6L18 18"
+      stroke={style && style.color ? style.color : "#4B465C"}
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export default SVG;
