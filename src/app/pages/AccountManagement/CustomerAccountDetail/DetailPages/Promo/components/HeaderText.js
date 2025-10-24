@@ -1,5 +1,9 @@
-const HeaderText = ({ text }) => {
-  return <div className="text-primary text-sm font-bold uppercase">{text}</div>;
+const HeaderText = ({ text, className = "text-sm" }) => {
+  return (
+    <div className={`text-primary ${className} font-bold uppercase`}>
+      {text}
+    </div>
+  );
 };
 
 export default HeaderText;

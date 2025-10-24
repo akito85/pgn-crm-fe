@@ -1,5 +1,5 @@
 import { UnorderedListOutlined } from "@ant-design/icons";
-import { Col, Tag } from "antd";
+import { Col } from "antd";
 import TagStatus from "../components/TagStatus";
 
 const promoRepository = {
@@ -605,7 +605,7 @@ const promoRepository = {
       status: "Inactive",
     },
   ],
-  getColumns: () => [
+  getColumns: (setIsModalPromoVisible, setDetailPromoData) => [
     {
       title: "No",
       dataIndex: "no",
@@ -658,9 +658,17 @@ const promoRepository = {
       title: "Action",
       dataIndex: "action",
       key: "action",
-      render: () => (
+      render: (_, record) => (
         <Col span={24} className="text-center">
-          <UnorderedListOutlined />
+          <UnorderedListOutlined
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              if (setIsModalPromoVisible) {
+                setIsModalPromoVisible(true);
+                setDetailPromoData(record);
+              }
+            }}
+          />
         </Col>
       ),
     },

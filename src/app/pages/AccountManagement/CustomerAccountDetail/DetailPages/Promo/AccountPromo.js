@@ -1,49 +1,36 @@
 import { Fragment, useState } from "react";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import { Col, Divider, Modal, Row, Space } from "antd";
+import { Col, Collapse, Divider, Modal, Row, Space } from "antd";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
-import {
-  ArrowLeftOutlined,
-  FilterOutlined,
-  LeftOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { LeftOutlined } from "@ant-design/icons";
 import HeaderText from "./components/HeaderText";
 import FilterButton from "./components/FilterButton";
 import promoRepository from "./repository/promoRepository";
 import promoHistoryRepository from "./repository/promoHistoryRepository";
+import ContainerWithTab from "./components/ContainerWithTab";
+import CriteriaAndCondition from "./CriteriaAndCondition";
+import HeadersTabs from "./components/HeadersTabs";
 
 const HeaderAccountPromo = ({ onChangeTab, isPromoHistory }) => {
+  const keys = [
+    { label: "PROMO", value: "promo" },
+    { label: "PROMO HISTORY", value: "promoHistory" },
+  ];
   return (
-    <Row>
-      <Col span={3}>
-        <ButtonComponent
-          type={isPromoHistory ? "default" : "submit"}
-          size="small"
-          fullButton
-          border={!isPromoHistory}
-          onClick={() => onChangeTab("promo")}
-        >
-          Promo
-        </ButtonComponent>
-      </Col>
-      <Col span={3} offset={1}>
-        <ButtonComponent
-          type={isPromoHistory ? "submit" : "default"}
-          size="small"
-          fullButton
-          border={isPromoHistory}
-          onClick={() => onChangeTab("promoHistory")}
-        >
-          Promo History
-        </ButtonComponent>
-      </Col>
-    </Row>
+    <HeadersTabs
+      keys={keys}
+      selectedTab={isPromoHistory ? "promoHistory" : "promo"}
+      onChangeTab={onChangeTab}
+    />
   );
 };
 
-const PromoViewData = ({ isModalPromoVisible, setIsModalPromoVisible }) => {
+const PromoViewData = ({
+  isModalPromoVisible,
+  setIsModalPromoVisible,
+  setDetailPromoData,
+}) => {
   return (
     <Fragment>
       <Row>
@@ -56,7 +43,10 @@ const PromoViewData = ({ isModalPromoVisible, setIsModalPromoVisible }) => {
       </Row>
       <Space direction="vertical" size={"large"}>
         <TablePaginationNew
-          columns={promoRepository.getColumns()}
+          columns={promoRepository.getColumns(
+            setIsModalPromoVisible,
+            setDetailPromoData,
+          )}
           dataSource={promoRepository.getPromoList()}
         />
         <Row>
@@ -109,16 +99,29 @@ const PromoHistoryViewData = () => {
   );
 };
 
-const selectedRender = (tab, isModalPromoVisible, setIsModalPromoVisible) => {
+const selectedRender = (
+  tab,
+  isModalPromoVisible,
+  setIsModalPromoVisible,
+  setDetailPromoData,
+) => {
   if (tab === "promoHistory") {
     return <PromoHistoryViewData />;
   }
-  return <PromoViewData />;
+  return (
+    <PromoViewData
+      isModalPromoVisible={isModalPromoVisible}
+      setIsModalPromoVisible={setIsModalPromoVisible}
+      setDetailPromoData={setDetailPromoData}
+    />
+  );
 };
 
 const AccountPromo = () => {
   const [selectedTab, setSelectedTab] = useState("promo");
   const [isModalPromoVisible, setIsModalPromoVisible] = useState(false);
+  const [detailPromoData, setDetailPromoData] = useState({});
+  const [onChangeDetailPromo, setOnChangeDetailPromo] = useState("criteria");
 
   const onChangeTab = (tab) => {
     setSelectedTab(tab);
@@ -127,24 +130,55 @@ const AccountPromo = () => {
 
   return (
     <Fragment>
-      <BaseContainer>
-        <HeaderAccountPromo
-          onChangeTab={onChangeTab}
-          isPromoHistory={isPromoHistory}
-        />
-        <Divider style={{ margin: "2rem 0" }} />
-        {selectedRender(
-          selectedTab,
-          isModalPromoVisible,
-          setIsModalPromoVisible,
-        )}
-      </BaseContainer>
+      <ContainerWithTab
+        children={
+          <Fragment>
+            <HeaderAccountPromo
+              onChangeTab={onChangeTab}
+              isPromoHistory={isPromoHistory}
+            />
+            <Divider style={{ margin: "2rem 0" }} />
+            {selectedRender(
+              selectedTab,
+              isModalPromoVisible,
+              setIsModalPromoVisible,
+              setDetailPromoData,
+            )}
+          </Fragment>
+        }
+      ></ContainerWithTab>
       <Modal
+        title={"DETAIL PROMO"}
         open={isModalPromoVisible}
         onCancel={() => setIsModalPromoVisible(false)}
         footer={null}
+        width={1000}
+        closable={true}
+        className="custom-modal-header"
       >
-        {/* Modal content goes here */}
+        <Space direction="vertical" style={{ width: "100%" }}>
+          <Collapse
+            defaultActiveKey={["criteria"]}
+            onChange={(key) => setOnChangeDetailPromo(key)}
+            style={{ borderRadius: "8px", backgroundColor: "#E6F1F9" }}
+          >
+            <Collapse.Panel header="Promo Information" key="general">
+              {/* Isi dari detail promo */}
+            </Collapse.Panel>
+          </Collapse>
+          <Collapse
+            defaultActiveKey={["criteria"]}
+            onChange={(key) => setOnChangeDetailPromo(key)}
+            style={{ borderRadius: "8px", backgroundColor: "#E6F1F9" }}
+          >
+            <Collapse.Panel
+              header="Criteria & Conditions Information"
+              key="criteria"
+            >
+              <CriteriaAndCondition />
+            </Collapse.Panel>
+          </Collapse>
+        </Space>
       </Modal>
     </Fragment>
   );
