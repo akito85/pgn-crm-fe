@@ -29,7 +29,7 @@ const data = [
   { value: "Gas Source" },
   { value: "Gas Deposit", disabled: true },
   { value: "Compensation", disabled: true },
-  { value: "Promo", disabled: true },
+  { value: "Promo", disabled: false },
   { value: "Multi Destination", disabled: true },
   { value: "Additional Information", disabled: true  },
   { value: "Gas Utilization", disabled: true  },
@@ -206,8 +206,8 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
             </div>
           </div>
           {/* ) : (
-           <UpdatePageInformation 
-          type={type} 
+           <UpdatePageInformation
+          type={type}
           handleChangeInteraction={handleSetType}
           />
         )} */}
