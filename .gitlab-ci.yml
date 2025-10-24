@@ -112,6 +112,7 @@ build-pgnbill-fe:
   stage: build
   before_script:
     - echo "APP_NAME=$APP_NAME" > build.env
+    - cp ${CONFIG_ENV} .env
   extends: .build-node
   image: node:18-alpine
   variables:
