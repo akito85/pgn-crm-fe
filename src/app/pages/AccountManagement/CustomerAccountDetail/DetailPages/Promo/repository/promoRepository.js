@@ -15,6 +15,7 @@ const promoRepository = {
       endDate: "2024-06-30",
       description: "Summer discount promotion",
       status: "Active",
+      item: "Koleksi Musim Panas",
     },
     {
       key: "2",
@@ -27,6 +28,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Winter special discount",
       status: "Active",
+      item: "Pakaian Hangat & Jaket",
     },
     {
       key: "3",
@@ -39,6 +41,7 @@ const promoRepository = {
       endDate: "2024-01-15",
       description: "New year celebration promo",
       status: "Inactive",
+      item: "Semua Produk",
     },
     {
       key: "4",
@@ -51,6 +54,7 @@ const promoRepository = {
       endDate: "2024-02-14",
       description: "Valentine's day special offer",
       status: "Inactive",
+      item: "Paket Pasangan/Hadiah",
     },
     {
       key: "5",
@@ -63,6 +67,7 @@ const promoRepository = {
       endDate: "2024-03-22",
       description: "3-day spring flash sale",
       status: "Inactive",
+      item: "Item Terpilih",
     },
     {
       key: "6",
@@ -75,6 +80,7 @@ const promoRepository = {
       endDate: "2024-04-05",
       description: "Easter family bundle discount",
       status: "Inactive",
+      item: "Paket Keluarga",
     },
     {
       key: "7",
@@ -87,6 +93,7 @@ const promoRepository = {
       endDate: "2024-05-12",
       description: "Mother's day gift voucher",
       status: "Inactive",
+      item: "Produk Hadiah Ibu",
     },
     {
       key: "8",
@@ -99,6 +106,7 @@ const promoRepository = {
       endDate: "2024-08-31",
       description: "Back to school student discount",
       status: "Active",
+      item: "Perlengkapan Sekolah/Edukasi",
     },
     {
       key: "9",
@@ -111,6 +119,7 @@ const promoRepository = {
       endDate: "2024-08-17",
       description: "Independence day special",
       status: "Inactive",
+      item: "Produk Merah Putih",
     },
     {
       key: "10",
@@ -123,6 +132,7 @@ const promoRepository = {
       endDate: "2024-10-31",
       description: "Halloween costume special",
       status: "Active",
+      item: "Kostum & Aksesori Halloween",
     },
     {
       key: "11",
@@ -135,6 +145,7 @@ const promoRepository = {
       endDate: "2024-11-29",
       description: "Black Friday mega sale",
       status: "Active",
+      item: "Semua Kategori Produk",
     },
     {
       key: "12",
@@ -147,6 +158,7 @@ const promoRepository = {
       endDate: "2024-12-02",
       description: "Cyber Monday online deals",
       status: "Active",
+      item: "Produk Online Eksklusif",
     },
     {
       key: "13",
@@ -159,6 +171,7 @@ const promoRepository = {
       endDate: "2024-12-25",
       description: "Free gift wrapping service",
       status: "Active",
+      item: "Item Kado/Hadiah Natal",
     },
     {
       key: "14",
@@ -171,6 +184,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Year end clearance sale",
       status: "Active",
+      item: "Stok Lama/Produk Cuci Gudang",
     },
     {
       key: "15",
@@ -183,6 +197,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Loyalty member rewards",
       status: "Active",
+      item: "Poin Member",
     },
     {
       key: "16",
@@ -195,6 +210,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Birthday month special discount",
       status: "Active",
+      item: "Produk Pilihan Pribadi",
     },
     {
       key: "17",
@@ -207,6 +223,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "First purchase welcome bonus",
       status: "Active",
+      item: "Pembelian Pertama",
     },
     {
       key: "18",
@@ -219,6 +236,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Friend referral bonus",
       status: "Active",
+      item: "Bonus Referensi",
     },
     {
       key: "19",
@@ -231,6 +249,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Bulk purchase discount",
       status: "Active",
+      item: "Produk Jumlah Besar",
     },
     {
       key: "20",
@@ -243,6 +262,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Weekend special offers",
       status: "Active",
+      item: "Produk Akhir Pekan",
     },
     {
       key: "21",
@@ -255,6 +275,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Early morning deals",
       status: "Active",
+      item: "Item Pagi Hari",
     },
     {
       key: "22",
@@ -267,6 +288,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Late night special prices",
       status: "Active",
+      item: "Item Malam Hari",
     },
     {
       key: "23",
@@ -279,6 +301,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Senior citizen discount",
       status: "Active",
+      item: "Diskon Usia Lanjut",
     },
     {
       key: "24",
@@ -291,6 +314,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Military service appreciation",
       status: "Active",
+      item: "Diskon Khusus Militer",
     },
     {
       key: "25",
@@ -303,6 +327,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Teacher appreciation discount",
       status: "Active",
+      item: "Diskon Khusus Guru/Pendidik",
     },
     {
       key: "26",
@@ -315,6 +340,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Healthcare worker appreciation",
       status: "Active",
+      item: "Diskon Tenaga Kesehatan",
     },
     {
       key: "27",
@@ -327,6 +353,7 @@ const promoRepository = {
       endDate: "2024-01-16",
       description: "Social media flash sale",
       status: "Inactive",
+      item: "Produk Terpilih Medsos",
     },
     {
       key: "28",
@@ -339,6 +366,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Product review rewards",
       status: "Active",
+      item: "Bonus Ulasan Produk",
     },
     {
       key: "29",
@@ -351,6 +379,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Mobile app exclusive deals",
       status: "Active",
+      item: "Item Aplikasi Mobile",
     },
     {
       key: "30",
@@ -363,6 +392,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Email subscriber bonus",
       status: "Active",
+      item: "Bonus Pelanggan Email",
     },
     {
       key: "31",
@@ -375,6 +405,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "VIP member exclusive offers",
       status: "Active",
+      item: "Item Eksklusif VIP",
     },
     {
       key: "32",
@@ -387,6 +418,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Gold member benefits",
       status: "Active",
+      item: "Item Khusus Tier Gold",
     },
     {
       key: "33",
@@ -399,6 +431,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Silver member benefits",
       status: "Active",
+      item: "Item Khusus Tier Silver",
     },
     {
       key: "34",
@@ -411,6 +444,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Bronze member benefits",
       status: "Active",
+      item: "Item Khusus Tier Bronze",
     },
     {
       key: "35",
@@ -423,6 +457,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Group booking discount",
       status: "Active",
+      item: "Item/Jasa Pemesanan Grup",
     },
     {
       key: "36",
@@ -435,6 +470,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Corporate bulk deals",
       status: "Active",
+      item: "Produk Pembelian Korporat",
     },
     {
       key: "37",
@@ -447,6 +483,7 @@ const promoRepository = {
       endDate: "2024-04-30",
       description: "Earth Day eco promotion",
       status: "Inactive",
+      item: "Produk Ramah Lingkungan",
     },
     {
       key: "38",
@@ -459,6 +496,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Local community support",
       status: "Active",
+      item: "Item/Jasa Lokal",
     },
     {
       key: "39",
@@ -471,6 +509,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Charity donation matching",
       status: "Active",
+      item: "Donasi & Produk Amal",
     },
     {
       key: "40",
@@ -483,6 +522,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Sports team fan discount",
       status: "Active",
+      item: "Merchandise Olahraga",
     },
     {
       key: "41",
@@ -495,6 +535,7 @@ const promoRepository = {
       endDate: "2024-07-20",
       description: "Music festival partnership",
       status: "Inactive",
+      item: "Produk Tiket Festival",
     },
     {
       key: "42",
@@ -507,6 +548,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Art gallery collaboration",
       status: "Active",
+      item: "Karya Seni/Aksesori Galeri",
     },
     {
       key: "43",
@@ -519,6 +561,7 @@ const promoRepository = {
       endDate: "2024-09-30",
       description: "Food festival special",
       status: "Inactive",
+      item: "Produk Makanan & Minuman",
     },
     {
       key: "44",
@@ -531,6 +574,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Book club member discount",
       status: "Active",
+      item: "Buku & Alat Tulis",
     },
     {
       key: "45",
@@ -543,6 +587,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Fitness challenge rewards",
       status: "Active",
+      item: "Produk Kesehatan/Fitness",
     },
     {
       key: "46",
@@ -555,6 +600,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Travel partner discount",
       status: "Active",
+      item: "Item/Jasa Travel",
     },
     {
       key: "47",
@@ -567,6 +613,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Pet owner special deals",
       status: "Active",
+      item: "Produk Kebutuhan Hewan Peliharaan",
     },
     {
       key: "48",
@@ -579,6 +626,7 @@ const promoRepository = {
       endDate: "2024-05-31",
       description: "Spring gardening promotion",
       status: "Inactive",
+      item: "Peralatan & Bibit Kebun",
     },
     {
       key: "49",
@@ -591,6 +639,7 @@ const promoRepository = {
       endDate: "2024-12-31",
       description: "Tech enthusiast deals",
       status: "Active",
+      item: "Gadget & Aksesori Teknologi",
     },
     {
       key: "50",
@@ -603,6 +652,7 @@ const promoRepository = {
       endDate: "2024-06-22",
       description: "Company anniversary celebration",
       status: "Inactive",
+      item: "baju bagus",
     },
   ],
   getColumns: (setIsModalPromoVisible, setDetailPromoData) => [
@@ -621,6 +671,11 @@ const promoRepository = {
       title: "Type",
       dataIndex: "type",
       key: "type",
+    },
+    {
+      title: "Item",
+      dataIndex: "item",
+      key: "item",
     },
     {
       title: "Category",
