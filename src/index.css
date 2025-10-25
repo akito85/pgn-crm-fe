@@ -1004,3 +1004,12 @@ span.ant-tree-title {
   font-size: 16px !important;
   font-weight: bold !important;
 }
+
+/* Colored panel used by Promo components */
+.colored-panel {
+  background-color: #e6f1f9;
+  border-radius: 8px;
+  width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+}
