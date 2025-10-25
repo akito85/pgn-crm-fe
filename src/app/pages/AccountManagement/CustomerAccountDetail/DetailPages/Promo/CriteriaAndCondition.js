@@ -1,10 +1,10 @@
 import { Fragment, useState } from "react";
-import { Col, Divider, Modal, Row, Space } from "antd";
+import { Col, Divider, Row, Space } from "antd";
 import HeaderText from "./components/HeaderText";
 import HeadersTabs from "./components/HeadersTabs";
 import FilterButton from "./components/FilterButton";
 import ExportButton from "./components/ExportButton";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import { TablePaginationNew } from "poc-table-dragandrop";
 import promoCriteriaRepository from "./repository/promoCriteriaRepository";
 import promoConditionRepository from "./repository/promoConditionRepository";
 import ModalCustomPromo from "./components/ModalCustomPromo";
@@ -40,6 +40,7 @@ const selectedRender = (selectedTab, handleClickDetail, setDetailData) => {
             </Col>
           </Row>
           <TablePaginationNew
+            enableDragColumn={true}
             columns={promoCriteriaRepository.getColumns(
               handleClickDetail,
               setDetailData,
@@ -63,6 +64,7 @@ const selectedRender = (selectedTab, handleClickDetail, setDetailData) => {
             </Col>
           </Row>
           <TablePaginationNew
+            enableDragColumn={true}
             columns={promoConditionRepository.getColumns(
               handleClickDetail,
               setDetailData,

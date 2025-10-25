@@ -2,7 +2,7 @@ import { Fragment, useState } from "react";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import { Col, Collapse, Divider, Modal, Row, Space } from "antd";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import { TablePaginationNew } from "poc-table-dragandrop";
 import { LeftOutlined } from "@ant-design/icons";
 import HeaderText from "./components/HeaderText";
 import FilterButton from "./components/FilterButton";
@@ -47,6 +47,7 @@ const PromoViewData = ({
       </Row>
       <Space direction="vertical" size={"large"}>
         <TablePaginationNew
+          enableDragColumn={true}
           columns={promoRepository.getColumns(
             setIsModalPromoVisible,
             setDetailPromoData,
@@ -87,6 +88,7 @@ const PromoHistoryViewData = ({
       </Row>
       <Space direction="vertical" size={"large"}>
         <TablePaginationNew
+          enableDragColumn={true}
           columns={promoHistoryRepository.getColumns(
             setIsModalHistoryVisible,
             setDetailHistoryData,
