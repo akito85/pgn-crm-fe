@@ -135,7 +135,7 @@ publish-pgnbill-fe:
   needs: ['prepare-version', 'prebuild-pgnbill-fe', 'build-pgnbill-fe']
   tags: !reference [.runner-tag, neuron]
 
-# ------------------------------------------- Trigger Deploy -------------------------------------------------------
+# ------------------------------------------- Trigger Deploy --------------------------------------------------------
 deploy-pgnbill-fe:
   variables:
     APP_VERSION : $APP_VERSION
