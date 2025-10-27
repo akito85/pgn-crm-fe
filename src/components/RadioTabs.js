@@ -3,11 +3,11 @@ import React, { useEffect, useState } from "react";
 import { Badge, Radio } from "antd";
 
 const RadioTabs = ({
-  onChange = () => { },
+  onChange = () => {},
   data,
-  onClick = () => { },
+  onClick = () => {},
   currentPosition = "",
-  disabled = false
+  disabled = false,
 }) => {
   const [value, setValue] = useState();
 

@@ -6,11 +6,11 @@ import "./app.less";
 import "./tailwind.css";
 import AppRoutes from "./routes/appRoutes";
 import { ErrorBoundary } from "react-error-boundary";
-import MaintenanceModeNotFound from "./app/pages/SystemSetup/MaintenanceMode/MaintenanceModeNotFound";
+import ErrorFallback from "./components/ErrorFallback";
 
 const App = () => {
   return (
-    <ErrorBoundary fallback={<MaintenanceModeNotFound />}>
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
       <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>
