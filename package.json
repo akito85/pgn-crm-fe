@@ -2,7 +2,7 @@
   "name": "pgn-billing-fe-digisquare",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:3000",
+  "proxy": "http://167.71.200.144:8080", 
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@react-google-maps/api": "^2.19.2",
