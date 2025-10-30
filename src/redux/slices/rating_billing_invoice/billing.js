@@ -423,38 +423,6 @@ export const getListApprovalById = createAsyncThunk(
   }
 );
 
-// for generate invoice purpose
-export const getBillingListApprovedStatus = createAsyncThunk(
-  "GET_BILLING_LIST_APPROVED_STATUS",
-  async (params, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/rbi/invoice/approved-billing`;
-      const response = await ratingBillingHttpService.getListPagination(
-        url,
-        params,
-        process.env.REACT_APP_BASE_URL_NGROK
-      );
-      return response.data;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return error;
-    }
-  }
-);
-
 const billingSlice = createSlice({
   name: "billing",
   initialState,
@@ -640,19 +608,6 @@ const billingSlice = createSlice({
     [getListApprovalById.rejected]: (state, action) => {
       state.data_approval_list = action.payload;
       state.loading = false;
-    },
-
-    // Get Billing List Approved Status
-    [getBillingListApprovedStatus.pending]: (state, action) => {
-      state.loading = true;
-    },
-    [getBillingListApprovedStatus.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data_list_billing_approved = action.payload;
-    },
-    [getBillingListApprovedStatus.rejected]: (state, action) => {
-      state.loading = false;
-      state.data_list_billing_approved = [];
     },
   },
 });

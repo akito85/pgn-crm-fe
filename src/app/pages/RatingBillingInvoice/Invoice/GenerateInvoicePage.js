@@ -1,13 +1,16 @@
 // GenerateInvoicePage.js
 import React, { useState, useRef, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Form, Select, Input, DatePicker, Button } from "antd";
+import { Form, Select, Input, DatePicker, Button, message } from "antd";
 import moment from "moment";
+import { useDispatch, useSelector } from "react-redux";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import TableRBI from "../../../../components/TableRBI";
+import TablePaginationNew from "../../../../components/TablePaginationNew";
 import { columnsGenerateInvoice } from "./TableGenerateInvoice";
 import CardContainer from "../../../../components/CardContainer";
-import { getBillingListApprovedStatus } from "../../../../redux/slices/rating_billing_invoice/billing";
+import {
+  getBillingApproval,
+  createGenerate,
+} from "../../../../redux/slices/rating_billing_invoice/invoice";
 
 const { TextArea } = Input;
 
@@ -55,12 +58,10 @@ const ScheduleSchedule = ({ schedule, setSchedule, remark, setRemark }) => (
 );
 
 const GenerateInvoicePage = () => {
+  const { data_billing } = useSelector((state) => state.invoice);
+  const dispatch = useDispatch();
   const [form] = Form.useForm();
   const searchInput = useRef(null);
-  const dispatch = useDispatch();
-  const { data_list_billing_approved, loading } = useSelector(
-    (state) => state.billing
-  );
 
   // State untuk form
   const [exportFormat, setExportFormat] = useState("PDF");
@@ -68,7 +69,7 @@ const GenerateInvoicePage = () => {
   const [schedule, setSchedule] = useState(null);
   const [remark, setRemark] = useState("");
 
-  // State untuk table (sama seperti ModalGenerateInvoice)
+  // State untuk table
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -77,42 +78,55 @@ const GenerateInvoicePage = () => {
   const [search, setSearch] = useState("");
   const [dataTable, setDataTable] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [filterRowSelected, setFilterRowSelected] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Setup data table saat component mount
+  // Fetch data billing saat component mount
   useEffect(() => {
-    dispatch(getBillingListApprovedStatus({ page: 1, size: 10 }));
+    fetchBillingData();
+  }, []);
 
-    // Add custom CSS for Tag close button
-    const style = document.createElement("style");
-    style.innerHTML = `
-      .tag-custom-close .ant-tag-close-icon {
-        color: white !important;
-      }
-      .tag-custom-close .ant-tag-close-icon:hover {
-        color: rgba(255, 255, 255, 0.85) !important;
-      }
-    `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [dispatch]);
-
-  // Update data table when API data changes
+  // Update dataTable saat data_billing berubah
   useEffect(() => {
-    if (data_list_billing_approved && data_list_billing_approved.content) {
-      console.log("Billing data from API:", data_list_billing_approved.content);
+    if (data_billing?.data) {
       setDataTable(
-        data_list_billing_approved.content.map((item, index) => ({
-          key: index + 1,
-          ...item,
-        }))
+        data_billing.data.map((item, index) => {
+          return {
+            key: index + 1,
+            ...item,
+          };
+        })
       );
     }
-  }, [data_list_billing_approved]);
+  }, [data_billing]);
 
-  // Handle Search - sama seperti ModalGenerateInvoice
+  // Update filterRowSelected saat selectedRowKeys berubah
+  useEffect(() => {
+    if (selectedRowKeys?.length !== 0) {
+      setFilterRowSelected(
+        dataTable?.filter((item) => selectedRowKeys?.includes(item?.key))
+      );
+    } else {
+      setFilterRowSelected([]);
+    }
+  }, [dataTable, selectedRowKeys]);
+
+  // Fetch Billing Data
+  const fetchBillingData = () => {
+    setLoading(true);
+    dispatch(getBillingApproval())
+      .unwrap()
+      .then(() => {
+        setLoading(false);
+      })
+      .catch((error) => {
+        setLoading(false);
+        message.error("Failed to fetch billing data");
+        console.error(error);
+      });
+  };
+
+  // Handle Search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -128,13 +142,13 @@ const GenerateInvoicePage = () => {
     });
   };
 
-  // Handle Change Page - sama seperti ModalGenerateInvoice
+  // Handle Change Page
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
   };
 
-  // Sort Table - sama seperti ModalGenerateInvoice
+  // Sort Table
   const onSort = (_, __, sort) => {
     const dataSort =
       sort.order !== undefined
@@ -143,7 +157,7 @@ const GenerateInvoicePage = () => {
     setSort(dataSort);
   };
 
-  // Row Selection - sama seperti ModalGenerateInvoice
+  // Row Selection
   const onSelectChange = (newSelectedRowKeys) => {
     setSelectedRowKeys(newSelectedRowKeys);
   };
@@ -159,12 +173,60 @@ const GenerateInvoicePage = () => {
     // Implement download logic if needed
   };
 
+  // Handle Submit
+  const handleSubmit = () => {
+    form
+      .validateFields()
+      .then((values) => {
+        if (selectedRowKeys.length === 0) {
+          message.warning("Please select at least one billing");
+          return;
+        }
+
+        const body = {
+          invoiceNumbers: filterRowSelected.map((a) => a.invoiceNumber),
+          remark: remark,
+        };
+
+        setLoading(true);
+        dispatch(createGenerate(body))
+          .unwrap()
+          .then(() => {
+            message.success("Invoice generated successfully");
+            setLoading(false);
+            // Reset form
+            form.resetFields();
+            setSelectedRowKeys([]);
+            setFilterRowSelected([]);
+            setRemark("");
+            // Refresh data
+            fetchBillingData();
+          })
+          .catch((error) => {
+            setLoading(false);
+            if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
+              const errorMessage =
+                error?.response?.data?.message ||
+                error?.message ||
+                error?.toString();
+              message.error(errorMessage);
+            } else {
+              message.error("Failed to generate invoice");
+            }
+            console.error(error);
+          });
+      })
+      .catch((error) => {
+        console.error("Validation failed:", error);
+      });
+  };
+
   return (
     <LayoutMenu>
       <Form layout="vertical" form={form}>
         <CardContainer header="GENERATE INFORMATION">
           <Form.Item label="Export Format" required>
-            <Select value={exportFormat} onChange={setExportFormat}>
+            <Select disabled value={exportFormat} onChange={setExportFormat}>
               <Select.Option value="PDF">PDF</Select.Option>
               <Select.Option value="Excel">Excel</Select.Option>
             </Select>
@@ -173,10 +235,9 @@ const GenerateInvoicePage = () => {
 
         <CardContainer header="SCHEDULE INFORMATION">
           <Form.Item label="Type" required>
-            <Select value={scheduleType} onChange={setScheduleType}>
+            <Select disabled value={scheduleType} onChange={setScheduleType}>
               <Select.Option value="Immediate">Immediate</Select.Option>
               <Select.Option value="Schedule">Schedule</Select.Option>
-              <Select.Option value="Recurring">Recurring</Select.Option>
             </Select>
           </Form.Item>
 
@@ -195,9 +256,10 @@ const GenerateInvoicePage = () => {
 
         <CardContainer header="Select billing">
           <div className="w-full">
-            <TableRBI
+            <TablePaginationNew
+              type="FE"
               dataSource={dataTable}
-              totalData={data_list_billing_approved?.totalElements || 0}
+              totalData={data_billing?.page?.totalElements || dataTable.length}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
@@ -214,7 +276,6 @@ const GenerateInvoicePage = () => {
               onSort={onSort}
               tableScrolled={{ y: 525, x: 11000 }}
               rowSelection={rowSelection}
-              handleDownload={handleDownload}
               loading={loading}
             />
           </div>
@@ -224,7 +285,12 @@ const GenerateInvoicePage = () => {
           <Button type="default" onClick={() => window.history.back()}>
             Back
           </Button>
-          <Button type="primary" htmlType="submit">
+          <Button
+            type="primary"
+            onClick={handleSubmit}
+            loading={loading}
+            disabled={selectedRowKeys.length === 0}
+          >
             Save Changes
           </Button>
         </div>

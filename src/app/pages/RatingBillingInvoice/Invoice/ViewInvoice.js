@@ -32,8 +32,6 @@ import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import { configApp } from "../../../../constants/configApp";
 import { tokenHeader } from "../../../../utils/tokenHeader";
-// ✅ Import komponen fix column
-import ColumnFixDropdown from "../../../../components/ColumnFixDropdown/ColumnFixDropdown";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const ViewInvoice = () => {
