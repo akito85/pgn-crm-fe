@@ -33,6 +33,7 @@ const LogIn = (props) => {
 	const [form] = Form.useForm();
 	const [failedCaptcha, setfailedCaptcha] = useState(false);
 	const [isMaintenance, setIsMaintenance] = useState(false);
+	const isCaptchaEnabled = process.env.REACT_APP_CAPTCHA_ENABLED === 'true';
 	useEffect(() => {
 		if (bodyError?.code === 503) {
 			setIsMaintenance(true)
@@ -44,14 +45,16 @@ const LogIn = (props) => {
 
 
 	useEffect(() => {
-		loadCaptchaEnginge(8)
+		if (isCaptchaEnabled) {
+			loadCaptchaEnginge(8)
+		}
 		dispatch(setUserLevel(type));
 		dispatch(clearBodyMessage())
 		dispatch(checkLoginBackground());
 		if (type === 'enduser') {
 			dispatch(getEntities())
 		}
-	}, [dispatch, type])
+	}, [dispatch, type, isCaptchaEnabled])
 
 
 	const options = data_entities?.data?.map((item) => {
@@ -59,7 +62,8 @@ const LogIn = (props) => {
 	})
 	const handleLogin = (formValue) => {
 		let data;
-		if (validateCaptcha(formValue.captcha)) {
+		const captchaValid = !isCaptchaEnabled || validateCaptcha(formValue.captcha);
+		if (captchaValid) {
 			if (type === "superuser") {
 				data = {
 					username: formValue.username,
@@ -198,42 +202,49 @@ const LogIn = (props) => {
 											/>
 										</Form.Item>
 									}
-									<Form.Item
-										label="Security Text"
-										style={{ marginBottom: 0 }}
-										className={"mt-9"}
-									>
-										<div
-											className={
-												"flex justify-between mt-4 w-full  item-center"
-											}
+									{isCaptchaEnabled && (
+										<Form.Item
+											label="Security Text"
+											style={{ marginBottom: 0 }}
+											className={"mt-9"}
 										>
-											<div className={"flex flex-col"}>
-												<Form.Item
-													name="captcha"
-													rules={[
-														{
-															required: true,
-															message: "Please input captcha!",
-														},
-													]}
-												>
-													<Input
-														placeholder="Enter the shown text"
-														className="bg-transparent text-base"
-														style={{ borderRadius: "9px" }}
-														size="large"
-													/>
-												</Form.Item>
-												<Form.Item name={"remember"} valuePropName={"checked"}>
-													<Checkbox> Remember Me</Checkbox>
-												</Form.Item>
+											<div
+												className={
+													"flex justify-between mt-4 w-full  item-center"
+												}
+											>
+												<div className={"flex flex-col"}>
+													<Form.Item
+														name="captcha"
+														rules={[
+															{
+																required: true,
+																message: "Please input captcha!",
+															},
+														]}
+													>
+														<Input
+															placeholder="Enter the shown text"
+															className="bg-transparent text-base"
+															style={{ borderRadius: "9px" }}
+															size="large"
+														/>
+													</Form.Item>
+													<Form.Item name={"remember"} valuePropName={"checked"}>
+														<Checkbox> Remember Me</Checkbox>
+													</Form.Item>
+												</div>
+												<div className="flex justify-end ">
+													<LoadCanvasTemplate reloadText="Reload"  />
+												</div>
 											</div>
-											<div className="flex justify-end ">
-												<LoadCanvasTemplate reloadText="Reload"  />
-											</div>
-										</div>
-									</Form.Item>
+										</Form.Item>
+									)}
+									{!isCaptchaEnabled && (
+										<Form.Item name={"remember"} valuePropName={"checked"} className={"mt-9"}>
+											<Checkbox> Remember Me</Checkbox>
+										</Form.Item>
+									)}
 									<div
 										className={
 											"w-full flex flex-col items-center justify-center mt-2"
