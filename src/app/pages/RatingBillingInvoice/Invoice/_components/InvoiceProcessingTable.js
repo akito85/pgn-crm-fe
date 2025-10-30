@@ -1,34 +1,28 @@
-// components/InvoiceProcessingTable.js
-import { useState, useMemo, useCallback } from "react";
+// components/InvoiceProcessingTable.js (REFACTORED)
+import { useState, useMemo } from "react";
 import {
   Table,
   Button,
   DatePicker,
   Select,
-  Space,
   Tag,
   Pagination,
   Card,
   Row,
   Col,
-  Divider,
   Dropdown,
   Menu,
-  Checkbox,
-  Radio,
 } from "antd";
 import dayjs from "dayjs";
 import {
-  FilterOutlined,
-  ReloadOutlined,
   EllipsisOutlined,
   EditOutlined,
   RedoOutlined,
   EyeOutlined,
   FileProtectOutlined,
-  PushpinOutlined,
-  SettingOutlined,
 } from "@ant-design/icons";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import ColumnFixDropdown from "../../../../../components/ColumnFixDropdown/ColumnFixDropdown";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -50,12 +44,10 @@ const InvoiceProcessingTable = ({
   const [stampingStatusFilter, setStampingStatusFilter] = useState("all");
   const [signingStatusFilter, setSigningStatusFilter] = useState("all");
 
-  // Column fixing settings
+  // ✅ Simplified: Only store fixed columns configuration
   const [fixedColumns, setFixedColumns] = useState({
     invoiceNumber: "left",
   });
-  const [columnFixDropdownVisible, setColumnFixDropdownVisible] =
-    useState(false);
 
   // Available columns definition (in order)
   const allColumnDefinitions = [
@@ -207,53 +199,10 @@ const InvoiceProcessingTable = ({
     },
   ];
 
-  // Reorder and apply fixed positions to columns
+  // ✅ Simplified: Use utility function to apply fixed columns
   const columns = useMemo(() => {
-    const leftFixed = [];
-    const rightFixed = [];
-    const normal = [];
-
-    allColumnDefinitions.forEach((col) => {
-      const fixedPos = fixedColumns[col.key];
-      const colWithFixed = { ...col, fixed: fixedPos || undefined };
-
-      if (fixedPos === "left") {
-        leftFixed.push(colWithFixed);
-      } else if (fixedPos === "right") {
-        rightFixed.push(colWithFixed);
-      } else {
-        normal.push(colWithFixed);
-      }
-    });
-
-    return [...leftFixed, ...normal, ...rightFixed];
+    return applyFixedColumns(allColumnDefinitions, fixedColumns);
   }, [fixedColumns]);
-
-  const handleColumnFixChange = (columnKey, checked) => {
-    if (checked) {
-      // Determine default position based on column index
-      const columnIndex = allColumnDefinitions.findIndex(
-        (col) => col.key === columnKey
-      );
-      const isFirstColumn = columnIndex === 0;
-      const isLastColumn = columnIndex === allColumnDefinitions.length - 1;
-
-      let defaultPosition = "left";
-      if (isLastColumn) {
-        defaultPosition = "right";
-      }
-
-      setFixedColumns((prev) => ({ ...prev, [columnKey]: defaultPosition }));
-    } else {
-      const newFixed = { ...fixedColumns };
-      delete newFixed[columnKey];
-      setFixedColumns(newFixed);
-    }
-  };
-
-  const handleColumnPositionChange = (columnKey, position) => {
-    setFixedColumns((prev) => ({ ...prev, [columnKey]: position }));
-  };
 
   // Filter options
   const stampingStatusOptions = [
@@ -277,160 +226,6 @@ const InvoiceProcessingTable = ({
       setPage(1);
     }
   };
-
-  // Check if column can have specific position
-  const canFixLeft = (columnIndex) => {
-    return columnIndex !== allColumnDefinitions.length - 1;
-  };
-
-  const canFixRight = (columnIndex) => {
-    return columnIndex !== 0;
-  };
-
-  // Column fixing menu
-  const columnFixMenu = (
-    <div
-      style={{
-        padding: "12px",
-        marginTop: "30px",
-        minWidth: "320px",
-        maxHeight: "500px",
-        overflowY: "auto",
-        border: "1px solid #ddd",
-        borderRadius: "6px",
-        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-        backgroundColor: "#fff",
-      }}
-    >
-      <div
-        style={{
-          marginBottom: "12px",
-          fontWeight: "600",
-          fontSize: "14px",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          color: "#262626",
-        }}
-      >
-        <PushpinOutlined />
-        Fix Columns Position
-      </div>
-      <Divider style={{ margin: "8px 0" }} />
-
-      {allColumnDefinitions.map((col, index) => {
-        const isFixed = !!fixedColumns[col.key];
-        const position = fixedColumns[col.key] || "left";
-        const isFirstColumn = index === 0;
-        const isLastColumn = index === allColumnDefinitions.length - 1;
-
-        return (
-          <div
-            key={col.key}
-            style={{
-              marginBottom: "16px",
-              padding: "12px",
-              backgroundColor: isFixed ? "#f0f5ff" : "#fafafa",
-              borderRadius: "6px",
-              border: isFixed ? "1px solid #d6e4ff" : "1px solid #f0f0f0",
-              transition: "all 0.3s",
-            }}
-          >
-            <div style={{ marginBottom: isFixed ? "8px" : "0" }}>
-              <Checkbox
-                checked={isFixed}
-                onChange={(e) =>
-                  handleColumnFixChange(col.key, e.target.checked)
-                }
-                style={{ fontWeight: "500" }}
-              >
-                {col.title}
-              </Checkbox>
-            </div>
-
-            {isFixed && (
-              <div
-                style={{
-                  marginLeft: "24px",
-                  marginTop: "8px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    marginBottom: "4px",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "12px",
-                      color: "#595959",
-                      fontWeight: "500",
-                    }}
-                  >
-                    Position:
-                  </span>
-                  <Radio.Group
-                    value={position}
-                    onChange={(e) =>
-                      handleColumnPositionChange(col.key, e.target.value)
-                    }
-                    size="small"
-                    buttonStyle="solid"
-                    style={{ display: "flex", gap: "6px" }}
-                  >
-                    <Radio.Button value="left" disabled={!canFixLeft(index)}>
-                      Left
-                    </Radio.Button>
-                    <Radio.Button value="right" disabled={!canFixRight(index)}>
-                      Right
-                    </Radio.Button>
-                  </Radio.Group>
-                </div>
-                {(isFirstColumn || isLastColumn) && (
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      color: "#8c8c8c",
-                      marginTop: "4px",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    {isFirstColumn && "* First column can only be fixed left"}
-                    {isLastColumn && "* Last column can only be fixed right"}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })}
-
-      <Divider style={{ margin: "12px 0" }} />
-
-      <div
-        style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}
-      >
-        <Button
-          size="small"
-          onClick={() => setFixedColumns({})}
-          style={{ flex: 1 }}
-        >
-          Clear All
-        </Button>
-        <Button
-          size="small"
-          type="primary"
-          onClick={() => setColumnFixDropdownVisible(false)}
-          style={{ flex: 1 }}
-        >
-          Done
-        </Button>
-      </div>
-    </div>
-  );
 
   return (
     <div style={{ width: "100%" }}>
@@ -509,17 +304,14 @@ const InvoiceProcessingTable = ({
             >
               _
             </div>
-            <Dropdown
-              overlay={columnFixMenu}
-              trigger={["click"]}
-              visible={columnFixDropdownVisible}
-              onVisibleChange={setColumnFixDropdownVisible}
-              placement="bottomRight"
-            >
-              <Button icon={<SettingOutlined />} style={{ width: "100%" }}>
-                Fix Columns ({Object.keys(fixedColumns).length})
-              </Button>
-            </Dropdown>
+
+            <ColumnFixDropdown
+              columns={allColumnDefinitions}
+              fixedColumns={fixedColumns}
+              onFixedColumnsChange={setFixedColumns}
+              buttonText="Fix Columns"
+              showCount={true}
+            />
           </Col>
         </Row>
         <Table
@@ -576,6 +368,7 @@ const InvoiceProcessingTable = ({
             onChange={handlePageChange}
             showSizeChanger={false}
             showTotal={false}
+            className="[&_.ant-pagination-item]:mx-2 [&_.ant-pagination-prev]:mx-2 [&_.ant-pagination-next]:mx-2"
           />
         </div>
       </Card>
