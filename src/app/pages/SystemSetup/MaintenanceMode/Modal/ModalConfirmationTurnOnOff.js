@@ -29,6 +29,7 @@ const ModalConfirmationTurnOnOff = ({
   // Declaration
   const [form] = Form.useForm();
   const dispatch = useDispatch();
+  const isCaptchaEnabled = process.env.REACT_APP_CAPTCHA_ENABLED === 'true';
 
   // Use State
   const [description, setDescription] = useState("");
@@ -38,10 +39,10 @@ const ModalConfirmationTurnOnOff = ({
 
   //Use Effect
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && isCaptchaEnabled) {
       loadCaptchaEnginge(8);
     }
-  }, [isOpen]);
+  }, [isOpen, isCaptchaEnabled]);
 
   const handleCloseModalError = () => {
     setModalError(false);
@@ -67,7 +68,8 @@ const ModalConfirmationTurnOnOff = ({
         id: bodyData?.maintenanceModeId,
       };
     }
-    if (validateCaptcha(formValue.captcha)) {
+    const captchaValid = !isCaptchaEnabled || validateCaptcha(formValue.captcha);
+    if (captchaValid) {
       if (bodyData?.value) {
         dispatch(createMaintenanceMode(body))
           .unwrap()
@@ -165,31 +167,33 @@ const ModalConfirmationTurnOnOff = ({
                 onChange={(e) => setDescription(e.target.value)}
               />
             </Form.Item>
-            <Form.Item label="Security Text" className={"mt-9"}>
-              <div className={"flex justify-between mt-4 w-full  item-center"}>
-                <div className={"w-full"}>
-                  <Form.Item
-                    name="captcha"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Please input captcha!",
-                      },
-                    ]}
-                  >
-                    <Input
-                      placeholder="Enter the shown text"
-                      className="bg-transparent text-base"
-                      style={{ borderRadius: "9px" }}
-                      size="large"
-                    />
-                  </Form.Item>
+            {isCaptchaEnabled && (
+              <Form.Item label="Security Text" className={"mt-9"}>
+                <div className={"flex justify-between mt-4 w-full  item-center"}>
+                  <div className={"w-full"}>
+                    <Form.Item
+                      name="captcha"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please input captcha!",
+                        },
+                      ]}
+                    >
+                      <Input
+                        placeholder="Enter the shown text"
+                        className="bg-transparent text-base"
+                        style={{ borderRadius: "9px" }}
+                        size="large"
+                      />
+                    </Form.Item>
+                  </div>
+                  <div className="flex justify-end  ">
+                    <LoadCanvasTemplate reloadText="Reload" cla />
+                  </div>
                 </div>
-                <div className="flex justify-end  ">
-                  <LoadCanvasTemplate reloadText="Reload" cla />
-                </div>
-              </div>
-            </Form.Item>
+              </Form.Item>
+            )}
             <div className="w-full flex flex-cols justify-center items-center gap-8 px-8">
               <SVGIcon
                 name={"IconAlertTriangle"}
