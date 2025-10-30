@@ -67,6 +67,7 @@ const LayoutMenu = ({ children }) => {
   const [form] = Form.useForm();
   const [collapsed, setCollapsed] = useState(false);
   const [modalConfirmation, setModalConfirmation] = useState(false);
+  const isIdleTimerEnabled = process.env.REACT_APP_IDLE_TIMER_ENABLED === 'true';
   const tokenJSON = JSON.parse(
     localStorage.getItem("token") || window.sessionStorage.getItem("token")
   );
@@ -83,7 +84,15 @@ const LayoutMenu = ({ children }) => {
 
   // use effect check grant access
   useEffect(() => {
-    dispatch(checkGrantedAccess(location?.pathname));
+    // dispatch(checkGrantedAccess(location?.pathname));
+    // Skip access check for service request details route 
+    const myRoutes = [
+      '/account-management/customers/view/service-requests/details'
+    ]
+    
+    if (!myRoutes.includes(location?.pathname)) {
+      dispatch(checkGrantedAccess(location?.pathname));
+    }
     dispatch(getProfile());
   }, [dispatch, location, data_switch]);
 
@@ -331,12 +340,14 @@ const LayoutMenu = ({ children }) => {
       </>
       :
       <>
-        <IdleTimerContainer
-          handleLogout={handleLogout}
-          timeout={isTimedout}
-          timeoutModal={() => setShowIdleModal(true)}
-          timedoutHandler={setIsTimedout}
-        />
+        {isIdleTimerEnabled && (
+          <IdleTimerContainer
+            handleLogout={handleLogout}
+            timeout={isTimedout}
+            timeoutModal={() => setShowIdleModal(true)}
+            timedoutHandler={setIsTimedout}
+          />
+        )}
         <Layout
           hasSider
           style={{
