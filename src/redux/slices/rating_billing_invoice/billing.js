@@ -19,6 +19,7 @@ const initialState = {
   data_approval_list: [],
   data_list_billing_request_approval: [],
   data_list_billing_approval: [],
+  data_list_billing_approved: [],
   data_prevBilling: [],
   loading: false,
   isFailed: false,
@@ -248,7 +249,13 @@ export const downloadBillingList = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_BILLING_LIST", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_BILLING_LIST",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -395,6 +402,38 @@ export const getListApprovalById = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/billing/approval-hierarchy-detail/${id}`;
       const response = await ratingBillingHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  }
+);
+
+// for generate invoice purpose
+export const getBillingListApprovedStatus = createAsyncThunk(
+  "GET_BILLING_LIST_APPROVED_STATUS",
+  async (params, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/invoice/approved-billing`;
+      const response = await ratingBillingHttpService.getListPagination(
+        url,
+        params,
+        process.env.REACT_APP_BASE_URL_NGROK
+      );
       return response.data;
     } catch (error) {
       const message =
@@ -601,6 +640,19 @@ const billingSlice = createSlice({
     [getListApprovalById.rejected]: (state, action) => {
       state.data_approval_list = action.payload;
       state.loading = false;
+    },
+
+    // Get Billing List Approved Status
+    [getBillingListApprovedStatus.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getBillingListApprovedStatus.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_list_billing_approved = action.payload;
+    },
+    [getBillingListApprovedStatus.rejected]: (state, action) => {
+      state.loading = false;
+      state.data_list_billing_approved = [];
     },
   },
 });

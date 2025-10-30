@@ -31,17 +31,19 @@ import {
 import { InvoiceDummy } from "./dummyInvoiceData";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
+import { configApp } from "../../../../constants/configApp";
+import { tokenHeader } from "../../../../utils/tokenHeader";
 
 const ViewInvoice = () => {
   // Selector
-  const { data, loading, data_detail, data_format, data_billing } = useSelector(
+  const { data, loading, data_detail, data_format } = useSelector(
     (state) => state.invoice
   );
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data?.content || [];
+  const dataSource = data?.result || [];
   // console.log("data", data?.content);
   // const dataSource = InvoiceDummy();
 
@@ -153,42 +155,45 @@ const ViewInvoice = () => {
   };
 
   // Handle Detail
-  const handleDetail = async (record) => {
-    console.log("=== START handleDetail ===");
-    console.log("Record:", record);
-    console.log("Invoice Number:", record?.invoiceNumber);
+  // const handleDetail = async (record) => {
 
-    try {
-      setPageDetail(true);
+  //   try {
+  //     setPageDetail(true);
 
-      // Gunakan .unwrap() untuk mendapatkan actual response atau error
-      const result = await dispatch(
-        getDetailInvoice(record?.invoiceNumber)
-      ).unwrap();
+  //     // Gunakan .unwrap() untuk mendapatkan actual response atau error
+  //     const result = await dispatch(
+  //       getDetailInvoice(record?.invoiceNumber)
+  //     ).unwrap();
 
-      console.log("✅ Success - Detail loaded:", result);
-      setInvoiceNumber(record?.invoiceNumber);
+  //     console.log("✅ Success - Detail loaded:", result);
+  //     setInvoiceNumber(record?.invoiceNumber);
 
-      // Scroll ke detail section
-      setTimeout(
-        () =>
-          window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: "smooth",
-          }),
-        100
-      );
-    } catch (error) {
-      console.error("❌ ERROR in handleDetail ===");
-      console.error("Error object:", error);
-      console.error("Error message:", error?.message);
-      console.error("Error response:", error?.response);
-      console.error("Error data:", error?.response?.data);
-      console.error("Full error:", JSON.stringify(error, null, 2));
+  //     // Scroll ke detail section
+  //     setTimeout(
+  //       () =>
+  //         window.scrollTo({
+  //           top: document.body.scrollHeight,
+  //           behavior: "smooth",
+  //         }),
+  //       100
+  //     );
+  //   } catch (error) {
+  //     console.error("❌ ERROR in handleDetail ===");
+  //     console.error("Error object:", error);
+  //     console.error("Error message:", error?.message);
+  //     console.error("Error response:", error?.response);
+  //     console.error("Error data:", error?.response?.data);
+  //     console.error("Full error:", JSON.stringify(error, null, 2));
 
-      // Reset state karena gagal
-      setPageDetail(false);
-    }
+  //     // Reset state karena gagal
+  //     setPageDetail(false);
+  //   }
+  // };
+
+  const handleDetail = (record) => {
+    setPageDetail(true);
+    dispatch(getDetailInvoice(record?.invoiceNumber));
+    setInvoiceNumber(record?.invoiceNumber);
   };
 
   // Handle Re Generate
@@ -201,12 +206,10 @@ const ViewInvoice = () => {
   const handlePreviewFile = async (record) => {
     try {
       const response = await axios.get(
-        `https://d28a5698909b.ngrok-free.app/api/v1/invoices/download/${record?.invoiceNumber}`,
+        configApp.RATING_BILLING_SERVICE +
+          `/v1/dbs/api/rbi/invoice/${record?.invoiceNumber}/preview`,
         {
-          headers: {
-            // tokenHeader(),
-            "ngrok-skip-browser-warning": "true",
-          },
+          headers: tokenHeader(),
           responseType: "arraybuffer",
         }
       );
@@ -450,9 +453,9 @@ const ViewInvoice = () => {
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
-              // onSizeChanger={handleChange}
-              // totalData={data?.page?.totalElements}
-              totalData={dataSource.length}
+              onSizeChanger={handleChange}
+              totalData={data?.page?.totalElements}
+              // totalData={dataSource.length}
               tableScrolled={{ y: 525, x: 12000 }}
               onSort={onSortApi}
               handleDownload={handleDownload}
@@ -463,7 +466,7 @@ const ViewInvoice = () => {
         {/* Invoice Log */}
         {pageDetail === true && data_detail ? (
           <DetailInvoice
-            detail={data_detail || []}
+            detail={data_detail?.logs}
             invoiceNumber={invoiceNumber}
           />
         ) : null}

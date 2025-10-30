@@ -74,27 +74,6 @@ const InvoiceProcessingTable = ({
       ellipsis: true,
     },
     {
-      key: "dummyColumn1",
-      title: "Dummy Column 1",
-      dataIndex: "customer",
-      width: 220,
-      ellipsis: true,
-    },
-    {
-      key: "dummyColumn2",
-      title: "Dummy Column 2",
-      dataIndex: "customer",
-      width: 220,
-      ellipsis: true,
-    },
-    {
-      key: "dummyColumn3",
-      title: "Dummy Column 3",
-      dataIndex: "customer",
-      width: 220,
-      ellipsis: true,
-    },
-    {
       key: "issueDate",
       title: "Issue Date",
       dataIndex: "issueDate",

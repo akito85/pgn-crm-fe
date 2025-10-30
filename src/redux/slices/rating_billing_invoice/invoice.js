@@ -21,39 +21,28 @@ export const getAllInvoicePaginate = createAsyncThunk(
   "GET_ALL_INVOICE_PAGINATE",
   async ({ page, pageSize, search, sort }, thunkAPI) => {
     try {
+      const searchParams = search === undefined ? "" : search;
       const sortParams =
-        sort === undefined || sort === "" ? "createdDate,desc" : sort;
-
-      // sort belum di atur jeremia
-      const url = `${BASE_URL}/api/invoices?page=0&size=${pageSize}&search=${
-        search || ""
-      }`;
-      const response = await axios.get(url, {
-        headers: {
-          "ngrok-skip-browser-warning": "true",
-        },
-      });
-      console.log("response", response);
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      console.log("pageSize:", pageSize);
+      const url = `/v1/dbs/api/rbi/invoice?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response?.data);
+      return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
 export const getDetailInvoice = createAsyncThunk(
   "GET_DETAIL_INVOICE",
-  async (invoiceNumber, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/api/v1/invoices/${invoiceNumber}`;
-      const response = await axios.get(url, {
-        headers: {
-          "ngrok-skip-browser-warning": "true",
-        },
-      });
-      const data = response?.data;
-      return Array.isArray(data) ? data : [data];
+      const url = `/v1/dbs/api/rbi/invoice/${id}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response;
+      // return Array.isArray(response) ? response : [response];
     } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response?.data);
+      return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );

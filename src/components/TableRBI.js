@@ -44,12 +44,12 @@ const TableRBI = ({
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false); // <-- state modal
 
-  const handleDisplayColumn = (value) => {
-    setOptionSelectedCol(value);
-  };
-  const handleDelete = (index) => {
-    onDelete(index);
-  };
+  // const handleDisplayColumn = (value) => {
+  //   setOptionSelectedCol(value);
+  // };
+  // const handleDelete = (index) => {
+  //   onDelete(index);
+  // };
   const filterColumns = () => {
     return columns.filter((col) => {
       return !optionSelectedCol.includes(col.title);
@@ -189,8 +189,8 @@ const TableRBI = ({
           <div className="flex items-center gap-3">
             <Select
               value={pageSize}
-              onChange={onSizeChanger}
-              className="w-20"
+              onChange={(value) => onSizeChanger(current, value)}
+              className="w-15"
               size="small"
             >
               {[10, 20, 50, 100].map((size) => (
@@ -211,6 +211,7 @@ const TableRBI = ({
             onChange={onChange}
             showSizeChanger={false}
             showTotal={false}
+            style={{ display: "flex", gap: "5px" }}
             size="small"
           />
         </div>
