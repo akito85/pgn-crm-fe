@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { Spin } from "antd";
+import React, { useState, useEffect } from "react";
+import { Spin, message } from "antd";
+import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import CardContainer from "../../../../components/CardContainer";
@@ -8,154 +9,25 @@ import InvoiceProcessingTable from "./_components/InvoiceProcessingTable";
 import StampingRequestModal from "./_components/StampingRequestModal";
 import ProcessSigningModal from "./_components/ProcessingSigningModal";
 import InvoiceDetailModal from "./_components/InvoiceDetailModal";
-
-// Data Dummy untuk Invoice Processing
-const invoiceProcessingData = [
-  {
-    invoiceNumber: "INV/X/001",
-    customer: "PT. Gas Nusantara",
-    issueDate: "01-10-2025",
-    dueDate: "31-10-2025",
-    amount: 150000000,
-    stampingStatus: "Pending Approval",
-    signingStatus: "Not Processed",
-    stamping: {
-      status: "Pending Approval",
-      method: "E-Stamping",
-      requested: "2025-10-01 14:30",
-    },
-    signing: {
-      status: "Not Processed",
-    },
-    approval: {
-      status: "Pending",
-      by: "manager.finance",
-      date: "2025-10-01 16:00",
-      reason: "",
-    },
-    documents: [
-      { name: "Original Invoice", disabled: false },
-      { name: "Stamped Document", disabled: true },
-      { name: "Final Document", disabled: true },
-    ],
-  },
-  {
-    invoiceNumber: "INV/X/002",
-    customer: "CV. Energi Prima",
-    issueDate: "01-10-2025",
-    dueDate: "31-10-2025",
-    amount: 25000000,
-    stampingStatus: "Success",
-    signingStatus: "Not Processed",
-    stamping: {
-      status: "Success",
-      method: "E-Stamping",
-      requested: "2025-10-01 10:00",
-    },
-    signing: {
-      status: "Not Processed",
-    },
-    approval: {
-      status: "Approved",
-      by: "manager.finance",
-      date: "2025-10-01 11:00",
-      reason: "",
-    },
-    documents: [
-      { name: "Original Invoice", disabled: false },
-      { name: "Stamped Document", disabled: false },
-      { name: "Final Document", disabled: true },
-    ],
-  },
-  {
-    invoiceNumber: "INV/X/003",
-    customer: "PT. Industri Maju",
-    issueDate: "02-10-2025",
-    dueDate: "31-10-2025",
-    amount: 75000000,
-    stampingStatus: "Failed",
-    signingStatus: "Not Processed",
-    stamping: {
-      status: "Failed",
-      method: "E-Stamping",
-      requested: "2025-10-02 09:00",
-    },
-    signing: {
-      status: "Not Processed",
-    },
-    approval: {
-      status: "Rejected",
-      by: "manager.finance",
-      date: "2025-10-02 10:00",
-      reason: "Stamp verification failed, please retry.",
-    },
-    documents: [
-      { name: "Original Invoice", disabled: false },
-      { name: "Stamped Document", disabled: true },
-      { name: "Final Document", disabled: true },
-    ],
-  },
-  {
-    invoiceNumber: "INV/X/004",
-    customer: "PT. Sinergi Gas",
-    issueDate: "03-10-2025",
-    dueDate: "31-10-2025",
-    amount: 10000000,
-    stampingStatus: "Not Processed",
-    signingStatus: "Not Processed",
-    stamping: {
-      status: "Not Processed",
-      method: "",
-      requested: "",
-    },
-    signing: {
-      status: "Not Processed",
-    },
-    approval: {
-      status: "Pending",
-      by: "",
-      date: "",
-      reason: "",
-    },
-    documents: [
-      { name: "Original Invoice", disabled: false },
-      { name: "Stamped Document", disabled: true },
-      { name: "Final Document", disabled: true },
-    ],
-  },
-  {
-    invoiceNumber: "INV/X/005",
-    customer: "PT. Telkom Indonesia",
-    issueDate: "04-10-2025",
-    dueDate: "31-10-2025",
-    amount: 200000000,
-    stampingStatus: "Success",
-    signingStatus: "Success",
-    stamping: {
-      status: "Success",
-      method: "E-Stamping",
-      requested: "2025-10-04 08:00",
-    },
-    signing: {
-      status: "Success",
-    },
-    approval: {
-      status: "Approved",
-      by: "manager.finance",
-      date: "2025-10-04 09:00",
-      reason: "",
-    },
-    documents: [
-      { name: "Original Invoice", disabled: false },
-      { name: "Stamped Document", disabled: false },
-      { name: "Final Document", disabled: false },
-    ],
-  },
-];
+import {
+  getAllEMeteraiInvoices,
+  createStampingRequest,
+  uploadManualStamping,
+  uploadManualSigning,
+} from "../../../../redux/slices/rating_billing_invoice/emeterai";
 
 const EMeteraiManagement = () => {
-  const [loading, setLoading] = useState(false);
-  const [dataSource] = useState(invoiceProcessingData);
+  const dispatch = useDispatch();
+
+  // Redux state
+  const { data, loading, stampingLoading, pageInfo } = useSelector(
+    (state) => state.emeterai
+  );
+
+  // Local state
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [filters, setFilters] = useState(null);
 
   // Modal states
   const [detailModalVisible, setDetailModalVisible] = useState(false);
@@ -177,33 +49,210 @@ const EMeteraiManagement = () => {
     },
   ];
 
+  // Fetch data on mount and when dependencies change
+  useEffect(() => {
+    fetchInvoices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, filters]);
+
+  const fetchInvoices = () => {
+    console.log("🔄 Fetching invoices from API...");
+    console.log("Current page:", page);
+    console.log("Page size:", pageSize);
+    console.log("Filters:", filters);
+
+    dispatch(
+      getAllEMeteraiInvoices({
+        page: page - 1, // API uses 0-based index
+        pageSize,
+        search: "",
+        sort: "billingPeriod~desc",
+        filters: filters,
+      })
+    );
+  };
+
+  // Transform API data to match table format
+  const getTransformedData = () => {
+    return data.map((invoice) => ({
+      ...invoice,
+      // Map API fields to table display format
+      invoiceNumber: invoice.invoiceNumber,
+      customer: invoice.customerName,
+      customerNumber: invoice.customerNumber,
+      accountNumber: invoice.accountNumber,
+      accountName: invoice.accountName,
+      issueDate: invoice.billingPeriod || "-",
+      amount: invoice.totalAmountEqvIdr,
+
+      // Stamping status mapping
+      stampingStatus: invoice.stampStatus || "Not Processed",
+      stampType: invoice.stampType,
+      stampRequestDate: invoice.stampRequestDate,
+      stampCompletionDate: invoice.stampCompletionDate,
+      stampRemark: invoice.stampRemark,
+
+      // Signing status mapping
+      signingStatus: invoice.signStatus || "Not Processed",
+      signType: invoice.signType,
+      signRequestDate: invoice.signRequestDate,
+      signCompletionDate: invoice.signCompletionDate,
+      signRemark: invoice.signRemark,
+
+      // For backward compatibility with table component
+      stamping: {
+        status: invoice.stampStatus || "Not Processed",
+        method: invoice.stampType,
+        requested: invoice.stampRequestDate,
+        completed: invoice.stampCompletionDate,
+        remark: invoice.stampRemark,
+      },
+      signing: {
+        status: invoice.signStatus || "Not Processed",
+        requested: invoice.signRequestDate,
+        completed: invoice.signCompletionDate,
+        remark: invoice.signRemark,
+      },
+    }));
+  };
+
   // Handlers
   const handleDetails = (record) => {
-    console.log("View details:", record);
-    setSelectedInvoice(record);
-    setDetailModalVisible(true);
+    console.log("👁️ View details:", record);
+    if (record) {
+      setSelectedInvoice(record);
+      setDetailModalVisible(true);
+    } else {
+      message.error("Invoice data not available");
+    }
   };
 
   const handleProcessSigning = (record) => {
-    console.log("Process signing:", record);
-    setSelectedInvoice(record);
-    setSigningModalVisible(true);
+    console.log("✍️ Process signing:", record);
+    if (record) {
+      setSelectedInvoice(record);
+      setSigningModalVisible(true);
+    } else {
+      message.error("Invoice data not available");
+    }
   };
 
   const handleRetry = (record) => {
-    console.log("Retry stamping:", record);
-    setSelectedInvoice(record);
-    setStampingModalVisible(true);
+    console.log("🔄 Retry stamping:", record);
+    if (record) {
+      setSelectedInvoice(record);
+      setStampingModalVisible(true);
+    } else {
+      message.error("Invoice data not available");
+    }
   };
 
   const handleProcessStamping = (record) => {
-    console.log("Process stamping:", record);
-    setSelectedInvoice(record);
-    setStampingModalVisible(true);
+    console.log("📋 Process stamping:", record);
+    if (record) {
+      setSelectedInvoice(record);
+      setStampingModalVisible(true);
+    } else {
+      message.error("Invoice data not available");
+    }
   };
 
+  // Handle stamping submission
+  const handleStampingSubmit = async (stampingData) => {
+    const { invoiceNumber, stampingMethod, file, remark } = stampingData;
+
+    try {
+      if (stampingMethod === "e-stamping") {
+        console.log("🌐 Submitting E-Stamping Request...");
+
+        await dispatch(
+          createStampingRequest({
+            invoiceNumber,
+            stampingMethod,
+          })
+        ).unwrap();
+      } else if (stampingMethod === "manual") {
+        await dispatch(
+          uploadManualStamping({
+            invoiceNumber,
+            file,
+            remark: remark || "Manual stamping upload",
+          })
+        ).unwrap();
+      }
+
+      // Close modal
+      setStampingModalVisible(false);
+      setSelectedInvoice(null);
+
+      // Manually refresh data after successful submission
+      fetchInvoices();
+    } catch (error) {
+      console.error("❌ Stamping Submission Error:", error);
+      // Error message already shown by slice
+    }
+  };
+
+  // Handle signing submission
+  const handleSigningSubmit = async (signingData) => {
+    const { invoiceNumber, signingMethod, file, remark } = signingData;
+
+    try {
+      if (signingMethod === "e-signing") {
+        console.log("🌐 Submitting E-Signing Request...");
+
+        await dispatch(
+          createStampingRequest({
+            invoiceNumber,
+            signingMethod,
+          })
+        ).unwrap();
+      } else if (signingMethod === "manual") {
+        await dispatch(
+          uploadManualSigning({
+            invoiceNumber,
+            file,
+            remark: remark || "Manual signing upload",
+          })
+        ).unwrap();
+      }
+
+      // Close modal
+      setSigningModalVisible(false);
+      setSelectedInvoice(null);
+
+      // Manually refresh data after successful submission
+      fetchInvoices();
+    } catch (error) {
+      console.error("❌ Signing Submission Error:", error);
+      // Error message already shown by slice
+    }
+  };
+
+  // Handle pagination change
+  const handlePageChange = (newPage, newPageSize) => {
+    console.log("📄 Page changed:", { newPage, newPageSize });
+
+    // If page size changes, reset to page 1
+    if (newPageSize !== pageSize) {
+      setPage(1);
+      setPageSize(newPageSize);
+    } else {
+      setPage(newPage);
+    }
+  };
+
+  // Handle filter change
+  const handleFilterChange = (newFilters) => {
+    console.log("🔍 Filters changed:", newFilters);
+    setFilters(newFilters);
+    setPage(1); // Reset to first page when filters change
+  };
+
+  const transformedData = getTransformedData();
+
   return (
-    <Spin spinning={loading}>
+    <Spin spinning={loading || stampingLoading}>
       <LayoutMenu>
         <BreadCrumb routes={routes} />
 
@@ -216,12 +265,19 @@ const EMeteraiManagement = () => {
         >
           <div className="flex flex-col gap-4 w-full">
             <InvoiceProcessingTable
-              dataSource={dataSource}
+              dataSource={transformedData}
               loading={loading}
+              pagination={{
+                current: page,
+                pageSize: pageSize,
+                total: pageInfo.totalElements,
+                onChange: handlePageChange,
+              }}
               onDetails={handleDetails}
               onProcessSigning={handleProcessSigning}
               onRetry={handleRetry}
               onProcessStamping={handleProcessStamping}
+              onFilterChange={handleFilterChange}
             />
           </div>
         </CardContainer>
@@ -243,6 +299,8 @@ const EMeteraiManagement = () => {
             setSelectedInvoice(null);
           }}
           invoiceData={selectedInvoice}
+          onSubmit={handleStampingSubmit}
+          loading={stampingLoading}
         />
 
         <ProcessSigningModal
@@ -252,6 +310,8 @@ const EMeteraiManagement = () => {
             setSelectedInvoice(null);
           }}
           invoiceData={selectedInvoice}
+          onSubmit={handleSigningSubmit}
+          loading={stampingLoading}
         />
       </LayoutMenu>
     </Spin>

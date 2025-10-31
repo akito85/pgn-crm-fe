@@ -1,4 +1,4 @@
-// components/InvoiceProcessingTable.js (REFACTORED)
+// components/InvoiceProcessingTable.js (FIXED PAGINATION)
 import { useState, useMemo } from "react";
 import {
   Table,
@@ -23,6 +23,7 @@ import {
 } from "@ant-design/icons";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 import ColumnFixDropdown from "../../../../../components/ColumnFixDropdown/ColumnFixDropdown";
+import StatusComponent from "../../../../../components/StatusComponent";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -30,13 +31,13 @@ const { Option } = Select;
 const InvoiceProcessingTable = ({
   dataSource = [],
   loading = false,
+  pagination = {},
   onDetails = () => {},
   onProcessSigning = () => {},
   onRetry = () => {},
   onProcessStamping = () => {},
+  onFilterChange = () => {},
 }) => {
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [dateRange, setDateRange] = useState([
     dayjs("2025-10-01"),
     dayjs("2025-10-31"),
@@ -53,9 +54,9 @@ const InvoiceProcessingTable = ({
   const allColumnDefinitions = [
     {
       key: "invoiceNumber",
-      title: "Invoice #",
+      title: "Invoice Number",
       dataIndex: "invoiceNumber",
-      width: 130,
+      width: 180,
       render: (text) => <span style={{ fontWeight: "600" }}>{text}</span>,
     },
     {
@@ -90,29 +91,16 @@ const InvoiceProcessingTable = ({
       dataIndex: "stampingStatus",
       width: 160,
       align: "center",
-      render: (status) => {
-        const getStampingStatusColor = (status) => {
-          const statusMap = {
-            "Pending Approval": "orange",
-            Success: "green",
-            Failed: "red",
-            "Not Processed": "default",
-          };
-          return statusMap[status] || "default";
-        };
-
-        return (
-          <Tag
-            color={getStampingStatusColor(status)}
-            style={{
-              color: "#000",
-              fontWeight: "500",
-              padding: "4px 12px",
-              fontSize: "13px",
-            }}
-          >
-            {status}
-          </Tag>
+      render: (index) => {
+        const text = index
+          ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
+          : index;
+        return text ? (
+          <div className={" flex justify-center"}>
+            <StatusComponent colour={index}>{text}</StatusComponent>
+          </div>
+        ) : (
+          text
         );
       },
     },
@@ -122,27 +110,16 @@ const InvoiceProcessingTable = ({
       dataIndex: "signingStatus",
       width: 150,
       align: "center",
-      render: (status) => {
-        const getSigningStatusColor = (status) => {
-          const statusMap = {
-            "Not Processed": "default",
-            Success: "green",
-          };
-          return statusMap[status] || "default";
-        };
-
-        return (
-          <Tag
-            color={getSigningStatusColor(status)}
-            style={{
-              color: "#000",
-              fontWeight: "500",
-              padding: "4px 12px",
-              fontSize: "13px",
-            }}
-          >
-            {status}
-          </Tag>
+      render: (index) => {
+        const text = index
+          ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
+          : index;
+        return text ? (
+          <div className={" flex justify-center"}>
+            <StatusComponent colour={index}>{text}</StatusComponent>
+          </div>
+        ) : (
+          text
         );
       },
     },
@@ -163,17 +140,14 @@ const InvoiceProcessingTable = ({
             key: "process-stamping",
             label: "Process Stamping",
             icon: <FileProtectOutlined />,
-            disabled: record.stampingStatus !== "Not Processed",
+            disabled: record.stampStatus !== null,
             onClick: () => onProcessStamping(record),
           },
           {
             key: "process-signing",
             label: "Process Signing",
             icon: <EditOutlined />,
-            disabled: !(
-              record.stampingStatus === "Success" &&
-              record.signingStatus === "Not Processed"
-            ),
+            disabled: record.stampStatus === null || record.signStatus !== null,
             onClick: () => onProcessSigning(record),
           },
           {
@@ -219,13 +193,45 @@ const InvoiceProcessingTable = ({
     { value: "success", label: "Success" },
   ];
 
-  const handlePageChange = (newPage, newPageSize) => {
-    setPage(newPage);
-    if (newPageSize !== pageSize) {
-      setPageSize(newPageSize);
-      setPage(1);
+  // Handle filter changes
+  const handleDateRangeChange = (dates) => {
+    setDateRange(dates);
+    if (dates && dates.length === 2) {
+      onFilterChange({
+        dateRange: dates,
+        stampStatus: stampingStatusFilter,
+        signStatus: signingStatusFilter,
+      });
     }
   };
+
+  const handleStampingStatusChange = (value) => {
+    setStampingStatusFilter(value);
+    onFilterChange({
+      dateRange: dateRange,
+      stampStatus: value,
+      signStatus: signingStatusFilter,
+    });
+  };
+
+  const handleSigningStatusChange = (value) => {
+    setSigningStatusFilter(value);
+    onFilterChange({
+      dateRange: dateRange,
+      stampStatus: stampingStatusFilter,
+      signStatus: value,
+    });
+  };
+
+  // Get pagination values from parent
+  const currentPage = pagination.current || 1;
+  const currentPageSize = pagination.pageSize || 20;
+  const totalRecords = pagination.total || 0;
+
+  // Calculate display text
+  const startRecord =
+    totalRecords > 0 ? (currentPage - 1) * currentPageSize + 1 : 0;
+  const endRecord = Math.min(currentPage * currentPageSize, totalRecords);
 
   return (
     <div style={{ width: "100%" }}>
@@ -239,7 +245,7 @@ const InvoiceProcessingTable = ({
             color: "#262626",
           }}
         >
-          Invoice Processing Status ({dataSource.length} total)
+          Invoice Processing Status ({totalRecords} total)
         </div>
       </Card>
 
@@ -252,7 +258,7 @@ const InvoiceProcessingTable = ({
             </div>
             <RangePicker
               value={dateRange}
-              onChange={setDateRange}
+              onChange={handleDateRangeChange}
               format="YYYY-MM-DD"
               style={{ width: "100%" }}
             />
@@ -265,7 +271,7 @@ const InvoiceProcessingTable = ({
             <Select
               placeholder="Select stamping status"
               value={stampingStatusFilter}
-              onChange={setStampingStatusFilter}
+              onChange={handleStampingStatusChange}
               style={{ width: "100%" }}
             >
               {stampingStatusOptions.map((opt) => (
@@ -283,7 +289,7 @@ const InvoiceProcessingTable = ({
             <Select
               placeholder="Select signing status"
               value={signingStatusFilter}
-              onChange={setSigningStatusFilter}
+              onChange={handleSigningStatusChange}
               style={{ width: "100%" }}
             >
               {signingStatusOptions.map((opt) => (
@@ -345,8 +351,8 @@ const InvoiceProcessingTable = ({
               Rows per page:
             </span>
             <Select
-              value={pageSize}
-              onChange={(value) => handlePageChange(1, value)}
+              value={currentPageSize}
+              onChange={(value) => pagination.onChange(1, value)}
               style={{ width: 80 }}
             >
               <Option value={10}>10</Option>
@@ -355,17 +361,15 @@ const InvoiceProcessingTable = ({
               <Option value={100}>100</Option>
             </Select>
             <span style={{ fontSize: "14px", color: "#595959" }}>
-              Showing {dataSource.length > 0 ? (page - 1) * pageSize + 1 : 0} to{" "}
-              {Math.min(page * pageSize, dataSource.length)} of{" "}
-              {dataSource.length} entries
+              Showing {startRecord} to {endRecord} of {totalRecords} entries
             </span>
           </div>
 
           <Pagination
-            current={page}
-            pageSize={pageSize}
-            total={dataSource.length}
-            onChange={handlePageChange}
+            current={currentPage}
+            pageSize={currentPageSize}
+            total={totalRecords}
+            onChange={pagination.onChange}
             showSizeChanger={false}
             showTotal={false}
             className="[&_.ant-pagination-item]:mx-2 [&_.ant-pagination-prev]:mx-2 [&_.ant-pagination-next]:mx-2"

@@ -104,9 +104,9 @@ const getWithBody = async (url, body) => {
   }
 };
 
-const downloadData = async (url) => {
+const downloadData = async (url, customBaseUrl) => {
   try {
-    const baseUrl = configApp.RATING_BILLING_SERVICE;
+    const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
 
     const response = await axios.get(baseUrl + url, {
       headers: buildHeaders(baseUrl),
@@ -198,9 +198,9 @@ const activationRemarkWithPut = async (url, body) => {
 };
 
 //upload attachment
-const uploadAttachment = async (url, body, onProgress) => {
+const uploadAttachment = async (url, body, onProgress, customBaseUrl) => {
   try {
-    const baseUrl = configApp.RATING_BILLING_SERVICE;
+    const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
 
     const response = await axios.post(baseUrl + url, body, {
       headers: buildHeaders(baseUrl, { "Content-Type": "multipart/form-data" }),
@@ -266,9 +266,9 @@ const downloadRtfFile = async (url, extension, nameFile, params) => {
   }
 };
 
-const previewOrDownloadData = async (url, params) => {
+const previewOrDownloadData = async (url, params, customBaseUrl) => {
   try {
-    const baseUrl = configApp.RATING_BILLING_SERVICE;
+    const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
 
     const response = await axios.get(baseUrl + url, {
       params: params,
