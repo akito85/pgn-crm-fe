@@ -1,19 +1,14 @@
-import React, { useState } from "react";
-import RadioTabs from "../../../../components/RadioTabs";
-import AccountList from "./DetailPages/Account/AccountList";
-import CustomerAddressList from "./DetailPages/Address/CustomerAddressList";
-import { Fragment } from "react";
-import CustomerContactList from "./DetailPages/Contact/CustomerContactList";
-import CustomerServiceRequestList from "./DetailPages/ServiceRequest/CustomerServiceRequestList";
+import React, { Fragment, useState } from "react";
+import RadioTabs from "../../../../../../../components/RadioTabs";
+import CustomerServiceRequestDetailAttch from "./CustomerServiceRequestDetailAttch"
+import CustomerServiceRequestDetailInfo from "./CustomerServiceRequestDetailInfo"
 
 const dataTabs = {
-  acc: "Account",
-  add: "Address",
-  con: "Contact",
-  sreq: "Service Request"
+  sreqi: "Service Request Information",
+  attch: "Attachment",
 };
 
-const CustomerDetailInformation = ({
+const CustomerServiceRequestDetailTabs = ({
   dispatch = () => {},
   id = 0,
   section = "",
@@ -31,14 +26,10 @@ const CustomerDetailInformation = ({
   //   };
   const renderSection = () => {
     switch (section) {
-      case dataTabs.acc:
-        return <AccountList id={id} dispatch={dispatch}/>;
-      case dataTabs.add:
-        return <CustomerAddressList id={id} dispatch={dispatch}/>;
-      case dataTabs.con:
-        return <CustomerContactList id={id} dispatch={dispatch}/>;
-      case dataTabs.sreq:
-        return <CustomerServiceRequestList id={id} dispatch={dispatch}/>;
+      case dataTabs.sreqi:
+        return <CustomerServiceRequestDetailInfo id={id} dispatch={dispatch}/>;
+      case dataTabs.attch:
+        return <CustomerServiceRequestDetailAttch id={id} dispatch={dispatch}/>;
       default:
         return <></>;
     }
@@ -65,4 +56,4 @@ const CustomerDetailInformation = ({
   );
 };
 
-export default CustomerDetailInformation;
+export default CustomerServiceRequestDetailTabs;

@@ -1,32 +1,28 @@
 import React, { useEffect, useRef } from "react";
-import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
+import BreadCrumb from "../../../../../../../components/BreadCrumb";
+import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import { Spin } from "antd";
-import ButtonComponent from "../../../../components/ButtonComponent";
+import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import { LeftOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import CustomerHeaderDetail from "./CustomerHeaderDetail";
-import BaseContainer from "../../../../components/BaseContainer";
-import DetailText from "../../../../components/DetailText";
-import CustomerDetailInformation from "./CustomerDetailInformation";
-import { getCustomerDetail } from "../../../../redux/slices/account_management/Customer/customerAccount";
+import CustomerHeaderDetail from "../../../CustomerHeaderDetail";
+import BaseContainer from "../../../../../../../components/BaseContainer";
+import DetailText from "../../../../../../../components/DetailText";
+import CustomerServiceRequestDetailTabs from "./CustomerServiceRequestDetailTabs";
+import { getCustomerDetail } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import moment from "moment";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
-import { dateFormatting } from "../../../../utils";
-import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
+import { dateFormatting } from "../../../../../../../utils";
+import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
 
 const tabs = [
-  { value: "Service Request" },
-  { value: "Account" }, //
-  { value: "Address" }, //
-  { value: "Contact" }, //
-  { value: "Relationship", disabled: true },
-  { value: "Assignment History", disabled: true },
+  { value: "Service Request Information" },
+  { value: "Attachment" },
 ];
 
-const CustomerDetail = () => {
+const CustomerServiceRequestDetails = () => {
   const dispatch = useDispatch();
   const { data_customerDetail, loading, loadingAccount } = useSelector(
     (state) => state.customerAccount
@@ -46,8 +42,8 @@ const CustomerDetail = () => {
   const [typeDetailSection, setTypeDetailSection] = useState(tabs[0].value);
 
   useEffect(() => {
-    dispatch(getGrantedAccessAccount('/account-management/customers'))
-}, [dispatch])
+    dispatch(getGrantedAccessAccount('/account-management/customers/view/service-requests/details'))
+  }, [dispatch])
 
   useEffect(() => {
     if (id) {
@@ -78,8 +74,16 @@ const CustomerDetail = () => {
       breadcrumbName:"Customers",
     },
     {
-      path:"",
-      breadcrumbName: "Detail Customer",
+      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_CUSTOMER,
+      breadcrumbName:"Detail Customers",
+    },
+    {
+      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST,
+      breadcrumbName: "Service Request",
+    },
+    {
+      path: "",
+      breadcrumbName: "Detail Service Requests",
     },
   ];
 
@@ -97,7 +101,7 @@ const CustomerDetail = () => {
         </div>
 
         <div className="my-5">
-          <CustomerDetailInformation
+          <CustomerServiceRequestDetailTabs
             dispatch={dispatch}
             id={id}
             section={typeDetailSection}
@@ -130,4 +134,4 @@ const CustomerDetail = () => {
   );
 };
 
-export default CustomerDetail;
+export default CustomerServiceRequestDetails;
