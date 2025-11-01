@@ -40,3 +40,5 @@ node_modules
 build/
 build.zip
 logs/
+
+.claude/
