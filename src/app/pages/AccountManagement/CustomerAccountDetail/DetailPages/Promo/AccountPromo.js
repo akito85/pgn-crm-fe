@@ -46,26 +46,20 @@ const PromoViewData = ({
         </Col>
       </Row>
       <Space direction="vertical" size={"large"}>
-        <TablePaginationNew
-          enableDragColumn={true}
-          columns={promoRepository.getColumns(
-            setIsModalPromoVisible,
-            setDetailPromoData,
-          )}
-          dataSource={promoRepository.getPromoList()}
-        />
-        <Row>
-          <Col span={2}>
-            <ButtonComponent
-              type="submit"
-              size="small"
-              fullButton
-              icon={<LeftOutlined />}
-            >
-              Back
-            </ButtonComponent>
-          </Col>
-        </Row>
+        <div style={{ width: "100%", overflowX: "auto" }}>
+          <TablePaginationNew
+            enableDragColumn={true}
+            enableColumnSorter={true}
+            enableColumnFilter={true}
+            freezeColumns={[{ key: "action", position: "left" }]}
+            tableScrolled={{ x: 800 }}
+            columns={promoRepository.getColumns(
+              setIsModalPromoVisible,
+              setDetailPromoData,
+            )}
+            dataSource={promoRepository.getPromoList()}
+          />
+        </div>
       </Space>
     </Fragment>
   );
@@ -87,26 +81,20 @@ const PromoHistoryViewData = ({
         </Col>
       </Row>
       <Space direction="vertical" size={"large"}>
-        <TablePaginationNew
-          enableDragColumn={true}
-          columns={promoHistoryRepository.getColumns(
-            setIsModalHistoryVisible,
-            setDetailHistoryData,
-          )}
-          dataSource={promoHistoryRepository.getPromoHistoryList()}
-        />
-        <Row>
-          <Col span={2}>
-            <ButtonComponent
-              type="submit"
-              size="small"
-              fullButton
-              icon={<LeftOutlined />}
-            >
-              Back
-            </ButtonComponent>
-          </Col>
-        </Row>
+        <div style={{ width: "100%", overflowX: "auto" }}>
+          <TablePaginationNew
+            enableDragColumn={true}
+            enableColumnSorter={true}
+            enableColumnFilter={true}
+            freezeColumns={[{ key: "action", position: "left" }]}
+            tableScrolled={{ x: 800 }}
+            columns={promoHistoryRepository.getColumns(
+              setIsModalHistoryVisible,
+              setDetailHistoryData,
+            )}
+            dataSource={promoHistoryRepository.getPromoHistoryList()}
+          />
+        </div>
       </Space>
     </Fragment>
   );

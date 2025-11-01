@@ -39,14 +39,20 @@ const selectedRender = (selectedTab, handleClickDetail, setDetailData) => {
               <ExportButton />
             </Col>
           </Row>
-          <TablePaginationNew
-            enableDragColumn={true}
-            columns={promoCriteriaRepository.getColumns(
-              handleClickDetail,
-              setDetailData,
-            )}
-            dataSource={promoCriteriaRepository.getPromoCriteriaList()}
-          />
+          <div style={{ width: "100%", overflowX: "auto" }}>
+            <TablePaginationNew
+              enableDragColumn={true}
+              enableColumnSorter={true}
+              enableColumnFilter={true}
+              freezeColumns={[{ key: "action", position: "left" }]}
+              tableScrolled={{ x: 800 }}
+              columns={promoCriteriaRepository.getColumns(
+                handleClickDetail,
+                setDetailData,
+              )}
+              dataSource={promoCriteriaRepository.getPromoCriteriaList()}
+            />
+          </div>
         </Space>
       );
     case "conditions":
@@ -63,14 +69,20 @@ const selectedRender = (selectedTab, handleClickDetail, setDetailData) => {
               <ExportButton />
             </Col>
           </Row>
-          <TablePaginationNew
-            enableDragColumn={true}
-            columns={promoConditionRepository.getColumns(
-              handleClickDetail,
-              setDetailData,
-            )}
-            dataSource={promoConditionRepository.getPromoConditionList()}
-          />
+          <div style={{ width: "100%", overflowX: "auto" }}>
+            <TablePaginationNew
+              enableDragColumn={true}
+              enableColumnSorter={true}
+              enableColumnFilter={true}
+              freezeColumns={[{ key: "action", position: "left" }]}
+              tableScrolled={{ x: 800 }}
+              columns={promoConditionRepository.getColumns(
+                handleClickDetail,
+                setDetailData,
+              )}
+              dataSource={promoConditionRepository.getPromoConditionList()}
+            />
+          </div>
         </Space>
       );
     default:
