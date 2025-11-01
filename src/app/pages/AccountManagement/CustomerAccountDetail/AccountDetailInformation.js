@@ -20,6 +20,9 @@ import EquipmentPage from "./DetailPages/Equipment/Equipment";
 import ProductDistribution from "./DetailPages/ProductDistribution/ProductDistribution";
 import RawMaterialSource from "./DetailPages/RawMaterialSource/RawMaterialSource";
 import GasUtilization from "./DetailPages/GasUtilization/GasUtilization";
+import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
+import { Switch } from "antd";
+import AccountPromo from "./DetailPages/Promo/AccountPromo";
 
 const dataTabs = {
   // ci: "Customer Information",
@@ -44,6 +47,7 @@ const dataTabs = {
   pd: "Product Distribution",
   ras: "Raw Material Source",
   gu: "Gas Utilization",
+  promo: "Promo",
 };
 const AccountDetailInformation = ({
   id = 0,
@@ -313,6 +317,8 @@ const AccountDetailInformation = ({
         return (
           <GasUtilization idAccount={id} idCustomer={idCustomer} type={type} />
         );
+      case dataTabs.promo:
+        return <AccountPromo />;
       default:
         return <></>;
     }
