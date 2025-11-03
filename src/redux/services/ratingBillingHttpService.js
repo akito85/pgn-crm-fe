@@ -5,7 +5,7 @@ import FileSaver from "file-saver";
 import { errorCode, hasValue } from "../../utils";
 
 const isNgrokUrl = (baseUrl) => {
-  return baseUrl && baseUrl.includes('ngrok');
+  return baseUrl && baseUrl.includes("ngrok");
 };
 
 const buildHeaders = (baseUrl, additionalHeaders = {}) => {
@@ -13,18 +13,18 @@ const buildHeaders = (baseUrl, additionalHeaders = {}) => {
     ...tokenHeader(),
     ...additionalHeaders,
   };
-  
+
   if (isNgrokUrl(baseUrl)) {
-    headers['ngrok-skip-browser-warning'] = 'true';
+    headers["ngrok-skip-browser-warning"] = "true";
   }
-  
+
   return headers;
 };
 
 const getAll = async (url, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
-    
+
     const response = await axios.get(baseUrl + url, {
       headers: buildHeaders(baseUrl),
     });
@@ -37,7 +37,7 @@ const getAll = async (url, customBaseUrl = null) => {
 const getPagination = async (url, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
-    
+
     const response = await axios.get(baseUrl + url, {
       headers: buildHeaders(baseUrl),
     });
@@ -47,10 +47,10 @@ const getPagination = async (url, customBaseUrl = null) => {
   }
 };
 
-const getListPagination = async (url, params) => {
+const getListPagination = async (url, params, customBaseUrl) => {
   try {
-    const baseUrl = configApp.RATING_BILLING_SERVICE;
-    
+    const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
+
     const response = await axios.get(baseUrl + url, {
       params: params,
       headers: buildHeaders(baseUrl),
@@ -64,7 +64,7 @@ const getListPagination = async (url, params) => {
 const getDetail = async (url, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
-    
+
     const response = await axios.get(baseUrl + url, {
       headers: buildHeaders(baseUrl),
     });
@@ -77,7 +77,7 @@ const getDetail = async (url, customBaseUrl = null) => {
 const getDetailByIdBody = async (url, id) => {
   try {
     const baseUrl = configApp.RATING_BILLING_SERVICE;
-    
+
     const response = await axios.get(
       baseUrl + url,
       { id: id },
@@ -93,7 +93,7 @@ const getWithBody = async (url, body) => {
   try {
     console.log(body, " getWith body");
     const baseUrl = configApp.RATING_BILLING_SERVICE;
-    
+
     const response = await axios.get(baseUrl + url, {
       data: body,
       headers: buildHeaders(baseUrl),
@@ -104,10 +104,10 @@ const getWithBody = async (url, body) => {
   }
 };
 
-const downloadData = async (url) => {
+const downloadData = async (url, customBaseUrl) => {
   try {
-    const baseUrl = configApp.RATING_BILLING_SERVICE;
-    
+    const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
+
     const response = await axios.get(baseUrl + url, {
       headers: buildHeaders(baseUrl),
       responseType: "blob",
@@ -123,7 +123,7 @@ const downloadData = async (url) => {
       const blob = await response?.data;
       FileSaver.saveAs(blob, filename);
     } else if (errorCode(response) === 204) {
-      throw response
+      throw response;
     }
     return response;
   } catch (error) {
@@ -148,14 +148,10 @@ const createData = async (url, body, customBaseUrl = null) => {
 const updateData = async (url, data) => {
   try {
     const baseUrl = configApp.RATING_BILLING_SERVICE;
-    
-    const response = await axios.put(
-      baseUrl + url,
-      data,
-      {
-        headers: buildHeaders(baseUrl),
-      }
-    );
+
+    const response = await axios.put(baseUrl + url, data, {
+      headers: buildHeaders(baseUrl),
+    });
     return response?.data;
   } catch (error) {
     throw error;
@@ -165,13 +161,10 @@ const updateData = async (url, data) => {
 const deleteData = async (url) => {
   try {
     const baseUrl = configApp.RATING_BILLING_SERVICE;
-    
-    const response = await axios.delete(
-      baseUrl + url,
-      {
-        headers: buildHeaders(baseUrl),
-      }
-    );
+
+    const response = await axios.delete(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
+    });
     return response?.data;
   } catch (error) {
     throw error;
@@ -181,14 +174,10 @@ const deleteData = async (url) => {
 const activationWithRemark = async (url, body, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
-    
-    const response = await axios.post(
-      baseUrl + url,
-      body,
-      {
-        headers: buildHeaders(baseUrl),
-      }
-    );
+
+    const response = await axios.post(baseUrl + url, body, {
+      headers: buildHeaders(baseUrl),
+    });
     return response?.data;
   } catch (error) {
     throw error;
@@ -198,14 +187,10 @@ const activationWithRemark = async (url, body, customBaseUrl = null) => {
 const activationRemarkWithPut = async (url, body) => {
   try {
     const baseUrl = configApp.RATING_BILLING_SERVICE;
-    
-    const response = await axios.put(
-      baseUrl + url,
-      body,
-      {
-        headers: buildHeaders(baseUrl),
-      }
-    );
+
+    const response = await axios.put(baseUrl + url, body, {
+      headers: buildHeaders(baseUrl),
+    });
     return response?.data;
   } catch (error) {
     throw error;
@@ -213,23 +198,19 @@ const activationRemarkWithPut = async (url, body) => {
 };
 
 //upload attachment
-const uploadAttachment = async (url, body, onProgress) => {
+const uploadAttachment = async (url, body, onProgress, customBaseUrl) => {
   try {
-    const baseUrl = configApp.RATING_BILLING_SERVICE;
-    
-    const response = await axios.post(
-      baseUrl + url,
-      body,
-      {
-        headers: buildHeaders(baseUrl, { "Content-Type": "multipart/form-data" }),
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          onProgress(percentCompleted);
-        },
-      }
-    );
+    const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
+
+    const response = await axios.post(baseUrl + url, body, {
+      headers: buildHeaders(baseUrl, { "Content-Type": "multipart/form-data" }),
+      onUploadProgress: (progressEvent) => {
+        const percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total
+        );
+        onProgress(percentCompleted);
+      },
+    });
     return response?.data;
   } catch (error) {
     throw error;
@@ -239,7 +220,7 @@ const uploadAttachment = async (url, body, onProgress) => {
 const downloadRtfFile = async (url, extension, nameFile, params) => {
   try {
     const baseUrl = configApp.RATING_BILLING_SERVICE;
-    
+
     const response = await axios.get(baseUrl + url, {
       params: params,
       headers: buildHeaders(baseUrl),
@@ -285,27 +266,31 @@ const downloadRtfFile = async (url, extension, nameFile, params) => {
   }
 };
 
-const previewOrDownloadData = async (url, params) => {
+const previewOrDownloadData = async (url, params, customBaseUrl) => {
   try {
-    const baseUrl = configApp.RATING_BILLING_SERVICE;
-    
+    const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
+
     const response = await axios.get(baseUrl + url, {
       params: params,
       headers: buildHeaders(baseUrl),
       responseType: "blob",
     });
 
-    const contentDisposition = response.headers['content-disposition'];
+    const contentDisposition = response.headers["content-disposition"];
     const filename = contentDisposition
-      ? contentDisposition.split(';').find(n => n.includes('filename=')).replace('filename=', '').trim()
-      : 'downloaded_file';
+      ? contentDisposition
+          .split(";")
+          .find((n) => n.includes("filename="))
+          .replace("filename=", "")
+          .trim()
+      : "downloaded_file";
 
-    const fileType = response.headers['content-type'];
+    const fileType = response.headers["content-type"];
     const blob = response.data;
 
     if (fileType === "application/pdf") {
       const fileURL = window.URL.createObjectURL(blob);
-      window.open(fileURL, '_blank');
+      window.open(fileURL, "_blank");
     } else {
       FileSaver.saveAs(blob, filename);
     }
@@ -313,7 +298,6 @@ const previewOrDownloadData = async (url, params) => {
     throw error;
   }
 };
-
 
 const ratingBillingHttpService = {
   getAll,
@@ -330,7 +314,7 @@ const ratingBillingHttpService = {
   uploadAttachment,
   activationRemarkWithPut,
   downloadRtfFile,
-  previewOrDownloadData
+  previewOrDownloadData,
 };
 
 export default ratingBillingHttpService;

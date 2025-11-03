@@ -356,14 +356,14 @@ export const getUserProfile = createAsyncThunk(
   "GET_USER_PROFILE_FOR_PRABILLING",
   async (thunkAPI) => {
     try {
-      const url = '/v1/dbs/api/profile/view-profile';
+      const url = "/v1/dbs/api/profile/view-profile";
       const response = await userHttpService.getAll(url);
       // Ambil data langsung dari response
       return response.data?.data || response.data;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
-      console.error('Error fetching user profile:', message);
+      console.error("Error fetching user profile:", message);
       return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
@@ -1213,7 +1213,6 @@ export const downloadPrabillingResult = createAsyncThunk(
   }
 );
 
-
 const prabillingSlice = createSlice({
   name: "prabilling",
   initialState,
@@ -1473,19 +1472,19 @@ const prabillingSlice = createSlice({
     [getListCalculationType.rejected]: (state, action) => {
       state.loading = false;
     },
-//profile
+    //profile
     [getUserProfile.pending]: (state) => {
-  state.loading_user_profile = true;
-},
-[getUserProfile.fulfilled]: (state, action) => {
-  state.loading_user_profile = false;
-  state.user_profile = action.payload;
-  console.log('✅ User Profile Loaded:', action.payload);
-},
-[getUserProfile.rejected]: (state) => {
-  state.loading_user_profile = false;
-  state.user_profile = null;
-},
+      state.loading_user_profile = true;
+    },
+    [getUserProfile.fulfilled]: (state, action) => {
+      state.loading_user_profile = false;
+      state.user_profile = action.payload;
+      console.log("✅ User Profile Loaded:", action.payload);
+    },
+    [getUserProfile.rejected]: (state) => {
+      state.loading_user_profile = false;
+      state.user_profile = null;
+    },
     // lov account group
     [getListAccountGroup.pending]: (state, action) => {
       state.loading = true;
@@ -1507,9 +1506,11 @@ const prabillingSlice = createSlice({
       state.loading_specific_customer = false;
       // Pastikan mengambil data dari response.data atau response
       const responseData = action.payload?.data || action.payload || [];
-      state.list_specific_customer = Array.isArray(responseData) ? responseData : [];
+      state.list_specific_customer = Array.isArray(responseData)
+        ? responseData
+        : [];
       state.specific_customer_message = action.payload?.message || "";
-      
+
       console.log("✅ Customer Data Received:", state.list_specific_customer);
     },
     [getListSpecificCustomer.rejected]: (state, action) => {
@@ -1517,7 +1518,7 @@ const prabillingSlice = createSlice({
       state.list_specific_customer = [];
       state.specific_customer_message = "";
     },
-    
+
     // lov billing cycle
     [getListBillingCycle.pending]: (state, action) => {
       state.loading = true;

@@ -21,14 +21,17 @@ export const columnsInvoice = (
   handleSearch = () => {}
 ) => [
   {
+    key: "no",
     title: "NO",
     align: "center",
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
+    key: "invoiceNumber",
     title: "INVOICE NUMBER",
     dataIndex: "invoiceNumber",
+    width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -50,8 +53,10 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "templateName",
     title: "TEMPLATE",
     dataIndex: "templateName",
+    width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -73,8 +78,10 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "billingCycle",
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -96,9 +103,11 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "billingPeriodName",
     title: "BILLING PERIOD",
     sorter: true,
     align: "center",
+    width: 180,
     dataIndex: "billingPeriodName",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -121,8 +130,10 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "billingCode",
     title: "BILLING CODE",
     dataIndex: "billingCode",
+    width: 180,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -144,8 +155,10 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
+    width: 180,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -167,8 +180,10 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
+    width: 250,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -190,8 +205,10 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
+    width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -213,8 +230,10 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
+    width: 250,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -236,7 +255,9 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "accountGroupType",
     title: "ACCOUNT GROUP TYPE",
+    width: 180,
     dataIndex: "accountGroupType",
     align: "center",
     sorter: true,
@@ -260,9 +281,11 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "serviceType",
     title: "SERVICE TYPE",
     dataIndex: "serviceType",
     align: "center",
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -284,7 +307,9 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "sor",
     title: "SOR",
+    width: 250,
     dataIndex: "sor",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -307,8 +332,10 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",
+    width: 180,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -330,9 +357,11 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "accountSegment",
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
     align: "center",
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -354,8 +383,10 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "meterReadingCode",
     title: "METER READING CODE",
     dataIndex: "meterReadingCode",
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -376,84 +407,12 @@ export const columnsInvoice = (
         search
       ),
   },
-  // {
-  //   title: "CURRENCY", //
-  //   dataIndex: "currency",
-  //   align: "center",
-  //   sorter: true,
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "currency",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch
-  //   ),
-  //   render: (text) => renderColumn('currency', hasValue(search['currency']), searchText, text, false, 'input', search)
-  // },
-  // {
-  //   title: "AMOUNT",
-  //   sorter: true,
-  //   align: "right",
-  //   dataIndex: "amount",
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //    search,
-  //     "amount",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch,
-  //   )
-  // },
-  // {
-  //   title: "AMOUNT IDR", //
-  //   sorter: true,
-  //   align: "right",
-  //   dataIndex: "amountIdr",
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "amountIdr",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch,
-  //   ),
-  //   render: (text) => renderColumn('amountIdr', hasValue(search['amountIdr']), searchText, text, false, 'input', search)
-  // },
-  // {
-  //   title: "AMOUNT USD", //
-  //   sorter: true,
-  //   align: "right",
-  //   dataIndex: "amountUsd",
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "amountUsd",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch,
-  //   ),
-  //   render: (text) => renderColumn('amountUsd', hasValue(search['amountUsd']), searchText, text, false, 'input', search)
-  // },
-  // {
-  //   title: "TAX BASIS",//
-  //   sorter: true,
-  //   align: "right",
-  //   dataIndex: "taxBasis",
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "taxBasis",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch,
-  //   ),
-  //   render: (text) => renderColumn('taxBasis', hasValue(search['taxBasis']), searchText, text, false, 'input', search)
-  // },
   {
+    key: "taxBasicEqvIdr",
     title: "TAX BASIS EQV IDR",
     sorter: true,
     align: "right",
+    width: 200,
     dataIndex: "taxBasicEqvIdr",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -474,25 +433,12 @@ export const columnsInvoice = (
         search
       ),
   },
-  // {
-  //   title: "VAT",
-  //   sorter: true,
-  //   align: "right",
-  //   dataIndex: "vat", //
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "vat",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch,
-  //   ),
-  //   render: (text) => renderColumn('vat', hasValue(search['vat']), searchText, text, false, 'input', search)
-  // },
   {
+    key: "vatEqvIdr",
     title: "VAT EQV IDR",
     sorter: true,
     align: "right",
+    width: 200,
     dataIndex: "vatEqvIdr",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -514,9 +460,11 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "withHoldingTax",
     title: "WITHHOLDING TAX",
     sorter: true,
     align: "right",
+    width: 200,
     dataIndex: "withHoldingTax",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -539,9 +487,11 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "taxRateType",
     title: "TAX RATE TYPE",
     dataIndex: "taxRateType",
     align: "center",
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -563,9 +513,11 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "taxRate",
     title: "TAX RATE",
     sorter: true,
     align: "right",
+    width: 150,
     dataIndex: "taxRate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -587,9 +539,11 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "taxRateDate",
     title: "TAX RATE DATE",
     sorter: true,
     align: "center",
+    width: 150,
     dataIndex: "taxRateDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -611,55 +565,12 @@ export const columnsInvoice = (
         search
       ),
   },
-  // {
-  //   title: "DISCOUNT AMOUNT", //
-  //   sorter: true,
-  //   align: "right",
-  //   dataIndex: "discountAmount",
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "discountAmount",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch,
-  //   ),
-  //   render: (text) => renderColumn('taxRate', hasValue(search['taxRate']), searchText, text, false, 'input', search)
-  // },
-  // {
-  //   title: "DISCOUNT AMOUNT IDR",//
-  //   sorter: true,
-  //   align: "right",
-  //   dataIndex: "discountAmountIdr",
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "discountAmountIdr",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch,
-  //   ),
-  //   render: (text) => renderColumn('discountAmountIdr', hasValue(search['discountAmountIdr']), searchText, text, false, 'input', search)
-  // },
-  // {
-  //   title: "DISCOUNT AMOUNT USD", //
-  //   sorter: true,
-  //   align: "right",
-  //   dataIndex: "discountAmountUsd",
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     search,
-  //     "discountAmountUsd",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch,
-  //   ),
-  //   render: (text) => renderColumn('discountAmountUsd', hasValue(search['discountAmountUsd']), searchText, text, false, 'input', search)
-  // },
   {
+    key: "totalAmountIdr",
     title: "TOTAL AMOUNT IDR",
     sorter: true,
     align: "right",
+    width: 200,
     dataIndex: "totalAmountIdr",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -681,9 +592,11 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "totalAmountUsd",
     title: "TOTAL AMOUNT USD",
     sorter: true,
     align: "right",
+    width: 200,
     dataIndex: "totalAmountUsd",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -705,8 +618,10 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "termOfPayment",
     title: "TERMS OF PAYMENT",
     dataIndex: "termOfPayment",
+    width: 180,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -728,9 +643,11 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "transactionDate",
     title: "TRANSACTION DATE",
     sorter: true,
     align: "center",
+    width: 180,
     dataIndex: "transactionDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -753,9 +670,11 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "invoiceDate",
     title: "INVOICE DATE",
     sorter: true,
     align: "center",
+    width: 180,
     dataIndex: "invoiceDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -778,9 +697,11 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "dueDate",
     title: "DUE DATE",
     sorter: true,
     align: "center",
+    width: 180,
     dataIndex: "dueDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -803,9 +724,11 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "rateType",
     title: "RATE TYPE",
     sorter: true,
     align: "center",
+    width: 150,
     dataIndex: "rateType",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -827,9 +750,11 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "rate",
     title: "RATE",
     sorter: true,
     align: "right",
+    width: 180,
     dataIndex: "rate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -851,10 +776,12 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "rateDate",
     title: "RATE DATE",
     sorter: true,
     align: "center",
-    dataIndex: "transactionDate",
+    width: 180,
+    dataIndex: "rateDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rateDate",
@@ -867,8 +794,8 @@ export const columnsInvoice = (
     ),
     render: (text) =>
       renderDateColumn(
-        "transactionDate",
-        hasValue(search["transactionDate"]),
+        "rateDate",
+        hasValue(search["rateDate"]),
         searchText,
         text,
         "date",
@@ -876,13 +803,15 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "totalAmountEqvIdr",
     title: "TOTAL AMOUNT EQV IDR",
     sorter: true,
     align: "right",
+    width: 200,
     dataIndex: "totalAmountEqvIdr",
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "totalAmountIdr",
+      "totalAmountEqvIdr",
       searchInput,
       searchedColumn,
       searchText,
@@ -900,13 +829,15 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "totalAmountEqvUsd",
     title: "TOTAL AMOUNT EQV USD",
     sorter: true,
     align: "right",
+    width: 200,
     dataIndex: "totalAmountEqvUsd",
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "totalAmountIdr",
+      "totalAmountEqvUsd",
       searchInput,
       searchedColumn,
       searchText,
@@ -924,9 +855,11 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "remark",
     sorter: true,
     title: "REMARK",
     dataIndex: "remark",
+    width: 250,
     ellipsis: {
       showTitle: false,
     },
@@ -943,11 +876,12 @@ export const columnsInvoice = (
       ),
   },
   {
+    key: "status",
     title: "STATUS",
     dataIndex: "status",
     fixed: "right",
     width: 150,
-    align: "left",
+    align: "center",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -958,21 +892,21 @@ export const columnsInvoice = (
       handleSearch
     ),
     render: (text) => (
-      <div className="flex justify-start">
-        <StatusComponent
-          colour={
-            text?.toLowerCase() === "inprogress"
-              ? "in progress"
-              : text?.toLowerCase()
-          }
-        >
-          {toTitleCase(
-            text?.toLowerCase() === "inprogress"
-              ? "in progress"
-              : text?.toLowerCase()
-          )}
-        </StatusComponent>
-      </div>
+      // <div>
+      <StatusComponent
+        colour={
+          text?.toLowerCase() === "inprogress"
+            ? "in progress"
+            : text?.toLowerCase()
+        }
+      >
+        {toTitleCase(
+          text?.toLowerCase() === "inprogress"
+            ? "in progress"
+            : text?.toLowerCase()
+        )}
+      </StatusComponent>
+      // </div>
     ),
   },
 ];

@@ -4,7 +4,7 @@ import { showModalError, validateError } from "../general_slice";
 import { showModalSuccess } from "../general_slice";
 import axios from "axios";
 
-const BASE_URL = "https://215307f9b9ec.ngrok-free.app/api/v1/invoices";
+const BASE_URL = process.env.REACT_APP_BASE_URL_NGROK;
 
 const initialState = {
   data: [],
@@ -21,37 +21,28 @@ export const getAllInvoicePaginate = createAsyncThunk(
   "GET_ALL_INVOICE_PAGINATE",
   async ({ page, pageSize, search, sort }, thunkAPI) => {
     try {
+      const searchParams = search === undefined ? "" : search;
       const sortParams =
-        sort === undefined || sort === "" ? "createdDate,desc" : sort;
-      const url = `${BASE_URL}?page=0&size=${pageSize}&sort=${sortParams}&search=${
-        search || ""
-      }`;
-      const response = await axios.get(url, {
-        headers: {
-          "ngrok-skip-browser-warning": "true",
-        },
-      });
-      console.log("response", response);
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      console.log("pageSize:", pageSize);
+      const url = `/v1/dbs/api/rbi/invoice?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response?.data);
+      return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
 export const getDetailInvoice = createAsyncThunk(
   "GET_DETAIL_INVOICE",
-  async (invoiceNumber, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/${invoiceNumber}`;
-      const response = await axios.get(url, {
-        headers: {
-          "ngrok-skip-browser-warning": "true",
-        },
-      });
-      const data = response?.data;
-      return Array.isArray(data) ? data : [data];
+      const url = `/v1/dbs/api/rbi/invoice/${id}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response;
+      // return Array.isArray(response) ? response : [response];
     } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response?.data);
+      return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
@@ -142,7 +133,7 @@ export const getDownloadList = createAsyncThunk(
   "DOWNLOAD_INVOICE",
   async (invoiceNumber, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/download/${invoiceNumber}`;
+      const url = `${BASE_URL}/api/v1/invoices/download/${invoiceNumber}`;
       const response = await axios.get(url, { responseType: "blob" });
       return response.data;
     } catch (error) {
