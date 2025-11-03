@@ -1,4 +1,4 @@
-const BASE_URL = process.env.REACT_APP_BASE_URL;
+const BASE_URL = process.env.REACT_APP_PGN_SERVER;
 // const BASE_URL = process.env.REACT_APP_LOCAL;
 
 // explort constant app service

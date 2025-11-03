@@ -1,5 +1,5 @@
 // _components/InvoiceDetailModal.js
-import React, { useState } from "react";
+import { useState } from "react";
 import { Modal, Button, Divider, Tag, Space, Table } from "antd";
 import {
   CloseOutlined,
