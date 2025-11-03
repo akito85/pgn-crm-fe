@@ -28,9 +28,9 @@ import { useColumnActionPermission } from "../../../../components/ColumnActionPe
 
 const CalculationPage = () => {
   // Selector
-
-  const { data: data_calculation = { result: [], page: {} }, loading } =
-    useSelector((state) => state.rbi_calculation);
+  const { data: data_calculation, loading } = useSelector(
+    (state) => state.rbi_calculation
+  );
 
   // Declaration
   const dispatch = useDispatch();
@@ -295,32 +295,6 @@ const CalculationPage = () => {
             "datePeriod",
             search
           ),
-        // ...getColumnSearchPropsPaging(
-        //   "billingPeriodVal",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch,
-        //   true
-        // ),
-        // render: (data) => {
-        //   const text = data ? moment(data).format(dateFormatting.datePeriod) : "";
-        //   if (searchedColumn === "endDate") {
-        //     return (
-        //       <Highlighter
-        //         highlightStyle={{
-        //           backgroundColor: "#ffc069",
-        //           padding: 0,
-        //         }}
-        //         searchWords={[searchText]}
-        //         autoEscape
-        //         textToHighlight={text ? text.toString() : ""}
-        //       />
-        //     );
-        //   } else {
-        //     return text || "";
-        //   }
-        // },
       },
       {
         key: "serviceTypeVal",
@@ -405,32 +379,6 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // render: (text) => {
-        //   if (searchedColumn === "costCenter") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
       },
       {
         key: "meterReadingCode",
@@ -461,32 +409,6 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // render: (text) => {
-        //   if (searchedColumn === "meterReadingCode") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
       },
       {
         key: "customerSegment",
@@ -517,35 +439,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // render: (text) => {
-        //   if (searchedColumn === "customerSegment") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
       },
       {
-        key: "no",
+        key: "accGroupType",
         title: "ACCOUNT GROUP TYPE",
         dataIndex: "accGroupType",
         align: "center",
@@ -573,35 +469,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // render: (text) => {
-        //   if (searchedColumn === "accGroupType") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
       },
       {
-        key: "no",
+        key: "custNumb",
         title: "SPECIFIC CUSTOMER ACCOUNT",
         dataIndex: "custNumb",
         align: "left",
@@ -629,27 +499,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // render: (text) =>
-        //   searchedColumn === "custNumb" ? (
-        //     <Highlighter
-        //       highlightStyle={{
-        //         backgroundColor: "#ffc069",
-        //         padding: 0,
-        //       }}
-        //       searchWords={[searchText]}
-        //       autoEscape
-        //       textToHighlight={text ? text.toString() : ""}
-        //     />
-        //   ) : text ? (
-        //     <Tooltip placement="topLeft" title={text}>
-        //       {text}
-        //     </Tooltip>
-        //   ) : (
-        //     ""
-        //   ),
       },
       {
-        key: "no",
+        key: "scheduleTypeVal",
         title: "SCHEDULE TYPE",
         dataIndex: "scheduleTypeVal",
         align: "center",
@@ -675,9 +527,8 @@ const CalculationPage = () => {
             search
           ),
       },
-
       {
-        key: "no",
+        key: "generateDate",
         title: "GENERATE DATE",
         dataIndex: "generateDate",
         align: "center",
@@ -702,36 +553,9 @@ const CalculationPage = () => {
             "date",
             search
           ),
-        // ...getColumnSearchPropsPaging(
-        //   "generateDate",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch,
-        //   false,
-        //   "date"
-        // ),
-        // render: (data) => {
-        //   const text = data ? moment(data).format(dateFormatting.dateTime) : "";
-        //   if (searchedColumn === "generateDate") {
-        //     return (
-        //       <Highlighter
-        //         highlightStyle={{
-        //           backgroundColor: "#ffc069",
-        //           padding: 0,
-        //         }}
-        //         searchWords={[searchText]}
-        //         autoEscape
-        //         textToHighlight={text ? text.toString() : ""}
-        //       />
-        //     );
-        //   } else {
-        //     return text || "";
-        //   }
-        // },
       },
       {
-        key: "no",
+        key: "remark",
         title: "REMARK",
         dataIndex: "remark",
         align: "left",
@@ -759,35 +583,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // render: (text) => {
-        //   if (searchedColumn === "remark") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
       },
       {
-        key: "no",
+        key: "typeVal",
         title: "TYPE",
         dataIndex: "typeVal",
         align: "center",
@@ -812,26 +610,13 @@ const CalculationPage = () => {
             "status",
             search
           ),
-        // ...getColumnSearchPropsPaging(
-        //   "typeVal",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-        // render: (index) => (
-        //   <div className={" flex justify-center"}>
-        //     <StatusComponent colour={index}>{index}</StatusComponent>
-        //   </div>
-        // ),
       },
       {
-        key: "no",
+        key: "status",
         title: "STATUS",
         dataIndex: "status",
         align: "center",
         sorter: true,
-        fixed: "right",
         width: 150,
         filteredValue: [search?.status] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -870,63 +655,7 @@ const CalculationPage = () => {
               )
             : text;
         },
-        // ...getColumnSearchPropsPaging(
-        //   "status",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-        // render: (index) => {
-        //   let text;
-        //   switch (index) {
-        //     case "INPROGRESS":
-        //       text = "In Progress";
-        //       break;
-        //     case "COMPLETE BILLING":
-        //       text = "Complete Billing";
-        //       break;
-        //     default:
-        //       text = index
-        //         ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-        //         : index;
-        //       break;
-        //   }
-        //   if (text) {
-        //     return (
-        //       <div className={" flex justify-center"}>
-        //         <StatusComponent colour={text}>{text}</StatusComponent>
-        //       </div>
-        //     );
-        //   } else {
-        //     return "";
-        //   }
-        // },
       },
-      // {
-      //   title: "ACTION",
-      //   align: "center",
-      //   fixed: "right",
-      //   key: "action",
-      //   width: 100,
-      //   render: (v, r) => {
-      //     return (
-      //       <Space>
-      //         <Tooltip title="Detail">
-      //           <Link
-      //             to={RBI_ROUTES.CALCULATION_DETAIL}
-      //             state={{ id: r?.calJobId }}
-      //           >
-      //             <ButtonComponent
-      //               icon={<SVGIcon name="IconDetail" width={24} />}
-      //               border={false}
-      //             />
-      //           </Link>
-      //         </Tooltip>
-      //       </Space>
-      //     );
-      //   },
-      // },
     ],
     [page, pageSize, search, searchText, searchedColumn]
   );
@@ -942,7 +671,7 @@ const CalculationPage = () => {
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
       {
-        key: "no",
+        key: "calCode",
         title: "CALCULATION CODE",
         dataIndex: "calCode",
         sorter: true,
@@ -968,7 +697,7 @@ const CalculationPage = () => {
           ),
       },
       {
-        key: "no",
+        key: "custNumb",
         title: "CUSTOMER NUMBER",
         dataIndex: "custNumb",
         sorter: true,
@@ -997,7 +726,7 @@ const CalculationPage = () => {
           ),
       },
       {
-        key: "no",
+        key: "custName",
         title: "CUSTOMER NAME",
         dataIndex: "custName",
         sorter: true,
@@ -1021,16 +750,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // ...getColumnSearchPropsPaging(
-        //   "custName",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
       },
       {
-        key: "no",
+        key: "accNumb",
         title: "ACCOUNT NUMBER",
         dataIndex: "accNumb",
         sorter: true,
@@ -1054,16 +776,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // ...getColumnSearchPropsPaging(
-        //   "accNumb",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
       },
       {
-        key: "no",
+        key: "accName",
         title: "ACCOUNT NAME",
         dataIndex: "accName",
         sorter: true,
@@ -1087,16 +802,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // ...getColumnSearchPropsPaging(
-        //   "accName",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
       },
       {
-        key: "no",
+        key: "accGroupTypeVal",
         title: "ACCOUNT GROUP TYPE",
         dataIndex: "accGroupTypeVal",
         sorter: true,
@@ -1124,35 +832,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // render: (text) => {
-        //   if (searchedColumn === "accGroupTypeVal") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
       },
       {
-        key: "no",
+        key: "serviceTypeVal",
         title: "SERVICE TYPE",
         dataIndex: "serviceTypeVal",
         sorter: true,
@@ -1177,16 +859,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // ...getColumnSearchPropsPaging(
-        //   "serviceTypeVal",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
       },
       {
-        key: "no",
+        key: "saNumb",
         title: "SA NUMBER",
         dataIndex: "saNumb",
         sorter: true,
@@ -1211,16 +886,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // ...getColumnSearchPropsPaging(
-        //   "saNumb",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
       },
       {
-        key: "no",
+        key: "sorVal",
         title: "SOR",
         dataIndex: "sorVal",
         sorter: true,
@@ -1247,35 +915,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // render: (text) => {
-        //   if (searchedColumn === "sorVal") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
       },
       {
-        key: "no",
+        key: "costCenterVal",
         title: "COST CENTER",
         dataIndex: "costCenterVal",
         sorter: true,
@@ -1302,35 +944,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // render: (text) => {
-        //   if (searchedColumn === "costCenterVal") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
       },
       {
-        key: "no",
+        key: "accSegmentVal",
         title: "ACCOUNT SEGMENT",
         dataIndex: "accSegmentVal",
         sorter: true,
@@ -1355,16 +971,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // ...getColumnSearchPropsPaging(
-        //   "accSegmentVal",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
       },
       {
-        key: "no",
+        key: "meterReadingCodeVal",
         title: "METER READING CODE",
         dataIndex: "meterReadingCodeVal",
         sorter: true,
@@ -1389,16 +998,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // ...getColumnSearchPropsPaging(
-        //   "meterReadingCodeVal",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
       },
       {
-        key: "no",
+        key: "billingCycVal",
         title: "BILLING CYCLE",
         dataIndex: "billingCycVal",
         sorter: true,
@@ -1423,16 +1025,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // ...getColumnSearchPropsPaging(
-        //   "billingCycVal",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
       },
       {
-        key: "no",
+        key: "billingPeriodVal",
         title: "BILLING PERIODE",
         dataIndex: "billingPeriodVal",
         sorter: true,
@@ -1457,16 +1052,9 @@ const CalculationPage = () => {
             "datePeriod",
             search
           ),
-        // ...getColumnSearchPropsPaging(
-        //   "billingPeriodVal",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
       },
       {
-        key: "no",
+        key: "message",
         title: "MESSAGE",
         dataIndex: "message",
         sorter: true,
@@ -1494,35 +1082,9 @@ const CalculationPage = () => {
             "input",
             search
           ),
-        // render: (text) => {
-        //   if (searchedColumn === "message") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
       },
       {
-        key: "no",
+        key: "calculateAt",
         title: "CALCULATE AT",
         dataIndex: "calculateAt",
         sorter: true,
@@ -1547,36 +1109,9 @@ const CalculationPage = () => {
             "datetime",
             search
           ),
-        // ...getColumnSearchPropsPaging(
-        //   "createdDate",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch,
-        //   false,
-        //   "date"
-        // ),
-        // render: (data) => {
-        //   const text = data ? moment(data).format(dateFormatting.dateTime) : "";
-        //   if (searchedColumn === "createdDate") {
-        //     return (
-        //       <Highlighter
-        //         highlightStyle={{
-        //           backgroundColor: "#ffc069",
-        //           padding: 0,
-        //         }}
-        //         searchWords={[searchText]}
-        //         autoEscape
-        //         textToHighlight={text ? text.toString() : ""}
-        //       />
-        //     );
-        //   } else {
-        //     return text || "";
-        //   }
-        // },
       },
       {
-        key: "no",
+        key: "isTry",
         title: "IS TRY",
         dataIndex: "isTry",
         sorter: true,
@@ -1592,13 +1127,11 @@ const CalculationPage = () => {
           true
         ),
         render: (text) => {
-          // Pastikan text dikonversi dengan aman
-          const displayText = text != null ? String(text) : "";
           return renderColumn(
             "isTry",
             hasValue(search["isTry"]),
             searchText,
-            displayText,
+            text?.toString(),
             false,
             "status",
             search
@@ -1606,11 +1139,10 @@ const CalculationPage = () => {
         },
       },
       {
-        key: "no",
+        key: "status",
         title: "STATUS",
         dataIndex: "status",
         align: "center",
-        fixed: "right",
         width: 150,
         sorter: true,
         filteredValue: [search?.status] || null,
@@ -1624,15 +1156,11 @@ const CalculationPage = () => {
           true
         ),
         render: (index) => {
-          // ✅ Tambahkan safety check sebelum toTitleCase
-          if (!index) return "";
-
-          const displayText = toTitleCase(index);
           return renderColumn(
             "status",
             hasValue(search["status"]),
             searchText,
-            displayText,
+            toTitleCase(index),
             false,
             "status",
             search
@@ -1662,6 +1190,7 @@ const CalculationPage = () => {
       breadcrumbName: "Calculation",
     },
   ];
+
   const handleDownload = () => {
     if (tabHeader === "Calculation List") {
       dispatch(
@@ -1683,6 +1212,7 @@ const CalculationPage = () => {
       );
     }
   };
+
   const handleChangePage = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
     setPage(tempPage);
@@ -1801,6 +1331,12 @@ const CalculationPage = () => {
               onChange={handleChangePage}
               tableScrolled={{ x: 6000, y: 600 }}
               onSort={onSort}
+              useFixColumn={true}
+              defaultFixedColumns={{
+                no: "left",
+                status: "right",
+                action: "right",
+              }}
             />
           </div>
         </BaseContainer>

@@ -602,23 +602,27 @@ export const createPrabilling = createAsyncThunk(
 export const getListPrabillingInitPopulate = createAsyncThunk(
   "GET_LIST_PRABILLING_INIT_POPULATE",
   async (
-    { page = 0, size = 10, searchs = {}, sort = "createdDtm,desc" },
+    { page = 0, size = 10, search = "", sort = "createdDtm~desc" },
     thunkAPI
   ) => {
     try {
-      const searchParam =
-        Object.keys(searchs).length > 0
-          ? `&searchs=${encodeURIComponent(JSON.stringify(searchs))}`
-          : "&searchs=%7B%7D";
+      // Simple search - langsung pakai string, BUKAN JSON
+      const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
       const url = `/v1/dbs/api/prabill-init-populate/list?page=${page}&size=${size}&sort=${sort}${searchParam}`;
+      
+      console.log("🔍 Request URL:", url);
+      console.log("🔍 Search keyword:", search);
+      
       const response = await ratingBillingHttpService.getAll(
         url,
         CUSTOM_BASE_URL
       );
+      
       const contentType = response.headers?.["content-type"];
       if (contentType && contentType.includes("text/html")) {
         throw new Error("Received HTML response instead of JSON");
       }
+      
       const responseData = response.data?.data || response.data;
 
       if (!responseData || !Array.isArray(responseData.content)) {
@@ -661,6 +665,7 @@ export const getListPrabillingInitPopulate = createAsyncThunk(
     }
   }
 );
+
 
 // Get Log Activities
 export const getLogActivities = createAsyncThunk(
@@ -947,12 +952,6 @@ export const getDetailPrabillingLog = createAsyncThunk(
         throw new Error("Invalid log data format received from server");
       }
 
-      console.log("Extracted Log Data:", {
-        content: responseData.content.length,
-        totalPages: responseData.totalPages,
-        totalElements: responseData.totalElements,
-      });
-
       return {
         content: responseData.content,
         pageable: responseData.pageable,
@@ -1029,7 +1028,7 @@ export const getCustomerAccountDetail = createAsyncThunk(
 
       const responseData = response.data?.data || response.data;
 
-      // Validasi struktur response baru
+      // Validasi struktur response
       if (!responseData) {
         console.error("Invalid response structure:", responseData);
         throw new Error("Invalid data format received from server");
@@ -1039,32 +1038,55 @@ export const getCustomerAccountDetail = createAsyncThunk(
       const dataUsage = responseData.dataUsage || [];
       const dataTaxImp = responseData.dataTaxImp || [];
       const dataSaPrcrule = responseData.dataSaPrcrule || [];
+      const dataSATosDet = responseData.dataSATosDet || [];
+      const dataTosSubDet = responseData.dataTosSubDet || [];
 
       console.log("Data Summary:", {
         totalDetailRecords: dataDetail.length,
         totalUsageRecords: dataUsage.length,
         totalTaxRecords: dataTaxImp.length,
         totalPricingTiers: dataSaPrcrule.length,
+        totalSATosRecords: dataSATosDet.length,
+        totalTosSubRecords: dataTosSubDet.length,
       });
 
-      const usageMap = new Map();
-      dataUsage.forEach((item) => {
-        const key = item.measDate;
-        if (!usageMap.has(key)) {
-          usageMap.set(key, item);
-        }
-      });
-      const uniqueUsageData = Array.from(usageMap.values());
+      // Process Usage Data - Menampilkan semua field termasuk yang null
+      const usageData = dataUsage.map((item) => ({
+        assetSerialNum: item.assetSerialNum,
+        assetType: item.assetType,
+        stream: item.stream,
+        temperature: item.temperature,
+        pressure: item.pressure,
+        correctionFactor: item.correctionFactor,
+        calorie: item.calorie,
+        beginStand: item.beginStand,
+        endStand: item.endStand,
+        engMeasured: item.engMeasured,
+        energy: item.energy,
+        ghv: item.ghv,
+        description: item.description,
+        taxation: item.taxation,
+        volMeasured27: item.volMeasured27,
+        volMeasured60: item.volMeasured60,
+        volMscf: item.volMscf,
+        measDate: item.measDate,
+        costCenter: item.costCenter,
+        usageInitCode: item.usageInitCode,
+        uncorrectedValue: item.uncorrectedValue,
+        ratingCode: item.ratingCode,
+      }));
 
+      // Process Tax Data
       const taxData = dataTaxImp.map((item) => ({
         category: item.category,
         taxImpName: item.taxImpName,
         serviceType: item.serviceType,
         impType: item.impType,
         gunggung: item.gunggung,
-        ratingCode: item.ratingCode || "-",
+        ratingCode: item.ratingCode,
       }));
 
+      // Process Pricing Data
       const pricingData = dataSaPrcrule.map((item) => ({
         lineNumber: item.lineNumber,
         priceCode: item.priceCodeRule || item.priceCode,
@@ -1075,6 +1097,7 @@ export const getCustomerAccountDetail = createAsyncThunk(
         priceCurrency: item.priceCurrency,
       }));
 
+      // Process SA Data - Group by saNumber to avoid duplicates
       const saMap = new Map();
       dataDetail.forEach((item) => {
         if (!saMap.has(item.saNumber)) {
@@ -1104,19 +1127,39 @@ export const getCustomerAccountDetail = createAsyncThunk(
       });
       const saData = Array.from(saMap.values());
 
+      // Process SA TOS Detail - Menampilkan semua field termasuk yang null
+      const saTosDet = dataSATosDet.map((item) => ({
+        saTosName: item.saTosName,
+        attributeName: item.attributeName,
+        value: item.value,
+      }));
+
+      // Process TOS Sub Detail - Menampilkan semua field termasuk yang null
+      const tosSubDet = dataTosSubDet.map((item) => ({
+        tosName: item.tosName,
+        attributeName: item.attributeName,
+        unit: item.unit,
+        value: item.value,
+        fromItem: item.fromItem,
+      }));
+
       console.log("Processed Data Summary:", {
-        uniqueUsageData: uniqueUsageData.length,
+        usageData: usageData.length,
         taxData: taxData.length,
         pricingData: pricingData.length,
         saData: saData.length,
+        saTosDet: saTosDet.length,
+        tosSubDet: tosSubDet.length,
       });
 
       return {
         rawContent: dataDetail,
-        usageData: uniqueUsageData,
+        usageData: usageData,
         taxData: taxData,
         pricingData: pricingData,
         saData: saData,
+        saTosDet: saTosDet,
+        tosSubDet: tosSubDet,
         totalPages: 1,
         totalElements: dataUsage.length,
       };

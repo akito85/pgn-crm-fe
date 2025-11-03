@@ -1,16 +1,7 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  Spin,
-  Tooltip,
-  Button,
-  Dropdown,
-  Checkbox,
-  Radio,
-  Divider,
-} from "antd";
+import { Spin, Tooltip, Input } from "antd";
 import { Link, NavLink } from "react-router-dom";
-import { SettingOutlined, PushpinOutlined } from "@ant-design/icons";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -18,12 +9,12 @@ import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import { getListPrabillingInitPopulate } from "../../../../redux/slices/rating_billing_invoice/praBilling";
-import { hasValue, renderColumn } from "../../../../utils";
-import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import moment from "moment";
+
+const { Search } = Input;
 
 const PrabillingPage = () => {
   const { loading, list_prabilling_init, prabilling_pagination } = useSelector(
@@ -31,71 +22,34 @@ const PrabillingPage = () => {
   );
 
   const dispatch = useDispatch();
-  const searchInput = useRef(null);
-
-  // Column fixing state
-  const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
-    initCode: "left",
-    status: "right",
-  });
-  const [columnFixDropdownVisible, setColumnFixDropdownVisible] =
-    useState(false);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [searchs, setSearchs] = useState({});
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [sort, setSort] = useState("createdDtm~desc");
 
   useEffect(() => {
     const backendPage = page - 1;
 
-    const filteredSearchs = Object.entries(searchs)
-      .filter(([_, value]) => value && value.trim() !== "")
-      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
-
-    const searchString =
-      Object.keys(filteredSearchs).length > 0
-        ? JSON.stringify(filteredSearchs)
-        : "";
-
-    console.log("Dispatching with params:", {
-      search: searchString,
+    console.log("🔍 Fetching data with:", {
       page: backendPage,
-      pageSize,
+      size: pageSize,
       sort,
+      search: searchKeyword,
     });
 
     dispatch(
       getListPrabillingInitPopulate({
-        search: searchString,
+        search: searchKeyword,
         page: backendPage,
         size: pageSize,
         sort: sort,
       })
     );
-  }, [dispatch, page, pageSize, searchs, sort]);
+  }, [dispatch, page, pageSize, searchKeyword, sort]);
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setPage(1);
-    setSearchs((prevState) => ({
-      ...prevState,
-      [dataIndex]: selectedKeys[0],
-    }));
-  };
-
-  const handleReset = (clearFilters, dataIndex) => {
-    clearFilters();
-    setSearchs((prevState) => {
-      const newSearch = { ...prevState };
-      delete newSearch[dataIndex];
-      return newSearch;
-    });
+  const handleGlobalSearch = (value) => {
+    setSearchKeyword(value);
     setPage(1);
   };
 
@@ -115,26 +69,6 @@ const PrabillingPage = () => {
         sorter: true,
         align: "left",
         width: 250,
-        filteredValue: [searchs?.initCode] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          searchs,
-          "initCode",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "initCode",
-            hasValue(searchs["initCode"]),
-            searchText,
-            text,
-            false,
-            "input",
-            searchs
-          ),
       },
       {
         key: "sor",
@@ -143,29 +77,14 @@ const PrabillingPage = () => {
         align: "left",
         sorter: true,
         width: 300,
-        filteredValue: [searchs?.sor] || null,
         ellipsis: {
           showTitle: false,
         },
-        ...getColumnSearchPropsUseFilteredValue(
-          searchs,
-          "sor",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
+        render: (text) => (
+          <Tooltip placement="topLeft" title={text}>
+            {text || "-"}
+          </Tooltip>
         ),
-        render: (text) =>
-          renderColumn(
-            "sor",
-            hasValue(searchs["sor"]),
-            searchText,
-            text,
-            true,
-            "input",
-            searchs
-          ),
       },
       {
         key: "billingCycle",
@@ -173,26 +92,6 @@ const PrabillingPage = () => {
         dataIndex: "billingCycle",
         align: "center",
         sorter: true,
-        filteredValue: [searchs?.billingCycle] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          searchs,
-          "billingCycle",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "billingCycle",
-            hasValue(searchs["billingCycle"]),
-            searchText,
-            text,
-            false,
-            "input",
-            searchs
-          ),
       },
       {
         key: "billPeriod",
@@ -200,26 +99,6 @@ const PrabillingPage = () => {
         dataIndex: "billPeriod",
         align: "center",
         sorter: true,
-        filteredValue: [searchs?.billPeriod] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          searchs,
-          "billPeriod",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "billPeriod",
-            hasValue(searchs["billPeriod"]),
-            searchText,
-            text,
-            false,
-            "input",
-            searchs
-          ),
       },
       {
         key: "processName",
@@ -227,26 +106,6 @@ const PrabillingPage = () => {
         dataIndex: "processName",
         align: "left",
         sorter: true,
-        filteredValue: [searchs?.processName] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          searchs,
-          "processName",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "processName",
-            hasValue(searchs["processName"]),
-            searchText,
-            text,
-            false,
-            "input",
-            searchs
-          ),
       },
       {
         key: "createdBy",
@@ -254,26 +113,6 @@ const PrabillingPage = () => {
         dataIndex: "createdBy",
         align: "center",
         sorter: true,
-        filteredValue: [searchs?.createdBy] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          searchs,
-          "createdBy",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "createdBy",
-            hasValue(searchs["createdBy"]),
-            searchText,
-            text,
-            false,
-            "input",
-            searchs
-          ),
       },
       {
         key: "createdDtm",
@@ -281,30 +120,8 @@ const PrabillingPage = () => {
         dataIndex: "createdDtm",
         align: "center",
         sorter: true,
-        filteredValue: [searchs?.createdDtm] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          searchs,
-          "createdDtm",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) => {
-          const formattedDate = text
-            ? moment(text).format("DD MMM YYYY HH:mm:ss")
-            : "-";
-          return renderColumn(
-            "createdDtm",
-            hasValue(searchs["createdDtm"]),
-            searchText,
-            formattedDate,
-            false,
-            "input",
-            searchs
-          );
-        },
+        render: (text) =>
+          text ? moment(text).format("DD MMM YYYY HH:mm:ss") : "-",
       },
       {
         key: "message",
@@ -312,29 +129,14 @@ const PrabillingPage = () => {
         dataIndex: "message",
         align: "left",
         sorter: true,
-        filteredValue: [searchs?.message] || null,
         ellipsis: {
           showTitle: false,
         },
-        ...getColumnSearchPropsUseFilteredValue(
-          searchs,
-          "message",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
+        render: (text) => (
+          <Tooltip placement="topLeft" title={text}>
+            {text || "-"}
+          </Tooltip>
         ),
-        render: (text) =>
-          renderColumn(
-            "message",
-            hasValue(searchs["message"]),
-            searchText,
-            text,
-            true,
-            "input",
-            searchs
-          ),
       },
       {
         key: "totalCustomer",
@@ -350,29 +152,14 @@ const PrabillingPage = () => {
         dataIndex: "remark",
         align: "left",
         sorter: true,
-        filteredValue: [searchs?.remark] || null,
         ellipsis: {
           showTitle: false,
         },
-        ...getColumnSearchPropsUseFilteredValue(
-          searchs,
-          "remark",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
+        render: (text) => (
+          <Tooltip placement="topLeft" title={text}>
+            {text || "-"}
+          </Tooltip>
         ),
-        render: (text) =>
-          renderColumn(
-            "remark",
-            hasValue(searchs["remark"]),
-            searchText,
-            text,
-            true,
-            "input",
-            searchs
-          ),
       },
       {
         key: "status",
@@ -403,203 +190,7 @@ const PrabillingPage = () => {
         },
       },
     ],
-    [page, pageSize, searchs, searchText, searchedColumn]
-  );
-
-  const handleColumnFixChange = (columnKey, checked) => {
-    if (checked) {
-      const columnIndex = allColumnDefinitions.findIndex(
-        (col) => col.key === columnKey
-      );
-      const isLastColumn = columnIndex === allColumnDefinitions.length - 1;
-
-      let defaultPosition = "left";
-      if (isLastColumn) {
-        defaultPosition = "right";
-      }
-
-      setFixedColumns((prev) => ({ ...prev, [columnKey]: defaultPosition }));
-    } else {
-      const newFixed = { ...fixedColumns };
-      delete newFixed[columnKey];
-      setFixedColumns(newFixed);
-    }
-  };
-
-  const handleColumnPositionChange = (columnKey, position) => {
-    setFixedColumns((prev) => ({ ...prev, [columnKey]: position }));
-  };
-
-  const canFixLeft = (columnIndex) => {
-    return columnIndex !== allColumnDefinitions.length - 1;
-  };
-
-  const canFixRight = (columnIndex) => {
-    return columnIndex !== 0;
-  };
-
-  const columnPrabillingInit = useMemo(() => {
-    const leftFixed = [];
-    const rightFixed = [];
-    const normal = [];
-
-    allColumnDefinitions.forEach((col) => {
-      const fixedPos = fixedColumns[col.key];
-      const colWithFixed = { ...col, fixed: fixedPos || undefined };
-
-      if (fixedPos === "left") {
-        leftFixed.push(colWithFixed);
-      } else if (fixedPos === "right") {
-        rightFixed.push(colWithFixed);
-      } else {
-        normal.push(colWithFixed);
-      }
-    });
-
-    return [...leftFixed, ...normal, ...rightFixed];
-  }, [allColumnDefinitions, fixedColumns]);
-
-  const columnFixMenu = (
-    <div
-      style={{
-        padding: "12px",
-        minWidth: "320px",
-        maxHeight: "500px",
-        overflowY: "auto",
-        border: "1px solid #ddd",
-        borderRadius: "6px",
-        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-        backgroundColor: "#fff",
-      }}
-    >
-      <div
-        style={{
-          marginBottom: "12px",
-          fontWeight: "600",
-          fontSize: "14px",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          color: "#262626",
-        }}
-      >
-        <PushpinOutlined />
-        Fix Columns Position
-      </div>
-      <Divider style={{ margin: "8px 0" }} />
-
-      {allColumnDefinitions.map((col, index) => {
-        const isFixed = !!fixedColumns[col.key];
-        const position = fixedColumns[col.key] || "left";
-        const isFirstColumn = index === 0;
-        const isLastColumn = index === allColumnDefinitions.length - 1;
-
-        return (
-          <div
-            key={col.key}
-            style={{
-              marginBottom: "16px",
-              padding: "12px",
-              backgroundColor: isFixed ? "#f0f5ff" : "#fafafa",
-              borderRadius: "6px",
-              border: isFixed ? "1px solid #d6e4ff" : "1px solid #f0f0f0",
-              transition: "all 0.3s",
-            }}
-          >
-            <div style={{ marginBottom: isFixed ? "8px" : "0" }}>
-              <Checkbox
-                checked={isFixed}
-                onChange={(e) =>
-                  handleColumnFixChange(col.key, e.target.checked)
-                }
-                style={{ fontWeight: "500" }}
-              >
-                {col.title}
-              </Checkbox>
-            </div>
-
-            {isFixed && (
-              <div
-                style={{
-                  marginLeft: "24px",
-                  marginTop: "8px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    marginBottom: "4px",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "12px",
-                      color: "#595959",
-                      fontWeight: "500",
-                    }}
-                  >
-                    Position:
-                  </span>
-                  <Radio.Group
-                    value={position}
-                    onChange={(e) =>
-                      handleColumnPositionChange(col.key, e.target.value)
-                    }
-                    size="small"
-                    buttonStyle="solid"
-                    style={{ display: "flex", gap: "6px" }}
-                  >
-                    <Radio.Button value="left" disabled={!canFixLeft(index)}>
-                      Left
-                    </Radio.Button>
-                    <Radio.Button value="right" disabled={!canFixRight(index)}>
-                      Right
-                    </Radio.Button>
-                  </Radio.Group>
-                </div>
-                {(isFirstColumn || isLastColumn) && (
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      color: "#8c8c8c",
-                      marginTop: "4px",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    {isFirstColumn && "* First column can only be fixed left"}
-                    {isLastColumn && "* Last column can only be fixed right"}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })}
-
-      <Divider style={{ margin: "12px 0" }} />
-
-      <div
-        style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}
-      >
-        <Button
-          size="small"
-          onClick={() => setFixedColumns({})}
-          style={{ flex: 1 }}
-        >
-          Clear All
-        </Button>
-        <Button
-          size="small"
-          type="primary"
-          onClick={() => setColumnFixDropdownVisible(false)}
-          style={{ flex: 1 }}
-        >
-          Done
-        </Button>
-      </div>
-    </div>
+    [page, pageSize]
   );
 
   const routes = [
@@ -614,8 +205,6 @@ const PrabillingPage = () => {
   ];
 
   const handleChangePage = (pageChange, pageSizeChange) => {
-    console.log("Page change:", { pageChange, pageSizeChange });
-
     if (pageSize !== pageSizeChange) {
       setPage(1);
       setPageSize(pageSizeChange);
@@ -625,12 +214,9 @@ const PrabillingPage = () => {
   };
 
   const handleTableChange = (pagination, filters, sorter) => {
-    console.log("Table change:", { pagination, filters, sorter });
-
     if (sorter.field && sorter.order) {
       const sortDirection = sorter.order === "ascend" ? "asc" : "desc";
       setSort(`${sorter.field}~${sortDirection}`);
-      console.log("Sort changed to:", `${sorter.field}~${sortDirection}`);
     } else {
       setSort("createdDtm~desc");
     }
@@ -677,8 +263,8 @@ const PrabillingPage = () => {
   );
 
   const columns = useMemo(() => {
-    return [...columnPrabillingInit, ...columnActionPermission];
-  }, [columnPrabillingInit, columnActionPermission]);
+    return [...allColumnDefinitions, ...columnActionPermission];
+  }, [allColumnDefinitions, columnActionPermission]);
 
   return (
     <Spin spinning={loading}>
@@ -689,20 +275,44 @@ const PrabillingPage = () => {
           <Toolbar items={itemGrantAccess} />
         </div>
 
-        <BaseContainer header={"PRABILLING JOB LIST"}>
-          {/* Fix Columns Button di dalam container */}
-          <div className="w-full flex justify-end mb-3">
-            <Dropdown
-              overlay={columnFixMenu}
-              trigger={["click"]}
-              visible={columnFixDropdownVisible}
-              onVisibleChange={setColumnFixDropdownVisible}
-              placement="bottomRight"
-            >
-              <Button icon={<SettingOutlined />}>
-                Fix Columns ({Object.keys(fixedColumns).length})
-              </Button>
-            </Dropdown>
+        <BaseContainer header={"PRABILLING LIST"}>
+          {/* Search bar di dalam container, di atas tabel */}
+          <div className="mb-3 flex justify-end">
+            <Input
+              placeholder="Search..."
+              allowClear
+              size="middle"
+              value={searchKeyword}
+              onChange={(e) => {
+                setSearchKeyword(e.target.value);
+                if (e.target.value === "") handleGlobalSearch("");
+              }}
+              onPressEnter={(e) => handleGlobalSearch(e.target.value)}
+              prefix={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="#999"
+                  style={{ width: 18, height: 18 }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 3a7.5 7.5 0 006.15 13.65z"
+                  />
+                </svg>
+              }
+              style={{
+                width: 280,
+                borderRadius: "9999px",
+                boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
+                padding: "6px 12px",
+                backgroundColor: "#fff",
+                transition: "all 0.3s ease",
+              }}
+            />
           </div>
 
           <div className="my-5">
@@ -716,6 +326,12 @@ const PrabillingPage = () => {
               onTableChange={handleTableChange}
               tableScrolled={{ x: 2500, y: 600 }}
               rowKey={(record) => record.initId}
+              useFixColumn={true}
+              defaultFixedColumns={{
+                no: "left",
+                status: "right",
+                action: "right",
+              }}
             />
           </div>
         </BaseContainer>
