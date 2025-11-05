@@ -7,6 +7,8 @@ import {
   validateError,
 } from "../general_slice";
 
+const CUSTOM_BASE_URL = process.env.REACT_APP_BASE_URL_NGROK;
+
 const initialState = {
   data: [],
   loading: false,
@@ -99,7 +101,13 @@ export const donwloadedExcel = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_CALCULATION_EXCEL", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_CALCULATION_EXCEL",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -115,7 +123,13 @@ export const donwloadedHistoryExcel = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_CALCULATION_HISTORY_EXCEL", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_CALCULATION_HISTORY_EXCEL",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -175,17 +189,33 @@ export const getListServiceType = createAsyncThunk(
 
 export const getListAccountGroup = createAsyncThunk(
   "GET_LIST_ACCOUNT_GROUP",
-  async (body, thunkAPI) => {
+  async (segmentIds, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/calculation/accountgrouptype`;
-      const response = await ratingBillingHttpService.activationWithRemark(
+      let queryParams = "";
+      if (segmentIds && Array.isArray(segmentIds) && segmentIds.length > 0) {
+        queryParams = segmentIds.map((id) => `idSegment=${id}`).join("&");
+      }
+
+      const url = `/v1/dbs/api/account-group-type/list${
+        queryParams ? `?${queryParams}` : ""
+      }`;
+
+      const response = await ratingBillingHttpService.getAll(
         url,
-        body
+        CUSTOM_BASE_URL
       );
-      return response.Data;
+
+      const accountGroups = Array.isArray(response)
+        ? response
+        : Array.isArray(response.data)
+        ? response.data
+        : [];
+
+      return accountGroups;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
+
       if (
         error?.response?.data?.code === 500 ||
         error?.response?.data?.code === 419
@@ -198,7 +228,7 @@ export const getListAccountGroup = createAsyncThunk(
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
-      return error;
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
@@ -339,10 +369,11 @@ export const getListSpecificCustomer = createAsyncThunk(
   "GET_LIST_SPECIFIC_CUSTOMER",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/calculation/speccustacc`;
+      const url = `/v1/dbs/api/customer-accounts`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
+        CUSTOM_BASE_URL
       );
       return response.data;
     } catch (error) {
@@ -360,7 +391,7 @@ export const getListSpecificCustomer = createAsyncThunk(
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
-      return error;
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
@@ -368,9 +399,27 @@ export const getListBillingCycle = createAsyncThunk(
   "GET_LIST_BILLING_CYCLE",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/calculation/billingcycle`;
-      const response = await ratingBillingHttpService.getAll(url);
-      return response.data;
+      const url = `/v1/dbs/api/billing-cycle/list`;
+      const response = await ratingBillingHttpService.getAll(
+        url,
+        CUSTOM_BASE_URL
+      );
+
+      console.log("Raw Response:", response); // Debug log
+
+      const rawData = response?.body?.data?.data || response?.data?.data || [];
+
+      console.log("Raw Data Array:", rawData);
+
+      const transformedData = rawData.map((item) => ({
+        id: item.id,
+        name: item.name,
+        ...item,
+      }));
+
+      console.log("Transformed Data:", transformedData);
+
+      return transformedData;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -386,7 +435,7 @@ export const getListBillingCycle = createAsyncThunk(
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
-      return error;
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
@@ -801,24 +850,32 @@ const calculationSlice = createSlice({
     // lov account group
     [getListAccountGroup.pending]: (state, action) => {
       state.loading = true;
+      state.list_account_group = [];
     },
     [getListAccountGroup.fulfilled]: (state, action) => {
       state.loading = false;
-      state.list_account_group = action.payload;
+      state.list_account_group = action.payload || [];
     },
     [getListAccountGroup.rejected]: (state, action) => {
       state.loading = false;
+      state.list_account_group = [];
     },
     // lov specific customer
     [getListSpecificCustomer.pending]: (state, action) => {
-      state.loading = true;
+      state.loading_specific_customer = true;
     },
     [getListSpecificCustomer.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.list_specific_customer = action.payload;
+      state.loading_specific_customer = false;
+      const responseData = action.payload?.data || action.payload || [];
+      state.list_specific_customer = Array.isArray(responseData)
+        ? responseData
+        : [];
+      state.specific_customer_message = action.payload?.message || "";
     },
     [getListSpecificCustomer.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_specific_customer = false;
+      state.list_specific_customer = [];
+      state.specific_customer_message = "";
     },
     // lov billing cycle
     [getListBillingCycle.pending]: (state, action) => {
@@ -830,6 +887,7 @@ const calculationSlice = createSlice({
     },
     [getListBillingCycle.rejected]: (state, action) => {
       state.loading = false;
+      state.list_billing_cycle = [];
     },
     // lov billing period
     [getListBillingPeriod.pending]: (state, action) => {

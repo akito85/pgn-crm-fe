@@ -7,23 +7,24 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
 } from "@ant-design/icons";
-import ButtonComponent from "../../../../components/ButtonComponent";
-import ModalCustom from "../../../../components/Modal/ModalCustom";
-import InputComponent from "../../../../components/InputComponent";
-import { ModalError, ModalSuccess } from "../../../../components/Modal/ModalPopUp";
-import { IconModal } from "../../../../utils/Icon";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import InputComponent from "../../../../../components/InputComponent";
+import { ModalError, ModalSuccess } from "../../../../../components/Modal/ModalPopUp";
+import { IconModal } from "../../../../../utils/Icon";
+// import { uploadEFakturFromDJP } from "../../../../../redux/slices/rating_billing_invoice/efakturSlice";
 
 const { Dragger } = Upload;
 
 const ModalUploadEFaktur = ({
   isOpen = false,
   handleClose = () => {},
-  noFaktur = "",
+  billingData = null, 
   onSuccess = () => {},
 }) => {
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.billing);
+  const { loading_modal } = useSelector((state) => state.efaktur);
 
   // State
   const [fileList, setFileList] = useState([]);
@@ -52,7 +53,12 @@ const ModalUploadEFaktur = ({
 
       // Validasi format file
       const isPDFOrXML =
-        file.type === "application/pdf" || file.type === "text/xml" || file.name.endsWith(".xml");
+        file.type === "application/pdf" || 
+        file.type === "text/xml" || 
+        file.type === "application/xml" ||
+        file.name.endsWith(".xml") ||
+        file.name.endsWith(".pdf");
+      
       if (!isPDFOrXML) {
         setErrorMessage("Hanya file PDF atau XML yang diperbolehkan!");
         setModalError(true);
@@ -60,7 +66,7 @@ const ModalUploadEFaktur = ({
       }
 
       setFileList([...fileList, file]);
-      return false; // Prevent auto upload
+      return false; 
     },
     onRemove: (file) => {
       const newFileList = fileList.filter((item) => item.uid !== file.uid);
@@ -76,79 +82,68 @@ const ModalUploadEFaktur = ({
       return;
     }
 
+    if (!billingData?.billingCode) {
+      setErrorMessage("Data billing tidak valid!");
+      setModalError(true);
+      return;
+    }
+
     setUploading(true);
     setUploadProgress(0);
 
-    // Simulasi upload dengan progress
+    // Progress bar simulation
     const interval = setInterval(() => {
       setUploadProgress((prev) => {
-        if (prev >= 100) {
+        if (prev >= 90) {
           clearInterval(interval);
-          return 100;
+          return 90;
         }
         return prev + 10;
       });
     }, 200);
 
-    // Simulasi proses upload
-    setTimeout(() => {
-      try {
-        // Prepare data untuk upload
-        const formData = new FormData();
-        fileList.forEach((file) => {
-          formData.append("files", file);
-        });
-        formData.append("noFaktur", noFaktur);
-        formData.append("keterangan", keterangan);
+    // Prepare FormData
+    const formData = new FormData();
+    fileList.forEach((file) => {
+      formData.append("files", file);
+    });
+    formData.append("billingCode", billingData.billingCode);
+    formData.append("keterangan", keterangan);
 
-        // TODO: Dispatch action untuk upload dan update status
-        // dispatch(uploadEFakturDJP(formData))
-        //   .unwrap()
-        //   .then((response) => {
-        //     // Update status E-Faktur menjadi SUCCESS
-        //     dispatch(updateStatusEFaktur({ 
-        //       noFaktur, 
-        //       status: "SUCCESS",
-        //       files: response.files 
-        //     }));
-        //     setUploadedFiles(response.files);
-        //     setModalSuccess(true);
-        //     setUploading(false);
-        //   })
-        //   .catch((error) => {
-        //     setErrorMessage(error.message);
-        //     setModalError(true);
-        //     setUploading(false);
-        //   });
-
-        // Simulasi hasil upload
-        const uploadResult = fileList.map((file, index) => ({
+    // Dispatch action untuk upload
+    dispatch(uploadEFakturFromDJP(formData))
+      .unwrap()
+      .then((response) => {
+        clearInterval(interval);
+        setUploadProgress(100);
+        
+        // Format uploaded files untuk ditampilkan
+        const uploadResult = response.files.map((file, index) => ({
           key: index + 1,
-          fileName: file.name,
-          fileSize: (file.size / 1024).toFixed(2) + " KB",
-          fileType: file.name.endsWith(".pdf") ? "PDF" : "XML",
+          fileName: file.fileName,
+          fileSize: file.fileSize,
+          fileType: file.fileType,
           status: "success",
-          url: `https://storage.minio.example.com/efaktur/${noFaktur}/${file.name}`,
-          uploadedAt: new Date().toLocaleString("id-ID"),
+          url: file.url,
+          uploadedAt: new Date(file.uploadedAt).toLocaleString("id-ID"),
         }));
 
         setUploadedFiles(uploadResult);
         setModalSuccess(true);
         setUploading(false);
+      })
+      .catch((error) => {
         clearInterval(interval);
-        
-        console.log("Status E-Faktur akan diupdate menjadi SUCCESS");
-      } catch (error) {
-        setErrorMessage("Gagal upload file: " + error.message);
+        setErrorMessage(error?.message || "Gagal upload file");
         setModalError(true);
         setUploading(false);
-        clearInterval(interval);
-      }
-    }, 2500);
+        setUploadProgress(0);
+      });
   };
 
-  // Handle Cancel
   const handleCancel = () => {
+    if (uploading) return; // Prevent closing while uploading
+    
     form.resetFields();
     setFileList([]);
     setUploadedFiles([]);
@@ -235,51 +230,69 @@ const ModalUploadEFaktur = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Upload E-Faktur dari DJP CoreTax"
+        header="Upload E-Faktur"
         handleCancel={handleCancel}
-        width={900}
+        width={800}
         footer={
           <div className="flex justify-end gap-3">
-            <ButtonComponent type="default" onClick={handleCancel} disabled={uploading}>
-              Batal
-            </ButtonComponent>
-            <ButtonComponent
-              type="submit"
-              onClick={handleUpload}
-              loading={uploading}
-              disabled={fileList.length === 0 || uploading}
+            <ButtonComponent 
+              type="default" 
+              onClick={handleCancel} 
+              disabled={uploading}
             >
-              {uploading ? "Uploading..." : "Upload ke Min.io"}
+              {uploadedFiles.length > 0 ? "Tutup" : "Batal"}
             </ButtonComponent>
+            {uploadedFiles.length === 0 && (
+              <ButtonComponent
+                type="submit"
+                onClick={handleUpload}
+                loading={uploading}
+                disabled={fileList.length === 0 || uploading}
+              >
+                {uploading ? "Uploading..." : "Upload"}
+              </ButtonComponent>
+            )}
           </div>
         }
       >
         <div className="my-6">
-          <Alert
-            message="Upload E-Faktur dari DJP CoreTax"
-            description="Upload file E-Faktur (PDF/XML) yang telah diunduh dari aplikasi e-Faktur DJP CoreTax. File akan disimpan ke object storage (Min.io)."
-            type="info"
-            showIcon
-            className="mb-6"
-          />
 
-          {/* Informasi E-Faktur */}
+          {/* Informasi Billing */}
           <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <h3 className="text-sm font-bold text-gray-700 mb-3">
+              Informasi Billing
+            </h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">
-                  No. Faktur:
+                <label className="text-xs font-medium text-gray-600">
+                  Billing Code:
                 </label>
-                <p className="text-base font-semibold text-gray-900 mt-1">
-                  {noFaktur}
+                <p className="text-sm font-semibold text-gray-900 mt-1">
+                  {billingData?.billingCode || "-"}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Status:
+                <label className="text-xs font-medium text-gray-600">
+                  Customer:
                 </label>
-                <p className="text-base font-semibold text-orange-600 mt-1">
-                  Menunggu Upload
+                <p className="text-sm font-semibold text-gray-900 mt-1">
+                  {billingData?.customerName || "-"}
+                </p>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-600">
+                  Status E-Faktur:
+                </label>
+                <p className="text-sm font-semibold text-gray-600 mt-1">
+                  {billingData?.eFakturStatus || "FAILED"}
+                </p>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-600">
+                  Total Amount:
+                </label>
+                <p className="text-sm font-semibold text-gray-900 mt-1">
+                  Rp {billingData?.totalAmountEqvIdrReal?.toLocaleString("id-ID") || "0"}
                 </p>
               </div>
             </div>
@@ -288,7 +301,7 @@ const ModalUploadEFaktur = ({
           <Form form={form} layout="vertical">
             {/* Upload Area */}
             <Form.Item label="Upload File E-Faktur (PDF/XML)">
-              <Dragger {...uploadProps} disabled={uploading}>
+              <Dragger {...uploadProps} disabled={uploading || uploadedFiles.length > 0}>
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined style={{ color: "#1890ff" }} />
                 </p>
@@ -311,7 +324,7 @@ const ModalUploadEFaktur = ({
                 value={keterangan}
                 onChange={(e) => setKeterangan(e.target.value)}
                 placeholder="Masukkan keterangan upload (opsional)"
-                disabled={uploading}
+                disabled={uploading || uploadedFiles.length > 0}
               />
             </Form.Item>
 
@@ -324,12 +337,19 @@ const ModalUploadEFaktur = ({
                 <Progress
                   percent={uploadProgress}
                   status={uploadProgress === 100 ? "success" : "active"}
+                  strokeColor={{
+                    '0%': '#108ee9',
+                    '100%': '#52c41a',
+                  }}
                 />
+                <p className="text-xs text-gray-500 mt-2">
+                  Uploading {fileList.length} file(s)
+                </p>
               </div>
             )}
 
             {/* File List Preview */}
-            {fileList.length > 0 && !uploading && (
+            {fileList.length > 0 && !uploading && uploadedFiles.length === 0 && (
               <div className="mb-6">
                 <p className="text-sm font-medium text-gray-700 mb-3">
                   File yang akan diupload ({fileList.length}):
@@ -369,7 +389,16 @@ const ModalUploadEFaktur = ({
               <div className="mt-6">
                 <Alert
                   message="Upload Berhasil!"
-                  description={`${uploadedFiles.length} file berhasil diupload ke Min.io storage.`}
+                  description={
+                    <div>
+                      <p className="mb-2">
+                        {uploadedFiles.length} file berhasil diupload
+                      </p>
+                      <p className="font-semibold text-green-700">
+                        Status E-Faktur akan berubah
+                      </p>
+                    </div>
+                  }
                   type="success"
                   showIcon
                   className="mb-4"
@@ -387,24 +416,29 @@ const ModalUploadEFaktur = ({
           </Form>
 
           {/* Panduan Upload */}
-          <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <h4 className="font-semibold text-sm text-yellow-800 mb-2">
-              Panduan Upload:
-            </h4>
-            <ul className="text-xs text-yellow-700 space-y-1 list-disc list-inside">
-              <li>
-                Download file E-Faktur (PDF/XML) dari aplikasi e-Faktur DJP CoreTax
-              </li>
-              <li>Pastikan file format PDF atau XML dengan ukuran maksimal 10MB</li>
-              <li>
-                Anda dapat mengupload multiple files sekaligus (misal: PDF dan XML)
-              </li>
-              <li>File akan disimpan ke object storage (Min.io) dengan enkripsi</li>
-              <li>
-                Setelah upload berhasil, file dapat diakses melalui menu detail E-Faktur
-              </li>
-            </ul>
-          </div>
+          {/* {uploadedFiles.length === 0 && (
+            <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <h4 className="font-semibold text-sm text-yellow-800 mb-2">
+                Panduan Upload:
+              </h4>
+              <ul className="text-xs text-yellow-700 space-y-1 list-disc list-inside">
+                <li>
+                  Download file E-Faktur (PDF/XML) dari aplikasi e-Faktur DJP CoreTax
+                </li>
+                <li>Pastikan file format PDF atau XML dengan ukuran maksimal 10MB</li>
+                <li>
+                  Anda dapat mengupload multiple files sekaligus (misal: PDF dan XML)
+                </li>
+                <li>File akan disimpan ke object storage (Min.io) dengan enkripsi</li>
+                <li>
+                  Status E-Faktur akan otomatis berubah dari FAILED → SUCCESS setelah upload berhasil
+                </li>
+                <li>
+                  Setelah upload berhasil, file dapat diakses melalui menu detail E-Faktur
+                </li>
+              </ul>
+            </div>
+          )} */}
         </div>
       </ModalCustom>
 
@@ -417,12 +451,17 @@ const ModalUploadEFaktur = ({
         <div className="px-5 pt-5 pb-[10px] justify-center">
           <div className="w-full flex gap-[20px]">
             {IconModal["icon_success"]}
-            <p className="text-[18px] font-bold">Success</p>
+            <p className="text-[18px] font-bold">Upload Berhasil</p>
           </div>
           <p className="pl-[70px]">
             {uploadedFiles.length} file E-Faktur berhasil diupload ke Min.io storage.
           </p>
-          <p className="pl-[70px]">File dapat diakses melalui detail E-Faktur.</p>
+          <p className="pl-[70px] font-semibold text-green-700">
+            Status E-Faktur telah berubah menjadi SUCCESS.
+          </p>
+          <p className="pl-[70px] text-sm text-gray-600 mt-2">
+            File dapat diakses melalui detail E-Faktur.
+          </p>
         </div>
       </ModalSuccess>
 
@@ -435,7 +474,7 @@ const ModalUploadEFaktur = ({
         <div className="px-5 pt-5 pb-[10px] justify-center">
           <div className="w-full flex gap-[20px]">
             {IconModal["icon_error_default"]}
-            <p className="text-[18px] font-bold">Failed</p>
+            <p className="text-[18px] font-bold">Upload Gagal</p>
           </div>
           <p className="pl-[70px]">{errorMessage}</p>
           <p className="pl-[70px]">Silakan coba lagi.</p>

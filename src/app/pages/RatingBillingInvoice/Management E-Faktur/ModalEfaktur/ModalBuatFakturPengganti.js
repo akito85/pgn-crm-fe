@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Table, DatePicker, Spin } from "antd";
-import ButtonComponent from "../../../../components/ButtonComponent";
-import InputComponent from "../../../../components/InputComponent";
-import ModalCustom from "../../../../components/Modal/ModalCustom";
-import SVGIcon from "../../../../assets/Icon/index";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import InputComponent from "../../../../../components/InputComponent";
+import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import SVGIcon from "../../../../../assets/Icon/index";
 import moment from "moment";
 
 const ModalBuatFakturPengganti = ({

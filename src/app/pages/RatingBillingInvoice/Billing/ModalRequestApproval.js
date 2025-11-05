@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Select, Radio, Checkbox } from "antd";
+import { Steps, Form, Select, Checkbox } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 import moment from "moment";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
@@ -58,8 +58,6 @@ const ModalRequestApproval = ({
   const [boolean, setBoolean] = useState(false);
   const [generateInvoice, setGenerateInvoice] = useState(false);
   const [dataTable, setDataTable] = useState([]);
-  const [tabHeader, setTabHeader] = useState("Billing");
-  const [tabHeader2, setTabHeader2] = useState("Billing");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [dataTableSelect, setDataTableSelect] = useState([]);
   const [modalError, setModalError] = useState(false);
@@ -126,14 +124,15 @@ const ModalRequestApproval = ({
     onChange: onSelectChange,
   };
 
-  // Step
+  // Step - Updated to 3 steps
   const steps = [
     {
       title: "BILLING INFORMATION",
-      disabled:
-        dataTableSelect.length === 0 ||
-        !form.getFieldValue().apphierId ||
-        !form.getFieldValue().remark,
+      disabled: dataTableSelect.length === 0 || !form.getFieldValue().remark,
+    },
+    {
+      title: "APPROVAL INFORMATION",
+      disabled: !form.getFieldValue().apphierId,
     },
     {
       title: "CONFIRMATION",
@@ -143,13 +142,11 @@ const ModalRequestApproval = ({
   // Button Next
   const next = () => {
     setCurrent(current + 1);
-    setTabHeader("Billing");
   };
 
   // Button Previous
   const prev = () => {
     setCurrent(current - 1);
-    setTabHeader2("Billing");
   };
 
   // Scroll Left Handler
@@ -185,38 +182,6 @@ const ModalRequestApproval = ({
     title: item.title,
   }));
 
-  // data tabs
-  const dataTabs = [
-    {
-      label: "Billing",
-      value: "Billing",
-    },
-    {
-      label: "Approval",
-      value: "Approval",
-    },
-  ];
-
-  const dataTabs2 = [
-    {
-      label: "Billing",
-      value: "Billing",
-    },
-    {
-      label: "Approval",
-      value: "Approval",
-    },
-  ];
-
-  // change tabs
-  const changeTabHeader = ({ target: { value } }) => {
-    setTabHeader(value);
-  };
-
-  const changeTabHeader2 = ({ target: { value } }) => {
-    setTabHeader2(value);
-  };
-
   //  Handle Select Approval Hierarchy
   const handleSelect = (e) => {
     dispatch(getListApprovalById(e));
@@ -231,6 +196,7 @@ const ModalRequestApproval = ({
     setDataTable([]);
     setBoolean(false);
     setRemark("");
+    setCurrent(0);
     form.resetFields();
   };
 
@@ -239,6 +205,7 @@ const ModalRequestApproval = ({
     handleOpenModal();
     setBodyError({});
   };
+
   const handleRetry = () => {
     handleSave();
     setModalError(false);
@@ -359,178 +326,21 @@ const ModalRequestApproval = ({
           </div>
         </div>
 
-        <div
-          className={`steps-content my-[30px] ${current !== 0 ? "hidden" : ""}`}
+        <Form
+          layout="vertical"
+          form={form}
+          id={"formRequest"}
+          onFinish={handleSave}
         >
-          <Radio.Group
-            options={dataTabs}
-            onChange={changeTabHeader}
-            value={tabHeader}
-            optionType="button"
-            buttonStyle="solid"
-            style={{ gap: 12, display: "flex" }}
-          />
-
-          <Form
-            layout="vertical"
-            form={form}
-            id={"formRequest"}
-            onFinish={handleSave}
+          {/* STEP 1: BILLING INFORMATION */}
+          <div
+            className={`steps-content my-[30px] ${current !== 0 ? "hidden" : ""}`}
           >
-            <div className={`${tabHeader !== "Billing" ? "hidden" : ""}`}>
-              <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-                <p className="text-primary uppercase font-bold">Billing List</p>
-                <TablePaginationNew
-                  type="FE"
-                  dataSource={filterDataByPage("data")}
-                  columns={columnsRequestBilling(
-                    page,
-                    pageSize,
-                    searchInput,
-                    searchedColumn,
-                    searchText,
-                    handleSearch
-                  )}
-                  current={page}
-                  pageSize={pageSize}
-                  onChange={handleChange}
-                  onSizeChanger={handleChange}
-                  totalData={filterDataByPage("length")}
-                  onSort={onSort}
-                  tableScrolled={{ y: 525, x: 15000 }}
-                  rowSelection={rowSelection}
-                />
-                <div className="pt-[30px]">
-                  <Form.Item name={"generateInvoice"}>
-                    <Checkbox
-                      onChange={(e) => setGenerateInvoice(e.target.checked)}
-                    >
-                      Generate Invoice
-                    </Checkbox>
-                    <p className="text-[#4B465C] text-[8px]">
-                      Click or tap this checkbox to automatically generate
-                      invoice
-                    </p>
-                  </Form.Item>
-                  <Form.Item
-                    label={"Remark"}
-                    name={"remark"}
-                    rules={[
-                      { required: true, message: "Please input your Remark!" },
-                    ]}
-                  >
-                    <InputComponent
-                      rows={1}
-                      type="textarea"
-                      value={remark}
-                      onChange={(e) => setRemark(e.target.value)}
-                      placeholder={"Type your remark"}
-                    />
-                  </Form.Item>
-                </div>
-              </div>
-            </div>
-
-            <div className={`${tabHeader !== "Approval" ? "hidden" : ""}`}>
-              <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-                <p className="text-primary uppercase font-bold">
-                  Approval Information
-                </p>
-
-                <div className="w-full grid grid-cols-1 gap-2">
-                  <div className="w-1/3">
-                    <Form.Item
-                      label="Approval Hierarchy"
-                      name="apphierId"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please input your Approval Hierarchy!",
-                        },
-                      ]}
-                    >
-                      <SelectComponent onChange={(e) => handleSelect(e)}>
-                        {data_approval &&
-                          data_approval?.map((data, index) => (
-                            <Select.Option value={data.appHierId} key={index}>
-                              {data.approvalName}
-                            </Select.Option>
-                          ))}
-                      </SelectComponent>
-                    </Form.Item>
-                  </div>
-                </div>
-              </div>
-
-              <div className="w-full">
-                {boolean === true ? (
-                  <TablePaginationNew
-                    type="FE"
-                    dataSource={
-                      data_approval_list && data_approval_list.length === 0
-                        ? null
-                        : dataTable
-                    }
-                    columns={columnsApproval(
-                      page,
-                      pageSize,
-                      searchInput,
-                      searchedColumn,
-                      searchText,
-                      handleSearch
-                    )}
-                    expandable={{
-                      expandedRowRender: (record) => (
-                        <div>
-                          <p className="text-primary text-xs font-bold uppercase pt-4">
-                            EMPLOYEE INFORMATION
-                          </p>
-                          <TablePaginationNew
-                            type="FE"
-                            useSelect={false}
-                            usePagination={false}
-                            dataSource={record?.employeeDetail}
-                            columns={columnsExpandApproval(
-                              page,
-                              pageSize,
-                              searchInput,
-                              searchedColumn,
-                              searchText,
-                              handleSearch
-                            )}
-                            className={"mb-4"}
-                          />
-                        </div>
-                      ),
-                    }}
-                    useSelect={false}
-                    usePagination={false}
-                  />
-                ) : null}
-              </div>
-            </div>
-          </Form>
-        </div>
-
-        {/* Confirmation */}
-        <div
-          className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
-        >
-          <Radio.Group
-            options={dataTabs2}
-            onChange={changeTabHeader2}
-            value={tabHeader2}
-            optionType="button"
-            buttonStyle="solid"
-            style={{ gap: 12, display: "flex" }}
-          />
-
-          <div className={`${tabHeader2 !== "Billing" ? "hidden" : ""}`}>
-            <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
+            <div className="w-full grid grid-cols-1 gap-x-4">
               <p className="text-primary uppercase font-bold">Billing List</p>
               <TablePaginationNew
                 type="FE"
-                dataSource={dataTableSelect}
+                dataSource={filterDataByPage("data")}
                 columns={columnsRequestBilling(
                   page,
                   pageSize,
@@ -543,38 +353,72 @@ const ModalRequestApproval = ({
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={dataTableSelect.length || 0}
+                totalData={filterDataByPage("length")}
                 onSort={onSort}
                 tableScrolled={{ y: 525, x: 15000 }}
+                rowSelection={rowSelection}
               />
               <div className="pt-[30px]">
-                <DetailText label={"Generate Invoice"}>
-                  {generateInvoice === false ? "No" : "Yes"}
-                </DetailText>
-                <DetailText label={"Remark"}>
-                  {form.getFieldValue().remark}
-                </DetailText>
+                <Form.Item name={"generateInvoice"}>
+                  <Checkbox
+                    onChange={(e) => setGenerateInvoice(e.target.checked)}
+                  >
+                    Generate Invoice
+                  </Checkbox>
+                  <p className="text-[#4B465C] text-[8px]">
+                    Click or tap this checkbox to automatically generate
+                    invoice
+                  </p>
+                </Form.Item>
+                <Form.Item
+                  label={"Remark"}
+                  name={"remark"}
+                  rules={[
+                    { required: true, message: "Please input your Remark!" },
+                  ]}
+                >
+                  <InputComponent
+                    rows={1}
+                    type="textarea"
+                    value={remark}
+                    onChange={(e) => setRemark(e.target.value)}
+                    placeholder={"Type your remark"}
+                  />
+                </Form.Item>
               </div>
             </div>
           </div>
 
-          <div className={`${tabHeader2 !== "Approval" ? "hidden" : ""}`}>
-            <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
+          {/* STEP 2: APPROVAL INFORMATION */}
+          <div
+            className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
+          >
+            <div className="w-full grid grid-cols-1 gap-x-4">
               <p className="text-primary uppercase font-bold">
                 Approval Information
               </p>
 
               <div className="w-full grid grid-cols-1 gap-2">
                 <div className="w-1/3">
-                  <DetailText label={"Approval Hierarchy"}>
-                    {
-                      data_approval
-                        ?.filter(
-                          (a) => a.appHierId === form.getFieldValue().apphierId
-                        )
-                        ?.find((b) => b.approvalName)?.approvalName
-                    }
-                  </DetailText>
+                  <Form.Item
+                    label="Approval Hierarchy"
+                    name="apphierId"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Approval Hierarchy!",
+                      },
+                    ]}
+                  >
+                    <SelectComponent onChange={(e) => handleSelect(e)}>
+                      {data_approval &&
+                        data_approval?.map((data, index) => (
+                          <Select.Option value={data.appHierId} key={index}>
+                            {data.approvalName}
+                          </Select.Option>
+                        ))}
+                    </SelectComponent>
+                  </Form.Item>
                 </div>
               </div>
             </div>
@@ -626,7 +470,112 @@ const ModalRequestApproval = ({
               ) : null}
             </div>
           </div>
-        </div>
+
+          {/* STEP 3: CONFIRMATION */}
+          <div
+            className={`steps-content my-[30px] ${current !== 2 ? "hidden" : ""}`}
+          >
+            {/* Billing Information Review */}
+            <div className="w-full grid grid-cols-1 gap-x-4 mb-8">
+              <p className="text-primary uppercase font-bold">Billing List</p>
+              <TablePaginationNew
+                type="FE"
+                dataSource={dataTableSelect}
+                columns={columnsRequestBilling(
+                  page,
+                  pageSize,
+                  searchInput,
+                  searchedColumn,
+                  searchText,
+                  handleSearch
+                )}
+                current={page}
+                pageSize={pageSize}
+                onChange={handleChange}
+                onSizeChanger={handleChange}
+                totalData={dataTableSelect.length || 0}
+                onSort={onSort}
+                tableScrolled={{ y: 525, x: 15000 }}
+              />
+              <div className="pt-[30px]">
+                <DetailText label={"Generate Invoice"}>
+                  {generateInvoice === false ? "No" : "Yes"}
+                </DetailText>
+                <DetailText label={"Remark"}>
+                  {form.getFieldValue().remark}
+                </DetailText>
+              </div>
+            </div>
+
+            {/* Approval Information Review */}
+            <div className="w-full grid grid-cols-1 gap-x-4 border-t pt-8">
+              <p className="text-primary uppercase font-bold">
+                Approval Information
+              </p>
+
+              <div className="w-full grid grid-cols-1 gap-2">
+                <div className="w-1/3">
+                  <DetailText label={"Approval Hierarchy"}>
+                    {
+                      data_approval
+                        ?.filter(
+                          (a) => a.appHierId === form.getFieldValue().apphierId
+                        )
+                        ?.find((b) => b.approvalName)?.approvalName
+                    }
+                  </DetailText>
+                </div>
+              </div>
+
+              <div className="w-full">
+                {boolean === true ? (
+                  <TablePaginationNew
+                    type="FE"
+                    dataSource={
+                      data_approval_list && data_approval_list.length === 0
+                        ? null
+                        : dataTable
+                    }
+                    columns={columnsApproval(
+                      page,
+                      pageSize,
+                      searchInput,
+                      searchedColumn,
+                      searchText,
+                      handleSearch
+                    )}
+                    expandable={{
+                      expandedRowRender: (record) => (
+                        <div>
+                          <p className="text-primary text-xs font-bold uppercase pt-4">
+                            EMPLOYEE INFORMATION
+                          </p>
+                          <TablePaginationNew
+                            type="FE"
+                            useSelect={false}
+                            usePagination={false}
+                            dataSource={record?.employeeDetail}
+                            columns={columnsExpandApproval(
+                              page,
+                              pageSize,
+                              searchInput,
+                              searchedColumn,
+                              searchText,
+                              handleSearch
+                            )}
+                            className={"mb-4"}
+                          />
+                        </div>
+                      ),
+                    }}
+                    useSelect={false}
+                    usePagination={false}
+                  />
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </Form>
       </ModalCustom>
 
       {/** Modal Retry */}

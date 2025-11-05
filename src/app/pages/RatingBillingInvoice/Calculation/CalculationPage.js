@@ -14,12 +14,7 @@ import {
   getCalculationPaginate,
   getHistoryCalculationPaginate,
 } from "../../../../redux/slices/rating_billing_invoice/calculation";
-import {
-  hasValue,
-  renderColumn,
-  renderDateColumn,
-  toTitleCase,
-} from "../../../../utils";
+import { hasValue, renderColumn, renderDateColumn, toTitleCase } from "../../../../utils";
 import RadioTabs from "../../../../components/RadioTabs";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
@@ -28,9 +23,9 @@ import { useColumnActionPermission } from "../../../../components/ColumnActionPe
 
 const CalculationPage = () => {
   // Selector
-
-  const { data: data_calculation = { result: [], page: {} }, loading } =
-    useSelector((state) => state.rbi_calculation);
+  const { data: data_calculation, loading } = useSelector(
+    (state) => state.rbi_calculation
+  );
 
   // Declaration
   const dispatch = useDispatch();
@@ -98,1550 +93,1056 @@ const CalculationPage = () => {
     });
   };
 
-  const column = useMemo(
-    () => [
-      {
-        key: "no",
-        title: "NO",
-        width: 60,
-        align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
-      },
-      {
-        key: "calculationCode",
-        title: "CALCULATION CODE",
-        dataIndex: "calculationCode",
-        sorter: true,
-        align: "left",
-        filteredValue: [search?.calculationCode] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+  const column = useMemo(() => [
+    {
+      key: "no",
+      title: "NO",
+      width: 60,
+      align: "center",
+      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
+      key: "calculationCode",
+      title: "CALCULATION CODE",
+      dataIndex: "calculationCode",
+      sorter: true,
+      align: "left",
+      filteredValue: [search?.calculationCode] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "calculationCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "calculationCode",
-          searchInput,
-          searchedColumn,
+          hasValue(search["calculationCode"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          false,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "calculationCode",
-            hasValue(search["calculationCode"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "customer",
-        title: "Σ CUSTOMER",
-        dataIndex: "customer",
-        align: "right",
-        sorter: true,
-        filteredValue: [search?.customer] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+    },
+    {
+      key: "customer",
+      title: "Σ CUSTOMER",
+      dataIndex: "customer",
+      align: "right",
+      sorter: true,
+      filteredValue: [search?.customer] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "customer",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "customer",
-          searchInput,
-          searchedColumn,
+          hasValue(search["customer"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          false,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "customer",
-            hasValue(search["customer"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "succeed",
-        title: "Σ SUCCEED",
-        dataIndex: "succeed",
-        align: "right",
-        sorter: true,
-        filteredValue: [search?.succeed] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+    },
+    {
+      key: "succeed",
+      title: "Σ SUCCEED",
+      dataIndex: "succeed",
+      align: "right",
+      sorter: true,
+      filteredValue: [search?.succeed] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "succeed",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "succeed",
-          searchInput,
-          searchedColumn,
+          hasValue(search["succeed"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          false,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "succeed",
-            hasValue(search["succeed"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "progress",
-        title: "Σ PROGRESS",
-        dataIndex: "progress",
-        align: "right",
-        sorter: true,
-        filteredValue: [search?.progress] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+    },
+    {
+      key: "progress",
+      title: "Σ PROGRESS",
+      dataIndex: "progress",
+      align: "right",
+      sorter: true,
+      filteredValue: [search?.progress] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "progress",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "progress",
-          searchInput,
-          searchedColumn,
+          hasValue(search["progress"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          false,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "progress",
-            hasValue(search["progress"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "failed",
-        title: "Σ FAILED",
-        dataIndex: "failed",
-        align: "right",
-        sorter: true,
-        filteredValue: [search?.failed] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+    },
+    {
+      key: "failed",
+      title: "Σ FAILED",
+      dataIndex: "failed",
+      align: "right",
+      sorter: true,
+      filteredValue: [search?.failed] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "failed",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "failed",
-          searchInput,
-          searchedColumn,
+          hasValue(search["failed"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          false,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "failed",
-            hasValue(search["failed"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "billingCycleVal",
-        title: "BILLING CYCLE",
-        dataIndex: "billingCycleVal",
-        align: "center",
-        sorter: true,
-        filteredValue: [search?.billingCycleVal] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+    },
+    {
+      key: "billingCycleVal",
+      title: "BILLING CYCLE",
+      dataIndex: "billingCycleVal",
+      align: "center",
+      sorter: true,
+      filteredValue: [search?.billingCycleVal] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "billingCycleVal",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "billingCycleVal",
-          searchInput,
-          searchedColumn,
+          hasValue(search["billingCycleVal"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          false,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "billingCycleVal",
-            hasValue(search["billingCycleVal"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "billingPeriodVal",
-        title: "BILLING PERIOD",
-        dataIndex: "billingPeriodVal",
-        align: "center",
-        sorter: true,
-        filteredValue: [search?.billingPeriodVal] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+    },
+    {
+      key: "billingPeriodVal",
+      title: "BILLING PERIOD",
+      dataIndex: "billingPeriodVal",
+      align: "center",
+      sorter: true,
+      filteredValue: [search?.billingPeriodVal] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "billingPeriodVal",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "datePeriod"
+      ),
+      render: (text) =>
+        renderDateColumn(
           "billingPeriodVal",
-          searchInput,
-          searchedColumn,
+          hasValue(search["billingPeriodVal"]),
           searchText,
-          handleSearch,
-          true,
-          "datePeriod"
+          text,
+          "datePeriod",
+          search
         ),
-        render: (text) =>
-          renderDateColumn(
-            "billingPeriodVal",
-            hasValue(search["billingPeriodVal"]),
-            searchText,
-            text,
-            "datePeriod",
-            search
-          ),
-        // ...getColumnSearchPropsPaging(
-        //   "billingPeriodVal",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch,
-        //   true
-        // ),
-        // render: (data) => {
-        //   const text = data ? moment(data).format(dateFormatting.datePeriod) : "";
-        //   if (searchedColumn === "endDate") {
-        //     return (
-        //       <Highlighter
-        //         highlightStyle={{
-        //           backgroundColor: "#ffc069",
-        //           padding: 0,
-        //         }}
-        //         searchWords={[searchText]}
-        //         autoEscape
-        //         textToHighlight={text ? text.toString() : ""}
-        //       />
-        //     );
-        //   } else {
-        //     return text || "";
-        //   }
-        // },
-      },
-      {
-        key: "serviceTypeVal",
-        title: "SERVICE TYPE",
-        dataIndex: "serviceTypeVal",
-        align: "center",
-        sorter: true,
-        filteredValue: [search?.serviceTypeVal] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+    },
+    {
+      key: "serviceTypeVal",
+      title: "SERVICE TYPE",
+      dataIndex: "serviceTypeVal",
+      align: "center",
+      sorter: true,
+      filteredValue: [search?.serviceTypeVal] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "serviceTypeVal",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "serviceTypeVal",
-          searchInput,
-          searchedColumn,
+          hasValue(search["serviceTypeVal"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          false,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "serviceTypeVal",
-            hasValue(search["serviceTypeVal"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "sorVal",
-        title: "SOR",
-        dataIndex: "sorVal",
-        align: "left",
-        sorter: true,
-        filteredValue: [search?.sorVal] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+    },
+    {
+      key: "sorVal",
+      title: "SOR",
+      dataIndex: "sorVal",
+      align: "left",
+      sorter: true,
+      filteredValue: [search?.sorVal] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "sorVal",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "sorVal",
-          searchInput,
-          searchedColumn,
+          hasValue(search["sorVal"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          false,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "sorVal",
-            hasValue(search["sorVal"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
+    },
+    {
+      key: "costCenter",
+      title: "COST CENTER",
+      dataIndex: "costCenter",
+      align: "left",
+      sorter: true,
+      filteredValue: [search?.costCenter] || null,
+      ellipsis: {
+        showTitle: false,
       },
-      {
-        key: "costCenter",
-        title: "COST CENTER",
-        dataIndex: "costCenter",
-        align: "left",
-        sorter: true,
-        filteredValue: [search?.costCenter] || null,
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "costCenter",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "costCenter",
-          searchInput,
-          searchedColumn,
+          hasValue(search["costCenter"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          true,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "costCenter",
-            hasValue(search["costCenter"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
-          ),
-        // render: (text) => {
-        //   if (searchedColumn === "costCenter") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
+    },
+    {
+      key: "meterReadingCode",
+      title: "METER READING CODE",
+      dataIndex: "meterReadingCode",
+      align: "left",
+      sorter: true,
+      filteredValue: [search?.meterReadingCode] || null,
+      ellipsis: {
+        showTitle: false,
       },
-      {
-        key: "meterReadingCode",
-        title: "METER READING CODE",
-        dataIndex: "meterReadingCode",
-        align: "left",
-        sorter: true,
-        filteredValue: [search?.meterReadingCode] || null,
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "meterReadingCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "meterReadingCode",
-          searchInput,
-          searchedColumn,
+          hasValue(search["meterReadingCode"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          true,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "meterReadingCode",
-            hasValue(search["meterReadingCode"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
-          ),
-        // render: (text) => {
-        //   if (searchedColumn === "meterReadingCode") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
+    },
+    {
+      key: "customerSegment",
+      title: "ACCOUNT SEGMENT",
+      dataIndex: "customerSegment",
+      align: "center",
+      sorter: true,
+      filteredValue: [search?.customerSegment] || null,
+      ellipsis: {
+        showTitle: false,
       },
-      {
-        key: "customerSegment",
-        title: "ACCOUNT SEGMENT",
-        dataIndex: "customerSegment",
-        align: "center",
-        sorter: true,
-        filteredValue: [search?.customerSegment] || null,
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "customerSegment",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "customerSegment",
-          searchInput,
-          searchedColumn,
+          hasValue(search["customerSegment"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          true,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "customerSegment",
-            hasValue(search["customerSegment"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
-          ),
-        // render: (text) => {
-        //   if (searchedColumn === "customerSegment") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
+    },
+    {
+      key: "accGroupType",
+      title: "ACCOUNT GROUP TYPE",
+      dataIndex: "accGroupType",
+      align: "center",
+      sorter: true,
+      filteredValue: [search?.accGroupType] || null,
+      ellipsis: {
+        showTitle: false,
       },
-      {
-        key: "no",
-        title: "ACCOUNT GROUP TYPE",
-        dataIndex: "accGroupType",
-        align: "center",
-        sorter: true,
-        filteredValue: [search?.accGroupType] || null,
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accGroupType",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "accGroupType",
-          searchInput,
-          searchedColumn,
+          hasValue(search["accGroupType"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          true,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "accGroupType",
-            hasValue(search["accGroupType"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
-          ),
-        // render: (text) => {
-        //   if (searchedColumn === "accGroupType") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
+    },
+    {
+      key: "custNumb",
+      title: "SPECIFIC CUSTOMER ACCOUNT",
+      dataIndex: "custNumb",
+      align: "left",
+      sorter: true,
+      filteredValue: [search?.custNumb] || null,
+      ellipsis: {
+        showTitle: false,
       },
-      {
-        key: "no",
-        title: "SPECIFIC CUSTOMER ACCOUNT",
-        dataIndex: "custNumb",
-        align: "left",
-        sorter: true,
-        filteredValue: [search?.custNumb] || null,
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "custNumb",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "custNumb",
-          searchInput,
-          searchedColumn,
+          hasValue(search["custNumb"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          true,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "custNumb",
-            hasValue(search["custNumb"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
-          ),
-        // render: (text) =>
-        //   searchedColumn === "custNumb" ? (
-        //     <Highlighter
-        //       highlightStyle={{
-        //         backgroundColor: "#ffc069",
-        //         padding: 0,
-        //       }}
-        //       searchWords={[searchText]}
-        //       autoEscape
-        //       textToHighlight={text ? text.toString() : ""}
-        //     />
-        //   ) : text ? (
-        //     <Tooltip placement="topLeft" title={text}>
-        //       {text}
-        //     </Tooltip>
-        //   ) : (
-        //     ""
-        //   ),
-      },
-      {
-        key: "no",
-        title: "SCHEDULE TYPE",
-        dataIndex: "scheduleTypeVal",
-        align: "center",
-        sorter: true,
-        filteredValue: [search?.scheduleTypeVal] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+    },
+    {
+      key: "scheduleTypeVal",
+      title: "SCHEDULE TYPE",
+      dataIndex: "scheduleTypeVal",
+      align: "center",
+      sorter: true,
+      filteredValue: [search?.scheduleTypeVal] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "scheduleTypeVal",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "scheduleTypeVal",
-          searchInput,
-          searchedColumn,
+          hasValue(search["scheduleTypeVal"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          false,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "scheduleTypeVal",
-            hasValue(search["scheduleTypeVal"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-
-      {
-        key: "no",
-        title: "GENERATE DATE",
-        dataIndex: "generateDate",
-        align: "center",
-        sorter: true,
-        filteredValue: [search?.generateDate] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+    },
+    {
+      key: "generateDate",
+      title: "GENERATE DATE",
+      dataIndex: "generateDate",
+      align: "center",
+      sorter: true,
+      filteredValue: [search?.generateDate] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "generateDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "date"
+      ),
+      render: (text) =>
+        renderDateColumn(
           "generateDate",
-          searchInput,
-          searchedColumn,
+          hasValue(search["generateDate"]),
           searchText,
-          handleSearch,
-          true,
-          "date"
+          text,
+          "date",
+          search
         ),
-        render: (text) =>
-          renderDateColumn(
-            "generateDate",
-            hasValue(search["generateDate"]),
-            searchText,
-            text,
-            "date",
-            search
-          ),
-        // ...getColumnSearchPropsPaging(
-        //   "generateDate",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch,
-        //   false,
-        //   "date"
-        // ),
-        // render: (data) => {
-        //   const text = data ? moment(data).format(dateFormatting.dateTime) : "";
-        //   if (searchedColumn === "generateDate") {
-        //     return (
-        //       <Highlighter
-        //         highlightStyle={{
-        //           backgroundColor: "#ffc069",
-        //           padding: 0,
-        //         }}
-        //         searchWords={[searchText]}
-        //         autoEscape
-        //         textToHighlight={text ? text.toString() : ""}
-        //       />
-        //     );
-        //   } else {
-        //     return text || "";
-        //   }
-        // },
+    },
+    {
+      key: "remark",
+      title: "REMARK",
+      dataIndex: "remark",
+      align: "left",
+      sorter: true,
+      filteredValue: [search?.remark] || null,
+      ellipsis: {
+        showTitle: false,
       },
-      {
-        key: "no",
-        title: "REMARK",
-        dataIndex: "remark",
-        align: "left",
-        sorter: true,
-        filteredValue: [search?.remark] || null,
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "remark",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "remark",
-          searchInput,
-          searchedColumn,
+          hasValue(search["remark"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          true,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "remark",
-            hasValue(search["remark"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
-          ),
-        // render: (text) => {
-        //   if (searchedColumn === "remark") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
-      },
-      {
-        key: "no",
-        title: "TYPE",
-        dataIndex: "typeVal",
-        align: "center",
-        sorter: true,
-        filteredValue: [search?.typeVal] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+    },
+    {
+      key: "typeVal",
+      title: "TYPE",
+      dataIndex: "typeVal",
+      align: "center",
+      sorter: true,
+      filteredValue: [search?.typeVal] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "typeVal",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "typeVal",
-          searchInput,
-          searchedColumn,
+          hasValue(search["typeVal"]),
           searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "typeVal",
-            hasValue(search["typeVal"]),
-            searchText,
-            text,
-            false,
-            "status",
-            search
-          ),
-        // ...getColumnSearchPropsPaging(
-        //   "typeVal",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-        // render: (index) => (
-        //   <div className={" flex justify-center"}>
-        //     <StatusComponent colour={index}>{index}</StatusComponent>
-        //   </div>
-        // ),
-      },
-      {
-        key: "no",
-        title: "STATUS",
-        dataIndex: "status",
-        align: "center",
-        sorter: true,
-        fixed: "right",
-        width: 150,
-        filteredValue: [search?.status] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+          text,
+          false,
           "status",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
+          search
         ),
-        render: (index) => {
-          let text;
-          switch (index) {
-            case "INPROGRESS":
-              text = "In Progress";
-              break;
-            case "COMPLETE BILLING":
-              text = "Complete Billing";
-              break;
-            default:
-              text = index
-                ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-                : index;
-              break;
-          }
-          return text
-            ? renderColumn(
-                "status",
-                hasValue(search["status"]),
-                searchText,
-                text,
-                false,
-                "status",
-                search
-              )
-            : text;
-        },
-        // ...getColumnSearchPropsPaging(
-        //   "status",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-        // render: (index) => {
-        //   let text;
-        //   switch (index) {
-        //     case "INPROGRESS":
-        //       text = "In Progress";
-        //       break;
-        //     case "COMPLETE BILLING":
-        //       text = "Complete Billing";
-        //       break;
-        //     default:
-        //       text = index
-        //         ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-        //         : index;
-        //       break;
-        //   }
-        //   if (text) {
-        //     return (
-        //       <div className={" flex justify-center"}>
-        //         <StatusComponent colour={text}>{text}</StatusComponent>
-        //       </div>
-        //     );
-        //   } else {
-        //     return "";
-        //   }
-        // },
-      },
-      // {
-      //   title: "ACTION",
-      //   align: "center",
-      //   fixed: "right",
-      //   key: "action",
-      //   width: 100,
-      //   render: (v, r) => {
-      //     return (
-      //       <Space>
-      //         <Tooltip title="Detail">
-      //           <Link
-      //             to={RBI_ROUTES.CALCULATION_DETAIL}
-      //             state={{ id: r?.calJobId }}
-      //           >
-      //             <ButtonComponent
-      //               icon={<SVGIcon name="IconDetail" width={24} />}
-      //               border={false}
-      //             />
-      //           </Link>
-      //         </Tooltip>
-      //       </Space>
-      //     );
-      //   },
-      // },
-    ],
-    [page, pageSize, search, searchText, searchedColumn]
-  );
-
-  // column history
-  const columnHistory = useMemo(
-    () => [
-      {
-        key: "no",
-        title: "NO",
-        width: 60,
-        align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
-      },
-      {
-        key: "no",
-        title: "CALCULATION CODE",
-        dataIndex: "calCode",
-        sorter: true,
-        filteredValue: [search?.calCode] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "calCode",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "calCode",
-            hasValue(search["calCode"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "no",
-        title: "CUSTOMER NUMBER",
-        dataIndex: "custNumb",
-        sorter: true,
-        filteredValue: [search?.custNumb] || null,
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "custNumb",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "custNumb",
-            hasValue(search["custNumb"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "no",
-        title: "CUSTOMER NAME",
-        dataIndex: "custName",
-        sorter: true,
-        filteredValue: [search?.custName] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "custName",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "custName",
-            hasValue(search["custName"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-        // ...getColumnSearchPropsPaging(
-        //   "custName",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-      },
-      {
-        key: "no",
-        title: "ACCOUNT NUMBER",
-        dataIndex: "accNumb",
-        sorter: true,
-        filteredValue: [search?.accNumb] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "accNumb",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "accNumb",
-            hasValue(search["accNumb"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-        // ...getColumnSearchPropsPaging(
-        //   "accNumb",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-      },
-      {
-        key: "no",
-        title: "ACCOUNT NAME",
-        dataIndex: "accName",
-        sorter: true,
-        filteredValue: [search?.accName] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "accName",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "accName",
-            hasValue(search["accName"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-        // ...getColumnSearchPropsPaging(
-        //   "accName",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-      },
-      {
-        key: "no",
-        title: "ACCOUNT GROUP TYPE",
-        dataIndex: "accGroupTypeVal",
-        sorter: true,
-        align: "center",
-        filteredValue: [search?.accGroupTypeVal] || null,
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "accGroupTypeVal",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "accGroupTypeVal",
-            hasValue(search["accGroupTypeVal"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
-          ),
-        // render: (text) => {
-        //   if (searchedColumn === "accGroupTypeVal") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
-      },
-      {
-        key: "no",
-        title: "SERVICE TYPE",
-        dataIndex: "serviceTypeVal",
-        sorter: true,
-        align: "center",
-        filteredValue: [search?.serviceTypeVal] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "serviceTypeVal",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "serviceTypeVal",
-            hasValue(search["serviceTypeVal"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-        // ...getColumnSearchPropsPaging(
-        //   "serviceTypeVal",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-      },
-      {
-        key: "no",
-        title: "SA NUMBER",
-        dataIndex: "saNumb",
-        sorter: true,
-        align: "center",
-        filteredValue: [search?.saNumb] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "saNumb",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "saNumb",
-            hasValue(search["saNumb"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-        // ...getColumnSearchPropsPaging(
-        //   "saNumb",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-      },
-      {
-        key: "no",
-        title: "SOR",
-        dataIndex: "sorVal",
-        sorter: true,
-        filteredValue: [search?.sorVal] || null,
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "sorVal",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "sorVal",
-            hasValue(search["sorVal"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
-          ),
-        // render: (text) => {
-        //   if (searchedColumn === "sorVal") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
-      },
-      {
-        key: "no",
-        title: "COST CENTER",
-        dataIndex: "costCenterVal",
-        sorter: true,
-        filteredValue: [search?.costCenterVal] || null,
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "costCenterVal",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "costCenterVal",
-            hasValue(search["costCenterVal"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
-          ),
-        // render: (text) => {
-        //   if (searchedColumn === "costCenterVal") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
-      },
-      {
-        key: "no",
-        title: "ACCOUNT SEGMENT",
-        dataIndex: "accSegmentVal",
-        sorter: true,
-        align: "center",
-        filteredValue: [search?.accSegmentVal] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "accSegmentVal",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "accSegmentVal",
-            hasValue(search["accSegmentVal"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-        // ...getColumnSearchPropsPaging(
-        //   "accSegmentVal",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-      },
-      {
-        key: "no",
-        title: "METER READING CODE",
-        dataIndex: "meterReadingCodeVal",
-        sorter: true,
-        align: "center",
-        filteredValue: [search?.meterReadingCodeVal] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "meterReadingCodeVal",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "meterReadingCodeVal",
-            hasValue(search["meterReadingCodeVal"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-        // ...getColumnSearchPropsPaging(
-        //   "meterReadingCodeVal",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-      },
-      {
-        key: "no",
-        title: "BILLING CYCLE",
-        dataIndex: "billingCycVal",
-        sorter: true,
-        align: "center",
-        filteredValue: [search?.billingCycVal] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "billingCycVal",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "billingCycVal",
-            hasValue(search["billingCycVal"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-        // ...getColumnSearchPropsPaging(
-        //   "billingCycVal",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-      },
-      {
-        key: "no",
-        title: "BILLING PERIODE",
-        dataIndex: "billingPeriodVal",
-        sorter: true,
-        align: "center",
-        filteredValue: [search?.billingPeriodVal] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "billingPeriodVal",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true,
-          "datePeriod"
-        ),
-        render: (text) =>
-          renderDateColumn(
-            "billingPeriodVal",
-            hasValue(search["billingPeriodVal"]),
-            searchText,
-            text,
-            "datePeriod",
-            search
-          ),
-        // ...getColumnSearchPropsPaging(
-        //   "billingPeriodVal",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch
-        // ),
-      },
-      {
-        key: "no",
-        title: "MESSAGE",
-        dataIndex: "message",
-        sorter: true,
-        align: "left",
-        filteredValue: [search?.message] || null,
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "message",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "message",
-            hasValue(search["message"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
-          ),
-        // render: (text) => {
-        //   if (searchedColumn === "message") {
-        //     return (
-        //       <Tooltip placement="topLeft" title={text}>
-        //         <Highlighter
-        //           highlightStyle={{
-        //             backgroundColor: "#ffc069",
-        //             padding: 0,
-        //           }}
-        //           searchWords={[searchText]}
-        //           autoEscape
-        //           textToHighlight={text ? text.toString() : ""}
-        //         />
-        //       </Tooltip>
-        //     );
-        //   } else {
-        //     if (text) {
-        //       return (
-        //         <Tooltip placement="topLeft" title={text}>
-        //           {text}
-        //         </Tooltip>
-        //       );
-        //     }
-        //     return "";
-        //   }
-        // },
-      },
-      {
-        key: "no",
-        title: "CALCULATE AT",
-        dataIndex: "calculateAt",
-        sorter: true,
-        align: "center",
-        filteredValue: [search?.calculateAt] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "calculateAt",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true,
-          "datetime"
-        ),
-        render: (text) =>
-          renderDateColumn(
-            "calculateAt",
-            hasValue(search["calculateAt"]),
-            searchText,
-            text,
-            "datetime",
-            search
-          ),
-        // ...getColumnSearchPropsPaging(
-        //   "createdDate",
-        //   searchInput,
-        //   searchedColumn,
-        //   searchText,
-        //   handleSearch,
-        //   false,
-        //   "date"
-        // ),
-        // render: (data) => {
-        //   const text = data ? moment(data).format(dateFormatting.dateTime) : "";
-        //   if (searchedColumn === "createdDate") {
-        //     return (
-        //       <Highlighter
-        //         highlightStyle={{
-        //           backgroundColor: "#ffc069",
-        //           padding: 0,
-        //         }}
-        //         searchWords={[searchText]}
-        //         autoEscape
-        //         textToHighlight={text ? text.toString() : ""}
-        //       />
-        //     );
-        //   } else {
-        //     return text || "";
-        //   }
-        // },
-      },
-      {
-        key: "no",
-        title: "IS TRY",
-        dataIndex: "isTry",
-        sorter: true,
-        align: "center",
-        filteredValue: [search?.isTry] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "isTry",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) => {
-          // Pastikan text dikonversi dengan aman
-          const displayText = text != null ? String(text) : "";
-          return renderColumn(
-            "isTry",
-            hasValue(search["isTry"]),
-            searchText,
-            displayText,
-            false,
-            "status",
-            search
-          );
-        },
-      },
-      {
-        key: "no",
-        title: "STATUS",
-        dataIndex: "status",
-        align: "center",
-        fixed: "right",
-        width: 150,
-        sorter: true,
-        filteredValue: [search?.status] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "status",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (index) => {
-          // ✅ Tambahkan safety check sebelum toTitleCase
-          if (!index) return "";
-
-          const displayText = toTitleCase(index);
-          return renderColumn(
+    },
+    {
+      key: "status",
+      title: "STATUS",
+      dataIndex: "status",
+      align: "center",
+      sorter: true,
+      width: 150,
+      filteredValue: [search?.status] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "status",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (index) => {
+        let text;
+        switch (index) {
+          case "INPROGRESS":
+            text = "In Progress";
+            break;
+          case "COMPLETE BILLING":
+            text = "Complete Billing";
+            break;
+          default:
+            text = index
+              ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
+              : index;
+            break;
+        }
+        return text
+          ? renderColumn(
             "status",
             hasValue(search["status"]),
             searchText,
-            displayText,
+            text,
             false,
             "status",
             search
-          );
-        },
+          )
+          : text;
       },
-    ],
-    [page, pageSize, search, searchText, searchedColumn]
-  );
+    },
+  ], [page, pageSize, search, searchText, searchedColumn]);
+
+  // column history
+  const columnHistory = useMemo(() => [
+    {
+      key: "no",
+      title: "NO",
+      width: 60,
+      align: "center",
+      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
+      key: "calCode",
+      title: "CALCULATION CODE",
+      dataIndex: "calCode",
+      sorter: true,
+      filteredValue: [search?.calCode] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "calCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "calCode",
+          hasValue(search["calCode"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "custNumb",
+      title: "CUSTOMER NUMBER",
+      dataIndex: "custNumb",
+      sorter: true,
+      filteredValue: [search?.custNumb] || null,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "custNumb",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "custNumb",
+          hasValue(search["custNumb"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "custName",
+      title: "CUSTOMER NAME",
+      dataIndex: "custName",
+      sorter: true,
+      filteredValue: [search?.custName] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "custName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "custName",
+          hasValue(search["custName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "accNumb",
+      title: "ACCOUNT NUMBER",
+      dataIndex: "accNumb",
+      sorter: true,
+      filteredValue: [search?.accNumb] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accNumb",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "accNumb",
+          hasValue(search["accNumb"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "accName",
+      title: "ACCOUNT NAME",
+      dataIndex: "accName",
+      sorter: true,
+      filteredValue: [search?.accName] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "accName",
+          hasValue(search["accName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "accGroupTypeVal",
+      title: "ACCOUNT GROUP TYPE",
+      dataIndex: "accGroupTypeVal",
+      sorter: true,
+      align: "center",
+      filteredValue: [search?.accGroupTypeVal] || null,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accGroupTypeVal",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "accGroupTypeVal",
+          hasValue(search["accGroupTypeVal"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "serviceTypeVal",
+      title: "SERVICE TYPE",
+      dataIndex: "serviceTypeVal",
+      sorter: true,
+      align: "center",
+      filteredValue: [search?.serviceTypeVal] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "serviceTypeVal",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "serviceTypeVal",
+          hasValue(search["serviceTypeVal"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "saNumb",
+      title: "SA NUMBER",
+      dataIndex: "saNumb",
+      sorter: true,
+      align: "center",
+      filteredValue: [search?.saNumb] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "saNumb",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "saNumb",
+          hasValue(search["saNumb"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "sorVal",
+      title: "SOR",
+      dataIndex: "sorVal",
+      sorter: true,
+      filteredValue: [search?.sorVal] || null,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "sorVal",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "sorVal",
+          hasValue(search["sorVal"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "costCenterVal",
+      title: "COST CENTER",
+      dataIndex: "costCenterVal",
+      sorter: true,
+      filteredValue: [search?.costCenterVal] || null,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "costCenterVal",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "costCenterVal",
+          hasValue(search["costCenterVal"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "accSegmentVal",
+      title: "ACCOUNT SEGMENT",
+      dataIndex: "accSegmentVal",
+      sorter: true,
+      align: "center",
+      filteredValue: [search?.accSegmentVal] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accSegmentVal",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "accSegmentVal",
+          hasValue(search["accSegmentVal"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "meterReadingCodeVal",
+      title: "METER READING CODE",
+      dataIndex: "meterReadingCodeVal",
+      sorter: true,
+      align: "center",
+      filteredValue: [search?.meterReadingCodeVal] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "meterReadingCodeVal",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "meterReadingCodeVal",
+          hasValue(search["meterReadingCodeVal"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "billingCycVal",
+      title: "BILLING CYCLE",
+      dataIndex: "billingCycVal",
+      sorter: true,
+      align: "center",
+      filteredValue: [search?.billingCycVal] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "billingCycVal",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "billingCycVal",
+          hasValue(search["billingCycVal"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "billingPeriodVal",
+      title: "BILLING PERIODE",
+      dataIndex: "billingPeriodVal",
+      sorter: true,
+      align: "center",
+      filteredValue: [search?.billingPeriodVal] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "billingPeriodVal",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "datePeriod"
+      ),
+      render: (text) =>
+        renderDateColumn(
+          "billingPeriodVal",
+          hasValue(search["billingPeriodVal"]),
+          searchText,
+          text,
+          "datePeriod",
+          search
+        ),
+    },
+    {
+      key: "message",
+      title: "MESSAGE",
+      dataIndex: "message",
+      sorter: true,
+      align: "left",
+      filteredValue: [search?.message] || null,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "message",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "message",
+          hasValue(search["message"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "calculateAt",
+      title: "CALCULATE AT",
+      dataIndex: "calculateAt",
+      sorter: true,
+      align: "center",
+      filteredValue: [search?.calculateAt] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "calculateAt",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "datetime"
+      ),
+      render: (text) =>
+        renderDateColumn(
+          "calculateAt",
+          hasValue(search["calculateAt"]),
+          searchText,
+          text,
+          "datetime",
+          search
+        ),
+    },
+    {
+      key: "isTry",
+      title: "IS TRY",
+      dataIndex: "isTry",
+      sorter: true,
+      align: "center",
+      filteredValue: [search?.isTry] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "isTry",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => {
+        return renderColumn('isTry', hasValue(search['isTry']), searchText, text?.toString(), false, 'status', search)
+      }
+    },
+    {
+      key: "status",
+      title: "STATUS",
+      dataIndex: "status",
+      align: "center",
+      width: 150,
+      sorter: true,
+      filteredValue: [search?.status] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "status",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (index) => {
+        return renderColumn('status', hasValue(search['status']), searchText, toTitleCase(index), false, 'status', search)
+      },
+    },
+  ], [page, pageSize, search, searchText, searchedColumn]);
 
   // onSort
   const onSort = (_, __, sort) => {
@@ -1662,6 +1163,7 @@ const CalculationPage = () => {
       breadcrumbName: "Calculation",
     },
   ];
+
   const handleDownload = () => {
     if (tabHeader === "Calculation List") {
       dispatch(
@@ -1683,6 +1185,7 @@ const CalculationPage = () => {
       );
     }
   };
+
   const handleChangePage = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
     setPage(tempPage);
@@ -1768,13 +1271,13 @@ const CalculationPage = () => {
 
   const columns = useMemo(() => {
     if (tabHeader === "Calculation List") {
-      return [...column, ...columnActionPermission];
+      return [...column, ...columnActionPermission]
     } else {
       return columnHistory;
     }
   }, [column, columnActionPermission, columnHistory, tabHeader]);
 
-  console.log(data_calculation, " data calculation");
+  console.log(data_calculation, ' data calculation');
 
   return (
     <Spin spinning={loading}>
@@ -1794,13 +1297,19 @@ const CalculationPage = () => {
           <div className="my-5">
             <TablePaginationNew
               columns={columns}
-              dataSource={data_calculation?.result || []}
+              dataSource={data_calculation.result}
               totalData={data_calculation?.page?.totalElements || 0}
               current={page}
               pageSize={pageSize}
               onChange={handleChangePage}
-              tableScrolled={{ x: 6000, y: 600 }}
+              tableScrolled={{ x: 6000, y: 525 }}
               onSort={onSort}
+              useFixColumn={true}
+              defaultFixedColumns={{
+                no: "left",
+                status: "right",
+                action: "right",
+              }}
             />
           </div>
         </BaseContainer>

@@ -244,8 +244,8 @@ const PrabillingForm = ({ type }) => {
       serviceType: formValue?.serviceType,
       sor: formValue?.sor,
       scheduleType: formValue?.type,
-      scheduleDateTime: formValue?.scheduleDateTime 
-        ? moment(formValue.scheduleDateTime).format('YYYY-MM-DD HH:mm:ss')
+      scheduleDateTime: formValue?.scheduleDateTime
+        ? moment(formValue.scheduleDateTime).format("YYYY-MM-DD HH:mm:ss")
         : null,
       calculationType: formValue?.calculation_type,
       remark: formValue?.remark,
@@ -316,84 +316,89 @@ const PrabillingForm = ({ type }) => {
     setPendingDataFinal(null);
   };
 
-  const handleSave = async () => {
-    const selectedBillingCycle = list_billing_cycle?.data?.find(
-      (item) => item.id === dataFinal?.billingCycle
-    );
+const handleSave = async () => {
+  const selectedBillingCycle = (list_billing_cycle || []).find(
+    (item) => item.id === dataFinal?.billingCycle
+  );
 
-    const selectedBillingPeriod = list_billing_period?.data?.find(
-      (item) => item.id === dataFinal?.billingPeriod
-    );
+  const selectedBillingPeriod = list_billing_period?.data?.find(
+    (item) => item.id === dataFinal?.billingPeriod
+  );
 
-    const selectedSor = list_sor?.data?.find(
-      (item) => item.id === dataFinal?.sor
-    );
+  const selectedSor = list_sor?.data?.find(
+    (item) => item.id === dataFinal?.sor
+  );
 
-    if (!user_profile) {
-      console.error("User profile not loaded");
-      setBodyError({
-        message: "User profile is not loaded. Please refresh the page.",
-      });
-      setModalError(true);
-      return;
-    }
+  const selectedSchedulerType = list_scheduler_type?.find(
+    (item) => item.id === dataFinal?.scheduleType
+  );
 
-    const finalSpecificAccounts = (
-      dataFinal?.rRbiCalculationSpecificCustomer || []
-    )
-      .filter((item) => item.custNumb)
-      .map((item) => item.custNumb);
+  if (!user_profile) {
+    console.error("User profile not loaded");
+    setBodyError({
+      message: "User profile is not loaded. Please refresh the page.",
+    });
+    setModalError(true);
+    return;
+  }
 
-    const tempBody = {
-      billingCycle:
-        selectedBillingCycle?.name || selectedBillingCycle?.code || "",
-      billPeriod:
-        selectedBillingPeriod?.name || selectedBillingPeriod?.code || "",
-      sor: selectedSor?.name || "",
-      costCenter: (dataFinal?.rRbiCalculationCostCenter || []).map(
-        (item) => item.costCenter
-      ),
-      meterReadingCode: (dataFinal?.rRbiCalculationMeterReadingCode || []).map(
-        (item) => item.mreadingCode
-      ),
-      accountSegment: (dataFinal?.rRbiCalculationAccountSegment || []).map(
-        (item) => item.accSegment
-      ),
-      accountGroupType: (dataFinal?.rRbiCalculationAccountGroupType || []).map(
-        (item) => item.accGroupType
-      ),
-      specificAccount: finalSpecificAccounts,
+  const finalSpecificAccounts = (
+    dataFinal?.rRbiCalculationSpecificCustomer || []
+  )
+    .filter((item) => item.custNumb)
+    .map((item) => item.custNumb);
 
-      billingCycleId: dataFinal?.billingCycle,
-      billPeriodId: dataFinal?.billingPeriod,
-      scheduleTypeId: dataFinal?.scheduleType || 1,
-      scheduleDateTime: dataFinal?.scheduleDateTime || null,
+  const tempBody = {
+    billingCycle:
+      selectedBillingCycle?.name || selectedBillingCycle?.code || "",
+    billPeriod:
+      selectedBillingPeriod?.name || selectedBillingPeriod?.code || "",
+    sor: selectedSor?.name || "",
+    costCenter: (dataFinal?.rRbiCalculationCostCenter || []).map(
+      (item) => item.costCenter
+    ),
+    meterReadingCode: (dataFinal?.rRbiCalculationMeterReadingCode || []).map(
+      (item) => item.mreadingCode
+    ),
+    accountSegment: (dataFinal?.rRbiCalculationAccountSegment || []).map(
+      (item) => item.accSegment
+    ),
+    accountGroupType: (dataFinal?.rRbiCalculationAccountGroupType || []).map(
+      (item) => item.accGroupType
+    ),
 
-      serviceTypeId: dataFinal?.serviceType,
-      sorId: dataFinal?.sor,
-      calculationTypeId: dataFinal?.calculationType,
-      remark: dataFinal?.remark,
-      createdBy: user_profile.username || "",
-    };
+    billingCycleId: dataFinal?.billingCycle,
+    billPeriodId: dataFinal?.billingPeriod,
+    
+    scheduleType: selectedSchedulerType?.name || "",
+    specificAccount: finalSpecificAccounts,
+    schedulerTime: dataFinal?.scheduleDateTime || "",
 
-    dispatch(createPrabilling({ body: tempBody }))
-      .unwrap()
-      .then((data) => {
-        if (data) {
-          setModalSuccess(true);
-        }
-      })
-      .catch((error) => {
-        if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
-          const message =
-            error?.response?.data?.message ||
-            error?.message ||
-            error?.toString();
-          setBodyError({ message });
-          setModalError(true);
-        }
-      });
+    serviceTypeId: dataFinal?.serviceType,
+    sorId: dataFinal?.sor,
+    calculationTypeId: dataFinal?.calculationType,
+    remark: dataFinal?.remark,
+    createdBy: user_profile.username || "",
   };
+
+  dispatch(createPrabilling({ body: tempBody }))
+    .unwrap()
+    .then((data) => {
+      if (data) {
+        setModalSuccess(true);
+      }
+    })
+    .catch((error) => {
+      if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          error?.toString();
+        setBodyError({ message });
+        setModalError(true);
+      }
+    });
+};
 
   const handleBackPage = () => {
     if (Object.values(formValue).length > 0) {
@@ -512,9 +517,9 @@ const PrabillingForm = ({ type }) => {
 
   const handleScheduleTypeChange = (value) => {
     setSelectedScheduleType(value);
-    const selectedType = list_scheduler_type?.find(item => item.id === value);
-    if (selectedType?.name?.toLowerCase() !== 'schedule') {
-      form.setFieldValue('scheduleDateTime', null);
+    const selectedType = list_scheduler_type?.find((item) => item.id === value);
+    if (selectedType?.name?.toLowerCase() !== "schedule") {
+      form.setFieldValue("scheduleDateTime", null);
     }
   };
 
@@ -565,7 +570,7 @@ const PrabillingForm = ({ type }) => {
               >
                 <SelectComponent
                   onChange={handleChangeBillingCycle}
-                  options={list_billing_cycle?.data?.map((item) => {
+                  options={(list_billing_cycle || []).map((item) => {
                     return {
                       label: item?.name,
                       value: item?.id,
@@ -771,31 +776,33 @@ const PrabillingForm = ({ type }) => {
                 })}
               />
             </Form.Item>
-            
-            {selectedScheduleType && 
-             list_scheduler_type?.find(item => item.id === selectedScheduleType)?.name?.toLowerCase() === 'scheduler' && (
-              <Form.Item
-                label={"Schedule"}
-                name={"scheduleDateTime"}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select schedule date and time",
-                  },
-                ]}
-              >
-                <DatePicker
-                  showTime
-                  format="DD MMM YYYY HH:mm:ss"
-                  placeholder="Select date and time"
-                  className="w-full"
-                  disabledDate={(current) => {
-                    return current && current < moment().startOf('day');
-                  }}
-                />
-              </Form.Item>
-            )}
-            
+
+            {selectedScheduleType &&
+              list_scheduler_type
+                ?.find((item) => item.id === selectedScheduleType)
+                ?.name?.toLowerCase() === "scheduler" && (
+                <Form.Item
+                  label={"Schedule"}
+                  name={"scheduleDateTime"}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select schedule date and time",
+                    },
+                  ]}
+                >
+                  <DatePicker
+                    showTime
+                    format="DD MMM YYYY HH:mm:ss"
+                    placeholder="Select date and time"
+                    className="w-full"
+                    disabledDate={(current) => {
+                      return current && current < moment().startOf("day");
+                    }}
+                  />
+                </Form.Item>
+              )}
+
             <Form.Item label={"Remark"} name={"remark"}>
               <InputComponent
                 type="textarea"

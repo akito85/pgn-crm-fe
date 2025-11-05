@@ -47,7 +47,7 @@ import TaxCodeForm from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode
 import ManagementBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/ManagementBillingInstallmentPage";
 import CreateBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/CreateBillingInstallmentPage";
 import PrabillingDetail from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingDetail";
-// import MonitoringCustomerPage from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/MonitoringCustomerPage";
+import MonitoringCustomerPage from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/MonitoringCustomerPage";
 import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/prabillCustomer/AccountDetailPage";
 
 export const RBI_ELEMENTS = {
@@ -71,7 +71,7 @@ export const RBI_ELEMENTS = {
   BILLING_VIEW_PAGE: <BillingPage />,
 
   // monitoring usage
-  // MONITORING_CUSTOMER_VIEW_ELEMENTS: <MonitoringCustomerPage />,
+  MONITORING_CUSTOMER_VIEW_ELEMENTS: <MonitoringCustomerPage />,
 
   // monitoring usage
   MONITORING_USAGE_VIEW_ELEMENTS: <MonitoringUsagePage />,

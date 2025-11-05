@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Spin,
-  Radio,
   Tooltip,
   Input,
   Select,
@@ -10,11 +9,14 @@ import {
   Button,
   Row,
   Col,
-  Popconfirm,
   Dropdown,
-  Menu
 } from "antd";
-import { SearchOutlined, DeleteOutlined, EyeOutlined, MoreOutlined } from "@ant-design/icons";
+import {
+  SearchOutlined,
+  MoreOutlined,
+  PlusOutlined,
+  CheckCircleOutlined,
+} from "@ant-design/icons";
 import moment from "moment";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -23,20 +25,17 @@ import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import BaseContainer from "../../../../components/BaseContainer";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
-import ModalCreateEFaktur from "./ModalCreateEFaktur";
-import ModalApprovalEFaktur from "./ModalApprovalEFaktur";
+import ModalGenerateEFaktur from "./ModalEfaktur/ModalGenerateEFaktur";
+import ModalGenerateXML from "./ModalEfaktur/ModalGenerateXML";
+import ModalUploadEFaktur from "./ModalEfaktur/ModalUploadEFaktur";
+import ModalApprovalEFaktur from "./ModalEfaktur/ModalApprovalEFaktur ";
 import LogAktivitasEFaktur from "./LogAktivitasEFaktur";
-import ModalBuatFakturPengganti from "./ModalBuatFakturPengganti";
-import ModalPreviewEFaktur from "./ModalPreviewEFaktur";
-import ModalGenerateXML from "./ModalGenerateXML";
-import ModalUploadEFaktur from "./ModalUploadEFaktur";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 import Toolbar from "../../../../components/Toolbar";
-import { Link } from "react-router-dom";
 import {
-  getListEFaktur,
-  deleteEFaktur,
-  updateEFakturStatus,
+  getListApprovedBilling,
+  downloadEFakturList,
+  getApprovalHistory,
 } from "../../../../redux/slices/rating_billing_invoice/efakturSlice";
 
 const { RangePicker } = DatePicker;
@@ -44,42 +43,30 @@ const { Option } = Select;
 
 const ViewFaktur = () => {
   const dispatch = useDispatch();
-  const { 
-    list_efaktur, 
-    loading, 
-    pagination 
-  } = useSelector((state) => state.efaktur);
+  const { list_approved_billing, loading, pagination, data_approval_history } =
+    useSelector((state) => state.efaktur);
 
   const searchInput = useRef(null);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState("");
+  const [sort, setSort] = useState("invoiceDate~desc");
 
   const [filterSearch, setFilterSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filterDateRange, setFilterDateRange] = useState(null);
 
-  const [valueTab, setValueTab] = useState("Billing Gas");
-  const [pageDetail, setPageDetail] = useState(false);
-  const [modalRequest, setModalRequest] = useState(false);
-  const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
-  const [modalApproval, setModalApproval] = useState(false);
-  const [logAktivitasOpen, setLogAktivitasOpen] = useState(false);
-  const [dataApprovalHistory, setDataApprovalHistory] = useState({});
-  const [selectedNoFaktur, setSelectedNoFaktur] = useState("");
-  const [modalFakturPengganti, setModalFakturPengganti] = useState(false);
-  const [noFakturForPengganti, setNoFakturForPengganti] = useState("");
-
-  const [modalPreview, setModalPreview] = useState(false);
-  const [noFakturForPreview, setNoFakturForPreview] = useState("");
+  const [modalGenerateEFaktur, setModalGenerateEFaktur] = useState(false);
   const [modalGenerateXML, setModalGenerateXML] = useState(false);
   const [modalUploadEFaktur, setModalUploadEFaktur] = useState(false);
-  const [noFakturForGenerate, setNoFakturForGenerate] = useState("");
+  const [modalApproval, setModalApproval] = useState(false);
+  const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
+  const [logAktivitasOpen, setLogAktivitasOpen] = useState(false);
 
-  const dataSource = list_efaktur;
+  const [selectedBilling, setSelectedBilling] = useState(null);
+  const [dataApprovalHistory, setDataApprovalHistory] = useState({});
+
+  const dataSource = list_approved_billing || [];
 
   // Breadcrumbs
   const routes = [
@@ -95,18 +82,34 @@ const ViewFaktur = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [page, pageSize, sort]);
+
+  useEffect(() => {
+    if (data_approval_history?.dataApprover) {
+      const temp = {
+        dataApprover: data_approval_history?.dataApprover?.EFAKTUR || [],
+        dataHistory: data_approval_history?.dataHistory?.EFAKTUR || [],
+      };
+      setDataApprovalHistory(temp);
+    } else {
+      setDataApprovalHistory({});
+    }
+  }, [data_approval_history]);
 
   const fetchData = () => {
     const filters = {
-      search: filterSearch,
-      status: filterStatus,
-      dateRange: filterDateRange,
+      ...(filterSearch && { search: filterSearch }),
+      ...(filterStatus && { eFakturStatus: filterStatus }),
+      ...(filterDateRange &&
+        filterDateRange[0] &&
+        filterDateRange[1] && {
+          startDate: moment(filterDateRange[0]).format("YYYY-MM-DD"),
+          endDate: moment(filterDateRange[1]).format("YYYY-MM-DD"),
+        }),
     };
 
     dispatch(
-      getListEFaktur({
-        search: filterSearch,
+      getListApprovedBilling({
         page: page,
         pageSize: pageSize,
         sort: sort,
@@ -116,7 +119,7 @@ const ViewFaktur = () => {
   };
 
   const handleFilter = () => {
-    setPage(1); 
+    setPage(1);
     fetchData();
   };
 
@@ -125,136 +128,80 @@ const ViewFaktur = () => {
     setFilterStatus("");
     setFilterDateRange(null);
     setPage(1);
-    
+
     dispatch(
-      getListEFaktur({
-        search: "",
+      getListApprovedBilling({
         page: 1,
         pageSize: pageSize,
-        sort: "",
+        sort: sort,
         filters: {},
       })
     );
-  };
-
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
   };
 
   const handleChange = (pageChange, pageSizeChange) => {
     const newPage = pageSize !== pageSizeChange ? 1 : pageChange;
     setPage(newPage);
     setPageSize(pageSizeChange);
-    
-    const filters = {
-      search: filterSearch,
-      status: filterStatus,
-      dateRange: filterDateRange,
-    };
-
-    dispatch(
-      getListEFaktur({
-        search: filterSearch,
-        page: newPage,
-        pageSize: pageSizeChange,
-        sort: sort,
-        filters: filters,
-      })
-    );
   };
 
-  const onSortApi = (_, __, sort) => {
+  const onSortApi = (_, __, sortInfo) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sortInfo.order !== undefined
+        ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
-    
-    const filters = {
-      search: filterSearch,
-      status: filterStatus,
-      dateRange: filterDateRange,
-    };
-
-    dispatch(
-      getListEFaktur({
-        search: filterSearch,
-        page: page,
-        pageSize: pageSize,
-        sort: dataSort,
-        filters: filters,
-      })
-    );
   };
 
   const handleDownload = () => {
-    console.log("Download list");
+    const filters = {
+      ...(filterSearch && { search: filterSearch }),
+      ...(filterStatus && { eFakturStatus: filterStatus }),
+      ...(filterDateRange &&
+        filterDateRange[0] &&
+        filterDateRange[1] && {
+          startDate: moment(filterDateRange[0]).format("YYYY-MM-DD"),
+          endDate: moment(filterDateRange[1]).format("YYYY-MM-DD"),
+        }),
+    };
+
+    dispatch(downloadEFakturList({ filters, page, pageSize, sort }));
+  };
+
+  const handleGenerateEFaktur = (record) => {
+    setSelectedBilling(record.billingCode);
+    setModalGenerateEFaktur(true);
   };
 
   const handleApprovalHistory = (record) => {
+    dispatch(getApprovalHistory(record.billingCode));
     setModalApprovalHistory(true);
   };
 
-  const handleLogAktivitas = (record) => {
-    setSelectedNoFaktur(record.noFaktur);
-    setLogAktivitasOpen(true);
-  };
-
-  const handlePreview = (record) => {
-    setNoFakturForPreview(record.noFaktur);
-    setModalPreview(true);
-  };
-
   const handleGenerateXML = (record) => {
-    setNoFakturForGenerate(record.noFaktur);
+    setSelectedBilling(record);
     setModalGenerateXML(true);
   };
 
   const handleUploadEFaktur = (record) => {
-    setNoFakturForGenerate(record.noFaktur);
+    setSelectedBilling(record);
     setModalUploadEFaktur(true);
   };
 
-  const handleRequestApproval = (record) => {
-    console.log("Request Approval untuk E-Faktur:", record.noFaktur);
-    
-    if (window.confirm(`Kirim E-Faktur ${record.noFaktur} untuk approval?`)) {
-      dispatch(
-        updateEFakturStatus({
-          noFaktur: record.noFaktur,
-          status: "AWAITING APPROVAL",
-        })
-      )
-        .unwrap()
-        .then(() => {
-          handleRefresh();
-        })
-        .catch((error) => {
-          console.error("Error requesting approval:", error);
-        });
-    }
+  const handleApproval = (record) => {
+    setSelectedBilling(record);
+    setModalApproval(true);
   };
 
-  const handleDelete = (record) => {
-    dispatch(deleteEFaktur(record.noFaktur))
-      .unwrap()
-      .then(() => {
-        handleRefresh();
-      })
-      .catch((error) => {
-        console.error("Error deleting e-faktur:", error);
-      });
-  };
-
-  const onChangeTab = ({ target: { value } }) => {
-    setValueTab(value);
+  const handleLogAktivitas = (record) => {
+    setSelectedBilling(record);
+    setLogAktivitasOpen(true);
   };
 
   const handleRefresh = () => {
     fetchData();
   };
+
   const columns = [
     {
       title: "NO",
@@ -264,55 +211,88 @@ const ViewFaktur = () => {
       render: (_, __, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "NO. FAKTUR",
-      dataIndex: "noFaktur",
-      key: "noFaktur",
-      width: 200,
+      title: "NO. E-FAKTUR",
+      dataIndex: "efakturNo", // ⚠️ UBAH dari "eFakturNo" ke "efakturNo" (huruf kecil)
+      key: "efakturNo",
+      width: 180,
+      render: (text) => text || "-",
     },
     {
-      title: "NAMA PELANGGAN",
-      dataIndex: "namaPelanggan",
-      key: "namaPelanggan",
+      title: "INVOICE NUMBER",
+      dataIndex: "invoiceNumber",
+      key: "invoiceNumber",
+      width: 180,
+      render: (text) => text || "-",
+    },
+    {
+      title: "BILLING CODE",
+      dataIndex: "billingCode",
+      key: "billingCode",
+      width: 180,
+    },
+    {
+      title: "CUSTOMER",
+      dataIndex: "customerName",
+      key: "customerName",
       width: 250,
     },
     {
-      title: "TANGGAL FAKTUR",
-      dataIndex: "tanggalFaktur",
-      key: "tanggalFaktur",
+      title: "ACCOUNT NUMBER",
+      dataIndex: "accountNumber",
+      key: "accountNumber",
       width: 150,
     },
     {
-      title: "TOTAL TAGIHAN",
-      dataIndex: "totalTagihan",
-      key: "totalTagihan",
-      width: 150,
+      title: "BILLING PERIOD",
+      dataIndex: "billingPeriod",
+      key: "billingPeriod",
+      width: 120,
+    },
+    {
+      title: "INVOICE DATE",
+      dataIndex: "invoiceDate",
+      key: "invoiceDate",
+      width: 120,
+      render: (text) => {
+        // Format date dari "2024-02-07 00:00:00" ke "07-02-2024"
+        if (!text) return "-";
+        return moment(text).format("DD-MM-YYYY");
+      },
+    },
+    {
+      title: "TOTAL AMOUNT (IDR)",
+      dataIndex: "totalAmountEqvIdr", // ⚠️ UBAH dari "totalAmountEqvIdrReal" ke "totalAmountEqvIdr"
+      key: "totalAmountEqvIdr",
+      width: 180,
       align: "right",
-      render: (value) => `Rp ${value?.toLocaleString("id-ID")}`,
+      render: (value) => `Rp ${value?.toLocaleString("id-ID") || 0}`,
     },
     {
-      title: "STATUS",
-      dataIndex: "status",
-      key: "status",
+      title: "STATUS E-FAKTUR",
+      dataIndex: "efakturStatus", // ⚠️ UBAH dari "eFakturStatus" ke "efakturStatus" (huruf kecil)
+      key: "efakturStatus",
       width: 180,
       align: "center",
       render: (status) => {
         const statusColors = {
-          SUCCESS: "bg-green-100 text-green-800 border-green-300",
-          "AWAITING APPROVAL":
-            "bg-yellow-100 text-yellow-800 border-yellow-300",
-          DRAFT: "bg-gray-100 text-gray-800 border-gray-300",
+          APPROVED: "bg-green-100 text-green-800 border-green-300", // ⚠️ TAMBAH status APPROVED
+          PROCESSING: "bg-blue-100 text-blue-800 border-blue-300",
+          AWAITING_APPROVAL: "bg-orange-100 text-orange-800 border-orange-300",
           FAILED: "bg-red-100 text-red-800 border-red-300",
-          PENGGANTI: "bg-purple-100 text-purple-800 border-purple-300",
+          REJECTED: "bg-red-100 text-red-800 border-red-300",
+          NOT_GENERATED: "bg-gray-100 text-gray-800 border-gray-300",
         };
+        // ⚠️ Handle null status sebagai NOT_GENERATED
+        const displayStatus = status || "NOT_GENERATED";
         return (
           <div className="flex justify-center">
             <span
               className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
-                statusColors[status] ||
+                statusColors[displayStatus] ||
                 "bg-gray-100 text-gray-800 border-gray-300"
               }`}
             >
-              {status}
+              {displayStatus.replace(/_/g, " ")}
             </span>
           </div>
         );
@@ -321,23 +301,17 @@ const ViewFaktur = () => {
     {
       title: "AKSI",
       key: "action",
-      width: 120,
+      width: 100,
       fixed: "right",
       align: "center",
       render: (_, record) => {
         const menuItems = [
           {
-            key: "preview",
-            label: "Preview",
-            icon: <EyeOutlined style={{ color: "#1890ff" }} />,
-            onClick: () => handlePreview(record),
-          },
-          {
             key: "detail",
             label: "Detail",
             icon: <SVGIcon name="IconDetail" width={16} />,
             onClick: () => {
-              window.location.href = `${INVOICE_ROUTES.EFAKTUR_VIEW_DETAIL}?noFaktur=${record.noFaktur}`;
+              window.location.href = `${INVOICE_ROUTES.EFAKTUR_VIEW_DETAIL}?billingCode=${record.billingCode}`;
             },
           },
           {
@@ -362,15 +336,36 @@ const ViewFaktur = () => {
             ),
             onClick: () => handleLogAktivitas(record),
           },
-          {
-            key: "approval-history",
-            label: "Approval History",
-            icon: <SVGIcon name="IconLogHistory" color="#0075bf" width={16} />,
-            onClick: () => handleApprovalHistory(record),
-          },
         ];
 
-        if (record.status === "FAILED") {
+        // ⚠️ UBAH kondisi ke huruf kecil "efakturStatus"
+        if (record.efakturStatus === "AWAITING_APPROVAL") {
+          menuItems.push(
+            { type: "divider" },
+            {
+              key: "approval",
+              label: "Approve/Reject",
+              icon: <CheckCircleOutlined style={{ color: "#52c41a" }} />,
+              onClick: () => handleApproval(record),
+            }
+          );
+        }
+
+        // ⚠️ UBAH kondisi untuk handle null status
+        if (!record.efakturStatus) {
+          menuItems.push(
+            { type: "divider" },
+            {
+              key: "generate",
+              label: "Generate E-Faktur",
+              icon: <PlusOutlined style={{ color: "#52c41a" }} />,
+              onClick: () => handleGenerateEFaktur(record),
+            }
+          );
+        }
+
+        // ⚠️ UBAH kondisi ke huruf kecil "efakturStatus"
+        if (record.efakturStatus === "FAILED") {
           menuItems.push(
             { type: "divider" },
             {
@@ -420,104 +415,20 @@ const ViewFaktur = () => {
           );
         }
 
-        if (record.status === "DRAFT") {
-          menuItems.push(
-            { type: "divider" },
-            {
-              key: "request-approval",
-              label: "Request Approval",
-              icon: (
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    stroke="#52c41a"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              ),
-              onClick: () => handleRequestApproval(record),
-            }
-          );
-        }
-
-        if (record.status === "DRAFT" || record.status === "REJECTED") {
-          menuItems.push(
-            { type: "divider" },
-            {
-              key: "delete",
-              label: "Hapus",
-              icon: <DeleteOutlined style={{ color: "#ff4d4f" }} />,
-              danger: true,
-              onClick: () => {
-              },
-            }
-          );
-        }
-
         return (
           <div className="flex gap-2 justify-center items-center">
-            <Tooltip title="Preview">
+            <Tooltip title="Approval History">
               <div
                 className="cursor-pointer hover:opacity-70 transition-opacity p-1.5 rounded hover:bg-blue-50 inline-flex items-center justify-center"
-                onClick={() => handlePreview(record)}
+                onClick={() => handleApprovalHistory(record)}
               >
-                <EyeOutlined style={{ fontSize: 18, color: "#1890ff" }} />
+                <SVGIcon name="IconLogHistory" color="#0075bf" width={18} />
               </div>
-            </Tooltip>
-
-            <Tooltip title="Detail">
-              <Link
-                to={INVOICE_ROUTES.EFAKTUR_VIEW_DETAIL}
-                state={{
-                  noFaktur: record.noFaktur,
-                  billingCode: record.billingCode,
-                  ratingCode: record.ratingCode,
-                  calculationCode: record.calculationCode,
-                  saNumber: record.saNumber,
-                  accountNumber: record.accountNumber,
-                }}
-              >
-                <div className="cursor-pointer hover:opacity-70 transition-opacity p-1.5 rounded hover:bg-gray-50 inline-flex items-center justify-center">
-                  <SVGIcon name="IconDetail" width={18} />
-                </div>
-              </Link>
             </Tooltip>
 
             <Dropdown
               menu={{
-                items: menuItems.map((item) => {
-                  if (item.type === "divider") {
-                    return item;
-                  }
-                  
-                  if (item.key === "delete") {
-                    return {
-                      ...item,
-                      label: (
-                        <Popconfirm
-                          title="Hapus E-Faktur"
-                          description={`Apakah Anda yakin ingin menghapus E-Faktur ${record.noFaktur}?`}
-                          onConfirm={() => handleDelete(record)}
-                          okText="Ya, Hapus"
-                          cancelText="Batal"
-                          okButtonProps={{ danger: true }}
-                        >
-                          <span className="text-red-500">Hapus</span>
-                        </Popconfirm>
-                      ),
-                    };
-                  }
-                  
-                  return item;
-                }),
+                items: menuItems,
               }}
               trigger={["click"]}
               placement="bottomRight"
@@ -547,30 +458,6 @@ const ViewFaktur = () => {
         </ButtonComponent>
       ),
     },
-    {
-      action: "Approval",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconRequestApproval" width={20} color="#FFF" />}
-          type="submit"
-          onClick={() => setModalApproval(true)}
-        >
-          Approval
-        </ButtonComponent>
-      ),
-    },
-    {
-      action: "Create",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonCreate" width={20} />}
-          type="submit"
-          onClick={() => setModalRequest(true)}
-        >
-          Buat E-Faktur
-        </ButtonComponent>
-      ),
-    },
   ];
 
   return (
@@ -583,14 +470,14 @@ const ViewFaktur = () => {
         </div>
 
         <BaseContainer header={"Manajemen E-Faktur"}>
-          <Row gutter={[16, 16]} align="bottom">
+          <Row gutter={[16, 26]} align="bottom">
             <Col xs={24} sm={12} md={7} lg={7}>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-gray-700">
                   Cari:
                 </label>
                 <Input
-                  placeholder="No. faktur atau nama pelanggan"
+                  placeholder="Billing code atau customer"
                   value={filterSearch}
                   onChange={(e) => setFilterSearch(e.target.value)}
                   prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
@@ -604,7 +491,7 @@ const ViewFaktur = () => {
             <Col xs={24} sm={12} md={6} lg={6}>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-gray-700">
-                  Status:
+                  Status E-Faktur:
                 </label>
                 <Select
                   placeholder="Pilih Status"
@@ -614,11 +501,13 @@ const ViewFaktur = () => {
                   style={{ width: "100%" }}
                   size="middle"
                 >
-                  <Option value="SUCCESS">SUCCESS</Option>
-                  <Option value="AWAITING APPROVAL">AWAITING APPROVAL</Option>
-                  <Option value="DRAFT">DRAFT</Option>
+                  <Option value="">Semua Status</Option>{" "}
+                  {/* Tambahkan opsi Semua */}
+                  <Option value="AWAITING_APPROVAL">AWAITING APPROVAL</Option>
+                  <Option value="APPROVED">APPROVED</Option> {/* ⚠️ TAMBAH */}
+                  <Option value="PROCESSING">PROCESSING</Option>
                   <Option value="FAILED">FAILED</Option>
-                  <Option value="PENGGANTI">PENGGANTI</Option>
+                  <Option value="REJECTED">REJECTED</Option>
                 </Select>
               </div>
             </Col>
@@ -661,7 +550,7 @@ const ViewFaktur = () => {
             </Col>
           </Row>
 
-          <div className="w-full">
+          <div className="w-full mt-6">
             <TablePaginationNew
               dataSource={dataSource}
               columns={columns}
@@ -671,23 +560,33 @@ const ViewFaktur = () => {
               onSizeChanger={handleChange}
               totalData={pagination?.totalElements || 0}
               onSort={onSortApi}
-              tableScrolled={{ y: 525, x: 1500 }}
+              tableScrolled={{ y: 525, x: 1600 }}
+              useFixColumn={true}
+              defaultFixedColumns={{
+                key: "left",
+                eFakturStatus: "right",
+                action: "right",
+              }}
             />
           </div>
         </BaseContainer>
 
-        <ModalPreviewEFaktur
-          isOpen={modalPreview}
-          handleClose={() => setModalPreview(false)}
-          noFaktur={noFakturForPreview}
+        <ModalGenerateEFaktur
+          isOpen={modalGenerateEFaktur}
+          handleClose={() => setModalGenerateEFaktur(false)}
+          billingData={selectedBilling}
+          onSuccess={() => {
+            console.log("E-Faktur generated successfully");
+            handleRefresh();
+          }}
         />
 
         <ModalGenerateXML
           isOpen={modalGenerateXML}
           handleClose={() => setModalGenerateXML(false)}
-          noFaktur={noFakturForGenerate}
+          billingData={selectedBilling}
           onSuccess={() => {
-            console.log("XML berhasil di-generate");
+            console.log("XML generated successfully");
             handleRefresh();
           }}
         />
@@ -695,20 +594,20 @@ const ViewFaktur = () => {
         <ModalUploadEFaktur
           isOpen={modalUploadEFaktur}
           handleClose={() => setModalUploadEFaktur(false)}
-          noFaktur={noFakturForGenerate}
+          billingData={selectedBilling}
           onSuccess={() => {
-            console.log("E-Faktur berhasil diupload");
+            console.log("E-Faktur uploaded successfully");
             handleRefresh();
           }}
         />
 
-        <ModalBuatFakturPengganti
-          isOpen={modalFakturPengganti}
-          handleClose={() => setModalFakturPengganti(false)}
-          noFakturAsli={noFakturForPengganti}
+        <ModalApprovalEFaktur
+          isOpen={modalApproval}
+          handleClose={() => setModalApproval(false)}
+          billingData={selectedBilling}
           onSuccess={() => {
+            console.log("E-Faktur approved/rejected successfully");
             handleRefresh();
-            console.log("Faktur pengganti berhasil dibuat");
           }}
         />
 
@@ -721,24 +620,10 @@ const ViewFaktur = () => {
           dataHistory={dataApprovalHistory?.dataHistory}
         />
 
-        <ModalCreateEFaktur
-          isOpen={modalRequest}
-          handleCancel={() => setModalRequest(false)}
-          handleRefresh={handleRefresh}
-          handleOpenModal={() => setModalRequest(true)}
-        />
-
-        <ModalApprovalEFaktur
-          isOpen={modalApproval}
-          handleCancel={() => setModalApproval(false)}
-          handleRefresh={handleRefresh}
-          handleOpenModal={() => setModalApproval(true)}
-        />
-
         <LogAktivitasEFaktur
           isOpen={logAktivitasOpen}
           handleClose={() => setLogAktivitasOpen(false)}
-          noFaktur={selectedNoFaktur}
+          billingCode={selectedBilling?.billingCode}
         />
       </Spin>
     </LayoutMenu>

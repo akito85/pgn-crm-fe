@@ -106,10 +106,8 @@ const getWithBody = async (url, body) => {
 
 const downloadData = async (url) => {
   try {
-    const baseUrl = configApp.RATING_BILLING_SERVICE;
-    
-    const response = await axios.get(baseUrl + url, {
-      headers: buildHeaders(baseUrl),
+    const response = await axios.get(configApp.RATING_BILLING_SERVICE + url, {
+      headers: tokenHeader(),
       responseType: "blob",
     });
     if (hasValue(response.headers?.get("content-disposition"))) {
@@ -127,6 +125,66 @@ const downloadData = async (url) => {
     }
     return response;
   } catch (error) {
+    throw error;
+  }
+};
+
+
+const downloadDataPrabill = async (url, customBaseUrl = null) => {
+  try {
+    const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
+    
+    const response = await axios.get(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
+      responseType: "arraybuffer",
+    });
+    
+    const urlParams = new URLSearchParams(url.split('?')[1]);
+    const searchParam = urlParams.get('search') || 'download';
+    
+    const now = new Date();
+    const timestamp = now.getFullYear() + 
+      String(now.getMonth() + 1).padStart(2, '0') + 
+      String(now.getDate()).padStart(2, '0') + 
+      String(now.getHours()).padStart(2, '0') + 
+      String(now.getMinutes()).padStart(2, '0') + 
+      String(now.getSeconds()).padStart(2, '0');
+    
+    const filename = `prabill_data_${searchParam}_${timestamp}.xlsx`;
+    
+    console.log('Generated filename:', filename);
+    
+    const blob = new Blob([response.data], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+    
+    console.log('Blob size:', blob.size, 'bytes');
+    
+    if (blob.size === 0) {
+      throw new Error('Downloaded file is empty');
+    }
+    
+    // Download file
+    FileSaver.saveAs(blob, filename);
+    
+    return response;
+  } catch (error) {
+    console.error('Download error:', error);
+    
+    if (error.response) {
+      console.error('Error response:', {
+        status: error.response.status,
+        statusText: error.response.statusText
+      });
+      
+      if (error.response.status === 204) {
+        throw new Error('No data available for download');
+      }
+      if (error.response.status === 404) {
+        throw new Error('File not found');
+      }
+    }
+    
     throw error;
   }
 };
@@ -327,6 +385,7 @@ const ratingBillingHttpService = {
   getWithBody,
   getListPagination,
   downloadData,
+  downloadDataPrabill,
   uploadAttachment,
   activationRemarkWithPut,
   downloadRtfFile,

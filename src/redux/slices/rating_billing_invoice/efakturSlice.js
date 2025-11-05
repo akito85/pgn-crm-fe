@@ -1,622 +1,470 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import ratingBillingHttpService from "../../services/ratingBillingHttpService";
 import {
   showModalSuccess,
   setBodyError,
   showModalError,
 } from "../general_slice";
 
-const DUMMY_EFAKTUR_DATA = [
-  {
-    id: 1,
-    key: 1,
-    noFaktur: "010.000-25.12345678",
-    namaPelanggan: "PT Industri Maju",
-    npwp: "12.345.678.9-012.000",
-    alamat: "Jl. Industri Raya No. 123, Jakarta Barat 11220",
-    tanggalFaktur: "28 Sep 2025",
-    tanggalJatuhTempo: "28 Oct 2025",
-    totalTagihan: 5500000,
-    status: "SUCCESS",
-    billingCode: "BC250800009001",
-    ratingCode: "RC250800009001",
-    calculationCode: "CLC250800000001",
-    saNumber: "SA/BULOG/218939812",
-    accountNumber: "ACC001",
-    items: [
-      {
-        key: 1,
-        productName: "Pemakaian Gas Industri",
-        quantity: 500,
-        unitPrice: 10000,
-        total: 5000000,
-      },
-      {
-        key: 2,
-        productName: "Biaya Maintenance",
-        quantity: 1,
-        unitPrice: 500000,
-        total: 500000,
-      },
-    ],
-    dpp: 5500000,
-    ppn: 605000,
-    catatan: "",
-    createdBy: "admin01",
-    createdDate: "2025-09-28 10:00:00",
-  },
-  {
-    id: 2,
-    key: 2,
-    noFaktur: "INV/DRAFT/102",
-    namaPelanggan: "CV Rumah Tangga Sejahtera",
-    npwp: "98.765.432.1-098.000",
-    alamat: "Jl. Sejahtera No. 45, Jakarta Selatan 12345",
-    tanggalFaktur: "28 Sep 2025",
-    tanggalJatuhTempo: "28 Oct 2025",
-    totalTagihan: 750000,
-    status: "AWAITING APPROVAL",
-    billingCode: "BC250800009003",
-    ratingCode: "RC250800009001",
-    calculationCode: "CLC250800000004",
-    saNumber: "SA/BULOG/218939812",
-    accountNumber: "ACC002",
-    items: [
-      {
-        key: 1,
-        productName: "Pemakaian Gas LPG",
-        quantity: 50,
-        unitPrice: 12000,
-        total: 600000,
-      },
-      {
-        key: 2,
-        productName: "Biaya Admin",
-        quantity: 1,
-        unitPrice: 150000,
-        total: 150000,
-      },
-    ],
-    dpp: 750000,
-    ppn: 82500,
-    catatan: "",
-    createdBy: "staff01",
-    createdDate: "2025-09-28 10:05:00",
-  },
-  {
-    id: 3,
-    key: 3,
-    noFaktur: "INV/DRAFT/101",
-    namaPelanggan: "Pelanggan Gas Retail",
-    npwp: "11.222.333.4-444.000",
-    alamat: "Jl. Retail No. 1, Jakarta Timur 13450",
-    tanggalFaktur: "27 Sep 2025",
-    tanggalJatuhTempo: "27 Oct 2025",
-    totalTagihan: 450000,
-    status: "DRAFT",
-    billingCode: "BC250800009005",
-    ratingCode: "RC250800009003",
-    calculationCode: "CLC250800000006",
-    saNumber: "SA/RETAIL/000001",
-    accountNumber: "ACC003",
-    items: [
-      {
-        key: 1,
-        productName: "Pemakaian Gas Retail",
-        quantity: 30,
-        unitPrice: 15000,
-        total: 450000,
-      },
-    ],
-    dpp: 450000,
-    ppn: 49500,
-    catatan: "",
-    createdBy: "staff01",
-    createdDate: "2025-09-27 09:00:00",
-  },
-  {
-    id: 4,
-    key: 4,
-    noFaktur: "010.000-25.12345670",
-    namaPelanggan: "PT Gas Sejati",
-    npwp: "55.666.777.8-888.000",
-    alamat: "Jl. Gas Sejati No. 88, Jakarta Utara 14250",
-    tanggalFaktur: "26 Sep 2025",
-    tanggalJatuhTempo: "26 Oct 2025",
-    totalTagihan: 12300000,
-    status: "FAILED",
-    billingCode: "BC250800009007",
-    ratingCode: "RC250800009004",
-    calculationCode: "CLC250800000007",
-    saNumber: "SA/N2N/000003",
-    accountNumber: "ACC004",
-    errorMessage: "Gagal mengirim ke DJP CoreTax: Connection timeout. Silakan gunakan proses manual.",
-    errorCode: "DJP_CONNECTION_ERROR",
-    items: [
-      {
-        key: 1,
-        productName: "Pemakaian Gas Industri Besar",
-        quantity: 1000,
-        unitPrice: 12300,
-        total: 12300000,
-      },
-    ],
-    dpp: 12300000,
-    ppn: 1353000,
-    catatan: "",
-    createdBy: "staff02",
-    createdDate: "2025-09-26 08:00:00",
-  },
-];
+const CUSTOM_BASE_URL = process.env.REACT_APP_BASE_URL_NGROK;
 
-const DUMMY_BILLING_DATA = [
-  {
-    id: 1,
-    billingCode: "BILL-XYZ-123",
-    customerName: "PT Industri Maju",
-    npwp: "12.345.678.9-012.000",
-    billingDate: "2025-09-30",
-    totalAmount: 5000000,
-    status: "Approved",
-    items: [
-      {
-        productName: "Pemakaian Gas Industri",
-        quantity: 500,
-        unitPrice: 10000,
-        total: 5000000,
-      },
-    ],
-  },
-  {
-    id: 2,
-    billingCode: "BILL-ABC-456",
-    customerName: "PT Sejahtera Jaya",
-    npwp: "98.765.432.1-098.000",
-    billingDate: "2025-09-28",
-    totalAmount: 3500000,
-    status: "Approved",
-    items: [
-      {
-        productName: "Pemakaian Gas Komersial",
-        quantity: 300,
-        unitPrice: 11000,
-        total: 3300000,
-      },
-      {
-        productName: "Biaya Admin",
-        quantity: 1,
-        unitPrice: 200000,
-        total: 200000,
-      },
-    ],
-  },
-  {
-    id: 3,
-    billingCode: "BILL-DEF-789",
-    customerName: "CV Maju Bersama",
-    npwp: "11.222.333.4-444.000",
-    billingDate: "2025-09-25",
-    totalAmount: 2800000,
-    status: "Approved",
-    items: [
-      {
-        productName: "Pemakaian Gas LPG",
-        quantity: 200,
-        unitPrice: 12500,
-        total: 2500000,
-      },
-      {
-        productName: "Biaya Pengiriman",
-        quantity: 1,
-        unitPrice: 300000,
-        total: 300000,
-      },
-    ],
-  },
-];
-
+// ==================== INITIAL STATE ====================
 const initialState = {
-  // List E-Faktur
-  list_efaktur: DUMMY_EFAKTUR_DATA,
-  list_billing: DUMMY_BILLING_DATA,
-  
-  // Detail E-Faktur
-  detail_efaktur: null,
-  
-  // Loading states
+  list_approved_billing: [],
   loading: false,
   loading_modal: false,
   loading_detail: false,
+  dataListCategory: [],
+  data_approval: [],
+  data_approval_list: [],
+  data_billingItem: [],
   
-  // Pagination
+  upload_progress: 0,
+  upload_results: [],
+  
   pagination: {
-    totalElements: DUMMY_EFAKTUR_DATA.length,
-    totalPages: 1,
+    totalElements: 0,
+    totalPages: 0,
     size: 10,
     number: 0,
   },
-  
-  // Log Aktivitas
   list_log_aktivitas: [],
   loading_log: false,
-  
-  // Approval History
-  approval_history: null,
-  loading_approval: false,
 };
 
-// Get List E-Faktur dengan Filter
-export const getListEFaktur = createAsyncThunk(
-  "GET_LIST_EFAKTUR",
-  async ({ search, page, pageSize, sort, filters }, thunkAPI) => {
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      let filteredData = [...DUMMY_EFAKTUR_DATA];
-      if (filters?.search) {
-        filteredData = filteredData.filter(item =>
-          item.noFaktur.toLowerCase().includes(filters.search.toLowerCase()) ||
-          item.namaPelanggan.toLowerCase().includes(filters.search.toLowerCase())
-        );
-      }
-    
-      if (filters?.status) {
-        filteredData = filteredData.filter(item => item.status === filters.status);
-      }
-      
-      if (filters?.dateRange && filters.dateRange.length === 2) {
-        const [startDate, endDate] = filters.dateRange;
-        filteredData = filteredData.filter(item => {
-          const itemDate = new Date(item.tanggalFaktur);
-          return itemDate >= new Date(startDate) && itemDate <= new Date(endDate);
-        });
-      }
-      
-      return {
-        result: filteredData,
-        page: {
-          totalElements: filteredData.length,
-          totalPages: Math.ceil(filteredData.length / pageSize),
-          size: pageSize,
-          number: page - 1,
-        },
-      };
-    } catch (error) {
-      const message = error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Failed to fetch E-Faktur list: ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error);
-    }
-  }
-);
+// ==================== ASYNC THUNKS ====================
 
-// Get List Billing untuk Create E-Faktur
-export const getListBilling = createAsyncThunk(
-  "GET_LIST_BILLING",
+export const getAllApprovalList = createAsyncThunk(
+  "GET_ALL_APPROVAL_LIST",
   async (_, thunkAPI) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return DUMMY_BILLING_DATA;
+      const url = "/v1/dbs/api/rbi/e-invoice/approval-hierarchy-list";
+      const response = await ratingBillingHttpService.getAll(url, CUSTOM_BASE_URL);
+      return response.data;
     } catch (error) {
-      const message = error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Failed to fetch billing list: ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error);
-    }
-  }
-);
-
-// Get Detail E-Faktur
-export const getDetailEFaktur = createAsyncThunk(
-  "GET_DETAIL_EFAKTUR",
-  async (noFaktur, thunkAPI) => {
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const efaktur = DUMMY_EFAKTUR_DATA.find(item => item.noFaktur === noFaktur);
-      
-      if (!efaktur) {
-        throw new Error("E-Faktur tidak ditemukan");
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
       }
-      
-      return efaktur;
-    } catch (error) {
-      const message = error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Failed to fetch E-Faktur detail: ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error);
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
 
-// Create E-Faktur
-export const createEFaktur = createAsyncThunk(
-  "CREATE_EFAKTUR",
-  async ({ body }, thunkAPI) => {
+export const getListApprovalById = createAsyncThunk(
+  "GET_LIST_APPROVAL_BY_ID",
+  async (id, thunkAPI) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Generate nomor faktur
-      const newId = DUMMY_EFAKTUR_DATA.length + 1;
-      const noFaktur = `INV/DRAFT/${100 + newId}`;
-      
-      const newEFaktur = {
-        id: newId,
-        key: newId,
-        noFaktur: noFaktur,
-        namaPelanggan: body.pelanggan,
-        npwp: "12.345.678.9-012.000",
-        alamat: "Alamat Pelanggan",
-        tanggalFaktur: body.tanggalFaktur,
-        tanggalJatuhTempo: body.tanggalJatuhTempo,
-        totalTagihan: body.totalTagihan,
-        status: body.status === "draft" ? "DRAFT" : "AWAITING APPROVAL",
-        billingCode: body.idBilling,
-        ratingCode: "RC250800009999",
-        calculationCode: "CLC250800000999",
-        saNumber: "SA/NEW/000999",
-        accountNumber: "ACC999",
-        items: body.items,
-        dpp: body.dpp,
-        ppn: body.ppn,
-        catatan: body.catatan || "",
-        createdBy: "current_user",
-        createdDate: new Date().toISOString(),
-      };
-      
-      const successBody = {
-        title: "Success",
-        description: "E-Faktur berhasil dibuat!",
-        return: false,
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      
-      return newEFaktur;
+      const url = `/v1/dbs/api/billing/approval-hierarchy-detail/${id}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data;
     } catch (error) {
-      const message = error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Failed to create E-Faktur: ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error);
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
     }
   }
 );
 
-// Update E-Faktur Status
-export const updateEFakturStatus = createAsyncThunk(
-  "UPDATE_EFAKTUR_STATUS",
-  async ({ noFaktur, status }, thunkAPI) => {
+export const getListApprovedBilling = createAsyncThunk(
+  "EFAKTUR/GET_LIST_APPROVED_BILLING",
+  async ({ page, pageSize, sort, filters }, thunkAPI) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      const successBody = {
-        title: "Success",
-        description: `E-Faktur ${noFaktur} status berhasil diupdate menjadi ${status}`,
-        return: false,
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      
-      return { noFaktur, status };
+      const searchParams = [];
+      if (filters?.search) searchParams.push(filters.search);
+      if (filters?.eFakturStatus) searchParams.push(`efakturStatus:${filters.eFakturStatus}`);
+      if (filters?.startDate && filters?.endDate) {
+        searchParams.push(`invoiceDate>=${filters.startDate}`);
+        searchParams.push(`invoiceDate<=${filters.endDate}`);
+      }
+
+      const sortParams = sort || "invoiceDate~desc";
+      const searchsParam = searchParams.length > 0 ? searchParams.join(",") : "";
+      const url = `/v1/dbs/api/rbi/e-invoice?sort=${sortParams}&size=${pageSize}&page=${page - 1}&searchs=${searchsParam}`;
+
+      // ✅ ADD: Pass CUSTOM_BASE_URL
+      const response = await ratingBillingHttpService.getPagination(url, CUSTOM_BASE_URL);
+      return response.data;
     } catch (error) {
-      const message = error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Failed to update status: ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error);
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = { title: "Failed", description: `${message}` };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
 
-// Delete E-Faktur
-export const deleteEFaktur = createAsyncThunk(
-  "DELETE_EFAKTUR",
-  async (noFaktur, thunkAPI) => {
+export const getAllBillingItemPaginate = createAsyncThunk(
+  "GET_ALL_BILLING_ITEM_PAGINATE",
+  async (billingCode, thunkAPI) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const successBody = {
-        title: "Success",
-        description: `E-Faktur ${noFaktur} berhasil dihapus`,
-        return: false,
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      
-      return noFaktur;
+      const url = `/v1/dbs/api/billing/billing-item/${billingCode}?page=0&size=999&sort=lineNumber~asc`;
+      // ✅ ADD: Pass CUSTOM_BASE_URL
+      const response = await ratingBillingHttpService.getPagination(url, CUSTOM_BASE_URL);
+      return response.data;
     } catch (error) {
-      const message = error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Failed to delete E-Faktur: ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error);
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = { title: "Failed", description: `${message}` };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
 
-// Approval E-Faktur (Approve/Reject)
-export const approvalEFaktur = createAsyncThunk(
-  "APPROVAL_EFAKTUR",
-  async ({ body }, thunkAPI) => {
+export const getListCategory = createAsyncThunk(
+  "EFAKTUR/GET_LIST_CATEGORY",
+  async (_, thunkAPI) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const action = body.action === "APPROVE" ? "disetujui" : "ditolak";
-      const newStatus = body.action === "APPROVE" ? "SUCCESS" : "REJECTED";
-      
+      const url = "/v1/dbs/api/rbi/e-invoice/category-list";
+      // ✅ ADD: Pass CUSTOM_BASE_URL
+      const response = await ratingBillingHttpService.getAll(url, CUSTOM_BASE_URL);
+      return response.data;
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = { title: "Failed", description: `${message}` };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+export const generateEFakturWithAttachments = createAsyncThunk(
+  "EFAKTUR/GENERATE_WITH_ATTACHMENTS",
+  async ({ efakturData, attachments }, thunkAPI) => {
+    try {
+      console.log("📤 Starting E-Faktur generation with attachments...");
+
+      const createUrl = "/v1/dbs/api/rbi/e-invoice/create-or-update";
+      const requestBody = {
+        apphierId: String(efakturData.apphierId),
+        billingCode: efakturData.billingCode,
+        invoiceNumber: efakturData.invoiceNumber,
+        invoiceDate: efakturData.invoiceDate,
+        invoiceDueDate: efakturData.invoiceDueDate,
+        dpp: Number(efakturData.dpp),
+        ppn: Number(efakturData.ppn),
+        totalAmount: Number(efakturData.totalAmount),
+        remark: efakturData.remark || "",
+        status: efakturData.status || "SUBMIT",
+      };
+
+      console.log("📤 Request Body E-Faktur:", requestBody);
+
+      // ✅ ADD: Pass CUSTOM_BASE_URL
+      const createResponse = await ratingBillingHttpService.createData(
+        createUrl,
+        requestBody,
+        CUSTOM_BASE_URL
+      );
+
+      console.log("📥 Response E-Faktur:", createResponse);
+
+      if (!createResponse.success) {
+        throw new Error(createResponse.message || "Gagal membuat E-Faktur");
+      }
+
+      const efakturResult = createResponse.data;
+      const einvoiceId = efakturResult.einvoiceId;
+
+      if (!einvoiceId) {
+        throw new Error("einvoiceId tidak ditemukan di response");
+      }
+
+      const uploadResults = [];
+
+      if (attachments && attachments.length > 0) {
+        console.log(`📎 Uploading ${attachments.length} attachment(s)...`);
+
+        for (let i = 0; i < attachments.length; i++) {
+          const attachment = attachments[i];
+
+          try {
+            if (!attachment.file) {
+              throw new Error(`File tidak ditemukan untuk attachment ${i + 1}`);
+            }
+            if (!attachment.fileCategoryId) {
+              throw new Error(`Category tidak dipilih untuk attachment ${i + 1}`);
+            }
+
+            const formData = new FormData();
+            formData.append("file", attachment.file);
+            formData.append("refId", einvoiceId);
+            formData.append("categoryId", attachment.fileCategoryId);
+
+            console.log(`📤 Uploading attachment ${i + 1}/${attachments.length}:`, {
+              fileName: attachment.file.name,
+              refId: einvoiceId,
+              categoryId: attachment.fileCategoryId,
+            });
+
+            const uploadUrl = "/v1/dbs/api/rbi/e-invoice/upload-attachment";
+            // ✅ Note: uploadAttachment already handles customBaseUrl internally
+            const uploadResponse = await ratingBillingHttpService.uploadAttachment(
+              uploadUrl,
+              formData,
+              (progressPercent) => {
+                const baseProgress = 70;
+                const uploadProgress = (30 / attachments.length) * (i + (progressPercent / 100));
+                const totalProgress = baseProgress + uploadProgress;
+                
+                thunkAPI.dispatch(
+                  updateUploadProgress(Math.min(totalProgress, 100))
+                );
+              }
+            );
+
+            console.log(`✅ Attachment ${i + 1} uploaded:`, uploadResponse);
+
+            uploadResults.push({
+              index: i + 1,
+              fileName: attachment.file.name,
+              success: true,
+              message: uploadResponse?.message || "Success",
+            });
+
+          } catch (uploadError) {
+            console.error(`❌ Error uploading attachment ${i + 1}:`, uploadError);
+
+            uploadResults.push({
+              index: i + 1,
+              fileName: attachment.file.name,
+              success: false,
+              error:
+                uploadError?.response?.data?.message ||
+                uploadError?.message ||
+                "Upload failed",
+            });
+          }
+        }
+      }
+
+      const failedUploads = uploadResults.filter((r) => !r.success);
+      const successUploads = uploadResults.filter((r) => r.success);
+
+      let successMessage = createResponse.message || "E-Faktur berhasil dibuat";
+
+      if (uploadResults.length > 0) {
+        if (failedUploads.length === 0) {
+          successMessage += ` dengan ${successUploads.length} attachment.`;
+        } else if (successUploads.length > 0) {
+          successMessage += `. ${successUploads.length} attachment berhasil, ${failedUploads.length} gagal.`;
+        } else {
+          successMessage += `, namun semua attachment gagal diupload.`;
+        }
+      }
+
       const successBody = {
         title: "Success",
-        description: `${body.eFakturCodes.length} E-Faktur berhasil ${action}`,
+        description: successMessage,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
-      
+
       return {
-        eFakturCodes: body.eFakturCodes,
-        action: body.action,
-        status: newStatus,
-        remark: body.remark,
-        alasanDitolak: body.alasanDitolak,
+        efaktur: efakturResult,
+        uploadResults: uploadResults,
+        summary: {
+          totalAttachments: uploadResults.length,
+          successCount: successUploads.length,
+          failedCount: failedUploads.length,
+        },
       };
+
     } catch (error) {
-      const message = error?.message || error?.toString();
+      console.error("❌ Error in generateEFakturWithAttachments:", error);
+
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+
       const errorBody = {
         title: "Failed",
-        description: `Failed to process approval: ${message}`,
+        description: `Gagal generate E-Faktur: ${message}`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error);
+
+      return thunkAPI.rejectWithValue({
+        message: message,
+        error: error?.response?.data || error,
+      });
     }
   }
 );
 
-// Generate XML E-Faktur
-export const generateXMLEFaktur = createAsyncThunk(
-  "GENERATE_XML_EFAKTUR",
-  async ({ noFaktur, xmlContent }, thunkAPI) => {
+// ✅ UPDATED: Approve/Reject E-Faktur dengan ngrok support
+export const approvedEfaktur = createAsyncThunk(
+  "EFAKTUR/APPROVE_EFAKTUR",
+  async ({ body, action: actionType }, thunkAPI) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Endpoint baru tanpa ID di URL
+      const url = `/v1/dbs/api/rbi/e-invoice/approval`;
       
-      const successBody = {
-        title: "Success",
-        description: "XML E-Faktur berhasil di-generate",
-        return: false,
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      
-      return { noFaktur, xmlContent };
-    } catch (error) {
-      const message = error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Failed to generate XML: ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error);
-    }
-  }
-);
-
-// Upload E-Faktur dari DJP
-export const uploadEFakturDJP = createAsyncThunk(
-  "UPLOAD_EFAKTUR_DJP",
-  async (formData, thunkAPI) => {
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Simulasi response upload
-      const uploadResult = {
-        noFaktur: formData.get('noFaktur'),
-        files: [
+      // Request body format baru dengan detailApproves array
+      const requestBody = {
+        detailApproves: [
           {
-            fileName: "efaktur_010.000-25.12345678.pdf",
-            fileSize: "2.3 MB",
-            fileType: "PDF",
-            url: "https://storage.minio.example.com/efaktur/...",
-            uploadedAt: new Date().toLocaleString("id-ID"),
-          },
+            approvalId: body.approvalId, // tappId dari list efaktur
+            billingCode: body.billingCode,
+            invoiceNumber: body.invoiceNumber,
+          }
         ],
+        action: body.action, // "APPROVE" atau "REJECT"
+        description: body.description || "",
       };
-      
-      const successBody = {
-        title: "Success",
-        description: "File E-Faktur berhasil diupload ke Min.io storage",
-        return: false,
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      
-      return uploadResult;
+
+      console.log("📤 Approval Request:", requestBody);
+
+      // ✅ ADD: Pass CUSTOM_BASE_URL
+      const response = await ratingBillingHttpService.createData(
+        url, 
+        requestBody,
+        CUSTOM_BASE_URL
+      );
+
+      console.log("📥 Approval Response:", response);
+
+      if (response.success) {
+        const successBody = {
+          title: "Success",
+          description: response.message || `E-Faktur berhasil di-${actionType}`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalSuccess(successBody));
+        
+        // Return data yang dibutuhkan untuk update state
+        return {
+          billingCode: body.billingCode,
+          action: body.action,
+          invoiceNumber: body.invoiceNumber,
+        };
+      } else {
+        throw new Error(response.message || `Gagal ${actionType} E-Faktur`);
+      }
     } catch (error) {
-      const message = error?.message || error?.toString();
+      const message = 
+        error?.response?.data?.message || 
+        error?.message || 
+        error?.toString();
+      
       const errorBody = {
         title: "Failed",
-        description: `Failed to upload E-Faktur: ${message}`,
+        description: `Gagal ${actionType} E-Faktur: ${message}`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error);
+      
+      return thunkAPI.rejectWithValue({
+        message: message,
+        billingCode: body.billingCode,
+      });
     }
   }
 );
 
-// Get Log Aktivitas E-Faktur
-export const getLogAktivitasEFaktur = createAsyncThunk(
-  "GET_LOG_AKTIVITAS_EFAKTUR",
-  async (noFaktur, thunkAPI) => {
+// ✅ ADD: Download E-Faktur List (with ngrok support)
+export const downloadEFakturList = createAsyncThunk(
+  "EFAKTUR/DOWNLOAD_LIST",
+  async ({ filters, page, pageSize, sort }, thunkAPI) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const logData = [
-        {
-          key: 1,
-          waktu: "2025-09-28 11:00:00",
-          pengguna: "supervisor01",
-          aktivitas: "Menyetujui E-Faktur",
-          catatan: "Data sudah sesuai.",
-        },
-        {
-          key: 2,
-          waktu: "2025-09-28 10:05:00",
-          pengguna: "staff01",
-          aktivitas: "Mengajukan Persetujuan",
-          catatan: "-",
-        },
-        {
-          key: 3,
-          waktu: "2025-09-28 10:00:00",
-          pengguna: "staff01",
-          aktivitas: "Membuat E-Faktur",
-          catatan: `Dibuat dari billing ID`,
-        },
-      ];
-      
-      return logData;
+      const searchParams = [];
+      if (filters?.search) searchParams.push(filters.search);
+      if (filters?.eFakturStatus) searchParams.push(`efakturStatus:${filters.eFakturStatus}`);
+      if (filters?.startDate && filters?.endDate) {
+        searchParams.push(`invoiceDate>=${filters.startDate}`);
+        searchParams.push(`invoiceDate<=${filters.endDate}`);
+      }
+
+      const sortParams = sort || "invoiceDate~desc";
+      const searchsParam = searchParams.length > 0 ? searchParams.join(",") : "";
+      const url = `/v1/dbs/api/rbi/e-invoice/download?sort=${sortParams}&size=${pageSize}&page=${page - 1}&searchs=${searchsParam}`;
+
+      const response = await ratingBillingHttpService.downloadDataPrabill(
+        url,
+        CUSTOM_BASE_URL
+      );
+      return response.data;
     } catch (error) {
-      const message = error?.message || error?.toString();
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      
       const errorBody = {
         title: "Failed",
-        description: `Failed to fetch log aktivitas: ${message}`,
+        description: `Download gagal: ${message}`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error);
+      
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
 
-// Buat Faktur Pengganti
-export const buatFakturPengganti = createAsyncThunk(
-  "BUAT_FAKTUR_PENGGANTI",
-  async (body, thunkAPI) => {
+// ✅ ADD: Get Approval History (with ngrok support)
+export const getApprovalHistory = createAsyncThunk(
+  "EFAKTUR/GET_APPROVAL_HISTORY",
+  async (billingCode, thunkAPI) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const successBody = {
-        title: "Success",
-        description: "Faktur Pengganti berhasil dibuat",
-        return: false,
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      
-      return body;
+      const url = `/v1/dbs/api/rbi/e-invoice/approval-history/${billingCode}`;
+      const response = await ratingBillingHttpService.getDetail(url, CUSTOM_BASE_URL);
+      return response.data;
     } catch (error) {
-      const message = error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Failed to create Faktur Pengganti: ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error);
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      
+      console.error("Error fetching approval history:", message);
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+// ✅ ADD: Get Billing Items by Code (alias for getAllBillingItemPaginate)
+export const getBillingItemsByCode = createAsyncThunk(
+  "EFAKTUR/GET_BILLING_ITEMS_BY_CODE",
+  async (billingCode, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/billing/billing-item/${billingCode}?page=0&size=999&sort=lineNumber~asc`;
+      const response = await ratingBillingHttpService.getPagination(url, CUSTOM_BASE_URL);
+      return response.data;
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = { title: "Failed", description: `${message}` };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
@@ -626,171 +474,215 @@ const efakturSlice = createSlice({
   name: "efaktur",
   initialState,
   reducers: {
-    // Reset state
     resetEFakturState: (state) => {
-      state.detail_efaktur = null;
       state.list_log_aktivitas = [];
-      state.approval_history = null;
+      state.data_billingItem = [];
+      state.upload_progress = 0;
+      state.upload_results = [];
     },
-    // Clear detail
-    clearDetailEFaktur: (state) => {
-      state.detail_efaktur = null;
+    clearBillingItems: (state) => {
+      state.data_billingItem = [];
+    },
+    updateUploadProgress: (state, action) => {
+      state.upload_progress = action.payload;
+    },
+    resetUploadProgress: (state) => {
+      state.upload_progress = 0;
+      state.upload_results = [];
     },
   },
   extraReducers: {
-    // Get List E-Faktur
-    [getListEFaktur.pending]: (state) => {
+    [getListApprovedBilling.pending]: (state) => {
       state.loading = true;
     },
-    [getListEFaktur.fulfilled]: (state, action) => {
+    [getListApprovedBilling.fulfilled]: (state, action) => {
       state.loading = false;
-      state.list_efaktur = action.payload.result;
-      state.pagination = action.payload.page;
+      state.list_approved_billing = action.payload.result || [];
+      state.pagination = action.payload.page || {
+        totalElements: 0,
+        totalPages: 0,
+        size: 10,
+        number: 0,
+      };
     },
-    [getListEFaktur.rejected]: (state) => {
+    [getListApprovedBilling.rejected]: (state) => {
       state.loading = false;
+      state.list_approved_billing = [];
     },
 
-    // Get List Billing
-    [getListBilling.pending]: (state) => {
-      state.loading = true;
-    },
-    [getListBilling.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.list_billing = action.payload;
-    },
-    [getListBilling.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    // Get Detail E-Faktur
-    [getDetailEFaktur.pending]: (state) => {
+    [getAllBillingItemPaginate.pending]: (state) => {
       state.loading_detail = true;
     },
-    [getDetailEFaktur.fulfilled]: (state, action) => {
+    [getAllBillingItemPaginate.fulfilled]: (state, action) => {
       state.loading_detail = false;
-      state.detail_efaktur = action.payload;
+      state.data_billingItem = action.payload;
     },
-    [getDetailEFaktur.rejected]: (state) => {
+    [getAllBillingItemPaginate.rejected]: (state) => {
       state.loading_detail = false;
+      state.data_billingItem = [];
     },
 
-    // Create E-Faktur
-    [createEFaktur.pending]: (state) => {
-      state.loading_modal = true;
+    // ✅ ADD: getBillingItemsByCode reducers (alias)
+    [getBillingItemsByCode.pending]: (state) => {
+      state.loading_detail = true;
     },
-    [createEFaktur.fulfilled]: (state, action) => {
-      state.loading_modal = false;
-      state.list_efaktur = [action.payload, ...state.list_efaktur];
-      state.pagination.totalElements += 1;
+    [getBillingItemsByCode.fulfilled]: (state, action) => {
+      state.loading_detail = false;
+      // Store in a separate key to avoid conflict with getAllBillingItemPaginate
+      state.billing_items_detail = action.payload;
     },
-    [createEFaktur.rejected]: (state) => {
-      state.loading_modal = false;
+    [getBillingItemsByCode.rejected]: (state) => {
+      state.loading_detail = false;
+      state.billing_items_detail = [];
     },
 
-    // Update E-Faktur Status
-    [updateEFakturStatus.pending]: (state) => {
+    [getListCategory.pending]: (state) => {
       state.loading = true;
     },
-    [updateEFakturStatus.fulfilled]: (state, action) => {
+    [getListCategory.fulfilled]: (state, action) => {
       state.loading = false;
-      const { noFaktur, status } = action.payload;
-      state.list_efaktur = state.list_efaktur.map(item =>
-        item.noFaktur === noFaktur ? { ...item, status } : item
+      state.dataListCategory = action.payload || [];
+    },
+    [getListCategory.rejected]: (state) => {
+      state.loading = false;
+      state.dataListCategory = [];
+    },
+
+    [generateEFakturWithAttachments.pending]: (state) => {
+      state.loading_modal = true;
+      state.upload_progress = 0;
+      state.upload_results = [];
+    },
+    [generateEFakturWithAttachments.fulfilled]: (state, action) => {
+      state.loading_modal = false;
+      state.upload_progress = 100;
+
+      const { efaktur, uploadResults, summary } = action.payload;
+      state.upload_results = uploadResults;
+
+      state.list_approved_billing = state.list_approved_billing.map((item) =>
+        item.billingCode === efaktur.billingCode
+          ? {
+              ...item,
+              eFakturStatus: efaktur.status,
+              eFakturNo: efaktur.efakturNo,
+              einvoiceId: efaktur.einvoiceId,
+              invoiceNumber: efaktur.invoiceNumber,
+              eFakturGeneratedAt: efaktur.createdDtm,
+              approvalStatus: efaktur.status,
+              dpp: efaktur.dpp,
+              ppn: efaktur.ppn,
+              totalAmount: efaktur.totalAmount,
+              attachmentSummary: summary,
+            }
+          : item
       );
-      if (state.detail_efaktur?.noFaktur === noFaktur) {
-        state.detail_efaktur.status = status;
+    },
+    [generateEFakturWithAttachments.rejected]: (state, action) => {
+      state.loading_modal = false;
+      state.upload_progress = 0;
+
+      const billingCode = action.meta.arg?.efakturData?.billingCode;
+      if (billingCode) {
+        state.list_approved_billing = state.list_approved_billing.map((item) =>
+          item.billingCode === billingCode
+            ? {
+                ...item,
+                eFakturStatus: "FAILED",
+                eFakturError: action.payload?.message || "Generate failed",
+              }
+            : item
+        );
       }
     },
-    [updateEFakturStatus.rejected]: (state) => {
-      state.loading = false;
+
+    [approvedEfaktur.pending]: (state) => {
+      state.loading_modal = true;
+    },
+    [approvedEfaktur.fulfilled]: (state, action) => {
+      state.loading_modal = false;
+      const { billingCode, action: approvalAction } = action.payload;
+
+      state.list_approved_billing = state.list_approved_billing.map((item) =>
+        item.billingCode === billingCode
+          ? {
+              ...item,
+              efakturStatus: approvalAction === "APPROVE" ? "APPROVED" : "REJECTED",
+              approvalStatus: approvalAction === "APPROVE" ? "APPROVED" : "REJECTED",
+            }
+          : item
+      );
+    },
+    [approvedEfaktur.rejected]: (state, action) => {
+      state.loading_modal = false;
+      
+      const billingCode = action.payload?.billingCode;
+      if (billingCode) {
+        state.list_approved_billing = state.list_approved_billing.map((item) =>
+          item.billingCode === billingCode
+            ? {
+                ...item,
+                approvalError: action.payload?.message,
+              }
+            : item
+        );
+      }
     },
 
-    // Delete E-Faktur
-    [deleteEFaktur.pending]: (state) => {
+    // ✅ ADD: Download reducers
+    [downloadEFakturList.pending]: (state) => {
       state.loading = true;
     },
-    [deleteEFaktur.fulfilled]: (state, action) => {
+    [downloadEFakturList.fulfilled]: (state) => {
       state.loading = false;
-      state.list_efaktur = state.list_efaktur.filter(
-        item => item.noFaktur !== action.payload
-      );
-      state.pagination.totalElements -= 1;
     },
-    [deleteEFaktur.rejected]: (state) => {
+    [downloadEFakturList.rejected]: (state) => {
       state.loading = false;
     },
 
-    // Approval E-Faktur
-    [approvalEFaktur.pending]: (state) => {
-      state.loading_approval = true;
+    // ✅ ADD: Approval History reducers
+    [getApprovalHistory.pending]: (state) => {
+      state.loading = true;
     },
-    [approvalEFaktur.fulfilled]: (state, action) => {
-      state.loading_approval = false;
-      const { eFakturCodes, status } = action.payload;
-      
-      state.list_efaktur = state.list_efaktur.map(item => {
-        const found = eFakturCodes.find(code => code.noFaktur === item.noFaktur);
-        return found ? { ...item, status } : item;
-      });
+    [getApprovalHistory.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_approval_history = action.payload;
     },
-    [approvalEFaktur.rejected]: (state) => {
-      state.loading_approval = false;
+    [getApprovalHistory.rejected]: (state) => {
+      state.loading = false;
+      state.data_approval_history = null;
     },
 
-    // Generate XML
-    [generateXMLEFaktur.pending]: (state) => {
-      state.loading_modal = true;
+    [getAllApprovalList.pending]: (state) => {
+      state.loading = true;
     },
-    [generateXMLEFaktur.fulfilled]: (state, action) => {
-      state.loading_modal = false;
+    [getAllApprovalList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_approval = action.payload;
     },
-    [generateXMLEFaktur.rejected]: (state) => {
-      state.loading_modal = false;
-    },
-
-    // Upload E-Faktur DJP
-    [uploadEFakturDJP.pending]: (state) => {
-      state.loading_modal = true;
-    },
-    [uploadEFakturDJP.fulfilled]: (state, action) => {
-      state.loading_modal = false;
-      // Update status menjadi SUCCESS setelah upload
-      const { noFaktur } = action.payload;
-      state.list_efaktur = state.list_efaktur.map(item =>
-        item.noFaktur === noFaktur ? { ...item, status: "SUCCESS" } : item
-      );
-    },
-    [uploadEFakturDJP.rejected]: (state) => {
-      state.loading_modal = false;
+    [getAllApprovalList.rejected]: (state) => {
+      state.loading = false;
     },
 
-    // Get Log Aktivitas
-    [getLogAktivitasEFaktur.pending]: (state) => {
-      state.loading_log = true;
+    [getListApprovalById.pending]: (state) => {
+      state.loading = true;
     },
-    [getLogAktivitasEFaktur.fulfilled]: (state, action) => {
-      state.loading_log = false;
-      state.list_log_aktivitas = action.payload;
+    [getListApprovalById.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_approval_list = action.payload;
     },
-    [getLogAktivitasEFaktur.rejected]: (state) => {
-      state.loading_log = false;
-    },
-
-    // Buat Faktur Pengganti
-    [buatFakturPengganti.pending]: (state) => {
-      state.loading_modal = true;
-    },
-    [buatFakturPengganti.fulfilled]: (state, action) => {
-      state.loading_modal = false;
-    },
-    [buatFakturPengganti.rejected]: (state) => {
-      state.loading_modal = false;
+    [getListApprovalById.rejected]: (state) => {
+      state.loading = false;
     },
   },
 });
 
-export const { resetEFakturState, clearDetailEFaktur } = efakturSlice.actions;
+export const {
+  resetEFakturState,
+  clearBillingItems,
+  updateUploadProgress,
+  resetUploadProgress,
+} = efakturSlice.actions;
 
 const { reducer } = efakturSlice;
 export default reducer;

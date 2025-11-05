@@ -312,7 +312,7 @@ const BillingPage = () => {
                   searchedColumn,
                   searchText,
                   handleSearch,
-                  search,
+                  search
                   // handleDetail,
                   // handleApprovalHistory
                 ),
@@ -328,6 +328,12 @@ const BillingPage = () => {
               totalData={data?.page?.totalElements || 0}
               onSort={onSortApi}
               tableScrolled={{ y: 525, x: 16000 }}
+              useFixColumn={true}
+              defaultFixedColumns={{
+                no: "left",
+                statusApproval: "right",
+                action: "right",
+              }}
             />
           </div>
         </BaseContainer>
