@@ -106,15 +106,8 @@ const getWithBody = async (url, body) => {
 
 const downloadData = async (url, customBaseUrl) => {
   try {
-<<<<<<< HEAD
     const response = await axios.get(configApp.RATING_BILLING_SERVICE + url, {
       headers: tokenHeader(),
-=======
-    const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
-
-    const response = await axios.get(baseUrl + url, {
-      headers: buildHeaders(baseUrl),
->>>>>>> 51f67a22e904d7de12e2f96d7c62641c325fda8e
       responseType: "blob",
     });
     if (hasValue(response.headers?.get("content-disposition"))) {
