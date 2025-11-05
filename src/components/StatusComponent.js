@@ -135,11 +135,14 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
 
     switch (lowerColour) {
       case "completed":
-        return <CheckCircleFilled style={{ fontSize: "20px" }} />;
+      case "success":
+        return <CheckCircleFilled style={{ fontSize: "15px" }} />;
       case "generating":
-        return <Loading3QuartersOutlined style={{ fontSize: "20px" }} />;
+      case "in progress":
+      case "inprogress":
+        return <Loading3QuartersOutlined style={{ fontSize: "15px" }} />;
       case "failed":
-        return <CloseCircleFilled style={{ fontSize: "20px" }} />;
+        return <CloseCircleFilled style={{ fontSize: "15px" }} />;
       default:
         return null;
     }
@@ -151,7 +154,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
     <p
       className={
         type === "status"
-          ? `flex gap-2 items-center text-white ${bgcolor} px-4 py-1 mt-3 rounded-3xl text-center w-fit`
+          ? `flex gap-2 items-center text-white ${bgcolor} px-3 my-0 rounded-3xl text-center w-fit`
           : `${color} font-semibold`
       }
     >

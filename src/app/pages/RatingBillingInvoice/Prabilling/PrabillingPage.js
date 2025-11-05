@@ -16,6 +16,8 @@ import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColum
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import moment from "moment";
 
+const { Search } = Input;
+
 const PrabillingPage = () => {
   const { loading, list_prabilling_init, prabilling_pagination } = useSelector(
     (state) => state.rbi_prabilling

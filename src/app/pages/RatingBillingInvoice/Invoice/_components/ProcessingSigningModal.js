@@ -1,5 +1,5 @@
 // _components/ProcessSigningModal.js
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   Button,
@@ -10,6 +10,7 @@ import {
   Upload,
   Alert,
   Steps,
+  Input,
 } from "antd";
 import {
   CloseOutlined,
@@ -18,21 +19,53 @@ import {
   UploadOutlined,
   InboxOutlined,
 } from "@ant-design/icons";
+import { useSelector, useDispatch } from "react-redux";
+import { previewStampedInvoice } from "../../../../../redux/slices/rating_billing_invoice/emeterai";
 
 const { Dragger } = Upload;
 const { Step } = Steps;
+const { TextArea } = Input;
 
-const ProcessSigningModal = ({ visible, onClose, invoiceData }) => {
+const ProcessSigningModal = ({
+  visible,
+  onClose,
+  invoiceData,
+  onSubmit,
+  loading: externalLoading = false,
+}) => {
+  const dispatch = useDispatch();
+  const { previewLoading } = useSelector((state) => state.emeterai);
+
   const [signingMethod, setSigningMethod] = useState("digital");
   const [currentStep, setCurrentStep] = useState(0);
-  const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState([]);
+  const [remark, setRemark] = useState("");
 
-  const invoice = invoiceData || {
-    invoiceNumber: "INV/X/002",
-    customer: "CV. Energi Prima",
-    amount: 25000000,
-  };
+  // Safe invoice data with proper fallback
+  const invoice = React.useMemo(() => {
+    if (!invoiceData) {
+      return {
+        invoiceNumber: "-",
+        customer: "-",
+        amount: 0,
+      };
+    }
+    return {
+      invoiceNumber: invoiceData.invoiceNumber || "-",
+      customer: invoiceData.customer || invoiceData.customerName || "-",
+      amount: invoiceData.amount || invoiceData.totalAmountEqvIdr || 0,
+    };
+  }, [invoiceData]);
+
+  // Reset state when modal closes or opens
+  useEffect(() => {
+    if (visible) {
+      setSigningMethod("digital");
+      setFileList([]);
+      setCurrentStep(0);
+      setRemark("");
+    }
+  }, [visible]);
 
   const formatAmount = (amount) => {
     if (typeof amount === "number") {
@@ -41,10 +74,26 @@ const ProcessSigningModal = ({ visible, onClose, invoiceData }) => {
     return amount;
   };
 
-  const handleDownloadInvoice = () => {
-    message.success("Stamped invoice downloaded successfully!");
-    console.log("Downloading stamped invoice:", invoice.invoiceNumber);
-    // Implement actual download logic here
+  const handlePreviewFile = async () => {
+    try {
+      const result = await dispatch(
+        previewStampedInvoice({ invoiceNumber: invoice.invoiceNumber })
+      ).unwrap();
+
+      // Create blob and open in new tab
+      const blob = new Blob([result], { type: "application/pdf" });
+      const blobUrl = URL.createObjectURL(blob);
+      const newTab = window.open(blobUrl, "_blank");
+
+      if (newTab) {
+        newTab.document.title = `Preview - ${invoice.invoiceNumber}`;
+      }
+
+      console.log("✅ Preview opened successfully");
+    } catch (error) {
+      console.error("❌ Error previewing document:", error);
+      // Error message already handled in slice
+    }
   };
 
   const uploadProps = {
@@ -56,7 +105,7 @@ const ProcessSigningModal = ({ visible, onClose, invoiceData }) => {
       const isValidType = isPDF || isJPG || isPNG;
 
       if (!isValidType) {
-        message.error("You can only upload PDF, JPG, or PNG files!");
+        message.error("You can only upload PDF/JPG/PNG files!");
         return Upload.LIST_IGNORE;
       }
 
@@ -94,38 +143,64 @@ const ProcessSigningModal = ({ visible, onClose, invoiceData }) => {
   };
 
   const handleSubmit = async () => {
-    if (signingMethod === "manual" && fileList.length === 0) {
-      message.error("Please upload the signed invoice file!");
-      return;
+    if (signingMethod === "manual") {
+      if (fileList.length === 0) {
+        message.error("Please upload the signed invoice file!");
+        return;
+      }
+      if (!remark || remark.trim() === "") {
+        message.error("Please provide a remark!");
+        return;
+      }
     }
 
-    setLoading(true);
-    try {
-      console.log("Processing signing:", {
-        invoiceNumber: invoice.invoiceNumber,
-        signingMethod: signingMethod,
-        file: signingMethod === "manual" ? fileList[0] : null,
+    if (signingMethod === "manual" && fileList.length > 0) {
+      const file = fileList[0].originFileObj || fileList[0];
+      console.log("📁 File Details:", {
+        name: file.name,
+        size: `${(file.size / 1024).toFixed(2)} KB`,
+        type: file.type,
+        lastModified: new Date(file.lastModified).toLocaleString("id-ID"),
       });
+    }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      // Call parent onSubmit handler
+      if (onSubmit) {
+        const submissionData = {
+          invoiceNumber: invoice.invoiceNumber,
+          customer: invoice.customer,
+          amount: invoice.amount,
+          signingMethod: signingMethod,
+          file:
+            signingMethod === "manual"
+              ? fileList[0].originFileObj || fileList[0]
+              : null,
+          remark: remark,
+          submittedAt: new Date().toISOString(),
+        };
 
-      message.success(
-        signingMethod === "digital"
-          ? "Digital signing process initiated successfully!"
-          : "Signed invoice uploaded successfully!"
-      );
+        await onSubmit(submissionData);
+      } else {
+        // Fallback if no onSubmit handler provided
+        console.warn("⚠️ No onSubmit handler provided, using local simulation");
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        message.success(
+          signingMethod === "digital"
+            ? "Digital signing request submitted successfully!"
+            : "Signed invoice uploaded successfully!"
+        );
+        onClose();
+      }
 
-      // Reset
+      // Reset state
       setSigningMethod("digital");
       setFileList([]);
       setCurrentStep(0);
-      onClose();
+      setRemark("");
     } catch (error) {
-      console.error("Error processing signing:", error);
-      message.error("Failed to process signing");
-    } finally {
-      setLoading(false);
+      console.error("❌ Error in handleSubmit:", error);
+      // Error handling is done in parent component
     }
   };
 
@@ -133,13 +208,16 @@ const ProcessSigningModal = ({ visible, onClose, invoiceData }) => {
     setSigningMethod("digital");
     setFileList([]);
     setCurrentStep(0);
+    setRemark("");
     onClose();
   };
 
   const handleMethodChange = (e) => {
-    setSigningMethod(e.target.value);
+    const newMethod = e.target.value;
+    setSigningMethod(newMethod);
     setFileList([]);
     setCurrentStep(0);
+    setRemark("");
   };
 
   // Render Step 1: Select Method & Invoice Info
@@ -376,7 +454,9 @@ const ProcessSigningModal = ({ visible, onClose, invoiceData }) => {
           type="default"
           size="large"
           icon={<DownloadOutlined />}
-          onClick={handleDownloadInvoice}
+          onClick={handlePreviewFile}
+          loading={previewLoading}
+          disabled={previewLoading}
           style={{
             width: "100%",
             height: "48px",
@@ -385,14 +465,14 @@ const ProcessSigningModal = ({ visible, onClose, invoiceData }) => {
             borderWidth: "2px",
           }}
         >
-          Download Stamped Invoice (.pdf)
+          {previewLoading ? "Loading..." : "Download Stamped Invoice (.pdf)"}
         </Button>
       </div>
 
       <Divider style={{ margin: "32px 0" }} />
 
       {/* Upload Area */}
-      <div>
+      <div style={{ marginBottom: "24px" }}>
         <label
           style={{
             display: "block",
@@ -402,7 +482,8 @@ const ProcessSigningModal = ({ visible, onClose, invoiceData }) => {
             color: "#262626",
           }}
         >
-          Scanned File (PDF/JPG/PNG, max 5MB):
+          Scanned File (PDF/JPG/PNG, max 5MB):{" "}
+          <span style={{ color: "red" }}>*</span>
         </label>
         <Dragger {...uploadProps}>
           <p className="ant-upload-drag-icon">
@@ -431,9 +512,35 @@ const ProcessSigningModal = ({ visible, onClose, invoiceData }) => {
           ).toFixed(2)} KB)`}
           type="success"
           showIcon
-          style={{ marginTop: "16px" }}
+          style={{ marginBottom: "24px" }}
         />
       )}
+
+      {/* Remark Field */}
+      <div>
+        <label
+          style={{
+            display: "block",
+            marginBottom: "8px",
+            fontSize: "15px",
+            fontWeight: "600",
+            color: "#262626",
+          }}
+        >
+          Remark: <span style={{ color: "red" }}>*</span>
+        </label>
+        <TextArea
+          rows={4}
+          placeholder="Enter remark for manual signing (required)"
+          value={remark}
+          onChange={(e) => setRemark(e.target.value)}
+          maxLength={500}
+          showCount
+          style={{
+            fontSize: "14px",
+          }}
+        />
+      </div>
     </>
   );
 
@@ -527,7 +634,7 @@ const ProcessSigningModal = ({ visible, onClose, invoiceData }) => {
               size="large"
               icon={<CheckOutlined />}
               onClick={handleNext}
-              loading={loading}
+              loading={externalLoading}
               style={{
                 minWidth: "160px",
                 height: "44px",
@@ -543,8 +650,10 @@ const ProcessSigningModal = ({ visible, onClose, invoiceData }) => {
               size="large"
               icon={<UploadOutlined />}
               onClick={handleSubmit}
-              loading={loading}
-              disabled={fileList.length === 0}
+              loading={externalLoading}
+              disabled={
+                fileList.length === 0 || !remark || remark.trim() === ""
+              }
               style={{
                 minWidth: "160px",
                 height: "44px",
@@ -552,7 +661,7 @@ const ProcessSigningModal = ({ visible, onClose, invoiceData }) => {
                 fontWeight: "500",
               }}
             >
-              Upload Document
+              Submit File
             </Button>
           )}
         </div>

@@ -19,6 +19,7 @@ const initialState = {
   data_approval_list: [],
   data_list_billing_request_approval: [],
   data_list_billing_approval: [],
+  data_list_billing_approved: [],
   data_prevBilling: [],
   loading: false,
   isFailed: false,
@@ -248,7 +249,13 @@ export const downloadBillingList = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_BILLING_LIST", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_BILLING_LIST",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }

@@ -1,6 +1,6 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Tooltip } from "antd";
-import { EyeOutlined } from "@ant-design/icons";
+import { DownloadOutlined, EyeOutlined } from "@ant-design/icons";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import BaseContainer from "../../../../components/CardContainer";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
@@ -9,8 +9,8 @@ import { configApp } from "../../../../constants/configApp";
 import { tokenHeader } from "../../../../utils/tokenHeader";
 import DocViewer from "react-doc-viewer";
 import { sorterFunction } from "../../../../utils/sorterFunction";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
-import TablePagination from "../../../../components/TableRBI";
+import TableRBI from "../../../../components/TableRBI";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 export const columns = (
   search,
@@ -24,12 +24,14 @@ export const columns = (
 ) => [
   {
     title: "NO",
+    key: "no",
     align: "center",
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
     title: "ACTION",
+    key: "action",
     dataIndex: "action",
     sorter: (a, b) => sorterFunction("action", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
@@ -54,6 +56,7 @@ export const columns = (
   },
   {
     title: "ACTION BY",
+    key: "actionBy",
     dataIndex: "actionBy",
     sorter: (a, b) => sorterFunction("actionBy", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
@@ -78,6 +81,7 @@ export const columns = (
   },
   {
     title: "FORMAT OPTION",
+    key: "formatOptionName",
     dataIndex: "formatOptionName",
     sorter: (a, b) => sorterFunction("formatOptionName", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
@@ -102,6 +106,7 @@ export const columns = (
   },
   {
     title: "ACTION DATE",
+    key: "actionDate",
     align: "center",
     dataIndex: "actionDate",
     sorter: (a, b) => sorterFunction("actionDate", a, b, "date"),
@@ -126,6 +131,7 @@ export const columns = (
   },
   {
     title: "STATUS",
+    key: "status",
     dataIndex: "status",
     sorter: (a, b) => sorterFunction("status", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
@@ -150,6 +156,7 @@ export const columns = (
   },
   {
     title: "REMARK",
+    key: "remark",
     dataIndex: "remark",
     sorter: (a, b) => sorterFunction("remark", a, b),
     ellipsis: {
@@ -166,8 +173,8 @@ export const columns = (
     ),
     render: (text) =>
       renderColumn(
-        "status",
-        hasValue(search["status"]),
+        "remark",
+        hasValue(search["remark"]),
         searchText,
         text,
         true,
@@ -176,28 +183,23 @@ export const columns = (
       ),
   },
   {
-    title: "ACTION",
+    title: "FILE ACTION",
+    key: "actionButtons",
     fixed: "right",
-    width: 150,
+    width: 100,
     align: "center",
-    render: (id, record) => {
-      return (
-        <div className="flex w-full justify-center gap-6">
-          <Tooltip title="Preview">
-            <div className="pt-1">
-              <EyeOutlined
-                style={{
-                  fontSize: "24px",
-                  color: "#0075bf",
-                  cursor: "pointer",
-                }}
-                onClick={() => handlePreview(record)}
-              />
-            </div>
-          </Tooltip>
-        </div>
-      );
-    },
+    render: (id, record) => (
+      <div className="flex w-full justify-center gap-6">
+        <Tooltip title="Preview">
+          <div
+            className="pt-1 cursor-pointer"
+            onClick={() => handlePreview(record)}
+          >
+            <DownloadOutlined style={{ fontSize: "25px" }} />
+          </div>
+        </Tooltip>
+      </div>
+    ),
   },
 ];
 
@@ -214,22 +216,87 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
   const [orderSort, setOrderSort] = useState("");
   const [search, setSearch] = useState({});
 
-  // Use Effect
+  // ✅ State untuk fix column (dengan localStorage persistence)
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    const saved = localStorage.getItem("invoiceLogFixedColumns");
+    return saved ? JSON.parse(saved) : { no: "left", actionButtons: "right" }; // Default fix
+  });
+
+  // ✅ Save to localStorage when fixedColumns change
+  useEffect(() => {
+    localStorage.setItem(
+      "invoiceLogFixedColumns",
+      JSON.stringify(fixedColumns)
+    );
+  }, [fixedColumns]);
+
+  // ✅ Filter data based on search
+  const filteredData = useMemo(() => {
+    if (!detail || detail.length === 0) return [];
+
+    let filtered = [...detail];
+
+    // Apply search filters
+    Object.keys(search).forEach((key) => {
+      const searchValue = search[key];
+      if (searchValue) {
+        filtered = filtered.filter((item) => {
+          const itemValue = item[key];
+          if (itemValue === null || itemValue === undefined) return false;
+          return String(itemValue)
+            .toLowerCase()
+            .includes(String(searchValue).toLowerCase());
+        });
+      }
+    });
+
+    return filtered;
+  }, [detail, search]);
+
+  // ✅ Sort data
+  const sortedData = useMemo(() => {
+    if (!fieldSort || !orderSort) return filteredData;
+
+    const sorted = [...filteredData].sort((a, b) => {
+      const aValue = a[fieldSort];
+      const bValue = b[fieldSort];
+
+      // Handle null/undefined
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+
+      // Sort based on order
+      if (orderSort === "asc") {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+
+    return sorted;
+  }, [filteredData, fieldSort, orderSort]);
+
+  // ✅ Paginate data (slice based on current page and pageSize)
+  const paginatedData = useMemo(() => {
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return sortedData.slice(startIndex, endIndex);
+  }, [sortedData, page, pageSize]);
+
+  // ✅ Reset page when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   // Function Search No API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
   // Handle Change Page
@@ -286,40 +353,73 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
     }
   };
 
-  console.log("detailPage: ", detail);
+  // ✅ Get base columns and add 'key' property to each column
+  const baseColumns = useMemo(() => {
+    const invoiceCols = columns(
+      search,
+      page,
+      pageSize,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      handlePreviewFile
+    );
+
+    // Add 'key' property to columns that don't have it
+    const columnsWithKeys = [...invoiceCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+
+    return columnsWithKeys;
+  }, [search, page, pageSize, searchedColumn, searchText]);
+
+  // ✅ Apply fixed columns using useMemo
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(baseColumns, fixedColumns);
+  }, [baseColumns, fixedColumns]);
+
+  // ✅ Extract column definitions for ColumnFixDropdown (with key and title only)
+  const columnDefinitions = useMemo(() => {
+    return baseColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [baseColumns]);
 
   return (
-    <BaseContainer header={"Invoice Log Information"}>
-      <div className="flex flex-row align-middle gap-2">
-        <p className="text-[15px] font-semibold text-text-color-semibold">
-          Invoice Number:
-        </p>
-        <p className="text-[15px] font-semibold text-primary">
-          {invoiceNumber}
-        </p>
-      </div>
+    <BaseContainer
+      header={
+        <div className="flex justify-between w-full h-8">
+          <p>Invoice Log Information</p>
+          <div className="flex flex-row align-middle gap-2 justify-end">
+            <p className="text-[15px] font-semibold text-text-color-semibold">
+              Invoice Number:
+            </p>
+            <p className="text-[15px] font-semibold text-primary">
+              {invoiceNumber}
+            </p>
+          </div>
+        </div>
+      }
+    >
       <div>
         {detail && (
-          <TablePaginationNew
+          <TableRBI
             type="FE"
-            dataSource={detail || []}
-            columns={columns(
-              search,
-              page,
-              pageSize,
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearch,
-              handlePreviewFile
-            )}
+            dataSource={paginatedData} // ✅ Use paginated data
+            columns={processedColumns}
             current={page}
             pageSize={pageSize}
             onChange={handleChange}
-            // onSizeChanger={handleChange}
-            totalData={detail?.length || 0}
+            onSizeChanger={handleChange}
+            totalData={sortedData.length} // ✅ Total from filtered & sorted data
             onSort={onSort}
             tableScrolled={{ y: 525, x: 1400 }}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
           />
         )}
       </div>

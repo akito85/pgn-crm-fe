@@ -253,57 +253,49 @@ const PrabillingForm = ({ type }) => {
         return {
           id: null,
           calCode: null,
-          costCenter: id,
+          mreadingCode: id,
         };
-      }),
-      rRbiCalculationMeterReadingCode: (formValue?.meterReading || []).map(
-        (id) => {
-          return {
-            id: null,
-            calCode: null,
-            mreadingCode: id,
-          };
-        }
-      ),
-      rRbiCalculationAccountSegment: (formValue?.accountSegment || []).map(
-        (id) => {
-          return {
-            id: null,
-            calCode: null,
-            accSegment: id,
-          };
-        }
-      ),
-      rRbiCalculationAccountGroupType: (formValue?.accountGroupType || []).map(
-        (id) => {
-          return {
-            id: null,
-            calCode: null,
-            accGroupType: id,
-          };
-        }
-      ),
-      rRbiCalculationSpecificCustomer: (formValue?.specificCustomer || []).map(
-        (id) => {
-          return {
-            id: null,
-            calCode: null,
-            custNumb: id,
-          };
-        }
-      ),
-    };
-
-    const hasSpecificCustomer = (formValue?.specificCustomer || []).length > 0;
-
-    if (!hasSpecificCustomer) {
-      setPendingDataFinal(tempDataFinal);
-      setOpenWarningPopulate(true);
-    } else {
-      setDataFinal(tempDataFinal);
-      setOpenModal(true);
-    }
+      }
+    ),
+    rRbiCalculationAccountSegment: (formValue?.accountSegment || []).map(
+      (id) => {
+        return {
+          id: null,
+          calCode: null,
+          accSegment: id,
+        };
+      }
+    ),
+    rRbiCalculationAccountGroupType: (formValue?.accountGroupType || []).map(
+      (id) => {
+        return {
+          id: null,
+          calCode: null,
+          accGroupType: id,
+        };
+      }
+    ),
+    rRbiCalculationSpecificCustomer: (formValue?.specificCustomer || []).map(
+      (id) => {
+        return {
+          id: null,
+          calCode: null,
+          custNumb: id,
+        };
+      }
+    ),
   };
+
+  const hasSpecificCustomer = (formValue?.specificCustomer || []).length > 0;
+
+  if (!hasSpecificCustomer) {
+    setPendingDataFinal(tempDataFinal);
+    setOpenWarningPopulate(true);
+  } else {
+    setDataFinal(tempDataFinal);
+    setOpenModal(true);
+  }
+};
 
   const handleConfirmPopulateAll = () => {
     setOpenWarningPopulate(false);

@@ -1,5 +1,5 @@
 // ViewInvoice.js
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Form, Select, Tooltip } from "antd";
 import axios from "axios";
@@ -28,22 +28,22 @@ import {
   EyeOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
-import { InvoiceDummy } from "./dummyInvoiceData";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
+import { configApp } from "../../../../constants/configApp";
+import { tokenHeader } from "../../../../utils/tokenHeader";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const ViewInvoice = () => {
   // Selector
-  const { data, loading, data_detail, data_format, data_billing } = useSelector(
+  const { data, loading, data_detail, data_format } = useSelector(
     (state) => state.invoice
   );
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  // const dataSource = data?.content || [];
-  // console.log("data", data?.content);
-  const dataSource = InvoiceDummy();
+  const dataSource = data?.result || [];
 
   // State
   const [page, setPage] = useState(1);
@@ -61,6 +61,24 @@ const ViewInvoice = () => {
   const [modalReGenerate, setModalReGenerate] = useState(false);
   const [modalGenerate, setModalGenerate] = useState(false);
 
+  // ✅ State untuk fix column (dengan localStorage persistence)
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    const saved = localStorage.getItem("invoiceFixedColumns");
+    return saved
+      ? JSON.parse(saved)
+      : {
+          no: "left",
+          invoiceNumber: "left",
+          status: "right",
+          action: "right",
+        }; // Default fix invoice number
+  });
+
+  // ✅ Save to localStorage when fixedColumns change
+  useEffect(() => {
+    localStorage.setItem("invoiceFixedColumns", JSON.stringify(fixedColumns));
+  }, [fixedColumns]);
+
   // Use Effect
   useEffect(() => {
     let tempSearch = "";
@@ -76,7 +94,6 @@ const ViewInvoice = () => {
 
     let searchParam = undefined;
     if (tempSearch) {
-      // Hanya kirim search jika ada nilai
       searchParam = encodeURIComponent(JSON.stringify(search));
     }
     dispatch(
@@ -153,42 +170,10 @@ const ViewInvoice = () => {
   };
 
   // Handle Detail
-  const handleDetail = async (record) => {
-    console.log("=== START handleDetail ===");
-    console.log("Record:", record);
-    console.log("Invoice Number:", record?.invoiceNumber);
-
-    try {
-      setPageDetail(true);
-
-      // Gunakan .unwrap() untuk mendapatkan actual response atau error
-      const result = await dispatch(
-        getDetailInvoice(record?.invoiceNumber)
-      ).unwrap();
-
-      console.log("✅ Success - Detail loaded:", result);
-      setInvoiceNumber(record?.invoiceNumber);
-
-      // Scroll ke detail section
-      setTimeout(
-        () =>
-          window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: "smooth",
-          }),
-        100
-      );
-    } catch (error) {
-      console.error("❌ ERROR in handleDetail ===");
-      console.error("Error object:", error);
-      console.error("Error message:", error?.message);
-      console.error("Error response:", error?.response);
-      console.error("Error data:", error?.response?.data);
-      console.error("Full error:", JSON.stringify(error, null, 2));
-
-      // Reset state karena gagal
-      setPageDetail(false);
-    }
+  const handleDetail = (record) => {
+    setPageDetail(true);
+    dispatch(getDetailInvoice(record?.invoiceNumber));
+    setInvoiceNumber(record?.invoiceNumber);
   };
 
   // Handle Re Generate
@@ -201,12 +186,10 @@ const ViewInvoice = () => {
   const handlePreviewFile = async (record) => {
     try {
       const response = await axios.get(
-        `https://d28a5698909b.ngrok-free.app/api/v1/invoices/download/${record?.invoiceNumber}`,
+        configApp.RATING_BILLING_SERVICE +
+          `/v1/dbs/api/rbi/invoice/${record?.invoiceNumber}/preview`,
         {
-          headers: {
-            // tokenHeader(),
-            "ngrok-skip-browser-warning": "true",
-          },
+          headers: tokenHeader(),
           responseType: "arraybuffer",
         }
       );
@@ -325,12 +308,10 @@ const ViewInvoice = () => {
     {
       action: "Create",
       render: (
-        // trigger generate invoice
         <ButtonComponent
           icon={<SVGIcon name="IconButtonCreate" width={24} />}
           type="submit"
           onClick={() => {
-            // Open new page instead of modal
             window.location.href =
               "/invoice/generate-invoice/generate-form-invoice";
           }}
@@ -401,6 +382,46 @@ const ViewInvoice = () => {
     },
   ];
 
+  // ✅ Call hook at component level (not inside useMemo)
+  const actionCols = useColumnActionPermission(
+    ["view", "preview", "regenerate"],
+    itemGrantAccess
+  );
+
+  // ✅ Get base columns and add 'key' property to each column
+  const baseColumns = useMemo(() => {
+    const invoiceCols = columnsInvoice(
+      search,
+      page,
+      pageSize,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    );
+
+    // Add 'key' property to columns that don't have it
+    const columnsWithKeys = [...invoiceCols, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title, // Fallback to dataIndex or title if no key
+    }));
+
+    return columnsWithKeys;
+  }, [search, page, pageSize, searchedColumn, searchText, actionCols]);
+
+  // ✅ Apply fixed columns using useMemo
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(baseColumns, fixedColumns);
+  }, [baseColumns, fixedColumns]);
+
+  // ✅ Extract column definitions for ColumnFixDropdown (with key and title only)
+  const columnDefinitions = useMemo(() => {
+    return baseColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [baseColumns]);
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
@@ -410,12 +431,11 @@ const ViewInvoice = () => {
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">Invoice List</p>
-              <div>
+              <div className="flex gap-2">
                 <ButtonComponent
                   icon={<SVGIcon name="IconButtonCreate" width={24} />}
                   type="submit"
                   onClick={() => {
-                    // Open new page instead of modal
                     window.location.href =
                       "/invoice/generate-invoice/generate-form-invoice";
                   }}
@@ -429,33 +449,18 @@ const ViewInvoice = () => {
           <div className="w-full">
             <TableRBI
               dataSource={dataSource}
-              columns={[
-                ...columnsInvoice(
-                  search,
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                  // handlePreviewFile,
-                  // handleDetail,
-                  // handleReGenerate
-                ),
-                ...useColumnActionPermission(
-                  ["view", "preview", "regenerate"],
-                  itemGrantAccess
-                ),
-              ]}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
-              // onSizeChanger={handleChange}
-              // totalData={data?.page?.totalElements}
-              totalData={dataSource.length}
-              tableScrolled={{ y: 525, x: 12000 }}
+              onSizeChanger={handleChange}
+              totalData={data?.page?.totalElements}
+              tableScrolled={{ y: 525, x: 2000 }}
               onSort={onSortApi}
               handleDownload={handleDownload}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
             />
           </div>
         </CardContainer>
@@ -463,7 +468,7 @@ const ViewInvoice = () => {
         {/* Invoice Log */}
         {pageDetail === true && data_detail ? (
           <DetailInvoice
-            detail={data_detail || []}
+            detail={data_detail?.logs}
             invoiceNumber={invoiceNumber}
           />
         ) : null}
@@ -513,18 +518,6 @@ const ViewInvoice = () => {
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
-
-        {/* Modal Generate */}
-        {/*
-        <ModalGenerateInvoice
-          isOpen={modalGenerate}
-          handleCancel={() => setModalGenerate(false)}
-          data={data_billing?.data}
-          refreshTable={refreshTable}
-          setBodyError={setBodyError}
-          setModalError={setModalError}
-        />
-        */}
       </Spin>
     </LayoutMenu>
   );

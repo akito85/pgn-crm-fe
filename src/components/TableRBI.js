@@ -16,6 +16,7 @@ import {
   Modal,
 } from "antd";
 import { useState, useMemo } from "react";
+import ColumnFixDropdown from "./ColumnFixDropdown/ColumnFixDropdown";
 const { Option } = Select;
 
 const TableRBI = ({
@@ -38,28 +39,27 @@ const TableRBI = ({
   usePagination = true,
   onSort = () => {},
   handleDownload = () => {},
+  columnDefinitions,
+  fixedColumns,
+  setFixedColumns,
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [isAdvanceOpen, setIsAdvanceOpen] = useState(false); // <-- state modal
+  const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
 
-  const handleDisplayColumn = (value) => {
-    setOptionSelectedCol(value);
-  };
-  const handleDelete = (index) => {
-    onDelete(index);
-  };
+  // ✅ Filter columns based on visibility (hide/show)
   const filterColumns = () => {
     return columns.filter((col) => {
       return !optionSelectedCol.includes(col.title);
     });
   };
 
+  // ✅ Filtered columns for search in dropdown
   const filteredColumns = useMemo(() => {
     if (!searchText) return columns;
     return columns.filter((col) =>
-      col.title.toLowerCase().includes(searchText.toLowerCase())
+      col.title?.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [columns, searchText]);
 
@@ -101,8 +101,8 @@ const TableRBI = ({
           paddingTop: 8,
         }}
       >
-        {filteredColumns.map((col) => (
-          <div key={col.title} style={{ marginBottom: 4 }}>
+        {filteredColumns.map((col, index) => (
+          <div key={col.title || index} style={{ marginBottom: 4 }}>
             <Checkbox
               checked={!optionSelectedCol.includes(col.title)}
               onChange={(e) => onCheckboxChange(e, col.title)}
@@ -139,6 +139,18 @@ const TableRBI = ({
             </Button>
           </Dropdown>
 
+          {/* ✅ Add ColumnFixDropdown button */}
+          <div className="w-md">
+            <ColumnFixDropdown
+              columns={columnDefinitions}
+              fixedColumns={fixedColumns}
+              onFixedColumnsChange={setFixedColumns}
+              buttonText="Fix Columns"
+              buttonStyle={{ height: "40px" }}
+              showCount={true}
+            />
+          </div>
+
           <div className="w-full flex justify-end gap-2 hidden">
             <Button
               icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
@@ -170,7 +182,7 @@ const TableRBI = ({
       {/* Table */}
       <Table
         dataSource={dataSource}
-        columns={[...filterColumns()]}
+        columns={filterColumns()} // ✅ Apply filtered columns (without spread operator to preserve fixed prop)
         scroll={tableScrolled}
         bordered
         pagination={false}
@@ -189,7 +201,7 @@ const TableRBI = ({
           <div className="flex items-center gap-3">
             <Select
               value={pageSize}
-              onChange={onSizeChanger}
+              onChange={(value) => onSizeChanger(current, value)}
               className="w-20"
               size="small"
             >
@@ -211,6 +223,7 @@ const TableRBI = ({
             onChange={onChange}
             showSizeChanger={false}
             showTotal={false}
+            style={{ display: "flex", gap: "3px" }}
             size="small"
           />
         </div>
