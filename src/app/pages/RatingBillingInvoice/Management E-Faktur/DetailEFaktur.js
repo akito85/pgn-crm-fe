@@ -97,8 +97,6 @@ const DetailEFaktur = () => {
   // Fetch data on mount
   useEffect(() => {
     if (billingCode) {
-      console.log("📥 Fetching detail for billing code:", billingCode);
-      
       // Fetch E-Faktur detail
       dispatch(getDetailEFaktur(billingCode));
       
@@ -115,7 +113,6 @@ const DetailEFaktur = () => {
   // Fetch log activity when efakturId is available
   useEffect(() => {
     if (detail_efaktur?.efakturId && activeTab === "2") {
-      console.log("📥 Fetching log activity for efakturId:", detail_efaktur.efakturId);
       dispatch(
         getLogActivity({
           efakturId: detail_efaktur.efakturId,

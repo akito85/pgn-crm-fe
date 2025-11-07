@@ -49,18 +49,15 @@ const ModalUploadEFaktur = ({
   // Load E-Faktur detail ketika modal dibuka
   useEffect(() => {
     if (isOpen && billingData?.billingCode) {
-      console.log("Fetching E-Faktur detail for upload:", billingData.billingCode);
       
       dispatch(getDetailEFaktur(billingData.billingCode))
         .unwrap()
         .then((result) => {
           if (result) {
-            console.log("E-Faktur detail loaded:", result);
             setEfakturDetail(result);
           }
         })
         .catch((error) => {
-          console.log(" E-Faktur detail not found:", error);
           setErrorMessage("E-Faktur belum dibuat untuk billing ini");
           setModalError(true);
         });
@@ -135,8 +132,6 @@ const ModalUploadEFaktur = ({
     }
 
     try {
-      console.log("Uploading manual E-Faktur...");
-
       const payload = {
         efakturId: efakturDetail.efakturId,
         efakturFile: fileList[0], 
@@ -146,11 +141,9 @@ const ModalUploadEFaktur = ({
 
 
       await dispatch(uploadManualEFaktur(payload)).unwrap();
-
-      console.log("Upload successful");
+;
       setModalSuccess(true);
     } catch (error) {
-      console.error("Upload error:", error);
 
       if (error?.data && Array.isArray(error.data)) {
         setErrorDetails(error.data);

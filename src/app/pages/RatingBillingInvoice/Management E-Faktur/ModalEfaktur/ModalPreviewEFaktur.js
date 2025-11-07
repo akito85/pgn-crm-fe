@@ -150,7 +150,7 @@ const ModalPreviewEFaktur = ({
 
   // Handle Print
   const handlePrint = () => {
-    console.log("Print E-Faktur:", noFaktur);
+
     // TODO: Implement print functionality
     window.print();
   };
