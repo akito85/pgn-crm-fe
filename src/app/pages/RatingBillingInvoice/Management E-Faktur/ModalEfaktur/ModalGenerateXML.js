@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Spin, Alert, Table, message } from "antd";
+import { Spin, Alert, Table, message } from "antd";
 import {
   DownloadOutlined,
   FileTextOutlined,
@@ -12,163 +12,154 @@ import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import DetailText from "../../../../../components/DetailText";
 import {
   ModalError,
-  ModalSuccess,
 } from "../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../utils/Icon";
-// import {
-//   getBillingItemsByCode,
-//   generateXMLEFaktur,
-// } from "../../../../../redux/slices/rating_billing_invoice/efakturSlice";
+import {
+  getAllBillingItemPaginate,
+  generateXMLEFaktur,
+  getDetailEFaktur,
+} from "../../../../../redux/slices/rating_billing_invoice/efakturSlice";
 
 const ModalGenerateXML = ({
   isOpen = false,
   handleClose = () => {},
-  billingData = null, 
+  billingData = null,
   onSuccess = () => {},
 }) => {
-  const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const { billing_items_detail, loading_modal } = useSelector(
-    (state) => state.efaktur
-  );
+  
+  const { 
+    data_billingItem, 
+    loading_modal, 
+    loading_detail,
+    detail_efaktur 
+  } = useSelector((state) => state.efaktur);
 
-  // State
   const [xmlContent, setXmlContent] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [modalSuccess, setModalSuccess] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
+  const [efakturDetail, setEfakturDetail] = useState(null);
 
-  // Generate XML Content berdasarkan data billing
-  const generateXMLContent = (billing, items) => {
-    const tanggalFaktur =
-      billing.invoiceDate || new Date().toISOString().split("T")[0];
-    const date = new Date(tanggalFaktur);
+  useEffect(() => {
+    if (isOpen && billingData?.billingCode) {
+      dispatch(getAllBillingItemPaginate(billingData.billingCode));
+      
+      dispatch(getDetailEFaktur(billingData.billingCode))
+        .unwrap()
+        .then((result) => {
+          if (result) {
+            setEfakturDetail(result);
+          }
+        })
+        .catch((error) => {
+          setErrorMessage("E-Faktur belum dibuat untuk billing ini");
+          setModalError(true);
+        });
+    }
+  }, [isOpen, billingData, dispatch]);
 
-    // Hitung total DPP dan PPN dari items
-    const totalDPP = items.reduce((sum, item) => {
-      // Asumsikan item terakhir adalah PPN
-      if (!item.productName.toLowerCase().includes("ppn")) {
-        return sum + (item.total || 0);
-      }
-      return sum;
-    }, 0);
+  useEffect(() => {
+    if (detail_efaktur) {
+      setEfakturDetail(detail_efaktur);
+    }
+  }, [detail_efaktur]);
 
-    const totalPPN = items.reduce((sum, item) => {
-      if (item.productName.toLowerCase().includes("ppn")) {
-        return sum + (item.total || 0);
-      }
-      return sum;
-    }, 0);
-
-    const xmlHeader = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    const xmlContent = `<EFAKTUR>
-  <FK>
-    <KD_JENIS_TRANSAKSI>01</KD_JENIS_TRANSAKSI>
-    <FG_PENGGANTI>0</FG_PENGGANTI>
-    <NOMOR_FAKTUR>${
-      billing.eFakturNo || "01000025" + Date.now().toString().slice(-8)
-    }</NOMOR_FAKTUR>
-    <MASA_PAJAK>${date.getMonth() + 1}</MASA_PAJAK>
-    <TAHUN_PAJAK>${date.getFullYear()}</TAHUN_PAJAK>
-    <TANGGAL_FAKTUR>${tanggalFaktur}</TANGGAL_FAKTUR>
-    <NPWP>${billing.npwp || "00000000000000"}</NPWP>
-    <NAMA>PT GAS INDONESIA</NAMA>
-    <ALAMAT_LENGKAP>Jl. Gas Raya No. 100, Jakarta Pusat 10110</ALAMAT_LENGKAP>
-    <JUMLAH_DPP>${totalDPP}</JUMLAH_DPP>
-    <JUMLAH_PPN>${totalPPN}</JUMLAH_PPN>
-    <JUMLAH_PPNBM>0</JUMLAH_PPNBM>
-    <ID_KETERANGAN_TAMBAHAN>1</ID_KETERANGAN_TAMBAHAN>
-    <FG_UANG_MUKA>0</FG_UANG_MUKA>
-    <UANG_MUKA_DPP>0</UANG_MUKA_DPP>
-    <UANG_MUKA_PPN>0</UANG_MUKA_PPN>
-    <UANG_MUKA_PPNBM>0</UANG_MUKA_PPNBM>
-    <REFERENSI>${billing.billingCode}</REFERENSI>
-  </FK>
-  <FAPR>
-    <NPWP_PASANGAN>${billing.npwp || "00000000000000"}</NPWP_PASANGAN>
-    <NAMA_PASANGAN>${billing.customerName}</NAMA_PASANGAN>
-    <JALAN_PASANGAN>${
-      billing.address || "Alamat tidak tersedia"
-    }</JALAN_PASANGAN>
-    <NOMOR_URUT_PASANGAN>1</NOMOR_URUT_PASANGAN>
-  </FAPR>
-${items
-  .filter((item) => !item.productName.toLowerCase().includes("ppn"))
-  .map(
-    (item, index) => `  <OF>
-    <KODE_OBJEK>BKP</KODE_OBJEK>
-    <NAMA>${item.productName}</NAMA>
-    <HARGA_SATUAN>${item.unitPrice || 0}</HARGA_SATUAN>
-    <JUMLAH_BARANG>${item.quantity || 0}</JUMLAH_BARANG>
-    <HARGA_TOTAL>${item.total || 0}</HARGA_TOTAL>
-    <DISKON>0</DISKON>
-    <DPP>${item.total || 0}</DPP>
-    <PPN>${Math.round((item.total || 0) * 0.11)}</PPN>
-    <TARIF_PPN>11</TARIF_PPN>
-    <PPNBM>0</PPNBM>
-    <TARIF_PPNBM>0</TARIF_PPNBM>
-  </OF>`
-  )
-  .join("\n")}
-</EFAKTUR>`;
-
-    return xmlHeader + xmlContent;
+  const formatXML = (xmlString) => {
+    try {
+      let formatted = xmlString.trim();
+      formatted = formatted.replace(/></g, '>\n<');
+      
+      let indent = 0;
+      const lines = formatted.split('\n');
+      
+      formatted = lines.map(line => {
+        const trimmed = line.trim();
+        
+        if (!trimmed) return '';
+        
+        if (trimmed.startsWith('</')) {
+          indent = Math.max(0, indent - 1);
+        }
+        
+        const indentation = '  '.repeat(indent);
+        
+        if (trimmed.startsWith('<') && 
+            !trimmed.startsWith('</') && 
+            !trimmed.endsWith('/>') &&
+            !trimmed.match(/<[^>]+>[^<]*<\/[^>]+>/)) {
+          indent++;
+        }
+        
+        return indentation + trimmed;
+      }).filter(line => line !== '').join('\n');
+      
+      return formatted;
+    } catch (error) {
+      return xmlString;
+    }
   };
 
-  // Load data ketika modal dibuka
-  // useEffect(() => {
-  //   if (isOpen && billingData?.billingCode) {
-  //     dispatch(getBillingItemsByCode(billingData.billingCode));
-  //   }
-  // }, [isOpen, billingData, dispatch]);
+  const handleGenerateXML = async () => {
+    if (!billingData) {
+      setErrorMessage("Data billing tidak ditemukan");
+      setModalError(true);
+      return;
+    }
 
-  // Handle Generate XML
-  const handleGenerateXML = () => {
-    if (
-      !billingData ||
-      !billing_items_detail ||
-      billing_items_detail.length === 0
-    ) {
-      setErrorMessage("Data billing atau items tidak ditemukan");
+    if (!efakturDetail?.efakturId) {
+      setErrorMessage("E-Faktur ID tidak ditemukan. Pastikan E-Faktur sudah dibuat.");
       setModalError(true);
       return;
     }
 
     setIsGenerating(true);
 
-    // Simulasi proses generate
-    setTimeout(() => {
-      try {
-        const xml = generateXMLContent(billingData, billing_items_detail);
-        setXmlContent(xml);
+    try {
+      const result = await dispatch(
+        generateXMLEFaktur(efakturDetail.efakturId)
+      ).unwrap();
 
-        dispatch(
-          // generateXMLEFaktur({
-          //   billingCode: billingData.billingCode,
-          //   xmlContent: xml,
-          // })
-        )
-          .unwrap()
-          .then(() => {
-            setModalSuccess(true);
-            setIsGenerating(false);
-          })
-          .catch((error) => {
-            setErrorMessage(error.message || "Gagal menyimpan XML");
-            setModalError(true);
-            setIsGenerating(false);
-          });
-      } catch (error) {
-        setErrorMessage("Gagal generate XML: " + error.message);
-        setModalError(true);
-        setIsGenerating(false);
+      let xmlString = '';
+      
+      if (typeof result === 'string') {
+        xmlString = result;
+      } else if (result && typeof result === 'object') {
+        xmlString = result.xml || result.data || result.content || '';
       }
-    }, 1500);
+
+      if (!xmlString || xmlString.trim().length === 0) {
+        throw new Error("XML content is empty");
+      }
+
+      if (!xmlString.trim().startsWith('<')) {
+        throw new Error("Invalid XML format: content does not start with '<'");
+      }
+
+      const formattedXml = formatXML(xmlString);
+      setXmlContent(formattedXml);
+      
+      message.success("XML berhasil di-generate!");
+      
+      setIsGenerating(false);
+    } catch (error) {
+      let errorMsg = "Gagal generate XML E-Faktur";
+      
+      if (error?.message) {
+        errorMsg = error.message;
+      } else if (error?.response?.data?.message) {
+        errorMsg = error.response.data.message;
+      } else if (typeof error === 'string') {
+        errorMsg = error;
+      }
+      
+      setErrorMessage(errorMsg);
+      setModalError(true);
+      setIsGenerating(false);
+    }
   };
 
-  // Handle Copy XML to Clipboard
   const handleCopyXML = async () => {
     if (!xmlContent) {
       message.error("XML belum di-generate");
@@ -180,16 +171,32 @@ ${items
       setCopied(true);
       message.success("XML berhasil di-copy ke clipboard");
 
-      // Reset icon setelah 2 detik
       setTimeout(() => {
         setCopied(false);
       }, 2000);
     } catch (error) {
-      message.error("Gagal copy XML ke clipboard");
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = xmlContent;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        setCopied(true);
+        message.success("XML berhasil di-copy ke clipboard");
+        
+        setTimeout(() => {
+          setCopied(false);
+        }, 2000);
+      } catch (fallbackError) {
+        message.error("Gagal copy XML ke clipboard");
+      }
     }
   };
 
-  // Handle Download XML
   const handleDownloadXML = () => {
     if (!xmlContent) {
       setErrorMessage("XML belum di-generate");
@@ -197,44 +204,61 @@ ${items
       return;
     }
 
-    // Create blob dan download
-    const blob = new Blob([xmlContent], { type: "text/xml" });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    const fileName = `efaktur_${
-      billingData.billingCode
-    }_${new Date().getTime()}.xml`;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    try {
+      const blob = new Blob([xmlContent], { 
+        type: "application/xml;charset=utf-8" 
+      });
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      const fileName = `efaktur_${billingData.billingCode}_${timestamp}.xml`;
+      
+      link.download = fileName;
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
-    message.success(`File ${fileName} berhasil diunduh`);
+      message.success(`File ${fileName} berhasil diunduh`);
+    } catch (error) {
+      message.error("Gagal mengunduh file XML");
+    }
   };
 
-  // Handle Cancel
   const handleCancel = () => {
     setXmlContent("");
     setIsGenerating(false);
     setCopied(false);
+    setEfakturDetail(null);
     handleClose();
   };
 
-  // Columns untuk preview items
   const columnsItems = [
     {
-      title: "No",
+      title: "#",
       dataIndex: "lineNumber",
       key: "lineNumber",
       width: 50,
+      align: "center",
     },
     {
       title: "Nama Barang/Jasa",
       dataIndex: "productName",
       key: "productName",
       width: 300,
+      render: (text, record) => (
+        <div>
+          <div className="font-medium">{text}</div>
+          {record.description && (
+            <div className="text-xs text-gray-500">{record.description}</div>
+          )}
+        </div>
+      ),
     },
     {
       title: "Qty",
@@ -242,6 +266,10 @@ ${items
       key: "quantity",
       width: 80,
       align: "right",
+      render: (value) => {
+        const numValue = parseFloat(value);
+        return numValue.toLocaleString("id-ID");
+      },
     },
     {
       title: "Harga Satuan",
@@ -249,7 +277,10 @@ ${items
       key: "unitPrice",
       width: 120,
       align: "right",
-      render: (value) => `Rp ${value?.toLocaleString("id-ID")}`,
+      render: (value, record) => {
+        const symbol = record.currency === "USD" ? "$" : "Rp";
+        return `${symbol} ${value?.toLocaleString("id-ID")}`;
+      },
     },
     {
       title: "Total",
@@ -257,28 +288,43 @@ ${items
       key: "total",
       width: 150,
       align: "right",
-      render: (value) => `Rp ${value?.toLocaleString("id-ID")}`,
+      render: (value, record) => {
+        const symbol = record.currency === "USD" ? "$" : "Rp";
+        return (
+          <span className="font-semibold">
+            {symbol} {value?.toLocaleString("id-ID")}
+          </span>
+        );
+      },
     },
   ];
 
-  // Hitung summary
-  const totalDPP =
-    billing_items_detail?.reduce((sum, item) => {
-      if (!item.productName.toLowerCase().includes("ppn")) {
-        return sum + (item.total || 0);
-      }
-      return sum;
-    }, 0) || 0;
+  const calculateTotals = () => {
+    if (!data_billingItem || data_billingItem.length === 0) {
+      return { totalDpp: 0, totalPpn: 0, total: 0 };
+    }
 
-  const totalPPN =
-    billing_items_detail?.reduce((sum, item) => {
-      if (item.productName.toLowerCase().includes("ppn")) {
-        return sum + (item.total || 0);
-      }
-      return sum;
-    }, 0) || 0;
+    const totalDpp = data_billingItem
+      .filter((item) => {
+        const itemName = (item.productName || "").toLowerCase();
+        return !itemName.includes("ppn");
+      })
+      .reduce((sum, item) => sum + (item.total || 0), 0);
 
-  const totalNilai = billingData?.totalAmountEqvIdrReal || totalDPP + totalPPN;
+    const totalPpn = data_billingItem
+      .filter((item) => {
+        const itemName = (item.productName || "").toLowerCase();
+        return itemName.includes("ppn");
+      })
+      .reduce((sum, item) => sum + (item.total || 0), 0);
+
+    const total = totalDpp + totalPpn;
+
+    return { totalDpp, totalPpn, total };
+  };
+
+  const totals = calculateTotals();
+  const currency = data_billingItem?.[0]?.currency || "IDR";
 
   return (
     <div>
@@ -287,7 +333,7 @@ ${items
         type="confirmation"
         header="Generate XML E-Faktur"
         handleCancel={handleCancel}
-        width={800}
+        width={900}
         footer={
           <div className="flex justify-end gap-3">
             <ButtonComponent type="default" onClick={handleCancel}>
@@ -299,9 +345,7 @@ ${items
                 onClick={handleGenerateXML}
                 loading={isGenerating}
                 icon={<FileTextOutlined />}
-                disabled={
-                  !billing_items_detail || billing_items_detail.length === 0
-                }
+                disabled={!efakturDetail?.efakturId}
               >
                 Generate XML
               </ButtonComponent>
@@ -319,7 +363,7 @@ ${items
                   {copied ? "Copied!" : "Copy XML"}
                 </ButtonComponent>
                 <ButtonComponent
-                  type="default"
+                  type="primary"
                   onClick={handleDownloadXML}
                   icon={<DownloadOutlined />}
                 >
@@ -330,21 +374,30 @@ ${items
           </div>
         }
       >
-        <Spin spinning={loading_modal || isGenerating}>
+        <Spin spinning={loading_modal || loading_detail || isGenerating}>
           <div className="my-6">
-            {/* Informasi E-Faktur */}
-            {billingData && (
+            {!loading_detail && !efakturDetail && (
+              <Alert
+                message="E-Faktur Belum Dibuat"
+                description="E-Faktur untuk billing ini belum dibuat. Silakan buat E-Faktur terlebih dahulu sebelum generate XML."
+                type="warning"
+                showIcon
+                className="mb-6"
+              />
+            )}
+
+            {billingData && efakturDetail && (
               <>
-                <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                  <h3 className="text-lg font-bold text-blue-700 mb-4">
+                <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
+                  <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
                     Informasi Billing
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                     <DetailText label="Billing Code">
                       {billingData.billingCode}
                     </DetailText>
-                    <DetailText label="Invoice Date">
-                      {billingData.invoiceDate}
+                    <DetailText label="Invoice Number">
+                      {efakturDetail.invoiceNumber || billingData.invoiceNumber || "-"}
                     </DetailText>
                     <DetailText label="Customer">
                       {billingData.customerName}
@@ -352,23 +405,54 @@ ${items
                     <DetailText label="Account Number">
                       {billingData.accountNumber}
                     </DetailText>
-                    <DetailText label="NPWP">
-                      {billingData.npwp || "-"}
+                    <DetailText label="Invoice Date">
+                      {billingData.invoiceDate}
                     </DetailText>
                     <DetailText label="Billing Period">
-                      {billingData.billingPeriod}
+                      {billingData.billingPeriod || "-"}
                     </DetailText>
+                    <DetailText label="E-Faktur Status">
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold border bg-orange-100 text-orange-800 border-orange-300">
+                        {efakturDetail.efakturStatus?.replace(/_/g, " ")}
+                      </span>
+                    </DetailText>
+                    {efakturDetail.efakturNo && (
+                      <DetailText label="No. E-Faktur">
+                        {efakturDetail.efakturNo}
+                      </DetailText>
+                    )}
                   </div>
                 </div>
 
-                {/* Rincian Items */}
-                {billing_items_detail && billing_items_detail.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-bold text-blue-700 mb-3">
+                {efakturDetail && (
+                  <div className="mb-6 p-5 bg-purple-50 border-2 border-purple-300 rounded-lg">
+                    <h3 className="text-base font-bold text-purple-800 mb-4 pb-2 border-b-2 border-purple-200">
+                      Informasi Customer
+                    </h3>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                      <DetailText label="Customer Name">
+                        {efakturDetail.customerName || "-"}
+                      </DetailText>
+                      <DetailText label="NPWP">
+                        {efakturDetail.customerNpwp || "-"}
+                      </DetailText>
+                      <DetailText label="Address">
+                        {efakturDetail.customerAddress || "-"}
+                      </DetailText>
+                      <DetailText label="Email">
+                        {efakturDetail.customerEmail || "-"}
+                      </DetailText>
+                    </div>
+                  </div>
+                )}
+
+                {data_billingItem && data_billingItem.length > 0 && (
+                  <div className="mb-6 p-5 bg-white border-2 border-gray-300 rounded-lg">
+                    <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
                       Rincian Barang/Jasa
                     </h3>
                     <Table
-                      dataSource={billing_items_detail}
+                      dataSource={data_billingItem}
                       columns={columnsItems}
                       pagination={false}
                       size="small"
@@ -378,28 +462,46 @@ ${items
                   </div>
                 )}
 
-                {/* Summary */}
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="grid grid-cols-2 gap-3">
-                    <DetailText label="Total DPP">
-                      Rp {totalDPP?.toLocaleString("id-ID")}
-                    </DetailText>
-                    <DetailText label="Total PPN">
-                      Rp {totalPPN?.toLocaleString("id-ID")}
-                    </DetailText>
-                    <DetailText label="Total PPnBM">Rp 0</DetailText>
-                    <DetailText label="Total Nilai">
-                      <span className="font-bold text-blue-600">
-                        Rp {totalNilai?.toLocaleString("id-ID")}
-                      </span>
-                    </DetailText>
+                {data_billingItem.length > 0 && (
+                  <div className="mb-6 p-5 bg-blue-50 border-2 border-blue-300 rounded-lg">
+                    <h3 className="text-base font-bold text-blue-800 mb-4 pb-2 border-b-2 border-blue-200">
+                      Ringkasan ({currency})
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between px-3 py-2">
+                        <span className="font-medium">Total DPP (Tanpa PPN):</span>
+                        <span className="font-semibold">
+                          {currency === "USD" ? "$" : "Rp"}{" "}
+                          {totals.totalDpp.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                      <div className="flex justify-between px-3 py-2">
+                        <span className="font-medium">Total PPN:</span>
+                        <span className="font-semibold">
+                          {currency === "USD" ? "$" : "Rp"}{" "}
+                          {totals.totalPpn.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                      <div className="flex justify-between px-3 py-2">
+                        <span className="font-medium">Total PPnBM:</span>
+                        <span className="font-semibold">Rp 0</span>
+                      </div>
+                      <div className="flex justify-between items-center pt-3 pb-2 px-3 border-t-2 border-blue-300 bg-blue-100 rounded">
+                        <span className="text-base font-bold text-blue-900">
+                          Total Nilai:
+                        </span>
+                        <span className="text-xl font-bold text-blue-700">
+                          {currency === "USD" ? "$" : "Rp"}{" "}
+                          {totals.total.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* XML Preview */}
                 {xmlContent && (
                   <div className="mt-6">
-                    <h3 className="text-lg font-bold text-green-700 mb-3 flex items-center gap-2">
+                    <h3 className="text-base font-bold text-green-800 mb-3 flex items-center gap-2">
                       <FileTextOutlined /> XML Generated Successfully
                     </h3>
                     <Alert
@@ -407,13 +509,12 @@ ${items
                       description="File XML sudah siap untuk diunduh dan digunakan di aplikasi e-Faktur DJP."
                       type="success"
                       showIcon
-                      className="mb-3"
+                      className="mb-4"
                     />
-                    <div className="rounded-lg border border-gray-200 bg-white shadow-md">
-                      {/* Header Copy Section */}
-                      <div className="flex justify-between items-center px-4 py-2 border-b border-gray-100 bg-gray-50">
-                        <p className="text-sm font-medium text-gray-700">
-                          XML Preview
+                    <div className="rounded-lg border-2 border-green-300 bg-white shadow-md overflow-hidden">
+                      <div className="flex justify-between items-center px-4 py-3 border-b-2 border-green-200 bg-green-50">
+                        <p className="text-sm font-bold text-green-800">
+                          XML Preview ({xmlContent.length.toLocaleString()} characters)
                         </p>
                         <ButtonComponent
                           type="default"
@@ -430,12 +531,28 @@ ${items
                         </ButtonComponent>
                       </div>
 
-                      {/* Isi XML */}
-                      <div className="p-4 bg-gray-900 text-green-400 font-mono text-xs overflow-auto max-h-96 rounded-b-lg">
-                        <pre className="whitespace-pre-wrap">{xmlContent}</pre>
+                      <div className="p-4 bg-gray-900 text-green-400 font-mono text-xs overflow-auto max-h-96">
+                        <pre className="whitespace-pre-wrap break-words">
+                          {xmlContent}
+                        </pre>
                       </div>
                     </div>
                   </div>
+                )}
+
+                {!xmlContent && efakturDetail?.efakturId && (
+                  <Alert
+                    message="Siap Generate XML"
+                    description={
+                      <div>
+                        <p>E-Faktur ID: <strong>{efakturDetail.efakturId}</strong></p>
+                        <p className="mt-2">Klik tombol "Generate XML" untuk membuat file XML yang dapat digunakan di aplikasi e-Faktur DJP.</p>
+                      </div>
+                    }
+                    type="info"
+                    showIcon
+                    className="mt-6"
+                  />
                 )}
               </>
             )}
@@ -443,27 +560,6 @@ ${items
         </Spin>
       </ModalCustom>
 
-      {/* Modal Success
-      <ModalSuccess
-        isOpen={modalSuccess}
-        handleOk={() => {
-          setModalSuccess(false);
-          onSuccess();
-          handleCancel();
-        }}
-        handleCancel={() => setModalSuccess(false)}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            {IconModal["icon_success"]}
-            <p className="text-[18px] font-bold">Success</p>
-          </div>
-          <p className="pl-[70px]">XML E-Faktur berhasil di-generate.</p>
-          <p className="pl-[70px]">Silakan download file XML.</p>
-        </div>
-      </ModalSuccess> */}
-
-      {/* Modal Error */}
       <ModalError
         isOpen={modalError}
         handleOk={() => setModalError(false)}

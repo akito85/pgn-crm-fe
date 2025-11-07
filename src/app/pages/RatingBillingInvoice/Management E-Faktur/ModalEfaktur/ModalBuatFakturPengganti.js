@@ -210,7 +210,7 @@ const ModalBuatFakturPengganti = ({
           {/* Rincian Item */}
           <div className="mb-6">
             <h3 className="text-lg font-bold text-blue-700 mb-4">
-              Rincian Item (Dapat Diedit)
+              Rincian Item
             </h3>
             {dataFakturAsli?.items && (
               <Table

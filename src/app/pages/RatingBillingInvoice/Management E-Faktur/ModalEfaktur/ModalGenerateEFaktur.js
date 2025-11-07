@@ -1,9 +1,6 @@
-// ✅ BEST PRACTICE: Component hanya handle UI dan dispatch action
-// Semua logic API ada di slice
-
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Table, Alert, Progress, Spin, Steps } from "antd";
+import { Form, Table, Alert, Progress, Spin, Steps, Select  } from "antd";
 import {
   ThunderboltOutlined,
   CheckCircleOutlined,
@@ -23,7 +20,8 @@ import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import {
   getAllBillingItemPaginate,
-  generateEFakturWithAttachments, // ✅ NEW: All-in-one action
+  getDetailEFaktur,
+  generateEFakturWithAttachments,
   getListCategory,
   getAllApprovalList,
   getListApprovalById,
@@ -47,7 +45,6 @@ const ModalGenerateEFaktur = ({
   const containerRef = useRef(null);
   const searchInput = useRef(null);
 
-  // ✅ Selector dari Redux State
   const {
     loading,
     loading_modal,
@@ -56,46 +53,56 @@ const ModalGenerateEFaktur = ({
     data_approval,
     data_approval_list,
     data_billingItem,
-    upload_progress, // ✅ Progress dari slice
-    upload_results,  // ✅ Upload results dari slice
+    upload_progress, 
+    upload_results, 
   } = useSelector((state) => state.efaktur);
 
-  // State untuk UI
+  const [existingEFaktur, setExistingEFaktur] = useState(null);
+  const [isExistingEFaktur, setIsExistingEFaktur] = useState(false);
   const [current, setCurrent] = useState(0);
   const [billingItems, setBillingItems] = useState([]);
   const [modalSuccess, setModalSuccess] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [generatedData, setGeneratedData] = useState(null);
-
-  // State untuk approval
   const [boolean, setBoolean] = useState(false);
   const [dataTable, setDataTable] = useState([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-
-  // State untuk attachment
   const [listDataAttachment, setListDataAttachment] = useState([]);
 
   useEffect(() => {
     if (isOpen) {
       dispatch(getAllApprovalList());
       dispatch(getListCategory());
-      dispatch(resetUploadProgress()); // ✅ Reset progress saat buka modal
+      dispatch(resetUploadProgress()); 
     }
   }, [isOpen, dispatch]);
 
   useEffect(() => {
     if (isOpen && billingData?.billingCode) {
       dispatch(getAllBillingItemPaginate(billingData.billingCode));
+
+      dispatch(getDetailEFaktur(billingData.billingCode))
+        .unwrap()
+        .then((result) => {
+          if (result && result.efakturId) {
+            setExistingEFaktur(result);
+          }
+        })
+        .catch(() => {
+          setExistingEFaktur(null);
+        });
     }
   }, [isOpen, billingData, dispatch]);
 
   useEffect(() => {
-    if (data_billingItem) {
+    if (data_billingItem && data_billingItem.length > 0) {
       setBillingItems(data_billingItem);
+    } else {
+      setBillingItems([]);
     }
   }, [data_billingItem]);
 
@@ -113,10 +120,12 @@ const ModalGenerateEFaktur = ({
     }
   }, [data_approval_list, boolean]);
 
-  // Steps definition
   const steps = [
     { title: "BILLING INFORMATION", disabled: false },
-    { title: "APPROVAL INFORMATION", disabled: !form.getFieldValue()?.apphierId },
+    {
+      title: "APPROVAL INFORMATION",
+      disabled: !form.getFieldValue()?.apphierId,
+    },
     { title: "ATTACHMENT", disabled: false },
     { title: "CONFIRMATION & GENERATE", disabled: false },
   ];
@@ -126,7 +135,6 @@ const ModalGenerateEFaktur = ({
     title: item.title,
   }));
 
-  // Navigation functions
   const next = () => setCurrent(current + 1);
   const prev = () => setCurrent(current - 1);
 
@@ -163,7 +171,6 @@ const ModalGenerateEFaktur = ({
     setPageSize(pageSizeChange);
   };
 
-  // Table columns
   const columnsItems = [
     {
       title: "#",
@@ -177,6 +184,14 @@ const ModalGenerateEFaktur = ({
       dataIndex: "productName",
       key: "productName",
       width: 300,
+      render: (text, record) => (
+        <div>
+          <div className="font-medium">{text}</div>
+          {record.description && (
+            <div className="text-xs text-gray-500">{record.description}</div>
+          )}
+        </div>
+      ),
     },
     {
       title: "Kuantitas",
@@ -185,10 +200,15 @@ const ModalGenerateEFaktur = ({
       width: 120,
       align: "right",
       render: (value) => {
+        const numValue =
+          typeof value === "string"
+            ? parseFloat(value.replace(/,/g, ""))
+            : value;
+
         const formatted =
-          value % 1 === 0
-            ? value.toLocaleString("id-ID")
-            : value.toLocaleString("id-ID", {
+          numValue % 1 === 0
+            ? numValue.toLocaleString("id-ID")
+            : numValue.toLocaleString("id-ID", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               });
@@ -219,7 +239,7 @@ const ModalGenerateEFaktur = ({
     },
     {
       title: "Total",
-      dataIndex: "total",
+      dataIndex: "total", 
       key: "total",
       width: 180,
       align: "right",
@@ -238,21 +258,24 @@ const ModalGenerateEFaktur = ({
     },
   ];
 
-  // Calculate totals
   const calculateTotals = () => {
+    if (!billingItems || billingItems.length === 0) {
+      return { totalDpp: 0, totalPpn: 0, total: 0 };
+    }
+
     const totalDpp = billingItems
       .filter((item) => {
         const itemName = (item.productName || "").toLowerCase();
         return !itemName.includes("ppn");
       })
-      .reduce((sum, item) => sum + item.total, 0);
+      .reduce((sum, item) => sum + (item.total || 0), 0);
 
     const totalPpn = billingItems
       .filter((item) => {
         const itemName = (item.productName || "").toLowerCase();
         return itemName.includes("ppn");
       })
-      .reduce((sum, item) => sum + item.total, 0);
+      .reduce((sum, item) => sum + (item.total || 0), 0);
 
     const total = totalDpp + totalPpn;
 
@@ -262,7 +285,6 @@ const ModalGenerateEFaktur = ({
   const totals = calculateTotals();
   const currency = billingItems[0]?.currency || "IDR";
 
-  // ✅ BEST PRACTICE: Component hanya dispatch, semua logic di slice
   const handleGenerate = async (formValues) => {
     if (!billingData) {
       setErrorMessage("Data billing tidak ditemukan");
@@ -277,12 +299,13 @@ const ModalGenerateEFaktur = ({
     }
 
     if (listDataAttachment.length === 0) {
-      setErrorMessage("Attachment is mandatory. Please upload at least one file.");
+      setErrorMessage(
+        "Attachment is mandatory. Please upload at least one file."
+      );
       setModalError(true);
       return;
     }
 
-    // ✅ Prepare data untuk dispatch
     const efakturData = {
       apphierId: formValues.apphierId,
       billingCode: billingData.billingCode,
@@ -296,10 +319,7 @@ const ModalGenerateEFaktur = ({
       status: "SUBMIT",
     };
 
-    console.log("📤 Dispatching generateEFakturWithAttachments...");
-
     try {
-      // ✅ Dispatch single action - semua logic di slice
       const result = await dispatch(
         generateEFakturWithAttachments({
           efakturData,
@@ -307,9 +327,6 @@ const ModalGenerateEFaktur = ({
         })
       ).unwrap();
 
-      console.log("✅ Generation completed:", result);
-
-      // ✅ Set data untuk modal success
       setGeneratedData({
         einvoiceId: result.efaktur.einvoiceId,
         invoiceNumber: result.efaktur.invoiceNumber,
@@ -323,9 +340,7 @@ const ModalGenerateEFaktur = ({
       });
 
       setModalSuccess(true);
-
     } catch (error) {
-      console.error("❌ Error:", error);
       const errorMsg = error?.message || "Gagal generate E-Faktur";
       setErrorMessage(errorMsg);
       setModalError(true);
@@ -339,6 +354,8 @@ const ModalGenerateEFaktur = ({
     setBoolean(false);
     setDataTable([]);
     setListDataAttachment([]);
+    setExistingEFaktur(null);
+    setIsExistingEFaktur(false);
     setCurrent(0);
     dispatch(resetUploadProgress());
     handleClose();
@@ -409,7 +426,6 @@ const ModalGenerateEFaktur = ({
       >
         <Spin spinning={loading || loading_detail}>
           <div className="my-6">
-            {/* Steps */}
             <div className="flex flex-row justify-center mb-6">
               <div
                 ref={containerRef}
@@ -433,8 +449,47 @@ const ModalGenerateEFaktur = ({
               id="formGenerateEfaktur"
               onFinish={handleGenerate}
             >
-              {/* STEP 1: BILLING INFORMATION */}
               <div className={`${current !== 0 ? "hidden" : ""}`}>
+                {isExistingEFaktur && existingEFaktur && (
+                  <Alert
+                    message="E-Faktur Sudah Ada"
+                    description={
+                      <div>
+                        <p>
+                          E-Faktur untuk billing code{" "}
+                          <strong>{billingData?.billingCode}</strong> sudah
+                          dibuat sebelumnya.
+                        </p>
+                        <div className="mt-2 text-sm">
+                          <p>
+                            Invoice Number:{" "}
+                            <strong>{existingEFaktur.invoiceNumber}</strong>
+                          </p>
+                          <p>
+                            Status:{" "}
+                            <strong className="text-orange-600">
+                              {existingEFaktur.efakturStatus}
+                            </strong>
+                          </p>
+                          {existingEFaktur.efakturNo && (
+                            <p>
+                              No. E-Faktur:{" "}
+                              <strong>{existingEFaktur.efakturNo}</strong>
+                            </p>
+                          )}
+                        </div>
+                        <p className="mt-2 text-xs text-gray-600">
+                          Generate ulang akan meng-update E-Faktur yang sudah
+                          ada.
+                        </p>
+                      </div>
+                    }
+                    type="warning"
+                    showIcon
+                    className="mb-6"
+                  />
+                )}
+
                 {billingData && (
                   <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
                     <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
@@ -447,11 +502,17 @@ const ModalGenerateEFaktur = ({
                       <DetailText label="Customer">
                         {billingData.customerName}
                       </DetailText>
+                      <DetailText label="Account Number">
+                        {billingData.accountNumber}
+                      </DetailText>
+                      <DetailText label="Account Name">
+                        {billingData.accountName || billingData.customerName}
+                      </DetailText>
                       <DetailText label="Invoice Date">
                         {billingData.invoiceDate}
                       </DetailText>
-                      <DetailText label="Account Number">
-                        {billingData.accountNumber}
+                      <DetailText label="Billing Period">
+                        {billingData.billingPeriod || "-"}
                       </DetailText>
                     </div>
                   </div>
@@ -461,37 +522,66 @@ const ModalGenerateEFaktur = ({
                   <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
                     Rincian Item Billing
                   </h3>
-                  <Table
-                    dataSource={billingItems}
-                    columns={columnsItems}
-                    pagination={false}
-                    size="small"
-                    bordered
-                    scroll={{ x: 900 }}
-                    loading={loading_detail}
-                  />
+
+                  {loading_detail ? (
+                    <div className="text-center py-8">
+                      <Spin size="large" />
+                      <p className="mt-4 text-gray-500">
+                        Loading billing items...
+                      </p>
+                    </div>
+                  ) : billingItems.length === 0 ? (
+                    <Alert
+                      message="Tidak Ada Data"
+                      description="Billing items tidak ditemukan untuk billing code ini."
+                      type="warning"
+                      showIcon
+                    />
+                  ) : (
+                    <Table
+                      dataSource={billingItems}
+                      columns={columnsItems}
+                      pagination={false}
+                      size="small"
+                      bordered
+                      scroll={{ x: 900 }}
+                      rowKey="key"
+                    />
+                  )}
                 </div>
 
-                <div className="mb-6 p-5 bg-blue-50 border-2 border-blue-300 rounded-lg">
-                  <h3 className="text-base font-bold text-blue-800 mb-4 pb-2 border-b-2 border-blue-200">
-                    Ringkasan ({currency})
-                  </h3>
-                  <div className="flex justify-between items-center pt-3 pb-2 px-3 border-t-2 border-blue-300 bg-blue-100 rounded">
-                    <span className="text-base font-bold text-blue-900">
-                      Total Tagihan:
-                    </span>
-                    <span className="text-xl font-bold text-blue-700">
-                      {currency === "USD" ? "$" : "Rp"}{" "}
-                      {totals.total.toLocaleString("id-ID", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </span>
+                {billingItems.length > 0 && (
+                  <div className="mb-6 p-5 bg-blue-50 border-2 border-blue-300 rounded-lg">
+                    <h3 className="text-base font-bold text-blue-800 mb-4">
+                      Ringkasan ({currency})
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between px-3 py-2">
+                        <span className="font-medium">DPP:</span>
+                        <span className="font-semibold">
+                          {currency === "USD" ? "$" : "Rp"}{" "}
+                          {totals.totalDpp.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                      <div className="flex justify-between px-3 py-2">
+                        <span className="font-medium">PPN:</span>
+                        <span className="font-semibold">
+                          {currency === "USD" ? "$" : "Rp"}{" "}
+                          {totals.totalPpn.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                      <div className="flex justify-between px-3 py-2 border-t-2 bg-blue-100">
+                        <span className="font-bold">Total:</span>
+                        <span className="text-xl font-bold">
+                          {currency === "USD" ? "$" : "Rp"}{" "}
+                          {totals.total.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
-              {/* STEP 2: APPROVAL INFORMATION */}
               <div className={`${current !== 1 ? "hidden" : ""}`}>
                 <div className="w-full grid grid-cols-1 gap-x-4">
                   <p className="text-primary uppercase font-bold mb-4">
@@ -509,14 +599,24 @@ const ModalGenerateEFaktur = ({
                         },
                       ]}
                     >
-                      <SelectComponent onChange={handleSelect}>
-                        {data_approval &&
-                          data_approval?.map((data, index) => (
-                            <SelectComponent.Option value={data.appHierId} key={index}>
-                              {data.approvalName}
-                            </SelectComponent.Option>
-                          ))}
-                      </SelectComponent>
+                      <Select 
+                        onChange={handleSelect}
+                        placeholder="Select approval hierarchy"
+                        loading={loading}
+                        showSearch
+                        filterOption={(input, option) =>
+                          (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                        }
+                      >
+                        {data_approval && data_approval.map((data, index) => (
+                          <Select.Option
+                            value={data.appHierId}
+                            key={data.appHierId}
+                          >
+                            {data.approvalName}
+                          </Select.Option>
+                        ))}
+                      </Select>
                     </Form.Item>
                   </div>
 
@@ -563,7 +663,6 @@ const ModalGenerateEFaktur = ({
                 </div>
               </div>
 
-              {/* STEP 3: ATTACHMENT */}
               <div className={`${current !== 2 ? "hidden" : ""}`}>
                 <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
                   <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
@@ -576,7 +675,6 @@ const ModalGenerateEFaktur = ({
                     dispatch={dispatch}
                     getAPICategory={getListCategory}
                     typeSelector="efaktur"
-                    
                     configApplication={configApp.RATING_BILLING_SERVICE}
                     getAPIGuard={getConfigFileRBIData}
                     typeRBI={"data"}
@@ -584,7 +682,6 @@ const ModalGenerateEFaktur = ({
                 </div>
               </div>
 
-              {/* STEP 4: CONFIRMATION & GENERATE */}
               <div className={`${current !== 3 ? "hidden" : ""}`}>
                 {!loading_modal && !generatedData && (
                   <>
@@ -649,7 +746,6 @@ const ModalGenerateEFaktur = ({
                   </>
                 )}
 
-                {/* ✅ Progress dari Redux State */}
                 {loading_modal && (
                   <div className="mb-6">
                     <p className="text-sm font-medium text-gray-700 mb-2">
@@ -665,9 +761,15 @@ const ModalGenerateEFaktur = ({
                     />
                     <p className="text-xs text-gray-500 mt-2">
                       {upload_progress < 30 && "Memproses data billing..."}
-                      {upload_progress >= 30 && upload_progress < 50 && "Membuat E-Faktur..."}
-                      {upload_progress >= 50 && upload_progress < 70 && "Mengirim ke sistem..."}
-                      {upload_progress >= 70 && upload_progress < 100 && "Mengupload attachment..."}
+                      {upload_progress >= 30 &&
+                        upload_progress < 50 &&
+                        "Membuat E-Faktur..."}
+                      {upload_progress >= 50 &&
+                        upload_progress < 70 &&
+                        "Mengirim ke sistem..."}
+                      {upload_progress >= 70 &&
+                        upload_progress < 100 &&
+                        "Mengupload attachment..."}
                       {upload_progress === 100 && "Selesai!"}
                     </p>
                   </div>
@@ -679,25 +781,30 @@ const ModalGenerateEFaktur = ({
                     description={
                       <div>
                         <p>
-                          Invoice Number: <strong>{generatedData.invoiceNumber}</strong>
+                          Invoice Number:{" "}
+                          <strong>{generatedData.invoiceNumber}</strong>
                         </p>
                         {generatedData.efakturNo && (
                           <p>
-                            No. E-Faktur: <strong>{generatedData.efakturNo}</strong>
+                            No. E-Faktur:{" "}
+                            <strong>{generatedData.efakturNo}</strong>
                           </p>
                         )}
                         <p>
                           Status:{" "}
-                          <strong className="text-orange-600">{generatedData.status}</strong>
+                          <strong className="text-orange-600">
+                            {generatedData.status}
+                          </strong>
                         </p>
-                        
-                        {/* ✅ Show upload summary */}
+
                         {generatedData.summary && (
                           <div className="mt-3 pt-3 border-t">
-                            <p className="text-sm font-semibold">Upload Summary:</p>
+                            <p className="text-sm font-semibold">
+                              Upload Summary:
+                            </p>
                             <p className="text-xs">
                               ✓ {generatedData.summary.successCount} berhasil
-                              {generatedData.summary.failedCount > 0 && 
+                              {generatedData.summary.failedCount > 0 &&
                                 `, ✗ ${generatedData.summary.failedCount} gagal`}
                             </p>
                           </div>
@@ -715,7 +822,6 @@ const ModalGenerateEFaktur = ({
         </Spin>
       </ModalCustom>
 
-      {/* Modal Success */}
       <ModalSuccess
         isOpen={modalSuccess}
         handleOk={handleSuccessClose}
@@ -736,16 +842,18 @@ const ModalGenerateEFaktur = ({
           )}
           {generatedData?.status && (
             <p className="pl-[70px]">
-              Status: <strong className="text-orange-600">{generatedData.status}</strong>
+              Status:{" "}
+              <strong className="text-orange-600">
+                {generatedData.status}
+              </strong>
             </p>
           )}
-          
-          {/* ✅ Show upload results */}
+
           {generatedData?.summary && (
             <div className="pl-[70px] mt-3">
               <p className="text-sm">
                 Attachment: {generatedData.summary.successCount} berhasil
-                {generatedData.summary.failedCount > 0 && 
+                {generatedData.summary.failedCount > 0 &&
                   `, ${generatedData.summary.failedCount} gagal`}
               </p>
             </div>
@@ -753,7 +861,6 @@ const ModalGenerateEFaktur = ({
         </div>
       </ModalSuccess>
 
-      {/* Modal Error */}
       <ModalError
         isOpen={modalError}
         handleOk={() => setModalError(false)}

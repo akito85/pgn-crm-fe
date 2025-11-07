@@ -10,6 +10,7 @@ import {
   Row,
   Col,
   Dropdown,
+  message,
 } from "antd";
 import {
   SearchOutlined,
@@ -43,8 +44,13 @@ const { Option } = Select;
 
 const ViewFaktur = () => {
   const dispatch = useDispatch();
-  const { list_approved_billing, loading, pagination, data_approval_history } =
-    useSelector((state) => state.efaktur);
+  const {
+    list_approved_billing,
+    loading,
+    pagination,
+    data_approval_history,
+    loading_approval_history,
+  } = useSelector((state) => state.efaktur);
 
   const searchInput = useRef(null);
 
@@ -68,7 +74,6 @@ const ViewFaktur = () => {
 
   const dataSource = list_approved_billing || [];
 
-  // Breadcrumbs
   const routes = [
     {
       path: "",
@@ -169,12 +174,17 @@ const ViewFaktur = () => {
   };
 
   const handleGenerateEFaktur = (record) => {
-    setSelectedBilling(record.billingCode);
+    setSelectedBilling(record);
     setModalGenerateEFaktur(true);
   };
 
   const handleApprovalHistory = (record) => {
-    dispatch(getApprovalHistory(record.billingCode));
+    if (!record.efakturId) {
+      message.warning("E-Faktur belum dibuat untuk billing ini");
+      return;
+    }
+
+    dispatch(getApprovalHistory(record.efakturId));
     setModalApprovalHistory(true);
   };
 
@@ -202,6 +212,35 @@ const ViewFaktur = () => {
     fetchData();
   };
 
+  const closeModalGenerateEFaktur = () => {
+    setModalGenerateEFaktur(false);
+    setSelectedBilling(null);
+  };
+
+  const closeModalGenerateXML = () => {
+    setModalGenerateXML(false);
+    setSelectedBilling(null);
+  };
+
+  const closeModalUploadEFaktur = () => {
+    setModalUploadEFaktur(false);
+    setSelectedBilling(null);
+  };
+
+  const closeModalApproval = () => {
+    setModalApproval(false);
+    setSelectedBilling(null);
+  };
+
+  const closeModalApprovalHistory = () => {
+    setModalApprovalHistory(false);
+  };
+
+  const closeLogAktivitas = () => {
+    setLogAktivitasOpen(false);
+    setSelectedBilling(null);
+  };
+
   const columns = [
     {
       title: "NO",
@@ -212,7 +251,7 @@ const ViewFaktur = () => {
     },
     {
       title: "NO. E-FAKTUR",
-      dataIndex: "efakturNo", // ⚠️ UBAH dari "eFakturNo" ke "efakturNo" (huruf kecil)
+      dataIndex: "efakturNo",
       key: "efakturNo",
       width: 180,
       render: (text) => text || "-",
@@ -254,14 +293,13 @@ const ViewFaktur = () => {
       key: "invoiceDate",
       width: 120,
       render: (text) => {
-        // Format date dari "2024-02-07 00:00:00" ke "07-02-2024"
         if (!text) return "-";
         return moment(text).format("DD-MM-YYYY");
       },
     },
     {
       title: "TOTAL AMOUNT (IDR)",
-      dataIndex: "totalAmountEqvIdr", // ⚠️ UBAH dari "totalAmountEqvIdrReal" ke "totalAmountEqvIdr"
+      dataIndex: "totalAmountEqvIdr",
       key: "totalAmountEqvIdr",
       width: 180,
       align: "right",
@@ -269,21 +307,22 @@ const ViewFaktur = () => {
     },
     {
       title: "STATUS E-FAKTUR",
-      dataIndex: "efakturStatus", // ⚠️ UBAH dari "eFakturStatus" ke "efakturStatus" (huruf kecil)
+      dataIndex: "efakturStatus",
       key: "efakturStatus",
       width: 180,
       align: "center",
       render: (status) => {
         const statusColors = {
-          APPROVED: "bg-green-100 text-green-800 border-green-300", // ⚠️ TAMBAH status APPROVED
+          APPROVED: "bg-green-100 text-green-800 border-green-300",
           PROCESSING: "bg-blue-100 text-blue-800 border-blue-300",
           AWAITING_APPROVAL: "bg-orange-100 text-orange-800 border-orange-300",
           FAILED: "bg-red-100 text-red-800 border-red-300",
           REJECTED: "bg-red-100 text-red-800 border-red-300",
           NOT_GENERATED: "bg-gray-100 text-gray-800 border-gray-300",
         };
-        // ⚠️ Handle null status sebagai NOT_GENERATED
+        
         const displayStatus = status || "NOT_GENERATED";
+        
         return (
           <div className="flex justify-center">
             <span
@@ -338,7 +377,6 @@ const ViewFaktur = () => {
           },
         ];
 
-        // ⚠️ UBAH kondisi ke huruf kecil "efakturStatus"
         if (record.efakturStatus === "AWAITING_APPROVAL") {
           menuItems.push(
             { type: "divider" },
@@ -351,8 +389,7 @@ const ViewFaktur = () => {
           );
         }
 
-        // ⚠️ UBAH kondisi untuk handle null status
-        if (!record.efakturStatus) {
+        if (!record.efakturStatus || record.efakturStatus === "NOT_GENERATED") {
           menuItems.push(
             { type: "divider" },
             {
@@ -364,7 +401,6 @@ const ViewFaktur = () => {
           );
         }
 
-        // ⚠️ UBAH kondisi ke huruf kecil "efakturStatus"
         if (record.efakturStatus === "FAILED") {
           menuItems.push(
             { type: "divider" },
@@ -411,6 +447,34 @@ const ViewFaktur = () => {
                 </svg>
               ),
               onClick: () => handleUploadEFaktur(record),
+            }
+          );
+        }
+
+        if (record.efakturStatus === "APPROVED") {
+          menuItems.push(
+            { type: "divider" },
+            {
+              key: "generate-xml-approved",
+              label: "Generate XML",
+              icon: (
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    stroke="#52c41a"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              ),
+              onClick: () => handleGenerateXML(record),
             }
           );
         }
@@ -501,13 +565,13 @@ const ViewFaktur = () => {
                   style={{ width: "100%" }}
                   size="middle"
                 >
-                  <Option value="">Semua Status</Option>{" "}
-                  {/* Tambahkan opsi Semua */}
+                  <Option value="">Semua Status</Option>
                   <Option value="AWAITING_APPROVAL">AWAITING APPROVAL</Option>
-                  <Option value="APPROVED">APPROVED</Option> {/* ⚠️ TAMBAH */}
+                  <Option value="APPROVED">APPROVED</Option>
                   <Option value="PROCESSING">PROCESSING</Option>
                   <Option value="FAILED">FAILED</Option>
                   <Option value="REJECTED">REJECTED</Option>
+                  <Option value="NOT_GENERATED">NOT GENERATED</Option>
                 </Select>
               </div>
             </Col>
@@ -564,7 +628,7 @@ const ViewFaktur = () => {
               useFixColumn={true}
               defaultFixedColumns={{
                 key: "left",
-                eFakturStatus: "right",
+                efakturStatus: "right",
                 action: "right",
               }}
             />
@@ -573,57 +637,58 @@ const ViewFaktur = () => {
 
         <ModalGenerateEFaktur
           isOpen={modalGenerateEFaktur}
-          handleClose={() => setModalGenerateEFaktur(false)}
+          handleClose={closeModalGenerateEFaktur}
           billingData={selectedBilling}
           onSuccess={() => {
-            console.log("E-Faktur generated successfully");
+            closeModalGenerateEFaktur();
             handleRefresh();
           }}
         />
 
         <ModalGenerateXML
           isOpen={modalGenerateXML}
-          handleClose={() => setModalGenerateXML(false)}
+          handleClose={closeModalGenerateXML}
           billingData={selectedBilling}
           onSuccess={() => {
-            console.log("XML generated successfully");
+            closeModalGenerateXML();
             handleRefresh();
           }}
         />
 
         <ModalUploadEFaktur
           isOpen={modalUploadEFaktur}
-          handleClose={() => setModalUploadEFaktur(false)}
+          handleClose={closeModalUploadEFaktur}
           billingData={selectedBilling}
           onSuccess={() => {
-            console.log("E-Faktur uploaded successfully");
+            closeModalUploadEFaktur();
             handleRefresh();
           }}
         />
 
         <ModalApprovalEFaktur
           isOpen={modalApproval}
-          handleClose={() => setModalApproval(false)}
+          handleClose={closeModalApproval}
           billingData={selectedBilling}
           onSuccess={() => {
-            console.log("E-Faktur approved/rejected successfully");
+            closeModalApproval();
             handleRefresh();
           }}
         />
 
         <ModalHistory
-          isOpen={modalApprovalHistory && dataApprovalHistory}
-          handleClose={() => setModalApprovalHistory(false)}
+          isOpen={modalApprovalHistory && data_approval_history}
+          handleClose={closeModalApprovalHistory}
           header={"Approval History"}
           width={1000}
           dataApprover={dataApprovalHistory?.dataApprover}
           dataHistory={dataApprovalHistory?.dataHistory}
+          loading={loading_approval_history}
         />
 
         <LogAktivitasEFaktur
           isOpen={logAktivitasOpen}
-          handleClose={() => setLogAktivitasOpen(false)}
-          billingCode={selectedBilling?.billingCode}
+          handleClose={closeLogAktivitas}
+          billingData={selectedBilling}
         />
       </Spin>
     </LayoutMenu>
