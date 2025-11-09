@@ -46,7 +46,7 @@ import TaxCodeView from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode
 import TaxCodeDetail from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode/TaxCodeDetail";
 import TaxCodeForm from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode/TaxCodeForm";
 // import MonitoringCustomerPage from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/MonitoringCustomerPage";
-// :import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/prabillCustomer/AccountDetailPage";
+// import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/prabillCustomer/AccountDetailPage";
 
 
 
