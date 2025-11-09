@@ -56,6 +56,20 @@ const LogIn = (props) => {
 		}
 	}, [dispatch, type, isCaptchaEnabled])
 
+	// Set default entity value
+	useEffect(() => {
+		if (type === 'enduser' && data_entities?.data?.length > 0) {
+			// Try to find "PGN" entity first
+			const pgnEntity = data_entities.data.find(item =>
+				item?.name?.toLowerCase().includes('pgn')
+			);
+			// Use PGN entity if found, otherwise use the first entity
+			const defaultEntity = pgnEntity || data_entities.data[0];
+			form.setFieldsValue({
+				entityId: defaultEntity?.id
+			});
+		}
+	}, [data_entities, type, form]);
 
 	const options = data_entities?.data?.map((item) => {
 		return { value: item?.id, label: item?.name }
