@@ -47,7 +47,7 @@ const CustomerDetail = () => {
 
   useEffect(() => {
     dispatch(getGrantedAccessAccount('/account-management/customers'))
-}, [dispatch])
+  }, [dispatch])
 
   useEffect(() => {
     if (id) {
