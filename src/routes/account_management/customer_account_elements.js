@@ -48,6 +48,8 @@ import EquipmentForm from "../../app/pages/AccountManagement/CustomerAccountDeta
 import RawMaterialSourceForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/RawMaterialSource/RawMaterialSourceHistory/RawMaterialSourceForm";
 import ProductDistributionForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ProductDistribution/ProductDistributionHistory/ProductDistributionForm";
 import CustomerServiceRequestDetail from "../../app/pages/AccountManagement/Customer/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
+import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/Customer/DetailPages/ServiceRequest/Create/CreateCustomerServiceRequest";
+
 
 export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Customer/Account List
@@ -95,6 +97,8 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
 
   // Service Request Detail
   VIEW_DETAIL_SERVICE_REQUEST_PAGE: <CustomerServiceRequestDetail />,
+  CREATE_SERVICE_REQUEST_PAGE: <CreateCustomerServiceRequest />,
+  // UPDATE_SERVICE_REQUEST_PAGE: <UpdateCustomerServiceRequest />,
 
   // Gas Source
   DETAIL_GAS_SOURCE: <DetailGasSource />,
