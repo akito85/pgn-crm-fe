@@ -29,54 +29,115 @@ const CustomerServiceRequestList = ({
   const [modalDetail, setModalDetail] = useState(false);
   const [dataDetail, setDataDetail] = useState({});
 
-  // Dummy data
+  // Updated dummy data with all 18 fields
   const dummyData = [
     {
       id: "SR001",
-      type: "Service Request",
-      category: "Installation",
-      priority: "High",
-      createdDate: "2025-10-20",
+      serviceRequestNumber: "SR2024090000001",
+      serviceRequestReference: "SR20240900000001",
+      type: "Billing",
+      category: "Restructure",
+      subCategory: "Restructure",
+      channel: "WA Business",
+      requestSource: "Customer",
+      requestDate: "2024-01-22 18:14:45",
+      openDate: "2024-01-22 18:14:45",
+      resolvedDate: "2024-01-22 18:14:45",
+      closedDate: "2024-01-22 18:14:45",
+      age: 48,
+      description: "Contoh description",
       statusApproval: "approved",
-      status: "active"
+      statusPrerequisite: "completed",
+      status: "inProgress",
+      priority: "High",
+      createdDate: "2024-01-22"
     },
     {
       id: "SR002",
-      type: "Maintenance",
-      category: "Repair",
+      serviceRequestNumber: "SR2024090000002",
+      serviceRequestReference: "SR20240900000002",
+      type: "Administrative",
+      category: "Data Change",
+      subCategory: "Data Change",
+      channel: "Manual",
+      requestSource: "Entity",
+      requestDate: "2024-01-22 18:14:45",
+      openDate: "2024-01-22 18:14:45",
+      resolvedDate: "2024-01-22 18:14:45",
+      closedDate: "2024-01-22 18:14:45",
+      age: 48,
+      description: "Contoh description",
+      statusApproval: "approved",
+      statusPrerequisite: "pending",
+      status: "onHold",
       priority: "Medium",
-      createdDate: "2025-10-18",
-      statusApproval: "pending",
-      status: "pending"
+      createdDate: "2024-01-22"
     },
     {
       id: "SR003",
-      type: "Complaint",
-      category: "Quality",
+      serviceRequestNumber: "SR2024090000003",
+      serviceRequestReference: "SR20240900000003",
+      type: "Field Service",
+      category: "Meter Replacement",
+      subCategory: "Meter Replacement",
+      channel: "PGN Mobile",
+      requestSource: "Customer",
+      requestDate: "2024-01-22 18:14:45",
+      openDate: "2024-01-22 18:14:45",
+      resolvedDate: "2024-01-22 18:14:45",
+      closedDate: "2024-01-22 18:14:45",
+      age: 2,
+      description: "Contoh description",
+      statusApproval: "waitingApproval",
+      statusPrerequisite: "none",
+      status: "closed",
       priority: "High",
-      createdDate: "2025-10-15",
-      statusApproval: "rejected",
-      status: "inactive"
+      createdDate: "2024-01-22"
     },
     {
       id: "SR004",
-      type: "Service Request",
-      category: "Upgrade",
-      priority: "Low",
-      createdDate: "2025-10-10",
+      serviceRequestNumber: "SR2024090000004",
+      serviceRequestReference: "SR20240900000004",
+      type: "Administrative",
+      category: "Invoice Shipment",
+      subCategory: "Invoice Shipment",
+      channel: "PGN Partner",
+      requestSource: "Customer",
+      requestDate: "2024-01-22 18:14:45",
+      openDate: "2024-01-22 18:14:45",
+      resolvedDate: "2024-01-22 18:14:45",
+      closedDate: "2024-01-22 18:14:45",
+      age: 4,
+      description: "Contoh description",
       statusApproval: "approved",
-      status: "active"
+      statusPrerequisite: "none",
+      status: "closed",
+      priority: "Low",
+      createdDate: "2024-01-22"
     },
     {
       id: "SR005",
-      type: "Maintenance",
-      category: "Inspection",
-      priority: "Medium",
-      createdDate: "2025-10-08",
+      serviceRequestNumber: "SR2024090000005",
+      serviceRequestReference: "SR20240900000005",
+      type: "Field Service",
+      category: "Suspend",
+      subCategory: "Suspend",
+      channel: "PGN Partner",
+      requestSource: "Customer",
+      requestDate: "2024-01-22 18:14:45",
+      openDate: "2024-01-22 18:14:45",
+      resolvedDate: "2024-01-22 18:14:45",
+      closedDate: "2024-01-22 18:14:45",
+      age: 5,
+      description: "Contoh description",
       statusApproval: "approved",
-      status: "active"
+      statusPrerequisite: "completed",
+      status: "closed",
+      priority: "Medium",
+      createdDate: "2024-01-22"
     }
   ];
+
   // nav
   const navigate = useNavigate();
 
@@ -94,6 +155,13 @@ const CustomerServiceRequestList = ({
 
   const renderDate = (date) => {
     if (date) {
+      return moment(date).format("DD MMM YYYY HH:mm:ss");
+    }
+    return "";
+  };
+
+  const renderSimpleDate = (date) => {
+    if (date) {
       return moment(date).format("DD MMM YYYY");
     }
     return "";
@@ -107,73 +175,158 @@ const CustomerServiceRequestList = ({
       render: (text, object, index) => (sanitizedPage - 1) * sanitizedPageSize + index + 1,
     },
     {
-      title: "ID",
-      dataIndex: "id",
-      width: 150,
+      title: "SERVICE REQUEST NUMBER",
+      dataIndex: "serviceRequestNumber",
+      width: 200,
       sorter: true,
-      ...getColumnSearchProps("id"),
+      ...getColumnSearchProps("serviceRequestNumber"),
+    },
+    {
+      title: "SERVICE REQUEST REFERENCE",
+      dataIndex: "serviceRequestReference",
+      width: 220,
+      sorter: true,
+      ...getColumnSearchProps("serviceRequestReference"),
+      render: (reference) => (
+        <span className="underline cursor-pointer text-blue-600">
+          {reference || "-"}
+        </span>
+      ),
     },
     {
       title: "TYPE",
       dataIndex: "type",
-      width: 180,
+      width: 150,
       sorter: true,
       ...getColumnSearchProps("type"),
     },
     {
       title: "CATEGORY",
       dataIndex: "category",
-      width: 180,
+      width: 160,
       sorter: true,
       ...getColumnSearchProps("category"),
     },
     {
-      title: "PRIORITY",
-      dataIndex: "priority",
-      width: 150,
+      title: "SUB CATEGORY",
+      dataIndex: "subCategory",
+      width: 160,
       sorter: true,
-      align: "center",
-      ...getColumnSearchProps("priority"),
-      render: (priority) => {
-        const colorMap = {
-          "High": "red",
-          "Medium": "orange",
-          "Low": "green"
-        };
-        return (
-          <div className="flex justify-center">
-            <StatusComponent colour={colorMap[priority] || "gray"}>
-              {priority || "-"}
-            </StatusComponent>
-          </div>
-        );
-      },
+      ...getColumnSearchProps("subCategory"),
     },
     {
-      title: "CREATED DATE",
-      dataIndex: "createdDate",
-      width: 180,
+      title: "CHANNEL",
+      dataIndex: "channel",
+      width: 140,
       sorter: true,
-      ...getColumnSearchProps("createdDate"),
+      ...getColumnSearchProps("channel"),
+    },
+    {
+      title: "REQUEST SOURCE",
+      dataIndex: "requestSource",
+      width: 150,
+      sorter: true,
+      ...getColumnSearchProps("requestSource"),
+    },
+    {
+      title: "REQUEST DATE",
+      dataIndex: "requestDate",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("requestDate"),
       render: (date) => renderDate(date) || "-",
+    },
+    {
+      title: "OPEN DATE",
+      dataIndex: "openDate",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("openDate"),
+      render: (date) => renderDate(date) || "-",
+    },
+    {
+      title: "RESOLVED DATE",
+      dataIndex: "resolvedDate",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("resolvedDate"),
+      render: (date) => renderDate(date) || "-",
+    },
+    {
+      title: "CLOSED DATE",
+      dataIndex: "closedDate",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("closedDate"),
+      render: (date) => renderDate(date) || "-",
+    },
+    {
+      title: "AGE (HOUR)",
+      dataIndex: "age",
+      width: 120,
+      sorter: true,
+      align: "center",
+      ...getColumnSearchProps("age"),
+      render: (age) => age || "0",
+    },
+    {
+      title: "DESCRIPTION",
+      dataIndex: "description",
+      width: 250,
+      sorter: true,
+      ...getColumnSearchProps("description"),
     },
     {
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
-      width: 180,
+      width: 160,
       sorter: true,
       align: "center",
       ...getColumnSearchProps("statusApproval"),
       render: (status) => {
         const colorMap = {
           "approved": "green",
+          "waitingApproval": "orange",
           "pending": "orange",
           "rejected": "red"
+        };
+        const displayText = {
+          "approved": "Approved",
+          "waitingApproval": "Waiting Approval",
+          "pending": "Pending",
+          "rejected": "Rejected"
         };
         return (
           <div className="flex justify-center">
             <StatusComponent colour={colorMap[status] || "gray"}>
-              {toTitleCase(String(status || "")) || "-"}
+              {displayText[status] || toTitleCase(String(status || "")) || "-"}
+            </StatusComponent>
+          </div>
+        );
+      },
+    },
+    {
+      title: "STATUS PRE-REQUISITE",
+      dataIndex: "statusPrerequisite",
+      width: 180,
+      sorter: true,
+      align: "center",
+      ...getColumnSearchProps("statusPrerequisite"),
+      render: (status) => {
+        const colorMap = {
+          "completed": "green",
+          "pending": "red",
+          "none": "blue"
+        };
+        const displayText = {
+          "completed": "Completed",
+          "pending": "Pending",
+          "none": "None"
+        };
+        return (
+          <div className="flex justify-center">
+            <StatusComponent colour={colorMap[status] || "gray"}>
+              {displayText[status] || toTitleCase(String(status || "")) || "-"}
             </StatusComponent>
           </div>
         );
@@ -182,37 +335,66 @@ const CustomerServiceRequestList = ({
     {
       title: "STATUS",
       dataIndex: "status",
-      width: 150,
-      fixed: "right",
+      width: 140,
       sorter: true,
       align: "center",
       ...getColumnSearchProps("status"),
-      render: (status) => (
-        <div className="flex justify-center">
-          <StatusComponent colour={String(status || "gray")}>
-            {toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
-        </div>
-      ),
+      render: (status) => {
+        const colorMap = {
+          "inProgress": "blue",
+          "onHold": "orange",
+          "closed": "red",
+          "canceled": "gray",
+          "open": "green",
+          "active": "green",
+          "pending": "orange"
+        };
+        const displayText = {
+          "inProgress": "In Progress",
+          "onHold": "On Hold",
+          "closed": "Closed",
+          "canceled": "Canceled",
+          "open": "Open"
+        };
+        return (
+          <div className="flex justify-center">
+            <StatusComponent colour={colorMap[status] || "gray"}>
+              {displayText[status] || toTitleCase(String(status || "")) || "-"}
+            </StatusComponent>
+          </div>
+        );
+      },
     },
     {
       title: "ACTION",
       align: "center",
-      width: 100,
+      width: 120,
       fixed: "right",
       render: (v, r, i) => {
         return (
-          <div className="flex w-full justify-center gap-6">
+          <div className="flex w-full justify-center gap-4">
             <Tooltip title="Detail">
               <div className="pt-1 cursor-pointer">
                 <SVGIcon
                   name="IconDetail"
                   color={"#0075bf"}
-                  width={24}
+                  width={20}
                   onClick={() => {
                     navigate("/account-management/customers/view/service-requests/details");
                     // handleDetail(r);
                     // setModalDetail(true);
+                  }}
+                />
+              </div>
+            </Tooltip>
+            <Tooltip title="Update">
+              <div className="pt-1 cursor-pointer">
+                <SVGIcon
+                  name="IconEdit"
+                  color={"#0075bf"}
+                  width={20}
+                  onClick={() => {
+                    // Handle update action
                   }}
                 />
               </div>
@@ -235,7 +417,7 @@ const CustomerServiceRequestList = ({
         pageSize={sanitizedPageSize}
         onChange={handleChange}
         onSizeChanger={handleChangeSize}
-        tableScrolled={{ y: 525, x: 1500 }}
+        tableScrolled={{ y: 525, x: 3000 }}
         onSort={onSort}
         columns={columns}
       />
@@ -245,7 +427,7 @@ const CustomerServiceRequestList = ({
         isOpen={modalDetail}
         type="detail"
         header="Service Request Detail"
-        width={800}
+        width={1000}
         handleCancel={() => {
           setModalDetail(false);
         }}
@@ -265,8 +447,12 @@ const CustomerServiceRequestList = ({
         <div className="p-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="font-semibold">ID:</label>
-              <p>{dataDetail?.id || "-"}</p>
+              <label className="font-semibold">Service Request Number:</label>
+              <p>{dataDetail?.serviceRequestNumber || "-"}</p>
+            </div>
+            <div>
+              <label className="font-semibold">Service Request Reference:</label>
+              <p className="underline text-blue-600">{dataDetail?.serviceRequestReference || "-"}</p>
             </div>
             <div>
               <label className="font-semibold">Type:</label>
@@ -277,16 +463,48 @@ const CustomerServiceRequestList = ({
               <p>{dataDetail?.category || "-"}</p>
             </div>
             <div>
-              <label className="font-semibold">Priority:</label>
-              <p>{dataDetail?.priority || "-"}</p>
+              <label className="font-semibold">Sub Category:</label>
+              <p>{dataDetail?.subCategory || "-"}</p>
             </div>
             <div>
-              <label className="font-semibold">Created Date:</label>
-              <p>{renderDate(dataDetail?.createdDate) || "-"}</p>
+              <label className="font-semibold">Channel:</label>
+              <p>{dataDetail?.channel || "-"}</p>
+            </div>
+            <div>
+              <label className="font-semibold">Request Source:</label>
+              <p>{dataDetail?.requestSource || "-"}</p>
+            </div>
+            <div>
+              <label className="font-semibold">Request Date:</label>
+              <p>{renderDate(dataDetail?.requestDate) || "-"}</p>
+            </div>
+            <div>
+              <label className="font-semibold">Open Date:</label>
+              <p>{renderDate(dataDetail?.openDate) || "-"}</p>
+            </div>
+            <div>
+              <label className="font-semibold">Resolved Date:</label>
+              <p>{renderDate(dataDetail?.resolvedDate) || "-"}</p>
+            </div>
+            <div>
+              <label className="font-semibold">Closed Date:</label>
+              <p>{renderDate(dataDetail?.closedDate) || "-"}</p>
+            </div>
+            <div>
+              <label className="font-semibold">Age (Hour):</label>
+              <p>{dataDetail?.age || "0"}</p>
+            </div>
+            <div className="col-span-2">
+              <label className="font-semibold">Description:</label>
+              <p>{dataDetail?.description || "-"}</p>
             </div>
             <div>
               <label className="font-semibold">Status Approval:</label>
               <p>{toTitleCase(String(dataDetail?.statusApproval || "")) || "-"}</p>
+            </div>
+            <div>
+              <label className="font-semibold">Status Pre-requisite:</label>
+              <p>{toTitleCase(String(dataDetail?.statusPrerequisite || "")) || "-"}</p>
             </div>
             <div>
               <label className="font-semibold">Status:</label>

@@ -2,7 +2,12 @@ import React, { Fragment, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom"
 import BaseContainer from "../../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import { LeftOutlined, RightOutlined, PlusOutlined, FilterOutlined } from "@ant-design/icons";
+import { 
+  FilterOutlined, 
+  DownloadOutlined, 
+  CheckOutlined, 
+  PlusOutlined 
+} from "@ant-design/icons";
 import CustomerServiceRequestTable from "./CustomerServiceRequestTable";
 
 const CustomerServiceRequestList = ({ id = 0, dispatch = () => {} }) => {
@@ -13,44 +18,106 @@ const CustomerServiceRequestList = ({ id = 0, dispatch = () => {} }) => {
   return (
     <Fragment>
       <BaseContainer header={"SERVICE REQUEST LIST"}>
-        <div className="mb-5 flex justify-end gap-5">
+        <div className="flex justify-between items-center gap-5 mb-5">
+          {/* Filter Button - Left side */}
           <ButtonComponent
             type={"submit"}
             onClick={() => navigate(-1)}
             icon={
               <FilterOutlined
                 style={{
-                  color: "#0075bf",
-                  fontSize: 24,
-                  justifyItems: "center",
+                  color: "#fff",
+                  fontSize: 20,
                 }}
               />
             }
             style={{
-              backgroundColor: "#fff",
-              color: "#0075bf",
+              backgroundColor: "#0075bf",
+              color: "#fff",
               borderColor: "#0075bf",
-              border: "1px solid #0075bf"
+              border: "1px solid #0075bf",
+              width: "128px",
+              height: "48px",
+              borderRadius: "5px"
             }}
-            border={true}
           >
-            Filter
+            Filters
           </ButtonComponent>
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <PlusOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
-            Create
-          </ButtonComponent>
+          
+          {/* Right side buttons container */}
+          <div className="flex justify-end items-center gap-2.5">
+            {/* Download List Button */}
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => {}}
+              icon={
+                <DownloadOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 20,
+                  }}
+                />
+              }
+              style={{
+                backgroundColor: "#0075bf",
+                color: "#fff",
+                borderColor: "#0075bf",
+                border: "1px solid #0075bf",
+                borderRadius: "5px",
+                height: "48px"
+              }}
+            >
+              Download List
+            </ButtonComponent>
+
+            {/* Approval Button */}
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => {}}
+              icon={
+                <CheckOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 20,
+                  }}
+                />
+              }
+              style={{
+                backgroundColor: "#0075bf",
+                color: "#fff",
+                borderColor: "#0075bf",
+                border: "1px solid #0075bf",
+                borderRadius: "5px",
+                height: "48px"
+              }}
+            >
+              Approval
+            </ButtonComponent>
+
+            {/* Create Button */}
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => navigate("/account-management/customers/view/service-requests/create")}
+              icon={
+                <PlusOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 20,
+                  }}
+                />
+              }
+              style={{
+                backgroundColor: "#0075bf",
+                color: "#fff",
+                borderColor: "#0075bf",
+                border: "1px solid #0075bf",
+                borderRadius: "5px",
+                height: "48px"
+              }}
+            >
+              Create
+            </ButtonComponent>
+          </div>
         </div>
         <CustomerServiceRequestTable id={id} dispatch={dispatch} />
       </BaseContainer>

@@ -1,57 +1,65 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment } from "react";
 import RadioTabs from "../../../../../../../components/RadioTabs";
-import CustomerServiceRequestDetailAttch from "./CustomerServiceRequestDetailAttch"
-import CustomerServiceRequestDetailInfo from "./CustomerServiceRequestDetailInfo"
+import CustomerServiceRequestDetailAttch from "./CustomerServiceRequestDetailAttch";
+import CustomerServiceRequestDetailInfo from "./CustomerServiceRequestDetailInfo";
+import CustomerServiceRequestContact from "./CustomerServiceRequestContact";
+import CustomerServiceRequestPreRequisite from "./CustomerServiceRequestPreRequisite";
+import CustomerServiceRequestWorkOrder from "./CustomerServiceRequestWorkOrder";
 
 const dataTabs = {
-  sreqi: "Service Request Information",
-  attch: "Attachment",
+  sreqi: "Service Request",
+  contact: "Contact",
+  prerequisite: "Pre-Requisite", 
+  workorder: "Work Order",
+  attch: "Attachment"
 };
 
 const CustomerServiceRequestDetailTabs = ({
-  dispatch = () => {},
-  id = 0,
   section = "",
   options = [],
   handleChangeOption = () => {},
 }) => {
-  //   const sliderLeft = () => {
-  //     const slider = document.getElementById("slider");
-  //     slider.scrollLeft = slider.scrollLeft - 250;
-  //   };
+  // Use provided options or fall back to default tabs
+  const tabOptions = options.length > 0 ? options : [
+    { value: "sreqi", label: "Service Request" },
+    { value: "contact", label: "Contact" },
+    { value: "prerequisite", label: "Pre-Requisite" },
+    { value: "workorder", label: "Work Order" },
+    { value: "attch", label: "Attachment" }
+  ];
 
-  //   const sliderRight = () => {
-  //     const slider = document.getElementById("slider");
-  //     slider.scrollLeft = slider.scrollLeft + 250;
-  //   };
   const renderSection = () => {
     switch (section) {
       case dataTabs.sreqi:
-        return <CustomerServiceRequestDetailInfo id={id} dispatch={dispatch}/>;
+        return <CustomerServiceRequestDetailInfo />;
       case dataTabs.attch:
-        return <CustomerServiceRequestDetailAttch id={id} dispatch={dispatch}/>;
+        return <CustomerServiceRequestDetailAttch />;
+      case dataTabs.contact:
+        return <CustomerServiceRequestContact />;
+      case dataTabs.prerequisite:
+        return <CustomerServiceRequestPreRequisite />;
+      case dataTabs.workorder:
+        return <CustomerServiceRequestWorkOrder />;
       default:
-        return <></>;
+        return <CustomerServiceRequestDetailInfo />;
     }
   };
+
   return (
     <Fragment>
       <div className="flex flex-col gap-4">
-      <div className="relative flex justify-center items-center gap-4">
-        <div
-          className={
-            "flex gap-2 w-full h-full overflow-x-auto scroll whitespace-nowrap scroll-smooth no-scrollbar"
-          }
-        >
-          <RadioTabs
-            currentPosition={section}
-            data={options}
-            onChange={handleChangeOption}
-          />
+        {/* Wrapper div to ensure proper styling */}
+        <div className="self-stretch inline-flex justify-start items-center gap-2.5">
+          <div className="w-full">
+            <RadioTabs
+              currentPosition={section}
+              data={tabOptions}
+              onChange={handleChangeOption}
+            />
+          </div>
         </div>
+        {renderSection()}
       </div>
-      {renderSection()}
-    </div>
     </Fragment>
   );
 };

@@ -1,97 +1,333 @@
-import React, { Fragment } from 'react';
-import BaseContainer from '../../../../../../../components/BaseContainer';
-import moment from 'moment';
+import React, { useState, useEffect, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Tooltip } from "antd";
+import TablePagination from "../../../../../../../components/TablePagination";
+import SVGIcon from "../../../../../../../assets/Icon/index";
+import { Fragment } from "react";
+import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import DetailText from "../../../../../../../components/DetailText";
+import BaseContainer from "../../../../../../../components/BaseContainer";
+import { CloseOutlined, PauseCircleOutlined, PlayCircleOutlined, LockOutlined, PlusOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import CustomerServiceRequestHeader from "./CustomerServiceRequestHeader";
+import { getCustomerDetail } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
+import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
 
-// Dummy data
-const dummyData = {
-  serviceRequestId: "SR-2025-001847",
-  serviceRequestType: "Maintenance Request",
-  serviceRequestCategory: "HVAC System",
-  priority: "High",
-  requesterName: "John Michael Thompson",
-  telephone: "+1-555-0147",
-  email: "john.thompson@example.com",
-  source: "Phone Call",
-  address: "1250 Oak Street, Suite 302, Springfield, IL 62701",
-  createdDate: "2025-10-28T14:30:00Z",
-  age: 45,
-  escalation: "Yes",
-  description: "Customer reported that the HVAC system in the main office is not functioning properly. The system has been making unusual noises for the past 3 days and the temperature control is not responding to adjustments. The thermostat displays an error code E-4521. This is affecting the entire third floor workspace with approximately 25 employees. The customer has already attempted basic troubleshooting including resetting the system and checking the thermostat batteries, but the issue persists. The system was last serviced in March 2025. Customer requests urgent attention as the lack of proper climate control is impacting productivity and employee comfort. Preferred contact time is between 9 AM and 5 PM on weekdays."
-};
 
-const data_customerDetail = {
-  customerId: 1,
-  createdDate: "2025-10-30T15:15:00Z",
-  createdBy: "Admin",
-  updatedDate: "2025-10-30T15:15:00Z",
-  updatedBy: "Admin"
-}
+const CustomerServiceRequestDetailInfo = ({
+  data = [],
+  handleChange = () => {},
+  handleChangeSize = () => {},
+  totalElement = 0,
+  page = 1,
+  pageSize = 10,
+  searchText = "",
+  searchedColumn = "",
+  onSort = () => {},
+  getColumnSearchProps = () => {},
+  searchInput,
+  handleSearch
+}) => {
+  // State
+  const [dataDetail, setDataDetail] = useState({});
+  const dispatch = useDispatch();
+  const [SRStatus, setSRStatus] = useState(null);
 
-const dateFormatting = {
-  date: 'MM/DD/YYYY'
-};
+  const { data_customerDetail, loading, loadingAccount } = useSelector(
+    (state) => state.customerAccount
+    );
+  const { access_account } = useSelector(
+    (state) => state.accountManagement
+  );
+  
+  const isLoading = loading || loadingAccount;
 
-// DetailText component (assuming you have this)
-const DetailText = ({ label, children }) => (
-  <div className="flex flex-col">
-    <span className="text-xs font-semibold text-gray-700">{label}</span>
-    <span className="text-xs text-gray-900">{children}</span>
-  </div>
-);
+  //declare
+  const navigate = useNavigate();
+  const location = useLocation();
+  const id = location?.state?.id;
+  
+  useEffect(() => {
+    dispatch(getGrantedAccessAccount('/account-management/customers'))
+  }, [dispatch])
 
-const CustomerServiceRequestDetailInfo = () => {
-  const data = dummyData;
+  useEffect(() => {
+    if (id) {
+      dispatch(getCustomerDetail(id));
+    }
+  }, [dispatch, id]);
+
+
+  const log = []
+
+  // Updated dummy data based on fikri.susilo extracted table data
+  const dummyData = [
+    {
+      id: "1",
+      date: "22 Jan 2022 19:35:23",
+      username: "fikri.susilo",
+      remark: "Update status to \"Closed\", remark: \"sudah selesai\""
+    },
+    {
+      id: "2", 
+      date: "22 Jan 2022 19:35:23",
+      username: "fikri.susilo",
+      remark: "Update status to \"Resolved\", remark: \"lanjut\""
+    },
+    {
+      id: "3",
+      date: "22 Jan 2022 19:35:23",
+      username: "fikri.susilo",
+      remark: "Update status to \"In Progress\", remark: \"lanjut\""
+    },
+    {
+      id: "4",
+      date: "22 Jan 2022 19:35:23",
+      username: "fikri.susilo",
+      remark: "Create service request"
+    }
+  ];
+
+  const HistoryLogDummy = {
+    recordId: "491",
+    createdDate: "21 Dec 2021 23:11:09",
+    createdBy: "Annisa",
+    updatedDate: "28 Dec 2021 23:11:09",
+    updatedBy: "Annisa"
+  };
+
+  const ServiceRequestDummy = {
+    serviceRequestNumber: "SR20240800000002",
+    serviceRequestReference: "SR20240800000004",
+    costCenter: "015 - AREA BOGOR",
+    type: "Field Service",
+    category: "Gas Management",
+    subCategory: "Gas Termination",
+    channel: "Manual",
+    priority: "High",
+    requestSource: "Customer",
+    requestDate: "21 Jan 2022 12:34:34",
+    openDate: "21 Jan 2022 12:34:34",
+    resolvedDate: "21 Jan 2022 12:34:34",
+    closedDate: "21 Jan 2022 12:34:34",
+    ageHour: "3.4",
+    statusApproval: "Approved",
+    statusPreRequisite: "Completed",
+    status: "Open",
+    description: "-"
+  };
+
+  // Use dummy data if no data provided
+  const tableData = (Array.isArray(data) && data.length > 0) ? data : dummyData;
+
+  // Sanitize pagination values to prevent NaN
+  const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
+  const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
+  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : tableData.length;
+
+  const handleDetail = (value) => {
+    setDataDetail(value);
+  };
+
+  const handleViewFile = (fileData) => {
+    // Placeholder for view file action
+    console.log("View file:", fileData);
+    // Add your file viewing logic here
+  };
+
+  const columns = [
+    {
+      title: "NO",
+      width: 80,
+      align: "center",
+      render: (text, object, index) => (sanitizedPage - 1) * sanitizedPageSize + index + 1,
+    },
+    {
+      title: "DATE",
+      dataIndex: "date",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("date"),
+    },
+    {
+      title: "USERNAME", 
+      dataIndex: "username",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("username"),
+    },
+    {
+      title: "REMARK",
+      dataIndex: "remark",
+      width: 400,
+      sorter: true,
+      ...getColumnSearchProps("remark"),
+    },
+    {
+      title: "ACTION",
+      align: "center",
+      width: 100,
+      fixed: "right",
+      render: (v, r, i) => {
+        return (
+          <div className="flex w-full justify-center gap-6">
+            <Tooltip title="View">
+              <div className="pt-1 cursor-pointer">
+                <SVGIcon
+                  name="IconEye"
+                  color={"#0075bf"}
+                  width={24}
+                  onClick={() => {
+                    handleViewFile(r);
+                  }}
+                />
+              </div>
+            </Tooltip>
+          </div>
+        );
+      },
+    },
+  ];
+
+  console.log(SRStatus)
 
   return (
     <Fragment>
-      <BaseContainer header={"SERVICE REQUEST INFORMATION"}>
-        <div className="w-full grid grid-cols-4 gap-4 mb-5">
+      <div className="flex items-center justify-between">
+        {/* Left Side Buttons Group */}
+        <div className="flex items-center gap-3">
+          {/* Cancel Button */}
+          {SRStatus !== "canceled" && SRStatus !== "closed" && SRStatus !== "resolved" && (
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => {setSRStatus("canceled")}}
+              icon={<CloseOutlined className="text-2xl" />}
+            >
+              Cancel
+            </ButtonComponent>
+          )}
+
+          {/* On Hold Button */}
+          {SRStatus !== "canceled" && SRStatus !== "closed" && SRStatus !== "on-hold" && SRStatus !== "resolved" && (
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => {setSRStatus("on-hold")}}
+              icon={<PauseCircleOutlined className="text-2xl" />}
+            >
+              Marks as On Hold
+            </ButtonComponent>
+          )}
+        </div>
+
+        {/* Right Side Buttons Group */}
+        <div className="flex items-center gap-3">
+          {/* Marks as Open Button */}
+          {SRStatus !== "canceled" && SRStatus !== "closed" && (SRStatus === "on-hold" || SRStatus === "in-progress" || SRStatus === "resolved") && (
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => {setSRStatus("open")}}
+              icon={<PlayCircleOutlined className="text-2xl" />}
+            >
+              Marks as Open
+            </ButtonComponent>
+          )}
+
+          {/* Marks as In Progress Button */}
+          {SRStatus !== "canceled" && SRStatus !== "closed" && SRStatus !== "in-progress" && (
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => {setSRStatus("in-progress")}}
+              icon={<PlayCircleOutlined className="text-2xl" />}
+            >
+              Marks as In Progress
+            </ButtonComponent>
+          )}
+
+          {/* Mark as Resolved Button */}
+          {SRStatus !== "canceled" && SRStatus !== "closed" && SRStatus !== "resolved" && (
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => {setSRStatus("resolved")}}
+              icon={<CheckCircleOutlined className="text-2xl" />}
+            >
+              Mark as Resolved
+            </ButtonComponent>
+          )}
+
+          {/* Mark as Closed Button */}
+          {SRStatus !== "canceled" && SRStatus !== "closed" && (
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => {setSRStatus("closed")}}
+              icon={<LockOutlined className="text-2xl text-white" />}
+              className="bg-[#0075bf] text-white hover:bg-[#0075bf]/90 transition-colors"
+            >
+              Mark as Closed
+            </ButtonComponent>
+          )}
+        </div>
+      </div>
+      <div className="w-full">
+        <CustomerServiceRequestHeader
+          id={id}
+          data_detail={data_customerDetail}
+          dispatch={dispatch}
+          access_account={access_account}
+        />
+      </div>
+      
+      <BaseContainer header={"SERVICE REQUEST"}>
+        <div className="w-full grid grid-cols-4 gap-4">
           {/* Service Request Information */}
-          <DetailText label="Service Request ID">{data?.serviceRequestId}</DetailText>
-          <DetailText label="Service Request Type">
-            {data?.serviceRequestType}
-          </DetailText>
-          <DetailText label="Service Request Category">
-            {data?.serviceRequestCategory}
-          </DetailText>
-          <DetailText label="Priority">{data?.priority}</DetailText>
-          
-          {/* Requester Information */}
-          <DetailText label="Requester Name">{data?.requesterName}</DetailText>
-          <DetailText label="Telephone">{data?.telephone}</DetailText>
-          <DetailText label="Email">{data?.email}</DetailText>
-          <DetailText label="Source">{data?.source}</DetailText>
-          
-          {/* Request Details */}
-          <DetailText label="Address">{data?.address}</DetailText>
-          <DetailText label="Created Date">
-            {data?.createdDate ? moment(data?.createdDate).format(dateFormatting.date) : ""}
-          </DetailText>
-          <DetailText label="Age">{data?.age}</DetailText>
-          <DetailText label="Escalation">{data?.escalation}</DetailText>
+          <DetailText label="Service Request Number">{data?.serviceRequestNumber || ServiceRequestDummy.serviceRequestNumber}</DetailText>
+          <DetailText label="Service Request Reference"><u>{data?.serviceRequestReference || ServiceRequestDummy.serviceRequestReference}</u></DetailText>
+          <DetailText label="Cost Center">{data?.costCenter || ServiceRequestDummy.costCenter}</DetailText>
+          <DetailText label="Type">{data?.type || ServiceRequestDummy.type}</DetailText>
+          <DetailText label="Category">{data?.category || ServiceRequestDummy.category}</DetailText>
+          <DetailText label="Sub Category">{data?.subCategory || ServiceRequestDummy.subCategory}</DetailText>
+          <DetailText label="Channel">{data?.channel || ServiceRequestDummy.channel}</DetailText>
+          <DetailText label="Priority">{data?.priority || ServiceRequestDummy.priority}</DetailText>
+          <DetailText label="Request Source">{data?.requestSource || ServiceRequestDummy.requestSource}</DetailText>
+          <DetailText label="Request Date">{data?.requestDate || ServiceRequestDummy.requestDate}</DetailText>
+          <DetailText label="Open Date">{data?.openDate || ServiceRequestDummy.openDate}</DetailText>
+          <DetailText label="Resolved Date">{data?.resolvedDate || ServiceRequestDummy.resolvedDate}</DetailText>
+          <DetailText label="Closed Date">{data?.closedDate || ServiceRequestDummy.closedDate}</DetailText>
+          <DetailText label="Age (Hour)">{data?.ageHour || ServiceRequestDummy.ageHour}</DetailText>
+          <DetailText label="Status Approval">{data?.statusApproval || ServiceRequestDummy.statusApproval}</DetailText>
+          <DetailText label="Status Pre-Requisite">{data?.statusPreRequisite || ServiceRequestDummy.statusPreRequisite}</DetailText>
+          <DetailText label="Status">{data?.status || ServiceRequestDummy.status}</DetailText>
         </div>
         <div className="w-full">
-          <DetailText label="Description">{data?.description}</DetailText>
+          <DetailText label="Description">{data?.description || ServiceRequestDummy.description}</DetailText>
         </div>
       </BaseContainer>
 
+      <BaseContainer header={"ACTION LOG"}>
+        <TablePagination
+          dataSource={tableData.map((item, idx) => ({
+            ...item,
+            key: item.id || idx,
+          }))}
+          totalData={sanitizedTotalElement}
+          current={sanitizedPage}
+          pageSize={sanitizedPageSize}
+          onChange={handleChange}
+          onSizeChanger={handleChangeSize}
+          tableScrolled={{ y: 525, x: 1500 }}
+          onSort={onSort}
+          columns={columns}
+        />
+      </BaseContainer>
+
       <BaseContainer header={"HISTORY LOG INFORMATION"}>
-        <div className="w-full grid grid-cols-5 gap-5">
-          <DetailText label="Record ID">
-            {data_customerDetail?.customerId}
-          </DetailText>
-          <DetailText label="Created Date">
-            {data_customerDetail?.createdDate}
-          </DetailText>
-          <DetailText label="Created By">
-            {data_customerDetail?.createdBy}
-          </DetailText>
-          <DetailText label="Update Date">
-            {data_customerDetail?.updatedDate}
-          </DetailText>
-          <DetailText label="Updated By">
-            {data_customerDetail?.updatedBy}
-          </DetailText>
+        <div className="w-full grid grid-cols-5 gap-4">
+          {/* History Log Information */}
+          <DetailText label="Record Id">{log?.recordId || HistoryLogDummy.recordId}</DetailText>
+          <DetailText label="Created Date">{log?.createdDate || HistoryLogDummy.createdDate}</DetailText>
+          <DetailText label="Created By">{log?.createdBy || HistoryLogDummy.createdBy}</DetailText>
+          <DetailText label="Updated Date">{log?.updatedDate || HistoryLogDummy.updatedDate}</DetailText>
+          <DetailText label="Updated By">{log?.updatedBy || HistoryLogDummy.updatedBy}</DetailText>
         </div>
       </BaseContainer>
     </Fragment>
