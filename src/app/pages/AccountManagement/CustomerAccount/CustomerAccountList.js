@@ -37,7 +37,7 @@ import moment from "moment";
 import { dateFormatting } from "../../../../utils";
 import { useEffect } from "react";
 import { useRef } from "react";
-import CustomerQuesry from "../Customer/Component/CustomerQuesry";
+import CustomerQuery from "../Customer/Component/CustomerQuery";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import Toolbar from "../../../../components/Toolbar";
@@ -1188,7 +1188,7 @@ const CustomerList = () => {
             form={formQuery}
             onFinish={onFinishQuery}
           >
-            <CustomerQuesry
+            <CustomerQuery
               // queries={inputFields}
               // handleDeleteQuery={handleDeleteQuery}
               // handleQueryChange={handleQueryChange}
