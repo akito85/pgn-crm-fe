@@ -18,7 +18,10 @@ import { dateFormatting } from "../../../../../../../utils";
 import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
 
 const tabs = [
-  { value: "Service Request Information" },
+  { value: "Service Request" },
+  { value: "Contact" },
+  { value: "Pre-Requisite" },
+  { value: "Work Order" },
   { value: "Attachment" },
 ];
 
@@ -91,24 +94,15 @@ const CustomerServiceRequestDetails = () => {
     <LayoutMenu>
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <BreadCrumb routes={routes} />
-        <div className="w-full">
-          <CustomerHeaderDetail
-            id={id}
-            data_detail={data_customerDetail}
-            dispatch={dispatch}
-            access_account={access_account}
-          />
-        </div>
-
         <div className="my-5">
           <CustomerServiceRequestDetailTabs
-            dispatch={dispatch}
             id={id}
             section={typeDetailSection}
             options={tabs}
             handleChangeOption={handleDetailSection}
           />
         </div>
+
 
         <div>
           <div className="mb-5 flex">

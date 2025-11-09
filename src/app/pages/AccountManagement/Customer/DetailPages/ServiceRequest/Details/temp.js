@@ -5,24 +5,14 @@ import { Tooltip } from "antd";
 import TablePagination from "../../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { Fragment } from "react";
+import moment from "moment";
+import StatusComponent from "../../../../../../../components/StatusComponent";
+import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import { toTitleCase } from "../../../../../../../utils";
 import BaseContainer from "../../../../../../../components/BaseContainer";
-import { 
-  CloseOutlined, 
-  PauseCircleOutlined, 
-  PlayCircleOutlined, 
-  LockOutlined, 
-  PlusOutlined, 
-  CheckCircleOutlined,
-  FilterOutlined,
-  DownloadOutlined,
-  EyeOutlined,
-  EditOutlined,
-  MoreOutlined
-} from "@ant-design/icons";
 
-
-const CustomerServiceRequestDetailAttch = ({
+const CustomerServiceRequestDetailInfo = ({
   data = [],
   handleChange = () => {},
   handleChangeSize = () => {},
@@ -151,31 +141,44 @@ const CustomerServiceRequestDetailAttch = ({
 
   return (
     <Fragment>
-      <BaseContainer header={"ATTACHMENTS"}>
-        <div className="mb-5 flex items-center justify-between">
-          {/* Left Side Buttons Group */}
-          <div className="flex items-center gap-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {/* trigger filter */}}
-              icon={<FilterOutlined className="text-2xl" />}
-            >
-              Filter
-            </ButtonComponent>
-          </div>
-
-          {/* Right Side Buttons Group */}
-          <div className="flex items-center gap-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {/* trigger download list */}}
-              icon={<DownloadOutlined className="text-2xl" />}
-            >
-              Download List
-            </ButtonComponent>
-          </div>
-        </div>
-
+      <BaseContainer header={"SERVICE REQUEST ATTACHMENTS"}>
+        <ButtonComponent
+          type={"submit"}
+          onClick={() => navigate(-1)}
+          icon={
+            <FilterOutlined
+              style={{
+                color: "#0075bf",
+                fontSize: 24,
+                justifyItems: "center",
+              }}
+            />
+          }
+          style={{
+            backgroundColor: "#fff",
+            color: "#0075bf",
+            borderColor: "#0075bf",
+            border: "1px solid #0075bf"
+          }}
+          border={true}
+        >
+          Filter
+        </ButtonComponent>
+        <ButtonComponent
+          type={"submit"}
+          onClick={() => navigate("/account-management/customers/view/service-requests/create")}
+          icon={
+            <PlusOutlined
+              style={{
+                color: "#fff",
+                fontSize: 24,
+                justifyItems: "center",
+              }}
+            />
+          }
+        >
+          Create
+        </ButtonComponent>
         <TablePagination
           dataSource={tableData.map((item, idx) => ({
             ...item,
@@ -191,9 +194,48 @@ const CustomerServiceRequestDetailAttch = ({
           columns={columns}
         />
 
+        {/* Detail Modal */}
+        <ModalCustom
+          isOpen={modalDetail}
+          type="detail"
+          header="File Detail"
+          width={800}
+          handleCancel={() => {
+            setModalDetail(false);
+          }}
+          footer={
+            <div className="w-full flex justify-end">
+              <ButtonComponent
+                type="default"
+                onClick={() => {
+                  setModalDetail(false);
+                }}
+              >
+                Back
+              </ButtonComponent>
+            </div>
+          }
+        >
+          <div className="p-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="font-semibold">Type:</label>
+                <p>{dataDetail?.type || "-"}</p>
+              </div>
+              <div>
+                <label className="font-semibold">File Name:</label>
+                <p>{dataDetail?.fileName || "-"}</p>
+              </div>
+              <div>
+                <label className="font-semibold">File Size:</label>
+                <p>{dataDetail?.fileSize || "-"}</p>
+              </div>
+            </div>
+          </div>
+        </ModalCustom>
       </BaseContainer>
     </Fragment>
   );
 };
 
-export default CustomerServiceRequestDetailAttch;
+export default CustomerServiceRequestDetailInfo;
