@@ -9,11 +9,11 @@ import BreadCrumb from "../../../../../../../components/BreadCrumb";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import BaseContainer from "../../../../../../../components/BaseContainer";
 import StepContents from "./StepContents";
-import SVGIcon from "../../../../assets/Icon/index";
-import ButtonComponent from "../../../../components/ButtonComponent";
-import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
+import SVGIcon from "../../../../../../../assets/Icon/index";
+import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import { ModalConfirm } from "../../../../../../../components/Modal/ModalPopUp";
 
-const { InformationForm, AddressForm, ContactForm } = StepContents;
+const { InformationForm, AttachmentForm, ApprovalForm, ContactForm, PreRequisiteForm } = StepContents;
 
 const routes = [
   {
@@ -61,18 +61,28 @@ const CreateCustomerServiceRequest = (props) => {
 
   const steps = [
     {
-      title: "Service Request Information",
-      content: <InformationForm updateBody={handleProductInfoObj} />,
+      title: "Service Request",
+      content: <InformationForm />,
+      disabled: false
+    },
+    {
+      title: "Contact",
+      content: <ContactForm />,
+      disabled: false
+    },    
+    {
+      title: "Pre-Requisite",
+      content: <PreRequisiteForm />,
       disabled: false
     },
     {
       title: "Attachment",
-      content: <AddressForm />,
+      content: <AttachmentForm />,
       disabled: false
     },
     {
       title: "Approval",
-      content: <ContactForm />,
+      content: <ApprovalForm />,
       disabled: false
     }
   ];
