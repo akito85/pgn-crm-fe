@@ -20,6 +20,7 @@ import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColum
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import CardContainer from "../../../../components/CardContainer";
 
 const CalculationPage = () => {
   // Selector
@@ -1288,7 +1289,13 @@ const CalculationPage = () => {
           <Toolbar items={itemGrantAccess} />
         </div>
 
-        <BaseContainer header={"CALCULATION JOB LIST"}>
+        <CardContainer 
+        header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">Calculation Job List</p>
+            </div>
+          }
+        >
           <RadioTabs
             data={tabs}
             onChange={changeTab}
@@ -1312,7 +1319,7 @@ const CalculationPage = () => {
               }}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
       </LayoutMenu>
     </Spin>
   );
