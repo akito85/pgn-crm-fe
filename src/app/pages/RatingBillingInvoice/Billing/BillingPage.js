@@ -6,7 +6,6 @@ import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import SVGIcon from "../../../../assets/Icon/index";
-import BaseContainer from "../../../../components/BaseContainer";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import {
   downloadBillingList,
@@ -22,6 +21,7 @@ import ModalApprovalBilling from "./ModalApprovalBilling";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import CardContainer from "../../../../components/CardContainer";
 
 const BillingPage = () => {
   // Selector
@@ -287,8 +287,12 @@ const BillingPage = () => {
           <Toolbar items={itemGrantAccess} />
         </div>
 
-        <BaseContainer
-          header={"Billing List"}
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">Billing List</p>
+            </div>
+          }
           type="tabs"
           element={
             <Radio.Group
@@ -336,7 +340,7 @@ const BillingPage = () => {
               }}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         {/* Detail Billing */}
         {pageDetail === true ? (
