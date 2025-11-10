@@ -269,10 +269,13 @@ const CalculationForm = ({ type }) => {
     const tempDataFinal = {
       billingCycle: formValue?.billing_cycle,
       billingPeriod: formValue?.billing_period,
+      billingPeriodName: list_billing_period?.data?.find(
+      item => item.id === formValue?.billing_period
+    )?.name || null,
       serviceType: formValue?.serviceType,
       sor: formValue?.sor,
       scheduleType: formValue?.type,
-      scheduleDateTime: formValue?.scheduleDateTime
+      schedulerTime: formValue?.scheduleDateTime
         ? moment(formValue.scheduleDateTime).format("YYYY-MM-DD HH:mm:ss")
         : null,
       calculationType: formValue?.calculation_type,
