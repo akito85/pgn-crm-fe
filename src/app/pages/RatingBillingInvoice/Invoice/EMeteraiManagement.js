@@ -56,14 +56,9 @@ const EMeteraiManagement = () => {
   }, [page, pageSize, filters]);
 
   const fetchInvoices = () => {
-    console.log("🔄 Fetching invoices from API...");
-    console.log("Current page:", page);
-    console.log("Page size:", pageSize);
-    console.log("Filters:", filters);
-
     dispatch(
       getAllEMeteraiInvoices({
-        page: page - 1, // API uses 0-based index
+        page: page, // API uses 0-based index
         pageSize,
         search: "",
         sort: "billingPeriod~desc",
@@ -157,36 +152,57 @@ const EMeteraiManagement = () => {
     }
   };
 
-  // Handle stamping submission
-  const handleStampingSubmit = async (stampingData) => {
-    const { invoiceNumber, stampingMethod, file, remark } = stampingData;
-
+  // Handle stamping submission - UPDATED
+  const handleStampingSubmit = async (submissionData) => {
     try {
-      if (stampingMethod === "e-stamping") {
-        console.log("🌐 Submitting E-Stamping Request...");
+      console.log("📤 Processing stamping submission:", submissionData);
 
-        await dispatch(
-          createStampingRequest({
-            invoiceNumber,
-            stampingMethod,
-          })
-        ).unwrap();
-      } else if (stampingMethod === "manual") {
-        await dispatch(
-          uploadManualStamping({
-            invoiceNumber,
-            file,
-            remark: remark || "Manual stamping upload",
-          })
-        ).unwrap();
+      if (submissionData.stampingMethod === "e-stamping") {
+        // E-Meterai Digital - HARDCODED PAYLOAD
+        const payload = {
+          invoiceNumber: submissionData.invoiceNumber,
+          jenisDoc: "invoice",
+          visLLX: "10",
+          visLLY: "10",
+          visURX: "500",
+          visURY: "700",
+          pageStamp: "1",
+          jenisIdentitas: "Test Jenis",
+          noIdentitas: "123456789",
+          namaIdentitas: "Test User",
+          kopur: "1",
+          remark: "Test stamp",
+        };
+
+        console.log("🌐 Submitting E-Stamping Request with payload:", payload);
+        await dispatch(createStampingRequest(payload)).unwrap();
+      } else if (submissionData.stampingMethod === "manual") {
+        // Manual stamping
+        const payload = {
+          invoiceNumber: submissionData.invoiceNumber,
+          file: submissionData.file,
+          remark: submissionData.remark,
+        };
+
+        console.log(
+          "📁 Submitting Manual Stamping with file:",
+          payload.file?.name
+        );
+        await dispatch(uploadManualStamping(payload)).unwrap();
       }
 
-      // Close modal
+      // Close modal and reset state
       setStampingModalVisible(false);
       setSelectedInvoice(null);
 
-      // Manually refresh data after successful submission
+      // Refresh invoice list
       fetchInvoices();
+
+      message.success(
+        submissionData.stampingMethod === "e-stamping"
+          ? "E-Stamping request submitted successfully!"
+          : "Manual stamping uploaded successfully!"
+      );
     } catch (error) {
       console.error("❌ Stamping Submission Error:", error);
       // Error message already shown by slice
@@ -252,69 +268,67 @@ const EMeteraiManagement = () => {
   const transformedData = getTransformedData();
 
   return (
-    <Spin spinning={loading || stampingLoading}>
-      <LayoutMenu>
-        <BreadCrumb routes={routes} />
+    <LayoutMenu>
+      <BreadCrumb routes={routes} />
 
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">E-Meterai Management</p>
-            </div>
-          }
-        >
-          <div className="flex flex-col gap-4 w-full">
-            <InvoiceProcessingTable
-              dataSource={transformedData}
-              loading={loading}
-              pagination={{
-                current: page,
-                pageSize: pageSize,
-                total: pageInfo.totalElements,
-                onChange: handlePageChange,
-              }}
-              onDetails={handleDetails}
-              onProcessSigning={handleProcessSigning}
-              onRetry={handleRetry}
-              onProcessStamping={handleProcessStamping}
-              onFilterChange={handleFilterChange}
-            />
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">E-Meterai Management</p>
           </div>
-        </CardContainer>
+        }
+      >
+        <div className="flex flex-col gap-4 w-full">
+          <InvoiceProcessingTable
+            dataSource={transformedData}
+            loading={loading}
+            pagination={{
+              current: page,
+              pageSize: pageSize,
+              total: pageInfo.totalElements,
+              onChange: handlePageChange,
+            }}
+            onDetails={handleDetails}
+            onProcessSigning={handleProcessSigning}
+            onRetry={handleRetry}
+            onProcessStamping={handleProcessStamping}
+            onFilterChange={handleFilterChange}
+          />
+        </div>
+      </CardContainer>
 
-        {/* Modals */}
-        <InvoiceDetailModal
-          visible={detailModalVisible}
-          onClose={() => {
-            setDetailModalVisible(false);
-            setSelectedInvoice(null);
-          }}
-          invoiceData={selectedInvoice}
-        />
+      {/* Modals */}
+      <InvoiceDetailModal
+        visible={detailModalVisible}
+        onClose={() => {
+          setDetailModalVisible(false);
+          setSelectedInvoice(null);
+        }}
+        invoiceData={selectedInvoice}
+      />
 
-        <StampingRequestModal
-          visible={stampingModalVisible}
-          onClose={() => {
-            setStampingModalVisible(false);
-            setSelectedInvoice(null);
-          }}
-          invoiceData={selectedInvoice}
-          onSubmit={handleStampingSubmit}
-          loading={stampingLoading}
-        />
+      <StampingRequestModal
+        visible={stampingModalVisible}
+        onClose={() => {
+          setStampingModalVisible(false);
+          setSelectedInvoice(null);
+        }}
+        invoiceData={selectedInvoice}
+        onSubmit={handleStampingSubmit}
+        loading={stampingLoading}
+      />
 
-        <ProcessSigningModal
-          visible={signingModalVisible}
-          onClose={() => {
-            setSigningModalVisible(false);
-            setSelectedInvoice(null);
-          }}
-          invoiceData={selectedInvoice}
-          onSubmit={handleSigningSubmit}
-          loading={stampingLoading}
-        />
-      </LayoutMenu>
-    </Spin>
+      <ProcessSigningModal
+        visible={signingModalVisible}
+        onClose={() => {
+          setSigningModalVisible(false);
+          setSelectedInvoice(null);
+        }}
+        invoiceData={selectedInvoice}
+        onSubmit={handleSigningSubmit}
+        loading={stampingLoading}
+      />
+    </LayoutMenu>
   );
 };
 

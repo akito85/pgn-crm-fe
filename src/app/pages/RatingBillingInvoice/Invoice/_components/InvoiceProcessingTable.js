@@ -140,14 +140,17 @@ const InvoiceProcessingTable = ({
             key: "process-stamping",
             label: "Process Stamping",
             icon: <FileProtectOutlined />,
-            disabled: record.stampStatus !== null,
+            disabled: record.stampStatus === "SUCCESS",
             onClick: () => onProcessStamping(record),
           },
           {
             key: "process-signing",
             label: "Process Signing",
             icon: <EditOutlined />,
-            disabled: record.stampStatus === null || record.signStatus !== null,
+            disabled:
+              record.stampStatus === null ||
+              record.stampStatus === "FAILED" ||
+              record.signStatus === "SUCCESS",
             onClick: () => onProcessSigning(record),
           },
           {
