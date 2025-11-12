@@ -1,4 +1,4 @@
-name: Integration Service Workflow
+name: Frontend Service Workflow
 
 on:
   pull_request:
