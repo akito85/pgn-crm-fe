@@ -1,0 +1,37 @@
+name: Frontend Service Workflow
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - stg
+      - prod
+  push:
+    branches:
+      - dev
+      - stg
+      - prod
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  Preparation:
+    uses: PT-Perusahaan-Gas-Negara-Tbk/reusable-workflow/.github/workflows/preparation.yml@energy-template
+    secrets: inherit
+
+  remote-workflow:
+    uses: PT-Perusahaan-Gas-Negara-Tbk/reusable-workflow/.github/workflows/energy-frontendservice-template.yml@energy-template
+    needs: Preparation
+    secrets: inherit
+    with:
+      RUNNER_GROUP: ${{ needs.Preparation.outputs.RUNNER_GROUP }}
+      ENV_SERVER: ${{ needs.Preparation.outputs.ENV_SERVER }}
+      REPO_OWNER: ${{ needs.Preparation.outputs.REPO_OWNER }}
+      REPO_NAME: ${{ needs.Preparation.outputs.REPO_NAME }}
+      APP_VERSION: ${{ needs.Preparation.outputs.APP_VERSION }}
+      SQ_RULES: ${{ needs.Preparation.outputs.SQ_RULES }}
+      MERGED_RULES: ${{ needs.Preparation.outputs.MERGED_RULES }}
+      MANUAL_RULES: ${{ needs.Preparation.outputs.MANUAL_RULES }}
+      DOCKERFILE_NAME: Dockerfile
