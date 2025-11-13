@@ -1,6 +1,6 @@
 import { Checkbox, Radio, Select, Space } from "antd";
 import Col from "antd/es/grid/col";
-import React, { useState } from "react";
+import { useState } from "react";
 
 const CronMonth = (props) => {
   const { onChangeMonth } = props;

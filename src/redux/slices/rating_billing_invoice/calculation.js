@@ -727,128 +727,128 @@ const calculationSlice = createSlice({
   initialState,
   extraReducers: {
     // get pagination calculation
-    [getCalculationPaginate.pending]: (state, action) => {
+    [getCalculationPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getCalculationPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [getCalculationPaginate.rejected]: (state, action) => {
+    [getCalculationPaginate.rejected]: (state) => {
       state.loading = false;
     },
     // get pagination calculation history
-    [getHistoryCalculationPaginate.pending]: (state, action) => {
+    [getHistoryCalculationPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getHistoryCalculationPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [getHistoryCalculationPaginate.rejected]: (state, action) => {
+    [getHistoryCalculationPaginate.rejected]: (state) => {
       state.loading = false;
     },
     // download excel
-    [donwloadedExcel.pending]: (state, action) => {
+    [donwloadedExcel.pending]: (state) => {
       state.loading = true;
     },
-    [donwloadedExcel.fulfilled]: (state, action) => {
+    [donwloadedExcel.fulfilled]: (state) => {
       state.loading = false;
       // state.data = action.payload;
     },
-    [donwloadedExcel.rejected]: (state, action) => {
+    [donwloadedExcel.rejected]: (state) => {
       state.loading = false;
     },
     // download excel
-    [donwloadedHistoryExcel.pending]: (state, action) => {
+    [donwloadedHistoryExcel.pending]: (state) => {
       state.loading = true;
     },
-    [donwloadedHistoryExcel.fulfilled]: (state, action) => {
+    [donwloadedHistoryExcel.fulfilled]: (state) => {
       state.loading = false;
       // state.data = action.payload;
     },
-    [donwloadedHistoryExcel.rejected]: (state, action) => {
+    [donwloadedHistoryExcel.rejected]: (state) => {
       state.loading = false;
     },
     // lov sor
-    [getListSor.pending]: (state, action) => {
+    [getListSor.pending]: (state) => {
       state.loading = true;
     },
     [getListSor.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_sor = action.payload;
     },
-    [getListSor.rejected]: (state, action) => {
+    [getListSor.rejected]: (state) => {
       state.loading = false;
     },
     // lov service type
-    [getListServiceType.pending]: (state, action) => {
+    [getListServiceType.pending]: (state) => {
       state.loading = true;
     },
     [getListServiceType.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_service_type = action.payload;
     },
-    [getListServiceType.rejected]: (state, action) => {
+    [getListServiceType.rejected]: (state) => {
       state.loading = false;
     },
     // lov scheduler type
-    [getListSchedulerType.pending]: (state, action) => {
+    [getListSchedulerType.pending]: (state) => {
       state.loading = true;
     },
     [getListSchedulerType.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_scheduler_type = action.payload;
     },
-    [getListSchedulerType.rejected]: (state, action) => {
+    [getListSchedulerType.rejected]: (state) => {
       state.loading = false;
     },
     // lov meter reading code
-    [getListMeterReadingCode.pending]: (state, action) => {
+    [getListMeterReadingCode.pending]: (state) => {
       state.loading = true;
     },
     [getListMeterReadingCode.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_meter_reading_code = action.payload;
     },
-    [getListMeterReadingCode.rejected]: (state, action) => {
+    [getListMeterReadingCode.rejected]: (state) => {
       state.loading = false;
     },
     // lov customer segment
-    [getListCustomerSegment.pending]: (state, action) => {
+    [getListCustomerSegment.pending]: (state) => {
       state.loading = true;
     },
     [getListCustomerSegment.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_customer_segment = action.payload;
     },
-    [getListCustomerSegment.rejected]: (state, action) => {
+    [getListCustomerSegment.rejected]: (state) => {
       state.loading = false;
     },
     // lov cost center
-    [getListCostCenter.pending]: (state, action) => {
+    [getListCostCenter.pending]: (state) => {
       state.loading = true;
     },
     [getListCostCenter.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_cost_center = action.payload;
     },
-    [getListCostCenter.rejected]: (state, action) => {
+    [getListCostCenter.rejected]: (state) => {
       state.loading = false;
     },
     // lov calculation type
-    [getListCalculationType.pending]: (state, action) => {
+    [getListCalculationType.pending]: (state) => {
       state.loading = true;
     },
     [getListCalculationType.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_calculation_type = action.payload;
     },
-    [getListCalculationType.rejected]: (state, action) => {
+    [getListCalculationType.rejected]: (state) => {
       state.loading = false;
     },
     // lov account group
-    [getListAccountGroup.pending]: (state, action) => {
+    [getListAccountGroup.pending]: (state) => {
       state.loading = true;
       state.list_account_group = [];
     },
@@ -856,12 +856,12 @@ const calculationSlice = createSlice({
       state.loading = false;
       state.list_account_group = action.payload || [];
     },
-    [getListAccountGroup.rejected]: (state, action) => {
+    [getListAccountGroup.rejected]: (state) => {
       state.loading = false;
       state.list_account_group = [];
     },
     // lov specific customer
-    [getListSpecificCustomer.pending]: (state, action) => {
+    [getListSpecificCustomer.pending]: (state) => {
       state.loading_specific_customer = true;
     },
     [getListSpecificCustomer.fulfilled]: (state, action) => {
@@ -872,89 +872,89 @@ const calculationSlice = createSlice({
         : [];
       state.specific_customer_message = action.payload?.message || "";
     },
-    [getListSpecificCustomer.rejected]: (state, action) => {
+    [getListSpecificCustomer.rejected]: (state) => {
       state.loading_specific_customer = false;
       state.list_specific_customer = [];
       state.specific_customer_message = "";
     },
     // lov billing cycle
-    [getListBillingCycle.pending]: (state, action) => {
+    [getListBillingCycle.pending]: (state) => {
       state.loading = true;
     },
     [getListBillingCycle.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_billing_cycle = action.payload;
     },
-    [getListBillingCycle.rejected]: (state, action) => {
+    [getListBillingCycle.rejected]: (state) => {
       state.loading = false;
       state.list_billing_cycle = [];
     },
     // lov billing period
-    [getListBillingPeriod.pending]: (state, action) => {
+    [getListBillingPeriod.pending]: (state) => {
       state.loading = true;
     },
     [getListBillingPeriod.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_billing_period = action.payload;
     },
-    [getListBillingPeriod.rejected]: (state, action) => {
+    [getListBillingPeriod.rejected]: (state) => {
       state.loading = false;
     },
     // lov user detail calculation
-    [getUserDetailCalculation.pending]: (state, action) => {
+    [getUserDetailCalculation.pending]: (state) => {
       state.loading = true;
     },
     [getUserDetailCalculation.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_user_calculation = action.payload;
     },
-    [getUserDetailCalculation.rejected]: (state, action) => {
+    [getUserDetailCalculation.rejected]: (state) => {
       state.loading = false;
     },
 
     // create calculation
-    [createCalculation.pending]: (state, action) => {
+    [createCalculation.pending]: (state) => {
       state.loading = true;
     },
     [createCalculation.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [createCalculation.rejected]: (state, action) => {
+    [createCalculation.rejected]: (state) => {
       state.loading = false;
     },
     // get detail calculation job
-    [getDetailCalculationJob.pending]: (state, action) => {
+    [getDetailCalculationJob.pending]: (state) => {
       state.loading = true;
     },
     [getDetailCalculationJob.fulfilled]: (state, action) => {
       state.loading = false;
       state.detail_calculation_job = action.payload;
     },
-    [getDetailCalculationJob.rejected]: (state, action) => {
+    [getDetailCalculationJob.rejected]: (state) => {
       state.loading = false;
     },
     // get detail calculation log
-    [getDetailCalculationLog.pending]: (state, action) => {
+    [getDetailCalculationLog.pending]: (state) => {
       state.loading = true;
     },
     [getDetailCalculationLog.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_calculation_result = action.payload;
     },
-    [getDetailCalculationLog.rejected]: (state, action) => {
+    [getDetailCalculationLog.rejected]: (state) => {
       state.loading = false;
     },
 
     // get detail calculation log no paigng
-    [getDetailCalculationResultNoPaging.pending]: (state, action) => {
+    [getDetailCalculationResultNoPaging.pending]: (state) => {
       state.loading = true;
     },
     [getDetailCalculationResultNoPaging.fulfilled]: (state, action) => {
       state.loading = false;
       state.list_calculation_no_paging = action.payload;
     },
-    [getDetailCalculationResultNoPaging.rejected]: (state, action) => {
+    [getDetailCalculationResultNoPaging.rejected]: (state) => {
       state.loading = false;
     },
 

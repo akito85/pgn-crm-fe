@@ -1,13 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { MoreOutlined, PlusOutlined, WarningOutlined } from "@ant-design/icons";
+import { PlusOutlined, WarningOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
-import { Alert, Checkbox, Popover, Tooltip } from "antd";
+import { Checkbox, Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 
 import { IconModal } from "../../../../../../utils/Icon";
-import { ModalConfirm, ModalError } from "../../../../../../components/Modal/ModalPopUp";
+import {
+  ModalConfirm,
+  ModalError,
+} from "../../../../../../components/Modal/ModalPopUp";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import ModalHistory from "../../../../../../components/Modal/ModalHistory";
@@ -24,7 +27,7 @@ import {
   getListAppHier,
   getListAppHierDetail,
   inactiveTaxImplicationRule,
-  deleteTaxImplicationRule
+  deleteTaxImplicationRule,
 } from "../../../../../../redux/slices/account_management/MasterData/tax_implication";
 import { useColumnActionPermissionAccount } from "../../../../AccountManagement/ComponentAccount/ColumnActionPermissionAccount";
 
@@ -34,11 +37,7 @@ const columns = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
-  handleApprovalHistory = () => {},
-  handleOpenModalInactivate = () => {},
-  id,
-  openModalDeleteRule = () => {},
+  handleSearch = () => {}
 ) => {
   return [
     {
@@ -335,7 +334,7 @@ const columns = (
     //                   to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_TAX_IMPLICATION_RULE}
     //                   state={{
     //                     id: r?.id,
-    //                     taxImplicationId: id 
+    //                     taxImplicationId: id
     //                   }}
     //                 >
     //                   <ButtonComponent
@@ -417,22 +416,22 @@ const columns = (
     //           <ButtonComponent icon={<MoreOutlined />} border={false} />
     //         </Popover>
     //         <Tooltip title="Delete">
-    //           <span   
+    //           <span
     //             className={`flex justify-center
-    //               ${r.approvalStatus !== "DRAFT" && r.status !== "DRAFT" ? 
-    //               "cursor-not-allowed" : 
+    //               ${r.approvalStatus !== "DRAFT" && r.status !== "DRAFT" ?
+    //               "cursor-not-allowed" :
     //               ""
     //             }`}
     //           >
-    //             <SVGIcon 
-    //               name="IconDelete" 
+    //             <SVGIcon
+    //               name="IconDelete"
     //               className={
     //                 r.approvalStatus !== "DRAFT" && r.status !== "DRAFT" ? " disabled" : ""
     //               }
-    //               width={24} 
-    //               onClick={ 
-    //                 r.approvalStatus === "DRAFT" && r.status === "DRAFT" 
-    //                 ? ()=>openModalDeleteRule(r?.id) 
+    //               width={24}
+    //               onClick={
+    //                 r.approvalStatus === "DRAFT" && r.status === "DRAFT"
+    //                 ? ()=>openModalDeleteRule(r?.id)
     //                 : undefined
     //               }
     //             />
@@ -446,9 +445,11 @@ const columns = (
   ];
 };
 
-const TaxImplicationRuleTable = ({id, isRuleActive, access}) => {
+const TaxImplicationRuleTable = ({ id, isRuleActive, access }) => {
   const dispatch = useDispatch();
-  const { data_tax_implication_rule, dataApprovalHistory = {} } = useSelector((state) => state.tax_implication);
+  const { data_tax_implication_rule, dataApprovalHistory = {} } = useSelector(
+    (state) => state.tax_implication
+  );
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -472,12 +473,14 @@ const TaxImplicationRuleTable = ({id, isRuleActive, access}) => {
         dataApprover: {
           create: dataApprovalHistory?.dataApprover?.TAX_IMPLICATION_RULE || [],
           inactive:
-            dataApprovalHistory?.dataApprover?.INACTIVE_TAX_IMPLICATION_RULE || [],
+            dataApprovalHistory?.dataApprover?.INACTIVE_TAX_IMPLICATION_RULE ||
+            [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.TAX_IMPLICATION_RULE || [],
           inactive:
-            dataApprovalHistory?.dataHistory?.INACTIVE_TAX_IMPLICATION_RULE || [],
+            dataApprovalHistory?.dataHistory?.INACTIVE_TAX_IMPLICATION_RULE ||
+            [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -566,8 +569,7 @@ const TaxImplicationRuleTable = ({id, isRuleActive, access}) => {
       taxImplicationRuleId: dataInactivate.id,
       appHierId: res.approvalHierarchy,
       remark: res.remark,
-      endDate: moment(res.endDate).format(dateFormatting.f_date)
-,
+      endDate: moment(res.endDate).format(dateFormatting.f_date),
     };
     dispatch(inactiveTaxImplicationRule({ data }))
       .unwrap()
@@ -623,51 +625,50 @@ const TaxImplicationRuleTable = ({id, isRuleActive, access}) => {
   };
 
   const openModalDeleteRule = (id) => {
-    setModalDeleteRule(true)
-    setIdDeleteRule(id)
-  }
+    setModalDeleteRule(true);
+    setIdDeleteRule(id);
+  };
   const handleDeleteRule = () => {
     dispatch(deleteTaxImplicationRule(idDeleteRule))
-    .unwrap()
-    .then(async (data) => {
-      if(data?.code === 200){
-        setModalDeleteRule(false)
-        setIdDeleteRule("")
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
+      .unwrap()
+      .then(async (data) => {
+        if (data?.code === 200) {
+          setModalDeleteRule(false);
+          setIdDeleteRule("");
+          let tempSearch = "";
+          for (const dataIndex in search) {
+            if (Object.hasOwnProperty.call(search, dataIndex)) {
+              const tempSearchText = search[dataIndex];
+              if (tempSearchText) {
+                tempSearch += `${dataIndex}~${tempSearchText},`;
+              }
             }
           }
+          tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+          dispatch(
+            getTaxImplicationRulePaginate({
+              id,
+              search: tempSearch,
+              sort,
+              page,
+              pageSize,
+            })
+          );
         }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-        dispatch(
-          getTaxImplicationRulePaginate({
-            id,
-            search: tempSearch,
-            sort,
-            page,
-            pageSize,
-          })
-        );
-      }
-    })
-    .catch((error) => {
-    });
-  }
+      })
+      .catch((error) => {});
+  };
 
   const itemActions = [
     //action toolbar
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink
           to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_LATE_CHARGES_RULE}
           state={{
             lateChargeId: id,
-            from:"create"
+            from: "create",
           }}
         >
           <ButtonComponent
@@ -677,8 +678,7 @@ const TaxImplicationRuleTable = ({id, isRuleActive, access}) => {
             Create
           </ButtonComponent>
         </NavLink>
-
-      )
+      ),
     },
 
     // Action Table
@@ -686,26 +686,21 @@ const TaxImplicationRuleTable = ({id, isRuleActive, access}) => {
       action: "View",
       type: "table",
       render: (record, data) => {
-        const renderAction = data > 3 ? (
-          <ButtonComponent
-            icon={
-              <SVGIcon
-                name="IconDetail"
-                color={"#0075bf"}
-                width={24}
-              />
-            }
-            border={false}
-          >
-            <span className={"text-black ml-2"}>Detail</span>
-          </ButtonComponent>
-        ) : (
-					<Tooltip title="Detail">
-						<div className="pt-1">
-							<SVGIcon name="IconDetail" width={24} />
-						</div>
-					</Tooltip>
-        )
+        const renderAction =
+          data > 3 ? (
+            <ButtonComponent
+              icon={<SVGIcon name="IconDetail" color={"#0075bf"} width={24} />}
+              border={false}
+            >
+              <span className={"text-black ml-2"}>Detail</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Detail">
+              <div className="pt-1">
+                <SVGIcon name="IconDetail" width={24} />
+              </div>
+            </Tooltip>
+          );
         return (
           <Link
             to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_TAX_IMPLICATION_RULE}
@@ -713,137 +708,135 @@ const TaxImplicationRuleTable = ({id, isRuleActive, access}) => {
           >
             {renderAction}
           </Link>
-        )
-      }
+        );
+      },
     },
     {
       action: "Update",
       type: "table",
       render: (record, data) => {
-        const isUpdate = record.approvalStatus !== "WAITING_APPROVAL" && record.status !== "INACTIVE"
-        const renderAction = data > 3 ? (
-          isUpdate ? (
-            <Link
-              to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_TAX_IMPLICATION_RULE}
-              state={{
-                id: record?.id,
-                taxImplicationId: id 
-              }}
-            >
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name="IconEdit"
-                    color={"#0075bf"}
-                    width={24}
-                  />
-                }
-                border={false}
-              >
-                <span className={"text-black ml-2"}>Update</span>
-              </ButtonComponent>
-            </Link>
-          ) : (
-            <ButtonComponent
-              icon={
-                <SVGIcon name="IconEdit" color={"#8D91A0"} width={24} />
-              }
-              border={false}
-              disabled={true}
-            >
-              <span className={"text-black ml-2"}>Update</span>
-            </ButtonComponent>
-          )
-        ): (
-          <Tooltip title="Update">
-            {isUpdate ? (
+        const isUpdate =
+          record.approvalStatus !== "WAITING_APPROVAL" &&
+          record.status !== "INACTIVE";
+        const renderAction =
+          data > 3 ? (
+            isUpdate ? (
               <Link
                 to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_TAX_IMPLICATION_RULE}
                 state={{
                   id: record?.id,
-                  taxImplicationId: id 
+                  taxImplicationId: id,
                 }}
               >
-                <div className="pt-1">
-                  <SVGIcon name="IconEdit" width={24} />
-                </div>
+                <ButtonComponent
+                  icon={
+                    <SVGIcon name="IconEdit" color={"#0075bf"} width={24} />
+                  }
+                  border={false}
+                >
+                  <span className={"text-black ml-2"}>Update</span>
+                </ButtonComponent>
               </Link>
             ) : (
-              <div className={"cursor-not-allowed pt-1"}>
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  color={"#C0BEC6"}
-                  className={"cursor-not-allowed"}
-                />
-              </div>
-            )}
-          </Tooltip>
-        )
+              <ButtonComponent
+                icon={<SVGIcon name="IconEdit" color={"#8D91A0"} width={24} />}
+                border={false}
+                disabled={true}
+              >
+                <span className={"text-black ml-2"}>Update</span>
+              </ButtonComponent>
+            )
+          ) : (
+            <Tooltip title="Update">
+              {isUpdate ? (
+                <Link
+                  to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_TAX_IMPLICATION_RULE}
+                  state={{
+                    id: record?.id,
+                    taxImplicationId: id,
+                  }}
+                >
+                  <div className="pt-1">
+                    <SVGIcon name="IconEdit" width={24} />
+                  </div>
+                </Link>
+              ) : (
+                <div className={"cursor-not-allowed pt-1"}>
+                  <SVGIcon
+                    name="IconEdit"
+                    width={24}
+                    color={"#C0BEC6"}
+                    className={"cursor-not-allowed"}
+                  />
+                </div>
+              )}
+            </Tooltip>
+          );
         return renderAction;
-      }
+      },
     },
     {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const renderAction = data > 3 ? (
-          <ButtonComponent
-            icon={
-              <Checkbox
-                className="inactive-check"
-                checked={!(record.status === "ACTIVE")}
-                disabled={
-                  !(
-                    record.status === "ACTIVE" &&
-                    record.approvalStatus !== "WAITING_APPROVAL"
-                  )
-                }
-              />
-            }
-            border={false}
-            disabled={
-              !(
-                record.status === "ACTIVE" &&
-                record.approvalStatus !== "WAITING_APPROVAL"
-              )
-            }
-            onClick={
-              record.status === "ACTIVE" &&
-              record.approvalStatus !== "WAITING_APPROVAL"
-                ? () => handleOpenModalInactivate(record)
-                : undefined
-            }
-          >
-            <span className={"text-black ml-3"}>
-              {record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-            </span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip
-            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div className="pt-1">
-              <Checkbox
-                onClick={
+        const renderAction =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <Checkbox
+                  className="inactive-check"
+                  checked={!(record.status === "ACTIVE")}
+                  disabled={
+                    !(
+                      record.status === "ACTIVE" &&
+                      record.approvalStatus !== "WAITING_APPROVAL"
+                    )
+                  }
+                />
+              }
+              border={false}
+              disabled={
+                !(
                   record.status === "ACTIVE" &&
                   record.approvalStatus !== "WAITING_APPROVAL"
-                    ? () => handleOpenModalInactivate(record)
-                    : undefined
-                }
-                checked={record?.status === "INACTIVE"}
-                disabled={
-                  !(
+                )
+              }
+              onClick={
+                record.status === "ACTIVE" &&
+                record.approvalStatus !== "WAITING_APPROVAL"
+                  ? () => handleOpenModalInactivate(record)
+                  : undefined
+              }
+            >
+              <span className={"text-black ml-3"}>
+                {record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+            >
+              <div className="pt-1">
+                <Checkbox
+                  onClick={
                     record.status === "ACTIVE" &&
                     record.approvalStatus !== "WAITING_APPROVAL"
-                  )
-                }
-              />
-            </div>
-          </Tooltip>
-        )
+                      ? () => handleOpenModalInactivate(record)
+                      : undefined
+                  }
+                  checked={record?.status === "INACTIVE"}
+                  disabled={
+                    !(
+                      record.status === "ACTIVE" &&
+                      record.approvalStatus !== "WAITING_APPROVAL"
+                    )
+                  }
+                />
+              </div>
+            </Tooltip>
+          );
         return renderAction;
-      }
+      },
     },
     {
       action: "Delete",
@@ -851,73 +844,79 @@ const TaxImplicationRuleTable = ({id, isRuleActive, access}) => {
       render: (record, data) => {
         return (
           <Tooltip title="Delete">
-            <div   
-              className={`pt-1 ${record.approvalStatus === "DRAFT" && record.status === "DRAFT" ? "" : "cursor-not-allowed"
+            <div
+              className={`pt-1 ${
+                record.approvalStatus === "DRAFT" && record.status === "DRAFT"
+                  ? ""
+                  : "cursor-not-allowed"
               }`}
             >
-              <SVGIcon 
-                name="IconDelete" 
+              <SVGIcon
+                name="IconDelete"
                 className={
-                  record.approvalStatus === "DRAFT" && record.status === "DRAFT" ? "" : " disabled cursor-not-allowed"
+                  record.approvalStatus === "DRAFT" && record.status === "DRAFT"
+                    ? ""
+                    : " disabled cursor-not-allowed"
                 }
-                width={24} 
-                color={record.approvalStatus === "DRAFT" && record.status === "DRAFT" ? "#FF2E2E" : "#8d91a0"}
-                onClick={ 
-                  record.approvalStatus === "DRAFT" && record.status === "DRAFT" 
-                  ? ()=>openModalDeleteRule(record?.id) 
-                  : undefined
+                width={24}
+                color={
+                  record.approvalStatus === "DRAFT" && record.status === "DRAFT"
+                    ? "#FF2E2E"
+                    : "#8d91a0"
+                }
+                onClick={
+                  record.approvalStatus === "DRAFT" && record.status === "DRAFT"
+                    ? () => openModalDeleteRule(record?.id)
+                    : undefined
                 }
               />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
       action: "History",
       type: "table",
       render: (record, data) => {
-        const renderAction = data > 3 ? (
-          <ButtonComponent
-            icon={
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={24}
-              />
-            }
-            border={false}
-            onClick={() => handleApprovalHistory(record)}
-          >
-            <span className={"text-black ml-2"}>Approval History</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title="Approval History">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={24}
-                onClick={() => handleApprovalHistory(record)}
-              />
-            </div>
-          </Tooltip>
-        )
+        const renderAction =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+              }
+              border={false}
+              onClick={() => handleApprovalHistory(record)}
+            >
+              <span className={"text-black ml-2"}>Approval History</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Approval History">
+              <div className="pt-1">
+                <SVGIcon
+                  name="IconLogHistory"
+                  color={"#0075bf"}
+                  width={24}
+                  onClick={() => handleApprovalHistory(record)}
+                />
+              </div>
+            </Tooltip>
+          );
         return renderAction;
-      }
-    }
-  ]
+      },
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-4">
       {!isRuleActive ? (
         <div className="flex w-full justify-end">
-          <NavLink 
+          <NavLink
             to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_TAX_IMPLICATION_RULE}
             state={{
               taxImplicationId: id,
-              from:"create"
-            }}  
+              from: "create",
+            }}
           >
             <ButtonComponent
               icon={<PlusOutlined style={{ fontSize: "24px" }} />}
@@ -974,32 +973,32 @@ const TaxImplicationRuleTable = ({id, isRuleActive, access}) => {
         />
       </div>
 
-    {/* Modal History*/}
-    <ModalHistory
-      isOpen={openModalHistory && dataApprovalHistoryFix}
-      handleClose={() => setOpenModalHistory(false)}
-      header={"Approval History"}
-      width={850}
-      tabOptions={handleOptions()}
-      dataApprover={dataApprovalHistoryFix?.dataApprover}
-      dataHistory={dataApprovalHistoryFix?.dataHistory}
-    />
-
-    {/* Modal Inactivate Hierarchy */}
-    {openModalInactivate ? (
-      <ModalInactivateWithHierarchy
-        dispatch={dispatch}
-        getAPIOption={getListAppHier}
-        getAPIDetail={getListAppHierDetail}
-        selector="tax_implication"
-        alertMessage={`Are you sure you want to inactivate Tax Implication Rule with named ${dataInactivate.documentNumber}?`}
-        openModalInactivate={openModalInactivate}
-        handleCloseModalInactivate={handleCancelModalInactivate}
-        onFinish={handleSubmitModalInactivate}
-        addEndDate={true}
-        dataStartDate={dataInactivate.startDate || null}
+      {/* Modal History*/}
+      <ModalHistory
+        isOpen={openModalHistory && dataApprovalHistoryFix}
+        handleClose={() => setOpenModalHistory(false)}
+        header={"Approval History"}
+        width={850}
+        tabOptions={handleOptions()}
+        dataApprover={dataApprovalHistoryFix?.dataApprover}
+        dataHistory={dataApprovalHistoryFix?.dataHistory}
       />
-    ) : null}
+
+      {/* Modal Inactivate Hierarchy */}
+      {openModalInactivate ? (
+        <ModalInactivateWithHierarchy
+          dispatch={dispatch}
+          getAPIOption={getListAppHier}
+          getAPIDetail={getListAppHierDetail}
+          selector="tax_implication"
+          alertMessage={`Are you sure you want to inactivate Tax Implication Rule with named ${dataInactivate.documentNumber}?`}
+          openModalInactivate={openModalInactivate}
+          handleCloseModalInactivate={handleCancelModalInactivate}
+          onFinish={handleSubmitModalInactivate}
+          addEndDate={true}
+          dataStartDate={dataInactivate.startDate || null}
+        />
+      ) : null}
 
       {/** Modal Retry */}
       <ModalError
@@ -1018,23 +1017,23 @@ const TaxImplicationRuleTable = ({id, isRuleActive, access}) => {
         </div>
       </ModalError>
 
-        {/* Modal Delete Tax Implication Rule */}
-        <ModalConfirm
-          isOpen={modalDeleteRule}
-          handleCancel={() => setModalDeleteRule(false)}
-          handleOk={handleDeleteRule}
-          header={"Delete tax implication Rule"}
-          width={500}
-          useOk={true}
-        >
-          <div className="w-full flex flex-col mt-10 justify-end">
-            <div className={"w-full flex flex-row items-center px-10"}>
-              <WarningOutlined style={{ color: "red" }} className={"text-4xl"} />
-              <span className={"text-lg text-black font-bold h-auto mx-auto"}>
-                {`Are you sure want to delete tax implication rule?`}
-              </span>
-            </div>
-              {/* <div className={"w-full justify-center my-4 flex text-sm"}>
+      {/* Modal Delete Tax Implication Rule */}
+      <ModalConfirm
+        isOpen={modalDeleteRule}
+        handleCancel={() => setModalDeleteRule(false)}
+        handleOk={handleDeleteRule}
+        header={"Delete tax implication Rule"}
+        width={500}
+        useOk={true}
+      >
+        <div className="w-full flex flex-col mt-10 justify-end">
+          <div className={"w-full flex flex-row items-center px-10"}>
+            <WarningOutlined style={{ color: "red" }} className={"text-4xl"} />
+            <span className={"text-lg text-black font-bold h-auto mx-auto"}>
+              {`Are you sure want to delete tax implication rule?`}
+            </span>
+          </div>
+          {/* <div className={"w-full justify-center my-4 flex text-sm"}>
                 <Alert
                   message={
                     <span className="text-sm">
@@ -1045,11 +1044,10 @@ const TaxImplicationRuleTable = ({id, isRuleActive, access}) => {
                   icon={<WarningOutlined />}
                 />
               </div> */}
-          </div>
-        </ModalConfirm>
-
+        </div>
+      </ModalConfirm>
     </div>
-  )
-}
+  );
+};
 
-export default TaxImplicationRuleTable
+export default TaxImplicationRuleTable;

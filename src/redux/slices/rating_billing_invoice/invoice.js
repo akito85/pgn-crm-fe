@@ -62,7 +62,7 @@ export const getBillingApproval = createAsyncThunk(
   "GET_BILLING_APPROVAL",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/invoice/billing`;
+      const url = `/v1/dbs/api/billing/list-billing-gas`;
       const response = await ratingBillingHttpService.getAll(url);
       return response;
     } catch (error) {
@@ -153,70 +153,70 @@ const invoiceSlice = createSlice({
   initialState,
   extraReducers: {
     // Get All Billing Item Pagination
-    [getAllInvoicePaginate.pending]: (state, action) => {
+    [getAllInvoicePaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllInvoicePaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [getAllInvoicePaginate.rejected]: (state, action) => {
+    [getAllInvoicePaginate.rejected]: (state) => {
       state.loading = false;
     },
     // get detail
-    [getDetailInvoice.pending]: (state, action) => {
+    [getDetailInvoice.pending]: (state) => {
       state.loading = true;
     },
     [getDetailInvoice.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_detail = action.payload;
     },
-    [getDetailInvoice.rejected]: (state, action) => {
+    [getDetailInvoice.rejected]: (state) => {
       state.loading = false;
     },
     // get format type
-    [getFormatType.pending]: (state, action) => {
+    [getFormatType.pending]: (state) => {
       state.loading = true;
     },
     [getFormatType.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_format = action.payload;
     },
-    [getFormatType.rejected]: (state, action) => {
+    [getFormatType.rejected]: (state) => {
       state.loading = false;
     },
     // get billing approval
-    [getBillingApproval.pending]: (state, action) => {
+    [getBillingApproval.pending]: (state) => {
       state.loading = true;
     },
     [getBillingApproval.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_billing = action.payload;
     },
-    [getBillingApproval.rejected]: (state, action) => {
+    [getBillingApproval.rejected]: (state) => {
       state.loading = false;
     },
     // create generate
-    [createGenerate.pending]: (state, action) => {
+    [createGenerate.pending]: (state) => {
       state.loading = true;
     },
     [createGenerate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_billing = action.payload;
     },
-    [createGenerate.rejected]: (state, action) => {
+    [createGenerate.rejected]: (state) => {
       state.loading = false;
     },
 
     // download list invoice
-    [getDownloadList.pending]: (state, action) => {
+    [getDownloadList.pending]: (state) => {
       state.loading = true;
     },
     [getDownloadList.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_billing = action.payload;
     },
-    [getDownloadList.rejected]: (state, action) => {
+    [getDownloadList.rejected]: (state) => {
       state.loading = false;
     },
   },

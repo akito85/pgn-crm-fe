@@ -311,11 +311,6 @@ export const downloadOriginalInvoice = createAsyncThunk(
   "DOWNLOAD_ORIGINAL_INVOICE",
   async ({ invoiceNumber }, thunkAPI) => {
     try {
-      console.log("=".repeat(80));
-      console.log("📥 Download Original Invoice Request");
-      console.log("Invoice Number:", invoiceNumber);
-      console.log("=".repeat(80));
-
       const response = await axios.get(
         process.env.REACT_APP_BASE_URL_NGROK +
           `/v1/dbs/api/rbi/invoice/stampsign/download/original/${invoiceNumber}`,

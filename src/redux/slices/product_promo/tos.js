@@ -77,7 +77,7 @@ export const getCriteriaPaging = createAsyncThunk(
 
 export const getTosCriteria = createAsyncThunk(
   "GET_TOS_CRITERIA",
-  async (_,thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/tos/get-criteria`;
       const response = await productPromoHttpService.getAll(url);
@@ -93,7 +93,7 @@ export const getTosCriteria = createAsyncThunk(
 
 export const getTosAttribute = createAsyncThunk(
   "GET_TOS_ATTRIBUTE",
-  async (_,thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/tos/get-attribute`;
       const response = await productPromoHttpService.getAll(url);
@@ -231,7 +231,9 @@ export const downloadTOS = createAsyncThunk(
       const response = await productPromoHttpService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response , action: "DOWNLOAD_TOS", back : false }));
+      thunkAPI.dispatch(
+        validateError({ error: response, action: "DOWNLOAD_TOS", back: false })
+      );
       if (response.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(response));
       }
@@ -253,7 +255,7 @@ export const getBudgetList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -274,7 +276,7 @@ export const getSubDistrictList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -295,7 +297,7 @@ export const getDistrictList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -316,7 +318,7 @@ export const getCityList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -337,7 +339,7 @@ export const getProvinceList = createAsyncThunk(
           value: item.id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -358,7 +360,7 @@ export const getCostCenterList = createAsyncThunk(
           value: item.Id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -379,7 +381,7 @@ export const getSorList = createAsyncThunk(
           value: item.Id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -416,7 +418,7 @@ export const getIndustrialSectorList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -437,7 +439,7 @@ export const getGsizesList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -458,7 +460,7 @@ export const getCustomerSegmentList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -479,7 +481,7 @@ export const getAccountGroupList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -500,7 +502,7 @@ export const getAccountCategoryList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -521,7 +523,7 @@ export const getServiceTypeList = createAsyncThunk(
           value: item.id,
           label: item.text,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -542,7 +544,7 @@ export const getCustomerList = createAsyncThunk(
           value: item.Id,
           label: item.name,
         };
-    });
+      });
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -554,7 +556,7 @@ export const getCustomerList = createAsyncThunk(
 
 export const getSelectCriteria = createAsyncThunk(
   "GET_SELECT_CRITERIA_TOS",
-  async (_,thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/tos/get-criteria`;
       const response = await productPromoHttpService.getAll(url);
@@ -643,10 +645,10 @@ const tosSlice = createSlice({
     },
 
     // Inactive TOS
-    [inactiveTos.pending]: (state, action) => {
+    [inactiveTos.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveTos.fulfilled]: (state, action) => {
+    [inactiveTos.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -657,14 +659,14 @@ const tosSlice = createSlice({
     },
 
     // Create TOS
-    [createTOS.pending]: (state, action) => {
+    [createTOS.pending]: (state) => {
       state.loading = true;
     },
-    [createTOS.fulfilled]: (state, action) => {
+    [createTOS.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [createTOS.rejected]: (state, action) => {
+    [createTOS.rejected]: (state) => {
       state.loading = false;
       state.isFailed = true;
     },

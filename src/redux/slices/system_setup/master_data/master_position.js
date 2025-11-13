@@ -228,7 +228,7 @@ const masterPositionSlice = createSlice({
   initialState,
   extraReducers: {
     // get all
-    [getListMasterPosition.pending]: (state, action) => {
+    [getListMasterPosition.pending]: (state) => {
       state.isFailed = false;
       state.isSuccess = false;
       state.loading = true;
@@ -257,46 +257,46 @@ const masterPositionSlice = createSlice({
       state.loading = false;
     },
     // inactive position
-    [inactiveMasterPosition.pending]: (state, action) => {
+    [inactiveMasterPosition.pending]: (state) => {
       state.loading = true;
     },
     [inactiveMasterPosition.fulfilled]: (state, action) => {
       state.data = action?.payload;
       state.loading = false;
     },
-    [inactiveMasterPosition.rejected]: (state, action) => {
+    [inactiveMasterPosition.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
     // create position
-    [createMasterPosition.fulfilled]: (state, action) => {
+    [createMasterPosition.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [createMasterPosition.pending]: (state, action) => {
+    [createMasterPosition.pending]: (state) => {
       state.loading = true;
     },
-    [createMasterPosition.rejected]: (state, action) => {
+    [createMasterPosition.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
     // valdiate create position
-    [validateCreatePosition.fulfilled]: (state, action) => {
+    [validateCreatePosition.fulfilled]: (state) => {
       state.loading = false;
     },
-    [validateCreatePosition.pending]: (state, action) => {
+    [validateCreatePosition.pending]: (state) => {
       state.loading = true;
     },
-    [validateCreatePosition.rejected]: (state, action) => {
+    [validateCreatePosition.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
     // update position
-    [updateMasterPosition.fulfilled]: (state, action) => {
+    [updateMasterPosition.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [updateMasterPosition.pending]: (state, action) => {
+    [updateMasterPosition.pending]: (state) => {
       state.loading = true;
     },
     [updateMasterPosition.rejected]: (state, action) => {
@@ -306,7 +306,7 @@ const masterPositionSlice = createSlice({
     },
 
     // update position
-    [downloadMasterPosition.pending]: (state, action) => {
+    [downloadMasterPosition.pending]: (state) => {
       state.loading = true;
     },
     [downloadMasterPosition.fulfilled]: (state, action) => {

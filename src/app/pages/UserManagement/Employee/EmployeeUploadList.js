@@ -1,12 +1,11 @@
 import { FilterOutlined } from "@ant-design/icons";
 import { DatePicker, Input } from "antd";
 import moment from "moment";
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import StatusComponent from "../../../../components/StatusComponent";
 import DynamicTableInline from "../../../../components/Table/DynamicTableInline";
-import TableInline from "../../../../components/Table/TableInline";
-import { dateFormat, dateFormatting } from "../../../../utils";
+import { dateFormatting } from "../../../../utils";
 
 const EmployeeUploadList = ({
   dataEmp,

@@ -1,6 +1,6 @@
 import { Form, Spin } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -29,9 +29,7 @@ const DelegationDetail = () => {
   );
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const searchInput = useRef(null);
   const record = useLocation().state?.id;
-  const [form] = Form.useForm();
 
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [approveOrReject, setApproveOrReject] = useState("");
@@ -123,7 +121,8 @@ const DelegationDetail = () => {
                   {detail_Delegation?.delegateFrom}
                 </DetailText>
                 <DetailText label="Start Date">
-                  {hasValue(detail_Delegation?.startDate) && renderDateConverter(detail_Delegation?.startDate, 'date')}
+                  {hasValue(detail_Delegation?.startDate) &&
+                    renderDateConverter(detail_Delegation?.startDate, "date")}
                 </DetailText>
                 <DetailText label="Request Remark">
                   {detail_Delegation?.requestRemark}
@@ -134,7 +133,8 @@ const DelegationDetail = () => {
                   {detail_Delegation?.position}
                 </DetailText>
                 <DetailText label="End Date">
-                  {hasValue(detail_Delegation?.endDate) && renderDateConverter(detail_Delegation?.endDate, 'date')}
+                  {hasValue(detail_Delegation?.endDate) &&
+                    renderDateConverter(detail_Delegation?.endDate, "date")}
                 </DetailText>
                 <DetailText label="Approval Remark">
                   {detail_Delegation?.approvalRemark}
@@ -147,9 +147,7 @@ const DelegationDetail = () => {
           </BaseContainer>
           <BaseContainer header={"History Log Information"}>
             <div className="w-full grid grid-cols-5 gap-5">
-              <DetailText label="Record Id">
-                {record}
-              </DetailText>
+              <DetailText label="Record Id">{record}</DetailText>
               <DetailText label="Created Date">
                 {renderDateTime(detail_Delegation?.createdDate)}
               </DetailText>

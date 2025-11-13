@@ -233,7 +233,7 @@ const positionHierarchySlice = createSlice({
   initialState,
   extraReducers: {
     // get pagination
-    [getPositionHierarchyPaginate.pending]: (state, action) => {
+    [getPositionHierarchyPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getPositionHierarchyPaginate.rejected]: (state, action) => {
@@ -246,7 +246,7 @@ const positionHierarchySlice = createSlice({
     },
 
     // get position
-    [getPosition.pending]: (state, action) => {
+    [getPosition.pending]: (state) => {
       state.loading = true;
     },
     [getPosition.rejected]: (state, action) => {
@@ -259,7 +259,7 @@ const positionHierarchySlice = createSlice({
     },
 
     // get detail hierarchy
-    [getDetailHierarchy.pending]: (state, action) => {
+    [getDetailHierarchy.pending]: (state) => {
       state.loading = true;
     },
     [getDetailHierarchy.rejected]: (state, action) => {
@@ -272,7 +272,7 @@ const positionHierarchySlice = createSlice({
     },
 
     // get detail position
-    [getDetailPosition.pending]: (state, action) => {
+    [getDetailPosition.pending]: (state) => {
       state.loading = true;
     },
     [getDetailPosition.rejected]: (state, action) => {
@@ -285,7 +285,7 @@ const positionHierarchySlice = createSlice({
     },
 
     // get pagination
-    [getPositionHierarchyPaginate.pending]: (state, action) => {
+    [getPositionHierarchyPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getPositionHierarchyPaginate.rejected]: (state, action) => {
@@ -298,7 +298,7 @@ const positionHierarchySlice = createSlice({
     },
 
     // create position hierarchy
-    [createPositionHierarchy.pending]: (state, action) => {
+    [createPositionHierarchy.pending]: (state) => {
       state.loading = true;
     },
     [createPositionHierarchy.rejected]: (state, action) => {
@@ -311,7 +311,7 @@ const positionHierarchySlice = createSlice({
     },
 
     // update position hierarchy
-    [updatePositionHierarchy.pending]: (state, action) => {
+    [updatePositionHierarchy.pending]: (state) => {
       state.loading = true;
     },
     [updatePositionHierarchy.rejected]: (state, action) => {
@@ -324,7 +324,7 @@ const positionHierarchySlice = createSlice({
     },
 
     // duplicate position hierarchy
-    [duplicatePositionHierarchy.pending]: (state, action) => {
+    [duplicatePositionHierarchy.pending]: (state) => {
       state.loading = true;
     },
     [duplicatePositionHierarchy.rejected]: (state, action) => {
@@ -337,7 +337,7 @@ const positionHierarchySlice = createSlice({
     },
 
     // activation position hierarchy
-    [activationPositionHierarchy.pending]: (state, action) => {
+    [activationPositionHierarchy.pending]: (state) => {
       state.loading = true;
     },
     [activationPositionHierarchy.rejected]: (state, action) => {
@@ -350,14 +350,14 @@ const positionHierarchySlice = createSlice({
     },
 
     // download position hierarchy
-    [downloadPositionHierarchy.pending]: (state, action) => {
+    [downloadPositionHierarchy.pending]: (state) => {
       state.loading = true;
     },
-    [downloadPositionHierarchy.rejected]: (state, action) => {
+    [downloadPositionHierarchy.rejected]: (state) => {
       state.loading = false;
       // state.data = action.payload;
     },
-    [downloadPositionHierarchy.fulfilled]: (state, action) => {
+    [downloadPositionHierarchy.fulfilled]: (state) => {
       state.loading = false;
       // state.data = action.payload;
     },
