@@ -189,85 +189,85 @@ const mainMenuSlice = createSlice({
       state.isSuccess = false;
       state.loading = false;
     },
-    [getAllMenuPaginate.rejected]: (state, action) => {
+    [getAllMenuPaginate.rejected]: (state) => {
       state.isFailed = false;
       state.isSuccess = false;
       state.loading = false;
     },
 
     // create
-    [getCreateMenu.pending]: (state, action) => {
+    [getCreateMenu.pending]: (state) => {
       state.loading = true;
     },
-    [getCreateMenu.fulfilled]: (state, action) => {
+    [getCreateMenu.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [getCreateMenu.rejected]: (state, action) => {
+    [getCreateMenu.rejected]: (state) => {
       state.loading = false;
       state.isFailed = true;
     },
     //update
-    [updateMenu.fulfilled]: (state, action) => {
+    [updateMenu.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [updateMenu.pending]: (state, action) => {
+    [updateMenu.pending]: (state) => {
       state.loading = true;
     },
-    [updateMenu.rejected]: (state, action) => {
+    [updateMenu.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
 
     // menu detail
-    [getMenuDetail.pending]: (state, action) => {
+    [getMenuDetail.pending]: (state) => {
       state.loading = true;
     },
     [getMenuDetail.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getMenuDetail.rejected]: (state, action) => {
+    [getMenuDetail.rejected]: (state) => {
       state.loading = false;
     },
 
     //inactive
-    [inactiveMenu.pending]: (state, action) => {
+    [inactiveMenu.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveMenu.fulfilled]: (state, action) => {
+    [inactiveMenu.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [inactiveMenu.rejected]: (state, action) => {
+    [inactiveMenu.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
-    [getParent.pending]: (state, action) => {
+    [getParent.pending]: (state) => {
       state.loading = true;
     },
     [getParent.fulfilled]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
     },
-    [getParent.rejected]: (state, action) => {
+    [getParent.rejected]: (state) => {
       state.loading = false;
     },
     // get actions
-    [getActions.pending]: (state, action) => {
+    [getActions.pending]: (state) => {
       state.loading = true;
     },
     [getActions.fulfilled]: (state, action) => {
       state.data_actions = action.payload;
       state.loading = false;
     },
-    [getActions.rejected]: (state, action) => {
+    [getActions.rejected]: (state) => {
       state.loading = false;
     },
     //download
 
-    [downloadMenu.pending]: (state, action) => {
+    [downloadMenu.pending]: (state) => {
       state.loading = true;
     },
     [downloadMenu.fulfilled]: (state, action) => {

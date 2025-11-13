@@ -6,7 +6,6 @@ import StatusComponent from "../../../../../../components/StatusComponent";
 import moment from "moment";
 import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 import { columnsTableCriteria } from "../../columnTableCriteria";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { columnsTableCriteriaAll } from "../../../UtilsProduct/TableCriteriaAllProduct";
 import FunctionalCriteriaProduct from"../../../UtilsProduct/FunctionalCriteriaProduct";
 

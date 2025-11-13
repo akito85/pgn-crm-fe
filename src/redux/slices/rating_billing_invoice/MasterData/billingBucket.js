@@ -33,7 +33,6 @@ const initialState = {
   data_AttachmentTable: [],
   data_AttachmentDetail: [],
   data_approval_history: [],
-  data_detail: [],
   data_detail_draft: [],
   isFailed: false,
   isSuccess: false,
@@ -913,7 +912,13 @@ export const downloadBillingBucket = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_BILLING_BUCKET", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_BILLING_BUCKET",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -963,18 +968,18 @@ const billingBucketSlice = createSlice({
   initialState,
   extraReducers: {
     // get all
-    [getAllBillingBucketPaginate.pending]: (state, action) => {
+    [getAllBillingBucketPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllBillingBucketPaginate.fulfilled]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
     },
-    [getAllBillingBucketPaginate.rejected]: (state, action) => {
+    [getAllBillingBucketPaginate.rejected]: (state) => {
       state.loading = true;
     },
     // get list billing item
-    [getListBillingItem.pending]: (state, action) => {
+    [getListBillingItem.pending]: (state) => {
       state.loading = true;
       // state.data_billing_item = action.payload;
     },
@@ -982,7 +987,7 @@ const billingBucketSlice = createSlice({
       state.data_billing_item = action.payload;
       state.loading = false;
     },
-    [getListBillingItem.rejected]: (state, action) => {
+    [getListBillingItem.rejected]: (state) => {
       // state.data_billing_item = action.payload;
       state.loading = false;
     },
@@ -1221,36 +1226,36 @@ const billingBucketSlice = createSlice({
       state.loading = false;
     },
     // get available approval
-    [getAvailableApproval.pending]: (state, action) => {
+    [getAvailableApproval.pending]: (state) => {
       state.loading = true;
     },
     [getAvailableApproval.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataListAppHierId = action.payload;
     },
-    [getAvailableApproval.rejected]: (state, action) => {
+    [getAvailableApproval.rejected]: (state) => {
       state.loading = false;
     },
     // get selected approval
-    [getSelectedApproval.pending]: (state, action) => {
+    [getSelectedApproval.pending]: (state) => {
       state.loading = true;
     },
     [getSelectedApproval.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataListAppHierDetail = action.payload;
     },
-    [getSelectedApproval.rejected]: (state, action) => {
+    [getSelectedApproval.rejected]: (state) => {
       state.loading = false;
     },
     // get attachment category
-    [getAttachmentCategory.pending]: (state, action) => {
+    [getAttachmentCategory.pending]: (state) => {
       state.loading = true;
     },
     [getAttachmentCategory.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataListCategory = action.payload;
     },
-    [getAttachmentCategory.rejected]: (state, action) => {
+    [getAttachmentCategory.rejected]: (state) => {
       state.loading = false;
     },
     // get approval history
@@ -1293,10 +1298,10 @@ const billingBucketSlice = createSlice({
       state.loading = false;
     },
     // inactive billing bucket
-    [inactiveBillingBucket.pending]: (state, action) => {
+    [inactiveBillingBucket.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveBillingBucket.fulfilled]: (state, action) => {
+    [inactiveBillingBucket.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -1332,10 +1337,10 @@ const billingBucketSlice = createSlice({
       state.loading = false;
     },
     // approve reject billing bucket
-    [approveRejectBillingBucket.pending]: (state, action) => {
+    [approveRejectBillingBucket.pending]: (state) => {
       state.loading = true;
     },
-    [approveRejectBillingBucket.fulfilled]: (state, action) => {
+    [approveRejectBillingBucket.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -1345,10 +1350,10 @@ const billingBucketSlice = createSlice({
       state.message = action.payload;
     },
     // approve reject inactive billing bucket
-    [approveRejectInactiveBillingBucket.pending]: (state, action) => {
+    [approveRejectInactiveBillingBucket.pending]: (state) => {
       state.loading = true;
     },
-    [approveRejectInactiveBillingBucket.fulfilled]: (state, action) => {
+    [approveRejectInactiveBillingBucket.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },

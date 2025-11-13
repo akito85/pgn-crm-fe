@@ -1,8 +1,6 @@
-import { Form, Input, Select } from "antd";
+import { Form, Select } from "antd";
 import React, { Fragment, useRef, useState } from "react";
 import SelectComponent from "../../../../../components/SelectComponent";
-import { FilterOutlined } from "@ant-design/icons";
-import Highlighter from "react-highlight-words";
 import TablePagination from "../../../../../components/TablePagination";
 import { requiredMessage } from "../../../../../utils";
 import { getColumnSearchProps } from "../../../../../utils/getColumnSearchProps";

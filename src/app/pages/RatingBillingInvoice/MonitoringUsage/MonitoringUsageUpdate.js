@@ -1,4 +1,4 @@
-import { DatePicker, Form, Input, Select, Spin, TimePicker } from "antd";
+import { DatePicker, Form, Select, Spin, TimePicker } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import moment from "moment";
-import { addUpdatedData, clearUpdated, getAccountNumber, getAssetType, getSource } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
+import { addUpdatedData, getAccountNumber, getAssetType, getSource } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { hasValue } from "../../../../utils";
 import InputComponent from "../../../../components/InputComponent";
 

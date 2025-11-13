@@ -1,6 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import productPromoHttpService from "../../services/productPromoHttpService";
-import { grantedAccessDetail, showModalError, showModalSuccess, validateError } from "../general_slice";
+import {
+  grantedAccessDetail,
+  showModalError,
+  showModalSuccess,
+  validateError,
+} from "../general_slice";
 
 const initialState = {
   dataProduct: {},
@@ -73,16 +78,23 @@ const initialState = {
   data_customer: [],
 };
 
-export const getGrantedAccessProduct =  createAsyncThunk("CHECK_GRANTED_PRODUCT", async (body, thunkAPI) => {
-  try {
-    const data = await productPromoHttpService.checkGrantedAccessProduct(body)
-    thunkAPI.dispatch(grantedAccessDetail(body?.body))
-		return data?.data;
-	} catch (error) {
-		thunkAPI.dispatch(validateError({ error: error, action:'CHECK_GRANTED_PRODUCT'}))
-		return thunkAPI.rejectWithValue(error);
-	}
-}); 
+export const getGrantedAccessProduct = createAsyncThunk(
+  "CHECK_GRANTED_PRODUCT",
+  async (body, thunkAPI) => {
+    try {
+      const data = await productPromoHttpService.checkGrantedAccessProduct(
+        body
+      );
+      thunkAPI.dispatch(grantedAccessDetail(body?.body));
+      return data?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "CHECK_GRANTED_PRODUCT" })
+      );
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
 
 export const getGlobalPropertiesAttachment = createAsyncThunk(
   "GET_GLOBAL_PROPERTIES_ATTACHMENT",
@@ -311,7 +323,7 @@ export const getSelectCriteria = createAsyncThunk(
       return (response?.data || []).map((item) => ({
         label: item.text,
         value: item.id,
-        code:item?.code,
+        code: item?.code,
       }));
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
@@ -843,8 +855,12 @@ export const downloadProduct = createAsyncThunk(
       const response = await productPromoHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error, action: "DOWNLOAD_PRODUCT", back : false }));
-      return thunkAPI.rejectWithValue(error.response.data.code === 419 ? null : error.response.data)
+      thunkAPI.dispatch(
+        validateError({ error, action: "DOWNLOAD_PRODUCT", back: false })
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data
+      );
     }
   }
 );
@@ -1886,7 +1902,7 @@ const productSlice = createSlice({
       state.dataListUnit = action.payload;
       state.loadingProduct = false;
     },
-    [getListUnit.rejected]: (state, action) => {
+    [getListUnit.rejected]: (state) => {
       state.dataListUnit = [];
       state.loadingProduct = false;
     },
@@ -1899,7 +1915,7 @@ const productSlice = createSlice({
       state.dataListUnit = action.payload;
       state.loadingProduct = false;
     },
-    [getListUnitVAT.rejected]: (state, action) => {
+    [getListUnitVAT.rejected]: (state) => {
       state.dataListUnit = [];
       state.loadingProduct = false;
     },
@@ -1912,7 +1928,7 @@ const productSlice = createSlice({
       state.dataListUnit = action.payload;
       state.loadingProduct = false;
     },
-    [getListUnitWithHoldTax.rejected]: (state, action) => {
+    [getListUnitWithHoldTax.rejected]: (state) => {
       state.dataListUnit = [];
       state.loadingProduct = false;
     },
@@ -1926,7 +1942,7 @@ const productSlice = createSlice({
       state.dataListUnitTos = action.payload;
       state.loadingProduct = false;
     },
-    [getListUnitTOS.rejected]: (state, action) => {
+    [getListUnitTOS.rejected]: (state) => {
       state.dataListUnitTos = [];
       state.loadingProduct = false;
     },
@@ -1940,7 +1956,7 @@ const productSlice = createSlice({
       state.dataListFromItem = action.payload;
       state.loadingProduct = false;
     },
-    [getListFromItemTos.rejected]: (state, action) => {
+    [getListFromItemTos.rejected]: (state) => {
       state.dataListFromItem = [];
       state.loadingProduct = false;
     },
@@ -2001,34 +2017,34 @@ const productSlice = createSlice({
       state.loadingProduct = false;
     },
     /** Download Product */
-    [downloadProduct.pending]: (state, action) => {
+    [downloadProduct.pending]: (state) => {
       state.loadingProduct = true;
     },
-    [downloadProduct.fulfilled]: (state, action) => {
+    [downloadProduct.fulfilled]: (state) => {
       state.loadingProduct = false;
     },
-    [downloadProduct.rejected]: (state, action) => {
+    [downloadProduct.rejected]: (state) => {
       state.loadingProduct = false;
     },
     /** Lock Product */
-    [lockProduct.pending]: (state, action) => {
+    [lockProduct.pending]: (state) => {
       state.loadingProduct = true;
     },
-    [lockProduct.fulfilled]: (state, action) => {
+    [lockProduct.fulfilled]: (state) => {
       state.loadingProduct = false;
     },
-    [lockProduct.rejected]: (state, action) => {
+    [lockProduct.rejected]: (state) => {
       state.loadingProduct = false;
     },
 
     /** Inactive Product */
-    [inactiveProduct.pending]: (state, action) => {
+    [inactiveProduct.pending]: (state) => {
       state.loadingProduct = true;
     },
-    [inactiveProduct.fulfilled]: (state, action) => {
+    [inactiveProduct.fulfilled]: (state) => {
       state.loadingProduct = false;
     },
-    [inactiveProduct.rejected]: (state, action) => {
+    [inactiveProduct.rejected]: (state) => {
       state.loadingProduct = false;
     },
     /** Get Approval History Product */
@@ -2188,73 +2204,73 @@ const productSlice = createSlice({
       state.loadingProduct = false;
     },
     /** Release Product */
-    [releaseProduct.pending]: (state, action) => {
+    [releaseProduct.pending]: (state) => {
       state.loadingProduct = true;
     },
-    [releaseProduct.fulfilled]: (state, action) => {
+    [releaseProduct.fulfilled]: (state) => {
       state.loadingProduct = false;
     },
-    [releaseProduct.rejected]: (state, action) => {
+    [releaseProduct.rejected]: (state) => {
       state.loadingProduct = false;
     },
     /** Extend Product */
-    [extendProductVersion.pending]: (state, action) => {
+    [extendProductVersion.pending]: (state) => {
       state.loadingProduct = true;
     },
-    [extendProductVersion.fulfilled]: (state, action) => {
+    [extendProductVersion.fulfilled]: (state) => {
       state.loadingProduct = false;
     },
-    [extendProductVersion.rejected]: (state, action) => {
+    [extendProductVersion.rejected]: (state) => {
       state.loadingProduct = false;
     },
     /** Terminate Product */
-    [terminateProductVersion.pending]: (state, action) => {
+    [terminateProductVersion.pending]: (state) => {
       state.loadingProduct = true;
     },
-    [terminateProductVersion.fulfilled]: (state, action) => {
+    [terminateProductVersion.fulfilled]: (state) => {
       state.loadingProduct = false;
     },
-    [terminateProductVersion.rejected]: (state, action) => {
+    [terminateProductVersion.rejected]: (state) => {
       state.loadingProduct = false;
     },
     /** Approve/Reject Inactive Product */
-    [approvalInactiveProduct.pending]: (state, action) => {
+    [approvalInactiveProduct.pending]: (state) => {
       state.loadingPricing = true;
     },
-    [approvalInactiveProduct.fulfilled]: (state, action) => {
+    [approvalInactiveProduct.fulfilled]: (state) => {
       state.loadingPricing = false;
     },
-    [approvalInactiveProduct.rejected]: (state, action) => {
+    [approvalInactiveProduct.rejected]: (state) => {
       state.loadingPricing = false;
     },
     /** Approve/Reject Product Version*/
-    [approvalProductVersion.pending]: (state, action) => {
+    [approvalProductVersion.pending]: (state) => {
       state.loadingPricing = true;
     },
-    [approvalProductVersion.fulfilled]: (state, action) => {
+    [approvalProductVersion.fulfilled]: (state) => {
       state.loadingPricing = false;
     },
-    [approvalProductVersion.rejected]: (state, action) => {
+    [approvalProductVersion.rejected]: (state) => {
       state.loadingPricing = false;
     },
     /** Approve/Reject Extend Product Version */
-    [approvalExtendProductVersion.pending]: (state, action) => {
+    [approvalExtendProductVersion.pending]: (state) => {
       state.loadingPricing = true;
     },
-    [approvalExtendProductVersion.fulfilled]: (state, action) => {
+    [approvalExtendProductVersion.fulfilled]: (state) => {
       state.loadingPricing = false;
     },
-    [approvalExtendProductVersion.rejected]: (state, action) => {
+    [approvalExtendProductVersion.rejected]: (state) => {
       state.loadingPricing = false;
     },
     /** Approve/Reject Terminate Product Version */
-    [approvalTerminateProductVersion.pending]: (state, action) => {
+    [approvalTerminateProductVersion.pending]: (state) => {
       state.loadingPricing = true;
     },
-    [approvalTerminateProductVersion.fulfilled]: (state, action) => {
+    [approvalTerminateProductVersion.fulfilled]: (state) => {
       state.loadingPricing = false;
     },
-    [approvalTerminateProductVersion.rejected]: (state, action) => {
+    [approvalTerminateProductVersion.rejected]: (state) => {
       state.loadingPricing = false;
     },
     //Access

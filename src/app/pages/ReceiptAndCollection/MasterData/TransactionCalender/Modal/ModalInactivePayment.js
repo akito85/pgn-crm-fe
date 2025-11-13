@@ -12,7 +12,6 @@ import {
   CloseCircleOutlined,
   ExclamationCircleOutlined,
   FilterOutlined,
-  WarningOutlined,
 } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import TablePagination from "../../../../../../components/TablePagination";

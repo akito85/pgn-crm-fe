@@ -1,6 +1,4 @@
 import React, {useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../../../components/TablePagination'
-import { Tooltip } from 'antd';
 import TablePaginationNew from '../../../../../../../../../../components/TablePaginationNew';
 import { hasValue, renderColumn } from '../../../../../../../../../../utils';
 import { getColumnSearchPropsUseFilteredValueFE } from '../../../../../../../../../../utils/getColumnSearchProps';

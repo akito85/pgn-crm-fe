@@ -1,20 +1,16 @@
 import {
   DownloadOutlined,
-  FilterOutlined,
-  ReconciliationFilled,
 } from "@ant-design/icons";
-import { DatePicker, Input, Tooltip, Spin } from "antd";
+import { Tooltip, Spin } from "antd";
 import moment from "moment";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
-import SVGIcon from "../../../../assets/Icon/index";
 import TablePagination from "../../../../components/TablePagination";
 import {
   downloadReceiptHistories,
@@ -22,7 +18,6 @@ import {
 } from "../../../../redux/slices/receipt_collection/receiptHistories";
 import { dateFormatting, hasValue, toTitleCase } from "../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../utils/getColumnSearchProps";
-import { columnsReceipt } from "../Receipt/ColumnReceiptView";
 import StatusComponent from "../../../../components/StatusComponent";
 import { NumericFormat } from "react-number-format";
 import { sorterFunction } from "../../../../utils/sorterFunction";

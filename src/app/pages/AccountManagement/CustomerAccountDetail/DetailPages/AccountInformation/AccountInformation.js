@@ -1,9 +1,8 @@
 import { Fragment } from "react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import DetailText from "../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import StatusComponent from "../../../../../../components/StatusComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import { NavLink, useLocation } from "react-router-dom";

@@ -230,7 +230,7 @@ const EquipmentForm = ({
           form={form}
           onFinish={onFinishCreate}
         >
-          <div class="text-primary text-xs font-semibold uppercase pb-[30px]">
+          <div className="text-primary text-xs font-semibold uppercase pb-[30px]">
             EQUIPMENT INFORMATION
           </div>
 

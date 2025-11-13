@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Table,
   Input,
@@ -8,17 +8,11 @@ import {
   Checkbox,
   Tooltip,
   DatePicker,
-  Popover,
   Pagination,
   Space,
 } from "antd";
-import BaseContainer from "../BaseContainer";
 import ButtonComponent from "../ButtonComponent";
-import {
-  DeleteOutlined,
-  PlusOutlined,
-  InfoCircleOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import SVGIcon from "../../assets/Icon/index";
 import moment from "moment";
 import InputComponent from "../InputComponent";
@@ -212,7 +206,7 @@ const TableInlineCreateAndUpdate = (props) => {
     usePagination = true,
     showCreateButton = true,
     scrollTable = {},
-    disableDate
+    disableDate,
   } = props;
 
   // Declaration
@@ -238,7 +232,7 @@ const TableInlineCreateAndUpdate = (props) => {
         tableData?.map((row, index) => ({ ...row, key: index.toString() }))
       );
     }
-    setData(tableData)
+    setData(tableData);
   }, [mode, tableData]);
 
   const edit = (record, field) => {
@@ -463,7 +457,7 @@ const TableInlineCreateAndUpdate = (props) => {
                 handlePassword: handleVisiblePassword,
                 regex: regex,
                 required: required,
-                disableDate
+                disableDate,
               }),
             }))
           )}

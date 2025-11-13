@@ -1,11 +1,10 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import { Tooltip } from "antd";
-import Highlighter from "react-highlight-words";
 import BaseContainer from "../../../../../components/BaseContainer";
 import moment from "moment";
 import StatusComponent from "../../../../../components/StatusComponent";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../components/ButtonComponent";

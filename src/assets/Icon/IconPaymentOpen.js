@@ -22,23 +22,23 @@ const SVG = ({
       cy="12"
       r="9"
       stroke={color}
-      stroke-width="1.75"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M15 9L9 15"
       stroke={color}
-      stroke-width="1.75"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M15 15V9H9"
       stroke={color}
-      stroke-width="1.75"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );

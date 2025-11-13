@@ -1,9 +1,8 @@
 import { Fragment } from "react";
-import React, { useEffect, useRef } from "react";
-import { Link, NavLink, Route, Routes, useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import DetailText from "../../../../../../components/DetailText";
-import { Spin, Input, Form, Alert, Popover, Checkbox, Tooltip } from "antd";
 import CardComponent from "../../../../../../components/Card/CardComponent";
 
 const ServiceRequestDetail = (props) => {

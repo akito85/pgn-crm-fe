@@ -2,7 +2,6 @@ import {
   DatePicker,
   Form,
   Input,
-  Pagination,
   Select,
   Table,
   Tooltip,
@@ -15,7 +14,6 @@ import {
   getColumnSearchPropsCriteria,
 } from "./columnTableCriteriaPriceAdjust";
 import { useRef } from "react";
-import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { NumericFormat } from "react-number-format";

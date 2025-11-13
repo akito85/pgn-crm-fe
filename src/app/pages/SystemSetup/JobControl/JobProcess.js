@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { Tooltip } from "antd";
 import SVGIcon from "../../../../assets/Icon/index";
 import ButtonComponent from "../../../../components/ButtonComponent";

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Spin, Input } from "antd";
+import { Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,14 +11,11 @@ import {
 } from "../../../../redux/slices/system_setup/globalProperties";
 import BaseContainer from "../../../../components/BaseContainer";
 import DetailText from "../../../../components/DetailText";
-import { dateFormat, hasValue, renderColumn, toTitleCase } from "../../../../utils";
+import { dateFormat, renderColumn, toTitleCase } from "../../../../utils";
 import moment from "moment";
-import TablePagination from "../../../../components/TablePagination";
-import StatusComponent from "../../../../components/StatusComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { FilterOutlined, LeftOutlined } from "@ant-design/icons";
+import { LeftOutlined } from "@ant-design/icons";
 import { useRef } from "react";
-import Highlighter from "react-highlight-words";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks.js";
 import { getColumnSearchProps } from "../../../../utils/getColumnSearchProps.js";
 import TablePaginationNew from "../../../../components/TablePaginationNew.js";

@@ -9,7 +9,6 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import { Form, Spin, Steps } from "antd";
 import InputComponent from "../../../../../components/InputComponent";
-import { requiredMessage } from "../../../../../utils";
 import {
   getDetailCalculationResult,
   getDetailCalculationResultNoPaging,

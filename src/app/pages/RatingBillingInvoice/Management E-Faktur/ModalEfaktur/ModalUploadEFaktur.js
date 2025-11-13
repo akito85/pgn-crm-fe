@@ -4,7 +4,6 @@ import { Form, Upload, Alert, DatePicker, Spin } from "antd";
 import {
   InboxOutlined,
   FileOutlined,
-  CheckCircleOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -140,7 +139,7 @@ const ModalUploadEFaktur = ({
 
 
       await dispatch(uploadManualEFaktur(payload)).unwrap();
-;
+
       setModalSuccess(true);
     } catch (error) {
 

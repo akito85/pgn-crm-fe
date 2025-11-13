@@ -1,10 +1,9 @@
-import React,{ useState, useRef, useEffect } from 'react'
+import React,{ useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Spin } from 'antd'
 
 import BaseContainer from '../../../../../../components/BaseContainer'
 import RadioTabs from '../../../../../../components/RadioTabs'
-import DetailText from '../../../../../../components/DetailText'
 import TableGasUtilCurrent from './TableGasUtilCurrent'
 import TableGasUtilHistory from './TableGasUtilHistory'
 import { getGrantedAccessAccount } from '../../../../../../redux/slices/account_management/accountManagement'

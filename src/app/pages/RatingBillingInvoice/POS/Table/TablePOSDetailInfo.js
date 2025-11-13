@@ -1,8 +1,7 @@
 import { Tooltip } from "antd";
-import Highlighter from "react-highlight-words";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../assets/Icon/index";
-import { formatToTwoDecimalPlaces, separatorCurrency } from "../Utils";
+import { separatorCurrency } from "../Utils";
 import { hasValue, renderColumn } from "../../../../../utils";
 
 export const columnsTablePOSDetailInfo = (

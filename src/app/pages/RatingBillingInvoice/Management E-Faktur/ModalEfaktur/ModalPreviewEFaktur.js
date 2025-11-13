@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Spin, Divider, Table } from "antd";
 import { CloseOutlined, PrinterOutlined } from "@ant-design/icons";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import SVGIcon from "../../../../../assets/Icon/index";
 
 const ModalPreviewEFaktur = ({
   isOpen = false,

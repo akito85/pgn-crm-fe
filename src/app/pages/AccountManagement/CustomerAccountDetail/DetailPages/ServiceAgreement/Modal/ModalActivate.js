@@ -1,5 +1,4 @@
 import React, {useState, useRef, useEffect} from 'react'
-import ModalCustom from '../../../../../../../components/Modal/ModalCustom'
 import { Form, Input, Select, Spin } from 'antd'
 import ButtonComponent from '../../../../../../../components/ButtonComponent'
 import SelectComponent from '../../../../../../../components/SelectComponent'

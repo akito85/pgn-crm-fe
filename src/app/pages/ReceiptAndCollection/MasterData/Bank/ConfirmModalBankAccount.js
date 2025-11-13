@@ -1,10 +1,8 @@
-import { Checkbox } from "antd";
 import moment from "moment";
 import { Fragment, useState } from "react";
 import DetailText from "../../../../../components/DetailText";
 import RadioTabs from "../../../../../components/RadioTabs";
 import { dateFormatting } from "../../../../../utils";
-import ApprovalSectionForm from "../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 import FunctionalTableCriteriaPayment from "./Table/FunctionalTableCriteriaPayment";
 import { useSelector } from "react-redux";

@@ -1,30 +1,20 @@
 import {
   ExclamationCircleOutlined,
-  FilterOutlined,
-  LeftCircleOutlined,
   LeftOutlined,
-  RightCircleOutlined,
   RightOutlined,
 } from "@ant-design/icons";
 import {
   Alert,
-  DatePicker,
   Form,
-  Input,
   Spin,
   Steps,
-  Tooltip,
-  message,
 } from "antd";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
-import Highlighter from "react-highlight-words";
 import { useDispatch, useSelector } from "react-redux";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import CardComponent from "../../../../../../components/Card/CardComponent";
 import InputComponent from "../../../../../../components/InputComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
-import StatusComponent from "../../../../../../components/StatusComponent";
 import TablePagination from "../../../../../../components/TablePagination";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
@@ -41,19 +31,13 @@ import {
   requestModal,
 } from "../../../../../../redux/slices/receipt_collection/electrionicBank";
 import {
-  dateFormatting,
   formMessageRequired,
-  requiredMessage,
 } from "../../../../../../utils";
-import {
-  getColumnSearchProps,
-  getColumnSearchPropsPaging,
-} from "../../../../../../utils/getColumnSearchProps";
+
+
 import ApprovalSectionForm from "../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
-import AttachmentSectionForm from "../../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 import ContentModalConfirmStatment from "../ContentModalConfirmStatment";
 import TableForceFE from "./TableForceFE";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { configApp } from "../../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../../components/Attachment/AttachmentComponent";
 import { columnsAwalForce } from "./columnForce";

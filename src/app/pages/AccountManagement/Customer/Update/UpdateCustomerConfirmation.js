@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import moment from "moment";
 import DetailText from "../../../../../components/DetailText";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";

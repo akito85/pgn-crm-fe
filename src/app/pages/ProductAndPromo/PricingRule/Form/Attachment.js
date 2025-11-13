@@ -5,7 +5,7 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../components/TablePagination";
 import { getSelectCategory } from "../../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 import ModalAttachment from "../Modal/ModalAttachment";
-import { Input, Space, Spin, Tooltip } from "antd";
+import { Input, Spin, Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { FilterOutlined, EyeOutlined } from "@ant-design/icons";

@@ -4,7 +4,6 @@ import { Form, Table, DatePicker, Spin } from "antd";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import InputComponent from "../../../../../components/InputComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import SVGIcon from "../../../../../assets/Icon/index";
 import moment from "moment";
 
 const ModalBuatFakturPengganti = ({

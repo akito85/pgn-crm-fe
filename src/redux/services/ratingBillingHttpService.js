@@ -129,62 +129,62 @@ const downloadData = async (url, customBaseUrl) => {
   }
 };
 
-
 const downloadDataPrabill = async (url, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
-    
+
     const response = await axios.get(baseUrl + url, {
       headers: buildHeaders(baseUrl),
       responseType: "arraybuffer",
     });
-    
-    const urlParams = new URLSearchParams(url.split('?')[1]);
-    const searchParam = urlParams.get('search') || 'download';
-    
+
+    const urlParams = new URLSearchParams(url.split("?")[1]);
+    const searchParam = urlParams.get("search") || "download";
+
     const now = new Date();
-    const timestamp = now.getFullYear() + 
-      String(now.getMonth() + 1).padStart(2, '0') + 
-      String(now.getDate()).padStart(2, '0') + 
-      String(now.getHours()).padStart(2, '0') + 
-      String(now.getMinutes()).padStart(2, '0') + 
-      String(now.getSeconds()).padStart(2, '0');
-    
+    const timestamp =
+      now.getFullYear() +
+      String(now.getMonth() + 1).padStart(2, "0") +
+      String(now.getDate()).padStart(2, "0") +
+      String(now.getHours()).padStart(2, "0") +
+      String(now.getMinutes()).padStart(2, "0") +
+      String(now.getSeconds()).padStart(2, "0");
+
     const filename = `prabill_data_${searchParam}_${timestamp}.xlsx`;
-    
-    console.log('Generated filename:', filename);
-    
-    const blob = new Blob([response.data], { 
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+    console.log("Generated filename:", filename);
+
+    const blob = new Blob([response.data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    
-    console.log('Blob size:', blob.size, 'bytes');
-    
+
+    console.log("Blob size:", blob.size, "bytes");
+
     if (blob.size === 0) {
-      throw new Error('Downloaded file is empty');
+      throw new Error("Downloaded file is empty");
     }
-    
+
     // Download file
     FileSaver.saveAs(blob, filename);
-    
+
     return response;
   } catch (error) {
-    console.error('Download error:', error);
-    
+    console.error("Download error:", error);
+
     if (error.response) {
-      console.error('Error response:', {
+      console.error("Error response:", {
         status: error.response.status,
-        statusText: error.response.statusText
+        statusText: error.response.statusText,
       });
-      
+
       if (error.response.status === 204) {
-        throw new Error('No data available for download');
+        throw new Error("No data available for download");
       }
       if (error.response.status === 404) {
-        throw new Error('File not found');
+        throw new Error("File not found");
       }
     }
-    
+
     throw error;
   }
 };
@@ -357,6 +357,76 @@ const previewOrDownloadData = async (url, params, customBaseUrl) => {
   }
 };
 
+const downloadXlsx = async (
+  url,
+  fallbackFilename = "download",
+  customBaseUrl
+) => {
+  try {
+    const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
+
+    const response = await axios.get(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
+      responseType: "blob",
+    });
+
+    const contentDisposition = response.headers["content-disposition"];
+    let filename = null;
+
+    if (contentDisposition) {
+      const utf8Match = contentDisposition.match(/filename\*=UTF-8''(.+)/i);
+      if (utf8Match) {
+        filename = decodeURIComponent(utf8Match[1]);
+      } else {
+        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/i);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+    }
+
+    if (!filename) {
+      const timestamp = new Date();
+      const day = String(timestamp.getDate()).padStart(2, "0");
+      const month = timestamp
+        .toLocaleString("en-US", { month: "short" })
+        .toUpperCase();
+      const year = timestamp.getFullYear();
+      const formattedDate = `${day}${month}${year}`;
+      filename = `${fallbackFilename}_${formattedDate}.xlsx`;
+      console.warn(
+        "⚠️ Filename not found in header, using fallback:",
+        filename
+      );
+    } else {
+      console.log("✅ Filename from header:", filename);
+    }
+
+    const blob = new Blob([response.data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    if (blob.size === 0) {
+      throw new Error("Downloaded file is empty");
+    }
+
+    FileSaver.saveAs(blob, filename);
+
+    return response;
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 204) {
+        throw new Error("No data available for download");
+      }
+      if (error.response.status === 404) {
+        throw new Error("File not found");
+      }
+    }
+
+    throw error;
+  }
+};
+
 const ratingBillingHttpService = {
   getAll,
   getDetail,
@@ -374,6 +444,7 @@ const ratingBillingHttpService = {
   activationRemarkWithPut,
   downloadRtfFile,
   previewOrDownloadData,
+  downloadXlsx,
 };
 
 export default ratingBillingHttpService;

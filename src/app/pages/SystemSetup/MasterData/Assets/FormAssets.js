@@ -245,7 +245,7 @@ const FormAssets = ({ type }) => {
     ];
 
     const onChangeCustody = (e) => setCheckCustody(e.target.checked);
-    ;
+    
 
     // handle asset name
     const handleAssetName = (e) => {

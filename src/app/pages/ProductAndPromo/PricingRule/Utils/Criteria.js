@@ -1,8 +1,7 @@
 import { Spin } from "antd";
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
+import { useSelector } from "react-redux";
 import TableCriteriaDetail from "../Table/TableCriteriaDetail";
-import { getHeaderPricingRule } from "../../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 
 const Criteria = ({ apiHeader, data = [] }) => {
   const { loading } = useSelector((state) => state.pricingRule);

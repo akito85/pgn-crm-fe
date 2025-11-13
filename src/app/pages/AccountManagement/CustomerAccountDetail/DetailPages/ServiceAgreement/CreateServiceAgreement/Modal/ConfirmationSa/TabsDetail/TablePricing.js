@@ -1,5 +1,4 @@
 import React, {useState} from 'react'
-import TablePagination from '../../../../../../../../../../components/TablePagination'
 
 const TablePricing = ({
   dataPricing

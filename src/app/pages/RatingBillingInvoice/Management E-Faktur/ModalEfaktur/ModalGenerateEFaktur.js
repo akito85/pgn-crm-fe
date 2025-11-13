@@ -9,7 +9,6 @@ import {
 } from "@ant-design/icons";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import SelectComponent from "../../../../../components/SelectComponent";
 import DetailText from "../../../../../components/DetailText";
 import SVGIcon from "../../../../../assets/Icon/index";
 import {

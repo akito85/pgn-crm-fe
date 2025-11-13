@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { getDetailLateChargePayment } from "../../../../../redux/slices/receipt_collection/lateCharge";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import { columnAdjusmentList } from "./TableDetail/ColumnAdjusmentList";
 import TablePagination from "../../../../../components/TablePagination";
 import { columnLateChargeHistories } from "./TableDetail/ColumnLateChargeHistories";

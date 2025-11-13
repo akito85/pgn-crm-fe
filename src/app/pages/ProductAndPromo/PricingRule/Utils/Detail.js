@@ -5,9 +5,7 @@ import { FilterOutlined } from "@ant-design/icons";
 import { Input } from "antd";
 import TablePagination from "../../../../../components/TablePagination";
 import { NumericFormat } from "react-number-format";
-import { columnsDetail } from "../Table/TableDetail";
 import { useEffect } from "react";
-import { list } from "postcss";
 
 const Detail = ({ id = 0, getAPI, selector = "pricingRule" }) => {
   // Declaration

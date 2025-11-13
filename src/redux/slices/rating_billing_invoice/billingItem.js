@@ -5,7 +5,7 @@ import ratingBillingHttpService from "../../services/ratingBillingHttpService";
 
 const initialState = {
   data_view: [],
-  data_billingItemCategoryDdl : [],
+  data_billingItemCategoryDdl: [],
   data_billingItemCategory: [],
   data_billType: [],
   data_itemMappingCategory: [],
@@ -88,7 +88,10 @@ export const getBillingItemCategoryDdl = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_BILLING_ITEM_MAPPING_CATEGORY_DDL" })
+        validateError({
+          error,
+          action: "GET_BILLING_ITEM_MAPPING_CATEGORY_DDL",
+        })
       );
       return thunkAPI.rejectWithValue(
         error.response.data.code === 419 ? null : error.response.data
@@ -297,7 +300,13 @@ export const downloadBillingItem = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_BILLING_ITEM", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_BILLING_ITEM",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -400,7 +409,9 @@ export const approvalRejectBillingItem = createAsyncThunk(
       );
       const successBody = {
         title: "Successful",
-        description: `Your data has been ${body.action === "APPROVE"? "approved": "rejected"}.`,
+        description: `Your data has been ${
+          body.action === "APPROVE" ? "approved" : "rejected"
+        }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -467,15 +478,13 @@ export const approvalInactiveBillingItem = createAsyncThunk(
 
 export const getDetailDraft = createAsyncThunk(
   "GET_DETAIL_DRAFT",
-  async ({id}, thunkAPI) => {
+  async ({ id }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/billingitem/draft/${id}`;
       const response = await ratingBillingHttpService.getDetail(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error, action: "GET_DETAIL_DRAFT", })
-      );
+      thunkAPI.dispatch(validateError({ error, action: "GET_DETAIL_DRAFT" }));
       return thunkAPI.rejectWithValue(
         error.response.data.code === 419 ? null : error.response.data
       );
@@ -486,13 +495,15 @@ export const getDetailDraft = createAsyncThunk(
 // RBI MASTER BILLING ITEM
 export const getConfigFileRBIBillingItem = createAsyncThunk(
   "GET_CONFIG_FILE_RBI_BILLING_ITEM",
-  async (_,thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/billingitem/attachment-config-file";
       const response = await ratingBillingHttpService.getAll(url);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data.code === 419 ? null : error.response.data);
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data
+      );
     }
   }
 );
@@ -502,132 +513,132 @@ const billingItemSlice = createSlice({
   initialState,
   extraReducers: {
     //GET BILLING ITEM LIST
-    [getBillingItemList.pending]: (state, action) => {
+    [getBillingItemList.pending]: (state) => {
       state.loading = true;
     },
     [getBillingItemList.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_view = action.payload;
     },
-    [getBillingItemList.rejected]: (state, action) => {
+    [getBillingItemList.rejected]: (state) => {
       state.loading = false;
     },
     //GET BILLING ITEM CATEGORY
-    [getBillingItemCategory.pending]: (state, action) => {
+    [getBillingItemCategory.pending]: (state) => {
       state.loading = true;
     },
     [getBillingItemCategory.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_billingItemCategory = action.payload;
     },
-    [getBillingItemCategory.rejected]: (state, action) => {
+    [getBillingItemCategory.rejected]: (state) => {
       state.loading = false;
     },
 
     //GET BILLING ITEM CATEGORY DDL
-    [getBillingItemCategoryDdl.pending]: (state, action) => {
+    [getBillingItemCategoryDdl.pending]: (state) => {
       state.loading = true;
     },
     [getBillingItemCategoryDdl.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_billingItemCategoryDdl = action.payload;
     },
-    [getBillingItemCategoryDdl.rejected]: (state, action) => {
+    [getBillingItemCategoryDdl.rejected]: (state) => {
       state.loading = false;
     },
     //GET BILL TYPE
-    [getBillType.pending]: (state, action) => {
+    [getBillType.pending]: (state) => {
       state.loading = true;
     },
     [getBillType.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_billType = action.payload;
     },
-    [getBillType.rejected]: (state, action) => {
+    [getBillType.rejected]: (state) => {
       state.loading = false;
     },
     //GET BILL TYPE
-    [getDetailMappingCategory.pending]: (state, action) => {
+    [getDetailMappingCategory.pending]: (state) => {
       state.loading = true;
     },
     [getDetailMappingCategory.fulfilled]: (state, action) => {
       state.loading = false;
       state.detail_mapping_category = action.payload;
     },
-    [getDetailMappingCategory.rejected]: (state, action) => {
+    [getDetailMappingCategory.rejected]: (state) => {
       state.loading = false;
     },
     //GET AVAILABLE APPROVAL
-    [getAvailableApproval.pending]: (state, action) => {
+    [getAvailableApproval.pending]: (state) => {
       state.loading = true;
     },
     [getAvailableApproval.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataListAppHierId = action.payload;
     },
-    [getAvailableApproval.rejected]: (state, action) => {
+    [getAvailableApproval.rejected]: (state) => {
       state.loading = false;
     },
     //GET SELECTED APPROVAL
-    [getSelectedApproval.pending]: (state, action) => {
+    [getSelectedApproval.pending]: (state) => {
       state.loading = true;
     },
     [getSelectedApproval.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataListAppHierDetail = action.payload;
     },
-    [getSelectedApproval.rejected]: (state, action) => {
+    [getSelectedApproval.rejected]: (state) => {
       state.loading = false;
     },
     //GET ATTACHMENT TABLE
-    [getAttachmentTable.pending]: (state, action) => {
+    [getAttachmentTable.pending]: (state) => {
       state.loading = true;
     },
     [getAttachmentTable.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_AttachmentTable = action.payload;
     },
-    [getAttachmentTable.rejected]: (state, action) => {
+    [getAttachmentTable.rejected]: (state) => {
       state.loading = false;
     },
     //GET ATTACHMENT CATEGORY
-    [getAttachmentCategory.pending]: (state, action) => {
+    [getAttachmentCategory.pending]: (state) => {
       state.loading = true;
     },
     [getAttachmentCategory.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataListCategory = action.payload;
     },
-    [getAttachmentCategory.rejected]: (state, action) => {
+    [getAttachmentCategory.rejected]: (state) => {
       state.loading = false;
     },
     //GET BILLING ITEM DETAIL
-    [getBillingItemDetail.pending]: (state, action) => {
+    [getBillingItemDetail.pending]: (state) => {
       state.loading = true;
     },
     [getBillingItemDetail.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_BillingItemDetail = action.payload;
     },
-    [getBillingItemDetail.rejected]: (state, action) => {
+    [getBillingItemDetail.rejected]: (state) => {
       state.loading = false;
     },
     //GET ATTACHMENT DETAIL
-    [getAttachmentDetail.pending]: (state, action) => {
+    [getAttachmentDetail.pending]: (state) => {
       state.loading = true;
     },
     [getAttachmentDetail.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_AttachmentDetail = action.payload;
     },
-    [getAttachmentDetail.rejected]: (state, action) => {
+    [getAttachmentDetail.rejected]: (state) => {
       state.loading = false;
     },
     //GET INACTIVE
-    [inactiveBillingItem.pending]: (state, action) => {
+    [inactiveBillingItem.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveBillingItem.fulfilled]: (state, action) => {
+    [inactiveBillingItem.fulfilled]: (state) => {
       state.loading = false;
       state.isSuccess = true;
     },
@@ -649,36 +660,36 @@ const billingItemSlice = createSlice({
       state.loading = false;
     },
     //DOWNLOAD BILLING ITEM
-    [downloadBillingItem.pending]: (state, action) => {
+    [downloadBillingItem.pending]: (state) => {
       state.loading = true;
     },
     [downloadBillingItem.fulfilled]: (state, action) => {
       state.loading = false;
       state.download_BillingItem = action.payload;
     },
-    [downloadBillingItem.rejected]: (state, action) => {
+    [downloadBillingItem.rejected]: (state) => {
       state.loading = false;
     },
     //DOWNLOAD BILLING ITEM
-    [getDetailDraft.pending]: (state, action) => {
+    [getDetailDraft.pending]: (state) => {
       state.loading = true;
     },
     [getDetailDraft.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_detailDraft = action.payload;
     },
-    [getDetailDraft.rejected]: (state, action) => {
+    [getDetailDraft.rejected]: (state) => {
       state.loading = false;
     },
     //CONFIG FILE RBI BILLING ITEM
-    [getConfigFileRBIBillingItem.pending]: (state, action) => {
+    [getConfigFileRBIBillingItem.pending]: (state) => {
       state.loading = true;
     },
     [getConfigFileRBIBillingItem.fulfilled]: (state, action) => {
       state.loading = false;
-      state.getConfigFile= action.payload;
+      state.getConfigFile = action.payload;
     },
-    [getConfigFileRBIBillingItem.rejected]: (state, action) => {
+    [getConfigFileRBIBillingItem.rejected]: (state) => {
       state.loading = false;
     },
   },

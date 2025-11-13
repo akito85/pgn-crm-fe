@@ -1,6 +1,5 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Tooltip } from "antd";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import TablePagination from "../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../assets/Icon/index";
@@ -12,7 +11,6 @@ import ButtonComponent from "../../../../../../components/ButtonComponent";
 import CustomerAddressDetail from "./CustomerAddressDetail";
 import Highlighter from "react-highlight-words";
 import { toTitleCase } from "../../../../../../utils";
-import { sorterFunction } from "../../../../../../utils/sorterFunction";
 // import { getColumnSearchProps } from "../../../../../../utils/getColumnSearchProps";
 
 

@@ -9,7 +9,6 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_m
 import DetailText from "../../../../../../../components/DetailText";
 import RadioTabs from "../../../../../../../components/RadioTabs";
 import ServiceAgreementDetailCompoment from "./ServiceAgreementDetailCompoment";
-import Attachment from "./Attachment";
 import Warranty from "./Warranty";
 import TosSubmission from "./TosSubmission";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";

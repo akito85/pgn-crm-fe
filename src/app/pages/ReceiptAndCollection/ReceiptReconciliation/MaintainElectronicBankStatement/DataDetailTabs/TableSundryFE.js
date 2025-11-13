@@ -5,14 +5,11 @@ import Highlighter from "react-highlight-words";
 import { useDispatch, useSelector } from "react-redux";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import StatusComponent from "../../../../../../components/StatusComponent";
-import TablePagination from "../../../../../../components/TablePagination";
 import { getCustomerInfo } from "../../../../../../redux/slices/receipt_collection/electrionicBank";
 import { dateFormatting } from "../../../../../../utils";
 import {
-  getColumnSearchProps,
   getColumnSearchPropsPaging,
 } from "../../../../../../utils/getColumnSearchProps";
-import { columnForce } from "./columnForce";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 const { Option } = Select;
 

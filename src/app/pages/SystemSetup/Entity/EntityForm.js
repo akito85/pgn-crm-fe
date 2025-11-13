@@ -1,16 +1,14 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
 import {
-  Alert,
   Button,
   Checkbox,
   Form,
   Image,
   Input,
-  InputNumber,
   Spin,
   Tooltip,
   Upload,
@@ -18,17 +16,12 @@ import {
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import {
-  ExclamationCircleOutlined,
-  FilterOutlined,
   LeftOutlined,
-  PlusOutlined,
   UploadOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import SVGIcon from "../../../../assets/Icon/index";
-import TextArea from "antd/lib/input/TextArea";
-import TableInline from "../../../../components/Table/TableInline";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import EntityConfirmationLayout from "./EntityConfirmationLayout";
 import { getBase64 } from "../../../../utils/getBase64";
@@ -37,25 +30,20 @@ import {
   createEntity,
   getDetailEntity,
   getDetailTaxEntity,
-  inactiveTax,
   updateEntity,
 } from "../../../../redux/slices/system_setup/entity";
 import moment from "moment";
 import TaxIdentifierDetail from "./TaxIdentifierDetail";
 import StatusComponent from "../../../../components/StatusComponent";
 import {
-  ModalAttention,
   ModalConfirm,
-  ModalError,
 } from "../../../../components/Modal/ModalPopUp";
-import TableInlineCreateAndUpdate from "../../../../components/Table/TableInlineCreateAndUpdate";
-import { dateFormat, dateFormatting, formMessageRequired, hasValue, toTitleCase } from "../../../../utils";
+import { formMessageRequired, hasValue, toTitleCase } from "../../../../utils";
 import { intToNPWP } from "../../../../utils/npwp";
 import Highlighter from "react-highlight-words";
 import InputComponent from "../../../../components/InputComponent";
-import { useDynamicTableInlineHooks } from "../../../../components/Table/useDynamicTableInlineHooks";
 import TableInlineEntity from "../../../../components/Table/TableInlineEntity";
-import { clearBodyMessage, showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
+import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
 import { getColumnSearchProps } from "../../../../utils/getColumnSearchProps";
 import userHttpService from "../../../../redux/services/userHttpService";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";

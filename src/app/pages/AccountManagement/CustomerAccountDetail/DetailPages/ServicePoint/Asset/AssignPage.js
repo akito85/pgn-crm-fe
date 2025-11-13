@@ -1,9 +1,8 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Fragment } from "react";
 import InputComponent from "../../../../../../../components/InputComponent";
 import { Checkbox, DatePicker, Form, Select } from "antd";
 import { dateFormatting, requiredMessage } from "../../../../../../../utils";
-import DateComponent from "../../../../../../../components/DateComponent";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import SelectComponent from "../../../../../../../components/SelectComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";

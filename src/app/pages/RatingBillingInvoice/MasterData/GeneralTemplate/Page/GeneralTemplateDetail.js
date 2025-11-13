@@ -1,6 +1,5 @@
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import { LeftOutlined } from "@ant-design/icons";
 import {
-  ModalConfirm,
   ModalError,
 } from "../../../../../../components/Modal/ModalPopUp";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
@@ -15,8 +14,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
-import InputComponent from "../../../../../../components/InputComponent";
-import { dateFormatting, requiredMessage } from "../../../../../../utils";
+import { dateFormatting } from "../../../../../../utils";
 import GeneralTemplateDetailForm from "../Form/GeneralTemplateDetailForm";
 import GeneralTempalteAttachment from "../Form/GeneralTemplateAttachment";
 import {

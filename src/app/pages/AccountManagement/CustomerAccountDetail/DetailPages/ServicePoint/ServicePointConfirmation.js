@@ -1,6 +1,5 @@
 import { Fragment } from "react";
-import React, { useEffect, useRef } from "react";
-import moment from "moment";
+import React from "react";
 import DetailText from "../../../../../../components/DetailText";
 
 const ServicePointConfirm = ({ data = {} }) => {

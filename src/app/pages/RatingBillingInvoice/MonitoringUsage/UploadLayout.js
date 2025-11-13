@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import DetailText from '../../../../components/DetailText';
-import BaseContainer from '../../../../components/BaseContainer';
 import { useState } from 'react';
-import { Alert, Form, Modal, Progress, Select, Spin, Tooltip, Typography, message } from 'antd';
+import { Alert, Form, Progress, Select, Spin, Tooltip, Typography } from 'antd';
 import SelectComponent from '../../../../components/SelectComponent';
 import Dragger from 'antd/lib/upload/Dragger';
 import { bytesConverter } from '../../../../utils/bytesConverter';
@@ -11,7 +10,7 @@ import InputComponent from '../../../../components/InputComponent';
 import ButtonComponent from '../../../../components/ButtonComponent';
 import { CloseOutlined, FileOutlined, UndoOutlined, UploadOutlined, WarningOutlined } from '@ant-design/icons';
 import TablePagination from '../../../../components/TablePagination';
-import { addDeletedData, clearUpdated, clearUpdatedDeleted, getFormatUsageType, setClearData, uploadMonitoringUsage } from '../../../../redux/slices/rating_billing_invoice/monitoring_usage';
+import { addDeletedData, getFormatUsageType, uploadMonitoringUsage } from '../../../../redux/slices/rating_billing_invoice/monitoring_usage';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { RBI_ROUTES } from '../../../../routes/rating_billing/rbi_routes';

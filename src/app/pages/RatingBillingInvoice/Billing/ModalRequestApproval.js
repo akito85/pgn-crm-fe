@@ -2,7 +2,6 @@ import React, { useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form, Select, Checkbox } from "antd";
 import { RightOutlined } from "@ant-design/icons";
-import moment from "moment";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";

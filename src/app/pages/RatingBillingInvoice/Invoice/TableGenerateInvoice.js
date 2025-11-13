@@ -1,12 +1,10 @@
 import moment from "moment";
 import {
-  dateFormatting,
   hasValue,
   renderColumn,
   renderDateColumn,
 } from "../../../../utils";
 import {
-  getColumnSearchProps,
   getColumnSearchPropsUseFilteredValueFE,
 } from "../../../../utils/getColumnSearchProps";
 

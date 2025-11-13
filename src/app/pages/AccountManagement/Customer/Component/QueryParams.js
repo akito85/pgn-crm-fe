@@ -1,9 +1,8 @@
-import { Form, Select, Tooltip, message } from "antd";
-import React, { useEffect, useRef, useState } from "react";
+import { Form, Select } from "antd";
+import React from "react";
 import { Fragment } from "react";
 import SelectComponent from "../../../../../components/SelectComponent";
 import InputComponent from "../../../../../components/InputComponent";
-import SVGIcon from "../../../../../assets/Icon/index";
 import { requiredMessage } from "../../../../../utils";
 
 const QueryParams = ({

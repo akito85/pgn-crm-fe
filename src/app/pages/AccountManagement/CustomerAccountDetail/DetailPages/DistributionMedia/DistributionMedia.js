@@ -1,12 +1,12 @@
 import { Fragment } from "react";
 import React, { useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import DistributionMediaTable from "./DistributionMediaTable";
-import { Checkbox, DatePicker, Form, Input, Spin } from "antd";
+import { DatePicker, Form, Input, Spin } from "antd";
 import moment from "moment";
 import BaseContainer from "../../../../../../components/BaseContainer";
-import { FilterOutlined, LeftOutlined, PlusOutlined } from "@ant-design/icons";
+import { FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { dateFormatting, requiredMessage } from "../../../../../../utils";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
@@ -15,7 +15,6 @@ import SVGIcon from "../../../../../../assets/Icon/index";
 import DistributionMediaCreate from "./DistributionMediaCreate";
 import DistributionMediaConfirm from "./DistributionMediaConfirm";
 import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
-import InputComponent from "../../../../../../components/InputComponent";
 import DateComponent from "../../../../../../components/DateComponent";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -25,7 +24,6 @@ import {
   inActiveDistributionMedia,
 } from "../../../../../../redux/slices/account_management/detailAccount/DistributionMedia";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
-import Toolbar from "../../../../../../components/Toolbar";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 import ToolbarAccount from "../../../ComponentAccount/ToolbarAccount";
 import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";
