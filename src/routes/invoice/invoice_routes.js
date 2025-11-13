@@ -15,5 +15,5 @@ export const INVOICE_ROUTES = {
 
   //E-Faktur
     EFAKTUR_VIEW : '/invoice/e-faktur',
-    EFAKTUR_VIEW_DETAIL: '/invoice/e-faktur/detail',
+    EFAKTUR_VIEW_DETAIL: '/invoice/e-faktur/view',
 };
