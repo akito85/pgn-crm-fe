@@ -5,7 +5,6 @@ import { RightOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
 import InputComponent from "../../../../components/InputComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import { columnsRequestBilling } from "./Table/TableRequestBilling";
 import DetailText from "../../../../components/DetailText";
 import {

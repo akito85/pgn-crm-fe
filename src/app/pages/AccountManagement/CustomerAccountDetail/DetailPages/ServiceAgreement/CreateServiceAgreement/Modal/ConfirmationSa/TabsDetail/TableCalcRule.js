@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 
 import TablePagination from '../../../../../../../../../../components/TablePagination'
 import DetailText from '../../../../../../../../../../components/DetailText'
-import { render } from '@testing-library/react';
 import { Tooltip } from 'antd';
 
 

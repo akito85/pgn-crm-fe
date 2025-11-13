@@ -1,15 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Checkbox, Popover, Spin, Tooltip } from "antd";
+import { Checkbox, Spin, Tooltip } from "antd";
 
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import TablePagination from "../../../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
-import StatusComponent from "../../../../../../../../components/StatusComponent";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../../utils/getColumnSearchProps";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { Link, NavLink } from "react-router-dom";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
-import Highlighter from "react-highlight-words";
 import ModalHistory from "../../../../../../../../components/Modal/ModalHistory";
 import ModalInactivateWithHierarchy from "../../../../../../../../components/Modal/ModalInactivateWithHierarchy";
 import {
@@ -26,11 +24,11 @@ import {
   getApprovalHistory,
 } from "../../../../../../../../redux/slices/account_management/detailAccount/tosSubmissionSlice";
 import moment from "moment";
-import { MoreOutlined, WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import { getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import ToolbarAccount from "../../../../../ComponentAccount/ToolbarAccount";
 import { useColumnActionPermissionAccount } from "../../../../../ComponentAccount/ColumnActionPermissionAccount";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../../../../utils";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../../../../utils";
 
 const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
   const saMainStartDate = dataDetailSA?.saInfo?.saMainStartDate

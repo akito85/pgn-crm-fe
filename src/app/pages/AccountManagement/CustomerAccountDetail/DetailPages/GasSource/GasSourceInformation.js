@@ -108,7 +108,7 @@ const GasSourceInformation = () => {
         startDate: moment(value.startDate).format(dateFormatting.date),
         remark: value.remark,
         needValidation: flag === 0 ? true : false,
-      };;
+      };
       setBodyData(bodyRequest);
       url = "/v1/dbs/api/gas-source/validate-assign";
       await dispatch(validateCreateUpdate({ body: bodyRequest, services: accountManagementService, endPoint: url, type: "create" }))?.unwrap();

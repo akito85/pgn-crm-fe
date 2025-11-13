@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import TableContact from "../../Table/Contact/TableContact";
 import ModalCustom from "../ModalCustom";
-import { Checkbox, Form, Select } from "antd";
+import { Checkbox, Form } from "antd";
 import ButtonComponent from "../../ButtonComponent";
 import ModalChooseContact from "./ModalChooseContact";
 import { sorterFunction } from "../../../utils/sorterFunction";

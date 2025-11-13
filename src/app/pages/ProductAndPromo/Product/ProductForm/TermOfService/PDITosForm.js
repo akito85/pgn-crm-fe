@@ -14,10 +14,8 @@ import TableDetailTos from "./TableDetailTos";
 // import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 
 import SVGIcon from "../../../../../../assets/Icon/index";
-import Highlighter from "react-highlight-words";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import { hasValue, renderColumn, requiredMessage } from "../../../../../../utils";
-import { getColumnSearchPropsCriteria } from "../../columnTableCriteria";
 import SectionInfoProductDetail from "../../ProductDetail/SectionPricing/SectionInfoProductDetail";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";

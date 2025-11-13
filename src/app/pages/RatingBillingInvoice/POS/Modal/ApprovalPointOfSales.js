@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form } from "antd";
-import moment from "moment";
 import { RightOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";

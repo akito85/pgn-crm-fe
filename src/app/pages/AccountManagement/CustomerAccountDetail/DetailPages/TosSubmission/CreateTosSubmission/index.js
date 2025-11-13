@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Form, Steps, message, Button, Spin } from "antd";
+import { Form, Steps, Button, Spin } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   LeftCircleOutlined,
@@ -10,7 +10,6 @@ import {
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import BaseContainer from "../../../../../../../components/BaseContainer";
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
-import BreadCrumb from "../../../../../../../components/BreadCrumb";
 import HeaderDetail from "../../../HeaderDetail";
 import TosInformation from "./TosInformation";
 import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";

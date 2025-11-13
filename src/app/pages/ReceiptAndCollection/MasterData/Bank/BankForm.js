@@ -1,11 +1,8 @@
 import {
-  FilterOutlined,
   LeftOutlined,
-  SyncOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import { Alert, DatePicker, Form, Input, Spin, Tooltip } from "antd";
-import moment from "moment";
+import { Alert, Form, Spin } from "antd";
 import React, { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { useDispatch, useSelector } from "react-redux";
@@ -37,10 +34,6 @@ import {
   getZoneContact,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
-import { dateFormatting } from "../../../../../utils";
-import ApprovalSectionForm from "../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
-import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
-import ContentModalConfirmPayment from "../../ReceiptReconciliation/ContentModalConfirmPayment";
 import BankCreate from "./BankCreate";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ContentModalConfirmBank from "./ContentModalConfirmBank";
@@ -54,7 +47,6 @@ import {
 import { bytesConverter } from "../../../../../utils/bytesConverter";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import { configApp } from "../../../../../constants/configApp";
-import AttachmentSectionComponent from "../../../RatingBillingInvoice/MasterData/BillingItem/Form/tab/AttachmentSectionComponent";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { intToNPWP } from "../../../../../utils/npwp";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";

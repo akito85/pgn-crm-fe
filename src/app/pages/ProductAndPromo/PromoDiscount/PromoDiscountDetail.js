@@ -21,7 +21,6 @@ import {
   approvePromo,
   getDetailPromo,
   getDetailPromoDraft,
-  getPromoAttachment,
   inactiveApprovePromo,
 } from "../../../../redux/slices/product_promo/promoSlice";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";

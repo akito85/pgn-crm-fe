@@ -1,7 +1,7 @@
 import React, { Fragment, useCallback, useEffect } from "react";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import SelectComponent from "../../../../../../components/SelectComponent";
-import { DatePicker, Form, Input, Select } from "antd";
+import { Form, Input, Select } from "antd";
 import InputComponent from "../../../../../../components/InputComponent";
 import { hasValue, requiredMessage } from "../../../../../../utils";
 import DateComponent from "../../../../../../components/DateComponent";

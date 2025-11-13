@@ -1,7 +1,6 @@
 import {
   Checkbox,
   Form,
-  Input,
   Spin,
   Tooltip,
 } from "antd";
@@ -13,11 +12,8 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../components/TablePagination";
 import {
   DownloadOutlined,
-  FilterOutlined,
 } from "@ant-design/icons";
-import Highlighter from "react-highlight-words";
 import {
-  disabledActionByStatus,
   renderColumn,
   renderDateColumn,
 } from "../../../../../utils";

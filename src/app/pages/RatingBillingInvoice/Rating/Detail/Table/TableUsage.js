@@ -1,8 +1,5 @@
-import Highlighter from "react-highlight-words";
-import moment from "moment";
-import { Tooltip } from "antd";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
 export const columnsUsage = (
   search,

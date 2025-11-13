@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import Highlighter from "react-highlight-words";
 import { Tooltip } from "antd";
 import { getColumnSearchProps } from "../../../../../../utils/getColumnSearchProps";
-import TablePagination from "../../../../../../components/TablePagination";
 import { useSelector } from "react-redux";
 import ModalFormEligibilityProduct from "./ModalFormEligibilityProduct";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";

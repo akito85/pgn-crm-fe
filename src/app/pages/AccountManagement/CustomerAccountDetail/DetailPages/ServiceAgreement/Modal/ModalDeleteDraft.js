@@ -1,7 +1,6 @@
 import React from 'react'
 import { WarningOutlined } from '@ant-design/icons'
 import { ModalConfirm } from '../../../../../../../components/Modal/ModalPopUp'
-import { Alert } from 'antd'
 
 const ModalDeleteDraft = ({
   modalDeleteDraft,

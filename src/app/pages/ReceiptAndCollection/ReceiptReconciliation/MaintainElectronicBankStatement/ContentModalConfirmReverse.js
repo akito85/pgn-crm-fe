@@ -1,10 +1,8 @@
 import { Fragment, useState } from "react";
 import DetailText from "../../../../../components/DetailText";
 import RadioTabs from "../../../../../components/RadioTabs";
-import TablePagination from "../../../../../components/TablePagination";
 import ApprovalSectionForm from "../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
-import TableForceFE from "./DataDetailTabs/TableForceFE";
 import TableReverseFE from "./DataDetailTabs/TableReverseFE";
 
 const ContentModalConfirmReverse = ({

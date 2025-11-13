@@ -1,11 +1,9 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { Button, Form, Input, InputNumber, Select, Tooltip, Pagination, Table } from "antd";
+import { Button, Form, Input, Select } from "antd";
 import SelectComponent from "../../../../../../../../components/SelectComponent";
 import InputComponent from "../../../../../../../../components/InputComponent";
-import ModalCustom from "../../../../../../../../components/Modal/ModalCustom";
-import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import { hasValue } from "../../../../../../../../utils";
 
 import RadioTabs from "../../../../../../../../components/RadioTabs";
@@ -18,7 +16,7 @@ import TableProduct from "./TableProductDetail";
 import TableTos from "./TableTos";
 import ModalForm from "./TableTos/ModalForm";
 import ModalChooseTos from "./TableTos/ModalChooseTos";
-import { getDetailProductSa, getListPriceRuleById, getListLateCharge, getListProduct, getPriceCode, getPriceRule, resetDataDetail } from "../../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
+import { getListPriceRuleById, getListLateCharge, getListProduct, getPriceCode, getPriceRule, resetDataDetail } from "../../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 import ModalChooseProduct from "./ModalChoose";
 
 const SaDetail = ({

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import RadioTabs from "../../../../components/RadioTabs";
 import AccountList from "./DetailPages/Account/AccountList";
 import CustomerAddressList from "./DetailPages/Address/CustomerAddressList";

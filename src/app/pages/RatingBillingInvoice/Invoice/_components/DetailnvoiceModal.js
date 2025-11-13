@@ -11,7 +11,7 @@ import {
   Tag,
   message,
 } from "antd";
-import { FileTextOutlined, ReloadOutlined } from "@ant-design/icons";
+import { FileTextOutlined } from "@ant-design/icons";
 import LogDetailModal from "./ManagementDeliveryComponent/LogDetailModal";
 
 // Status Tag Component

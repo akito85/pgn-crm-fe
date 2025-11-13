@@ -1,11 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Spin, Input, Form, Checkbox, Tooltip, DatePicker } from "antd";
+import { Spin, Form, Checkbox, Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
-import moment from "moment";
 import { Link, NavLink, useLocation } from "react-router-dom";
 
-import { dateFormatting } from "../../../../../../utils";
 import StatusComponent from "../../../../../../components/StatusComponent";
 import { useState } from "react";
 import TablePagination from "../../../../../../components/TablePagination";
@@ -13,18 +11,16 @@ import SVGIcon from "../../../../../../assets/Icon/index";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ModalDetailAccountAddress from "./ModalDetailAccountAddress";
-import ModalActivateAddress from "./ModalActivateAddress";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import {
   getListDetailAccountAddress,
   activationAccountAddress,
   getDetailAddress,
 } from "../../../../../../redux/slices/account_management/detailAccount/accountAddressSlice";
-import { FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 import { useColumnActionPermissionAccount } from "../../../ComponentAccount/ColumnActionPermissionAccount";
-import Toolbar from "../../../../../../components/Toolbar";
 import ToolbarAccount from "../../../ComponentAccount/ToolbarAccount";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 

@@ -1,13 +1,9 @@
-import Highlighter from "react-highlight-words";
-import moment from "moment";
 import {
-  dateFormatting,
   hasValue,
   renderColumn,
   renderDateColumn,
 } from "../../../../../../utils";
 import {
-  getColumnSearchPropsPaging,
   getColumnSearchPropsUseFilteredValue,
 } from "../../../../../../utils/getColumnSearchProps";
 

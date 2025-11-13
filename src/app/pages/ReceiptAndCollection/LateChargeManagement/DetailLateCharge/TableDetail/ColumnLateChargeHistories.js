@@ -1,5 +1,3 @@
-import { Tooltip } from "antd";
-import Highlighter from "react-highlight-words";
 import {
     getColumnSearchPropsPaging,
   } from "../../../../../../utils/getColumnSearchProps";

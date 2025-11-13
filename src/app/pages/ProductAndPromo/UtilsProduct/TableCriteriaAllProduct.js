@@ -1,9 +1,5 @@
-import { FilterOutlined } from "@ant-design/icons";
-import { Input, DatePicker, Tooltip } from "antd";
-import Highlighter from "react-highlight-words";
 import moment from "moment";
 import {
-  dateFormatting,
   hasValue,
   renderColumn,
   renderDateColumn,

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Spin } from "antd";
 import { Fragment } from "react";
 import TaxIdentifier from "./TaxIdentifierHeader/TaxIdentifier";

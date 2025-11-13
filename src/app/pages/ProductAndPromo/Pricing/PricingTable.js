@@ -10,7 +10,7 @@ import {
   inactivePricing,
 } from "../../../../redux/slices/product_promo/pricing";
 import { useRef } from "react";
-import { Checkbox, Input, Popover, Tooltip } from "antd";
+import { Checkbox, Tooltip } from "antd";
 import { Link } from "react-router-dom";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -18,7 +18,7 @@ import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import ModalInactivateWithHierarchy from "../../../../components/Modal/ModalInactivateWithHierarchy";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 import { hasValue, renderColumn } from "../../../../utils";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";

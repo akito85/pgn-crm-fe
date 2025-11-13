@@ -1,9 +1,7 @@
 import Highlighter from "react-highlight-words";
-import { Popover, Space, Tooltip } from "antd";
 import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import {
-  getColumnSearchPropsPaging,
   getColumnSearchPropsUseFilteredValue,
 } from "../../../../../utils/getColumnSearchProps";
 

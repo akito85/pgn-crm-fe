@@ -1,10 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Table } from "antd";
+import { Steps, Form } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../utils/Icon";
-import { useMonitoringList } from "./useMonirotingList";
 import {
   approveRejectData,
   getListApproval,

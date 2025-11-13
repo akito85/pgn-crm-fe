@@ -11,7 +11,6 @@ import RadioTabs from "../../../../components/RadioTabs";
 import ApprovalSectionForm from "../Pricing/Form/ApprovalSectionForm";
 import AttachmentSectionForm from "../Pricing/Form/AttachmentSectionForm";
 import PricingAdjustSectionForm from "./PricingAdjustSectionForm";
-import PricingAdjustTableDetail from "./PricingAdjustTableDetail";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { LeftOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -51,7 +50,6 @@ import {
 } from "../../../../redux/slices/product_promo/pricing";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import ModalBack from "../../../../components/Modal/ModalBack";
-import { columnsTableCriteria } from "./columnTableCriteriaPriceAdjust";
 import moment from "moment";
 import { bytesConverter } from "../../../../utils/bytesConverter";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";

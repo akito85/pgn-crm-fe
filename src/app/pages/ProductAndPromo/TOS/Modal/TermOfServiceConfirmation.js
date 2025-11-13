@@ -1,9 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import DetailText from "../../../../../components/DetailText";
-import { useDispatch } from "react-redux";
-import FunctionalTableCriteriaTOS from "../Utils/FunctionalTableCriteriaTOS";
 import { columnsTableCriteriaAll } from "../../UtilsProduct/TableCriteriaAllProduct";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";
 

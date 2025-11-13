@@ -22,7 +22,7 @@ import {
   getListAppHierDetail,
 } from "../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 import Highlighter from "react-highlight-words";
-import { FilterOutlined, MoreOutlined } from "@ant-design/icons";
+import { FilterOutlined } from "@ant-design/icons";
 import moment from "moment";
 import BaseContainer from "../../../../components/BaseContainer";
 import {

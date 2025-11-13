@@ -1,15 +1,13 @@
 /* eslint-disable default-case */
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../components/BaseContainer";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import DetailReceipt from "./DetailReceipt";
-import DetailApproval from "./DetailApproval";
 import {
   approveOrRejectReceipt,
   createAllocation,
-  getAllocation,
   getReceiptDetail,
 } from "../../../../redux/slices/receipt_collection/receipt";
 import RadioTabs from "../../../../components/RadioTabs";
@@ -17,10 +15,8 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { LeftOutlined, SyncOutlined } from "@ant-design/icons";
-import { Form, Radio } from "antd";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
-import InputComponent from "../../../../components/InputComponent";
-import { hasValue, requiredMessage } from "../../../../utils";
+import { hasValue } from "../../../../utils";
 import { configApp } from "../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../redux/services/receiptCollectionHttpService";
 import moment from "moment";

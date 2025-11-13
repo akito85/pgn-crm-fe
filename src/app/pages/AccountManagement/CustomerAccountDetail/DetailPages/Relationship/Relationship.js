@@ -1,10 +1,8 @@
 import { Fragment } from "react";
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import BaseContainer from "../../../../../../components/BaseContainer";
-import { Checkbox } from "antd";
-import moment from "moment";
 import RelationshipTable from "./RelationshipTable";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import ButtonComponent from "../../../../../../components/ButtonComponent";

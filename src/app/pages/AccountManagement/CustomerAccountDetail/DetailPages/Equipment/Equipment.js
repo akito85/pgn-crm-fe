@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import BaseContainer from "../../../../../../components/BaseContainer";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import DetailEquipment from "./DetailEquipment";
@@ -13,15 +13,7 @@ import EquipmentForm from "./Form/EquipmentForm";
 import {
   getDetailEquipment,
   getListEqupment,
-  getDdlBrandEquipment,
-  getDdlCapacityEquipment,
-  getDdlEnergyEquipment,
-  getDdlGasConversionEquipment,
-  getDdlNameEquipment,
-  getDdlQtyEquipment,
-  getDdlTypeEquipment,
   createEqupment,
-  getDdlFuelTypeEquipment,
   deleteEquipment,
 } from "../../../../../../redux/slices/account_management/detailAccount/equpmentSlice";
 import { ModalConfirm } from "../../../../../../components/Modal/ModalPopUp";

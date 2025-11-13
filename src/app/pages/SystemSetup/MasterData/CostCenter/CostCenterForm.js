@@ -15,8 +15,6 @@ import {
   getCostCenterDetail,
   getType,
   updateCostCenter,
-  validateCreateCostCenter,
-  validateUpdateCostCenter,
 } from "../../../../../redux/slices/system_setup/master_data/master_cost_center";
 import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";

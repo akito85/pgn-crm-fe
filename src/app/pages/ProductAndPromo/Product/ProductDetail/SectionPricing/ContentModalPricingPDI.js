@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import SectionInfoProductDetail from "./SectionInfoProductDetail";
-import TablePriceAdjust from "./TablePriceAdjust";
-import TablePriceAdjustDetail from "./TablePriceAdjustDetail";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import { Select } from "antd";
 import PricingDetailAdjustmentTable from "../../../Pricing/Detail/PricingDetailAdjustmentTable";
@@ -10,7 +8,6 @@ import { getPricingAdjustment } from "../../../../../../redux/slices/product_pro
 import PricingAdjustTableDetail from "../../../PricingAdjustment/PricingAdjustTableDetail";
 import { columnsTableCriteria } from "../../../PricingAdjustment/columnTableCriteriaPriceAdjust";
 import moment from "moment";
-import { current } from "@reduxjs/toolkit";
 import DetailText from "../../../../../../components/DetailText";
 import CardComponent from "../../../../../../components/Card/CardComponent";
 import { dateFormatting } from "../../../../../../utils";

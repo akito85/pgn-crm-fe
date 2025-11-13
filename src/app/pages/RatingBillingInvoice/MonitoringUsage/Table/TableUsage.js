@@ -1,9 +1,6 @@
 import moment from "moment";
-import Highlighter from "react-highlight-words";
-import { Tooltip } from "antd";
-import { dateFormatting, hasValue, renderColumn, toTitleCase } from "../../../../../utils";
-import { getColumnSearchProps, getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../../components/StatusComponent";
+import { dateFormatting, hasValue, renderColumn } from "../../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 
 export const tableUsage = (
   search,

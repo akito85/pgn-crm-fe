@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment } from "react";
 import React from "react";
 import DetailText from "../../../../../../components/DetailText";
 import { handleDate, renderDateTime } from "../Utils/Utils";

@@ -17,7 +17,6 @@ import {
 import PricingRule from "./Form/PricingRule";
 import moment, { isMoment } from "moment";
 import Approval from "./Form/Approval";
-import Attachment from "./Form/Attachment";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { WarningOutlined, LeftOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -27,7 +26,6 @@ import {
 } from "../../../../components/Modal/ModalPopUp";
 import ConfirmationLayout from "./Modal/ConfirmationLayout";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
-import { columnsTableCriteria } from "./Table/TableCriteria";
 import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
 import AttachmentSectionForm from "../Pricing/Form/AttachmentSectionForm";
 import BaseContainer from "../../../../components/BaseContainer";

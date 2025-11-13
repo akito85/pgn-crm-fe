@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Form, Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import RadioTabs from "../../../../components/RadioTabs";
@@ -28,7 +28,6 @@ import {
   getListCriteriaPromo,
   getListPromoCategory,
   getListPromoType,
-  getPromoAttachment,
   getSelectedApprovalPromo,
   updatePromo,
 } from "../../../../redux/slices/product_promo/promoSlice";
@@ -46,7 +45,6 @@ import productPromoHttpService from "../../../../redux/services/productPromoHttp
 import {
   handleDisabledEachColumnCriteria,
   handleMappingCriteriaGeneral,
-  handleCheckCriteriaMissingValidation,
 } from "../UtilsProduct/UtilsAllProduct";
 
 const PromoDiscountCreateAndUpdate = ({ type }) => {

@@ -1,9 +1,8 @@
 import React from "react";
 import BaseContainer from "../../../../components/BaseContainer";
 import DetailText from "../../../../components/DetailText";
-import PricingAdjustTableDetail from "./PricingAdjustTableDetail";
 import PricingLogInformationDetail from "../Pricing/Detail/PricingLogInformationDetail";
-import { listSectionInfoProductDetail, lowerCaseStatus } from "../Product/utils";
+import { lowerCaseStatus } from "../Product/utils";
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
 import FunctionalCriteriaProduct from "../UtilsProduct/FunctionalCriteriaProduct";
 

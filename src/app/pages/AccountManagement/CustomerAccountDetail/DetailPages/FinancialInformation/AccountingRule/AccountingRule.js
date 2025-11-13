@@ -1,18 +1,7 @@
-import React, { useEffect, useRef } from "react";
-import {
-  DownloadOutlined,
-  PlusOutlined,
-  UnorderedListOutlined,
-  EditOutlined,
-  WarningOutlined,
-  MoreOutlined,
-  ExclamationCircleOutlined,
-  CheckSquareOutlined,
-  CheckSquareFilled,
-} from "@ant-design/icons";
-import { Collapse, Form, Space, Spin, Switch } from "antd";
-import { Link, NavLink, Route, Routes, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import React, { useEffect } from "react";
+
+
+import { Form, Spin } from "antd";
 import { Fragment } from "react";
 import { requiredMessage } from "../../../../../../../utils";
 import InputComponent from "../../../../../../../components/InputComponent";

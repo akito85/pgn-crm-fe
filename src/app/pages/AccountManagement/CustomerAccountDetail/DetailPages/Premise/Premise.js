@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import React, { useEffect, useRef } from "react";
 import { useState } from "react";
 import BaseContainer from "../../../../../../components/BaseContainer";
-import { Checkbox, DatePicker, Form, Input, Spin } from "antd";
+import { DatePicker, Form, Input, Spin } from "antd";
 import moment from "moment";
 import PremiseTable from "./PremiseTable";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
@@ -11,9 +11,7 @@ import ServicePointCreateAndUpdate from "../ServicePoint/ServicePointCreateAndUp
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ServicePointConfirm from "../ServicePoint/ServicePointConfirmation";
-import InputComponent from "../../../../../../components/InputComponent";
 import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
-import { requiredMessage } from "../../../../../../utils";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createServicePoint,
@@ -27,7 +25,6 @@ import Highlighter from "react-highlight-words";
 import { dateFormatting } from "../../../../../../utils";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../../utils/Icon";
-import Toolbar from "../../../../../../components/Toolbar";
 import { getGrantedAccessAccount, getGrantedAccessAccountExtend } from "../../../../../../redux/slices/account_management/accountManagement";
 import ToolbarAccount from "../../../ComponentAccount/ToolbarAccount";
 import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";

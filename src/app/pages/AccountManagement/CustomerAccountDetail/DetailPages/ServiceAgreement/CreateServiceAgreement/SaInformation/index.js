@@ -1,11 +1,10 @@
 import React, {useState, useEffect} from 'react'
-import BaseContainer from '../../../../../../../../components/BaseContainer'
 import { Checkbox, Form, Select } from 'antd'
 import SelectComponent from '../../../../../../../../components/SelectComponent'
 import DateComponent from '../../../../../../../../components/DateComponent'
 import InputComponent from '../../../../../../../../components/InputComponent'
 import moment from "moment";
-import { dateFormatting, hasValue } from '../../../../../../../../utils'
+import { hasValue } from '../../../../../../../../utils'
 import { getTaxImplication } from '../../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice'
 
 const SaInformation = ({
