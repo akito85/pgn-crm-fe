@@ -1,12 +1,6 @@
 import receiptCollectionHttpService from "../../services/receiptCollectionHttpService";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import thunk from "redux-thunk";
-import {
-  setBodyError,
-  showModalError,
-  showModalSuccess,
-  validateError,
-} from "../general_slice";
+import { setBodyError, showModalError, validateError } from "../general_slice";
 
 const initialState = {
   loading: false,
@@ -105,14 +99,14 @@ const lateCharge = createSlice({
     },
 
     // get detail
-    [getDetailLateChargePayment.pending]: (state, action) => {
+    [getDetailLateChargePayment.pending]: (state) => {
       state.loading = true;
     },
     [getDetailLateChargePayment.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getDetailLateChargePayment.rejected]: (state, action) => {
+    [getDetailLateChargePayment.rejected]: (state) => {
       state.loading = true;
     },
 

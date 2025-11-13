@@ -18,7 +18,6 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalConfirm, ModalError } from "../../../../../components/Modal/ModalPopUp";
 import moment from "moment";
 import ConfirmationLayout from "./Modal/ConfirmationLayout";
-import DynamicTableInline from "../../../../../components/Table/DynamicTableInline";
 import {
   createGasSource,
   getCostCenter,

@@ -1,4 +1,4 @@
-import { FilterOutlined, ReloadOutlined } from "@ant-design/icons";
+import { FilterOutlined } from "@ant-design/icons";
 import { Button, Card, Col, DatePicker, Row, Select, Space } from "antd";
 
 const { RangePicker } = DatePicker;

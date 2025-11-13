@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Spin, DatePicker, Input, Tooltip } from "antd";
+import { DatePicker, Input, Tooltip } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
 import moment from "moment";
 import Highlighter from "react-highlight-words";

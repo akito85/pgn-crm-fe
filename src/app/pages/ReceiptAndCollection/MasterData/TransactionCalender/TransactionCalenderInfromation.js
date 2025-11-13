@@ -6,36 +6,27 @@ import BaseContainer from "../../../../../components/BaseContainer";
 import DateComponent from "../../../../../components/DateComponent";
 import InputComponent from "../../../../../components/InputComponent";
 import SelectComponent from "../../../../../components/SelectComponent";
-import { getCriteriaInform } from "../../../../../redux/slices/receipt_collection/transactionCalender";
 import {
   convertToSnakeCase,
-  dateFormatting,
   formMessageRequired,
   hasValue,
   requiredMessage,
   toTitleCase,
 } from "../../../../../utils";
-import FunctionalTableCriteriaPayment from "../Bank/Table/FunctionalTableCriteriaPayment";
 import FunctionalCriteria from "../../../../../components/Criteria/FunctionalCriteria";
 import { useCriteriaHooks } from "../../../../../components/Criteria/useCriteriaHooks";
 import {
   getAccount,
   getAccountCategory,
   getAccountGroupType,
-  getAccountNumber,
-  getAccountSegment,
-  getAccountType,
   getBudget,
   getCity,
-  getClassificationType,
   getCostCenter,
-  getCountry,
   getCustomerSegment,
   getDistrict,
   getGsize,
   getIndustrialSector,
   getProvince,
-  getSAType,
   getServiceType,
   getSor,
   getSubDistrict,

@@ -1,6 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import ratingBillingHttpService from "../../../services/ratingBillingHttpService";
-import { showModalError, showModalSuccess, validateError } from "../../general_slice";
+import {
+  showModalError,
+  showModalSuccess,
+  validateError,
+} from "../../general_slice";
 
 const initialState = {
   data_list: [],
@@ -148,7 +152,13 @@ export const getDowloadRateType = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_RATE_TYPES", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_RATE_TYPES",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -159,7 +169,7 @@ const rateTypeSlice = createSlice({
   initialState,
   extraReducers: {
     // Get All Rate Type Pagination
-    [getRateTypePaginate.pending]: (state, action) => {
+    [getRateTypePaginate.pending]: (state) => {
       state.loading = true;
     },
     [getRateTypePaginate.fulfilled]: (state, action) => {
@@ -172,21 +182,21 @@ const rateTypeSlice = createSlice({
     },
 
     // create Rate Type
-    [createRateType.fulfilled]: (state, action) => {
+    [createRateType.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [createRateType.rejected]: (state, action) => {
+    [createRateType.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
 
     // update Rate Type
-    [updateRateType.fulfilled]: (state, action) => {
+    [updateRateType.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [updateRateType.rejected]: (state, action) => {
+    [updateRateType.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
@@ -202,11 +212,11 @@ const rateTypeSlice = createSlice({
     },
 
     // inactive position
-    [inactiveMasterRateType.fulfilled]: (state, action) => {
+    [inactiveMasterRateType.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [inactiveMasterRateType.rejected]: (state, action) => {
+    [inactiveMasterRateType.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },

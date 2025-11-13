@@ -1,8 +1,5 @@
 import { Tooltip } from "antd";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
-import moment from "moment";
-import { Link } from "react-router-dom";
-import Highlighter from "react-highlight-words";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
 

@@ -1,9 +1,6 @@
 import React, { Fragment, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import ApprovalSectionForm from "../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
-import { getFormula } from "./util";
-import TableTaxImplicationRuleFormula from "./TableTaxImplicationRuleFormula";
-import TableTaxImplicationRuleCondition from "./TableTaxImplicationRuleCondition";
 import DetailText from "../../../../../../components/DetailText";
 import AttachmentSectionForm from "../../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 import RadioTabs from "../../../../../../components/RadioTabs";

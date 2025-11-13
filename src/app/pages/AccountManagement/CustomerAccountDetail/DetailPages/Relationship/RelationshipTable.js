@@ -1,20 +1,10 @@
-import React, { useEffect, useRef } from "react";
-import { Spin, Input, Form, Alert, Popover, Checkbox, Tooltip } from "antd";
+import React, { useRef } from "react";
+import { Input, Checkbox, Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
 import {
-  DownloadOutlined,
-  PlusOutlined,
-  UnorderedListOutlined,
-  EditOutlined,
-  WarningOutlined,
-  MoreOutlined,
-  ExclamationCircleOutlined,
-  CheckSquareOutlined,
-  CheckSquareFilled,
   LeftOutlined,
-  CloseCircleOutlined,
 } from "@ant-design/icons";
-import { Link, NavLink, Route, Routes, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import TablePagination from "../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../assets/Icon/index";
@@ -24,7 +14,6 @@ import moment from "moment";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import StatusComponent from "../../../../../../components/StatusComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
-import { setData } from "../../../../../../redux/slices/data_slice";
 import RelationshipDetail from "./RelationshipDetail";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 const data = [

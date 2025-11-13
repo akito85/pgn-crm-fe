@@ -1,9 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import ratingBillingHttpService from "../../services/ratingBillingHttpService";
-import {
-  showModalError,
-  setBodyError,
-} from "../general_slice";
+import { showModalError, setBodyError } from "../general_slice";
 
 const initialState = {
   list_logging: [],
@@ -26,49 +23,59 @@ const buildSearchParams = (searchObject) => {
   if (!searchObject || Object.keys(searchObject).length === 0) {
     return "";
   }
-  
+
   // Ambil value pertama yang ada untuk global search
   const searchValues = Object.entries(searchObject)
-    .filter(([_, value]) => value !== undefined && value !== null && value !== "")
+    .filter(
+      ([_, value]) => value !== undefined && value !== null && value !== ""
+    )
     .map(([_, value]) => value);
-  
+
   // Return value pertama untuk global search
   return searchValues.length > 0 ? searchValues[0] : "";
 };
 
 export const getGlobalLogging = createAsyncThunk(
   "logging/getGlobalLogging",
-  async ({ page = 0, pageSize = 10, search = {}, sort = "createdDtm~desc" } = {}, thunkAPI) => {
+  async (
+    { page = 0, pageSize = 10, search = {}, sort = "createdDtm~desc" } = {},
+    thunkAPI
+  ) => {
     try {
       const searchParam = buildSearchParams(search);
       const sortParams = sort || "createdDtm~desc";
-      
+
       // Build URL dengan URLSearchParams
       const params = new URLSearchParams({
         page: page.toString(),
         size: pageSize.toString(),
         sort: sortParams,
       });
-      
+
       // Tambahkan search param jika ada (tanpa key, hanya value)
       if (searchParam) {
-        params.append('search', searchParam);
+        params.append("search", searchParam);
       }
-      
+
       const url = `/v1/dbs/api/log/view-activity?${params.toString()}`;
-      
-      const ngrokBaseUrl = process.env.REACT_APP_NGROK_BASE_URL || "https://f2709fa4b0d6.ngrok-free.app";
-      
-      const response = await ratingBillingHttpService.getPagination(url, ngrokBaseUrl);
-      
+
+      const ngrokBaseUrl =
+        process.env.REACT_APP_NGROK_BASE_URL ||
+        "https://f2709fa4b0d6.ngrok-free.app";
+
+      const response = await ratingBillingHttpService.getPagination(
+        url,
+        ngrokBaseUrl
+      );
+
       return {
         data: response.data,
-        requestParams: { page, pageSize, search, sort }
+        requestParams: { page, pageSize, search, sort },
       };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
-      
+
       if (
         error?.response?.data?.code === 500 ||
         error?.response?.data?.code === 419
@@ -81,7 +88,7 @@ export const getGlobalLogging = createAsyncThunk(
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
-      
+
       return thunkAPI.rejectWithValue({
         message,
         code: error?.response?.data?.code,
@@ -94,7 +101,7 @@ const loggingSlice = createSlice({
   name: "logging",
   initialState,
   reducers: {
-    resetLogging: (state) => {
+    resetLogging: () => {
       return initialState;
     },
     setFilters: (state, action) => {
@@ -114,10 +121,15 @@ const loggingSlice = createSlice({
       })
       .addCase(getGlobalLogging.fulfilled, (state, action) => {
         state.loading_logging = false;
-        
+
         const { data, requestParams } = action.payload;
-        const { content = [], pageable = {}, totalPages = 0, totalElements = 0 } = data || {};
-        
+        const {
+          content = [],
+          pageable = {},
+          totalPages = 0,
+          totalElements = 0,
+        } = data || {};
+
         state.list_logging = content;
         state.pagination = {
           page: pageable.pageNumber ?? requestParams.page ?? 0,
@@ -125,13 +137,13 @@ const loggingSlice = createSlice({
           totalPages,
           totalElements,
         };
-        
+
         state.filters = {
           search: requestParams.search || {},
           sort: requestParams.sort || "createdDtm~desc",
         };
       })
-      .addCase(getGlobalLogging.rejected, (state, action) => {
+      .addCase(getGlobalLogging.rejected, (state) => {
         state.loading_logging = false;
         state.list_logging = [];
       });

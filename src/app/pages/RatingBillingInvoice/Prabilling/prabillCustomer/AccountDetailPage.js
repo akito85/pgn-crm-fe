@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Tabs, Spin, Card, Statistic, Row, Col, Tag, Button } from "antd";
+import { Tabs, Spin, Tag, Button } from "antd";
 import {
   FileTextOutlined,
   ThunderboltOutlined,
   PercentageOutlined,
-  DashboardOutlined,
   DollarOutlined,
   LeftOutlined,
   InfoCircleOutlined,

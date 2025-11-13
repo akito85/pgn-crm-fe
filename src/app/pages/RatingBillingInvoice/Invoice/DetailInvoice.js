@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Tooltip } from "antd";
-import { DownloadOutlined, EyeOutlined } from "@ant-design/icons";
+import { DownloadOutlined } from "@ant-design/icons";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import BaseContainer from "../../../../components/CardContainer";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";

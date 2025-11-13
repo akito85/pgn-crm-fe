@@ -1,5 +1,4 @@
 import { LeftOutlined } from "@ant-design/icons";
-import { Form } from "antd";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,7 +7,6 @@ import AttachmentComponent from "../../../../../../components/Attachment/Attachm
 import BaseContainer from "../../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import InputComponent from "../../../../../../components/InputComponent";
 import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 import RadioTabs from "../../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";

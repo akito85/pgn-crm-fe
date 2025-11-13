@@ -39,7 +39,6 @@ import { useColumnActionPermission } from "../../../../components/ColumnActionPe
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import { getColumnSearchProps } from "../../../../utils/getColumnSearchProps";
 import { sorterFunction } from "../../../../utils/sorterFunction";
-import { updatePagination } from "../../../../utils/updatePagination";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 

@@ -25,7 +25,6 @@ const initialState = {
   //criteria
   data_select_criteria: [],
   dataListCurrency: [],
-  dataListCategory: [],
   data_province: [],
   data_city: [],
   data_cost_center: [],
@@ -327,7 +326,9 @@ export const downloadTOPS = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_TOPS", back: false }))
+      thunkAPI.dispatch(
+        validateError({ error: response, action: "DOWNLOAD_TOPS", back: false })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -342,7 +343,7 @@ export const inactiveTOP = createAsyncThunk(
         url,
         body
       );
-      const message = response.message;
+
       const successMessage = {
         title: "Successfull",
         description: "Your data has been submitted.",
@@ -695,7 +696,7 @@ const termsofPaymentSlice = createSlice({
   initialState,
   extraReducers: {
     // Get All Rate Type Pagination
-    [getTopPaginate.pending]: (state, action) => {
+    [getTopPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getTopPaginate.fulfilled]: (state, action) => {
@@ -708,13 +709,13 @@ const termsofPaymentSlice = createSlice({
     },
 
     /* Download Invoice Template */
-    [downloadTOPS.pending]: (state, action) => {
+    [downloadTOPS.pending]: (state) => {
       state.loading = true;
     },
-    [downloadTOPS.fulfilled]: (state, action) => {
+    [downloadTOPS.fulfilled]: (state) => {
       state.loading = false;
     },
-    [downloadTOPS.rejected]: (state, action) => {
+    [downloadTOPS.rejected]: (state) => {
       state.loading = false;
     },
 
@@ -733,26 +734,26 @@ const termsofPaymentSlice = createSlice({
     },
 
     // get detail
-    [getDetailTOP.pending]: (state, action) => {
+    [getDetailTOP.pending]: (state) => {
       state.loading = true;
     },
     [getDetailTOP.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getDetailTOP.rejected]: (state, action) => {
+    [getDetailTOP.rejected]: (state) => {
       state.loading = true;
     },
 
     // get detail draft
-    [getDetailDraftTOP.pending]: (state, action) => {
+    [getDetailDraftTOP.pending]: (state) => {
       state.loading = true;
     },
     [getDetailDraftTOP.fulfilled]: (state, action) => {
       state.data_detail_draft = action.payload;
       state.loading = false;
     },
-    [getDetailDraftTOP.rejected]: (state, action) => {
+    [getDetailDraftTOP.rejected]: (state) => {
       state.loading = true;
     },
 
@@ -799,23 +800,23 @@ const termsofPaymentSlice = createSlice({
     },
 
     // inactive app
-    [inactiveTOP.pending]: (state, action) => {
+    [inactiveTOP.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveTOP.fulfilled]: (state, action) => {
+    [inactiveTOP.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [inactiveTOP.rejected]: (state, action) => {
+    [inactiveTOP.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
 
     // Approve Or Reject Inactive
-    [approveInactive.pending]: (state, action) => {
+    [approveInactive.pending]: (state) => {
       state.loading = true;
     },
-    [approveInactive.fulfilled]: (state, action) => {
+    [approveInactive.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -826,10 +827,10 @@ const termsofPaymentSlice = createSlice({
     },
 
     // Approve Or Reject Create
-    [approveCreateUpdateTOP.pending]: (state, action) => {
+    [approveCreateUpdateTOP.pending]: (state) => {
       state.loading = true;
     },
-    [approveCreateUpdateTOP.fulfilled]: (state, action) => {
+    [approveCreateUpdateTOP.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },

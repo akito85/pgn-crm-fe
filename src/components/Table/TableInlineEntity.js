@@ -16,12 +16,9 @@ import moment from "moment";
 import BaseContainer from "../BaseContainer";
 import ButtonComponent from "../ButtonComponent";
 import {
-  DeleteOutlined,
   MoreOutlined,
   PlusOutlined,
   InfoCircleOutlined,
-  DeleteColumnOutlined,
-  DeleteFilled,
 } from "@ant-design/icons";
 import { useEffect } from "react";
 import SVGIcon from "../../assets/Icon/index";
@@ -42,7 +39,7 @@ const EditableCell = ({
   required,
   disableDate,
   onCellClicked,
-  onInput = () => { },
+  onInput = () => {},
   maxLength,
   form,
   validator,
@@ -228,8 +225,8 @@ const TableInlineEntity = ({
   action,
   useSelect = false,
   usePagination = false,
-  onChangePage = () => { },
-  onSizeChanger = () => { },
+  onChangePage = () => {},
+  onSizeChanger = () => {},
   pageSize,
   current,
   totalData,
@@ -244,8 +241,8 @@ const TableInlineEntity = ({
   checkNameColumn,
   handleValidate,
   messageValidate,
-  setMessageValidate = () => { },
-  setInserted = () => { }
+  setMessageValidate = () => {},
+  setInserted = () => {},
 }) => {
   const [form] = Form.useForm();
   // const [data, setData] = useState([]);
@@ -263,10 +260,9 @@ const TableInlineEntity = ({
     if (isInsert === true) {
       setInserted(true);
     } else {
-      setInserted(false)
+      setInserted(false);
     }
   }, [isInsert, setInserted]);
-
 
   const edit = (record, field) => {
     form.setFieldsValue(record);
@@ -284,7 +280,7 @@ const TableInlineEntity = ({
     setStoredData(false);
     setStatusAction("");
     setMessageValidate("");
-    setIsInsert(false)
+    setIsInsert(false);
   };
 
   const handleVisiblePassword = (data) => {
@@ -316,7 +312,7 @@ const TableInlineEntity = ({
         setIsValid(true);
       }
       setStoredData(false);
-      setIsInsert(false     )
+      setIsInsert(false);
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
     }
@@ -338,7 +334,7 @@ const TableInlineEntity = ({
     const newData = tableData.filter((item) => item.key !== key);
     onDataChange(newData);
     setStoredData(false);
-    setMessageValidate('')
+    setMessageValidate("");
   };
   const renderDelete = (record) => {
     return record.id ? (
@@ -363,7 +359,7 @@ const TableInlineEntity = ({
       dataIndex: "operation",
       align: "center",
       width: 200,
-      fixed: 'right',
+      fixed: "right",
       render: (_, record) => {
         const editable = record.key === editingKey;
         return (
@@ -407,31 +403,35 @@ const TableInlineEntity = ({
                             />
                           }
                           border={false}
-                        // onClick={() => onDetail(record?.id)}
+                          // onClick={() => onDetail(record?.id)}
                         >
                           <span className={"text-[#C0BEC6]"}> Detail</span>
                         </ButtonComponent>
                       )}
-                      {
-                        record?.status === "INACTIVE" ? (
-                          <ButtonComponent
-                            disabled
-                            icon={<SVGIcon name="IconEdit" width={24} color={"#C0BEC6"} />}
-                            border={false}
-                          >
-                            <span className={"text-[#C0BEC6]"}> Update</span>
-                          </ButtonComponent>
-                        ) : (
-                          <ButtonComponent
-                            onClick={() => edit(record)}
-                            disabled={editingKey !== ""}
-                            icon={<SVGIcon name="IconEdit" width={24} />}
-                            border={false}
-                          >
-                            <span className={"text-black"}> Update</span>
-                          </ButtonComponent>
-                        )
-                      }
+                      {record?.status === "INACTIVE" ? (
+                        <ButtonComponent
+                          disabled
+                          icon={
+                            <SVGIcon
+                              name="IconEdit"
+                              width={24}
+                              color={"#C0BEC6"}
+                            />
+                          }
+                          border={false}
+                        >
+                          <span className={"text-[#C0BEC6]"}> Update</span>
+                        </ButtonComponent>
+                      ) : (
+                        <ButtonComponent
+                          onClick={() => edit(record)}
+                          disabled={editingKey !== ""}
+                          icon={<SVGIcon name="IconEdit" width={24} />}
+                          border={false}
+                        >
+                          <span className={"text-black"}> Update</span>
+                        </ButtonComponent>
+                      )}
                       <ButtonComponent border={false}>
                         <Checkbox
                           onClick={() => onInactive(record)}
@@ -457,24 +457,22 @@ const TableInlineEntity = ({
                   />
                 </Popover>
                 {/* {record.status === "ACTIVE" || record.status === "INACTIVE" ? ( */}
-                {
-                  record.id ? (
-                    <ButtonComponent
-                      disabled
-                      icon={
-                        <SVGIcon name="IconDelete" width={24} color={"#C0BEC6"} />
-                      }
-                      border={false}
-                    />
-                  ) : (
-                    <ButtonComponent
-                      onClick={() => deleteRow(record.key)}
-                      disabled={editingKey !== ""}
-                      icon={<SVGIcon name="IconDelete" width={24} />}
-                      border={false}
-                    />
-                  )
-                }
+                {record.id ? (
+                  <ButtonComponent
+                    disabled
+                    icon={
+                      <SVGIcon name="IconDelete" width={24} color={"#C0BEC6"} />
+                    }
+                    border={false}
+                  />
+                ) : (
+                  <ButtonComponent
+                    onClick={() => deleteRow(record.key)}
+                    disabled={editingKey !== ""}
+                    icon={<SVGIcon name="IconDelete" width={24} />}
+                    border={false}
+                  />
+                )}
               </>
             ) : (
               <>
@@ -611,7 +609,7 @@ const TableInlineEntity = ({
                     onInput: col.onInput,
                     maxLength: col.maxLength,
                     validator: col.validator,
-                    rules: col.rules
+                    rules: col.rules,
                   }),
                 };
               })

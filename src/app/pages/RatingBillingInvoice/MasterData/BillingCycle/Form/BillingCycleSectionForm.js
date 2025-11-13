@@ -1,4 +1,4 @@
-import { Form, Input, Select } from "antd";
+import { Form, Select } from "antd";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import InputComponent from "../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../components/SelectComponent";

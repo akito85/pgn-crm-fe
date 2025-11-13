@@ -1,6 +1,6 @@
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { Space, Tooltip } from "antd";
-import { useEffect, useRef, useState, useNavigate } from "react";
+import { useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";

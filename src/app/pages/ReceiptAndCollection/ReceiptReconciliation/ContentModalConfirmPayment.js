@@ -1,18 +1,11 @@
-import { FilterOutlined } from "@ant-design/icons";
-import { DatePicker, Input } from "antd";
 import moment from "moment";
-import { Fragment, useRef, useState } from "react";
-import Highlighter from "react-highlight-words";
+import { Fragment, useState } from "react";
 import ApprovalComponentGeneral from "../../../../components/Approval/ApprovalComponentGeneral";
 import DetailText from "../../../../components/DetailText";
 import RadioTabs from "../../../../components/RadioTabs";
 import TablePagination from "../../../../components/TablePagination";
 import { dateFormatting } from "../../../../utils";
-import ApprovalSectionForm from "../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
 import AttachmentSectionForm from "../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
-import ListFormPaymentItem from "../MasterData/PaymentItem/ListFormPaymentItem";
-import PaymentItemForm from "../MasterData/PaymentItem/PaymentItemForm";
-import TableGlInformation from "../MasterData/PaymentItem/TableGlInformation";
 
 const ContentModalConfirmPayment = ({
   data,

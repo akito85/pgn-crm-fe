@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import userHttpService from "../../services/userHttpService";
-import {  showModalSuccess, validateError } from "../general_slice";
+import { showModalSuccess, validateError } from "../general_slice";
 import { errorBody, errorCode, errorMessage } from "../../../utils";
 
 const initialState = {
@@ -28,7 +28,13 @@ export const getAllGlobalTypesPaginate = createAsyncThunk(
       const response = await userHttpService.getPagination(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_ALL_GLOBAL_TYPES_PAGINATE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_ALL_GLOBAL_TYPES_PAGINATE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -48,7 +54,17 @@ export const createGlobalType = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(response), 'created', errorMessage(response)), action: "CREATE_GLOBAL_TYPE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(
+            errorCode(response),
+            "created",
+            errorMessage(response)
+          ),
+          action: "CREATE_GLOBAL_TYPE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response);
     }
   }
@@ -68,7 +84,17 @@ export const updateGlobalType = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(response), 'updated', errorMessage(response)), action: "UPDATE_GLOBAL_TYPE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(
+            errorCode(response),
+            "updated",
+            errorMessage(response)
+          ),
+          action: "UPDATE_GLOBAL_TYPE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response);
     }
   }
@@ -83,7 +109,13 @@ export const getViewDetailGlobalType = createAsyncThunk(
       const response = await userHttpService.getDetail(url);
       return response;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_VIEW_DETAIL_GLOBAL_TYPE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_VIEW_DETAIL_GLOBAL_TYPE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -97,7 +129,13 @@ export const getDetailGlobalType = createAsyncThunk(
       const data = await userHttpService.getDetail(url);
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_DETAIL_GLOBAL_TYPE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_DETAIL_GLOBAL_TYPE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -112,7 +150,13 @@ export const getDetailGlobalTypeValue = createAsyncThunk(
       const response = await userHttpService.getDetail(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_DETAIL_GLOBAL_TYPE_VALUE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_DETAIL_GLOBAL_TYPE_VALUE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -127,7 +171,13 @@ export const getSortBy = createAsyncThunk(
       const response = await userHttpService.getAll(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_GLOBAL_TYPE_SORT_BY", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_GLOBAL_TYPE_SORT_BY",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -136,13 +186,19 @@ export const getSortBy = createAsyncThunk(
 // Parent and Group
 export const getParentAndGroup = createAsyncThunk(
   "GET_GLOBAL_TYPE_PARENT_AND_GROUP",
-  async (_,thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/globaltype/parent/group";
       const response = await userHttpService.getAll(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_GLOBAL_TYPE_PARENT_AND_GROUP", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_GLOBAL_TYPE_PARENT_AND_GROUP",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -152,7 +208,7 @@ export const getParentAndGroup = createAsyncThunk(
 export const inactiveGlobalType = createAsyncThunk(
   "INACTIVE_GLOBAL_TYPE",
   async ({ id, statusData }, thunkAPI) => {
-    let status = statusData === "ACTIVE" ? 'inactivated' : 'activated';
+    let status = statusData === "ACTIVE" ? "inactivated" : "activated";
     try {
       const url = `/v1/dbs/api/globaltype/inactive/${id}`;
       const response = await userHttpService.deleteData(url);
@@ -166,7 +222,13 @@ export const inactiveGlobalType = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), status, errorMessage(error)), action: "INACTIVE_GLOBAL_TYPE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), status, errorMessage(error)),
+          action: "INACTIVE_GLOBAL_TYPE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error);
     }
   }
@@ -184,7 +246,13 @@ export const downloadExcelGlobalType = createAsyncThunk(
       const response = await userHttpService.downloadData(url);
       return response;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_GLOBAL_TYPE_EXCEL", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_GLOBAL_TYPE_EXCEL",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -209,10 +277,10 @@ const globalTypesSlice = createSlice({
     },
 
     // create global type reducer
-    [createGlobalType.pending]: (state, action) => {
+    [createGlobalType.pending]: (state) => {
       state.loading = true;
     },
-    [createGlobalType.fulfilled]: (state, action) => {
+    [createGlobalType.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -223,14 +291,14 @@ const globalTypesSlice = createSlice({
     },
 
     // update global type reducer
-    [updateGlobalType.pending]: (state, action) => {
+    [updateGlobalType.pending]: (state) => {
       state.loading = true;
     },
-    [updateGlobalType.fulfilled]: (state, action) => {
+    [updateGlobalType.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [updateGlobalType.rejected]: (state, action) => {
+    [updateGlobalType.rejected]: (state) => {
       state.loading = false;
       state.isFailed = true;
     },
@@ -258,7 +326,7 @@ const globalTypesSlice = createSlice({
       state.data_detail_value = action.payload;
       state.loading = false;
     },
-    [getDetailGlobalTypeValue.rejected]: (state, action) => {
+    [getDetailGlobalTypeValue.rejected]: (state) => {
       state.loading = false;
     },
 
@@ -299,14 +367,14 @@ const globalTypesSlice = createSlice({
     },
 
     // inactive Global Type
-    [inactiveGlobalType.pending]: (state, action) => {
+    [inactiveGlobalType.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveGlobalType.fulfilled]: (state, action) => {
+    [inactiveGlobalType.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [inactiveGlobalType.rejected]: (state, action) => {
+    [inactiveGlobalType.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
@@ -315,14 +383,14 @@ const globalTypesSlice = createSlice({
     [downloadExcelGlobalType.pending]: (state) => {
       state.loading = true;
     },
-    [downloadExcelGlobalType.fulfilled]: (state, action) => {
+    [downloadExcelGlobalType.fulfilled]: (state) => {
       state.loading = false;
     },
     [downloadExcelGlobalType.rejected]: (state) => {
       state.loading = false;
     },
 
-    [getDetailGlobalType.pending]: (state, action) => {
+    [getDetailGlobalType.pending]: (state) => {
       state.loading = true;
     },
     [getDetailGlobalType.fulfilled]: (state, action) => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Checkbox, Form, Select, DatePicker } from "antd";
+import { Checkbox, Form, Select } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../../components/SelectComponent";
 import { useSelector } from "react-redux";

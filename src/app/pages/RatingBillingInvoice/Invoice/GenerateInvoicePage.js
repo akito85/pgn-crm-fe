@@ -90,7 +90,7 @@ const GenerateInvoicePage = () => {
   useEffect(() => {
     if (data_billing?.data) {
       setDataTable(
-        data_billing.data.map((item, index) => {
+        data_billing.data.result.map((item, index) => {
           return {
             key: index + 1,
             ...item,

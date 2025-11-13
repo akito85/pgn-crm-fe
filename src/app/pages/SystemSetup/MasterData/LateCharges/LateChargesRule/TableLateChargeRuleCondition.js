@@ -1,19 +1,14 @@
-import { Form, Input, message, Select, Table, Tooltip } from "antd";
+import { Form, Input, Select, Table, Tooltip } from "antd";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import {
-  getDataTypeConditionList,
-  getOperatorConditionList,
-  getVariableNameList,
-} from "../../../../../../redux/slices/account_management/MasterData/late_charges";
+
+
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
-import { NumericFormat } from "react-number-format";
 import InputComponent from "../../../../../../components/InputComponent";
-import { formMessageRequired } from "../../../../../../utils";
 
 export const getColumnSearchPropsCriteria = (
   dataIndex,

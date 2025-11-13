@@ -1,10 +1,8 @@
-import React, { useEffect, useRef } from "react";
-import { Spin, Input, Form, Alert, Popover, Checkbox, Tooltip } from "antd";
+import React from "react";
+import { Tooltip } from "antd";
 import TablePagination from "../../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { Fragment } from "react";
-import StatusComponent from "../../../../../../../components/StatusComponent";
-import Highlighter from "react-highlight-words";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../../../utils";
 

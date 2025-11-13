@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BaseContainer from "../../../../../../components/BaseContainer";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import { getAllDetailServiceAgreementPaginate } from "../../../../../../redux/slices/rating_billing_invoice/rating";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { hasValue, renderColumn } from "../../../../../../utils";

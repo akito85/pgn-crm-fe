@@ -277,7 +277,13 @@ export const downloadTaxCode = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_ACCOUNT_STANDARD", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_ACCOUNT_STANDARD",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -680,50 +686,50 @@ const taxCodeSlice = createSlice({
     },
 
     // get condition name
-    [getConditionName.pending]: (state, action) => {
+    [getConditionName.pending]: (state) => {
       state.loading = true;
     },
     [getConditionName.fulfilled]: (state, action) => {
       state.data_condition_name = action.payload;
       state.loading = false;
     },
-    [getConditionName.rejected]: (state, action) => {
+    [getConditionName.rejected]: (state) => {
       state.loading = false;
     },
 
     // get condition operator
-    [getConditionOperator.pending]: (state, action) => {
+    [getConditionOperator.pending]: (state) => {
       state.loading = true;
     },
     [getConditionOperator.fulfilled]: (state, action) => {
       state.data_condition_operator = action.payload;
       state.loading = false;
     },
-    [getConditionOperator.rejected]: (state, action) => {
+    [getConditionOperator.rejected]: (state) => {
       state.loading = false;
     },
 
     // get condition type
-    [getConditionType.pending]: (state, action) => {
+    [getConditionType.pending]: (state) => {
       state.loading = true;
     },
     [getConditionType.fulfilled]: (state, action) => {
       state.data_condition_type = action.payload;
       state.loading = false;
     },
-    [getConditionType.rejected]: (state, action) => {
+    [getConditionType.rejected]: (state) => {
       state.loading = false;
     },
 
     // get pagination list
-    [getTaxCodePaginate.pending]: (state, action) => {
+    [getTaxCodePaginate.pending]: (state) => {
       state.loading = true;
     },
     [getTaxCodePaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [getTaxCodePaginate.rejected]: (state, action) => {
+    [getTaxCodePaginate.rejected]: (state) => {
       state.loading = false;
     },
 
@@ -742,37 +748,37 @@ const taxCodeSlice = createSlice({
     },
 
     //get detail
-    [getDetailTaxCode.pending]: (state, action) => {
+    [getDetailTaxCode.pending]: (state) => {
       state.loading = true;
     },
     [getDetailTaxCode.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_detail = action.payload;
     },
-    [getDetailTaxCode.rejected]: (state, action) => {
+    [getDetailTaxCode.rejected]: (state) => {
       state.loading = false;
     },
 
     // Get Detail Draft
-    [getDetailDraftTaxCode.pending]: (state, action) => {
+    [getDetailDraftTaxCode.pending]: (state) => {
       state.loading = true;
     },
     [getDetailDraftTaxCode.fulfilled]: (state, action) => {
       state.data_detail_draft = action.payload;
       state.loading = false;
     },
-    [getDetailDraftTaxCode.rejected]: (state, action) => {
+    [getDetailDraftTaxCode.rejected]: (state) => {
       state.loading = false;
     },
 
     /* Download Tax Code */
-    [downloadTaxCode.pending]: (state, action) => {
+    [downloadTaxCode.pending]: (state) => {
       state.loading = true;
     },
-    [downloadTaxCode.fulfilled]: (state, action) => {
+    [downloadTaxCode.fulfilled]: (state) => {
       state.loading = false;
     },
-    [downloadTaxCode.rejected]: (state, action) => {
+    [downloadTaxCode.rejected]: (state) => {
       state.loading = false;
     },
 
@@ -819,10 +825,10 @@ const taxCodeSlice = createSlice({
     },
 
     // Inactive Tax Code
-    [inactiveTaxCode.pending]: (state, action) => {
+    [inactiveTaxCode.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveTaxCode.fulfilled]: (state, action) => {
+    [inactiveTaxCode.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -833,26 +839,26 @@ const taxCodeSlice = createSlice({
     },
 
     // Create Tax Code
-    [createTaxCode.pending]: (state, action) => {
+    [createTaxCode.pending]: (state) => {
       state.loading = true;
     },
     [createTaxCode.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataForm = action.payload;
     },
-    [createTaxCode.rejected]: (state, action) => {
+    [createTaxCode.rejected]: (state) => {
       state.loading = false;
     },
 
     // Update Tax Code
-    [updateTaxCode.pending]: (state, action) => {
+    [updateTaxCode.pending]: (state) => {
       state.loading = true;
     },
     [updateTaxCode.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataForm = action.payload;
     },
-    [updateTaxCode.rejected]: (state, action) => {
+    [updateTaxCode.rejected]: (state) => {
       state.loading = false;
     },
   },

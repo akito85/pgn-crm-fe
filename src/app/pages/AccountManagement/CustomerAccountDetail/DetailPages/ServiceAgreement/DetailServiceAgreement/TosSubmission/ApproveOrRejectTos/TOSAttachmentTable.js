@@ -1,13 +1,9 @@
-import React, { useEffect, useRef } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { Spin, Input, Form, Alert, Popover, Checkbox, Tooltip } from "antd";
-import Highlighter from "react-highlight-words";
-import { Link, NavLink, Route, Routes, useNavigate } from "react-router-dom";
+import React from "react";
+import { Tooltip } from "antd";
 import { useState } from "react";
 import TablePagination from "../../../../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
 import { Fragment } from "react";
-import moment from "moment";
 import ModalCustom from "../../../../../../../../../components/Modal/ModalCustom";
 
 const TOSAttachmentTable = ({ 

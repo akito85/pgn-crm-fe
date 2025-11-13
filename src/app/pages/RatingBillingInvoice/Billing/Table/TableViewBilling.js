@@ -1,10 +1,5 @@
-import Highlighter from "react-highlight-words";
-import { Tooltip } from "antd";
-import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../../components/StatusComponent";
-import SVGIcon from "../../../../../assets/Icon/index";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 
 export const columnsBilling = (
   page = 1,

@@ -1,8 +1,5 @@
-import Highlighter from "react-highlight-words";
-import moment from "moment";
-import { Tooltip } from "antd";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn, separatorNumber } from "../../../../../../utils";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import { hasValue, renderColumn, separatorNumber } from "../../../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
 export const columnsBillingItem = (
   pageBI = 1,

@@ -1,10 +1,7 @@
 import { FilterOutlined } from "@ant-design/icons";
-import { Input, Space, Tooltip } from "antd";
+import { Input, Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
-import { NumericFormat } from "react-number-format";
-import { Link } from "react-router-dom";
 import SVGIcon from "../../../../../assets/Icon/index";
-import ButtonComponent from "../../../../../components/ButtonComponent";
 import { hasValue, renderColumn } from "../../../../../utils";
   
   const separatorNumber = (text) => {

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink, Link, json } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -32,7 +32,6 @@ import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalI
 import { intToNPWP } from "../../../../../utils/npwp";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";

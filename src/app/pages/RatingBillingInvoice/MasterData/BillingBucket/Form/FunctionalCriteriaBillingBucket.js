@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
-import { Form, Input, Select, Space, Table, Tooltip, DatePicker } from "antd";
+import { Form, Select, Space, Table, Tooltip } from "antd";
 import { columnsTableCriteriaBillingBucket } from "../Table/TableCriteriaBillingBucket";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../components/ButtonComponent";

@@ -1,6 +1,5 @@
 import React,{useState} from 'react'
 import RadioTabs from '../../../../../../../../../../components/RadioTabs';
-import TableDetail from "./TableDetail"
 // import TablePricing from "./TablePricing"
 import TableLateCharge from "./TableLateCharge"
 import TableCalcRule from "./TableCalcRule"

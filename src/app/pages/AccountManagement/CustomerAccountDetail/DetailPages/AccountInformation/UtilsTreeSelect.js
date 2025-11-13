@@ -1,6 +1,5 @@
-import { DatePicker, TreeSelect } from "antd";
+import { TreeSelect } from "antd";
 import React from "react";
-import moment from "moment/moment";
 
 const UtilsTreeSelect = (props) => {
   const {

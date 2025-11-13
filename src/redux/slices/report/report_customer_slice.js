@@ -10,11 +10,7 @@ export const reportCustomerSlice = createApi({
   }),
   endpoints: (builder) => ({
     getCustomerAccountPagination: builder.query({
-      queryFn: async (
-        { page, pageSize, sort, search, body },
-        api,
-        extraOptions
-      ) => {
+      queryFn: async ({ page, pageSize, sort, search }, api) => {
         try {
           const sortParams = !sort ? "createdDate~desc" : sort;
           const url = `/v1/dbs/api/summary/account/list-account-summary?searchs=${search}&page=${page}&size=${pageSize}&sort=${sortParams}`;
@@ -42,12 +38,7 @@ export const reportCustomerSlice = createApi({
       },
     }),
     getCustomerDownload: builder.mutation({
-      async queryFn(
-        { page, pageSize, sort, search },
-        api,
-        extraOptions,
-        baseQuery
-      ) {
+      async queryFn({ page, pageSize, sort, search }, api) {
         try {
           const sortParams = !sort ? "createdDate~desc" : sort;
           const url = `/v1/dbs/api/summary/account/download-account-summary?searchs=${search}&page=${page}&size=${pageSize}&sort=${sortParams}`;

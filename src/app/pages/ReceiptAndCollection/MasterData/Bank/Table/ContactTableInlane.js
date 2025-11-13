@@ -24,7 +24,7 @@ import {
 import moment from "moment";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import InputComponent from "../../../../../../components/InputComponent";
-import { formMessageRequired, hasValue } from "../../../../../../utils";
+import { hasValue } from "../../../../../../utils";
 import { useDispatch } from "react-redux";
 import { getZoneContact } from "../../../../../../redux/slices/receipt_collection/bankSlice";
 const EditableCell = ({

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Alert, Checkbox, Form, Input, Select, Spin, Tooltip } from "antd";
+import { Alert, Checkbox, Form, Select, Spin } from "antd";
 
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
@@ -15,7 +15,6 @@ import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import ModalChooseContact from "./ModalChooseContactComp";
 import ModalCreateNewContact from "./ModalCreateNewContact";
 import {
-  getListChooseContact,
   getDetailContactAfterChoose,
   getDetailAccountContact,
   getJob,
@@ -26,7 +25,6 @@ import {
   getContactType,
   getInputType,
   getCountryCode,
-  getCountryZone,
   resetDataDetail,
 } from "../../../../../../../redux/slices/account_management/detailAccount/accountContactSlice";
 import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
