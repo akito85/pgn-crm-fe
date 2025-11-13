@@ -99,7 +99,7 @@ const DetailEFaktur = () => {
     if (billingCode) {
       // Fetch E-Faktur detail
       dispatch(getDetailEFaktur(billingCode));
-      
+
       // Fetch billing items
       dispatch(getAllBillingItemPaginate(billingCode));
     }
@@ -126,7 +126,7 @@ const DetailEFaktur = () => {
   // Handle tab change
   const handleTabChange = (key) => {
     setActiveTab(key);
-    
+
     // Reset pagination when switching to log tab
     if (key === "2" && detail_efaktur?.efakturId) {
       setPageLog(1);
@@ -141,7 +141,6 @@ const DetailEFaktur = () => {
 
   const handleKirimKePelanggan = () => {
     message.info("Fitur kirim ke pelanggan akan segera tersedia");
-    console.log("Kirim ke pelanggan", detail_efaktur?.efakturNo);
   };
 
   const handleUnduhPDF = () => {
@@ -182,10 +181,10 @@ const DetailEFaktur = () => {
   // Calculate totals from items
   const calculateTotals = () => {
     if (!data_billingItem || data_billingItem.length === 0) {
-      return { 
-        dpp: detail_efaktur?.dpp || 0, 
-        ppn: detail_efaktur?.ppn || 0, 
-        total: detail_efaktur?.totalAmount || 0 
+      return {
+        dpp: detail_efaktur?.dpp || 0,
+        ppn: detail_efaktur?.ppn || 0,
+        total: detail_efaktur?.totalAmount || 0,
       };
     }
 
@@ -460,7 +459,8 @@ const DetailEFaktur = () => {
                     Informasi Faktur
                   </h3>
                   <div className="flex gap-2">
-                    {(displayStatus === "APPROVED" || displayStatus === "PROCESSING") && (
+                    {(displayStatus === "APPROVED" ||
+                      displayStatus === "PROCESSING") && (
                       <>
                         <ButtonComponent
                           type="default"
@@ -473,7 +473,10 @@ const DetailEFaktur = () => {
                           type="default"
                           onClick={handleUnduhPDF}
                           size="small"
-                          disabled={!detail_efaktur?.manualUploadDoc && !detail_efaktur?.finalUploadDoc}
+                          disabled={
+                            !detail_efaktur?.manualUploadDoc &&
+                            !detail_efaktur?.finalUploadDoc
+                          }
                         >
                           Unduh PDF
                         </ButtonComponent>

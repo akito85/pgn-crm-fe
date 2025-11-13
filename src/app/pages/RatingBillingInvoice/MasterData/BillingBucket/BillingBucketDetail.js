@@ -405,7 +405,6 @@ const BillingBucketDetail = () => {
           setModalErrorServer(true);
         }
       });
-    console.log(data);
   };
 
   return (

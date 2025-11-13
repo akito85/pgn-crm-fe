@@ -84,10 +84,6 @@ const ManagementDeliveryInvoice = () => {
 
   const handleApplyFilter = () => {
     setLoading(true);
-    console.log("Applying filters:", {
-      dateRange,
-      status,
-    });
     setTimeout(() => {
       setLoading(false);
     }, 500);
@@ -99,19 +95,16 @@ const ManagementDeliveryInvoice = () => {
   };
 
   const handleViewDetail = (record) => {
-    console.log("View detail for:", record);
     setSelectedInvoice(record);
     setDetailModalVisible(true);
   };
 
   const handlePreview = (record) => {
-    console.log("Preview message for:", record);
     setSelectedInvoice(record);
     setPreviewModalVisible(true);
   };
 
   const handleCreateJob = (jobData) => {
-    console.log("Creating job with data:", jobData);
     setModalVisible(false);
   };
 

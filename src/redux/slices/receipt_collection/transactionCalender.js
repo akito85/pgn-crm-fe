@@ -482,7 +482,6 @@ export const createTransactionCalender = createAsyncThunk(
       const data = await receiptCollectionHttpService.createData(url, body);
       return data.data;
     } catch (error) {
-      console.log(error, " error");
       const message =
         (error.response &&
           error.response.data &&

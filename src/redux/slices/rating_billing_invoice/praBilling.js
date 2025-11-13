@@ -401,19 +401,13 @@ export const getListBillingCycle = createAsyncThunk(
         CUSTOM_BASE_URL
       );
 
-      console.log("Raw Response:", response); // Debug log
-
       const rawData = response?.body?.data?.data || response?.data?.data || [];
-
-      console.log("Raw Data Array:", rawData);
 
       const transformedData = rawData.map((item) => ({
         id: item.id,
         name: item.name,
         ...item,
       }));
-
-      console.log("Transformed Data:", transformedData);
 
       return transformedData;
     } catch (error) {
@@ -573,7 +567,7 @@ export const getLogActivities = createAsyncThunk(
         url,
         CUSTOM_BASE_URL
       );
-      console.log("Log Activities Response:", response);
+
       return response.data || response;
     } catch (error) {
       const message =
@@ -601,7 +595,6 @@ export const getLogActivityDetail = createAsyncThunk(
         url,
         CUSTOM_BASE_URL
       );
-      console.log("Log Activity Detail Response:", response);
       return response.data || response;
     } catch (error) {
       const message =
@@ -906,14 +899,10 @@ export const getCustomerAccountDetail = createAsyncThunk(
 
       url += `&page=${page}&size=${size}`;
 
-      console.log("Fetching customer account detail:", url);
-
       const response = await ratingBillingHttpService.getAll(
         url,
         CUSTOM_BASE_URL
       );
-
-      console.log("Customer Account Detail Response:", response);
 
       const responseData = response.data?.data || response.data;
 
@@ -929,15 +918,6 @@ export const getCustomerAccountDetail = createAsyncThunk(
       const dataSaPrcrule = responseData.dataSaPrcrule || [];
       const dataSATosDet = responseData.dataSATosDet || [];
       const dataTosSubDet = responseData.dataTosSubDet || [];
-
-      console.log("Data Summary:", {
-        totalDetailRecords: dataDetail.length,
-        totalUsageRecords: dataUsage.length,
-        totalTaxRecords: dataTaxImp.length,
-        totalPricingTiers: dataSaPrcrule.length,
-        totalSATosRecords: dataSATosDet.length,
-        totalTosSubRecords: dataTosSubDet.length,
-      });
 
       // Process Usage Data - Menampilkan semua field termasuk yang null
       const usageData = dataUsage.map((item) => ({
@@ -1031,15 +1011,6 @@ export const getCustomerAccountDetail = createAsyncThunk(
         value: item.value,
         fromItem: item.fromItem,
       }));
-
-      console.log("Processed Data Summary:", {
-        usageData: usageData.length,
-        taxData: taxData.length,
-        pricingData: pricingData.length,
-        saData: saData.length,
-        saTosDet: saTosDet.length,
-        tosSubDet: tosSubDet.length,
-      });
 
       return {
         rawContent: dataDetail,

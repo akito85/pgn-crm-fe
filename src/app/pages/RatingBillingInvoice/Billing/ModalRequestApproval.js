@@ -25,9 +25,9 @@ import TablePaginationNew from "../../../../components/TablePaginationNew";
 
 const ModalRequestApproval = ({
   isOpen,
-  handleCancel = () => { },
-  handleRefresh = () => { },
-  handleOpenModal = () => { },
+  handleCancel = () => {},
+  handleRefresh = () => {},
+  handleOpenModal = () => {},
 }) => {
   // Selector
   const {
@@ -244,8 +244,6 @@ const ModalRequestApproval = ({
           setModalError(true);
         }
       });
-
-    console.log(body, "body");
   };
 
   const filterDataByPage = (type = "data") => {
@@ -333,7 +331,9 @@ const ModalRequestApproval = ({
         >
           {/* STEP 1: BILLING INFORMATION */}
           <div
-            className={`steps-content my-[30px] ${current !== 0 ? "hidden" : ""}`}
+            className={`steps-content my-[30px] ${
+              current !== 0 ? "hidden" : ""
+            }`}
           >
             <div className="w-full grid grid-cols-1 gap-x-4">
               <p className="text-primary uppercase font-bold">Billing List</p>
@@ -365,8 +365,7 @@ const ModalRequestApproval = ({
                     Generate Invoice
                   </Checkbox>
                   <p className="text-[#4B465C] text-[8px]">
-                    Click or tap this checkbox to automatically generate
-                    invoice
+                    Click or tap this checkbox to automatically generate invoice
                   </p>
                 </Form.Item>
                 <Form.Item
@@ -390,7 +389,9 @@ const ModalRequestApproval = ({
 
           {/* STEP 2: APPROVAL INFORMATION */}
           <div
-            className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
+            className={`steps-content my-[30px] ${
+              current !== 1 ? "hidden" : ""
+            }`}
           >
             <div className="w-full grid grid-cols-1 gap-x-4">
               <p className="text-primary uppercase font-bold">
@@ -472,7 +473,9 @@ const ModalRequestApproval = ({
 
           {/* STEP 3: CONFIRMATION */}
           <div
-            className={`steps-content my-[30px] ${current !== 2 ? "hidden" : ""}`}
+            className={`steps-content my-[30px] ${
+              current !== 2 ? "hidden" : ""
+            }`}
           >
             {/* Billing Information Review */}
             <div className="w-full grid grid-cols-1 gap-x-4 mb-8">

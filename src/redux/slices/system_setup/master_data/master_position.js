@@ -106,7 +106,6 @@ export const validateCreatePosition = createAsyncThunk(
 export const inactiveMasterPosition = createAsyncThunk(
   "INACTIVE_MASTER_POSITION",
   async (body, thunkAPI) => {
-    console.log(body);
     let status = body?.statusData === "ACTIVE" ? "inactivated" : "activated";
     try {
       const url = `/v1/dbs/api/position/active/inactive`;

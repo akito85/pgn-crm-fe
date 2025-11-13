@@ -394,8 +394,6 @@ const ListJob = () => {
     return [...column, ...columnActionPermission];
   }, [column, columnActionPermission]);
 
-  console.log("Jobs Data:", jobs);
-
   return (
     <Spin spinning={loading}>
       <LayoutMenu>

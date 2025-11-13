@@ -405,19 +405,13 @@ export const getListBillingCycle = createAsyncThunk(
         CUSTOM_BASE_URL
       );
 
-      console.log("Raw Response:", response); // Debug log
-
       const rawData = response?.body?.data?.data || response?.data?.data || [];
-
-      console.log("Raw Data Array:", rawData);
 
       const transformedData = rawData.map((item) => ({
         id: item.id,
         name: item.name,
         ...item,
       }));
-
-      console.log("Transformed Data:", transformedData);
 
       return transformedData;
     } catch (error) {

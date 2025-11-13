@@ -88,31 +88,10 @@ export const getAllEMeteraiInvoices = createAsyncThunk(
         }
       }
 
-      console.log("=".repeat(80));
-      console.log("📡 GET E-Meterai Invoices Request");
-      console.log("=".repeat(80));
-      console.log("URL:", url);
-      console.log("Parameters:", {
-        page,
-        pageSize,
-        search: searchParams,
-        sort: sortParams,
-        filters,
-      });
-      console.log("Timestamp:", new Date().toLocaleString("id-ID"));
-      console.log("=".repeat(80));
-
       const response = await ratingBillingHttpService.getPagination(
         url,
         process.env.REACT_APP_BASE_URL_NGROK
       );
-
-      console.log("✅ GET E-Meterai Invoices Response:");
-      console.log("Total Elements:", response?.data?.page?.totalElements);
-      console.log("Total Pages:", response?.data?.page?.totalPages);
-      console.log("Current Page:", response?.data?.page?.number);
-      console.log("Data Count:", response?.data?.result?.length);
-      console.log("=".repeat(80));
 
       return response.data;
     } catch (error) {
@@ -134,27 +113,10 @@ export const getInvoiceDetail = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/rbi/invoice/stampsign/${invoiceNumber}`;
 
-      console.log("=".repeat(80));
-      console.log("📡 GET Invoice Detail Request");
-      console.log("=".repeat(80));
-      console.log("URL:", url);
-      console.log("Invoice Number:", invoiceNumber);
-      console.log("Timestamp:", new Date().toLocaleString("id-ID"));
-      console.log("=".repeat(80));
-
       const response = await ratingBillingHttpService.getDetail(
         url,
         process.env.REACT_APP_BASE_URL_NGROK
       );
-
-      console.log("✅ GET Invoice Detail Response:");
-      console.log("Success:", response?.success);
-      console.log("Customer:", response?.data?.customerName);
-      console.log("Invoice Number:", response?.data?.invoiceNumber);
-      console.log("Has Original URL:", !!response?.data?.invoiceUrl);
-      console.log("Has Stamped URL:", !!response?.data?.invoiceStampedUrl);
-      console.log("Has Signed URL:", !!response?.data?.invoiceSignedUrl);
-      console.log("=".repeat(80));
 
       return response.data;
     } catch (error) {
@@ -176,24 +138,10 @@ export const getInvoiceActivityLogs = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/rbi/invoice/stampsign/logs/${invoiceNumber}?page=${page}&size=${pageSize}`;
 
-      console.log("=".repeat(80));
-      console.log("📡 GET Invoice Activity Logs Request");
-      console.log("=".repeat(80));
-      console.log("URL:", url);
-      console.log("Invoice Number:", invoiceNumber);
-      console.log("Page:", page, "Size:", pageSize);
-      console.log("Timestamp:", new Date().toLocaleString("id-ID"));
-      console.log("=".repeat(80));
-
       const response = await ratingBillingHttpService.getPagination(
         url,
         process.env.REACT_APP_BASE_URL_NGROK
       );
-
-      console.log("✅ GET Invoice Activity Logs Response:");
-      console.log("Total Elements:", response?.data?.page?.totalElements);
-      console.log("Log Count:", response?.data?.result?.length);
-      console.log("=".repeat(80));
 
       return response.data;
     } catch (error) {
@@ -213,11 +161,6 @@ export const previewOriginalInvoice = createAsyncThunk(
   "PREVIEW_ORIGINAL_INVOICE",
   async ({ invoiceNumber }, { rejectWithValue }) => {
     try {
-      console.log("=".repeat(80));
-      console.log("📡 Preview Original Invoice Request");
-      console.log("Invoice Number:", invoiceNumber);
-      console.log("=".repeat(80));
-
       const response = await axios.get(
         process.env.REACT_APP_BASE_URL_NGROK +
           `/v1/dbs/api/rbi/invoice/stampsign/download/original/${invoiceNumber}`,
@@ -248,8 +191,6 @@ export const previewOriginalInvoice = createAsyncThunk(
           viewerContainer
         );
       }
-      console.log("✅ Preview Original Invoice Success");
-      console.log("=".repeat(80));
     } catch (error) {
       console.error("❌ Preview Original Invoice Error:", error);
       console.error("=".repeat(80));
@@ -262,11 +203,6 @@ export const previewStampedInvoice = createAsyncThunk(
   "PREVIEW_STAMPED_INVOICE",
   async ({ invoiceNumber }, { rejectWithValue }) => {
     try {
-      console.log("=".repeat(80));
-      console.log("📡 Preview Stamped Invoice Request");
-      console.log("Invoice Number:", invoiceNumber);
-      console.log("=".repeat(80));
-
       const response = await axios.get(
         process.env.REACT_APP_BASE_URL_NGROK +
           `/v1/dbs/api/rbi/invoice/stampsign/download/stamped/${invoiceNumber}`,
@@ -297,8 +233,6 @@ export const previewStampedInvoice = createAsyncThunk(
           viewerContainer
         );
       }
-      console.log("✅ Preview Stamped Invoice Success");
-      console.log("=".repeat(80));
     } catch (error) {
       console.error("❌ Preview Stamped Invoice Error:", error);
       console.error("=".repeat(80));
@@ -326,16 +260,6 @@ export const downloadOriginalInvoice = createAsyncThunk(
       const contentDisposition = response.headers["content-disposition"];
       let filename = getFilenameFromHeader(contentDisposition);
 
-      if (!filename) {
-        filename = formatFilename(invoiceNumber, "original");
-        console.warn(
-          "⚠️ Filename not found in header, using fallback:",
-          filename
-        );
-      } else {
-        console.log("✅ Filename from header:", filename);
-      }
-
       const blob = new Blob([response.data], { type: "application/pdf" });
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -345,9 +269,6 @@ export const downloadOriginalInvoice = createAsyncThunk(
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(downloadUrl);
-
-      console.log("✅ Download Original Invoice Success");
-      console.log("=".repeat(80));
 
       return response.data;
     } catch (error) {
@@ -377,11 +298,6 @@ export const downloadStampedInvoice = createAsyncThunk(
   "DOWNLOAD_STAMPED_INVOICE",
   async ({ invoiceNumber }, thunkAPI) => {
     try {
-      console.log("=".repeat(80));
-      console.log("📥 Download Stamped Invoice Request");
-      console.log("Invoice Number:", invoiceNumber);
-      console.log("=".repeat(80));
-
       const response = await axios.get(
         process.env.REACT_APP_BASE_URL_NGROK +
           `/v1/dbs/api/rbi/invoice/stampsign/download/stamped/${invoiceNumber}`,
@@ -397,16 +313,6 @@ export const downloadStampedInvoice = createAsyncThunk(
       const contentDisposition = response.headers["content-disposition"];
       let filename = getFilenameFromHeader(contentDisposition);
 
-      if (!filename) {
-        filename = formatFilename(invoiceNumber, "stamped");
-        console.warn(
-          "⚠️ Filename not found in header, using fallback:",
-          filename
-        );
-      } else {
-        console.log("✅ Filename from header:", filename);
-      }
-
       const blob = new Blob([response.data], { type: "application/pdf" });
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -416,9 +322,6 @@ export const downloadStampedInvoice = createAsyncThunk(
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(downloadUrl);
-
-      console.log("✅ Download Stamped Invoice Success");
-      console.log("=".repeat(80));
 
       return response.data;
     } catch (error) {
@@ -448,11 +351,6 @@ export const downloadSignedInvoice = createAsyncThunk(
   "DOWNLOAD_SIGNED_INVOICE",
   async ({ invoiceNumber }, thunkAPI) => {
     try {
-      console.log("=".repeat(80));
-      console.log("📥 Download Signed Invoice Request");
-      console.log("Invoice Number:", invoiceNumber);
-      console.log("=".repeat(80));
-
       const response = await axios.get(
         process.env.REACT_APP_BASE_URL_NGROK +
           `/v1/dbs/api/rbi/invoice/stampsign/download/signed/${invoiceNumber}`,
@@ -468,16 +366,6 @@ export const downloadSignedInvoice = createAsyncThunk(
       const contentDisposition = response.headers["content-disposition"];
       let filename = getFilenameFromHeader(contentDisposition);
 
-      if (!filename) {
-        filename = formatFilename(invoiceNumber, "signed");
-        console.warn(
-          "⚠️ Filename not found in header, using fallback:",
-          filename
-        );
-      } else {
-        console.log("✅ Filename from header:", filename);
-      }
-
       const blob = new Blob([response.data], { type: "application/pdf" });
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -487,9 +375,6 @@ export const downloadSignedInvoice = createAsyncThunk(
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(downloadUrl);
-
-      console.log("✅ Download Signed Invoice Success");
-      console.log("=".repeat(80));
 
       return response.data;
     } catch (error) {
@@ -551,25 +436,11 @@ export const createStampingRequest = createAsyncThunk(
 
       const url = `/v1/dbs/api/rbi/invoice/stampsign/${invoiceNumber}/stamp/emeterai`;
 
-      console.log("=".repeat(80));
-      console.log("📡 POST E-Meterai Stamping Request");
-      console.log("=".repeat(80));
-      console.log("URL:", url);
-      console.log("Invoice Number:", invoiceNumber);
-      console.log("Payload:", JSON.stringify(body, null, 2));
-      console.log("Timestamp:", new Date().toLocaleString("id-ID"));
-      console.log("=".repeat(80));
-
       const response = await ratingBillingHttpService.createData(
         url,
         body,
         process.env.REACT_APP_BASE_URL_NGROK
       );
-
-      console.log("✅ POST E-Meterai Stamping Response:");
-      console.log("Success:", response?.success);
-      console.log("Message:", response?.message);
-      console.log("=".repeat(80));
 
       const successMessage = {
         title: "Successful",
@@ -614,49 +485,11 @@ export const uploadManualStamping = createAsyncThunk(
 
       const url = `/v1/dbs/api/rbi/invoice/stampsign/${invoiceNumber}/stamp/manual`;
 
-      console.log("=".repeat(80));
-      console.log("📡 POST Manual Stamping Upload");
-      console.log("=".repeat(80));
-      console.log("URL:", url);
-      console.log("Invoice Number:", invoiceNumber);
-      console.log("Remark:", remark || "Manual stamping upload");
-      console.log("File Details:", {
-        name: file.name,
-        size: `${(file.size / 1024).toFixed(2)} KB`,
-        type: file.type,
-        lastModified: new Date(file.lastModified).toLocaleString("id-ID"),
-      });
-      console.log("Timestamp:", new Date().toLocaleString("id-ID"));
-      console.log("=".repeat(80));
-
-      console.log("📦 FormData Contents:");
-      for (let pair of formData.entries()) {
-        if (pair[1] instanceof File) {
-          console.log(`  ${pair[0]}:`, {
-            name: pair[1].name,
-            size: `${(pair[1].size / 1024).toFixed(2)} KB`,
-            type: pair[1].type,
-          });
-        } else {
-          console.log(`  ${pair[0]}: ${pair[1]}`);
-        }
-      }
-      console.log("=".repeat(80));
-
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
         formData,
-        (progress) => {
-          console.log(`⏳ Upload Progress: ${progress}%`);
-        },
         process.env.REACT_APP_BASE_URL_NGROK
       );
-
-      console.log("✅ POST Manual Stamping Response:");
-      console.log("Success:", response?.success);
-      console.log("Message:", response?.message);
-      console.log("Code:", response?.code);
-      console.log("=".repeat(80));
 
       const successMessage = {
         title: "Successful",
@@ -701,47 +534,11 @@ export const uploadManualSigning = createAsyncThunk(
 
       const url = `/v1/dbs/api/rbi/invoice/stampsign/${invoiceNumber}/sign/manual`;
 
-      console.log("=".repeat(80));
-      console.log("📡 POST Manual Signing Upload");
-      console.log("=".repeat(80));
-      console.log("URL:", url);
-      console.log("Invoice Number:", invoiceNumber);
-      console.log("Remark:", remark || "Manual signing upload");
-      console.log("File Details:", {
-        name: file.name,
-        size: `${(file.size / 1024).toFixed(2)} KB`,
-        type: file.type,
-        lastModified: new Date(file.lastModified).toLocaleString("id-ID"),
-      });
-      console.log("Timestamp:", new Date().toLocaleString("id-ID"));
-      console.log("=".repeat(80));
-
-      for (let pair of formData.entries()) {
-        if (pair[1] instanceof File) {
-          console.log(`  ${pair[0]}:`, {
-            name: pair[1].name,
-            size: `${(pair[1].size / 1024).toFixed(2)} KB`,
-            type: pair[1].type,
-          });
-        } else {
-          console.log(`  ${pair[0]}: ${pair[1]}`);
-        }
-      }
-
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
         formData,
-        (progress) => {
-          console.log(`⏳ Upload Progress: ${progress}%`);
-        },
         process.env.REACT_APP_BASE_URL_NGROK
       );
-
-      console.log("✅ POST Manual Signing Response:");
-      console.log("Success:", response?.success);
-      console.log("Message:", response?.message);
-      console.log("Code:", response?.code);
-      console.log("=".repeat(80));
 
       const successMessage = {
         title: "Successful",

@@ -347,7 +347,6 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
           viewerContainer
         );
       }
-      console.log("Preview");
     } catch (error) {
       console.error("Error fetching document:", error);
     }

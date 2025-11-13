@@ -191,7 +191,6 @@ const ProformaInvoice = () => {
           viewerContainer
         );
       }
-      console.log("Preview");
     } catch (error) {
       console.error("Error fetching document:", error);
     }

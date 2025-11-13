@@ -73,19 +73,9 @@ const StampingRequestModal = ({
 
   const handlePreviewFile = async () => {
     try {
-      console.log("=".repeat(80));
-      console.log("📥 PREVIEW INVOICE REQUEST");
-      console.log("=".repeat(80));
-      console.log("Invoice Number:", invoice.invoiceNumber);
-      console.log("Timestamp:", new Date().toLocaleString("id-ID"));
-      console.log("=".repeat(80));
-
       await dispatch(
         previewOriginalInvoice({ invoiceNumber: invoice.invoiceNumber })
       ).unwrap();
-
-      console.log("✅ Preview opened successfully");
-      console.log("=".repeat(80));
     } catch (error) {
       console.error("❌ Error previewing document:", error);
       console.error("=".repeat(80));
@@ -148,28 +138,6 @@ const StampingRequestModal = ({
       }
     }
 
-    console.log("=".repeat(80));
-    console.log("📤 STAMPING REQUEST SUBMISSION");
-    console.log("=".repeat(80));
-    console.log("📋 Invoice Number:", invoice.invoiceNumber);
-    console.log("🏷️  Customer:", invoice.customer);
-    console.log("💰 Amount:", formatAmount(invoice.amount));
-    console.log("🔖 Stamping Method:", stampingMethod);
-    console.log("📝 Remark:", remark || "N/A");
-    console.log("⏰ Timestamp:", new Date().toLocaleString("id-ID"));
-
-    if (stampingMethod === "manual" && fileList.length > 0) {
-      const file = fileList[0].originFileObj || fileList[0];
-      console.log("📁 File Details:", {
-        name: file.name,
-        size: `${(file.size / 1024).toFixed(2)} KB`,
-        type: file.type,
-        lastModified: new Date(file.lastModified).toLocaleString("id-ID"),
-      });
-    }
-
-    console.log("=".repeat(80));
-
     try {
       if (onSubmit) {
         const submissionData = {
@@ -207,7 +175,6 @@ const StampingRequestModal = ({
   };
 
   const handleCancel = () => {
-    console.log("❌ Stamping request cancelled");
     setStampingMethod("e-stamping");
     setFileList([]);
     setCurrentStep(0);
@@ -217,7 +184,6 @@ const StampingRequestModal = ({
 
   const handleMethodChange = (e) => {
     const newMethod = e.target.value;
-    console.log("🔄 Stamping method changed:", newMethod);
     setStampingMethod(newMethod);
     setFileList([]);
     setCurrentStep(0);
