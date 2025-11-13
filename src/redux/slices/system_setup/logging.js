@@ -59,14 +59,7 @@ export const getGlobalLogging = createAsyncThunk(
 
       const url = `/v1/dbs/api/log/view-activity?${params.toString()}`;
 
-      const ngrokBaseUrl =
-        process.env.REACT_APP_NGROK_BASE_URL ||
-        "https://f2709fa4b0d6.ngrok-free.app";
-
-      const response = await ratingBillingHttpService.getPagination(
-        url,
-        ngrokBaseUrl
-      );
+      const response = await ratingBillingHttpService.getPagination(url);
 
       return {
         data: response.data,

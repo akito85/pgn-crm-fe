@@ -21,12 +21,10 @@ const initialState = {
   },
 };
 
-const NGROK_BASE_URL = "https://6db0aac26041.ngrok-free.app";
-
 export const getJobs = createAsyncThunk("job/getJobs", async (_, thunkAPI) => {
   try {
     const url = "/v1/dbs/api/job/list";
-    const response = await userHttpService.getAll(url, NGROK_BASE_URL);
+    const response = await userHttpService.getAll(url);
 
     if (
       response &&
@@ -73,7 +71,7 @@ export const getJobById = createAsyncThunk(
   async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/job/view/${id}`;
-      const response = await userHttpService.getDetail(url, NGROK_BASE_URL);
+      const response = await userHttpService.getDetail(url);
 
       if (response && response.success) {
         return response.data;
@@ -108,7 +106,7 @@ export const getListJobType = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/job-type/list`;
-      const response = await userHttpService.getAll(url, NGROK_BASE_URL);
+      const response = await userHttpService.getAll(url);
 
       if (response && response.success && response.data) {
         return response.data.content || response.data;
@@ -141,7 +139,7 @@ export const getListParentJob = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/job/list`;
-      const response = await userHttpService.getAll(url, NGROK_BASE_URL);
+      const response = await userHttpService.getAll(url);
 
       if (
         response &&
@@ -198,11 +196,7 @@ export const createJob = createAsyncThunk(
       };
 
       const url = "/v1/dbs/api/job/create";
-      const response = await userHttpService.createData(
-        url,
-        payload,
-        NGROK_BASE_URL
-      );
+      const response = await userHttpService.createData(url, payload);
 
       if (response && response.success) {
         const successBody = {

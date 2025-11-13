@@ -6,8 +6,6 @@ import {
   showModalError,
 } from "../general_slice";
 
-const CUSTOM_BASE_URL = process.env.REACT_APP_BASE_URL_NGROK;
-
 const transformBillingItems = (items) => {
   if (!items || items.length === 0) return [];
 
@@ -94,10 +92,7 @@ export const getListApprovedBilling = createAsyncThunk(
         searchParam ? `&search=${searchParam}` : ""
       }`;
 
-      const response = await ratingBillingHttpService.getPagination(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getPagination(url);
 
       return response.data || { result: [], page: {} };
     } catch (error) {
@@ -122,10 +117,7 @@ export const getListCategory = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/rbi/e-invoice/category-list";
-      const response = await ratingBillingHttpService.getAll(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getAll(url);
 
       return response.data || [];
     } catch (error) {
@@ -150,20 +142,17 @@ export const getAllApprovalList = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/rbi/e-invoice/approval-hierarchy-list";
-      const response = await ratingBillingHttpService.getAll(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getAll(url);
 
-      const approvalList = Array.isArray(response.data) 
-        ? response.data 
+      const approvalList = Array.isArray(response.data)
+        ? response.data
         : response.data?.result || [];
 
       return approvalList;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
-      
+
       if (
         error?.response?.data?.code === 500 ||
         error?.response?.data?.code === 419
@@ -186,10 +175,7 @@ export const getListApprovalById = createAsyncThunk(
   async (appHierId, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/e-invoice/apphier-detail/${appHierId}`;
-      const response = await ratingBillingHttpService.getDetail(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getDetail(url);
 
       return response.data || [];
     } catch (error) {
@@ -218,10 +204,7 @@ export const getAllBillingItemPaginate = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/billing/billing-item/${billingCode}?page=0&size=999&sort=lineNumber~asc`;
 
-      const response = await ratingBillingHttpService.getPagination(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getPagination(url);
 
       const transformedItems = transformBillingItems(
         response.data?.result || []
@@ -255,10 +238,7 @@ export const getDetailEFaktur = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/rbi/e-invoice/${billingCode}`;
 
-      const response = await ratingBillingHttpService.getDetail(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getDetail(url);
 
       return response.data || null;
     } catch (error) {
@@ -294,10 +274,7 @@ export const getLogActivity = createAsyncThunk(
         page - 1
       }&size=${size}`;
 
-      const response = await ratingBillingHttpService.getPagination(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getPagination(url);
 
       return response.data || { result: [], page: {} };
     } catch (error) {
@@ -329,7 +306,6 @@ export const getLogActivity = createAsyncThunk(
   }
 );
 
-
 export const uploadAttachment = createAsyncThunk(
   "EFAKTUR/UPLOAD_ATTACHMENT",
   async ({ einvoiceId, file, categoryId, onProgress }, thunkAPI) => {
@@ -343,8 +319,7 @@ export const uploadAttachment = createAsyncThunk(
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
         formData,
-        onProgress || (() => {}),
-        CUSTOM_BASE_URL
+        onProgress || (() => {})
       );
 
       return {
@@ -376,8 +351,7 @@ export const generateEFakturWithAttachments = createAsyncThunk(
 
       const createResponse = await ratingBillingHttpService.createData(
         createUrl,
-        requestBody,
-        CUSTOM_BASE_URL
+        requestBody
       );
 
       if (!createResponse.success) {
@@ -426,8 +400,7 @@ export const generateEFakturWithAttachments = createAsyncThunk(
                   thunkAPI.dispatch(
                     updateUploadProgress(Math.min(totalProgress, 100))
                   );
-                },
-                CUSTOM_BASE_URL
+                }
               );
 
             uploadResults.push({
@@ -518,8 +491,7 @@ export const approvedEfaktur = createAsyncThunk(
 
       const response = await ratingBillingHttpService.createData(
         url,
-        requestBody,
-        CUSTOM_BASE_URL
+        requestBody
       );
 
       if (response.success) {
@@ -571,8 +543,7 @@ export const generateXMLEFaktur = createAsyncThunk(
 
       const response = await ratingBillingHttpService.createData(
         url,
-        requestBody,
-        CUSTOM_BASE_URL
+        requestBody
       );
 
       const successBody = {
@@ -612,8 +583,7 @@ export const uploadManualEFaktur = createAsyncThunk(
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
         formData,
-        () => {},
-        CUSTOM_BASE_URL
+        () => {}
       );
 
       const successBody = {
@@ -658,10 +628,7 @@ export const downloadEFakturList = createAsyncThunk(
         searchParam ? `&search=${searchParam}` : ""
       }`;
 
-      const response = await ratingBillingHttpService.downloadDataPrabill(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.downloadDataPrabill(url);
       return response.data;
     } catch (error) {
       const message =
@@ -684,10 +651,7 @@ export const getApprovalHistory = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/rbi/e-invoice/approval-history/${efakturId}`;
 
-      const response = await ratingBillingHttpService.getDetail(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getDetail(url);
 
       return response.data || { dataHistory: {}, dataApprover: {} };
     } catch (error) {

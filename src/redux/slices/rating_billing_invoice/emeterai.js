@@ -50,17 +50,6 @@ const getFilenameFromHeader = (contentDisposition) => {
   return null;
 };
 
-const formatFilename = (invoiceNumber, type, timestamp = new Date()) => {
-  const day = String(timestamp.getDate()).padStart(2, "0");
-  const month = timestamp
-    .toLocaleString("en-US", { month: "short" })
-    .toUpperCase();
-  const year = timestamp.getFullYear();
-  const formattedDate = `${day}${month}${year}`;
-
-  return `${invoiceNumber}-(${type})-${formattedDate}.pdf`;
-};
-
 export const getAllEMeteraiInvoices = createAsyncThunk(
   "GET_ALL_EMETERAI_INVOICES",
   async ({ page, pageSize, search, sort, filters }, thunkAPI) => {
@@ -88,10 +77,7 @@ export const getAllEMeteraiInvoices = createAsyncThunk(
         }
       }
 
-      const response = await ratingBillingHttpService.getPagination(
-        url,
-        process.env.REACT_APP_BASE_URL_NGROK
-      );
+      const response = await ratingBillingHttpService.getPagination(url);
 
       return response.data;
     } catch (error) {
@@ -113,10 +99,7 @@ export const getInvoiceDetail = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/rbi/invoice/stampsign/${invoiceNumber}`;
 
-      const response = await ratingBillingHttpService.getDetail(
-        url,
-        process.env.REACT_APP_BASE_URL_NGROK
-      );
+      const response = await ratingBillingHttpService.getDetail(url);
 
       return response.data;
     } catch (error) {
@@ -138,10 +121,7 @@ export const getInvoiceActivityLogs = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/rbi/invoice/stampsign/logs/${invoiceNumber}?page=${page}&size=${pageSize}`;
 
-      const response = await ratingBillingHttpService.getPagination(
-        url,
-        process.env.REACT_APP_BASE_URL_NGROK
-      );
+      const response = await ratingBillingHttpService.getPagination(url);
 
       return response.data;
     } catch (error) {
@@ -162,8 +142,7 @@ export const previewOriginalInvoice = createAsyncThunk(
   async ({ invoiceNumber }, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        process.env.REACT_APP_BASE_URL_NGROK +
-          `/v1/dbs/api/rbi/invoice/stampsign/download/original/${invoiceNumber}`,
+        +`/v1/dbs/api/rbi/invoice/stampsign/download/original/${invoiceNumber}`,
         {
           headers: {
             ...tokenHeader(),
@@ -204,8 +183,7 @@ export const previewStampedInvoice = createAsyncThunk(
   async ({ invoiceNumber }, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        process.env.REACT_APP_BASE_URL_NGROK +
-          `/v1/dbs/api/rbi/invoice/stampsign/download/stamped/${invoiceNumber}`,
+        +`/v1/dbs/api/rbi/invoice/stampsign/download/stamped/${invoiceNumber}`,
         {
           headers: {
             ...tokenHeader(),
@@ -246,8 +224,7 @@ export const downloadOriginalInvoice = createAsyncThunk(
   async ({ invoiceNumber }, thunkAPI) => {
     try {
       const response = await axios.get(
-        process.env.REACT_APP_BASE_URL_NGROK +
-          `/v1/dbs/api/rbi/invoice/stampsign/download/original/${invoiceNumber}`,
+        +`/v1/dbs/api/rbi/invoice/stampsign/download/original/${invoiceNumber}`,
         {
           headers: {
             ...tokenHeader(),
@@ -299,8 +276,7 @@ export const downloadStampedInvoice = createAsyncThunk(
   async ({ invoiceNumber }, thunkAPI) => {
     try {
       const response = await axios.get(
-        process.env.REACT_APP_BASE_URL_NGROK +
-          `/v1/dbs/api/rbi/invoice/stampsign/download/stamped/${invoiceNumber}`,
+        +`/v1/dbs/api/rbi/invoice/stampsign/download/stamped/${invoiceNumber}`,
         {
           headers: {
             ...tokenHeader(),
@@ -352,8 +328,7 @@ export const downloadSignedInvoice = createAsyncThunk(
   async ({ invoiceNumber }, thunkAPI) => {
     try {
       const response = await axios.get(
-        process.env.REACT_APP_BASE_URL_NGROK +
-          `/v1/dbs/api/rbi/invoice/stampsign/download/signed/${invoiceNumber}`,
+        +`/v1/dbs/api/rbi/invoice/stampsign/download/signed/${invoiceNumber}`,
         {
           headers: {
             ...tokenHeader(),
@@ -436,11 +411,7 @@ export const createStampingRequest = createAsyncThunk(
 
       const url = `/v1/dbs/api/rbi/invoice/stampsign/${invoiceNumber}/stamp/emeterai`;
 
-      const response = await ratingBillingHttpService.createData(
-        url,
-        body,
-        process.env.REACT_APP_BASE_URL_NGROK
-      );
+      const response = await ratingBillingHttpService.createData(url, body);
 
       const successMessage = {
         title: "Successful",
@@ -487,8 +458,7 @@ export const uploadManualStamping = createAsyncThunk(
 
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
-        formData,
-        process.env.REACT_APP_BASE_URL_NGROK
+        formData
       );
 
       const successMessage = {
@@ -536,8 +506,7 @@ export const uploadManualSigning = createAsyncThunk(
 
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
-        formData,
-        process.env.REACT_APP_BASE_URL_NGROK
+        formData
       );
 
       const successMessage = {
