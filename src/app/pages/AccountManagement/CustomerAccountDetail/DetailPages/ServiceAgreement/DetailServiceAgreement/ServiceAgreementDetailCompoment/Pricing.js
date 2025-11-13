@@ -1,5 +1,4 @@
 import React,{ useState,useEffect, useRef } from 'react'
-import moment from "moment";
 
 import GridLayout from '../../../../../../../../components/GridLayout'
 import DetailText from '../../../../../../../../components/DetailText'
@@ -7,7 +6,7 @@ import TablePagination from '../../../../../../../../components/TablePagination'
 // import { getColumnSearchProps } from "../../../../../../../../utils/getColumnSearchProps";
 import { NumericFormat } from 'react-number-format';
 import Highlighter from 'react-highlight-words';
-import { Input, Tooltip } from 'antd';
+import { Input } from 'antd';
 import { hasValue, renderColumn } from '../../../../../../../../utils';
 import { FilterOutlined } from '@ant-design/icons';
 

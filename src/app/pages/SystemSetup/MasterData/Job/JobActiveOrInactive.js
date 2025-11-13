@@ -1,5 +1,4 @@
 import React from "react";
-import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import InputComponent from "../../../../../components/InputComponent";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../assets/Icon/index";

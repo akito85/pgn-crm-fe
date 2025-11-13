@@ -1,20 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Link, NavLink, Route, Routes, useNavigate } from "react-router-dom";
 import {
-  Spin,
   Input,
-  Form,
-  Alert,
-  Popover,
-  Checkbox,
   Tooltip,
   Space,
   DatePicker,
 } from "antd";
 import Highlighter from "react-highlight-words";
 
-import SVGIcon from "../../../../../../../assets/Icon/index";
 import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../../../components/TablePagination";

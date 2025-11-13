@@ -2,7 +2,6 @@ import React from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
 import RadioTabs from "../../../../../components/RadioTabs";
 import PricingDetailTableDetail from "../Form/PricingDetailTableDetail";
-import PricingDetailTableCriteria from "../Form/PricingDetailTableCriteria";
 import PricingDetailAdjustmentTable from "./PricingDetailAdjustmentTable";
 import PricingLogInformationDetail from "./PricingLogInformationDetail";
 import { columnsTableCriteriaAll } from "../../UtilsProduct/TableCriteriaAllProduct";

@@ -4,7 +4,6 @@ import moment from "moment";
 import React, { useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import BaseContainer from "../../../../../components/BaseContainer";
-import StatusComponent from "../../../../../components/StatusComponent";
 import TablePagination from "../../../../../components/TablePagination";
 import { dateFormatting } from "../../../../../utils";
 

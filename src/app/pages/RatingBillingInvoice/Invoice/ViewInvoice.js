@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+// ViewInvoice.js
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Form, Select, Tooltip } from "antd";
 import axios from "axios";
@@ -9,11 +10,8 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
-import BaseContainer from "../../../../components/BaseContainer";
-import TablePagination from "../../../../components/TablePagination";
 import { columnsInvoice } from "./TableViewInvoice";
 import DetailInvoice from "./DetailInvoice";
-import ModalGenerateInvoice from "./ModalGenerateInvoice";
 import {
   createRegenerate,
   getAllInvoicePaginate,
@@ -22,24 +20,30 @@ import {
   getDownloadList,
   getFormatType,
 } from "../../../../redux/slices/rating_billing_invoice/invoice";
-import { configApp } from "../../../../constants/configApp";
-import { tokenHeader } from "../../../../utils/tokenHeader";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
-import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
-import { EyeOutlined } from "@ant-design/icons";
+import {
+  DownloadOutlined,
+  EyeOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
+import CardContainer from "../../../../components/CardContainer";
+import TableRBI from "../../../../components/TableRBI";
+import { configApp } from "../../../../constants/configApp";
+import { tokenHeader } from "../../../../utils/tokenHeader";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const ViewInvoice = () => {
   // Selector
-  const { data, loading, data_detail, data_format, data_billing } = useSelector(
+  const { data, loading, data_detail, data_format } = useSelector(
     (state) => state.invoice
   );
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data?.result;
+  const dataSource = data?.result || [];
 
   // State
   const [page, setPage] = useState(1);
@@ -57,6 +61,24 @@ const ViewInvoice = () => {
   const [modalReGenerate, setModalReGenerate] = useState(false);
   const [modalGenerate, setModalGenerate] = useState(false);
 
+  // ✅ State untuk fix column (dengan localStorage persistence)
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    const saved = localStorage.getItem("invoiceFixedColumns");
+    return saved
+      ? JSON.parse(saved)
+      : {
+          no: "left",
+          invoiceNumber: "left",
+          status: "right",
+          action: "right",
+        }; // Default fix invoice number
+  });
+
+  // ✅ Save to localStorage when fixedColumns change
+  useEffect(() => {
+    localStorage.setItem("invoiceFixedColumns", JSON.stringify(fixedColumns));
+  }, [fixedColumns]);
+
   // Use Effect
   useEffect(() => {
     let tempSearch = "";
@@ -69,9 +91,14 @@ const ViewInvoice = () => {
       }
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+
+    let searchParam = undefined;
+    if (tempSearch) {
+      searchParam = encodeURIComponent(JSON.stringify(search));
+    }
     dispatch(
       getAllInvoicePaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
+        search: searchParam,
         page,
         pageSize,
         sort,
@@ -132,7 +159,14 @@ const ViewInvoice = () => {
 
   // Handle Download
   const handleDownload = () => {
-    dispatch(getDownloadList({ page, pageSize, sort, search: encodeURIComponent(JSON.stringify(search)) }));
+    dispatch(
+      getDownloadList({
+        page,
+        pageSize,
+        sort,
+        search: encodeURIComponent(JSON.stringify(search)),
+      })
+    );
   };
 
   // Handle Detail
@@ -148,12 +182,12 @@ const ViewInvoice = () => {
     setModalReGenerate(true);
   };
 
-  // Handle Preview
+  // Handle Preview File
   const handlePreviewFile = async (record) => {
     try {
       const response = await axios.get(
         configApp.RATING_BILLING_SERVICE +
-        `/v1/dbs/api/rbi/invoice/${record?.invoiceNumber}/preview`,
+          `/v1/dbs/api/rbi/invoice/${record?.invoiceNumber}/preview`,
         {
           headers: tokenHeader(),
           responseType: "arraybuffer",
@@ -179,7 +213,6 @@ const ViewInvoice = () => {
           viewerContainer
         );
       }
-      console.log("Preview");
     } catch (error) {
       console.error("Error fetching document:", error);
     }
@@ -201,7 +234,7 @@ const ViewInvoice = () => {
     setBodyError({});
   };
 
-  // Handle Preview
+  // Handle Confirm ReGenerate
   const handleConfirmReGenerate = async (res, handleClear) => {
     try {
       setModalReGenerate(false);
@@ -211,8 +244,10 @@ const ViewInvoice = () => {
         action: "REGENERATE",
         remark: res.remark,
       };
-      await dispatch(createRegenerate({ id: invoiceNumber, body: body }))?.unwrap();
-      await handleClear()
+      await dispatch(
+        createRegenerate({ id: invoiceNumber, body: body })
+      )?.unwrap();
+      await handleClear();
       await dispatch(
         getAllInvoicePaginate({
           search: encodeURIComponent(JSON.stringify(search)),
@@ -254,7 +289,7 @@ const ViewInvoice = () => {
         sort,
       })
     );
-  }
+  };
 
   const itemGrantAccess = [
     {
@@ -265,7 +300,7 @@ const ViewInvoice = () => {
           type="submit"
           onClick={handleDownload}
         >
-          Download List
+          Export Data
         </ButtonComponent>
       ),
     },
@@ -275,7 +310,10 @@ const ViewInvoice = () => {
         <ButtonComponent
           icon={<SVGIcon name="IconButtonCreate" width={24} />}
           type="submit"
-          onClick={() => setModalGenerate(true)}
+          onClick={() => {
+            window.location.href =
+              "/invoice/generate-invoice/generate-form-invoice";
+          }}
         >
           Generate Invoice
         </ButtonComponent>
@@ -288,30 +326,22 @@ const ViewInvoice = () => {
       type: "table",
       render: (record) => {
         return (
-          <Tooltip title="Detail">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDetail"
-                width={24}
-                onClick={() => handleDetail(record)}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Preview",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Re-Generate">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconReGenerate"
-                width={24}
-                onClick={() => handleReGenerate(record)}
-              />
+          <Tooltip title="Detail Invoice Log">
+            <div
+              className="pt-1 cursor-pointer"
+              onClick={() => {
+                handleDetail(record);
+                setTimeout(
+                  () =>
+                    window.scrollTo({
+                      top: document.body.scrollHeight,
+                      behavior: "smooth",
+                    }),
+                  100
+                );
+              }}
+            >
+              <EyeOutlined style={{ fontSize: "20px" }} />
             </div>
           </Tooltip>
         );
@@ -322,16 +352,28 @@ const ViewInvoice = () => {
       type: "table",
       render: (record) => {
         return (
-          <Tooltip title="Preview">
-            <div className="pt-1">
-              <EyeOutlined
-                style={{
-                  fontSize: "24px",
-                  color: "#0075bf",
-                  cursor: "pointer",
-                }}
-                onClick={() => handlePreviewFile(record)}
-              />
+          <Tooltip title="Re-Generate">
+            <div
+              className="pt-1 cursor-pointer"
+              onClick={() => handleReGenerate(record)}
+            >
+              <ReloadOutlined style={{ fontSize: "20px" }} />
+            </div>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      action: "Preview",
+      type: "table",
+      render: (record) => {
+        return (
+          <Tooltip title="Download">
+            <div
+              className="pt-1 cursor-pointer"
+              onClick={() => handlePreviewFile(record)}
+            >
+              <DownloadOutlined style={{ fontSize: "25px" }} />
             </div>
           </Tooltip>
         );
@@ -339,51 +381,95 @@ const ViewInvoice = () => {
     },
   ];
 
+  // ✅ Call hook at component level (not inside useMemo)
+  const actionCols = useColumnActionPermission(
+    ["view", "preview", "regenerate"],
+    itemGrantAccess
+  );
+
+  // ✅ Get base columns and add 'key' property to each column
+  const baseColumns = useMemo(() => {
+    const invoiceCols = columnsInvoice(
+      search,
+      page,
+      pageSize,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    );
+
+    // Add 'key' property to columns that don't have it
+    const columnsWithKeys = [...invoiceCols, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title, // Fallback to dataIndex or title if no key
+    }));
+
+    return columnsWithKeys;
+  }, [search, page, pageSize, searchedColumn, searchText, actionCols]);
+
+  // ✅ Apply fixed columns using useMemo
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(baseColumns, fixedColumns);
+  }, [baseColumns, fixedColumns]);
+
+  // ✅ Extract column definitions for ColumnFixDropdown (with key and title only)
+  const columnDefinitions = useMemo(() => {
+    return baseColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [baseColumns]);
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <div className="w-full flex justify-end gap-[20px]">
-          <Toolbar items={itemGrantAccess} />
-        </div>
-
-        <BaseContainer header={"Invoice List"}>
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">Invoice List</p>
+              <div className="flex gap-2">
+                <ButtonComponent
+                  icon={<SVGIcon name="IconButtonCreate" width={24} />}
+                  type="submit"
+                  onClick={() => {
+                    window.location.href =
+                      "/invoice/generate-invoice/generate-form-invoice";
+                  }}
+                >
+                  Generate Invoice
+                </ButtonComponent>
+              </div>
+            </div>
+          }
+        >
           <div className="w-full">
-            <TablePagination
+            <TableRBI
               dataSource={dataSource}
-              columns={[
-                ...columnsInvoice(
-                  search,
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                  // handlePreviewFile,
-                  // handleDetail,
-                  // handleReGenerate
-                ),
-                ...useColumnActionPermission(
-                  ["view", "preview", "regenerate"],
-                  itemGrantAccess
-                ),
-              ]}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements}
-              tableScrolled={{ y: 525, x: 12000 }}
+              tableScrolled={{ y: 525, x: 2000 }}
               onSort={onSortApi}
+              handleDownload={handleDownload}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         {/* Invoice Log */}
-        {pageDetail === true ? (
-          <DetailInvoice detail={data_detail?.logs} invoiceNumber={invoiceNumber}/>
+        {pageDetail === true && data_detail ? (
+          <DetailInvoice
+            detail={data_detail?.logs}
+            invoiceNumber={invoiceNumber}
+          />
         ) : null}
 
         {/* Modal Re-Generate */}
@@ -431,16 +517,6 @@ const ViewInvoice = () => {
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
-
-        {/* Modal Generate */}
-        <ModalGenerateInvoice
-          isOpen={modalGenerate}
-          handleCancel={() => setModalGenerate(false)}
-          data={data_billing?.data}
-          refreshTable={refreshTable}
-          setBodyError={setBodyError}
-          setModalError={setModalError}
-        />
       </Spin>
     </LayoutMenu>
   );

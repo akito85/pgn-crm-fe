@@ -143,7 +143,7 @@ const ModalAttachment = ({
   const handleUploadLink = async (e) => {
     e.stopPropagation();
     const url = urlLink;
-    if (!!url) {
+    if (url) {
       try {
         const fileName = url.split("/").pop();
         const result = await fetch(url);

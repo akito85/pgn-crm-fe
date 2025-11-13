@@ -1,11 +1,9 @@
-import { Checkbox, Col, DatePicker, Form, Row, Select } from "antd";
+import { Checkbox, Form, Select } from "antd";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import InputComponent from "../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../components/SelectComponent";
-import { getListCriteriaTOP } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/termsofPayment";
 import { formMessageRequired, requiredMessage } from "../../../../../../utils";
 import FunctionalTableCriteriaTOP from "../TableCriteria/FunctionalTableCriteriaTOP";
 import DateComponent from "../../../../../../components/DateComponent";

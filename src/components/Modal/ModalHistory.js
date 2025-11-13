@@ -4,10 +4,10 @@ import {
   RightCircleFilled,
   RightOutlined,
 } from "@ant-design/icons";
-import { Avatar, Divider, List, Modal, Segmented, Tooltip } from "antd";
+import { Avatar, Divider, List, Modal, Tooltip } from "antd";
 import React, { Fragment, useEffect, useState } from "react";
 import SVGIcon from "../../assets/Icon/index";
-import { dateFormat, dateFormatting } from "../../utils";
+import { dateFormatting } from "../../utils";
 import moment from "moment";
 import ButtonComponent from "../ButtonComponent";
 import RadioTabs from "../RadioTabs";

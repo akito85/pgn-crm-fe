@@ -2,7 +2,6 @@ import React, { useEffect, Fragment, useState, useRef } from "react";
 import moment from "moment";
 import { dateFormatting, hasValue } from "../../../../../../../utils";
 import columnsDetail from "../../Table/TableDetailMappingInformation";
-import { Spin } from "antd";
 import DynamicTableInlineBilling from "../../Table/DynamicTableInlineBilling";
 
 const DetailMappingInformation = ({

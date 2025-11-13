@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { showModalError, validateError } from "../../general_slice";
+import { validateError } from "../../general_slice";
 import { showModalSuccess } from "../../general_slice";
 import accountManagementService from "../../../services/account_management/accountManagementService";
 import { errorBody, errorCode, errorMessage } from "../../../../utils";
@@ -67,7 +67,7 @@ export const getDetailEquipment = createAsyncThunk(
 //Create Equipment
 export const createEqupment = createAsyncThunk(
   "CREATE_EQUIPMENT",
-  async (body , thunkAPI) => {
+  async (body, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/account-detail/equipment/create-update`;
       const response = await accountManagementService.createData(url, body);
@@ -116,9 +116,6 @@ export const deleteEquipment = createAsyncThunk(
     }
   }
 );
-
-
-
 
 /* ================= 
 Drop Down List 
@@ -329,10 +326,10 @@ const accountEquipmentSlice = createSlice({
   initialState,
   extraReducers: {
     // Get Pagination Equipment
-    [getListEqupment.pending]: (state, action) => {
+    [getListEqupment.pending]: (state) => {
       state.loading = true;
     },
-    [getListEqupment.rejected]: (state, action) => {
+    [getListEqupment.rejected]: (state) => {
       state.loading = false;
     },
     [getListEqupment.fulfilled]: (state, action) => {
@@ -341,10 +338,10 @@ const accountEquipmentSlice = createSlice({
     },
 
     // Get Detail Equipment
-    [getDetailEquipment.pending]: (state, action) => {
+    [getDetailEquipment.pending]: (state) => {
       state.loading = true;
     },
-    [getDetailEquipment.rejected]: (state, action) => {
+    [getDetailEquipment.rejected]: (state) => {
       state.loading = false;
     },
     [getDetailEquipment.fulfilled]: (state, action) => {
@@ -353,10 +350,10 @@ const accountEquipmentSlice = createSlice({
     },
 
     // Get Ddl Name Equipment
-    [getDdlNameEquipment.pending]: (state, action) => {
+    [getDdlNameEquipment.pending]: (state) => {
       state.loading = true;
     },
-    [getDdlNameEquipment.rejected]: (state, action) => {
+    [getDdlNameEquipment.rejected]: (state) => {
       state.loading = false;
     },
     [getDdlNameEquipment.fulfilled]: (state, action) => {
@@ -365,10 +362,10 @@ const accountEquipmentSlice = createSlice({
     },
 
     // Get Ddl Type Equipment
-    [getDdlTypeEquipment.pending]: (state, action) => {
+    [getDdlTypeEquipment.pending]: (state) => {
       state.loading = true;
     },
-    [getDdlTypeEquipment.rejected]: (state, action) => {
+    [getDdlTypeEquipment.rejected]: (state) => {
       state.loading = false;
     },
     [getDdlTypeEquipment.fulfilled]: (state, action) => {
@@ -377,10 +374,10 @@ const accountEquipmentSlice = createSlice({
     },
 
     // Get Ddl Brand Equipment
-    [getDdlBrandEquipment.pending]: (state, action) => {
+    [getDdlBrandEquipment.pending]: (state) => {
       state.loading = true;
     },
-    [getDdlBrandEquipment.rejected]: (state, action) => {
+    [getDdlBrandEquipment.rejected]: (state) => {
       state.loading = false;
     },
     [getDdlBrandEquipment.fulfilled]: (state, action) => {
@@ -389,10 +386,10 @@ const accountEquipmentSlice = createSlice({
     },
 
     // Get Ddl Quantity
-    [getDdlQtyEquipment.pending]: (state, action) => {
+    [getDdlQtyEquipment.pending]: (state) => {
       state.loading = true;
     },
-    [getDdlQtyEquipment.rejected]: (state, action) => {
+    [getDdlQtyEquipment.rejected]: (state) => {
       state.loading = false;
     },
     [getDdlQtyEquipment.fulfilled]: (state, action) => {
@@ -401,10 +398,10 @@ const accountEquipmentSlice = createSlice({
     },
 
     // Get Ddl Capacity
-    [getDdlCapacityEquipment.pending]: (state, action) => {
+    [getDdlCapacityEquipment.pending]: (state) => {
       state.loading = true;
     },
-    [getDdlCapacityEquipment.rejected]: (state, action) => {
+    [getDdlCapacityEquipment.rejected]: (state) => {
       state.loading = false;
     },
     [getDdlCapacityEquipment.fulfilled]: (state, action) => {
@@ -413,10 +410,10 @@ const accountEquipmentSlice = createSlice({
     },
 
     // Get Ddl Energy
-    [getDdlEnergyEquipment.pending]: (state, action) => {
+    [getDdlEnergyEquipment.pending]: (state) => {
       state.loading = true;
     },
-    [getDdlEnergyEquipment.rejected]: (state, action) => {
+    [getDdlEnergyEquipment.rejected]: (state) => {
       state.loading = false;
     },
     [getDdlEnergyEquipment.fulfilled]: (state, action) => {
@@ -425,10 +422,10 @@ const accountEquipmentSlice = createSlice({
     },
 
     // Get Ddl Gas Conversion
-    [getDdlGasConversionEquipment.pending]: (state, action) => {
+    [getDdlGasConversionEquipment.pending]: (state) => {
       state.loading = true;
     },
-    [getDdlGasConversionEquipment.rejected]: (state, action) => {
+    [getDdlGasConversionEquipment.rejected]: (state) => {
       state.loading = false;
     },
     [getDdlGasConversionEquipment.fulfilled]: (state, action) => {
@@ -437,10 +434,10 @@ const accountEquipmentSlice = createSlice({
     },
 
     // Get Ddl Fuel TYpe
-    [getDdlFuelTypeEquipment.pending]: (state, action) => {
+    [getDdlFuelTypeEquipment.pending]: (state) => {
       state.loading = true;
     },
-    [getDdlFuelTypeEquipment.rejected]: (state, action) => {
+    [getDdlFuelTypeEquipment.rejected]: (state) => {
       state.loading = false;
     },
     [getDdlFuelTypeEquipment.fulfilled]: (state, action) => {
@@ -449,24 +446,24 @@ const accountEquipmentSlice = createSlice({
     },
 
     // Create Equipment
-    [createEqupment.pending]: (state, action) => {
+    [createEqupment.pending]: (state) => {
       state.loading = true;
     },
-    [createEqupment.rejected]: (state, action) => {
+    [createEqupment.rejected]: (state) => {
       state.loading = false;
     },
-    [createEqupment.fulfilled]: (state, action) => {
+    [createEqupment.fulfilled]: (state) => {
       state.loading = false;
     },
 
     // Delete Equipment
-    [deleteEquipment.pending]: (state, action) => {
+    [deleteEquipment.pending]: (state) => {
       state.loading = true;
     },
-    [deleteEquipment.rejected]: (state, action) => {
+    [deleteEquipment.rejected]: (state) => {
       state.loading = false;
     },
-    [deleteEquipment.fulfilled]: (state, action) => {
+    [deleteEquipment.fulfilled]: (state) => {
       state.loading = false;
     },
   },

@@ -3,7 +3,6 @@ import StatusComponent from "../../../../../components/StatusComponent";
 import { dateFormatting, hasValue, toTitleCase } from "../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import { sorterFunction } from "../../../../../utils/sorterFunction";
-import { render } from "@testing-library/react";
 
 export const columnAllocation = (
   page = 1,

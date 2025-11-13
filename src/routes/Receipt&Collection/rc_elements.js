@@ -1,5 +1,4 @@
 import ViewReceipt from "../../app/pages/ReceiptAndCollection/Receipt/ViewReceipt";
-import DetailReceipt from "../../app/pages/ReceiptAndCollection/Receipt/DetailReceipt";
 import ListDetailReceipt from "../../app/pages/ReceiptAndCollection/Receipt/ListDetailReceipt";
 import ViewSynchronizeReceipt from "../../app/pages/ReceiptAndCollection/ReceiptReconciliation/SynchronizeReceipt/ViewSynchronizeReceipt";
 import DetailSynchronizeReceipt from "../../app/pages/ReceiptAndCollection/ReceiptReconciliation/SynchronizeReceipt/DetailSynchronizeReceipt";
@@ -10,7 +9,6 @@ import UploadMaintainElectronicBankStatement from "../../app/pages/ReceiptAndCol
 import ViewBank from "../../app/pages/ReceiptAndCollection/MasterData/Bank/ViewBank";
 import ViewReceiptHistories from "../../app/pages/ReceiptAndCollection/ReceiptHistories/ViewReceiptHistories";
 import ViewPaymentItem from "../../app/pages/ReceiptAndCollection/MasterData/PaymentItem/ViewPaymentItem";
-import DetailBank from "../../app/pages/ReceiptAndCollection/MasterData/Bank/DetailBank";
 import ListDetailBank from "../../app/pages/ReceiptAndCollection/MasterData/Bank/ListDetailBank";
 import BankForm from "../../app/pages/ReceiptAndCollection/MasterData/Bank/BankForm";
 import ListDetailPaymentItem from "../../app/pages/ReceiptAndCollection/MasterData/PaymentItem/ListDetailPaymentItem";
@@ -74,5 +72,5 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
 
   //late Charge
   VIEW_LATE_CHARGE: <ViewLateCharge />,
-  DETAIL_LATE_CHARGE: <ListDetailLateCharge />
+  DETAIL_LATE_CHARGE: <ListDetailLateCharge />,
 };

@@ -9,7 +9,6 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import { Form, Spin, Steps } from "antd";
 import InputComponent from "../../../../../components/InputComponent";
-import { requiredMessage } from "../../../../../utils";
 import {
   getDetailCalculationResult,
   getDetailCalculationResultNoPaging,
@@ -336,7 +335,6 @@ const DetailInformation = ({ data, tabHeader }) => {
     },
   };
 
-
   const next = () => {
     setCurrent(current + 1);
   };
@@ -364,7 +362,7 @@ const DetailInformation = ({ data, tabHeader }) => {
     setPageSizeCal(10);
     setSearchTextCal("");
     setSearchedColumnCal("");
-    handleResetFilter()
+    handleResetFilter();
   };
 
   const handleButtonNext = () => {
@@ -374,16 +372,16 @@ const DetailInformation = ({ data, tabHeader }) => {
     setPageSizeCal(10);
     setSearchTextCal("");
     setSearchedColumnCal("");
-    handleResetFilter()
+    handleResetFilter();
   };
 
   const handleResetFilter = () => {
     setPageCal(1);
     setPageSizeCal(10);
-    setSearchedColumnCal("")
+    setSearchedColumnCal("");
     setSearchTextCal("");
-    setSearchRecalculate({})
-  }
+    setSearchRecalculate({});
+  };
 
   const filterDataByPage = (data = [], type = "data") => {
     let result = [...data]?.map((item, index) => ({
@@ -394,7 +392,6 @@ const DetailInformation = ({ data, tabHeader }) => {
 
     return type === "data" ? result : result.length;
   };
-
 
   const steps = () => {
     let temp = [
@@ -410,13 +407,16 @@ const DetailInformation = ({ data, tabHeader }) => {
                 <TablePaginationNew
                   type="FE"
                   dataSource={filterDataByPage(
-                    (list_calculation_no_paging || []).filter(
-                      (item) => item.calType !== 624 && !item.isTry
-                    )?.map(item => {
-                      return Object.fromEntries(
-                        Object.entries(item).map(([key, value]) => [key, value === null ? "" : value])
-                      );
-                    }),
+                    (list_calculation_no_paging || [])
+                      .filter((item) => item.calType !== 624 && !item.isTry)
+                      ?.map((item) => {
+                        return Object.fromEntries(
+                          Object.entries(item).map(([key, value]) => [
+                            key,
+                            value === null ? "" : value,
+                          ])
+                        );
+                      }),
                     "data"
                   )}
                   columns={columnsRecalculate(
@@ -498,7 +498,7 @@ const DetailInformation = ({ data, tabHeader }) => {
     setCurrent(0);
     setKeyTableSelected([]);
     setTableSelected([]);
-    handleResetFilter()
+    handleResetFilter();
   };
 
   const clearRetry = () => {
@@ -506,11 +506,7 @@ const DetailInformation = ({ data, tabHeader }) => {
     setOpenRetry(false);
   };
 
-  console.log(tableSelected);
-
   const handleSave = () => {
-
-
     const accNumb = tableSelected?.map((item) => {
       return item?.accNumb;
     });
@@ -520,7 +516,9 @@ const DetailInformation = ({ data, tabHeader }) => {
       calCode: data?.calCode,
       calType: segmentedPage === "Rating Result" ? 621 : 623,
       remark: forceObj?.remark,
-      resultId: tableSelected?.filter(item => keyTableSelected?.includes(item?.key))?.map(item => item?.resultId),
+      resultId: tableSelected
+        ?.filter((item) => keyTableSelected?.includes(item?.key))
+        ?.map((item) => item?.resultId),
     };
     dispatch(recalculateData(body))
       .unwrap()
@@ -578,7 +576,7 @@ const DetailInformation = ({ data, tabHeader }) => {
           })
         );
         clearRetry();
-        handleClear()
+        handleClear();
       });
   };
 

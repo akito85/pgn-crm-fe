@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import { PlusOutlined, FilterOutlined } from "@ant-design/icons";
-import { Collapse, DatePicker, Form, Input, Space, Switch } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import { Form } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
@@ -16,7 +16,6 @@ import {
   getGlobalTypeTaxIdentifier,
 } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import { useDispatch, useSelector } from "react-redux";
-import Highlighter from "react-highlight-words";
 import { dateFormatting } from "../../../../../../../../utils";
 import moment from "moment";
 import { ModalError } from "../../../../../../../../components/Modal/ModalPopUp";

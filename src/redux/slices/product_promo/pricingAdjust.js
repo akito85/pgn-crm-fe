@@ -37,19 +37,29 @@ const initialState = {
   dataDetailPricing: {},
   dataListCategory: [],
   message: "",
-  data_grant_access:{},
+  data_grant_access: {},
 };
 
-export const getGrantedAccessPriceAdjust = createAsyncThunk("CHECK_GRANTED_PRICE_ADJUSTMENT", async (body, thunkAPI) => {
-  try {
-    const data = await productPromoHttpService.checkGrantedAccessProduct(body)
-    thunkAPI.dispatch(grantedAccessDetail(body?.body))
-		return data?.data;
-	} catch (error) {
-		thunkAPI.dispatch(validateError({ error: error, action:'CHECK_GRANTED_PRICE_ADJUSTMENT'}))
-		return thunkAPI.rejectWithValue(error);
-	}
-}); 
+export const getGrantedAccessPriceAdjust = createAsyncThunk(
+  "CHECK_GRANTED_PRICE_ADJUSTMENT",
+  async (body, thunkAPI) => {
+    try {
+      const data = await productPromoHttpService.checkGrantedAccessProduct(
+        body
+      );
+      thunkAPI.dispatch(grantedAccessDetail(body?.body));
+      return data?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "CHECK_GRANTED_PRICE_ADJUSTMENT",
+        })
+      );
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
 
 export const getAllPricingAdjustPaginate = createAsyncThunk(
   "GET_ALL_PRICING_ADJUST_PAGINATE",
@@ -203,8 +213,12 @@ export const downloadPriceAdjust = createAsyncThunk(
       const response = await productPromoHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error, action: "DOWNLOAD_PRICE_ADJUST", back : false }));
-      return thunkAPI.rejectWithValue(error.response.data.code === 419 ? null : error.response.data)
+      thunkAPI.dispatch(
+        validateError({ error, action: "DOWNLOAD_PRICE_ADJUST", back: false })
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data
+      );
     }
   }
 );
@@ -797,13 +811,13 @@ const pricingAdjustSlice = createSlice({
       state.loadingPricingAdjust = false;
     },
     /** Inactive Pricing */
-    [inactivePricingAdjust.pending]: (state, action) => {
+    [inactivePricingAdjust.pending]: (state) => {
       state.loadingPricingAdjust = true;
     },
-    [inactivePricingAdjust.fulfilled]: (state, action) => {
+    [inactivePricingAdjust.fulfilled]: (state) => {
       state.loadingPricingAdjust = false;
     },
-    [inactivePricingAdjust.rejected]: (state, action) => {
+    [inactivePricingAdjust.rejected]: (state) => {
       state.loadingPricingAdjust = false;
     },
     /** Get List AppHierId */
@@ -846,13 +860,13 @@ const pricingAdjustSlice = createSlice({
       state.loadingPricingAdjust = false;
     },
     /** Download Price Adjust*/
-    [downloadPriceAdjust.pending]: (state, action) => {
+    [downloadPriceAdjust.pending]: (state) => {
       state.loadingPricingAdjust = true;
     },
-    [downloadPriceAdjust.fulfilled]: (state, action) => {
+    [downloadPriceAdjust.fulfilled]: (state) => {
       state.loadingPricingAdjust = false;
     },
-    [downloadPriceAdjust.rejected]: (state, action) => {
+    [downloadPriceAdjust.rejected]: (state) => {
       state.loadingPricingAdjust = false;
     },
     /** Get All Pricing Detail Paginate */
@@ -1146,23 +1160,23 @@ const pricingAdjustSlice = createSlice({
       state.loadingPricingAdjust = false;
     },
     /** Approve/Reject Create Price Adjust */
-    [approvalCreatePriceAdjust.pending]: (state, action) => {
+    [approvalCreatePriceAdjust.pending]: (state) => {
       state.loadingPricingAdjust = true;
     },
-    [approvalCreatePriceAdjust.fulfilled]: (state, action) => {
+    [approvalCreatePriceAdjust.fulfilled]: (state) => {
       state.loadingPricingAdjust = false;
     },
-    [approvalCreatePriceAdjust.rejected]: (state, action) => {
+    [approvalCreatePriceAdjust.rejected]: (state) => {
       state.loadingPricingAdjust = false;
     },
     /** Approve/Reject Inactive Price Adjust */
-    [approvalInactivePriceAdjust.pending]: (state, action) => {
+    [approvalInactivePriceAdjust.pending]: (state) => {
       state.loadingPricingAdjust = true;
     },
-    [approvalInactivePriceAdjust.fulfilled]: (state, action) => {
+    [approvalInactivePriceAdjust.fulfilled]: (state) => {
       state.loadingPricingAdjust = false;
     },
-    [approvalInactivePriceAdjust.rejected]: (state, action) => {
+    [approvalInactivePriceAdjust.rejected]: (state) => {
       state.loadingPricingAdjust = false;
     },
 

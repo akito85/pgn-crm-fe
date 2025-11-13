@@ -5,10 +5,8 @@ import Highlighter from "react-highlight-words";
 import { Link } from "react-router-dom";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import StatusComponent from "../../../../../../components/StatusComponent";
-import { getCustomerInfo } from "../../../../../../redux/slices/receipt_collection/electrionicBank";
 import { dateFormatting } from "../../../../../../utils";
 import {
-  getColumnSearchProps,
   getColumnSearchPropsPaging,
 } from "../../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../../assets/Icon/index";

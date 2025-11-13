@@ -1,6 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import moment from "moment";
+import { useDispatch } from "react-redux";
 
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
@@ -8,7 +7,6 @@ import { Select, Form, InputNumber } from "antd";
 import ModalCustom from "../../../../../../../../../components/Modal/ModalCustom";
 import SelectComponent from "../../../../../../../../../components/SelectComponent";
 import InputComponent from "../../../../../../../../../components/InputComponent";
-import { getListPriceCode } from "../../../../../../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 import { columnsDetail } from "../TablePricing/TableDetail";
 import TablePagination from "../../../../../../../../../components/TablePagination";
 import { showModalError } from "../../../../../../../../../redux/slices/general_slice";

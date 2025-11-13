@@ -63,14 +63,21 @@ export const inactiveAnnouncement = createAsyncThunk(
       const response = await userHttpService.activationWithRemark(url, body);
       const successBody = {
         title: "Successful",
-        description: `Your data has been ${action === "INACTIVE" ? "activated" : "inactivated"
-          }`,
+        description: `Your data has been ${
+          action === "INACTIVE" ? "activated" : "inactivated"
+        }`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), status, errorMessage(error)), action: "INACTIVE_ANNOUNCEMENT", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), status, errorMessage(error)),
+          action: "INACTIVE_ANNOUNCEMENT",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -89,7 +96,13 @@ export const createHtmlAnnouncement = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_HTML_ANNOUNCEMENT", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "CREATE_HTML_ANNOUNCEMENT",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error);
     }
   }
@@ -125,8 +138,9 @@ export const createImageAnnouncement = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${body.isSubmit ? "created" : "submitted"
-              }. ${message}.`,
+            description: `Your data was not ${
+              body.isSubmit ? "created" : "submitted"
+            }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -204,8 +218,9 @@ export const updateImageAnnouncement = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${body.isSubmit ? "updated" : "submitted"
-              }. ${message}.`,
+            description: `Your data was not ${
+              body.isSubmit ? "updated" : "submitted"
+            }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -216,7 +231,8 @@ export const updateImageAnnouncement = createAsyncThunk(
   }
 );
 
-export const checkAllowingFile = createAsyncThunk("CHECK_ALLOWING_FILE",
+export const checkAllowingFile = createAsyncThunk(
+  "CHECK_ALLOWING_FILE",
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/announcement/config-file`;
@@ -224,10 +240,15 @@ export const checkAllowingFile = createAsyncThunk("CHECK_ALLOWING_FILE",
       return data;
     } catch (error) {
       const message =
-        (error.response && error.response.data && error.response.data.message) ||
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
         error.message ||
         error.toString();
-      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
         const errorBody = {
@@ -239,7 +260,7 @@ export const checkAllowingFile = createAsyncThunk("CHECK_ALLOWING_FILE",
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
-)
+);
 
 export const downloadAnnouncement = createAsyncThunk(
   "DOWNLOAD_ANNOUNCEMENT",
@@ -267,67 +288,67 @@ const announcementSlice = createSlice({
   initialState,
   extraReducers: {
     //GET ANNOUNCEMENT LIST
-    [getAnnouncementList.pending]: (state, action) => {
+    [getAnnouncementList.pending]: (state) => {
       state.loading = true;
     },
     [getAnnouncementList.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_Announcement = action.payload;
     },
-    [getAnnouncementList.rejected]: (state, action) => {
+    [getAnnouncementList.rejected]: (state) => {
       state.loading = false;
     },
 
     //GET ANNOUNCEMENT DETAIL
-    [getAnnouncementDetail.pending]: (state, action) => {
+    [getAnnouncementDetail.pending]: (state) => {
       state.loading = true;
     },
     [getAnnouncementDetail.fulfilled]: (state, action) => {
       state.loading = false;
       state.detail_Announcement = action.payload;
     },
-    [getAnnouncementDetail.rejected]: (state, action) => {
+    [getAnnouncementDetail.rejected]: (state) => {
       state.loading = false;
     },
 
-    //CREATE ANNOUNCEMENT 
-    [createHtmlAnnouncement.pending]: (state, action) => {
+    //CREATE ANNOUNCEMENT
+    [createHtmlAnnouncement.pending]: (state) => {
       state.loading = true;
     },
     [createHtmlAnnouncement.fulfilled]: (state, action) => {
       state.loading = false;
       state.create_Announcement = action.payload;
     },
-    [createHtmlAnnouncement.rejected]: (state, action) => {
+    [createHtmlAnnouncement.rejected]: (state) => {
       state.loading = false;
     },
 
-    //UPDATE ANNOUNCEMENT 
-    [updateHtmlAnnouncement.pending]: (state, action) => {
+    //UPDATE ANNOUNCEMENT
+    [updateHtmlAnnouncement.pending]: (state) => {
       state.loading = true;
     },
     [updateHtmlAnnouncement.fulfilled]: (state, action) => {
       state.loading = false;
       state.update_Announcement = action.payload;
     },
-    [updateHtmlAnnouncement.rejected]: (state, action) => {
+    [updateHtmlAnnouncement.rejected]: (state) => {
       state.loading = false;
     },
 
     //INACTIVE ANNOUNCEMENT
-    [inactiveAnnouncement.pending]: (state, action) => {
+    [inactiveAnnouncement.pending]: (state) => {
       state.loading = true;
     },
     [inactiveAnnouncement.fulfilled]: (state, action) => {
       state.loading = false;
       state.inactive_Announcement = action.payload;
     },
-    [inactiveAnnouncement.rejected]: (state, action) => {
+    [inactiveAnnouncement.rejected]: (state) => {
       state.loading = false;
     },
 
     // check allowing file
-    [checkAllowingFile.pending]: (state, action) => {
+    [checkAllowingFile.pending]: (state) => {
       state.loading = true;
     },
     [checkAllowingFile.fulfilled]: (state, action) => {
@@ -340,14 +361,14 @@ const announcementSlice = createSlice({
     },
 
     //DOWNLOAD ANNOUNCEMENT
-    [downloadAnnouncement.pending]: (state, action) => {
+    [downloadAnnouncement.pending]: (state) => {
       state.loading = true;
     },
     [downloadAnnouncement.fulfilled]: (state, action) => {
       state.loading = false;
       state.download_Announcement = action.payload;
     },
-    [downloadAnnouncement.rejected]: (state, action) => {
+    [downloadAnnouncement.rejected]: (state) => {
       state.loading = false;
     },
   },

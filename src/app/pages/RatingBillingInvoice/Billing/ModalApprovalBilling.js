@@ -5,7 +5,6 @@ import { RightOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
 import InputComponent from "../../../../components/InputComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import { columnsRequestBilling } from "./Table/TableRequestBilling";
 import DetailText from "../../../../components/DetailText";
 import {
@@ -19,9 +18,9 @@ import ModalCustom from "../../../../components/Modal/ModalCustom";
 
 const ModalApprovalBilling = ({
   isOpen,
-  handleCancel = () => { },
-  handleRefresh = () => { },
-  handleOpenModal = () => { },
+  handleCancel = () => {},
+  handleRefresh = () => {},
+  handleOpenModal = () => {},
 }) => {
   // Selector
   const { data_list_billing_approval } = useSelector((state) => state.billing);
@@ -205,8 +204,6 @@ const ModalApprovalBilling = ({
           setModalError(true);
         }
       });
-
-    console.log(body, "body");
   };
 
   const handleCloseModalError = () => {
@@ -409,8 +406,9 @@ const ModalApprovalBilling = ({
               : IconModal["icon_error_default"]}
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`Your data was not ${action === "APPROVE" ? "approved" : "rejected"
-            }. ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">{`Your data was not ${
+            action === "APPROVE" ? "approved" : "rejected"
+          }. ${bodyError.message}.`}</p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>

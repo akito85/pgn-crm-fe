@@ -24,7 +24,6 @@ import { WarningOutlined } from "@ant-design/icons";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
-import moment from "moment";
 
 const AdjustmentBillingPage = () => {
   // Selector

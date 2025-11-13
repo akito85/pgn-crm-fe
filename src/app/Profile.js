@@ -1,14 +1,11 @@
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { Image, Spin, Avatar } from "antd";
-import React, { useState } from "react";
+import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import BaseContainer from "../components/BaseContainer";
-import BreadCrumb from "../components/BreadCrumb";
 import ButtonComponent from "../components/ButtonComponent";
-import DetailText from "../components/DetailText";
 import DetailTextNonPopUp from "../components/DetailTextNonPopUp";
 import LayoutMenu from "../components/SidebarMenu/LayoutMenu";
-import SVGIcon from "../assets/Icon/IconEdit";
 
 const Profile = () => {
   const navigate = useNavigate();

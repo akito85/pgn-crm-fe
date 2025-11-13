@@ -1,4 +1,4 @@
-import React, { useEffect, Fragment, useState, useRef, useLayoutEffect } from "react";
+import React, { useEffect, Fragment, useState, useRef } from "react";
 import { Form } from "antd";
 import moment from "moment";
 import { useSelector } from "react-redux";
@@ -11,7 +11,6 @@ import CreateAndUpdatePOSDetail from "./CreateAndUpdatePOSDetail";
 import {
   getCalculate,
   getCalculateBilling,
-  getRate,
 } from "../../../../../../redux/slices/rating_billing_invoice/PointOfSales";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../../utils/Icon";

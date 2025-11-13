@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import DetailText from "../../../../../components/DetailText";
@@ -8,7 +8,6 @@ import moment from "moment";
 import TablePagination from "../../../../../components/TablePagination";
 import { columnsApproval, columnsExpandApproval } from "../Table/TableApproval";
 import { columnAttachmentData } from "../Table/TableAttachment";
-import FunctionalTableCriteria from "../Table/FunctionalTableCriteria";
 import { columnsDetail } from "../Table/TableDetail";
 import { columnsTableCriteriaAll } from "../../UtilsProduct/TableCriteriaAllProduct";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";

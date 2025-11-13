@@ -23,11 +23,8 @@ import {
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
 import CreateReceiptForm from "./CreateReceiptForm";
-import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 import {
   createReceipt,
-  getAccountDDL,
-  getAccountNumberDDL,
   getAllApprovalListReceipt,
   getBankDDL,
   getCollectionAgentDDL,
@@ -50,8 +47,6 @@ import { configApp } from "../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { countBadgeFieldsErrorMandatory, dateFormatting, hasValue } from "../../../../../utils";
 import moment from "moment";
-import AttachmentSectionComponent from "../../../RatingBillingInvoice/MasterData/BillingItem/Form/tab/AttachmentSectionComponent";
-import { handleMandatory } from "../../../RatingBillingInvoice/POS/Utils";
 
 const ListRececiptForm = ({ type }) => {
   const {

@@ -25,14 +25,11 @@ import {
 } from "../../../../redux/slices/system_setup/entity";
 import { dateFormatting, hasValue, renderColumn, renderDateColumn, toTitleCase } from "../../../../utils";
 import moment from "moment";
-import Highlighter from "react-highlight-words";
 import TaxIdentifierDetail from "./TaxIdentifierDetail";
 import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
-import SVG from "../../../../assets/Icon/IconAccountManagement";
 import { intToNPWP } from "../../../../utils/npwp";
 import { getColumnSearchProps } from "../../../../utils/getColumnSearchProps";
 import { sorterFunction } from "../../../../utils/sorterFunction";
-import { updatePagination } from "../../../../utils/updatePagination";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 
 

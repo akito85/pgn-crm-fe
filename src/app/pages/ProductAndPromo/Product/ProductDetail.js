@@ -17,9 +17,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { LeftOutlined } from "@ant-design/icons";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
-import InputComponent from "../../../../components/InputComponent";
 import { listSectionInfoProductDetail } from "./utils";
-import { dateFormatting, requiredMessage } from "../../../../utils";
+import { dateFormatting } from "../../../../utils";
 import { useDispatch, useSelector } from "react-redux";
 import {
   approvalExtendProductVersion,

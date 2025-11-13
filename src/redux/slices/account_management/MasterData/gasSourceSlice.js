@@ -1,8 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { setBodyError, showModalError, validateError } from "../../general_slice";
+import { validateError } from "../../general_slice";
 import { showModalSuccess } from "../../general_slice";
 import accountManagementService from "../../../services/account_management/accountManagementService";
-import { validateCaptcha } from "react-simple-captcha";
 import { errorBody, errorCode, errorMessage } from "../../../../utils";
 
 const initialState = {
@@ -40,7 +39,13 @@ export const getAllGasSourcePaginate = createAsyncThunk(
       //   };
       //   thunkAPI.dispatch(showModalError(errorBody))
       // }
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_ALL_GAS_SOURCE_PAGINATE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_ALL_GAS_SOURCE_PAGINATE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -68,7 +73,13 @@ export const getAllGasSourceQualityPaginate = createAsyncThunk(
       //   };
       //   thunkAPI.dispatch(showModalError(errorBody))
       // }
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_ALL_GAS_SOURCE_QUALITY_PAGINATE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_ALL_GAS_SOURCE_QUALITY_PAGINATE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -91,7 +102,9 @@ export const getUOM = createAsyncThunk("GET_UOM", async (_, thunkAPI) => {
     //   };
     //   thunkAPI.dispatch(showModalError(errorBody))
     // }
-    thunkAPI.dispatch(validateError({ error: error, action: "GET_UOM", back: false }))
+    thunkAPI.dispatch(
+      validateError({ error: error, action: "GET_UOM", back: false })
+    );
     return thunkAPI.rejectWithValue(error?.response);
   }
 });
@@ -115,7 +128,9 @@ export const getCostCenter = createAsyncThunk(
       //   };
       //   thunkAPI.dispatch(showModalError(errorBody))
       // }
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_COST_CENTER", back: false }))
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_COST_CENTER", back: false })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -132,7 +147,13 @@ export const downloadGasSource = createAsyncThunk(
       const response = await accountManagementService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_GAS_SOURCE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_GAS_SOURCE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -166,7 +187,13 @@ export const createGasSource = createAsyncThunk(
       //   };
       //   thunkAPI.dispatch(showModalError(errorBody));
       // }
-      thunkAPI.dispatch(validateError({ error: error, action: "CREATE_GAS_SOURCE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "CREATE_GAS_SOURCE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -202,14 +229,20 @@ export const createGasSourceQuality = createAsyncThunk(
       //   };
       //   thunkAPI.dispatch(showModalError(errorBody));
       // }
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_GAS_SOURCE_QUALITY", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "CREATE_GAS_SOURCE_QUALITY",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
 export const updateEnDateGasSourceQuality = createAsyncThunk(
   "UPDATE_END_DATE_GAS_SOURCE_QUALITY",
-  async (body , thunkAPI) => {
+  async (body, thunkAPI) => {
     // console.log("🚀 ~ body:", body)
     try {
       const url = "/v1/dbs/api/gas-source/update-quality";
@@ -222,8 +255,13 @@ export const updateEnDateGasSourceQuality = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
-     
-      thunkAPI.dispatch(validateError({ error: error, action: "UPDATE_END_DATE_GAS_SOURCE_QUALITY", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "UPDATE_END_DATE_GAS_SOURCE_QUALITY",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -257,7 +295,13 @@ export const updateGasSource = createAsyncThunk(
       //   };
       //   thunkAPI.dispatch(showModalError(errorBody));
       // }
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'updated', errorMessage(error)), action: "UPDATE_GAS_SOURCE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "updated", errorMessage(error)),
+          action: "UPDATE_GAS_SOURCE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -293,7 +337,13 @@ export const activeOrInactiveGasSource = createAsyncThunk(
       //   };
       //   thunkAPI.dispatch(showModalError(errorBody));
       // }
-      thunkAPI.dispatch(validateError({ error: error, action: "ACTIVE_OR_INACTIVE_GAS_SOURCE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "ACTIVE_OR_INACTIVE_GAS_SOURCE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -329,7 +379,13 @@ export const activeOrInactiveGasSourceQuality = createAsyncThunk(
       //   };
       //   thunkAPI.dispatch(showModalError(errorBody))
       // };
-      thunkAPI.dispatch(validateError({ error: error, action: "ACTIVE_OR_INACTIVE_GAS_SOURCE_QUALITY", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "ACTIVE_OR_INACTIVE_GAS_SOURCE_QUALITY",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -354,7 +410,13 @@ export const getDetailGasSource = createAsyncThunk(
       //   };
       //   thunkAPI.dispatch(showModalError(errorBody))
       // }
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_DETAIL_GAS_SOURCE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_DETAIL_GAS_SOURCE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -379,7 +441,13 @@ export const getDetailGasSourceQuality = createAsyncThunk(
       //   };
       //   thunkAPI.dispatch(showModalError(errorBody))
       // }
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_DETAIL_GAS_SOURCE_QUALITY", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_DETAIL_GAS_SOURCE_QUALITY",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -446,53 +514,53 @@ const gasSourceSlice = createSlice({
     },
 
     // Create Gas Source
-    [createGasSource.pending]: (state, action) => {
+    [createGasSource.pending]: (state) => {
       state.loading = true;
     },
-    [createGasSource.fulfilled]: (state, action) => {
+    [createGasSource.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [createGasSource.rejected]: (state, action) => {
+    [createGasSource.rejected]: (state) => {
       state.loading = false;
       state.isFailed = true;
     },
 
     // Create Gas Source Quality
-    [createGasSourceQuality.pending]: (state, action) => {
+    [createGasSourceQuality.pending]: (state) => {
       state.loading = true;
     },
-    [createGasSourceQuality.fulfilled]: (state, action) => {
+    [createGasSourceQuality.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [createGasSourceQuality.rejected]: (state, action) => {
+    [createGasSourceQuality.rejected]: (state) => {
       state.loading = false;
       state.isFailed = true;
     },
 
     // Update Gas Source
-    [updateGasSource.pending]: (state, action) => {
+    [updateGasSource.pending]: (state) => {
       state.loading = true;
     },
-    [updateGasSource.fulfilled]: (state, action) => {
+    [updateGasSource.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [updateGasSource.rejected]: (state, action) => {
+    [updateGasSource.rejected]: (state) => {
       state.loading = false;
       state.isFailed = true;
     },
 
     // Update End Date Gas Source Quality
-    [updateEnDateGasSourceQuality.pending]: (state, action) => {
+    [updateEnDateGasSourceQuality.pending]: (state) => {
       state.loading = true;
     },
-    [updateEnDateGasSourceQuality.fulfilled]: (state, action) => {
+    [updateEnDateGasSourceQuality.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [updateEnDateGasSourceQuality.rejected]: (state, action) => {
+    [updateEnDateGasSourceQuality.rejected]: (state) => {
       state.loading = false;
       state.isFailed = true;
     },

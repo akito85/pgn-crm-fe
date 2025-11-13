@@ -16,13 +16,11 @@ import {
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
-import FunctionalTableCriteriaTOS from "./Utils/FunctionalTableCriteriaTOS";
 import {
   ModalConfirm,
   ModalError,
 } from "../../../../components/Modal/ModalPopUp";
 import TermOfServiceConfirmation from "./Modal/TermOfServiceConfirmation";
-import { columnsTableCriteriaTOS } from "./Utils/TableCriteriaTos";
 import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
 import FunctionalCriteriaProduct from "../UtilsProduct/FunctionalCriteriaProduct";
 import {

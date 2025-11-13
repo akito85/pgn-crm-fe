@@ -5,7 +5,6 @@ import Dragger from "antd/lib/upload/Dragger";
 import {
   CloseOutlined,
   FileOutlined,
-  InboxOutlined,
   UndoOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
@@ -15,7 +14,6 @@ import { bytesConverter } from "../../../../../utils/bytesConverter";
 import { getBase64 } from "../../../../../utils/getBase64";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ExtensionFile from "../../../../../utils/ExtensionFile";
-import productPromoHttpService from "../../../../../redux/services/productPromoHttpService";
 
 const MAX_FILE_SIZE = 5000000;
 const ModalAttachment = ({
@@ -158,7 +156,7 @@ const ModalAttachment = ({
   const handleUploadLink = async (e) => {
     e.stopPropagation();
     const url = urlLink.startsWith("http") ? urlLink : `https://${urlLink}`;
-    if (!!url) {
+    if (url) {
       try {
         const fileName = url.split("/").pop();
         const result = await fetch(url);

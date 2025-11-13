@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Form, Steps, message, Button, Spin } from "antd";
+import { Form, Steps, Button, Spin } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
 	LeftCircleOutlined,
@@ -14,7 +14,6 @@ import accountManagementPromoHttpService from "../../../../../../../redux/servic
 import BaseContainer from "../../../../../../../components/BaseContainer";
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import BreadCrumb from "../../../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import HeaderDetail from "../../../HeaderDetail";
@@ -37,7 +36,6 @@ import {
 	resetDataDetail,
 	getPriceCode,
 	getPriceRule,
-	getListPriceRuleById,
 	getListChooseTos,
 	getDetailServiceAgreement,
 	getDetailServiceAgreementDraft,

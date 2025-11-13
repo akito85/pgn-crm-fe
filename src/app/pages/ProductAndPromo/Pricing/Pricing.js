@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
-import { Popover, Spin } from "antd";
+import { Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { NavLink } from "react-router-dom";

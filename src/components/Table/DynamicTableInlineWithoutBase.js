@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Table,
   Input,
@@ -15,7 +15,6 @@ import {
 import moment from "moment";
 import ButtonComponent from "../ButtonComponent";
 import {
-  DeleteOutlined,
   MoreOutlined,
   PlusOutlined,
   InfoCircleOutlined,
@@ -201,7 +200,9 @@ const EditableCell = ({
                       setSuffix((prevState) => {
                         return {
                           ...prevState,
-                          [`${keyModal}~${key}`]: hasValue(e.target.value) ? e.target.value : null,
+                          [`${keyModal}~${key}`]: hasValue(e.target.value)
+                            ? e.target.value
+                            : null,
                         };
                       });
                     }}
@@ -267,30 +268,34 @@ const EditableCell = ({
         }
         if (selectDataRecord[`${record.key}type`] === 743) {
           //email
-          return <InputComponent 
-          onChange={(e) =>
-            setValue((prevState) => {
-              return {
-                ...prevState,
-                [`${keyModal}~${key}`]: e.target.value,
-              };
-            })
-          }
-          value={value[`${keyModal}~${key}`]}
-          />;
+          return (
+            <InputComponent
+              onChange={(e) =>
+                setValue((prevState) => {
+                  return {
+                    ...prevState,
+                    [`${keyModal}~${key}`]: e.target.value,
+                  };
+                })
+              }
+              value={value[`${keyModal}~${key}`]}
+            />
+          );
         }
         if (selectDataRecord[`${record.key}type`] === 742) {
-          return <InputComponent 
-          onChange={(e) =>
-            setValue((prevState) => {
-              return {
-                ...prevState,
-                [`${keyModal}~${key}`]: e.target.value,
-              };
-            })
-          }
-          value={value[`${keyModal}~${key}`]}
-          />;
+          return (
+            <InputComponent
+              onChange={(e) =>
+                setValue((prevState) => {
+                  return {
+                    ...prevState,
+                    [`${keyModal}~${key}`]: e.target.value,
+                  };
+                })
+              }
+              value={value[`${keyModal}~${key}`]}
+            />
+          );
         }
         if (selectDataRecord[`${record.key}type`] === 746) {
           return (
@@ -394,16 +399,15 @@ const EditableCell = ({
           return (
             <div className="w-full flex flex-row">
               <Select
-                onChange={(e) =>{
+                onChange={(e) => {
                   getCountryZone(e);
                   setPrefix1((prevState) => {
                     return {
                       ...prevState,
                       [`${keyModal}~${key}`]: e,
                     };
-                  })
-                } 
-                }
+                  });
+                }}
                 value={prefix1[`${keyModal}~${key}`]}
                 showSearch
                 optionFilterProp="children"
@@ -470,7 +474,9 @@ const EditableCell = ({
                     setSuffix((prevState) => {
                       return {
                         ...prevState,
-                        [`${keyModal}~${key}`]: hasValue(e.target.value) ? e.target.value : null,
+                        [`${keyModal}~${key}`]: hasValue(e.target.value)
+                          ? e.target.value
+                          : null,
                       };
                     });
                   }}
@@ -486,29 +492,33 @@ const EditableCell = ({
           );
         }
         if (selectDataRecord[`${record.key}type`] === 744) {
-          return <InputComponent 
-          onChange={(e) => {
-            setValue((prevState) => {
-              return {
-                ...prevState,
-                [`${keyModal}~${key}`]: e.target.value,
-              };
-            });
-          }}
-          value={value[`${keyModal}~${key}`]}
-          />;
+          return (
+            <InputComponent
+              onChange={(e) => {
+                setValue((prevState) => {
+                  return {
+                    ...prevState,
+                    [`${keyModal}~${key}`]: e.target.value,
+                  };
+                });
+              }}
+              value={value[`${keyModal}~${key}`]}
+            />
+          );
         } else {
-          return <InputComponent 
-          onChange={(e) => {
-            setValue((prevState) => {
-              return {
-                ...prevState,
-                [`${keyModal}~${key}`]: e.target.value,
-              };
-            });
-          }}
-          value={value[`${keyModal}~${key}`]}
-          />;
+          return (
+            <InputComponent
+              onChange={(e) => {
+                setValue((prevState) => {
+                  return {
+                    ...prevState,
+                    [`${keyModal}~${key}`]: e.target.value,
+                  };
+                });
+              }}
+              value={value[`${keyModal}~${key}`]}
+            />
+          );
         }
       case "input_regex":
         return (
@@ -710,10 +720,10 @@ const DynamicTableInlineWithoutBase = ({
 
   //validate for inline create and update
   useEffect(() => {
-    if(editingKey !== null){
-      setIsEditing(editingKey !== "" ? true : false)
+    if (editingKey !== null) {
+      setIsEditing(editingKey !== "" ? true : false);
     }
-  },[editingKey])
+  }, [editingKey]);
 
   const edit = (record, field) => {
     form.setFieldsValue(record);
@@ -734,25 +744,25 @@ const DynamicTableInlineWithoutBase = ({
       const newData = data.filter((item) => item.key !== key);
       setData(newData);
       onDataChange(newData);
-    }else{
+    } else {
       setPrefix1((prevState) => {
         return {
           ...prevState,
           [`${keyModal}~${key}`]: tempUpdate?.prefix1, // Reset the value for changes
         };
-      })
+      });
       setPrefix2((prevState) => {
         return {
           ...prevState,
           [`${keyModal}~${key}`]: tempUpdate?.prefix2, // Reset the value for changes
         };
-      })
+      });
       setSuffix((prevState) => {
         return {
           ...prevState,
           [`${keyModal}~${key}`]: tempUpdate?.suffix, // Reset the value for changes
         };
-      })
+      });
       setValue((prevState) => {
         return {
           ...prevState,
@@ -797,21 +807,32 @@ const DynamicTableInlineWithoutBase = ({
   const checkValidationInside = (data, key) => {
     switch (data) {
       case 741: // phone
-        return  hasValue(prefix1[`${keyModal}~${key}`]) && hasValue(value[`${keyModal}~${key}`]) && hasValue(prefix2[`${keyModal}~${key}`]);
+        return (
+          hasValue(prefix1[`${keyModal}~${key}`]) &&
+          hasValue(value[`${keyModal}~${key}`]) &&
+          hasValue(prefix2[`${keyModal}~${key}`])
+        );
       case 746: // Whatsapp
       case 747: // pgn mobile
-        return hasValue(prefix1[`${keyModal}~${key}`]) && hasValue(value[`${keyModal}~${key}`]);
+        return (
+          hasValue(prefix1[`${keyModal}~${key}`]) &&
+          hasValue(value[`${keyModal}~${key}`])
+        );
       case 742: // pgn mobile (email)
       case 743: // email
         return hasValue(value[`${keyModal}~${key}`]);
       case 745: // fax
-        return hasValue(prefix1[`${keyModal}~${key}`]) && hasValue(value[`${keyModal}~${key}`]) && hasValue(prefix2[`${keyModal}~${key}`]);
+        return (
+          hasValue(prefix1[`${keyModal}~${key}`]) &&
+          hasValue(value[`${keyModal}~${key}`]) &&
+          hasValue(prefix2[`${keyModal}~${key}`])
+        );
       case 744: // url
         return hasValue(value[`${keyModal}~${key}`]);
       default:
         return true; // Or any other default value
     }
-  }
+  };
 
   const handleSelectDataRecord = (data, key, index) => {
     const keyName = key + index;
@@ -827,7 +848,7 @@ const DynamicTableInlineWithoutBase = ({
         return {
           ...prevState,
           // [keyName]: value,
-          [`${key}inputType`] : typeValue(value),
+          [`${key}inputType`]: typeValue(value),
         };
       });
       form.setFieldsValue({
@@ -838,19 +859,19 @@ const DynamicTableInlineWithoutBase = ({
           ...prevState,
           [`${keyModal}~${key}`]: "", // Reset the value for changes
         };
-      })
+      });
       setPrefix2((prevState) => {
         return {
           ...prevState,
           [`${keyModal}~${key}`]: "", // Reset the value for changes
         };
-      })
+      });
       setSuffix((prevState) => {
         return {
           ...prevState,
           [`${keyModal}~${key}`]: "", // Reset the value for changes
         };
-      })
+      });
       setValue((prevState) => {
         return {
           ...prevState,
@@ -858,8 +879,8 @@ const DynamicTableInlineWithoutBase = ({
         };
       });
       form.resetFields([
-        // "inputType", 
-        "value"
+        // "inputType",
+        "value",
       ]);
     }
     return value;
@@ -886,7 +907,13 @@ const DynamicTableInlineWithoutBase = ({
     try {
       const row = await form.validateFields();
       console.log(row, "row");
-      if(Object.values(row).some(value => value === undefined || !checkValidationInside(selectDataRecord[`${key}type`], key))){
+      if (
+        Object.values(row).some(
+          (value) =>
+            value === undefined ||
+            !checkValidationInside(selectDataRecord[`${key}type`], key)
+        )
+      ) {
         setEmptyValueValidate(true);
         setModalValidate(true);
       } else {
@@ -930,7 +957,7 @@ const DynamicTableInlineWithoutBase = ({
         ...prevState,
         [`${keyModal}~${newRow.key}`]: "", // Reset the value for the new row
       };
-    })
+    });
 
     // setPrefix1((prevState) => {
     //   let temp = { ...prevState };
@@ -943,7 +970,7 @@ const DynamicTableInlineWithoutBase = ({
         ...prevState,
         [`${keyModal}~${newRow.key}`]: "", // Reset the value for the new row
       };
-    })
+    });
 
     // setPrefix2((prevState) => {
     //   let temp = { ...prevState };
@@ -956,7 +983,7 @@ const DynamicTableInlineWithoutBase = ({
         ...prevState,
         [`${keyModal}~${newRow.key}`]: "", // Reset the value for the new row
       };
-    })
+    });
 
     // setSuffix((prevState) => {
     //   let temp = { ...prevState };
@@ -982,16 +1009,18 @@ const DynamicTableInlineWithoutBase = ({
   };
   // console.log(value, "value")
   const deleteRow = (key) => {
-    const newData = data.filter((item) => item.key !== key).map((item) => {
-      const currentKey = parseInt(item.key, 10);
-    
-      // Update the key only if it comes after the deleted key
-      if (currentKey > key) {
-        item.key = (currentKey - 1).toString();
-      }
-    
-      return item;
-    });
+    const newData = data
+      .filter((item) => item.key !== key)
+      .map((item) => {
+        const currentKey = parseInt(item.key, 10);
+
+        // Update the key only if it comes after the deleted key
+        if (currentKey > key) {
+          item.key = (currentKey - 1).toString();
+        }
+
+        return item;
+      });
     setData(newData);
     onDataChange(newData);
     setStoredData(false);
@@ -1006,20 +1035,21 @@ const DynamicTableInlineWithoutBase = ({
     setPrefix1((prevState) => {
       let temp = { ...prevState };
       delete temp[`${keyModal}~${key}`];
-    
+
       // Iterate over the remaining keys and update their values
       Object.keys(temp).forEach((existingKey) => {
-        const [existingKeyModal, existingKeyNumber] = existingKey.split('~');
+        const [existingKeyModal, existingKeyNumber] = existingKey.split("~");
         const newKeyNumber = parseInt(existingKeyNumber, 10);
-    
+
         // Update the key only if it comes after the deleted key
-        if (newKeyNumber > key && parseInt(existingKeyModal) === keyModal) { // 3 > 2 && 3 === 3
+        if (newKeyNumber > key && parseInt(existingKeyModal) === keyModal) {
+          // 3 > 2 && 3 === 3
           const newKey = `${existingKeyModal}~${newKeyNumber - 1}`;
           temp[newKey] = temp[existingKey]; // 3~2 = 3~3
           delete temp[existingKey];
         }
       });
-    
+
       return temp;
     });
 
@@ -1032,12 +1062,12 @@ const DynamicTableInlineWithoutBase = ({
     setPrefix2((prevState) => {
       let temp = { ...prevState };
       delete temp[`${keyModal}~${key}`];
-    
+
       // Iterate over the remaining keys and update their values
       Object.keys(temp).forEach((existingKey) => {
-        const [existingKeyModal, existingKeyNumber] = existingKey.split('~');
+        const [existingKeyModal, existingKeyNumber] = existingKey.split("~");
         const newKeyNumber = parseInt(existingKeyNumber, 10);
-    
+
         // Update the key only if it comes after the deleted key
         if (newKeyNumber > key && parseInt(existingKeyModal) === keyModal) {
           const newKey = `${existingKeyModal}~${newKeyNumber - 1}`;
@@ -1045,7 +1075,7 @@ const DynamicTableInlineWithoutBase = ({
           delete temp[existingKey];
         }
       });
-    
+
       return temp;
     });
 
@@ -1058,12 +1088,12 @@ const DynamicTableInlineWithoutBase = ({
     setSuffix((prevState) => {
       let temp = { ...prevState };
       delete temp[`${keyModal}~${key}`];
-    
+
       // Iterate over the remaining keys and update their values
       Object.keys(temp).forEach((existingKey) => {
-        const [existingKeyModal, existingKeyNumber] = existingKey.split('~');
+        const [existingKeyModal, existingKeyNumber] = existingKey.split("~");
         const newKeyNumber = parseInt(existingKeyNumber, 10);
-    
+
         // Update the key only if it comes after the deleted key
         if (newKeyNumber > key && parseInt(existingKeyModal) === keyModal) {
           const newKey = `${existingKeyModal}~${newKeyNumber - 1}`;
@@ -1071,7 +1101,7 @@ const DynamicTableInlineWithoutBase = ({
           delete temp[existingKey];
         }
       });
-    
+
       return temp;
     });
 
@@ -1088,7 +1118,7 @@ const DynamicTableInlineWithoutBase = ({
       // Iterate over the remaining keys and update their values
       Object.keys(temp).forEach((existingKey) => {
         // console.log(existingKey, "existingKey")
-        const [existingKeyModal, existingKeyNumber] = existingKey.split('~');
+        const [existingKeyModal, existingKeyNumber] = existingKey.split("~");
         const newKeyNumber = parseInt(existingKeyNumber, 10);
         // console.log(newKeyNumber, "newKeyNumber")
         // Update the key only if it comes after the deleted key
@@ -1100,7 +1130,7 @@ const DynamicTableInlineWithoutBase = ({
           delete temp[existingKey];
         }
       });
-    
+
       return temp;
     });
 
@@ -1140,7 +1170,7 @@ const DynamicTableInlineWithoutBase = ({
       dataIndex: "operation",
       align: "center",
       width: 200,
-      fixed:"right",
+      fixed: "right",
       render: (_, record) => {
         const editable = record.key === editingKey;
         return (

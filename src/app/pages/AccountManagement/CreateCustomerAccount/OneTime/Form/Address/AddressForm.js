@@ -28,10 +28,8 @@ import {
   getPostalCode,
   getProvince,
   getSubDistrict,
-  getType,
-  checkIsPremiseAlready
+  getType
 } from "../../../../../../../redux/slices/account_management/Account/accountSlice";
-import GoogleMapsCustom from "../../../../CustomerAccountDetail/DetailPages/AccountAddress/GoogleMapsCustom";
 import { onInputUpperCase } from "../../../../Utils";
 import Maps from "../../../../../../../components/Maps";
 

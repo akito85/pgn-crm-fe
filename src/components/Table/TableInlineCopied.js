@@ -10,7 +10,6 @@ import {
   DatePicker,
   Popover,
 } from "antd";
-import moment from "moment";
 import BaseContainer from "../BaseContainer";
 import ButtonComponent from "../ButtonComponent";
 import {
@@ -75,8 +74,8 @@ const EditableCell = ({
                     - No Space
                     <br />
                     - Upper case letter
-                    <br />
-                    - Non-alphanumeric characters, such as !, @, #, $, %, ^, &, *, etc.
+                    <br />- Non-alphanumeric characters, such as !, @, #, $, %,
+                    ^, &, *, etc.
                   </span>
                 }
               >

@@ -1,9 +1,6 @@
-import {
-  LeftOutlined,
-  ExclamationCircleOutlined,
-} from "@ant-design/icons";
+import { LeftOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { Select, Alert, Form, Spin } from "antd";
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -20,7 +17,7 @@ import {
 } from "../../../../redux/slices/user_management/user";
 import TablePagination from "../../../../components/TablePagination";
 import { useDispatch, useSelector } from "react-redux";
-import { renderColumn, } from "../../../../utils";
+import { renderColumn } from "../../../../utils";
 import ModalBack from "../../../../components/Modal/ModalBack";
 import { requiredMessage } from "../../../../utils";
 import InputComponent from "../../../../components/InputComponent";
@@ -60,11 +57,7 @@ const MaintainUser = ({ dataTable }) => {
   const [filteredData, setFilteredData] = useState([]);
   const [initValue, setInitValue] = useState("");
 
-  const handleFetch = useCallback(() => {
-
-
-  }, []);
-
+  const handleFetch = useCallback(() => {}, []);
 
   const routes = [
     {
@@ -113,7 +106,6 @@ const MaintainUser = ({ dataTable }) => {
       })
     );
   }, [search, sort, page, pageSize, dispatch]);
-
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -212,9 +204,18 @@ const MaintainUser = ({ dataTable }) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
+        handleSearch
       ),
-      render: (text) => renderColumn('username', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "username",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
       title: "EMAIL",
@@ -228,9 +229,18 @@ const MaintainUser = ({ dataTable }) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
+        handleSearch
       ),
-      render: (text) => renderColumn('email', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "email",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
       title: "STATUS",
@@ -245,10 +255,18 @@ const MaintainUser = ({ dataTable }) => {
         searchText,
         handleSearch,
         false,
-        'status'
+        "status"
       ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
-
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "status",
+          search
+        ),
     },
     {
       title: "AUTH TYPE",
@@ -262,21 +280,26 @@ const MaintainUser = ({ dataTable }) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
+        handleSearch
       ),
-      render: (text) => renderColumn('authType', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "authType",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
   ];
 
-
   const handleRetry = () => {
-    handleCancelTryAgain()
-
-
+    handleCancelTryAgain();
   };
 
-
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
@@ -409,7 +432,7 @@ const MaintainUser = ({ dataTable }) => {
 
               <Form.Item
                 name={"remark"}
-                label={'Remark'}
+                label={"Remark"}
                 rules={[{ message: requiredMessage("Remark"), required: true }]}
                 className="w-full"
               >

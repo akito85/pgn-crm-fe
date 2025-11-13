@@ -1,6 +1,6 @@
-import { Checkbox, DatePicker, Form, Input, InputNumber, Select } from "antd";
+import { Checkbox, DatePicker, Form, Input, Select } from "antd";
 import moment from "moment";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
 import InputComponent from "../../../../../components/InputComponent";
 import SelectComponent from "../../../../../components/SelectComponent";
@@ -13,7 +13,6 @@ import AllocationSection from "../Table/AllocationSection";
 import {
   getAccountDDL,
   getAccountNumberDDL,
-  getConvertedCurrency,
 } from "../../../../../redux/slices/receipt_collection/receipt";
 import { useDispatch } from "react-redux";
 

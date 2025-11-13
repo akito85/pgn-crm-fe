@@ -264,110 +264,110 @@ const dataAccessSlice = createSlice({
     [downloadDataAccess.pending]: (state) => {
       state.loading = true;
     },
-    [downloadDataAccess.fulfilled]: (state, action) => {
+    [downloadDataAccess.fulfilled]: (state) => {
       state.loading = false;
     },
     [downloadDataAccess.rejected]: (state) => {
       state.loading = false;
     },
-    [downloadDetail.pending]: (state, action) => {
+    [downloadDetail.pending]: (state) => {
       state.loading = true;
     },
     [downloadDetail.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [downloadDetail.rejected]: (state, action) => {
+    [downloadDetail.rejected]: (state) => {
       state.loading = false;
     },
-    [getDataAccessPaginate.pending]: (state, action) => {
+    [getDataAccessPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getDataAccessPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [getDataAccessPaginate.rejected]: (state, action) => {
+    [getDataAccessPaginate.rejected]: (state) => {
       state.loading = false;
     },
-    [getDetailDataAccess.pending]: (state, action) => {
+    [getDetailDataAccess.pending]: (state) => {
       state.loading = true;
     },
     [getDetailDataAccess.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getDetailDataAccess.rejected]: (state, action) => {
+    [getDetailDataAccess.rejected]: (state) => {
       state.loading = false;
     },
-    [createDataAccess.pending]: (state, action) => {
+    [createDataAccess.pending]: (state) => {
       state.loading = true;
     },
     [createDataAccess.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_detail = action.payload;
     },
-    [createDataAccess.rejected]: (state, action) => {
+    [createDataAccess.rejected]: (state) => {
       state.loading = false;
     },
-    [dupliacateDataAccess.pending]: (state, action) => {
+    [dupliacateDataAccess.pending]: (state) => {
       state.loading = true;
     },
     [dupliacateDataAccess.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_detail = action.payload;
     },
-    [dupliacateDataAccess.rejected]: (state, action) => {
+    [dupliacateDataAccess.rejected]: (state) => {
       state.loading = false;
     },
-    [activationDataAccess.pending]: (state, action) => {
+    [activationDataAccess.pending]: (state) => {
       state.loading = true;
     },
     [activationDataAccess.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_detail = action.payload;
     },
-    [activationDataAccess.rejected]: (state, action) => {
+    [activationDataAccess.rejected]: (state) => {
       state.loading = false;
     },
-    [updateDataAccess.pending]: (state, action) => {
+    [updateDataAccess.pending]: (state) => {
       state.loading = true;
     },
     [updateDataAccess.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_detail = action.payload;
     },
-    [updateDataAccess.rejected]: (state, action) => {
+    [updateDataAccess.rejected]: (state) => {
       state.loading = false;
     },
-    [getDetailCostCenter.pending]: (state, action) => {
+    [getDetailCostCenter.pending]: (state) => {
       state.loading = true;
     },
     [getDetailCostCenter.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [getDetailCostCenter.rejected]: (state, action) => {
+    [getDetailCostCenter.rejected]: (state) => {
       state.loading = false;
     },
-    [activationCostCenter.pending]: (state, action) => {
+    [activationCostCenter.pending]: (state) => {
       state.loading = true;
     },
     [activationCostCenter.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [activationCostCenter.rejected]: (state, action) => {
+    [activationCostCenter.rejected]: (state) => {
       state.loading = false;
     },
-    [getAllCostCenter.pending]: (state, action) => {
+    [getAllCostCenter.pending]: (state) => {
       state.loading = true;
     },
     [getAllCostCenter.fulfilled]: (state, action) => {
       state.loading = false;
       state.cost_center_data = action.payload;
     },
-    [getAllCostCenter.rejected]: (state, action) => {
+    [getAllCostCenter.rejected]: (state) => {
       state.loading = false;
     },
   },

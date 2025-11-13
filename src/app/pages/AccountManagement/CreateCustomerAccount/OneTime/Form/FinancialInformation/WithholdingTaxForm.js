@@ -1,7 +1,5 @@
 import React from "react";
-import { Spin, Form, Checkbox } from "antd";
-import moment from "moment";
-import { dateFormatting } from "../../../../../../../utils";
+import { Form, Checkbox } from "antd";
 import DateComponent from "../../../../../../../components/DateComponent";
 import InputComponent from "../../../../../../../components/InputComponent";
 

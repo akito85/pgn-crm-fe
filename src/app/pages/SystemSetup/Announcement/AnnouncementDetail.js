@@ -12,9 +12,7 @@ import BaseContainer from "../../../../components/BaseContainer";
 import DetailText from "../../../../components/DetailText";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import TablePagination from "../../../../components/TablePagination";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { updatePagination } from "../../../../utils/updatePagination";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 
 const AnnouncementDetail = () => {

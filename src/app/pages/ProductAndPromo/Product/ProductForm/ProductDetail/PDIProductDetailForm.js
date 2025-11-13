@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 import { Form, Input, InputNumber, Select, Table, Tooltip } from "antd";
-import Highlighter from "react-highlight-words";
 import {
   getListChargingMethod,
-  getListName,
   getListNameProductDetail,
   getListPaymentType,
   getListUnit,
@@ -13,7 +11,6 @@ import {
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import SelectComponent from "../../../../../../components/SelectComponent";
-import { getColumnSearchPropsCriteria } from "../../columnTableCriteria";
 import { hasValue, renderColumn, requiredMessage } from "../../../../../../utils";
 import InputComponent from "../../../../../../components/InputComponent";
 

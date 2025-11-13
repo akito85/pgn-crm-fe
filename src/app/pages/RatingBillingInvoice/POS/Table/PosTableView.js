@@ -1,8 +1,3 @@
-import React from "react";
-import Highlighter from "react-highlight-words";
-import { Tooltip } from "antd";
-import moment from "moment";
-import StatusComponent from "../../../../../components/StatusComponent";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 

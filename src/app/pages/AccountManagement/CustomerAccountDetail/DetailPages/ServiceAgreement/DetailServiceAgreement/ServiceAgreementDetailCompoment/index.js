@@ -1,30 +1,17 @@
 import React,{useState, useEffect, useRef} from 'react'
 import moment from 'moment'
-import FileSaver from "file-saver";
-import { useDispatch, useSelector } from "react-redux";
-import { getColumnSearchProps, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchProps } from "../../../../../../../../utils/getColumnSearchProps";
 
-import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment"
 import BaseContainer from '../../../../../../../../components/BaseContainer'
 import GridLayout from '../../../../../../../../components/GridLayout'
 import DetailText from '../../../../../../../../components/DetailText'
 import RadioTabs from '../../../../../../../../components/RadioTabs'
-import Detail from './Detail'
 import Pricing from './Pricing'
 import LateCharge from './LateCharge'
 import CalculationRule from './CalculationRule'
 import TermOfService from './TermOfService'
-import TablePagination from '../../../../../../../../components/TablePagination'
 import { dateFormatting, hasValue, renderColumn } from '../../../../../../../../utils'
 import TaxImplication from './TaxImplication'
-import { Tooltip } from 'antd'
-import { EyeOutlined } from '@ant-design/icons'
-import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
-import productPromoHttpService from "../../../../../../../../redux/services/productPromoHttpService";
-import { getBase64 } from "../../../../../../../../utils/getBase64";
-import axios from "axios";
-import { configApp } from "../../../../../../../../constants/configApp";
-import { tokenHeader } from "../../../../../../../../utils/tokenHeader";
 import Attachment from '../Attachment';
 import { sorterFunction } from '../../../../../../../../utils/sorterFunction';
 import TablePaginationNew from '../../../../../../../../components/TablePaginationNew';

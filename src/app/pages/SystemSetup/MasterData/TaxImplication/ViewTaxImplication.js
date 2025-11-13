@@ -1,8 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {  Checkbox, Form, Spin, Tooltip } from "antd";
+import { Checkbox, Form, Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
-import { DownloadOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import {
+  DownloadOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -12,16 +16,14 @@ import BaseContainer from "../../../../../components/BaseContainer";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
-import {
-  ModalError,
-} from "../../../../../components/Modal/ModalPopUp";
+import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../utils/Icon";
 import {
   activeInactiveTaxImplication,
   downloadTaxImplication,
   getTaxImplicationPaginate,
 } from "../../../../../redux/slices/account_management/MasterData/tax_implication";
-import { toTitleCase, renderColumn } from '../../../../../utils';
+import { toTitleCase, renderColumn } from "../../../../../utils";
 import StatusComponent from "../../../../../components/StatusComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import { getGrantedAccessAccount } from "../../../../../redux/slices/account_management/accountManagement";
@@ -105,7 +107,7 @@ const columns = (
       width: 240,
       sorter: true,
       ellipsis: {
-        showTitle:false
+        showTitle: false,
       },
       ...getColumnSearchPropsPaging(
         "criteria",
@@ -114,7 +116,16 @@ const columns = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('criteria', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "criteria",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
     },
     {
       title: "IMPLICATION TYPE",
@@ -128,7 +139,16 @@ const columns = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('implicationType', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "implicationType",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -136,7 +156,7 @@ const columns = (
       width: 240,
       sorter: true,
       ellipsis: {
-        showTitle: false
+        showTitle: false,
       },
       ...getColumnSearchPropsPaging(
         "description",
@@ -145,8 +165,16 @@ const columns = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
-
+      render: (text) =>
+        renderColumn(
+          "description",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
     },
     {
       title: "STATUS",
@@ -189,12 +217,13 @@ const routes = [
 const ViewTaxImplication = () => {
   const { data, loading } = useSelector((state) => state.tax_implication);
   const { access_account } = useSelector((state) => state.accountManagement);
-	const filteredArray = {
-		actionList: access_account?.actionList?.filter(action => 
-			action.path.includes("/system-setup/tax-implication/") &&
-			!action.path.includes("/system-setup/tax-implication-rule/")
-		)
-	}
+  const filteredArray = {
+    actionList: access_account?.actionList?.filter(
+      (action) =>
+        action.path.includes("/system-setup/tax-implication/") &&
+        !action.path.includes("/system-setup/tax-implication-rule/")
+    ),
+  };
 
   const dispatch = useDispatch();
   const [formModalInactive] = Form.useForm();
@@ -212,12 +241,12 @@ const ViewTaxImplication = () => {
   const [bodyError, setBodyError] = useState({});
 
   useEffect(() => {
-    dispatch(getGrantedAccessAccount('/system-setup/tax-implication'))
-  }, [dispatch])
+    dispatch(getGrantedAccessAccount("/system-setup/tax-implication"));
+  }, [dispatch]);
 
   // use effect
   useEffect(() => {
-    const reqSearch = encodeURIComponent(JSON.stringify(search))
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
       getTaxImplicationPaginate({ search: reqSearch, sort, page, pageSize })
     );
@@ -257,21 +286,23 @@ const ViewTaxImplication = () => {
     setModalActive(true);
   };
 
-  {/* ACTION ACTIVE/INACTIVE */}
+  {
+    /* ACTION ACTIVE/INACTIVE */
+  }
   const handleOk = (formValue, handleClear) => {
     const body = {
       taxImplicationId: dataActivate.id,
-      remark: formValue.remark
+      remark: formValue.remark,
     };
     const activeOrInactive =
-    dataActivate.status === "ACTIVE" ? "inactivate" : "activate";
+      dataActivate.status === "ACTIVE" ? "inactivate" : "activate";
     dispatch(activeInactiveTaxImplication({ body, activeOrInactive }))
       .unwrap()
       .then(() => {
-        handleClear()
+        handleClear();
         setDataActivate({});
         setModalActive(false);
-        const reqSearch = encodeURIComponent(JSON.stringify(search))
+        const reqSearch = encodeURIComponent(JSON.stringify(search));
         dispatch(
           getTaxImplicationPaginate({ search: reqSearch, sort, page, pageSize })
         );
@@ -308,7 +339,14 @@ const ViewTaxImplication = () => {
       }
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(downloadTaxImplication({ search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }));
+    dispatch(
+      downloadTaxImplication({
+        search: encodeURIComponent(JSON.stringify(search)),
+        sort,
+        page,
+        pageSize,
+      })
+    );
   };
 
   const handleClose = () => {
@@ -318,7 +356,7 @@ const ViewTaxImplication = () => {
   const itemActions = [
     //action toolbar
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
@@ -327,11 +365,10 @@ const ViewTaxImplication = () => {
         >
           Download List
         </ButtonComponent>
-
-      )
+      ),
     },
     {
-      action: 'Upload',
+      action: "Upload",
       render: (
         <NavLink to={""}>
           <ButtonComponent
@@ -341,11 +378,10 @@ const ViewTaxImplication = () => {
             Upload
           </ButtonComponent>
         </NavLink>
-
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_TAX_IMPLICATION}>
           <ButtonComponent
@@ -355,7 +391,7 @@ const ViewTaxImplication = () => {
             Create Tax Implication
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // Column Action Table
@@ -374,8 +410,8 @@ const ViewTaxImplication = () => {
               </div>
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
 
     {
@@ -404,8 +440,8 @@ const ViewTaxImplication = () => {
               </Link>
             )}
           </Tooltip>
-        )
-      }
+        );
+      },
     },
 
     {
@@ -425,17 +461,16 @@ const ViewTaxImplication = () => {
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
-
-  ]
+        );
+      },
+    },
+  ];
 
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <ToolbarAccount items={itemActions} advancedAccess={filteredArray}/>
+        <ToolbarAccount items={itemActions} advancedAccess={filteredArray} />
         <BaseContainer header={"Tax Implication List"}>
           <div className="w-full">
             <TablePaginationNew
@@ -474,12 +509,16 @@ const ViewTaxImplication = () => {
           isOpen={modalActive}
           handleCloseModal={handleClose}
           onFinish={handleOk}
-          header={`${dataActivate?.status === "ACTIVE" ? "Inactivate" : "Activate"}`}
-          approveOrReject={`${dataActivate?.status === "ACTIVE" ? "Inactivate" : "Activate"}`}
+          header={`${
+            dataActivate?.status === "ACTIVE" ? "Inactivate" : "Activate"
+          }`}
+          approveOrReject={`${
+            dataActivate?.status === "ACTIVE" ? "Inactivate" : "Activate"
+          }`}
           menu={"Tax Implication"}
           named={dataActivate?.taxImplicationName}
-        />  
-        
+        />
+
         {/** Modal Retry */}
         <ModalError
           isOpen={modalError}
@@ -496,7 +535,6 @@ const ViewTaxImplication = () => {
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
-
       </Spin>
     </LayoutMenu>
   );

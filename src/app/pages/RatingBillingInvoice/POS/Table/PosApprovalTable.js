@@ -1,8 +1,5 @@
 import React, { Fragment } from "react";
 import moment from "moment";
-import { Tooltip } from "antd";
-import Highlighter from "react-highlight-words";
-import TablePagination from "../../../../../components/TablePagination";
 import DetailText from "../../../../../components/DetailText";
 import {
   getColumnSearchPropsPaging,

@@ -218,50 +218,50 @@ const rawMaterialSourceSlice = createSlice({
     },
 
     // Get Current Raw Material Source
-    [getCurrentRaw.pending]: (state, action) => {
+    [getCurrentRaw.pending]: (state) => {
       state.loading = true;
     },
     [getCurrentRaw.fulfilled]: (state, action) => {
       state.data_current = action.payload;
       state.loading = false;
     },
-    [getCurrentRaw.rejected]: (state, action) => {
+    [getCurrentRaw.rejected]: (state) => {
       state.loading = false;
     },
 
     // get detail RMS History
-    [getDetailRMSHistory.pending]: (state, action) => {
+    [getDetailRMSHistory.pending]: (state) => {
       state.loading = true;
     },
     [getDetailRMSHistory.fulfilled]: (state, action) => {
       state.data_detail_history = action.payload;
       state.loading = false;
     },
-    [getDetailRMSHistory.rejected]: (state, action) => {
+    [getDetailRMSHistory.rejected]: (state) => {
       state.loading = false;
     },
 
     // delete rms
-    [deleteRMS.pending]: (state, action) => {
+    [deleteRMS.pending]: (state) => {
       state.loading = true;
     },
     [deleteRMS.fulfilled]: (state, action) => {
       state.dataDelete = action.payload;
       state.loading = false;
     },
-    [deleteRMS.rejected]: (state, action) => {
+    [deleteRMS.rejected]: (state) => {
       state.loading = false;
     },
 
     // Get Country RMS
-    [getCountryRMS.pending]: (state, action) => {
+    [getCountryRMS.pending]: (state) => {
       state.loading = true;
     },
     [getCountryRMS.fulfilled]: (state, action) => {
       state.data_country = action.payload;
       state.loading = false;
     },
-    [getCountryRMS.rejected]: (state, action) => {
+    [getCountryRMS.rejected]: (state) => {
       state.loading = false;
     },
   },

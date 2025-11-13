@@ -215,50 +215,50 @@ const productDistributionSlice = createSlice({
     },
 
     // Get Current Product Distribution
-    [getCurrentPB.pending]: (state, action) => {
+    [getCurrentPB.pending]: (state) => {
       state.loading = true;
     },
     [getCurrentPB.fulfilled]: (state, action) => {
       state.data_current = action.payload;
       state.loading = false;
     },
-    [getCurrentPB.rejected]: (state, action) => {
+    [getCurrentPB.rejected]: (state) => {
       state.loading = false;
     },
 
     // get detail PD History
-    [getDetailPDHistory.pending]: (state, action) => {
+    [getDetailPDHistory.pending]: (state) => {
       state.loading = true;
     },
     [getDetailPDHistory.fulfilled]: (state, action) => {
       state.data_detail_history = action.payload;
       state.loading = false;
     },
-    [getDetailPDHistory.rejected]: (state, action) => {
+    [getDetailPDHistory.rejected]: (state) => {
       state.loading = false;
     },
 
     // delete pd
-    [deletePD.pending]: (state, action) => {
+    [deletePD.pending]: (state) => {
       state.loading = true;
     },
     [deletePD.fulfilled]: (state, action) => {
       state.dataDelete = action.payload;
       state.loading = false;
     },
-    [deletePD.rejected]: (state, action) => {
+    [deletePD.rejected]: (state) => {
       state.loading = false;
     },
 
     // Get Country PD
-    [getCountryPD.pending]: (state, action) => {
+    [getCountryPD.pending]: (state) => {
       state.loading = true;
     },
     [getCountryPD.fulfilled]: (state, action) => {
       state.data_country = action.payload;
       state.loading = false;
     },
-    [getCountryPD.rejected]: (state, action) => {
+    [getCountryPD.rejected]: (state) => {
       state.loading = false;
     },
   },

@@ -1,7 +1,4 @@
 import React,{ useState, useEffect, useRef } from 'react'
-import GridLayout from '../../../../../../../../components/GridLayout'
-import DetailText from '../../../../../../../../components/DetailText'
-import TablePagination from '../../../../../../../../components/TablePagination';
 import moment from 'moment';
 import TablePaginationNew from '../../../../../../../../components/TablePaginationNew';
 import { getColumnSearchPropsUseFilteredValueFE } from '../../../../../../../../utils/getColumnSearchProps';
