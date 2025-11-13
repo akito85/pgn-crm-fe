@@ -286,7 +286,7 @@ const ModalApprovalEFaktur = ({
             )}
             {current > 0 && (
               <ButtonComponent
-                onClick={() => prev()}
+                onClick={prev}
                 type={"submit"}
                 icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
               >
@@ -296,7 +296,7 @@ const ModalApprovalEFaktur = ({
 
             {current < steps.length - 1 && (
               <ButtonComponent
-                onClick={() => next()}
+                onClick={next}
                 type={"submit"}
                 className="ant-btn ant-btn-submit flex w-full justify-center"
                 disabled={steps[current].disabled}
@@ -337,10 +337,15 @@ const ModalApprovalEFaktur = ({
         }
       >
         <Spin spinning={loading_detail}>
-          <div className="flex flex-row justify-center mb-6 px-32">
-            <div className="w-full max-w-xl">
-              <Steps current={current} items={items} labelPlacement="vertical" />
-            </div>
+          {/* FIXED STEPS SECTION */}
+          <div className="mb-8">
+            <Steps 
+              current={current} 
+              items={items} 
+              labelPlacement="vertical"
+              size="small"
+              className="custom-steps-approval"
+            />
           </div>
 
           {/* STEP 1: E-FAKTUR INFORMATION */}
@@ -380,32 +385,6 @@ const ModalApprovalEFaktur = ({
                       <span className="px-3 py-1 rounded-full text-xs font-semibold border bg-orange-100 text-orange-800 border-orange-300">
                         {billingData.efakturStatus?.replace(/_/g, " ")}
                       </span>
-                    </DetailText>
-                  </div>
-                </div>
-              )}
-
-              {/* Customer Information (dari detail E-Faktur) */}
-              {customerDetail && (
-                <div className="mb-6 p-5 bg-purple-50 border-2 border-purple-300 rounded-lg">
-                  <h3 className="text-base font-bold text-purple-800 mb-4 pb-2 border-b-2 border-purple-200">
-                    Informasi Customer (E-Faktur)
-                  </h3>
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                    <DetailText label="Customer Name">
-                      {customerDetail.customerName || "-"}
-                    </DetailText>
-                    <DetailText label="Customer NPWP">
-                      {customerDetail.customerNpwp || "-"}
-                    </DetailText>
-                    <DetailText label="Customer Address">
-                      {customerDetail.customerAddress || "-"}
-                    </DetailText>
-                    <DetailText label="Customer Email">
-                      {customerDetail.customerEmail || "-"}
-                    </DetailText>
-                    <DetailText label="Customer Phone">
-                      {customerDetail.customerPhone || "-"}
                     </DetailText>
                   </div>
                 </div>
@@ -550,29 +529,6 @@ const ModalApprovalEFaktur = ({
               </div>
             )}
 
-            {/* Customer Information Review */}
-            {customerDetail && (
-              <div className="mb-6 p-5 bg-purple-50 border-2 border-purple-300 rounded-lg">
-                <h3 className="text-base font-bold text-purple-800 mb-4 pb-2 border-b-2 border-purple-200">
-                  Review - Customer Information
-                </h3>
-                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                  <DetailText label={"Customer Name"}>
-                    {customerDetail.customerName || "-"}
-                  </DetailText>
-                  <DetailText label={"Customer NPWP"}>
-                    {customerDetail.customerNpwp || "-"}
-                  </DetailText>
-                  <DetailText label={"Customer Address"}>
-                    {customerDetail.customerAddress || "-"}
-                  </DetailText>
-                  <DetailText label={"Customer Email"}>
-                    {customerDetail.customerEmail || "-"}
-                  </DetailText>
-                </div>
-              </div>
-            )}
-
             {/* Remark Review */}
             <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
               <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
@@ -581,14 +537,6 @@ const ModalApprovalEFaktur = ({
               <DetailText label={"Remark"}>
                 {form.getFieldValue()?.remark}
               </DetailText>
-            </div>
-
-            {/* Warning */}
-            <div className="mt-6 p-4 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
-              <p className="text-sm font-semibold text-yellow-800">
-                ⚠️ Perhatian: Tindakan ini tidak dapat dibatalkan. Pastikan data
-                sudah benar sebelum melanjutkan.
-              </p>
             </div>
           </div>
         </Spin>

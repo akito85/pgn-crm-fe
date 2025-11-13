@@ -43,10 +43,10 @@ const ModalGenerateXML = ({
   const [efakturDetail, setEfakturDetail] = useState(null);
 
   useEffect(() => {
-    if (isOpen && billingData?.billingCode) {
-      dispatch(getAllBillingItemPaginate(billingData.billingCode));
+    if (isOpen && billingData?.efakturId) {
+      dispatch(getAllBillingItemPaginate(billingData.efakturId));
       
-      dispatch(getDetailEFaktur(billingData.billingCode))
+      dispatch(getDetailEFaktur(billingData.efakturId))
         .unwrap()
         .then((result) => {
           if (result) {
@@ -69,6 +69,8 @@ const ModalGenerateXML = ({
   const formatXML = (xmlString) => {
     try {
       let formatted = xmlString.trim();
+      
+      // Format XML dengan indentasi yang benar
       formatted = formatted.replace(/></g, '>\n<');
       
       let indent = 0;
@@ -79,12 +81,14 @@ const ModalGenerateXML = ({
         
         if (!trimmed) return '';
         
+        // Kurangi indent untuk closing tag
         if (trimmed.startsWith('</')) {
           indent = Math.max(0, indent - 1);
         }
         
         const indentation = '  '.repeat(indent);
         
+        // Tambah indent untuk opening tag (kecuali self-closing)
         if (trimmed.startsWith('<') && 
             !trimmed.startsWith('</') && 
             !trimmed.endsWith('/>') &&
@@ -97,6 +101,7 @@ const ModalGenerateXML = ({
       
       return formatted;
     } catch (error) {
+      console.error("Error formatting XML:", error);
       return xmlString;
     }
   };
@@ -118,32 +123,43 @@ const ModalGenerateXML = ({
 
     try {
       const result = await dispatch(
-        generateXMLEFaktur(efakturDetail.efakturId)
+        generateXMLEFaktur({
+          efakturId: efakturDetail.efakturId,
+          invoiceNumber: efakturDetail.invoiceNumber || billingData.invoiceNumber
+        })
       ).unwrap();
 
+      // Extract XML content dari result
       let xmlString = '';
       
       if (typeof result === 'string') {
         xmlString = result;
-      } else if (result && typeof result === 'object') {
-        xmlString = result.xml || result.data || result.content || '';
+      } else if (result?.xmlContent) {
+        xmlString = result.xmlContent;
+      } else if (result?.data) {
+        xmlString = typeof result.data === 'string' ? result.data : result.data.xmlContent || '';
       }
 
+      // Validasi XML content
       if (!xmlString || xmlString.trim().length === 0) {
-        throw new Error("XML content is empty");
+        throw new Error("XML content kosong dari backend");
       }
 
-      if (!xmlString.trim().startsWith('<')) {
-        throw new Error("Invalid XML format: content does not start with '<'");
+      const trimmedXml = xmlString.trim();
+      if (!trimmedXml.startsWith('<')) {
+        throw new Error("Format XML tidak valid dari backend");
       }
 
+      // Format XML untuk display
       const formattedXml = formatXML(xmlString);
       setXmlContent(formattedXml);
       
-      message.success("XML berhasil di-generate!");
+      message.success("XML berhasil di-generate dan didownload!");
       
       setIsGenerating(false);
     } catch (error) {
+      console.error("Generate XML Error:", error);
+      
       let errorMsg = "Gagal generate XML E-Faktur";
       
       if (error?.message) {
@@ -175,23 +191,32 @@ const ModalGenerateXML = ({
         setCopied(false);
       }, 2000);
     } catch (error) {
+      // Fallback untuk browser yang tidak support clipboard API
       try {
         const textArea = document.createElement("textarea");
         textArea.value = xmlContent;
         textArea.style.position = "fixed";
         textArea.style.left = "-999999px";
+        textArea.style.top = "0";
         document.body.appendChild(textArea);
+        textArea.focus();
         textArea.select();
-        document.execCommand('copy');
+        
+        const successful = document.execCommand('copy');
         document.body.removeChild(textArea);
         
-        setCopied(true);
-        message.success("XML berhasil di-copy ke clipboard");
-        
-        setTimeout(() => {
-          setCopied(false);
-        }, 2000);
+        if (successful) {
+          setCopied(true);
+          message.success("XML berhasil di-copy ke clipboard");
+          
+          setTimeout(() => {
+            setCopied(false);
+          }, 2000);
+        } else {
+          throw new Error("Copy command failed");
+        }
       } catch (fallbackError) {
+        console.error("Copy error:", fallbackError);
         message.error("Gagal copy XML ke clipboard");
       }
     }
@@ -214,7 +239,8 @@ const ModalGenerateXML = ({
       link.href = url;
       
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-      const fileName = `efaktur_${billingData.billingCode}_${timestamp}.xml`;
+      const invoiceNum = efakturDetail?.invoiceNumber || billingData?.invoiceNumber || 'unknown';
+      const fileName = `E-Faktur_${invoiceNum}_${timestamp}.xml`;
       
       link.download = fileName;
       
@@ -226,6 +252,7 @@ const ModalGenerateXML = ({
 
       message.success(`File ${fileName} berhasil diunduh`);
     } catch (error) {
+      console.error("Download error:", error);
       message.error("Gagal mengunduh file XML");
     }
   };
@@ -424,28 +451,6 @@ const ModalGenerateXML = ({
                   </div>
                 </div>
 
-                {efakturDetail && (
-                  <div className="mb-6 p-5 bg-purple-50 border-2 border-purple-300 rounded-lg">
-                    <h3 className="text-base font-bold text-purple-800 mb-4 pb-2 border-b-2 border-purple-200">
-                      Informasi Customer
-                    </h3>
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                      <DetailText label="Customer Name">
-                        {efakturDetail.customerName || "-"}
-                      </DetailText>
-                      <DetailText label="NPWP">
-                        {efakturDetail.customerNpwp || "-"}
-                      </DetailText>
-                      <DetailText label="Address">
-                        {efakturDetail.customerAddress || "-"}
-                      </DetailText>
-                      <DetailText label="Email">
-                        {efakturDetail.customerEmail || "-"}
-                      </DetailText>
-                    </div>
-                  </div>
-                )}
-
                 {data_billingItem && data_billingItem.length > 0 && (
                   <div className="mb-6 p-5 bg-white border-2 border-gray-300 rounded-lg">
                     <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
@@ -538,21 +543,6 @@ const ModalGenerateXML = ({
                       </div>
                     </div>
                   </div>
-                )}
-
-                {!xmlContent && efakturDetail?.efakturId && (
-                  <Alert
-                    message="Siap Generate XML"
-                    description={
-                      <div>
-                        <p>E-Faktur ID: <strong>{efakturDetail.efakturId}</strong></p>
-                        <p className="mt-2">Klik tombol "Generate XML" untuk membuat file XML yang dapat digunakan di aplikasi e-Faktur DJP.</p>
-                      </div>
-                    }
-                    type="info"
-                    showIcon
-                    className="mt-6"
-                  />
                 )}
               </>
             )}

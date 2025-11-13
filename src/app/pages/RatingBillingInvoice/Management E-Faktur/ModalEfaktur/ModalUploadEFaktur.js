@@ -64,7 +64,6 @@ const ModalUploadEFaktur = ({
     }
   }, [isOpen, billingData, dispatch]);
 
-  // Update efaktur detail dari Redux state
   useEffect(() => {
     if (detail_efaktur) {
       setEfakturDetail(detail_efaktur);
@@ -327,51 +326,6 @@ const ModalUploadEFaktur = ({
                   </div>
                 )}
               </Form>
-            )}
-
-            {/* Panduan Upload */}
-            {efakturDetail?.efakturId && (
-              <div className="mt-6 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
-                <h4 className="font-bold text-sm text-yellow-800 mb-3">
-                  📋 Panduan Upload E-Faktur Manual:
-                </h4>
-                <ul className="text-xs text-yellow-700 space-y-2 list-disc list-inside">
-                  <li>
-                    Download file E-Faktur (PDF) dari aplikasi e-Faktur DJP CoreTax
-                  </li>
-                  <li>
-                    Pastikan format file adalah <strong>PDF</strong> dengan ukuran maksimal 10MB
-                  </li>
-                  <li>
-                    Isi <strong>Nomor E-Faktur</strong> sesuai yang tertera di file PDF
-                  </li>
-                  <li>
-                    Pilih <strong>Tanggal E-Faktur</strong> sesuai tanggal penerbitan
-                  </li>
-                  <li>
-                    File akan disimpan dan status E-Faktur akan berubah dari FAILED → APPROVED
-                  </li>
-                  <li>
-                    Setelah upload berhasil, file dapat diakses melalui menu detail E-Faktur
-                  </li>
-                </ul>
-              </div>
-            )}
-
-            {/* Info E-Faktur ID */}
-            {efakturDetail?.efakturId && (
-              <Alert
-                message="Ready to Upload"
-                description={
-                  <div>
-                    <p>E-Faktur ID: <strong>{efakturDetail.efakturId}</strong></p>
-                    <p className="mt-1">Silakan lengkapi form di atas dan upload file E-Faktur.</p>
-                  </div>
-                }
-                type="info"
-                showIcon
-                className="mt-4"
-              />
             )}
           </div>
         </Spin>
