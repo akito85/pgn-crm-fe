@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useRef, useCallback, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
-import { Form, Input, Select, Space, Table, Tooltip, DatePicker } from "antd";
+import { Form, Input, Select, Space, Table, Tooltip } from "antd";
 import SVGIcon from "../../../../assets/Icon/index";
 import DateComponent from "../../../../components/DateComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { NumericFormat } from "react-number-format";
 import { columnsTableCriteriaPromo } from "../PromoDiscount/Table/TableCriteriaPromo";
 import { dateFormatting, hasValue } from "../../../../utils";
-import { checkEditableUnCriteria, dataDependAdvanced, dataDepended, handleMappingBodyTiering } from "./UtilsAllProduct";
+import { dataDependAdvanced, dataDepended, handleMappingBodyTiering } from "./UtilsAllProduct";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../components/Card/CardComponent";
 import DetailText from "../../../../components/DetailText";

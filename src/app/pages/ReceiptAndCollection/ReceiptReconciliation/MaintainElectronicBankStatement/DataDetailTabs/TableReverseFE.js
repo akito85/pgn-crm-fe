@@ -1,5 +1,4 @@
 import React, { useRef, useState } from "react";
-import TablePagination from "../../../../../../components/TablePagination";
 import { columnsReverse } from "./columnForce";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { columnsReverseTab } from "./ColumnReverseTab";

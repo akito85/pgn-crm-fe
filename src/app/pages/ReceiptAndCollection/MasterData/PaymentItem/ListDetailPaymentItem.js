@@ -1,12 +1,10 @@
-import { LeftOutlined, SyncOutlined } from "@ant-design/icons";
-import { Form } from "antd";
+import { LeftOutlined } from "@ant-design/icons";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import InputComponent from "../../../../../components/InputComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
@@ -18,7 +16,6 @@ import {
   getGLInformation,
 } from "../../../../../redux/slices/receipt_collection/paymentItem";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
-import { formMessageRequired, requiredMessage } from "../../../../../utils";
 import DetailPaymentItem from "./DetailPaymentItem";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import BaseContainer from "../../../../../components/BaseContainer";

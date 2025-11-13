@@ -12,18 +12,15 @@ import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   getElectronicDetail,
-  getTableForce,
-  getTableMatch,
   getTableParsing,
   getTableReverse,
   getTableSundry,
 } from "../../../../../redux/slices/receipt_collection/electrionicBank";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
-import { dateFormat, dateFormatting, toTitleCase } from "../../../../../utils";
+import { dateFormatting, toTitleCase } from "../../../../../utils";
 import DetailForce from "./DataDetailTabs/DetailForce";
 import DetailMatch from "./DataDetailTabs/DetailMatch";
 import DetailParsingResulte from "./DataDetailTabs/DetailParsingResulte";
-import DetailParsing from "./DataDetailTabs/DetailParsingResulte";
 import DetailRevers from "./DataDetailTabs/DetailRevers";
 import DetailSundry from "./DataDetailTabs/DetailSundry";
 

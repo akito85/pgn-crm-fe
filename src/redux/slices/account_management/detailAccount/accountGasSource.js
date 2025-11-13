@@ -157,7 +157,7 @@ const accountGasSourceSlice = createSlice({
     },
 
     // Assign Gas Source
-    [assignGasSource.pending]: (state, action) => {
+    [assignGasSource.pending]: (state) => {
       state.loading = true;
     },
     [assignGasSource.fulfilled]: (state, action) => {
@@ -165,7 +165,7 @@ const accountGasSourceSlice = createSlice({
       state.loading = false;
       state.data_create = action.payload;
     },
-    [assignGasSource.rejected]: (state, action) => {
+    [assignGasSource.rejected]: (state) => {
       state.loading = false;
       state.isFailed = true;
     },
@@ -185,14 +185,14 @@ const accountGasSourceSlice = createSlice({
     },
 
     /* Inactive Account Gas Source */
-    [InactiveAccountGasSource.pending]: (state, action) => {
+    [InactiveAccountGasSource.pending]: (state) => {
       state.loading = true;
     },
-    [InactiveAccountGasSource.fulfilled]: (state, action) => {
+    [InactiveAccountGasSource.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [InactiveAccountGasSource.rejected]: (state, action) => {
+    [InactiveAccountGasSource.rejected]: (state) => {
       state.loading = false;
       state.isFailed = true;
     },

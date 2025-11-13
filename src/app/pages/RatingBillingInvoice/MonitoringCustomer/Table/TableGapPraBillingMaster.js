@@ -1,5 +1,5 @@
 import React from "react";
-import { Input, Button, Space, Tooltip, Tag } from "antd";
+import { Input, Button, Space, Tooltip } from "antd";
 import { SearchOutlined, SyncOutlined, FileTextOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 

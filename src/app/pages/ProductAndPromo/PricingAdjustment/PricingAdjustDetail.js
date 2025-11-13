@@ -5,16 +5,12 @@ import { Form, Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
 import RadioTabs from "../../../../components/RadioTabs";
-import PricingLogInformationDetail from "../Pricing/Detail/PricingLogInformationDetail";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { LeftOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
-import InputComponent from "../../../../components/InputComponent";
-import DetailText from "../../../../components/DetailText";
 import moment from "moment";
 import AttachmentSectionForm from "../Pricing/Form/AttachmentSectionForm";
-import PricingAdjustTableDetail from "./PricingAdjustTableDetail";
 import PricingInactiveRequest from "../Pricing/Detail/PricingInactiveRequest";
 import { useDispatch, useSelector } from "react-redux";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
@@ -28,7 +24,7 @@ import {
 import LayoutContentTabPriceAdjust from "./LayoutContentTabPriceAdjust";
 import SVGIcon from "../../../../assets/Icon/index";
 import { bytesConverter } from "../../../../utils/bytesConverter";
-import { dateFormatting, requiredMessage } from "../../../../utils";
+import { dateFormatting } from "../../../../utils";
 import { columnsTableCriteria } from "./columnTableCriteriaPriceAdjust";
 
 const routes = [

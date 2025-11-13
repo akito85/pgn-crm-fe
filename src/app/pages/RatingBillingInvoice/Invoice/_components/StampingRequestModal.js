@@ -1,4 +1,3 @@
-// _components/StampingRequestModal.js
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -41,7 +40,6 @@ const StampingRequestModal = ({
   const [fileList, setFileList] = useState([]);
   const [remark, setRemark] = useState("");
 
-  // Safe invoice data with proper fallback
   const invoice = React.useMemo(() => {
     if (!invoiceData) {
       return {
@@ -57,7 +55,6 @@ const StampingRequestModal = ({
     };
   }, [invoiceData]);
 
-  // Reset state when modal closes or opens
   useEffect(() => {
     if (visible) {
       setStampingMethod("e-stamping");
@@ -76,23 +73,22 @@ const StampingRequestModal = ({
 
   const handlePreviewFile = async () => {
     try {
-      const result = await dispatch(
+      console.log("=".repeat(80));
+      console.log("📥 PREVIEW INVOICE REQUEST");
+      console.log("=".repeat(80));
+      console.log("Invoice Number:", invoice.invoiceNumber);
+      console.log("Timestamp:", new Date().toLocaleString("id-ID"));
+      console.log("=".repeat(80));
+
+      await dispatch(
         previewOriginalInvoice({ invoiceNumber: invoice.invoiceNumber })
       ).unwrap();
 
-      // Create blob and open in new tab
-      const blob = new Blob([result], { type: "application/pdf" });
-      const blobUrl = URL.createObjectURL(blob);
-      const newTab = window.open(blobUrl, "_blank");
-
-      if (newTab) {
-        newTab.document.title = `Preview - ${invoice.invoiceNumber}`;
-      }
-
       console.log("✅ Preview opened successfully");
+      console.log("=".repeat(80));
     } catch (error) {
       console.error("❌ Error previewing document:", error);
-      // Error message already handled in slice
+      console.error("=".repeat(80));
     }
   };
 
@@ -115,11 +111,11 @@ const StampingRequestModal = ({
         return Upload.LIST_IGNORE;
       }
 
-      return false; // Prevent auto upload
+      return false;
     },
     onChange: (info) => {
       let newFileList = [...info.fileList];
-      newFileList = newFileList.slice(-1); // Keep only the last file
+      newFileList = newFileList.slice(-1);
       setFileList(newFileList);
     },
     onRemove: () => {
@@ -129,10 +125,8 @@ const StampingRequestModal = ({
 
   const handleNext = () => {
     if (stampingMethod === "e-stamping") {
-      // Direct submit for e-stamping
       handleSubmit();
     } else {
-      // Go to step 2 for manual
       setCurrentStep(1);
     }
   };
@@ -154,6 +148,16 @@ const StampingRequestModal = ({
       }
     }
 
+    console.log("=".repeat(80));
+    console.log("📤 STAMPING REQUEST SUBMISSION");
+    console.log("=".repeat(80));
+    console.log("📋 Invoice Number:", invoice.invoiceNumber);
+    console.log("🏷️  Customer:", invoice.customer);
+    console.log("💰 Amount:", formatAmount(invoice.amount));
+    console.log("🔖 Stamping Method:", stampingMethod);
+    console.log("📝 Remark:", remark || "N/A");
+    console.log("⏰ Timestamp:", new Date().toLocaleString("id-ID"));
+
     if (stampingMethod === "manual" && fileList.length > 0) {
       const file = fileList[0].originFileObj || fileList[0];
       console.log("📁 File Details:", {
@@ -164,8 +168,9 @@ const StampingRequestModal = ({
       });
     }
 
+    console.log("=".repeat(80));
+
     try {
-      // Call parent onSubmit handler
       if (onSubmit) {
         const submissionData = {
           invoiceNumber: invoice.invoiceNumber,
@@ -176,13 +181,12 @@ const StampingRequestModal = ({
             stampingMethod === "manual"
               ? fileList[0].originFileObj || fileList[0]
               : null,
-          remark: remark,
+          remark: stampingMethod === "manual" ? remark : "Test stamp",
           submittedAt: new Date().toISOString(),
         };
 
         await onSubmit(submissionData);
       } else {
-        // Fallback if no onSubmit handler provided
         console.warn("⚠️ No onSubmit handler provided, using local simulation");
         await new Promise((resolve) => setTimeout(resolve, 1500));
         message.success(
@@ -193,14 +197,12 @@ const StampingRequestModal = ({
         onClose();
       }
 
-      // Reset state
       setStampingMethod("e-stamping");
       setFileList([]);
       setCurrentStep(0);
       setRemark("");
     } catch (error) {
       console.error("❌ Error in handleSubmit:", error);
-      // Error handling is done in parent component
     }
   };
 
@@ -222,10 +224,8 @@ const StampingRequestModal = ({
     setRemark("");
   };
 
-  // Render Step 1: Select Method & Invoice Info
   const renderStep1 = () => (
     <>
-      {/* Invoice Information (Readonly) */}
       <div style={{ marginBottom: "32px" }}>
         <div
           style={{
@@ -234,7 +234,6 @@ const StampingRequestModal = ({
             gap: "16px",
           }}
         >
-          {/* Invoice Number */}
           <div>
             <label
               style={{
@@ -263,7 +262,6 @@ const StampingRequestModal = ({
 
           <div></div>
 
-          {/* Customer */}
           <div>
             <label
               style={{
@@ -292,7 +290,6 @@ const StampingRequestModal = ({
 
           <div></div>
 
-          {/* Total Amount */}
           <div>
             <label
               style={{
@@ -324,7 +321,6 @@ const StampingRequestModal = ({
 
       <Divider style={{ margin: "32px 0" }} />
 
-      {/* Select Stamping Method */}
       <div style={{ marginBottom: "24px" }}>
         <label
           style={{
@@ -387,7 +383,6 @@ const StampingRequestModal = ({
         </Radio.Group>
       </div>
 
-      {/* Method Description */}
       {stampingMethod === "e-stamping" && (
         <Alert
           message="E-Stamping Process"
@@ -410,10 +405,8 @@ const StampingRequestModal = ({
     </>
   );
 
-  // Render Step 2: Upload Document (Manual Only)
   const renderStep2 = () => (
     <>
-      {/* Instructions */}
       <div
         style={{
           background: "#f0f5ff",
@@ -449,7 +442,6 @@ const StampingRequestModal = ({
         </ol>
       </div>
 
-      {/* Download Button */}
       <div style={{ marginBottom: "32px" }}>
         <Button
           type="default"
@@ -472,7 +464,6 @@ const StampingRequestModal = ({
 
       <Divider style={{ margin: "32px 0" }} />
 
-      {/* Upload Area */}
       <div style={{ marginBottom: "24px" }}>
         <label
           style={{
@@ -517,7 +508,6 @@ const StampingRequestModal = ({
         />
       )}
 
-      {/* Remark Field */}
       <div>
         <label
           style={{
@@ -554,7 +544,6 @@ const StampingRequestModal = ({
       closeIcon={<CloseOutlined />}
       bodyStyle={{ padding: 0 }}
     >
-      {/* Header */}
       <div
         style={{
           padding: "20px 24px",
@@ -576,7 +565,6 @@ const StampingRequestModal = ({
         </h2>
       </div>
 
-      {/* Steps Indicator (for Manual only) */}
       {stampingMethod === "manual" && (
         <div style={{ padding: "24px 32px 0" }}>
           <Steps current={currentStep} size="small">
@@ -586,12 +574,10 @@ const StampingRequestModal = ({
         </div>
       )}
 
-      {/* Content */}
       <div style={{ padding: "32px" }}>
         {currentStep === 0 ? renderStep1() : renderStep2()}
       </div>
 
-      {/* Footer */}
       <div
         style={{
           padding: "16px 32px",

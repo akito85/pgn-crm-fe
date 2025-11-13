@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Fragment } from "react";
 import InputComponent from "../../../../../../components/InputComponent";
-import { Checkbox, Form, Select } from "antd";
+import { Form, Select } from "antd";
 import { requiredMessage } from "../../../../../../utils";
 import DateComponent from "../../../../../../components/DateComponent";
 import SelectComponent from "../../../../../../components/SelectComponent";

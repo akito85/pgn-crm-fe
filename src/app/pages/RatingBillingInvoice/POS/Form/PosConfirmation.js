@@ -1,7 +1,5 @@
 import { Fragment } from "react";
-import React, { useEffect, useRef } from "react";
-import moment from "moment";
-import DetailText from "../../../../../components/DetailText";
+import React from "react";
 import PointOfSalesConfirmation from "./Confirmation/PointOfSalesConfirmation";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 import PointOfSalesApprovalConfirmation from "./Confirmation/PointOfSalesApprovalConfirmation";

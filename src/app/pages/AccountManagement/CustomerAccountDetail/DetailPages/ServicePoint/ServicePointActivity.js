@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import BaseContainer from "../../../../../../components/BaseContainer";
-import { Link, NavLink, Route, Routes, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ServicePointActivityTable from "./ServicePointActivityTable";
 

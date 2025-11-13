@@ -3,13 +3,12 @@ import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import BaseContainer from '../../../../../components/BaseContainer';
 import { RBI_ROUTES } from '../../../../../routes/rating_billing/rbi_routes';
-import RadioTabs from '../../../../../components/RadioTabs';
 import ButtonComponent from '../../../../../components/ButtonComponent';
 import { LeftOutlined } from '@ant-design/icons';
 import SVGIcon from "../../../../../assets/Icon/index";
 import UploadLayout from '../UploadLayout';
 import ApprovalLayout from '../ApprovalLayout';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { Form, Spin } from 'antd';

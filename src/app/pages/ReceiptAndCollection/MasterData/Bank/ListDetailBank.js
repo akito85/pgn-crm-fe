@@ -1,5 +1,4 @@
-import { LeftOutlined, SyncOutlined } from "@ant-design/icons";
-import { Form } from "antd";
+import { LeftOutlined } from "@ant-design/icons";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -7,21 +6,17 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import DetailText from "../../../../../components/DetailText";
-import InputComponent from "../../../../../components/InputComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   approveOrRejectInactiveBank,
-  getAccountInformationPaging,
   getBankDetail,
   getBankDetailDraft,
   getJobContact,
   getPositionContact,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
-import { hasValue, requiredMessage } from "../../../../../utils";
 import DetailBank from "./DetailBank";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";

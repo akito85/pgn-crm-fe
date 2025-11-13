@@ -1,6 +1,6 @@
-import { Checkbox, Input, InputNumber, Select } from "antd";
-import React, { useEffect, useState } from "react";
-import { Form, Spin } from "antd";
+import { Input, Select } from "antd";
+import React, { useState } from "react";
+import { Form } from "antd";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { formMessageRequired } from "../../../../../utils";
 import InputComponent from "../../../../../components/InputComponent";

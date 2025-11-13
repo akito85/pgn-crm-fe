@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Table,
   Input,
@@ -16,16 +16,12 @@ import moment from "moment";
 import BaseContainer from "../BaseContainer";
 import ButtonComponent from "../ButtonComponent";
 import {
-  DeleteOutlined,
   MoreOutlined,
   PlusOutlined,
   InfoCircleOutlined,
-  DeleteColumnOutlined,
-  DeleteFilled,
 } from "@ant-design/icons";
 import { useEffect } from "react";
 import SVGIcon from "../../assets/Icon/index";
-import { useDynamicTableInlineHooks } from "./useDynamicTableInlineHooks";
 import InputComponent from "../InputComponent";
 const EditableCell = ({
   editing,
@@ -220,8 +216,8 @@ const DynamicTableInline = ({
   action,
   useSelect = false,
   usePagination = false,
-  onChangePage = () => { },
-  onSizeChanger = () => { },
+  onChangePage = () => {},
+  onSizeChanger = () => {},
   pageSize,
   current,
   totalData,
@@ -237,7 +233,7 @@ const DynamicTableInline = ({
   handleValidate,
   messageValidate,
   actionFix,
-  setInserted = () => { }
+  setInserted = () => {},
 }) => {
   const [form] = Form.useForm();
   // const [data, setData] = useState([]);
@@ -264,10 +260,10 @@ const DynamicTableInline = ({
     if (isInsert === true) {
       setInserted(true);
     } else {
-      setInserted(false)
+      setInserted(false);
     }
   }, [isInsert, setInserted]);
-  
+
   const edit = (record, field) => {
     form.setFieldsValue(record);
     setEditingKey(record.key);
@@ -284,7 +280,7 @@ const DynamicTableInline = ({
     setEditingKey("");
     setStoredData(false);
     setStatusAction("");
-    setIsInsert(false)
+    setIsInsert(false);
   };
 
   const handleVisiblePassword = (data) => {
@@ -343,7 +339,7 @@ const DynamicTableInline = ({
           setIsSame(false);
           setIsValid(true);
         }
-        setIsInsert(false)
+        setIsInsert(false);
       } else {
         setIsValid(false);
       }
@@ -369,7 +365,7 @@ const DynamicTableInline = ({
     onDataChange(newData);
     onDataChange(newData);
     setStoredData(false);
-    setIsInsert(false)
+    setIsInsert(false);
   };
   const renderDelete = (record) => {
     // return record.status === "ACTIVE" || record.status === "INACTIVE" ? (
@@ -441,7 +437,7 @@ const DynamicTableInline = ({
                             />
                           }
                           border={false}
-                        // onClick={() => onDetail(record?.id)}
+                          // onClick={() => onDetail(record?.id)}
                         >
                           <span className={"text-[#C0BEC6]"}> Detail</span>
                         </ButtonComponent>
@@ -530,15 +526,17 @@ const DynamicTableInline = ({
 
                 {actionButton?.includes("delete") && renderDelete(record)}
 
-                 {/* create detail */}
+                {/* create detail */}
                 {actionButton?.includes("create") && (
                   <ButtonComponent
-                    onClick={()=> onCreate(record)}
-                    icon={<SVGIcon
-                      name="IconActionCreate"
-                      color={"#0075bf"}
-                      width={24}
-                    />}
+                    onClick={() => onCreate(record)}
+                    icon={
+                      <SVGIcon
+                        name="IconActionCreate"
+                        color={"#0075bf"}
+                        width={24}
+                      />
+                    }
                     border={false}
                   />
                 )}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Row, Col, Card, Statistic, Input, Select } from "antd";
+import { Spin, Row, Col, Card, Statistic, Select } from "antd";
 import {
   ClockCircleOutlined,
   CheckCircleOutlined,
@@ -8,12 +8,10 @@ import {
   SyncOutlined,
 } from "@ant-design/icons";
 import { motion } from "framer-motion";
-import moment from "moment";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import BaseContainer from "../../../../components/BaseContainer";
-import SVGIcon from "../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {
   getSummaryData,

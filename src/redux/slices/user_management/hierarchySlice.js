@@ -261,14 +261,14 @@ const approvHierarchy = createSlice({
     },
 
     // inactive app
-    [inactiveAppHierarchy.pending]: (state, action) => {
+    [inactiveAppHierarchy.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveAppHierarchy.fulfilled]: (state, action) => {
+    [inactiveAppHierarchy.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [inactiveAppHierarchy.rejected]: (state, action) => {
+    [inactiveAppHierarchy.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
@@ -287,7 +287,7 @@ const approvHierarchy = createSlice({
       state.loading = false;
     },
     //Get app hierarchy code
-    [getAppCode.pending]: (state, action) => {
+    [getAppCode.pending]: (state) => {
       state.loading = true;
     },
     [getAppCode.fulfilled]: (state, action) => {
@@ -295,12 +295,12 @@ const approvHierarchy = createSlice({
       state.data_code = action.payload;
       state.loading = false;
     },
-    [getAppCode.rejected]: (state, action) => {
+    [getAppCode.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
 
-    [getAppType.pending]: (state, action) => {
+    [getAppType.pending]: (state) => {
       state.loading = true;
     },
     [getAppType.fulfilled]: (state, action) => {
@@ -308,7 +308,7 @@ const approvHierarchy = createSlice({
       state.data_type = action.payload;
       state.loading = false;
     },
-    [getAppType.rejected]: (state, action) => {
+    [getAppType.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
@@ -328,7 +328,7 @@ const approvHierarchy = createSlice({
     },
 
     //detail ddl
-    [getPositionDDL.pending]: (state, action) => {
+    [getPositionDDL.pending]: (state) => {
       // state.data_DDL = action.payload;
       state.loading = true;
     },
@@ -342,7 +342,7 @@ const approvHierarchy = createSlice({
     },
 
     // detail employee by id
-    [getEmployeeByIdPosition.pending]: (state, action) => {
+    [getEmployeeByIdPosition.pending]: (state) => {
       // state.data_DDL = action.payload;
       state.loading = true;
     },

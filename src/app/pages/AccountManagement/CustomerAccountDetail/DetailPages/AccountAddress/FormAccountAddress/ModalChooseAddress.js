@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useRef } from "react";
 import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../../../components/TablePagination";
@@ -7,7 +7,6 @@ import { DatePicker, Input, Spin, Tooltip } from "antd";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 
-import ModalCreateNewAddress from "./ModalCreateNewAddress";
 import { dateFormatting } from "../../../../../../../utils";
 
 const ModalChooseAddress = ({

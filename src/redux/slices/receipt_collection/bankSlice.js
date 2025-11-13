@@ -1,6 +1,4 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import thunk from "redux-thunk";
-import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../routes/Receipt&Collection/rc_routes";
 import receiptCollectionHttpService from "../../services/receiptCollectionHttpService";
 import {
   setBodyError,
@@ -8,7 +6,6 @@ import {
   showModalSuccess,
   validateError,
 } from "../general_slice";
-import { hasValue } from "../../../utils";
 import accountManagementService from "../../services/account_management/accountManagementService";
 
 const initialState = {
@@ -39,7 +36,6 @@ const initialState = {
 
   data_select_criteria: [],
   dataListCurrency: [],
-  dataListCategory: [],
   // dataListAppHierId: [],
   // dataListAppHierDetail: [],
   data_province: [],
@@ -304,7 +300,6 @@ export const inactiveBank = createAsyncThunk(
         url,
         body
       );
-      const message = response.message;
       const successMessage = {
         title: "Successfull",
         description: "Your data has been submitted.",
@@ -532,7 +527,7 @@ export const getContryContact = createAsyncThunk(
 
 export const getAllContactPaginate = createAsyncThunk(
   "GET_ALL_CONTACT",
-  async ({ id, search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
@@ -595,9 +590,8 @@ export const approveOrRejectInactiveBank = createAsyncThunk(
   async ({ body }, thunkAPI) => {
     try {
       let url = "";
-      if (body.type.toLowerCase() === 'bank') {
+      if (body.type.toLowerCase() === "bank") {
         url = "/v1/dbs/api/bank/approve-reject";
-
       } else {
         url = "/v1/dbs/api/bank/approve-inactive";
       }
@@ -621,8 +615,9 @@ export const approveOrRejectInactiveBank = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+          description: `Your data was not ${
+            body.action === "APPROVE" ? "approved" : "rejected"
+          }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
@@ -652,8 +647,9 @@ export const approveOrRejectInactiveBankAccount = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+          description: `Your data was not ${
+            body.action === "APPROVE" ? "approved" : "rejected"
+          }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
@@ -672,8 +668,9 @@ export const approveOrRejectBankAccount = createAsyncThunk(
         await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const messageBody = {
         title: `Successful`,
-        description: `Your data has been ${body.action === "APPROVED" ? "Approved" : "Rejected"
-          }.`,
+        description: `Your data has been ${
+          body.action === "APPROVED" ? "Approved" : "Rejected"
+        }.`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(messageBody));
@@ -693,8 +690,9 @@ export const approveOrRejectBankAccount = createAsyncThunk(
       } else {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.action === "APPROVED" ? "Approve" : "Reject"
-            }. ${message}.`,
+          description: `Your data was not ${
+            body.action === "APPROVED" ? "Approve" : "Reject"
+          }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -1416,7 +1414,11 @@ export const getApprovalHistory = createAsyncThunk(
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_APPROVAL_HISTORY_BANK_MASTER", back: false })
+        validateError({
+          error: error,
+          action: "GET_APPROVAL_HISTORY_BANK_MASTER",
+          back: false,
+        })
       );
       return thunkAPI.rejectWithValue(error.response);
     }
@@ -1544,63 +1546,63 @@ const bankSlice = createSlice({
     },
 
     // get detail akun information
-    [getDetailAccountInformation.pending]: (state, action) => {
+    [getDetailAccountInformation.pending]: (state) => {
       state.loading = true;
     },
     [getDetailAccountInformation.fulfilled]: (state, action) => {
       state.data_modal = action.payload;
       state.loading = false;
     },
-    [getDetailAccountInformation.rejected]: (state, action) => {
+    [getDetailAccountInformation.rejected]: (state) => {
       state.loading = true;
     },
 
     // get detail
-    [getBankDetail.pending]: (state, action) => {
+    [getBankDetail.pending]: (state) => {
       state.loading = true;
     },
     [getBankDetail.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getBankDetail.rejected]: (state, action) => {
+    [getBankDetail.rejected]: (state) => {
       state.loading = true;
     },
 
     //draft detail
-    [getBankDetailDraft.pending]: (state, action) => {
+    [getBankDetailDraft.pending]: (state) => {
       state.loading = true;
     },
     [getBankDetailDraft.fulfilled]: (state, action) => {
       state.data_detail_draft = action.payload;
       state.loading = false;
     },
-    [getBankDetailDraft.rejected]: (state, action) => {
+    [getBankDetailDraft.rejected]: (state) => {
       state.loading = true;
     },
 
     // inactive app
-    [inactiveBank.pending]: (state, action) => {
+    [inactiveBank.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveBank.fulfilled]: (state, action) => {
+    [inactiveBank.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [inactiveBank.rejected]: (state, action) => {
+    [inactiveBank.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
 
     //inactve bank account
-    [inactiveBankAccount.pending]: (state, action) => {
+    [inactiveBankAccount.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveBankAccount.fulfilled]: (state, action) => {
+    [inactiveBankAccount.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [inactiveBankAccount.rejected]: (state, action) => {
+    [inactiveBankAccount.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
@@ -1657,10 +1659,10 @@ const bankSlice = createSlice({
     //   state.loading = false;
     // },
     // Approve Or Reject BANK
-    [approveOrRejectInactiveBank.pending]: (state, action) => {
+    [approveOrRejectInactiveBank.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectInactiveBank.fulfilled]: (state, action) => {
+    [approveOrRejectInactiveBank.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -1670,10 +1672,10 @@ const bankSlice = createSlice({
       state.message = action.payload;
     },
     // Approve Or Reject BANK account
-    [approveOrRejectInactiveBankAccount.pending]: (state, action) => {
+    [approveOrRejectInactiveBankAccount.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectInactiveBankAccount.fulfilled]: (state, action) => {
+    [approveOrRejectInactiveBankAccount.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -1684,10 +1686,10 @@ const bankSlice = createSlice({
     },
 
     //approve reject bak account
-    [approveOrRejectBankAccount.pending]: (state, action) => {
+    [approveOrRejectBankAccount.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectBankAccount.fulfilled]: (state, action) => {
+    [approveOrRejectBankAccount.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -2162,10 +2164,10 @@ const bankSlice = createSlice({
       state.loading = false;
     },
     // update
-    [getGLAccount.pending]: (state, action) => {
+    [getGLAccount.pending]: (state) => {
       state.loading = true;
     },
-    [getGLAccount.rejected]: (state, action) => {
+    [getGLAccount.rejected]: (state) => {
       state.loading = false;
     },
     [getGLAccount.fulfilled]: (state, action) => {

@@ -1,17 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import CardComponent from "../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../components/DetailText";
 import moment from "moment";
-import { dateFormat, dateFormatting } from "../../../../../utils";
+import { dateFormatting } from "../../../../../utils";
 import {
-  getCriteriaPaging,
   getTosAttribute,
   getTosDetail,
 } from "../../../../../redux/slices/product_promo/tos";
-import TableDetailCriteria from "../Utils/TableDetailCriteria";
 import { lowerCaseStatus } from "../../Product/utils";
 import { columnsTableCriteriaAll } from "../../UtilsProduct/TableCriteriaAllProduct";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";

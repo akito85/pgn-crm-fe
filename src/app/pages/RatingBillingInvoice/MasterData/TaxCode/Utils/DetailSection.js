@@ -1,14 +1,11 @@
-import moment from "moment";
 import BaseContainer from "../../../../../../components/BaseContainer";
-import { dateFormatting } from "../../../../../../utils";
 import TaxCodeInfo from "./TaxCodeInfo";
 import DetailText from "../../../../../../components/DetailText";
 import ConditionForm from "../Form/ConditionForm";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { showModalError } from "../../../../../../redux/slices/general_slice";
 import RadioTabs from "../../../../../../components/RadioTabs";
-import FunctionalCriteriaInvoiceTemplate from "../../InvoiceTemplate/Form/FunctionalCriteriaInvoiceTemplate";
 import FunctionalCriteriaTaxCode from "../Form/FunctionalCriteriaTaxCode";
 
 const DetailSectionTaxCode = ({

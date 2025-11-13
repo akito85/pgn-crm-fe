@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import ratingBillingHttpService from "../../services/ratingBillingHttpService";
-import create from "@ant-design/icons/lib/components/IconFont";
 import {
   setBodyError,
   showModalError,
@@ -28,6 +27,7 @@ const initialState = {
   updatedData: [],
   deletedData: [],
 };
+
 export const getListUsagePaginate = createAsyncThunk(
   "GET_MONITORING_USAGE_PAGINATE",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
@@ -90,12 +90,8 @@ export const getListBatchPaginate = createAsyncThunk(
 // list approval
 export const getListApproval = createAsyncThunk(
   "GET_LIST_APPROVAL",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ page, pageSize }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const params = { page, pageSize };
       const url = `/v1/dbs/api/usage/get-approval?page=${page}&size=${pageSize}`;
       const response = await ratingBillingHttpService.getListPagination(url);
       return response?.data;
@@ -125,8 +121,8 @@ export const getApprovalHierarchy = createAsyncThunk(
     try {
       const searchParams = search || "";
       const sortParams = sort || "createdDate~desc";
-      const params = { searchParams, page, pageSize, sortParams };
-      const url = `/v1/dbs/api/usage/list-available-approval?size=${pageSize}&search&page=${page}&sort=${sortParams}`;
+      // const params = { searchParams, page, pageSize, sortParams };
+      const url = `/v1/dbs/api/usage/list-available-approval?size=${pageSize}&search=${searchParams}&page=${page}&sort=${sortParams}`;
       const response = await ratingBillingHttpService.getListPagination(url);
       return response?.data;
     } catch (error) {
@@ -293,7 +289,9 @@ export const approveRejectData = createAsyncThunk(
       );
       const successMessage = {
         title: "Successfull",
-        description: `Your data has been ${data?.action === "APPROVE" ? "approved" : "rejected"}`,
+        description: `Your data has been ${
+          data?.action === "APPROVE" ? "approved" : "rejected"
+        }`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
@@ -308,7 +306,9 @@ export const approveRejectData = createAsyncThunk(
       const errorBody = {
         title: "Failed",
         data: response.response.data.data,
-        description: `Your data was not ${data?.action === "APPROVE" ? "approved" : "rejected"}. ${message}. Please try again.`,
+        description: `Your data was not ${
+          data?.action === "APPROVE" ? "approved" : "rejected"
+        }. ${message}. Please try again.`,
         return: false,
       };
       thunkAPI.dispatch(showModalError(errorBody));
@@ -328,7 +328,9 @@ export const saveSubmitData = createAsyncThunk(
       );
       const successMessage = {
         title: "Successfull",
-        description: `Your data has been ${data?.isSubmit ? "submitted" : "updated"}.`,
+        description: `Your data has been ${
+          data?.isSubmit ? "submitted" : "updated"
+        }.`,
       }; // 1 draft false , 2 submit true
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
@@ -342,7 +344,9 @@ export const saveSubmitData = createAsyncThunk(
       const errorBody = {
         title: "Failed",
         data: response.response.data.data,
-        description: `Your data was not ${data?.isSubmit ? "submitted" : "updated"}. ${message}. Please try again.`,
+        description: `Your data was not ${
+          data?.isSubmit ? "submitted" : "updated"
+        }. ${message}. Please try again.`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response.data);
@@ -372,31 +376,48 @@ export const getDownloadList = createAsyncThunk(
     }
   }
 );
+
 export const getDownloadTemplate = createAsyncThunk(
   "DOWNLOAD_MONITORING_USAGE_TEMPLATE",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/usage/download-template`;
-      const response = await ratingBillingHttpService.downloadData(url);
-      return response.data;
-    } catch (response) {
+
+      const response = await ratingBillingHttpService.downloadXlsx(
+        url,
+        "monitoring_usage_template"
+      );
+
+      return response;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error.message || error.toString();
+
       thunkAPI.dispatch(
         validateError({
-          error: response,
+          error: error?.response,
           action: "DOWNLOAD_MONITORING_USAGE_TEMPLATE",
           back: false,
         })
       );
-      return thunkAPI.rejectWithValue(response.response.data);
+
+      const errorBody = {
+        title: "Failed",
+        description: `Failed to download template. ${message}`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );
+
 export const getDownloadFailed = createAsyncThunk(
   "DOWNLOAD_MONITORING_USAGE_FAILED",
   async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/usage/download-failed-data/${id}`;
-      const response = await ratingBillingHttpService.downloadData(url);      
+      const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (response) {
       thunkAPI.dispatch(
@@ -436,7 +457,7 @@ export const uploadMonitoringUsage = createAsyncThunk(
       let message = errorMessage(e);
       const errorBody = {
         title: "Failed",
-        description: message + '. Please try again!',
+        description: message + ". Please try again!",
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(e?.response);
@@ -448,7 +469,7 @@ const monitoringUsageSlice = createSlice({
   name: "monitoring_usage",
   initialState,
   reducers: {
-    setClearData: (state, action) => {
+    setClearData: (state) => {
       state.data_upload = null;
       state.data_submit = null;
     },
@@ -562,7 +583,7 @@ const monitoringUsageSlice = createSlice({
         state.list_approval = action.payload;
         state.loading = false;
       })
-      .addCase(getApprovalHierarchy.rejected, (state, action) => {
+      .addCase(getApprovalHierarchy.rejected, (state) => {
         state.loading = false;
       });
 
@@ -574,7 +595,7 @@ const monitoringUsageSlice = createSlice({
         state.list_approval_by_id = action.payload;
         state.loading = false;
       })
-      .addCase(getListApprovalById.rejected, (state, action) => {
+      .addCase(getListApprovalById.rejected, (state) => {
         state.loading = false;
       });
     builder
@@ -585,7 +606,7 @@ const monitoringUsageSlice = createSlice({
         state.list_usage_type = action.payload;
         state.loading = false;
       })
-      .addCase(getFormatUsageType.rejected, (state, action) => {
+      .addCase(getFormatUsageType.rejected, (state) => {
         state.loading = false;
       });
     builder

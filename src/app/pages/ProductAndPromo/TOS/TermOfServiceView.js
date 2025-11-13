@@ -3,7 +3,7 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
-import { Spin, Input, Space, Tooltip, Checkbox } from "antd";
+import { Spin, Input, Tooltip, Checkbox } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import {
   DownloadOutlined,
@@ -13,7 +13,6 @@ import {
 import { NavLink, Link } from "react-router-dom";
 import Highlighter from "react-highlight-words";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
-import StatusComponent from "../../../../components/StatusComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import {
   downloadTOS,

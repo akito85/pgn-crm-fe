@@ -1,7 +1,4 @@
-import { Tooltip } from "antd";
-import Highlighter from "react-highlight-words";
-import StatusComponent from "../../../../../../components/StatusComponent";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn } from "../../../../../../utils";
 
 export const columnsCalculation = (

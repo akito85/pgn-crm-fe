@@ -1,25 +1,18 @@
 import {
-  FilterOutlined,
   LeftOutlined,
-  WarningOutlined,
 } from "@ant-design/icons";
-import { DatePicker, Form, Input, Spin } from "antd";
+import { Form, Spin } from "antd";
 import moment from "moment";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import Highlighter from "react-highlight-words";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
-import { dateFormatting, hasValue, renderDateConverter } from "../../../../../utils";
-import ApprovalSectionForm from "../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
-import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
-import ContentModalConfirmPayment from "../../ReceiptReconciliation/ContentModalConfirmPayment";
+import { dateFormatting } from "../../../../../utils";
 import SVGIcon from "../../../../../assets/Icon/index";
 import BaseContainer from "../../../../../components/BaseContainer";
 import {
@@ -27,7 +20,6 @@ import {
   createValidasiTransCal,
   getAllApprovalList,
   getAllBeginEnd,
-  getCriteriaInform,
   getDetailTransaction,
   getListApprovalById,
   getListCategory,
@@ -35,7 +27,6 @@ import {
   getTimeUnit,
 } from "../../../../../redux/slices/receipt_collection/transactionCalender";
 import TransactionCalenderInfromation from "./TransactionCalenderInfromation";
-import TableCriteriaInformation from "./TableCriteriaInformation";
 import ConfirmModalTransactionCalender from "./Modal/ConfirmModalTransactionCalender";
 import { columnsTableCriteria } from "../Bank/Table/TableCriteriaPayment";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
@@ -47,9 +38,7 @@ import { bytesConverter } from "../../../../../utils/bytesConverter";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import { configApp } from "../../../../../constants/configApp";
 import ModalBack from "../../../../../components/Modal/ModalBack";
-import AttachmentSectionComponent from "../../../RatingBillingInvoice/MasterData/BillingItem/Form/tab/AttachmentSectionComponent";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
-import { constantKeys } from "../../../../../components/Criteria/constantCriteriaKey";
 
 const TransactionCalenderForm = (props) => {
   const { type } = props;

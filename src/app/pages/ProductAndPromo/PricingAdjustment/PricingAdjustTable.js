@@ -3,26 +3,24 @@ import { useSelector } from "react-redux";
 import { Fragment } from "react";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import ModalInactivateWithHierarchy from "../../../../components/Modal/ModalInactivateWithHierarchy";
-import { Checkbox, Input, Popover, Tooltip } from "antd";
+import { Checkbox, Tooltip } from "antd";
 import { Link } from "react-router-dom";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import {
   getAllPricingAdjustPaginate,
   getApprovalHistory,
-  getGrantedAccessPriceAdjust,
   inactivePricingAdjust,
 } from "../../../../redux/slices/product_promo/pricingAdjust";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import {
   getListAppHier,
   getListAppHierDetail,
 } from "../../../../redux/slices/product_promo/pricingAdjust";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 import { hasValue, renderColumn } from "../../../../utils";
-import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { useColumnActionPermissionDynamic } from "../UtilsProduct/useColumnActionPermissionDynamic";
 
 const columns = (

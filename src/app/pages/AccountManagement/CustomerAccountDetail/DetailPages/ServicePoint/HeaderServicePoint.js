@@ -1,16 +1,6 @@
-import React, { useEffect, useRef } from "react";
-import {
-  Spin,
-  Input,
-  Form,
-  Alert,
-  Popover,
-  Tooltip,
-  Select,
-  Checkbox,
-} from "antd";
-import { Link, NavLink, Route, Routes, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import React from "react";
+
+
 import { Fragment } from "react";
 import DetailText from "../../../../../../components/DetailText";
 import MiniBaseContainer from "../../../../../../components/MiniBaseContainer";

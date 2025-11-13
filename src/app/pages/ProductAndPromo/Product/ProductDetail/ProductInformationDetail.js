@@ -1,6 +1,5 @@
 import React from "react";
 import DetailText from "../../../../../components/DetailText";
-import moment from "moment";
 
 const ProductInformationDetail = ({ data }) => {
   return (

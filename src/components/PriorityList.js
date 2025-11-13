@@ -66,21 +66,16 @@ const PriorityList = ({ data, onItemClick }) => {
         </span>
       ),
       children: (
-        data?.priorPendingTransactions && data.priorPendingTransactions.length > 0 ? (
-          <Table
-            dataSource={data.priorPendingTransactions}
-            columns={getColumns("#faad14", "pendingTransactions")}
-            rowKey={(record, index) => `pending-trans-${record.accountNum}-${index}`}
-            pagination={false}
-            size="small"
-            scroll={{ x: 600 }}
-          />
-        ) : (
-          <Empty 
-            description="No pending transactions anomalies" 
-            style={{ padding: "40px 0" }}
-          />
-        )
+        <Table
+          dataSource={data.priorPendingTransactions}
+          columns={getColumns("#faad14", "pendingTransactions")}
+          rowKey={(record, index) =>
+            `pending-trans-${record.accountNum}-${index}`
+          }
+          pagination={false}
+          size="small"
+          scroll={{ x: 600 }}
+        />
       ),
     },
     {
@@ -91,23 +86,24 @@ const PriorityList = ({ data, onItemClick }) => {
           Pending Approvals ({data?.priorApprovalBatches?.length || 0})
         </span>
       ),
-      children: (
+      children:
         data?.priorApprovalBatches && data.priorApprovalBatches.length > 0 ? (
           <Table
             dataSource={data.priorApprovalBatches}
             columns={getColumns("#1890ff", "pendingApprovals")}
-            rowKey={(record, index) => `approval-batch-${record.accountNum}-${index}`}
+            rowKey={(record, index) =>
+              `approval-batch-${record.accountNum}-${index}`
+            }
             pagination={false}
             size="small"
             scroll={{ x: 600 }}
           />
         ) : (
-          <Empty 
-            description="No pending approvals anomalies" 
+          <Empty
+            description="No pending approvals anomalies"
             style={{ padding: "40px 0" }}
           />
-        )
-      ),
+        ),
     },
     {
       key: "3",
@@ -117,59 +113,57 @@ const PriorityList = ({ data, onItemClick }) => {
           Gap Rating vs Billing ({data?.priorGapRatingBilling?.length || 0})
         </span>
       ),
-      children: (
+      children:
         data?.priorGapRatingBilling && data.priorGapRatingBilling.length > 0 ? (
           <Table
             dataSource={data.priorGapRatingBilling}
             columns={getColumns("#f5222d", "gapRatingBilling")}
-            rowKey={(record, index) => `gap-rating-${record.accountNum}-${index}`}
+            rowKey={(record, index) =>
+              `gap-rating-${record.accountNum}-${index}`
+            }
             pagination={false}
             size="small"
             scroll={{ x: 600 }}
           />
         ) : (
-          <Empty 
-            description="No gap rating billing anomalies" 
+          <Empty
+            description="No gap rating billing anomalies"
             style={{ padding: "40px 0" }}
           />
-        )
-      ),
+        ),
     },
     {
       key: "4",
       label: (
         <span>
           <SyncOutlined style={{ marginRight: 8 }} />
-          Gap Pra-Billing vs Master ({data?.priorGapPrabillingMaster?.length || 0})
+          Gap Pra-Billing vs Master (
+          {data?.priorGapPrabillingMaster?.length || 0})
         </span>
       ),
-      children: (
-        data?.priorGapPrabillingMaster && data.priorGapPrabillingMaster.length > 0 ? (
+      children:
+        data?.priorGapPrabillingMaster &&
+        data.priorGapPrabillingMaster.length > 0 ? (
           <Table
             dataSource={data.priorGapPrabillingMaster}
             columns={getColumns("#722ed1", "gapPraBillingMaster")}
-            rowKey={(record, index) => `gap-prabil-${record.accountNum}-${index}`}
+            rowKey={(record, index) =>
+              `gap-prabil-${record.accountNum}-${index}`
+            }
             pagination={false}
             size="small"
             scroll={{ x: 600 }}
           />
         ) : (
-          <Empty 
-            description="No gap pra-billing master anomalies" 
+          <Empty
+            description="No gap pra-billing master anomalies"
             style={{ padding: "40px 0" }}
           />
-        )
-      ),
+        ),
     },
   ];
 
-  return (
-    <Tabs 
-      defaultActiveKey="1" 
-      type="card"
-      items={items}
-    />
-  );
+  return <Tabs defaultActiveKey="1" type="card" items={items} />;
 };
 
 export default PriorityList;

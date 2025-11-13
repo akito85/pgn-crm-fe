@@ -1,17 +1,16 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Tooltip, Input, DatePicker, Table, Spin } from "antd";
+import { Tooltip, Input, DatePicker, Spin } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 import SVGIcon from "../../../../../../../assets/Icon/index";
-import { dateFormatting, hasValue } from "../../../../../../../utils";
+import { dateFormatting } from "../../../../../../../utils";
 import { useDispatch, useSelector } from "react-redux";
 import BaseContainer from "../../../../../../../components/BaseContainer";
 import TablePagination from "../../../../../../../components/TablePagination";
 import {
   getContactType,
   getCountryCode,
-  getCountryZone,
   getInputType,
   getJob,
   getPosition,

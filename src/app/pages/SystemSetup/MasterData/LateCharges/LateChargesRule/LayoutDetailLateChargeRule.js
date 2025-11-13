@@ -1,8 +1,5 @@
 import React from "react";
 import DetailText from "../../../../../../components/DetailText";
-import { getListCategory } from "../../../../../../redux/slices/account_management/MasterData/late_charges";
-import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";
-import AttachmentSectionForm from "../../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import TableLateChargeRuleCondition from "./TableLateChargeRuleCondition";
 import { getFormula } from "./util";

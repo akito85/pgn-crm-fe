@@ -1,20 +1,13 @@
-import { Checkbox, DatePicker, Input } from "antd";
-import React, { useEffect, useRef, useState } from "react";
-import { Form, Spin } from "antd";
+import { Checkbox, Input } from "antd";
+import React from "react";
+import { Form } from "antd";
 import BaseContainer from "../../../../../components/BaseContainer";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
-import { dateFormatting, formMessageRequired } from "../../../../../utils";
+import { formMessageRequired } from "../../../../../utils";
 import InputComponent from "../../../../../components/InputComponent";
-import DynamicTableInline from "../../../../../components/Table/DynamicTableInline";
-import Highlighter from "react-highlight-words";
-import { FilterOutlined } from "@ant-design/icons";
 import moment from "moment";
-import { useDispatch, useSelector } from "react-redux";
-import { getDetailItem } from "../../../../../redux/slices/receipt_collection/paymentItem";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import DynamicTableInlinePayment from "../../DynamicTableInlinePayment";
+import { useDispatch } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
 import DateComponent from "../../../../../components/DateComponent";
-import { current } from "@reduxjs/toolkit";
 
 const PaymentItemForm = (props) => {
   const {

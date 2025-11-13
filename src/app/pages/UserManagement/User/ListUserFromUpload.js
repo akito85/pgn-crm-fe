@@ -1,10 +1,6 @@
-import React from "react";
 import BaseContainer from "../../../../components/BaseContainer";
-import TablePagination from "../../../../components/TablePagination";
-import { useState } from "react";
-import TableInline from "../../../../components/Table/TableInline";
+import { useState, useEffect, useRef } from "react";
 import moment from "moment";
-import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllAuthType,
@@ -14,7 +10,6 @@ import {
   getAllUserType,
 } from "../../../../redux/slices/user_management/user";
 import StatusComponent from "../../../../components/StatusComponent";
-import { useRef } from "react";
 import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { dateFormatting } from "../../../../utils";

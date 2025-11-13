@@ -4,10 +4,8 @@ import RadioTabs from "../../../../../components/RadioTabs";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../utils";
 import moment from "moment";
-import Criteria from "../Form/Criteria";
 import Detail from "../Form/Detail";
 import { lowerCaseStatus } from "../../Product/utils";
-import { columnsTableCriteriaPromo } from "../../PromoDiscount/Table/TableCriteriaPromo";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";
 import { columnsTableCriteriaAll } from "../../UtilsProduct/TableCriteriaAllProduct";
 

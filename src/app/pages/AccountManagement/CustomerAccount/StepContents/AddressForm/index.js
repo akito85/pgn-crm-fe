@@ -1,10 +1,7 @@
 import React, { useState } from 'react'
-import { Form, Select } from 'antd';
+import { Form } from 'antd';
 
 import RadioTabs from '../../../../../../components/RadioTabs'
-import SelectComponent from '../../../../../../components/SelectComponent';
-import ButtonComponent from '../../../../../../components/ButtonComponent';
-import ModalCustom from '../../../../../../components/Modal/ModalCustom';
 import ChooseAddressForm from './ChooseAddressForm';
 import CreateNewAddressForm from './CreateNewAddressForm';
 

@@ -1,11 +1,10 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { Tooltip } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import ToolbarAccount from "../../../../ComponentAccount/ToolbarAccount";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../../../utils";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
@@ -13,7 +12,6 @@ import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
 import RawMaterialSourceDetail from "./RawMaterialSourceDetail";
-import { WarningOutlined } from "@ant-design/icons";
 import {
   ModalConfirm,
   ModalError,

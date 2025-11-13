@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState, useEffect } from "react";
+import { Fragment, useRef, useState } from "react";
 import DetailText from "../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
@@ -7,7 +7,6 @@ import columnsMapping from "../Table/TableMappingInformation";
 import { renderDateTime } from "../../GeneralTemplate/Utils/Utils";
 import moment from "moment";
 import { dateFormatting, hasValue } from "../../../../../../utils";
-import { data } from "autoprefixer";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../../../components/Card/CardComponent";
 import ButtonComponent from "../../../../../../components/ButtonComponent";

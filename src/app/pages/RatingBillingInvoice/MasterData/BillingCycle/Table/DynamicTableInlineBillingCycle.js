@@ -16,12 +16,9 @@ import moment from "moment";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import {
-  DeleteOutlined,
   MoreOutlined,
   PlusOutlined,
   InfoCircleOutlined,
-  DeleteColumnOutlined,
-  DeleteFilled,
 } from "@ant-design/icons";
 import { useEffect } from "react";
 import SVGIcon from "../../../../../../assets/Icon/index";
@@ -29,12 +26,10 @@ import { dateFormatting } from "../../../../../../utils";
 import {
   createPeriodInformation,
   getBillingPeriodList,
-  getInfoDetail,
   updatePeriodInformation,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/billingCycle";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
 import Toolbar from "../../../../../../components/Toolbar";
-import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import useGrantAccessHooks from "../../../../../../components/useGrantAccessHooks";
 import InputComponent from "../../../../../../components/InputComponent";
 const EditableCell = ({

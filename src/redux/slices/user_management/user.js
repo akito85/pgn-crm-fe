@@ -498,7 +498,7 @@ const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    setClearData: (state, action) => {
+    setClearData: (state) => {
       state.data_list_upload = null;
     },
   },
@@ -514,7 +514,7 @@ const userSlice = createSlice({
       state.loading = false;
       state.isFailed = false;
     },
-    [getListUser.rejected]: (state, action) => {
+    [getListUser.rejected]: (state) => {
       state.loading = false;
     },
 
@@ -578,7 +578,7 @@ const userSlice = createSlice({
     [donwloadedExcel.pending]: (state) => {
       state.loading = true;
     },
-    [donwloadedExcel.fulfilled]: (state, action) => {
+    [donwloadedExcel.fulfilled]: (state) => {
       state.loading = false;
     },
     [donwloadedExcel.rejected]: (state) => {
@@ -700,7 +700,7 @@ const userSlice = createSlice({
       state.isSuccess = true;
       state.loading = false;
     },
-    [generatePasswordLink.rejected]: (state, action) => {
+    [generatePasswordLink.rejected]: (state) => {
       state.loading = false;
     },
     // downlaod template
@@ -712,7 +712,7 @@ const userSlice = createSlice({
       state.data = action.payload;
       state.loading = false;
     },
-    [downloadTemplate.rejected]: (state, action) => {
+    [downloadTemplate.rejected]: (state) => {
       state.loading = false;
     },
     // final upload user
@@ -724,22 +724,22 @@ const userSlice = createSlice({
       state.data = action.payload;
       state.loading = false;
     },
-    [finalUploadUser.rejected]: (state, action) => {
+    [finalUploadUser.rejected]: (state) => {
       state.loading = false;
     },
     // get employee by id
-    [getEmployeeById.pending]: (state, action) => {
+    [getEmployeeById.pending]: (state) => {
       state.loading = true;
     },
     [getEmployeeById.fulfilled]: (state, action) => {
       state.data_employee_id = action.payload;
       state.loading = false;
     },
-    [getEmployeeById.rejected]: (state, action) => {
+    [getEmployeeById.rejected]: (state) => {
       state.loading = false;
     },
     // get detail update uesr
-    [getDetailUpdateUser.pending]: (state, action) => {
+    [getDetailUpdateUser.pending]: (state) => {
       state.loading = true;
     },
     [getDetailUpdateUser.fulfilled]: (state, action) => {
@@ -752,7 +752,7 @@ const userSlice = createSlice({
     },
 
     // get user position to
-    [getUserPositionTo.pending]: (state, action) => {
+    [getUserPositionTo.pending]: (state) => {
       state.loading = true;
     },
     [getUserPositionTo.fulfilled]: (state, action) => {
@@ -765,14 +765,14 @@ const userSlice = createSlice({
     },
 
     // forward user
-    [forwardTaskUser.pending]: (state, action) => {
+    [forwardTaskUser.pending]: (state) => {
       state.loading = true;
     },
-    [forwardTaskUser.fulfilled]: (state, action) => {
+    [forwardTaskUser.fulfilled]: (state) => {
       state.loading = false;
       // state.data_user = action.payload;
     },
-    [forwardTaskUser.rejected]: (state, action) => {
+    [forwardTaskUser.rejected]: (state) => {
       state.loading = false;
       // state.data_user = action.payload;
     },

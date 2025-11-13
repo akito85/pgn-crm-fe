@@ -134,7 +134,7 @@ export const downloadGroupAccess = createAsyncThunk(
 
 export const createGroupAccess = createAsyncThunk(
   "CREATE_GROUP_ACCESS",
-  async ({ body, responseSuccess }, thunkAPI) => {
+  async ({ body }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/ga/create";
       const response = await userHttpService.createData(url, body);
@@ -159,7 +159,7 @@ export const createGroupAccess = createAsyncThunk(
 
 export const updateGroupAccess = createAsyncThunk(
   "UPDATE_GROUP_ACCESS",
-  async ({ body, responseSuccess }, thunkAPI) => {
+  async ({ body }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/ga//update-group-access";
       const response = await userHttpService.updateData(url, body);
@@ -250,14 +250,14 @@ const groupAccessSlice = createSlice({
       state.loading = false;
     },
     // inactive ga
-    [activeAndInactiveGroupAccess.pending]: (state, action) => {
+    [activeAndInactiveGroupAccess.pending]: (state) => {
       state.loading = true;
     },
-    [activeAndInactiveGroupAccess.fulfilled]: (state, action) => {
+    [activeAndInactiveGroupAccess.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [activeAndInactiveGroupAccess.rejected]: (state, action) => {
+    [activeAndInactiveGroupAccess.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
@@ -290,7 +290,7 @@ const groupAccessSlice = createSlice({
 
     //download
 
-    [downloadGroupAccess.pending]: (state, action) => {
+    [downloadGroupAccess.pending]: (state) => {
       state.loading = true;
     },
     [downloadGroupAccess.fulfilled]: (state, action) => {

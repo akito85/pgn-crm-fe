@@ -5,10 +5,8 @@ import CardComponent from "../../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../../components/DetailText";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
-import Highlighter from "react-highlight-words";
-import { Tooltip } from "antd";
 import { useDispatch } from "react-redux";
 import { getHistoryPeriod } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/billingCycle";
 

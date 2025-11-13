@@ -48,7 +48,7 @@ const ConfirmationUpdateDetail = ({
         if (apphierId === null || apphierId === undefined || isNaN(apphierId)) {
             openNotification("warning", "Warning", "Please fill form approval first before save & submit");
             return;
-        };
+        }
 
         const updatedDataParse = updatedData?.map(item => {
             return {

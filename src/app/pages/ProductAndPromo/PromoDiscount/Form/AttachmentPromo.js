@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { Input, Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
