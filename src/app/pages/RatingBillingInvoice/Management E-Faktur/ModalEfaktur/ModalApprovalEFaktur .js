@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Steps, Table, Spin, Alert } from "antd";
+import { Steps, Form } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../assets/Icon/index";
 import InputComponent from "../../../../../components/InputComponent";
@@ -8,265 +8,338 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import DetailText from "../../../../../components/DetailText";
 import {
   approvedEfaktur,
-  getAllBillingItemPaginate,
-  getDetailEFaktur,
+  getAllEFakturApprovePaginate,
 } from "../../../../../redux/slices/rating_billing_invoice/efakturSlice";
-import {
-  ModalError,
-} from "../../../../../components/Modal/ModalPopUp";
+import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../utils/Icon";
+import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 
 const ModalApprovalEFaktur = ({
-  isOpen,
-  handleClose = () => {},
-  billingData = null,
-  onSuccess = () => {},
+   isOpen,
+  handleClose,           // Ganti dari handleCancel ke handleClose
+  onSuccess,            // Ganti dari handleRefresh ke onSuccess
+  billingData,  
 }) => {
+  // Selector
+  const { list_efaktur_approval, loading_modal } = useSelector((state) => state.efaktur);
+
+  // Declaration
+  const containerRef = useRef(null);
+  const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-
-  const { 
-    data_billingItem, 
-    loading_detail, 
-    loading_modal,
-    detail_efaktur 
-  } = useSelector(
-    (state) => state.efaktur
-  );
+  const dataSource = list_efaktur_approval;
 
   // State
   const [current, setCurrent] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
   const [remark, setRemark] = useState("");
   const [action, setAction] = useState("");
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [dataTableSelect, setDataTableSelect] = useState([]);
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
-  const [customerDetail, setCustomerDetail] = useState(null);
 
-  // Fetch billing items dan detail E-Faktur ketika modal dibuka
+  // Use Effect
   useEffect(() => {
-    if (isOpen && billingData?.billingCode) {
-      dispatch(getAllBillingItemPaginate(billingData.billingCode));
-      
-      dispatch(getDetailEFaktur(billingData.billingCode))
-        .unwrap()
-        .then((result) => {
-          if (result) {
-            setCustomerDetail(result);
-          }
-        })
-        .catch(() => {
-          setCustomerDetail(null);
-        });
+    if (isOpen) {
+      dispatch(getAllEFakturApprovePaginate());
     }
-  }, [isOpen, billingData, dispatch]);
+  }, [dispatch, isOpen]);
 
-  // Update customer detail dari Redux state
-  useEffect(() => {
-    if (detail_efaktur) {
-      setCustomerDetail(detail_efaktur);
+  // Function Search
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
+    if (searchedColumn !== tempSearchColumn) {
+      setPage(1);
     }
-  }, [detail_efaktur]);
+    setSearchedColumn(tempSearchColumn);
+  };
+
+  // Handle Change Page
+  const handleChange = (pageChange, pageSizeChange) => {
+    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+    setPageSize(pageSizeChange);
+  };
+
+  // Sort Table
+  const onSort = (_, __, sort) => {
+    // Implement if needed
+  };
+
+  const onSelectChange = (newSelectedRowKeys, newSelectedRow) => {
+    setDataTableSelect(newSelectedRow);
+    setSelectedRowKeys(newSelectedRowKeys);
+  };
+
+  const rowSelection = {
+    fixed: true,
+    selectedRowKeys,
+    onChange: onSelectChange,
+  };
 
   // Steps
   const steps = [
     {
       title: "E-FAKTUR INFORMATION",
-      disabled: !form.getFieldValue()?.remark,
+      disabled: dataTableSelect.length === 0 || !form.getFieldValue().remark,
     },
     {
       title: "CONFIRMATION",
     },
   ];
 
+  // Navigation
+  const next = () => setCurrent(current + 1);
+  const prev = () => setCurrent(current - 1);
+
+  // Scroll Handlers
+  const scrollLeftHandler = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollLeft -= 250;
+    }
+  };
+
+  const scrollRightHandler = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollLeft += 250;
+    }
+  };
+
+  const handleScroll = () => {
+    if (containerRef.current) {
+      setScrollLeft(containerRef.current.scrollLeft);
+    }
+  };
+
+  const handleButtonNext = () => {
+    next();
+    scrollRightHandler();
+  };
+
   const items = steps.map((item) => ({
     key: item.title,
     title: item.title,
   }));
 
-  // Navigation
-  const next = () => setCurrent(current + 1);
-  const prev = () => setCurrent(current - 1);
-
-  // Calculate totals
-  const calculateTotals = () => {
-    if (!data_billingItem || data_billingItem.length === 0) {
-      return { totalDpp: 0, totalPpn: 0, total: 0 };
-    }
-
-    const totalDpp = data_billingItem
-      .filter((item) => {
-        const itemName = (item.productName || "").toLowerCase();
-        return !itemName.includes("ppn");
-      })
-      .reduce((sum, item) => sum + (item.total || 0), 0);
-
-    const totalPpn = data_billingItem
-      .filter((item) => {
-        const itemName = (item.productName || "").toLowerCase();
-        return itemName.includes("ppn");
-      })
-      .reduce((sum, item) => sum + (item.total || 0), 0);
-
-    const total = totalDpp + totalPpn;
-
-    return { totalDpp, totalPpn, total };
-  };
-
-  const totals = calculateTotals();
-  const currency = data_billingItem?.[0]?.currency || "IDR";
-
-  // Columns untuk tabel items
-  const columnsItems = [
-    {
-      title: "#",
-      dataIndex: "lineNumber",
-      key: "lineNumber",
-      width: 50,
-      align: "center",
-    },
-    {
-      title: "Produk/Jasa",
-      dataIndex: "productName",
-      key: "productName",
-      width: 300,
-      render: (text, record) => (
-        <div>
-          <div className="font-medium">{text}</div>
-          {record.description && (
-            <div className="text-xs text-gray-500">{record.description}</div>
-          )}
-        </div>
-      ),
-    },
-    {
-      title: "Kuantitas",
-      dataIndex: "quantity",
-      key: "quantity",
-      width: 120,
-      align: "right",
-      render: (value) => {
-        const numValue = parseFloat(value);
-        const formatted =
-          numValue % 1 === 0
-            ? numValue.toLocaleString("id-ID")
-            : numValue.toLocaleString("id-ID", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              });
-        return formatted;
-      },
-    },
-    {
-      title: "UOM",
-      dataIndex: "uom",
-      key: "uom",
-      width: 80,
-      align: "center",
-    },
-    {
-      title: "Harga Satuan",
-      dataIndex: "unitPrice",
-      key: "unitPrice",
-      width: 150,
-      align: "right",
-      render: (value, record) => {
-        const symbol = record.currency === "USD" ? "$" : "Rp";
-        const formatted = value.toLocaleString("id-ID", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        });
-        return `${symbol} ${formatted}`;
-      },
-    },
-    {
-      title: "Total",
-      dataIndex: "total",
-      key: "total",
-      width: 180,
-      align: "right",
-      render: (value, record) => {
-        const symbol = record.currency === "USD" ? "$" : "Rp";
-        const formatted = value.toLocaleString("id-ID", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        });
-        return (
-          <span className="font-semibold text-gray-900">
-            {symbol} {formatted}
-          </span>
-        );
-      },
-    },
-  ];
-
-  // Handle Cancel
+  // Handle Cancel Form
   const handleCancelForm = () => {
-    handleClose();
-    setRemark("");
-    setAction("");
-    setCurrent(0);
-    setCustomerDetail(null);
-    form.resetFields();
-  };
+  handleClose();  // Dulu: handleCancel()
+  setSelectedRowKeys([]);
+  setDataTableSelect([]);
+  setRemark("");
+  setAction("");
+  setCurrent(0);
+  form.resetFields();
+};
 
   // Handle Save
+  // Handle Save
   const handleSave = (formValue) => {
-    if (!billingData) {
-      setBodyError({ message: "Billing data not found" });
+    // Pastikan data yang dipilih valid
+    if (!dataTableSelect || dataTableSelect.length === 0) {
+      setBodyError({ message: "Tidak ada E-Faktur yang dipilih" });
       setModalError(true);
       return;
     }
 
-    if (!billingData.tappId) {
-      setBodyError({ message: "Approval ID (tappId) tidak ditemukan" });
+    // Validasi setiap item memiliki tappId dan efakturId
+    const invalidItems = dataTableSelect.filter(
+      (item) => !item.tappId || !item.efakturId
+    );
+
+    if (invalidItems.length > 0) {
+      console.error("Invalid items found:", invalidItems);
+      setBodyError({
+        message: "Beberapa E-Faktur tidak memiliki data approval yang lengkap",
+      });
       setModalError(true);
       return;
     }
 
-    if (!billingData.efakturId) {
-      setBodyError({ message: "E-Faktur ID tidak ditemukan" });
-      setModalError(true);
-      return;
-    }
+    const detailApproves = dataTableSelect.map((item) => ({
+      approvalId: Number(item.tappId), // Pastikan berupa number
+      efakturId: Number(item.efakturId), // Pastikan berupa number
+    }));
 
     const body = {
-      approvalId: billingData.tappId,
-      efakturId: billingData.efakturId,
-      billingCode: billingData.billingCode,
+      detailApproves: detailApproves,
       action: action,
       description: remark,
     };
 
+    console.log("Sending approval payload:", body); // Debug log
+
     dispatch(
       approvedEfaktur({
-        body: body,
+        body: { ...body, billingCode: "" }, // billingCode kosong karena bulk approval
         action: action === "APPROVE" ? "approved" : "rejected",
       })
     )
       .unwrap()
       .then(() => {
-        setTimeout(() => {
-          handleCancelForm();
-          onSuccess();
-        }, 2000);
+        onSuccess();
+        setCurrent(0);
+        form.resetFields();
+        setRemark("");
+        setAction("");
+        handleClose();
+        setSelectedRowKeys([]);
+        setDataTableSelect([]);
       })
       .catch((error) => {
-        if (!error?.response || Math.floor((error?.response?.data?.code || 0) / 100) !== 5) {
-          const message =
-            error?.message || 
-            error?.toString() ||
-            "Terjadi kesalahan saat memproses approval";
-          
-          setBodyError({ message });
-          setModalError(true);
-        }
+        const message =
+          error?.message ||
+          error?.toString() ||
+          "Terjadi kesalahan saat memproses approval";
+        setBodyError({ message });
+        setModalError(true);
       });
   };
 
   const handleCloseModalError = () => {
+  setModalError(false);
+  handleClose();  // Dulu: handleOpenModal()
+  setBodyError({});
+};
+
+  const handleRetry = () => {
+    handleSave();
     setModalError(false);
     setBodyError({});
+  };
+
+  const filterDataByPage = (type = "data") => {
+    let result = [...dataSource].map((a, index) => ({
+      ...a,
+      key: index + 1,
+    }));
+    return type === "data" ? result : result.length;
+  };
+
+  // Columns Definition
+  const columnsApprovalEFaktur = (
+    page,
+    pageSize,
+    searchInput,
+    searchedColumn,
+    searchText,
+    handleSearch
+  ) => {
+    return [
+      {
+        title: "NO",
+        dataIndex: "no",
+        key: "no",
+        width: 60,
+        render: (_, __, index) => (page - 1) * pageSize + index + 1,
+      },
+      {
+        title: "NO. E-FAKTUR",
+        dataIndex: "efakturNo",
+        key: "efakturNo",
+        width: 180,
+        render: (text) => text || "-",
+      },
+      {
+        title: "INVOICE NUMBER",
+        dataIndex: "invoiceNumber",
+        key: "invoiceNumber",
+        width: 180,
+      },
+      {
+        title: "BILLING CODE",
+        dataIndex: "billingCode",
+        key: "billingCode",
+        width: 180,
+      },
+      {
+        title: "CUSTOMER",
+        dataIndex: "customerName",
+        key: "customerName",
+        width: 250,
+      },
+      {
+        title: "ACCOUNT NUMBER",
+        dataIndex: "accountNumber",
+        key: "accountNumber",
+        width: 150,
+      },
+      {
+        title: "BILLING PERIOD",
+        dataIndex: "billingPeriod",
+        key: "billingPeriod",
+        width: 120,
+      },
+      {
+        title: "INVOICE DATE",
+        dataIndex: "invoiceDate",
+        key: "invoiceDate",
+        width: 120,
+        render: (text) => {
+          if (!text) return "-";
+          const date = new Date(text);
+          return date.toLocaleDateString("id-ID", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          });
+        },
+      },
+      {
+        title: "TOTAL AMOUNT (IDR)",
+        dataIndex: "totalAmountEqvIdr",
+        key: "totalAmountEqvIdr",
+        width: 180,
+        align: "right",
+        render: (value) => `Rp ${value?.toLocaleString("id-ID") || 0}`,
+      },
+      {
+        title: "STATUS E-FAKTUR",
+        dataIndex: "efakturStatus",
+        key: "efakturStatus",
+        width: 180,
+        align: "center",
+        render: (status) => {
+          const statusColors = {
+            APPROVED: "bg-green-100 text-green-800 border-green-300",
+            SUCCESS: "bg-green-100 text-green-800 border-green-300",
+            PROCESSING: "bg-blue-100 text-blue-800 border-blue-300",
+            AWAITING_APPROVAL: "bg-orange-100 text-orange-800 border-orange-300",
+            FAILED: "bg-red-100 text-red-800 border-red-300",
+            REJECTED: "bg-red-100 text-red-800 border-red-300",
+          };
+
+          return (
+            <div className="flex justify-center">
+              <span
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                  statusColors[status] ||
+                  "bg-gray-100 text-gray-800 border-gray-300"
+                }`}
+              >
+                {status?.replace(/_/g, " ")}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        title: "REMARK",
+        dataIndex: "remark",
+        key: "remark",
+        width: 200,
+        render: (text) => text || "-",
+      },
+    ];
   };
 
   return (
@@ -276,7 +349,7 @@ const ModalApprovalEFaktur = ({
         type={"confirmation"}
         header="Approval E-Faktur"
         handleCancel={handleCancelForm}
-        width={1000}
+        width={1200}
         footer={
           <div className="flex w-full justify-end gap-5">
             {current < steps.length - 1 && (
@@ -286,7 +359,10 @@ const ModalApprovalEFaktur = ({
             )}
             {current > 0 && (
               <ButtonComponent
-                onClick={prev}
+                onClick={() => {
+                  prev();
+                  scrollLeftHandler();
+                }}
                 type={"submit"}
                 icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
               >
@@ -296,7 +372,7 @@ const ModalApprovalEFaktur = ({
 
             {current < steps.length - 1 && (
               <ButtonComponent
-                onClick={next}
+                onClick={handleButtonNext}
                 type={"submit"}
                 className="ant-btn ant-btn-submit flex w-full justify-center"
                 disabled={steps[current].disabled}
@@ -316,7 +392,7 @@ const ModalApprovalEFaktur = ({
                 <ButtonComponent
                   type={"reject"}
                   htmlType={"submit"}
-                  form={"formApproveEfaktur"}
+                  form={"formApproveEFaktur"}
                   onClick={() => setAction("REJECT")}
                   loading={loading_modal}
                 >
@@ -325,7 +401,7 @@ const ModalApprovalEFaktur = ({
                 <ButtonComponent
                   type={"approve"}
                   htmlType={"submit"}
-                  form={"formApproveEfaktur"}
+                  form={"formApproveEFaktur"}
                   onClick={() => setAction("APPROVE")}
                   loading={loading_modal}
                 >
@@ -336,138 +412,51 @@ const ModalApprovalEFaktur = ({
           </div>
         }
       >
-        <Spin spinning={loading_detail}>
-          {/* FIXED STEPS SECTION */}
-          <div className="mb-8">
-            <Steps 
-              current={current} 
-              items={items} 
-              labelPlacement="vertical"
-              size="small"
-              className="custom-steps-approval"
-            />
+        <div className="flex flex-row justify-center">
+          <div
+            onScroll={handleScroll}
+            ref={containerRef}
+            className="overflow-x-scroll scrollStepsCstm"
+          >
+            <Steps current={current} items={items} labelPlacement="vertical" />
           </div>
+        </div>
 
-          {/* STEP 1: E-FAKTUR INFORMATION */}
-          <div className={`${current !== 0 ? "hidden" : ""}`}>
-            <Form
-              layout="vertical"
-              form={form}
-              id={"formApproveEfaktur"}
-              onFinish={handleSave}
-            >
-              {/* Billing Information */}
-              {billingData && (
-                <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
-                  <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
-                    Informasi Billing
-                  </h3>
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                    <DetailText label="Billing Code">
-                      {billingData.billingCode}
-                    </DetailText>
-                    <DetailText label="Invoice Number">
-                      {billingData.invoiceNumber || "-"}
-                    </DetailText>
-                    <DetailText label="Customer">
-                      {billingData.customerName}
-                    </DetailText>
-                    <DetailText label="Account Number">
-                      {billingData.accountNumber}
-                    </DetailText>
-                    <DetailText label="Invoice Date">
-                      {billingData.invoiceDate}
-                    </DetailText>
-                    <DetailText label="Billing Period">
-                      {billingData.billingPeriod}
-                    </DetailText>
-                    <DetailText label="Status">
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold border bg-orange-100 text-orange-800 border-orange-300">
-                        {billingData.efakturStatus?.replace(/_/g, " ")}
-                      </span>
-                    </DetailText>
-                  </div>
-                </div>
-              )}
-
-              {/* Billing Items */}
-              <div className="mb-6 p-5 bg-white border-2 border-gray-300 rounded-lg">
-                <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
-                  Rincian Item Billing
-                </h3>
-                
-                {loading_detail ? (
-                  <div className="text-center py-8">
-                    <Spin size="large" />
-                    <p className="mt-4 text-gray-500">Loading billing items...</p>
-                  </div>
-                ) : data_billingItem.length === 0 ? (
-                  <Alert
-                    message="Tidak Ada Data"
-                    description="Billing items tidak ditemukan untuk billing code ini."
-                    type="warning"
-                    showIcon
-                  />
-                ) : (
-                  <Table
-                    dataSource={data_billingItem || []}
-                    columns={columnsItems}
-                    pagination={false}
-                    size="small"
-                    bordered
-                    scroll={{ x: 900 }}
-                    locale={{
-                      emptyText: "Tidak ada data",
-                    }}
-                  />
+        {/* STEP 1: E-FAKTUR INFORMATION */}
+        <div
+          className={`steps-content my-[30px] ${current !== 0 ? "hidden" : ""}`}
+        >
+          <Form
+            layout="vertical"
+            form={form}
+            id={"formApproveEFaktur"}
+            onFinish={handleSave}
+          >
+            <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
+              <p className="text-primary uppercase font-bold">
+                E-Faktur List - Ready to Approve
+              </p>
+              <TablePaginationNew
+                type="FE"
+                dataSource={filterDataByPage("data")}
+                columns={columnsApprovalEFaktur(
+                  page,
+                  pageSize,
+                  searchInput,
+                  searchedColumn,
+                  searchText,
+                  handleSearch
                 )}
-              </div>
-
-              {/* Summary */}
-              {data_billingItem.length > 0 && (
-                <div className="mb-6 p-5 bg-blue-50 border-2 border-blue-300 rounded-lg">
-                  <h3 className="text-base font-bold text-blue-800 mb-4 pb-2 border-b-2 border-blue-200">
-                    Ringkasan ({currency})
-                  </h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between px-3 py-2">
-                      <span className="font-medium">DPP (Tanpa PPN):</span>
-                      <span className="font-semibold">
-                        {currency === "USD" ? "$" : "Rp"}{" "}
-                        {totals.totalDpp.toLocaleString("id-ID", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </span>
-                    </div>
-                    <div className="flex justify-between px-3 py-2">
-                      <span className="font-medium">PPN:</span>
-                      <span className="font-semibold">
-                        {currency === "USD" ? "$" : "Rp"}{" "}
-                        {totals.totalPpn.toLocaleString("id-ID", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center pt-3 pb-2 px-3 border-t-2 border-blue-300 bg-blue-100 rounded">
-                      <span className="text-base font-bold text-blue-900">
-                        Total Tagihan:
-                      </span>
-                      <span className="text-xl font-bold text-blue-700">
-                        {currency === "USD" ? "$" : "Rp"}{" "}
-                        {totals.total.toLocaleString("id-ID", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Remark */}
-              <div className="pt-4">
+                current={page}
+                pageSize={pageSize}
+                onChange={handleChange}
+                onSizeChanger={handleChange}
+                totalData={filterDataByPage("length")}
+                onSort={onSort}
+                tableScrolled={{ y: 525, x: 2000 }}
+                rowSelection={rowSelection}
+              />
+              <div className="pt-[30px]">
                 <Form.Item
                   label={"Remark"}
                   name={"remark"}
@@ -484,70 +473,53 @@ const ModalApprovalEFaktur = ({
                   />
                 </Form.Item>
               </div>
-            </Form>
-          </div>
+            </div>
+          </Form>
+        </div>
 
-          {/* STEP 2: CONFIRMATION */}
-          <div className={`${current !== 1 ? "hidden" : ""}`}>
-            {/* Billing Information Review */}
-            {billingData && (
-              <div className="mb-6 p-5 bg-blue-50 border-2 border-blue-300 rounded-lg">
-                <h3 className="text-base font-bold text-blue-800 mb-4 pb-2 border-b-2 border-blue-200">
-                  Review - E-Faktur yang Akan Di-
-                  {action === "APPROVE" ? "Approve" : "Reject"}
-                </h3>
-                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                  <DetailText label={"Billing Code"}>
-                    {billingData.billingCode}
-                  </DetailText>
-                  <DetailText label={"Invoice Number"}>
-                    {billingData.invoiceNumber || "-"}
-                  </DetailText>
-                  <DetailText label={"Customer Name"}>
-                    {billingData.customerName}
-                  </DetailText>
-                  <DetailText label={"Account Number"}>
-                    {billingData.accountNumber}
-                  </DetailText>
-                  <DetailText label={"Invoice Date"}>
-                    {billingData.invoiceDate}
-                  </DetailText>
-                  <DetailText label={"Billing Period"}>
-                    {billingData.billingPeriod}
-                  </DetailText>
-                  <DetailText label={"Total Amount"}>
-                    Rp{" "}
-                    {billingData.totalAmountEqvIdr?.toLocaleString("id-ID") ||
-                      0}
-                  </DetailText>
-                  <DetailText label={"Status"}>
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold border bg-orange-100 text-orange-800 border-orange-300">
-                      {billingData.efakturStatus?.replace(/_/g, " ")}
-                    </span>
-                  </DetailText>
-                </div>
-              </div>
-            )}
-
-            {/* Remark Review */}
-            <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
-              <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
-                Review - Remark
-              </h3>
+        {/* STEP 2: CONFIRMATION */}
+        <div
+          className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
+        >
+          <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
+            <p className="text-primary uppercase font-bold">
+              Review - E-Faktur yang Akan Di-
+              {action === "APPROVE" ? "Approve" : "Reject"}
+            </p>
+            <TablePaginationNew
+              type="FE"
+              dataSource={dataTableSelect}
+              columns={columnsApprovalEFaktur(
+                page,
+                pageSize,
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch
+              )}
+              current={page}
+              pageSize={pageSize}
+              onChange={handleChange}
+              onSizeChanger={handleChange}
+              totalData={dataTableSelect.length || 0}
+              onSort={onSort}
+              tableScrolled={{ y: 525, x: 2000 }}
+            />
+            <div className="pt-[30px]">
               <DetailText label={"Remark"}>
-                {form.getFieldValue()?.remark}
+                {form.getFieldValue().remark}
               </DetailText>
             </div>
           </div>
-        </Spin>
+        </div>
       </ModalCustom>
 
       {/* Modal Error */}
       <ModalError
         isOpen={modalError}
-        handleOk={() => handleCloseModalError()}
-        handleCancel={() => handleCloseModalError()}
-        customText={"Close"}
+        handleOk={handleRetry}
+        handleCancel={handleCloseModalError}
+        customText={"Try Again"}
       >
         <div className="px-5 pt-5 pb-[10px] justify-center">
           <div className="w-full flex gap-[20px]">

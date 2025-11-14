@@ -46,6 +46,7 @@ import {
   getListEFaktur,
   downloadEFakturList,
   getApprovalHistory,
+  getAllEFakturApprovePaginate,
 } from "../../../../redux/slices/rating_billing_invoice/efakturSlice";
 
 const { RangePicker } = DatePicker;
@@ -462,6 +463,18 @@ const ViewFaktur = () => {
         </ButtonComponent>
       ),
     },
+    {
+      action: "Approval",
+      render: (
+        <ButtonComponent
+          icon={<SVGIcon name="IconRequestApproval" width={24} color="#FFF" />}
+          type="submit"
+          onClick={() => setModalApproval(true)}
+        >
+          Approval
+        </ButtonComponent>
+      ),
+    },
 
     // Column Action Table - Approval History
     {
@@ -533,19 +546,6 @@ const ViewFaktur = () => {
                 </div>
               </Dropdown>
             </Tooltip>
-          );
-        }
-
-        // Approval action
-        if (record.efakturStatus === "AWAITING_APPROVAL") {
-          menuItems.push(
-            { type: "divider" },
-            {
-              key: "approval",
-              label: "Approve/Reject",
-              icon: <CheckCircleOutlined style={{ color: "#52c41a" }} />,
-              onClick: () => handleApproval(record),
-            }
           );
         }
 
@@ -755,6 +755,19 @@ const ViewFaktur = () => {
                   onClick={handleDownload}
                 >
                   Export Data
+                </ButtonComponent>
+                <ButtonComponent
+                  icon={
+                    <SVGIcon
+                      name="IconRequestApproval"
+                      width={24}
+                      color="#FFF"
+                    />
+                  }
+                  type="submit"
+                  onClick={() => setModalApproval(true)}
+                >
+                  Approval
                 </ButtonComponent>
               </div>
             </div>

@@ -6,7 +6,7 @@ import {
   showModalError,
 } from "../general_slice";
 
-const CUSTOM_BASE_URL = process.env.REACT_APP_BASE_URL_NGROK;
+const CUSTOM_BASE_URL = process.env.REACT_APP_BASE_URL;
 
 // ============================================
 // UTILITY FUNCTIONS
@@ -77,6 +77,7 @@ const initialState = {
   dataListCategory: [],
   data_approval: [],
   data_approval_list: [],
+  list_efaktur_approval: [],
   data_billingItem: [],
   detail_efaktur: null,
   log_activity: [],
@@ -379,21 +380,35 @@ export const uploadAttachment = createAsyncThunk(
   }
 );
 
+export const getAllEFakturApprovePaginate = createAsyncThunk(
+  "EFAKTUR/GET_ALL_EFAKTUR_APPROVE_PAGINATE",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/approval-efaktur-list";
+      const response = await ratingBillingHttpService.getAll(url, CUSTOM_BASE_URL);
+      
+      return Array.isArray(response.data) ? response.data : response.data?.result || [];
+    } catch (error) {
+      return handleApiError(error, thunkAPI, "Gagal mengambil list E-Faktur approval");
+    }
+  }
+);
+
 export const approvedEfaktur = createAsyncThunk(
   "EFAKTUR/APPROVE_EFAKTUR",
   async ({ body, action: actionType }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/e-invoice/approval`;
+      
+      // JANGAN memodifikasi body, kirim langsung seperti yang diterima
+      // Body sudah dalam format yang benar dari modal
       const requestBody = {
-        detailApproves: [
-          {
-            approvalId: body.approvalId,
-            efakturId: body.efakturId,
-          },
-        ],
+        detailApproves: body.detailApproves, // Sudah array of {approvalId, efakturId}
         action: body.action,
         description: body.description || "",
       };
+
+      console.log("Sending to API:", requestBody); // Debug log
 
       const response = await ratingBillingHttpService.createData(url, requestBody, CUSTOM_BASE_URL);
 
@@ -405,9 +420,8 @@ export const approvedEfaktur = createAsyncThunk(
         }));
 
         return {
-          billingCode: body.billingCode,
-          efakturId: body.efakturId,
           action: body.action,
+          detailApproves: body.detailApproves,
         };
       } else {
         throw new Error(response.message || `Gagal ${actionType} E-Faktur`);
@@ -424,8 +438,7 @@ export const approvedEfaktur = createAsyncThunk(
 
       return thunkAPI.rejectWithValue({
         message,
-        billingCode: body.billingCode,
-        efakturId: body.efakturId,
+        detailApproves: body.detailApproves,
       });
     }
   }
@@ -648,6 +661,30 @@ const efakturSlice = createSlice({
       state.loading_detail = false;
       state.data_billingItem = [];
     },
+
+    // GET ALL EFAKTUR APPROVE LIST
+  [getAllEFakturApprovePaginate.pending]: (state) => {
+    state.loading = true;
+  },
+  [getAllEFakturApprovePaginate.fulfilled]: (state, action) => {
+  state.loading = false;
+  const data = Array.isArray(action.payload) 
+    ? action.payload 
+    : action.payload?.result || [];
+  
+  // Debug: pastikan tappId dan efakturId ada
+  console.log('Approval list data:', data);
+  if (data.length > 0) {
+    console.log('First item tappId:', data[0].tappId);
+    console.log('First item efakturId:', data[0].efakturId);
+  }
+  
+  state.list_efaktur_approval = data;
+},
+  [getAllEFakturApprovePaginate.rejected]: (state) => {
+    state.loading = false;
+    state.list_efaktur_approval = [];
+  },
 
     // GET DETAIL E-FAKTUR
     [getDetailEFaktur.pending]: (state) => {
