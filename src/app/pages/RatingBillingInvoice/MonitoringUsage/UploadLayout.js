@@ -18,10 +18,13 @@ import { useMonitoringList } from './useMonirotingList';
 import { ModalAttention, ModalConfirm } from '../../../../components/Modal/ModalPopUp';
 
 const UploadLayout = ({ dataTable, setDataTable = () => { }, tabHeader, id, dataHeader, type }) => {
-    const [format, setFormat] = useState(null);
+    // const [page, setPage] = useState(1)
+    // const [pageSize, setPageSize] = useState(10);
+    // const [sort, setSort] = useState('');
+    const [format, setFormat] = useState();
     const [urlLink, setUrlLink] = useState("");
     const [fileList, setFileList] = useState([]);
-    const [fileName, setFileName] = useState(null);
+    const [fileName, setFileName] = useState("");
     const [fileProgress, setFileProgress] = useState(0);
     const [dataSource, setDataSource] = useState(null);
     const [selectedRecord, setSelectedRecord] = useState(null);
@@ -29,76 +32,56 @@ const UploadLayout = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
     const [isFileUploadEnabled, setFileUploadEnabled] = useState(false);
     const [isModalVisible, setModalVisible] = useState(false);
     const [modalDelete, setModalDelete] = useState(false);
-    const [loadingUpload, setLoadingUpload] = useState(false);
+    const [loadingUpload, setLoadingUpload] = useState(false)
     const MAX_FILE_SIZE = 5000000;
-    
-    const { loading } = useSelector((state) => state.monitoring_usage);
+    const { loading } = useSelector((state) => state.monitoring_usage)
     const { columns, page, setPage, pageSize, setPageSize, onSort } = useMonitoringList(tabHeader, id);
     const [tableDataSource, setTableDataSource] = useState([]);
     const dispatch = useDispatch();
 
     const { list_usage_type, updatedData, deletedData } = useSelector((state) => state.monitoring_usage);
-
     useEffect(() => {
         try {
             dispatch(getFormatUsageType());
+            // setTableDataSource(data?.usageList?.result)
         } catch (error) {
-            console.error('Error fetching format usage type:', error);
-            message.error('Failed to load usage types');
+            console.log('Error', error)
         }
     }, [dispatch]);
 
-    // FIX: Aktifkan useEffect untuk sync updatedData dan deletedData
-    useEffect(() => {
-        if (!dataTable) return;
-        
-        let updatedTableData = [...dataTable];
+    // useEffect(() => {
+    //     if (updatedData.length > 0 || deletedData.length > 0) {
+    //         const updatedTableDataSource = tableDataSource?.map((item) => {
+    //             const updatedItem = updatedData?.find((updated) => updated.recordId === item.recordId);
+    //             return updatedItem ? { ...item, ...updatedItem } : item;
+    //         });
 
-        // Apply updates
-        if (updatedData && updatedData.length > 0) {
-            updatedTableData = updatedTableData.map((item) => {
-                const updatedItem = updatedData.find((updated) => updated.recordId === item.recordId);
-                return updatedItem ? { ...item, ...updatedItem } : item;
-            });
-        }
-
-        // Apply deletions
-        if (deletedData && deletedData.length > 0) {
-            updatedTableData = updatedTableData.filter(
-                (item) => !deletedData.some((deleted) => deleted.recordId === item.recordId)
-            );
-        }
-
-        setTableDataSource(updatedTableData);
-    }, [dataTable, updatedData, deletedData]);
+    //         const finalTableDataSource = updatedTableDataSource?.filter(
+    //             (item) => !deletedData?.some((deleted) => deleted.recordId === item.recordId)
+    //         );
+    //         setTableDataSource(finalTableDataSource);
+    //     }
+    // }, [tableDataSource, updatedData, deletedData]);
 
     // onChange Size
     const onChangeSize = (page, pageSize) => {
-        setPage(page);
-        setPageSize(pageSize);
-    };
+        setPage(page)
+        setPageSize(pageSize)
+    }
 
-    // FIX: Perbaiki handleUpdate untuk dispatch ke Redux
     const handleUpdate = (record, values) => {
-        const updatedData = { ...record, ...values };
-        
+        const updatedData = { record }
         setDataSource((prevDataSource) => {
             return prevDataSource.map((data) =>
                 data.key === record.key ? { ...data, ...updatedData } : data
             );
         });
-        
         setSelectedRecord(null);
-        message.success('Record updated successfully');
     };
 
-    const handleDeleteOk = () => {
-        if (deletedRecord) {
-            dispatch(addDeletedData(deletedRecord));
-            message.success('Record deleted successfully');
-        }
+    const handleDeleteOk = (record) => {
         setModalDelete(false);
-        setDeletedRecord(null);
+        dispatch(addDeletedData(deletedRecord));
     };
 
     // column
@@ -117,7 +100,7 @@ const UploadLayout = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
                                 state={{ id: id, record: record }}
                             >
                                 <div className="pt-1">
-                                    <SVGIcon name="IconEdit" width={24} />
+                                    <SVGIcon name="IconEdit" width={24} onClick={() => handleUpdate(record)} />
                                 </div>
                             </Link>
                         </Tooltip>
@@ -128,81 +111,43 @@ const UploadLayout = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
                                     width={24}
                                     onClick={() => {
                                         setModalDelete(true);
-                                        setDeletedRecord(record);
+                                        setDeletedRecord(record)
                                     }}
                                 />
                             </div>
                         </Tooltip>
                     </div>
-                );
+                )
+
             }
         }
     ];
 
     // handle pagination
     const updateDataPagination = (page, pageSize) => {
-        const dataToUse = tableDataSource?.length > 0 ? tableDataSource : dataTable;
-        return dataToUse?.slice((page - 1) * pageSize, page * pageSize);
+        return dataTable?.slice((page - 1) * pageSize, page * pageSize);
     };
 
-    // FIX: Perbaiki handle format change
+    // handle format change
     const handleFormat = (value) => {
-        setFormat(value);
+        // console.log(value)
+        setFormat(value)
         setFileUploadEnabled(!!value);
     };
 
-    // FIX: Fungsi upload yang diperbaiki dengan parameter file
-    const handleUploadWithFile = async (file) => {
-        if (!format) {
-            setModalVisible(true);
-            return;
-        }
+    // data format 
+    const dataFormat = [
+        { id: 1, text: 'docs' },
+        { id: 2, text: 'xlxs' },
+        { id: 3, text: 'csv' },
+    ];
 
-        if (file.size > MAX_FILE_SIZE) {
-            message.error('File size exceeds 5MB limit');
-            setFileList((prevFileList) =>
-                prevFileList.map((f) =>
-                    f.uid === file.uid ? { ...f, status: 'error', errorMessage: 'File too large' } : f
-                )
-            );
-            return;
-        }
-
-        try {
-            setFileProgress(0);
-            setLoadingUpload(true);
-
-            const body = {
-                document: file,
-                calculationType: format.value,
-                onProgress: (progress) => setFileProgress(progress)
-            };
-
-            await dispatch(uploadMonitoringUsage(body)).unwrap();
-            
-            message.success('File uploaded successfully');
-            
-            // Update file list dengan status success
-            setFileList((prevFileList) =>
-                prevFileList.map((f) =>
-                    f.uid === file.uid ? { ...f, status: 'done', percent: 100 } : f
-                )
-            );
-        } catch (error) {
-            console.error('Upload error:', error);
-            message.error('Failed to upload file');
-            
-            setFileList((prevFileList) =>
-                prevFileList.map((f) =>
-                    f.uid === file.uid ? { ...f, status: 'error', errorMessage: error.message } : f
-                )
-            );
-        } finally {
-            setLoadingUpload(false);
-        }
+    const handleFileChange = ({ fileList }) => {
+        setFileList(fileList);
+        handleUpload();
     };
 
-    // FIX: Perbaiki properties dragger
+    // properties dragger
     const property = {
         name: "file",
         multiple: false,
@@ -211,29 +156,10 @@ const UploadLayout = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
         accept: ".xlsx, .xls",
         maxCount: 1,
         beforeUpload: async (file) => {
-            // Validasi format sebelum upload
-            if (!format) {
-                setModalVisible(true);
-                return false;
-            }
-
-            // Tambahkan file ke list dengan status uploading
-            setFileList([{
-                uid: file.uid,
-                name: file.name,
-                fileName: file.name,
-                size: file.size,
-                status: 'uploading',
-                percent: 0
-            }]);
-
             setFileName(file);
-            
-            // Langsung upload
-            handleUploadWithFile(file);
-            
-            return false; // Prevent auto upload by antd
-        }
+            return false;
+        },
+        onChange: handleFileChange,
     };
 
     const handleUploadButtonClick = () => {
@@ -246,44 +172,49 @@ const UploadLayout = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
         setModalVisible(false);
     };
 
-    // FIX: Perbaiki upload by link dengan validasi
-    const handleUploadLink = async () => {
-        if (!format) {
-            setModalVisible(true);
-            return;
-        }
 
-        if (!urlLink || urlLink.trim() === '') {
-            message.warning('Please enter a valid link');
-            return;
-        }
 
-        // Validasi URL format (basic)
-        const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-        if (!urlPattern.test(urlLink)) {
-            message.error('Please enter a valid URL');
-            return;
-        }
-
+    const handleUpload = async () => {
         try {
-            setFileProgress(0);
-            setLoadingUpload(true);
-
+            setFileProgress(0)
+            const body = {
+                document: fileName,
+                calculationType: format.value,
+                onProgress: (progress) => setFileProgress(progress)
+            };
+            setLoadingUpload(true)
+            await dispatch(uploadMonitoringUsage(body)).unwrap();
+        } catch (error) {
+            setFileList((prevFileList) =>
+                prevFileList.map((file) => {
+                    if (file.name === fileName.name) {
+                        return { ...file, status: 'error' };
+                    }
+                    return file;
+                })
+            );
+        }
+        setLoadingUpload(false)
+    };
+    // handle upload by link
+    const handleUploadLink = async () => {
+        try {
+            setFileProgress(0)
             const body = {
                 document: urlLink,
                 calculationType: format.value,
                 onProgress: (progress) => setFileProgress(progress)
             };
-
             await dispatch(uploadMonitoringUsage(body)).unwrap();
-            
-            message.success('File uploaded successfully from link');
-            setUrlLink(''); // Clear input after success
         } catch (error) {
-            console.error('Upload link error:', error);
-            message.error('Failed to upload file from link');
-        } finally {
-            setLoadingUpload(false);
+            setFileList((prevFileList) =>
+                prevFileList.map((file) => {
+                    if (file.name === fileName.name) {
+                        return { ...file, status: 'error' };
+                    }
+                    return file;
+                })
+            );
         }
     };
 
@@ -293,30 +224,39 @@ const UploadLayout = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
         setPageSize(pageSizeChange);
     };
 
+    // const onSort = (_, __, sort) => {
+    //     const dataSort =
+    //         sort.order !== undefined
+    //             ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+    //             : "";
+    //     setSort(dataSort);
+    // };
+
     // update link files
     const updateLink = (e) => {
+        console.log(e)
         e.stopPropagation();
         setUrlLink(e.target.value);
     };
 
-    // FIX: Perbaiki re-upload dengan file yang sama
-    const reUploadImage = async (file) => {
+    const reUploadImage = async () => {
         setFileList((prevFileList) =>
-            prevFileList.map((f) =>
-                f.uid === file.uid ? { ...f, percent: 0, status: 'uploading' } : f
-            )
+            prevFileList.map((file) => ({
+                ...file,
+                percent: 0,
+                status: 'uploading'
+            }))
         );
-        
-        // Re-upload file
-        handleUploadWithFile(file);
+        handleUpload();
     };
 
     // remove file list
-    const handleRemove = (fileToRemove) => {
+    const handleRemove = (index) => {
         setFileList((prevFileList) => {
-            return prevFileList.filter(file => file.uid !== fileToRemove.uid);
+            const updatedFileList = [...prevFileList];
+            updatedFileList.splice(index, 1);
+            return updatedFileList;
         });
-        message.info('File removed');
     };
 
     const renderLayout = (type) => {
@@ -348,7 +288,7 @@ const UploadLayout = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
                         <TablePagination
                             columns={columns}
                             dataSource={updateDataPagination(page, pageSize)}
-                            totalData={tableDataSource?.length || dataTable?.length || 0}
+                            totalData={dataTable?.length}
                             current={page}
                             pageSize={pageSize}
                             onChange={handleChangePage}
@@ -357,7 +297,7 @@ const UploadLayout = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
                         />
                     </div>
                 </div>
-            );
+            )
         } else {
             return (
                 <Form>
@@ -373,9 +313,8 @@ const UploadLayout = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
                                     label={"Format Usage Type"}
                                     onChange={handleFormat}
                                     labelInValue
-                                    placeholder="Select format type"
                                 >
-                                    {list_usage_type?.map((data) => (
+                                    {list_usage_type?.map((data, index) => (
                                         <Select.Option key={data.id} value={data.id}>
                                             {data.name}
                                         </Select.Option>
@@ -385,10 +324,10 @@ const UploadLayout = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
                         </div>
                         <Form.Item name={"file"}>
                             <div className="w-full">
-                                <Spin spinning={loadingUpload} tip="Uploading...">
+                                <Spin spinning={loadingUpload}>
                                     <Dragger {...property} disabled={!isFileUploadEnabled}>
                                         <p className="ant-upload-drag-icon">
-                                            <SVGIcon name={'IconUploadAttachment'} />
+                                            <SVGIcon name={'IconUploadAttachment'} onClick={handleUploadButtonClick} />
                                         </p>
                                         <p className="ant-upload-text text-bold">
                                             Drag and drop your file here or <span className="underline"> click for upload</span>
@@ -407,17 +346,13 @@ const UploadLayout = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
                                         <div className="flex my-5 justify-center items-center">
                                             <div className="flex gap-3 justify-center items-center">
                                                 <InputComponent
-                                                    value={urlLink}
                                                     onChange={updateLink}
-                                                    placeholder="Enter file URL"
-                                                    disabled={!isFileUploadEnabled}
                                                 />
                                                 <ButtonComponent
                                                     icon={<UploadOutlined />}
                                                     type={"submit"}
                                                     border={false}
                                                     onClick={handleUploadLink}
-                                                    disabled={!isFileUploadEnabled || !urlLink}
                                                 />
                                             </div>
                                         </div>
@@ -425,63 +360,65 @@ const UploadLayout = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
                                 </Spin>
                             </div>
                         </Form.Item>
-                        {fileList.map((file) => (
+                        {fileList.map((file, index) => (
                             <div
                                 className="border-solid border-[0.12rem] border-black rounded-[0.5rem] my-4 py-2 px-3 flex gap-4 items-center"
-                                key={file.uid}
+                                key={index}
                             >
                                 <div>
                                     <FileOutlined style={{ fontSize: "20px" }} />
                                 </div>
                                 <div className="flex flex-col w-full">
                                     <div className="flex w-full justify-between">
-                                        <Typography className={file.status === 'error' ? "text-red-500" : ""}>
-                                            {file.fileName || file.name}
+                                        <Typography className={"text-red-500"}>
+                                            {file.fileName}
                                         </Typography>
+                                        <ButtonComponent
+                                            icon={<CloseOutlined style={{ color: "#58804D" }} />}
+                                            border={false}
+                                            onClick={() => handleRemove(index)}
+                                        />
                                     </div>
                                     <Typography>{bytesConverter(file.size)}</Typography>
-                                    {file.status === "error" ? (
-                                        <div className="flex w-full justify-between items-center">
-                                            <span className={"text-red-700"}>
-                                                {file.errorMessage || 'Failed to Upload'}
-                                            </span>
-                                            <ButtonComponent 
-                                                border={false}
-                                                onClick={() => reUploadImage(file)}
-                                            >
+                                    {file.fileStatus === "error" ? (
+                                        <div className="flex w-full justify-between">
+                                            <span className={"text-red-700"}>Failed to Upload</span>
+                                            <ButtonComponent border={false}>
                                                 <span className={"text-green-800 mr-2"}>Re-upload</span>
                                                 <UndoOutlined style={{ color: "#58804D" }} />
                                             </ButtonComponent>
                                         </div>
-                                    ) : file.size <= MAX_FILE_SIZE && file.status === 'uploading' ? (
+                                    ) : file.size <= MAX_FILE_SIZE ? (
                                         <Progress
-                                            percent={file.percent || fileProgress}
+                                            percent={fileProgress}
                                             format={(percent) => `${percent}%`}
-                                            status={file.status === 'error' ? 'exception' : 'active'}
                                         />
-                                    ) : file.status === 'done' ? (
-                                        <span className={"text-green-700"}>Upload completed</span>
-                                    ) : file.size > MAX_FILE_SIZE ? (
+                                    ) : (
                                         <span className={"text-red-700"}>
                                             File is bigger than 5MB
                                         </span>
-                                    ) : null}
+                                    )}
                                 </div>
                                 <div className={"flex flex-col justify-end items-end"}>
                                     <ButtonComponent
                                         icon={<CloseOutlined style={{ color: "#58804D" }} />}
                                         border={false}
-                                        onClick={() => handleRemove(file)}
+                                        onClick={() => handleRemove(index)}
                                     />
+                                    {file.status === "error" && (
+                                        <ButtonComponent border={false}>
+                                            <span className={"text-green-800 mr-2"} onClick={reUploadImage}>Re-upload</span>
+                                            <UndoOutlined style={{ color: "#58804D" }} />
+                                        </ButtonComponent>
+                                    )}
                                 </div>
                             </div>
                         ))}
                     </div>
                 </Form>
-            );
+            )
         }
-    };
-
+    }
     return (
         <>
             {renderLayout(type)}
@@ -489,15 +426,12 @@ const UploadLayout = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
                 isOpen={isModalVisible}
                 handleCancel={handleModalClose}
                 handleOk={handleModalClose}
-                textList={"Please select format usage type before uploading a file"}
-                header='Format Required'
+                textList={"format usage type before uploading a file"}
+                header='Failed'
             />
             <ModalConfirm
                 isOpen={modalDelete}
-                handleCancel={() => {
-                    setModalDelete(false);
-                    setDeletedRecord(null);
-                }}
+                handleCancel={() => setModalDelete(false)}
                 handleOk={handleDeleteOk}
                 width={500}
                 useOk={true}
@@ -505,16 +439,16 @@ const UploadLayout = ({ dataTable, setDataTable = () => { }, tabHeader, id, data
                 <div className="flex justify-center gap-[20px] mt-6">
                     <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
                     <p className={"text-[18px] font-bold"}>
-                        {`Are you sure you want to delete this record?`}
+                        {`Are you sure want to delete it?`}
                     </p>
                 </div>
                 <Alert
-                    message="Warning! If you delete this data, it will be permanently removed."
+                    message="Warning! if you delete this data, it will be permanently."
                     type={"error"}
                 />
             </ModalConfirm>
         </>
     );
-};
+}
 
 export default UploadLayout;
