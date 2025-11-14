@@ -17,8 +17,8 @@ import ModalCustom from "../../../../../components/Modal/ModalCustom";
 
 const ModalApprovalEFaktur = ({
    isOpen,
-  handleClose,           // Ganti dari handleCancel ke handleClose
-  onSuccess,            // Ganti dari handleRefresh ke onSuccess
+  handleClose,           
+  onSuccess,      
   billingData,  
 }) => {
   // Selector
@@ -157,7 +157,6 @@ const ModalApprovalEFaktur = ({
     );
 
     if (invalidItems.length > 0) {
-      console.error("Invalid items found:", invalidItems);
       setBodyError({
         message: "Beberapa E-Faktur tidak memiliki data approval yang lengkap",
       });
@@ -176,11 +175,9 @@ const ModalApprovalEFaktur = ({
       description: remark,
     };
 
-    console.log("Sending approval payload:", body); // Debug log
-
     dispatch(
       approvedEfaktur({
-        body: { ...body, billingCode: "" }, // billingCode kosong karena bulk approval
+        body: { ...body, billingCode: "" },
         action: action === "APPROVE" ? "approved" : "rejected",
       })
     )
@@ -207,7 +204,7 @@ const ModalApprovalEFaktur = ({
 
   const handleCloseModalError = () => {
   setModalError(false);
-  handleClose();  // Dulu: handleOpenModal()
+  handleClose(); 
   setBodyError({});
 };
 

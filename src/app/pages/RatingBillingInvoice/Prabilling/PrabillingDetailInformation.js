@@ -73,7 +73,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
 
   const handleDownload = () => {
     if (!data?.initCode) {
-      console.error("No initCode available for download");
       return;
     }
 

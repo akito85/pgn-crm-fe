@@ -20,9 +20,6 @@ import {
 
 const { TabPane } = Tabs;
 
-// Tambahkan constant untuk base URL
-const CUSTOM_BASE_URL = process.env.REACT_APP_BASE_URL_NGROK;
-
 const DetailEFaktur = () => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -111,7 +108,6 @@ const DetailEFaktur = () => {
             dispatch(getAllBillingItemPaginate(billingCode))
           ]);
         } catch (error) {
-          console.error("Error fetching data:", error);
           message.error("Gagal memuat data E-Faktur");
         }
       }
@@ -156,11 +152,9 @@ const DetailEFaktur = () => {
 
   const handleUnduhPDF = () => {
     if (detail_efaktur?.finalUploadDoc) {
-      const fullUrl = `${CUSTOM_BASE_URL || ""}${detail_efaktur.finalUploadDoc}`;
-      window.open(fullUrl, "_blank");
+      window.open(detail_efaktur.finalUploadDoc, "_blank");
     } else if (detail_efaktur?.manualUploadDoc) {
-      const fullUrl = `${CUSTOM_BASE_URL || ""}${detail_efaktur.manualUploadDoc}`;
-      window.open(fullUrl, "_blank");
+      window.open(detail_efaktur.manualUploadDoc, "_blank");
     } else {
       message.warning("Dokumen PDF tidak tersedia");
     }
@@ -185,8 +179,7 @@ const DetailEFaktur = () => {
 
   const handleDownloadAttachment = (attachment) => {
     if (attachment.downloadUrl) {
-      const fullUrl = `${CUSTOM_BASE_URL || ""}${attachment.downloadUrl}`;
-      window.open(fullUrl, "_blank");
+      window.open(attachment.downloadUrl, "_blank");
     } else {
       message.error("URL download tidak tersedia");
     }
@@ -344,7 +337,7 @@ const DetailEFaktur = () => {
       ),
     },
     {
-      title: "Tipe File",
+      title: "Filetype",
       dataIndex: "type",
       key: "type",
       width: 150,

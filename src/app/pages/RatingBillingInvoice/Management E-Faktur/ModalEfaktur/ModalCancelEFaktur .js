@@ -60,7 +60,6 @@ const ModalCancelEFaktur = ({
       onSuccess();
       handleCancel();
     } catch (error) {
-      console.error("Cancel error:", error);
     } finally {
       setIsSubmitting(false);
     }

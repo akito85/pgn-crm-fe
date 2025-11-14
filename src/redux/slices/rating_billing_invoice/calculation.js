@@ -484,7 +484,7 @@ export const createCalculation = createAsyncThunk(
   async ({ body }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/calculation/test-create `;
-      const response = await ratingBillingHttpService.createData(url, body, CUSTOM_BASE_URL);
+      const response = await ratingBillingHttpService.createData(url, body);
       return response.data;
     } catch (error) {
       const message =

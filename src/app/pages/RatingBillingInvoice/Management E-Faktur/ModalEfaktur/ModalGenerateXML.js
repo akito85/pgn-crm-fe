@@ -101,7 +101,6 @@ const ModalGenerateXML = ({
       
       return formatted;
     } catch (error) {
-      console.error("Error formatting XML:", error);
       return xmlString;
     }
   };
@@ -158,7 +157,6 @@ const ModalGenerateXML = ({
       
       setIsGenerating(false);
     } catch (error) {
-      console.error("Generate XML Error:", error);
       
       let errorMsg = "Gagal generate XML E-Faktur";
       
@@ -216,7 +214,6 @@ const ModalGenerateXML = ({
           throw new Error("Copy command failed");
         }
       } catch (fallbackError) {
-        console.error("Copy error:", fallbackError);
         message.error("Gagal copy XML ke clipboard");
       }
     }
@@ -252,7 +249,6 @@ const ModalGenerateXML = ({
 
       message.success(`File ${fileName} berhasil diunduh`);
     } catch (error) {
-      console.error("Download error:", error);
       message.error("Gagal mengunduh file XML");
     }
   };

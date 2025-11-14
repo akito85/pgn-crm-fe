@@ -6,8 +6,6 @@ import {
   showModalError,
 } from "../general_slice";
 
-const CUSTOM_BASE_URL = process.env.REACT_APP_BASE_URL;
-
 // ============================================
 // UTILITY FUNCTIONS
 // ============================================
@@ -119,7 +117,7 @@ export const getListEFaktur = createAsyncThunk(
         searchParam ? `&search=${searchParam}` : ""
       }`;
 
-      const response = await ratingBillingHttpService.getPagination(url, CUSTOM_BASE_URL);
+      const response = await ratingBillingHttpService.getPagination(url);
       return response.data || { result: [], page: {} };
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal mengambil list E-Faktur");
@@ -132,7 +130,7 @@ export const getListCategory = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/rbi/e-invoice/category-list";
-      const response = await ratingBillingHttpService.getAll(url, CUSTOM_BASE_URL);
+      const response = await ratingBillingHttpService.getAll(url);
 
       return response.data.map((item) => ({
         Id: item.id,
@@ -149,7 +147,7 @@ export const getAllApprovalList = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/rbi/e-invoice/approval-hierarchy-list";
-      const response = await ratingBillingHttpService.getAll(url, CUSTOM_BASE_URL);
+      const response = await ratingBillingHttpService.getAll(url);
 
       return Array.isArray(response.data) ? response.data : response.data?.result || [];
     } catch (error) {
@@ -163,7 +161,7 @@ export const getListApprovalById = createAsyncThunk(
   async (appHierId, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/e-invoice/apphier-detail/${appHierId}`;
-      const response = await ratingBillingHttpService.getDetail(url, CUSTOM_BASE_URL);
+      const response = await ratingBillingHttpService.getDetail(url);
       return response.data || [];
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal mengambil detail approval");
@@ -176,7 +174,7 @@ export const getAllBillingItemPaginate = createAsyncThunk(
   async (billingCode, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/billing/billing-item/${billingCode}?page=0&size=999&sort=lineNumber~asc`;
-      const response = await ratingBillingHttpService.getPagination(url, CUSTOM_BASE_URL);
+      const response = await ratingBillingHttpService.getPagination(url);
       
       return transformBillingItems(response.data?.result || []);
     } catch (error) {
@@ -190,7 +188,7 @@ export const getDetailEFaktur = createAsyncThunk(
   async (efakturId, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/e-invoice/${efakturId}`;
-      const response = await ratingBillingHttpService.getDetail(url, CUSTOM_BASE_URL);
+      const response = await ratingBillingHttpService.getDetail(url);
       return response.data || null;
     } catch (error) {
       if (error?.response?.status === 404) return null;
@@ -204,7 +202,7 @@ export const getLogActivity = createAsyncThunk(
   async ({ efakturId, page = 1, size = 10 }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/e-invoice/logs/${efakturId}?page=${page - 1}&size=${size}`;
-      const response = await ratingBillingHttpService.getPagination(url, CUSTOM_BASE_URL);
+      const response = await ratingBillingHttpService.getPagination(url);
       return response.data || { result: [], page: {} };
     } catch (error) {
       if (error?.response?.status === 404) {
@@ -220,7 +218,7 @@ export const getApprovalHistory = createAsyncThunk(
   async (efakturId, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/e-invoice/approval-history/${efakturId}`;
-      const response = await ratingBillingHttpService.getDetail(url, CUSTOM_BASE_URL);
+      const response = await ratingBillingHttpService.getDetail(url);
       return response.data || { dataHistory: {}, dataApprover: {} };
     } catch (error) {
       if (error?.response?.status === 404) {
@@ -290,8 +288,7 @@ export const generateEFakturWithAttachments = createAsyncThunk(
                 const baseProgress = 70;
                 const uploadProgress = (30 / newAttachments.length) * (i + progressPercent / 100);
                 thunkAPI.dispatch(updateUploadProgress(Math.min(baseProgress + uploadProgress, 100)));
-              },
-              CUSTOM_BASE_URL
+              }
             );
 
             uploadResults.push({
@@ -361,8 +358,7 @@ export const uploadAttachment = createAsyncThunk(
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
         formData,
-        onProgress || (() => {}),
-        CUSTOM_BASE_URL
+        onProgress || (() => {})
       );
 
       return {
@@ -384,7 +380,7 @@ export const getAllEFakturApprovePaginate = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/rbi/e-invoice/approval-efaktur-list";
-      const response = await ratingBillingHttpService.getAll(url, CUSTOM_BASE_URL);
+      const response = await ratingBillingHttpService.getAll(url);
       
       return Array.isArray(response.data) ? response.data : response.data?.result || [];
     } catch (error) {
@@ -399,17 +395,13 @@ export const approvedEfaktur = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/rbi/e-invoice/approval`;
       
-      // JANGAN memodifikasi body, kirim langsung seperti yang diterima
-      // Body sudah dalam format yang benar dari modal
       const requestBody = {
-        detailApproves: body.detailApproves, // Sudah array of {approvalId, efakturId}
+        detailApproves: body.detailApproves,
         action: body.action,
         description: body.description || "",
       };
 
-      console.log("Sending to API:", requestBody); // Debug log
-
-      const response = await ratingBillingHttpService.createData(url, requestBody, CUSTOM_BASE_URL);
+      const response = await ratingBillingHttpService.createData(url, requestBody);
 
       if (response.success) {
         thunkAPI.dispatch(showModalSuccess({
@@ -450,7 +442,7 @@ export const cancelEFaktur = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/e-invoice/${efakturId}/cancellation`;
       const requestBody = { reason };
 
-      const response = await ratingBillingHttpService.createData(url, requestBody, CUSTOM_BASE_URL);
+      const response = await ratingBillingHttpService.createData(url, requestBody);
 
       if (response.success) {
         thunkAPI.dispatch(showModalSuccess({
@@ -493,7 +485,7 @@ export const replaceEFaktur = createAsyncThunk(
         reason,
       };
 
-      const response = await ratingBillingHttpService.createData(url, requestBody, CUSTOM_BASE_URL);
+      const response = await ratingBillingHttpService.createData(url, requestBody);
 
       if (response.success) {
         thunkAPI.dispatch(showModalSuccess({
@@ -519,7 +511,7 @@ export const generateXMLEFaktur = createAsyncThunk(
       const url = "/v1/dbs/api/rbi/e-invoice/generate-xml";
       const requestBody = { efakturId };
 
-      const response = await ratingBillingHttpService.createData(url, requestBody, CUSTOM_BASE_URL);
+      const response = await ratingBillingHttpService.createData(url, requestBody);
 
       // Extract XML content
       let xmlContent = "";
@@ -601,7 +593,7 @@ export const downloadEFakturList = createAsyncThunk(
         searchParam ? `&search=${searchParam}` : ""
       }`;
 
-      const response = await ratingBillingHttpService.downloadDataPrabill(url, CUSTOM_BASE_URL);
+      const response = await ratingBillingHttpService.downloadDataPrabill(url);
       return response.data;
     } catch (error) {
       return handleApiError(error, thunkAPI, "Download gagal");
@@ -661,28 +653,21 @@ const efakturSlice = createSlice({
     },
 
     // GET ALL EFAKTUR APPROVE LIST
-  [getAllEFakturApprovePaginate.pending]: (state) => {
-    state.loading = true;
-  },
-  [getAllEFakturApprovePaginate.fulfilled]: (state, action) => {
-  state.loading = false;
-  const data = Array.isArray(action.payload) 
-    ? action.payload 
-    : action.payload?.result || [];
-  
-  // Debug: pastikan tappId dan efakturId ada
-  console.log('Approval list data:', data);
-  if (data.length > 0) {
-    console.log('First item tappId:', data[0].tappId);
-    console.log('First item efakturId:', data[0].efakturId);
-  }
-  
-  state.list_efaktur_approval = data;
-},
-  [getAllEFakturApprovePaginate.rejected]: (state) => {
-    state.loading = false;
-    state.list_efaktur_approval = [];
-  },
+    [getAllEFakturApprovePaginate.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllEFakturApprovePaginate.fulfilled]: (state, action) => {
+      state.loading = false;
+      const data = Array.isArray(action.payload) 
+        ? action.payload 
+        : action.payload?.result || [];
+      
+      state.list_efaktur_approval = data;
+    },
+    [getAllEFakturApprovePaginate.rejected]: (state) => {
+      state.loading = false;
+      state.list_efaktur_approval = [];
+    },
 
     // GET DETAIL E-FAKTUR
     [getDetailEFaktur.pending]: (state) => {

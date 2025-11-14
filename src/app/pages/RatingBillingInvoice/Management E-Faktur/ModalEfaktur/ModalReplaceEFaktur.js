@@ -60,7 +60,6 @@ const ModalReplaceEFaktur = ({
       onSuccess();
       handleCancel();
     } catch (error) {
-      console.error("Replace error:", error);
     } finally {
       setIsSubmitting(false);
     }
