@@ -93,6 +93,7 @@ import prabillingLogReducer from "../slices/rating_billing_invoice/prabillingLog
 import jobSlice from "../slices/system_setup/jobSlice";
 import loggingReducer from "../slices/system_setup/logging";
 import emeteraiReducer from "../slices/rating_billing_invoice/emeterai";
+import gracePeriodReducer from "../slices/debt_and_collection/gracePeriod";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -211,6 +212,12 @@ const reducer = combineReducers({
   [reportCustomerSlice.reducerPath]: reportCustomerSlice.reducer,
   [reportCustomerAgreementSlice.reducerPath]:
     reportCustomerAgreementSlice.reducer,
+
+
+  // debt and collection
+  gracePeriod: gracePeriodReducer
+
+
 });
 
 // add throttle middlewares
