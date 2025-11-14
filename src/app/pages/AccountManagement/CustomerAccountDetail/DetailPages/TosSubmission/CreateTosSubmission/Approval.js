@@ -1,13 +1,13 @@
-import React,{useState} from 'react'
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 
-import BaseContainer from '../../../../../../../components/BaseContainer'
-import TablePagination from '../../../../../../../components/TablePagination'
-import { Form, Select } from 'antd';
-import SelectComponent from '../../../../../../../components/SelectComponent';
+import BaseContainer from "../../../../../../../components/BaseContainer";
+import TablePagination from "../../../../../../../components/TablePagination";
+import { Form, Select } from "antd";
+import SelectComponent from "../../../../../../../components/SelectComponent";
 
 const expandedRowRender = (record) => {
-  const dataExpand = record?.dataDetail
+  const dataExpand = record?.dataDetail;
   const columns = [
     {
       title: "NO",
@@ -16,9 +16,9 @@ const expandedRowRender = (record) => {
       render: (text, object, index) => index + 1,
     },
     {
-      title: 'EMPLOYEE',
-      dataIndex: 'employee',
-    }
+      title: "EMPLOYEE",
+      dataIndex: "employee",
+    },
   ];
   return (
     <div>
@@ -30,10 +30,10 @@ const expandedRowRender = (record) => {
         columns={columns}
       />
     </div>
-  )
+  );
 };
 
-const Approval = ({type}) => {
+const Approval = ({ type }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [boolean, setBoolean] = useState(false);
@@ -53,38 +53,38 @@ const Approval = ({type}) => {
       render: (text, object, index) => index + 1,
     },
     {
-      title: 'HIERARCHY',
-      dataIndex: 'hierarchy',
+      title: "HIERARCHY",
+      dataIndex: "hierarchy",
     },
     {
-      title: 'POSITION',
-      dataIndex: 'position',
-    }
+      title: "POSITION",
+      dataIndex: "position",
+    },
   ];
-  const dataSource = []
+  const dataSource = [];
   for (let i = 0; i < 10; ++i) {
     dataSource.push({
-      key: i+1,
+      key: i + 1,
       hierarchy: "Submiter",
       position: "CM Bogor 1",
       dataDetail: [
         {
-          employee: `Karyawan ${i+1}`
+          employee: `Karyawan ${i + 1}`,
         },
         {
-          employee: `Karyawan ${i+2}`
+          employee: `Karyawan ${i + 2}`,
         },
         {
-          employee: `Karyawan ${i+3}`
-        }
-      ]
+          employee: `Karyawan ${i + 3}`,
+        },
+      ],
     });
   }
 
   //  Handle Select Approval Hierarchy
   const handleSelect = (e) => {
     // dispatch(getListApprovalById(e));
-    console.log(e)
+
     setBoolean(true);
   };
   return (
@@ -119,16 +119,16 @@ const Approval = ({type}) => {
             </Form.Item>
           </div>
         </div>
-        <TablePagination 
+        <TablePagination
           dataSource={dataSource}
           columns={columns}
-          expandable={{expandedRowRender}}
+          expandable={{ expandedRowRender }}
           useSelect={false}
           usePagination={false}
         />
       </BaseContainer>
     </div>
-  )
-}
+  );
+};
 
-export default Approval
+export default Approval;

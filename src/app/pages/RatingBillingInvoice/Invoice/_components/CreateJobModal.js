@@ -26,7 +26,6 @@ const CreateJobModal = ({ visible, onCancel, onSubmit }) => {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      console.log("Form values:", values);
 
       message.success("Job pengiriman berhasil dibuat!");
       onSubmit(values);

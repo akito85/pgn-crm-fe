@@ -767,7 +767,7 @@ export const takeOverDelegation = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/auth/take-over-delegation`;
       const response = await userHttpService.createData(url, body);
-      console.log(response, "response");
+
       if (body?.remember === "true") {
         thunkAPI.dispatch(
           setData({

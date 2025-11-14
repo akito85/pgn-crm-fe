@@ -88,8 +88,6 @@ const ProcessSigningModal = ({
       if (newTab) {
         newTab.document.title = `Preview - ${invoice.invoiceNumber}`;
       }
-
-      console.log("✅ Preview opened successfully");
     } catch (error) {
       console.error("❌ Error previewing document:", error);
       // Error message already handled in slice
@@ -152,16 +150,6 @@ const ProcessSigningModal = ({
         message.error("Please provide a remark!");
         return;
       }
-    }
-
-    if (signingMethod === "manual" && fileList.length > 0) {
-      const file = fileList[0].originFileObj || fileList[0];
-      console.log("📁 File Details:", {
-        name: file.name,
-        size: `${(file.size / 1024).toFixed(2)} KB`,
-        type: file.type,
-        lastModified: new Date(file.lastModified).toLocaleString("id-ID"),
-      });
     }
 
     try {

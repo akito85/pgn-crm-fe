@@ -295,7 +295,6 @@ export const getLocationParent = createAsyncThunk(
       // const url = `/v1/dbs/api/master/location/list-location-parent/${id}`;
       const url = `/v1/dbs/api/master/location/paging-location-parent/${id}?page=${page}&size=${pageSize}&sort=createdDate~asc`;
       const response = await accountManagementService.getAll(url);
-      console.log(response);
       const responseMap = response?.data?.result?.map((item) => ({
         value: item?.id,
         name: item?.locationName,

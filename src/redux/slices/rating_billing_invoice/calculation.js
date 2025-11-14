@@ -7,8 +7,6 @@ import {
   validateError,
 } from "../general_slice";
 
-const CUSTOM_BASE_URL = process.env.REACT_APP_BASE_URL_NGROK;
-
 const initialState = {
   data: [],
   loading: false,
@@ -200,10 +198,7 @@ export const getListAccountGroup = createAsyncThunk(
         queryParams ? `?${queryParams}` : ""
       }`;
 
-      const response = await ratingBillingHttpService.getAll(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getAll(url);
 
       const accountGroups = Array.isArray(response)
         ? response
@@ -372,8 +367,7 @@ export const getListSpecificCustomer = createAsyncThunk(
       const url = `/v1/dbs/api/customer-accounts`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body,
-        CUSTOM_BASE_URL
+        body
       );
       return response.data;
     } catch (error) {
@@ -400,24 +394,15 @@ export const getListBillingCycle = createAsyncThunk(
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/billing-cycle/list`;
-      const response = await ratingBillingHttpService.getAll(
-        url,
-        CUSTOM_BASE_URL
-      );
-
-      console.log("Raw Response:", response); // Debug log
+      const response = await ratingBillingHttpService.getAll(url);
 
       const rawData = response?.body?.data?.data || response?.data?.data || [];
-
-      console.log("Raw Data Array:", rawData);
 
       const transformedData = rawData.map((item) => ({
         id: item.id,
         name: item.name,
         ...item,
       }));
-
-      console.log("Transformed Data:", transformedData);
 
       return transformedData;
     } catch (error) {

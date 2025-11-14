@@ -96,7 +96,6 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
   };
 
   const handleViewLog = (delivery) => {
-    console.log("Opening log for:", delivery);
     setSelectedLog(delivery);
     setLogModalVisible(true);
   };

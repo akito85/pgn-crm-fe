@@ -4,8 +4,6 @@ import { showModalError, validateError } from "../general_slice";
 import { showModalSuccess } from "../general_slice";
 import axios from "axios";
 
-const BASE_URL = process.env.REACT_APP_BASE_URL_NGROK;
-
 const initialState = {
   data: [],
   loading: false,
@@ -24,7 +22,6 @@ export const getAllInvoicePaginate = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      console.log("pageSize:", pageSize);
       const url = `/v1/dbs/api/rbi/invoice?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
@@ -133,7 +130,7 @@ export const getDownloadList = createAsyncThunk(
   "DOWNLOAD_INVOICE",
   async (invoiceNumber, thunkAPI) => {
     try {
-      const url = `${BASE_URL}/api/v1/invoices/download/${invoiceNumber}`;
+      const url = `/api/v1/invoices/download/${invoiceNumber}`;
       const response = await axios.get(url, { responseType: "blob" });
       return response.data;
     } catch (error) {
