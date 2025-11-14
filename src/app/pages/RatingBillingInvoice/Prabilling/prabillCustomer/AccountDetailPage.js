@@ -50,7 +50,6 @@ const AccountDetailPage = () => {
 
   useEffect(() => {
     if (!customerNumber || !billPeriod || !inSor) {
-      console.error('Missing required parameters');
       return;
     }
 

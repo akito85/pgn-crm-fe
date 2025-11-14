@@ -148,7 +148,6 @@ const CalculationForm = ({ type }) => {
       dataSpecificCustomer?.search &&
       dataSpecificCustomer.search.length >= 3
     ) {
-      console.log("Calling API with search:", dataSpecificCustomer.search);
       dispatch(getListSpecificCustomer(dataSpecificCustomer));
     }
   }, [

@@ -57,48 +57,16 @@ const PricingSection = ({ SAId }) => {
     dispatch(getDetailPricing(SAId));
   }, [dispatch, SAId]);
 
+  // Simplified useEffect - No merge logic, just simple mapping
   useEffect(() => {
-    let result = [...dataSource];
-
-    let map = new Map();
-    for (let item of result) {
-      map.set(item["priceCode"], item);
-    }
-    let iteratorValues = map.values();
-    let uniquePriceCode = [...iteratorValues];
-    // setTotalElement(uniquePriceCode.length);
-    const dataFilter = uniquePriceCode
-      .slice((page - 1) * pageSize, page * pageSize)
-      .map((item) => item.priceCode);
-    const dataFix = result.filter((item) =>
-      dataFilter.includes(item.priceCode)
-    );
-
-    /** Function Merge Table */
-    const uniquePriceCode2 = new Set();
-    let pageNo = 0;
-    let pageNumber = 0;
-    const mergedData = dataFix.map((rowData, index) => {
-      const updatedRowsData = { ...rowData };
-      if (index !== 0 && index % pageSize === 0) {
-        uniquePriceCode2.clear();
-        pageNo += 1;
-      }
-      if (uniquePriceCode2.has(rowData.idPricing)) {
-        updatedRowsData.rowSpan = 0;
-      } else {
-        const occurCount = dataFix
-          .slice(pageNo * pageSize, (pageNo + 1) * pageSize)
-          .filter((data) => data.idPricing === rowData.idPricing).length;
-        updatedRowsData.rowSpan = Math.min(pageSize, occurCount);
-        updatedRowsData.number = pageNumber;
-        uniquePriceCode2.add(rowData.idPricing);
-        pageNumber++;
-      }
-      return updatedRowsData;
-    });
-    setDataTable(mergedData);
-  }, [dataSource, page, pageSize]);
+    const mappedData = dataSource.map((item, index) => ({
+      ...item,
+      number: index,
+      key: item.ratingSaPricingRuleId || index, // Add unique key
+    }));
+    
+    setDataTable(mappedData);
+  }, [dataSource]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -124,7 +92,7 @@ const PricingSection = ({ SAId }) => {
 
   // Sort Table
   const onSortApi = (_, __, sort) => {
-    if (sort?.field === "min" || sort?.field ==="max") {
+    if (sort?.field === "min" || sort?.field === "max") {
       const dataSort =
         sort.order !== undefined
           ? `lineNumber~${sort.order === "ascend" ? "asc" : "desc"}`
@@ -135,11 +103,10 @@ const PricingSection = ({ SAId }) => {
         sort.order !== undefined
           ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
           : "";
-      setSort(dataSort); 
+      setSort(dataSort);
     }
   };
-  // console.log("data_pricing", data_pricing);
-  
+
   return (
     <BaseContainer header={"Pricing Information"}>
       <div className={"w-full grid grid-cols-2 gap-3"}>
@@ -152,7 +119,9 @@ const PricingSection = ({ SAId }) => {
           <p className={"font-bold text text-primary uppercase"}>
             Price Adjustment
           </p>
-          <DetailText label={"Price Adjustment"}>{data_pricing?.pricingAdjustment}</DetailText>
+          <DetailText label={"Price Adjustment"}>
+            {data_pricing?.pricingAdjustment}
+          </DetailText>
         </div>
 
         <div>
@@ -163,7 +132,6 @@ const PricingSection = ({ SAId }) => {
             {pricingRuleName ? pricingRuleName : ""}
           </DetailText>
         </div>
-
       </div>
       <div className="w-full mt-[30px]">
         <TablePaginationNew
