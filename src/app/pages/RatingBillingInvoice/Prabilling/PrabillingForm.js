@@ -144,7 +144,6 @@ const PrabillingForm = ({ type }) => {
       dataSpecificCustomer?.search &&
       dataSpecificCustomer.search.length >= 3
     ) {
-      console.log("Calling API with search:", dataSpecificCustomer.search);
       dispatch(getListSpecificCustomer(dataSpecificCustomer));
     }
   }, [
@@ -326,7 +325,6 @@ const handleSave = async () => {
   );
 
   if (!user_profile) {
-    console.error("User profile not loaded");
     setBodyError({
       message: "User profile is not loaded. Please refresh the page.",
     });
@@ -611,7 +609,7 @@ const handleSave = async () => {
                   />
                 </Form.Item>
               </div>
-              <Form.Item label={"Cost Center"} name={"costCenter"}>
+              {/* <Form.Item label={"Cost Center"} name={"costCenter"}>
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleChangeCostCenter}
@@ -748,8 +746,8 @@ const handleSave = async () => {
                       </Select.Option>
                     ))}
                   </Select>
-                </Form.Item>
-              </div>
+                </Form.Item> */}
+              {/* </div> */}
             </div>
           </BaseContainer>
           <BaseContainer header={"Scheduler Information"}>

@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Spin,
@@ -24,36 +30,44 @@ import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
-import BaseContainer from "../../../../components/BaseContainer";
+import CardContainer from "../../../../components/CardContainer";
+import TableRBI from "../../../../components/TableRBI";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import ModalGenerateEFaktur from "./ModalEfaktur/ModalGenerateEFaktur";
 import ModalGenerateXML from "./ModalEfaktur/ModalGenerateXML";
 import ModalUploadEFaktur from "./ModalEfaktur/ModalUploadEFaktur";
 import ModalApprovalEFaktur from "./ModalEfaktur/ModalApprovalEFaktur ";
+import ModalReplaceEFaktur from "./ModalEfaktur/ModalReplaceEFaktur";
+import ModalCancelEFaktur from "./ModalEfaktur/ModalCancelEFaktur ";
 import LogAktivitasEFaktur from "./LogAktivitasEFaktur";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
-import Toolbar from "../../../../components/Toolbar";
+import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import {
-  getListApprovedBilling,
+  getListEFaktur,
   downloadEFakturList,
   getApprovalHistory,
+  getAllEFakturApprovePaginate,
 } from "../../../../redux/slices/rating_billing_invoice/efakturSlice";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 const ViewFaktur = () => {
-  const dispatch = useDispatch();
+  // Selector
   const {
-    list_approved_billing,
+    list_efaktur,
     loading,
     pagination,
     data_approval_history,
     loading_approval_history,
   } = useSelector((state) => state.efaktur);
 
+  // Declaration
+  const dispatch = useDispatch();
   const searchInput = useRef(null);
+  const dataSource = list_efaktur || [];
 
+  // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState("invoiceDate~desc");
@@ -68,12 +82,19 @@ const ViewFaktur = () => {
   const [modalApproval, setModalApproval] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [logAktivitasOpen, setLogAktivitasOpen] = useState(false);
+  const [modalReplaceFaktur, setModalReplaceFaktur] = useState(false);
+  const [modalCancelFaktur, setModalCancelFaktur] = useState(false);
 
   const [selectedBilling, setSelectedBilling] = useState(null);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
 
-  const dataSource = list_approved_billing || [];
+  const [fixedColumns, setFixedColumns] = useState({
+    no: "left",
+    efakturStatus: "right",
+    action: "right",
+  });
 
+  // Breadcrumbs
   const routes = [
     {
       path: "",
@@ -85,8 +106,38 @@ const ViewFaktur = () => {
     },
   ];
 
+  const fetchDataWithCurrentFilters = useCallback(() => {
+    const filters = {
+      ...(filterSearch && { search: filterSearch }),
+      ...(filterStatus && { efakturStatus: filterStatus }),
+      ...(filterDateRange &&
+        filterDateRange[0] &&
+        filterDateRange[1] && {
+          startDate: moment(filterDateRange[0]).format("YYYY-MM-DD"),
+          endDate: moment(filterDateRange[1]).format("YYYY-MM-DD"),
+        }),
+    };
+
+    dispatch(
+      getListEFaktur({
+        page: page,
+        pageSize: pageSize,
+        sort: sort,
+        filters: filters,
+      })
+    );
+  }, [
+    dispatch,
+    page,
+    pageSize,
+    sort,
+    filterSearch,
+    filterStatus,
+    filterDateRange,
+  ]);
+
   useEffect(() => {
-    fetchData();
+    fetchDataWithCurrentFilters();
   }, [page, pageSize, sort]);
 
   useEffect(() => {
@@ -101,10 +152,11 @@ const ViewFaktur = () => {
     }
   }, [data_approval_history]);
 
-  const fetchData = () => {
+  const handleFilter = () => {
+    setPage(1);
     const filters = {
       ...(filterSearch && { search: filterSearch }),
-      ...(filterStatus && { eFakturStatus: filterStatus }),
+      ...(filterStatus && { efakturStatus: filterStatus }),
       ...(filterDateRange &&
         filterDateRange[0] &&
         filterDateRange[1] && {
@@ -114,18 +166,13 @@ const ViewFaktur = () => {
     };
 
     dispatch(
-      getListApprovedBilling({
-        page: page,
+      getListEFaktur({
+        page: 1,
         pageSize: pageSize,
         sort: sort,
         filters: filters,
       })
     );
-  };
-
-  const handleFilter = () => {
-    setPage(1);
-    fetchData();
   };
 
   const handleResetFilter = () => {
@@ -135,7 +182,7 @@ const ViewFaktur = () => {
     setPage(1);
 
     dispatch(
-      getListApprovedBilling({
+      getListEFaktur({
         page: 1,
         pageSize: pageSize,
         sort: sort,
@@ -144,12 +191,13 @@ const ViewFaktur = () => {
     );
   };
 
+  // Handle Change Page
   const handleChange = (pageChange, pageSizeChange) => {
-    const newPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(newPage);
+    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
   };
 
+  // Sort Table
   const onSortApi = (_, __, sortInfo) => {
     const dataSort =
       sortInfo.order !== undefined
@@ -158,10 +206,11 @@ const ViewFaktur = () => {
     setSort(dataSort);
   };
 
+  // Handle Download
   const handleDownload = () => {
     const filters = {
       ...(filterSearch && { search: filterSearch }),
-      ...(filterStatus && { eFakturStatus: filterStatus }),
+      ...(filterStatus && { efakturStatus: filterStatus }),
       ...(filterDateRange &&
         filterDateRange[0] &&
         filterDateRange[1] && {
@@ -173,18 +222,32 @@ const ViewFaktur = () => {
     dispatch(downloadEFakturList({ filters, page, pageSize, sort }));
   };
 
+  // Handle Actions
   const handleGenerateEFaktur = (record) => {
     setSelectedBilling(record);
     setModalGenerateEFaktur(true);
   };
 
-  const handleApprovalHistory = (record) => {
+  const handleCancelFaktur = (record) => {
+    setSelectedBilling(record);
+    setModalCancelFaktur(true);
+  };
+
+  const handleReplaceFaktur = (record) => {
+    setSelectedBilling(record);
+    setModalReplaceFaktur(true);
+  };
+
+  const handleApprovalHistory = async (record) => {
     if (!record.efakturId) {
       message.warning("E-Faktur belum dibuat untuk billing ini");
       return;
     }
 
-    dispatch(getApprovalHistory(record.efakturId));
+    if (loading_approval_history) {
+      return;
+    }
+    await dispatch(getApprovalHistory(record.efakturId));
     setModalApprovalHistory(true);
   };
 
@@ -209,9 +272,10 @@ const ViewFaktur = () => {
   };
 
   const handleRefresh = () => {
-    fetchData();
+    fetchDataWithCurrentFilters();
   };
 
+  // Close Modal Functions
   const closeModalGenerateEFaktur = () => {
     setModalGenerateEFaktur(false);
     setSelectedBilling(null);
@@ -219,6 +283,11 @@ const ViewFaktur = () => {
 
   const closeModalGenerateXML = () => {
     setModalGenerateXML(false);
+    setSelectedBilling(null);
+  };
+
+  const closeModalCancelFaktur = () => {
+    setModalCancelFaktur(false);
     setSelectedBilling(null);
   };
 
@@ -231,6 +300,10 @@ const ViewFaktur = () => {
     setModalApproval(false);
     setSelectedBilling(null);
   };
+  const closeModalReplaceFaktur = () => {
+    setModalReplaceFaktur(false);
+    setSelectedBilling(null);
+  };
 
   const closeModalApprovalHistory = () => {
     setModalApprovalHistory(false);
@@ -241,11 +314,12 @@ const ViewFaktur = () => {
     setSelectedBilling(null);
   };
 
-  const columns = [
+  // Columns Definition
+  const baseColumns = [
     {
       title: "NO",
-      dataIndex: "key",
-      key: "key",
+      dataIndex: "no",
+      key: "no",
       width: 60,
       render: (_, __, index) => (page - 1) * pageSize + index + 1,
     },
@@ -292,6 +366,7 @@ const ViewFaktur = () => {
       dataIndex: "invoiceDate",
       key: "invoiceDate",
       width: 120,
+      sorter: true,
       render: (text) => {
         if (!text) return "-";
         return moment(text).format("DD-MM-YYYY");
@@ -318,11 +393,12 @@ const ViewFaktur = () => {
           AWAITING_APPROVAL: "bg-orange-100 text-orange-800 border-orange-300",
           FAILED: "bg-red-100 text-red-800 border-red-300",
           REJECTED: "bg-red-100 text-red-800 border-red-300",
+          SUCCESS_UPLOAD: "bg-green-100 text-green-800 border-green-300",
           NOT_GENERATED: "bg-gray-100 text-gray-800 border-gray-300",
         };
-        
+
         const displayStatus = status || "NOT_GENERATED";
-        
+
         return (
           <div className="flex justify-center">
             <span
@@ -338,19 +414,98 @@ const ViewFaktur = () => {
       },
     },
     {
-      title: "AKSI",
-      key: "action",
-      width: 100,
-      fixed: "right",
+      title: "REPLACEMENT",
+      dataIndex: "replacement",
+      key: "replacement",
+      width: 120,
       align: "center",
-      render: (_, record) => {
+      render: (replacement) => {
+        if (!replacement) {
+          return <span className="text-gray-400">-</span>;
+        }
+
+        if (replacement === "Y") {
+          return (
+            <Tooltip title="Faktur ini sudah diganti dengan faktur baru">
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-800 border border-orange-300">
+                REPLACED
+              </span>
+            </Tooltip>
+          );
+        }
+
+        if (replacement === "N") {
+          return (
+            <Tooltip title="Faktur pengganti terbaru">
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-300">
+                LATEST
+              </span>
+            </Tooltip>
+          );
+        }
+
+        return <span className="text-gray-400">-</span>;
+      },
+    },
+  ];
+
+  // Item Grant Access untuk action columns
+  const itemGrantAccess = [
+    {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          type="submit"
+          onClick={handleDownload}
+        >
+          Export Data
+        </ButtonComponent>
+      ),
+    },
+    {
+      action: "Approval",
+      render: (
+        <ButtonComponent
+          icon={<SVGIcon name="IconRequestApproval" width={24} color="#FFF" />}
+          type="submit"
+          onClick={() => setModalApproval(true)}
+        >
+          Approval
+        </ButtonComponent>
+      ),
+    },
+
+    // Column Action Table - Approval History
+    {
+      action: "View",
+      type: "table",
+      render: (record) => {
+        return (
+          <Tooltip title="Approval History">
+            <div
+              className="pt-1 cursor-pointer"
+              onClick={() => handleApprovalHistory(record)}
+            >
+              <SVGIcon name="IconLogHistory" color="#0075bf" width={20} />
+            </div>
+          </Tooltip>
+        );
+      },
+    },
+
+    // Column Action Table - More Actions
+    {
+      action: "Update",
+      type: "table",
+      render: (record) => {
         const menuItems = [
           {
             key: "detail",
             label: "Detail",
             icon: <SVGIcon name="IconDetail" width={16} />,
             onClick: () => {
-              window.location.href = `${INVOICE_ROUTES.EFAKTUR_VIEW_DETAIL}?billingCode=${record.billingCode}`;
+              window.location.href = `${INVOICE_ROUTES.EFAKTUR_VIEW_DETAIL}?efakturId=${record.efakturId}`;
             },
           },
           {
@@ -377,18 +532,24 @@ const ViewFaktur = () => {
           },
         ];
 
-        if (record.efakturStatus === "AWAITING_APPROVAL") {
-          menuItems.push(
-            { type: "divider" },
-            {
-              key: "approval",
-              label: "Approve/Reject",
-              icon: <CheckCircleOutlined style={{ color: "#52c41a" }} />,
-              onClick: () => handleApproval(record),
-            }
+        if (record.replacement === "Y") {
+          return (
+            <Tooltip title="Faktur ini sudah diganti, tidak dapat dimodifikasi">
+              <Dropdown
+                menu={{ items: menuItems }}
+                trigger={["click"]}
+                placement="bottomRight"
+                disabled
+              >
+                <div className="pt-1 cursor-not-allowed opacity-50">
+                  <MoreOutlined style={{ fontSize: 20, color: "#595959" }} />
+                </div>
+              </Dropdown>
+            </Tooltip>
           );
         }
 
+        // Generate E-Faktur
         if (!record.efakturStatus || record.efakturStatus === "NOT_GENERATED") {
           menuItems.push(
             { type: "divider" },
@@ -401,6 +562,7 @@ const ViewFaktur = () => {
           );
         }
 
+        // Failed status actions
         if (record.efakturStatus === "FAILED") {
           menuItems.push(
             { type: "divider" },
@@ -450,8 +612,11 @@ const ViewFaktur = () => {
             }
           );
         }
-
-        if (record.efakturStatus === "APPROVED") {
+        if (
+          record.efakturStatus === "SUCCESS" ||
+          record.efakturStatus === "SUCCESS_UPLOAD" ||
+          record.efakturStatus === "APPROVED"
+        ) {
           menuItems.push(
             { type: "divider" },
             {
@@ -477,64 +642,139 @@ const ViewFaktur = () => {
               onClick: () => handleGenerateXML(record),
             }
           );
+
+          if (record.replacement !== "Y") {
+            menuItems.push({
+              key: "replace-faktur",
+              label: "Buat Faktur Pengganti",
+              icon: (
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    stroke="#1890ff"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              ),
+              onClick: () => handleReplaceFaktur(record),
+            });
+          }
+
+          if (
+            record.efakturStatus !== "CANCELLED" &&
+            record.replacement !== "Y"
+          ) {
+            menuItems.push({
+              key: "cancel-faktur",
+              label: "Batalkan E-Faktur",
+              icon: (
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    stroke="#ff4d4f"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              ),
+              onClick: () => handleCancelFaktur(record),
+              danger: true,
+            });
+          }
         }
 
         return (
-          <div className="flex gap-2 justify-center items-center">
-            <Tooltip title="Approval History">
-              <div
-                className="cursor-pointer hover:opacity-70 transition-opacity p-1.5 rounded hover:bg-blue-50 inline-flex items-center justify-center"
-                onClick={() => handleApprovalHistory(record)}
-              >
-                <SVGIcon name="IconLogHistory" color="#0075bf" width={18} />
-              </div>
-            </Tooltip>
-
+          <Tooltip title="Aksi Lainnya">
             <Dropdown
-              menu={{
-                items: menuItems,
-              }}
+              menu={{ items: menuItems }}
               trigger={["click"]}
               placement="bottomRight"
             >
-              <Tooltip title="Aksi Lainnya">
-                <div className="cursor-pointer hover:opacity-70 transition-opacity p-1.5 rounded hover:bg-gray-50 inline-flex items-center justify-center">
-                  <MoreOutlined style={{ fontSize: 18, color: "#595959" }} />
-                </div>
-              </Tooltip>
+              <div className="pt-1 cursor-pointer">
+                <MoreOutlined style={{ fontSize: 20, color: "#595959" }} />
+              </div>
             </Dropdown>
-          </div>
+          </Tooltip>
         );
       },
     },
   ];
 
-  const itemGrantAccess = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={20} />}
-          type="submit"
-          onClick={handleDownload}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
-  ];
+  const actionCols = useColumnActionPermission(
+    ["view", "update", "download"],
+    itemGrantAccess
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
 
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <div className="w-full flex justify-end gap-3 mb-4">
-          <Toolbar items={itemGrantAccess} />
-        </div>
-
-        <BaseContainer header={"Manajemen E-Faktur"}>
-          <Row gutter={[16, 26]} align="bottom">
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">Manajemen E-Faktur</p>
+              <div className="flex gap-2">
+                <ButtonComponent
+                  icon={<SVGIcon name="IconButtonDownload" width={24} />}
+                  type="submit"
+                  onClick={handleDownload}
+                >
+                  Export Data
+                </ButtonComponent>
+                <ButtonComponent
+                  icon={
+                    <SVGIcon
+                      name="IconRequestApproval"
+                      width={24}
+                      color="#FFF"
+                    />
+                  }
+                  type="submit"
+                  onClick={() => setModalApproval(true)}
+                >
+                  Approval
+                </ButtonComponent>
+              </div>
+            </div>
+          }
+        >
+          {/* Filter Section */}
+          <Row gutter={[16, 26]} align="bottom" className="mb-6">
             <Col xs={24} sm={12} md={7} lg={7}>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-gray-700">
@@ -571,6 +811,7 @@ const ViewFaktur = () => {
                   <Option value="PROCESSING">PROCESSING</Option>
                   <Option value="FAILED">FAILED</Option>
                   <Option value="REJECTED">REJECTED</Option>
+                  <Option value="SUCCESS_UPLOAD">SUCCESS UPLOAD</Option>
                   <Option value="NOT_GENERATED">NOT GENERATED</Option>
                 </Select>
               </div>
@@ -614,27 +855,27 @@ const ViewFaktur = () => {
             </Col>
           </Row>
 
-          <div className="w-full mt-6">
-            <TablePaginationNew
+          {/* Table Section */}
+          <div className="w-full">
+            <TableRBI
               dataSource={dataSource}
-              columns={columns}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={pagination?.totalElements || 0}
+              tableScrolled={{ y: 525, x: 2000 }}
               onSort={onSortApi}
-              tableScrolled={{ y: 525, x: 1600 }}
-              useFixColumn={true}
-              defaultFixedColumns={{
-                key: "left",
-                efakturStatus: "right",
-                action: "right",
-              }}
+              handleDownload={handleDownload}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
+        {/* Modal Generate E-Faktur */}
         <ModalGenerateEFaktur
           isOpen={modalGenerateEFaktur}
           handleClose={closeModalGenerateEFaktur}
@@ -645,6 +886,7 @@ const ViewFaktur = () => {
           }}
         />
 
+        {/* Modal Generate XML */}
         <ModalGenerateXML
           isOpen={modalGenerateXML}
           handleClose={closeModalGenerateXML}
@@ -655,6 +897,7 @@ const ViewFaktur = () => {
           }}
         />
 
+        {/* Modal Upload E-Faktur */}
         <ModalUploadEFaktur
           isOpen={modalUploadEFaktur}
           handleClose={closeModalUploadEFaktur}
@@ -665,6 +908,17 @@ const ViewFaktur = () => {
           }}
         />
 
+        <ModalReplaceEFaktur
+          isOpen={modalReplaceFaktur}
+          handleClose={closeModalReplaceFaktur}
+          billingData={selectedBilling}
+          onSuccess={() => {
+            closeModalReplaceFaktur();
+            handleRefresh();
+          }}
+        />
+
+        {/* Modal Approval */}
         <ModalApprovalEFaktur
           isOpen={modalApproval}
           handleClose={closeModalApproval}
@@ -675,6 +929,17 @@ const ViewFaktur = () => {
           }}
         />
 
+        <ModalCancelEFaktur
+          isOpen={modalCancelFaktur}
+          handleClose={closeModalCancelFaktur}
+          billingData={selectedBilling}
+          onSuccess={() => {
+            closeModalCancelFaktur();
+            handleRefresh();
+          }}
+        />
+
+        {/* Modal Approval History */}
         <ModalHistory
           isOpen={modalApprovalHistory && data_approval_history}
           handleClose={closeModalApprovalHistory}
@@ -685,6 +950,7 @@ const ViewFaktur = () => {
           loading={loading_approval_history}
         />
 
+        {/* Log Aktivitas E-Faktur */}
         <LogAktivitasEFaktur
           isOpen={logAktivitasOpen}
           handleClose={closeLogAktivitas}

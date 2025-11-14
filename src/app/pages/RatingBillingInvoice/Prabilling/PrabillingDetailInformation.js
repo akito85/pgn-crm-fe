@@ -73,7 +73,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
 
   const handleDownload = () => {
     if (!data?.initCode) {
-      console.error("No initCode available for download");
       return;
     }
 
@@ -762,7 +761,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         </div>
       </BaseContainer>
 
-      <BaseContainer header={"Prabilling Detail"}>
+      {/* <BaseContainer header={"Prabilling Detail"}>
         <Tabs activeKey={activeTab} onChange={setActiveTab} type="card">
           <TabPane
             tab={`Account Group Type (${accountGroupData.length})`}
@@ -840,7 +839,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             </div>
           </TabPane>
         </Tabs>
-      </BaseContainer>
+      </BaseContainer> */}
 
       <BaseContainer header={"Prabilling Result"}>
         <div className={"w-full flex justify-between items-center my-2"}>

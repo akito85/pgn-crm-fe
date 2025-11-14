@@ -4,17 +4,18 @@ import { Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import BaseContainer from "../../../../components/BaseContainer";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import { getListPrabillingInitPopulate } from "../../../../redux/slices/rating_billing_invoice/praBilling";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import moment from "moment";
+import CardContainer from "../../../../components/CardContainer";
 
 const PrabillingPage = () => {
   const { loading, list_prabilling_init, prabilling_pagination } = useSelector(
@@ -30,6 +31,13 @@ const PrabillingPage = () => {
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
+
+  // ✅ State untuk fix column (tanpa localStorage)
+  const [fixedColumns, setFixedColumns] = useState({
+    no: "left",
+    status: "right",
+    action: "right",
+  });
 
   useEffect(() => {
     dispatch(
@@ -57,7 +65,7 @@ const PrabillingPage = () => {
     });
   };
 
-  const allColumnDefinitions = useMemo(
+  const baseColumns = useMemo(
     () => [
       {
         key: "no",
@@ -460,14 +468,30 @@ const PrabillingPage = () => {
     },
   ];
 
-  const columnActionPermission = useColumnActionPermission(
-    ["view"],
-    itemGrantAccess
-  );
+  // ✅ Call hook at component level
+  const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
 
-  const columns = useMemo(() => {
-    return [...allColumnDefinitions, ...columnActionPermission];
-  }, [allColumnDefinitions, columnActionPermission]);
+  // ✅ Combine columns with keys
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  // ✅ Apply fixed columns
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  // ✅ Column definitions for dropdown
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
 
   return (
     <Spin spinning={loading}>
@@ -478,29 +502,31 @@ const PrabillingPage = () => {
           <Toolbar items={itemGrantAccess} />
         </div>
 
-        <BaseContainer header={"PRABILLING LIST"}>
+        <CardContainer 
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">PRABILLING LIST</p>
+            </div>
+          }
+        >
           <div className="my-5">
-            <TablePaginationNew
-              columns={columns}
+            <TableRBI
               dataSource={list_prabilling_init}
-              totalData={prabilling_pagination.totalElements}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
               onChange={handleChangePage}
-              onSort={onSort}
+              onSizeChanger={handleChangePage}
+              totalData={prabilling_pagination?.totalElements || 0}
               tableScrolled={{ x: 2500, y: 525 }}
-              rowKey={(record) => record.initId}
-              useFixColumn={true}
-              defaultFixedColumns={{
-                no: "left",
-                status: "right",
-                action: "right",
-              }}
-              type="BE"
+              onSort={onSort}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
               loading={loading}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
       </LayoutMenu>
     </Spin>
   );
