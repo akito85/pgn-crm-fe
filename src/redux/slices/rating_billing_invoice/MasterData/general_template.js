@@ -21,7 +21,7 @@ const initialState = {
   data_approval_history: [],
   data_template_type: [],
   dataListCategory: [],
-  dataConfigRBIDataGeneralTemplate : {},
+  dataConfigRBIDataGeneralTemplate: {},
 };
 
 export const getAllGeneralTemplatePaginate = createAsyncThunk(
@@ -438,7 +438,13 @@ export const getDownloadGeneralTemplateList = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_GENERAL_TEMPLATE_LIST", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_GENERAL_TEMPLATE_LIST",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -487,7 +493,7 @@ export const previewGeneralTemplate = createAsyncThunk(
 
 export const getConfigFileRBIDataGeneralTemplate = createAsyncThunk(
   "GET_CONFIG_FILE_RBI_DATA_GENERAL_TEMPLATE",
-  async (_,thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/rbi/config-file-generaltemplate";
       const response = await ratingBillingHttpService.getAll(url);
@@ -499,7 +505,9 @@ export const getConfigFileRBIDataGeneralTemplate = createAsyncThunk(
           action: "GET_CONFIG_FILE_RBI_DATA_GENERAL_TEMPLATE",
         })
       );
-      return thunkAPI.rejectWithValue(error.response.data.code === 419 ? null : error.response.data);
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data
+      );
     }
   }
 );
@@ -508,7 +516,7 @@ const generalTemplateSlice = createSlice({
   initialState,
   extraReducers: {
     // Get All Billing Item Pagination
-    [getAllGeneralTemplatePaginate.pending]: (state, action) => {
+    [getAllGeneralTemplatePaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllGeneralTemplatePaginate.fulfilled]: (state, action) => {
@@ -520,7 +528,7 @@ const generalTemplateSlice = createSlice({
       state.data_list = action.payload;
     },
 
-    [getDetailGeneralTemplate.pending]: (state, action) => {
+    [getDetailGeneralTemplate.pending]: (state) => {
       state.loading = true;
     },
     [getDetailGeneralTemplate.fulfilled]: (state, action) => {
@@ -532,7 +540,7 @@ const generalTemplateSlice = createSlice({
       state.data_detail = action.payload;
     },
 
-    [getDetailDraftGeneralTemplate.pending]: (state, action) => {
+    [getDetailDraftGeneralTemplate.pending]: (state) => {
       state.loading = true;
     },
     [getDetailDraftGeneralTemplate.fulfilled]: (state, action) => {
@@ -544,7 +552,7 @@ const generalTemplateSlice = createSlice({
       state.data_detail_draft = action.payload;
     },
 
-    [getApprovalHistoryGeneralTemplate.pending]: (state, action) => {
+    [getApprovalHistoryGeneralTemplate.pending]: (state) => {
       state.loading = true;
     },
     [getApprovalHistoryGeneralTemplate.fulfilled]: (state, action) => {
@@ -569,7 +577,7 @@ const generalTemplateSlice = createSlice({
       state.loading = false;
     },
 
-    [getGeneralTemplateType.pending]: (state, action) => {
+    [getGeneralTemplateType.pending]: (state) => {
       state.loading = true;
     },
     [getGeneralTemplateType.fulfilled]: (state, action) => {
@@ -581,7 +589,7 @@ const generalTemplateSlice = createSlice({
       state.data_template_type = action.payload;
     },
 
-    [getApprovalList.pending]: (state, action) => {
+    [getApprovalList.pending]: (state) => {
       state.loading = true;
     },
     [getApprovalList.fulfilled]: (state, action) => {
@@ -593,7 +601,7 @@ const generalTemplateSlice = createSlice({
       state.dataListAppHierId = action.payload;
     },
 
-    [getApprovalListDetail.pending]: (state, action) => {
+    [getApprovalListDetail.pending]: (state) => {
       state.loading = true;
     },
     [getApprovalListDetail.fulfilled]: (state, action) => {

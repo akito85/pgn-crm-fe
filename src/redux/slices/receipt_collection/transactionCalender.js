@@ -381,7 +381,11 @@ export const getApprovalHistory = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_APPROVAL_HISTORY_CALENDAR", back: false })
+        validateError({
+          error: error,
+          action: "GET_APPROVAL_HISTORY_CALENDAR",
+          back: false,
+        })
       );
       return thunkAPI.rejectWithValue(error.response);
     }
@@ -478,7 +482,6 @@ export const createTransactionCalender = createAsyncThunk(
       const data = await receiptCollectionHttpService.createData(url, body);
       return data.data;
     } catch (error) {
-      console.log(error, " error");
       const message =
         (error.response &&
           error.response.data &&
@@ -639,50 +642,50 @@ const cycleSlice = createSlice({
     },
 
     // get detail
-    [getDetailTransaction.pending]: (state, action) => {
+    [getDetailTransaction.pending]: (state) => {
       state.loading = true;
     },
     [getDetailTransaction.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getDetailTransaction.rejected]: (state, action) => {
+    [getDetailTransaction.rejected]: (state) => {
       state.loading = true;
     },
 
     // get detail draft
-    [getDetailTransactionDraft.pending]: (state, action) => {
+    [getDetailTransactionDraft.pending]: (state) => {
       state.loading = true;
     },
     [getDetailTransactionDraft.fulfilled]: (state, action) => {
       state.data_detail_draft = action.payload;
       state.loading = false;
     },
-    [getDetailTransactionDraft.rejected]: (state, action) => {
+    [getDetailTransactionDraft.rejected]: (state) => {
       state.loading = true;
     },
     // inactive app
-    [inactiveTransaction.pending]: (state, action) => {
+    [inactiveTransaction.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveTransaction.fulfilled]: (state, action) => {
+    [inactiveTransaction.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [inactiveTransaction.rejected]: (state, action) => {
+    [inactiveTransaction.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
 
     // open close
-    [openCloseTransCalender.pending]: (state, action) => {
+    [openCloseTransCalender.pending]: (state) => {
       state.loading = true;
     },
-    [openCloseTransCalender.fulfilled]: (state, action) => {
+    [openCloseTransCalender.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [openCloseTransCalender.rejected]: (state, action) => {
+    [openCloseTransCalender.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
@@ -754,10 +757,10 @@ const cycleSlice = createSlice({
       state.loading = false;
     },
 
-    [approveOrRejectInactiveTrans.pending]: (state, action) => {
+    [approveOrRejectInactiveTrans.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectInactiveTrans.fulfilled]: (state, action) => {
+    [approveOrRejectInactiveTrans.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -766,11 +769,11 @@ const cycleSlice = createSlice({
       state.loading = false;
       state.message = action.payload;
     },
-   
-    [approveOrRejectInactiveTransInactive.pending]: (state, action) => {
+
+    [approveOrRejectInactiveTransInactive.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectInactiveTransInactive.fulfilled]: (state, action) => {
+    [approveOrRejectInactiveTransInactive.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -829,7 +832,7 @@ const cycleSlice = createSlice({
       state.data = action.payload;
       state.isSuccess = false;
     },
-    [updatePeriod.rejected]: (state, action) => {
+    [updatePeriod.rejected]: (state) => {
       state.isFailed = false;
     },
 

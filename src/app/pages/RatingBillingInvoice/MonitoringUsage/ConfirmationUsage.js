@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { clearUpdated, clearUpdatedDeleted, saveSubmitData } from '../../../../redux/slices/rating_billing_invoice/monitoring_usage';
-import { ModalConfirm } from '../../../../components/Modal/ModalPopUp';
 import ButtonComponent from '../../../../components/ButtonComponent';
 import RadioTabs from '../../../../components/RadioTabs';
 import ApprovalComponentGeneral from '../../../../components/Approval/ApprovalComponentGeneral';

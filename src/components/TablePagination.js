@@ -1,6 +1,4 @@
-import { SearchOutlined } from "@ant-design/icons";
-import { Button, Input, Pagination, Select, Space, Table } from "antd";
-import React from "react";
+import { Pagination, Select, Table } from "antd";
 import { useState } from "react";
 const { Option } = Select;
 

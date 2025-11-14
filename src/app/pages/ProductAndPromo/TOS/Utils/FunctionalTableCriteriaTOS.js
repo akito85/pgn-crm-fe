@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { columnsTableCriteriaTOS } from "./TableCriteriaTos";
-import { Form, Input, Pagination, Select, Space, Table, Tooltip } from "antd";
+import { Form, Select, Space, Table, Tooltip } from "antd";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { useRef } from "react";
-import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getCustomerSegmentList,
@@ -23,7 +22,6 @@ import {
   getSubDistrictList,
   getCustomerList,
 } from "../../../../../redux/slices/product_promo/tos";
-import moment from "moment";
 import InputComponent from "../../../../../components/InputComponent";
 
 const EditableCell = ({

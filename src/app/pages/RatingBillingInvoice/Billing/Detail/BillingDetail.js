@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Radio } from "antd";
 import BillingItemTab from "./BillingItemTab";
 import PaymentTab from "./PaymentTab";
@@ -13,11 +13,23 @@ const BillingDetail = ({
   accountNumberId,
 }) => {
   const [tabHeader, setTabHeader] = useState("Billing Item");
+  const detailRef = useRef(null);
 
-  // Use Effect
+  // Use Effect untuk scroll otomatis saat komponen muncul
   useEffect(() => {
-    if (billingCodeId) {
+    if (billingCodeId && detailRef.current) {
       setTabHeader("Billing Item");
+      
+      // Gunakan requestAnimationFrame untuk scroll lebih smooth
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          detailRef.current?.scrollIntoView({ 
+            behavior: "smooth", 
+            block: "start",
+            inline: "nearest"
+          });
+        });
+      });
     }
   }, [billingCodeId]);
 
@@ -80,7 +92,7 @@ const BillingDetail = ({
   };
 
   return (
-    <div className="pt-[30px]">
+    <div ref={detailRef} className="pt-[30px] scroll-mt-4">
       <Radio.Group
         options={dataTabs}
         onChange={changeTabHeader}

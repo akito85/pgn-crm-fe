@@ -1,18 +1,14 @@
-import { ExclamationCircleOutlined, FilterOutlined } from "@ant-design/icons";
-import { Alert, DatePicker, Form, Grid, Input, Tooltip } from "antd";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
+import { Alert, DatePicker, Form, Tooltip } from "antd";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import StatusComponent from "../../../../../components/StatusComponent";
-import TablePagination from "../../../../../components/TablePagination";
 import {
   dateFormatting,
-  formMessageRequired,
   requiredMessage,
 } from "../../../../../utils";
 import DynamicTableInlinePayment from "../../DynamicTableInlinePayment";
@@ -20,20 +16,15 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import {
   createTransPeriod,
-  getDetailTransaction,
   getTransPeriod,
   openCloseTransCalender,
-  updatePeriod,
 } from "../../../../../redux/slices/receipt_collection/transactionCalender";
-import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import InputComponent from "../../../../../components/InputComponent";
 import FunctionalTableCriteriaPayment from "../Bank/Table/FunctionalTableCriteriaPayment";
 import {
-  getColumnSearchProps,
   getColumnSearchPropsPaging,
 } from "../../../../../utils/getColumnSearchProps";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 
 export const columnPeriod = (
   page = 1,

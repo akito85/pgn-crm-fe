@@ -31,12 +31,27 @@ import FormAssets from "../../app/pages/SystemSetup/MasterData/Assets/FormAssets
 import ViewAssets from "../../app/pages/SystemSetup/MasterData/Assets/ViewAssets";
 import DetailAssets from "../../app/pages/SystemSetup/MasterData/Assets/DetailAssets";
 import GroupAccessFormBackup from "../../app/pages/SystemSetup/GroupAccess/GroupAccessFormBackup";
+import ListJob from "../../app/pages/SystemSetup/JobManagement/ListJob";
+import FormJob from "../../app/pages/SystemSetup/JobManagement/FormJob";
+import JobControlPage from "../../app/pages/SystemSetup/JobControl/JobControlPage";
+import LoggingPage from "../../app/pages/SystemSetup/Logging/LoggingPage";
 
 export const SYSTEM_SETUP_ELEMENTS = {
+  // logging
+  VIEW_LOGGING_PAGE: <LoggingPage />,
+  
   // menu
   VIEW_MENU_PAGE: <Menu />,
   CREATE_MENU_PAGE: <FormMenu type={"create"} />,
   UPDATE_MENU_PAGE: <FormMenu type={"update"} />,
+
+  //Job Management
+  VIEW_JOBM_PAGE: <ListJob />,
+  CREATE_JOBM_PAGE: <FormJob type={"create"} />,
+  DETAIL_JOBM_PAGE: <FormJob type={"view"}/>,
+
+  //Job Control
+  VIEW_JOB_CONTROL_PAGE: <JobControlPage />,
 
   // global type
   VIEW_GLOBAL_PAGE: <ViewGlobalType />,

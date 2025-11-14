@@ -2,9 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import moment from "moment";
 
 import { useDispatch, useSelector } from "react-redux";
-import { Input, Tooltip } from "antd";
-import { EyeOutlined, FilterOutlined } from "@ant-design/icons";
-import Highlighter from "react-highlight-words";
+import { Tooltip } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 import FileSaver from "file-saver";
 import axios from "axios";
 
@@ -12,7 +11,6 @@ import { getBase64 } from "../../../../../../../../utils/getBase64";
 import { tokenHeader } from "../../../../../../../../utils/tokenHeader";
 import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
 import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
-import BaseContainer from "../../../../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import ModalAttachment from "./ModalAttachment";
 import TablePagination from "../../../../../../../../components/TablePagination";

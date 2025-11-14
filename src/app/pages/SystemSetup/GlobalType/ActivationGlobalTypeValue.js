@@ -1,5 +1,4 @@
 import { WarningOutlined } from '@ant-design/icons';
-import { Alert } from 'antd';
 import React from 'react';
 
 const ActivationGlobalTypeValue = (props) => {

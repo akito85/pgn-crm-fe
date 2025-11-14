@@ -1,10 +1,8 @@
 import {
-  FilterOutlined,
   LeftOutlined,
-  SyncOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import { DatePicker, Form, Input, message, Spin } from "antd";
+import { Form } from "antd";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,8 +29,6 @@ import PaymentItemForm from "./PaymentItemForm";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import BaseContainer from "../../../../../components/BaseContainer";
-import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
-import ContentModalConfirmPricing from "../../../ProductAndPromo/Pricing/Form/ContentModalConfirmPricing";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ContentModalConfirmPayment from "../../ReceiptReconciliation/ContentModalConfirmPayment";
 import TableGlInformation from "./TableGlInformation";
@@ -46,7 +42,6 @@ import { bytesConverter } from "../../../../../utils/bytesConverter";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import { configApp } from "../../../../../constants/configApp";
-import AttachmentSectionComponent from "../../../RatingBillingInvoice/MasterData/BillingItem/Form/tab/AttachmentSectionComponent";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 
 const ListFormPaymentItem = (props) => {

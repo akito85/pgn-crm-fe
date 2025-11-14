@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import { RBI_ROUTES } from '../../../../../routes/rating_billing/rbi_routes';
@@ -6,18 +6,16 @@ import ButtonComponent from '../../../../../components/ButtonComponent';
 import SVGIcon from '../../../../../assets/Icon/index';
 import RadioTabs from '../../../../../components/RadioTabs';
 import { useState } from 'react';
-import UploadLayout from '../UploadLayout';
 import ApprovalLayout from '../ApprovalLayout';
-import { Form, Modal, Spin } from 'antd';
+import { Form, Spin } from 'antd';
 import { LeftOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { clearUpdatedDeleted, getDetailBatch, getDownloadFailed, setClearData } from '../../../../../redux/slices/rating_billing_invoice/monitoring_usage';
+import { clearUpdatedDeleted, getDetailBatch, getDownloadFailed } from '../../../../../redux/slices/rating_billing_invoice/monitoring_usage';
 import { SummaryTable } from '../SummaryTableUpdateDelete';
 import { ModalAttention } from '../../../../../components/Modal/ModalPopUp';
 import ConfirmationUpdateDetail from '../ConfirmationUpdateDetail';
 import DetailUpload from './DetailUpload';
-import ModalUpdateUsage from '../ModalUpdateUsage';
 
 
 const DetailPage = () => {

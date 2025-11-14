@@ -10,11 +10,7 @@ export const reportCustomerAgreementSlice = createApi({
   }),
   endpoints: (builder) => ({
     getCustomerAgreementPagination: builder.query({
-      queryFn: async (
-        { page, pageSize, sort, search, body },
-        api,
-        extraOptions
-      ) => {
+      queryFn: async ({ page, pageSize, sort, search }, api) => {
         try {
           const sortParams = !sort ? "createdDate~desc" : sort;
           const url = `/v1/dbs/api/summary/agreement/paging-sa-agreement?searchs=${search}&page=${page}&size=${pageSize}&sort=${sortParams}`;
@@ -40,12 +36,7 @@ export const reportCustomerAgreementSlice = createApi({
       },
     }),
     getCustomerAgreementDownload: builder.mutation({
-      async queryFn(
-        { page, pageSize, sort, search, body },
-        api,
-        extraOptions,
-        baseQuery
-      ) {
+      async queryFn({ page, pageSize, sort, search }, api) {
         try {
           const sortParams = !sort ? "createdDate~desc" : sort;
           const url = `/v1/dbs/api/summary/agreement/download-sa-agreement?searchs=${search}&page=${page}&size=${pageSize}&sort=${sortParams}`;

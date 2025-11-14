@@ -2,7 +2,7 @@ import { Fragment, useCallback, useState } from "react";
 import React, { useEffect } from "react";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import FunctionalTableInlineAccount from "./FunctionalTableInlineAccount";
-import { Alert, Form, Spin } from "antd";
+import { Form, Spin } from "antd";
 import { additionalInformationTable, itemActionViewAdditionalInfoTable } from "./AdditionalInformationDetail";
 import { useDispatch, useSelector } from "react-redux";
 import {createUpdateAdditionalInfo, deleteAdditonalInfo, getAccountAdditionalInfo, getValueAdditionalInfoList } from "../../../../../../redux/slices/account_management/detailAccount/additionalInformation";

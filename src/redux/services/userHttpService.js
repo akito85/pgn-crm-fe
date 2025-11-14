@@ -4,42 +4,70 @@ import { tokenHeader } from "../../utils/tokenHeader";
 import FileSaver from "file-saver";
 import { errorCode, hasValue } from "../../utils";
 
-const getAll = async (url) => {
+const isNgrokUrl = (baseUrl) => {
+  return baseUrl && baseUrl.includes('ngrok');
+};
+
+const buildHeaders = (baseUrl, additionalHeaders = {}) => {
+  const headers = {
+    ...tokenHeader(),
+    ...additionalHeaders,
+  };
+  
+  if (isNgrokUrl(baseUrl)) {
+    headers['ngrok-skip-browser-warning'] = 'true';
+  }
+  
+  return headers;
+};
+
+const getAll = async (url, customBaseUrl = null) => {
   try {
-    const response = await axios.get(configApp.USER_MANAGEMENT_SERVICE + url, {
-      headers: tokenHeader(),
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
+    const response = await axios.get(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
     });
     return response?.data;
   } catch (error) {
     throw error;
   }
 };
-const getPagination = async (url) => {
+
+const getPagination = async (url, customBaseUrl = null) => {
   try {
-    const response = await axios.get(configApp.USER_MANAGEMENT_SERVICE + url, {
-      headers: tokenHeader(),
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
+    const response = await axios.get(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
     });
     return response?.data;
   } catch (error) {
     throw error;
   }
 };
-const getDetail = async (url) => {
+
+const getDetail = async (url, customBaseUrl = null) => {
   try {
-    const response = await axios.get(configApp.USER_MANAGEMENT_SERVICE + url, {
-      headers: tokenHeader(),
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
+    const response = await axios.get(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
     });
     return response?.data;
   } catch (error) {
     throw error;
   }
 };
-const getDetailByIdBody = async (url, id) => {
+
+const getDetailByIdBody = async (url, id, customBaseUrl = null) => {
   try {
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
     const response = await axios.get(
-      configApp.USER_MANAGEMENT_SERVICE + url,
+      baseUrl + url,
       { id: id },
-      { headers: tokenHeader() }
+      { headers: buildHeaders(baseUrl) }
     );
     return response?.data;
   } catch (error) {
@@ -47,10 +75,12 @@ const getDetailByIdBody = async (url, id) => {
   }
 };
 
-const downloadData = async (url) => {
+const downloadData = async (url, customBaseUrl = null) => {
   try {
-    const response = await axios.get(configApp.USER_MANAGEMENT_SERVICE + url, {
-      headers: tokenHeader(),
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
+    const response = await axios.get(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
       responseType: "blob",
     });
     if (hasValue(response.headers?.get("content-disposition"))) {
@@ -72,13 +102,15 @@ const downloadData = async (url) => {
   }
 };
 
-const createData = async (url, body) => {
+const createData = async (url, body, customBaseUrl = null) => {
   try {
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
     const response = await axios.post(
-      configApp.USER_MANAGEMENT_SERVICE + url,
+      baseUrl + url,
       body,
       {
-        headers: tokenHeader(),
+        headers: buildHeaders(baseUrl),
       }
     );
     return response?.data;
@@ -86,13 +118,16 @@ const createData = async (url, body) => {
     throw error;
   }
 };
-const updateData = async (url, data) => {
+
+const updateData = async (url, data, customBaseUrl = null) => {
   try {
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
     const response = await axios.put(
-      configApp.USER_MANAGEMENT_SERVICE + url,
+      baseUrl + url,
       data,
       {
-        headers: tokenHeader(),
+        headers: buildHeaders(baseUrl),
       }
     );
     return response?.data;
@@ -101,12 +136,14 @@ const updateData = async (url, data) => {
   }
 };
 
-const deleteData = async (url) => {
+const deleteData = async (url, customBaseUrl = null) => {
   try {
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
     const response = await axios.delete(
-      configApp.USER_MANAGEMENT_SERVICE + url,
+      baseUrl + url,
       {
-        headers: tokenHeader(),
+        headers: buildHeaders(baseUrl),
       }
     );
     return response?.data;
@@ -115,13 +152,15 @@ const deleteData = async (url) => {
   }
 };
 
-const activationWithRemark = async (url, body) => {
+const activationWithRemark = async (url, body, customBaseUrl = null) => {
   try {
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
     const response = await axios.post(
-      configApp.USER_MANAGEMENT_SERVICE + url,
+      baseUrl + url,
       body,
       {
-        headers: tokenHeader(),
+        headers: buildHeaders(baseUrl),
       }
     );
     return response?.data;
@@ -129,30 +168,13 @@ const activationWithRemark = async (url, body) => {
     throw error;
   }
 };
-const removePicture = async (url) => {
+
+const removePicture = async (url, customBaseUrl = null) => {
   try {
-    const response = await axios.get(configApp.USER_MANAGEMENT_SERVICE + url, {
-      headers: tokenHeader(),
-    });
-    return response?.data;
-  } catch (error) {
-    throw error;
-  }
-};
-const activationWithOutRemark = async (url) => {
-  try {
-    const response = await axios.post(configApp.USER_MANAGEMENT_SERVICE + url, {
-      headers: tokenHeader(),
-    });
-    return response?.data;
-  } catch (error) {
-    throw error;
-  }
-};
-const activationWithMethodGet = async (url) => {
-  try {
-    const response = await axios.get(configApp.USER_MANAGEMENT_SERVICE + url, {
-      headers: tokenHeader(),
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
+    const response = await axios.get(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
     });
     return response?.data;
   } catch (error) {
@@ -160,12 +182,40 @@ const activationWithMethodGet = async (url) => {
   }
 };
 
-const activationWithDelete = async (url) => {
+const activationWithOutRemark = async (url, customBaseUrl = null) => {
   try {
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
+    const response = await axios.post(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const activationWithMethodGet = async (url, customBaseUrl = null) => {
+  try {
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
+    const response = await axios.get(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const activationWithDelete = async (url, customBaseUrl = null) => {
+  try {
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
     const response = await axios.delete(
-      configApp.USER_MANAGEMENT_SERVICE + url,
+      baseUrl + url,
       {
-        headers: tokenHeader(),
+        headers: buildHeaders(baseUrl),
       }
     );
     return response?.data;
@@ -174,19 +224,18 @@ const activationWithDelete = async (url) => {
   }
 };
 
-const uploadImage = async (url, data, onProgress) => {
+const uploadImage = async (url, data, onProgress, customBaseUrl = null) => {
   try {
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
     const response = await axios.post(
-      configApp.USER_MANAGEMENT_SERVICE + url,
+      baseUrl + url,
       data,
       {
-        headers: {
-          ...tokenHeader(),
-          "Content-Type": "multipart/form-data",
-        },
+        headers: buildHeaders(baseUrl, { "Content-Type": "multipart/form-data" }),
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percentCompleted); // Callback to update progress
+          onProgress(percentCompleted);
         },
       }
     );
@@ -196,13 +245,15 @@ const uploadImage = async (url, data, onProgress) => {
   }
 };
 
-const terminateData = async (url, body) => {
+const terminateData = async (url, body, customBaseUrl = null) => {
   try {
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
     const response = await axios.put(
-      configApp.USER_MANAGEMENT_SERVICE + url,
+      baseUrl + url,
       body,
       {
-        headers: tokenHeader(),
+        headers: buildHeaders(baseUrl),
       }
     );
     return response?.data;
@@ -211,11 +262,16 @@ const terminateData = async (url, body) => {
   }
 };
 
-const takeOver = async (url, body) => {
+const takeOver = async (url, body, customBaseUrl = null) => {
   try {
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+    
     const response = await axios.post(
-      configApp.USER_MANAGEMENT_SERVICE + url,
+      baseUrl + url,
       body,
+      {
+        headers: buildHeaders(baseUrl),
+      }
     );
     return response?.data;
   } catch (error) {

@@ -1,4 +1,4 @@
-const BASE_URL = process.env.REACT_APP_PGN_SERVER;
+// const BASE_URL = process.env.REACT_APP_PGN_SERVER;
 // const BASE_URL = process.env.REACT_APP_LOCAL;
 
 // explort constant app service
@@ -17,5 +17,5 @@ export const configApp = {
   PAYMENT_SERVICE: `/payment`,
   INTEGRATION_SERVICE: `/service/integration`,
   JP_SERVICE: `/service/jp`,
-  REPORT_SERVICE: '/rpt'
+  REPORT_SERVICE: `/rpt`,
 };

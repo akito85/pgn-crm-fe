@@ -210,6 +210,11 @@ const RatingPage = () => {
             totalData={data?.page?.totalElements || 0}
             onSort={onSortApi}
             tableScrolled={{ y: 525, x: 23000 }}
+            useFixColumn={true}
+              defaultFixedColumns={{
+                no: "left",
+                action: "right",
+              }}
           />
         </BaseContainer>
 

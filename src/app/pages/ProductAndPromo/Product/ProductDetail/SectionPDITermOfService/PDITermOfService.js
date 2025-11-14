@@ -1,11 +1,10 @@
 import React, { useRef, useState } from "react";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 import { Tooltip } from "antd";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ContentModalTosPDI from "./ContentModalTosPDI";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
-import Highlighter from "react-highlight-words";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { hasValue, renderColumn } from "../../../../../../utils";
 

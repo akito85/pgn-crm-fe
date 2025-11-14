@@ -19,6 +19,7 @@ const initialState = {
   data_approval_list: [],
   data_list_billing_request_approval: [],
   data_list_billing_approval: [],
+  data_list_billing_approved: [],
   data_prevBilling: [],
   loading: false,
   isFailed: false,
@@ -248,7 +249,13 @@ export const downloadBillingList = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_BILLING_LIST", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_BILLING_LIST",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -421,10 +428,10 @@ const billingSlice = createSlice({
   initialState,
   extraReducers: {
     // Requested Billing
-    [requestedBilling.pending]: (state, action) => {
+    [requestedBilling.pending]: (state) => {
       state.loading = true;
     },
-    [requestedBilling.fulfilled]: (state, action) => {
+    [requestedBilling.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -435,10 +442,10 @@ const billingSlice = createSlice({
     },
 
     // Requested Billing
-    [approvedBilling.pending]: (state, action) => {
+    [approvedBilling.pending]: (state) => {
       state.loading = true;
     },
-    [approvedBilling.fulfilled]: (state, action) => {
+    [approvedBilling.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -449,73 +456,73 @@ const billingSlice = createSlice({
     },
 
     // Get All Billing Pagination
-    [getAllBillingPaginate.pending]: (state, action) => {
+    [getAllBillingPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllBillingPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [getAllBillingPaginate.rejected]: (state, action) => {
+    [getAllBillingPaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Get All Billing Request Pagination
-    [getAllBillingRequestPaginate.pending]: (state, action) => {
+    [getAllBillingRequestPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllBillingRequestPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_list_billing_request_approval = action.payload;
     },
-    [getAllBillingRequestPaginate.rejected]: (state, action) => {
+    [getAllBillingRequestPaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Get All Billing Approve Pagination
-    [getAllBillingApprovePaginate.pending]: (state, action) => {
+    [getAllBillingApprovePaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllBillingApprovePaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_list_billing_approval = action.payload;
     },
-    [getAllBillingApprovePaginate.rejected]: (state, action) => {
+    [getAllBillingApprovePaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Get All Billing Item Pagination
-    [getAllBillingItemPaginate.pending]: (state, action) => {
+    [getAllBillingItemPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllBillingItemPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_billingItem = action.payload;
     },
-    [getAllBillingItemPaginate.rejected]: (state, action) => {
+    [getAllBillingItemPaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Get All Rating Result Pagination
-    [getAllRatingResultPaginate.pending]: (state, action) => {
+    [getAllRatingResultPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllRatingResultPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_ratingResult = action.payload;
     },
-    [getAllRatingResultPaginate.rejected]: (state, action) => {
+    [getAllRatingResultPaginate.rejected]: (state) => {
       state.loading = false;
     },
 
     // Download Billing
-    [downloadBillingList.pending]: (state, action) => {
+    [downloadBillingList.pending]: (state) => {
       state.loading = true;
     },
-    [downloadBillingList.fulfilled]: (state, action) => {
+    [downloadBillingList.fulfilled]: (state) => {
       state.loading = true;
     },
-    [downloadBillingList.rejected]: (state, action) => {
+    [downloadBillingList.rejected]: (state) => {
       state.loading = false;
     },
 

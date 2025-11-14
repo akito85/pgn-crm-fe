@@ -1,13 +1,10 @@
 import { FilterOutlined } from "@ant-design/icons";
-import { DatePicker, Grid, Input } from "antd";
+import { DatePicker, Input } from "antd";
 import moment from "moment";
 import React, { useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import TablePagination from "../../../../../components/TablePagination";
 import { dateFormatting } from "../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";

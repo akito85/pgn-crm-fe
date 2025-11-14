@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Table,
   Input,
@@ -16,16 +16,11 @@ import moment from "moment";
 import BaseContainer from "../BaseContainer";
 import ButtonComponent from "../ButtonComponent";
 import {
-  DeleteOutlined,
   MoreOutlined,
   PlusOutlined,
   InfoCircleOutlined,
-  DeleteColumnOutlined,
-  DeleteFilled,
 } from "@ant-design/icons";
-import { useEffect } from "react";
 import SVGIcon from "../../assets/Icon/index";
-import { useDynamicTableInlineHooks } from "./useDynamicTableInlineHooks";
 import InputComponent from "../InputComponent";
 const EditableCell = ({
   editing,

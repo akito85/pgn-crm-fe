@@ -2,7 +2,7 @@ import React from 'react';
 import CardComponent from '../../../../components/Card/CardComponent';
 import DetailText from '../../../../components/DetailText';
 import moment from 'moment';
-import { dateFormat, dateFormatting, toTitleCase } from '../../../../utils';
+import { dateFormatting, toTitleCase } from '../../../../utils';
 
 const DetailGlobalTypeValue = (props) => {
     const { data } = props;

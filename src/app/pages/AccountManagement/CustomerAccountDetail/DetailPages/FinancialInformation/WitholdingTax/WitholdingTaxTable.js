@@ -1,6 +1,5 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Tooltip } from "antd";
-import { Link, NavLink, Route, Routes, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import TablePagination from "../../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../../assets/Icon/index";
@@ -8,7 +7,6 @@ import { Fragment } from "react";
 import moment from "moment";
 import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 import WitholdingTaxDetail from "./WitholdingTaxDetail";
-import Highlighter from "react-highlight-words";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import { useColumnActionPermissionAccount } from "../../../../ComponentAccount/ColumnActionPermissionAccount";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";

@@ -1,10 +1,7 @@
 import React from "react";
-import InputComponent from "../../../../../components/InputComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../assets/Icon/index";
-import ButtonComponent from "../../../../../components/ButtonComponent";
-import { requiredMessage } from "../../../../../utils";
 import { Form } from "antd";
 
 const ModalApproveOrRejectPricingRule = ({

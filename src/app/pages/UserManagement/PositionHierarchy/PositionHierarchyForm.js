@@ -567,7 +567,7 @@ const PositionHierarchyForm = (props) => {
             rules = true;
         } else if (dataTable?.length > 0) {
             return true;
-        };
+        }
         return rules;
     };
 

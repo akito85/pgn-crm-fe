@@ -1,10 +1,5 @@
-import Highlighter from "react-highlight-words";
-import { Tooltip } from "antd";
-import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../../components/StatusComponent";
-import SVGIcon from "../../../../../assets/Icon/index";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 
 export const columnsBilling = (
   page = 1,
@@ -18,12 +13,14 @@ export const columnsBilling = (
   // handleApprovalHistory = () => {}
 ) => [
   {
+    key: "no",
     title: "NO",
     align: "center",
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
+    key: "calculationCode",
     title: "CALCULATION CODE",
     dataIndex: "calculationCode",
     sorter: true,
@@ -55,6 +52,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "ratingCode",
     title: "RATING CODE",
     dataIndex: "ratingCode",
     sorter: true,
@@ -86,6 +84,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "billingCode",
     title: "BILLING CODE",
     dataIndex: "billingCode",
     sorter: true,
@@ -117,6 +116,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "saNumber",
     title: "SA NUMBER",
     dataIndex: "saNumber",
     sorter: true,
@@ -148,6 +148,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "billingCycle",
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
     sorter: true,
@@ -180,6 +181,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "billingPeriod",
     title: "BILLING PERIOD",
     sorter: true,
     align: "center",
@@ -236,6 +238,7 @@ export const columnsBilling = (
     //   ),
   },
   {
+    key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
     sorter: true,
@@ -267,6 +270,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
     sorter: true,
@@ -298,6 +302,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
     sorter: true,
@@ -329,6 +334,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
     sorter: true,
@@ -360,6 +366,7 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "accountGroupType",
     title: "ACCOUNT GROUP TYPE",
     dataIndex: "accountGroupType",
     sorter: true,
@@ -392,6 +399,7 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "serviceType",
     title: "SERVICE TYPE",
     dataIndex: "serviceType",
     sorter: true,
@@ -424,6 +432,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "sor",
     title: "SOR",
     dataIndex: "sor",
     sorter: true,
@@ -455,6 +464,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",
     sorter: true,
@@ -486,6 +496,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "accountSegment",
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
     sorter: true,
@@ -518,6 +529,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "meterReadingCode",
     title: "METER READING CODE",
     dataIndex: "meterReadingCode",
     sorter: true,
@@ -549,6 +561,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "product",
     title: "PRODUCT",
     dataIndex: "product",
     sorter: true,
@@ -580,6 +593,7 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "timeUnitContract",
     title: "CONTRACT PERIOD UNIT",
     dataIndex: "timeUnitContract",
     sorter: true,
@@ -612,6 +626,7 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "uom",
     title: "UOM",
     dataIndex: "uom",
     sorter: true,
@@ -644,6 +659,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "minContract",
     title: "MIN CONTRACT",
     dataIndex: "minContract",
     sorter: true,
@@ -676,6 +692,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "maxContract",
     title: "MAX CONTRACT",
     dataIndex: "maxContract",
     sorter: true,
@@ -708,6 +725,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "totalUsage",
     title: "TOTAL USAGE",
     dataIndex: "totalUsage",
     sorter: true,
@@ -740,6 +758,7 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "totalUsageConvM3",
     title: "TOTAL USAGE EQV M3",
     dataIndex: "totalUsageConvM3",
     sorter: true,
@@ -772,6 +791,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "totalUsageConvMmbtu",
     title: "TOTAL USAGE EQV MMBTU",
     dataIndex: "totalUsageConvMmbtu",
     sorter: true,
@@ -804,6 +824,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "basicBillingIdr",
     title: "BASIC BILL IDR",
     dataIndex: "basicBillingIdr",
     sorter: true,
@@ -836,6 +857,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "basicBillingUsd",
     title: "BASIC BILL USD",
     dataIndex: "basicBillingUsd",
     sorter: true,
@@ -868,6 +890,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "totalBasicBillEqvIdr",
     title: "TOTAL BASIC BILL EQV IDR",
     dataIndex: "totalBasicBillEqvIdr",
     sorter: true,
@@ -900,6 +923,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "totalBasicBillEqvUsd",
     title: "TOTAL BASIC BILL EQV USD",
     dataIndex: "totalBasicBillEqvUsd",
     sorter: true,
@@ -932,6 +956,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "otherBillIdr",
     title: "OTHER BILL IDR",
     dataIndex: "otherBillIdr",
     sorter: true,
@@ -964,6 +989,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "otherBillUsd",
     title: "OTHER BILL USD",
     dataIndex: "otherBillUsd",
     sorter: true,
@@ -996,6 +1022,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "totalOtherBillEqvIdr",
     title: "TOTAL OTHER BILL EQV IDR",
     dataIndex: "totalOtherBillEqvIdr",
     sorter: true,
@@ -1028,6 +1055,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "totalOtherBillEqvUsd",
     title: "TOTAL OTHER BILL EQV USD",
     dataIndex: "totalOtherBillEqvUsd",
     sorter: true,
@@ -1060,6 +1088,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "discountAmountIdr",
     title: "DISCOUNT IDR",
     dataIndex: "discountAmountIdr",
     sorter: true,
@@ -1092,6 +1121,7 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "discountAmountUsd",
     title: "DISCOUNT USD",
     dataIndex: "discountAmountUsd",
     sorter: true,
@@ -1124,6 +1154,7 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "taxBasicIdr",
     title: "TAX BASIS IDR",
     dataIndex: "taxBasicIdr",
     sorter: true,
@@ -1149,6 +1180,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "taxBasicUsd",
     title: "TAX BASIS USD",
     dataIndex: "taxBasicUsd",
     sorter: true,
@@ -1181,6 +1213,7 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "taxBasicEqvIdr",
     title: "TAX BASIS EQV IDR",
     dataIndex: "taxBasicEqvIdr",
     sorter: true,
@@ -1213,6 +1246,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "vatIdr",
     title: "VAT IDR",
     dataIndex: "vatIdr",
     sorter: true,
@@ -1245,6 +1279,7 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "vatUsd",
     title: "VAT USD",
     dataIndex: "vatUsd",
     sorter: true,
@@ -1277,6 +1312,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "vatEqvIdr",
     title: "VAT EQV IDR",
     dataIndex: "vatEqvIdr",
     sorter: true,
@@ -1309,6 +1345,7 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "withHoldingTax",
     title: "WITHHOLDING TAX",
     dataIndex: "withHoldingTax",
     sorter: true,
@@ -1341,6 +1378,7 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "prevWithHoldingTax",
     title: "PREV WITHHOLDING TAX",
     dataIndex: "prevWithHoldingTax",
     sorter: true,
@@ -1374,6 +1412,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "taxRateType",
     title: "TAX RATE TYPE",
     dataIndex: "taxRateType",
     sorter: true,
@@ -1406,6 +1445,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "taxRate",
     title: "TAX RATE",
     dataIndex: "taxRate",
     sorter: true,
@@ -1438,6 +1478,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "taxRateDate",
     title: "TAX RATE DATE",
     sorter: true,
     align: "center",
@@ -1492,6 +1533,7 @@ export const columnsBilling = (
     //   ),
   },
   {
+    key: "totalAmountIdr",
     title: "TOTAL AMOUNT IDR",
     dataIndex: "totalAmountIdr",
     sorter: true,
@@ -1524,6 +1566,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "totalAmountUsd",
     title: "TOTAL AMOUNT USD",
     dataIndex: "totalAmountUsd",
     sorter: true,
@@ -1556,6 +1599,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "totalAmountEqvIdr",
     title: "TOTAL AMOUNT EQV IDR",
     dataIndex: "totalAmountEqvIdr",
     sorter: true,
@@ -1588,6 +1632,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "totalAmountEqvUsd",
     title: "TOTAL AMOUNT EQV USD",
     dataIndex: "totalAmountEqvUsd",
     sorter: true,
@@ -1620,6 +1665,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "rateType",
     title: "RATE TYPE",
     dataIndex: "rateType",
     sorter: true,
@@ -1651,6 +1697,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "rate",
     title: "RATE",
     align: "right",
     dataIndex: "rate",
@@ -1683,6 +1730,7 @@ export const columnsBilling = (
     // ),
   },
   {
+    key: "rateDate",
     title: "RATE DATE",
     sorter: true,
     align: "center",
@@ -1737,6 +1785,7 @@ export const columnsBilling = (
     //   ),
   },
   {
+    key: "transactionDate",
     title: "TRANSACTION DATE",
     sorter: true,
     align: "center",
@@ -1791,6 +1840,7 @@ export const columnsBilling = (
     //   ),
   },
   {
+    key: "accountDate",
     title: "ACCOUNTING DATE",
     sorter: true,
     align: "center",
@@ -1845,6 +1895,7 @@ export const columnsBilling = (
     //   ),
   },
   {
+    key: "invoiceDate",
     title: "INVOICE DATE",
     sorter: true,
     align: "center",
@@ -1899,6 +1950,7 @@ export const columnsBilling = (
       ),
   },
   {
+    key: "dueDate",
     title: "DUE DATE",
     sorter: true,
     align: "center",
@@ -1953,6 +2005,7 @@ export const columnsBilling = (
     //   ),
   },
   {
+    key: "remark",
     sorter: true,
     title: "REMARK",
     dataIndex: "remark",
@@ -2005,6 +2058,7 @@ export const columnsBilling = (
     //   ),
   },
   {
+    key: "paymentStatus",
     title: "PAYMENT STATUS",
     dataIndex: "paymentStatus",
     sorter: true,
@@ -2053,6 +2107,7 @@ export const columnsBilling = (
     },
   },
   {
+    key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     fixed: "right",

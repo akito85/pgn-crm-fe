@@ -1,6 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import accountManagementService from "../../../services/account_management/accountManagementService";
-import { showModalError, showModalSuccess, validateError } from "../../general_slice";
+import {
+  showModalError,
+  showModalSuccess,
+  validateError,
+} from "../../general_slice";
 import { errorBody, errorCode, errorMessage } from "../../../../utils";
 
 const initialState = {
@@ -37,7 +41,7 @@ const initialState = {
   message: "",
   categoryList: [],
   serviceTypeList: [],
-  transactionCodeData :[]
+  transactionCodeData: [],
 };
 
 export const getTaxImplicationPaginate = createAsyncThunk(
@@ -80,7 +84,13 @@ export const downloadTaxImplication = createAsyncThunk(
       const response = await accountManagementService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_TAX_IMPLICATION", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_TAX_IMPLICATION",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -139,7 +149,13 @@ export const createTaxImplication = createAsyncThunk(
       //   };
       //   thunkAPI.dispatch(showModalError(errorBody));
       // }
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'updated', errorMessage(error)), action: 'CREATE_TAX_IMPLICATION', back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "updated", errorMessage(error)),
+          action: "CREATE_TAX_IMPLICATION",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error);
     }
   }
@@ -250,7 +266,6 @@ export const getListAppHierDetail = createAsyncThunk(
     }
   }
 );
-
 
 /** Get List Criteria */
 export const getCountryList = createAsyncThunk(
@@ -552,7 +567,7 @@ export const getSelectCriteria = createAsyncThunk(
       return (response?.data || []).map((item) => ({
         label: item.text,
         value: item.id,
-        code: item?.code
+        code: item?.code,
       }));
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
@@ -639,8 +654,8 @@ export const getListCategory = createAsyncThunk(
       return response.data.map((item) => {
         return {
           glbTypeValId: item.id,
-          name: item.name
-        }
+          name: item.name,
+        };
       });
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
@@ -873,7 +888,6 @@ export const inactiveTaxImplicationRule = createAsyncThunk(
   }
 );
 
-
 export const deleteTaxImplicationRule = createAsyncThunk(
   "DELETE_TAX_IMPLICATION_RULE",
   async (id, thunkAPI) => {
@@ -915,16 +929,15 @@ export const checkStartDate = createAsyncThunk(
   }
 );
 
-
 const taxImplicationSlice = createSlice({
   name: "tax_implication_slice",
   initialState,
   extraReducers: {
     // pagination
-    [getTaxImplicationPaginate.pending]: (state, action) => {
+    [getTaxImplicationPaginate.pending]: (state) => {
       state.loading = true;
     },
-    [getTaxImplicationPaginate.rejected]: (state, action) => {
+    [getTaxImplicationPaginate.rejected]: (state) => {
       state.loading = false;
     },
     [getTaxImplicationPaginate.fulfilled]: (state, action) => {
@@ -932,21 +945,21 @@ const taxImplicationSlice = createSlice({
       state.data = action.payload;
     },
     // download
-    [downloadTaxImplication.pending]: (state, action) => {
+    [downloadTaxImplication.pending]: (state) => {
       state.loading = true;
     },
-    [downloadTaxImplication.rejected]: (state, action) => {
+    [downloadTaxImplication.rejected]: (state) => {
       state.loading = false;
     },
-    [downloadTaxImplication.fulfilled]: (state, action) => {
+    [downloadTaxImplication.fulfilled]: (state) => {
       state.loading = false;
       // state.data = action.payload;
     },
     // detail
-    [getDetailTaxImplication.pending]: (state, action) => {
+    [getDetailTaxImplication.pending]: (state) => {
       state.loading = true;
     },
-    [getDetailTaxImplication.rejected]: (state, action) => {
+    [getDetailTaxImplication.rejected]: (state) => {
       state.loading = false;
     },
     [getDetailTaxImplication.fulfilled]: (state, action) => {
@@ -954,10 +967,10 @@ const taxImplicationSlice = createSlice({
       state.data_detail = action.payload;
     },
     // detail list tax implication rule
-    [getTaxImplicationRulePaginate.pending]: (state, action) => {
+    [getTaxImplicationRulePaginate.pending]: (state) => {
       state.loading = true;
     },
-    [getTaxImplicationRulePaginate.rejected]: (state, action) => {
+    [getTaxImplicationRulePaginate.rejected]: (state) => {
       state.loading = false;
     },
     [getTaxImplicationRulePaginate.fulfilled]: (state, action) => {
@@ -965,10 +978,10 @@ const taxImplicationSlice = createSlice({
       state.data_tax_implication_rule = action.payload;
     },
     // create
-    [createTaxImplication.pending]: (state, action) => {
+    [createTaxImplication.pending]: (state) => {
       state.loading = true;
     },
-    [createTaxImplication.rejected]: (state, action) => {
+    [createTaxImplication.rejected]: (state) => {
       state.loading = false;
     },
     [createTaxImplication.fulfilled]: (state, action) => {
@@ -976,10 +989,10 @@ const taxImplicationSlice = createSlice({
       state.data = action.payload;
     },
     // update
-    [updateTaxImplication.pending]: (state, action) => {
+    [updateTaxImplication.pending]: (state) => {
       state.loading = true;
     },
-    [updateTaxImplication.rejected]: (state, action) => {
+    [updateTaxImplication.rejected]: (state) => {
       state.loading = false;
     },
     [updateTaxImplication.fulfilled]: (state, action) => {
@@ -987,311 +1000,311 @@ const taxImplicationSlice = createSlice({
       state.data = action.payload;
     },
     // activation
-    [activationTaxImplication.pending]: (state, action) => {
+    [activationTaxImplication.pending]: (state) => {
       state.loading = true;
     },
-    [activationTaxImplication.rejected]: (state, action) => {
+    [activationTaxImplication.rejected]: (state) => {
       state.loading = false;
     },
-    [activationTaxImplication.fulfilled]: (state, action) => {
+    [activationTaxImplication.fulfilled]: (state) => {
       state.loading = false;
       // state.data = action.payload;
     },
-    
+
     /** List Premise Country */
-    [getCountryList.pending]: (state, action) => {
+    [getCountryList.pending]: (state) => {
       state.loading = true;
     },
     [getCountryList.fulfilled]: (state, action) => {
       state.premiseCountryList = action.payload;
       state.loading = false;
     },
-    [getCountryList.rejected]: (state, action) => {
+    [getCountryList.rejected]: (state) => {
       state.premiseCountryList = [];
       state.loading = false;
     },
     /** List Premise Province */
-    [getProvinceList.pending]: (state, action) => {
+    [getProvinceList.pending]: (state) => {
       state.loading = true;
     },
     [getProvinceList.fulfilled]: (state, action) => {
       state.premiseProvinceList = action.payload;
       state.loading = false;
     },
-    [getProvinceList.rejected]: (state, action) => {
+    [getProvinceList.rejected]: (state) => {
       state.premiseProvinceList = [];
       state.loading = false;
     },
     /** List Premise City */
-    [getCityList.pending]: (state, action) => {
+    [getCityList.pending]: (state) => {
       state.loading = true;
     },
     [getCityList.fulfilled]: (state, action) => {
       state.premiseCityList = action.payload;
       state.loading = false;
     },
-    [getCityList.rejected]: (state, action) => {
+    [getCityList.rejected]: (state) => {
       state.premiseCityList = [];
       state.loading = false;
     },
     /** List Premise District */
-    [getDistrictList.pending]: (state, action) => {
+    [getDistrictList.pending]: (state) => {
       state.loading = true;
     },
     [getDistrictList.fulfilled]: (state, action) => {
       state.premiseDistrictList = action.payload;
       state.loading = false;
     },
-    [getDistrictList.rejected]: (state, action) => {
+    [getDistrictList.rejected]: (state) => {
       state.premiseDistrictList = [];
       state.loading = false;
     },
     /** List Premise Subdistrict */
-    [getSubDistrictList.pending]: (state, action) => {
+    [getSubDistrictList.pending]: (state) => {
       state.loading = true;
     },
     [getSubDistrictList.fulfilled]: (state, action) => {
       state.premiseSubdistrictList = action.payload;
       state.loading = false;
     },
-    [getSubDistrictList.rejected]: (state, action) => {
+    [getSubDistrictList.rejected]: (state) => {
       state.premiseSubdistrictList = [];
       state.loading = false;
     },
     /** List Cost Center */
-    [getCostCenterList.pending]: (state, action) => {
+    [getCostCenterList.pending]: (state) => {
       state.loading = true;
     },
     [getCostCenterList.fulfilled]: (state, action) => {
       state.costCenterList = action.payload;
       state.loading = false;
     },
-    [getCostCenterList.rejected]: (state, action) => {
+    [getCostCenterList.rejected]: (state) => {
       state.costCenterList = [];
       state.loading = false;
     },
     /** List Sor */
-    [getSorList.pending]: (state, action) => {
+    [getSorList.pending]: (state) => {
       state.loading = true;
     },
     [getSorList.fulfilled]: (state, action) => {
       state.sorList = action.payload;
       state.loading = false;
     },
-    [getSorList.rejected]: (state, action) => {
+    [getSorList.rejected]: (state) => {
       state.sorList = [];
       state.loading = false;
     },
     /** List Account Number */
-    [getAccountNumberList.pending]: (state, action) => {
+    [getAccountNumberList.pending]: (state) => {
       state.loading = true;
     },
     [getAccountNumberList.fulfilled]: (state, action) => {
       state.accountNumberList = action.payload;
       state.loading = false;
     },
-    [getAccountNumberList.rejected]: (state, action) => {
+    [getAccountNumberList.rejected]: (state) => {
       state.accountNumberList = [];
       state.loading = false;
     },
     /** List Classification Type */
-    [getClassificationTypeList.pending]: (state, action) => {
+    [getClassificationTypeList.pending]: (state) => {
       state.loading = true;
     },
     [getClassificationTypeList.fulfilled]: (state, action) => {
       state.classificationTypeList = action.payload;
       state.loading = false;
     },
-    [getClassificationTypeList.rejected]: (state, action) => {
+    [getClassificationTypeList.rejected]: (state) => {
       state.classificationTypeList = [];
       state.loading = false;
     },
     /** List Account Segment */
-    [getAccountSegment.pending]: (state, action) => {
+    [getAccountSegment.pending]: (state) => {
       state.loading = true;
     },
     [getAccountSegment.fulfilled]: (state, action) => {
       state.accountSegmentList = action.payload;
       state.loading = false;
     },
-    [getAccountSegment.rejected]: (state, action) => {
+    [getAccountSegment.rejected]: (state) => {
       state.accountSegmentList = [];
       state.loading = false;
     },
     /** List SA Type */
-    [getSATypeList.pending]: (state, action) => {
+    [getSATypeList.pending]: (state) => {
       state.loading = true;
     },
     [getSATypeList.fulfilled]: (state, action) => {
       state.saTypeList = action.payload;
       state.loading = false;
     },
-    [getSATypeList.rejected]: (state, action) => {
+    [getSATypeList.rejected]: (state) => {
       state.saTypeList = [];
       state.loading = false;
     },
     /** List Account Category */
-    [getAccountCategoryList.pending]: (state, action) => {
+    [getAccountCategoryList.pending]: (state) => {
       state.loading = true;
     },
     [getAccountCategoryList.fulfilled]: (state, action) => {
       state.accountCategoryList = action.payload;
       state.loading = false;
     },
-    [getAccountCategoryList.rejected]: (state, action) => {
+    [getAccountCategoryList.rejected]: (state) => {
       state.accountCategoryList = [];
       state.loading = false;
     },
     /** List Account Group Type */
-    [getAccountGroupList.pending]: (state, action) => {
+    [getAccountGroupList.pending]: (state) => {
       state.loading = true;
     },
     [getAccountGroupList.fulfilled]: (state, action) => {
       state.accountGroupTypeList = action.payload;
       state.loading = false;
     },
-    [getAccountGroupList.rejected]: (state, action) => {
+    [getAccountGroupList.rejected]: (state) => {
       state.accountGroupTypeList = [];
       state.loading = false;
     },
     /** List Account Type */
-    [getAccountTypeList.pending]: (state, action) => {
+    [getAccountTypeList.pending]: (state) => {
       state.loading = true;
     },
     [getAccountTypeList.fulfilled]: (state, action) => {
       state.accountTypeList = action.payload;
       state.loading = false;
     },
-    [getAccountTypeList.rejected]: (state, action) => {
+    [getAccountTypeList.rejected]: (state) => {
       state.accountTypeList = [];
       state.loading = false;
     },
-    
+
     /** List Select Criteria */
-    [getSelectCriteria.pending]: (state, action) => {
+    [getSelectCriteria.pending]: (state) => {
       state.loading = true;
     },
     [getSelectCriteria.fulfilled]: (state, action) => {
       state.dataListCriteriaOpt = action.payload;
       state.loading = false;
     },
-    [getSelectCriteria.rejected]: (state, action) => {
+    [getSelectCriteria.rejected]: (state) => {
       state.dataListCriteriaOpt = [];
       state.loading = false;
     },
     /** List Category list */
-    [getCategoryList.pending]: (state, action) => {
+    [getCategoryList.pending]: (state) => {
       state.loading = true;
     },
     [getCategoryList.fulfilled]: (state, action) => {
       state.categoryList = action.payload;
       state.loading = false;
     },
-    [getCategoryList.rejected]: (state, action) => {
+    [getCategoryList.rejected]: (state) => {
       state.categoryList = [];
       state.loading = false;
     },
     /** List Service Type list */
-    [getServiceTypeList.pending]: (state, action) => {
+    [getServiceTypeList.pending]: (state) => {
       state.loading = true;
     },
     [getServiceTypeList.fulfilled]: (state, action) => {
       state.serviceTypeList = action.payload;
       state.loading = false;
     },
-    [getServiceTypeList.rejected]: (state, action) => {
+    [getServiceTypeList.rejected]: (state) => {
       state.serviceTypeList = [];
       state.loading = false;
     },
     /** Get List AppHierId */
-    [getListAppHier.pending]: (state, action) => {
+    [getListAppHier.pending]: (state) => {
       state.loading = true;
     },
     [getListAppHier.fulfilled]: (state, action) => {
       state.dataListAppHierId = action.payload;
       state.loading = false;
     },
-    [getListAppHier.rejected]: (state, action) => {
+    [getListAppHier.rejected]: (state) => {
       state.dataListAppHierId = [];
       state.loading = false;
     },
     /** Get List AppHierDetail */
-    [getListAppHierDetail.pending]: (state, action) => {
+    [getListAppHierDetail.pending]: (state) => {
       state.loading = true;
     },
     [getListAppHierDetail.fulfilled]: (state, action) => {
       state.dataListAppHierDetail = action.payload;
       state.loading = false;
     },
-    [getListAppHierDetail.rejected]: (state, action) => {
+    [getListAppHierDetail.rejected]: (state) => {
       state.dataListAppHierDetail = [];
       state.loading = false;
     },
     /** List Variable Name */
-    [getConditionNameList.pending]: (state, action) => {
+    [getConditionNameList.pending]: (state) => {
       state.loading = true;
     },
     [getConditionNameList.fulfilled]: (state, action) => {
       state.conditionNameList = action.payload;
       state.loading = false;
     },
-    [getConditionNameList.rejected]: (state, action) => {
+    [getConditionNameList.rejected]: (state) => {
       state.conditionNameList = [];
       state.loading = false;
     },
     /** List Formula Condition */
-    [getOperatorConditionList.pending]: (state, action) => {
+    [getOperatorConditionList.pending]: (state) => {
       state.loading = true;
     },
     [getOperatorConditionList.fulfilled]: (state, action) => {
       state.operationConditionList = action.payload;
       state.loading = false;
     },
-    [getOperatorConditionList.rejected]: (state, action) => {
+    [getOperatorConditionList.rejected]: (state) => {
       state.operationConditionList = [];
       state.loading = false;
     },
     /** List Data Type Condition */
-    [getImplicationTypeList.pending]: (state, action) => {
+    [getImplicationTypeList.pending]: (state) => {
       state.loading = true;
     },
     [getImplicationTypeList.fulfilled]: (state, action) => {
       state.dataImplicationType = action.payload;
       state.loading = false;
     },
-    [getImplicationTypeList.rejected]: (state, action) => {
+    [getImplicationTypeList.rejected]: (state) => {
       state.dataImplicationType = [];
       state.loading = false;
     },
     /** List Formula Operation */
-    [getOperationFormulaList.pending]: (state, action) => {
+    [getOperationFormulaList.pending]: (state) => {
       state.loading = true;
     },
     [getOperationFormulaList.fulfilled]: (state, action) => {
       state.operationFormulaList = action.payload;
       state.loading = false;
     },
-    [getOperationFormulaList.rejected]: (state, action) => {
+    [getOperationFormulaList.rejected]: (state) => {
       state.operationFormulaList = [];
       state.loading = false;
     },
-     /** Get List Category */
-     [getListCategory.pending]: (state, action) => {
+    /** Get List Category */
+    [getListCategory.pending]: (state) => {
       state.loading = true;
     },
     [getListCategory.fulfilled]: (state, action) => {
       state.dataListCategory = action.payload;
       state.loading = false;
     },
-    [getListCategory.rejected]: (state, action) => {
+    [getListCategory.rejected]: (state) => {
       state.dataListCategory = [];
       state.loading = false;
     },
     /**detail tax implication rule*/
-    [getDetailTaxImplicationRule.pending]: (state, action) => {
+    [getDetailTaxImplicationRule.pending]: (state) => {
       state.loading = true;
     },
-    [getDetailTaxImplicationRule.rejected]: (state, action) => {
+    [getDetailTaxImplicationRule.rejected]: (state) => {
       state.loading = false;
       state.data_detail_tax_implication_rule = null;
     },
@@ -1300,10 +1313,10 @@ const taxImplicationSlice = createSlice({
       state.data_detail_tax_implication_rule = action.payload;
     },
     /**detail draft tax implication rule*/
-    [getDetailDraftTaxImplicationRule.pending]: (state, action) => {
+    [getDetailDraftTaxImplicationRule.pending]: (state) => {
       state.loading = true;
     },
-    [getDetailDraftTaxImplicationRule.rejected]: (state, action) => {
+    [getDetailDraftTaxImplicationRule.rejected]: (state) => {
       state.loading = false;
       state.data_detail_draft_tax_implication_rule = null;
     },
@@ -1312,70 +1325,70 @@ const taxImplicationSlice = createSlice({
       state.data_detail_draft_tax_implication_rule = action.payload;
     },
     /** Approve Tax Implication Rule */
-    [approvalCreateTaxImplicationRule.pending]: (state, action) => {
+    [approvalCreateTaxImplicationRule.pending]: (state) => {
       state.loading = true;
     },
-    [approvalCreateTaxImplicationRule.fulfilled]: (state, action) => {
+    [approvalCreateTaxImplicationRule.fulfilled]: (state) => {
       state.loading = false;
     },
-    [approvalCreateTaxImplicationRule.rejected]: (state, action) => {
+    [approvalCreateTaxImplicationRule.rejected]: (state) => {
       state.loading = false;
     },
     /** Approve Inactive Tax Implication Rule */
-    [approvalInactiveTaxImplicationRule.pending]: (state, action) => {
+    [approvalInactiveTaxImplicationRule.pending]: (state) => {
       state.loading = true;
     },
-    [approvalInactiveTaxImplicationRule.fulfilled]: (state, action) => {
+    [approvalInactiveTaxImplicationRule.fulfilled]: (state) => {
       state.loading = false;
     },
-    [approvalInactiveTaxImplicationRule.rejected]: (state, action) => {
+    [approvalInactiveTaxImplicationRule.rejected]: (state) => {
       state.loading = false;
     },
     /** Get Approval History */
-    [getApprovalHistory.pending]: (state, action) => {
+    [getApprovalHistory.pending]: (state) => {
       state.loading = true;
     },
     [getApprovalHistory.fulfilled]: (state, action) => {
       state.dataApprovalHistory = action.payload;
       state.loading = false;
     },
-    [getApprovalHistory.rejected]: (state, action) => {
+    [getApprovalHistory.rejected]: (state) => {
       state.dataApprovalHistory = {};
       state.loading = false;
     },
     /** Inactive tax implication Rule */
-    [inactiveTaxImplicationRule.pending]: (state, action) => {
+    [inactiveTaxImplicationRule.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveTaxImplicationRule.fulfilled]: (state, action) => {
+    [inactiveTaxImplicationRule.fulfilled]: (state) => {
       state.loading = false;
     },
-    [inactiveTaxImplicationRule.rejected]: (state, action) => {
+    [inactiveTaxImplicationRule.rejected]: (state) => {
       state.loading = false;
     },
 
     /** delete tax implciation Rule */
-    [deleteTaxImplicationRule.pending]: (state, action) => {
+    [deleteTaxImplicationRule.pending]: (state) => {
       state.loading = true;
     },
-    [deleteTaxImplicationRule.fulfilled]: (state, action) => {
+    [deleteTaxImplicationRule.fulfilled]: (state) => {
       state.loading = false;
     },
-    [deleteTaxImplicationRule.rejected]: (state, action) => {
+    [deleteTaxImplicationRule.rejected]: (state) => {
       state.loading = false;
     },
 
     // get transaction code
-    [getTransactionCode.pending]: (state, action) => {
+    [getTransactionCode.pending]: (state) => {
       state.loading = true;
     },
     [getTransactionCode.fulfilled]: (state, action) => {
       state.loading = false;
-      state.transactionCodeData = action.payload
+      state.transactionCodeData = action.payload;
     },
     [getTransactionCode.rejected]: (state, action) => {
       state.loading = false;
-      state.transactionCodeData = action.payload
+      state.transactionCodeData = action.payload;
     },
   },
 });

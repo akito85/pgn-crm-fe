@@ -519,22 +519,13 @@ export const getAllApprovalListReceipt = createAsyncThunk(
 export const getAllocationRecomendationList = createAsyncThunk(
   "GET_ALLOCATION_LIST",
   async (
-    {
-      search,
-      pageChoose,
-      pageSizeChoose,
-      sort,
-      accountNumberSelected,
-      balance,
-      currencyId,
-      rateAmount,
-    },
+    { accountNumberSelected, balance, currencyId, rateAmount },
     thunkAPI
   ) => {
     try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      // const searchParams = search === undefined ? "" : search;
+      // const sortParams =
+      //   sort === undefined || sort === "" ? "createdDate~desc" : sort;
       // let url = `/v1/dbs/api/receipt/recommendation-allocation-get/0000000000000528-${balance}`;
       let url = ``;
 
@@ -554,7 +545,11 @@ export const getAllocationRecomendationList = createAsyncThunk(
       }
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: errorBody( errorCode(error), "created", errorMessage(error) ), action: "allocation-list", back: false })
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "allocation-list",
+          back: false,
+        })
       );
       return thunkAPI.rejectWithValue([]);
     }
@@ -754,7 +749,7 @@ const receiptSlice = createSlice({
     resetDataAccountNumber: (state) => {
       state.dataAccountNumber = null;
     },
-    resetConvertedAmount: (state, action) => {
+    resetConvertedAmount: (state) => {
       state.data_converted_currency = null;
     },
   },
@@ -942,25 +937,25 @@ const receiptSlice = createSlice({
     },
 
     // get detail
-    [getReceiptDetail.pending]: (state, action) => {
+    [getReceiptDetail.pending]: (state) => {
       state.loading = true;
     },
     [getReceiptDetail.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getReceiptDetail.rejected]: (state, action) => {
+    [getReceiptDetail.rejected]: (state) => {
       state.loading = true;
     },
     // get eallocation
-    [getAllocation.pending]: (state, action) => {
+    [getAllocation.pending]: (state) => {
       state.loading = true;
     },
     [getAllocation.fulfilled]: (state, action) => {
       state.data_allocation = action.payload;
       state.loading = false;
     },
-    [getAllocation.rejected]: (state, action) => {
+    [getAllocation.rejected]: (state) => {
       state.loading = true;
     },
 
@@ -1020,10 +1015,10 @@ const receiptSlice = createSlice({
       state.loading = false;
     },
 
-    [approveOrRejectReceipt.pending]: (state, action) => {
+    [approveOrRejectReceipt.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectReceipt.fulfilled]: (state, action) => {
+    [approveOrRejectReceipt.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },

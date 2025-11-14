@@ -6,14 +6,12 @@ import DetailText from '../../../../../components/DetailText'
 import ButtonComponent from '../../../../../components/ButtonComponent'
 import { LeftOutlined } from '@ant-design/icons'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Select, Spin } from 'antd'
+import { Spin } from 'antd'
 import { useDispatch, useSelector } from 'react-redux'
 import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../routes/account_management/customer_account_routes'
 import { useEffect } from 'react'
 import { getDetailAddress } from '../../../../../redux/slices/account_management/MasterData/addresses_slice'
 import GoogleMapsCustom from '../../../AccountManagement/CustomerAccountDetail/DetailPages/AccountAddress/GoogleMapsCustom'
-import InputComponent from '../../../../../components/InputComponent'
-import SelectComponent from '../../../../../components/SelectComponent'
 
 const DetailAddresses = () => {
   const { loading, data_detail } = useSelector(state => state?.address);

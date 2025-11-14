@@ -23,7 +23,6 @@ import {
 import { showModalError } from "../../../../../../redux/slices/general_slice";
 import CardComponent from "../../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../../components/DetailText";
-import { key } from "localforage";
 
 const ConditionForm = ({
   type,

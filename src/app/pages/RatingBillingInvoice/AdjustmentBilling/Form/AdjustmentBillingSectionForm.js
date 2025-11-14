@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Select, Input, DatePicker } from "antd";
+import { Form, Select, DatePicker } from "antd";
 import AdjustmentBISectionForm from "./AdjustmentBISectionForm";
 import BaseContainer from "../../../../../components/BaseContainer";
 import SelectComponent from "../../../../../components/SelectComponent";
@@ -15,12 +15,11 @@ import {
   getListCurrency,
   getListInvoice,
   getListInvoiceInformation,
-  getListItem,
   getListType,
 } from "../../../../../redux/slices/rating_billing_invoice/adjustmentBilling";
 import { currencyFormatting } from "../../../../../utils/formatCurrency";
 import DetailText from "../../../../../components/DetailText";
-import { dateFormatting, hasValue, renderDateConverter } from "../../../../../utils";
+import { dateFormatting, hasValue } from "../../../../../utils";
 import moment from "moment";
 
 const AdjustmentBillingSectionForm = ({

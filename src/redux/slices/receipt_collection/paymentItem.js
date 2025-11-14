@@ -258,7 +258,6 @@ export const updatePaymentItem = createAsyncThunk(
       // thunkAPI.dispatch(showModalSuccess(successBody));
       return data.data;
     } catch (error) {
-      console.log(error);
       const message =
         (error.response &&
           error.response.data &&
@@ -410,7 +409,11 @@ export const getApprovalHistory = createAsyncThunk(
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_APPROVAL_HISTORY_METHOD", back: false })
+        validateError({
+          error: error,
+          action: "GET_APPROVAL_HISTORY_METHOD",
+          back: false,
+        })
       );
       return thunkAPI.rejectWithValue(error.response);
     }
@@ -599,38 +602,38 @@ const itemSlice = createSlice({
     },
 
     // get detail
-    [getDetailItem.pending]: (state, action) => {
+    [getDetailItem.pending]: (state) => {
       state.loading = true;
     },
     [getDetailItem.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getDetailItem.rejected]: (state, action) => {
+    [getDetailItem.rejected]: (state) => {
       state.loading = true;
     },
 
     // get detail draft
-    [getDetailDraftItem.pending]: (state, action) => {
+    [getDetailDraftItem.pending]: (state) => {
       state.loading = true;
     },
     [getDetailDraftItem.fulfilled]: (state, action) => {
       state.data_detail_draft = action.payload;
       state.loading = false;
     },
-    [getDetailDraftItem.rejected]: (state, action) => {
+    [getDetailDraftItem.rejected]: (state) => {
       state.loading = true;
     },
 
     // inactive app
-    [inactivePaymentItem.pending]: (state, action) => {
+    [inactivePaymentItem.pending]: (state) => {
       state.loading = true;
     },
-    [inactivePaymentItem.fulfilled]: (state, action) => {
+    [inactivePaymentItem.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [inactivePaymentItem.rejected]: (state, action) => {
+    [inactivePaymentItem.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
@@ -703,10 +706,10 @@ const itemSlice = createSlice({
       state.loadingProduct = false;
     },
 
-    [approveOrRejectPaymentItem.pending]: (state, action) => {
+    [approveOrRejectPaymentItem.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectPaymentItem.fulfilled]: (state, action) => {
+    [approveOrRejectPaymentItem.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -716,10 +719,10 @@ const itemSlice = createSlice({
       state.message = action.payload;
     },
 
-    [approveOrRejectPaymentInactive.pending]: (state, action) => {
+    [approveOrRejectPaymentInactive.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectPaymentInactive.fulfilled]: (state, action) => {
+    [approveOrRejectPaymentInactive.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -752,7 +755,7 @@ const itemSlice = createSlice({
       state.data = action.payload;
       state.isSuccess = false;
     },
-    [updatePaymentItem.rejected]: (state, action) => {
+    [updatePaymentItem.rejected]: (state) => {
       state.isFailed = false;
     },
 

@@ -19,27 +19,39 @@ export const getAllActionPaginate = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/action/paging?searchs=${searchParams}&page=${page}&size=${pageSize}${sort ? `&sort=${sortParams}` : ""
-        }`;
+      const url = `/v1/dbs/api/action/paging?searchs=${searchParams}&page=${page}&size=${pageSize}${
+        sort ? `&sort=${sortParams}` : ""
+      }`;
       const response = await userHttpService.getPagination(url);
       return response.data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action: "GET_ALL_ACTION_PAGINATE", back: false }))
+      thunkAPI?.dispatch(
+        validateError({
+          error: error,
+          action: "GET_ALL_ACTION_PAGINATE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
 
-export const getActionList = createAsyncThunk("GET_ACTION_LIST", async (thunkAPI) => {
-  try {
-    const url = `/v1/dbs/api/action/list`;
-    const response = await userHttpService.getAll(url);
-    return response.data;
-  } catch (error) {
-    thunkAPI?.dispatch(validateError({ error: error, action: "GET_ACTION_LIST", back: false }))
-    return thunkAPI.rejectWithValue(error?.response);
+export const getActionList = createAsyncThunk(
+  "GET_ACTION_LIST",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/action/list`;
+      const response = await userHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI?.dispatch(
+        validateError({ error: error, action: "GET_ACTION_LIST", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
   }
-});
+);
 
 export const createAction = createAsyncThunk(
   "CREATE_ACTION",
@@ -54,29 +66,47 @@ export const createAction = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_ACTION", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "CREATE_ACTION",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
 
-export const validateAction = createAsyncThunk('VALIDATE_ACTION', async (body, thunkAPI) => {
-  const { type, ...keys } = body
-  try {
-    let url;
-    if (type === 'create') {
-      url = `/v1/dbs/api/action/validate-create`;
-    } else {
-      url = `/v1/dbs/api/action/validate-update`;
+export const validateAction = createAsyncThunk(
+  "VALIDATE_ACTION",
+  async (body, thunkAPI) => {
+    const { type, ...keys } = body;
+    try {
+      let url;
+      if (type === "create") {
+        url = `/v1/dbs/api/action/validate-create`;
+      } else {
+        url = `/v1/dbs/api/action/validate-update`;
+      }
+      const response = await userHttpService.createData(url, keys);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(
+            errorCode(error),
+            type === "update" ? "updated" : "created",
+            errorMessage(error)
+          ),
+          action: "VALIDATE_ACTION",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response.data);
     }
-    const response = await userHttpService.createData(url, keys);
-    return response.data;
-  } catch (error) {
-    thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), type === 'update' ? 'updated' : 'created', errorMessage(error)), action: "VALIDATE_ACTION", back: false }))
-    return thunkAPI.rejectWithValue(error.response.data);
   }
-});
-
+);
 
 export const getDetailAction = createAsyncThunk(
   "GET_DETAIL_ACTION",
@@ -86,7 +116,13 @@ export const getDetailAction = createAsyncThunk(
       const response = await userHttpService.getDetail(url, id);
       return response.data;
     } catch (response) {
-      thunkAPI?.dispatch(validateError({ error: response, action: "GET_DETAIL_ACTION", back: false }))
+      thunkAPI?.dispatch(
+        validateError({
+          error: response,
+          action: "GET_DETAIL_ACTION",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -105,7 +141,13 @@ export const updateAction = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'updated', errorMessage(error)), action: "UPDATE_ACTION", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "updated", errorMessage(error)),
+          action: "UPDATE_ACTION",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -114,7 +156,7 @@ export const updateAction = createAsyncThunk(
 export const inactiveAction = createAsyncThunk(
   "INACTIVE_ACTION",
   async ({ id, status }, thunkAPI) => {
-    let statusData = status === "ACTIVE" ? "inactivated" : 'activated';
+    let statusData = status === "ACTIVE" ? "inactivated" : "activated";
     try {
       const url = `/v1/dbs/api/action/activeInactivate/${id}`;
       const data = await userHttpService.activationWithMethodGet(url);
@@ -127,7 +169,13 @@ export const inactiveAction = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), statusData, errorMessage(error)), action: "INACTIVE_ACTION", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), statusData, errorMessage(error)),
+          action: "INACTIVE_ACTION",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -144,8 +192,10 @@ export const downloadAction = createAsyncThunk(
       const response = await userHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action: "DOWNLOAD_ACTION", back: false }))
-      return thunkAPI.rejectWithValue(error?.response?.data)
+      thunkAPI?.dispatch(
+        validateError({ error: error, action: "DOWNLOAD_ACTION", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );
@@ -204,14 +254,14 @@ const actionSlice = createSlice({
     },
 
     //get detail
-    [getDetailAction.pending]: (state, action) => {
+    [getDetailAction.pending]: (state) => {
       state.loading = true;
     },
     [getDetailAction.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getDetailAction.rejected]: (state, action) => {
+    [getDetailAction.rejected]: (state) => {
       state.loading = false;
     },
 
@@ -224,36 +274,36 @@ const actionSlice = createSlice({
       state.data = action.payload;
       state.isSuccess = false;
     },
-    [updateAction.rejected]: (state, action) => {
+    [updateAction.rejected]: (state) => {
       state.isFailed = true;
     },
-    
+
     // validate action
-    [validateAction.pending]: (state, action) => {
+    [validateAction.pending]: (state) => {
       state.loading = true;
     },
-    [validateAction.fulfilled]: (state, action) => {
+    [validateAction.fulfilled]: (state) => {
       state.isSuccess = false;
     },
-    [validateAction.rejected]: (state, action) => {
+    [validateAction.rejected]: (state) => {
       state.isFailed = true;
     },
     // inactive master job
-    [inactiveAction.pending]: (state, action) => {
+    [inactiveAction.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveAction.fulfilled]: (state, action) => {
+    [inactiveAction.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [inactiveAction.rejected]: (state, action) => {
+    [inactiveAction.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
 
     //download
 
-    [downloadAction.pending]: (state, action) => {
+    [downloadAction.pending]: (state) => {
       state.loading = true;
     },
     [downloadAction.fulfilled]: (state, action) => {

@@ -123,6 +123,7 @@ export const useColumnActionPermission = (
     } else {
       return [
         {
+          key: "action",
           title: "ACTION",
           dataIndex: "action",
           fixed: "right",

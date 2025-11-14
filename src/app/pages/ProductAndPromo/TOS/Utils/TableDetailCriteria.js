@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { columnsTableCriteriaTOS } from "./TableCriteriaTos";
-import { Pagination, Select, Table } from "antd";
-import { useDispatch, useSelector } from "react-redux";
-import { getCriteriaPaging } from "../../../../../redux/slices/product_promo/tos";
+import { Select, Table } from "antd";
 
 const TableDetailCriteria = ({
   type,

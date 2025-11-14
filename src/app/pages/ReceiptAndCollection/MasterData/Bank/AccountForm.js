@@ -1,7 +1,6 @@
-import { Checkbox, DatePicker, Form, Input, Select } from "antd";
+import { Checkbox, Form, Input, Select } from "antd";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
 import DateComponent from "../../../../../components/DateComponent";
 import InputComponent from "../../../../../components/InputComponent";

@@ -3,10 +3,9 @@ import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../../components/DetailText";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import TablePagination from "../../../../../../components/TablePagination";
 import moment from 'moment'
 import { dateFormatting, renderColumn} from "../../../../../../utils";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 import { sorterFunction } from "../../../../../../utils/sorterFunction";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 

@@ -1,6 +1,5 @@
 import React, { Fragment, useRef, useState } from "react";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
-import Highlighter from "react-highlight-words";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 import { Tooltip } from "antd";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import SVGIcon from "../../../../../../assets/Icon/index";

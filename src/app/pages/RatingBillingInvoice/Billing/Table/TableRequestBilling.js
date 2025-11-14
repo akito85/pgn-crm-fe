@@ -3,7 +3,6 @@ import { Tooltip } from "antd";
 import moment from "moment";
 import { dateFormatting } from "../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../../components/StatusComponent";
 
 export const columnsRequestBilling = (
   page = 1,

@@ -2,6 +2,28 @@ import { RBI_ELEMENTS } from "./rbi_elements";
 import { RBI_ROUTES } from "./rbi_routes";
 
 export const rating_billing = [
+  
+   // prabilling
+  {
+    path: RBI_ROUTES.PRABILLING_VIEW,
+    element: RBI_ELEMENTS.PRABILLING_VIEW_ELEMENTS,
+  },  
+  {
+    path: RBI_ROUTES.PRABILLING_CREATE,
+    element: RBI_ELEMENTS.PRABILLING_CREATE_ELEMENTS,
+  },
+  {
+    path: RBI_ROUTES.PRABILLING_VIEW_LOG,
+    element: RBI_ELEMENTS.PRABILLOG_VIEW_ELEMENTS,
+  },
+  {
+    path: RBI_ROUTES.PRABILLING_DETAIL,
+    element: RBI_ELEMENTS.PRABILLING_DETAIL_ELEMENTS,
+  },
+  {
+    path: RBI_ROUTES.PRABILLING_DETAIL_CUSTOMER,
+    element: RBI_ELEMENTS.PRABILLCUS_DETAIL_ELEMENTS,
+  },
   // calculation
   {
     path: RBI_ROUTES.CALCULATION_VIEW,
@@ -34,6 +56,11 @@ export const rating_billing = [
   {
     path: RBI_ROUTES.RATING_VIEW,
     element: RBI_ELEMENTS.RATING_VIEW_PAGE,
+  },
+  // monitoring customer
+  {
+    path: RBI_ROUTES.MONITORING_CUSTOMER_VIEW,
+    element: RBI_ELEMENTS.MONITORING_CUSTOMER_VIEW_ELEMENTS,
   },
 
   // monitoring usage
@@ -247,5 +274,15 @@ export const rating_billing = [
   {
     path: RBI_ROUTES.TAX_CODE_DETAIL,
     element: RBI_ELEMENTS.TAX_CODE_DETAIL_ELEMENT,
+  },
+
+  // Management Billing Installment
+  {
+    path: RBI_ROUTES.MANAGEMENT_BILLING_INSTALLMENT_VIEW,
+    element: RBI_ELEMENTS.MANAGEMENT_BILLING_INSTALLMENT_VIEW_ELEMENT,
+  },
+  {
+    path: RBI_ROUTES.MANAGEMENT_BILLING_INSTALLMENT_CREATE,
+    element: RBI_ELEMENTS.MANAGEMENT_BILLING_INSTALLMENT_CREATE_ELEMENT,
   },
 ];

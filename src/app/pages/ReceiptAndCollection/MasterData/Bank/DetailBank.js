@@ -1,9 +1,6 @@
-import { FilterOutlined, MoreOutlined } from "@ant-design/icons";
+import { MoreOutlined } from "@ant-design/icons";
 import {
   Checkbox,
-  DatePicker,
-  Form,
-  Input,
   Popover,
   Space,
   Spin,
@@ -13,7 +10,7 @@ import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import DetailText from "../../../../../components/DetailText";
@@ -22,21 +19,14 @@ import TablePagination from "../../../../../components/TablePagination";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
 import {
-  dateFormat,
   dateFormatting,
-  hasValue,
-  requiredMessage,
 } from "../../../../../utils";
 import {
   approveOrRejectBankAccount,
-  approveOrRejectInactiveBank,
   approveOrRejectInactiveBankAccount,
   getAccountInformationPaging,
-  getAccountVApagging,
   getAllApprovalList,
   getApprovalHistoryBankAccount,
-  getBankDetail,
-  getBankDetailDraft,
   getDetailAccountInformation,
   getListApprovalById,
   inactiveBankAccount,
@@ -52,7 +42,6 @@ import {
   getColumnSearchPropsPaging,
 } from "../../../../../utils/getColumnSearchProps";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import InputComponent from "../../../../../components/InputComponent";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 

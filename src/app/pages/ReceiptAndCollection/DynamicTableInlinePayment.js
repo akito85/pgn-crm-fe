@@ -23,11 +23,9 @@ import {
 import { useEffect } from "react";
 import SVGIcon from "../../../assets/Icon/index";
 import ButtonComponent from "../../../components/ButtonComponent";
-import BaseContainer from "../../../components/BaseContainer";
 import { useDispatch } from "react-redux";
 import { updatePeriod } from "../../../redux/slices/receipt_collection/transactionCalender";
 import { dateFormatting } from "../../../utils";
-import DateComponent from "../../../components/DateComponent";
 import InputComponent from "../../../components/InputComponent";
 const EditableCell = ({
   editing,

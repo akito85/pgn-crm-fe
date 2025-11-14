@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
-import { Spin, Input } from "antd";
+import { Input } from "antd";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import DetailText from "../../../../../components/DetailText";

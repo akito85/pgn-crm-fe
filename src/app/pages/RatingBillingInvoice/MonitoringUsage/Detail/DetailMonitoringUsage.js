@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { Alert, Form, Spin, Tooltip } from "antd";
@@ -20,7 +20,6 @@ import {
 import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting, hasValue, toTitleCase } from "../../../../../utils";
-import TablePagination from "../../../../../components/TablePagination";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import { useMonitoringList } from "../useMonirotingList";
 import ModalUpdateUsage from "../ModalUpdateUsage";

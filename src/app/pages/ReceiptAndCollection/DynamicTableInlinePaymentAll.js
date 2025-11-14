@@ -15,17 +15,13 @@ import {
 import moment from "moment";
 
 import {
-  DeleteOutlined,
   MoreOutlined,
   PlusOutlined,
   InfoCircleOutlined,
 } from "@ant-design/icons";
-import { useEffect } from "react";
 import SVGIcon from "../../../assets/Icon/index";
 import ButtonComponent from "../../../components/ButtonComponent";
 import BaseContainer from "../../../components/BaseContainer";
-import { useDispatch } from "react-redux";
-import { updatePeriod } from "../../../redux/slices/receipt_collection/transactionCalender";
 import InputComponent from "../../../components/InputComponent";
 import { hasValue } from "../../../utils";
 const EditableCell = ({

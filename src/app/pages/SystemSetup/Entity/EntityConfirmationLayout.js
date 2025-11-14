@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import DetailText from "../../../../components/DetailText";
 import TablePagination from "../../../../components/TablePagination";
-import { getBase64 } from "../../../../utils/getBase64";
-import { Checkbox, Image, Input, Tooltip } from "antd";
-import { FilterOutlined } from "@ant-design/icons";
+import { Image, Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
 import { useRef } from "react";
 import { intToNPWP } from "../../../../utils/npwp";

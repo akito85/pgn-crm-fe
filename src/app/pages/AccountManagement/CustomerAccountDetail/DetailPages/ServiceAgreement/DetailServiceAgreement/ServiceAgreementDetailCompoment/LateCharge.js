@@ -1,6 +1,4 @@
 import React,{ useState, useEffect, useRef } from 'react'
-import GridLayout from '../../../../../../../../components/GridLayout'
-import DetailText from '../../../../../../../../components/DetailText'
 import TablePagination from '../../../../../../../../components/TablePagination';
 
 const LateCharge = ({data}) => {

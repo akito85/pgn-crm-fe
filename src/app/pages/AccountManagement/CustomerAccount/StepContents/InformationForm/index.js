@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import RadioTabs from "../../../../../../components/RadioTabs";
-import { Form, Select } from "antd";
-import SelectComponent from "../../../../../../components/SelectComponent";
 import InformationInputForm from "./InformationInputForm";
 
 const dataTabs = [{ value: "Customer Account" }, { value: "Attachment" }];

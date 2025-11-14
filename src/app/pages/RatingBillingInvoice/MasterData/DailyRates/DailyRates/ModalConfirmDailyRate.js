@@ -5,8 +5,6 @@ import DetailText from "../../../../../../components/DetailText";
 import RadioTabs from "../../../../../../components/RadioTabs";
 import { dateFormatting } from "../../../../../../utils";
 import AttachmentSectionForm from "../../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
-import { currencyFormatting } from "../../../../../../utils/formatCurrency";
-import { NumericFormat } from "react-number-format";
 
 const ModalConfirmDailyRate = ({
   data,
