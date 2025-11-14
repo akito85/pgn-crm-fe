@@ -635,7 +635,6 @@ export const getAttachmentCategory = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/rbi/billing-bucket/list-attachment-category`;
       const response = await ratingBillingHttpService.getAll(url);
-      console.log(response);
       return response.data?.map((item) => ({
         Id: item.id,
         text: item.text,

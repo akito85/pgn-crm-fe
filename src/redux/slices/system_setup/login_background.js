@@ -88,11 +88,10 @@ export const inactiveBackground = createAsyncThunk(
 export const getDetailBackground = createAsyncThunk(
   "GET_DETAIL_BACKGROUND",
   async (id, thunkAPI) => {
-    console.log("test");
     try {
       const url = `/v1/dbs/api/background/detail/${id}`;
       const response = await userHttpService.getDetail(url);
-      console.log("Response:", response);
+
       return response.data;
     } catch (error) {
       const message =

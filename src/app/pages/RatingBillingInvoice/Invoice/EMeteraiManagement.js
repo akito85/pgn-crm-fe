@@ -113,7 +113,6 @@ const EMeteraiManagement = () => {
 
   // Handlers
   const handleDetails = (record) => {
-    console.log("👁️ View details:", record);
     if (record) {
       setSelectedInvoice(record);
       setDetailModalVisible(true);
@@ -123,7 +122,6 @@ const EMeteraiManagement = () => {
   };
 
   const handleProcessSigning = (record) => {
-    console.log("✍️ Process signing:", record);
     if (record) {
       setSelectedInvoice(record);
       setSigningModalVisible(true);
@@ -133,7 +131,6 @@ const EMeteraiManagement = () => {
   };
 
   const handleRetry = (record) => {
-    console.log("🔄 Retry stamping:", record);
     if (record) {
       setSelectedInvoice(record);
       setStampingModalVisible(true);
@@ -143,7 +140,6 @@ const EMeteraiManagement = () => {
   };
 
   const handleProcessStamping = (record) => {
-    console.log("📋 Process stamping:", record);
     if (record) {
       setSelectedInvoice(record);
       setStampingModalVisible(true);
@@ -155,8 +151,6 @@ const EMeteraiManagement = () => {
   // Handle stamping submission - UPDATED
   const handleStampingSubmit = async (submissionData) => {
     try {
-      console.log("📤 Processing stamping submission:", submissionData);
-
       if (submissionData.stampingMethod === "e-stamping") {
         // E-Meterai Digital - HARDCODED PAYLOAD
         const payload = {
@@ -174,7 +168,6 @@ const EMeteraiManagement = () => {
           remark: "Test stamp",
         };
 
-        console.log("🌐 Submitting E-Stamping Request with payload:", payload);
         await dispatch(createStampingRequest(payload)).unwrap();
       } else if (submissionData.stampingMethod === "manual") {
         // Manual stamping
@@ -184,10 +177,6 @@ const EMeteraiManagement = () => {
           remark: submissionData.remark,
         };
 
-        console.log(
-          "📁 Submitting Manual Stamping with file:",
-          payload.file?.name
-        );
         await dispatch(uploadManualStamping(payload)).unwrap();
       }
 
@@ -215,8 +204,6 @@ const EMeteraiManagement = () => {
 
     try {
       if (signingMethod === "e-signing") {
-        console.log("🌐 Submitting E-Signing Request...");
-
         await dispatch(
           createStampingRequest({
             invoiceNumber,
@@ -247,8 +234,6 @@ const EMeteraiManagement = () => {
 
   // Handle pagination change
   const handlePageChange = (newPage, newPageSize) => {
-    console.log("📄 Page changed:", { newPage, newPageSize });
-
     // If page size changes, reset to page 1
     if (newPageSize !== pageSize) {
       setPage(1);
@@ -260,7 +245,6 @@ const EMeteraiManagement = () => {
 
   // Handle filter change
   const handleFilterChange = (newFilters) => {
-    console.log("🔍 Filters changed:", newFilters);
     setFilters(newFilters);
     setPage(1); // Reset to first page when filters change
   };

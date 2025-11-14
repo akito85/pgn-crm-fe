@@ -91,7 +91,6 @@ const getDetailByIdBody = async (url, id) => {
 
 const getWithBody = async (url, body) => {
   try {
-    console.log(body, " getWith body");
     const baseUrl = configApp.RATING_BILLING_SERVICE;
 
     const response = await axios.get(baseUrl + url, {
@@ -152,13 +151,9 @@ const downloadDataPrabill = async (url, customBaseUrl = null) => {
 
     const filename = `prabill_data_${searchParam}_${timestamp}.xlsx`;
 
-    console.log("Generated filename:", filename);
-
     const blob = new Blob([response.data], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-
-    console.log("Blob size:", blob.size, "bytes");
 
     if (blob.size === 0) {
       throw new Error("Downloaded file is empty");
@@ -383,23 +378,6 @@ const downloadXlsx = async (
           filename = filenameMatch[1];
         }
       }
-    }
-
-    if (!filename) {
-      const timestamp = new Date();
-      const day = String(timestamp.getDate()).padStart(2, "0");
-      const month = timestamp
-        .toLocaleString("en-US", { month: "short" })
-        .toUpperCase();
-      const year = timestamp.getFullYear();
-      const formattedDate = `${day}${month}${year}`;
-      filename = `${fallbackFilename}_${formattedDate}.xlsx`;
-      console.warn(
-        "⚠️ Filename not found in header, using fallback:",
-        filename
-      );
-    } else {
-      console.log("✅ Filename from header:", filename);
     }
 
     const blob = new Blob([response.data], {

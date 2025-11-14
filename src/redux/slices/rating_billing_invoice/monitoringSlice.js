@@ -6,8 +6,6 @@ import {
   showModalError,
 } from "../general_slice";
 
-const CUSTOM_BASE_URL = process.env.REACT_APP_BASE_URL_NGROK;
-
 const initialState = {
   loading: false,
   error: null,
@@ -68,10 +66,7 @@ export const getSummaryData = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/monitoringcustomer/summary`;
-      const response = await ratingBillingHttpService.getAll(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getAll(url);
 
       return {
         pendingTransactions: response.data.summaryPendingTransaction,
@@ -183,10 +178,7 @@ export const getPriorityList = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/monitoringcustomer/anomalies-top5`;
-      const response = await ratingBillingHttpService.getAll(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getAll(url);
 
       return {
         priorPendingTransactions: response.data.priorPendingTransactions || [],
@@ -248,10 +240,7 @@ export const getPendingTransactions = createAsyncThunk(
       const searchParams = search || "";
       const sortParams = sort || "receivedAt~desc";
       const url = `/v1/dbs/api/monitoringcustomer/list-pending-trans?period=${period}&sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
-      const response = await ratingBillingHttpService.getPagination(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getPagination(url);
 
       return {
         result: response.data.content.map((item) => ({
@@ -299,11 +288,7 @@ export const updateInvestigationFlag = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/monitoringcustomer/update-flag`;
       const body = { id };
-      const response = await ratingBillingHttpService.createData(
-        url,
-        body,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.createData(url, body);
 
       const successBody = {
         title: "Successful",
@@ -340,10 +325,7 @@ export const getPendingApprovals = createAsyncThunk(
       const apiPage = page - 1;
 
       const url = `/v1/dbs/api/monitoringcustomer/list-pending-approvals?sort=${sortParams}&size=${pageSize}&page=${apiPage}&searchs=${searchParams}`;
-      const response = await ratingBillingHttpService.getPagination(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getPagination(url);
 
       return {
         result: response.data.content.map((item) => ({
@@ -393,10 +375,7 @@ export const getGapRatingBilling = createAsyncThunk(
       const apiPage = page - 1;
 
       const url = `/v1/dbs/api/monitoringcustomer/list-gap-rating-billing?sort=${sortParams}&size=${pageSize}&page=${apiPage}&searchs=${searchParams}`;
-      const response = await ratingBillingHttpService.getPagination(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getPagination(url);
 
       return {
         result: response.data.content.map((item) => ({

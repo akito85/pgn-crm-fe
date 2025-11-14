@@ -258,7 +258,6 @@ export const updatePaymentItem = createAsyncThunk(
       // thunkAPI.dispatch(showModalSuccess(successBody));
       return data.data;
     } catch (error) {
-      console.log(error);
       const message =
         (error.response &&
           error.response.data &&

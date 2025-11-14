@@ -23,7 +23,7 @@ const ModalBuatFakturPengganti = ({
     if (isOpen && noFakturAsli) {
       // TODO: Fetch data faktur asli
       // dispatch(getDetailEFaktur(noFakturAsli));
-      
+
       // Dummy data
       const dummyData = {
         noFaktur: noFakturAsli,
@@ -39,7 +39,7 @@ const ModalBuatFakturPengganti = ({
           },
         ],
       };
-      
+
       setDataFakturAsli(dummyData);
       form.setFieldsValue({
         noFakturAsli: dummyData.noFaktur,
@@ -60,12 +60,11 @@ const ModalBuatFakturPengganti = ({
     const body = {
       noFakturAsli: values.noFakturAsli,
       pelanggan: values.pelanggan,
-      tanggalFakturPengganti: values.tanggalFakturPengganti.format("YYYY-MM-DD"),
+      tanggalFakturPengganti:
+        values.tanggalFakturPengganti.format("YYYY-MM-DD"),
       alasanPenggantian: values.alasanPenggantian,
       items: dataFakturAsli?.items || [],
     };
-
-    console.log("Buat Faktur Pengganti:", body);
 
     // TODO: Dispatch action
     // dispatch(buatFakturPengganti(body))

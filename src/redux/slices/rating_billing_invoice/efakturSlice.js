@@ -247,8 +247,7 @@ export const generateEFakturWithAttachments = createAsyncThunk(
 
       const createResponse = await ratingBillingHttpService.createData(
         createUrl,
-        requestBody,
-        CUSTOM_BASE_URL
+        requestBody
       );
 
       if (!createResponse.success) {
@@ -577,8 +576,7 @@ export const uploadManualEFaktur = createAsyncThunk(
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
         formData,
-        () => {},
-        CUSTOM_BASE_URL
+        () => {}
       );
 
       thunkAPI.dispatch(showModalSuccess({

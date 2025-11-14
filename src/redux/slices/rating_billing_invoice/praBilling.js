@@ -3,8 +3,6 @@ import ratingBillingHttpService from "../../services/ratingBillingHttpService";
 import userHttpService from "../../services/userHttpService";
 import { setBodyError, showModalError, validateError } from "../general_slice";
 
-const CUSTOM_BASE_URL = process.env.REACT_APP_BASE_URL_NGROK;
-
 const initialState = {
   data: [],
   loading: false,
@@ -172,10 +170,7 @@ export const getListAccountGroup = createAsyncThunk(
         queryParams ? `?${queryParams}` : ""
       }`;
 
-      const response = await ratingBillingHttpService.getAll(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getAll(url);
 
       const accountGroups = Array.isArray(response)
         ? response
@@ -367,8 +362,7 @@ export const getListSpecificCustomer = createAsyncThunk(
       const url = `/v1/dbs/api/customer-accounts`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body,
-        CUSTOM_BASE_URL
+        body
       );
       return response.data;
     } catch (error) {
@@ -396,24 +390,15 @@ export const getListBillingCycle = createAsyncThunk(
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/billing-cycle/list`;
-      const response = await ratingBillingHttpService.getAll(
-        url,
-        CUSTOM_BASE_URL
-      );
-
-      console.log("Raw Response:", response); // Debug log
+      const response = await ratingBillingHttpService.getAll(url);
 
       const rawData = response?.body?.data?.data || response?.data?.data || [];
-
-      console.log("Raw Data Array:", rawData);
 
       const transformedData = rawData.map((item) => ({
         id: item.id,
         name: item.name,
         ...item,
       }));
-
-      console.log("Transformed Data:", transformedData);
 
       return transformedData;
     } catch (error) {
@@ -497,11 +482,7 @@ export const createPrabilling = createAsyncThunk(
     try {
       const url = "/v1/dbs/api/create";
 
-      const response = await ratingBillingHttpService.createData(
-        url,
-        body,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.createData(url, body);
 
       return response.data;
     } catch (error) {
@@ -535,10 +516,7 @@ export const getListPrabillingInitPopulate = createAsyncThunk(
       const sortParams = sort || "createdDtm~desc";
       const url = `/v1/dbs/api/prabill-init-populate/list?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
 
-      const response = await ratingBillingHttpService.getPagination(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getPagination(url);
 
       return response.data;
     } catch (error) {
@@ -569,11 +547,8 @@ export const getLogActivities = createAsyncThunk(
     try {
       const url = "/v1/dbs/api/log/view-activity";
 
-      const response = await ratingBillingHttpService.getAll(
-        url,
-        CUSTOM_BASE_URL
-      );
-      console.log("Log Activities Response:", response);
+      const response = await ratingBillingHttpService.getAll(url);
+
       return response.data || response;
     } catch (error) {
       const message =
@@ -597,11 +572,7 @@ export const getLogActivityDetail = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/log/view-activity-detail/${id}`;
 
-      const response = await ratingBillingHttpService.getDetail(
-        url,
-        CUSTOM_BASE_URL
-      );
-      console.log("Log Activity Detail Response:", response);
+      const response = await ratingBillingHttpService.getDetail(url);
       return response.data || response;
     } catch (error) {
       const message =
@@ -624,10 +595,7 @@ export const getDetailPrabillingInit = createAsyncThunk(
   async (initCode, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/prabill/${initCode}`;
-      const response = await ratingBillingHttpService.getDetail(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getDetail(url);
       const contentType = response.headers?.["content-type"];
       if (contentType && contentType.includes("text/html")) {
         throw new Error(
@@ -778,10 +746,7 @@ export const getDetailPrabillingResult = createAsyncThunk(
         url += `&searchs=${encodeURIComponent(JSON.stringify(search))}`;
       }
 
-      const response = await ratingBillingHttpService.getPagination(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getPagination(url);
 
       // Response structure sama dengan log:
       // { success, code, message, data: { result, page, links } }
@@ -832,10 +797,7 @@ export const getDetailPrabillingLog = createAsyncThunk(
         initCode
       )}?page=${page}&size=${size}&sort=${sortParams}&searchs=${searchParams}`;
 
-      const response = await ratingBillingHttpService.getAll(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.getAll(url);
 
       // Response structure: { success, code, message, data: { result, page } }
       const apiData = response.data?.data || response.data;
@@ -906,14 +868,7 @@ export const getCustomerAccountDetail = createAsyncThunk(
 
       url += `&page=${page}&size=${size}`;
 
-      console.log("Fetching customer account detail:", url);
-
-      const response = await ratingBillingHttpService.getAll(
-        url,
-        CUSTOM_BASE_URL
-      );
-
-      console.log("Customer Account Detail Response:", response);
+      const response = await ratingBillingHttpService.getAll(url);
 
       const responseData = response.data?.data || response.data;
 
@@ -929,15 +884,6 @@ export const getCustomerAccountDetail = createAsyncThunk(
       const dataSaPrcrule = responseData.dataSaPrcrule || [];
       const dataSATosDet = responseData.dataSATosDet || [];
       const dataTosSubDet = responseData.dataTosSubDet || [];
-
-      console.log("Data Summary:", {
-        totalDetailRecords: dataDetail.length,
-        totalUsageRecords: dataUsage.length,
-        totalTaxRecords: dataTaxImp.length,
-        totalPricingTiers: dataSaPrcrule.length,
-        totalSATosRecords: dataSATosDet.length,
-        totalTosSubRecords: dataTosSubDet.length,
-      });
 
       // Process Usage Data - Menampilkan semua field termasuk yang null
       const usageData = dataUsage.map((item) => ({
@@ -1032,15 +978,6 @@ export const getCustomerAccountDetail = createAsyncThunk(
         fromItem: item.fromItem,
       }));
 
-      console.log("Processed Data Summary:", {
-        usageData: usageData.length,
-        taxData: taxData.length,
-        pricingData: pricingData.length,
-        saData: saData.length,
-        saTosDet: saTosDet.length,
-        tosSubDet: tosSubDet.length,
-      });
-
       return {
         rawContent: dataDetail,
         usageData: usageData,
@@ -1082,10 +1019,7 @@ export const downloadPrabillingResult = createAsyncThunk(
       // Update endpoint sesuai dengan backend baru
       const url = `/v1/dbs/api/download?search=${encodeURIComponent(initCode)}`;
 
-      const response = await ratingBillingHttpService.downloadDataPrabill(
-        url,
-        CUSTOM_BASE_URL
-      );
+      const response = await ratingBillingHttpService.downloadDataPrabill(url);
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(

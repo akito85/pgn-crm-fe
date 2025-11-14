@@ -23,8 +23,6 @@ const LogAktivitasEFaktur = ({
 
   useEffect(() => {
     if (isOpen && billingData?.efakturId) {
-      console.log("📥 Fetching log activity for efakturId:", billingData.efakturId);
-      
       dispatch(
         getLogActivity({
           efakturId: billingData.efakturId,
@@ -77,21 +75,15 @@ const LogAktivitasEFaktur = ({
       dataIndex: "activity",
       key: "activity",
       width: 300,
-      render: (text) => (
-        <div className="text-sm">
-          {text || "-"}
-        </div>
-      ),
+      render: (text) => <div className="text-sm">{text || "-"}</div>,
     },
     {
       title: "PESAN / CATATAN",
-      dataIndex: "message", 
+      dataIndex: "message",
       key: "message",
       width: 300,
       render: (text) => (
-        <div className="text-sm text-gray-600">
-          {text || "-"}
-        </div>
+        <div className="text-sm text-gray-600">{text || "-"}</div>
       ),
     },
   ];
@@ -111,11 +103,17 @@ const LogAktivitasEFaktur = ({
               {billingData && (
                 <div className="flex gap-4 text-sm text-gray-600">
                   <span>
-                    Billing Code: <strong className="text-gray-800">{billingData.billingCode}</strong>
+                    Billing Code:{" "}
+                    <strong className="text-gray-800">
+                      {billingData.billingCode}
+                    </strong>
                   </span>
                   {billingData.invoiceNumber && (
                     <span>
-                      Invoice: <strong className="text-gray-800">{billingData.invoiceNumber}</strong>
+                      Invoice:{" "}
+                      <strong className="text-gray-800">
+                        {billingData.invoiceNumber}
+                      </strong>
                     </span>
                   )}
                 </div>
