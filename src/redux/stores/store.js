@@ -94,6 +94,7 @@ import jobSlice from "../slices/system_setup/jobSlice";
 import loggingReducer from "../slices/system_setup/logging";
 import emeteraiReducer from "../slices/rating_billing_invoice/emeterai";
 import gracePeriodReducer from "../slices/debt_and_collection/gracePeriod";
+import activityNameReducer from "../slices/debt_and_collection/activityName";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -215,7 +216,8 @@ const reducer = combineReducers({
 
 
   // debt and collection
-  gracePeriod: gracePeriodReducer
+  gracePeriod: gracePeriodReducer,
+  activityName: activityNameReducer,
 
 
 });
