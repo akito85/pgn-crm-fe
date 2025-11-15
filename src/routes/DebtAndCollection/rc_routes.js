@@ -10,4 +10,11 @@ export const DEBT_AND_COLLECTION_ROUTES = {
   CREATE_ACTIVITY_NAME: "/debt-and-collection/activitiy-name/create",
   DETAIL_ACTIVITY_NAME: "/debt-and-collection/activitiy-name/view",
   UPDATE_ACTIVITY_NAME: "/debt-and-collection/activitiy-name/update",
+
+
+  // Activity Name
+  VIEW_ACTIVITY_TYPE: "/debt-and-collection/activity-type",
+  CREATE_ACTIVITY_TYPE: "/debt-and-collection/activity-type/create",
+  DETAIL_ACTIVITY_TYPE: "/debt-and-collection/activity-type/view",
+  UPDATE_ACTIVITY_TYPE: "/debt-and-collection/activity-type/update",
 };
