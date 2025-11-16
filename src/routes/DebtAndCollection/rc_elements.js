@@ -6,6 +6,10 @@ import ViewActivityName from "../../app/pages/DebtAndCollection/ActivityName/Vie
 import DetailActivityName from "../../app/pages/DebtAndCollection/ActivityName/DetailActivityName";
 import FormActivityName from "../../app/pages/DebtAndCollection/ActivityName/FormActivityName";
 
+import ViewActivityType from "../../app/pages/DebtAndCollection/ActivityType/ViewActivityType";
+import DetailActivityType from "../../app/pages/DebtAndCollection/ActivityType/DetailActivityType";
+import FormActivityType from "../../app/pages/DebtAndCollection/ActivityType/FormActivityType";
+
 export const DEBT_AND_COLLECTION_ELEMENTS = {
   // Grace Period
   VIEW_GRACE_PERIOD_PAGE: <ViewGracePeriod />,
@@ -19,5 +23,12 @@ export const DEBT_AND_COLLECTION_ELEMENTS = {
   DETAIL_ACTIVITY_NAME_PAGE: <DetailActivityName />,
   CREATE_ACTIVITY_NAME_PAGE: <FormActivityName type="create" />,
   UPDATE_ACTIVITY_NAME_PAGE: <FormActivityName type="update" />,
+
+
+  // Activity Type
+  VIEW_ACTIVITY_TYPE_PAGE: <ViewActivityType />,
+  DETAIL_ACTIVITY_TYPE_PAGE: <DetailActivityType />,
+  CREATE_ACTIVITY_TYPE_PAGE: <FormActivityType type="create" />,
+  UPDATE_ACTIVITY_TYPE_PAGE: <FormActivityType type="update" />,
 
 };
