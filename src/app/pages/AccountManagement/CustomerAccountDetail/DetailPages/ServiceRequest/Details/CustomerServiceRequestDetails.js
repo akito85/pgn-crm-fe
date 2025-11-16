@@ -7,9 +7,6 @@ import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import { LeftOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import CustomerHeaderDetail from "../../../CustomerHeaderDetail";
-import BaseContainer from "../../../../../../../components/BaseContainer";
-import DetailText from "../../../../../../../components/DetailText";
 import CustomerServiceRequestDetailTabs from "./CustomerServiceRequestDetailTabs";
 import { getCustomerDetail } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import moment from "moment";
@@ -25,7 +22,9 @@ const tabs = [
   { value: "Attachment" },
 ];
 
-const CustomerServiceRequestDetails = () => {
+const CustomerServiceRequestDetails = ({
+  type = "standard"
+}) => {
   const dispatch = useDispatch();
   const { data_customerDetail, loading, loadingAccount } = useSelector(
     (state) => state.customerAccount
@@ -66,27 +65,33 @@ const CustomerServiceRequestDetails = () => {
       return "";
     }
   };
-
   const routes = [
     {
       path: "",
       breadcrumbName: "Account",
     },
     {
-      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_CUSTOMER,
-      breadcrumbName:"Customers",
+      path:
+        type == "standard"
+          ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
+          : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME,
+      breadcrumbName:
+        type == "standard" ? "Account - Standard" : "Account - One Time",
     },
     {
-      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_CUSTOMER,
-      breadcrumbName:"Detail Customers",
+      path:
+        type == "standard"
+          ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
+          : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
+      breadcrumbName: "Detail Account",
     },
     {
       path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST,
-      breadcrumbName: "Service Request",
+      breadcrumbName: "Service Requests",
     },
     {
       path: "",
-      breadcrumbName: "Detail Service Requests",
+      breadcrumbName: "Detail",
     },
   ];
 

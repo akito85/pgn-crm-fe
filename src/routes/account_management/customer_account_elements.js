@@ -47,8 +47,10 @@ import GasUtilizationForm from "../../app/pages/AccountManagement/CustomerAccoun
 import EquipmentForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Equipment/Form/EquipmentForm";
 import RawMaterialSourceForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/RawMaterialSource/RawMaterialSourceHistory/RawMaterialSourceForm";
 import ProductDistributionForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ProductDistribution/ProductDistributionHistory/ProductDistributionForm";
-import CustomerServiceRequestDetail from "../../app/pages/AccountManagement/Customer/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
-import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/Customer/DetailPages/ServiceRequest/Create/CreateCustomerServiceRequest";
+
+import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/CreateCustomerServiceRequest";
+import CustomerServiceRequestDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
+
 
 
 export const ACCOUNT_MANAGEMENT_ELEMENTS = {
@@ -96,7 +98,7 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   UPDATE_ACCOUNT_CONTACT_PAGE: <FormAccountContact type={"update"} />,
 
   // Service Request Detail
-  VIEW_DETAIL_SERVICE_REQUEST_PAGE: <CustomerServiceRequestDetail />,
+  VIEW_DETAIL_SERVICE_REQUEST_PAGE: <CustomerServiceRequestDetails />,
   CREATE_SERVICE_REQUEST_PAGE: <CreateCustomerServiceRequest />,
   // UPDATE_SERVICE_REQUEST_PAGE: <UpdateCustomerServiceRequest />,
 

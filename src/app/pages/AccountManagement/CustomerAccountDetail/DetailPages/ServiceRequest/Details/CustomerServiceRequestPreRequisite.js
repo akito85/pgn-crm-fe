@@ -5,7 +5,7 @@ import TablePagination from "../../../../../../../components/TablePagination";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import DetailText from "../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../components/BaseContainer";
-import NxsDropdownMenu from "../../../../../../../components/NxsDropdownMenu";
+import NxDropdownMenu from "../../../../../../../components/Nx/NxDropdownMenu";
 
 import { 
   CloseOutlined, 

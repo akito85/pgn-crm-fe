@@ -28,10 +28,29 @@ const CustomerServiceRequestDetailTabs = ({
     { value: "attch", label: "Attachment" }
   ];
 
+
+  const AccountType = () => {
+    // Path form URL
+    const path = window.location.pathname
+
+    // Strict whitelist (prevents XSS, traversal, unicode injections)
+    const allowed = /^[a-zA-Z0-9-_]+$/;
+
+    // Match only your known route structure:
+    // /account-management/<dynamic>/view
+    const match = path.match(/^\/account-management\/([a-zA-Z0-9-_]+)\/view\/?$/);
+
+    if (!match) return null;
+
+    const dynamicPart = match[1];
+
+    return allowed.test(dynamicPart) ? dynamicPart : null;
+  }
+
   const renderSection = () => {
     switch (section) {
       case dataTabs.sreqi:
-        return <CustomerServiceRequestDetailInfo />;
+        return <CustomerServiceRequestDetailInfo type={AccountType}/>;
       case dataTabs.attch:
         return <CustomerServiceRequestDetailAttch />;
       case dataTabs.contact:
