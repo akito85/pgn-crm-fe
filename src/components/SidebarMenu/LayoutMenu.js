@@ -87,7 +87,11 @@ const LayoutMenu = ({ children }) => {
     // dispatch(checkGrantedAccess(location?.pathname));
     // Skip access check for service request details route 
     const myRoutes = [
-      '/account-management/customers/view/service-requests/details'
+      '/account-management/account-standard/service-requests/details',
+      '/account-management/account-standard/service-requests/create',
+      '/account-management/account-standard/service-requests/update',
+      '/account-management/account-standard/service-requests/delete',
+      '/account-management/customers/update',
     ]
     
     if (!myRoutes.includes(location?.pathname)) {
