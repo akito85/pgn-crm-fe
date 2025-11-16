@@ -1,6 +1,5 @@
 import { getColumnSearchPropsUseFilteredValue} from "../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn } from "../../../../utils";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
 export const columns = (
   search,
@@ -151,48 +150,6 @@ export const columns = (
           "input",
           search
         ),
-    },
-    {
-      title: "ACTION",
-      width: 20,
-      align: "center",
-      render: (_, record) => (
-        <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-          <button
-            onClick={() => handleSearch(record)}
-            style={{
-              padding: 6,
-              background: "#1677ff",
-              color: "#fff",
-              border: "none",
-              borderRadius: 4,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center"
-            }}
-          >
-            <EditOutlined />
-          </button>
-
-          <button
-            onClick={() => handleOpenDelete(record)}
-            style={{
-              padding: 6,
-              background: "#ff4d4f",
-              color: "#fff",
-              border: "none",
-              borderRadius: 4,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center"
-            }}
-          >
-            <DeleteOutlined />
-          </button>
-        </div>
-      ),
     }
   ];
 };
