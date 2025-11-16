@@ -13,10 +13,10 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   VIEW_DETAIL_ACCOUNT_ONETIME: "/account-management/account-onetime/view",
 
   // Service Request Detail
-  VIEW_DETAIL_SERVICE_REQUEST: "/account-management/customers/view/service-requests/details",
-  CREATE_SERVICE_REQUEST: "/account-management/customers/view/service-requests/create",
-  UPDATE_SERVICE_REQUEST: "/account-management/customers/view/service-requests/update",
-  DELETE_SERVICE_REQUEST: "/account-management/customers/view/service-requests/delete",
+  VIEW_DETAIL_SERVICE_REQUEST: "/account-management/account-standard/service-requests/details",
+  CREATE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/create",
+  UPDATE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/update",
+  DELETE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/delete",
 
   //Detail Service Agreement
   VIEW_DETAIL_SERVICE_AGREEMENT:

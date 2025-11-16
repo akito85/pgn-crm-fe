@@ -17,7 +17,7 @@ const data = [
   { value: "Last Activity", disabled: true },
   { value: "Billing", disabled: true },
   { value: "Receipt", disabled: true },
-  { value: "Service Request", disabled: true },
+  { value: "Service Request", disabled: false },
   { value: "Account Statement", disabled: true },
   { value: "Pre Requisite", disabled: true },
   { value: "Account Address" }, //

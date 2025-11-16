@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import BaseContainer from "../../../../../../../components/BaseContainer";
-import CustomerInformation from "../../CustomerInformation";
+import CustomerInformation from "../../../../Customer/DetailPages/CustomerInformation";
 
 
 const CustomerServiceRequestHeader = ({
