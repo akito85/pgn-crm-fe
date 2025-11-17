@@ -4,7 +4,6 @@ import { Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import BaseContainer from "../../../../components/BaseContainer";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -22,9 +21,10 @@ import {
 } from "../../../../utils";
 import RadioTabs from "../../../../components/RadioTabs";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
 
 const CalculationPage = () => {
@@ -45,6 +45,12 @@ const CalculationPage = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [tabHeader, setTabHeader] = useState("Calculation List");
+
+  const [fixedColumns, setFixedColumns] = useState({
+    no: "left",
+    status: "right",
+    action: "right",
+  });
 
   // use effect
   useEffect(() => {
@@ -99,7 +105,7 @@ const CalculationPage = () => {
     });
   };
 
-  const column = useMemo(
+  const baseColumns = useMemo(
     () => [
       {
         key: "no",
@@ -662,7 +668,7 @@ const CalculationPage = () => {
   );
 
   // column history
-  const columnHistory = useMemo(
+  const baseColumnHistory = useMemo(
     () => [
       {
         key: "no",
@@ -1173,10 +1179,10 @@ const CalculationPage = () => {
   );
 
   // onSort
-  const onSort = (_, __, sort) => {
+  const onSort = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -1292,18 +1298,33 @@ const CalculationPage = () => {
     },
   ];
 
-  const columnActionPermission = useColumnActionPermission(
-    ["view"],
-    itemGrantAccess
-  );
+  const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
 
-  const columns = useMemo(() => {
-    if (tabHeader === "Calculation List") {
-      return [...column, ...columnActionPermission];
-    } else {
-      return columnHistory;
-    }
-  }, [column, columnActionPermission, columnHistory, tabHeader]);
+  const allColumns = useMemo(() => {
+    const currentBaseColumns =
+      tabHeader === "Calculation List" ? baseColumns : baseColumnHistory;
+    const currentActionCols =
+      tabHeader === "Calculation List" ? actionCols : [];
+
+    const columnsWithKeys = [...currentBaseColumns, ...currentActionCols].map(
+      (col) => ({
+        ...col,
+        key: col.key || col.dataIndex || col.title,
+      })
+    );
+    return columnsWithKeys;
+  }, [baseColumns, baseColumnHistory, actionCols, tabHeader]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
 
   return (
     <Spin spinning={loading}>
@@ -1317,7 +1338,7 @@ const CalculationPage = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">Calculation Job List</p>
+              <p className="mt-[15px] font-bold">CALCULATION JOB LIST</p>
             </div>
           }
         >
@@ -1327,21 +1348,20 @@ const CalculationPage = () => {
             currentPosition={tabHeader}
           />
           <div className="my-5">
-            <TablePaginationNew
-              columns={columns}
+            <TableRBI
               dataSource={data_calculation.result}
-              totalData={data_calculation?.page?.totalElements || 0}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
               onChange={handleChangePage}
+              onSizeChanger={handleChangePage}
+              totalData={data_calculation?.page?.totalElements || 0}
               tableScrolled={{ x: 6000, y: 525 }}
               onSort={onSort}
-              useFixColumn={true}
-              defaultFixedColumns={{
-                no: "left",
-                status: "right",
-                action: "right",
-              }}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
             />
           </div>
         </CardContainer>
@@ -1350,4 +1370,4 @@ const CalculationPage = () => {
   );
 };
 
-export default CalculationPage;
+export default CalculationPage

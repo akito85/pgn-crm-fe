@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Radio, Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../assets/Icon/index";
-import BaseContainer from "../../../../components/BaseContainer";
+import CardContainer from "../../../../components/CardContainer";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {
   downloadRatingGas,
@@ -13,9 +13,10 @@ import {
 } from "../../../../redux/slices/rating_billing_invoice/rating";
 import { columnsRating } from "./TableRatingView";
 import RatingDetail from "./RatingDetail";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const RatingPage = () => {
   // Selector
@@ -39,6 +40,11 @@ const RatingPage = () => {
   const [ratingCode, setRatingCode] = useState("");
   const [calculationCode, setCalculationCode] = useState("");
   const [saNumberId, setSANumberId] = useState("");
+
+  const [fixedColumns, setFixedColumns] = useState({
+    no: "left",
+    action: "right",
+  });
 
   // Use Effect
   useEffect(() => {
@@ -100,10 +106,10 @@ const RatingPage = () => {
   };
 
   // Sort Table
-  const onSortApi = (_, __, sort) => {
+  const onSortApi = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -166,6 +172,42 @@ const RatingPage = () => {
       },
     },
   ];
+
+  const baseColumns = useMemo(
+    () =>
+      columnsRating(
+        search,
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    [search, page, pageSize, searchedColumn, searchText]
+  );
+
+  const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
@@ -174,49 +216,41 @@ const RatingPage = () => {
           <Toolbar items={itemGrantAccess} />
         </div>
 
-        <BaseContainer
-          header={"Rating List"}
-          type="tabs"
-          element={
-            <Radio.Group
-              options={tabRating}
-              onChange={onChangeTab}
-              value={valueTab}
-              optionType="button"
-              buttonStyle="solid"
-              style={{ gap: 12, display: "flex" }}
-            />
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">RATING LIST</p>
+              <div className="mt-[15px]">
+                <Radio.Group
+                  options={tabRating}
+                  onChange={onChangeTab}
+                  value={valueTab}
+                  optionType="button"
+                  buttonStyle="solid"
+                  style={{ gap: 12, display: "flex" }}
+                />
+              </div>
+            </div>
           }
         >
-          <TablePaginationNew
-            dataSource={dataSource}
-            columns={[
-              ...columnsRating(
-                search,
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch
-                // handleDetail
-              ),
-              ...useColumnActionPermission(["view"], itemGrantAccess),
-            ]}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChange}
-            onSizeChanger={handleChange}
-            totalData={data?.page?.totalElements || 0}
-            onSort={onSortApi}
-            tableScrolled={{ y: 525, x: 23000 }}
-            useFixColumn={true}
-              defaultFixedColumns={{
-                no: "left",
-                action: "right",
-              }}
-          />
-        </BaseContainer>
+          <div className="my-5">
+            <TableRBI
+              dataSource={dataSource}
+              columns={processedColumns}
+              current={page}
+              pageSize={pageSize}
+              onChange={handleChange}
+              onSizeChanger={handleChange}
+              totalData={data?.page?.totalElements || 0}
+              tableScrolled={{ y: 525, x: 23000 }}
+              onSort={onSortApi}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
+            />
+          </div>
+        </CardContainer>
 
         {/* Detail Rating */}
         {pageDetail === true ? (
@@ -231,4 +265,4 @@ const RatingPage = () => {
   );
 };
 
-export default RatingPage;
+export default RatingPage;  
