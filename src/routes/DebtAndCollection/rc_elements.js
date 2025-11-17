@@ -10,6 +10,10 @@ import ViewTemplateReminding from "../../app/pages/DebtAndCollection/TemplateRem
 import ListDetailTemplateReminding from "../../app/pages/DebtAndCollection/TemplateReminding/DetailTemplateReminding";
 import FormTemplateReminding from "../../app/pages/DebtAndCollection/TemplateReminding/FormTemplateReminding";
 
+import ViewActivityType from "../../app/pages/DebtAndCollection/ActivityType/ViewActivityType";
+import DetailActivityType from "../../app/pages/DebtAndCollection/ActivityType/DetailActivityType";
+import FormActivityType from "../../app/pages/DebtAndCollection/ActivityType/FormActivityType";
+
 export const DEBT_AND_COLLECTION_ELEMENTS = {
   // Grace Period
   VIEW_GRACE_PERIOD_PAGE: <ViewGracePeriod />,
@@ -28,5 +32,11 @@ export const DEBT_AND_COLLECTION_ELEMENTS = {
   DETAIL_TEMPLATE_REMINDING_PAGE: <ListDetailTemplateReminding />,
   CREATE_TEMPLATE_REMINDING_PAGE: <FormTemplateReminding type="create" />,
   UPDATE_TEMPLATE_REMINDING_PAGE: <FormTemplateReminding type="update" />,
+
+  // Activity Type
+  VIEW_ACTIVITY_TYPE_PAGE: <ViewActivityType />,
+  DETAIL_ACTIVITY_TYPE_PAGE: <DetailActivityType />,
+  CREATE_ACTIVITY_TYPE_PAGE: <FormActivityType type="create" />,
+  UPDATE_ACTIVITY_TYPE_PAGE: <FormActivityType type="update" />,
 
 };
