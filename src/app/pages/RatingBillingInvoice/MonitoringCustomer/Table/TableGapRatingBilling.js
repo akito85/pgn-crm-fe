@@ -1,9 +1,9 @@
 import React from "react";
-import { Input, Button, Space, Tag } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
-import Highlighter from "react-highlight-words";
+import { Tag } from "antd";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import { hasValue, renderColumn } from "../../../../../utils";
 
-export const columnsGapRatingBilling = (
+export const getColumnsGapRatingBilling = (
   page,
   pageSize,
   searchInput,
@@ -12,162 +12,247 @@ export const columnsGapRatingBilling = (
   handleSearch,
   search
 ) => {
-  // Get Column Search Props
-  const getColumnSearchProps = (dataIndex, name) => ({
-    filterDropdown: ({
-      setSelectedKeys,
-      selectedKeys,
-      confirm,
-      clearFilters,
-    }) => (
-      <div style={{ padding: 8 }}>
-        <Input
-          ref={searchInput}
-          placeholder={`Search ${name}`}
-          value={selectedKeys[0]}
-          onChange={(e) =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
-          }
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{ marginBottom: 8, display: "block" }}
-        />
-        <Space>
-          <Button
-            type="primary"
-            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
-            icon={<SearchOutlined />}
-            size="small"
-            style={{ width: 90 }}
-          >
-            Search
-          </Button>
-          <Button
-            onClick={() => {
-              clearFilters();
-              handleSearch([""], confirm, dataIndex);
-            }}
-            size="small"
-            style={{ width: 90 }}
-          >
-            Reset
-          </Button>
-        </Space>
-      </div>
-    ),
-    filterIcon: (filtered) => (
-      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-    ),
-    onFilter: (value, record) =>
-      record[dataIndex]
-        ? record[dataIndex]
-            .toString()
-            .toLowerCase()
-            .includes(value.toLowerCase())
-        : "",
-    onFilterDropdownVisibleChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 100);
-      }
-    },
-    render: (text) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text
-      ),
-  });
-
   return [
     {
-      title: "No",
-      dataIndex: "no",
       key: "no",
+      title: "NO",
       width: 60,
-      fixed: "left",
+      align: "center",
       render: (text, record, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "Account Number",
-      dataIndex: "accountNumber",
       key: "accountNumber",
-      width: 150,
-      fixed: "left",
+      title: "ACCOUNT NUMBER",
+      dataIndex: "accountNumber",
       sorter: true,
-      ...getColumnSearchProps("accountNumber", "Account Number"),
+      align: "left",
+      width: 180,
+      filteredValue: [search?.accountNumber] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accountNumber",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "accountNumber",
+          hasValue(search["accountNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
-      title: "Customer Name",
-      dataIndex: "customerName",
       key: "customerName",
-      width: 200,
+      title: "CUSTOMER NAME",
+      dataIndex: "customerName",
       sorter: true,
-      ...getColumnSearchProps("customerName", "Customer Name"),
+      align: "left",
+      width: 250,
+      filteredValue: [search?.customerName] || null,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "customerName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "customerName",
+          hasValue(search["customerName"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
     },
     {
-      title: "Billing Period",
-      dataIndex: "billingPeriod",
       key: "billingPeriod",
-      width: 130,
+      title: "BILLING PERIOD",
+      dataIndex: "billingPeriod",
       sorter: true,
       align: "center",
+      width: 150,
+      filteredValue: [search?.billingPeriod] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "billingPeriod",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "billingPeriod",
+          hasValue(search["billingPeriod"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
-      title: "Rating Code",
-      dataIndex: "ratingCode",
       key: "ratingCode",
-      width: 120,
+      title: "RATING CODE",
+      dataIndex: "ratingCode",
       sorter: true,
       align: "center",
+      width: 130,
+      filteredValue: [search?.ratingCode] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "ratingCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "ratingCode",
+          hasValue(search["ratingCode"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
-      title: "Rating Value",
-      dataIndex: "ratingValue",
       key: "ratingValue",
-      width: 150,
+      title: "RATING VALUE",
+      dataIndex: "ratingValue",
       sorter: true,
       align: "right",
-      render: (text) => (
-        <span style={{ fontWeight: 500 }}>
-          {text ? `Rp ${text.toLocaleString("id-ID")}` : "-"}
-        </span>
+      width: 170,
+      filteredValue: [search?.ratingValue] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "ratingValue",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
       ),
+      render: (text) => {
+        const displayText = text ? `Rp ${text.toLocaleString("id-ID")}` : "-";
+        return (
+          <span style={{ fontWeight: 500 }}>
+            {renderColumn(
+              "ratingValue",
+              hasValue(search["ratingValue"]),
+              searchText,
+              displayText,
+              false,
+              "input",
+              search
+            )}
+          </span>
+        );
+      },
     },
     {
-      title: "Billing Code",
-      dataIndex: "billingCode",
       key: "billingCode",
-      width: 120,
+      title: "BILLING CODE",
+      dataIndex: "billingCode",
       sorter: true,
       align: "center",
-    },
-    {
-      title: "Billing Value",
-      dataIndex: "billingValue",
-      key: "billingValue",
-      width: 150,
-      sorter: true,
-      align: "right",
-      render: (text) => (
-        <span style={{ fontWeight: 500 }}>
-          {text ? `Rp ${text.toLocaleString("id-ID")}` : "-"}
-        </span>
+      width: 130,
+      filteredValue: [search?.billingCode] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "billingCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
       ),
+      render: (text) =>
+        renderColumn(
+          "billingCode",
+          hasValue(search["billingCode"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
-      title: "Gap Amount",
-      dataIndex: "gap",
-      key: "gap",
-      width: 150,
+      key: "billingValue",
+      title: "BILLING VALUE",
+      dataIndex: "billingValue",
       sorter: true,
       align: "right",
+      width: 170,
+      filteredValue: [search?.billingValue] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "billingValue",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => {
+        const displayText = text ? `Rp ${text.toLocaleString("id-ID")}` : "-";
+        return (
+          <span style={{ fontWeight: 500 }}>
+            {renderColumn(
+              "billingValue",
+              hasValue(search["billingValue"]),
+              searchText,
+              displayText,
+              false,
+              "input",
+              search
+            )}
+          </span>
+        );
+      },
+    },
+    {
+      key: "gap",
+      title: "GAP AMOUNT",
+      dataIndex: "gap",
+      sorter: true,
+      align: "right",
+      width: 170,
+      filteredValue: [search?.gap] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "gap",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
       render: (gap) => {
         const isPositive = gap > 0;
         const isNegative = gap < 0;
+        const displayText = gap ? `Rp ${gap.toLocaleString("id-ID")}` : "Rp 0";
+        
         return (
           <span
             style={{
@@ -175,36 +260,77 @@ export const columnsGapRatingBilling = (
               color: isPositive ? "#52c41a" : isNegative ? "#ff4d4f" : "#000",
             }}
           >
-            {gap ? `Rp ${gap.toLocaleString("id-ID")}` : "Rp 0"}
+            {renderColumn(
+              "gap",
+              hasValue(search["gap"]),
+              searchText,
+              displayText,
+              false,
+              "input",
+              search
+            )}
           </span>
         );
       },
     },
     {
-      title: "Gap (%)",
-      dataIndex: "gapPercentage",
       key: "gapPercentage",
-      width: 110,
+      title: "GAP (%)",
+      dataIndex: "gapPercentage",
       sorter: true,
       align: "center",
+      width: 120,
+      filteredValue: [search?.gapPercentage] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "gapPercentage",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
       render: (percentage) => {
         const value = parseFloat(percentage);
         const isPositive = value > 0;
         const isNegative = value < 0;
+        const displayText = `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
+        
         return (
           <Tag color={isPositive ? "success" : isNegative ? "error" : "default"}>
-            {value > 0 ? "+" : ""}{value.toFixed(2)}%
+            {displayText}
           </Tag>
         );
       },
     },
     {
-      title: "Detected At",
-      dataIndex: "detectedAt",
       key: "detectedAt",
-      width: 170,
+      title: "DETECTED AT",
+      dataIndex: "detectedAt",
       sorter: true,
       align: "center",
+      width: 180,
+      filteredValue: [search?.detectedAt] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "detectedAt",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "date"
+      ),
+      render: (text) =>
+        renderColumn(
+          "detectedAt",
+          hasValue(search["detectedAt"]),
+          searchText,
+          text,
+          false,
+          "date",
+          search
+        ),
     },
   ];
 };

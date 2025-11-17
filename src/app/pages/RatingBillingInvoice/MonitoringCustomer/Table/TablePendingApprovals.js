@@ -1,11 +1,10 @@
 import React from "react";
-import { Input, Button, Space, Tooltip } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
-import Highlighter from "react-highlight-words";
+import { Tooltip } from "antd";
 import SVGIcon from "../../../../../assets/Icon/index";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import { hasValue, renderColumn } from "../../../../../utils";
 
-
-export const columnsPendingApprovals = (
+export const getColumnsPendingApprovals = (
   page,
   pageSize,
   searchInput,
@@ -15,155 +14,283 @@ export const columnsPendingApprovals = (
   search,
   handleApprovalDetail
 ) => {
-  const getColumnSearchProps = (dataIndex, name) => ({
-    filterDropdown: ({
-      setSelectedKeys,
-      selectedKeys,
-      confirm,
-      clearFilters,
-    }) => (
-      <div style={{ padding: 8 }}>
-        <Input
-          ref={searchInput}
-          placeholder={`Search ${name}`}
-          value={selectedKeys[0]}
-          onChange={(e) =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
-          }
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{ marginBottom: 8, display: "block" }}
-        />
-        <Space>
-          <Button
-            type="primary"
-            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
-            icon={<SearchOutlined />}
-            size="small"
-            style={{ width: 90 }}
-          >
-            Search
-          </Button>
-          <Button
-            onClick={() => {
-              clearFilters();
-              handleSearch([""], confirm, dataIndex);
-            }}
-            size="small"
-            style={{ width: 90 }}
-          >
-            Reset
-          </Button>
-        </Space>
-      </div>
-    ),
-    filterIcon: (filtered) => (
-      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-    ),
-    onFilter: (value, record) =>
-      record[dataIndex]
-        ? record[dataIndex]
-            .toString()
-            .toLowerCase()
-            .includes(value.toLowerCase())
-        : "",
-    onFilterDropdownVisibleChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 100);
-      }
-    },
-    render: (text) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text
-      ),
-  });
-
   return [
     {
-      title: "No",
-      dataIndex: "no",
       key: "no",
+      title: "NO",
       width: 60,
-      fixed: "left",
+      align: "center",
       render: (text, record, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "Batch ID",
-      dataIndex: "batchId",
       key: "batchId",
-      width: 150,
-      fixed: "left",
+      title: "BATCH ID",
+      dataIndex: "batchId",
       sorter: true,
-      ...getColumnSearchProps("batchId", "Batch ID"),
-    },
-    {
-      title: "Billing Period",
-      dataIndex: "billingPeriod",
-      key: "billingPeriod",
-      width: 150,
-      sorter: true,
-    },
-    {
-      title: "Account Number",
-      dataIndex: "accountNumber",
-      key: "accountNumber",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("accountNumber", "Account Number"),
-    },
-    {
-      title: "Total Customers",
-      dataIndex: "totalCustomers",
-      key: "totalCustomers",
-      width: 150,
-      sorter: true,
-      align: "right",
-      render: (text) => (text ? text.toLocaleString("id-ID") : "-"),
-    },
-    {
-      title: "Est. Amount (Rp)",
-      dataIndex: "estimatedAmount",
-      key: "estimatedAmount",
+      align: "left",
       width: 180,
+      filteredValue: [search?.batchId] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "batchId",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "batchId",
+          hasValue(search["batchId"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "billingPeriod",
+      title: "BILLING PERIOD",
+      dataIndex: "billingPeriod",
+      sorter: true,
+      align: "center",
+      width: 150,
+      filteredValue: [search?.billingPeriod] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "billingPeriod",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "billingPeriod",
+          hasValue(search["billingPeriod"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "accountNumber",
+      title: "ACCOUNT NUMBER",
+      dataIndex: "accountNumber",
+      sorter: true,
+      align: "left",
+      width: 180,
+      filteredValue: [search?.accountNumber] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accountNumber",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "accountNumber",
+          hasValue(search["accountNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "totalCustomers",
+      title: "TOTAL CUSTOMERS",
+      dataIndex: "totalCustomers",
       sorter: true,
       align: "right",
-      render: (text) => (text ? text.toLocaleString("id-ID") : "-"),
-    },
-    {
-      title: "Created By",
-      dataIndex: "createdBy",
-      key: "createdBy",
-      width: 130,
-      sorter: true,
-    },
-    {
-      title: "Created At",
-      dataIndex: "createdAt",
-      key: "createdAt",
       width: 150,
-      sorter: true,
+      filteredValue: [search?.totalCustomers] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "totalCustomers",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => {
+        const displayText = text?.toLocaleString("id-ID") || "-";
+        return renderColumn(
+          "totalCustomers",
+          hasValue(search["totalCustomers"]),
+          searchText,
+          displayText,
+          false,
+          "input",
+          search
+        );
+      },
     },
     {
-      title: "Action",
+      key: "estimatedAmount",
+      title: "EST. AMOUNT (Rp)",
+      dataIndex: "estimatedAmount",
+      sorter: true,
+      align: "right",
+      width: 180,
+      filteredValue: [search?.estimatedAmount] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "estimatedAmount",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => {
+        const displayText = text?.toLocaleString("id-ID") || "-";
+        return renderColumn(
+          "estimatedAmount",
+          hasValue(search["estimatedAmount"]),
+          searchText,
+          displayText,
+          false,
+          "input",
+          search
+        );
+      },
+    },
+    {
+      key: "createdBy",
+      title: "CREATED BY",
+      dataIndex: "createdBy",
+      sorter: true,
+      align: "center",
+      width: 150,
+      filteredValue: [search?.createdBy] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "createdBy",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "createdBy",
+          hasValue(search["createdBy"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "createdAt",
+      title: "CREATED AT",
+      dataIndex: "createdAt",
+      sorter: true,
+      align: "center",
+      width: 180,
+      filteredValue: [search?.createdAt] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "createdAt",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "date"
+      ),
+      render: (text) =>
+        renderColumn(
+          "createdAt",
+          hasValue(search["createdAt"]),
+          searchText,
+          text,
+          false,
+          "date",
+          search
+        ),
+    },
+    {
+      key: "area",
+      title: "AREA",
+      dataIndex: "area",
+      sorter: true,
+      align: "center",
+      width: 150,
+      filteredValue: [search?.area] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "area",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "area",
+          hasValue(search["area"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "status",
+      title: "STATUS",
+      dataIndex: "status",
+      sorter: true,
+      align: "center",
+      width: 130,
+      filteredValue: [search?.status] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "status",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "status",
+          hasValue(search["status"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
       key: "action",
+      title: "ACTION",
       width: 100,
-      fixed: "right",
-      render: (text, record) => (
-        <Tooltip title="Approval Detail">
-          <div className="pt-1">
-            <SVGIcon
-              name="IconDetail"
-              width={24}
-              color="#1890ff"
-              onClick={() => handleApprovalDetail(record)}
-              style={{ cursor: "pointer" }}
-            />
+      align: "center",
+      render: (record) => (
+        <Tooltip title="View Detail">
+          <div 
+            className="cursor-pointer pt-1"
+            onClick={() => handleApprovalDetail(record)}
+          >
+            <SVGIcon name="IconDetail" width={24} />
           </div>
         </Tooltip>
       ),
