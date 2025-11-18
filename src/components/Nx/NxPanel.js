@@ -6,7 +6,7 @@ const NxPanel = ({ title, children }) => {
   }
 
   return (
-    <div className="self-stretch p-5 bg-white rounded-lg shadow-[0px_4px_18px_0px_rgba(75,70,92,0.10)] inline-flex flex-col justify-start items-start gap-5">
+    <div className="self-stretch mb-5 p-5 bg-white rounded-lg shadow-[0px_4px_18px_0px_rgba(75,70,92,0.10)] flex flex-col justify-start items-start gap-5">
       <div className="self-stretch p-4 flex flex-col justify-start items-start gap-5">
         <div className="flex-1 justify-start text-sky-600 text-sm font-bold">
           {title}
