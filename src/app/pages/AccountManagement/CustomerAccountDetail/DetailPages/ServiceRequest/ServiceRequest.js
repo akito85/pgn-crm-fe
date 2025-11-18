@@ -8,7 +8,7 @@ import { useState } from "react";
 import ServiceRequestTable from "./ServiceRequestTable";
 import { FilterOutlined, DownloadOutlined, CheckOutlined, PlusOutlined } from "@ant-design/icons"
 
-const ServiceRequest = () => {
+const ServiceRequest = ({ idAccount, idCustomer, type }) => {
   const navigate = useNavigate();
 
   // const dispatch = useDispatch();
@@ -110,7 +110,9 @@ const ServiceRequest = () => {
             {/* Create Button */}
             <ButtonComponent
               type={"submit"}
-              onClick={() => navigate("/account-management/customers/view/service-requests/create")}
+              onClick={() => navigate("/account-management/account-standard/service-requests/create", {
+                state: { idAccount, idCustomer, type }
+              })}
               icon={
                 <PlusOutlined
                   style={{
