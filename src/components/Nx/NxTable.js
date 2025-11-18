@@ -1,6 +1,6 @@
 import { Table, Pagination, Select, Input, Space, Button } from 'antd';
-import { SearchOutlined, FilterOutlined} from '@ant-design/icons';
-import { useState, useRef } from 'react';
+import { SearchOutlined, FilterOutlined, LoadingOutlined } from '@ant-design/icons';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Highlighter from 'react-highlight-words';
 
 const { Option } = Select;
@@ -25,6 +25,8 @@ const NxTable = ({
   onSort = () => {},
   rowSelection,
   onRowClicked = () => {},
+  onRowClickedAsync = null, // ← NEW: Async row click handler
+  preventRowClickOn = ['button', 'a', 'svg', 'path', '.ant-btn', '.action-button'], // ← NEW: Prevent click on these elements
   tableScrolled,
   className = '',
   idTable,
@@ -37,6 +39,11 @@ const NxTable = ({
   useSearch = false,
   searchPlaceholder = 'Search...',
   onSearch = () => {},
+  searchDebounceDelay = 500, // Delay in ms for debounced search
+  searchLoading: externalSearchLoading = false, // External loading state
+  // Performance props
+  virtual = false, // ← NEW: Enable virtualization for large datasets
+  virtualHeight = 600, // ← NEW: Virtual scroll container height
   // Styling props
   tablePadding = 'medium', // 'small' | 'medium' | 'large' | custom string (e.g., '12px')
   fontSize = 'medium', // 'small' | 'medium' | 'large' | custom string (e.g., '14px')
@@ -45,11 +52,79 @@ const NxTable = ({
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [searchText, setSearchText] = useState('');
+  const [internalSearchLoading, setInternalSearchLoading] = useState(false);
 
   // Column search state (internal)
   const [searchTextColumn, setSearchTextColumn] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef(null);
+  const [loadingRows, setLoadingRows] = useState(new Set()); // ← NEW: Track loading state per row
+
+  // NEW: Smart row click handler that prevents clicks on action buttons
+  const handleRowClick = async (record, rowIndex, event) => {
+    // Check if click originated from a prevented element
+    const target = event.target;
+    const shouldPrevent = preventRowClickOn.some((selector) => {
+      if (selector.startsWith('.')) {
+        // Class selector
+        return target.closest(selector) !== null;
+      } else {
+        // Tag name
+        return target.tagName.toLowerCase() === selector.toLowerCase() ||
+               target.closest(selector) !== null;
+      }
+    });
+
+    if (shouldPrevent) {
+      // Click was on a button/action - don't trigger row click
+      return;
+    }
+
+    // Handle async row click
+    if (onRowClickedAsync) {
+      const rowKey = record.key || record.id;
+      setLoadingRows(prev => new Set(prev).add(rowKey));
+
+      try {
+        await onRowClickedAsync(record, rowIndex, event);
+      } catch (error) {
+        console.error('Row click async error:', error);
+      } finally {
+        setLoadingRows(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(rowKey);
+          return newSet;
+        });
+      }
+    } else {
+      // Fallback to sync handler
+      onRowClicked(record, rowIndex, event);
+    }
+  };
+
+  // Debounced search implementation
+  useEffect(() => {
+    if (!useSearch) return;
+
+    const handler = setTimeout(async () => {
+      setInternalSearchLoading(true);
+      try {
+        const result = onSearch(searchText);
+        // Check if onSearch returns a Promise (async function)
+        if (result instanceof Promise) {
+          await result;
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+      } finally {
+        setInternalSearchLoading(false);
+      }
+    }, searchDebounceDelay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchText, searchDebounceDelay, onSearch, useSearch]);
 
   // Internal column search handler
   const handleColumnSearch = (selectedKeys, confirm, dataIndex) => {
@@ -82,6 +157,7 @@ const NxTable = ({
           style={{
             marginBottom: 8,
             display: 'block',
+            borderRadius: '6px',
           }}
         />
         <Space>
@@ -171,7 +247,7 @@ const NxTable = ({
 
   const handleSearch = (value) => {
     setSearchText(value);
-    onSearch(value);
+    // Don't call onSearch here - the useEffect hook will handle it with debounce
   };
 
   const filterColumns = () => {
@@ -361,10 +437,18 @@ const NxTable = ({
               <Input
                 placeholder={searchPlaceholder}
                 prefix={<SearchOutlined />}
+                suffix={
+                  (internalSearchLoading || externalSearchLoading) && (
+                    <LoadingOutlined style={{ color: '#1890ff' }} />
+                  )
+                }
                 className="nx-search-input w-full max-w-sm"
                 value={searchText}
                 onChange={(e) => handleSearch(e.target.value)}
                 allowClear
+                style={{
+                  borderRadius: '6px',
+                }}
               />
             )}
           </div>
@@ -416,11 +500,20 @@ const NxTable = ({
           }}
           rowSelection={rowSelection}
           scroll={tableScrolled || { x: 'max-content' }}
-          onRow={(record, rowIndex) => ({
-            onClick: (event) => {
-              onRowClicked(record, rowIndex, event);
-            },
-          })}
+          onRow={(record, rowIndex) => {
+            const rowKey = record.key || record.id;
+            const isLoading = loadingRows.has(rowKey);
+
+            return {
+              onClick: (event) => {
+                handleRowClick(record, rowIndex, event);
+              },
+              style: {
+                cursor: isLoading ? 'wait' : (onRowClicked || onRowClickedAsync ? 'pointer' : 'default'),
+                opacity: isLoading ? 0.6 : 1,
+              },
+            };
+          }}
           style={{ width: '100%', fontSize: fontSizeValue }}
         />
       </div>
