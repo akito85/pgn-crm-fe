@@ -1,64 +1,236 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect,  useState, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { Steps, Button, message, Form } from "antd";
 import { LeftCircleOutlined, RightCircleOutlined, RightOutlined, WarningOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
 
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../../components/BreadCrumb";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import BaseContainer from "../../../../../../../components/BaseContainer";
 import StepContents from "./StepContents";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { ModalConfirm } from "../../../../../../../components/Modal/ModalPopUp";
 
-const { InformationForm, AttachmentForm, ApprovalForm, ContactForm, PreRequisiteForm } = StepContents;
+// you fucking nasty using bulky moment lazy as fuck
+import moment from "moment";
 
-const routes = [
-  {
-    path: "",
-    breadcrumbName: "Account Management",
-  },
-  {
-    path: ACCOUNT_MANAGEMENT_ROUTES.CREATE_CUSTOMER_ACCOUNT,
-    breadcrumbName: "Customer/Account Create",
-  },
-];
+import {
+  ModalConfirm,
+  ModalError,
+  ModalSuccess,
+} from "../../../../../../../components/Modal/ModalPopUp";
+import { bytesConverter } from "../../../../../../../utils/bytesConverter";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
+
+import {
+  getCustomerAttachment,
+  getCustomerDetail,
+  getGlobalCustomerType,
+  getGlobalIdentificationType,
+  getGlobalMartialStatus,
+  getGlobalSex,
+  getListCategoryFile,
+  updateCustomer,
+} from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
+import {
+  getAccountStandardDetail,
+  getAccountOneTimeDetail,
+} from "../../../../../../../redux/slices/account_management/accountManagement";
 
 const CreateCustomerServiceRequest = (props) => {
   const containerRef = useRef(null);
-  const [modalBack, setModalBack] = useState(false);
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const [modalConfirm, setModalConfirm] = useState(false);
-  const [form] = Form.useForm();
   const { type } = props;
-  const [productInfoObj, setProductInfoObj] = useState({});
+
+  const dispatch = useDispatch();
+  const {
+    data_customerDetailAttachment,
+    data_customerDetail,
+    data_globalCustomerType,
+    data_globalIdentificationType,
+    data_globalSex,
+    data_globalMartialStatus,
+    loading,
+  } = useSelector((state) => state.customerAccount);
+
+  const {
+    data_accountDetail,
+    loading: loadingAccount,
+  } = useSelector((state) => state.accountManagement);
+
+  //declare
+  const location = useLocation();
+  const [formCreate] = Form.useForm();
+  const id = location?.state?.id;
+  const idAccount = location?.state?.idAccount;
+  const idCustomer = location?.state?.idCustomer;
+  const accountType = location?.state?.type; // "standard" or "onetime"
+  // const id = 7;
+    
+  //state
+  const [dataAttachment, setDataAttachment] = useState([]);
+  const [data, setData] = useState({});
+  const [dataSend, setDataSend] = useState({});
+  const [modalSuccess, setModalSuccess] = useState(false);
+  const [loadingForm, setLoadingForm] = useState(false);
+  const [modalConfirm, setModalConfirm] = useState(false);
+  const [dataConfirm, setDataConfirm] = useState({});
+  const [btnConfirm, setBtnConfirm] = useState(false);
+  const [modalBack, setModalBack] = useState(false);
+
+  const [modalError, setModalError] = useState(false);
+  const [bodyError, setBodyError] = useState({});
+
+  const [customerType, setCustomerType] = useState(0);
+  const [identificationDdlValue, setIdentificationDdlValue] = useState([]);
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
+
+  const isLoading = loading || loadingForm || loadingAccount;
+
+ 
+  const { InformationForm, AttachmentForm, ApprovalForm, ContactForm, PreRequisiteForm } = StepContents;
+
+  const routes = [
+    {
+      path: "",
+      breadcrumbName: "Account",
+    },
+    {
+      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD,
+      breadcrumbName: "Account - Standard",
+    },
+    {
+      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+      breadcrumbName: "Detail Account",
+    },
+    {
+      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST,
+      breadcrumbName: "Service Requests",
+    },
+    {
+      path: "",
+      breadcrumbName: "Create",
+    },
+  ];
+  // Fetch Account Standard/OneTime Detail
+  useEffect(() => {
+    if (idAccount && idCustomer && accountType) {
+      if (accountType === "standard") {
+        dispatch(getAccountStandardDetail({ idCustomer, idAccount }));
+      } else {
+        dispatch(getAccountOneTimeDetail({ idCustomer, idAccount }));
+      }
+    }
+  }, [dispatch, idAccount, idCustomer, accountType]);
 
   useEffect(() => {
-  }, [productInfoObj])
-
-
-  const handleProductInfoObj = (e, type) => {
-    let result;
-    switch (type) {
-      case "productName":
-      case "productDescription":
-        result = e.target.value;
-        break;
-      default:
-        result = e;
-        break;
+    if (id) {
+      dispatch(getCustomerDetail(id));
     }
-    setProductInfoObj((prevState) => ({
-      ...prevState,
-      [type]: result,
-    }));
-    console.log(type, "<<<<<<<<<<")
-    return result;
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    dispatch(getGlobalCustomerType());
+    dispatch(getGlobalIdentificationType());
+    dispatch(getGlobalSex());
+    dispatch(getGlobalMartialStatus());
+  }, [dispatch]);
+
+  const handleSetData = (e) => {
+    const temp = (e?.customerName || "").split(" ");
+    setData({
+      foundedBirthDate: e.foundedBirthDate ? moment(e.foundedBirthDate) : null,
+      foundedBirthPlace: e?.foundedBirthPlace,
+      customerType: e?.customerTypeId,
+      identificationType: e?.identificationTypeId,
+      customerIdentificationNumber: e?.customerIdentificationNumber,
+      sex: e?.sexId,
+      maritalStatus: e?.maritalStatusId,
+      searchKey: e?.searchKey,
+      firstName: (temp[0] || "").toUpperCase(),
+      middleName: (temp[1] || "").toUpperCase(),
+      lastName: (temp[2] || "").toUpperCase(),
+      customerName: (e?.customerName || "").toUpperCase(),
+      description: e?.description,
+    });
+    setFirstName((temp[0] || "").toUpperCase());
+    setMiddleName((temp[1] || "").toUpperCase());
+    setLastName((temp[2] || "").toUpperCase());
   };
 
+  useEffect(() => {
+    if (data_customerDetail) {
+      setCustomerType(data_customerDetail?.customerTypeId);
+      handleSetData(data_customerDetail);
+    }
+  }, [data_customerDetail]);
+
+  useEffect(() => {
+    if(customerType === 58){
+
+      setIdentificationDdlValue(data_globalIdentificationType?.filter(item => item?.id !== 1123))
+    } else {
+      setIdentificationDdlValue(data_globalIdentificationType)
+    }
+  },[customerType, data_globalIdentificationType])
+
+  useEffect(() => {
+    formCreate.setFieldsValue({
+      customerName: `${firstName}${middleName ? ` ${middleName}` : ""}${lastName ? ` ${lastName}` : ""}`,
+    });
+  },[firstName, middleName, lastName])
+
+  useEffect(() => {
+    formCreate.setFieldsValue({
+      ...data,
+    });
+  }, [data, formCreate]);
+
+  // Populate form with Account Standard/OneTime information
+  useEffect(() => {
+    if (data_accountDetail?.accountInformation) {
+      const accountInfo = data_accountDetail.accountInformation;
+      formCreate.setFieldsValue({
+        account: accountInfo?.accountId || "",
+        accountType: accountInfo?.accountType || "",
+        longitude: accountInfo?.longitude || "",
+        accountSegment: accountInfo?.accountSegment || "",
+        city: accountInfo?.city || "",
+        accountCostCenter: accountInfo?.costCenter || "",
+        subdistrict: accountInfo?.subDistrict || "",
+        meterReadingCode: accountInfo?.mrc || "",
+        district: accountInfo?.district || "",
+        accountSOR: accountInfo?.sor || "",
+        premiseAddress: accountInfo?.premiseAddress || "",
+        latitude: accountInfo?.latitude || "",
+        accountGroupType: accountInfo?.accountGroupType || "",
+        country: accountInfo?.country || "",
+      });
+    }
+    console.log(data_accountDetail.accountInformation)
+  }, [data_accountDetail, formCreate]);
+
+  const handleChangeName = (e, type) => {
+    switch (type) {
+      case "firstName":
+        setFirstName(e.target.value);
+        break;
+      case "middleName":
+        setMiddleName(e.target.value);
+        break;
+      case "lastName":
+        setLastName(e.target.value);
+        break;
+      default:
+        break;
+    }
+  }
+
+  const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}` 
+  
   const steps = [
     {
       title: "Service Request",
@@ -131,28 +303,27 @@ const CreateCustomerServiceRequest = (props) => {
       <BreadCrumb routes={routes} />
       <Form
         id="accountForm"
-        form={form}
+        form={formCreate}
         layout={"vertical"}
         onFinish={handleSubmitForm}
         // onFinishFailed={handleErrorSubmit}
         scrollToFirstError={true}
       >
         {/* Step Contents */}
-        <BaseContainer>
-          <div className="flex flex-row gap-x-6 justify-center">
-            <span className="mt-[10px]">
-              <LeftCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollLeftHandler}/>
-            </span>
-            <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
-              <Steps current={current} items={items} labelPlacement="vertical" />
-            </div>
-            <span className="mt-[10px]">
-              <RightCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollRightHandler}/>
-            </span>
+        <div className="flex flex-row gap-x-6 justify-center">
+          <span className="mt-[10px]">
+            <LeftCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollLeftHandler}/>
+          </span>
+          <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
+            <Steps current={current} items={items} labelPlacement="vertical" />
           </div>
-          <div className="steps-content my-6">{steps[current].content}</div>
-        </BaseContainer>
+          <span className="mt-[10px]">
+            <RightCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollRightHandler}/>
+          </span>
+        </div>
         
+        <div className="steps-content my-6">{steps[current].content}</div>
+
         {/* Section Action Steps */}
         <div className="steps-action my-8 flex w-full justify-between gap-x-2">
           <ButtonComponent
