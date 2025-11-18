@@ -17,9 +17,14 @@ export const DEBT_AND_COLLECTION_ROUTES = {
   DETAIL_TEMPLATE_REMINDING: "/debt-and-collection/template-reminding/view",
   UPDATE_TEMPLATE_REMINDING: "/debt-and-collection/template-reminding/update",
 
-  // Activity Name
+  // Activity Type
   VIEW_ACTIVITY_TYPE: "/debt-and-collection/activity-type",
   CREATE_ACTIVITY_TYPE: "/debt-and-collection/activity-type/create",
   DETAIL_ACTIVITY_TYPE: "/debt-and-collection/activity-type/view",
   UPDATE_ACTIVITY_TYPE: "/debt-and-collection/activity-type/update",
+
+  // Activity Action
+  VIEW_ACTIVITY_ACTION: "/debt-and-collection/activity-action",
+  CREATE_ACTIVITY_ACTION: "/debt-and-collection/activity-action/create",
+  UPDATE_ACTIVITY_ACTION: "/debt-and-collection/activity-action/update",
 };

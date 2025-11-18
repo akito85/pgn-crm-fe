@@ -41,5 +41,5 @@ export const index = [
   ...rating_billing,
   ...invoice,
   ...report_setup,
-  ...debt_and_collection
+  ...debt_and_collection,
 ];
