@@ -1,10 +1,10 @@
 import {
-  ClockCircleOutlined,
-  CloseCircleOutlined,
-  FileTextOutlined,
+  ClockCircleFilled,
+  CloseCircleFilled,
+  FileTextFilled,
   SendOutlined,
 } from "@ant-design/icons";
-import { Card, Col, Row, Statistic } from "antd";
+import { Card, Col, Row } from "antd";
 
 // Summary Statistics Component
 const SummaryStatistics = ({ totalSent, failed, pending, notProcessed }) => {
@@ -15,108 +15,165 @@ const SummaryStatistics = ({ totalSent, failed, pending, notProcessed }) => {
           <Card
             bordered={false}
             style={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              borderRadius: "12px",
-              boxShadow: "0 4px 12px rgba(102, 126, 234, 0.15)",
-              padding: "10px",
+              background: "#F5F5F5",
+              padding: "16px",
+              borderRadius: "8px",
+              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+              border: "1px solid #f0f0f0",
             }}
+            bodyStyle={{ padding: "20px" }}
           >
-            <Statistic
-              title={
-                <span
-                  style={{ color: "rgba(255,255,255,0.85)", fontSize: "14px" }}
-                >
-                  Total Terkirim
-                </span>
-              }
-              value={totalSent}
-              valueStyle={{
-                color: "#fff",
-                fontSize: "32px",
-                fontWeight: "700",
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "8px",
               }}
-              prefix={<SendOutlined style={{ fontSize: "24px" }} />}
-            />
+            >
+              <SendOutlined
+                style={{
+                  fontSize: "14px",
+                  color: "#1976D2",
+                  marginRight: "6px",
+                }}
+              />
+              <span
+                style={{
+                  color: "#1976D2",
+                  fontSize: "13px",
+                  fontWeight: "900",
+                }}
+              >
+                Total Sending
+              </span>
+            </div>
+            <div
+              style={{ fontSize: "28px", fontWeight: "600", color: "#262626" }}
+            >
+              {totalSent.toLocaleString()}
+            </div>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card
             bordered={false}
             style={{
-              background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-              borderRadius: "12px",
-              boxShadow: "0 4px 12px rgba(245, 87, 108, 0.15)",
-              padding: "10px",
+              background: "#F5F5F5",
+              padding: "16px",
+              borderRadius: "8px",
+              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+              border: "1px solid #f0f0f0",
             }}
+            bodyStyle={{ padding: "20px" }}
           >
-            <Statistic
-              title={
-                <span
-                  style={{ color: "rgba(255,255,255,0.85)", fontSize: "14px" }}
-                >
-                  Gagal
-                </span>
-              }
-              value={failed}
-              valueStyle={{
-                color: "#fff",
-                fontSize: "32px",
-                fontWeight: "700",
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "8px",
               }}
-              prefix={<CloseCircleOutlined style={{ fontSize: "24px" }} />}
-            />
+            >
+              <CloseCircleFilled
+                style={{
+                  fontSize: "14px",
+                  color: "#D32F2F",
+                  marginRight: "6px",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: "13px",
+                  fontWeight: "900",
+                  color: "#D32F2F",
+                }}
+              >
+                Failed
+              </span>
+            </div>
+            <div
+              style={{ fontSize: "28px", fontWeight: "600", color: "#262626" }}
+            >
+              {failed.toLocaleString()}
+            </div>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card
             bordered={false}
             style={{
-              background: "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)",
-              borderRadius: "12px",
-              boxShadow: "0 4px 12px rgba(252, 182, 159, 0.15)",
-              padding: "10px",
+              background: "#F5F5F5",
+              padding: "16px",
+              borderRadius: "8px",
+              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+              border: "1px solid #f0f0f0",
             }}
+            bodyStyle={{ padding: "20px" }}
           >
-            <Statistic
-              title={
-                <span style={{ color: "rgba(0,0,0,0.65)", fontSize: "14px" }}>
-                  Menunggu
-                </span>
-              }
-              value={pending}
-              valueStyle={{
-                color: "#d46b08",
-                fontSize: "32px",
-                fontWeight: "700",
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "8px",
               }}
-              prefix={<ClockCircleOutlined style={{ fontSize: "24px" }} />}
-            />
+            >
+              <ClockCircleFilled
+                style={{
+                  fontSize: "14px",
+                  color: "#F57C00",
+                  marginRight: "6px",
+                }}
+              />
+              <span
+                style={{
+                  color: "#F57C00",
+                  fontSize: "13px",
+                  fontWeight: "900",
+                }}
+              >
+                Waiting
+              </span>
+            </div>
+            <div
+              style={{ fontSize: "28px", fontWeight: "600", color: "#262626" }}
+            >
+              {pending.toLocaleString()}
+            </div>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card
             bordered={false}
             style={{
-              background: "linear-gradient(135deg, #e0e7ff 0%, #cfd9ff 100%)",
-              borderRadius: "12px",
-              boxShadow: "0 4px 12px rgba(207, 217, 255, 0.15)",
-              padding: "10px",
+              background: "#F5F5F5",
+              padding: "16px",
+              borderRadius: "8px",
+              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+              border: "1px solid #f0f0f0",
             }}
+            bodyStyle={{ padding: "20px" }}
           >
-            <Statistic
-              title={
-                <span style={{ color: "rgba(0,0,0,0.65)", fontSize: "14px" }}>
-                  Belum Diproses
-                </span>
-              }
-              value={notProcessed}
-              valueStyle={{
-                color: "#595959",
-                fontSize: "32px",
-                fontWeight: "700",
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "8px",
               }}
-              prefix={<FileTextOutlined style={{ fontSize: "24px" }} />}
-            />
+            >
+              <FileTextFilled
+                style={{
+                  fontSize: "14px",
+                  marginRight: "6px",
+                }}
+              />
+              <span style={{ fontSize: "13px", fontWeight: "900" }}>
+                Not Processed
+              </span>
+            </div>
+            <div
+              style={{ fontSize: "28px", fontWeight: "600", color: "#262626" }}
+            >
+              {notProcessed.toLocaleString()}
+            </div>
           </Card>
         </Col>
       </Row>

@@ -1,22 +1,21 @@
 /* eslint-disable default-case */
 import {
   CheckCircleFilled,
+  ClockCircleFilled,
   CloseCircleFilled,
   Loading3QuartersOutlined,
 } from "@ant-design/icons";
 import React, { useMemo } from "react";
 
 const StatusComponent = ({ children, colour, type = "status" }) => {
-  // ✅ Gunakan useMemo untuk menghitung styles
-  const { bgcolor, color } = useMemo(() => {
-    // Safety check
+  const { bgcolor, textColor } = useMemo(() => {
     if (!colour || typeof colour !== "string") {
-      return { bgcolor: "bg-slate-600", color: "" };
+      return { bgcolor: "bg-slate-600", textColor: "text-white" };
     }
 
     const lowerColour = colour.toLowerCase();
     let bgColor = "bg-slate-600";
-    let textColor = "";
+    let tColor = "text-white";
 
     switch (lowerColour) {
       case "active":
@@ -28,9 +27,11 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "true":
       case "paid":
       case "complete billing":
+      case "sent":
         bgColor = "status-active";
-        textColor = "text-[#14a38b]";
+        tColor = "text-white";
         break;
+
       case "inactive":
       case "rejected":
       case "failed":
@@ -43,38 +44,56 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "failed billing":
       case "fail":
         bgColor = "status-inactive";
-        textColor = "text-[#be3036]";
+        tColor = "text-white";
         break;
+
       case "waiting":
       case "waiting approval":
-      case "WAITING_APPROVAL":
+      case "waiting_approval":
       case "in progress":
       case "inprogress":
       case "partial payment":
       case "waiting to release":
         bgColor = "status-waiting";
+        tColor = "text-yellow-700";
         break;
+
       case "draft":
         bgColor = "status-draft";
+        tColor = "text-gray-700";
         break;
+
       case "approved":
       case "main":
         bgColor = "status-approved";
+        tColor = "text-green-700";
         break;
+
       case "expire":
         bgColor = "status-expire";
+        tColor = "text-red-700";
         break;
+
       case "expire10":
       case "need review":
         bgColor = "status-expire10";
         break;
+
       case "expire30":
         bgColor = "status-expire30";
         break;
+
       case "pending":
       case "assigned":
         bgColor = "status-pending";
+        tColor = "text-yellow-800";
         break;
+
+      case "scheduled":
+        bgColor = "bg-[#EEEEEE]";
+        tColor = "text-[#000]";
+        break;
+
       case "primary":
       case "refund":
       case "unapplied":
@@ -82,52 +101,76 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "rating":
       case "standby":
         bgColor = "bg-blue-500";
+        tColor = "text-white";
         break;
+
       case "applied":
         bgColor = "bg-[#ACC424]";
+        tColor = "text-white";
         break;
+
       case "reverse":
         bgColor = "bg-[#910000]";
+        tColor = "text-white";
         break;
+
       case "non-primary":
         bgColor = "bg-gray-500";
+        tColor = "text-white";
         break;
+
       case "rating and billing":
         bgColor = "rating-billing-pils";
         break;
+
       case "billing":
         bgColor = "billing-pils";
         break;
+
       case "pre paid":
         bgColor = "bg-lime-600";
+        tColor = "text-white";
         break;
+
       case "registered":
         bgColor = "bg-[#0075BF]";
+        tColor = "text-white";
         break;
+
       case "pra-active":
         bgColor = "bg-[#4D6AFE]";
+        tColor = "text-white";
         break;
+
       case "suspended":
         bgColor = "bg-[#F2D957]";
+        tColor = "text-black";
         break;
+
       case "terminated":
-        bgColor = "bg-[#BE3036]";
+        bgColor = "bg-white";
+        tColor = "text-white";
         break;
+
       case "prospect":
         bgColor = "bg-[#8D91A0]";
+        tColor = "text-white";
         break;
+
       case "partially paid":
         bgColor = "bg-[#C6D681]";
+        tColor = "text-black";
         break;
+
       case "generating":
         bgColor = "bg-[#F57C00]";
+        tColor = "text-white";
         break;
     }
 
-    return { bgcolor: bgColor, color: textColor };
+    return { bgcolor: bgColor, textColor: tColor };
   }, [colour]);
 
-  // ✅ Render icon dengan safety check
   const renderIconStatus = () => {
     if (!colour || typeof colour !== "string") return null;
 
@@ -136,6 +179,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
     switch (lowerColour) {
       case "completed":
       case "success":
+      case "sent":
         return <CheckCircleFilled style={{ fontSize: "15px" }} />;
       case "generating":
       case "in progress":
@@ -143,6 +187,8 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         return <Loading3QuartersOutlined style={{ fontSize: "15px" }} />;
       case "failed":
         return <CloseCircleFilled style={{ fontSize: "15px" }} />;
+      case "scheduled":
+        return <ClockCircleFilled style={{ fontSize: "15px" }} />;
       default:
         return null;
     }
@@ -154,8 +200,8 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
     <p
       className={
         type === "status"
-          ? `flex gap-2 items-center text-white ${bgcolor} px-3 my-0 rounded-3xl text-center w-fit`
-          : `${color} font-semibold`
+          ? `flex gap-2 items-center ${bgcolor} ${textColor} px-3 my-1 rounded-3xl text-center w-fit`
+          : `${textColor} font-semibold`
       }
     >
       {renderIconStatus()}

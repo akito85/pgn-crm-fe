@@ -1,5 +1,5 @@
 // ProformaInvoice.js
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Form, Select, Tooltip } from "antd";
 import axios from "axios";
@@ -10,7 +10,6 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
-import TableRBI from "../../../../components/TableRBI";
 import { columnsInvoice } from "./TableViewInvoice";
 import DetailInvoice from "./DetailInvoice";
 import {
@@ -21,8 +20,6 @@ import {
   getDownloadList,
   getFormatType,
 } from "../../../../redux/slices/rating_billing_invoice/invoice";
-import { configApp } from "../../../../constants/configApp";
-import { tokenHeader } from "../../../../utils/tokenHeader";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
@@ -31,20 +28,21 @@ import {
   EyeOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
-import { InvoiceDummy } from "./dummyInvoiceData";
 import CardContainer from "../../../../components/CardContainer";
+import TableRBI from "../../../../components/TableRBI";
+import { configApp } from "../../../../constants/configApp";
+import { tokenHeader } from "../../../../utils/tokenHeader";
 
 const ProformaInvoice = () => {
   // Selector
-  const { data, loading, data_detail, data_format, data_billing } = useSelector(
+  const { data, loading, data_detail, data_format } = useSelector(
     (state) => state.invoice
   );
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  // const dataSource = data?.result;
-  const dataSource = InvoiceDummy();
+  const dataSource = data?.result || [];
 
   // State
   const [page, setPage] = useState(1);
@@ -62,7 +60,34 @@ const ProformaInvoice = () => {
   const [modalReGenerate, setModalReGenerate] = useState(false);
   const [modalGenerate, setModalGenerate] = useState(false);
 
-  // Use Effect
+  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("proformaFixedColumns");
+      return saved
+        ? JSON.parse(saved)
+        : {
+            left: ["no"], // default left fixed column keys if any
+            right: ["action", "status"], // default right fixed column keys if any
+          };
+    } catch (e) {
+      return { left: ["no"], right: ["action", "status"] };
+    }
+  });
+
+  // ✅ Save to localStorage when fixedColumns change
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "proformaFixedColumns",
+        JSON.stringify(fixedColumns)
+      );
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
+
+  // Use Effect - fetch page
   useEffect(() => {
     let tempSearch = "";
     for (const dataIndex in search) {
@@ -74,9 +99,14 @@ const ProformaInvoice = () => {
       }
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+
+    let searchParam = undefined;
+    if (tempSearch) {
+      searchParam = encodeURIComponent(JSON.stringify(search));
+    }
     dispatch(
       getAllInvoicePaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
+        search: searchParam,
         page,
         pageSize,
         sort,
@@ -235,7 +265,7 @@ const ProformaInvoice = () => {
         })
       )?.unwrap();
     } catch (error) {
-      if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
         const message =
           (error.response &&
             error.response.data &&
@@ -243,6 +273,9 @@ const ProformaInvoice = () => {
           error.message ||
           error.toString();
         setBodyError({ message });
+        setModalError(true);
+      } else {
+        setBodyError({ message: error?.message || "Error" });
         setModalError(true);
       }
     }
@@ -285,7 +318,6 @@ const ProformaInvoice = () => {
     {
       action: "Create",
       render: (
-        // trigger generate invoice
         <ButtonComponent
           icon={<SVGIcon name="IconButtonCreate" width={24} />}
           type="submit"
@@ -328,7 +360,7 @@ const ProformaInvoice = () => {
       },
     },
     {
-      action: "Preview",
+      action: "Regenerate",
       type: "table",
       render: (record) => {
         return (
@@ -344,7 +376,7 @@ const ProformaInvoice = () => {
       },
     },
     {
-      action: "Regenerate",
+      action: "Preview",
       type: "table",
       render: (record) => {
         return (
@@ -361,6 +393,78 @@ const ProformaInvoice = () => {
     },
   ];
 
+  // ✅ Call hook at component level (not inside useMemo)
+  const actionCols = useColumnActionPermission(
+    ["view", "preview", "regenerate"],
+    itemGrantAccess
+  );
+
+  // ✅ Get base columns with key property
+  const baseColumns = useMemo(() => {
+    const invoiceCols = columnsInvoice(
+      search,
+      page,
+      pageSize,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    );
+
+    // Add 'key' property to columns that don't have it
+    const columnsWithKeys = [...invoiceCols, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title, // Fallback to dataIndex or title if no key
+    }));
+
+    return columnsWithKeys;
+  }, [search, page, pageSize, searchedColumn, searchText, actionCols]);
+
+  const columnDefinitions = useMemo(() => {
+    return baseColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [baseColumns]);
+
+  const columns = useMemo(() => {
+    // Separate columns into categories
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    baseColumns.forEach((col) => {
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        leftFixed.push(col);
+      } else if (fixedColumns.right.includes(colKey)) {
+        rightFixed.push(col);
+      } else {
+        normal.push(col);
+      }
+    });
+
+    // Reorder: left fixed → normal → right fixed
+    const reorderedColumns = [...leftFixed, ...normal, ...rightFixed];
+
+    // Apply fixed property
+    return reorderedColumns.map((col) => {
+      const newCol = { ...col };
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        newCol.fixed = "left";
+      } else if (fixedColumns.right.includes(colKey)) {
+        newCol.fixed = "right";
+      } else {
+        delete newCol.fixed;
+      }
+
+      return newCol;
+    });
+  }, [baseColumns, fixedColumns]);
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
@@ -370,7 +474,7 @@ const ProformaInvoice = () => {
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">Proforma Invoice List</p>
-              <div>
+              <div className="flex gap-2">
                 <ButtonComponent
                   icon={<SVGIcon name="IconButtonCreate" width={24} />}
                   type="submit"
@@ -389,39 +493,24 @@ const ProformaInvoice = () => {
           <div className="w-full">
             <TableRBI
               dataSource={dataSource}
-              columns={[
-                ...columnsInvoice(
-                  search,
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                  // handlePreviewFile,
-                  // handleDetail,
-                  // handleReGenerate
-                ),
-                ...useColumnActionPermission(
-                  ["view", "preview", "regenerate"],
-                  itemGrantAccess
-                ),
-              ]}
+              columns={columns}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
-              // onSizeChanger={handleChange}
-              // totalData={data?.page?.totalElements}
-              totalData={dataSource.length}
-              tableScrolled={{ y: 525, x: 12000 }}
+              onSizeChanger={handleChange}
+              totalData={data?.page?.totalElements}
+              tableScrolled={{ y: 525, x: 7000 }}
               onSort={onSortApi}
               handleDownload={handleDownload}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
             />
           </div>
         </CardContainer>
 
         {/* Invoice Log */}
-        {pageDetail === true ? (
+        {pageDetail === true && data_detail ? (
           <DetailInvoice
             detail={data_detail?.logs}
             invoiceNumber={invoiceNumber}
@@ -473,18 +562,6 @@ const ProformaInvoice = () => {
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
-
-        {/* Modal Generate */}
-        {/*
-        <ModalGenerateInvoice
-          isOpen={modalGenerate}
-          handleCancel={() => setModalGenerate(false)}
-          data={data_billing?.data}
-          refreshTable={refreshTable}
-          setBodyError={setBodyError}
-          setModalError={setModalError}
-        />
-        */}
       </Spin>
     </LayoutMenu>
   );

@@ -871,7 +871,7 @@ const ViewFaktur = () => {
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={pagination?.totalElements || 0}
-              tableScrolled={{ y: 525, x: 2000 }}
+              tableScrolled={{ y: 525, x: 2500 }}
               onSort={onSortApi}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
