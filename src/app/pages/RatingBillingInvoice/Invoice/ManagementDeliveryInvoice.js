@@ -1,16 +1,14 @@
 // components/ManagementDeliveryInvoice.js
 import React, { useState } from "react";
 import { Card, Button, Tag } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { EyeOutlined, PlusOutlined } from "@ant-design/icons";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import SummaryStatistics from "./_components/ManagementDeliveryComponent/SummaryStatistics";
-import FilterSection from "./_components/ManagementDeliveryComponent/FilterSection";
-import DeliveryTable from "./_components/ManagementDeliveryComponent/DeliveryTable";
 import CreateJobModal from "./_components/CreateJobModal";
 import DetailInvoiceModal from "./_components/DetailnvoiceModal";
 import PreviewMessageModal from "./_components/ManagementDeliveryComponent/PreviewMessageModal";
-
-// Import modular components
+import CardContainer from "../../../../components/CardContainer";
+import TableRBI from "../../../../components/TableRBI";
 
 // Main Component
 const ManagementDeliveryInvoice = () => {
@@ -21,6 +19,16 @@ const ManagementDeliveryInvoice = () => {
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [previewModalVisible, setPreviewModalVisible] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  // Fixed columns state
+  const [fixedColumns, setFixedColumns] = useState({
+    left: [],
+    right: [],
+  });
 
   // Summary data
   const summaryData = {
@@ -80,7 +88,97 @@ const ManagementDeliveryInvoice = () => {
       status: "Menunggu",
       lastUpdate: "02/10/2025 14:33",
     },
+    {
+      key: "7",
+      invoiceNo: "INV-005",
+      customer: "PT. ABADI",
+      channel: "Email",
+      status: "Terkirim",
+      lastUpdate: "02/10/2025 14:35",
+    },
+    {
+      key: "8",
+      invoiceNo: "INV-006",
+      customer: "CV. MAJU",
+      channel: "WhatsApp",
+      status: "Menunggu",
+      lastUpdate: "02/10/2025 14:36",
+    },
   ];
+
+  const columnDefinitions = [
+    {
+      key: "no",
+      title: "NO",
+      width: 10,
+      render: (_, __, index) => (
+        <div className="text-center">
+          {(currentPage - 1) * pageSize + index + 1}
+        </div>
+      ),
+    },
+    {
+      key: "invoiceNo",
+      title: "INVOICE NUMBER",
+      dataIndex: "invoiceNo",
+      width: 60,
+    },
+    {
+      key: "customer",
+      title: "CUSTOMER",
+      dataIndex: "customer",
+      width: 50,
+    },
+    {
+      key: "channel",
+      title: "DELIVERY SERVICE",
+      dataIndex: "channel",
+      width: 60,
+    },
+    {
+      key: "status",
+      title: "STATUS",
+      dataIndex: "status",
+      width: 35,
+      render: (status) => {
+        let color = "default";
+        if (status === "Terkirim") color = "success";
+        else if (status === "Gagal") color = "error";
+        else if (status === "Menunggu") color = "warning";
+
+        return <Tag color={color}>{status}</Tag>;
+      },
+    },
+    {
+      key: "actions",
+      title: "ACTION",
+      width: 18,
+      render: (_, record) => (
+        <div className="flex justify-center gap-2">
+          <Button
+            type="link"
+            size="small"
+            onClick={() => handleViewDetail(record)}
+          >
+            <EyeOutlined style={{ fontSize: "20px" }} />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  // Apply fixed columns
+  const columns = columnDefinitions.map((col) => {
+    const newCol = { ...col };
+
+    if (fixedColumns.left.includes(col.key)) {
+      newCol.fixed = "left";
+    } else if (fixedColumns.right.includes(col.key)) {
+      newCol.fixed = "right";
+    }
+
+    return newCol;
+  });
 
   const handleApplyFilter = () => {
     setLoading(true);
@@ -108,60 +206,41 @@ const ManagementDeliveryInvoice = () => {
     setModalVisible(false);
   };
 
+  const handlePageChange = (page, size) => {
+    setCurrentPage(page);
+    setPageSize(size);
+  };
+
+  const handleSizeChange = (current, size) => {
+    setCurrentPage(1);
+    setPageSize(size);
+  };
+
   return (
     <LayoutMenu>
-      <div style={{ maxWidth: "1600px", margin: "0 auto" }}>
-        {/* Page Header with Button */}
-        <div
-          style={{
-            marginBottom: "24px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "16px",
-          }}
-        >
-          <div>
-            <h1
-              style={{
-                fontSize: "28px",
-                fontWeight: "700",
-                color: "#262626",
-                margin: 0,
-                marginBottom: "8px",
-              }}
-            >
+      <CardContainer
+        header={
+          <div className="flex sm:flex-cols justify-between md:gap-2 md:items-center">
+            <h2 className="text-2xl font-semibold">
               Management Delivery Invoice
-            </h1>
-            <p
+            </h2>
+            <Button
+              type="primary"
+              size="large"
+              icon={<PlusOutlined />}
+              onClick={() => setModalVisible(true)}
               style={{
-                fontSize: "14px",
-                color: "#8c8c8c",
-                margin: 0,
+                height: "48px",
+                fontSize: "15px",
+                fontWeight: "500",
+                borderRadius: "8px",
               }}
             >
-              Monitor dan kelola pengiriman invoice kepada pelanggan secara
-              realtime
-            </p>
+              Create Delivery Job
+            </Button>
           </div>
-          <Button
-            type="primary"
-            size="large"
-            icon={<PlusOutlined />}
-            onClick={() => setModalVisible(true)}
-            style={{
-              height: "48px",
-              fontSize: "15px",
-              fontWeight: "500",
-              borderRadius: "8px",
-              boxShadow: "0 2px 8px rgba(24, 144, 255, 0.3)",
-            }}
-          >
-            Buat Job Pengiriman
-          </Button>
-        </div>
-
+        }
+      >
         {/* Summary Statistics */}
         <SummaryStatistics
           totalSent={summaryData.totalSent}
@@ -170,43 +249,22 @@ const ManagementDeliveryInvoice = () => {
           notProcessed={summaryData.notProcessed}
         />
 
-        {/* Filter Section */}
-        <FilterSection
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-          status={status}
-          setStatus={setStatus}
-          onApplyFilter={handleApplyFilter}
-          onResetFilter={handleResetFilter}
+        <TableRBI
+          idTable="delivery-invoice-table"
+          dataSource={invoiceData}
+          columns={columns}
+          pageSize={pageSize}
+          current={currentPage}
+          loading={loading}
+          onChange={handlePageChange}
+          onSizeChanger={handleSizeChange}
+          totalData={invoiceData.length}
+          useSelect={true}
+          usePagination={true}
+          columnDefinitions={columnDefinitions}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
         />
-
-        {/* Invoice Table */}
-        <Card
-          title={
-            <span style={{ fontSize: "16px", fontWeight: "600" }}>
-              📋 Daftar Pengiriman Invoice
-            </span>
-          }
-          extra={
-            <Tag color="blue" style={{ fontSize: "13px", padding: "4px 12px" }}>
-              Total: {invoiceData.length} data
-            </Tag>
-          }
-          bordered={false}
-          style={{
-            borderRadius: "12px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-          }}
-        >
-          <div className="p-5">
-            <DeliveryTable
-              dataSource={invoiceData}
-              loading={loading}
-              onViewDetail={handleViewDetail}
-              onPreview={handlePreview}
-            />
-          </div>
-        </Card>
 
         {/* Create Job Modal */}
         <CreateJobModal
@@ -234,7 +292,7 @@ const ManagementDeliveryInvoice = () => {
           }}
           messageData={selectedInvoice}
         />
-      </div>
+      </CardContainer>
     </LayoutMenu>
   );
 };

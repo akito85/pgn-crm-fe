@@ -1,22 +1,11 @@
 // TableRBI.js
-import {
-  DeleteOutlined,
-  DownloadOutlined,
-  DownOutlined,
-  FilterOutlined,
-} from "@ant-design/icons";
-import {
-  Button,
-  Input,
-  Pagination,
-  Select,
-  Table,
-  Dropdown,
-  Checkbox,
-  Modal,
-} from "antd";
-import { useState, useMemo } from "react";
-import ColumnFixDropdown from "./ColumnFixDropdown/ColumnFixDropdown";
+import { DownloadOutlined, FilterOutlined } from "@ant-design/icons";
+import { Button, Pagination, Select, Table } from "antd";
+import { useState } from "react";
+import ColumnSettings from "./ColumnSettings/ColumnSettings";
+import SearchBar from "./SearchBar";
+import AdvanceSearch from "./AdvanceSearch";
+
 const { Option } = Select;
 
 const TableRBI = ({
@@ -42,139 +31,75 @@ const TableRBI = ({
   columnDefinitions,
   fixedColumns,
   setFixedColumns,
+  onAdvanceSearch = () => {},
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
-  const [searchText, setSearchText] = useState("");
-  const [dropdownVisible, setDropdownVisible] = useState(false);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
 
-  // ✅ Filter columns based on visibility (hide/show)
+  // Filter columns based on visibility (hide/show)
   const filterColumns = () => {
     return columns.filter((col) => {
-      return !optionSelectedCol.includes(col.title);
+      return !optionSelectedCol.includes(col.key);
     });
   };
 
-  // ✅ Filtered columns for search in dropdown
-  const filteredColumns = useMemo(() => {
-    if (!searchText) return columns;
-    return columns.filter((col) =>
-      col.title?.toLowerCase().includes(searchText.toLowerCase())
-    );
-  }, [columns, searchText]);
-
-  const onCheckboxChange = (e, title) => {
-    const checked = e.target.checked;
-    let newSelected;
-    if (checked) {
-      newSelected = optionSelectedCol.filter((col) => col !== title);
-    } else {
-      newSelected = [...optionSelectedCol, title];
-    }
-    setOptionSelectedCol(newSelected);
+  // Handle advance search
+  const handleAdvanceSearch = (searchData) => {
+    console.log("Advance Search Data:", searchData);
+    onAdvanceSearch(searchData);
+    setIsAdvanceOpen(false);
   };
 
-  const menu = (
-    <div
-      style={{
-        padding: 10,
-        width: 250,
-        background: "white",
-        border: "1px solid #ddd",
-        borderRadius: 4,
-      }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div style={{ fontWeight: "bold", marginBottom: 8 }}>Visibility</div>
-      <Input
-        placeholder="Search column..."
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        style={{ marginBottom: 8 }}
-        allowClear
-      />
-      <div
-        style={{
-          maxHeight: 200,
-          overflowY: "auto",
-          borderTop: "1px solid #eee",
-          paddingTop: 8,
-        }}
-      >
-        {filteredColumns.map((col, index) => (
-          <div key={col.title || index} style={{ marginBottom: 4 }}>
-            <Checkbox
-              checked={!optionSelectedCol.includes(col.title)}
-              onChange={(e) => onCheckboxChange(e, col.title)}
-            >
-              {col.title}
-            </Checkbox>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  // Handle clear filter
+  const handleClearFilter = () => {
+    console.log("Clear filter");
+    onAdvanceSearch(null);
+  };
 
   return (
     <div className={"flex flex-col w-full"}>
       {useSelect ? (
         <div className={"w-full flex mb-5 justify-between items-center"}>
-          <Dropdown
-            overlay={menu}
-            trigger={["click"]}
-            visible={dropdownVisible}
-            onVisibleChange={(flag) => setDropdownVisible(flag)}
-          >
-            <Button
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                border: "1px solid #BDBDBD",
-                height: "40px",
-                color: "black",
-              }}
-            >
-              Show / Hide Column <DownOutlined style={{ fontSize: "15px" }} />
-            </Button>
-          </Dropdown>
+          {/* Column Settings Component */}
+          <ColumnSettings
+            columns={columnDefinitions || columns}
+            hiddenColumns={optionSelectedCol}
+            onHiddenColumnsChange={setOptionSelectedCol}
+            fixedColumns={fixedColumns}
+            onFixedColumnsChange={setFixedColumns}
+            buttonText="Column Settings"
+            buttonStyle={{ height: "40px" }}
+          />
 
-          {/* ✅ Add ColumnFixDropdown button */}
-          <div className="w-md">
-            <ColumnFixDropdown
-              columns={columnDefinitions}
-              fixedColumns={fixedColumns}
-              onFixedColumnsChange={setFixedColumns}
-              buttonText="Fix Columns"
-              buttonStyle={{ height: "40px" }}
-              showCount={true}
-            />
-          </div>
-
-          <div className="w-full flex justify-end gap-2 hidden">
+          <div className="w-full flex justify-end gap-2">
             <Button
               icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
+              onClick={handleDownload}
               style={{
                 border: "1px solid #BDBDBD",
                 color: "black",
+                borderRadius: "8px",
                 height: "40px",
               }}
             >
-              Export List
+              Export
             </Button>
 
-            {/* button trigger modal */}
             <Button
               onClick={() => setIsAdvanceOpen(true)}
               style={{
                 border: "1px solid #BDBDBD",
                 color: "black",
+                borderRadius: "8px",
                 height: "40px",
               }}
             >
               <FilterOutlined style={{ fontSize: "20px" }} />
-              Advance Filter
+              Advance Search
             </Button>
+
+            {/* SearchBar - jangan di hilangkan */}
+            <SearchBar />
           </div>
         </div>
       ) : null}
@@ -182,7 +107,7 @@ const TableRBI = ({
       {/* Table */}
       <Table
         dataSource={dataSource}
-        columns={filterColumns()} // ✅ Apply filtered columns (without spread operator to preserve fixed prop)
+        columns={filterColumns()}
         scroll={tableScrolled}
         bordered
         pagination={false}
@@ -230,97 +155,14 @@ const TableRBI = ({
       ) : null}
 
       {/* Advance Search Modal */}
-      <Modal
+      <AdvanceSearch
         visible={isAdvanceOpen}
-        footer={null}
-        onCancel={() => setIsAdvanceOpen(false)}
-        width={700}
-        bodyStyle={{ padding: "40px" }}
-      >
-        <div className="flex gap-4 mb-4">
-          <Select
-            defaultValue="Periode"
-            className="w-1/3 rounded-lg border border-gray-300"
-            dropdownClassName="rounded-lg"
-          >
-            <Option value="Periode">Periode</Option>
-            <Option value="Customer">Customer</Option>
-          </Select>
-          <Select
-            defaultValue="Contains"
-            className="w-1/3 rounded-lg border border-gray-300"
-            dropdownClassName="rounded-lg"
-          >
-            <Option value="Contains">Contains</Option>
-            <Option value="Equals">Equals</Option>
-          </Select>
-          <Select
-            defaultValue="Limit Row"
-            className="w-1/3 rounded-lg border border-gray-300"
-            dropdownClassName="rounded-lg"
-          >
-            <Option value="10">10</Option>
-            <Option value="50">50</Option>
-          </Select>
-        </div>
-
-        <div className="flex gap-4">
-          <Input.TextArea
-            rows={6}
-            placeholder="Enter a formula..."
-            className="flex-1 rounded-lg border border-gray-300 p-2"
-          />
-          <div className="flex flex-col gap-2">
-            <Button
-              style={{
-                backgroundColor: "#E6F4FA",
-                color: "#0175BF",
-                border: "none",
-                height: "40px",
-              }}
-            >
-              + AND
-            </Button>
-            <Button
-              style={{
-                backgroundColor: "#E6F4FA",
-                color: "#0175BF",
-                border: "none",
-                height: "40px",
-              }}
-            >
-              + OR
-            </Button>
-          </div>
-        </div>
-
-        <p className="text-gray-400 text-sm mt-2 mb-4">
-          Hint/Tips will be placed here.
-        </p>
-
-        <div className="flex justify-between bg-[#F5F5F5] -mx-[40px] -mb-[40px] px-[40px] py-[10px] gap-2">
-          <Button
-            style={{
-              border: "none",
-              color: "#D32F2F",
-              backgroundColor: "#FFEBEE",
-            }}
-          >
-            <DeleteOutlined
-              style={{
-                display: "flex",
-                alignItems: "center",
-                fontSize: "20px",
-                height: "40px",
-              }}
-            />
-            Clear Filter
-          </Button>
-          <Button type="primary" style={{ height: "42px", fontSize: "16px" }}>
-            Search
-          </Button>
-        </div>
-      </Modal>
+        onClose={() => setIsAdvanceOpen(false)}
+        onSearch={handleAdvanceSearch}
+        onClear={handleClearFilter}
+        columns={columnDefinitions || columns}
+        modalWidth={600}
+      />
     </div>
   );
 };
