@@ -19,6 +19,9 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data_serviceAgreement?.result;
+  
+  // Ref untuk detail section
+  const saDetailRef = useRef(null);
 
   // State
   const [page, setPage] = useState(1);
@@ -48,6 +51,18 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
       })
     );
   }, [ratingCodeId, search, page, pageSize, sort, dispatch]);
+
+  useEffect(() => {
+    if (pageDetail && saDetailRef.current) {
+      setTimeout(() => {
+        saDetailRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start',
+          inline: 'nearest'
+        });
+      }, 100);
+    }
+  }, [pageDetail, ratingSaId]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -108,6 +123,7 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
   const handleDetail = (record) => {
     setPageDetail(true);
     setRatingSaId(record.ratingSaId);
+    setTabSection("Detail");
   };
 
   // render SA Detail Section
@@ -203,7 +219,7 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
 
       {/* Detail Service Agreement */}
       {pageDetail === true ? (
-        <div className="pt-[30px]">
+        <div ref={saDetailRef} className="pt-[30px]">
           <Radio.Group
             options={serviceSection}
             onChange={onChangeTab}
