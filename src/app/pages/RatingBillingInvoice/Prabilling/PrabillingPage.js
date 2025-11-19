@@ -32,7 +32,6 @@ const PrabillingPage = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
 
-  // ✅ State untuk fix column (tanpa localStorage)
   const [fixedColumns, setFixedColumns] = useState({
     no: "left",
     status: "right",
@@ -468,10 +467,8 @@ const PrabillingPage = () => {
     },
   ];
 
-  // ✅ Call hook at component level
   const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
 
-  // ✅ Combine columns with keys
   const allColumns = useMemo(() => {
     const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
       ...col,
@@ -480,12 +477,10 @@ const PrabillingPage = () => {
     return columnsWithKeys;
   }, [baseColumns, actionCols]);
 
-  // ✅ Apply fixed columns
   const processedColumns = useMemo(() => {
     return applyFixedColumns(allColumns, fixedColumns);
   }, [allColumns, fixedColumns]);
 
-  // ✅ Column definitions for dropdown
   const columnDefinitions = useMemo(() => {
     return allColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,

@@ -8,7 +8,7 @@ export const columnsBilling = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  search,
+  search
   // handleDetail = () => {},
   // handleApprovalHistory = () => {}
 ) => [
@@ -2113,13 +2113,6 @@ export const columnsBilling = (
     fixed: "right",
     width: 200,
     sorter: true,
-    // ...getColumnSearchPropsPaging(
-    //   "statusApproval",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusApproval",
@@ -2127,7 +2120,14 @@ export const columnsBilling = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
+      "select",
+      [
+        // tambahkan options
+        { value: "APPROVED", label: "Approved" },
+        { value: "NEED REVIEW", label: "Need Review" },
+        { value: "WAITING APPROVAL", label: "Waiting Approval" },
+      ]
     ),
     render: (index) => {
       let text;

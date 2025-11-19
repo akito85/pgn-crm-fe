@@ -43,7 +43,6 @@ const AccountDetailPage = () => {
     (state) => state.rbi_prabilling
   );
 
-  // ✅ State untuk fix columns
   const [fixedColumnsUsage, setFixedColumnsUsage] = useState({
     no: "left",
     measDate: "left",
@@ -81,7 +80,6 @@ const AccountDetailPage = () => {
     dispatch(getCustomerAccountDetail(params));
   }, [dispatch, customerNumber, billPeriod, inSor, accNumber, saNumber]);
 
-  // ✅ Ambil data dari response - TETAP TAMPILKAN yang null
   const usageData = customer_account_detail?.usageData || [];
   const taxData = customer_account_detail?.taxData || [];
   const saPriceRuleData = customer_account_detail?.pricingData || [];
@@ -121,7 +119,7 @@ const AccountDetailPage = () => {
     return val;
   };
 
-  // INIT / CUSTOMER & ACCOUNT - Sesuaikan dengan response backend
+  // INIT / CUSTOMER & ACCOUNT 
   const renderInitCustomerAccount = () => (
     <CardContainer 
       header={
@@ -275,7 +273,6 @@ const AccountDetailPage = () => {
     </CardContainer>
   );
 
-  // ✅ USAGE Data Columns dengan key
   const usageColumns = useMemo(() => [
     {
       key: "no",
@@ -461,7 +458,6 @@ const AccountDetailPage = () => {
     },
   ], []);
 
-  // ✅ TAX IMPLICATION Columns dengan key
   const taxColumns = useMemo(() => [
     {
       key: "no",
@@ -518,7 +514,6 @@ const AccountDetailPage = () => {
     },
   ], []);
 
-  // ✅ SA PRICE RULE Columns dengan key
   const saPriceRuleColumns = useMemo(() => [
     {
       key: "no",
@@ -597,7 +592,6 @@ const AccountDetailPage = () => {
     },
   ], []);
 
-  // ✅ SA TOS DETAIL Columns dengan key
   const saTosColumns = useMemo(() => [
     {
       key: "no",
@@ -629,7 +623,6 @@ const AccountDetailPage = () => {
     },
   ], []);
 
-  // ✅ TOS SUBMISSION Columns dengan key (untuk saData kalau ada)
   const tosSubmissionColumns = useMemo(() => [
     {
       key: "no",
@@ -670,7 +663,6 @@ const AccountDetailPage = () => {
     },
   ], []);
 
-  // ✅ TOS SUBMISSION DETAIL Columns dengan key
   const tosSubColumns = useMemo(() => [
     {
       key: "no",
@@ -717,7 +709,6 @@ const AccountDetailPage = () => {
     },
   ], []);
 
-  // ✅ Apply fixed columns for all tables
   const processedUsageColumns = useMemo(() => 
     applyFixedColumns(usageColumns, fixedColumnsUsage), 
     [usageColumns, fixedColumnsUsage]
@@ -748,7 +739,6 @@ const AccountDetailPage = () => {
     [tosSubColumns, fixedColumnsTosSub]
   );
 
-  // ✅ Column definitions for each table
   const usageColumnDefs = useMemo(() => 
     usageColumns.map(col => ({ key: col.key, title: col.title })), 
     [usageColumns]
