@@ -42,28 +42,28 @@ const ModalReplaceEFaktur = ({
   };
 
   const handleSubmit = async (values) => {
-    if (!billingData?.efakturId) {
-      return;
-    }
+  if (!billingData?.efakturId) {
+    return;
+  }
 
-    setIsSubmitting(true);
+  setIsSubmitting(true);
 
-    try {
-      const result = await dispatch(
-        replaceEFaktur({
-          efakturId: billingData.efakturId,
-          reason: values.reason,
-        })
-      ).unwrap();
+  try {
+    const result = await dispatch(
+      replaceEFaktur({
+        efakturId: billingData.efakturId,
+        reason: values.reason,
+        appHierId: 620
+      })
+    ).unwrap();
 
-      // Success
-      onSuccess();
-      handleCancel();
-    } catch (error) {
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    onSuccess();
+    handleCancel();
+  } catch (error) {
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <ModalCustom

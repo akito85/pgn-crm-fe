@@ -344,6 +344,12 @@ const ViewFaktur = () => {
       width: 180,
     },
     {
+      title: "Type PPN",
+      dataIndex: "typePpn",
+      key: "typePpn",
+      width: 180,
+    },
+    {
       title: "CUSTOMER",
       dataIndex: "customerName",
       key: "customerName",

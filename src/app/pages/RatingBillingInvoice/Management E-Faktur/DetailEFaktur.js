@@ -13,7 +13,6 @@ import ModalBuatFakturPengganti from "./ModalEfaktur/ModalBuatFakturPengganti";
 import ModalGenerateXML from "./ModalEfaktur/ModalGenerateXML";
 import {
   getDetailEFaktur,
-  getAllBillingItemPaginate,
   getLogActivity,
   resetEFakturState,
 } from "../../../../redux/slices/rating_billing_invoice/efakturSlice";
@@ -26,12 +25,11 @@ const DetailEFaktur = () => {
   const navigate = useNavigate();
 
   const searchParams = new URLSearchParams(location.search);
-  const billingCode = searchParams.get("billingCode");
+  const efakturId = searchParams.get("efakturId");
 
   // Redux state
   const {
     detail_efaktur,
-    data_billingItem,
     log_activity,
     loading_detail,
     loading_log,
@@ -101,12 +99,9 @@ const DetailEFaktur = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (billingCode) {
+      if (efakturId) {
         try {
-          await Promise.all([
-            dispatch(getDetailEFaktur(billingCode)),
-            dispatch(getAllBillingItemPaginate(billingCode))
-          ]);
+          await dispatch(getDetailEFaktur(efakturId));
         } catch (error) {
           message.error("Gagal memuat data E-Faktur");
         }
@@ -119,20 +114,20 @@ const DetailEFaktur = () => {
       dispatch(resetEFakturState());
       setHasLoadedLog(false);
     };
-  }, [billingCode, dispatch]);
+  }, [efakturId, dispatch]);
 
   useEffect(() => {
-    if (detail_efaktur?.efakturId && activeTab === "3") {
+    if (efakturId && activeTab === "3") {
       dispatch(
         getLogActivity({
-          efakturId: detail_efaktur.efakturId,
+          efakturId: efakturId,
           page: pageLog,
           size: pageSizeLog,
         })
       );
       setHasLoadedLog(true);
     }
-  }, [detail_efaktur?.efakturId, activeTab, pageLog, pageSizeLog, dispatch]);
+  }, [efakturId, activeTab, pageLog, pageSizeLog, dispatch]);
 
   const handleTabChange = (key) => {
     setActiveTab(key);
@@ -161,7 +156,7 @@ const DetailEFaktur = () => {
   };
 
   const handleGenerateXML = () => {
-    if (!detail_efaktur?.efakturId) {
+    if (!efakturId) {
       message.error("E-Faktur ID tidak ditemukan");
       return;
     }
@@ -179,81 +174,12 @@ const DetailEFaktur = () => {
 
   const handleDownloadAttachment = (attachment) => {
     if (attachment.downloadUrl) {
-      window.open(attachment.downloadUrl, "_blank");
+      const fullUrl = `${process.env.REACT_APP_BASE_URL || ""}${attachment.downloadUrl}`;
+      window.open(fullUrl, "_blank");
     } else {
       message.error("URL download tidak tersedia");
     }
   };
-
-  const calculateTotals = () => {
-    return {
-      dpp: detail_efaktur?.dpp || 0,
-      ppn: detail_efaktur?.ppn || 0,
-      total: detail_efaktur?.totalAmount || 0,
-    };
-  };
-
-  const totals = calculateTotals();
-
-  const columnsRincianFaktur = [
-    {
-      title: "#",
-      dataIndex: "lineNumber",
-      key: "lineNumber",
-      width: 60,
-      align: "center",
-    },
-    {
-      title: "Nama Barang/Jasa",
-      dataIndex: "productName",
-      key: "productName",
-      render: (text, record) => (
-        <div>
-          <div className="font-medium">{text}</div>
-          {record.description && (
-            <div className="text-xs text-gray-500">{record.description}</div>
-          )}
-        </div>
-      ),
-    },
-    {
-      title: "Kuantitas",
-      dataIndex: "quantity",
-      key: "quantity",
-      width: 120,
-      align: "right",
-      render: (value, record) => {
-        const qty = parseFloat(value);
-        return `${qty.toLocaleString("id-ID")} ${record.uom || ""}`;
-      },
-    },
-    {
-      title: "Harga Satuan",
-      dataIndex: "unitPrice",
-      key: "unitPrice",
-      width: 180,
-      align: "right",
-      render: (value, record) => {
-        const symbol = record.currency === "USD" ? "$" : "Rp";
-        return `${symbol} ${value?.toLocaleString("id-ID")}`;
-      },
-    },
-    {
-      title: "Jumlah",
-      dataIndex: "total",
-      key: "total",
-      width: 180,
-      align: "right",
-      render: (value, record) => {
-        const symbol = record.currency === "USD" ? "$" : "Rp";
-        return (
-          <span className="font-semibold">
-            {symbol} {value?.toLocaleString("id-ID")}
-          </span>
-        );
-      },
-    },
-  ];
 
   const columnsLog = [
     {
@@ -294,7 +220,7 @@ const DetailEFaktur = () => {
     },
     {
       title: "PESAN / CATATAN",
-      dataIndex: "message", 
+      dataIndex: "message",
       key: "message",
       width: 300,
       render: (text) => (
@@ -481,7 +407,7 @@ const DetailEFaktur = () => {
 
       <BaseContainer
         header={`Detail E-Faktur: ${
-          detail_efaktur?.efakturNo || detail_efaktur?.billingCode || ""
+          detail_efaktur?.efakturNo || detail_efaktur?.invoiceNumber || ""
         }`}
       >
         <div className="mb-6">
@@ -616,6 +542,14 @@ const DetailEFaktur = () => {
                   </div>
                   <div>
                     <div className="text-sm font-medium text-gray-600 mb-1">
+                      Type PPN
+                    </div>
+                    <div className="font-semibold text-gray-900">
+                      {detail_efaktur?.typePpn || "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-600 mb-1">
                       Account Number
                     </div>
                     <div className="font-semibold text-gray-900">
@@ -628,6 +562,30 @@ const DetailEFaktur = () => {
                     </div>
                     <div className="font-semibold text-gray-900">
                       {detail_efaktur?.accountName || "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-600 mb-1">
+                      NPWP
+                    </div>
+                    <div className="font-semibold text-gray-900">
+                      {detail_efaktur?.npwp || "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-600 mb-1">
+                      NIK/Passport
+                    </div>
+                    <div className="font-semibold text-gray-900">
+                      {detail_efaktur?.nikPasp || "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-600 mb-1">
+                      Email
+                    </div>
+                    <div className="font-semibold text-gray-900">
+                      {detail_efaktur?.email || "-"}
                     </div>
                   </div>
                   <div>
@@ -662,6 +620,22 @@ const DetailEFaktur = () => {
                         : "-"}
                     </div>
                   </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-600 mb-1">
+                      E-Faktur Type
+                    </div>
+                    <div className="font-semibold text-gray-900">
+                      {detail_efaktur?.efakturType || "-"}
+                    </div>
+                  </div>
+                  <div className="col-span-2">
+                    <div className="text-sm font-medium text-gray-600 mb-1">
+                      Alamat
+                    </div>
+                    <div className="font-semibold text-gray-900">
+                      {detail_efaktur?.alamat || "-"}
+                    </div>
+                  </div>
                   {detail_efaktur?.remark && (
                     <div className="col-span-2">
                       <div className="text-sm font-medium text-gray-600 mb-1">
@@ -672,54 +646,6 @@ const DetailEFaktur = () => {
                       </div>
                     </div>
                   )}
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-bold text-blue-700 mb-4">
-                  Rincian Item
-                </h3>
-                <Table
-                  dataSource={data_billingItem || []}
-                  columns={columnsRincianFaktur}
-                  pagination={false}
-                  size="middle"
-                  bordered
-                  scroll={{ x: 800 }}
-                  loading={loading_detail}
-                  locale={{
-                    emptyText: "Tidak ada data item",
-                  }}
-                />
-              </div>
-
-              <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-                <h3 className="text-lg font-bold text-blue-700 mb-4">
-                  Ringkasan
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-gray-700">DPP:</span>
-                    <span className="font-semibold text-gray-900">
-                      Rp {totals.dpp?.toLocaleString("id-ID")}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-gray-700">
-                      PPN (11%):
-                    </span>
-                    <span className="font-semibold text-gray-900">
-                      Rp {totals.ppn?.toLocaleString("id-ID")}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center border-t-2 border-blue-300 pt-3">
-                    <span className="font-bold text-lg text-gray-900">
-                      Total:
-                    </span>
-                    <span className="font-bold text-xl text-blue-600">
-                      Rp {totals.total?.toLocaleString("id-ID")}
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -829,8 +755,7 @@ const DetailEFaktur = () => {
       <ModalGenerateXML
         visible={modalGenerateXML}
         onCancel={() => setModalGenerateXML(false)}
-        efakturId={detail_efaktur?.efakturId}
-        billingCode={billingCode}
+        efakturId={efakturId}
       />
     </LayoutMenu>
   );
