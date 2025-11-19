@@ -9,6 +9,7 @@ import DetailInvoiceModal from "./_components/DetailnvoiceModal";
 import PreviewMessageModal from "./_components/ManagementDeliveryComponent/PreviewMessageModal";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
+import StatusComponent from "../../../../components/StatusComponent";
 
 // Main Component
 const ManagementDeliveryInvoice = () => {
@@ -45,7 +46,7 @@ const ManagementDeliveryInvoice = () => {
       invoiceNo: "INV-001",
       customer: "PT. JAYA",
       channel: "Email",
-      status: "Terkirim",
+      status: "Sent",
       lastUpdate: "02/10/2025 14:30",
     },
     {
@@ -53,7 +54,7 @@ const ManagementDeliveryInvoice = () => {
       invoiceNo: "INV-001",
       customer: "PT. JAYA",
       channel: "SMS",
-      status: "Terkirim",
+      status: "Sent",
       lastUpdate: "02/10/2025 14:32",
     },
     {
@@ -61,7 +62,7 @@ const ManagementDeliveryInvoice = () => {
       invoiceNo: "INV-002",
       customer: "PT. MAKMUR",
       channel: "WhatsApp",
-      status: "Gagal",
+      status: "Failed",
       lastUpdate: "02/10/2025 14:31",
     },
     {
@@ -69,7 +70,7 @@ const ManagementDeliveryInvoice = () => {
       invoiceNo: "INV-002",
       customer: "PT. MAKMUR",
       channel: "SMS",
-      status: "Gagal",
+      status: "Failed",
       lastUpdate: "02/10/2025 14:31",
     },
     {
@@ -77,7 +78,7 @@ const ManagementDeliveryInvoice = () => {
       invoiceNo: "INV-003",
       customer: "Bpk. Budi",
       channel: "SMS",
-      status: "Terkirim",
+      status: "Sent",
       lastUpdate: "02/10/2025 14:32",
     },
     {
@@ -85,7 +86,7 @@ const ManagementDeliveryInvoice = () => {
       invoiceNo: "INV-004",
       customer: "PT. SEJAHTERA",
       channel: "Kurir",
-      status: "Menunggu",
+      status: "Scheduled",
       lastUpdate: "02/10/2025 14:33",
     },
     {
@@ -93,7 +94,7 @@ const ManagementDeliveryInvoice = () => {
       invoiceNo: "INV-005",
       customer: "PT. ABADI",
       channel: "Email",
-      status: "Terkirim",
+      status: "Sent",
       lastUpdate: "02/10/2025 14:35",
     },
     {
@@ -101,7 +102,7 @@ const ManagementDeliveryInvoice = () => {
       invoiceNo: "INV-006",
       customer: "CV. MAJU",
       channel: "WhatsApp",
-      status: "Menunggu",
+      status: "Scheduled",
       lastUpdate: "02/10/2025 14:36",
     },
   ];
@@ -141,14 +142,11 @@ const ManagementDeliveryInvoice = () => {
       title: "STATUS",
       dataIndex: "status",
       width: 120,
-      render: (status) => {
-        let color = "default";
-        if (status === "Terkirim") color = "success";
-        else if (status === "Gagal") color = "error";
-        else if (status === "Menunggu") color = "warning";
-
-        return <Tag color={color}>{status}</Tag>;
-      },
+      render: (status) => (
+        <div className={"flex justify-center"}>
+          <StatusComponent colour={status}>{status}</StatusComponent>
+        </div>
+      ),
     },
     {
       key: "actions",
