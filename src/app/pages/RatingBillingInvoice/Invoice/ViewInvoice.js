@@ -32,7 +32,6 @@ import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import { configApp } from "../../../../constants/configApp";
 import { tokenHeader } from "../../../../utils/tokenHeader";
-import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const ViewInvoice = () => {
   // Selector
@@ -61,17 +60,15 @@ const ViewInvoice = () => {
   const [modalReGenerate, setModalReGenerate] = useState(false);
   const [modalGenerate, setModalGenerate] = useState(false);
 
-  // ✅ State untuk fix column (dengan localStorage persistence)
+  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
     const saved = localStorage.getItem("invoiceFixedColumns");
     return saved
       ? JSON.parse(saved)
       : {
-          no: "left",
-          invoiceNumber: "left",
-          status: "right",
-          action: "right",
-        }; // Default fix invoice number
+          left: [], // Default: no fixed left
+          right: [], // Default: no fixed right
+        };
   });
 
   // ✅ Save to localStorage when fixedColumns change
@@ -387,7 +384,7 @@ const ViewInvoice = () => {
     itemGrantAccess
   );
 
-  // ✅ Get base columns and add 'key' property to each column
+  // ✅ Get base columns with key property
   const baseColumns = useMemo(() => {
     const invoiceCols = columnsInvoice(
       search,
@@ -408,18 +405,73 @@ const ViewInvoice = () => {
     return columnsWithKeys;
   }, [search, page, pageSize, searchedColumn, searchText, actionCols]);
 
-  // ✅ Apply fixed columns using useMemo
-  const processedColumns = useMemo(() => {
-    return applyFixedColumns(baseColumns, fixedColumns);
-  }, [baseColumns, fixedColumns]);
-
-  // ✅ Extract column definitions for ColumnFixDropdown (with key and title only)
+  // ✅ Extract column definitions for ColumnSettings (with key and title only)
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
       title: col.title,
     }));
   }, [baseColumns]);
+
+  // ✅ Apply fixed columns and reorder using useMemo
+  const columns = useMemo(() => {
+    console.log("🔄 === REORDERING INVOICE COLUMNS ===");
+    console.log(
+      "📋 Original columns:",
+      baseColumns.map((c) => c.title).join(" → ")
+    );
+    console.log("📌 Fixed state:", fixedColumns);
+
+    // Separate columns into categories
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    baseColumns.forEach((col) => {
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        leftFixed.push(col);
+        console.log(`  ⬅️  LEFT FIXED: ${col.title} (${colKey})`);
+      } else if (fixedColumns.right.includes(colKey)) {
+        rightFixed.push(col);
+        console.log(`  ➡️  RIGHT FIXED: ${col.title} (${colKey})`);
+      } else {
+        normal.push(col);
+        console.log(`  ➖ NORMAL: ${col.title} (${colKey})`);
+      }
+    });
+
+    console.log("📊 Groups:");
+    console.log("  Left:", leftFixed.map((c) => c.title).join(", "));
+    console.log("  Normal:", normal.map((c) => c.title).join(", "));
+    console.log("  Right:", rightFixed.map((c) => c.title).join(", "));
+
+    // Reorder: left fixed → normal → right fixed
+    const reorderedColumns = [...leftFixed, ...normal, ...rightFixed];
+
+    console.log(
+      "✅ Final order:",
+      reorderedColumns.map((c) => c.title).join(" → ")
+    );
+    console.log("🔄 === REORDERING END ===");
+
+    // Apply fixed property
+    return reorderedColumns.map((col) => {
+      const newCol = { ...col };
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        newCol.fixed = "left";
+      } else if (fixedColumns.right.includes(colKey)) {
+        newCol.fixed = "right";
+      } else {
+        delete newCol.fixed;
+      }
+
+      return newCol;
+    });
+  }, [baseColumns, fixedColumns]);
 
   return (
     <LayoutMenu>
@@ -448,7 +500,7 @@ const ViewInvoice = () => {
           <div className="w-full">
             <TableRBI
               dataSource={dataSource}
-              columns={processedColumns}
+              columns={columns}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
