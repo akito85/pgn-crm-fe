@@ -614,9 +614,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         }
       >
         <div className={"w-full flex justify-between items-center my-2"}>
-          <div className="text-sm text-gray-600">
-            Total Records: {pageInfo?.totalElements || 0}
-          </div>
           <ButtonComponent
             type={"submit"}
             border={false}

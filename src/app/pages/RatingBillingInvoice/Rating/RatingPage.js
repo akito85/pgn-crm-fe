@@ -46,6 +46,18 @@ const RatingPage = () => {
     action: "right",
   });
 
+   const detailRef = useRef(null);
+
+   useEffect(() => {
+    if (pageDetail && detailRef.current) {
+      // Smooth scroll ke detail section
+      detailRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }
+  }, [pageDetail]);
+
   // Use Effect
   useEffect(() => {
     dispatch(
@@ -254,11 +266,13 @@ const RatingPage = () => {
 
         {/* Detail Rating */}
         {pageDetail === true ? (
-          <RatingDetail
-            calculationCode={calculationCode}
-            SAId={saNumberId}
-            ratingCodeId={ratingCode}
-          />
+          <div ref={detailRef}>
+            <RatingDetail
+              calculationCode={calculationCode}
+              SAId={saNumberId}
+              ratingCodeId={ratingCode}
+            />
+          </div>
         ) : null}
       </Spin>
     </LayoutMenu>
