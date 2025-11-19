@@ -1,7 +1,7 @@
-// TableRBI.js
+// TableRBI.js (updated)
+import React, { useMemo, useState } from "react";
 import { DownloadOutlined, FilterOutlined } from "@ant-design/icons";
 import { Button, Pagination, Select, Table } from "antd";
-import { useState } from "react";
 import ColumnSettings from "./ColumnSettings/ColumnSettings";
 import SearchBar from "./SearchBar";
 import AdvanceSearch from "./AdvanceSearch";
@@ -11,7 +11,7 @@ const { Option } = Select;
 const TableRBI = ({
   idTable,
   dataSource,
-  columns,
+  columns = [],
   pageSize,
   current,
   loading,
@@ -29,33 +29,74 @@ const TableRBI = ({
   onSort = () => {},
   handleDownload = () => {},
   columnDefinitions,
-  fixedColumns,
-  setFixedColumns,
+  fixedColumns = { left: [], right: [] },
+  setFixedColumns = () => {},
   onAdvanceSearch = () => {},
 }) => {
-  const [optionSelectedCol, setOptionSelectedCol] = useState([]);
+  const [optionSelectedCol, setOptionSelectedCol] = useState([]); // hidden columns keys
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
 
-  // Filter columns based on visibility (hide/show)
-  const filterColumns = () => {
-    return columns.filter((col) => {
-      return !optionSelectedCol.includes(col.key);
-    });
-  };
+  // ---------- Helper: build visible + fixed-applied columns ----------
+  const displayedColumns = useMemo(() => {
+    // Normalize keys for safety
+    const cols = (columns || []).map((c) => ({
+      ...c,
+      key: c.key || c.dataIndex || c.title,
+    }));
 
-  // Handle advance search
+    // 1) Filter out hidden columns
+    const visible = cols.filter((col) => !optionSelectedCol.includes(col.key));
+
+    // 2) Separate into left, normal, right based on fixedColumns lists, preserving original order
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    visible.forEach((col) => {
+      if (
+        Array.isArray(fixedColumns.left) &&
+        fixedColumns.left.includes(col.key)
+      ) {
+        leftFixed.push(col);
+      } else if (
+        Array.isArray(fixedColumns.right) &&
+        fixedColumns.right.includes(col.key)
+      ) {
+        rightFixed.push(col);
+      } else {
+        normal.push(col);
+      }
+    });
+
+    // 3) Apply `fixed` property to copies of columns
+    const applyFixedProp = (col, fixedPos) => {
+      const newCol = { ...col };
+      if (fixedPos) newCol.fixed = fixedPos;
+      else delete newCol.fixed;
+      return newCol;
+    };
+
+    // 4) Reorder: leftFixed -> normal -> rightFixed
+    const finalCols = [
+      ...leftFixed.map((c) => applyFixedProp(c, "left")),
+      ...normal.map((c) => applyFixedProp(c, undefined)),
+      ...rightFixed.map((c) => applyFixedProp(c, "right")),
+    ];
+
+    return finalCols;
+  }, [columns, optionSelectedCol, fixedColumns]);
+
+  // ---------- Handlers ----------
   const handleAdvanceSearch = (searchData) => {
-    console.log("Advance Search Data:", searchData);
     onAdvanceSearch(searchData);
     setIsAdvanceOpen(false);
   };
 
-  // Handle clear filter
   const handleClearFilter = () => {
-    console.log("Clear filter");
     onAdvanceSearch(null);
   };
 
+  // ---------- UI ----------
   return (
     <div className={"flex flex-col w-full"}>
       {useSelect ? (
@@ -107,7 +148,7 @@ const TableRBI = ({
       {/* Table */}
       <Table
         dataSource={dataSource}
-        columns={filterColumns()}
+        columns={displayedColumns}
         scroll={tableScrolled}
         bordered
         pagination={false}

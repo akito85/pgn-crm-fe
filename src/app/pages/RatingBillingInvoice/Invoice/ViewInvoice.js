@@ -66,8 +66,8 @@ const ViewInvoice = () => {
     return saved
       ? JSON.parse(saved)
       : {
-          left: [], // Default: no fixed left
-          right: [], // Default: no fixed right
+          left: ["no"], // Default: no fixed left
+          right: ["action", "status"], // Default: no fixed right
         };
   });
 
@@ -405,7 +405,6 @@ const ViewInvoice = () => {
     return columnsWithKeys;
   }, [search, page, pageSize, searchedColumn, searchText, actionCols]);
 
-  // ✅ Extract column definitions for ColumnSettings (with key and title only)
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
@@ -413,15 +412,7 @@ const ViewInvoice = () => {
     }));
   }, [baseColumns]);
 
-  // ✅ Apply fixed columns and reorder using useMemo
   const columns = useMemo(() => {
-    console.log("🔄 === REORDERING INVOICE COLUMNS ===");
-    console.log(
-      "📋 Original columns:",
-      baseColumns.map((c) => c.title).join(" → ")
-    );
-    console.log("📌 Fixed state:", fixedColumns);
-
     // Separate columns into categories
     const leftFixed = [];
     const rightFixed = [];
@@ -432,29 +423,15 @@ const ViewInvoice = () => {
 
       if (fixedColumns.left.includes(colKey)) {
         leftFixed.push(col);
-        console.log(`  ⬅️  LEFT FIXED: ${col.title} (${colKey})`);
       } else if (fixedColumns.right.includes(colKey)) {
         rightFixed.push(col);
-        console.log(`  ➡️  RIGHT FIXED: ${col.title} (${colKey})`);
       } else {
         normal.push(col);
-        console.log(`  ➖ NORMAL: ${col.title} (${colKey})`);
       }
     });
 
-    console.log("📊 Groups:");
-    console.log("  Left:", leftFixed.map((c) => c.title).join(", "));
-    console.log("  Normal:", normal.map((c) => c.title).join(", "));
-    console.log("  Right:", rightFixed.map((c) => c.title).join(", "));
-
     // Reorder: left fixed → normal → right fixed
     const reorderedColumns = [...leftFixed, ...normal, ...rightFixed];
-
-    console.log(
-      "✅ Final order:",
-      reorderedColumns.map((c) => c.title).join(" → ")
-    );
-    console.log("🔄 === REORDERING END ===");
 
     // Apply fixed property
     return reorderedColumns.map((col) => {
@@ -506,7 +483,7 @@ const ViewInvoice = () => {
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements}
-              tableScrolled={{ y: 525, x: 2000 }}
+              tableScrolled={{ y: 525, x: 7000 }}
               onSort={onSortApi}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
