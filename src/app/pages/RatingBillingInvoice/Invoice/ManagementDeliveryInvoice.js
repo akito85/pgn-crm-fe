@@ -10,6 +10,7 @@ import PreviewMessageModal from "./_components/ManagementDeliveryComponent/Previ
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import StatusComponent from "../../../../components/StatusComponent";
+import CreateFormDelivery from "./_components/ManagementDeliveryComponent/CreateFormDelivery";
 
 // Main Component
 const ManagementDeliveryInvoice = () => {
@@ -291,7 +292,7 @@ const ManagementDeliveryInvoice = () => {
         />
 
         {/* Create Job Modal */}
-        <CreateJobModal
+        <CreateFormDelivery
           visible={modalVisible}
           onCancel={() => setModalVisible(false)}
           onSubmit={handleCreateJob}
