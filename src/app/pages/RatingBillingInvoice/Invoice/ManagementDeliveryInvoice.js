@@ -1,6 +1,6 @@
 // components/ManagementDeliveryInvoice.js
-import React, { useState } from "react";
-import { Card, Button, Tag } from "antd";
+import React, { useState, useMemo } from "react";
+import { Button, Tag } from "antd";
 import { EyeOutlined, PlusOutlined } from "@ant-design/icons";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import SummaryStatistics from "./_components/ManagementDeliveryComponent/SummaryStatistics";
@@ -106,11 +106,12 @@ const ManagementDeliveryInvoice = () => {
     },
   ];
 
+  // Column definitions
   const columnDefinitions = [
     {
       key: "no",
       title: "NO",
-      width: 10,
+      width: 60,
       render: (_, __, index) => (
         <div className="text-center">
           {(currentPage - 1) * pageSize + index + 1}
@@ -121,25 +122,25 @@ const ManagementDeliveryInvoice = () => {
       key: "invoiceNo",
       title: "INVOICE NUMBER",
       dataIndex: "invoiceNo",
-      width: 60,
+      width: 150,
     },
     {
       key: "customer",
       title: "CUSTOMER",
       dataIndex: "customer",
-      width: 50,
+      width: 200,
     },
     {
       key: "channel",
       title: "DELIVERY SERVICE",
       dataIndex: "channel",
-      width: 60,
+      width: 150,
     },
     {
       key: "status",
       title: "STATUS",
       dataIndex: "status",
-      width: 35,
+      width: 120,
       render: (status) => {
         let color = "default";
         if (status === "Terkirim") color = "success";
@@ -152,7 +153,7 @@ const ManagementDeliveryInvoice = () => {
     {
       key: "actions",
       title: "ACTION",
-      width: 18,
+      width: 100,
       render: (_, record) => (
         <div className="flex justify-center gap-2">
           <Button
@@ -167,18 +168,42 @@ const ManagementDeliveryInvoice = () => {
     },
   ];
 
-  // Apply fixed columns
-  const columns = columnDefinitions.map((col) => {
-    const newCol = { ...col };
+  // Apply fixed columns and reorder
+  const columns = useMemo(() => {
+    // Separate columns into categories while preserving original order
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
 
-    if (fixedColumns.left.includes(col.key)) {
-      newCol.fixed = "left";
-    } else if (fixedColumns.right.includes(col.key)) {
-      newCol.fixed = "right";
-    }
+    // First pass: categorize columns based on their ORIGINAL order in columnDefinitions
+    columnDefinitions.forEach((col) => {
+      if (fixedColumns.left.includes(col.key)) {
+        leftFixed.push(col);
+      } else if (fixedColumns.right.includes(col.key)) {
+        rightFixed.push(col);
+      } else {
+        normal.push(col);
+      }
+    });
 
-    return newCol;
-  });
+    // Reorder: left fixed → normal → right fixed
+    const reorderedColumns = [...leftFixed, ...normal, ...rightFixed];
+
+    // Apply fixed property
+    return reorderedColumns.map((col) => {
+      const newCol = { ...col };
+
+      if (fixedColumns.left.includes(col.key)) {
+        newCol.fixed = "left";
+      } else if (fixedColumns.right.includes(col.key)) {
+        newCol.fixed = "right";
+      } else {
+        delete newCol.fixed;
+      }
+
+      return newCol;
+    });
+  }, [fixedColumns, currentPage, pageSize]);
 
   const handleApplyFilter = () => {
     setLoading(true);
@@ -259,6 +284,7 @@ const ManagementDeliveryInvoice = () => {
           onChange={handlePageChange}
           onSizeChanger={handleSizeChange}
           totalData={invoiceData.length}
+          tableScrolled={{ x: 1200 }}
           useSelect={true}
           usePagination={true}
           columnDefinitions={columnDefinitions}

@@ -1,9 +1,7 @@
 // components/ColumnSettings/ColumnSettings.js
 import React, { useState, useEffect, useRef } from "react";
-import { Button, Input, Checkbox, Select } from "antd";
+import { Button, Input, Checkbox, Radio } from "antd";
 import { DownOutlined, UpOutlined, SearchOutlined } from "@ant-design/icons";
-
-const { Option } = Select;
 
 const ColumnSettings = ({
   columns = [],
@@ -13,8 +11,8 @@ const ColumnSettings = ({
   onFixedColumnsChange,
   buttonStyle = {},
   buttonText = "Column Settings",
-  panelWidth = "440px", // Updated default to 440px
-  panelMaxHeight = "288px", // Updated default to 288px (total height including padding)
+  panelWidth = "480px",
+  panelMaxHeight = "288px",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -68,6 +66,12 @@ const ColumnSettings = ({
     return null;
   };
 
+  // Check if column can be fixed to left
+  const canFixLeft = (columnIndex) => columnIndex !== columns.length - 1;
+
+  // Check if column can be fixed to right
+  const canFixRight = (columnIndex) => columnIndex !== 0;
+
   // Handle visibility checkbox change
   const handleVisibilityChange = (e, columnKey) => {
     const checked = e.target.checked;
@@ -88,11 +92,24 @@ const ColumnSettings = ({
     if (!onFixedColumnsChange) return;
 
     if (checked) {
-      // Add to left by default
-      onFixedColumnsChange({
-        ...fixedColumns,
-        left: [...fixedColumns.left, columnKey],
-      });
+      // Determine default position based on column index
+      const columnIndex = columns.findIndex((col) => col.key === columnKey);
+      const isLastColumn = columnIndex === columns.length - 1;
+      const defaultPosition = isLastColumn ? "right" : "left";
+
+      // Add to the appropriate position
+      const newFixed = {
+        left: fixedColumns.left.filter((key) => key !== columnKey),
+        right: fixedColumns.right.filter((key) => key !== columnKey),
+      };
+
+      if (defaultPosition === "left") {
+        newFixed.left = [...newFixed.left, columnKey];
+      } else {
+        newFixed.right = [...newFixed.right, columnKey];
+      }
+
+      onFixedColumnsChange(newFixed);
     } else {
       // Remove from both left and right
       onFixedColumnsChange({
@@ -106,11 +123,13 @@ const ColumnSettings = ({
   const handlePositionChange = (columnKey, position) => {
     if (!onFixedColumnsChange) return;
 
+    // Remove from both positions first
     const newFixed = {
       left: fixedColumns.left.filter((key) => key !== columnKey),
       right: fixedColumns.right.filter((key) => key !== columnKey),
     };
 
+    // Add to the selected position
     if (position === "left") {
       newFixed.left = [...newFixed.left, columnKey];
     } else if (position === "right") {
@@ -192,7 +211,7 @@ const ColumnSettings = ({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "35px 1fr 55px 80px",
+              gridTemplateColumns: "35px 1fr 55px 110px",
               gap: "6px",
               padding: "6px 4px",
               fontWeight: "600",
@@ -226,7 +245,7 @@ const ColumnSettings = ({
                   key={col.key || index}
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "35px 1fr 55px 80px",
+                    gridTemplateColumns: "35px 1fr 55px 110px",
                     gap: "6px",
                     padding: "8px 4px",
                     alignItems: "center",
@@ -266,21 +285,43 @@ const ColumnSettings = ({
                     />
                   </div>
 
-                  {/* Position Select */}
+                  {/* Position Radio Buttons */}
                   <div>
-                    <Select
+                    <Radio.Group
                       value={position || "left"}
-                      onChange={(value) => handlePositionChange(col.key, value)}
+                      onChange={(e) =>
+                        handlePositionChange(col.key, e.target.value)
+                      }
                       disabled={!isFixed || !isVisible}
-                      style={{
-                        width: "100%",
-                        fontSize: "11px",
-                      }}
                       size="small"
+                      buttonStyle="solid"
+                      style={{ display: "flex", gap: "4px" }}
                     >
-                      <Option value="left">Left</Option>
-                      <Option value="right">Right</Option>
-                    </Select>
+                      <Radio.Button
+                        value="left"
+                        disabled={!canFixLeft(index) || !isFixed || !isVisible}
+                        style={{
+                          fontSize: "11px",
+                          flex: 1,
+                          textAlign: "center",
+                          padding: "0 8px",
+                        }}
+                      >
+                        Left
+                      </Radio.Button>
+                      <Radio.Button
+                        value="right"
+                        disabled={!canFixRight(index) || !isFixed || !isVisible}
+                        style={{
+                          fontSize: "11px",
+                          flex: 1,
+                          textAlign: "center",
+                          padding: "0 8px",
+                        }}
+                      >
+                        Right
+                      </Radio.Button>
+                    </Radio.Group>
                   </div>
                 </div>
               );
