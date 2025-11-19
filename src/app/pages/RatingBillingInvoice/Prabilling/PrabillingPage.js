@@ -452,7 +452,6 @@ const PrabillingPage = () => {
     },
   ];
 
-  // ✅ Call hook at component level
   const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
 
   // ✅ Combine columns with keys (base + action columns)

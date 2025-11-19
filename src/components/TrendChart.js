@@ -1,7 +1,9 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import { Empty, Radio } from "antd";
+import { Empty, Select } from "antd";
 import moment from "moment";
 import { Chart, registerables } from "chart.js";
+
+const { Option } = Select;
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -15,7 +17,7 @@ const TrendChart = ({ data = [] }) => {
     if (!data || data.length === 0) return [];
     return data.map((item) => ({
       ...item,
-      date: moment(item.date).format("DD MMM"),
+      date: moment(item.date).format("MMM"),
       fullDate: moment(item.date).format("DD MMMM YYYY"),
       dayName: moment(item.date).format("dddd"),
     }));
@@ -25,46 +27,31 @@ const TrendChart = ({ data = [] }) => {
     {
       key: "pendingTransactions",
       name: "Pending Transactions",
-      color: "#faad14",
+      color: "#FF9800",
     },
-    { key: "pendingApprovals", name: "Pending Approvals", color: "#1890ff" },
+    { 
+      key: "pendingApprovals", 
+      name: "Pending Approvals", 
+      color: "#2196F3" 
+    },
     {
       key: "gapRatingBilling",
       name: "Gap Rating vs Billing",
-      color: "#f5222d",
+      color: "#F44336",
     },
     {
       key: "gapPraBillingMaster",
-      name: "Gap Pra-Billing vs Master",
-      color: "#722ed1",
+      name: "Gap Pra Billing vs Master",
+      color: "#9E9E9E",
     },
   ];
 
-  const activeMetrics =
-    selectedMetric === "all"
-      ? metrics
-      : metrics.filter((m) => m.key === selectedMetric);
-
-  const stats = useMemo(() => {
-    if (chartData.length === 0) return [];
-    return metrics.map((metric) => {
-      const values = chartData.map((d) => d[metric.key] || 0);
-      const total = values.reduce((a, b) => a + b, 0);
-      const avg = total / values.length;
-      const max = Math.max(...values);
-      const trend = values[values.length - 1] - values[0];
-
-      return {
-        ...metric,
-        total,
-        avg: avg.toFixed(1),
-        max,
-        trend,
-        trendPercent:
-          values[0] !== 0 ? ((trend / values[0]) * 100).toFixed(1) : 0,
-      };
-    });
-  }, [chartData]);
+  const getActiveMetrics = () => {
+    if (selectedMetric === "all") {
+      return metrics;
+    }
+    return metrics.filter((m) => m.key === selectedMetric);
+  };
 
   useEffect(() => {
     if (!chartRef.current || chartData.length === 0) return;
@@ -75,24 +62,25 @@ const TrendChart = ({ data = [] }) => {
     }
 
     const ctx = chartRef.current.getContext("2d");
+    const activeMetrics = getActiveMetrics();
 
     // Prepare datasets
     const datasets = activeMetrics.map((metric) => ({
       label: metric.name,
       data: chartData.map((item) => item[metric.key] || 0),
       borderColor: metric.color,
-      backgroundColor: metric.color + "20",
-      borderWidth: 2.5,
-      tension: 0.1,
-      fill: true,
-      pointRadius: 4,
-      pointHoverRadius: 6,
-      pointBackgroundColor: "#fff",
-      pointBorderColor: metric.color,
+      backgroundColor: "transparent",
+      borderWidth: 2,
+      tension: 0.4,
+      fill: false,
+      pointRadius: 0,
+      pointHoverRadius: 5,
+      pointBackgroundColor: metric.color,
+      pointBorderColor: "#fff",
       pointBorderWidth: 2,
-      pointHoverBackgroundColor: "#fff",
-      pointHoverBorderColor: metric.color,
-      pointHoverBorderWidth: 3,
+      pointHoverBackgroundColor: metric.color,
+      pointHoverBorderColor: "#fff",
+      pointHoverBorderWidth: 2,
     }));
 
     // Create new chart
@@ -111,14 +99,20 @@ const TrendChart = ({ data = [] }) => {
         },
         plugins: {
           legend: {
-            display: selectedMetric === "all",
+            display: true,
             position: "bottom",
+            align: "start",
             labels: {
               usePointStyle: true,
-              padding: 15,
+              pointStyle: "line",
+              padding: 20,
               font: {
-                size: 12,
+                size: 11,
+                family: "Arial, sans-serif",
               },
+              color: "#666",
+              boxWidth: 20,
+              boxHeight: 2,
             },
           },
           tooltip: {
@@ -126,10 +120,9 @@ const TrendChart = ({ data = [] }) => {
             backgroundColor: "#fff",
             titleColor: "#262626",
             bodyColor: "#595959",
-            borderColor: "#f0f0f0",
+            borderColor: "#e0e0e0",
             borderWidth: 1,
-            padding: 12,
-            boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+            padding: 10,
             displayColors: true,
             callbacks: {
               title: (tooltipItems) => {
@@ -145,33 +138,37 @@ const TrendChart = ({ data = [] }) => {
         scales: {
           y: {
             beginAtZero: true,
-            grid: {
-              color: "#f0f0f0",
-              drawBorder: true,
-              borderColor: "#d9d9d9",
-              borderWidth: 1,
-            },
+            max: 100,
             ticks: {
+              stepSize: 20,
               color: "#999",
               font: {
                 size: 10,
               },
               padding: 8,
+            },
+            grid: {
+              color: "#f0f0f0",
+              drawBorder: false,
+            },
+            border: {
+              display: false,
             },
           },
           x: {
-            grid: {
-              display: false,
-              drawBorder: true,
-              borderColor: "#d9d9d9",
-              borderWidth: 1,
-            },
             ticks: {
               color: "#999",
               font: {
                 size: 10,
               },
               padding: 8,
+            },
+            grid: {
+              display: false,
+              drawBorder: false,
+            },
+            border: {
+              display: false,
             },
           },
         },
@@ -184,7 +181,7 @@ const TrendChart = ({ data = [] }) => {
         chartInstanceRef.current.destroy();
       }
     };
-  }, [chartData, activeMetrics, selectedMetric]);
+  }, [chartData, selectedMetric]);
 
   if (!data || data.length === 0) {
     return (
@@ -202,116 +199,50 @@ const TrendChart = ({ data = [] }) => {
   }
 
   return (
-    <div style={{ padding: "0 8px" }}>
+    <div>
+      {/* Header dengan Dropdown */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: 20,
-          flexWrap: "wrap",
-          gap: 12,
         }}
       >
-        <Radio.Group
-          value={selectedMetric}
-          onChange={(e) => setSelectedMetric(e.target.value)}
-          buttonStyle="solid"
-          size="small"
+        <div
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: "#262626",
+            textTransform: "uppercase",
+            letterSpacing: "0.5px",
+          }}
         >
-          <Radio.Button value="all">Semua</Radio.Button>
+          CHART GRAPHIC TREND ANOMALIES
+        </div>
+        <Select
+          value={selectedMetric}
+          onChange={(value) => setSelectedMetric(value)}
+          style={{ width: 200 }}
+          size="middle"
+        >
+          <Option value="all">Semua</Option>
           {metrics.map((m) => (
-            <Radio.Button key={m.key} value={m.key}>
-              {m.name.split(" ")[0]}
-            </Radio.Button>
+            <Option key={m.key} value={m.key}>
+              {m.name}
+            </Option>
           ))}
-        </Radio.Group>
+        </Select>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: 12,
-          marginBottom: 20,
-        }}
-      >
-        {stats.map((stat) => {
-          const isActive =
-            selectedMetric === "all" || selectedMetric === stat.key;
-          return (
-            <div
-              key={stat.key}
-              style={{
-                padding: "12px 16px",
-                borderRadius: 8,
-                border: `2px solid ${isActive ? stat.color : "#f0f0f0"}`,
-                backgroundColor: isActive ? `${stat.color}10` : "#fafafa",
-                cursor: "pointer",
-                transition: "all 0.3s",
-                opacity: isActive ? 1 : 0.6,
-              }}
-              onClick={() => setSelectedMetric(stat.key)}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  marginBottom: 8,
-                }}
-              >
-                <span style={{ fontSize: 12, color: "#666", fontWeight: 500 }}>
-                  {stat.name}
-                </span>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "baseline",
-                }}
-              >
-                <div>
-                  <div
-                    style={{ fontSize: 24, fontWeight: 700, color: stat.color }}
-                  >
-                    {stat.total}
-                  </div>
-                  <div style={{ fontSize: 11, color: "#999" }}>
-                    Total • Avg: {stat.avg}
-                  </div>
-                </div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color:
-                      stat.trend > 0
-                        ? "#f5222d"
-                        : stat.trend < 0
-                        ? "#52c41a"
-                        : "#999",
-                    textAlign: "right",
-                  }}
-                >
-                  {stat.trend > 0 ? "↑" : stat.trend < 0 ? "↓" : "→"}
-                  {Math.abs(stat.trendPercent)}%
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
+      {/* Chart Container */}
       <div
         style={{
           backgroundColor: "#fff",
-          borderRadius: 8,
-          padding: 16,
+          borderRadius: "6px",
+          padding: "20px 16px",
           border: "1px solid #f0f0f0",
-          boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
-          height: 350,
+          height: 320,
         }}
       >
         <canvas ref={chartRef}></canvas>

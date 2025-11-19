@@ -6,9 +6,6 @@ import {
   showModalError,
 } from "../general_slice";
 
-// ============================================
-// UTILITY FUNCTIONS
-// ============================================
 
 const transformBillingItems = (items) => {
   if (!items || items.length === 0) return [];
@@ -60,10 +57,7 @@ const handleApiError = (error, thunkAPI, defaultMessage = "Terjadi kesalahan") =
   return thunkAPI.rejectWithValue(error.response?.data);
 };
 
-// ============================================
-// INITIAL STATE
-// ============================================
-
+//initial state
 const initialState = {
   list_efaktur: [],
   loading: false,
@@ -103,17 +97,13 @@ const initialState = {
   },
 };
 
-// ============================================
-// ASYNC THUNKS
-// ============================================
-
 // GET - List Operations
 export const getListEFaktur = createAsyncThunk(
   "EFAKTUR/GET_LIST_EFAKTUR",
   async ({ page = 1, pageSize = 10, sort = "invoiceDate~desc", filters = {} }, thunkAPI) => {
     try {
       const searchParam = buildSearchParams(filters);
-      const url = `/v1/dbs/api/rbi/e-invoice?page=${page - 1}&size=${pageSize}&sort=${sort}${
+      const url = `/v1/dbs/api/rbi/e-invoice?page=${page}&size=${pageSize}&sort=${sort}${
         searchParam ? `&search=${searchParam}` : ""
       }`;
 
@@ -234,7 +224,6 @@ export const generateEFakturWithAttachments = createAsyncThunk(
   "EFAKTUR/GENERATE_WITH_ATTACHMENTS",
   async ({ efakturData, attachments = [] }, thunkAPI) => {
     try {
-      // Step 1: Create E-Faktur
       const createUrl = "/v1/dbs/api/rbi/e-invoice/create-or-update";
       const requestBody = {
         apphierId: String(efakturData.apphierId),
@@ -245,7 +234,8 @@ export const generateEFakturWithAttachments = createAsyncThunk(
 
       const createResponse = await ratingBillingHttpService.createData(
         createUrl,
-        requestBody
+        requestBody,
+      
       );
 
       if (!createResponse.success) {
@@ -259,7 +249,6 @@ export const generateEFakturWithAttachments = createAsyncThunk(
         throw new Error("einvoiceId tidak ditemukan di response");
       }
 
-      // Step 2: Upload Attachments (only new files)
       const uploadResults = [];
       const newAttachments = attachments.filter((item) => item.dataType !== "exist");
 
@@ -288,7 +277,8 @@ export const generateEFakturWithAttachments = createAsyncThunk(
                 const baseProgress = 70;
                 const uploadProgress = (30 / newAttachments.length) * (i + progressPercent / 100);
                 thunkAPI.dispatch(updateUploadProgress(Math.min(baseProgress + uploadProgress, 100)));
-              }
+              },
+            
             );
 
             uploadResults.push({
@@ -358,7 +348,8 @@ export const uploadAttachment = createAsyncThunk(
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
         formData,
-        onProgress || (() => {})
+        onProgress || (() => {}),
+      
       );
 
       return {
@@ -437,10 +428,13 @@ export const approvedEfaktur = createAsyncThunk(
 
 export const cancelEFaktur = createAsyncThunk(
   "EFAKTUR/CANCEL_EFAKTUR",
-  async ({ efakturId, reason }, thunkAPI) => {
+  async ({ efakturId, reason, appHierId }, thunkAPI) => { 
     try {
       const url = `/v1/dbs/api/rbi/e-invoice/${efakturId}/cancellation`;
-      const requestBody = { reason };
+      const requestBody = { 
+        reason,
+        appHierId: 620
+      };
 
       const response = await ratingBillingHttpService.createData(url, requestBody);
 
@@ -477,12 +471,13 @@ export const cancelEFaktur = createAsyncThunk(
 
 export const replaceEFaktur = createAsyncThunk(
   "EFAKTUR/REPLACE_EFAKTUR",
-  async ({ efakturId, reason }, thunkAPI) => {
+  async ({ efakturId, reason, appHierId }, thunkAPI) => { 
     try {
       const url = `/v1/dbs/api/rbi/e-invoice/replacement`;
       const requestBody = {
         efakturId: String(efakturId),
         reason,
+        appHierId: 620,
       };
 
       const response = await ratingBillingHttpService.createData(url, requestBody);
@@ -568,7 +563,7 @@ export const uploadManualEFaktur = createAsyncThunk(
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
         formData,
-        () => {}
+        () => {},     
       );
 
       thunkAPI.dispatch(showModalSuccess({
@@ -600,10 +595,6 @@ export const downloadEFakturList = createAsyncThunk(
     }
   }
 );
-
-// ============================================
-// SLICE
-// ============================================
 
 const efakturSlice = createSlice({
   name: "efaktur",
