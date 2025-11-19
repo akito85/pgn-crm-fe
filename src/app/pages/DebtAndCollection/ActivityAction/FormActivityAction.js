@@ -1,5 +1,5 @@
 import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
-import { Form, Input, Spin,InputNumber } from "antd";
+import { Form, Input, Spin,Select} from "antd";
 import SVGIcon from "../../../../assets/Icon/index";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,20 +10,26 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
+import SelectComponent from "../../../../components/SelectComponent";
 import {
-  getDetailTemplateRemindingPaginate,
-  createUpdateTemplateReminding,
-  validateCreateUpdateTemplateReminding
-} from "../../../../redux/slices/debt_and_collection/templateReminding";
+  getDetailActivityActionPaginate,
+  createActivityAction,
+  updateActivityAction,
+  // getActivityNameList
+} from "../../../../redux/slices/debt_and_collection/activityAction";
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../routes/DebtAndCollection/rc_routes.js";
 import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import { formMessageRequired, hasValue } from "../../../../utils";
-import InputComponent from "../../../../components/InputComponent";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
+const { Option } = Select;
 
-const FormTemplateReminding = (props) => {
+
+const FormActivityAction = (props) => {
   const { type } = props;
-  const { dataDetailTemplateReminding,  loading } = useSelector((state) => state.templateReminding);
+  const { dataDetailActivityAction, dataActivityName, loading } = useSelector((state) => state.activityAction);
+
+  // console.log("dataActivityName", dataActivityName);
+  // console.log("dataDetailActivityAction", dataDetailActivityAction);
 
 
   const location = useLocation();
@@ -36,24 +42,28 @@ const FormTemplateReminding = (props) => {
   const [modalBack, setModalBack] = useState(false);
   const navigate = useNavigate();
   const id = location?.state?.id;
+  // console.log(location?.state?.id)
   const [payload, setPayload] = useState({});
 
   const assert = () => {
-    // console.log("dataDetail", dataDetailTemplateReminding);
+    // console.log("dataDetail", dataDetailActivityAction);
     form.setFieldsValue({
-      remindingType: dataDetailTemplateReminding?.remindingType,
-      content: dataDetailTemplateReminding?.content,
-      emailSubject: dataDetailTemplateReminding?.emailSubject,
-      emailBody: dataDetailTemplateReminding?.emailBody,
-      templateCode: dataDetailTemplateReminding?.templateCode,
+      mpMActivityId: dataDetailActivityAction?.mpMActivityId,
+      resultCode: dataDetailActivityAction?.resultCode,
+      description: dataDetailActivityAction?.description,
     });
   };
+  
+  useEffect(() => {
+    // call detailActivityName
+    // dispatch(getActivityNameList());
+  })
 
   // call id 
   useEffect(() => {
     if (id) {
-      // console.log("id", id);
-      dispatch(getDetailTemplateRemindingPaginate(id));
+      console.log("id", id);
+      dispatch(getDetailActivityActionPaginate(id));
     }
   }, [dispatch, id]);
 
@@ -62,7 +72,7 @@ const FormTemplateReminding = (props) => {
     if (type === 'update') {
       assert();
     }
-  }, [dataDetailTemplateReminding, form, type]);
+  }, [dataDetailActivityAction, form, type]);
 
 
   const routes = [
@@ -71,12 +81,12 @@ const FormTemplateReminding = (props) => {
       breadcrumbName: "Debt & Collection",
     },
     {
-      path: DEBT_AND_COLLECTION_ROUTES.VIEW_TEMPLATE_REMINDING,
-      breadcrumbName: "Template Reminding",
+      path: DEBT_AND_COLLECTION_ROUTES.VIEW_ACTIVITY_ACTION,
+      breadcrumbName: "Activity Action",
     },
     {
       path: "",
-      breadcrumbName: `${type === "update" ? "Update Template Reminding" : "Create Template Reminding"}`,
+      breadcrumbName: `${type === "update" ? "Update Activity Action" : "Create Activity Action"}`,
     },
   ];
 
@@ -85,13 +95,12 @@ const FormTemplateReminding = (props) => {
     try {
       setOpenModal(false);
       if (type === "update") {
-        const bodyUpdate = {
-          ...payload?.body,
-          id: dataDetailTemplateReminding?.id,
-        };
-        await dispatch(createUpdateTemplateReminding(bodyUpdate))?.unwrap()
+
+        const id = dataDetailActivityAction?.mpMActivityResultOptId
+        
+        await dispatch(updateActivityAction({ body: payload?.body, id }))?.unwrap()
       }else{
-        await dispatch(createUpdateTemplateReminding(payload?.body))?.unwrap()
+        await dispatch(createActivityAction(payload?.body))?.unwrap()
       }
     } catch (error) {
       setOpenModal(false);
@@ -101,16 +110,14 @@ const FormTemplateReminding = (props) => {
   const onFinish = async (formValue) => {
     try {
       const dataValue = {
-        remindingType: formValue.remindingType,
-        content: formValue.content,
-        emailSubject: formValue.emailSubject,
-        emailBody: formValue.emailBody,
-        templateCode: formValue.templateCode
+        activityActionId: formValue.activityActionId,
+        activityAction: formValue.activityAction,
+        description: formValue.description
       };
       
       const bodyValidasiUpdate = {
         ...dataValue,
-        id: dataDetailTemplateReminding?.id,
+        id: dataDetailActivityAction?.id,
       };
 
       setPayload(
@@ -118,28 +125,26 @@ const FormTemplateReminding = (props) => {
           body: formValue
         }
       )
-      if (type !== "update") {
-        dispatch(validateCreateUpdateTemplateReminding(dataValue))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setOpenModal(false);
-            }
-            setOpenModal(true);
-          });
-      }else{
-        dispatch(validateCreateUpdateTemplateReminding(bodyValidasiUpdate))
-        .unwrap()
-        .then(async (data) => {
-          const sukses = data?.success;
-          if (sukses === false) {
-            setOpenModal(false);
-          }
+      // if (type !== "update") {
+      //   dispatch(validateCreateUpdateActivityAction(dataValue))
+      //     .unwrap()
+      //     .then(async (data) => {
+      //       const sukses = data?.success;
+      //       if (sukses === false) {
+      //         setOpenModal(false);
+      //       }
+      //       setOpenModal(true);
+      //     });
+      // }
+      // dispatch(validateCreateUpdateActivityAction(bodyValidasiUpdate))
+      //   .unwrap()
+      //   .then(async (data) => {
+      //     const sukses = data?.success;
+      //     if (sukses === false) {
+      //       setOpenModal(false);
+      //     }
           setOpenModal(true);
-        });
-      }
-      
+        // });
 
       
 
@@ -167,7 +172,11 @@ const FormTemplateReminding = (props) => {
 
   const handleRetry = () => {
     handleCancelTryAgain()
-    dispatch(createUpdateTemplateReminding(payload?.body));
+    if (type === "update") {
+        dispatch(updateActivityAction(payload?.body,dataDetailActivityAction?.activityActionId))?.unwrap()
+    }else{
+        dispatch(createActivityAction(payload?.body))?.unwrap()
+    }
   };
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
@@ -184,72 +193,63 @@ const FormTemplateReminding = (props) => {
         >
           <div className={"flex w-full gap-12 mt-5"}>
             <BaseContainer
-              header={type === "update" ? "UPDATE TEMPLATE REMINDING" : "CREATE TEMPLATE REMINDING"}
+              header={type === "update" ? "UPDATE ACTIVITY TYPE" : "CREATE ACTIVITY TYPE"}
             >
-              <div className="flex flex-col w-full gap-4">
+              <div className="flex flex-col w-full gap-3">
+                <div className={"flex w-full gap-3"}>
+                  <div className={"flex flex-col w-full"}>
+                    <Form.Item
+                      label={"Activity Name"}
+                      name={"mpMActivityId"}
+                      className="no-margin-form"
+                      rules={formMessageRequired('Activity Name')}
+                    >
+                      <SelectComponent
+                      >
+                        {dataActivityName?.data?.map((index, key) => (
+                          <Option key={key} value={index.activityNameId}>
+                            {index.name}
+                          </Option>
+                        ))}
+                      </SelectComponent>
+                    </Form.Item>
+                  </div>
+                  <div className={"flex flex-col w-full"}>
+                    <Form.Item
+                      label={"Result Code"}
+                      name={"resultCode"}
+                      rules={formMessageRequired("Result Code")}
+                      className={"w-full no-margin-form"}
+                    >
+                      <Input
+                        // disabled={type === "update"} 
+                        onInput={(e) =>
+                          (e.target.value = e.target.value.trimStart())
+                        }
+                      />
+                    </Form.Item>
+                  </div>
+                  
 
-                {/* Baris: Type + Content */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                  {/* Type */}
-                  <Form.Item
-                    label="Reminding Type"
-                    name="remindingType"
-                    rules={formMessageRequired("Reminding Type")}
-                    className="w-full no-margin-form"
-                  >
-                    <Input
-                      onChange={(e) => (e.target.value = e.target.value.trimStart())}
-                    />
-                  </Form.Item>
-
-                  {/* Content (string) */}
-                  <Form.Item
-                    label="Content"
-                    name="content"
-                    className="w-full no-margin-form"
-                  >
-                    <Input
-                      onChange={(e) => (e.target.value = e.target.value.trimStart())}
-                    />
-                  </Form.Item>
+                  <div className={"flex flex-col w-full"}>
+                    <Form.Item
+                      label={"Description"}
+                      name={"description"}
+                      // rules={formMessageRequired("Description")}
+                      className={"w-full no-margin-form"}
+                    >
+                      <Input
+                        onInput={(e) =>
+                          (e.target.value = e.target.value.trimStart())
+                        }
+                      />
+                    </Form.Item>
+                  </div>
                 </div>
-
-                {/* Email Subject (vertikal) */}
-                <Form.Item
-                  label="Email Subject"
-                  name="emailSubject"
-                  className="w-full no-margin-form"
-                >
-                  <Input
-                    onChange={(e) => (e.target.value = e.target.value.trimStart())}
-                  />
-                </Form.Item>
-
-                {/* Email Body (vertikal) */}
-                <Form.Item
-                  label="Email Body"
-                  name="emailBody"
-                  className="w-full no-margin-form"
-                >
-                  <Input
-                    onChange={(e) => (e.target.value = e.target.value.trimStart())}
-                  />
-                </Form.Item>
-
-                {/* Template Code */}
-                <Form.Item
-                  label="Template Code"
-                  name="templateCode"
-                  rules={formMessageRequired("Template Code")}
-                  className="w-full"
-                >
-                  <InputComponent type="textarea" />
-                </Form.Item>
-
+                <div className={"flex w-full gap-3"}>
+                </div>
               </div>
             </BaseContainer>
-
           </div>
           <div className={"w-full flex my-5"}>
             <ButtonComponent
@@ -300,24 +300,18 @@ const FormTemplateReminding = (props) => {
       >
         <div className="w-full flex flex-col flex-wrap gap-y-3">
           <div className="w-full">
-            <span className="text-primary uppercase">Template Reminding</span>
+            <span className="text-primary uppercase">Activity Action</span>
           </div>
           <div className={"w-full flex"}>
             <div className={"w-full flex-col"}>
-              <DetailText label={"Reminding Type"}>{payload?.body?.remindingType}</DetailText>
+              <DetailText label={"Activity Name"}>{payload?.body?.activityName}</DetailText>
             </div>
             <div className={"w-full flex-col"}>
-              <DetailText label={"Content"}>{payload?.body?.content}</DetailText>
+              <DetailText label={"Result Code"}>{payload?.body?.resultCode}</DetailText>
             </div>
             <div className={"w-full flex-col"}>
-              <DetailText label={"Email Subject"}>{payload?.body?.emailSubject}</DetailText>
+              <DetailText label={"Description"}>{payload?.body?.description}</DetailText>
             </div>
-            <div className={"w-full flex-col"}>
-              <DetailText label={"Email Body"}>{payload?.body?.emailBody}</DetailText>
-            </div>
-          </div>
-          <div className="w-full">
-            <DetailText label={"Template Code"}>{payload?.body?.templateCode}</DetailText>
           </div>
         </div>
         <div className="flex justify-end gap-5">
@@ -351,4 +345,4 @@ const FormTemplateReminding = (props) => {
   );
 };
 
-export default FormTemplateReminding;
+export default FormActivityAction;

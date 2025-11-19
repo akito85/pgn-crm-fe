@@ -180,6 +180,17 @@ const deleteData = async (url) => {
     throw error;
   }
 };
+
+const getPaginationPost = async (url,body) => {
+  try {
+    const response = await axios.post(configApp.PAYMENT_SERVICE + url,body, {
+      headers: tokenHeader(),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
 const debtAndCollectionHttpService = {
   getAll,
   inactiveWithApproval,
@@ -195,6 +206,7 @@ const debtAndCollectionHttpService = {
   updateDataPost,
   uploadBulk,
   deleteData,
+  getPaginationPost
 };
 
 export default debtAndCollectionHttpService;

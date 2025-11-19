@@ -40,7 +40,7 @@ const FormActivityType = (props) => {
   const [payload, setPayload] = useState({});
 
   const assert = () => {
-    console.log("dataDetail", dataDetailActivityType);
+    // console.log("dataDetail", dataDetailActivityType);
     form.setFieldsValue({
       activityTypeId: dataDetailActivityType?.activityTypeId,
       activityType: dataDetailActivityType?.activityType,

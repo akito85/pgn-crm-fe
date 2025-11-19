@@ -39,7 +39,7 @@ const FormGracePeriod = (props) => {
   const [payload, setPayload] = useState({});
 
   const assert = () => {
-    console.log("dataDetail", dataDetailGracePeriod);
+    // console.log("dataDetail", dataDetailGracePeriod);
     form.setFieldsValue({
       customerSegment: dataDetailGracePeriod?.customerSegment,
       gracePeriod: dataDetailGracePeriod?.gracePeriod,
@@ -126,16 +126,17 @@ const FormGracePeriod = (props) => {
             }
             setOpenModal(true);
           });
+      }else{
+        dispatch(validateCreateUpdateGracePeriod(bodyValidasiUpdate))
+          .unwrap()
+          .then(async (data) => {
+            const sukses = data?.success;
+            if (sukses === false) {
+              setOpenModal(false);
+            }
+            setOpenModal(true);
+          });
       }
-      dispatch(validateCreateUpdateGracePeriod(bodyValidasiUpdate))
-        .unwrap()
-        .then(async (data) => {
-          const sukses = data?.success;
-          if (sukses === false) {
-            setOpenModal(false);
-          }
-          setOpenModal(true);
-        });
 
       
 

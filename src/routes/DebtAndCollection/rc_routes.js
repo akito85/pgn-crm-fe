@@ -26,5 +26,6 @@ export const DEBT_AND_COLLECTION_ROUTES = {
   // Activity Action
   VIEW_ACTIVITY_ACTION: "/debt-and-collection/activity-action",
   CREATE_ACTIVITY_ACTION: "/debt-and-collection/activity-action/create",
+  DETAIL_ACTIVITY_ACTION: "/debt-and-collection/activity-action/view",
   UPDATE_ACTIVITY_ACTION: "/debt-and-collection/activity-action/update",
 };

@@ -203,26 +203,6 @@ const ViewActivityName = () => {
   
 
   
-
-  const renderType = () => {
-    let text = "";
-    if (bodyError.type) {
-      switch (bodyError.type) {
-        case "UNLOCK":
-          text = "unlocked";
-          break;
-        case "LOCK":
-          text = "locked";
-          break;
-        case "INACTIVE":
-          text = "submitted";
-          break;
-        default:
-          break;
-      }
-    }
-    return text;
-  };
   return (
     <LayoutMenu>
       <Spin

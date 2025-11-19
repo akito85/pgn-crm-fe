@@ -55,7 +55,7 @@ export const createUpdateActivityName = createAsyncThunk(
       const successMessage = {
         title: "Successfull",
         description: `${message}`,
-        return: false,
+        // return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return data.data;

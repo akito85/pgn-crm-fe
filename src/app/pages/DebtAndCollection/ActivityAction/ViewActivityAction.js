@@ -7,14 +7,14 @@ import { Link, NavLink } from "react-router-dom";
 import SVGIcon from "../../../../assets/Icon/index";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getAllGracePeriodPaginate,deleteGracePeriod
-} from "../../../../redux/slices/debt_and_collection/gracePeriod";
+  getAllActivityActionPaginate,deleteActivityAction
+} from "../../../../redux/slices/debt_and_collection/activityAction";
 import BaseContainer from "../../../../components/BaseContainer";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../routes/DebtAndCollection/rc_routes";
-import { columns } from "./ColumnGracePeriodView";
+import { columns } from "./ColumnActivityActionView";
 import { ModalConfirm } from '../../../../components/Modal/ModalPopUp';
 import { WarningOutlined } from '@ant-design/icons'
 
@@ -25,18 +25,24 @@ const routes = [
     breadcrumbName: "Debt & Collection",
   },
   {
-    path: DEBT_AND_COLLECTION_ROUTES.VIEW_GRACE_PERIOD,
-    breadcrumbName: "Grace Period",
+    path: DEBT_AND_COLLECTION_ROUTES.VIEW_ACTIVITY_ACTION,
+    breadcrumbName: "Activity Action",
   },
 ];
 
 
-const ViewGracePeriod = () => {
+const ViewActivityAction = () => {
   const dispatch = useDispatch();
+  // const fullState = useSelector((state) => state);
+  // console.log("🌐 Full Redux State:", fullState);
+
   const {
-    dataGracePeriod,
+    dataActivityAction,
     loading = false
-  } = useSelector((state) => state.gracePeriod);
+  } = useSelector((state) => state.activityAction);
+
+
+
   const searchInput = useRef(null);
   const [dataTable, setDataTable] = useState([]);
   const [page, setPage] = useState(1);
@@ -58,11 +64,11 @@ const ViewGracePeriod = () => {
 
   const handleConfirmModalDelete = () => {
     setOpenModalDelete(false);
-    dispatch(deleteGracePeriod({ id: idSelected }))
+    dispatch(deleteActivityAction({ id: idSelected }))
     .unwrap()
     .then((data) => {
       dispatch(
-        getAllGracePeriodPaginate({
+        getAllActivityActionPaginate({
           page,
           pageSize,
           search: encodeURIComponent(JSON.stringify(search)),
@@ -81,7 +87,7 @@ const ViewGracePeriod = () => {
       action: "Create",
       render: (
         <NavLink
-          to={DEBT_AND_COLLECTION_ROUTES.CREATE_GRACE_PERIOD}
+          to={DEBT_AND_COLLECTION_ROUTES.CREATE_ACTIVITY_ACTION}
           state={{ prevPage: "table-product" }}
         >
           <ButtonComponent
@@ -102,8 +108,8 @@ const ViewGracePeriod = () => {
         return (
           <Tooltip title="Detail">
             <Link
-              to={DEBT_AND_COLLECTION_ROUTES.DETAIL_GRACE_PERIOD}
-              state={{ id: record?.id }}
+              to={DEBT_AND_COLLECTION_ROUTES.DETAIL_ACTIVITY_ACTION}
+              state={{ id: record?.mpMActivityResultOptId }}
             >
               <SVGIcon name="IconDetail" width={24} />
             </Link>
@@ -118,8 +124,8 @@ const ViewGracePeriod = () => {
           return (
             <Tooltip title="Update">
               <Link
-                to={DEBT_AND_COLLECTION_ROUTES.UPDATE_GRACE_PERIOD}
-                state={{ id: record?.id }}
+                to={DEBT_AND_COLLECTION_ROUTES.UPDATE_ACTIVITY_ACTION}
+                state={{ id: record?.mpMActivityResultOptId }}
               >
                 <SVGIcon
                   name="IconEdit"
@@ -140,7 +146,7 @@ const ViewGracePeriod = () => {
                 <SVGIcon
                   name="IconDelete"
                   width={24}
-                  onClick={() => handleOpenDelete(record?.id)}
+                  onClick={() => handleOpenDelete(record?.mpMActivityResultOptId)}
                 />
               </div>
             </Tooltip>
@@ -151,7 +157,7 @@ const ViewGracePeriod = () => {
 
   useEffect(() => {
     dispatch(
-      getAllGracePeriodPaginate({
+      getAllActivityActionPaginate({
         page,
         pageSize,
         search: encodeURIComponent(JSON.stringify(search)),
@@ -161,13 +167,13 @@ const ViewGracePeriod = () => {
   }, [dispatch, page, pageSize, search, sort]);
 
   useEffect(() => {
-    if (dataGracePeriod) {
-      let result = dataGracePeriod?.result || [];
-      const totalData = dataGracePeriod?.page?.totalElements || 0;
+    if (dataActivityAction) {
+      let result = dataActivityAction?.result || [];
+      const totalData = dataActivityAction?.page?.totalElements || 0;
       setDataTable(result);
       setTotalElement(totalData);
     }
-  }, [dataGracePeriod]);
+  }, [dataActivityAction]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -196,6 +202,14 @@ const ViewGracePeriod = () => {
       : "";
     setSort(dataSort);
   };
+
+  
+
+  
+  
+
+  
+
   return (
     <LayoutMenu>
       <Spin
@@ -210,7 +224,7 @@ const ViewGracePeriod = () => {
               dataUser,
             )}
           />
-          <BaseContainer header={"Grace Period List"}>
+          <BaseContainer header={"Activity Action List"}>
             <TablePaginationNew
               dataSource={dataTable}
               totalData={totalElements}
@@ -262,4 +276,4 @@ const ViewGracePeriod = () => {
   );
 };
 
-export default ViewGracePeriod;
+export default ViewActivityAction;

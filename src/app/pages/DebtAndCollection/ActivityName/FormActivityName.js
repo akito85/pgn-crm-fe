@@ -39,7 +39,7 @@ const FormActivityName = (props) => {
   const [payload, setPayload] = useState({});
 
   const assert = () => {
-    console.log("dataDetail", dataDetailActivityName);
+    // console.log("dataDetail", dataDetailActivityName);
     form.setFieldsValue({
       name: dataDetailActivityName?.name,
       exception: dataDetailActivityName?.exception,

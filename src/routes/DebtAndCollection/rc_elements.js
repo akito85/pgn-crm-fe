@@ -14,8 +14,9 @@ import ViewActivityType from "../../app/pages/DebtAndCollection/ActivityType/Vie
 import DetailActivityType from "../../app/pages/DebtAndCollection/ActivityType/DetailActivityType";
 import FormActivityType from "../../app/pages/DebtAndCollection/ActivityType/FormActivityType";
 
-import ActivityActionPage from "../../app/pages/DebtAndCollection/ActivityActionPage";
-import FormActivityAction from "../../app/pages/DebtAndCollection/FormActivityAction";
+import ViewActivityAction from "../../app/pages/DebtAndCollection/ActivityAction/ViewActivityAction";
+import DetailActivityAction from "../../app/pages/DebtAndCollection/ActivityAction/DetailActivityAction";
+import FormActivityAction from "../../app/pages/DebtAndCollection/ActivityAction/FormActivityAction";
 
 export const DEBT_AND_COLLECTION_ELEMENTS = {
   // Grace Period
@@ -43,7 +44,8 @@ export const DEBT_AND_COLLECTION_ELEMENTS = {
   UPDATE_ACTIVITY_TYPE_PAGE: <FormActivityType type="update" />,
 
   // Activity Action
-  VIEW_ACTIVITY_ACTION_PAGE: <ActivityActionPage />,
+  VIEW_ACTIVITY_ACTION_PAGE: <ViewActivityAction />,
+  DETAIL_ACTIVITY_ACTION_PAGE: <DetailActivityAction />,
   CREATE_ACTIVITY_ACTION_PAGE: <FormActivityAction type="create" />,
   UPDATE_ACTIVITY_ACTION_PAGE: <FormActivityAction type="update" />,
 };
