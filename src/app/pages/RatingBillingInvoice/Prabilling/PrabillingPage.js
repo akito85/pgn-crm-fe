@@ -1,3 +1,4 @@
+// PrabillingPage.js
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Tooltip } from "antd";
@@ -32,12 +33,11 @@ const PrabillingPage = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
 
-  // ✅ State untuk fix column (tanpa localStorage)
-  const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
-    status: "right",
-    action: "right",
-  });
+  // ✅ fixedColumns in { left: [], right: [] } format for TableRBI & ColumnSettings
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status", "action"],
+  }));
 
   useEffect(() => {
     dispatch(
@@ -110,9 +110,7 @@ const PrabillingPage = () => {
         sorter: true,
         width: 300,
         filteredValue: [search?.sor] || null,
-        ellipsis: {
-          showTitle: false,
-        },
+        ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "sor",
@@ -259,7 +257,9 @@ const PrabillingPage = () => {
           "date"
         ),
         render: (text) => {
-          const formattedDate = text ? moment(text).format("DD MMM YYYY HH:mm:ss") : "-";
+          const formattedDate = text
+            ? moment(text).format("DD MMM YYYY HH:mm:ss")
+            : "-";
           return renderDateColumn(
             "createdDtm",
             hasValue(search["createdDtm"]),
@@ -277,9 +277,7 @@ const PrabillingPage = () => {
         align: "left",
         sorter: true,
         filteredValue: [search?.message] || null,
-        ellipsis: {
-          showTitle: false,
-        },
+        ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "message",
@@ -336,9 +334,7 @@ const PrabillingPage = () => {
         align: "left",
         sorter: true,
         filteredValue: [search?.remark] || null,
-        ellipsis: {
-          showTitle: false,
-        },
+        ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "remark",
@@ -384,14 +380,11 @@ const PrabillingPage = () => {
             3: { text: "Failed", color: "#f5222d" },
             5: { text: "Open", color: "#1890ff" },
           };
-
           const config = statusConfig[status] || {
             text: "Unknown",
             color: "#d9d9d9",
           };
-
           const displayText = config.text;
-
           return renderColumn(
             "status",
             hasValue(search["status"]),
@@ -408,14 +401,8 @@ const PrabillingPage = () => {
   );
 
   const routes = [
-    {
-      path: "",
-      breadcrumbName: "Rating Billing",
-    },
-    {
-      path: "",
-      breadcrumbName: "Prabilling",
-    },
+    { path: "", breadcrumbName: "Rating Billing" },
+    { path: "", breadcrumbName: "Prabilling" },
   ];
 
   const handleChangePage = (pageChange, pageSizeChange) => {
@@ -426,10 +413,9 @@ const PrabillingPage = () => {
 
   const onSort = (_, __, sorter) => {
     const dataSort =
-      sorter.order !== undefined
+      sorter && sorter.order !== undefined
         ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
-    
     setSort(dataSort);
   };
 
@@ -451,27 +437,24 @@ const PrabillingPage = () => {
     {
       action: "View",
       type: "table",
-      render: (record) => {
-        return (
-          <Link
-            to={RBI_ROUTES.PRABILLING_DETAIL}
-            state={{ id: record?.initCode }}
-          >
-            <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
-            </Tooltip>
-          </Link>
-        );
-      },
+      render: (record) => (
+        <Link
+          to={RBI_ROUTES.PRABILLING_DETAIL}
+          state={{ id: record?.initCode }}
+        >
+          <Tooltip title="Detail">
+            <div className="pt-1">
+              <SVGIcon name="IconDetail" width={24} />
+            </div>
+          </Tooltip>
+        </Link>
+      ),
     },
   ];
 
-  // ✅ Call hook at component level
   const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
 
-  // ✅ Combine columns with keys
+  // ✅ Combine columns with keys (base + action columns)
   const allColumns = useMemo(() => {
     const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
       ...col,
@@ -480,12 +463,13 @@ const PrabillingPage = () => {
     return columnsWithKeys;
   }, [baseColumns, actionCols]);
 
-  // ✅ Apply fixed columns
+  // ✅ Apply fixed columns (returns columns with fixed props set)
+  // applyFixedColumns should return reordered columns with `fixed` props applied
   const processedColumns = useMemo(() => {
     return applyFixedColumns(allColumns, fixedColumns);
   }, [allColumns, fixedColumns]);
 
-  // ✅ Column definitions for dropdown
+  // ✅ Column definitions for ColumnSettings dropdown
   const columnDefinitions = useMemo(() => {
     return allColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
@@ -502,7 +486,7 @@ const PrabillingPage = () => {
           <Toolbar items={itemGrantAccess} />
         </div>
 
-        <CardContainer 
+        <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">PRABILLING LIST</p>

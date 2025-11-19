@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form } from "antd";
 import { RightOutlined } from "@ant-design/icons";
@@ -12,17 +12,20 @@ import {
 } from "../../../../../redux/slices/rating_billing_invoice/efakturSlice";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../utils/Icon";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../components/TableRBI";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const ModalApprovalEFaktur = ({
-   isOpen,
-  handleClose,           
-  onSuccess,      
-  billingData,  
+  isOpen,
+  handleClose,
+  onSuccess,
+  billingData,
 }) => {
   // Selector
-  const { list_efaktur_approval, loading_modal } = useSelector((state) => state.efaktur);
+  const { list_efaktur_approval, loading_modal } = useSelector(
+    (state) => state.efaktur
+  );
 
   // Declaration
   const containerRef = useRef(null);
@@ -45,6 +48,11 @@ const ModalApprovalEFaktur = ({
   const [dataTableSelect, setDataTableSelect] = useState([]);
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
+
+  const [fixedColumns, setFixedColumns] = useState({
+    no: "left",
+    efakturStatus: "right",
+  });
 
   // Use Effect
   useEffect(() => {
@@ -132,26 +140,23 @@ const ModalApprovalEFaktur = ({
 
   // Handle Cancel Form
   const handleCancelForm = () => {
-  handleClose();  // Dulu: handleCancel()
-  setSelectedRowKeys([]);
-  setDataTableSelect([]);
-  setRemark("");
-  setAction("");
-  setCurrent(0);
-  form.resetFields();
-};
+    handleClose();
+    setSelectedRowKeys([]);
+    setDataTableSelect([]);
+    setRemark("");
+    setAction("");
+    setCurrent(0);
+    form.resetFields();
+  };
 
   // Handle Save
-  // Handle Save
   const handleSave = (formValue) => {
-    // Pastikan data yang dipilih valid
     if (!dataTableSelect || dataTableSelect.length === 0) {
       setBodyError({ message: "Tidak ada E-Faktur yang dipilih" });
       setModalError(true);
       return;
     }
 
-    // Validasi setiap item memiliki tappId dan efakturId
     const invalidItems = dataTableSelect.filter(
       (item) => !item.tappId || !item.efakturId
     );
@@ -165,8 +170,8 @@ const ModalApprovalEFaktur = ({
     }
 
     const detailApproves = dataTableSelect.map((item) => ({
-      approvalId: Number(item.tappId), // Pastikan berupa number
-      efakturId: Number(item.efakturId), // Pastikan berupa number
+      approvalId: Number(item.tappId),
+      efakturId: Number(item.efakturId),
     }));
 
     const body = {
@@ -203,10 +208,10 @@ const ModalApprovalEFaktur = ({
   };
 
   const handleCloseModalError = () => {
-  setModalError(false);
-  handleClose(); 
-  setBodyError({});
-};
+    setModalError(false);
+    handleClose();
+    setBodyError({});
+  };
 
   const handleRetry = () => {
     handleSave();
@@ -222,65 +227,64 @@ const ModalApprovalEFaktur = ({
     return type === "data" ? result : result.length;
   };
 
-  // Columns Definition
-  const columnsApprovalEFaktur = (
-    page,
-    pageSize,
-    searchInput,
-    searchedColumn,
-    searchText,
-    handleSearch
-  ) => {
-    return [
+  const baseColumns = useMemo(
+    () => [
       {
-        title: "NO",
-        dataIndex: "no",
         key: "no",
+        title: "NO",
         width: 60,
+        align: "center",
         render: (_, __, index) => (page - 1) * pageSize + index + 1,
       },
       {
+        key: "efakturNo",
         title: "NO. E-FAKTUR",
         dataIndex: "efakturNo",
-        key: "efakturNo",
         width: 180,
         render: (text) => text || "-",
       },
       {
+        key: "invoiceNumber",
         title: "INVOICE NUMBER",
         dataIndex: "invoiceNumber",
-        key: "invoiceNumber",
         width: 180,
+        render: (text) => text || "-",
       },
       {
+        key: "billingCode",
         title: "BILLING CODE",
         dataIndex: "billingCode",
-        key: "billingCode",
         width: 180,
+        render: (text) => text || "-",
       },
       {
+        key: "customerName",
         title: "CUSTOMER",
         dataIndex: "customerName",
-        key: "customerName",
         width: 250,
+        render: (text) => text || "-",
       },
       {
+        key: "accountNumber",
         title: "ACCOUNT NUMBER",
         dataIndex: "accountNumber",
-        key: "accountNumber",
         width: 150,
+        render: (text) => text || "-",
       },
       {
+        key: "billingPeriod",
         title: "BILLING PERIOD",
         dataIndex: "billingPeriod",
-        key: "billingPeriod",
         width: 120,
+        align: "center",
+        render: (text) => text || "-",
       },
       {
+        key: "invoiceDate",
         title: "INVOICE DATE",
         dataIndex: "invoiceDate",
-        key: "invoiceDate",
         width: 120,
+        align: "center",
         render: (text) => {
           if (!text) return "-";
           const date = new Date(text);
@@ -292,17 +296,17 @@ const ModalApprovalEFaktur = ({
         },
       },
       {
+        key: "totalAmountEqvIdr",
         title: "TOTAL AMOUNT (IDR)",
         dataIndex: "totalAmountEqvIdr",
-        key: "totalAmountEqvIdr",
         width: 180,
         align: "right",
         render: (value) => `Rp ${value?.toLocaleString("id-ID") || 0}`,
       },
       {
+        key: "efakturStatus",
         title: "STATUS E-FAKTUR",
         dataIndex: "efakturStatus",
-        key: "efakturStatus",
         width: 180,
         align: "center",
         render: (status) => {
@@ -330,14 +334,34 @@ const ModalApprovalEFaktur = ({
         },
       },
       {
+        key: "remark",
         title: "REMARK",
         dataIndex: "remark",
-        key: "remark",
         width: 200,
         render: (text) => text || "-",
       },
-    ];
-  };
+    ],
+    [page, pageSize]
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
 
   return (
     <div>
@@ -430,27 +454,23 @@ const ModalApprovalEFaktur = ({
             onFinish={handleSave}
           >
             <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-              <p className="text-primary uppercase font-bold">
+              <p className="text-primary uppercase font-bold mb-4">
                 E-Faktur List - Ready to Approve
               </p>
-              <TablePaginationNew
-                type="FE"
+              <TableRBI
                 dataSource={filterDataByPage("data")}
-                columns={columnsApprovalEFaktur(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                )}
+                columns={processedColumns}
                 current={page}
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
                 totalData={filterDataByPage("length")}
-                onSort={onSort}
                 tableScrolled={{ y: 525, x: 2000 }}
+                onSort={onSort}
+                columnDefinitions={columnDefinitions}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                loading={loading_modal}
                 rowSelection={rowSelection}
               />
               <div className="pt-[30px]">
@@ -479,28 +499,24 @@ const ModalApprovalEFaktur = ({
           className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
         >
           <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-            <p className="text-primary uppercase font-bold">
+            <p className="text-primary uppercase font-bold mb-4">
               Review - E-Faktur yang Akan Di-
               {action === "APPROVE" ? "Approve" : "Reject"}
             </p>
-            <TablePaginationNew
-              type="FE"
+            <TableRBI
               dataSource={dataTableSelect}
-              columns={columnsApprovalEFaktur(
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch
-              )}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={dataTableSelect.length || 0}
-              onSort={onSort}
               tableScrolled={{ y: 525, x: 2000 }}
+              onSort={onSort}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={false}
             />
             <div className="pt-[30px]">
               <DetailText label={"Remark"}>

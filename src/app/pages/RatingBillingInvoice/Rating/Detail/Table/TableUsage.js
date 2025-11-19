@@ -11,12 +11,14 @@ export const columnsUsage = (
   handleSearch = () => {}
 ) => [
   {
+    key: "no",
     title: "NO",
     align: "center",
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
+    key: "billingPeriod",
     title: "PERIOD",
     sorter: true,
     align: "center",
@@ -40,29 +42,9 @@ export const columnsUsage = (
         "datePeriod",
         search
       ),
-    // searchedColumn === "period" ? (
-    //   <Highlighter
-    //     highlightStyle={{
-    //       backgroundColor: "#ffc069",
-    //       padding: 0,
-    //     }}
-    //     searchWords={[
-    //       searchText
-    //         ? moment(searchText, "YYYY-MM").format(dateFormatting.datePeriod)
-    //         : "",
-    //     ]}
-    //     autoEscape
-    //     textToHighlight={
-    //       text ? moment(text).format(dateFormatting.datePeriod) : ""
-    //     }
-    //   />
-    // ) : text === null ? (
-    //   "-"
-    // ) : (
-    //   moment(text).format(dateFormatting.datePeriod)
-    // ),
   },
   {
+    key: "assetSerialNumber",
     title: "ASSET SERIAL NUMBER",
     dataIndex: "assetSerialNumber",
     sorter: true,
@@ -89,17 +71,11 @@ export const columnsUsage = (
       ),
   },
   {
+    key: "assetType",
     title: "ASSET TYPE",
     dataIndex: "assetType",
     sorter: true,
     align: "center",
-    // ...getColumnSearchPropsUseFilteredValue(
-    //   "assetType",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "assetType",
@@ -122,6 +98,7 @@ export const columnsUsage = (
       ),
   },
   {
+    key: "measDate",
     title: "READING DATE",
     sorter: true,
     align: "center",
@@ -145,37 +122,9 @@ export const columnsUsage = (
         "datetime",
         search
       ),
-    // ...getColumnSearchPropsUseFilteredValue(
-    //   "measDate",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch,
-    //   true,
-    //   "date"
-    // ),
-    // render: (text) =>
-    //   searchedColumn === "measDate" ? (
-    //     <Highlighter
-    //       highlightStyle={{
-    //         backgroundColor: "#ffc069",
-    //         padding: 0,
-    //       }}
-    //       searchWords={[
-    //         searchText
-    //           ? moment(searchText, "YYYY-MM-DD").format(dateFormatting.date)
-    //           : "",
-    //       ]}
-    //       autoEscape
-    //       textToHighlight={text ? moment(text).format(dateFormatting.date) : ""}
-    //     />
-    //   ) : text === null ? (
-    //     "-"
-    //   ) : (
-    //     moment(text).format(dateFormatting.date)
-    //   ),
   },
   {
+    key: "fdate",
     title: "DATE",
     sorter: true,
     align: "center",
@@ -199,28 +148,9 @@ export const columnsUsage = (
         "date",
         search
       ),
-    // render: (text) =>
-    //   searchedColumn === "fdate" ? (
-    //     <Highlighter
-    //       highlightStyle={{
-    //         backgroundColor: "#ffc069",
-    //         padding: 0,
-    //       }}
-    //       searchWords={[
-    //         searchText
-    //           ? moment(searchText, "YYYY-MM-DD").format(dateFormatting.date)
-    //           : "",
-    //       ]}
-    //       autoEscape
-    //       textToHighlight={text ? moment(text).format(dateFormatting.date) : ""}
-    //     />
-    //   ) : text === null ? (
-    //     "-"
-    //   ) : (
-    //     moment(text).format(dateFormatting.date)
-    //   ),
   },
   {
+    key: "fhour",
     title: "HOUR",
     dataIndex: "fhour",
     sorter: true,
@@ -238,17 +168,11 @@ export const columnsUsage = (
     render: (creationDate) => renderColumn('fhour', hasValue(search['fhour']), searchText, creationDate, false, 'input', search)
   },
   {
+    key: "streamId",
     title: "STREAM ID",
     dataIndex: "streamId",
     sorter: true,
     align: "right",
-    // ...getColumnSearchPropsUseFilteredValue(
-    //   "streamId",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "streamId",
@@ -271,17 +195,11 @@ export const columnsUsage = (
       ),
   },
   {
+    key: "temperature",
     title: "TEMPERATURE",
     dataIndex: "temperature",
     sorter: true,
     align: "right",
-    // ...getColumnSearchPropsUseFilteredValue(
-    //   "temperature",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "temperature",
@@ -304,17 +222,11 @@ export const columnsUsage = (
       ),
   },
   {
+    key: "pressure",
     title: "PRESSURE",
     dataIndex: "pressure",
     sorter: true,
     align: "right",
-    // ...getColumnSearchPropsUseFilteredValue(
-    //   "pressure",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "pressure",
@@ -337,17 +249,11 @@ export const columnsUsage = (
       ),
   },
   {
+    key: "correctionFactor",
     title: "CORRECTION FACTOR",
     dataIndex: "correctionFactor",
     sorter: true,
     align: "right",
-    // ...getColumnSearchPropsUseFilteredValue(
-    //   "correctionFactor",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "correctionFactor",
@@ -370,17 +276,11 @@ export const columnsUsage = (
       ),
   },
   {
+    key: "calorie",
     title: "CALORIE",
     dataIndex: "calorie",
     sorter: true,
     align: "right",
-    // ...getColumnSearchPropsUseFilteredValue(
-    //   "calorie",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "calorie",
@@ -389,7 +289,6 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      // "decimal,4"
     ),
     render: (text) =>
       renderColumn(
@@ -403,6 +302,7 @@ export const columnsUsage = (
       ),
   },
   {
+    key: "beginStand",
     title: "BEGIN STAND",
     dataIndex: "beginStand",
     sorter: true,
@@ -415,7 +315,6 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      // "decimal,4"
     ),
     render: (text) =>
       renderColumn(
@@ -429,6 +328,7 @@ export const columnsUsage = (
       ),
   },
   {
+    key: "endStand",
     title: "END STAND",
     dataIndex: "endStand",
     sorter: true,
@@ -441,7 +341,6 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      // "decimal,4"
     ),
     render: (text) =>
       renderColumn(
@@ -455,6 +354,7 @@ export const columnsUsage = (
       ),
   },
   {
+    key: "volMeasured27",
     title: "VOLUME 27",
     dataIndex: "volMeasured27",
     sorter: true,
@@ -467,7 +367,6 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      // "decimal,4"
     ),
     render: (text) =>
       renderColumn(
@@ -481,6 +380,7 @@ export const columnsUsage = (
       ),
   },
   {
+    key: "volMeasured60",
     title: "VOLUME 60",
     dataIndex: "volMeasured60",
     sorter: true,
@@ -493,7 +393,6 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      // "decimal,4"
     ),
     render: (text) =>
       renderColumn(
@@ -507,6 +406,7 @@ export const columnsUsage = (
       ),
   },
   {
+    key: "engMeasured",
     title: "MMBTU",
     dataIndex: "engMeasured",
     sorter: true,
@@ -519,11 +419,11 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      // "decimal,4"
     ),
     render: (text) => renderColumn('engMeasured', hasValue(search['engMeasured']), searchText, text, false, 'input', search)
   },
   {
+    key: "ghv",
     title: "GHV",
     dataIndex: "ghv",
     sorter: true,
@@ -536,11 +436,11 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      // "decimal,7"
     ),
     render: (text) => renderColumn('ghv', hasValue(search['ghv']), searchText, text, false, 'input', search)
   },
   {
+    key: "fileSource",
     sorter: true,
     title: "SOURCE",
     dataIndex: "fileSource",
@@ -549,35 +449,17 @@ export const columnsUsage = (
     },
     ...getColumnSearchPropsUseFilteredValue(
       search,
-        "fileSource",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn('fileSource', hasValue(search['fileSource']), searchText, text, false, 'input', search)
-    // ...getColumnSearchPropsUseFilteredValue("fileSource"),
-    // render: (text) =>
-    //   searchedColumn === "fileSource" ? (
-    //     <Highlighter
-    //       highlightStyle={{
-    //         backgroundColor: "#ffc069",
-    //         padding: 0,
-    //       }}
-    //       searchWords={[searchText]}
-    //       autoEscape
-    //       textToHighlight={text ? text.toString() : ""}
-    //     />
-    //   ) : text ? (
-    //     <Tooltip placement="topLeft" title={text}>
-    //       {text}
-    //     </Tooltip>
-    //   ) : (
-    //     "-"
-    //   ),
+      "fileSource",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => renderColumn('fileSource', hasValue(search['fileSource']), searchText, text, false, 'input', search)
   },
   {
+    key: "taxationRowId",
     title: "TAXATION ROW ID",
     dataIndex: "taxationRowId",
     sorter: true,
@@ -594,6 +476,7 @@ export const columnsUsage = (
     render: (text) => renderColumn('taxationRowId', hasValue(search['taxationRowId']), searchText, text, false, 'input', search)
   },
   {
+    key: "createdDate",
     title: "CREATION DATE",
     sorter: true,
     align: "center",
@@ -611,6 +494,7 @@ export const columnsUsage = (
     render: (creationDate) => renderDateColumn('createdDate', hasValue(search['createdDate']), searchText, creationDate, 'date', search)
   },
   {
+    key: "approvedBy",
     title: "APPROVED BY",
     dataIndex: "approvedBy",
     sorter: true,
@@ -622,12 +506,11 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true
-
     ),
     render: (text) => renderColumn('approvedBy', hasValue(search['approvedBy']), searchText, text, false, 'input', search)
-
   },
   {
+    key: "volMscf",
     title: "VOLUME MSCF",
     dataIndex: "volMscf",
     sorter: true,
@@ -642,28 +525,26 @@ export const columnsUsage = (
       true
     ),
     render: (text) => renderColumn('volMscf', hasValue(search['volMscf']), searchText, text, false, 'input', search)
-
   },
   {
+    key: "uncorrectedValue",
     title: "UNCORRECTED VOL",
     dataIndex: "uncorrectedValue",
     sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "uncorrectedValue",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        // "currency"
-
-      ),
-      render: (text) => renderColumn('uncorrectedValue', hasValue(search['uncorrectedValue']), searchText, text, false, 'input', search)
-
+      search,
+      "uncorrectedValue",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) => renderColumn('uncorrectedValue', hasValue(search['uncorrectedValue']), searchText, text, false, 'input', search)
   },
   {
+    key: "lastUpdatedDate",
     title: "LAST UPDATE DATE",
     sorter: true,
     align: "center",
@@ -679,38 +560,9 @@ export const columnsUsage = (
       'date'
     ),
     render: (text) => renderDateColumn('lastUpdatedDate', hasValue(search['lastUpdatedDate']), searchText, text, 'date', search)
-
-    // ...getColumnSearchPropsUseFilteredValue(
-    //   "lastUpdatedDate",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch,
-    //   true,
-    //   "date"
-    // ),
-    // render: (text) =>
-    //   searchedColumn === "lastUpdatedDate" ? (
-    //     <Highlighter
-    //       highlightStyle={{
-    //         backgroundColor: "#ffc069",
-    //         padding: 0,
-    //       }}
-    //       searchWords={[
-    //         searchText
-    //           ? moment(searchText, "YYYY-MM-DD").format(dateFormatting.date)
-    //           : "",
-    //       ]}
-    //       autoEscape
-    //       textToHighlight={text ? moment(text).format(dateFormatting.date) : ""}
-    //     />
-    //   ) : text === null ? (
-    //     "-"
-    //   ) : (
-    //     moment(text).format(dateFormatting.date)
-    //   ),
   },
   {
+    key: "source",
     title: "SOURCE",
     dataIndex: "source",
     sorter: true,
@@ -724,13 +576,15 @@ export const columnsUsage = (
     ),
   },
   {
+    key: "description",
     sorter: true,
     title: "DESCRIPTION",
     dataIndex: "description",
     ellipsis: {
       showTitle: false,
     },
-    ...getColumnSearchPropsUseFilteredValue(search,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
       "description",
       searchInput,
       searchedColumn,
@@ -749,24 +603,5 @@ export const columnsUsage = (
         "input",
         search
       ),
-    // ...getColumnSearchPropsUseFilteredValue("description"),
-    // render: (text) =>
-    //   searchedColumn === "description" ? (
-    //     <Highlighter
-    //       highlightStyle={{
-    //         backgroundColor: "#ffc069",
-    //         padding: 0,
-    //       }}
-    //       searchWords={[searchText]}
-    //       autoEscape
-    //       textToHighlight={text ? text.toString() : ""}
-    //     />
-    //   ) : text ? (
-    //     <Tooltip placement="topLeft" title={text}>
-    //       {text}
-    //     </Tooltip>
-    //   ) : (
-    //     "-"
-    //   ),
   },
 ];

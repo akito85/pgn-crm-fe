@@ -65,7 +65,7 @@ export const approvedBilling = createAsyncThunk(
   "APPROVED_BILLING",
   async ({ body, action }, thunkAPI) => {
     try {
-      const url = "//v1/dbs/api/billing/approval-billing";
+      const url = "/v1/dbs/api/billing/approval-billing";
       const response = await ratingBillingHttpService.createData(url, body);
       const successBody = {
         title: `Successful`,

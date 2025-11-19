@@ -1,6 +1,6 @@
 // GenerateProformaInvoicePage.js
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import {
   Form,
   Select,
@@ -19,6 +19,7 @@ import TableRBI from "../../../../components/TableRBI";
 import { columnsGenerateInvoice } from "./TableGenerateInvoice";
 
 const { TextArea } = Input;
+const { Option } = Select;
 
 const ScheduleImmediate = ({ remark, setRemark }) => (
   <>
@@ -110,8 +111,11 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
   ];
 
   const handleAddSpecificValue = () => {
-    if (inputValue && !specificValues.includes(parseInt(inputValue))) {
-      setSpecificValues([...specificValues, parseInt(inputValue)]);
+    if (
+      inputValue !== "" &&
+      !specificValues.includes(parseInt(inputValue, 10))
+    ) {
+      setSpecificValues([...specificValues, parseInt(inputValue, 10)]);
       setInputValue("");
     }
   };
@@ -150,10 +154,8 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
     const index = unitMap[recurringUnit];
 
     if (recurringUnit === "Year") {
-      // For Year, only show "Every year"
       cronParts[5] = "*";
     } else if (recurringUnit === "Day") {
-      // For Day, handle days of week
       if (recurringPattern === "every") {
         cronParts[index] = "*";
       } else if (recurringPattern === "specific") {
@@ -163,7 +165,6 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
         cronParts[index] = `${betweenStart}-${betweenEnd}`;
       }
     } else if (recurringUnit === "Month") {
-      // For Month, handle months
       if (recurringPattern === "every") {
         cronParts[index] = "*";
       } else if (recurringPattern === "specific") {
@@ -173,7 +174,6 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
         cronParts[index] = `${betweenStart}-${betweenEnd}`;
       }
     } else {
-      // For Seconds, Minutes, Hours
       if (recurringPattern === "every") {
         cronParts[index] = "*";
       } else if (recurringPattern === "everyStarting") {
@@ -194,7 +194,6 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
 
   return (
     <>
-      {/* Unit Selection */}
       <div className="mb-6">
         <div className="grid grid-cols-6 gap-3">
           {["Seconds", "Minutes", "Hours", "Day", "Month", "Year"].map(
@@ -213,7 +212,6 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
         </div>
       </div>
 
-      {/* Pattern Selection */}
       <div className="mb-6">
         <Radio.Group
           value={recurringPattern}
@@ -221,7 +219,6 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
           className="w-full"
         >
           <div className="space-y-4">
-            {/* Year - Only Every Year */}
             {recurringUnit === "Year" && (
               <div className="flex items-center gap-2">
                 <Radio value="every" checked>
@@ -230,15 +227,12 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
               </div>
             )}
 
-            {/* Day - Special Options */}
             {recurringUnit === "Day" && (
               <>
-                {/* Every Day */}
                 <div className="flex items-center gap-2">
                   <Radio value="every">Every day (Monday - Sunday)</Radio>
                 </div>
 
-                {/* Specific Days */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     <Radio value="specific">Specific days</Radio>
@@ -265,7 +259,6 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
                   )}
                 </div>
 
-                {/* Between Days */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <Radio value="between">Between</Radio>
                   <Select
@@ -297,15 +290,12 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
               </>
             )}
 
-            {/* Month - Special Options */}
             {recurringUnit === "Month" && (
               <>
-                {/* Every Month */}
                 <div className="flex items-center gap-2">
                   <Radio value="every">Every month (January - December)</Radio>
                 </div>
 
-                {/* Specific Months */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     <Radio value="specific">Specific months</Radio>
@@ -332,7 +322,6 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
                   )}
                 </div>
 
-                {/* Between Months */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <Radio value="between">Between</Radio>
                   <Select
@@ -364,17 +353,14 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
               </>
             )}
 
-            {/* Seconds, Minutes, Hours - Standard Options */}
             {!["Day", "Month", "Year"].includes(recurringUnit) && (
               <>
-                {/* Every */}
                 <div className="flex items-center gap-2">
                   <Radio value="every">
                     Every {unitLabels[recurringUnit].singular}
                   </Radio>
                 </div>
 
-                {/* Every X starting at */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <Radio value="everyStarting">Every</Radio>
                   <InputNumber
@@ -401,7 +387,6 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
                   />
                 </div>
 
-                {/* Between */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <Radio value="between">Between</Radio>
                   <InputNumber
@@ -424,7 +409,6 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
                   <span>{unitLabels[recurringUnit].plural}</span>
                 </div>
 
-                {/* Specific */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     <Radio value="specific">
@@ -481,7 +465,6 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
         </Radio.Group>
       </div>
 
-      {/* Cron Preview */}
       <div className="mb-6">
         <div className="text-sm text-gray-600 mb-3 font-medium">
           This schedule will run at:
@@ -516,7 +499,6 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
         </div>
       </div>
 
-      {/* Remark */}
       <Form.Item label="Remark" name="remark" rules={[{ required: true }]}>
         <TextArea
           rows={4}
@@ -534,23 +516,44 @@ const GenerateProformaInvoicePage = () => {
   const [form] = Form.useForm();
   const searchInput = useRef(null);
 
-  // State untuk form
+  // form state
   const [exportFormat, setExportFormat] = useState("PDF");
   const [scheduleType, setScheduleType] = useState("Immediate");
   const [schedule, setSchedule] = useState(null);
   const [remark, setRemark] = useState("");
 
-  // State untuk table (sama seperti ModalGenerateInvoice)
+  // table state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState({});
   const [dataTable, setDataTable] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-  // Dummy data - ganti dengan data real dari API atau props
+  // persisted fixedColumns (localStorage)
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("generateProformaFixedColumns");
+      return saved ? JSON.parse(saved) : { left: [], right: [] };
+    } catch {
+      return { left: [], right: [] };
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "generateProformaFixedColumns",
+        JSON.stringify(fixedColumns)
+      );
+    } catch (e) {
+      // ignore
+    }
+  }, [fixedColumns]);
+
+  // dummy data
   const dummyData = [
     {
       invoiceNumber: "INV001",
@@ -578,7 +581,6 @@ const GenerateProformaInvoicePage = () => {
     },
   ];
 
-  // Setup data table saat component mount
   useEffect(() => {
     setDataTable(
       dummyData.map((item, index) => ({
@@ -587,7 +589,6 @@ const GenerateProformaInvoicePage = () => {
       }))
     );
 
-    // Add custom CSS for Tag close button
     const style = document.createElement("style");
     style.innerHTML = `
       .tag-custom-close .ant-tag-close-icon {
@@ -604,7 +605,7 @@ const GenerateProformaInvoicePage = () => {
     };
   }, []);
 
-  // Handle Search - sama seperti ModalGenerateInvoice
+  // handleSearch
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -620,36 +621,63 @@ const GenerateProformaInvoicePage = () => {
     });
   };
 
-  // Handle Change Page - sama seperti ModalGenerateInvoice
+  // handle pagination change
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
   };
 
-  // Sort Table - sama seperti ModalGenerateInvoice
-  const onSort = (_, __, sort) => {
+  // sort
+  const onSort = (_, __, sortObj) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sortObj && sortObj.order
+        ? `${sortObj.field}~${sortObj.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
 
-  // Row Selection - sama seperti ModalGenerateInvoice
+  // row selection (no fixed: true)
   const onSelectChange = (newSelectedRowKeys) => {
     setSelectedRowKeys(newSelectedRowKeys);
   };
 
   const rowSelection = {
-    fixed: true,
     selectedRowKeys,
     onChange: onSelectChange,
   };
 
-  // Handle Download
   const handleDownload = () => {
-    // Implement download logic if needed
+    // implement download logic
   };
+
+  // build columns for table and columnDefinitions for ColumnSettings
+  const computedColumns = useMemo(() => {
+    const cols = columnsGenerateInvoice(
+      search,
+      page,
+      pageSize,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    );
+
+    // ensure key exists for each column
+    return cols.map((c, idx) => ({
+      ...c,
+      key: c.key || c.dataIndex || `col_${idx}`,
+    }));
+  }, [search, page, pageSize, searchedColumn, searchText]);
+
+  const columnDefinitions = useMemo(
+    () =>
+      computedColumns.map((c) => ({
+        key: c.key,
+        title: c.title,
+        width: c.width,
+      })),
+    [computedColumns]
+  );
 
   return (
     <LayoutMenu>
@@ -657,8 +685,8 @@ const GenerateProformaInvoicePage = () => {
         <CardContainer header="GENERATE PROFORMA INFORMATION">
           <Form.Item label="Export Format" required>
             <Select value={exportFormat} onChange={setExportFormat}>
-              <Select.Option value="PDF">PDF</Select.Option>
-              <Select.Option value="Excel">Excel</Select.Option>
+              <Option value="PDF">PDF</Option>
+              <Option value="Excel">Excel</Option>
             </Select>
           </Form.Item>
         </CardContainer>
@@ -666,9 +694,9 @@ const GenerateProformaInvoicePage = () => {
         <CardContainer header="SCHEDULE INFORMATION">
           <Form.Item label="Type" required>
             <Select value={scheduleType} onChange={setScheduleType}>
-              <Select.Option value="Immediate">Immediate</Select.Option>
-              <Select.Option value="Schedule">Schedule</Select.Option>
-              <Select.Option value="Recurring">Recurring</Select.Option>
+              <Option value="Immediate">Immediate</Option>
+              <Option value="Schedule">Schedule</Option>
+              <Option value="Recurring">Recurring</Option>
             </Select>
           </Form.Item>
 
@@ -691,25 +719,21 @@ const GenerateProformaInvoicePage = () => {
         <CardContainer header="Select billing">
           <div className="w-full">
             <TableRBI
+              idTable="generate-proforma-table"
               dataSource={dataTable}
               totalData={dataTable.length}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
               onSizeChanger={handleChange}
-              columns={columnsGenerateInvoice(
-                search,
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch
-              )}
+              columns={computedColumns}
               onSort={onSort}
-              tableScrolled={{ y: 525, x: 11000 }}
+              tableScrolled={{ y: 525, x: 7500 }}
               rowSelection={rowSelection}
               handleDownload={handleDownload}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
             />
           </div>
         </CardContainer>

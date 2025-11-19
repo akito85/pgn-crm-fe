@@ -1,18 +1,19 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Input, Select, message, Modal } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import BaseContainer from "../../../../components/BaseContainer";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import CardContainer from "../../../../components/CardContainer";
+import TableRBI from "../../../../components/TableRBI";
 import SVGIcon from "../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {
   getPendingApprovals,
   downloadPendingApprovals,
 } from "../../../../redux/slices/rating_billing_invoice/monitoringSlice";
-import { columnsPendingApprovals } from "./Table/TablePendingApprovals";
+import { getColumnsPendingApprovals } from "./Table/TablePendingApprovals";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const { Option } = Select;
 
@@ -34,6 +35,12 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
   const [filterArea, setFilterArea] = useState("All");
   const [filterStatus, setFilterStatus] = useState("All");
 
+  // State untuk fix column
+  const [fixedColumns, setFixedColumns] = useState({
+    no: "left",
+    action: "right",
+  });
+
   useEffect(() => {
     dispatch(
       getPendingApprovals({
@@ -44,7 +51,6 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
       })
     );
   }, [search, page, pageSize, sort, dispatch]);
-
 
   const routes = [
     {
@@ -64,7 +70,7 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
@@ -76,15 +82,16 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
     });
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+  const handleChangePage = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
-  const onSortApi = (_, __, sort) => {
+  const onSort = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -134,6 +141,44 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
     });
   };
 
+  // Get columns from separated file
+  const baseColumns = useMemo(
+    () =>
+      getColumnsPendingApprovals(
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        search,
+        handleApprovalDetail
+      ),
+    [page, pageSize, searchedColumn, searchText, search]
+  );
+
+  // Combine columns with keys
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+
+  // Apply fixed columns
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  // Column definitions for dropdown
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
@@ -152,16 +197,22 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
           </ButtonComponent>
         </div>
 
-        <BaseContainer header={"Detail - Pending Approvals"}>
+        <CardContainer 
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">DETAIL - PENDING APPROVALS</p>
+            </div>
+          }
+        >
           {/* Filters */}
-          <div className="w-full mb-4">
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+          <div className="w-full mb-4 mt-4">
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
               <div>
-                <span style={{ marginRight: 8 }}>Periode:</span>
+                <span style={{ marginRight: 8, fontWeight: 500 }}>Period:</span>
                 <Input value={filterPeriod} disabled style={{ width: 120 }} />
               </div>
               <div>
-                <span style={{ marginRight: 8 }}>Area:</span>
+                <span style={{ marginRight: 8, fontWeight: 500 }}>Area:</span>
                 <Select
                   value={filterArea}
                   onChange={setFilterArea}
@@ -174,7 +225,7 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
                 </Select>
               </div>
               <div>
-                <span style={{ marginRight: 8 }}>Status:</span>
+                <span style={{ marginRight: 8, fontWeight: 500 }}>Status:</span>
                 <Select
                   value={filterStatus}
                   onChange={setFilterStatus}
@@ -189,29 +240,24 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
           </div>
 
           {/* Table */}
-          <div className="w-full">
-            <TablePaginationNew
+          <div className="my-5">
+            <TableRBI
               dataSource={dataSource}
-              columns={columnsPendingApprovals(
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                search,
-                handleApprovalDetail
-              )}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
+              onChange={handleChangePage}
+              onSizeChanger={handleChangePage}
               totalData={pendingApprovalsData?.page?.totalElements || 0}
-              onSort={onSortApi}
-              tableScrolled={{ y: 525, x: 1500 }}
+              tableScrolled={{ x: 1600, y: 525 }}
+              onSort={onSort}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
       </Spin>
     </LayoutMenu>
   );

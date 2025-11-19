@@ -344,6 +344,12 @@ const ViewFaktur = () => {
       width: 180,
     },
     {
+      title: "Type PPN",
+      dataIndex: "typePpn",
+      key: "typePpn",
+      width: 180,
+    },
+    {
       title: "CUSTOMER",
       dataIndex: "customerName",
       key: "customerName",
@@ -865,7 +871,7 @@ const ViewFaktur = () => {
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={pagination?.totalElements || 0}
-              tableScrolled={{ y: 525, x: 2000 }}
+              tableScrolled={{ y: 525, x: 2500 }}
               onSort={onSortApi}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}

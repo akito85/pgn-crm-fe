@@ -11,12 +11,14 @@ export const columnsRatingResult = (
   search
 ) => [
   {
+    key: "no",
     title: "NO",
     align: "center",
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
+    key: "description",
     title: "DESCRIPTION",
     dataIndex: "description",
     sorter: true,
@@ -41,6 +43,7 @@ export const columnsRatingResult = (
       ),
   },
   {
+    key: "value",
     title: "VALUE",
     dataIndex: "value",
     sorter: true,
@@ -66,6 +69,7 @@ export const columnsRatingResult = (
       ),
   },
   {
+    key: "uom",
     title: "UOM",
     dataIndex: "uom",
     sorter: true,
@@ -91,6 +95,7 @@ export const columnsRatingResult = (
       ),
   },
   {
+    key: "pricing",
     title: "PRICE",
     dataIndex: "pricing",
     sorter: true,
@@ -116,6 +121,7 @@ export const columnsRatingResult = (
       ),
   },
   {
+    key: "totalAmount",
     title: "TOTAL AMOUNT",
     dataIndex: "totalAmount",
     sorter: true,
@@ -141,6 +147,7 @@ export const columnsRatingResult = (
       ),
   },
   {
+    key: "currency",
     title: "CURRENCY",
     dataIndex: "currency",
     sorter: true,

@@ -74,6 +74,14 @@ const ModalGenerateEFaktur = ({
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [saveType, setSaveType] = useState(""); // 'SUBMIT' or 'DRAFT'
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  
+  // State untuk data detail E-Faktur (NPWP, NIK, Email, Alamat)
+  const [detailData, setDetailData] = useState({
+    npwp: null,
+    nikPasp: null,
+    email: null,
+    alamat: null,
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -85,28 +93,57 @@ const ModalGenerateEFaktur = ({
   }, [isOpen, dispatch]);
 
   useEffect(() => {
-    if (isOpen && billingData?.billingCode && !isDataLoaded) {
+    if (isOpen && billingData && !isDataLoaded) {
       setIsDataLoaded(true);
 
-      dispatch(getAllBillingItemPaginate(billingData.billingCode));
+      // Load billing items
+      if (billingData.billingCode) {
+        dispatch(getAllBillingItemPaginate(billingData.billingCode));
+      }
 
-      dispatch(getDetailEFaktur(billingData.billingCode))
-        .unwrap()
-        .then((result) => {
-          if (result && result.efakturId) {
-            setExistingEFaktur(result);
-            setIsExistingEFaktur(true);
-          } else {
+      // Load detail E-Faktur jika efakturId tersedia
+      if (billingData.efakturId) {
+        dispatch(getDetailEFaktur(billingData.efakturId))
+          .unwrap()
+          .then((result) => {
+            if (result && result.efakturId) {
+              setExistingEFaktur(result);
+              setIsExistingEFaktur(true);
+              
+              // Set detail data dari existing e-faktur
+              setDetailData({
+                npwp: result.npwp,
+                nikPasp: result.nikPasp,
+                email: result.email,
+                alamat: result.alamat,
+              });
+            } else {
+              setExistingEFaktur(null);
+              setIsExistingEFaktur(false);
+              setDetailDataFromBilling();
+            }
+          })
+          .catch(() => {
             setExistingEFaktur(null);
             setIsExistingEFaktur(false);
-          }
-        })
-        .catch(() => {
-          setExistingEFaktur(null);
-          setIsExistingEFaktur(false);
-        });
+            setDetailDataFromBilling();
+          });
+      } else {
+        // Jika tidak ada efakturId, gunakan data dari billingData
+        setDetailDataFromBilling();
+      }
     }
   }, [isOpen, billingData, dispatch, isDataLoaded]);
+
+  // Function untuk set detail data dari billingData jika tidak ada efakturId
+  const setDetailDataFromBilling = () => {
+    setDetailData({
+      npwp: billingData?.npwp || null,
+      nikPasp: billingData?.nikPasp || null,
+      email: billingData?.email || null,
+      alamat: billingData?.alamat || billingData?.address || null,
+    });
+  };
 
   useEffect(() => {
     if (data_billingItem && data_billingItem.length > 0) {
@@ -359,6 +396,12 @@ const ModalGenerateEFaktur = ({
     setCurrent(0);
     setIsDataLoaded(false);
     setSaveType("");
+    setDetailData({
+      npwp: null,
+      nikPasp: null,
+      email: null,
+      alamat: null,
+    });
     dispatch(resetUploadProgress());
     handleClose();
   };
@@ -517,6 +560,22 @@ const ModalGenerateEFaktur = ({
                       <DetailText label="Billing Period">
                         {billingData.billingPeriod || "-"}
                       </DetailText>
+                      
+                      {/* Detail data tambahan dari endpoint detail e-faktur */}
+                      {/* <DetailText label="NPWP">
+                        {detailData.npwp || "-"}
+                      </DetailText>
+                      <DetailText label="NIK/PASP">
+                        {detailData.nikPasp || "-"}
+                      </DetailText>
+                      <DetailText label="Email">
+                        {detailData.email || "-"}
+                      </DetailText>
+                      <div className="col-span-2">
+                        <DetailText label="Alamat">
+                          {detailData.alamat || "-"}
+                        </DetailText>
+                      </div> */}
                     </div>
                   </div>
                 )}
@@ -711,6 +770,12 @@ const ModalGenerateEFaktur = ({
                           {currency === "USD" ? "$" : "Rp"}{" "}
                           {totals.total.toLocaleString("id-ID")}
                         </DetailText>
+                        {/* <DetailText label="NPWP">
+                          {detailData.npwp || "-"}
+                        </DetailText>
+                        <DetailText label="Email">
+                          {detailData.email || "-"}
+                        </DetailText> */}
                       </div>
                     </div>
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Radio, Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -18,9 +18,10 @@ import { columnsBilling } from "./Table/TableViewBilling";
 import BillingDetail from "./Detail/BillingDetail";
 import ModalRequestApproval from "./ModalRequestApproval";
 import ModalApprovalBilling from "./ModalApprovalBilling";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
 
 const BillingPage = () => {
@@ -53,6 +54,12 @@ const BillingPage = () => {
   const [saNumberId, setSANumberId] = useState("");
   const [calculationCodeId, setCalculationCodeId] = useState("");
   const [accountNumberId, setAccountNumberId] = useState("");
+
+  const [fixedColumns, setFixedColumns] = useState({
+    no: "left",
+    statusApproval: "right",
+    action: "right",
+  });
 
   // Use Effect
   useEffect(() => {
@@ -125,16 +132,17 @@ const BillingPage = () => {
   };
 
   // Handle Change Page
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+  const handleChangePage = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
   // Sort Table
-  const onSortApi = (_, __, sort) => {
+  const onSort = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -278,6 +286,42 @@ const BillingPage = () => {
     },
   ];
 
+  const actionCols = useColumnActionPermission(
+    ["view", "history"],
+    itemGrantAccess
+  );
+
+  const baseColumns = useMemo(() => {
+    return columnsBilling(
+      page,
+      pageSize,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      search
+    );
+  }, [page, pageSize, searchInput, searchedColumn, searchText, search]);
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
@@ -305,39 +349,21 @@ const BillingPage = () => {
             />
           }
         >
-          <div className="w-full">
-            <TablePaginationNew
+          <div className="my-5">
+            <TableRBI
               dataSource={dataSource}
-              columns={[
-                ...columnsBilling(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch,
-                  search
-                  // handleDetail,
-                  // handleApprovalHistory
-                ),
-                ...useColumnActionPermission(
-                  ["view", "history"],
-                  itemGrantAccess
-                ),
-              ]}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
+              onChange={handleChangePage}
+              onSizeChanger={handleChangePage}
               totalData={data?.page?.totalElements || 0}
-              onSort={onSortApi}
-              tableScrolled={{ y: 525, x: 16000 }}
-              useFixColumn={true}
-              defaultFixedColumns={{
-                no: "left",
-                statusApproval: "right",
-                action: "right",
-              }}
+              tableScrolled={{ x: 16000, y: 525 }}
+              onSort={onSort}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
             />
           </div>
         </CardContainer>

@@ -32,7 +32,6 @@ import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import { configApp } from "../../../../constants/configApp";
 import { tokenHeader } from "../../../../utils/tokenHeader";
-import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const ViewInvoice = () => {
   // Selector
@@ -61,17 +60,15 @@ const ViewInvoice = () => {
   const [modalReGenerate, setModalReGenerate] = useState(false);
   const [modalGenerate, setModalGenerate] = useState(false);
 
-  // ✅ State untuk fix column (dengan localStorage persistence)
+  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
     const saved = localStorage.getItem("invoiceFixedColumns");
     return saved
       ? JSON.parse(saved)
       : {
-          no: "left",
-          invoiceNumber: "left",
-          status: "right",
-          action: "right",
-        }; // Default fix invoice number
+          left: ["no"], // Default: no fixed left
+          right: ["action", "status"], // Default: no fixed right
+        };
   });
 
   // ✅ Save to localStorage when fixedColumns change
@@ -387,7 +384,7 @@ const ViewInvoice = () => {
     itemGrantAccess
   );
 
-  // ✅ Get base columns and add 'key' property to each column
+  // ✅ Get base columns with key property
   const baseColumns = useMemo(() => {
     const invoiceCols = columnsInvoice(
       search,
@@ -408,18 +405,50 @@ const ViewInvoice = () => {
     return columnsWithKeys;
   }, [search, page, pageSize, searchedColumn, searchText, actionCols]);
 
-  // ✅ Apply fixed columns using useMemo
-  const processedColumns = useMemo(() => {
-    return applyFixedColumns(baseColumns, fixedColumns);
-  }, [baseColumns, fixedColumns]);
-
-  // ✅ Extract column definitions for ColumnFixDropdown (with key and title only)
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
       title: col.title,
     }));
   }, [baseColumns]);
+
+  const columns = useMemo(() => {
+    // Separate columns into categories
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    baseColumns.forEach((col) => {
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        leftFixed.push(col);
+      } else if (fixedColumns.right.includes(colKey)) {
+        rightFixed.push(col);
+      } else {
+        normal.push(col);
+      }
+    });
+
+    // Reorder: left fixed → normal → right fixed
+    const reorderedColumns = [...leftFixed, ...normal, ...rightFixed];
+
+    // Apply fixed property
+    return reorderedColumns.map((col) => {
+      const newCol = { ...col };
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        newCol.fixed = "left";
+      } else if (fixedColumns.right.includes(colKey)) {
+        newCol.fixed = "right";
+      } else {
+        delete newCol.fixed;
+      }
+
+      return newCol;
+    });
+  }, [baseColumns, fixedColumns]);
 
   return (
     <LayoutMenu>
@@ -448,13 +477,13 @@ const ViewInvoice = () => {
           <div className="w-full">
             <TableRBI
               dataSource={dataSource}
-              columns={processedColumns}
+              columns={columns}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements}
-              tableScrolled={{ y: 525, x: 2000 }}
+              tableScrolled={{ y: 525, x: 7000 }}
               onSort={onSortApi}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}

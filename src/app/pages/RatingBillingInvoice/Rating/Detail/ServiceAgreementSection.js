@@ -1,23 +1,27 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Radio } from "antd";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import DetailSection from "./ServiceAgreement/DetailSection";
 import PricingSection from "./ServiceAgreement/PricingSection";
 import CalculationRuleSection from "./ServiceAgreement/CalculationRuleSection";
 import TosSection from "./ServiceAgreement/TosSection";
 import { getAllServiceAgreementPaginate } from "../../../../../redux/slices/rating_billing_invoice/rating";
 import { columnsServiceAgreement } from "./Table/TableServiceAgreement";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../components/TableRBI";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
   // Selector
-  const { data_serviceAgreement } = useSelector((state) => state.rating);
+  const { data_serviceAgreement, loading } = useSelector((state) => state.rating);
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data_serviceAgreement?.result;
+  
+  // Ref untuk detail section
+  const saDetailRef = useRef(null);
 
   // State
   const [page, setPage] = useState(1);
@@ -29,6 +33,11 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
   const [tabSection, setTabSection] = useState("Detail");
   const [ratingSaId, setRatingSaId] = useState();
   const [pageDetail, setPageDetail] = useState(false);
+
+  const [fixedColumns, setFixedColumns] = useState({
+    no: "left",
+    action: "right",
+  });
 
   // Use Effect
   useEffect(() => {
@@ -42,6 +51,18 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
       })
     );
   }, [ratingCodeId, search, page, pageSize, sort, dispatch]);
+
+  useEffect(() => {
+    if (pageDetail && saDetailRef.current) {
+      setTimeout(() => {
+        saDetailRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start',
+          inline: 'nearest'
+        });
+      }, 100);
+    }
+  }, [pageDetail, ratingSaId]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -66,10 +87,10 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
   };
 
   // Sort Table
-  const onSortApi = (_, __, sort) => {
+  const onSortApi = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -102,6 +123,7 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
   const handleDetail = (record) => {
     setPageDetail(true);
     setRatingSaId(record.ratingSaId);
+    setTabSection("Detail");
   };
 
   // render SA Detail Section
@@ -120,10 +142,49 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
     }
   };
 
+  const baseColumns = useMemo(
+    () =>
+      columnsServiceAgreement(
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        handleDetail
+      ),
+    [page, pageSize, searchedColumn, searchText]
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
   return (
     <>
-      <BaseContainer header={"Service Agreement Information"}>
-        <div className="flex flex-row align-middle gap-2">
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">SERVICE AGREEMENT INFORMATION</p>
+          </div>
+        }
+      >
+        <div className="flex flex-row align-middle gap-2 mb-4">
           <p className="text-[15px] font-semibold text-text-color-semibold">
             Calculation Code:
           </p>
@@ -138,31 +199,27 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
           </p>
         </div>
         <div className="w-full">
-          <TablePaginationNew
+          <TableRBI
             dataSource={dataSource}
-            columns={columnsServiceAgreement(
-              page,
-              pageSize,
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearch,
-              handleDetail
-            )}
+            columns={processedColumns}
             current={page}
             pageSize={pageSize}
             onChange={handleChange}
             onSizeChanger={handleChange}
             totalData={data_serviceAgreement?.page?.totalElements || 0}
-            onSort={onSortApi}
             tableScrolled={{ y: 525, x: 3000 }}
+            onSort={onSortApi}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
           />
         </div>
-      </BaseContainer>
+      </CardContainer>
 
       {/* Detail Service Agreement */}
       {pageDetail === true ? (
-        <div className="pt-[30px]">
+        <div ref={saDetailRef} className="pt-[30px]">
           <Radio.Group
             options={serviceSection}
             onChange={onChangeTab}
