@@ -145,15 +145,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           ),
       },
       {
-        key: "customerTypeId",
-        title: "CUSTOMER TYPE ID",
-        dataIndex: "customerTypeId",
-        width: 150,
-        align: "center",
-        sorter: true,
-        render: (text) => text || "-",
-      },
-      {
         key: "billingCycle",
         title: "BILLING CYCLE",
         dataIndex: "billingCycle",
@@ -429,59 +420,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         render: (text) => text || "-",
       },
       {
-        key: "avgCalorie",
-        title: "AVG CALORIE",
-        dataIndex: "avgCalorie",
-        width: 120,
-        align: "right",
-        sorter: true,
-        render: (text) => (text != null ? text.toFixed(4) : "-"),
-      },
-      {
-        key: "firstMeasDate",
-        title: "FIRST MEAS DATE",
-        dataIndex: "firstMeasDate",
-        width: 150,
-        align: "center",
-        sorter: true,
-        render: (text) => (text ? moment(text).format("DD MMM YYYY") : "-"),
-      },
-      {
-        key: "lastMeasDate",
-        title: "LAST MEAS DATE",
-        dataIndex: "lastMeasDate",
-        width: 150,
-        align: "center",
-        sorter: true,
-        render: (text) => (text ? moment(text).format("DD MMM YYYY") : "-"),
-      },
-      {
-        key: "totalVol27",
-        title: "TOTAL VOL 27",
-        dataIndex: "totalVol27",
-        width: 150,
-        align: "right",
-        sorter: true,
-        render: (text) => (text != null ? text.toLocaleString() : "-"),
-      },
-      {
-        key: "totalVol60",
-        title: "TOTAL VOL 60",
-        dataIndex: "totalVol60",
-        width: 150,
-        align: "right",
-        sorter: true,
-        render: (text) => (text != null ? text.toLocaleString() : "-"),
-      },
-      {
-        key: "mpricingCode",
-        title: "MPRICING CODE",
-        dataIndex: "mpricingCode",
-        width: 150,
-        sorter: true,
-        render: (text) => text || "-",
-      },
-      {
         key: "action",
         title: "ACTION",
         width: 80,
@@ -613,18 +551,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           </div>
         }
       >
-        <div className={"w-full flex justify-between items-center my-2"}>
-          <ButtonComponent
-            type={"submit"}
-            border={false}
-            icon={<SVGIcon name={"IconButtonDownload"} width={24} />}
-            onClick={handleDownload}
-            disabled={resultData.length === 0}
-          >
-            Download
-          </ButtonComponent>
-        </div>
-
         <div className="my-5">
           <TableRBI
             dataSource={resultData}
