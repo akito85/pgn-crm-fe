@@ -609,7 +609,7 @@ const handleSave = async () => {
                   />
                 </Form.Item>
               </div>
-              {/* <Form.Item label={"Cost Center"} name={"costCenter"}>
+              <Form.Item label={"Cost Center"} name={"costCenter"}>
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleChangeCostCenter}
@@ -746,8 +746,8 @@ const handleSave = async () => {
                       </Select.Option>
                     ))}
                   </Select>
-                </Form.Item> */}
-              {/* </div> */}
+                </Form.Item> 
+              </div> 
             </div>
           </BaseContainer>
           <BaseContainer header={"Scheduler Information"}>
