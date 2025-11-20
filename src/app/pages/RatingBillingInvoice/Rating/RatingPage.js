@@ -40,25 +40,28 @@ const RatingPage = () => {
   const [ratingCode, setRatingCode] = useState("");
   const [calculationCode, setCalculationCode] = useState("");
   const [saNumberId, setSANumberId] = useState("");
+  const [activeRowKey, setActiveRowKey] = useState(null); // Track active row
 
   const [fixedColumns, setFixedColumns] = useState({
     no: "left",
     action: "right",
   });
 
-   const detailRef = useRef(null);
+  const detailRef = useRef(null);
 
-   useEffect(() => {
-    if (pageDetail && detailRef.current) {
-      // Smooth scroll ke detail section
-      detailRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
-      });
+  useEffect(() => {
+    if (pageDetail && activeRowKey && detailRef.current) {
+      setTimeout(() => {
+        detailRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start',
+          inline: 'nearest'
+        });
+      }, 100);
     }
-  }, [pageDetail]);
+  }, [activeRowKey, pageDetail]);
 
-  // Use Effect
+  // Use Effect - Fetch Data
   useEffect(() => {
     dispatch(
       getListRatingGasPaginate({
@@ -131,12 +134,24 @@ const RatingPage = () => {
     setValueTab(value);
   };
 
-  // Handle Detail
   const handleDetail = (record) => {
-    setPageDetail(true);
-    setRatingCode(record.ratingCode);
-    setCalculationCode(record.calculationCode);
-    setSANumberId(record.saNumber);
+    const recordKey = record.ratingCode;
+    
+    // Toggle: jika row yang sama diklik lagi, tutup detail
+    if (activeRowKey === recordKey && pageDetail) {
+      setPageDetail(false);
+      setActiveRowKey(null);
+      setRatingCode("");
+      setCalculationCode("");
+      setSANumberId("");
+    } else {
+      // Buka detail untuk row baru atau berbeda
+      setRatingCode(record.ratingCode);
+      setCalculationCode(record.calculationCode);
+      setSANumberId(record.saNumber);
+      setActiveRowKey(recordKey);
+      setPageDetail(true);
+    }
   };
 
   // Handle Download
@@ -175,7 +190,7 @@ const RatingPage = () => {
             <div className="pt-1">
               <SVGIcon
                 name="IconDetail"
-                width={24}
+                width={15}
                 onClick={() => handleDetail(record)}
               />
             </div>
@@ -184,6 +199,13 @@ const RatingPage = () => {
       },
     },
   ];
+
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSource?.map((item) => ({
+      ...item,
+      key: item.ratingCode, 
+    }));
+  }, [dataSource]);
 
   const baseColumns = useMemo(
     () =>
@@ -247,7 +269,8 @@ const RatingPage = () => {
         >
           <div className="my-5">
             <TableRBI
-              dataSource={dataSource}
+              size="small"
+              dataSource={dataSourceWithKeys} 
               columns={processedColumns}
               current={page}
               pageSize={pageSize}
@@ -260,23 +283,68 @@ const RatingPage = () => {
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={loading}
+              onRow={(record) => ({
+                onClick: () => handleDetail(record),
+                style: {
+                  cursor: 'pointer',
+                  backgroundColor: activeRowKey === record.ratingCode 
+                    ? '#bae7ff'
+                    : 'transparent',
+                  transition: 'background-color 0.2s ease',
+                },
+                onMouseEnter: (e) => {
+                  if (activeRowKey !== record.ratingCode) {
+                    e.currentTarget.style.backgroundColor = '#f5f5f5';
+                  }
+                },
+                onMouseLeave: (e) => {
+                  if (activeRowKey !== record.ratingCode) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                },
+              })}
             />
           </div>
         </CardContainer>
 
         {/* Detail Rating */}
-        {pageDetail === true ? (
-          <div ref={detailRef}>
+        {pageDetail && (
+          <div 
+            ref={detailRef}
+            className="mt-6 border-t-4 border-blue-500 pt-4 bg-blue-50/30 rounded-lg p-4"
+          >
+            {/* Header with close button */}
+            <div className="flex justify-between items-center mb-4 pb-3 border-b border-blue-200">
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-lg text-blue-700">
+                  Rating Detail: {ratingCode}
+                </h3>
+              </div>
+              <button
+                onClick={() => {
+                  setPageDetail(false);
+                  setActiveRowKey(null);
+                  setRatingCode("");
+                  setCalculationCode("");
+                  setSANumberId("");
+                }}
+                className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+                title="Close Detail"
+              >
+                ✕
+              </button>
+            </div>
+            
             <RatingDetail
               calculationCode={calculationCode}
               SAId={saNumberId}
               ratingCodeId={ratingCode}
             />
           </div>
-        ) : null}
+        )}
       </Spin>
     </LayoutMenu>
   );
 };
 
-export default RatingPage;  
+export default RatingPage;
