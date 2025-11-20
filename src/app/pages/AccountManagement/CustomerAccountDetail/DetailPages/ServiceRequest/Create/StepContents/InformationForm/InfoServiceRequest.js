@@ -6,10 +6,10 @@ import { Form, Select, Button, Tooltip } from "antd";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
 
 import InputComponent from "../../../../../../../../../components/InputComponent";
-import ModalCustom from "../../../../../../../../../components/Modal/ModalCustom";
+import StatusComponent from "../../../../../../../../../components/StatusComponent";
 import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
-import StatusComponent from "../../../../../../../../../components/StatusComponent";
+import NxModal from "../../../../../../../../../components/Nx/NxModal";
 import { requiredMessage, toTitleCase } from "../../../../../../../../../utils";
 
 import moment from "moment";
@@ -31,7 +31,9 @@ export default function InfoServiceRequest({
   const navigate = useNavigate();
 
   const handleOk = () => {
+    // TODO: Add logic to select service request and populate the form
     console.log("ok")
+    setIsOpen(false)
   }
 
   const handleCancel = () => {
@@ -528,17 +530,31 @@ export default function InfoServiceRequest({
       </div>
     </NxPanel>
 
-    <ModalCustom
+    <NxModal
       isOpen={isOpen}
       handleCancel={handleCancel}
       handleOk={handleOk}
-      header={"CHOOSE SERVICE REQUEST REFERENCE"}
+      title={"CHOOSE SERVICE REQUEST REFERENCE"}
       width={1100}
       type={"custom"}
       footer={[
-        <Button key="close" onClick={handleClose}>
-          Close
-        </Button>,
+        <Button
+          type="primary"
+          className="h-9 px-5 justify-center items-center"
+          style={{
+            backgroundColor: "#0075bf",
+            borderColor: "#0075bf",
+            borderRadius: "5px",
+            minWidth: "112px",
+          }}
+          onClick={() => {
+            // Add your select logic here
+            console.log("Select button clicked");
+            handleOk(); // Use handleOk to properly close the modal
+          }}
+        >
+          Select
+        </Button>
       ]}
     >
       <NxTable
@@ -551,7 +567,7 @@ export default function InfoServiceRequest({
         fontSize={"small"}
       />
 
-    </ModalCustom>
+    </NxModal>
   </Fragment>
   )
 }

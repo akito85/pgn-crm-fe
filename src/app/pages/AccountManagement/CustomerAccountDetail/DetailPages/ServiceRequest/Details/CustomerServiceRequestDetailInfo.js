@@ -27,36 +27,35 @@ const CustomerServiceRequestDetailInfo = ({
   onSort = () => {},
   getColumnSearchProps = () => {},
   searchInput,
-  handleSearch
+  handleSearch,
+  id,
+  idAccount,
+  idCustomer,
+  accountType,
+  data_accountDetail,
+  data_customerDetail,
 }) => {
   // State
   const [dataDetail, setDataDetail] = useState({});
   const dispatch = useDispatch();
   const [SRStatus, setSRStatus] = useState(null);
 
-  const { data_customerDetail, loading, loadingAccount } = useSelector(
+  const { loading, loadingAccount } = useSelector(
     (state) => state.customerAccount
     );
   const { access_account } = useSelector(
     (state) => state.accountManagement
   );
-  
+
   const isLoading = loading || loadingAccount;
 
   //declare
   const navigate = useNavigate();
   const location = useLocation();
-  const id = location?.state?.id;
-  
+
   useEffect(() => {
     dispatch(getGrantedAccessAccount('/account-management/customers'))
   }, [dispatch])
-
-  useEffect(() => {
-    if (id) {
-      dispatch(getCustomerDetail(id));
-    }
-  }, [dispatch, id]);
 
 
   const log = []
@@ -272,6 +271,7 @@ const CustomerServiceRequestDetailInfo = ({
         <CustomerServiceRequestHeader
           id={id}
           data_detail={data_customerDetail}
+          data_accountDetail={data_accountDetail}
           dispatch={dispatch}
           access_account={access_account}
         />

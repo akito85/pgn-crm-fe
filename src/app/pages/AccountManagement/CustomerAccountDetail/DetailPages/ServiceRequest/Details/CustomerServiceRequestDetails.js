@@ -12,7 +12,11 @@ import { getCustomerDetail } from "../../../../../../../redux/slices/account_man
 import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import { dateFormatting } from "../../../../../../../utils";
-import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
+import {
+  getGrantedAccessAccount,
+  getAccountStandardDetail,
+  getAccountOneTimeDetail,
+} from "../../../../../../../redux/slices/account_management/accountManagement";
 
 const tabs = [
   { value: "Service Request" },
@@ -29,15 +33,22 @@ const CustomerServiceRequestDetails = ({
   const { data_customerDetail, loading, loadingAccount } = useSelector(
     (state) => state.customerAccount
     );
-  const { access_account } = useSelector(
+  const {
+    access_account,
+    data_accountDetail,
+    loading: loadingAccountDetail,
+  } = useSelector(
     (state) => state.accountManagement
   );
-  const isLoading = loading || loadingAccount;
+  const isLoading = loading || loadingAccount || loadingAccountDetail;
 
   //declare
   const navigate = useNavigate();
   const location = useLocation();
   const id = location?.state?.id;
+  const idAccount = location?.state?.idAccount;
+  const idCustomer = location?.state?.idCustomer;
+  const accountType = location?.state?.type; // "standard" or "onetime"
   // const id = 7;
 
   //state
@@ -46,6 +57,17 @@ const CustomerServiceRequestDetails = ({
   useEffect(() => {
     dispatch(getGrantedAccessAccount('/account-management/customers/view/service-requests/details'))
   }, [dispatch])
+
+  // Fetch Account Standard/OneTime Detail
+  useEffect(() => {
+    if (idAccount && idCustomer && accountType) {
+      if (accountType === "standard") {
+        dispatch(getAccountStandardDetail({ idCustomer, idAccount }));
+      } else {
+        dispatch(getAccountOneTimeDetail({ idCustomer, idAccount }));
+      }
+    }
+  }, [dispatch, idAccount, idCustomer, accountType]);
 
   useEffect(() => {
     if (id) {
@@ -102,6 +124,11 @@ const CustomerServiceRequestDetails = ({
         <div className="my-5">
           <CustomerServiceRequestDetailTabs
             id={id}
+            idAccount={idAccount}
+            idCustomer={idCustomer}
+            accountType={accountType}
+            data_accountDetail={data_accountDetail}
+            data_customerDetail={data_customerDetail}
             section={typeDetailSection}
             options={tabs}
             handleChangeOption={handleDetailSection}

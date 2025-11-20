@@ -18,6 +18,12 @@ const CustomerServiceRequestDetailTabs = ({
   section = "",
   options = [],
   handleChangeOption = () => {},
+  id,
+  idAccount,
+  idCustomer,
+  accountType,
+  data_accountDetail,
+  data_customerDetail,
 }) => {
   // Use provided options or fall back to default tabs
   const tabOptions = options.length > 0 ? options : [
@@ -48,19 +54,28 @@ const CustomerServiceRequestDetailTabs = ({
   }
 
   const renderSection = () => {
+    const commonProps = {
+      id,
+      idAccount,
+      idCustomer,
+      accountType,
+      data_accountDetail,
+      data_customerDetail,
+    };
+
     switch (section) {
       case dataTabs.sreqi:
-        return <CustomerServiceRequestDetailInfo type={AccountType}/>;
+        return <CustomerServiceRequestDetailInfo {...commonProps} type={AccountType}/>;
       case dataTabs.attch:
-        return <CustomerServiceRequestDetailAttch />;
+        return <CustomerServiceRequestDetailAttch {...commonProps} />;
       case dataTabs.contact:
-        return <CustomerServiceRequestContact />;
+        return <CustomerServiceRequestContact {...commonProps} />;
       case dataTabs.prerequisite:
-        return <CustomerServiceRequestPreRequisite />;
+        return <CustomerServiceRequestPreRequisite {...commonProps} />;
       case dataTabs.workorder:
-        return <CustomerServiceRequestWorkOrder />;
+        return <CustomerServiceRequestWorkOrder {...commonProps} />;
       default:
-        return <CustomerServiceRequestDetailInfo />;
+        return <CustomerServiceRequestDetailInfo {...commonProps} />;
     }
   };
 

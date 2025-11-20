@@ -34,7 +34,13 @@ const CustomerServiceRequestDetailAttch = ({
   onSort = () => {},
   getColumnSearchProps = () => {},
   searchInput,
-  handleSearch
+  handleSearch,
+  id,
+  idAccount,
+  idCustomer,
+  accountType,
+  data_accountDetail,
+  data_customerDetail,
 }) => {
   // State
   const [modalDetail, setModalDetail] = useState(false);

@@ -22,6 +22,12 @@ const CustomerServiceRequestContact = ({
   page = 1,
   pageSize = 10,
   onSort = () => {},
+  id,
+  idAccount,
+  idCustomer,
+  accountType,
+  data_accountDetail,
+  data_customerDetail,
 }) => {
   const [dataDetail, setDataDetail] = useState({});
   const [expanded, setExpanded] = useState([]);
