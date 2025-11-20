@@ -15,6 +15,7 @@ import {
   getApprovalHistory,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
 import { columnsBilling } from "./Table/TableViewBilling";
+import { columnsAllBilling } from "./Table/TableViewAllBilling"; // Import kolom baru untuk Tab All
 import BillingDetail from "./Detail/BillingDetail";
 import ModalRequestApproval from "./ModalRequestApproval";
 import ModalApprovalBilling from "./ModalApprovalBilling";
@@ -111,7 +112,6 @@ const BillingPage = () => {
     {
       label: "All",
       value: "All",
-      disabled: true,
     },
   ];
 
@@ -172,7 +172,7 @@ const BillingPage = () => {
   // Handle Detail
   const handleDetail = (record) => {
     setPageDetail(true);
-    setBillingCode(record.billingCode);
+    setBillingCode(record.billingCode || record.invoiceNumber);
     setRatingCode(record.ratingCode);
     setAccountNumberId(record.accountNumber);
     setSANumberId(record.saNumber);
@@ -181,13 +181,16 @@ const BillingPage = () => {
 
   // Handle Approval History
   const handleApprovalHistory = (record) => {
-    dispatch(getApprovalHistory(record.billingCode));
+    dispatch(getApprovalHistory(record.billingCode || record.invoiceNumber));
     setModalApprovalHistory(true);
   };
 
   // Handle Value Tab
   const onChangeTab = ({ target: { value } }) => {
     setValueTab(value);
+    // Reset search dan page saat ganti tab
+    setSearch({});
+    setPage(1);
   };
 
   // Handle Refresh
@@ -291,7 +294,19 @@ const BillingPage = () => {
     itemGrantAccess
   );
 
+  // Gunakan kolom yang berbeda berdasarkan tab yang dipilih
   const baseColumns = useMemo(() => {
+    if (valueTab === "All") {
+      return columnsAllBilling(
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        search
+      );
+    }
     return columnsBilling(
       page,
       pageSize,
@@ -301,7 +316,7 @@ const BillingPage = () => {
       handleSearch,
       search
     );
-  }, [page, pageSize, searchInput, searchedColumn, searchText, search]);
+  }, [valueTab, page, pageSize, searchInput, searchedColumn, searchText, search]);
 
   const allColumns = useMemo(() => {
     const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
@@ -321,6 +336,41 @@ const BillingPage = () => {
       title: col.title,
     }));
   }, [allColumns]);
+
+  // Data source yang berbeda untuk Tab All (hardcoded untuk demo)
+  const dataSourceForTab = useMemo(() => {
+    if (valueTab === "All") {
+      // Hardcode data untuk Tab All
+      // Nanti bisa diganti dengan API call khusus
+      return [
+        {
+          invoiceNumber: "INV-2024-001",
+          billingType: "Gas",
+          quantity: 1500,
+          totalAmountIdr: 75000000,
+          transactionDate: "2024-01-15",
+          remark: "Regular monthly billing for gas supply",
+        },
+        {
+          invoiceNumber: "INV-2024-002",
+          billingType: "Non Gas",
+          quantity: 500,
+          totalAmountIdr: 25000000,
+          transactionDate: "2024-01-20",
+          remark: "Additional service charges",
+        },
+        {
+          invoiceNumber: "INV-2024-003",
+          billingType: "Gas",
+          quantity: 2000,
+          totalAmountIdr: 100000000,
+          transactionDate: "2024-02-01",
+          remark: "Peak season billing",
+        },
+      ];
+    }
+    return dataSource;
+  }, [valueTab, dataSource]);
 
   return (
     <LayoutMenu>
@@ -351,14 +401,14 @@ const BillingPage = () => {
         >
           <div className="my-5">
             <TableRBI
-              dataSource={dataSource}
+              dataSource={dataSourceForTab}
               columns={processedColumns}
               current={page}
               pageSize={pageSize}
               onChange={handleChangePage}
               onSizeChanger={handleChangePage}
-              totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ x: 16000, y: 525 }}
+              totalData={valueTab === "All" ? 3 : (data?.page?.totalElements || 0)}
+              tableScrolled={{ x: valueTab === "All" ? 1500 : 16000, y: 525 }}
               onSort={onSort}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
