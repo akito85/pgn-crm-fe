@@ -1,32 +1,59 @@
-import {
-  Button,
-  DatePicker,
-  Select,
-  Row,
-  Col,
-  Modal,
-  Form,
-  Input,
-  message,
-} from "antd";
+import { Button, DatePicker, Select, Row, Col, Modal, Form, Input } from "antd";
 import { SendOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
+
+import {
+  createDeliveryJob,
+  getBillingPeriod,
+} from "../../../../../../redux/slices/rating_billing_invoice/managementDeliveryInvoice";
 
 const { Option } = Select;
 const { TextArea } = Input;
 
-const CreateFormDelivery = ({ visible, onCancel, onSubmit }) => {
+const CreateFormDelivery = ({ visible, onCancel }) => {
   const [form] = Form.useForm();
+  const dispatch = useDispatch();
+
+  const { data_billingPeriod, loading } = useSelector(
+    (state) => state.managementDeliveryInvoice
+  );
+
   const [isScheduled, setIsScheduled] = useState(false);
 
+  console.log("Billing Period Data:", data_billingPeriod);
+  // Fetch Billing Period ketika modal dibuka
+  useEffect(() => {
+    if (visible) {
+      dispatch(getBillingPeriod());
+    }
+  }, [visible, dispatch]);
+
+  // Submit form
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      message.success("Delivery job berhasil dibuat!");
-      onSubmit(values);
+
+      const formattedScheduledAt = values?.scheduledAt
+        ? moment(values.scheduledAt).format("YYYY-MM-DD HH:mm:ss")
+        : null;
+
+      const payload = {
+        billPeriod: values.billingPeriod,
+        scheduleType: values.scheduleType,
+        scheduleTime: formattedScheduledAt,
+        remark: values.remark || "",
+      };
+
+      console.log("Payload:", payload);
+
+      await dispatch(createDeliveryJob(payload)).unwrap();
+
       form.resetFields();
+      onCancel();
     } catch (error) {
-      console.error("Validation failed:", error);
+      console.error("Create job failed:", error);
     }
   };
 
@@ -55,6 +82,7 @@ const CreateFormDelivery = ({ visible, onCancel, onSubmit }) => {
           type="primary"
           size="large"
           icon={<SendOutlined />}
+          loading={loading}
           onClick={handleSubmit}
         >
           Submit
@@ -65,41 +93,30 @@ const CreateFormDelivery = ({ visible, onCancel, onSubmit }) => {
       <Form form={form} layout="vertical">
         <Row gutter={20}>
           <Col span={24}>
-            {/* Billing Period */}
+            {/* Billing Period (Dynamic) */}
             <Form.Item
-              label={
-                <span style={{ fontWeight: 500, fontSize: 14 }}>
-                  Billing Period
-                </span>
-              }
+              label={<span style={{ fontWeight: 500 }}>Billing Period</span>}
               name="billingPeriod"
               rules={[
                 { required: true, message: "Billing period wajib dipilih!" },
               ]}
             >
-              <Select size="large" placeholder="Pilih billing period">
-                <Option value="jan">1 – 31 Januari</Option>
-                <Option value="feb">1 – 28 Februari</Option>
-                <Option value="mar">1 – 31 Maret</Option>
-                <Option value="apr">1 – 30 April</Option>
-                <Option value="may">1 – 31 Mei</Option>
-                <Option value="jun">1 – 30 Juni</Option>
-                <Option value="jul">1 – 31 Juli</Option>
-                <Option value="aug">1 – 31 Agustus</Option>
-                <Option value="sep">1 – 30 September</Option>
-                <Option value="oct">1 – 31 Oktober</Option>
-                <Option value="nov">1 – 30 November</Option>
-                <Option value="dec">1 – 31 Desember</Option>
+              <Select
+                size="large"
+                placeholder="Pilih billing period"
+                loading={loading}
+              >
+                {data_billingPeriod?.map((item, idx) => (
+                  <Option key={idx} value={item}>
+                    {item}
+                  </Option>
+                ))}
               </Select>
             </Form.Item>
 
             {/* Schedule Type */}
             <Form.Item
-              label={
-                <span style={{ fontWeight: 500, fontSize: 14 }}>
-                  Schedule Type
-                </span>
-              }
+              label={<span style={{ fontWeight: 500 }}>Schedule Type</span>}
               name="scheduleType"
               rules={[
                 { required: true, message: "Schedule type wajib dipilih!" },
@@ -115,13 +132,11 @@ const CreateFormDelivery = ({ visible, onCancel, onSubmit }) => {
               </Select>
             </Form.Item>
 
-            {/* Schedule DateTime */}
+            {/* Date & Time Selector */}
             {isScheduled && (
               <Form.Item
                 label={
-                  <span style={{ fontWeight: 500, fontSize: 14 }}>
-                    Choose Date & Time
-                  </span>
+                  <span style={{ fontWeight: 500 }}>Choose Date & Time</span>
                 }
                 name="scheduledAt"
                 rules={[
@@ -139,9 +154,7 @@ const CreateFormDelivery = ({ visible, onCancel, onSubmit }) => {
 
             {/* Remark */}
             <Form.Item
-              label={
-                <span style={{ fontWeight: 500, fontSize: 14 }}>Remark</span>
-              }
+              label={<span style={{ fontWeight: 500 }}>Remark</span>}
               name="remark"
             >
               <TextArea
