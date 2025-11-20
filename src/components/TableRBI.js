@@ -144,9 +144,21 @@ const TableRBI = ({
       const newCol = {
         ...col,
         width: columnWidths[colKey] || col.width || 150,
+        align: "center",
+        ellipsis: {
+          showTitle: true,
+        },
         onHeaderCell: (column) => ({
           width: columnWidths[colKey] || col.width || 150,
           onResize: handleResize(colKey),
+        }),
+        onCell: () => ({
+          style: {
+            textAlign: "center",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          },
         }),
       };
       if (fixedPos) newCol.fixed = fixedPos;
