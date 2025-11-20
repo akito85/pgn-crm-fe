@@ -201,17 +201,6 @@ const ModalReplaceEFaktur = ({
                   clipRule="evenodd"
                 />
               </svg>
-              <div>
-                <p className="text-sm font-semibold text-yellow-800 mb-1">
-                  Perhatian:
-                </p>
-                <ul className="text-sm text-yellow-700 space-y-1 list-disc list-inside">
-                  <li>Faktur asli akan ditandai sebagai "Replaced" dan tidak dapat digunakan lagi</li>
-                  <li>Faktur pengganti akan dibuat dengan status "PROCESSING"</li>
-                  <li>Proses pembuatan akan berjalan di background, mohon tunggu hingga selesai</li>
-                  <li>Pastikan alasan penggantian sudah benar sebelum submit</li>
-                </ul>
-              </div>
             </div>
           </div>
         </Form>

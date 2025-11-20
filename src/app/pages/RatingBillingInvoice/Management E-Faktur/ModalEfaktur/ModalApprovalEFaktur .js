@@ -244,6 +244,30 @@ const ModalApprovalEFaktur = ({
         render: (text) => text || "-",
       },
       {
+        key: "efakturDate",
+        title: "TGL E-FAKTUR",
+        dataIndex: "efakturDate",
+        width: 120,
+        align: "center",
+        render: (text) => {
+          if (!text) return "-";
+          const date = new Date(text);
+          return date.toLocaleDateString("id-ID", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          });
+        },
+      },
+      {
+        key: "efakturType",
+        title: "TIPE E-FAKTUR",
+        dataIndex: "efakturType",
+        width: 140,
+        align: "center",
+        render: (text) => text || "-",
+      },
+      {
         key: "invoiceNumber",
         title: "INVOICE NUMBER",
         dataIndex: "invoiceNumber",
@@ -258,6 +282,13 @@ const ModalApprovalEFaktur = ({
         render: (text) => text || "-",
       },
       {
+        key: "customerNumber",
+        title: "CUSTOMER NUMBER",
+        dataIndex: "customerNumber",
+        width: 160,
+        render: (text) => text || "-",
+      },
+      {
         key: "customerName",
         title: "CUSTOMER",
         dataIndex: "customerName",
@@ -268,7 +299,14 @@ const ModalApprovalEFaktur = ({
         key: "accountNumber",
         title: "ACCOUNT NUMBER",
         dataIndex: "accountNumber",
-        width: 150,
+        width: 180,
+        render: (text) => text || "-",
+      },
+      {
+        key: "accountName",
+        title: "ACCOUNT NAME",
+        dataIndex: "accountName",
+        width: 250,
         render: (text) => text || "-",
       },
       {
@@ -296,8 +334,32 @@ const ModalApprovalEFaktur = ({
         },
       },
       {
+        key: "dpp",
+        title: "DPP",
+        dataIndex: "dpp",
+        width: 150,
+        align: "right",
+        render: (value) => `Rp ${value?.toLocaleString("id-ID") || 0}`,
+      },
+      {
+        key: "ppn",
+        title: "PPN",
+        dataIndex: "ppn",
+        width: 150,
+        align: "right",
+        render: (value) => `Rp ${value?.toLocaleString("id-ID") || 0}`,
+      },
+      {
+        key: "totalAmount",
+        title: "TOTAL AMOUNT",
+        dataIndex: "totalAmount",
+        width: 180,
+        align: "right",
+        render: (value) => `Rp ${value?.toLocaleString("id-ID") || 0}`,
+      },
+      {
         key: "totalAmountEqvIdr",
-        title: "TOTAL AMOUNT (IDR)",
+        title: "TOTAL AMOUNT (EQV IDR)",
         dataIndex: "totalAmountEqvIdr",
         width: 180,
         align: "right",
@@ -314,9 +376,39 @@ const ModalApprovalEFaktur = ({
             APPROVED: "bg-green-100 text-green-800 border-green-300",
             SUCCESS: "bg-green-100 text-green-800 border-green-300",
             PROCESSING: "bg-blue-100 text-blue-800 border-blue-300",
-            AWAITING_APPROVAL: "bg-orange-100 text-orange-800 border-orange-300",
+            AWAITING_APPROVAL:
+              "bg-orange-100 text-orange-800 border-orange-300",
             FAILED: "bg-red-100 text-red-800 border-red-300",
             REJECTED: "bg-red-100 text-red-800 border-red-300",
+          };
+
+          return (
+            <div className="flex justify-center">
+              <span
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                  statusColors[status] ||
+                  "bg-gray-100 text-gray-800 border-gray-300"
+                }`}
+              >
+                {status?.replace(/_/g, " ")}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        key: "statusApproval",
+        title: "STATUS APPROVAL",
+        dataIndex: "statusApproval",
+        width: 200,
+        align: "center",
+        render: (status) => {
+          const statusColors = {
+            APPROVED: "bg-green-100 text-green-800 border-green-300",
+            WAITING_CANCELLATION_APPROVAL:
+              "bg-yellow-100 text-yellow-800 border-yellow-300",
+            REJECTED: "bg-red-100 text-red-800 border-red-300",
+            PENDING: "bg-blue-100 text-blue-800 border-blue-300",
           };
 
           return (
@@ -338,6 +430,20 @@ const ModalApprovalEFaktur = ({
         title: "REMARK",
         dataIndex: "remark",
         width: 200,
+        render: (text) => text || "-",
+      },
+      {
+        key: "reasonCanceled",
+        title: "REASON CANCELED",
+        dataIndex: "reasonCanceled",
+        width: 250,
+        render: (text) => text || "-",
+      },
+      {
+        key: "reasonReplacement",
+        title: "REASON REPLACEMENT",
+        dataIndex: "reasonReplacement",
+        width: 250,
         render: (text) => text || "-",
       },
     ],
