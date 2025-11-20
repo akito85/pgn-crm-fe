@@ -93,6 +93,7 @@ import prabillingLogReducer from "../slices/rating_billing_invoice/prabillingLog
 import jobSlice from "../slices/system_setup/jobSlice";
 import loggingReducer from "../slices/system_setup/logging";
 import emeteraiReducer from "../slices/rating_billing_invoice/emeterai";
+import managementDeliveryInvoiceReducer from "../slices/rating_billing_invoice/managementDeliveryInvoice";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -191,6 +192,7 @@ const reducer = combineReducers({
   top: termsofPaymentReducer,
   tax_code: taxCodeReducer,
   emeterai: emeteraiReducer,
+  managementDeliveryInvoice: managementDeliveryInvoiceReducer,
 
   //receipt and collection
   receipt: receiptReducer,

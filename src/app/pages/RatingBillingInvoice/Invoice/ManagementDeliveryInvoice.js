@@ -1,114 +1,65 @@
 // components/ManagementDeliveryInvoice.js
-import React, { useState, useMemo } from "react";
-import { Button, Tag } from "antd";
+import React, { useEffect, useState, useMemo } from "react";
+import { Button } from "antd";
 import { EyeOutlined, PlusOutlined } from "@ant-design/icons";
+import { useDispatch, useSelector } from "react-redux";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import SummaryStatistics from "./_components/ManagementDeliveryComponent/SummaryStatistics";
-import CreateJobModal from "./_components/CreateJobModal";
+import CreateFormDelivery from "./_components/ManagementDeliveryComponent/CreateFormDelivery";
 import DetailInvoiceModal from "./_components/DetailnvoiceModal";
 import PreviewMessageModal from "./_components/ManagementDeliveryComponent/PreviewMessageModal";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import StatusComponent from "../../../../components/StatusComponent";
-import CreateFormDelivery from "./_components/ManagementDeliveryComponent/CreateFormDelivery";
 
-// Main Component
+import {
+  getDeliveryList,
+  getDeliverySummary,
+} from "../../../../redux/slices/rating_billing_invoice/managementDeliveryInvoice";
+
 const ManagementDeliveryInvoice = () => {
-  const [dateRange, setDateRange] = useState(null);
-  const [status, setStatus] = useState("all");
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+
+  // Redux state
+  const { data_list, data_summary, loading } = useSelector(
+    (state) => state.managementDeliveryInvoice
+  );
+
+  // Modal & selection
   const [modalVisible, setModalVisible] = useState(false);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [previewModalVisible, setPreviewModalVisible] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
 
-  // Pagination states
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Fixed columns state
+  // Fixed column settings
   const [fixedColumns, setFixedColumns] = useState({
     left: [],
     right: [],
   });
 
-  // Summary data
-  const summaryData = {
-    totalSent: 10450,
-    failed: 15,
-    pending: 250,
-    notProcessed: 88,
-  };
+  /* ----------------------------------------------------------
+     FETCH DATA LIST + SUMMARY
+  ------------------------------------------------------------*/
+  useEffect(() => {
+    dispatch(
+      getDeliveryList({
+        page: currentPage,
+        pageSize,
+        search: "",
+        sort: "createdDate~desc",
+      })
+    );
 
-  // Table data
-  const invoiceData = [
-    {
-      key: "1",
-      invoiceNo: "INV-001",
-      customer: "PT. JAYA",
-      channel: "Email",
-      status: "Sent",
-      lastUpdate: "02/10/2025 14:30",
-    },
-    {
-      key: "2",
-      invoiceNo: "INV-001",
-      customer: "PT. JAYA",
-      channel: "SMS",
-      status: "Sent",
-      lastUpdate: "02/10/2025 14:32",
-    },
-    {
-      key: "3",
-      invoiceNo: "INV-002",
-      customer: "PT. MAKMUR",
-      channel: "WhatsApp",
-      status: "Failed",
-      lastUpdate: "02/10/2025 14:31",
-    },
-    {
-      key: "4",
-      invoiceNo: "INV-002",
-      customer: "PT. MAKMUR",
-      channel: "SMS",
-      status: "Failed",
-      lastUpdate: "02/10/2025 14:31",
-    },
-    {
-      key: "5",
-      invoiceNo: "INV-003",
-      customer: "Bpk. Budi",
-      channel: "SMS",
-      status: "Sent",
-      lastUpdate: "02/10/2025 14:32",
-    },
-    {
-      key: "6",
-      invoiceNo: "INV-004",
-      customer: "PT. SEJAHTERA",
-      channel: "Kurir",
-      status: "Scheduled",
-      lastUpdate: "02/10/2025 14:33",
-    },
-    {
-      key: "7",
-      invoiceNo: "INV-005",
-      customer: "PT. ABADI",
-      channel: "Email",
-      status: "Sent",
-      lastUpdate: "02/10/2025 14:35",
-    },
-    {
-      key: "8",
-      invoiceNo: "INV-006",
-      customer: "CV. MAJU",
-      channel: "WhatsApp",
-      status: "Scheduled",
-      lastUpdate: "02/10/2025 14:36",
-    },
-  ];
+    dispatch(getDeliverySummary());
+  }, [dispatch, currentPage, pageSize]);
 
-  // Column definitions
+  /* ----------------------------------------------------------
+     TABLE COLUMNS
+  ------------------------------------------------------------*/
   const columnDefinitions = [
     {
       key: "no",
@@ -121,21 +72,21 @@ const ManagementDeliveryInvoice = () => {
       ),
     },
     {
-      key: "invoiceNo",
+      key: "invoiceNumber",
       title: "INVOICE NUMBER",
-      dataIndex: "invoiceNo",
-      width: 150,
+      dataIndex: "invoiceNumber",
+      width: 180,
     },
     {
-      key: "customer",
+      key: "customerName",
       title: "CUSTOMER",
-      dataIndex: "customer",
-      width: 200,
+      dataIndex: "customerName",
+      width: 220,
     },
     {
-      key: "channel",
+      key: "deliveryService",
       title: "DELIVERY SERVICE",
-      dataIndex: "channel",
+      dataIndex: "deliveryService",
       width: 150,
     },
     {
@@ -144,7 +95,7 @@ const ManagementDeliveryInvoice = () => {
       dataIndex: "status",
       width: 120,
       render: (status) => (
-        <div className={"flex justify-center"}>
+        <div className="flex justify-center">
           <StatusComponent colour={status}>{status}</StatusComponent>
         </div>
       ),
@@ -167,55 +118,29 @@ const ManagementDeliveryInvoice = () => {
     },
   ];
 
-  // Apply fixed columns and reorder
+  // Integrate fixed columns
   const columns = useMemo(() => {
-    // Separate columns into categories while preserving original order
     const leftFixed = [];
-    const rightFixed = [];
     const normal = [];
+    const rightFixed = [];
 
-    // First pass: categorize columns based on their ORIGINAL order in columnDefinitions
     columnDefinitions.forEach((col) => {
-      if (fixedColumns.left.includes(col.key)) {
-        leftFixed.push(col);
-      } else if (fixedColumns.right.includes(col.key)) {
-        rightFixed.push(col);
-      } else {
-        normal.push(col);
-      }
+      if (fixedColumns.left.includes(col.key)) leftFixed.push(col);
+      else if (fixedColumns.right.includes(col.key)) rightFixed.push(col);
+      else normal.push(col);
     });
 
-    // Reorder: left fixed → normal → right fixed
-    const reorderedColumns = [...leftFixed, ...normal, ...rightFixed];
-
-    // Apply fixed property
-    return reorderedColumns.map((col) => {
+    return [...leftFixed, ...normal, ...rightFixed].map((col) => {
       const newCol = { ...col };
-
-      if (fixedColumns.left.includes(col.key)) {
-        newCol.fixed = "left";
-      } else if (fixedColumns.right.includes(col.key)) {
-        newCol.fixed = "right";
-      } else {
-        delete newCol.fixed;
-      }
-
+      if (fixedColumns.left.includes(col.key)) newCol.fixed = "left";
+      if (fixedColumns.right.includes(col.key)) newCol.fixed = "right";
       return newCol;
     });
   }, [fixedColumns, currentPage, pageSize]);
 
-  const handleApplyFilter = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-  };
-
-  const handleResetFilter = () => {
-    setDateRange(null);
-    setStatus("all");
-  };
-
+  /* ----------------------------------------------------------
+     HANDLERS
+  ------------------------------------------------------------*/
   const handleViewDetail = (record) => {
     setSelectedInvoice(record);
     setDetailModalVisible(true);
@@ -226,13 +151,8 @@ const ManagementDeliveryInvoice = () => {
     setPreviewModalVisible(true);
   };
 
-  const handleCreateJob = (jobData) => {
-    setModalVisible(false);
-  };
-
-  const handlePageChange = (page, size) => {
+  const handlePageChange = (page) => {
     setCurrentPage(page);
-    setPageSize(size);
   };
 
   const handleSizeChange = (current, size) => {
@@ -240,14 +160,16 @@ const ManagementDeliveryInvoice = () => {
     setPageSize(size);
   };
 
+  console.log(data_summary, "summary");
   return (
     <LayoutMenu>
       <CardContainer
         header={
-          <div className="flex sm:flex-cols justify-between md:gap-2 md:items-center">
+          <div className="flex justify-between items-center">
             <h2 className="text-2xl font-semibold">
               Management Delivery Invoice
             </h2>
+
             <Button
               type="primary"
               size="large"
@@ -256,7 +178,6 @@ const ManagementDeliveryInvoice = () => {
               style={{
                 height: "48px",
                 fontSize: "15px",
-                fontWeight: "500",
                 borderRadius: "8px",
               }}
             >
@@ -265,24 +186,25 @@ const ManagementDeliveryInvoice = () => {
           </div>
         }
       >
-        {/* Summary Statistics */}
+        {/* Summary from API */}
         <SummaryStatistics
-          totalSent={summaryData.totalSent}
-          failed={summaryData.failed}
-          pending={summaryData.pending}
-          notProcessed={summaryData.notProcessed}
+          totalSent={data_summary?.success ?? 0}
+          failed={data_summary?.failed ?? 0}
+          pending={data_summary?.awaitingDelivery ?? 0}
+          notProcessed={data_summary?.open ?? 0}
         />
 
+        {/* Main Table */}
         <TableRBI
           idTable="delivery-invoice-table"
-          dataSource={invoiceData}
+          dataSource={data_list?.result || []}
           columns={columns}
+          loading={loading}
           pageSize={pageSize}
           current={currentPage}
-          loading={loading}
           onChange={handlePageChange}
           onSizeChanger={handleSizeChange}
-          totalData={invoiceData.length}
+          totalData={data_list?.page?.totalElements || 0}
           tableScrolled={{ x: 1200 }}
           useSelect={true}
           usePagination={true}
@@ -295,10 +217,9 @@ const ManagementDeliveryInvoice = () => {
         <CreateFormDelivery
           visible={modalVisible}
           onCancel={() => setModalVisible(false)}
-          onSubmit={handleCreateJob}
         />
 
-        {/* Detail Invoice Modal */}
+        {/* Detail Modal */}
         <DetailInvoiceModal
           visible={detailModalVisible}
           onCancel={() => {
@@ -308,7 +229,7 @@ const ManagementDeliveryInvoice = () => {
           invoiceData={selectedInvoice}
         />
 
-        {/* Preview Message Modal */}
+        {/* Preview Modal */}
         <PreviewMessageModal
           visible={previewModalVisible}
           onCancel={() => {
