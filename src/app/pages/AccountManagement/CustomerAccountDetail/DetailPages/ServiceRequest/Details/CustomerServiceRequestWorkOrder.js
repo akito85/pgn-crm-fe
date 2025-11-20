@@ -37,7 +37,13 @@ const CustomerServiceRequestWorkOrder = ({
   onSort = () => {},
   getColumnSearchProps = () => {},
   searchInput,
-  handleSearch
+  handleSearch,
+  id,
+  idAccount,
+  idCustomer,
+  accountType,
+  data_accountDetail,
+  data_customerDetail,
 }) => {
   const [dataDetail, setDataDetail] = useState({});
   
