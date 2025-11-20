@@ -26,7 +26,27 @@ const NxTable = ({
   rowSelection,
   onRowClicked = () => {},
   onRowClickedAsync = null,
-  preventRowClickOn = ['button', 'a', 'svg', 'path', '.ant-btn', '.action-button'],
+  preventRowClickOn = [
+    'button',
+    'a',
+    'svg',
+    'path',
+    '.ant-btn',
+    '.ant-btn-link',
+    '.ant-btn-icon-only',
+    '.action-button',
+    '.ant-dropdown-trigger',
+    '.anticon',
+    '.ant-popconfirm',
+    '.ant-popover',
+    'input',
+    'select',
+    '.ant-select',
+    '.ant-input',
+    '.ant-checkbox',
+    '.ant-radio',
+    '.ant-switch',
+  ],
   tableScrolled,
   className = '',
   idTable,
@@ -58,19 +78,25 @@ const NxTable = ({
   const searchInput = useRef(null);
   const [loadingRows, setLoadingRows] = useState(new Set());
 
-  // Smart row click handler
+  // Smart row click handler that prevents clicks on action buttons
   const handleRowClick = async (record, rowIndex, event) => {
     const target = event.target;
+
+    // Check if click originated from a prevented element or any of its children
     const shouldPrevent = preventRowClickOn.some((selector) => {
       if (selector.startsWith('.')) {
+        // For class selectors, use closest to check if target or any parent has this class
         return target.closest(selector) !== null;
       } else {
+        // For tag selectors, check the tag itself or if it's inside the tag
         return target.tagName.toLowerCase() === selector.toLowerCase() ||
                target.closest(selector) !== null;
       }
     });
 
     if (shouldPrevent) {
+      // Prevent row click when clicking on action buttons/interactive elements
+      event.stopPropagation();
       return;
     }
 
@@ -320,8 +346,9 @@ const NxTable = ({
             padding: tablePaddingValue, // Same padding as body for alignment
             borderBottom: '0.5px solid #d4d4d8',
             backgroundColor: headerBackgroundColor, // Blue background #0075BF
-            fontWeight: 600,
+            fontWeight: 'bold', // Consistent bold weight
             color: '#ffffff', // White text on blue background
+            textTransform: 'uppercase', // All headers uppercase
           }}
         />
       ),
@@ -503,6 +530,8 @@ const NxTable = ({
         }
         .nx-table-container .ant-table-thead > tr > th {
           font-size: ${fontSizeValue} !important;
+          font-weight: bold !important;
+          text-transform: uppercase !important;
         }
         .nx-table-container .ant-table-tbody > tr > td {
           font-size: ${fontSizeValue} !important;
@@ -531,6 +560,15 @@ const NxTable = ({
         /* Ensure expanded row that has no content doesn't show */
         .nx-table-container .ant-table-expanded-row > td > .ant-table-wrapper:empty {
           display: none;
+        }
+
+        /* Ensure action buttons and interactive elements have pointer cursor */
+        .nx-table-container .ant-table-tbody button,
+        .nx-table-container .ant-table-tbody a,
+        .nx-table-container .ant-table-tbody .ant-btn,
+        .nx-table-container .ant-table-tbody .anticon,
+        .nx-table-container .ant-table-tbody .action-button {
+          cursor: pointer !important;
         }
       `}} />
 
