@@ -14,6 +14,7 @@ export default function ContactForm(){
 
   const [isOpen, setIsOpen] = useState(false)
   const [isSelectContactModal, setIsSelectContactModal] = useState(false)
+  const [expandedRowKeys, setExpandedRowKeys] = useState([])
 
   const contact = []
   const columnMain = [
@@ -106,6 +107,7 @@ export default function ContactForm(){
 
   const handleOk = () => {
     console.log("ok")
+    setIsOpen(false) // Close modal after OK
   }
 
   const handleCancel = () => {
@@ -181,11 +183,20 @@ export default function ContactForm(){
   }
 
   const handleOkSelectContactModal = () => {
-    setIsSelectContactModal(true)
+    setIsSelectContactModal(false) // Fixed: should close modal, not open
+    setExpandedRowKeys([]) // Reset expanded rows
   }
 
   const handleCancelSelectContactModal = () => {
     setIsSelectContactModal(false)
+    setExpandedRowKeys([]) // Reset expanded rows
+  }
+
+  const handleExpand = (expanded, record) => {
+    const keys = expanded
+      ? [...expandedRowKeys, record.key]
+      : expandedRowKeys.filter(k => k !== record.key)
+    setExpandedRowKeys(keys)
   }
 
   const contactSecondary = []
@@ -604,7 +615,12 @@ export default function ContactForm(){
             columnMain={expandColumnMain}
             columnExpand={columnExpand}
             dataExpand={dataExpand}
-            tablePadding="large" 
+            childTitle="EMPLOYEE DETAILS"
+            tablePadding="small"
+            fontSize="medium"
+            expandRowByClick={true}
+            expandedRowKeys={expandedRowKeys}
+            onExpand={handleExpand}
           />
         </NxModal>
       </NxPanel>

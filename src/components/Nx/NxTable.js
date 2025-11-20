@@ -45,8 +45,8 @@ const NxTable = ({
   virtual = false,
   virtualHeight = 600,
   // Styling props
-  tablePadding = 'medium',
-  fontSize = 'medium',
+  tablePadding = 'small',
+  fontSize = 'small',
   expandPadding = '24px',
   expandGap = '14px',
 }) => {
@@ -206,7 +206,7 @@ const NxTable = ({
       ),
   });
 
-  // Utility functions
+  // Utility functions for styling
   const getPaddingValue = (padding) => {
     const paddingMap = {
       small: '8px 12px',
@@ -225,8 +225,12 @@ const NxTable = ({
     return sizeMap[size] || size;
   };
 
+  // Calculate padding values
   const tablePaddingValue = getPaddingValue(tablePadding);
   const fontSizeValue = getFontSizeValue(fontSize);
+
+  // Shared header background color for consistency
+  const headerBackgroundColor = '#0075BF'; // Blue color for headers
 
   const handleDisplayColumn = (value) => {
     setOptionSelectedCol(value);
@@ -234,8 +238,10 @@ const NxTable = ({
 
   const handleSearch = (value) => {
     setSearchText(value);
+    // Note: Actual search is triggered by debounced useEffect
   };
 
+  // Filter and enhance columns with search capabilities
   const filterColumns = () => {
     return columnMain
       .filter((col) => {
@@ -279,11 +285,59 @@ const NxTable = ({
     return index % 2 === 0 ? 'nx-row-even' : 'nx-row-odd';
   };
 
+  /**
+   * Shared table cell components for consistency between main and expanded tables
+   *
+   * This object provides custom rendering for table cells and headers:
+   * - body.cell: Applies consistent padding (top/bottom/left/right) and borders to all body cells
+   * - header.cell: Applies consistent padding, background color, and borders to all header cells
+   *
+   * Benefits:
+   * 1. Single source of truth for cell styling
+   * 2. Ensures main table and expanded table look identical
+   * 3. Respects tablePaddingValue prop (small/medium/large)
+   */
+  const tableComponents = {
+    body: {
+      cell: (props) => (
+        <td
+          {...props}
+          style={{
+            ...props.style,
+            padding: tablePaddingValue, // e.g., '12px 16px' for medium
+            borderBottom: '0.5px solid #d4d4d8',
+            // backgroundColor handled by CSS classes with !important
+          }}
+        />
+      ),
+    },
+    header: {
+      cell: (props) => (
+        <th
+          {...props}
+          style={{
+            ...props.style,
+            padding: tablePaddingValue, // Same padding as body for alignment
+            borderBottom: '0.5px solid #d4d4d8',
+            backgroundColor: headerBackgroundColor, // Blue background #0075BF
+            fontWeight: 600,
+            color: '#ffffff', // White text on blue background
+          }}
+        />
+      ),
+    },
+  };
+
   // Render the expanded row content
   const expandedRowRender = (record) => {
     const expandData = Array.isArray(dataExpand)
       ? dataExpand.filter((item) => item.parentKey === record.key)
       : dataExpand[record.key] || [];
+
+    // Don't render anything if there's no data to display
+    if (!expandData || expandData.length === 0) {
+      return null;
+    }
 
     return (
       <div
@@ -303,9 +357,11 @@ const NxTable = ({
           }}
         >
           {/* Header for expanded section */}
-          <div className="nx-expand-title self-stretch justify-start text-sky-600 text-sm font-bold">
-            {childTitle}
-          </div>
+          {childTitle && (
+            <div className="nx-expand-title self-stretch justify-start text-sky-600 text-sm font-bold">
+              {childTitle}
+            </div>
+          )}
 
           {/* Nested table */}
           <div
@@ -322,39 +378,13 @@ const NxTable = ({
               columns={filterExpandColumns()}
               dataSource={expandData}
               pagination={false}
-              size="meidum"
+              size="small"
               style={{ width: '100%', fontSize: fontSizeValue }}
               showHeader={true}
-              // Apply striped pattern to expanded table as well
+              // Apply striped pattern to expanded table
               rowClassName={(record, index) => index % 2 === 0 ? 'nx-expand-row-even' : 'nx-expand-row-odd'}
-              // Add compact cell styling for expanded table
-              components={{
-                body: {
-                  cell: (props) => (
-                    <td 
-                      {...props} 
-                      style={{ 
-                        ...props.style, 
-                        padding: tablePaddingValue,
-                        borderBottom: '0.5px solid #d4d4d8'
-                      }} 
-                    />
-                  ),
-                },
-                header: {
-                  cell: (props) => (
-                    <th 
-                      {...props} 
-                      style={{ 
-                        ...props.style, 
-                        padding: tablePaddingValue,
-                        borderBottom: '0.5px solid #d4d4d8',
-                        backgroundColor: '#f8fafc'
-                      }} 
-                    />
-                  ),
-                },
-              }}
+              // Use shared table components for consistency
+              components={tableComponents}
             />
           </div>
         </div>
@@ -413,43 +443,96 @@ const NxTable = ({
 
   return (
     <div className="flex flex-col w-full nx-table-container">
-      {/* Add CSS for striped pattern and compact cells */}
-      <style jsx>{`
-        .nx-table-container :global(.nx-row-odd) {
-          background-color: #f0f9ff;
+      {/* Styling for table striping and hover effects */}
+      <style dangerouslySetInnerHTML={{__html: `
+        /* Main table striped rows - Light blue (#E6F1F9) and white */
+        .nx-table-container .ant-table-tbody > tr.nx-row-odd {
+          background-color: #E6F1F9;
         }
-        .nx-table-container :global(.nx-row-even) {
+        .nx-table-container .ant-table-tbody > tr.nx-row-even {
           background-color: #ffffff;
         }
-        .nx-table-container :global(.nx-expand-row-odd) {
-          background-color: #f8fafc;
+
+        /* Apply background to cells for proper display */
+        .nx-table-container .ant-table-tbody > tr.nx-row-odd > td {
+          background-color: #E6F1F9;
         }
-        .nx-table-container :global(.nx-expand-row-even) {
+        .nx-table-container .ant-table-tbody > tr.nx-row-even > td {
           background-color: #ffffff;
         }
-        .nx-table-container :global(.ant-table-tbody > tr:hover > td) {
-          background-color: #e1f5fe !important;
+
+        /* Expanded table striped rows - Light blue (#E6F1F9) and white */
+        .nx-table-container .ant-table-tbody > tr.nx-expand-row-odd > td {
+          background-color: #E6F1F9;
         }
-        
-        /* Compact table cell styling */
-        .nx-table-container :global(.ant-table-thead > tr > th) {
-          border-bottom: 0.5px solid #d4d4d8 !important;
-          background-color: #f8fafc !important;
+        .nx-table-container .ant-table-tbody > tr.nx-expand-row-even > td {
+          background-color: #ffffff;
         }
-        
-        .nx-table-container :global(.ant-table-tbody > tr > td) {
-          border-bottom: 0.5px solid #d4d4d8 !important;
+
+        /* Use default Ant Design hover effect - light gray */
+        .nx-table-container .ant-table-tbody > tr:hover > td {
+          background-color: #fafafa !important;
         }
-        
-        /* Adjust row height for compact look */
-        .nx-table-container :global(.ant-table-tbody > tr) {
-          height: 40px !important;
+
+        /* Force padding to be applied according to tablePaddingValue */
+        .nx-table-container .ant-table-thead > tr > th {
+          padding: ${tablePaddingValue} !important;
         }
-        
-        .nx-table-container :global(.ant-table-thead > tr) {
-          height: 40px !important;
+        .nx-table-container .ant-table-tbody > tr > td {
+          padding: ${tablePaddingValue} !important;
         }
-      `}</style>
+
+        /* Ensure expanded row content has no extra padding/margin */
+        .nx-table-container .ant-table-tbody > tr.ant-table-expanded-row > td {
+          padding: 0 !important;
+        }
+
+        /* Prevent extra spacing in collapsed state */
+        .nx-table-container .ant-table-tbody > tr.ant-table-expanded-row.ant-table-expanded-row-level-1 {
+          background-color: transparent;
+        }
+
+        /* Hide expand icon column if no expandable rows */
+        .nx-table-container .ant-table-row-expand-icon-cell {
+          width: 50px;
+        }
+
+        /* Force font size to be applied */
+        .nx-table-container .ant-table {
+          font-size: ${fontSizeValue} !important;
+        }
+        .nx-table-container .ant-table-thead > tr > th {
+          font-size: ${fontSizeValue} !important;
+        }
+        .nx-table-container .ant-table-tbody > tr > td {
+          font-size: ${fontSizeValue} !important;
+        }
+
+        /* Hide Ant Design measure row (used for column width calculation) */
+        .nx-table-container .ant-table-measure-row {
+          display: none !important;
+        }
+
+        /* Keep the placeholder when table is actually empty, but hide empty expanded rows */
+        .nx-table-container .ant-table-tbody > tr.ant-table-expanded-row:not(.ant-table-expanded-row-level-1) {
+          display: none;
+        }
+
+        /* Ensure expand icon cell doesn't create visual empty column */
+        .nx-table-container .ant-table-row-expand-icon-cell {
+          padding: 0 8px !important;
+        }
+
+        /* Hide rows that have all empty cells (but keep the No Data placeholder) */
+        .nx-table-container .ant-table-tbody > tr:not(.ant-table-placeholder):not(.ant-table-expanded-row):empty {
+          display: none !important;
+        }
+
+        /* Ensure expanded row that has no content doesn't show */
+        .nx-table-container .ant-table-expanded-row > td > .ant-table-wrapper:empty {
+          display: none;
+        }
+      `}} />
 
       {/* Top Controls: Column Selector, Search, Pagination */}
       {(useSelect || useSearch || usePagination) && (
@@ -540,6 +623,13 @@ const NxTable = ({
               onExpand(expanded, record);
             },
             expandRowByClick,
+            // Only show expand icon if row has child data
+            rowExpandable: (record) => {
+              const expandData = Array.isArray(dataExpand)
+                ? dataExpand.filter((item) => item.parentKey === record.key)
+                : dataExpand[record.key] || [];
+              return expandData && expandData.length > 0;
+            },
           }}
           pagination={false}
           loading={loading}
@@ -568,21 +658,8 @@ const NxTable = ({
             };
           }}
           style={{ width: '100%', fontSize: fontSizeValue }}
-          // Add compact cell styling using components prop
-          components={{
-            body: {
-              cell: (props) => (
-                <td 
-                  {...props} 
-                  style={{ 
-                    ...props.style, 
-                    padding: tablePaddingValue,
-                    borderBottom: '0.5px solid #d4d4d8'
-                  }} 
-                />
-              ),
-            },
-          }}
+          // Use shared table components for consistency with expanded table
+          components={tableComponents}
         />
       </div>
     </div>
