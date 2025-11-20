@@ -25,8 +25,8 @@ const NxTable = ({
   onSort = () => {},
   rowSelection,
   onRowClicked = () => {},
-  onRowClickedAsync = null, // ← NEW: Async row click handler
-  preventRowClickOn = ['button', 'a', 'svg', 'path', '.ant-btn', '.action-button'], // ← NEW: Prevent click on these elements
+  onRowClickedAsync = null,
+  preventRowClickOn = ['button', 'a', 'svg', 'path', '.ant-btn', '.action-button'],
   tableScrolled,
   className = '',
   idTable,
@@ -39,48 +39,41 @@ const NxTable = ({
   useSearch = false,
   searchPlaceholder = 'Search...',
   onSearch = () => {},
-  searchDebounceDelay = 500, // Delay in ms for debounced search
-  searchLoading: externalSearchLoading = false, // External loading state
+  searchDebounceDelay = 500,
+  searchLoading: externalSearchLoading = false,
   // Performance props
-  virtual = false, // ← NEW: Enable virtualization for large datasets
-  virtualHeight = 600, // ← NEW: Virtual scroll container height
+  virtual = false,
+  virtualHeight = 600,
   // Styling props
-  tablePadding = 'medium', // 'small' | 'medium' | 'large' | custom string (e.g., '12px')
-  fontSize = 'medium', // 'small' | 'medium' | 'large' | custom string (e.g., '14px')
-  expandPadding = '20px',
+  tablePadding = 'medium',
+  fontSize = 'medium',
+  expandPadding = '24px',
   expandGap = '14px',
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [internalSearchLoading, setInternalSearchLoading] = useState(false);
-
-  // Column search state (internal)
   const [searchTextColumn, setSearchTextColumn] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef(null);
-  const [loadingRows, setLoadingRows] = useState(new Set()); // ← NEW: Track loading state per row
+  const [loadingRows, setLoadingRows] = useState(new Set());
 
-  // NEW: Smart row click handler that prevents clicks on action buttons
+  // Smart row click handler
   const handleRowClick = async (record, rowIndex, event) => {
-    // Check if click originated from a prevented element
     const target = event.target;
     const shouldPrevent = preventRowClickOn.some((selector) => {
       if (selector.startsWith('.')) {
-        // Class selector
         return target.closest(selector) !== null;
       } else {
-        // Tag name
         return target.tagName.toLowerCase() === selector.toLowerCase() ||
                target.closest(selector) !== null;
       }
     });
 
     if (shouldPrevent) {
-      // Click was on a button/action - don't trigger row click
       return;
     }
 
-    // Handle async row click
     if (onRowClickedAsync) {
       const rowKey = record.key || record.id;
       setLoadingRows(prev => new Set(prev).add(rowKey));
@@ -97,7 +90,6 @@ const NxTable = ({
         });
       }
     } else {
-      // Fallback to sync handler
       onRowClicked(record, rowIndex, event);
     }
   };
@@ -110,7 +102,6 @@ const NxTable = ({
       setInternalSearchLoading(true);
       try {
         const result = onSearch(searchText);
-        // Check if onSearch returns a Promise (async function)
         if (result instanceof Promise) {
           await result;
         }
@@ -126,20 +117,18 @@ const NxTable = ({
     };
   }, [searchText, searchDebounceDelay, onSearch, useSearch]);
 
-  // Internal column search handler
+  // Column search handler
   const handleColumnSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchTextColumn(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
 
-  // Internal column search reset
   const handleColumnReset = (clearFilters) => {
     clearFilters();
     setSearchTextColumn('');
   };
 
-  // Internal getColumnSearchProps implementation
   const getColumnSearchPropsInternal = (dataIndex) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div
@@ -164,7 +153,6 @@ const NxTable = ({
           <Button
             type="primary"
             onClick={() => handleColumnSearch(selectedKeys, confirm, dataIndex)}
-            // icon={<FilterOutlined />}
             size="small"
             style={{
               width: 90,
@@ -218,7 +206,7 @@ const NxTable = ({
       ),
   });
 
-  // Utility to get padding value
+  // Utility functions
   const getPaddingValue = (padding) => {
     const paddingMap = {
       small: '8px 12px',
@@ -228,7 +216,6 @@ const NxTable = ({
     return paddingMap[padding] || padding;
   };
 
-  // Utility to get font size value
   const getFontSizeValue = (size) => {
     const sizeMap = {
       small: '12px',
@@ -247,7 +234,6 @@ const NxTable = ({
 
   const handleSearch = (value) => {
     setSearchText(value);
-    // Don't call onSearch here - the useEffect hook will handle it with debounce
   };
 
   const filterColumns = () => {
@@ -256,12 +242,10 @@ const NxTable = ({
         return !optionSelectedCol.includes(col.title);
       })
       .map((col) => {
-        // Apply internal search props if column has filter: true
         if (col.filter) {
           const { filter, render, ...restCol } = col;
           const searchProps = getColumnSearchPropsInternal(col.dataIndex || col.key);
 
-          // Preserve custom render if it exists, otherwise use search render
           return {
             ...restCol,
             ...searchProps,
@@ -276,12 +260,10 @@ const NxTable = ({
     if (!columnExpand) return [];
 
     return columnExpand.map((col) => {
-      // Apply internal search props if column has filter: true
       if (col.filter) {
         const { filter, render, ...restCol } = col;
         const searchProps = getColumnSearchPropsInternal(col.dataIndex || col.key);
 
-        // Preserve custom render if it exists, otherwise use search render
         return {
           ...restCol,
           ...searchProps,
@@ -292,9 +274,13 @@ const NxTable = ({
     });
   };
 
+  // Custom row className for striped pattern
+  const getRowClassName = (record, index) => {
+    return index % 2 === 0 ? 'nx-row-even' : 'nx-row-odd';
+  };
+
   // Render the expanded row content
   const expandedRowRender = (record) => {
-    // Filter expand data for this specific row
     const expandData = Array.isArray(dataExpand)
       ? dataExpand.filter((item) => item.parentKey === record.key)
       : dataExpand[record.key] || [];
@@ -336,9 +322,39 @@ const NxTable = ({
               columns={filterExpandColumns()}
               dataSource={expandData}
               pagination={false}
-              size="small"
+              size="meidum"
               style={{ width: '100%', fontSize: fontSizeValue }}
               showHeader={true}
+              // Apply striped pattern to expanded table as well
+              rowClassName={(record, index) => index % 2 === 0 ? 'nx-expand-row-even' : 'nx-expand-row-odd'}
+              // Add compact cell styling for expanded table
+              components={{
+                body: {
+                  cell: (props) => (
+                    <td 
+                      {...props} 
+                      style={{ 
+                        ...props.style, 
+                        padding: tablePaddingValue,
+                        borderBottom: '0.5px solid #d4d4d8'
+                      }} 
+                    />
+                  ),
+                },
+                header: {
+                  cell: (props) => (
+                    <th 
+                      {...props} 
+                      style={{ 
+                        ...props.style, 
+                        padding: tablePaddingValue,
+                        borderBottom: '0.5px solid #d4d4d8',
+                        backgroundColor: '#f8fafc'
+                      }} 
+                    />
+                  ),
+                },
+              }}
             />
           </div>
         </div>
@@ -346,7 +362,7 @@ const NxTable = ({
     );
   };
 
-  // Custom expand icon with animation
+  // Custom expand icon
   const expandIcon = ({ expanded, onExpand, record }) => (
     <div
       onClick={(e) => onExpand(record, e)}
@@ -362,43 +378,79 @@ const NxTable = ({
         transform: expanded ? 'rotate(0deg)' : 'rotate(0deg)',
       }}
     >
-      {expanded ? (
-        // Collapse icon (minus in square with cross)
-        <svg 
-          width="24" 
-          height="24" 
-          viewBox="0 0 24 24" 
-          fill="none"
-          className="nx-icon-svg"
-          style={{
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          }}
-        >
-          <rect x="3" y="3" width="18" height="18" stroke="black" strokeWidth="1.5" />
-          <line x1="7" y1="12" x2="17" y2="12" stroke="black" strokeWidth="1.5" />
-          <line x1="12" y1="7" x2="12" y2="17" stroke="black" strokeWidth="1.5" />
-        </svg>
-      ) : (
-        // Expand icon (plus in square)
-        <svg 
-          width="24" 
-          height="24" 
-          viewBox="0 0 24 24" 
-          fill="none"
-          className="nx-icon-svg"
-          style={{
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          }}
-        >
-          <rect x="3" y="3" width="18" height="18" stroke="black" strokeWidth="1.5" />
-          <line x1="7" y1="12" x2="17" y2="12" stroke="black" strokeWidth="1.5" />
-        </svg>
-      )}
+    {expanded ? (
+      <svg 
+        width="24" 
+        height="24" 
+        viewBox="0 0 24 24" 
+        fill="none"
+        className="nx-icon-svg"
+        style={{
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+      >
+        <path d="M15.667 11.9902H8.33301" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path fillRule="evenodd" clipRule="evenodd" d="M16.6857 2H7.31429C4.04762 2 2 4.31208 2 7.58516V16.4148C2 19.6879 4.0381 22 7.31429 22H16.6857C19.9619 22 22 19.6879 22 16.4148V7.58516C22 4.31208 19.9619 2 16.6857 2Z" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ) : (
+      <svg 
+        width="24" 
+        height="24" 
+        viewBox="0 0 24 24" 
+        fill="none"
+        className="nx-icon-svg"
+        style={{
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+      >
+        <path d="M12 8.32715V15.6541" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M15.667 11.9902H8.33301" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path fillRule="evenodd" clipRule="evenodd" d="M16.6857 2H7.31429C4.04762 2 2 4.31208 2 7.58516V16.4148C2 19.6879 4.0381 22 7.31429 22H16.6857C19.9619 22 22 19.6879 22 16.4148V7.58516C22 4.31208 19.9619 2 16.6857 2Z" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    )}
     </div>
   );
 
   return (
     <div className="flex flex-col w-full nx-table-container">
+      {/* Add CSS for striped pattern and compact cells */}
+      <style jsx>{`
+        .nx-table-container :global(.nx-row-odd) {
+          background-color: #f0f9ff;
+        }
+        .nx-table-container :global(.nx-row-even) {
+          background-color: #ffffff;
+        }
+        .nx-table-container :global(.nx-expand-row-odd) {
+          background-color: #f8fafc;
+        }
+        .nx-table-container :global(.nx-expand-row-even) {
+          background-color: #ffffff;
+        }
+        .nx-table-container :global(.ant-table-tbody > tr:hover > td) {
+          background-color: #e1f5fe !important;
+        }
+        
+        /* Compact table cell styling */
+        .nx-table-container :global(.ant-table-thead > tr > th) {
+          border-bottom: 0.5px solid #d4d4d8 !important;
+          background-color: #f8fafc !important;
+        }
+        
+        .nx-table-container :global(.ant-table-tbody > tr > td) {
+          border-bottom: 0.5px solid #d4d4d8 !important;
+        }
+        
+        /* Adjust row height for compact look */
+        .nx-table-container :global(.ant-table-tbody > tr) {
+          height: 40px !important;
+        }
+        
+        .nx-table-container :global(.ant-table-thead > tr) {
+          height: 40px !important;
+        }
+      `}</style>
+
       {/* Top Controls: Column Selector, Search, Pagination */}
       {(useSelect || useSearch || usePagination) && (
         <div className="nx-controls-wrapper w-full flex mb-5 gap-2 justify-between items-center flex-wrap">
@@ -490,7 +542,6 @@ const NxTable = ({
             expandRowByClick,
           }}
           pagination={false}
-          // bordered
           loading={loading}
           tableLayout="fixed"
           id={idTable}
@@ -500,6 +551,8 @@ const NxTable = ({
           }}
           rowSelection={rowSelection}
           scroll={tableScrolled || { x: 'max-content' }}
+          // Apply striped row classes
+          rowClassName={getRowClassName}
           onRow={(record, rowIndex) => {
             const rowKey = record.key || record.id;
             const isLoading = loadingRows.has(rowKey);
@@ -515,6 +568,21 @@ const NxTable = ({
             };
           }}
           style={{ width: '100%', fontSize: fontSizeValue }}
+          // Add compact cell styling using components prop
+          components={{
+            body: {
+              cell: (props) => (
+                <td 
+                  {...props} 
+                  style={{ 
+                    ...props.style, 
+                    padding: tablePaddingValue,
+                    borderBottom: '0.5px solid #d4d4d8'
+                  }} 
+                />
+              ),
+            },
+          }}
         />
       </div>
     </div>
