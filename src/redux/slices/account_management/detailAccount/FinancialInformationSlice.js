@@ -14,9 +14,11 @@ const initialState = {
   data_billingBucket: [],
   data_accountingRule: {},
   data_globalTypeTaxIdentifier: [],
+  data_paymentRelation: [],
   data_firstIndexIdentifier: [],
   data_taxRelationFirstIndex: [],
-  detail_taxImplication: {}
+  detail_taxImplication: {},
+  detail_paymentRelation: {},
 };
 
 export const getGlobalTypeTaxIdentifier= createAsyncThunk(

@@ -12,6 +12,8 @@ import TaxIdentifierAndRelation from "./TaxIdentifier/TaxIdentifierAndRelation";
 import AccountingRule from "./AccountingRule/AccountingRule";
 import TaxImplication from "./TaxImplication/TaxImplication";
 import BillingBucket from "./BillingBucket/BillingBucket";
+import PaymentRelation from "./PaymentRelation/PaymentRelation";
+import useGrantAccessHooks from "../../../../../../components/useGrantAccessHooks";
 import { useDispatch, useSelector } from "react-redux";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 
@@ -76,7 +78,7 @@ const FinancialInformation = ({id = 0}) => {
     },
     {
       header: "Payment Relation",
-      children: <TaxImplication id={id}/>,
+      children: <PaymentRelation id={id}/>,
     },
   ];
 
