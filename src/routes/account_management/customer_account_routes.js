@@ -18,6 +18,9 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   UPDATE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/update",
   DELETE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/delete",
 
+  // Payment Relation Detail
+  VIEW_DETAIL_PAYMENT_RELATION: "/account-management/account-standard/financial-information/payment-relation/details",
+
   //Detail Service Agreement
   VIEW_DETAIL_SERVICE_AGREEMENT:
     "/account-management/account-standard/service-agreement/view",
