@@ -14,10 +14,8 @@ import { getTaxImplication, getDetailTaxImplication } from "../../../../../../..
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
-import DetailPaymentRelation from "./DetailPaymentRelation";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import { useNavigate, useLocation } from "react-router-dom"
-import DetailTaxImplication from "./DetailPaymentRelation";
 
 // getDetailTaxImplication
 // detail_taxImplication
@@ -69,20 +67,6 @@ const PaymentRelation = ({ id = 0 }) => {
       setTotalElement(data_paymentRelation?.page?.totalElements);
     }
   }, [data_paymentRelation]);
-
-  const handleDetail = (record) => {
-  const id = record.id
-  setModalDetail(true);
-  dispatch(
-    getDetailTaxImplication(id)
-  )
-  .unwrap()
-  .then((data) => {
-  })
-  .catch((err) => {
-  })
-
-  }
 
   //handle on-changes listener
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -354,7 +338,7 @@ const PaymentRelation = ({ id = 0 }) => {
           searchedColumn={searchedColumn}
           onSort={onSort}
           getColumnSearchProps={getColumnSearchProps}
-          handleDetail={handleDetail}
+          handleDetail={() => {}}
           setModalDetail={setModalDetail}
         />
       </div>
