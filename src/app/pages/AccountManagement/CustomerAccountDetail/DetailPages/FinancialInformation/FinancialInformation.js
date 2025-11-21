@@ -85,6 +85,10 @@ const FinancialInformation = ({id = 0}) => {
       header: "Tax Implication",
       children: <TaxImplication id={id}/>,
     },
+    {
+      header: "Payment Relation",
+      children: <TaxImplication id={id}/>,
+    },
   ];
 
   // useEffect(() => {
