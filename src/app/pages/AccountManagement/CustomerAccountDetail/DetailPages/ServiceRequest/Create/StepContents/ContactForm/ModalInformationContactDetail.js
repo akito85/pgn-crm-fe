@@ -27,6 +27,8 @@ export default function ModalInformationContactDetail({
   contactDetailForm,
   onSaveContactDetail,
   onCancelContactDetail,
+  onEditContactDetail,
+  onDeleteContactDetail,
   onAddContactDetail,
 }) {
 
@@ -278,6 +280,10 @@ export default function ModalInformationContactDetail({
           formInstance={contactDetailForm}
           onSaveRow={onSaveContactDetail}
           onCancelEdit={onCancelContactDetail}
+          onEditRow={onEditContactDetail}
+          onDeleteRow={onDeleteContactDetail}
+          showEditAction={true}
+          showDeleteAction={true}
         />
 
         <br/>

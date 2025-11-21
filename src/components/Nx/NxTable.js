@@ -1,5 +1,5 @@
-import { Table, Pagination, Select, Input, Space, Button, Form } from 'antd';
-import { SearchOutlined, FilterOutlined, LoadingOutlined, SaveOutlined, CloseOutlined } from '@ant-design/icons';
+import { Table, Pagination, Select, Input, Space, Button, Form, Popconfirm } from 'antd';
+import { SearchOutlined, FilterOutlined, LoadingOutlined, SaveOutlined, CloseOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Highlighter from 'react-highlight-words';
 
@@ -126,9 +126,19 @@ const NxTable = ({
   useInlineEdit = false,
   onSaveRow = () => {},
   onCancelEdit = () => {},
+  onEditRow = () => {},
+  onDeleteRow = () => {},
   editingKey = '',
   setEditingKey = () => {},
   formInstance,
+  // Action button configuration
+  showEditAction = true,
+  showDeleteAction = true,
+  editIcon = <EditOutlined />,
+  deleteIcon = <DeleteOutlined />,
+  deleteConfirmTitle = 'Are you sure you want to delete this row?',
+  deleteConfirmOkText = 'Yes',
+  deleteConfirmCancelText = 'No',
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [searchText, setSearchText] = useState('');
@@ -347,6 +357,19 @@ const NxTable = ({
     onCancelEdit();
   };
 
+  // Handle edit action
+  const edit = (record) => {
+    console.log('NxTable edit: Starting edit for record:', record);
+    setEditingKey(record.key);
+    onEditRow(record);
+  };
+
+  // Handle delete action
+  const handleDelete = (record) => {
+    console.log('NxTable delete: Deleting record:', record);
+    onDeleteRow(record);
+  };
+
   // Filter and enhance columns with search capabilities
   const filterColumns = () => {
     const filteredColumns = columnMain
@@ -380,28 +403,88 @@ const NxTable = ({
           title: 'ACTIONS',
           key: 'actions',
           width: 150,
+          onCell: () => ({
+            onClick: (e) => {
+              // Prevent row click when clicking on action buttons
+              e.stopPropagation();
+            },
+          }),
           render: (_, record) => {
             const editable = isEditing(record);
-            return editable ? (
-              <Space size="small">
-                <Button
-                  type="link"
-                  icon={<SaveOutlined />}
-                  onClick={() => save(record.key)}
-                  style={{ color: '#52c41a' }}
-                >
-                  Save
-                </Button>
-                <Button
-                  type="link"
-                  icon={<CloseOutlined />}
-                  onClick={cancel}
-                  danger
-                >
-                  Cancel
-                </Button>
-              </Space>
-            ) : null;
+
+            if (editable) {
+              // Show Save/Cancel when editing
+              return (
+                <Space size="small">
+                  <Button
+                    type="link"
+                    icon={<SaveOutlined />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      save(record.key);
+                    }}
+                    style={{ color: '#52c41a' }}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    type="link"
+                    icon={<CloseOutlined />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      cancel();
+                    }}
+                    danger
+                  >
+                    Cancel
+                  </Button>
+                </Space>
+              );
+            } else {
+              // Show Edit/Delete when not editing
+              return (
+                <Space size="small">
+                  {showEditAction && (
+                    <Button
+                      type="link"
+                      icon={editIcon}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        edit(record);
+                      }}
+                      style={{ color: '#1890ff' }}
+                    >
+                      Edit
+                    </Button>
+                  )}
+                  {showDeleteAction && (
+                    <Popconfirm
+                      title={deleteConfirmTitle}
+                      onConfirm={(e) => {
+                        e?.stopPropagation();
+                        handleDelete(record);
+                      }}
+                      onCancel={(e) => {
+                        e?.stopPropagation();
+                      }}
+                      okText={deleteConfirmOkText}
+                      cancelText={deleteConfirmCancelText}
+                    >
+                      <Button
+                        type="link"
+                        icon={deleteIcon}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        danger
+                      >
+                        Delete
+                      </Button>
+                    </Popconfirm>
+                  )}
+                </Space>
+              );
+            }
           },
         });
       }
