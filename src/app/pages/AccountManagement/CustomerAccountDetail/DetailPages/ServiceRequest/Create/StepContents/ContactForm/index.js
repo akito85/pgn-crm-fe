@@ -275,6 +275,18 @@ export default function ContactForm() {
     contactDetailForm.resetFields()
   }
 
+  const handleEditContactDetail = (record) => {
+    console.log('Edit contact detail:', record)
+    // The NxTable will set editingKey, and useEffect will initialize the form
+  }
+
+  const handleDeleteContactDetail = (record) => {
+    console.log('Delete contact detail:', record)
+    const newData = contactSecondary.filter((item) => item.key !== record.key)
+    setContactSecondary(newData)
+    console.log('Contact detail deleted successfully')
+  }
+
   // --------------------------------------------------------------------------
   // EVENT HANDLERS - ModalListContact (Choose Contact)
   // --------------------------------------------------------------------------
@@ -606,6 +618,8 @@ export default function ContactForm() {
           contactDetailForm={contactDetailForm}
           onSaveContactDetail={handleSaveContactDetail}
           onCancelContactDetail={handleCancelContactDetail}
+          onEditContactDetail={handleEditContactDetail}
+          onDeleteContactDetail={handleDeleteContactDetail}
           onAddContactDetail={handleAddContactDetail}
         />
 
