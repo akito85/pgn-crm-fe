@@ -89,8 +89,8 @@ const TableRBI = ({
   fixedColumns = { left: [], right: [] },
   setFixedColumns = () => {},
   onAdvanceSearch = () => {},
-  onRow, // ⭐ TAMBAHAN BARU: terima prop onRow
-  rowClassName, // ⭐ TAMBAHAN BARU: terima prop rowClassName
+  onRow,
+  rowClassName,
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -254,8 +254,8 @@ const TableRBI = ({
         id={idTable}
         onChange={onSort}
         rowSelection={rowSelection}
-        onRow={onRow} // ⭐ TAMBAHAN BARU: pass onRow ke Ant Design Table
-        rowClassName={rowClassName} // ⭐ TAMBAHAN BARU: pass rowClassName ke Ant Design Table
+        onRow={onRow}
+        rowClassName={rowClassName} 
       />
 
       {usePagination ? (

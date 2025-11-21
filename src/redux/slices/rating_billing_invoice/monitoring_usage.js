@@ -495,7 +495,6 @@ const monitoringUsageSlice = createSlice({
         description: "Your data has been deleted",
       };
       showModalSuccess(successMessage);
-      // console.log('Adding deleted data:', action.payload);
       state.deletedData.push(action.payload);
     },
     clearUpdated: (state) => {
@@ -541,7 +540,6 @@ const monitoringUsageSlice = createSlice({
         state.loading = true;
       })
       .addCase(getListApproval.fulfilled, (state, action) => {
-        // console.log("data_approval", action.payload)
         state.loading = false;
         state.data_approval = action.payload;
       })
