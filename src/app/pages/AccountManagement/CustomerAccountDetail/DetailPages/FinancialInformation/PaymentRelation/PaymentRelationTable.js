@@ -67,12 +67,6 @@ const PaymentRelationTable = ({
       fixed: "right",
       ...getColumnSearchProps("statusApproval"),
       render: (status) => {
-        const colorMap = {
-          "approved": "green",
-          "waitingApproval": "orange",
-          "pending": "orange",
-          "rejected": "red"
-        };
         const displayText = {
           "approved": "Approved",
           "waitingApproval": "Waiting Approval",
@@ -81,7 +75,7 @@ const PaymentRelationTable = ({
         };
         return (
           <div className="flex justify-center">
-            <StatusComponent colour={colorMap[status] || "gray"}>
+            <StatusComponent colour={status}>
               {displayText[status] || toTitleCase(String(status || "")) || "-"}
             </StatusComponent>
           </div>
@@ -95,11 +89,20 @@ const PaymentRelationTable = ({
       fixed: "right",
       width: 100,
       ...getColumnSearchProps("status"),
-      render: (index) => (
-        <div className={" flex justify-center"}>
-          <StatusComponent colour={index}>{index}</StatusComponent>
-        </div>
-      ),
+      render: (status) => {
+        const displayText = {
+          "active": "Active",
+          "inactive": "inactive",
+        };
+
+        return (
+          <div className={" flex justify-center"}>
+            <StatusComponent colour={status}>
+              {displayText[status] || toTitleCase(String(status || "")) || "-"}
+            </StatusComponent>
+          </div>
+        )
+      },
     },
     {
       title: "ACTION",
