@@ -12,6 +12,15 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   CREATE_ACCOUNT_ONETIME: "/account-management/account-onetime/create",
   VIEW_DETAIL_ACCOUNT_ONETIME: "/account-management/account-onetime/view",
 
+  // Service Request Detail
+  VIEW_DETAIL_SERVICE_REQUEST: "/account-management/account-standard/service-requests/details",
+  CREATE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/create",
+  UPDATE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/update",
+  DELETE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/delete",
+
+  // Payment Relation Detail
+  VIEW_DETAIL_PAYMENT_RELATION: "/account-management/account-standard/financial-information/payment-relation/details",
+
   //Detail Service Agreement
   VIEW_DETAIL_SERVICE_AGREEMENT:
     "/account-management/account-standard/service-agreement/view",

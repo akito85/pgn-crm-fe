@@ -338,7 +338,7 @@ const PaymentRelation = ({ id = 0 }) => {
           searchedColumn={searchedColumn}
           onSort={onSort}
           getColumnSearchProps={getColumnSearchProps}
-          handleDetail={() => {}}
+          handleDetail={() => navigate("/account-management/account-standard/financial-information/payment-relation/details")}
           setModalDetail={setModalDetail}
         />
       </div>
