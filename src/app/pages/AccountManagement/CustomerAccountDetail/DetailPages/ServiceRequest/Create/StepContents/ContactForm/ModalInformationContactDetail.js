@@ -20,7 +20,14 @@ export default function ModalInformationContactDetail({
   onSave,
   onOpenSelectContact,
   onEdit,
-  onDelete
+  onDelete,
+  // Inline editing props
+  editingKey,
+  setEditingKey,
+  contactDetailForm,
+  onSaveContactDetail,
+  onCancelContactDetail,
+  onAddContactDetail,
 }) {
 
   return (
@@ -222,7 +229,7 @@ export default function ModalInformationContactDetail({
         <div className="self-stretch flex flex-col justify-end items-end">
           <ButtonComponent
             type={"button"}
-            onClick={() => console.log("Create contact detail")}
+            onClick={onAddContactDetail}
             icon={
               <PlusOutlined
                 style={{
@@ -265,6 +272,12 @@ export default function ModalInformationContactDetail({
           useSelect={true}
           dataMain={contactSecondary}
           columnMain={columnSecondary}
+          useInlineEdit={true}
+          editingKey={editingKey}
+          setEditingKey={setEditingKey}
+          formInstance={contactDetailForm}
+          onSaveRow={onSaveContactDetail}
+          onCancelEdit={onCancelContactDetail}
         />
 
         <br/>

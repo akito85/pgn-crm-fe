@@ -1,9 +1,62 @@
-import { Table, Pagination, Select, Input, Space, Button } from 'antd';
-import { SearchOutlined, FilterOutlined, LoadingOutlined } from '@ant-design/icons';
+import { Table, Pagination, Select, Input, Space, Button, Form } from 'antd';
+import { SearchOutlined, FilterOutlined, LoadingOutlined, SaveOutlined, CloseOutlined } from '@ant-design/icons';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Highlighter from 'react-highlight-words';
 
 const { Option } = Select;
+
+// Editable Cell Component for inline editing
+const EditableCell = ({
+  editing,
+  dataIndex,
+  title,
+  inputType,
+  record,
+  index,
+  children,
+  ...restProps
+}) => {
+  // Safety check for editing prop
+  if (!editing) {
+    // Render the actual value from record when not editing
+    const cellValue = record && dataIndex ? record[dataIndex] : null;
+    return (
+      <td {...restProps}>
+        {cellValue !== null && cellValue !== undefined && cellValue !== ''
+          ? cellValue
+          : children}
+      </td>
+    );
+  }
+
+  const inputNode = inputType === 'select' ? (
+    <Select style={{ width: '100%' }} placeholder={`Select ${title}`}>
+      <Option value="Phone">Phone</Option>
+      <Option value="Email">Email</Option>
+      <Option value="Mobile Phone">Mobile Phone</Option>
+      <Option value="Whatsapp">Whatsapp</Option>
+    </Select>
+  ) : (
+    <Input placeholder={`Enter ${title}`} />
+  );
+
+  return (
+    <td {...restProps}>
+      <Form.Item
+        name={dataIndex}
+        style={{ margin: 0 }}
+        rules={[
+          {
+            required: false, // Changed to false to prevent blocking
+            message: `Please input ${title}!`,
+          },
+        ]}
+      >
+        {inputNode}
+      </Form.Item>
+    </td>
+  );
+};
 
 const NxTable = ({
   dataMain,
@@ -69,6 +122,13 @@ const NxTable = ({
   fontSize = 'small',
   expandPadding = '24px',
   expandGap = '14px',
+  // Inline editing props
+  useInlineEdit = false,
+  onSaveRow = () => {},
+  onCancelEdit = () => {},
+  editingKey = '',
+  setEditingKey = () => {},
+  formInstance,
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [searchText, setSearchText] = useState('');
@@ -267,9 +327,29 @@ const NxTable = ({
     // Note: Actual search is triggered by debounced useEffect
   };
 
+  // Check if a row is being edited
+  const isEditing = (record) => record.key === editingKey;
+
+  // Handle save action
+  const save = async (key) => {
+    try {
+      console.log('NxTable save: Validating fields...');
+      const row = await formInstance.validateFields();
+      console.log('NxTable save: Fields validated successfully:', row);
+      await onSaveRow(key, row);
+    } catch (errInfo) {
+      console.log('NxTable save: Validate Failed:', errInfo);
+    }
+  };
+
+  // Handle cancel action
+  const cancel = () => {
+    onCancelEdit();
+  };
+
   // Filter and enhance columns with search capabilities
   const filterColumns = () => {
-    return columnMain
+    const filteredColumns = columnMain
       .filter((col) => {
         return !optionSelectedCol.includes(col.title);
       })
@@ -282,10 +362,52 @@ const NxTable = ({
             ...restCol,
             ...searchProps,
             render: render || searchProps.render,
+            editable: col.editable,
           };
         }
-        return col;
+        return {
+          ...col,
+          editable: col.editable,
+        };
       });
+
+    // Add actions column if inline editing is enabled
+    if (useInlineEdit) {
+      const hasActionsColumn = filteredColumns.some(col => col.key === 'actions' || col.dataIndex === 'actions');
+
+      if (!hasActionsColumn) {
+        filteredColumns.push({
+          title: 'ACTIONS',
+          key: 'actions',
+          width: 150,
+          render: (_, record) => {
+            const editable = isEditing(record);
+            return editable ? (
+              <Space size="small">
+                <Button
+                  type="link"
+                  icon={<SaveOutlined />}
+                  onClick={() => save(record.key)}
+                  style={{ color: '#52c41a' }}
+                >
+                  Save
+                </Button>
+                <Button
+                  type="link"
+                  icon={<CloseOutlined />}
+                  onClick={cancel}
+                  danger
+                >
+                  Cancel
+                </Button>
+              </Space>
+            ) : null;
+          },
+        });
+      }
+    }
+
+    return filteredColumns;
   };
 
   const filterExpandColumns = () => {
@@ -323,16 +445,51 @@ const NxTable = ({
    * 2. Ensures main table and expanded table look identical
    * 3. Respects tablePaddingValue prop (small/medium/large)
    */
-  const tableComponents = {
+  const mergedColumns = filterColumns().map((col) => {
+    if (!col.editable) {
+      return col;
+    }
+    return {
+      ...col,
+      onCell: (record) => ({
+        record,
+        inputType: col.inputType || 'text',
+        dataIndex: col.dataIndex,
+        title: col.title,
+        editing: isEditing(record),
+      }),
+    };
+  });
+
+  const tableComponents = useInlineEdit ? {
+    body: {
+      cell: EditableCell,
+    },
+    header: {
+      cell: (props) => (
+        <th
+          {...props}
+          style={{
+            ...props.style,
+            padding: tablePaddingValue,
+            borderBottom: '0.5px solid #d4d4d8',
+            backgroundColor: headerBackgroundColor,
+            fontWeight: 'bold',
+            color: '#ffffff',
+            textTransform: 'uppercase',
+          }}
+        />
+      ),
+    },
+  } : {
     body: {
       cell: (props) => (
         <td
           {...props}
           style={{
             ...props.style,
-            padding: tablePaddingValue, // e.g., '12px 16px' for medium
+            padding: tablePaddingValue,
             borderBottom: '0.5px solid #d4d4d8',
-            // backgroundColor handled by CSS classes with !important
           }}
         />
       ),
@@ -343,12 +500,12 @@ const NxTable = ({
           {...props}
           style={{
             ...props.style,
-            padding: tablePaddingValue, // Same padding as body for alignment
+            padding: tablePaddingValue,
             borderBottom: '0.5px solid #d4d4d8',
-            backgroundColor: headerBackgroundColor, // Blue background #0075BF
-            fontWeight: 'bold', // Consistent bold weight
-            color: '#ffffff', // White text on blue background
-            textTransform: 'uppercase', // All headers uppercase
+            backgroundColor: headerBackgroundColor,
+            fontWeight: 'bold',
+            color: '#ffffff',
+            textTransform: 'uppercase',
           }}
         />
       ),
@@ -357,13 +514,29 @@ const NxTable = ({
 
   // Render the expanded row content
   const expandedRowRender = (record) => {
-    const expandData = Array.isArray(dataExpand)
-      ? dataExpand.filter((item) => item.parentKey === record.key)
-      : dataExpand[record.key] || [];
+    // Get expand data for this record
+    const expandData = dataExpand
+      ? Array.isArray(dataExpand)
+        ? dataExpand.filter((item) => item.parentKey === record.key)
+        : dataExpand[record.key] || []
+      : [];
 
-    // Don't render anything if there's no data to display
+    // Show empty state when there's no data
     if (!expandData || expandData.length === 0) {
-      return null;
+      return (
+        <div
+          className="nx-expand-empty"
+          style={{
+            backgroundColor: 'white',
+            padding: expandPadding,
+            textAlign: 'center',
+            color: '#999',
+            fontStyle: 'italic',
+          }}
+        >
+          No data available
+        </div>
+      );
     }
 
     return (
@@ -649,56 +822,91 @@ const NxTable = ({
         style={{ display: 'flex', flexDirection: 'column', width: '100%' }}
         className={`table-expand-wrapper nx-main-table ${className}`}
       >
-        <Table
-          dataSource={dataMain}
-          columns={filterColumns()}
-          expandable={{
-            expandedRowRender,
-            expandIcon,
-            defaultExpandedRowKeys,
-            expandedRowKeys,
-            onExpand: (expanded, record) => {
-              onExpand(expanded, record);
-            },
-            expandRowByClick,
-            // Only show expand icon if row has child data
-            rowExpandable: (record) => {
-              const expandData = Array.isArray(dataExpand)
-                ? dataExpand.filter((item) => item.parentKey === record.key)
-                : dataExpand[record.key] || [];
-              return expandData && expandData.length > 0;
-            },
-          }}
-          pagination={false}
-          loading={loading}
-          tableLayout="fixed"
-          id={idTable}
-          onChange={(pagination, filters, sorter, extra) => {
-            onChange(pagination, filters, sorter, extra);
-            onSort(pagination, filters, sorter, extra);
-          }}
-          rowSelection={rowSelection}
-          scroll={tableScrolled || { x: 'max-content' }}
-          // Apply striped row classes
-          rowClassName={getRowClassName}
-          onRow={(record, rowIndex) => {
-            const rowKey = record.key || record.id;
-            const isLoading = loadingRows.has(rowKey);
+        {useInlineEdit && formInstance ? (
+          <Form form={formInstance} component={false}>
+            <Table
+              dataSource={dataMain}
+              columns={mergedColumns}
+              expandable={undefined}
+              pagination={false}
+              loading={loading}
+              tableLayout="fixed"
+              id={idTable}
+              onChange={(pagination, filters, sorter, extra) => {
+                onChange(pagination, filters, sorter, extra);
+                onSort(pagination, filters, sorter, extra);
+              }}
+              rowSelection={rowSelection}
+              scroll={tableScrolled || { x: 'max-content' }}
+              rowClassName={getRowClassName}
+              onRow={(record, rowIndex) => {
+                const rowKey = record.key || record.id;
+                const isLoading = loadingRows.has(rowKey);
 
-            return {
-              onClick: (event) => {
-                handleRowClick(record, rowIndex, event);
+                return {
+                  onClick: (event) => {
+                    handleRowClick(record, rowIndex, event);
+                  },
+                  style: {
+                    cursor: isLoading ? 'wait' : (onRowClicked || onRowClickedAsync ? 'pointer' : 'default'),
+                    opacity: isLoading ? 0.6 : 1,
+                  },
+                };
+              }}
+              style={{ width: '100%', fontSize: fontSizeValue }}
+              components={tableComponents}
+            />
+          </Form>
+        ) : (
+          <Table
+            dataSource={dataMain}
+            columns={filterColumns()}
+            expandable={{
+              expandedRowRender,
+              expandIcon,
+              defaultExpandedRowKeys,
+              expandedRowKeys,
+              onExpand: (expanded, record) => {
+                onExpand(expanded, record);
               },
-              style: {
-                cursor: isLoading ? 'wait' : (onRowClicked || onRowClickedAsync ? 'pointer' : 'default'),
-                opacity: isLoading ? 0.6 : 1,
+              expandRowByClick,
+              // Always show expand icon - will display empty state if no data
+              rowExpandable: (record) => {
+                // Always expandable to show empty state when needed
+                return true;
               },
-            };
-          }}
-          style={{ width: '100%', fontSize: fontSizeValue }}
-          // Use shared table components for consistency with expanded table
-          components={tableComponents}
-        />
+            }}
+            pagination={false}
+            loading={loading}
+            tableLayout="fixed"
+            id={idTable}
+            onChange={(pagination, filters, sorter, extra) => {
+              onChange(pagination, filters, sorter, extra);
+              onSort(pagination, filters, sorter, extra);
+            }}
+            rowSelection={rowSelection}
+            scroll={tableScrolled || { x: 'max-content' }}
+            // Apply striped row classes
+            rowClassName={getRowClassName}
+            onRow={(record, rowIndex) => {
+              const rowKey = record.key || record.id;
+              const isLoading = loadingRows.has(rowKey);
+
+              return {
+                onClick: (event) => {
+                  handleRowClick(record, rowIndex, event);
+                },
+                style: {
+                  cursor: isLoading ? 'wait' : (onRowClicked || onRowClickedAsync ? 'pointer' : 'default'),
+                  opacity: isLoading ? 0.6 : 1,
+                },
+              };
+            }}
+            style={{ width: '100%', fontSize: fontSizeValue }}
+            // Use shared table components for consistency with expanded table
+            components={tableComponents}
+          />
+        )}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react"
+import { Fragment, useState, useEffect } from "react"
 
 import { Space, Button, Popconfirm, Form } from "antd"
 import { PlusOutlined, EditOutlined, DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons"
@@ -128,12 +128,42 @@ export default function ContactForm() {
   // --------------------------------------------------------------------------
 
   const [form] = Form.useForm() // Form instance for contact information
+  const [contactDetailForm] = Form.useForm() // Form instance for inline editing
   const [isOpen, setIsOpen] = useState(false) // ModalInformationContactDetail
   const [isSelectContactModal, setIsSelectContactModal] = useState(false) // ModalListContact
   const [isConfirmationContactModal, setIsConfirmationContactModal] = useState(false) // ModalConfirmationContactDetail
   const [expandedRowKeys, setExpandedRowKeys] = useState([])
   const [contactList, setContactList] = useState(MOCK_CONTACT_LIST)
   const [contactSecondary, setContactSecondary] = useState(MOCK_CONTACT_SECONDARY)
+  const [editingKey, setEditingKey] = useState('') // Track which row is being edited
+
+  // --------------------------------------------------------------------------
+  // EFFECT: Initialize form when editing starts
+  // --------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (editingKey) {
+      console.log('useEffect: editingKey changed to:', editingKey)
+      // Find the row being edited
+      const rowToEdit = contactSecondary.find((item) => item.key === editingKey)
+
+      if (rowToEdit) {
+        console.log('useEffect: Found row to edit:', rowToEdit)
+        // Populate form with current row values
+        const formValues = {
+          type: rowToEdit.type || '',
+          inputtype: rowToEdit.inputtype || '',
+          inputvalue: rowToEdit.inputvalue || '',
+        }
+        console.log('useEffect: Setting form values:', formValues)
+        contactDetailForm.setFieldsValue(formValues)
+      } else {
+        console.log('useEffect: Row not found for key:', editingKey)
+      }
+    } else {
+      console.log('useEffect: editingKey is empty, skipping form initialization')
+    }
+  }, [editingKey, contactSecondary, contactDetailForm])
 
   // --------------------------------------------------------------------------
   // EVENT HANDLERS - Main Contact Table
@@ -171,6 +201,78 @@ export default function ContactForm() {
 
   const handleBackFromContactModal = () => {
     setIsOpen(false)
+  }
+
+  // --------------------------------------------------------------------------
+  // EVENT HANDLERS - Inline Editing (Contact Detail)
+  // --------------------------------------------------------------------------
+
+  const handleAddContactDetail = () => {
+    // Create a new empty row and set it as editing
+    const newKey = `temp-${Date.now()}`
+    const newRow = {
+      key: newKey,
+      no: contactSecondary.length + 1,
+      type: '',
+      inputtype: '',
+      inputvalue: '',
+    }
+
+    // Update state first
+    setContactSecondary([...contactSecondary, newRow])
+    // Set editing key - useEffect will handle form initialization
+    setEditingKey(newKey)
+  }
+
+  const handleSaveContactDetail = async (key, row) => {
+    try {
+      console.log('Save called with key:', key)
+      console.log('Form data received:', row)
+
+      const newData = [...contactSecondary]
+      const index = newData.findIndex((item) => key === item.key)
+
+      if (index > -1) {
+        const item = newData[index]
+        console.log('Current item before save:', item)
+
+        // If it's a temp key, convert to permanent key
+        const permanentKey = key.startsWith('temp-')
+          ? `contact-${Date.now()}-${index}`
+          : key
+
+        // Merge existing data with new form values
+        const updatedItem = {
+          ...item,
+          ...row,
+          key: permanentKey,
+        }
+
+        console.log('Updated item after merge:', updatedItem)
+
+        // Update the array
+        newData.splice(index, 1, updatedItem)
+        setContactSecondary(newData)
+        setEditingKey('')
+        contactDetailForm.resetFields()
+
+        console.log('Contact detail saved successfully')
+      } else {
+        console.error('Row not found for key:', key)
+      }
+    } catch (error) {
+      console.error('Save error:', error)
+    }
+  }
+
+  const handleCancelContactDetail = () => {
+    // If it's a new row (temp key), remove it
+    if (editingKey.startsWith('temp-')) {
+      const newData = contactSecondary.filter((item) => item.key !== editingKey)
+      setContactSecondary(newData)
+    }
+    setEditingKey('')
+    contactDetailForm.resetFields()
   }
 
   // --------------------------------------------------------------------------
@@ -328,53 +430,29 @@ export default function ContactForm() {
       dataIndex: 'no',
       key: 'no',
       filter: true,
+      editable: false,
     },
     {
       title: 'TYPE',
       dataIndex: 'type',
       key: 'type',
       filter: true,
+      editable: true,
+      inputType: 'select',
     },
     {
       title: 'INPUT TYPE',
       dataIndex: 'inputtype',
       key: 'inputtype',
+      editable: true,
+      inputType: 'text',
     },
     {
       title: 'INPUT VALUE',
       dataIndex: 'inputvalue',
       key: 'inputvalue',
-    },
-    {
-      title: 'ACTIONS',
-      key: 'actions',
-      width: 150,
-      render: (_, record) => (
-        <Space size="small">
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            Edit
-          </Button>
-
-          <Popconfirm
-            title="Are you sure?"
-            onConfirm={() => handleDelete(record)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button
-              type="link"
-              danger
-              icon={<DeleteOutlined />}
-            >
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
+      editable: true,
+      inputType: 'text',
     },
   ]
 
@@ -523,6 +601,12 @@ export default function ContactForm() {
           onOpenSelectContact={() => setIsSelectContactModal(true)}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          editingKey={editingKey}
+          setEditingKey={setEditingKey}
+          contactDetailForm={contactDetailForm}
+          onSaveContactDetail={handleSaveContactDetail}
+          onCancelContactDetail={handleCancelContactDetail}
+          onAddContactDetail={handleAddContactDetail}
         />
 
         {/* ====================================================================
@@ -565,7 +649,11 @@ export default function ContactForm() {
 // ============================================================================
 
 // Export form values getter for wizard step retrieval
-export const getContactFormValues = (form) => {
+export const getContactFormValues = (form, contactSecondary) => {
   if (!form) return null
-  return form.getFieldsValue()
+
+  return {
+    formData: form.getFieldsValue(),
+    contactDetails: contactSecondary || [],
+  }
 }
