@@ -1,25 +1,26 @@
 import React, { useEffect, useRef } from "react";
-import {
-  FilterOutlined,
-} from "@ant-design/icons";
+import { FilterOutlined } from "@ant-design/icons";
 import { Collapse, Space, Switch, Form, DatePicker, Input, Spin } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
-import TaxImplicationTable from "./PaymentRelationTable";
+import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { getTaxImplication, getDetailTaxImplication } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import {
+  getTaxImplication,
+  getDetailTaxImplication,
+} from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
-import DetailTaxImplication from "./DetailPaymentRelation";
+import DetailPaymentRelation from "./DetailPaymentRelation";
 
 // getDetailTaxImplication
 // detail_taxImplication
 
 const TaxImplication = ({ id = 0 }) => {
   const dispatch = useDispatch();
-  const { data_taxImplication, detail_taxImplication, loading } = useSelector(
-    (state) => state.financialInformation
+  const { data_paymentRelation, detail_paymentRelation, loading } = useSelector(
+    (state) => state.financialInformation,
   );
 
   //declare
@@ -48,33 +49,30 @@ const TaxImplication = ({ id = 0 }) => {
       }
       tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
       const reqSearch = encodeURIComponent(JSON.stringify(search));
-      dispatch(getTaxImplication({ id, page, pageSize, sort, search: reqSearch }));
+      dispatch(
+        getTaxImplication({ id, page, pageSize, sort, search: reqSearch }),
+      );
     }
   }, [dispatch, id, page, pageSize, sort, search]);
 
   useEffect(() => {
     if (
-      data_taxImplication && 
-      data_taxImplication.result &&
-      data_taxImplication.result.length > 0
+      data_paymentRelation &&
+      data_paymentRelation.result &&
+      data_paymentRelation.result.length > 0
     ) {
-      setTotalElement(data_taxImplication?.page?.totalElements);
+      setTotalElement(data_paymentRelation?.page?.totalElements);
     }
-  }, [data_taxImplication]);
+  }, [data_paymentRelation]);
 
   const handleDetail = (record) => {
-  const id = record.id
-  setModalDetail(true);
-  dispatch(
-    getDetailTaxImplication(id)
-  )
-  .unwrap()
-  .then((data) => {
-  })
-  .catch((err) => {
-  })
-
-  }
+    const id = record.id;
+    setModalDetail(true);
+    dispatch(getDetailTaxImplication(id))
+      .unwrap()
+      .then((data) => {})
+      .catch((err) => {});
+  };
 
   //handle on-changes listener
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -178,39 +176,36 @@ const TaxImplication = ({ id = 0 }) => {
   };
 
   return (
-    <Spin spinning={loading}>
-      <Fragment>
-        <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-          {"TAX IMPLICATION LIST"}
-        </div>
+    <Fragment>
+      <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
+        {"TAX IMPLICATION LIST"}
+      </div>
 
-        <div>
-          <TaxImplicationTable
-            data={data_taxImplication?.result}
-            handleChange={handleChange}
-            handleChangeSize={handleChangeSize}
-            totalElement={totalElement}
-            page={page}
-            pageSize={pageSize}
-            searchText={searchText}
-            searchedColumn={searchedColumn}
-            onSort={onSort}
-            getColumnSearchProps={getColumnSearchProps}
-            handleDetail={handleDetail}
-            setModalDetail={setModalDetail}
-          />
-        </div>
-      </Fragment>
+      <div>
+        <PaymentRelationTable
+          data={data_paymentRelation?.result}
+          handleChange={handleChange}
+          handleChangeSize={handleChangeSize}
+          totalElement={totalElement}
+          page={page}
+          pageSize={pageSize}
+          searchText={searchText}
+          searchedColumn={searchedColumn}
+          onSort={onSort}
+          getColumnSearchProps={getColumnSearchProps}
+          handleDetail={handleDetail}
+          setModalDetail={setModalDetail}
+        />
+      </div>
 
       {/* Modal detail tax implication */}
-      {modalDetail ? 
-        <DetailTaxImplication
+      {modalDetail ? (
+        <PaymentRelationTable
           setModalDetail={setModalDetail}
           modalDetail={modalDetail}
-          detail_taxImplication={detail_taxImplication}
-        /> : null
-      }
-    </Spin>
+        />
+      ) : null}
+    </Fragment>
   );
 };
 

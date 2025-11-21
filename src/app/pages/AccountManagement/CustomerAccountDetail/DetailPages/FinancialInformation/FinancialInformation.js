@@ -81,7 +81,7 @@ const FinancialInformation = ({ id = 0 }) => {
     },
     {
       header: "Payment Relation",
-      children: <TaxImplication id={id}/>,
+      children: <PaymentRelation id={id} />,
     },
   ];
 

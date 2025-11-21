@@ -4,8 +4,11 @@ import { Fragment } from "react";
 import Highlighter from "react-highlight-words";
 import { Checkbox, Tooltip } from "antd";
 import SVGIcon from "../../../../../../../assets/Icon/index";
+import moment from "moment";
+import { dateFormatting, toTitleCase } from "../../../../../../../utils";
+import StatusComponent from "../../../../../../../components/StatusComponent";
 
-const TaxImplicationTable = ({
+const PaymentRelationTable = ({
   data = [],
   handleChange = {},
   handleChangeSize = {},
@@ -26,94 +29,77 @@ const TaxImplicationTable = ({
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "CATEGORY",
-      dataIndex: "category",
+      title: "ACCOUNT NUMBER",
+      dataIndex: "accountNumber",
       width: 150,
       sorter: true,
-      ...getColumnSearchProps("category"),
+      ...getColumnSearchProps("accountNumber"),
     },
     {
-      title: "TAX IMPLICATION NAME",
-      dataIndex: "taxImplicationName",
-      width: 250,
+      title: "PRIORITY",
+      dataIndex: "priorty",
+      width: 100,
       sorter: true,
-      ...getColumnSearchProps("taxImplicationName"),
+      ...getColumnSearchProps("priorty"),
     },
     {
-      title: "SERVICE TYPE",
-      dataIndex: "serviceType",
+      title: "START DATE",
+      dataIndex: "startDate",
       width: 150,
-      sorter: true,
-      align:"center",
-      ...getColumnSearchProps("serviceType"),
+      align: "center",
+      ...getColumnSearchProps("startDate", "date"),
+      render: (startDate) => moment(startDate).format(dateFormatting.date),
     },
     {
-      title: "IMPLICATION TYPE",
-      dataIndex: "type",
+      title: "END DATE",
+      dataIndex: "endDate",
       width: 150,
-      sorter: true,
-      align:"center",
-      ...getColumnSearchProps("type"),
+      align: "center",
+      ...getColumnSearchProps("endDate", "date"),
+      render: (endDate) => moment(endDate).format(dateFormatting.date),
     },
     {
-      title: "GUNGGUNG",
-      dataIndex: "gunggung",
-      width: 150,
+      title: "STATUS APPROVAL",
+      dataIndex: "statusApproval",
+      width: 100,
       sorter: true,
-      align:"center",
-      ...getColumnSearchProps("gunggung"),
-    },
-    {
-      title: "VAT INVOICE ISSUANCE",
-      dataIndex: "vatInv",
-      width: 175,
-      sorter: true,
-      align:"center",
-      ...getColumnSearchProps("vatInv"),
-    },
-    {
-      title: "TRANSACTION CODE",
-      dataIndex: "transCodeName",
-      width: 150,
-      sorter: true,
-      align:"center",
-      ...getColumnSearchProps("transCodeName"),
-    },
-    {
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      width: 250,
-      sorter: true,
-      ...getColumnSearchProps("description"),
-      ellipsis: {
-        showTitle: false,
+      align: "center",
+      fixed: "right",
+      ...getColumnSearchProps("statusApproval"),
+      render: (status) => {
+        const colorMap = {
+          "approved": "green",
+          "waitingApproval": "orange",
+          "pending": "orange",
+          "rejected": "red"
+        };
+        const displayText = {
+          "approved": "Approved",
+          "waitingApproval": "Waiting Approval",
+          "pending": "Pending",
+          "rejected": "Rejected"
+        };
+        return (
+          <div className="flex justify-center">
+            <StatusComponent colour={colorMap[status] || "gray"}>
+              {displayText[status] || toTitleCase(String(status || "")) || "-"}
+            </StatusComponent>
+          </div>
+        );
       },
-      render: (text) => {
-        if (searchedColumn === "description") {
-          return (
-            <Tooltip placement="topLeft" title={text}>
-              <Highlighter
-                highlightStyle={{
-                  backgroundColor: "#ffc069",
-                  padding: 0,
-                }}
-                searchWords={[searchText]}
-                autoEscape
-                textToHighlight={text ? text.toString() : ""}
-              />
-            </Tooltip>
-          );
-        } else {
-          if (text) {
-            return (
-              <Tooltip placement="topLeft" title={text}>
-                {text}
-              </Tooltip>
-            );
-          }
-          return "";
-        }
-      },
+    },
+    {
+      title: "STATUS",
+      dataIndex: "status",
+      sorter: true,
+      fixed: "right",
+      width: 100,
+      ...getColumnSearchProps("status"),
+      render: (index) => (
+        <div className={" flex justify-center"}>
+          <StatusComponent colour={index}>{index}</StatusComponent>
+        </div>
+      ),
     },
     {
       title: "ACTION",
@@ -158,4 +144,4 @@ const TaxImplicationTable = ({
   );
 };
 
-export default TaxImplicationTable;
+export default PaymentRelationTable;
