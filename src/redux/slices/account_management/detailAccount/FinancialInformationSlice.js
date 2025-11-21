@@ -14,7 +14,7 @@ const initialState = {
   data_billingBucket: [],
   data_accountingRule: {},
   data_globalTypeTaxIdentifier: [],
-  data_paymentRelation: [],
+  data_paymentRelation: {},
   data_firstIndexIdentifier: [],
   data_taxRelationFirstIndex: [],
   detail_taxImplication: {},
