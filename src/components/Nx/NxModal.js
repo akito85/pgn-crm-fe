@@ -31,10 +31,32 @@ const NxModal = (props) => {
   title={title}
   className="custom-modal"
   closeIcon={
-    <div className="size-8 p-1.5 bg-white rounded-md shadow-[0px_2px_4px_0px_rgba(165,163,174,0.30)] inline-flex justify-center items-center">
-      <div className="size-5 relative">
-        <div className="size-5 absolute inset-0 flex items-center justify-center">
-          <CloseOutlined />
+    <div
+      style={{
+        padding: 6,
+        background: 'white',
+        boxShadow: '0px 2px 4px rgba(165, 163, 174, 0.30)',
+        overflow: 'hidden',
+        borderRadius: 6,
+        display: 'inline-flex',
+        justifyContent: 'flex-end',
+        alignItems: 'flex-start'
+      }}
+    >
+      <div style={{ width: 20, height: 20, position: 'relative' }}>
+        <div
+          style={{
+            width: 20,
+            height: 20,
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <CloseOutlined style={{ fontSize: 14 }} />
         </div>
       </div>
     </div>
