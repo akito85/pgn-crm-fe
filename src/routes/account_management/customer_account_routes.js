@@ -13,12 +13,20 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   VIEW_DETAIL_ACCOUNT_ONETIME: "/account-management/account-onetime/view",
 
   // Service Request Detail
-  VIEW_DETAIL_SERVICE_REQUEST: "/account-management/account-standard/service-requests/details",
-  CREATE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/create",
-  UPDATE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/update",
-  DELETE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/delete",
+  VIEW_DETAIL_SERVICE_REQUEST:
+    "/account-management/account-standard/service-requests/details",
+  CREATE_SERVICE_REQUEST:
+    "/account-management/account-standard/service-requests/create",
+  UPDATE_SERVICE_REQUEST:
+    "/account-management/account-standard/service-requests/update",
+  DELETE_SERVICE_REQUEST:
+    "/account-management/account-standard/service-requests/delete",
 
-  CREATE_SERVICE_REQUEST_PREREQUISITE: "/account-management/account-standard/service-requests/pre-requisites/create",
+  CREATE_SERVICE_REQUEST_PREREQUISITE:
+    "/account-management/account-standard/service-requests/pre-requisites/create",
+  // Payment Relation Detail
+  VIEW_DETAIL_PAYMENT_RELATION:
+    "/account-management/account-standard/financial-information/payment-relation/details",
 
   //Detail Service Agreement
   VIEW_DETAIL_SERVICE_AGREEMENT:
@@ -115,12 +123,12 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
     "/account-management/account-standard/raw-material-source/create",
   UPDATE_RAW_MATERIAL_SOURCE:
     "/account-management/account-standard/raw-material-source/update",
-    
-    // Product Distribution
-    CREATE_PRODUCT_DISTRIBUTION:
-      "/account-management/account-standard/product-distribution/create",
-    UPDATE_PRODUCT_DISTRIBUTION:
-      "/account-management/account-standard/product-distribution/update",
+
+  // Product Distribution
+  CREATE_PRODUCT_DISTRIBUTION:
+    "/account-management/account-standard/product-distribution/create",
+  UPDATE_PRODUCT_DISTRIBUTION:
+    "/account-management/account-standard/product-distribution/update",
 
   // MASTER DATA
   // METER READING CODE
@@ -180,7 +188,8 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   DETAIL_TAX_IMPLICATION_RULE: "/system-setup/tax-implication-rule/view",
 
   // GS UTILIZATION
-  CREATE_GAS_UTILIZATION: "/account-management/account-standard/gas-utilization/create",
-  UPDATE_GAS_UTILIZATION: "/account-management/account-standard/gas-utilization/update",
-  
+  CREATE_GAS_UTILIZATION:
+    "/account-management/account-standard/gas-utilization/create",
+  UPDATE_GAS_UTILIZATION:
+    "/account-management/account-standard/gas-utilization/update",
 };
