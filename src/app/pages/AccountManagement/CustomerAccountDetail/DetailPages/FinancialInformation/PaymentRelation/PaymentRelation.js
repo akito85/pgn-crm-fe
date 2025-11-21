@@ -180,7 +180,7 @@ const TaxImplication = ({ id = 0 }) => {
   return (
     <Fragment>
       <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-        {"TAX IMPLICATION LIST"}
+        {"Payment Relation LIST"}
       </div>
 
       <div>
