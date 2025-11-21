@@ -1,5 +1,5 @@
-// TableRBI.js (updated with onRow support)
-import React, { useMemo, useState } from "react";
+// TableRBI.js (with resizable columns)
+import React, { useMemo, useState, useCallback } from "react";
 import { DownloadOutlined, FilterOutlined } from "@ant-design/icons";
 import { Button, Pagination, Select, Table } from "antd";
 import ColumnSettings from "./ColumnSettings/ColumnSettings";
@@ -7,6 +7,63 @@ import SearchBar from "./SearchBar";
 import AdvanceSearch from "./AdvanceSearch";
 
 const { Option } = Select;
+
+// Resizable Title Component
+const ResizableTitle = (props) => {
+  const { onResize, width, ...restProps } = props;
+
+  if (!width) {
+    return <th {...restProps} />;
+  }
+
+  return (
+    <th {...restProps} style={{ ...restProps.style, position: "relative" }}>
+      {restProps.children}
+      <div
+        style={{
+          position: "absolute",
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: "10px",
+          cursor: "col-resize",
+          userSelect: "none",
+          zIndex: 1,
+        }}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          const startX = e.pageX;
+          const startWidth = width;
+
+          const handleMouseMove = (e) => {
+            const newWidth = startWidth + (e.pageX - startX);
+            if (newWidth > 50) {
+              onResize(newWidth);
+            }
+          };
+
+          const handleMouseUp = () => {
+            document.removeEventListener("mousemove", handleMouseMove);
+            document.removeEventListener("mouseup", handleMouseUp);
+            document.body.style.cursor = "default";
+            document.body.style.userSelect = "auto";
+          };
+
+          document.addEventListener("mousemove", handleMouseMove);
+          document.addEventListener("mouseup", handleMouseUp);
+          document.body.style.cursor = "col-resize";
+          document.body.style.userSelect = "none";
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.borderRight = "2px solid #1890ff";
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.borderRight = "none";
+        }}
+      />
+    </th>
+  );
+};
 
 const TableRBI = ({
   idTable,
@@ -35,21 +92,34 @@ const TableRBI = ({
   onRow, // ⭐ TAMBAHAN BARU: terima prop onRow
   rowClassName, // ⭐ TAMBAHAN BARU: terima prop rowClassName
 }) => {
-  const [optionSelectedCol, setOptionSelectedCol] = useState([]); // hidden columns keys
+  const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
 
-  // ---------- Helper: build visible + fixed-applied columns ----------
+  // State untuk menyimpan width setiap column
+  const [columnWidths, setColumnWidths] = useState({});
+
+  // Handler untuk resize column
+  const handleResize = useCallback(
+    (key) => (newWidth) => {
+      setColumnWidths((prev) => ({
+        ...prev,
+        [key]: newWidth,
+      }));
+    },
+    []
+  );
+
+  // Build visible + fixed-applied columns with resizable feature
   const displayedColumns = useMemo(() => {
-    // Normalize keys for safety
     const cols = (columns || []).map((c) => ({
       ...c,
       key: c.key || c.dataIndex || c.title,
     }));
 
-    // 1) Filter out hidden columns
+    // Filter out hidden columns
     const visible = cols.filter((col) => !optionSelectedCol.includes(col.key));
 
-    // 2) Separate into left, normal, right based on fixedColumns lists, preserving original order
+    // Separate into left, normal, right
     const leftFixed = [];
     const rightFixed = [];
     const normal = [];
@@ -70,25 +140,43 @@ const TableRBI = ({
       }
     });
 
-    // 3) Apply `fixed` property to copies of columns
-    const applyFixedProp = (col, fixedPos) => {
-      const newCol = { ...col };
+    // Apply fixed property and resizable width
+    const applyColumnProps = (col, fixedPos) => {
+      const colKey = col.key || col.dataIndex || col.title;
+      const newCol = {
+        ...col,
+        width: columnWidths[colKey] || col.width || 150,
+        align: "center",
+        ellipsis: {
+          showTitle: true,
+        },
+        onHeaderCell: (column) => ({
+          width: columnWidths[colKey] || col.width || 150,
+          onResize: handleResize(colKey),
+        }),
+        onCell: () => ({
+          style: {
+            textAlign: "center",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          },
+        }),
+      };
       if (fixedPos) newCol.fixed = fixedPos;
       else delete newCol.fixed;
       return newCol;
     };
 
-    // 4) Reorder: leftFixed -> normal -> rightFixed
     const finalCols = [
-      ...leftFixed.map((c) => applyFixedProp(c, "left")),
-      ...normal.map((c) => applyFixedProp(c, undefined)),
-      ...rightFixed.map((c) => applyFixedProp(c, "right")),
+      ...leftFixed.map((c) => applyColumnProps(c, "left")),
+      ...normal.map((c) => applyColumnProps(c, undefined)),
+      ...rightFixed.map((c) => applyColumnProps(c, "right")),
     ];
 
     return finalCols;
-  }, [columns, optionSelectedCol, fixedColumns]);
+  }, [columns, optionSelectedCol, fixedColumns, columnWidths, handleResize]);
 
-  // ---------- Handlers ----------
   const handleAdvanceSearch = (searchData) => {
     onAdvanceSearch(searchData);
     setIsAdvanceOpen(false);
@@ -98,12 +186,17 @@ const TableRBI = ({
     onAdvanceSearch(null);
   };
 
-  // ---------- UI ----------
+  // Components untuk Ant Design Table
+  const components = {
+    header: {
+      cell: ResizableTitle,
+    },
+  };
+
   return (
     <div className={"flex flex-col w-full"}>
       {useSelect ? (
         <div className={"w-full flex mb-5 justify-between items-center"}>
-          {/* Column Settings Component */}
           <ColumnSettings
             columns={columnDefinitions || columns}
             hiddenColumns={optionSelectedCol}
@@ -141,16 +234,16 @@ const TableRBI = ({
               Advance Search
             </Button>
 
-            {/* SearchBar - jangan di hilangkan */}
             <SearchBar />
           </div>
         </div>
       ) : null}
 
-      {/* Table */}
+      {/* Table with Resizable Columns */}
       <Table
         dataSource={dataSource}
         columns={displayedColumns}
+        components={components}
         scroll={tableScrolled}
         bordered
         pagination={false}
@@ -165,7 +258,6 @@ const TableRBI = ({
         rowClassName={rowClassName} // ⭐ TAMBAHAN BARU: pass rowClassName ke Ant Design Table
       />
 
-      {/* Pagination */}
       {usePagination ? (
         <div className={"w-full flex justify-between mt-5 items-center"}>
           <div className="flex items-center gap-3">
@@ -199,7 +291,6 @@ const TableRBI = ({
         </div>
       ) : null}
 
-      {/* Advance Search Modal */}
       <AdvanceSearch
         visible={isAdvanceOpen}
         onClose={() => setIsAdvanceOpen(false)}
