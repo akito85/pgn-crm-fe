@@ -1,28 +1,249 @@
 import { Fragment, useState } from "react"
 
-import { Space, Button, Popconfirm, Form, Select, Input } from "antd"
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons"
+import { Space, Button, Popconfirm, Form } from "antd"
+import { PlusOutlined, EditOutlined, DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons"
 
-import InputComponent from "../../../../../../../../../components/InputComponent" 
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent"
-import TabPane from "antd/lib/tabs/TabPane"
 import NxTable from "../../../../../../../../../components/Nx/NxTable"
 import NxPanel from "../../../../../../../../../components/Nx/NxPanel"
-import NxModal from "../../../../../../../../../components/Nx/NxModal"
 
-export default function ContactForm(){
+import ModalInformationContactDetail from "./ModalInformationContactDetail"
+import ModalListContact from "./ModalListContact"
+import ModalConfirmationContactDetail from "./ModalConfirmationContactDetail"
 
-  const [isOpen, setIsOpen] = useState(false)
-  const [isSelectContactModal, setIsSelectContactModal] = useState(false)
+// ============================================================================
+// STATIC DATA - Mock data for demonstration
+// ============================================================================
+
+// Main contact list data
+const MOCK_CONTACT_LIST = []
+
+// Contact secondary details (phone, email, etc.)
+const MOCK_CONTACT_SECONDARY = []
+
+// Expanded table data for ModalListContact
+const EXPAND_DATA_MAIN = [
+  {
+    "key": "1",
+    "no": "1",
+    "name": "Daniel Irza Kurniawan",
+    "job": "Engineer",
+    "position": "Staff Engineer",
+    "source": "PGN Directory"
+  },
+  {
+    "key": "2",
+    "no": "2",
+    "name": "Supratman",
+    "job": "Engineer",
+    "position": "Staff Engineer",
+    "source": "Customer Database"
+  },
+  {
+    "key": "3",
+    "no": "3",
+    "name": "Donny Malaka",
+    "job": "Engineer",
+    "position": "Staff Engineer",
+    "source": "PGN Directory"
+  }
+]
+
+// Expanded table details (phone, email, etc. for each contact)
+const DATA_EXPAND = [
+  {
+    "key": "expand-1-1",
+    "parentKey": "1",
+    "no": "1",
+    "type": "Phone",
+    "inputType": "Phone",
+    "value": "(62)(21)-81365479889"
+  },
+  {
+    "key": "expand-1-2",
+    "parentKey": "1",
+    "no": "2",
+    "type": "Email",
+    "inputType": "Email",
+    "value": "daniel.kurniawan@pgn.co.id"
+  },
+  {
+    "key": "expand-1-3",
+    "parentKey": "1",
+    "no": "3",
+    "type": "Mobile Phone",
+    "inputType": "Mobile Phone",
+    "value": "(62)-81365479889"
+  },
+  {
+    "key": "expand-2-1",
+    "parentKey": "2",
+    "no": "1",
+    "type": "Phone",
+    "inputType": "Phone",
+    "value": "(62)(21)-81365470000"
+  },
+  {
+    "key": "expand-2-2",
+    "parentKey": "2",
+    "no": "2",
+    "type": "Email",
+    "inputType": "Email",
+    "value": "supratman@pgn.co.id"
+  },
+  {
+    "key": "expand-3-1",
+    "parentKey": "3",
+    "no": "1",
+    "type": "Phone",
+    "inputType": "Phone",
+    "value": "(62)(21)-81365471111"
+  },
+  {
+    "key": "expand-3-2",
+    "parentKey": "3",
+    "no": "2",
+    "type": "Email",
+    "inputType": "Email",
+    "value": "donny.malaka@pgn.co.id"
+  },
+  {
+    "key": "expand-3-3",
+    "parentKey": "3",
+    "no": "3",
+    "type": "Whatsapp",
+    "inputType": "Whatsapp",
+    "value": "6287778786767"
+  }
+]
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+export default function ContactForm() {
+
+  // --------------------------------------------------------------------------
+  // STATE MANAGEMENT
+  // --------------------------------------------------------------------------
+
+  const [form] = Form.useForm() // Form instance for contact information
+  const [isOpen, setIsOpen] = useState(false) // ModalInformationContactDetail
+  const [isSelectContactModal, setIsSelectContactModal] = useState(false) // ModalListContact
+  const [isConfirmationContactModal, setIsConfirmationContactModal] = useState(false) // ModalConfirmationContactDetail
   const [expandedRowKeys, setExpandedRowKeys] = useState([])
+  const [contactList, setContactList] = useState(MOCK_CONTACT_LIST)
+  const [contactSecondary, setContactSecondary] = useState(MOCK_CONTACT_SECONDARY)
 
-  const contact = []
+  // --------------------------------------------------------------------------
+  // EVENT HANDLERS - Main Contact Table
+  // --------------------------------------------------------------------------
+
+  const handleEdit = (record) => {
+    console.log("edit", record)
+  }
+
+  const handleDelete = (record) => {
+    console.log("delete", record)
+  }
+
+  // --------------------------------------------------------------------------
+  // EVENT HANDLERS - ModalInformationContactDetail
+  // --------------------------------------------------------------------------
+
+  const handleClearForm = () => {
+    // Clear all form fields
+    form.resetFields()
+    console.log("Form cleared")
+  }
+
+  const handleSaveContact = () => {
+    form.validateFields()
+      .then((values) => {
+        console.log("Contact saved:", values)
+        // Here you would save the contact data
+        setIsOpen(false)
+      })
+      .catch((error) => {
+        console.log("Validation failed:", error)
+      })
+  }
+
+  const handleBackFromContactModal = () => {
+    setIsOpen(false)
+  }
+
+  // --------------------------------------------------------------------------
+  // EVENT HANDLERS - ModalListContact (Choose Contact)
+  // --------------------------------------------------------------------------
+
+  const handleOkSelectContactModal = () => {
+    setIsSelectContactModal(false)
+    setExpandedRowKeys([])
+  }
+
+  const handleCancelSelectContactModal = () => {
+    setIsSelectContactModal(false)
+    setExpandedRowKeys([])
+  }
+
+  const handleBackFromSelectContactModal = () => {
+    setIsSelectContactModal(false)
+    setExpandedRowKeys([])
+  }
+
+  const handleExpand = (expanded, record) => {
+    const keys = expanded
+      ? [...expandedRowKeys, record.key]
+      : expandedRowKeys.filter(k => k !== record.key)
+    setExpandedRowKeys(keys)
+  }
+
+  // --------------------------------------------------------------------------
+  // EVENT HANDLERS - ModalConfirmationContactDetail
+  // --------------------------------------------------------------------------
+
+  const handleOkConfirmationContactModal = () => {
+    setIsConfirmationContactModal(false)
+    setExpandedRowKeys([])
+  }
+
+  const handleCancelConfirmationContactModal = () => {
+    setIsConfirmationContactModal(false)
+    setExpandedRowKeys([])
+  }
+
+  const handleConfirmContact = () => {
+    console.log("Contact confirmed")
+    setIsConfirmationContactModal(false)
+    // Add selected contact to the main table
+  }
+
+  const handleBackFromConfirmationModal = () => {
+    setIsConfirmationContactModal(false)
+  }
+
+  const handleClearConfirmationForm = () => {
+    console.log("Clear confirmation form")
+    // Clear any temporary data
+  }
+
+  const handleSaveFromConfirmationModal = () => {
+    console.log("Save from confirmation")
+    setIsConfirmationContactModal(false)
+    // Save the confirmed contact
+  }
+
+  // --------------------------------------------------------------------------
+  // COLUMN DEFINITIONS - Main Contact Table
+  // --------------------------------------------------------------------------
+
   const columnMain = [
     {
       title: 'NO',
       dataIndex: 'no',
       key: 'no',
-      filter: true,  // NxTable's built-in search
+      filter: true,
     },
     {
       title: 'PRIMARY',
@@ -73,7 +294,7 @@ export default function ContactForm(){
           <Button
             type="link"
             icon={<EditOutlined />}
-            onClick={() =>  handleEdit(record)}
+            onClick={() => handleEdit(record)}
           >
             Edit
           </Button>
@@ -97,39 +318,22 @@ export default function ContactForm(){
     },
   ]
 
-  const handleEdit = () => {
-    console.log("edit") 
-  }
-
-  const handleDelete = () => {
-    console.log("delete")
-  }
-
-  const handleOk = () => {
-    console.log("ok")
-    setIsOpen(false) // Close modal after OK
-  }
-
-  const handleCancel = () => {
-    setIsOpen(false)
-  }
-
-  const handleClose = () => {
-    setIsOpen(false)
-  }
+  // --------------------------------------------------------------------------
+  // COLUMN DEFINITIONS - Contact Secondary Table (Phone, Email, etc.)
+  // --------------------------------------------------------------------------
 
   const columnSecondary = [
     {
       title: 'NO',
       dataIndex: 'no',
       key: 'no',
-      filter: true,  // NxTable's built-in search
-    },    
+      filter: true,
+    },
     {
       title: 'TYPE',
       dataIndex: 'type',
       key: 'type',
-      filter: true,  // NxTable's built-in search
+      filter: true,
     },
     {
       title: 'INPUT TYPE',
@@ -150,7 +354,7 @@ export default function ContactForm(){
           <Button
             type="link"
             icon={<EditOutlined />}
-            onClick={() =>  handleEdit(record)}
+            onClick={() => handleEdit(record)}
           >
             Edit
           </Button>
@@ -174,62 +378,9 @@ export default function ContactForm(){
     },
   ]
 
-  const handleEditInline = () => {
-    console.log("edit");
-  }
-
-  const handleDeleteInline = () => {
-    console.log("delete");
-  }
-
-  const handleOkSelectContactModal = () => {
-    setIsSelectContactModal(false) // Fixed: should close modal, not open
-    setExpandedRowKeys([]) // Reset expanded rows
-  }
-
-  const handleCancelSelectContactModal = () => {
-    setIsSelectContactModal(false)
-    setExpandedRowKeys([]) // Reset expanded rows
-  }
-
-  const handleExpand = (expanded, record) => {
-    const keys = expanded
-      ? [...expandedRowKeys, record.key]
-      : expandedRowKeys.filter(k => k !== record.key)
-    setExpandedRowKeys(keys)
-  }
-
-  const contactSecondary = []
-  const expandDataMain = [
-    {
-      "key": "1",
-      "no": "1",
-      "type": "Phone",
-      "inputType": "Phone",
-      "value": "(62)(21)-81365479889"
-    },
-    {
-      "key": "2", 
-      "no": "2",
-      "type": "Email",
-      "inputType": "Email", 
-      "value": "ijlalsetiawan@gmail.co.id"
-    },
-    {
-      "key": "3",
-      "no": "3", 
-      "type": "PGN Mobile (Phone)",
-      "inputType": "Mobile Phone",
-      "value": "(62)-81365479889"
-    },
-    {
-      "key": "4",
-      "no": "4",
-      "type": "Whatsapp", 
-      "inputType": "Whatsapp",
-      "value": "6287778786767"
-    }
-  ]
+  // --------------------------------------------------------------------------
+  // COLUMN DEFINITIONS - Expanded Main Table (for ModalListContact)
+  // --------------------------------------------------------------------------
 
   const expandColumnMain = [
     {
@@ -239,14 +390,71 @@ export default function ContactForm(){
       "width": 80
     },
     {
-      "title": "TYPE", 
+      "title": "NAME",
+      "dataIndex": "name",
+      "key": "name",
+      "width": 200
+    },
+    {
+      "title": "JOB",
+      "dataIndex": "job",
+      "key": "job",
+      "width": 150
+    },
+    {
+      "title": "POSITION",
+      "dataIndex": "position",
+      "key": "position",
+      "width": 180
+    },
+    {
+      "title": "SOURCE",
+      "dataIndex": "source",
+      "key": "source",
+      "width": 180
+    },
+    {
+      title: 'ACTIONS',
+      key: 'actions',
+      width: 150,
+      onCell: () => ({
+        onClick: (e) => {
+          e.stopPropagation()
+        },
+      }),
+      render: (_, record) => (
+        <Space size="small">
+          <Button
+            type="link"
+            icon={<PlusCircleOutlined />}
+            onClick={() => setIsConfirmationContactModal(true)}
+          >
+          </Button>
+        </Space>
+      ),
+    },
+  ]
+
+  // --------------------------------------------------------------------------
+  // COLUMN DEFINITIONS - Expanded Detail Table (for ModalListContact)
+  // --------------------------------------------------------------------------
+
+  const columnExpand = [
+    {
+      "title": "NO",
+      "dataIndex": "no",
+      "key": "no",
+      "width": 80
+    },
+    {
+      "title": "TYPE",
       "dataIndex": "type",
       "key": "type",
       "width": 150
     },
     {
       "title": "INPUT TYPE",
-      "dataIndex": "inputType", 
+      "dataIndex": "inputType",
       "key": "inputType",
       "width": 150
     },
@@ -254,85 +462,23 @@ export default function ContactForm(){
       "title": "VALUE",
       "dataIndex": "value",
       "key": "value",
-      "width": 200
+      "width": 250
     }
   ]
 
-  const dataExpand = [
-    {
-      "key": "expand-1-1",
-      "parentKey": "1",
-      "name": "2 Daniel Irza Kurniawan",
-      "position": "Staff Engineer", 
-      "department": "IT Master"
-    },
-    {
-      "key": "expand-1-2",
-      "parentKey": "1", 
-      "name": "3 Supratman",
-      "position": "Staff Engineer",
-      "department": "IT Master"
-    },
-    {
-      "key": "expand-1-3",
-      "parentKey": "1",
-      "name": "4 Donny Malaka", 
-      "position": "Staff Engineer",
-      "department": "IT Master"
-    },
-    {
-      "key": "expand-2-1",
-      "parentKey": "2",
-      "name": "2 Daniel Irza Kurniawan",
-      "position": "Staff Engineer",
-      "department": "IT Master" 
-    },
-    {
-      "key": "expand-3-1",
-      "parentKey": "3",
-      "name": "2 Daniel Irza Kurniawan",
-      "position": "Staff Engineer",
-      "department": "IT Master"
-    },
-    {
-      "key": "expand-4-1", 
-      "parentKey": "4",
-      "name": "2 Daniel Irza Kurniawan",
-      "position": "Staff Engineer",
-      "department": "IT Master"
-    }
-  ]
-  
-  const columnExpand = [
-    {
-      "title": "Name",
-      "dataIndex": "name", 
-      "key": "name",
-      "width": 200
-    },
-    {
-      "title": "Position",
-      "dataIndex": "position",
-      "key": "position", 
-      "width": 150
-    },
-    {
-      "title": "Department",
-      "dataIndex": "department",
-      "key": "department",
-      "width": 150
-    }
-  ]
+  // --------------------------------------------------------------------------
+  // RENDER
+  // --------------------------------------------------------------------------
 
-  return(
+  return (
     <Fragment>
       <NxPanel title={"CONTACT LIST"}>
 
+        {/* Create Contact Button */}
         <div className="w-full flex justify-end items-center gap-2.5 mb-5">
-          {/* Approval Button */}
           <ButtonComponent
             type={"submit"}
-            onClick={() => { setIsOpen(true) }}
+            onClick={() => setIsOpen(true)}
             icon={
               <PlusOutlined
                 style={{
@@ -354,276 +500,72 @@ export default function ContactForm(){
           </ButtonComponent>
         </div>
 
+        {/* Main Contact Table */}
         <NxTable
           className="border-[0.5px] border-[#c8cdd4] border-solid "
           usePagination={true}
           useSelect={true}
-          dataMain={contact}
+          dataMain={contactList}
           columnMain={columnMain}
-          
         />
 
-        <NxModal
+        {/* ====================================================================
+            MODAL 1: ModalInformationContactDetail (Create/Edit Contact)
+            ==================================================================== */}
+        <ModalInformationContactDetail
           isOpen={isOpen}
-          handleCancel={handleCancel}
-          handleOk={handleOk}
-          header={"CONTACT INFORMATION"}
-          width={1200}
-          title={"CONTACT INFORMATION"}
-          footer={[
-            <div className="self-stretch flex flex-row items-end justify-end">
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => { setIsOpen(true) }}
-                icon={
-                  <DeleteOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 20,
-                    }}
-                  />
-                }
-                className="mr-4"
-                style={{
-                  backgroundColor: "#0075bf",
-                  color: "#fff",
-                  borderColor: "#0075bf",
-                  border: "1px solid #0075bf",
-                  borderRadius: "5px",
-                  height: "48px"
-                }}
-              >
-                Clear
-              </ButtonComponent>
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => { setIsOpen(true) }}
-                style={{
-                  backgroundColor: "#0075bf",
-                  color: "#fff",
-                  borderColor: "#0075bf",
-                  border: "1px solid #0075bf",
-                  borderRadius: "5px",
-                  height: "48px"
-                }}
-              >
-                Save
-              </ButtonComponent>
-            </div>
-          ]}
-        >
-          <div className="flex-1 justify-start text-sky-600 text-sm font-bold">
-            CONTACT INFORMATION
-          </div>
+          form={form}
+          contactSecondary={contactSecondary}
+          columnSecondary={columnSecondary}
+          onBack={handleBackFromContactModal}
+          onClear={handleClearForm}
+          onSave={handleSaveContact}
+          onOpenSelectContact={() => setIsSelectContactModal(true)}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
 
-          <div class="self-stertch flex flex-col justify-end items-end">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => { setIsSelectContactModal(true) }}
-              className=""
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                borderRadius: "5px",
-                height: "48px"
-              }}
-            >
-              Choose Contact
-            </ButtonComponent>
-          </div>
-
-          <br/>
-
-          <div className="grid grid-cols-3 gap-3">
-            <div className="flex flex-col">
-              <label className="mb-2 font-medium">First Name</label>
-              <Form.Item
-                key="FirstName"
-                name={"FirstName"}
-                className="no-margin-form"
-              >
-                <InputComponent className="flex-1" />
-              </Form.Item>
-            </div>
-            <div className="flex flex-col">
-              <label className="mb-2 font-medium">Middle Name</label>
-              <Form.Item
-                key="MiddleName"
-                name={"MiddleName"}
-                className="no-margin-form"
-              >
-                <InputComponent className="flex-1" />
-              </Form.Item>
-            </div>            
-            <div className="flex flex-col">
-              <label className="mb-2 font-medium">Last Name</label>
-              <Form.Item
-                key="LastName"
-                name={"LastName"}
-                className="no-margin-form"
-              >
-                <InputComponent className="flex-1" />
-              </Form.Item>
-            </div>
-            <div className="flex flex-col">
-              <label className="mb-2 font-medium">Job</label>
-              <Form.Item
-                key="Job"
-                name={"Job"}
-                className="no-margin-form"
-              >
-                <Select></Select>
-              </Form.Item>
-            </div>
-            <div className="flex flex-col">
-              <label className="mb-2 font-medium">Position</label>
-              <Form.Item
-                key="Position"
-                name={"Position"}
-                className="no-margin-form"
-              >
-                <Select></Select>
-              </Form.Item>
-            </div>
-          </div>
-
-          <br/>
-
-          <div className="flex-1 justify-start text-sky-600 text-sm font-bold">
-            CONTACT DETAIL
-          </div>
-
-          <div class="self-stertch flex flex-col justify-end items-end">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => { setIsOpen(true) }}
-              className=""
-              icon={
-                <PlusOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                borderRadius: "5px",
-                height: "48px"
-              }}
-            >
-              Create
-            </ButtonComponent>
-          </div>
-
-          <br/>
-
-          <NxTable
-            className="border-[0.5px] border-[#c8cdd4] border-solid "
-            usePagination={true}
-            useSelect={true}
-            dataMain={contactSecondary}
-            columnMain={columnSecondary} 
-          />
-
-          <br/>
-
-          <div className="flex-1 justify-start text-sky-600 text-sm font-bold">
-            CONTACT PURPOSE INFORMATION
-          </div>
-
-          <br/>
-
-         <div className="grid grid-cols-3 gap-5">
-            <label className="flex flex-col gap-2.5 cursor-pointer">
-              <div className="flex items-center gap-1.5">
-                <input type="checkbox" className="size-4 rounded-sm border border-white/80 bg-transparent" />
-                <span className="font-medium leading-5">
-                  Primary Contact
-                </span>
-              </div>
-              <p className="text-neutral-400 text-[10px]">
-                Click or tap this checkbox if data is branch.
-              </p>
-            </label>
-            <div className="flex flex-col">
-              <label className="mb-2 font-medium">Contact Address</label>
-              <Form.Item
-                key="ContactAddress"
-                name={"ContactAddress"}
-                className="no-margin-form"
-              >
-                <InputComponent className="flex-1" />
-              </Form.Item>
-            </div>
-            <div className="flex flex-col">
-              <label className="mb-2 font-medium">Contact Address Additional Note</label>
-              <Form.Item
-                key="ContactAddressAdditionalNote"
-                name={"ContactAddressAdditionalNote"}
-                className="no-margin-form"
-              >
-                <InputComponent className="flex-1" />
-              </Form.Item>
-            </div>
-          </div>
-
-          <br/>
-          <div class="w-full">
-            <label className="mb-2 font-medium">Description</label>
-            <Input.TextArea rows={5} maxLength={255} />
-          </div>
-        </NxModal>
-
-        <NxModal
+        {/* ====================================================================
+            MODAL 2: ModalListContact (Choose Contact from Existing)
+            ==================================================================== */}
+        <ModalListContact
           isOpen={isSelectContactModal}
-          handleCancel={handleCancelSelectContactModal}
-          handleOk={handleOkSelectContactModal}
-          header={"CHOOSE CONTACT"}
-          width={1200}
-          title={"CHOOSE CONTACT"}
-          footer={
-            <div className="self-stretch flex flex-row items-end justify-end">
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => { setIsOpen(true) }}
-                style={{
-                  // backgroundColor: "#0075bf",
-                  backgroundColor: "#ffffff",
-                  color: "#0075bf",
-                  borderColor: "#0075bf",
-                  border: "1px solid #0075bf",
-                  borderRadius: "5px",
-                  height: "48px"
-                }}
-              >
-                Back
-              </ButtonComponent>
-            </div>
-          }
-        >
-          <NxTable
-            className="border-[0.5px] border-[#c8cdd4] border-solid "
-            usePagination={true}
-            useSelect={true}
-            dataMain={expandDataMain}
-            columnMain={expandColumnMain}
-            columnExpand={columnExpand}
-            dataExpand={dataExpand}
-            childTitle="EMPLOYEE DETAILS"
-            tablePadding="small"
-            fontSize="medium"
-            expandRowByClick={true}
-            expandedRowKeys={expandedRowKeys}
-            onExpand={handleExpand}
-          />
-        </NxModal>
+          expandDataMain={EXPAND_DATA_MAIN}
+          expandColumnMain={expandColumnMain}
+          columnExpand={columnExpand}
+          dataExpand={DATA_EXPAND}
+          expandedRowKeys={expandedRowKeys}
+          onExpand={handleExpand}
+          onBack={handleBackFromSelectContactModal}
+          onCancel={handleCancelSelectContactModal}
+          onOk={handleOkSelectContactModal}
+        />
+
+        {/* ====================================================================
+            MODAL 3: ModalConfirmationContactDetail (Confirm Selected Contact)
+            ==================================================================== */}
+        <ModalConfirmationContactDetail
+          isOpen={isConfirmationContactModal}
+          contactSecondary={contactSecondary}
+          columnSecondary={columnSecondary}
+          onBack={handleBackFromConfirmationModal}
+          onClear={handleClearConfirmationForm}
+          onSave={handleSaveFromConfirmationModal}
+          onCancel={handleCancelConfirmationContactModal}
+          onOk={handleOkConfirmationContactModal}
+        />
+
       </NxPanel>
     </Fragment>
   )
+}
+
+// ============================================================================
+// HELPER FUNCTIONS (if needed)
+// ============================================================================
+
+// Export form values getter for wizard step retrieval
+export const getContactFormValues = (form) => {
+  if (!form) return null
+  return form.getFieldsValue()
 }
