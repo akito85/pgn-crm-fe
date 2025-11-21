@@ -482,14 +482,13 @@ const PrabillingPage = () => {
       <LayoutMenu>
         <BreadCrumb routes={routes} />
 
-        <div className="w-full justify-end flex gap-2">
-          <Toolbar items={itemGrantAccess} />
-        </div>
-
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">PRABILLING LIST</p>
+              <div className="mt-[15px]">
+                <Toolbar items={itemGrantAccess} />
+              </div>
             </div>
           }
         >

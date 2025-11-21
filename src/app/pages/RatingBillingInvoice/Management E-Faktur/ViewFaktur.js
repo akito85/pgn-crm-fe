@@ -457,18 +457,18 @@ const ViewFaktur = () => {
 
   // Item Grant Access untuk action columns
   const itemGrantAccess = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={handleDownload}
-        >
-          Export Data
-        </ButtonComponent>
-      ),
-    },
+    // {
+    //   action: "Download",
+    //   render: (
+    //     <ButtonComponent
+    //       icon={<SVGIcon name="IconButtonDownload" width={24} />}
+    //       type="submit"
+    //       onClick={handleDownload}
+    //     >
+    //       Export Data
+    //     </ButtonComponent>
+    //   ),
+    // },
     {
       action: "Approval",
       render: (
@@ -755,13 +755,6 @@ const ViewFaktur = () => {
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">Manajemen E-Faktur</p>
               <div className="flex gap-2">
-                <ButtonComponent
-                  icon={<SVGIcon name="IconButtonDownload" width={24} />}
-                  type="submit"
-                  onClick={handleDownload}
-                >
-                  Export Data
-                </ButtonComponent>
                 <ButtonComponent
                   icon={
                     <SVGIcon

@@ -16,7 +16,6 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   
-  // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState("");
@@ -24,12 +23,11 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
 
-  const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
-    status: "right",
-  });
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status"],
+  }));
 
-  // Fetch data
   useEffect(() => {
     if (tabHeader === "Prabilling Log" && data?.initCode) {
       dispatch(
@@ -44,7 +42,6 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
     }
   }, [tabHeader, dispatch, data?.initCode, page, pageSize, sort, search]);
 
-  // Handle search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -60,7 +57,6 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
     });
   };
 
-  // Handle sort
   const onSort = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined
@@ -70,7 +66,6 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
     setSort(dataSort);
   };
 
-  // Render status tag
   const renderStatus = (status, isHighlight, searchValue) => {
     if (!status) return <Tag color="default">INFO</Tag>;
 
@@ -99,7 +94,6 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
     return <Tag color={color}>{statusUpper}</Tag>;
   };
 
-  // Base columns definition
   const baseColumns = useMemo(
     () => [
       {

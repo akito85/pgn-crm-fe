@@ -12,15 +12,12 @@ import { hasValue, renderDateConverter } from "../../../../../utils";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
-  // Selector
   const { data_calculationUsage, loading } = useSelector((state) => state.rating);
 
-  // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data_calculationUsage?.result;
 
-  // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -30,12 +27,11 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [detailCalculationItem, setDetailCalculationItem] = useState({});
 
-  const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
-    action: "right",
-  });
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["action"],
+  }));
 
-  // Use Effect
   useEffect(() => {
     let tempSearch = "";
     for (const dataIndex in search) {
@@ -58,7 +54,6 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
     );
   }, [ratingCodeId, search, page, pageSize, sort, dispatch]);
 
-  // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -74,13 +69,11 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
     });
   };
 
-  // Handle Change Page
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
   };
 
-  // Sort Table
   const onSortApi = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined
@@ -98,6 +91,7 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
     setDetailCalculationItem({});
     setIsOpen(false);
   };
+
   const baseColumns = useMemo(
     () =>
       columnsCalculationUsage(
@@ -173,7 +167,6 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
         </div>
       </CardContainer>
 
-      {/* modal history log */}
       <ModalCustom
         header={"Calculation Usage Detail"}
         isOpen={isOpen}

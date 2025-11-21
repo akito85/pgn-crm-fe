@@ -19,15 +19,12 @@ import { useColumnActionPermission } from "../../../../components/ColumnActionPe
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const RatingPage = () => {
-  // Selector
   const { data, loading } = useSelector((state) => state.rating);
 
-  // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data?.result;
 
-  // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -40,12 +37,12 @@ const RatingPage = () => {
   const [ratingCode, setRatingCode] = useState("");
   const [calculationCode, setCalculationCode] = useState("");
   const [saNumberId, setSANumberId] = useState("");
-  const [activeRowKey, setActiveRowKey] = useState(null); // Track active row
+  const [activeRowKey, setActiveRowKey] = useState(null);
 
-  const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
-    action: "right",
-  });
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["action"],
+  }));
 
   const detailRef = useRef(null);
 
@@ -61,7 +58,6 @@ const RatingPage = () => {
     }
   }, [activeRowKey, pageDetail]);
 
-  // Use Effect - Fetch Data
   useEffect(() => {
     dispatch(
       getListRatingGasPaginate({
@@ -73,7 +69,6 @@ const RatingPage = () => {
     );
   }, [search, page, pageSize, sort, dispatch]);
 
-  // Value Tab
   const tabRating = [
     {
       label: "Rating Gas",
@@ -86,7 +81,6 @@ const RatingPage = () => {
     },
   ];
 
-  // Breadcrumbs
   const routes = [
     {
       path: "",
@@ -98,7 +92,6 @@ const RatingPage = () => {
     },
   ];
 
-  // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -114,13 +107,11 @@ const RatingPage = () => {
     });
   };
 
-  // Handle Change Page
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
   };
 
-  // Sort Table
   const onSortApi = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined
@@ -129,7 +120,6 @@ const RatingPage = () => {
     setSort(dataSort);
   };
 
-  // Handle Value Tab
   const onChangeTab = ({ target: { value } }) => {
     setValueTab(value);
   };
@@ -137,7 +127,6 @@ const RatingPage = () => {
   const handleDetail = (record) => {
     const recordKey = record.ratingCode;
     
-    // Toggle: jika row yang sama diklik lagi, tutup detail
     if (activeRowKey === recordKey && pageDetail) {
       setPageDetail(false);
       setActiveRowKey(null);
@@ -145,7 +134,6 @@ const RatingPage = () => {
       setCalculationCode("");
       setSANumberId("");
     } else {
-      // Buka detail untuk row baru atau berbeda
       setRatingCode(record.ratingCode);
       setCalculationCode(record.calculationCode);
       setSANumberId(record.saNumber);
@@ -154,7 +142,6 @@ const RatingPage = () => {
     }
   };
 
-  // Handle Download
   const handleDownload = () => {
     dispatch(
       downloadRatingGas({
@@ -179,8 +166,6 @@ const RatingPage = () => {
         </ButtonComponent>
       ),
     },
-
-    // Column Action Column
     {
       action: "View",
       type: "table",
@@ -307,13 +292,11 @@ const RatingPage = () => {
           </div>
         </CardContainer>
 
-        {/* Detail Rating */}
         {pageDetail && (
           <div 
             ref={detailRef}
             className="mt-6 border-t-4 border-blue-500 pt-4 bg-blue-50/30 rounded-lg p-4"
           >
-            {/* Header with close button */}
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-blue-200">
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-lg text-blue-700">

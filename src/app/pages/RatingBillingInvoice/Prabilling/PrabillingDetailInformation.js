@@ -25,7 +25,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
-  // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState("");
@@ -33,13 +32,11 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
 
-  const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
-    customerNumber: "left",
-    action: "right",
-  });
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no", "customerNumber"],
+    right: ["action"],
+  }));
 
-  // Fetch data
   useEffect(() => {
     if (tabHeader === "Prabilling Information" && data?.initCode) {
       dispatch(
@@ -455,11 +452,9 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
     return columnsWithKeys;
   }, [baseResultColumns]);
 
-
   const processedColumns = useMemo(() => {
     return applyFixedColumns(allColumns, fixedColumns);
   }, [allColumns, fixedColumns]);
-
 
   const columnDefinitions = useMemo(() => {
     return allColumns.map((col) => ({
@@ -497,7 +492,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
     }
   };
 
-  // Extract data dengan struktur baru
   const resultData = detail_prabilling_result?.result || [];
   const pageInfo = detail_prabilling_result?.page || {};
 
@@ -562,6 +556,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             totalData={pageInfo?.totalElements || 0}
             tableScrolled={{ x: 5500, y: 600 }}
             onSort={onSort}
+            handleDownload={handleDownload}
             columnDefinitions={columnDefinitions}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
