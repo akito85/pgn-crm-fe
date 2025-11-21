@@ -1,6 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import {
   FilterOutlined,
+  DownloadOutlined, 
+  CheckOutlined, 
+  PlusOutlined 
 } from "@ant-design/icons";
 import { Collapse, Space, Switch, Form, DatePicker, Input, Spin } from "antd";
 import { useState } from "react";
@@ -12,12 +15,17 @@ import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
 import DetailPaymentRelation from "./DetailPaymentRelation";
+import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import { useNavigate, useLocation } from "react-router-dom"
+import DetailTaxImplication from "./DetailPaymentRelation";
 
 // getDetailTaxImplication
 // detail_taxImplication
 
-const TaxImplication = ({ id = 0 }) => {
+const PaymentRelation = ({ id = 0 }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const { data_paymentRelation, detail_paymentRelation, loading } = useSelector(
     (state) => state.financialInformation
   );
@@ -177,6 +185,55 @@ const TaxImplication = ({ id = 0 }) => {
     setSort(dataSort);
   };
 
+  // Dummy data
+  const data = [
+    {
+      accountNumber: "2027635461",
+      accountName: "PT XYZ",
+      priority: 1,
+      startDate: "2022-08-22",
+      endDate: "2022-08-22",
+      statusApproval: "approved",
+      status: "active",
+    },
+    {
+      accountNumber: "2027635461",
+      accountName: "PT KERAMIK INTI 1",
+      priority: 4,
+      startDate: "2022-08-22",
+      endDate: "2022-08-22",
+      statusApproval: "approved",
+      status: "active",
+    },
+    {
+      accountNumber: "2027635461",
+      accountName: "PT XYZ",
+      priority: 4,
+      startDate: "2022-08-22",
+      endDate: "2022-08-22",
+      statusApproval: "waitingApproval",
+      status: "inactive",
+    },
+    {
+      accountNumber: "2027635461",
+      accountName: "PT XYZ",
+      priority: 4,
+      startDate: "2022-08-22",
+      endDate: "2022-08-22",
+      statusApproval: "rejected",
+      status: "inactive",
+    },
+    {
+      accountNumber: "2027635461",
+      accountName: "PT XYZ",
+      priority: 4,
+      startDate: "2022-08-22",
+      endDate: "2022-08-22",
+      statusApproval: "approved",
+      status: "inactive",
+    },
+  ]
+
   return (
     <Fragment>
       <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
@@ -184,8 +241,110 @@ const TaxImplication = ({ id = 0 }) => {
       </div>
 
       <div>
+        <div className="flex justify-between items-center gap-5 mb-5">
+          {/* Filter Button - Left side */}
+          <ButtonComponent
+            type={"submit"}
+            onClick={() => navigate(-1)}
+            icon={
+              <FilterOutlined
+                style={{
+                  color: "#fff",
+                  fontSize: 20,
+                }}
+              />
+            }
+            style={{
+              backgroundColor: "#0075bf",
+              color: "#fff",
+              borderColor: "#0075bf",
+              border: "1px solid #0075bf",
+              width: "128px",
+              height: "48px",
+              borderRadius: "5px"
+            }}
+          >
+            Filters
+          </ButtonComponent>
+          
+          {/* Right side buttons container */}
+          <div className="flex justify-end items-center gap-2.5">
+            {/* Download List Button */}
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => {}}
+              icon={
+                <DownloadOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 20,
+                  }}
+                />
+              }
+              style={{
+                backgroundColor: "#0075bf",
+                color: "#fff",
+                borderColor: "#0075bf",
+                border: "1px solid #0075bf",
+                borderRadius: "5px",
+                height: "48px"
+              }}
+            >
+              Download List
+            </ButtonComponent>
+
+            {/* Approval Button */}
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => {}}
+              icon={
+                <CheckOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 20,
+                  }}
+                />
+              }
+              style={{
+                backgroundColor: "#0075bf",
+                color: "#fff",
+                borderColor: "#0075bf",
+                border: "1px solid #0075bf",
+                borderRadius: "5px",
+                height: "48px"
+              }}
+            >
+              Approval
+            </ButtonComponent>
+
+            {/* Create Button */}
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => navigate("/account-management/customers/view/service-requests/create")}
+              icon={
+                <PlusOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 20,
+                  }}
+                />
+              }
+              style={{
+                backgroundColor: "#0075bf",
+                color: "#fff",
+                borderColor: "#0075bf",
+                border: "1px solid #0075bf",
+                borderRadius: "5px",
+                height: "48px"
+              }}
+            >
+              Create
+            </ButtonComponent>
+          </div>
+        </div>
         <PaymentRelationTable
-          data={data_paymentRelation?.result}
+          // data={data_paymentRelation?.result}
+          data={data}
           handleChange={handleChange}
           handleChangeSize={handleChangeSize}
           totalElement={totalElement}
@@ -199,16 +358,8 @@ const TaxImplication = ({ id = 0 }) => {
           setModalDetail={setModalDetail}
         />
       </div>
-      
-      {/* Modal detail tax implication */}
-      {modalDetail ? 
-        <PaymentRelationTable
-          setModalDetail={setModalDetail}
-          modalDetail={modalDetail}
-        /> : null
-      }
     </Fragment>  
   );
 };
 
-export default TaxImplication;
+export default PaymentRelation;
