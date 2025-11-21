@@ -1,14 +1,17 @@
+// EMeteraiManagement.js
 import React, { useState, useEffect } from "react";
 import { message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
+import dayjs from "dayjs";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import CardContainer from "../../../../components/CardContainer";
+import TableRBI from "../../../../components/TableRBI";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
-import InvoiceProcessingTable from "./_components/InvoiceProcessingTable";
 import StampingRequestModal from "./_components/StampingRequestModal";
 import ProcessSigningModal from "./_components/ProcessingSigningModal";
 import InvoiceDetailModal from "./_components/InvoiceDetailModal";
+import { getEMeteraiColumns } from "./_components/EMeteraiColumns";
 import {
   getAllEMeteraiInvoices,
   createStampingRequest,
@@ -20,14 +23,16 @@ const EMeteraiManagement = () => {
   const dispatch = useDispatch();
 
   // Redux state
-  const { data, loading, stampingLoading, pageInfo } = useSelector(
-    (state) => state.emeterai
-  );
+  const {
+    data: DATA_INVOICE,
+    loading,
+    stampingLoading,
+    pageInfo,
+  } = useSelector((state) => state.emeterai);
 
   // Local state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [filters, setFilters] = useState(null);
 
   // Modal states
   const [detailModalVisible, setDetailModalVisible] = useState(false);
@@ -36,6 +41,12 @@ const EMeteraiManagement = () => {
 
   // Selected invoice
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+
+  // Fixed column settings
+  const [fixedColumns, setFixedColumns] = useState({
+    left: ["invoiceNumber"],
+    right: ["actions"],
+  });
 
   // Breadcrumbs
   const routes = [
@@ -53,63 +64,56 @@ const EMeteraiManagement = () => {
   useEffect(() => {
     fetchInvoices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize, filters]);
+  }, [page, pageSize]);
 
   const fetchInvoices = () => {
     dispatch(
       getAllEMeteraiInvoices({
-        page: page, // API uses 0-based index
+        page: page,
         pageSize,
         search: "",
         sort: "billingPeriod~desc",
-        filters: filters,
       })
     );
   };
 
   // Transform API data to match table format
-  const getTransformedData = () => {
-    return data.map((invoice) => ({
-      ...invoice,
-      // Map API fields to table display format
-      invoiceNumber: invoice.invoiceNumber,
-      customer: invoice.customerName,
-      customerNumber: invoice.customerNumber,
-      accountNumber: invoice.accountNumber,
-      accountName: invoice.accountName,
-      issueDate: invoice.billingPeriod || "-",
-      amount: invoice.totalAmountEqvIdr,
-
-      // Stamping status mapping
-      stampingStatus: invoice.stampStatus || "Not Processed",
-      stampType: invoice.stampType,
-      stampRequestDate: invoice.stampRequestDate,
-      stampCompletionDate: invoice.stampCompletionDate,
-      stampRemark: invoice.stampRemark,
-
-      // Signing status mapping
-      signingStatus: invoice.signStatus || "Not Processed",
-      signType: invoice.signType,
-      signRequestDate: invoice.signRequestDate,
-      signCompletionDate: invoice.signCompletionDate,
-      signRemark: invoice.signRemark,
-
-      // For backward compatibility with table component
-      stamping: {
-        status: invoice.stampStatus || "Not Processed",
-        method: invoice.stampType,
-        requested: invoice.stampRequestDate,
-        completed: invoice.stampCompletionDate,
-        remark: invoice.stampRemark,
-      },
-      signing: {
-        status: invoice.signStatus || "Not Processed",
-        requested: invoice.signRequestDate,
-        completed: invoice.signCompletionDate,
-        remark: invoice.signRemark,
-      },
-    }));
-  };
+  // const getTransformedData = () => {
+  //   return data.map((invoice, index) => ({
+  //     ...invoice,
+  //     key: invoice.invoiceNumber || index,
+  //     invoiceNumber: invoice.invoiceNumber,
+  //     customer: invoice.customerName,
+  //     customerNumber: invoice.customerNumber,
+  //     accountNumber: invoice.accountNumber,
+  //     accountName: invoice.accountName,
+  //     issueDate: invoice.billingPeriod || "-",
+  //     amount: invoice.totalAmountEqvIdr,
+  //     stampingStatus: invoice.stampStatus || "Not Processed",
+  //     stampType: invoice.stampType,
+  //     stampRequestDate: invoice.stampRequestDate,
+  //     stampCompletionDate: invoice.stampCompletionDate,
+  //     stampRemark: invoice.stampRemark,
+  //     signingStatus: invoice.signStatus || "Not Processed",
+  //     signType: invoice.signType,
+  //     signRequestDate: invoice.signRequestDate,
+  //     signCompletionDate: invoice.signCompletionDate,
+  //     signRemark: invoice.signRemark,
+  //     stamping: {
+  //       status: invoice.stampStatus || "Not Processed",
+  //       method: invoice.stampType,
+  //       requested: invoice.stampRequestDate,
+  //       completed: invoice.stampCompletionDate,
+  //       remark: invoice.stampRemark,
+  //     },
+  //     signing: {
+  //       status: invoice.signStatus || "Not Processed",
+  //       requested: invoice.signRequestDate,
+  //       completed: invoice.signCompletionDate,
+  //       remark: invoice.signRemark,
+  //     },
+  //   }));
+  // };
 
   // Handlers
   const handleDetails = (record) => {
@@ -148,11 +152,10 @@ const EMeteraiManagement = () => {
     }
   };
 
-  // Handle stamping submission - UPDATED
+  // Handle stamping submission
   const handleStampingSubmit = async (submissionData) => {
     try {
       if (submissionData.stampingMethod === "e-stamping") {
-        // E-Meterai Digital - HARDCODED PAYLOAD
         const payload = {
           invoiceNumber: submissionData.invoiceNumber,
           jenisDoc: "invoice",
@@ -170,7 +173,6 @@ const EMeteraiManagement = () => {
 
         await dispatch(createStampingRequest(payload)).unwrap();
       } else if (submissionData.stampingMethod === "manual") {
-        // Manual stamping
         const payload = {
           invoiceNumber: submissionData.invoiceNumber,
           file: submissionData.file,
@@ -180,11 +182,8 @@ const EMeteraiManagement = () => {
         await dispatch(uploadManualStamping(payload)).unwrap();
       }
 
-      // Close modal and reset state
       setStampingModalVisible(false);
       setSelectedInvoice(null);
-
-      // Refresh invoice list
       fetchInvoices();
 
       message.success(
@@ -194,7 +193,6 @@ const EMeteraiManagement = () => {
       );
     } catch (error) {
       console.error("❌ Stamping Submission Error:", error);
-      // Error message already shown by slice
     }
   };
 
@@ -220,36 +218,33 @@ const EMeteraiManagement = () => {
         ).unwrap();
       }
 
-      // Close modal
       setSigningModalVisible(false);
       setSelectedInvoice(null);
-
-      // Manually refresh data after successful submission
       fetchInvoices();
     } catch (error) {
       console.error("❌ Signing Submission Error:", error);
-      // Error message already shown by slice
     }
   };
 
   // Handle pagination change
-  const handlePageChange = (newPage, newPageSize) => {
-    // If page size changes, reset to page 1
-    if (newPageSize !== pageSize) {
-      setPage(1);
-      setPageSize(newPageSize);
-    } else {
-      setPage(newPage);
-    }
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
   };
 
-  // Handle filter change
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-    setPage(1); // Reset to first page when filters change
+  const handleSizeChange = (current, size) => {
+    setPage(1);
+    setPageSize(size);
   };
 
-  const transformedData = getTransformedData();
+  // const transformedData = getTransformedData();
+
+  // Get columns with handlers
+  const columnDefinitions = getEMeteraiColumns({
+    onDetails: handleDetails,
+    onProcessStamping: handleProcessStamping,
+    onProcessSigning: handleProcessSigning,
+    onRetry: handleRetry,
+  });
 
   return (
     <LayoutMenu>
@@ -262,23 +257,24 @@ const EMeteraiManagement = () => {
           </div>
         }
       >
-        <div className="flex flex-col gap-4 w-full">
-          <InvoiceProcessingTable
-            dataSource={transformedData}
-            loading={loading}
-            pagination={{
-              current: page,
-              pageSize: pageSize,
-              total: pageInfo.totalElements,
-              onChange: handlePageChange,
-            }}
-            onDetails={handleDetails}
-            onProcessSigning={handleProcessSigning}
-            onRetry={handleRetry}
-            onProcessStamping={handleProcessStamping}
-            onFilterChange={handleFilterChange}
-          />
-        </div>
+        {/* Table with TableRBI */}
+        <TableRBI
+          idTable="emeterai-management-table"
+          dataSource={DATA_INVOICE.result || []}
+          columns={columnDefinitions}
+          loading={loading}
+          pageSize={pageSize}
+          current={page}
+          onChange={handlePageChange}
+          onSizeChanger={handleSizeChange}
+          totalData={pageInfo.totalElements || 0}
+          tableScrolled={{ x: 1500, y: 500 }}
+          useSelect={true}
+          usePagination={true}
+          columnDefinitions={columnDefinitions}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+        />
       </CardContainer>
 
       {/* Modals */}

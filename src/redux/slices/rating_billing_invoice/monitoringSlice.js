@@ -515,7 +515,6 @@ export const downloadPendingTransactions = createAsyncThunk(
   "DOWNLOAD_PENDING_TRANSACTIONS",
   async (_, thunkAPI) => {
     try {
-      console.log("Download Pending Transactions");
       return null;
     } catch (error) {
       const message =
@@ -534,7 +533,6 @@ export const downloadPendingApprovals = createAsyncThunk(
   "DOWNLOAD_PENDING_APPROVALS",
   async (_, thunkAPI) => {
     try {
-      console.log("Download Pending Approvals");
       return null;
     } catch (error) {
       const message =
@@ -553,7 +551,6 @@ export const downloadGapRatingBilling = createAsyncThunk(
   "DOWNLOAD_GAP_RATING_BILLING",
   async (_, thunkAPI) => {
     try {
-      console.log("Download Gap Rating Billing");
       return null;
     } catch (error) {
       const message =
@@ -572,7 +569,6 @@ export const downloadGapPraBillingMaster = createAsyncThunk(
   "DOWNLOAD_GAP_PRABIL_MASTER",
   async (_, thunkAPI) => {
     try {
-      console.log("Download Gap Pra-Billing Master");
       return null;
     } catch (error) {
       const message =

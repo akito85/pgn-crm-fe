@@ -25,7 +25,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
-  // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState("");
@@ -33,13 +32,11 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
 
-  const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
-    customerNumber: "left",
-    action: "right",
-  });
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no", "customerNumber"],
+    right: ["action"],
+  }));
 
-  // Fetch data
   useEffect(() => {
     if (tabHeader === "Prabilling Information" && data?.initCode) {
       dispatch(
@@ -143,15 +140,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             "input",
             search
           ),
-      },
-      {
-        key: "customerTypeId",
-        title: "CUSTOMER TYPE ID",
-        dataIndex: "customerTypeId",
-        width: 150,
-        align: "center",
-        sorter: true,
-        render: (text) => text || "-",
       },
       {
         key: "billingCycle",
@@ -429,59 +417,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         render: (text) => text || "-",
       },
       {
-        key: "avgCalorie",
-        title: "AVG CALORIE",
-        dataIndex: "avgCalorie",
-        width: 120,
-        align: "right",
-        sorter: true,
-        render: (text) => (text != null ? text.toFixed(4) : "-"),
-      },
-      {
-        key: "firstMeasDate",
-        title: "FIRST MEAS DATE",
-        dataIndex: "firstMeasDate",
-        width: 150,
-        align: "center",
-        sorter: true,
-        render: (text) => (text ? moment(text).format("DD MMM YYYY") : "-"),
-      },
-      {
-        key: "lastMeasDate",
-        title: "LAST MEAS DATE",
-        dataIndex: "lastMeasDate",
-        width: 150,
-        align: "center",
-        sorter: true,
-        render: (text) => (text ? moment(text).format("DD MMM YYYY") : "-"),
-      },
-      {
-        key: "totalVol27",
-        title: "TOTAL VOL 27",
-        dataIndex: "totalVol27",
-        width: 150,
-        align: "right",
-        sorter: true,
-        render: (text) => (text != null ? text.toLocaleString() : "-"),
-      },
-      {
-        key: "totalVol60",
-        title: "TOTAL VOL 60",
-        dataIndex: "totalVol60",
-        width: 150,
-        align: "right",
-        sorter: true,
-        render: (text) => (text != null ? text.toLocaleString() : "-"),
-      },
-      {
-        key: "mpricingCode",
-        title: "MPRICING CODE",
-        dataIndex: "mpricingCode",
-        width: 150,
-        sorter: true,
-        render: (text) => text || "-",
-      },
-      {
         key: "action",
         title: "ACTION",
         width: 80,
@@ -517,11 +452,9 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
     return columnsWithKeys;
   }, [baseResultColumns]);
 
-
   const processedColumns = useMemo(() => {
     return applyFixedColumns(allColumns, fixedColumns);
   }, [allColumns, fixedColumns]);
-
 
   const columnDefinitions = useMemo(() => {
     return allColumns.map((col) => ({
@@ -559,7 +492,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
     }
   };
 
-  // Extract data dengan struktur baru
   const resultData = detail_prabilling_result?.result || [];
   const pageInfo = detail_prabilling_result?.page || {};
 
@@ -613,18 +545,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           </div>
         }
       >
-        <div className={"w-full flex justify-between items-center my-2"}>
-          <ButtonComponent
-            type={"submit"}
-            border={false}
-            icon={<SVGIcon name={"IconButtonDownload"} width={24} />}
-            onClick={handleDownload}
-            disabled={resultData.length === 0}
-          >
-            Download
-          </ButtonComponent>
-        </div>
-
         <div className="my-5">
           <TableRBI
             dataSource={resultData}
@@ -636,6 +556,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             totalData={pageInfo?.totalElements || 0}
             tableScrolled={{ x: 5500, y: 600 }}
             onSort={onSort}
+            handleDownload={handleDownload}
             columnDefinitions={columnDefinitions}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}

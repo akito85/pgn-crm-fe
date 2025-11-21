@@ -12,18 +12,13 @@ import TableRBI from "../../../../../components/TableRBI";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
-  // Selector
   const { data_serviceAgreement, loading } = useSelector((state) => state.rating);
 
-  // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data_serviceAgreement?.result;
-  
-  // Ref untuk detail section
   const saDetailRef = useRef(null);
 
-  // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -34,12 +29,11 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
   const [ratingSaId, setRatingSaId] = useState();
   const [pageDetail, setPageDetail] = useState(false);
 
-  const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
-    action: "right",
-  });
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["action"],
+  }));
 
-  // Use Effect
   useEffect(() => {
     dispatch(
       getAllServiceAgreementPaginate({
@@ -64,7 +58,6 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
     }
   }, [pageDetail, ratingSaId]);
 
-  // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -80,13 +73,11 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
     });
   };
 
-  // Handle Change Page
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
   };
 
-  // Sort Table
   const onSortApi = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined
@@ -114,19 +105,16 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
     },
   ];
 
-  // change tabs
   const onChangeTab = ({ target: { value } }) => {
     setTabSection(value);
   };
 
-  // Handle Detail
   const handleDetail = (record) => {
     setPageDetail(true);
     setRatingSaId(record.ratingSaId);
     setTabSection("Detail");
   };
 
-  // render SA Detail Section
   const renderServiceAgreementDetail = (tabName) => {
     switch (tabName) {
       case "Detail":
@@ -217,7 +205,6 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
         </div>
       </CardContainer>
 
-      {/* Detail Service Agreement */}
       {pageDetail === true ? (
         <div ref={saDetailRef} className="pt-[30px]">
           <Radio.Group

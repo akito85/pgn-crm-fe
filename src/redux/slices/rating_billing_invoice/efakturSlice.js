@@ -288,7 +288,6 @@ export const generateEFakturWithAttachments = createAsyncThunk(
               message: uploadResponse?.message || "Success",
             });
           } catch (uploadError) {
-            console.error("Upload error:", uploadError);
             uploadResults.push({
               index: i + 1,
               fileName: attachment.file?.name || "Unknown file",

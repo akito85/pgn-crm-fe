@@ -203,6 +203,78 @@ export const columnsCalculation = (
     // },
   },
   {
+    title: "Created Date",
+    dataIndex: "createdDate",
+    align: "left",
+    sorter: true,
+    // ...getColumnSearchPropsPaging(
+    //   "message",
+    //   searchInput,
+    //   searchedColumn,
+    //   searchText,
+    //   handleSearch,
+    //   true
+    // ),
+    ellipsis: {
+      showTitle: false,
+    },
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "createdDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "createdDate",
+        hasValue(search["createdDate"]),
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "Updated Date",
+    dataIndex: "updatedDate",
+    align: "left",
+    sorter: true,
+    // ...getColumnSearchPropsPaging(
+    //   "message",
+    //   searchInput,
+    //   searchedColumn,
+    //   searchText,
+    //   handleSearch,
+    //   true
+    // ),
+    ellipsis: {
+      showTitle: false,
+    },
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "updatedDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "updatedDate",
+        hasValue(search["updatedDate"]),
+        searchText,
+        text,
+        true,
+        "input",
+        search
+      ),
+  },
+  {
     title: "IS TRY",
     dataIndex: "isTry",
     align: "center",

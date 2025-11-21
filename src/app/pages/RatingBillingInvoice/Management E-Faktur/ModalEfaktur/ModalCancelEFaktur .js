@@ -144,7 +144,7 @@ const ModalCancelEFaktur = ({
           </div>
 
           {/* Informasi Pembatalan */}
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="mb-6 p-4 border border-red-200 rounded-lg">
             <h3 className="text-base font-semibold text-red-800 mb-4">
               Informasi Pembatalan
             </h3>
@@ -189,7 +189,7 @@ const ModalCancelEFaktur = ({
           </div>
 
           {/* Critical Warning */}
-          <div className="p-4 bg-red-50 border-2 border-red-300 rounded-lg">
+          <div className="p-4 border-2 border-red-300 rounded-lg">
             <div className="flex gap-2">
               <svg
                 className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"
@@ -202,18 +202,6 @@ const ModalCancelEFaktur = ({
                   clipRule="evenodd"
                 />
               </svg>
-              <div>
-                <p className="text-sm font-semibold text-red-800 mb-1">
-                  PERHATIAN PENTING:
-                </p>
-                <ul className="text-sm text-red-700 space-y-1 list-disc list-inside">
-                  <li>E-Faktur akan dibatalkan secara permanen dan tidak dapat dikembalikan</li>
-                  <li>Status E-Faktur akan berubah menjadi "CANCELLED"</li>
-                  <li>E-Faktur yang dibatalkan tidak dapat digunakan untuk pelaporan pajak</li>
-                  <li>Proses pembatalan bersifat final dan tidak dapat di-undo</li>
-                  <li>Pastikan alasan pembatalan sudah benar dan lengkap</li>
-                </ul>
-              </div>
             </div>
           </div>
         </Form>

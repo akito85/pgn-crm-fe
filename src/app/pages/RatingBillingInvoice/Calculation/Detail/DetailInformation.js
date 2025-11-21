@@ -627,6 +627,9 @@ const DetailInformation = ({ data, tabHeader }) => {
             <DetailText label={"Generate Date"}>
               {data?.generateDate}
             </DetailText>
+            <DetailText label={"Compeletion Date"}>
+              21 Nov 2025 17:49:31
+            </DetailText>
             <DetailText label={"Status"}>
               {renderStatus(data?.status)}
             </DetailText>

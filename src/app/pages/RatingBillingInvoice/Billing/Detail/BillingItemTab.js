@@ -12,18 +12,15 @@ import { columnsRatingResult } from "./Table/TableRatingResult";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
-  // Selector
   const { data_billingItem, data_ratingResult } = useSelector(
     (state) => state.billing
   );
 
-  // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSourceBI = data_billingItem?.result;
   const dataSourceRR = data_ratingResult?.result;
 
-  // State for Rating Result Table
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -31,7 +28,6 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
 
-  // State for Billing Item Table
   const [pageBI, setPageBI] = useState(1);
   const [pageSizeBI, setPageSizeBI] = useState(10);
   const [searchedColumnBI, setSearchedColumnBI] = useState("");
@@ -41,17 +37,16 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
 
   const [tabHeader, setTabHeader] = useState("Rating Result");
 
-  // ✅ State untuk fix column Billing Item (tanpa localStorage)
-  const [fixedColumnsBI, setFixedColumnsBI] = useState({
-    no: "left",
-  });
+  const [fixedColumnsBI, setFixedColumnsBI] = useState(() => ({
+    left: ["no"],
+    right: [],
+  }));
 
-  // ✅ State untuk fix column Rating Result (tanpa localStorage)
-  const [fixedColumnsRR, setFixedColumnsRR] = useState({
-    no: "left",
-  });
+  const [fixedColumnsRR, setFixedColumnsRR] = useState(() => ({
+    left: ["no"],
+    right: [],
+  }));
 
-  // Use Effect for Rating Result
   useEffect(() => {
     dispatch(
       getAllRatingResultPaginate({
@@ -64,7 +59,6 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     );
   }, [dispatch, ratingCodeId, search, page, pageSize, sort]);
 
-  // Use Effect for Billing Item
   useEffect(() => {
     dispatch(
       getAllBillingItemPaginate({
@@ -77,7 +71,6 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     );
   }, [dispatch, billingCodeId, searchBI, pageBI, pageSizeBI, sortBI]);
 
-  // Function Search API for Billing Item
   const handleSearchBI = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchTextBI(selectedKeys[0]);
@@ -93,7 +86,6 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     });
   };
 
-  // Function Search API for Rating Result
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -109,21 +101,18 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     });
   };
 
-  // Handle Change Page for Rating Result
   const handleChangePage = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
     setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
-  // Handle Change Page for Billing Item
   const handleChangePageBI = (pageChange, pageSizeChange) => {
     const tempPage = pageSizeBI !== pageSizeChange ? 1 : pageChange;
     setPageBI(tempPage);
     setPageSizeBI(pageSizeChange);
   };
 
-  // Sort Table for Billing Item
   const onSortBI = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined
@@ -132,7 +121,6 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     setSortBI(dataSort);
   };
 
-  // Sort Table for Rating Result
   const onSort = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined
@@ -141,7 +129,6 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     setSort(dataSort);
   };
 
-  // ✅ Base columns for Billing Item
   const baseColumnsBI = useMemo(() => {
     return columnsBillingItem(
       pageBI,
@@ -154,7 +141,6 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     );
   }, [pageBI, pageSizeBI, searchedColumnBI, searchTextBI, searchBI]);
 
-  // ✅ Columns with keys for Billing Item
   const allColumnsBI = useMemo(() => {
     return baseColumnsBI.map((col) => ({
       ...col,
@@ -162,12 +148,10 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     }));
   }, [baseColumnsBI]);
 
-  // ✅ Apply fixed columns for Billing Item
   const processedColumnsBI = useMemo(() => {
     return applyFixedColumns(allColumnsBI, fixedColumnsBI);
   }, [allColumnsBI, fixedColumnsBI]);
 
-  // ✅ Column definitions for dropdown - Billing Item
   const columnDefinitionsBI = useMemo(() => {
     return allColumnsBI.map((col) => ({
       key: col.key || col.dataIndex || col.title,
@@ -175,7 +159,6 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     }));
   }, [allColumnsBI]);
 
-  // ✅ Base columns for Rating Result
   const baseColumnsRR = useMemo(() => {
     return columnsRatingResult(
       page,
@@ -188,7 +171,6 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     );
   }, [page, pageSize, searchedColumn, searchText, search]);
 
-  // ✅ Columns with keys for Rating Result
   const allColumnsRR = useMemo(() => {
     return baseColumnsRR.map((col) => ({
       ...col,
@@ -196,12 +178,10 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     }));
   }, [baseColumnsRR]);
 
-  // ✅ Apply fixed columns for Rating Result
   const processedColumnsRR = useMemo(() => {
     return applyFixedColumns(allColumnsRR, fixedColumnsRR);
   }, [allColumnsRR, fixedColumnsRR]);
 
-  // ✅ Column definitions for dropdown - Rating Result
   const columnDefinitionsRR = useMemo(() => {
     return allColumnsRR.map((col) => ({
       key: col.key || col.dataIndex || col.title,
@@ -209,7 +189,6 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     }));
   }, [allColumnsRR]);
 
-  // data tabs
   const dataTabs = [
     {
       label: "Rating Result",
@@ -222,12 +201,10 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     },
   ];
 
-  // change tabs
   const changeTabHeader = ({ target: { value } }) => {
     setTabHeader(value);
   };
 
-  // render tabs item
   const renderLayout = (valueTab) => {
     switch (valueTab) {
       case "Rating Result":

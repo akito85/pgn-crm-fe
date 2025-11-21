@@ -136,6 +136,12 @@ const PaymentTab = ({ billingCodeId, calculationCodeId }) => {
           <DetailText label={"Total Payment Eqv USD"}>
             {currencyFormatting(data_Payment?.totalEqvUsd, "usd")}
           </DetailText>
+          <DetailText label={"Equivaled USD"}>
+            1000 (hardcode)
+          </DetailText>
+          <DetailText label={"Equivaled USD"}>
+            15000 (hardcode)
+          </DetailText>
         </div>
       </BaseContainer>
 

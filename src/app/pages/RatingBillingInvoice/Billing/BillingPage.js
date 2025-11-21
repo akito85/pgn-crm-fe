@@ -15,6 +15,7 @@ import {
   getApprovalHistory,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
 import { columnsBilling } from "./Table/TableViewBilling";
+import { columnsAllBilling } from "./Table/TableViewAllBilling";
 import BillingDetail from "./Detail/BillingDetail";
 import ModalRequestApproval from "./ModalRequestApproval";
 import ModalApprovalBilling from "./ModalApprovalBilling";
@@ -25,17 +26,15 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
 
 const BillingPage = () => {
-  // Selector
   const { data, loading, data_approval_history } = useSelector(
     (state) => state.billing
   );
 
-  // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data?.result;
+  const detailRef = useRef(null);
 
-  // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -54,14 +53,25 @@ const BillingPage = () => {
   const [saNumberId, setSANumberId] = useState("");
   const [calculationCodeId, setCalculationCodeId] = useState("");
   const [accountNumberId, setAccountNumberId] = useState("");
+  const [activeRowKey, setActiveRowKey] = useState(null);
 
-  const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
-    statusApproval: "right",
-    action: "right",
-  });
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["statusApproval", "action"],
+  }));
 
-  // Use Effect
+  useEffect(() => {
+    if (pageDetail && activeRowKey && detailRef.current) {
+      setTimeout(() => {
+        detailRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "nearest",
+        });
+      }, 100);
+    }
+  }, [activeRowKey, pageDetail]);
+
   useEffect(() => {
     dispatch(
       getAllBillingPaginate({
@@ -85,7 +95,6 @@ const BillingPage = () => {
     }
   }, [data_approval_history]);
 
-  // Breadcrumbs
   const routes = [
     {
       path: "",
@@ -97,7 +106,6 @@ const BillingPage = () => {
     },
   ];
 
-  // Value Tab
   const tabBilling = [
     {
       label: "Billing Gas",
@@ -111,11 +119,9 @@ const BillingPage = () => {
     {
       label: "All",
       value: "All",
-      disabled: true,
     },
   ];
 
-  // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -131,14 +137,12 @@ const BillingPage = () => {
     });
   };
 
-  // Handle Change Page
   const handleChangePage = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
     setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
-  // Sort Table
   const onSort = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined
@@ -147,7 +151,6 @@ const BillingPage = () => {
     setSort(dataSort);
   };
 
-  // Handle Download
   const handleDownload = () => {
     let tempSearch = "";
     for (const dataIndex in search) {
@@ -169,28 +172,39 @@ const BillingPage = () => {
     );
   };
 
-  // Handle Detail
   const handleDetail = (record) => {
-    setPageDetail(true);
-    setBillingCode(record.billingCode);
-    setRatingCode(record.ratingCode);
-    setAccountNumberId(record.accountNumber);
-    setSANumberId(record.saNumber);
-    setCalculationCodeId(record.calculationCode);
+    const recordKey = record.billingCode || record.invoiceNumber;
+
+    if (activeRowKey === recordKey && pageDetail) {
+      setPageDetail(false);
+      setActiveRowKey(null);
+      setBillingCode("");
+      setRatingCode("");
+      setAccountNumberId("");
+      setSANumberId("");
+      setCalculationCodeId("");
+    } else {
+      setBillingCode(recordKey);
+      setRatingCode(record.ratingCode);
+      setAccountNumberId(record.accountNumber);
+      setSANumberId(record.saNumber);
+      setCalculationCodeId(record.calculationCode);
+      setActiveRowKey(recordKey);
+      setPageDetail(true);
+    }
   };
 
-  // Handle Approval History
   const handleApprovalHistory = (record) => {
-    dispatch(getApprovalHistory(record.billingCode));
+    dispatch(getApprovalHistory(record.billingCode || record.invoiceNumber));
     setModalApprovalHistory(true);
   };
 
-  // Handle Value Tab
   const onChangeTab = ({ target: { value } }) => {
     setValueTab(value);
+    setSearch({});
+    setPage(1);
   };
 
-  // Handle Refresh
   const handleRefresh = () => {
     let tempSearch = "";
     for (const dataIndex in search) {
@@ -211,18 +225,18 @@ const BillingPage = () => {
   };
 
   const itemGrantAccess = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={handleDownload}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
+    // {
+    //   action: "Download",
+    //   render: (
+    //     <ButtonComponent
+    //       icon={<SVGIcon name="IconButtonDownload" width={24} />}
+    //       type="submit"
+    //       onClick={handleDownload}
+    //     >
+    //       Download List
+    //     </ButtonComponent>
+    //   ),
+    // },
     {
       action: "Approval",
       render: (
@@ -247,8 +261,6 @@ const BillingPage = () => {
         </ButtonComponent>
       ),
     },
-
-    // Column Action Table
     {
       action: "View",
       type: "table",
@@ -292,6 +304,17 @@ const BillingPage = () => {
   );
 
   const baseColumns = useMemo(() => {
+    if (valueTab === "All") {
+      return columnsAllBilling(
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        search
+      );
+    }
     return columnsBilling(
       page,
       pageSize,
@@ -301,7 +324,15 @@ const BillingPage = () => {
       handleSearch,
       search
     );
-  }, [page, pageSize, searchInput, searchedColumn, searchText, search]);
+  }, [
+    valueTab,
+    page,
+    pageSize,
+    searchInput,
+    searchedColumn,
+    searchText,
+    search,
+  ]);
 
   const allColumns = useMemo(() => {
     const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
@@ -322,19 +353,60 @@ const BillingPage = () => {
     }));
   }, [allColumns]);
 
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSource?.map((item) => ({
+      ...item,
+      key: item.billingCode || item.invoiceNumber,
+    }));
+  }, [dataSource]);
+
+  const dataSourceForTab = useMemo(() => {
+    if (valueTab === "All") {
+      return [
+        {
+          key: "INV-2024-001",
+          invoiceNumber: "INV-2024-001",
+          billingType: "Gas",
+          quantity: 1500,
+          totalAmountIdr: 75000000,
+          transactionDate: "2024-01-15",
+          remark: "Regular monthly billing for gas supply",
+        },
+        {
+          key: "INV-2024-002",
+          invoiceNumber: "INV-2024-002",
+          billingType: "Non Gas",
+          quantity: 500,
+          totalAmountIdr: 25000000,
+          transactionDate: "2024-01-20",
+          remark: "Additional service charges",
+        },
+        {
+          key: "INV-2024-003",
+          invoiceNumber: "INV-2024-003",
+          billingType: "Gas",
+          quantity: 2000,
+          totalAmountIdr: 100000000,
+          transactionDate: "2024-02-01",
+          remark: "Peak season billing",
+        },
+      ];
+    }
+    return dataSourceWithKeys;
+  }, [valueTab, dataSourceWithKeys]);
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <div className="w-full flex justify-end gap-[20px]">
-          <Toolbar items={itemGrantAccess} />
-        </div>
-
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">Billing List</p>
+              <div className="mt-[15px] flex gap-[20px]">
+                <Toolbar items={itemGrantAccess} />
+              </div>
             </div>
           }
           type="tabs"
@@ -351,35 +423,84 @@ const BillingPage = () => {
         >
           <div className="my-5">
             <TableRBI
-              dataSource={dataSource}
+              dataSource={dataSourceForTab}
               columns={processedColumns}
               current={page}
               pageSize={pageSize}
               onChange={handleChangePage}
               onSizeChanger={handleChangePage}
-              totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ x: 16000, y: 525 }}
+              totalData={
+                valueTab === "All" ? 3 : data?.page?.totalElements || 0
+              }
+              tableScrolled={{ x: valueTab === "All" ? 1500 : 3500, y: 525 }}
               onSort={onSort}
+              handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={loading}
+              // onRow={(record) => ({
+              //   onClick: () => handleDetail(record),
+              //   style: {
+              //     cursor: 'pointer',
+              //     backgroundColor: activeRowKey === (record.billingCode || record.invoiceNumber)
+              //       ? '#bae7ff'
+              //       : 'transparent',
+              //     transition: 'background-color 0.2s ease',
+              //   },
+              //   onMouseEnter: (e) => {
+              //     if (activeRowKey !== (record.billingCode || record.invoiceNumber)) {
+              //       e.currentTarget.style.backgroundColor = '#f5f5f5';
+              //     }
+              //   },
+              //   onMouseLeave: (e) => {
+              //     if (activeRowKey !== (record.billingCode || record.invoiceNumber)) {
+              //       e.currentTarget.style.backgroundColor = 'transparent';
+              //     }
+              //   },
+              // })}
             />
           </div>
         </CardContainer>
 
-        {/* Detail Billing */}
-        {pageDetail === true ? (
-          <BillingDetail
-            billingCodeId={billingCode}
-            ratingCodeId={ratingCode}
-            saNumberId={saNumberId}
-            accountNumberId={accountNumberId}
-            calculationCodeId={calculationCodeId}
-          />
-        ) : null}
+        {pageDetail && (
+          <div
+            ref={detailRef}
+            className="mt-6 border-t-4 border-blue-500 pt-4 bg-blue-50/30 rounded-lg p-4"
+          >
+            <div className="flex justify-between items-center mb-4 pb-3 border-b border-blue-200">
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-lg text-blue-700">
+                  Billing Detail: {billingCode}
+                </h3>
+              </div>
+              <button
+                onClick={() => {
+                  setPageDetail(false);
+                  setActiveRowKey(null);
+                  setBillingCode("");
+                  setRatingCode("");
+                  setAccountNumberId("");
+                  setSANumberId("");
+                  setCalculationCodeId("");
+                }}
+                className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+                title="Close Detail"
+              >
+                ✕
+              </button>
+            </div>
 
-        {/* Modal Approval History */}
+            <BillingDetail
+              billingCodeId={billingCode}
+              ratingCodeId={ratingCode}
+              saNumberId={saNumberId}
+              accountNumberId={accountNumberId}
+              calculationCodeId={calculationCodeId}
+            />
+          </div>
+        )}
+
         <ModalHistory
           isOpen={modalApprovalHistory && dataApprovalHistory}
           handleClose={() => setModalApprovalHistory(false)}
@@ -389,7 +510,6 @@ const BillingPage = () => {
           dataHistory={dataApprovalHistory?.dataHistory}
         />
 
-        {/* Modal Request Approval */}
         <ModalRequestApproval
           isOpen={modalRequest}
           handleCancel={() => setModalRequest(false)}
@@ -397,7 +517,6 @@ const BillingPage = () => {
           handleOpenModal={() => setModalRequest(true)}
         />
 
-        {/* Modal Approval */}
         <ModalApprovalBilling
           isOpen={modalApproval}
           handleCancel={() => setModalApproval(false)}

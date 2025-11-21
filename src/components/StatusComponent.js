@@ -43,6 +43,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "not paid":
       case "failed billing":
       case "fail":
+      case "not_paid":
         bgColor = "status-inactive";
         tColor = "text-white";
         break;
@@ -50,12 +51,16 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "waiting":
       case "waiting approval":
       case "waiting_approval":
-      case "in progress":
-      case "inprogress":
       case "partial payment":
       case "waiting to release":
         bgColor = "status-waiting";
         tColor = "text-yellow-700";
+        break;
+
+        case "in progress":
+        case "INPROGRESS":
+        bgColor = "bg-yellow-500";
+        tColor = "text-white";
         break;
 
       case "draft":
@@ -65,8 +70,8 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
 
       case "approved":
       case "main":
-        bgColor = "status-approved";
-        tColor = "text-green-700";
+        bgColor = "status-active";
+        tColor = "text-white";
         break;
 
       case "expire":
@@ -180,12 +185,19 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "completed":
       case "success":
       case "sent":
+      case "approved":
+      case "paid":
         return <CheckCircleFilled style={{ fontSize: "15px" }} />;
       case "generating":
       case "in progress":
       case "inprogress":
+      case "INPROGRESS":
+      case "waiting approval":
+      case "waiting_approval":
         return <Loading3QuartersOutlined style={{ fontSize: "15px" }} />;
       case "failed":
+      case "not paid":
+      case "not_paid":
         return <CloseCircleFilled style={{ fontSize: "15px" }} />;
       case "scheduled":
         return <ClockCircleFilled style={{ fontSize: "15px" }} />;

@@ -457,18 +457,18 @@ const ViewFaktur = () => {
 
   // Item Grant Access untuk action columns
   const itemGrantAccess = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={handleDownload}
-        >
-          Export Data
-        </ButtonComponent>
-      ),
-    },
+    // {
+    //   action: "Download",
+    //   render: (
+    //     <ButtonComponent
+    //       icon={<SVGIcon name="IconButtonDownload" width={24} />}
+    //       type="submit"
+    //       onClick={handleDownload}
+    //     >
+    //       Export Data
+    //     </ButtonComponent>
+    //   ),
+    // },
     {
       action: "Approval",
       render: (
@@ -756,13 +756,6 @@ const ViewFaktur = () => {
               <p className="mt-[15px] font-bold">Manajemen E-Faktur</p>
               <div className="flex gap-2">
                 <ButtonComponent
-                  icon={<SVGIcon name="IconButtonDownload" width={24} />}
-                  type="submit"
-                  onClick={handleDownload}
-                >
-                  Export Data
-                </ButtonComponent>
-                <ButtonComponent
                   icon={
                     <SVGIcon
                       name="IconRequestApproval"
@@ -779,88 +772,6 @@ const ViewFaktur = () => {
             </div>
           }
         >
-          {/* Filter Section */}
-          <Row gutter={[16, 26]} align="bottom" className="mb-6">
-            <Col xs={24} sm={12} md={7} lg={7}>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Cari:
-                </label>
-                <Input
-                  placeholder="Billing code atau customer"
-                  value={filterSearch}
-                  onChange={(e) => setFilterSearch(e.target.value)}
-                  prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
-                  allowClear
-                  onPressEnter={handleFilter}
-                  size="middle"
-                />
-              </div>
-            </Col>
-
-            <Col xs={24} sm={12} md={6} lg={6}>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Status E-Faktur:
-                </label>
-                <Select
-                  placeholder="Pilih Status"
-                  value={filterStatus || undefined}
-                  onChange={(value) => setFilterStatus(value)}
-                  allowClear
-                  style={{ width: "100%" }}
-                  size="middle"
-                >
-                  <Option value="">Semua Status</Option>
-                  <Option value="AWAITING_APPROVAL">AWAITING APPROVAL</Option>
-                  <Option value="APPROVED">APPROVED</Option>
-                  <Option value="PROCESSING">PROCESSING</Option>
-                  <Option value="FAILED">FAILED</Option>
-                  <Option value="REJECTED">REJECTED</Option>
-                  <Option value="SUCCESS_UPLOAD">SUCCESS UPLOAD</Option>
-                  <Option value="NOT_GENERATED">NOT GENERATED</Option>
-                </Select>
-              </div>
-            </Col>
-
-            <Col xs={24} sm={12} md={7} lg={7}>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Dari Tgl - Sampai Tgl:
-                </label>
-                <RangePicker
-                  value={filterDateRange}
-                  onChange={(dates) => setFilterDateRange(dates)}
-                  format="DD-MM-YYYY"
-                  placeholder={["Dari Tanggal", "Sampai Tanggal"]}
-                  style={{ width: "100%" }}
-                  separator={<span style={{ color: "#bfbfbf" }}>s/d</span>}
-                  size="middle"
-                />
-              </div>
-            </Col>
-
-            <Col xs={24} sm={12} md={4} lg={4}>
-              <div className="flex gap-2">
-                <Button
-                  type="primary"
-                  onClick={handleFilter}
-                  style={{ flex: 1, height: "32px" }}
-                  size="middle"
-                >
-                  Cari
-                </Button>
-                <Button
-                  onClick={handleResetFilter}
-                  style={{ flex: 1, height: "32px" }}
-                  size="middle"
-                >
-                  Reset
-                </Button>
-              </div>
-            </Col>
-          </Row>
-
           {/* Table Section */}
           <div className="w-full">
             <TableRBI

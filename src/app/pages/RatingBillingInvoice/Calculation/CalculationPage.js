@@ -28,16 +28,13 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
 
 const CalculationPage = () => {
-  // Selector
   const { data: data_calculation, loading } = useSelector(
     (state) => state.rbi_calculation
   );
 
-  // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
-  // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState("");
@@ -46,13 +43,11 @@ const CalculationPage = () => {
   const [searchText, setSearchText] = useState("");
   const [tabHeader, setTabHeader] = useState("Calculation List");
 
-  const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
-    status: "right",
-    action: "right",
-  });
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status", "action"],
+  }));
 
-  // use effect
   useEffect(() => {
     if (tabHeader === "Calculation List") {
       dispatch(
@@ -142,15 +137,15 @@ const CalculationPage = () => {
           ),
       },
       {
-        key: "customer",
-        title: "Σ CUSTOMER",
-        dataIndex: "customer",
+        key: "progress",
+        title: "Σ PROGRESS",
+        dataIndex: "progress",
         align: "right",
         sorter: true,
-        filteredValue: [search?.customer] || null,
+        filteredValue: [search?.progress] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "customer",
+          "progress",
           searchInput,
           searchedColumn,
           searchText,
@@ -159,8 +154,8 @@ const CalculationPage = () => {
         ),
         render: (text) =>
           renderColumn(
-            "customer",
-            hasValue(search["customer"]),
+            "progress",
+            hasValue(search["progress"]),
             searchText,
             text,
             false,
@@ -196,33 +191,6 @@ const CalculationPage = () => {
           ),
       },
       {
-        key: "progress",
-        title: "Σ PROGRESS",
-        dataIndex: "progress",
-        align: "right",
-        sorter: true,
-        filteredValue: [search?.progress] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "progress",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "progress",
-            hasValue(search["progress"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
         key: "failed",
         title: "Σ FAILED",
         dataIndex: "failed",
@@ -242,6 +210,33 @@ const CalculationPage = () => {
           renderColumn(
             "failed",
             hasValue(search["failed"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "customer",
+        title: "Σ CUSTOMER",
+        dataIndex: "customer",
+        align: "right",
+        sorter: true,
+        filteredValue: [search?.customer] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "customer",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "customer",
+            hasValue(search["customer"]),
             searchText,
             text,
             false,
@@ -667,7 +662,6 @@ const CalculationPage = () => {
     [page, pageSize, search, searchText, searchedColumn]
   );
 
-  // column history
   const baseColumnHistory = useMemo(
     () => [
       {
@@ -1150,7 +1144,7 @@ const CalculationPage = () => {
         title: "STATUS",
         dataIndex: "status",
         align: "center",
-        width: 150,
+        width: 80,
         sorter: true,
         filteredValue: [search?.status] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -1178,7 +1172,6 @@ const CalculationPage = () => {
     [page, pageSize, search, searchText, searchedColumn]
   );
 
-  // onSort
   const onSort = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined
@@ -1226,13 +1219,11 @@ const CalculationPage = () => {
     setPageSize(pageSizeChange);
   };
 
-  // data tabs
   const tabs = [
     { value: "Calculation List" },
     { value: "Calculation History" },
   ];
 
-  // onchange tabs
   const changeTab = (e) => {
     setTabHeader((prevState) => {
       const tempTab = e.target.value;
@@ -1250,19 +1241,6 @@ const CalculationPage = () => {
 
   const itemGrantAccess = [
     {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          type={"submit"}
-          border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          onClick={handleDownload}
-        >
-          Download
-        </ButtonComponent>
-      ),
-    },
-    {
       action: "Create",
       render: (
         <NavLink to={RBI_ROUTES.CALCULATION_CREATE}>
@@ -1276,8 +1254,6 @@ const CalculationPage = () => {
         </NavLink>
       ),
     },
-
-    // Column Action Table
     {
       action: "View",
       type: "table",
@@ -1331,14 +1307,13 @@ const CalculationPage = () => {
       <LayoutMenu>
         <BreadCrumb routes={routes} />
 
-        <div className="w-full justify-end flex gap-2">
-          <Toolbar items={itemGrantAccess} />
-        </div>
-
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">CALCULATION JOB LIST</p>
+              <div className="mt-[15px] flex gap-[20px]">
+                <Toolbar items={itemGrantAccess} />
+              </div>
             </div>
           }
         >
@@ -1356,9 +1331,10 @@ const CalculationPage = () => {
               onChange={handleChangePage}
               onSizeChanger={handleChangePage}
               totalData={data_calculation?.page?.totalElements || 0}
-              tableScrolled={{ x: 6000, y: 525 }}
+              tableScrolled={{ x: 4000, y: 525 }}
               onSort={onSort}
               columnDefinitions={columnDefinitions}
+              handleDownload={handleDownload}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={loading}
@@ -1370,4 +1346,4 @@ const CalculationPage = () => {
   );
 };
 
-export default CalculationPage
+export default CalculationPage;
