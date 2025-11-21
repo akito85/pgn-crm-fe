@@ -7,15 +7,12 @@ import { columnsUsage } from "./Table/TableUsage";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const UsageSection = ({ ratingCodeId, calculationCode }) => {
-  // Selector
   const { data_usageSA } = useSelector((state) => state.rating);
 
-  // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data_usageSA?.result;
 
-  // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -23,11 +20,11 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
 
-  const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
-  });
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: [],
+  }));
 
-  // Use Effect
   useEffect(() => {
     dispatch(
       getAllUsageServiceAgreementPaginate({
@@ -40,7 +37,6 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
     );
   }, [dispatch, ratingCodeId, search, page, pageSize, sort]);
 
-  // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -56,14 +52,12 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
     });
   };
 
-  // Handle Change Page
   const handleChangePage = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
     setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
-  // Sort Table
   const onSort = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined

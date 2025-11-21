@@ -19,15 +19,12 @@ import { useColumnActionPermission } from "../../../../components/ColumnActionPe
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const RatingPage = () => {
-  // Selector
   const { data, loading } = useSelector((state) => state.rating);
 
-  // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data?.result;
 
-  // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -40,25 +37,27 @@ const RatingPage = () => {
   const [ratingCode, setRatingCode] = useState("");
   const [calculationCode, setCalculationCode] = useState("");
   const [saNumberId, setSANumberId] = useState("");
+  const [activeRowKey, setActiveRowKey] = useState(null);
 
-  const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
-    action: "right",
-  });
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["action"],
+  }));
 
-   const detailRef = useRef(null);
+  const detailRef = useRef(null);
 
-   useEffect(() => {
-    if (pageDetail && detailRef.current) {
-      // Smooth scroll ke detail section
-      detailRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
-      });
+  useEffect(() => {
+    if (pageDetail && activeRowKey && detailRef.current) {
+      setTimeout(() => {
+        detailRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start',
+          inline: 'nearest'
+        });
+      }, 100);
     }
-  }, [pageDetail]);
+  }, [activeRowKey, pageDetail]);
 
-  // Use Effect
   useEffect(() => {
     dispatch(
       getListRatingGasPaginate({
@@ -70,7 +69,6 @@ const RatingPage = () => {
     );
   }, [search, page, pageSize, sort, dispatch]);
 
-  // Value Tab
   const tabRating = [
     {
       label: "Rating Gas",
@@ -83,7 +81,6 @@ const RatingPage = () => {
     },
   ];
 
-  // Breadcrumbs
   const routes = [
     {
       path: "",
@@ -95,7 +92,6 @@ const RatingPage = () => {
     },
   ];
 
-  // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -111,13 +107,11 @@ const RatingPage = () => {
     });
   };
 
-  // Handle Change Page
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
   };
 
-  // Sort Table
   const onSortApi = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined
@@ -126,20 +120,28 @@ const RatingPage = () => {
     setSort(dataSort);
   };
 
-  // Handle Value Tab
   const onChangeTab = ({ target: { value } }) => {
     setValueTab(value);
   };
 
-  // Handle Detail
   const handleDetail = (record) => {
-    setPageDetail(true);
-    setRatingCode(record.ratingCode);
-    setCalculationCode(record.calculationCode);
-    setSANumberId(record.saNumber);
+    const recordKey = record.ratingCode;
+    
+    if (activeRowKey === recordKey && pageDetail) {
+      setPageDetail(false);
+      setActiveRowKey(null);
+      setRatingCode("");
+      setCalculationCode("");
+      setSANumberId("");
+    } else {
+      setRatingCode(record.ratingCode);
+      setCalculationCode(record.calculationCode);
+      setSANumberId(record.saNumber);
+      setActiveRowKey(recordKey);
+      setPageDetail(true);
+    }
   };
 
-  // Handle Download
   const handleDownload = () => {
     dispatch(
       downloadRatingGas({
@@ -152,20 +154,6 @@ const RatingPage = () => {
   };
 
   const itemGrantAccess = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={handleDownload}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
-
-    // Column Action Column
     {
       action: "View",
       type: "table",
@@ -184,6 +172,13 @@ const RatingPage = () => {
       },
     },
   ];
+
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSource?.map((item) => ({
+      ...item,
+      key: item.ratingCode, 
+    }));
+  }, [dataSource]);
 
   const baseColumns = useMemo(
     () =>
@@ -247,36 +242,81 @@ const RatingPage = () => {
         >
           <div className="my-5">
             <TableRBI
-              dataSource={dataSource}
+              size="small"
+              dataSource={dataSourceWithKeys} 
               columns={processedColumns}
               current={page}
               pageSize={pageSize}
+              handleDownload={handleDownload}
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ y: 525, x: 23000 }}
+              tableScrolled={{ y: 525, x: 3500 }}
               onSort={onSortApi}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={loading}
+              onRow={(record) => ({
+                onClick: () => handleDetail(record),
+                style: {
+                  cursor: 'pointer',
+                  backgroundColor: activeRowKey === record.ratingCode 
+                    ? '#bae7ff'
+                    : 'transparent',
+                  transition: 'background-color 0.2s ease',
+                },
+                onMouseEnter: (e) => {
+                  if (activeRowKey !== record.ratingCode) {
+                    e.currentTarget.style.backgroundColor = '#f5f5f5';
+                  }
+                },
+                onMouseLeave: (e) => {
+                  if (activeRowKey !== record.ratingCode) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                },
+              })}
             />
           </div>
         </CardContainer>
 
-        {/* Detail Rating */}
-        {pageDetail === true ? (
-          <div ref={detailRef}>
+        {pageDetail && (
+          <div 
+            ref={detailRef}
+            className="mt-6 border-t-4 border-blue-500 pt-4 bg-blue-50/30 rounded-lg p-4"
+          >
+            <div className="flex justify-between items-center mb-4 pb-3 border-b border-blue-200">
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-lg text-blue-700">
+                  Rating Detail: {ratingCode}
+                </h3>
+              </div>
+              <button
+                onClick={() => {
+                  setPageDetail(false);
+                  setActiveRowKey(null);
+                  setRatingCode("");
+                  setCalculationCode("");
+                  setSANumberId("");
+                }}
+                className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+                title="Close Detail"
+              >
+                ✕
+              </button>
+            </div>
+            
             <RatingDetail
               calculationCode={calculationCode}
               SAId={saNumberId}
               ratingCodeId={ratingCode}
             />
           </div>
-        ) : null}
+        )}
       </Spin>
     </LayoutMenu>
   );
 };
 
-export default RatingPage;  
+export default RatingPage;

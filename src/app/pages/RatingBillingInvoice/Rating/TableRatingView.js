@@ -23,6 +23,7 @@ export const columnsRating = (
     title: "CALCULATION CODE",
     dataIndex: "calculationCode",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "calculationCode",
@@ -38,6 +39,7 @@ export const columnsRating = (
     title: "RATING CODE",
     dataIndex: "ratingCode",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "ratingCode",
@@ -53,6 +55,7 @@ export const columnsRating = (
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerNumber",
@@ -68,6 +71,7 @@ export const columnsRating = (
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerName",
@@ -83,6 +87,7 @@ export const columnsRating = (
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountNumber",
@@ -98,6 +103,7 @@ export const columnsRating = (
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountName",
@@ -145,6 +151,7 @@ export const columnsRating = (
     title: "SOR",
     dataIndex: "sor",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "sor",
@@ -160,6 +167,7 @@ export const columnsRating = (
     title: "COST CENTER",
     dataIndex: "costCenter",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "costCenter",
@@ -191,6 +199,7 @@ export const columnsRating = (
     title: "METER READING CODE",
     dataIndex: "mreadingCode",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "mreadingCode",
@@ -240,6 +249,7 @@ export const columnsRating = (
     title: "SA NUMBER",
     dataIndex: "saNumber",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "saNumber",
@@ -255,6 +265,7 @@ export const columnsRating = (
     title: "PRODUCT",
     dataIndex: "product",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "product",
@@ -270,7 +281,7 @@ export const columnsRating = (
     title: "MIN CONTRACT",
     dataIndex: "minContract",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "minContract",
@@ -286,7 +297,7 @@ export const columnsRating = (
     title: "MAX CONTRACT",
     dataIndex: "maxContract",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "maxContract",
@@ -334,7 +345,7 @@ export const columnsRating = (
     title: "USAGE",
     dataIndex: "usage",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "usage",
@@ -350,7 +361,7 @@ export const columnsRating = (
     title: "CONVERTED USAGE M3",
     dataIndex: "convUsageM3",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convUsageM3",
@@ -366,7 +377,7 @@ export const columnsRating = (
     title: "CONVERTED USAGE MMBTU",
     dataIndex: "convUsageMmbtu",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convUsageMmbtu",
@@ -382,7 +393,7 @@ export const columnsRating = (
     title: "DISCOUNT USAGE",
     dataIndex: "discountUsage",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "discountUsage",
@@ -398,7 +409,7 @@ export const columnsRating = (
     title: "TOTAL USAGE",
     dataIndex: "totalUsage",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalUsage",
@@ -414,7 +425,7 @@ export const columnsRating = (
     title: "CONVERTED TOTAL USAGE M3",
     dataIndex: "convTotalUsageM3",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convTotalUsageM3",
@@ -430,7 +441,7 @@ export const columnsRating = (
     title: "CONVERTED TOTAL USAGE MMBTU",
     dataIndex: "convTotalUsageMmbtu",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convTotalUsageMmbtu",
@@ -446,7 +457,7 @@ export const columnsRating = (
     title: "MINIMUM USAGE",
     dataIndex: "minimumUsage",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "minimumUsage",
@@ -462,7 +473,7 @@ export const columnsRating = (
     title: "CONVERTED MINIMUM USAGE M3",
     dataIndex: "convMinimumUsageM3",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convMinimumUsageM3",
@@ -478,7 +489,7 @@ export const columnsRating = (
     title: "CONVERTED MINIMUM USAGE MMBTU",
     dataIndex: "convMinimumUsageMmbtu",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convMinimumUsageMmbtu",
@@ -494,7 +505,7 @@ export const columnsRating = (
     title: "NORMAL USAGE",
     dataIndex: "normalUsage",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "normalUsage",
@@ -510,7 +521,7 @@ export const columnsRating = (
     title: "CONVERTED NORMAL USAGE M3",
     dataIndex: "convNormalUsageM3",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convNormalUsageM3",
@@ -526,7 +537,7 @@ export const columnsRating = (
     title: "CONVERTED NORMAL USAGE MMBTU",
     dataIndex: "convNormalUsageMmbtu",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convNormalUsageMmbtu",
@@ -542,7 +553,7 @@ export const columnsRating = (
     title: "OUP",
     dataIndex: "oup",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "oup",
@@ -558,7 +569,7 @@ export const columnsRating = (
     title: "CONVERTED OUP M3",
     dataIndex: "convOupM3",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convOupM3",
@@ -574,7 +585,7 @@ export const columnsRating = (
     title: "CONVERTED OUP MMBTU",
     dataIndex: "convOupMmbtu",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convOupMmbtu",
@@ -590,7 +601,7 @@ export const columnsRating = (
     title: "CALCULATED USAGE",
     dataIndex: "calculatedUsage",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "calculatedUsage",
@@ -606,7 +617,7 @@ export const columnsRating = (
     title: "CONVERTED CALCULATED USAGE M3",
     dataIndex: "convCalculatedUsageM3",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convCalculatedUsageM3",
@@ -622,7 +633,7 @@ export const columnsRating = (
     title: "CONVERTED CALCULATED USAGE MMBTU",
     dataIndex: "convCalculatedUsageMmbtu",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convCalculatedUsageMmbtu",
@@ -654,7 +665,7 @@ export const columnsRating = (
     title: "RATE",
     dataIndex: "rate",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rate",
@@ -688,7 +699,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT MINIMUM IDR",
     dataIndex: "totalAmountMinIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountMinIdr",
@@ -704,7 +715,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT MINIMUM USD",
     dataIndex: "totalAmountMinUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountMinUsd",
@@ -720,7 +731,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT MINIMUM EQV IDR",
     dataIndex: "totalAmountMinEqvIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountMinEqvIdr",
@@ -736,7 +747,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT MINIMUM EQV USD",
     dataIndex: "totalAmountMinEqvUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountMinEqvUsd",
@@ -752,7 +763,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT NORMAL IDR",
     dataIndex: "totalAmountNormalIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountNormalIdr",
@@ -768,7 +779,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT NORMAL USD",
     dataIndex: "totalAmountNormalUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountNormalUsd",
@@ -784,7 +795,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT NORMAL EQV IDR",
     dataIndex: "totalAmountNormalEqvIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountNormalEqvIdr",
@@ -800,7 +811,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT NORMAL EQV USD",
     dataIndex: "totalAmountNormalEqvUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountNormalEqvUsd",
@@ -816,7 +827,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT OUP IDR",
     dataIndex: "totalAmountOupIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountOupIdr",
@@ -832,7 +843,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT OUP USD",
     dataIndex: "totalAmountOupUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountOupUsd",
@@ -848,7 +859,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT OUP EQV IDR",
     dataIndex: "totalAmountOupEqvIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountOupEqvIdr",
@@ -864,7 +875,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT OUP EQV USD",
     dataIndex: "totalAmountOupEqvUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountOupEqvUsd",
@@ -880,7 +891,7 @@ export const columnsRating = (
     title: "AMOUNT IDR",
     dataIndex: "amountIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "amountIdr",
@@ -896,7 +907,7 @@ export const columnsRating = (
     title: "AMOUNT USD",
     dataIndex: "amountUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "amountUsd",
@@ -912,7 +923,7 @@ export const columnsRating = (
     title: "AMOUNT EQV IDR",
     dataIndex: "amountEqvIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "amountEqvIdr",
@@ -928,7 +939,7 @@ export const columnsRating = (
     title: "AMOUNT EQV USD",
     dataIndex: "amountEqvUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "amountEqvUsd",
@@ -944,7 +955,7 @@ export const columnsRating = (
     title: "DISCOUNT AMOUNT",
     dataIndex: "discountAmount",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "discountAmount",
@@ -960,7 +971,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT IDR",
     dataIndex: "totalAmountIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountIdr",
@@ -976,7 +987,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT USD",
     dataIndex: "totalAmountUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountUsd",
@@ -992,7 +1003,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT EQV IDR",
     dataIndex: "totalAmountEqvIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountEqvIdr",
@@ -1008,7 +1019,7 @@ export const columnsRating = (
     title: "TOTAL AMOUNT EQV USD",
     dataIndex: "totalAmountEqvUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountEqvUsd",
@@ -1037,22 +1048,22 @@ export const columnsRating = (
     ),
     render: (text) => renderDateColumn('transactionDate', hasValue(search['transactionDate']), searchText, text, 'date', search)
   },
-  {
-    key: "accountingDate",
-    title: "ACCOUNTING DATE",
-    sorter: true,
-    align: "center",
-    dataIndex: "accountingDate",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "accountingDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (text) => renderDateColumn('accountingDate', hasValue(search['accountingDate']), searchText, text, 'date', search)
-  },
+  // {
+  //   key: "accountingDate",
+  //   title: "ACCOUNTING DATE",
+  //   sorter: true,
+  //   align: "center",
+  //   dataIndex: "accountingDate",
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "accountingDate",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch,
+  //     true,
+  //     "date"
+  //   ),
+  //   render: (text) => renderDateColumn('accountingDate', hasValue(search['accountingDate']), searchText, text, 'date', search)
+  // },
 ];

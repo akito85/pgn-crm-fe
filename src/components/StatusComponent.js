@@ -51,12 +51,16 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "waiting":
       case "waiting approval":
       case "waiting_approval":
-      case "in progress":
-      case "inprogress":
       case "partial payment":
       case "waiting to release":
         bgColor = "status-waiting";
         tColor = "text-yellow-700";
+        break;
+
+        case "in progress":
+        case "INPROGRESS":
+        bgColor = "bg-yellow-500";
+        tColor = "text-white";
         break;
 
       case "draft":
@@ -187,6 +191,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "generating":
       case "in progress":
       case "inprogress":
+      case "INPROGRESS":
       case "waiting approval":
       case "waiting_approval":
         return <Loading3QuartersOutlined style={{ fontSize: "15px" }} />;
