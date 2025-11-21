@@ -17,7 +17,6 @@ import {
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
-import DetailPaymentRelation from "./DetailPaymentRelation";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import { useNavigate, useLocation } from "react-router-dom";
 import DetailTaxImplication from "./DetailPaymentRelation";
@@ -358,7 +357,7 @@ const PaymentRelation = ({ id = 0 }) => {
           searchedColumn={searchedColumn}
           onSort={onSort}
           getColumnSearchProps={getColumnSearchProps}
-          handleDetail={handleDetail}
+          handleDetail={() => {}}
           setModalDetail={setModalDetail}
         />
       </div>
