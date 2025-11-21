@@ -4,6 +4,17 @@ import { tokenHeader } from "../../utils/tokenHeader";
 import FileSaver from "file-saver";
 import { errorCode, hasValue } from "../../utils";
 
+const get = async (url) => {
+  try {
+    const response = await axios.get(configApp.PAYMENT_SERVICE + url, {
+      headers: tokenHeader(),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const getAll = async (url) => {
   try {
     const response = await axios.get(configApp.PAYMENT_SERVICE + url, {
@@ -192,6 +203,7 @@ const getPaginationPost = async (url,body) => {
   }
 };
 const debtAndCollectionHttpService = {
+  get,
   getAll,
   inactiveWithApproval,
   getDetail,

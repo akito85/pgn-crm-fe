@@ -15,7 +15,7 @@ import {
   getDetailActivityActionPaginate,
   createActivityAction,
   updateActivityAction,
-  // getActivityNameList
+  getActivityNameList
 } from "../../../../redux/slices/debt_and_collection/activityAction";
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../routes/DebtAndCollection/rc_routes.js";
 import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
@@ -28,49 +28,39 @@ const FormActivityAction = (props) => {
   const { type } = props;
   const { dataDetailActivityAction, dataActivityName, loading } = useSelector((state) => state.activityAction);
 
-  // console.log("dataActivityName", dataActivityName);
-  // console.log("dataDetailActivityAction", dataDetailActivityAction);
-
-
   const location = useLocation();
-
-  // console.log("location", location);
   const dispatch = useDispatch();
-
   const [form] = Form.useForm();
   const [openModal, setOpenModal] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const navigate = useNavigate();
-  const id = location?.state?.id;
-  // console.log(location?.state?.id)
+  const idFromLocation = location?.state?.id;
   const [payload, setPayload] = useState({});
 
-  const assert = () => {
-    // console.log("dataDetail", dataDetailActivityAction);
+  const assert = (data) => {
     form.setFieldsValue({
-      mpMActivityId: dataDetailActivityAction?.mpMActivityId,
-      resultCode: dataDetailActivityAction?.resultCode,
-      description: dataDetailActivityAction?.description,
+      activityId: data?.activityId,
+      resultCode: data?.resultCode,
+      description: data?.description,
     });
   };
   
   useEffect(() => {
-    // call detailActivityName
-    // dispatch(getActivityNameList());
-  })
+    dispatch(getActivityNameList());
+  }, [dispatch])
 
-  // call id 
+  // Fetch detail data when in update mode
   useEffect(() => {
-    if (id) {
-      console.log("id", id);
-      dispatch(getDetailActivityActionPaginate(id));
+    if (type === 'update' && idFromLocation) {
+      dispatch(getDetailActivityActionPaginate(idFromLocation));
     }
-  }, [dispatch, id]);
+  }, [dispatch, idFromLocation, type]);
 
+  // Set form values when detail data is available
   useEffect(() => {
-    // jika type update maka set form dengan data detail
-    if (type === 'update') {
-      assert();
+    if (type === 'update' && dataDetailActivityAction) {
+      console.log("Detail data received, setting form values:", dataDetailActivityAction);
+      assert(dataDetailActivityAction);
     }
   }, [dataDetailActivityAction, form, type]);
 
@@ -90,15 +80,28 @@ const FormActivityAction = (props) => {
     },
   ];
 
+  const getUpdateId = () => {
+    if (idFromLocation) return idFromLocation;
+    if (dataDetailActivityAction) {
+      // Use the ID from the detail object itself as a fallback
+      return dataDetailActivityAction.id || dataDetailActivityAction.activityId;
+    }
+    return undefined;
+  }
 
   const saveAction = async () => {
     try {
       setOpenModal(false);
       if (type === "update") {
+        const updateId = getUpdateId();
+        console.log("Using ID for update:", updateId);
 
-        const id = dataDetailActivityAction?.mpMActivityResultOptId
+        if (!updateId) {
+          console.error("Update failed: ID could not be determined.");
+          return;
+        }
         
-        await dispatch(updateActivityAction({ body: payload?.body, id }))?.unwrap()
+        await dispatch(updateActivityAction({ body: payload?.body, id: updateId }))?.unwrap()
       }else{
         await dispatch(createActivityAction(payload?.body))?.unwrap()
       }
@@ -109,46 +112,8 @@ const FormActivityAction = (props) => {
 
   const onFinish = async (formValue) => {
     try {
-      const dataValue = {
-        activityActionId: formValue.activityActionId,
-        activityAction: formValue.activityAction,
-        description: formValue.description
-      };
-      
-      const bodyValidasiUpdate = {
-        ...dataValue,
-        id: dataDetailActivityAction?.id,
-      };
-
-      setPayload(
-        {
-          body: formValue
-        }
-      )
-      // if (type !== "update") {
-      //   dispatch(validateCreateUpdateActivityAction(dataValue))
-      //     .unwrap()
-      //     .then(async (data) => {
-      //       const sukses = data?.success;
-      //       if (sukses === false) {
-      //         setOpenModal(false);
-      //       }
-      //       setOpenModal(true);
-      //     });
-      // }
-      // dispatch(validateCreateUpdateActivityAction(bodyValidasiUpdate))
-      //   .unwrap()
-      //   .then(async (data) => {
-      //     const sukses = data?.success;
-      //     if (sukses === false) {
-      //       setOpenModal(false);
-      //     }
-          setOpenModal(true);
-        // });
-
-      
-
-      // console.log("payload", { body: formValue });
+      setPayload({ body: formValue });
+      setOpenModal(true);
     } catch (error) {
       setOpenModal(false);
     }
@@ -165,7 +130,9 @@ const FormActivityAction = (props) => {
     if (type === "create") {
       form.resetFields();
     } else {
-      assert();
+      if (dataDetailActivityAction) {
+        assert(dataDetailActivityAction);
+      }
     }
   };
 
@@ -173,7 +140,12 @@ const FormActivityAction = (props) => {
   const handleRetry = () => {
     handleCancelTryAgain()
     if (type === "update") {
-        dispatch(updateActivityAction(payload?.body,dataDetailActivityAction?.activityActionId))?.unwrap()
+        const updateId = getUpdateId();
+        if (!updateId) {
+          console.error("Update retry failed: ID is missing.");
+          return;
+        }
+        dispatch(updateActivityAction({ body: payload?.body, id: updateId }))?.unwrap()
     }else{
         dispatch(createActivityAction(payload?.body))?.unwrap()
     }
@@ -193,21 +165,21 @@ const FormActivityAction = (props) => {
         >
           <div className={"flex w-full gap-12 mt-5"}>
             <BaseContainer
-              header={type === "update" ? "UPDATE ACTIVITY TYPE" : "CREATE ACTIVITY TYPE"}
+              header={type === "update" ? "UPDATE ACTIVITY ACTION" : "CREATE ACTIVITY ACTION"}
             >
               <div className="flex flex-col w-full gap-3">
                 <div className={"flex w-full gap-3"}>
                   <div className={"flex flex-col w-full"}>
                     <Form.Item
                       label={"Activity Name"}
-                      name={"mpMActivityId"}
+                      name={"activityId"}
                       className="no-margin-form"
                       rules={formMessageRequired('Activity Name')}
                     >
                       <SelectComponent
                       >
                         {dataActivityName?.data?.map((index, key) => (
-                          <Option key={key} value={index.activityNameId}>
+                          <Option key={key} value={index.id}>
                             {index.name}
                           </Option>
                         ))}
@@ -222,7 +194,6 @@ const FormActivityAction = (props) => {
                       className={"w-full no-margin-form"}
                     >
                       <Input
-                        // disabled={type === "update"} 
                         onInput={(e) =>
                           (e.target.value = e.target.value.trimStart())
                         }
@@ -235,7 +206,6 @@ const FormActivityAction = (props) => {
                     <Form.Item
                       label={"Description"}
                       name={"description"}
-                      // rules={formMessageRequired("Description")}
                       className={"w-full no-margin-form"}
                     >
                       <Input
@@ -246,14 +216,11 @@ const FormActivityAction = (props) => {
                     </Form.Item>
                   </div>
                 </div>
-                <div className={"flex w-full gap-3"}>
-                </div>
               </div>
             </BaseContainer>
           </div>
           <div className={"w-full flex my-5"}>
             <ButtonComponent
-              type={"submit"}
               onClick={() => setModalBack(true)}
               icon={
                 <LeftOutlined
@@ -277,13 +244,13 @@ const FormActivityAction = (props) => {
                     width={24}
                   />
                 }
-                type={"submit"}
+                type={"button"}
                 border={false}
                 onClick={handleClear}
               >
                 {type === "update" ? "Reset" : "Clear"}
               </ButtonComponent>
-              <ButtonComponent type={"submit"} htmlType={"submit"}>
+              <ButtonComponent type="primary" htmlType="submit">
                 Save
               </ButtonComponent>
             </div>
@@ -304,7 +271,7 @@ const FormActivityAction = (props) => {
           </div>
           <div className={"w-full flex"}>
             <div className={"w-full flex-col"}>
-              <DetailText label={"Activity Name"}>{payload?.body?.activityName}</DetailText>
+              <DetailText label={"Activity Name"}>{payload?.body?.activityId}</DetailText>
             </div>
             <div className={"w-full flex-col"}>
               <DetailText label={"Result Code"}>{payload?.body?.resultCode}</DetailText>

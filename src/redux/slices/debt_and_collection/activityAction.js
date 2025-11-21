@@ -174,7 +174,19 @@ export const updateActivityAction = createAsyncThunk(
   }
 );
 
-// getActivityNameList
+export const getActivityNameList = createAsyncThunk(
+  "GET_ACTIVITY_NAME_LIST",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/activity-name/get-all`;
+      const response = await debtAndCollectionHttpService.get(url);
+      return response; // Return the whole response object
+    } catch (error) {
+      console.log(error, " = error slice");
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
 
 const activityActionSlice = createSlice({
   name: "activityAction",
@@ -262,6 +274,20 @@ const activityActionSlice = createSlice({
     [updateActivityAction.rejected]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
+    },
+    
+    // Get Activity Name List
+    [getActivityNameList.pending]: (state, action) => {
+      state.loading = true;
+      state.dataActivityName = action.payload;
+    },
+    [getActivityNameList.fulfilled]: (state, action) => {
+      state.dataActivityName = action.payload;
+      state.loading = false;
+    },
+    [getActivityNameList.rejected]: (state, action) => {
+      state.dataActivityName = action.payload;
+      state.loading = false;
     },
   }
 });
