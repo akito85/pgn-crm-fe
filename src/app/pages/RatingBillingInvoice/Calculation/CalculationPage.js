@@ -1311,7 +1311,7 @@ const CalculationPage = () => {
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">CALCULATION JOB LIST</p>
-              <div className="w-full justify-end flex gap-2">
+              <div className="mt-[15px] flex gap-[20px]">
                 <Toolbar items={itemGrantAccess} />
               </div>
             </div>

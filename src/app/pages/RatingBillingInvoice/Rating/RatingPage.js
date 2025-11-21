@@ -155,18 +155,6 @@ const RatingPage = () => {
 
   const itemGrantAccess = [
     {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={handleDownload}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
-    {
       action: "View",
       type: "table",
       render: (record) => {
@@ -175,7 +163,7 @@ const RatingPage = () => {
             <div className="pt-1">
               <SVGIcon
                 name="IconDetail"
-                width={15}
+                width={24}
                 onClick={() => handleDetail(record)}
               />
             </div>
@@ -259,10 +247,11 @@ const RatingPage = () => {
               columns={processedColumns}
               current={page}
               pageSize={pageSize}
+              handleDownload={handleDownload}
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ y: 525, x: 23000 }}
+              tableScrolled={{ y: 525, x: 3500 }}
               onSort={onSortApi}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}

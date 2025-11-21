@@ -1,4 +1,3 @@
-// PrabillingPage.js
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Tooltip } from "antd";
@@ -33,7 +32,6 @@ const PrabillingPage = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
 
-  // ✅ fixedColumns in { left: [], right: [] } format for TableRBI & ColumnSettings
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
     right: ["status", "action"],
@@ -454,7 +452,6 @@ const PrabillingPage = () => {
 
   const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
 
-  // ✅ Combine columns with keys (base + action columns)
   const allColumns = useMemo(() => {
     const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
       ...col,
@@ -463,13 +460,10 @@ const PrabillingPage = () => {
     return columnsWithKeys;
   }, [baseColumns, actionCols]);
 
-  // ✅ Apply fixed columns (returns columns with fixed props set)
-  // applyFixedColumns should return reordered columns with `fixed` props applied
   const processedColumns = useMemo(() => {
     return applyFixedColumns(allColumns, fixedColumns);
   }, [allColumns, fixedColumns]);
 
-  // ✅ Column definitions for ColumnSettings dropdown
   const columnDefinitions = useMemo(() => {
     return allColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,

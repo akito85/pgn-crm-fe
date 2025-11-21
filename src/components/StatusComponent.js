@@ -59,7 +59,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
 
         case "in progress":
         case "INPROGRESS":
-        bgColor = "bg-yellow-700";
+        bgColor = "bg-yellow-500";
         tColor = "text-white";
         break;
 
