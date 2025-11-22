@@ -324,7 +324,7 @@ const ViewFaktur = () => {
       render: (_, __, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "NO. E-FAKTUR",
+      title: "KODE FAKTUR",
       dataIndex: "efakturNo",
       key: "efakturNo",
       width: 180,
@@ -753,7 +753,7 @@ const ViewFaktur = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">Manajemen E-Faktur</p>
+              <p className="mt-[15px] font-bold">E-Faktur Management</p>
               <div className="flex gap-2">
                 <ButtonComponent
                   icon={
