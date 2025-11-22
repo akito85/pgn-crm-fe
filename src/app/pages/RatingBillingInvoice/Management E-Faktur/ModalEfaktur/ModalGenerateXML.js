@@ -354,7 +354,7 @@ const ModalGenerateXML = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Generate XML E-Faktur"
+        header="Generate XML for E-Faktur"
         handleCancel={handleCancel}
         width={900}
         footer={
