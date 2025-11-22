@@ -103,7 +103,7 @@ const activationWithRemarkPost = async (url, body) => {
     throw error;
   }
 };
-const uploadImage = async (url, data) => {
+const upload = async (url, data) => {
   try {
     const response = await axios.post(configApp.PAYMENT_SERVICE + url, data, {
       headers: {
@@ -211,7 +211,7 @@ const debtAndCollectionHttpService = {
   createData,
   downloadData,
   activationWithRemark,
-  uploadImage,
+  upload,
   activationWithRemarkPost,
   updateData,
   updateDataTransaction,

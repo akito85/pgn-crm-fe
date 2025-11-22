@@ -28,4 +28,11 @@ export const DEBT_AND_COLLECTION_ROUTES = {
   CREATE_ACTIVITY_ACTION: "/debt-and-collection/activity-action/create",
   DETAIL_ACTIVITY_ACTION: "/debt-and-collection/activity-action/view",
   UPDATE_ACTIVITY_ACTION: "/debt-and-collection/activity-action/update",
+
+
+  // Activity
+  VIEW_ACTIVITIES: "/debt-and-collection/activities",
+  CREATE_ACTIVITIES: "/debt-and-collection/activities/create",
+  DETAIL_ACTIVITIES: "/debt-and-collection/activities/view",
+  UPDATE_ACTIVITIES: "/debt-and-collection/activities/update",
 };

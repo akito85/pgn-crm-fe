@@ -34,14 +34,16 @@ const FormActivityAction = (props) => {
   const [openModal, setOpenModal] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const navigate = useNavigate();
-  const idFromLocation = location?.state?.id;
+  console.log("Location state:", location?.state);
+  const id = location?.state?.id;
   const [payload, setPayload] = useState({});
 
-  const assert = (data) => {
+  const assert = () => {
+    console.log("dataDetail", dataDetailActivityAction);
     form.setFieldsValue({
-      activityId: data?.activityId,
-      resultCode: data?.resultCode,
-      description: data?.description,
+      activityId: dataDetailActivityAction?.activityId,
+      resultCode: dataDetailActivityAction?.resultCode,
+      description: dataDetailActivityAction?.description
     });
   };
   
@@ -51,16 +53,16 @@ const FormActivityAction = (props) => {
 
   // Fetch detail data when in update mode
   useEffect(() => {
-    if (type === 'update' && idFromLocation) {
-      dispatch(getDetailActivityActionPaginate(idFromLocation));
+    if (id) {
+      dispatch(getDetailActivityActionPaginate(id));
     }
-  }, [dispatch, idFromLocation, type]);
+  }, [dispatch, id]);
 
   // Set form values when detail data is available
   useEffect(() => {
-    if (type === 'update' && dataDetailActivityAction) {
+    if (type === 'update' ) {
       console.log("Detail data received, setting form values:", dataDetailActivityAction);
-      assert(dataDetailActivityAction);
+      assert();
     }
   }, [dataDetailActivityAction, form, type]);
 
@@ -80,28 +82,13 @@ const FormActivityAction = (props) => {
     },
   ];
 
-  const getUpdateId = () => {
-    if (idFromLocation) return idFromLocation;
-    if (dataDetailActivityAction) {
-      // Use the ID from the detail object itself as a fallback
-      return dataDetailActivityAction.id || dataDetailActivityAction.activityId;
-    }
-    return undefined;
-  }
 
   const saveAction = async () => {
     try {
       setOpenModal(false);
       if (type === "update") {
-        const updateId = getUpdateId();
-        console.log("Using ID for update:", updateId);
-
-        if (!updateId) {
-          console.error("Update failed: ID could not be determined.");
-          return;
-        }
         
-        await dispatch(updateActivityAction({ body: payload?.body, id: updateId }))?.unwrap()
+        await dispatch(updateActivityAction({ body: payload?.body, id: id }))?.unwrap()
       }else{
         await dispatch(createActivityAction(payload?.body))?.unwrap()
       }
@@ -130,9 +117,7 @@ const FormActivityAction = (props) => {
     if (type === "create") {
       form.resetFields();
     } else {
-      if (dataDetailActivityAction) {
-        assert(dataDetailActivityAction);
-      }
+        assert();
     }
   };
 
@@ -140,12 +125,7 @@ const FormActivityAction = (props) => {
   const handleRetry = () => {
     handleCancelTryAgain()
     if (type === "update") {
-        const updateId = getUpdateId();
-        if (!updateId) {
-          console.error("Update retry failed: ID is missing.");
-          return;
-        }
-        dispatch(updateActivityAction({ body: payload?.body, id: updateId }))?.unwrap()
+        dispatch(updateActivityAction({ body: payload?.body, id: id }))?.unwrap()
     }else{
         dispatch(createActivityAction(payload?.body))?.unwrap()
     }
@@ -221,6 +201,7 @@ const FormActivityAction = (props) => {
           </div>
           <div className={"w-full flex my-5"}>
             <ButtonComponent
+              type={"submit"}
               onClick={() => setModalBack(true)}
               icon={
                 <LeftOutlined
@@ -244,13 +225,13 @@ const FormActivityAction = (props) => {
                     width={24}
                   />
                 }
-                type={"button"}
+                type={"submit"}
                 border={false}
                 onClick={handleClear}
               >
                 {type === "update" ? "Reset" : "Clear"}
               </ButtonComponent>
-              <ButtonComponent type="primary" htmlType="submit">
+              <ButtonComponent type={"submit"} htmlType={"submit"}>
                 Save
               </ButtonComponent>
             </div>

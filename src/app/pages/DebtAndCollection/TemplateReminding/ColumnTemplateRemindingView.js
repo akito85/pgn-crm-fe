@@ -1,5 +1,6 @@
 import { getColumnSearchPropsUseFilteredValue} from "../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn } from "../../../../utils";
+import { key } from "localforage";
 
 export const columns = (
   search,
@@ -14,14 +15,15 @@ export const columns = (
 ) => {
   return [
     {
+      key: "no",
       title: "NO",
       width: 5,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
+      key: "remindingType",
       title: "TYPE",
-      width: 30,
       sorter: true,
       align: "left",
       dataIndex: "remindingType",
@@ -46,8 +48,8 @@ export const columns = (
         ),
     },
     {
+      key: "content",
       title: "CONTENT",
-      width: 30,
       sorter: true,
       dataIndex: "content",
       ellipsis: {
@@ -74,8 +76,8 @@ export const columns = (
         ),
     },
     {
+      key: "emailBody",
       title: "EMAIL SUBJECT",
-      width: 50,
       sorter: true,
       dataIndex: "emailSubject",
       ...getColumnSearchPropsUseFilteredValue(
@@ -99,8 +101,8 @@ export const columns = (
         ),
     },
     {
+      key: "emailBody",
       title: "EMAIL BODY",
-      width: 100,
       sorter: true,
       dataIndex: "emailBody",
       ...getColumnSearchPropsUseFilteredValue(
@@ -124,8 +126,8 @@ export const columns = (
         ),
     },
     {
+      key: "templateCode",
       title: "TEMPLATE CODE",
-      width: 50,
       sorter: true,
       dataIndex: "templateCode",
       ellipsis: {

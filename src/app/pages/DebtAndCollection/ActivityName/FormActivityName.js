@@ -126,16 +126,18 @@ const FormActivityName = (props) => {
             }
             setOpenModal(true);
           });
+      }else{
+        dispatch(validateCreateUpdateActivityName(bodyValidasiUpdate))
+          .unwrap()
+          .then(async (data) => {
+            const sukses = data?.success;
+            if (sukses === false) {
+              setOpenModal(false);
+            }
+            setOpenModal(true);
+          });
+
       }
-      dispatch(validateCreateUpdateActivityName(bodyValidasiUpdate))
-        .unwrap()
-        .then(async (data) => {
-          const sukses = data?.success;
-          if (sukses === false) {
-            setOpenModal(false);
-          }
-          setOpenModal(true);
-        });
 
       
 

@@ -98,6 +98,7 @@ import activityNameReducer from "../slices/debt_and_collection/activityName";
 import templateRemindingReducer from "../slices/debt_and_collection/templateReminding";
 import activityTypeReducer from "../slices/debt_and_collection/activityType";
 import activityActionReducer from "../slices/debt_and_collection/activityAction";
+import activitiesReducer from "../slices/debt_and_collection/activities";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -224,6 +225,7 @@ const reducer = combineReducers({
   templateReminding: templateRemindingReducer,
   activityType: activityTypeReducer,
   activityAction: activityActionReducer,
+  activities: activitiesReducer,
 
 });
 

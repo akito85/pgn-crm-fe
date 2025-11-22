@@ -41,6 +41,10 @@ export const getDetailActivityActionPaginate = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/collection-activity/result-option/${id}`;
       const response = await debtAndCollectionHttpService.getDetail(url);
+      console.log("response detail activity action:", response);
+      console.log("id detail activity action:", id);
+      console.log("thunkAPI detail activity action:", thunkAPI);
+      console.log("url detail activity action:", url);
       return response.data;
     } catch (error) {
       console.log(error, " = error slice");

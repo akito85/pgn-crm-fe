@@ -249,6 +249,11 @@ const ViewActivityAction = () => {
                   dataUser,
                 )
               )]}
+              useFixColumn={true}
+              defaultFixedColumns={{
+                no: "left",
+                action: "right",
+              }}
             />
           </BaseContainer>
         </div>

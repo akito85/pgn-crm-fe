@@ -1,5 +1,6 @@
 import { getColumnSearchPropsUseFilteredValue} from "../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn } from "../../../../utils";
+import { key } from "localforage";
 
 export const columns = (
   search,
@@ -14,14 +15,15 @@ export const columns = (
 ) => {
   return [
     {
+      key: "no",
       title: "NO",
-      width: 10,
+      width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
+      key: "activityType",
       title: "Activity Type",
-      width: 50,
       sorter: true,
       align: "left",
       dataIndex: "activityType",
@@ -46,8 +48,8 @@ export const columns = (
         ),
     },
     {
+      key: "description",
       title: "Description",
-      width: 50,
       sorter: true,
       dataIndex: "description",
       ellipsis: {
