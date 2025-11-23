@@ -20,6 +20,7 @@ import {
   BellOutlined,
   SwitcherOutlined,
 } from "@ant-design/icons";
+import NotificationDropdown from "../Notifications/NotificationDropdown";
 import { pgnLogo, pgnLogoKecil } from "../../assets/img/index";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -430,18 +431,7 @@ const LayoutMenu = ({ children }) => {
                     )}
                 </div>
                 <div className="flex justify-end items-center align-middle gap-x-5 mr-5">
-                  <Badge>
-                    {/* <Dropdown overlay={menu} trigger={["click"]}> */}
-                    <a onClick={(e) => e.preventDefault()} className="pt-2.5">
-                      <BellOutlined
-                        style={{
-                          fontSize: "24px",
-                          color: "#FFFFFF",
-                        }}
-                      />
-                    </a>
-                    {/* </Dropdown> */}
-                  </Badge>
+                  <NotificationDropdown />
                   <Dropdown overlay={menu} trigger={["click"]}>
                     <a onClick={(e) => e.preventDefault()}>
                       {data_profile?.data?.urlImage2 === null ? (

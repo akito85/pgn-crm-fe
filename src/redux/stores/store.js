@@ -85,7 +85,8 @@ import equpmentReducer from "../slices/account_management/detailAccount/equpment
 import criteriaReducer from '../slices/criteria_slice';
 import { reportCustomerSlice } from "../slices/report/report_customer_slice";
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
-import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement"; 
+import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement";
+import notificationsReducer from "../slices/notifications"; 
 
 const reducer = combineReducers({
   auth: authReducer,
@@ -189,6 +190,9 @@ const reducer = combineReducers({
 
   // Attachment
   attachment: attachmentReducer,
+
+  // Notifications
+  notifications: notificationsReducer,
 
   // criteria
   criteria_slice: criteriaReducer,

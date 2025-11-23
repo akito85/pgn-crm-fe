@@ -10,6 +10,7 @@ import { receipt_and_collection } from "./Receipt&Collection";
 import { rating_billing } from "./rating_billing";
 import { invoice } from "./invoice";
 import report_setup from "./report";
+import NotificationHistory from "../app/pages/Notifications/NotificationHistory";
 export const index = [
   {
     path: "/",
@@ -31,6 +32,10 @@ export const index = [
   {
     path: "/switch-position",
     element: <SwitchPage type={"switch-position"} />,
+  },
+  {
+    path: "/notifications",
+    element: <NotificationHistory />,
   },
   ...product_promo,
   ...user_management,
