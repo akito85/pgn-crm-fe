@@ -8,6 +8,7 @@ import SVGIcon from "../../../../assets/Icon/index";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllAccountPaginate,getAllActivityByAccountNumePaginate,deleteActivity,downloadEvidence
+  , createBulkAcitivity, validateBulkActivity, downloadTemplateBulkActivity
 } from "../../../../redux/slices/debt_and_collection/activities";
 import BaseContainer from "../../../../components/BaseContainer";
 import TablePayment from "../../../../components/TablePayment";
@@ -91,7 +92,7 @@ const ViewActivityAction = (props) => {
           getAllActivityByAccountNumePaginate({
             accountNum: accountNum,
             page: pageActivities,
-            pageSize: pageActivities,
+            pageSize: pageSizeActivities,
             search: encodeURIComponent(JSON.stringify(searchActivities)),
             sort: sortActivities,
           })
@@ -105,6 +106,7 @@ const ViewActivityAction = (props) => {
     setOpenModalDelete(true)
     setIdSelected(r)
   }
+  
 
   const handleConfirmModalDelete = () => {
     setOpenModalDelete(false);
@@ -115,7 +117,7 @@ const ViewActivityAction = (props) => {
         getAllActivityByAccountNumePaginate({
           accountNum: selectedAccountNum,
           page: pageActivities,
-          pageSize: pageActivities,
+          pageSize: pageSizeActivities,
           search: encodeURIComponent(JSON.stringify(searchActivities)),
           sort: sortActivities,
         })
@@ -374,7 +376,7 @@ const ViewActivityAction = (props) => {
               )
   
   const handleDownloadTemplate = ()=> {
-
+    dispatch(downloadTemplateBulkActivity())
   }
 
   const saveAction = async () => {
@@ -398,7 +400,20 @@ const ViewActivityAction = (props) => {
         });
       }
 
-      // await dispatch(createUpdateActivity(formData)).unwrap();
+      await dispatch(createBulkAcitivity(formData)).unwrap()
+      .then(() => {
+        form.resetFields();
+        setTabHeader("Activity Information"); 
+        dispatch(
+          getAllActivityByAccountNumePaginate({
+            accountNum: selectedAccountNum,
+            page: pageActivities,
+            pageSize: pageSizeActivities,
+            search: encodeURIComponent(JSON.stringify(searchActivities)),
+            sort: sortActivities,
+          })
+        );
+      });
 
     } catch (error) {
       setOpenModal(false);
@@ -439,17 +454,16 @@ const ViewActivityAction = (props) => {
         });
       }
 
-      setOpenModal(true);
 
-      // dispatch(validateCreateUpdateActivity(formData))
-      //   .unwrap()
-      //   .then(async (data) => {
-      //     const sukses = data?.success;
-      //     if (sukses === false) {
-      //       setOpenModal(false);
-      //     }
-      //     setOpenModal(true);
-      //   });
+      dispatch(validateBulkActivity(formData))
+        .unwrap()
+        .then(async (data) => {
+          const sukses = data?.success;
+          if (sukses === false) {
+            setOpenModal(false);
+          }
+          setOpenModal(true);
+        });
       
     } catch (error) {
       setOpenModal(false);
@@ -512,7 +526,6 @@ const ViewActivityAction = (props) => {
                 searchedColumn,
                 searchText,
                 handleSearch,
-                handleOpenDelete,
                 dataUser
               ),...permissionsAccount]}
               useFixColumn={true}
