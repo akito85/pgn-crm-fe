@@ -52,20 +52,22 @@ const downloadData = async (url) => {
       headers: tokenHeader(),
       responseType: "blob",
     });
-    if (hasValue(response.headers?.get("content-disposition"))) {
-      const filename = response.headers
-        .get("content-disposition")
+
+    const disposition = response.headers["content-disposition"];
+
+    if (disposition) {
+      const filename = disposition
         .split(";")
         .find((n) => n.includes("filename="))
         .replace("filename=", "")
+        .replace(/"/g, "")
         .trim();
 
-      const blob = await response?.data;
+      const blob = response.data;
       FileSaver.saveAs(blob, filename);
-    } else if (errorCode(response) === 204) {
-      throw response;
     }
-    return response;
+
+    return true; // 👉 return boleh serializable
   } catch (error) {
     throw error;
   }

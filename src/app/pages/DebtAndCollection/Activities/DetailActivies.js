@@ -5,12 +5,12 @@ import { DEBT_AND_COLLECTION_ROUTES } from "../../../../routes/DebtAndCollection
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getDetailActivity } from "../../../../redux/slices/debt_and_collection/activities.js";
+import { getDetailActivity,downloadEvidence } from "../../../../redux/slices/debt_and_collection/activities.js";
 import DetailText from "../../../../components/DetailText";
 import BaseContainer from "../../../../components/BaseContainer";
 import { Spin } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
+import { DownloadOutlined, LeftOutlined } from "@ant-design/icons";
 
 const DetailActivityAction = () => {
   const location = useLocation();
@@ -18,6 +18,11 @@ const DetailActivityAction = () => {
   const navigate = useNavigate();
   const id = location?.state?.id;
   const { dataDetailActivities,  loading } = useSelector((state) => state.activities);
+
+  const handleDownload = (id) => {
+      console.log("Download clicked for ID:", id);
+      dispatch(downloadEvidence({ id: id }))
+    }
 
   useEffect(() => {
     if (id) {
@@ -118,7 +123,30 @@ const DetailActivityAction = () => {
           {/* Evidence */}
           <div className="w-full">
             <DetailText label="Evidence File">
-              {dataDetailActivities?.evidence}
+              {dataDetailActivities?.evidence ? (
+                <div className="flex items-center gap-2">
+
+                  <ButtonComponent
+                    type={"submit"}
+                    size={"small"}
+                    onClick={() => handleDownload(dataDetailActivities?.id)}
+                    fontSizeClassname="text-[12px]"
+                    icon={
+                      <DownloadOutlined
+                        style={{
+                          color: "#fff",
+                          fontSize: 14, // kecil
+                        }}
+                      />
+                    }
+                    className="w-auto px-2"
+                  >
+                    {dataDetailActivities.evidence}
+                  </ButtonComponent>
+                </div>
+              ) : (
+                "-"
+              )}
             </DetailText>
           </div>
         </BaseContainer>
@@ -126,7 +154,7 @@ const DetailActivityAction = () => {
       <div className="flex  justify-between py-5">
         <ButtonComponent
           type={"submit"}
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_ACTIVITIES, { state: { accountNum: dataDetailActivities?.accountNum } })}
           icon={
             <LeftOutlined
               style={{

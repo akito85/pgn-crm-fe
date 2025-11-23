@@ -229,6 +229,35 @@ export const getUserList = createAsyncThunk(
 );
 
 
+export const downloadEvidence = createAsyncThunk(
+  "DOWNLOAD_ACTIVITY",
+  async ({ id }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/activity/download/${id}`;
+      await debtAndCollectionHttpService.downloadData(url);
+
+      // thunkAPI.dispatch(showModalSuccess({
+      //   title: "Successful",
+      //   description: "Your file has been downloaded.",
+      //   return: false,
+      // }));
+
+      // return hanya serializable
+      return { success: true };
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_ACTIVITY",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+
 const activitiesSlice = createSlice({
   name: "activities",
   initialState,
@@ -358,6 +387,20 @@ const activitiesSlice = createSlice({
     [getUserList.rejected]: (state, action) => {
       state.dataPic = action.payload;
       state.loading = false;
+    },
+
+
+    [downloadEvidence.pending]: (state, action) => {
+      state.loading = true;
+      state.data = action.payload;
+    },
+    [downloadEvidence.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data = action.payload;
+    },
+    [downloadEvidence.rejected]: (state, action) => {
+      state.loading = false;
+      state.data = action.payload;
     },
 
 

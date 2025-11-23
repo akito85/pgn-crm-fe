@@ -480,16 +480,7 @@ const FormActivities = (props) => {
                       <Upload
                         beforeUpload={() => false}
                         maxCount={1}
-                        accept="
-                          .pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt,
-                          application/pdf,
-                          application/msword,
-                          application/vnd.openxmlformats-officedocument.wordprocessingml.document,
-                          application/vnd.ms-excel,
-                          application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
-                          image/*,
-                          text/plain
-                        "
+                        accept=".jpg,.png,.jpeg,.pdf,.xlsx,.xls"
                       >
                         <Button icon={<UploadOutlined />}>Upload Evidence</Button>
                       </Upload>
@@ -652,7 +643,7 @@ const FormActivities = (props) => {
       <ModalConfirm
         isOpen={modalBack}
         handleCancel={() => setModalBack(false)}
-        handleOk={() => navigate(-1)}
+        handleOk={() => navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_ACTIVITIES, { state: { accountNum: accountNum } })}
         width={400}
       >
         <div className="flex justify-center mt-5 gap-[20px]">

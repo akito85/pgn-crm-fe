@@ -1,13 +1,13 @@
 import  { useEffect, useRef, useState } from "react";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import { Spin,  Tooltip } from "antd";
+import { Spin,  Tooltip, Upload, Button, Form } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { Link, NavLink } from "react-router-dom";
 import SVGIcon from "../../../../assets/Icon/index";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getAllAccountPaginate,getAllActivityByAccountNumePaginate
+  getAllAccountPaginate,getAllActivityByAccountNumePaginate,deleteActivity,downloadEvidence
 } from "../../../../redux/slices/debt_and_collection/activities";
 import BaseContainer from "../../../../components/BaseContainer";
 import TablePayment from "../../../../components/TablePayment";
@@ -17,9 +17,13 @@ import { DEBT_AND_COLLECTION_ROUTES } from "../../../../routes/DebtAndCollection
 import { columnsAccount } from "./ColumnAccount";
 import { columnsActivities } from "./ColumnActivities";
 import { ModalConfirm } from '../../../../components/Modal/ModalPopUp';
-import { WarningOutlined } from '@ant-design/icons'
+import { WarningOutlined, UploadOutlined } from '@ant-design/icons'
 import RadioTabs from "../../../../components/RadioTabs";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
+import { useLocation } from "react-router-dom";
+import { formMessageRequired } from "../../../../utils";
+import DetailText from "../../../../components/DetailText";
+import ModalCustom from "../../../../components/Modal/ModalCustom";
 
 // Breadcrumbs
 const routes = [
@@ -34,7 +38,8 @@ const routes = [
 ];
 
 
-const ViewActivityAction = () => {
+const ViewActivityAction = (props) => {
+  const { type } = props;
   const dispatch = useDispatch();
   // const fullState = useSelector((state) => state);
   // console.log("🌐 Full Redux State:", fullState);
@@ -46,7 +51,8 @@ const ViewActivityAction = () => {
   } = useSelector((state) => state.activities);
 
 
-
+  const location = useLocation();
+  // const navigate = useNavigate();
   const searchInput = useRef(null);
   const [dataTable, setDataTable] = useState([]);
   const [page, setPage] = useState(1);
@@ -72,6 +78,26 @@ const ViewActivityAction = () => {
   const [searchTextActivities, setSearchTextActivities] = useState("");
   const [searchActivities, setSearchActivities] = useState({});
   const [sortActivities, setSortActivities] = useState("");
+  const accountNum = location?.state?.accountNum;
+
+  const [form] = Form.useForm();
+  const [openModal, setOpenModal] = useState(false);
+  const [payload, setPayload] = useState({});
+
+  useEffect(() => {
+      if (accountNum) {
+        setSelectedAccountNum(accountNum); 
+        dispatch(
+          getAllActivityByAccountNumePaginate({
+            accountNum: accountNum,
+            page: pageActivities,
+            pageSize: pageActivities,
+            search: encodeURIComponent(JSON.stringify(searchActivities)),
+            sort: sortActivities,
+          })
+        );
+      }
+    }, [accountNum]);
 
 
 
@@ -82,22 +108,23 @@ const ViewActivityAction = () => {
 
   const handleConfirmModalDelete = () => {
     setOpenModalDelete(false);
-    // dispatch(deleteActivityAction({ id: idSelected }))
-    // .unwrap()
-    // .then((data) => {
-    //   dispatch(
-    //     getAllAccountPaginate({
-    //       page,
-    //       pageSize,
-    //       search: encodeURIComponent(JSON.stringify(search)),
-    //       sort,
-    //     })
-    //   );
-    // })  
-    // .catch((err) => {
-    //   console.log(err)
-    //   return;
-    // });
+    dispatch(deleteActivity({ id: idSelected }))
+    .unwrap()
+    .then((data) => {
+      dispatch(
+        getAllActivityByAccountNumePaginate({
+          accountNum: selectedAccountNum,
+          page: pageActivities,
+          pageSize: pageActivities,
+          search: encodeURIComponent(JSON.stringify(searchActivities)),
+          sort: sortActivities,
+        })
+      );
+    })  
+    .catch((err) => {
+      console.log(err)
+      return;
+    });
   };
 
   const itemsActionView = () => [
@@ -212,8 +239,8 @@ const ViewActivityAction = () => {
   ];
 
   const handleDownload = (id) => {
-    console.log("Download clicked for ID:", id);
-    // Implement download logic here
+    // console.log("Download clicked for ID:", id);
+    dispatch(downloadEvidence({ id: id }))
   }
 
   useEffect(() => {
@@ -232,8 +259,7 @@ const ViewActivityAction = () => {
       let result = dataAccount?.result || [];
       const totalData = dataAccount?.page?.totalElements || 0;
       setDataTable(result);
-      console.log("dataAccount result", result);
-      // setDataTable(dataAccount);
+      // console.log("dataAccount result", result);
       setTotalElement(totalData);
     }
   }, [dataAccount]);
@@ -266,8 +292,15 @@ const ViewActivityAction = () => {
     setSort(dataSort);
   };
 
+  const onSortActivities = (_, __, sort) => {
+    const dataSort = sort.order
+      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSortActivities(dataSort);
+  };
+
   const handleClickAccountRow = (record) => {
-    console.log("Parent Row Clicked:", record);
+    // console.log("Parent Row Clicked:", record);
     setSelectedAccountNum(record.accountNum); 
     dispatch(
       getAllActivityByAccountNumePaginate({
@@ -285,8 +318,7 @@ const ViewActivityAction = () => {
       let result = dataActivities?.result || [];
       const totalData = dataActivities?.page?.totalElements || 0;
       setDataTableActivites(result);
-      console.log("dataActivities result", result);
-      // setDataTable(dataAccount);
+      // console.log("dataActivities result", result);
       setTotalElementActivities(totalData);
     }
   }, [dataActivities]);
@@ -321,14 +353,8 @@ const ViewActivityAction = () => {
   const changeTab = (e) => {
     setTabHeader((prevState) => {
       const tempTab = e.target.value;
-      if (prevState !== tempTab) {
-        setPage(1);
-        setPageSize(10);
-        setSearch({});
-        setSort("");
-        setSearchText("");
-        setSearchedColumn("");
-      }
+      // if (prevState !== tempTab) {
+      // }
       return tempTab;
     });
   };
@@ -346,6 +372,112 @@ const ViewActivityAction = () => {
                   dataUser,
                 )
               )
+  
+  const handleDownloadTemplate = ()=> {
+
+  }
+
+  const saveAction = async () => {
+    try {
+      setOpenModal(false);
+
+      const formValue = form.getFieldsValue(); 
+      const formData = new FormData();
+
+      formData.append("accountNum", selectedAccountNum);
+
+      const templateFile = formValue.template?.[0]?.originFileObj;
+      if (templateFile) {
+        formData.append("template", templateFile);
+      }
+
+      const evidenceFiles = formValue.evidence?.map((f) => f.originFileObj);
+      if (evidenceFiles && evidenceFiles.length > 0) {
+        evidenceFiles.forEach((file) => {
+          formData.append("evidence", file);
+        });
+      }
+
+      // await dispatch(createUpdateActivity(formData)).unwrap();
+
+    } catch (error) {
+      setOpenModal(false);
+    }
+  };
+
+  const onFinish = async (formValue) => {
+    // console.log("🔥 DEBUG onFinish values:", formValue);
+
+    try {
+
+      const payload = {
+        ...formValue,
+        templateName:
+          formValue.template && formValue.template[0]
+            ? formValue.template[0].name
+            : null,
+        evidenceList:
+          formValue.evidence?.map((file) => file.name) ?? [],
+        accountNum: selectedAccountNum
+      };
+
+      setPayload(payload);
+
+      const formData = new FormData();
+
+      formData.append("accountNum", selectedAccountNum);
+
+      // template
+      if (formValue.template?.[0]) {
+        formData.append("template", formValue.template[0].originFileObj);
+      }
+
+      // evidence multi file
+      if (formValue.evidence?.length > 0) {
+        formValue.evidence.forEach((file) => {
+          formData.append("evidence", file.originFileObj);
+        });
+      }
+
+      setOpenModal(true);
+
+      // dispatch(validateCreateUpdateActivity(formData))
+      //   .unwrap()
+      //   .then(async (data) => {
+      //     const sukses = data?.success;
+      //     if (sukses === false) {
+      //       setOpenModal(false);
+      //     }
+      //     setOpenModal(true);
+      //   });
+      
+    } catch (error) {
+      setOpenModal(false);
+    }
+  };
+
+
+  const onFinishFailed = (err) => {
+    // console.log("❌ DEBUG onFinishFailed:",err);
+    setOpenModal(false);
+  };
+  const handleCancel = () => {
+    setOpenModal(false);
+  };
+
+  const handleClear = () => {
+    form.resetFields();
+  };
+
+  const normFile = (e) => {
+    // console.log("🔥 DEBUG normFile event:", e);
+
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
+  };
+
 
   
 
@@ -418,7 +550,7 @@ const ViewActivityAction = () => {
                         pageSize={pageSizeActivities}
                         tableScrolled={{ y: 525, x: 2300 }}
                         onChange={handleChangeSizeActivities}
-                        onSort={onSort}
+                        onSort={onSortActivities}
                         columns={[...columnsActivities(
                           search,
                           pageActivities,
@@ -441,11 +573,94 @@ const ViewActivityAction = () => {
                 )}
 
                 {tabHeader === "Upload Activities" && (
-                  <div className="p-4 border rounded bg-gray-50">
-                    <p className="mb-2">Upload Document</p>
-                    <input type="file" />
-                  </div>
+                  <Form className="p-6 border border-gray-300 shadow-sm rounded-lg bg-white"
+                        form={form}
+                        layout={"vertical"}
+                        onFinish={onFinish}
+                        onFinishFailed={onFinishFailed}
+                  >
+
+                    {/* TEMPLATE */}
+                    <Form.Item
+                      label="Template"
+                      name="template"
+                      valuePropName="fileList"
+                      getValueFromEvent={normFile}
+                      rules={formMessageRequired("template")}
+                      className={"w-full no-margin-form"}
+                    >
+                      <Upload
+                        beforeUpload={() => false}
+                        maxCount={1}
+                        accept=".xlsx,.xls"
+                      >
+                        <Button icon={<UploadOutlined />}>Choose File</Button>
+                      </Upload>
+
+                      
+                    </Form.Item>
+
+                    <div className="text-xs text-gray-500 mt-1 flex items-center gap-3">
+                      <span>*Hanya file excel yang sesuai format yang diterima</span>
+                      <ButtonComponent
+                        type="default"
+                        size="small"
+                        fontSizeClassname="text-[12px]"
+                        onClick={handleDownloadTemplate}
+                      >
+                        Download Template upload
+                      </ButtonComponent>
+                    </div>
+
+                    {/* EVIDENCE */}
+                    <Form.Item
+                      label="Evidence (Multi File)"
+                      name="evidence"
+                      valuePropName="fileList"
+                      getValueFromEvent={normFile}
+                      rules={formMessageRequired("evidence")}
+                      className={"w-full no-margin-form"}
+                    >
+                      <Upload
+                        beforeUpload={() => false}
+                        multiple 
+                        accept=".jpg,.png,.jpeg,.pdf,.xlsx,.xls"
+                      >
+                        <Button icon={<UploadOutlined />}>Choose Files</Button>
+                      </Upload>
+
+                      
+                    </Form.Item>
+                    <p className="text-xs text-gray-500 mt-1">
+                      *Filename harus sama dengan yang ada di template
+                    </p>
+
+                    {/* BUTTON UPLOAD */}
+                    <div className={"w-full justify-end flex gap-5"}>
+                      <ButtonComponent
+                        icon={
+                          <SVGIcon
+                            name={
+                              type === "update" ? `IconButtonReset` : `IconButtonClear`
+                            }
+                            width={24}
+                          />
+                        }
+                        type={"submit"}
+                        border={false}
+                        onClick={handleClear}
+                      >
+                        {type === "update" ? "Reset" : "Clear"}
+                      </ButtonComponent>
+                      <ButtonComponent type={"submit"} htmlType={"submit"}>
+                        Save
+                      </ButtonComponent>
+                    </div>
+                  </Form>
                 )}
+
+
+
                 </div>
 
               </div>
@@ -455,6 +670,61 @@ const ViewActivityAction = () => {
         </div>
         
       </Spin>
+
+      <ModalCustom
+        isOpen={openModal}
+        header={"CONFIRMATION"}
+        width={600}
+        type={"confirmation"}
+        handleCancel={handleCancel}
+      >
+        <div className="w-full flex flex-col flex-wrap gap-y-3">
+          <div className="w-full">
+            <span className="text-primary uppercase">Upload Summary</span>
+          </div>
+
+          {/* Row 1 */}
+          <div className="w-full flex gap-5">
+            <div className="w-full flex-col">
+              <DetailText label="Account Number">
+                {payload?.accountNum}
+              </DetailText>
+            </div>
+          </div>
+
+          {/* TEMPLATE */}
+          <div className="w-full mt-3">
+            <DetailText label="Template File">
+              {payload?.templateName || "-"}
+            </DetailText>
+          </div>
+
+          {/* EVIDENCE */}
+          <div className="w-full mt-2">
+            <DetailText label="Evidence Files">
+              <ul className="list-disc list-inside text-sm">
+                {payload?.evidenceList?.length > 0 ? (
+                  payload.evidenceList.map((file, idx) => (
+                    <li key={idx}>{file}</li>
+                  ))
+                ) : (
+                  <span>-</span>
+                )}
+              </ul>
+            </DetailText>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-5 mt-4">
+          <ButtonComponent onClick={handleCancel} type="default">
+            Cancel
+          </ButtonComponent>
+          <ButtonComponent onClick={saveAction} type="submit">
+            Confirm
+          </ButtonComponent>
+        </div>
+      </ModalCustom>
+
 
       {/* Modal Delete */}
       <ModalConfirm
