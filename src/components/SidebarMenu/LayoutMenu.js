@@ -92,6 +92,7 @@ const LayoutMenu = ({ children }) => {
       '/account-management/account-standard/service-requests/update',
       '/account-management/account-standard/service-requests/delete',
       '/account-management/customers/update',
+      '/account-management/account-standard/service-requests/prerequisite/create',
     ]
     
     if (!myRoutes.includes(location?.pathname)) {
