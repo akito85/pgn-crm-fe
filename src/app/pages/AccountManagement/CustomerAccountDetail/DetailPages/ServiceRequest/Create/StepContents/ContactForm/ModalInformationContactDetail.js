@@ -1,4 +1,5 @@
 import { Form, Select, Input } from "antd"
+import { useState, useEffect } from "react"
 import { PlusOutlined, ClearOutlined, ArrowLeftOutlined, LeftOutlined } from "@ant-design/icons"
 
 import InputComponent from "../../../../../../../../../components/InputComponent"
@@ -7,30 +8,163 @@ import NxTable from "../../../../../../../../../components/Nx/NxTable"
 import NxModal from "../../../../../../../../../components/Nx/NxModal"
 
 // ============================================================================
+// STATIC DATA
+// ============================================================================
+const MOCK_CONTACT_SECONDARY = []
+
+// ============================================================================
 // MODAL: ModalInformationContactDetail (Create/Edit Contact)
 // ============================================================================
 
 export default function ModalInformationContactDetail({
   isOpen,
-  form,
-  contactSecondary,
-  columnSecondary,
   onBack,
   onClear,
   onSave,
   onOpenSelectContact,
-  onEdit,
-  onDelete,
-  // Inline editing props
-  editingKey,
-  setEditingKey,
-  contactDetailForm,
-  onSaveContactDetail,
-  onCancelContactDetail,
-  onEditContactDetail,
-  onDeleteContactDetail,
-  onAddContactDetail,
 }) {
+  // --------------------------------------------------------------------------
+  // STATE MANAGEMENT
+  // --------------------------------------------------------------------------
+  const [form] = Form.useForm()
+  const [contactDetailForm] = Form.useForm()
+  const [contactSecondary, setContactSecondary] = useState(MOCK_CONTACT_SECONDARY)
+  const [editingKey, setEditingKey] = useState('')
+
+  // --------------------------------------------------------------------------
+  // COLUMN DEFINITIONS
+  // --------------------------------------------------------------------------
+  const columnSecondary = [
+    {
+      title: 'NO',
+      dataIndex: 'no',
+      key: 'no',
+      filter: true,
+      editable: false,
+    },
+    {
+      title: 'TYPE',
+      dataIndex: 'type',
+      key: 'type',
+      filter: true,
+      editable: true,
+      inputType: 'select',
+    },
+    {
+      title: 'INPUT TYPE',
+      dataIndex: 'inputtype',
+      key: 'inputtype',
+      editable: true,
+      inputType: 'text',
+    },
+    {
+      title: 'INPUT VALUE',
+      dataIndex: 'inputvalue',
+      key: 'inputvalue',
+      editable: true,
+      inputType: 'text',
+    },
+  ]
+
+  // --------------------------------------------------------------------------
+  // EFFECT: Initialize form when editing starts
+  // --------------------------------------------------------------------------
+  useEffect(() => {
+    if (editingKey) {
+      console.log('useEffect: editingKey changed to:', editingKey)
+      const rowToEdit = contactSecondary.find((item) => item.key === editingKey)
+
+      if (rowToEdit) {
+        console.log('useEffect: Found row to edit:', rowToEdit)
+        const formValues = {
+          type: rowToEdit.type || '',
+          inputtype: rowToEdit.inputtype || '',
+          inputvalue: rowToEdit.inputvalue || '',
+        }
+        console.log('useEffect: Setting form values:', formValues)
+        contactDetailForm.setFieldsValue(formValues)
+      } else {
+        console.log('useEffect: Row not found for key:', editingKey)
+      }
+    } else {
+      console.log('useEffect: editingKey is empty, skipping form initialization')
+    }
+  }, [editingKey, contactSecondary, contactDetailForm])
+
+  // --------------------------------------------------------------------------
+  // EVENT HANDLERS - Contact Detail Inline Editing
+  // --------------------------------------------------------------------------
+  const handleAddContactDetail = () => {
+    const newKey = `temp-${Date.now()}`
+    const newRow = {
+      key: newKey,
+      no: contactSecondary.length + 1,
+      type: '',
+      inputtype: '',
+      inputvalue: '',
+    }
+
+    setContactSecondary([...contactSecondary, newRow])
+    setEditingKey(newKey)
+  }
+
+  const handleSaveContactDetail = async (key, row) => {
+    try {
+      console.log('Save called with key:', key)
+      console.log('Form data received:', row)
+
+      const newData = [...contactSecondary]
+      const index = newData.findIndex((item) => key === item.key)
+
+      if (index > -1) {
+        const item = newData[index]
+        console.log('Current item before save:', item)
+
+        const permanentKey = key.startsWith('temp-')
+          ? `contact-${Date.now()}-${index}`
+          : key
+
+        const updatedItem = {
+          ...item,
+          ...row,
+          key: permanentKey,
+        }
+
+        console.log('Updated item after merge:', updatedItem)
+
+        newData.splice(index, 1, updatedItem)
+        setContactSecondary(newData)
+        setEditingKey('')
+        contactDetailForm.resetFields()
+
+        console.log('Contact detail saved successfully')
+      } else {
+        console.error('Row not found for key:', key)
+      }
+    } catch (error) {
+      console.error('Save error:', error)
+    }
+  }
+
+  const handleCancelContactDetail = () => {
+    if (editingKey.startsWith('temp-')) {
+      const newData = contactSecondary.filter((item) => item.key !== editingKey)
+      setContactSecondary(newData)
+    }
+    setEditingKey('')
+    contactDetailForm.resetFields()
+  }
+
+  const handleEditContactDetail = (record) => {
+    console.log('Edit contact detail:', record)
+  }
+
+  const handleDeleteContactDetail = (record) => {
+    console.log('Delete contact detail:', record)
+    const newData = contactSecondary.filter((item) => item.key !== record.key)
+    setContactSecondary(newData)
+    console.log('Contact detail deleted successfully')
+  }
 
   return (
     <NxModal
@@ -231,7 +365,7 @@ export default function ModalInformationContactDetail({
         <div className="self-stretch flex flex-col justify-end items-end">
           <ButtonComponent
             type={"button"}
-            onClick={onAddContactDetail}
+            onClick={handleAddContactDetail}
             icon={
               <PlusOutlined
                 style={{
@@ -278,10 +412,10 @@ export default function ModalInformationContactDetail({
           editingKey={editingKey}
           setEditingKey={setEditingKey}
           formInstance={contactDetailForm}
-          onSaveRow={onSaveContactDetail}
-          onCancelEdit={onCancelContactDetail}
-          onEditRow={onEditContactDetail}
-          onDeleteRow={onDeleteContactDetail}
+          onSaveRow={handleSaveContactDetail}
+          onCancelEdit={handleCancelContactDetail}
+          onEditRow={handleEditContactDetail}
+          onDeleteRow={handleDeleteContactDetail}
           showEditAction={true}
           showDeleteAction={true}
         />

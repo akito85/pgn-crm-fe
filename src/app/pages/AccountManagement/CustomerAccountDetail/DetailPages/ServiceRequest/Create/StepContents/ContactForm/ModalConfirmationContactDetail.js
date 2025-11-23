@@ -6,26 +6,67 @@ import NxPanel from "../../../../../../../../../components/Nx/NxPanel"
 import NxModal from "../../../../../../../../../components/Nx/NxModal"
 
 // ============================================================================
+// STATIC DATA
+// ============================================================================
+const MOCK_CONTACT_SECONDARY = []
+
+const columnSecondary = [
+  {
+    title: 'NO',
+    dataIndex: 'no',
+    key: 'no',
+    filter: true,
+  },
+  {
+    title: 'TYPE',
+    dataIndex: 'type',
+    key: 'type',
+    filter: true,
+  },
+  {
+    title: 'INPUT TYPE',
+    dataIndex: 'inputtype',
+    key: 'inputtype',
+  },
+  {
+    title: 'INPUT VALUE',
+    dataIndex: 'inputvalue',
+    key: 'inputvalue',
+  },
+]
+
+// ============================================================================
 // MODAL: ModalConfirmationContactDetail (Confirm Selected Contact)
 // ============================================================================
 
 export default function ModalConfirmationContactDetail({
   isOpen,
-  contactSecondary,
-  columnSecondary,
+  selectedContact,
   onBack,
-  onClear,
-  onSave,
-  onCancel,
-  onOk
+  onConfirm,
 }) {
+  // --------------------------------------------------------------------------
+  // EVENT HANDLERS
+  // --------------------------------------------------------------------------
+  const handleClear = () => {
+    console.log("Clear confirmation form")
+    onBack()
+  }
+
+  const handleConfirm = () => {
+    console.log("Contact confirmed")
+    if (onConfirm) {
+      onConfirm(selectedContact)
+    }
+    onBack()
+  }
 
   return (
     <NxModal
       id="ModalConfirmationContactDetail"
       isOpen={isOpen}
-      handleCancel={onCancel}
-      handleOk={onOk}
+      handleCancel={handleClear}
+      handleOk={handleConfirm}
       header={"CONFIRMATION CONTACT INFORMATION"}
       width={1200}
       title={"CONFIRMATION CONTACT INFORMATION"}
@@ -35,7 +76,7 @@ export default function ModalConfirmationContactDetail({
           <div className="flex flex-row items-center gap-3">
             <ButtonComponent
               type={"button"}
-              onClick={onClear}
+              onClick={handleClear}
               style={{
                 backgroundColor: "#ffffff",
                 color: "#0075bf",
@@ -61,7 +102,7 @@ export default function ModalConfirmationContactDetail({
             </ButtonComponent>
             <ButtonComponent
               type={"button"}
-              onClick={onSave}
+              onClick={handleConfirm}
               style={{
                 backgroundColor: "#0075bf",
                 color: "#fff",
@@ -122,7 +163,7 @@ export default function ModalConfirmationContactDetail({
           className="border-[0.5px] border-[#c8cdd4] border-solid "
           usePagination={true}
           useSelect={true}
-          dataMain={contactSecondary}
+          dataMain={selectedContact?.contactDetails || MOCK_CONTACT_SECONDARY}
           columnMain={columnSecondary}
         />
 
