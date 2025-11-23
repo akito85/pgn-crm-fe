@@ -30,3 +30,6 @@ build.zip
 logs/
 
 .claude/
+*.md
+*.sh
+&.txt
