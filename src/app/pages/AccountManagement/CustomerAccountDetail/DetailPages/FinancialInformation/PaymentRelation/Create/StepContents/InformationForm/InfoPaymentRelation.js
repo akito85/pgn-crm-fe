@@ -392,7 +392,6 @@ export default function InfoPaymentRelation({
         </Form.Item>
       </div>
 
-      {/* Description - Full Width */}
       <div className="w-full my-5">
         <Form.Item
           key="description"
