@@ -89,8 +89,8 @@ const PaymentRelationDetails = ({
       breadcrumbName: "Detail Account",
     },
     {
-      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST,
-      breadcrumbName: "Service Requests",
+      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION,
+      breadcrumbName: "Payment Relation",
     },
     {
       path: "",
