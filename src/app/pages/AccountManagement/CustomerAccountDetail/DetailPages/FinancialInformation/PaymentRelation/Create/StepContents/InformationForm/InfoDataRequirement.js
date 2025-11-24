@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { DownloadOutlined, CheckOutlined, FilterOutlined, DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { Popconfirm, Button, Space } from "antd";  
 
-import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
-import NxTable from "../../../../../../../../../components/Nx/NxTable";
-import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
+import NxPanel from "../../../../../../../../../../components/Nx/NxPanel";
+import NxTable from "../../../../../../../../../../components/Nx/NxTable";
+import ButtonComponent from "../../../../../../../../../../components/ButtonComponent";
 
 export default function InfoDataRequirement() {
   const [dataRequirement, setDataRequirement] = useState([]);

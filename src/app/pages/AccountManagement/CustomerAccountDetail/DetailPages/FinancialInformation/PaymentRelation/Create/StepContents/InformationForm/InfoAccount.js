@@ -1,7 +1,7 @@
 import { Form, Select } from "antd";
-import InputComponent from "../../../../../../../../../components/InputComponent";
-import { requiredMessage } from "../../../../../../../../../utils";
-import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
+import InputComponent from "../../../../../../../../../../components/InputComponent";
+import { requiredMessage } from "../../../../../../../../../../utils";
+import NxPanel from "../../../../../../../../../../components/Nx/NxPanel";
 
 export default function InfoAccount() {
   return(
