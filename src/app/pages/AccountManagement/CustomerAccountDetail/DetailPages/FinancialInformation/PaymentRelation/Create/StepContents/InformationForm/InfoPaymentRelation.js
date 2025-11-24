@@ -269,11 +269,6 @@ export default function InfoPaymentRelation({
           key="endDate"
           name={"endDate"}
           label={"End Date"}
-          rules={[
-            {
-              message: requiredMessage("End Date"),
-            },
-          ]}
           className="no-margin-form"
         >
           <DateComponent />
