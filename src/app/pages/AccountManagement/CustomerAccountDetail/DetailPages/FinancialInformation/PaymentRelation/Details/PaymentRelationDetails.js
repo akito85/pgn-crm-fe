@@ -144,45 +144,51 @@ const PaymentRelationDetails = ({
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <BreadCrumb routes={routes} />
         
-        <BaseContainer header={"CUSTOMER INFORMATION"}>
-          <div className="w-full grid grid-cols-4 gap-4">
+        <BaseContainer>
+          <div className="flex flex-col gap-y-5">
             {/* Customer Information */}
-            <DetailText label="Customer Number">{data_customerDetail?.customerNumber || CustomerInformationDummy.customerNumber}</DetailText>
-            <DetailText label="Identification Type">{data_customerDetail?.identificationType || CustomerInformationDummy.identificationType}</DetailText>
-            <DetailText label="Customer Identification Number">{data_customerDetail?.customerIdentificationNumber || CustomerInformationDummy.customerIdentificationNumber}</DetailText>
-            <DetailText label="Customer Name">{data_customerDetail?.customerName || CustomerInformationDummy.customerName}</DetailText>
-            <DetailText label="Customer Type">{data_customerDetail?.customerType || CustomerInformationDummy.customerType}</DetailText>
-            <DetailText label="Description">{data_customerDetail?.description || CustomerInformationDummy.description}</DetailText>
-            <DetailText label="Birth/Founded Date">{data_customerDetail?.birthFoundedDate ? renderDate(data_customerDetail.birthFoundedDate) : renderDate(CustomerInformationDummy.birthFoundedDate)}</DetailText>
-            <DetailText label="Birth/Founded Place">{data_customerDetail?.birthFoundedPlace || CustomerInformationDummy.birthFoundedPlace}</DetailText>
-            <DetailText label="Sex">{data_customerDetail?.sex || CustomerInformationDummy.sex}</DetailText>
-            <DetailText label="Maritial Status">{data_customerDetail?.maritialStatus || CustomerInformationDummy.maritialStatus}</DetailText>
-            <DetailText label="Search Key">{data_customerDetail?.searchKey || CustomerInformationDummy.searchKey}</DetailText>
-          </div>
-        </BaseContainer>
+            <div className="text-primary text-xs font-bold uppercase">
+              CUSTOMER INFORMATION
+            </div>
+            <div className="w-full grid grid-cols-4 gap-x-5">
+              <DetailText label="Customer Number">{data_customerDetail?.customerNumber || CustomerInformationDummy.customerNumber}</DetailText>
+              <DetailText label="Identification Type">{data_customerDetail?.identificationType || CustomerInformationDummy.identificationType}</DetailText>
+              <DetailText label="Customer Identification Number">{data_customerDetail?.customerIdentificationNumber || CustomerInformationDummy.customerIdentificationNumber}</DetailText>
+              <DetailText label="Customer Name">{data_customerDetail?.customerName || CustomerInformationDummy.customerName}</DetailText>
+              <DetailText label="Customer Type">{data_customerDetail?.customerType || CustomerInformationDummy.customerType}</DetailText>
+              <DetailText label="Description">{data_customerDetail?.description || CustomerInformationDummy.description}</DetailText>
+              <DetailText label="Birth/Founded Date">{data_customerDetail?.birthFoundedDate ? renderDate(data_customerDetail.birthFoundedDate) : renderDate(CustomerInformationDummy.birthFoundedDate)}</DetailText>
+              <DetailText label="Birth/Founded Place">{data_customerDetail?.birthFoundedPlace || CustomerInformationDummy.birthFoundedPlace}</DetailText>
+              <DetailText label="Sex">{data_customerDetail?.sex || CustomerInformationDummy.sex}</DetailText>
+              <DetailText label="Maritial Status">{data_customerDetail?.maritialStatus || CustomerInformationDummy.maritialStatus}</DetailText>
+              <DetailText label="Search Key">{data_customerDetail?.searchKey || CustomerInformationDummy.searchKey}</DetailText>
+            </div>
 
-        <BaseContainer header={"ACCOUNT INFORMATION"}>
-          <div className="w-full grid grid-cols-4 gap-4">
             {/* Account Information */}
-            <DetailText label="Account Number">{data_accountDetail?.accountNumber || AccountInformationDummy.accountNumber}</DetailText>
-            <DetailText label="Registration Number">{data_accountDetail?.registrationNumber || AccountInformationDummy.registrationNumber}</DetailText>
-            <DetailText label="Account Name">{data_accountDetail?.accountName || AccountInformationDummy.accountName}</DetailText>
-            <DetailText label="Category">{data_accountDetail?.category || AccountInformationDummy.category}</DetailText>
-            <DetailText label="SOR">{data_accountDetail?.sor || AccountInformationDummy.sor}</DetailText>
-            <DetailText label="Cost Center">{data_accountDetail?.costCenter || AccountInformationDummy.costCenter}</DetailText>
-            <DetailText label="Meter Reading Codes">{data_accountDetail?.meterReadingCodes ? renderDate(data_accountDetail.meterReadingCodes) : renderDate(AccountInformationDummy.birthFoundedDate)}</DetailText>
-            <DetailText label="Customer Management">{data_accountDetail?.customerManagement || AccountInformationDummy.customerManagement}</DetailText>
-            <DetailText label="Classification Type">{data_accountDetail?.classificationType || AccountInformationDummy.classificationType}</DetailText>
-            <DetailText label="Segment">{data_accountDetail?.segment || AccountInformationDummy.segment}</DetailText>
-            <DetailText label="Account Group Type">{data_accountDetail?.accountGroupType || AccountInformationDummy.accountGroupType}</DetailText>
-            <DetailText label="Premise Address">{data_accountDetail?.premiseAddress || AccountInformationDummy.premiseAddress}</DetailText>
-            <DetailText label="Subdistrict">{data_accountDetail?.subdistrict || AccountInformationDummy.subdistrict}</DetailText>
-            <DetailText label="District">{data_accountDetail?.district || AccountInformationDummy.district}</DetailText>
-            <DetailText label="City">{data_accountDetail?.city || AccountInformationDummy.city}</DetailText>
-            <DetailText label="Country">{data_accountDetail?.country || AccountInformationDummy.country}</DetailText>
-            <DetailText label="Longitude">{data_accountDetail?.longitude || AccountInformationDummy.longitude}</DetailText>
-            <DetailText label="Latitude">{data_accountDetail?.latitude || AccountInformationDummy.latitude}</DetailText>
-            <DetailText label="Status">{data_accountDetail?.status || AccountInformationDummy.status}</DetailText>
+            <div className="text-primary text-xs font-bold uppercase">
+              ACCOUNT INFORMATION
+            </div>
+            <div className="w-full grid grid-cols-4 gap-x-4">
+              <DetailText label="Account Number">{data_accountDetail?.accountNumber || AccountInformationDummy.accountNumber}</DetailText>
+              <DetailText label="Registration Number">{data_accountDetail?.registrationNumber || AccountInformationDummy.registrationNumber}</DetailText>
+              <DetailText label="Account Name">{data_accountDetail?.accountName || AccountInformationDummy.accountName}</DetailText>
+              <DetailText label="Category">{data_accountDetail?.category || AccountInformationDummy.category}</DetailText>
+              <DetailText label="SOR">{data_accountDetail?.sor || AccountInformationDummy.sor}</DetailText>
+              <DetailText label="Cost Center">{data_accountDetail?.costCenter || AccountInformationDummy.costCenter}</DetailText>
+              <DetailText label="Meter Reading Codes">{data_accountDetail?.meterReadingCodes ? renderDate(data_accountDetail.meterReadingCodes) : renderDate(AccountInformationDummy.birthFoundedDate)}</DetailText>
+              <DetailText label="Customer Management">{data_accountDetail?.customerManagement || AccountInformationDummy.customerManagement}</DetailText>
+              <DetailText label="Classification Type">{data_accountDetail?.classificationType || AccountInformationDummy.classificationType}</DetailText>
+              <DetailText label="Segment">{data_accountDetail?.segment || AccountInformationDummy.segment}</DetailText>
+              <DetailText label="Account Group Type">{data_accountDetail?.accountGroupType || AccountInformationDummy.accountGroupType}</DetailText>
+              <DetailText label="Premise Address">{data_accountDetail?.premiseAddress || AccountInformationDummy.premiseAddress}</DetailText>
+              <DetailText label="Subdistrict">{data_accountDetail?.subdistrict || AccountInformationDummy.subdistrict}</DetailText>
+              <DetailText label="District">{data_accountDetail?.district || AccountInformationDummy.district}</DetailText>
+              <DetailText label="City">{data_accountDetail?.city || AccountInformationDummy.city}</DetailText>
+              <DetailText label="Country">{data_accountDetail?.country || AccountInformationDummy.country}</DetailText>
+              <DetailText label="Longitude">{data_accountDetail?.longitude || AccountInformationDummy.longitude}</DetailText>
+              <DetailText label="Latitude">{data_accountDetail?.latitude || AccountInformationDummy.latitude}</DetailText>
+              <DetailText label="Status">{data_accountDetail?.status || AccountInformationDummy.status}</DetailText>    
+            </div>
           </div>
         </BaseContainer>
 
