@@ -545,7 +545,7 @@ export default function InfoPaymentRelation({
         className="border-[0.5px] border-[#c8cdd4] border-solid "
         usePagination={true}
         useSelect={true}
-        dataMain={ServiceRequest}
+        dataMain={paymentRelation}
         columnMain={columnMain}
         tablePadding={"small"}
         fontSize={"small"}
