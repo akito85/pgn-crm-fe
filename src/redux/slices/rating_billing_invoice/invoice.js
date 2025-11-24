@@ -12,7 +12,7 @@ const initialState = {
   message: "",
   data_detail: null,
   data_format: null,
-  data_billing: null,
+  data_billing: [],
 };
 
 export const getAllInvoicePaginate = createAsyncThunk(
@@ -59,7 +59,7 @@ export const getBillingApproval = createAsyncThunk(
   "GET_BILLING_APPROVAL",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/billing/list-billing-gas`;
+      const url = `/v1/dbs/api/rbi/invoice/billing`;
       const response = await ratingBillingHttpService.getAll(url);
       return response;
     } catch (error) {
@@ -127,24 +127,43 @@ export const createGenerate = createAsyncThunk(
 );
 
 export const getDownloadList = createAsyncThunk(
-  "DOWNLOAD_INVOICE",
-  async (invoiceNumber, thunkAPI) => {
+  "DOWNLOAD_INVOICE_LIST",
+  async ({ page, pageSize, search, sort }, thunkAPI) => {
     try {
-      const url = `/api/v1/invoices/download/${invoiceNumber}`;
-      const response = await axios.get(url, { responseType: "blob" });
-      return response.data;
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/rbi/invoice/download-filter?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+
+      const response = await ratingBillingHttpService.downloadXlsx(
+        url,
+        "invoice_list"
+      );
+
+      return response;
     } catch (error) {
+      const message =
+        error?.response?.data?.message || error.message || error.toString();
+
       thunkAPI.dispatch(
         validateError({
-          error,
-          action: "DOWNLOAD_INVOICE",
+          error: error?.response,
+          action: "DOWNLOAD_INVOICE_LIST",
           back: false,
         })
       );
+
+      const errorBody = {
+        title: "Failed",
+        description: `Failed to download list. ${message}`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );
+
 const invoiceSlice = createSlice({
   name: "invoice",
   initialState,
@@ -188,7 +207,7 @@ const invoiceSlice = createSlice({
     },
     [getBillingApproval.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data_billing = action.payload;
+      state.data_billing = action.payload.data;
     },
     [getBillingApproval.rejected]: (state) => {
       state.loading = false;

@@ -441,7 +441,7 @@ const PrabillingPage = () => {
           state={{ id: record?.initCode }}
         >
           <Tooltip title="Detail">
-            <div className="pt-1">
+            <div className="py-0">
               <SVGIcon name="IconDetail" width={24} />
             </div>
           </Tooltip>
@@ -479,7 +479,9 @@ const PrabillingPage = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">PRABILLING LIST</p>
+              <p className="mt-[15px] font-bold text-primary">
+                PRABILLING LIST
+              </p>
               <div className="mt-[15px]">
                 <Toolbar items={itemGrantAccess} />
               </div>
