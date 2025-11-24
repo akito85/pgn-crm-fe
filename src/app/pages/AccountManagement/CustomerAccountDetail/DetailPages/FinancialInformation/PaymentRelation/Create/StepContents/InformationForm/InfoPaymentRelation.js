@@ -70,99 +70,39 @@ export default function InfoPaymentRelation({
       render: (text, object, index) => (sanitizedPage - 1) * sanitizedPageSize + index + 1,
     },
     {
-      title: "SERVICE REQUEST NUMBER",
-      dataIndex: "serviceRequestNumber",
+      title: "CUSTOMER NUMBER",
+      dataIndex: "customerNumber",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("serviceRequestNumber"),
+      ...getColumnSearchProps("customerNumber"),
     },
     {
-      title: "SERVICE REQUEST REFERENCE",
-      dataIndex: "serviceRequestReference",
+      title: "IDENTIFICATION TYPE",
+      dataIndex: "identificationType",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("identificationType"),
+    },
+    {
+      title: "CUSTOMER IDENTIFICATION NUMBER",
+      dataIndex: "customerIdentificationNumber",
       width: 220,
       sorter: true,
-      ...getColumnSearchProps("serviceRequestReference"),
-      render: (reference) => (
-        <span className="underline cursor-pointer text-blue-600">
-          {reference || "-"}
-        </span>
-      ),
+      ...getColumnSearchProps("customerIdentificationNumber"),
     },
     {
-      title: "TYPE",
-      dataIndex: "type",
-      width: 150,
+      title: "CUSTOMER NAME",
+      dataIndex: "customerName",
+      width: 200,
       sorter: true,
-      ...getColumnSearchProps("type"),
+      ...getColumnSearchProps("customerName"),
     },
     {
-      title: "CATEGORY",
-      dataIndex: "category",
+      title: "CUSTOMER TYPE",
+      dataIndex: "customerType",
       width: 160,
       sorter: true,
-      ...getColumnSearchProps("category"),
-    },
-    {
-      title: "SUB CATEGORY",
-      dataIndex: "subCategory",
-      width: 160,
-      sorter: true,
-      ...getColumnSearchProps("subCategory"),
-    },
-    {
-      title: "CHANNEL",
-      dataIndex: "channel",
-      width: 140,
-      sorter: true,
-      ...getColumnSearchProps("channel"),
-    },
-    {
-      title: "REQUEST SOURCE",
-      dataIndex: "requestSource",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("requestSource"),
-    },
-    {
-      title: "REQUEST DATE",
-      dataIndex: "requestDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("requestDate"),
-      render: (date) => renderDate(date) || "-",
-    },
-    {
-      title: "OPEN DATE",
-      dataIndex: "openDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("openDate"),
-      render: (date) => renderDate(date) || "-",
-    },
-    {
-      title: "RESOLVED DATE",
-      dataIndex: "resolvedDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("resolvedDate"),
-      render: (date) => renderDate(date) || "-",
-    },
-    {
-      title: "CLOSED DATE",
-      dataIndex: "closedDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("closedDate"),
-      render: (date) => renderDate(date) || "-",
-    },
-    {
-      title: "AGE (HOUR)",
-      dataIndex: "age",
-      width: 120,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("age"),
-      render: (age) => age || "0",
+      ...getColumnSearchProps("customerType"),
     },
     {
       title: "DESCRIPTION",
@@ -172,93 +112,40 @@ export default function InfoPaymentRelation({
       ...getColumnSearchProps("description"),
     },
     {
-      title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
-      width: 160,
+      title: "BIRTH/FOUNDED DATE",
+      dataIndex: "birthFoundedDate",
+      width: 150,
       sorter: true,
-      align: "center",
-      ...getColumnSearchProps("statusApproval"),
-      render: (status) => {
-        const colorMap = {
-          "approved": "green",
-          "waitingApproval": "orange",
-          "pending": "orange",
-          "rejected": "red"
-        };
-        const displayText = {
-          "approved": "Approved",
-          "waitingApproval": "Waiting Approval",
-          "pending": "Pending",
-          "rejected": "Rejected"
-        };
-        return (
-          <div className="flex justify-center">
-            <StatusComponent colour={colorMap[status] || "gray"}>
-              {displayText[status] || toTitleCase(String(status || "")) || "-"}
-            </StatusComponent>
-          </div>
-        );
-      },
+      ...getColumnSearchProps("birthFoundedDate"),
+      render: (date) => renderDate(date) || "-",
     },
     {
-      title: "STATUS PRE-REQUISITE",
-      dataIndex: "statusPrerequisite",
-      width: 180,
+      title: "BIRTH/FOUNDED PLACE",
+      dataIndex: "birthFoundedPlace",
+      width: 200,
       sorter: true,
-      align: "center",
-      ...getColumnSearchProps("statusPrerequisite"),
-      render: (status) => {
-        const colorMap = {
-          "completed": "green",
-          "pending": "red",
-          "none": "blue"
-        };
-        const displayText = {
-          "completed": "Completed",
-          "pending": "Pending",
-          "none": "None"
-        };
-        return (
-          <div className="flex justify-center">
-            <StatusComponent colour={colorMap[status] || "gray"}>
-              {displayText[status] || toTitleCase(String(status || "")) || "-"}
-            </StatusComponent>
-          </div>
-        );
-      },
+      ...getColumnSearchProps("birthFoundedPlace"),
     },
     {
-      title: "STATUS",
-      dataIndex: "status",
-      width: 140,
+      title: "SEX",
+      dataIndex: "sex",
+      width: 200,
       sorter: true,
-      align: "center",
-      ...getColumnSearchProps("status"),
-      render: (status) => {
-        const colorMap = {
-          "inProgress": "blue",
-          "onHold": "orange",
-          "closed": "red",
-          "canceled": "gray",
-          "open": "green",
-          "active": "green",
-          "pending": "orange"
-        };
-        const displayText = {
-          "inProgress": "In Progress",
-          "onHold": "On Hold",
-          "closed": "Closed",
-          "canceled": "Canceled",
-          "open": "Open"
-        };
-        return (
-          <div className="flex justify-center">
-            <StatusComponent colour={colorMap[status] || "gray"}>
-              {displayText[status] || toTitleCase(String(status || "")) || "-"}
-            </StatusComponent>
-          </div>
-        );
-      },
+      ...getColumnSearchProps("sex"),
+    },
+    {
+      title: "MARITAL STATUS",
+      dataIndex: "maritalStatus",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("maritalStatus"),
+    },
+    {
+      title: "SEARCH KEY",
+      dataIndex: "searchKey",
+      width: 200,
+      sorter: true,
+      ...getColumnSearchProps("searchKey"),
     },
     {
       title: "ACTION",
@@ -271,26 +158,10 @@ export default function InfoPaymentRelation({
             <Tooltip title="Detail">
               <div className="pt-1 cursor-pointer">
                 <SVGIcon
-                  name="IconDetail"
+                  name="IconActionCreate"
                   color={"#0075bf"}
                   width={20}
-                  onClick={() => {
-                    navigate("/account-management/account-standard/service-requests/details");
-                    // handleDetail(r);
-                    // setModalDetail(true);
-                  }}
-                />
-              </div>
-            </Tooltip>
-            <Tooltip title="Update">
-              <div className="pt-1 cursor-pointer">
-                <SVGIcon
-                  name="IconEdit"
-                  color={"#0075bf"}
-                  width={20}
-                  onClick={() => {
-                    // Handle update action
-                  }}
+                  onClick={() => {}}
                 />
               </div>
             </Tooltip>
@@ -298,7 +169,22 @@ export default function InfoPaymentRelation({
         );
       },
     },
+  ]
 
+  const paymentRelationDummy = [
+    {
+      customerNumber: "CST009425",
+      identificationType: "NPWP",
+      customerIdentificationNumber: "9809149088941",
+      customerName: "KERAMIK INTI",
+      customerType: "Organization",
+      description: "-",
+      birthFoundedDate: "22-08-2022",
+      birthFoundedPlace: "Jakarta",
+      sex: "Male",
+      maritalStatus: "Married",
+      searchKey: "Keramik Inti Pusat",
+    }
   ]
 
   return(
@@ -426,7 +312,7 @@ export default function InfoPaymentRelation({
         className="border-[0.5px] border-[#c8cdd4] border-solid "
         usePagination={true}
         useSelect={true}
-        dataMain={paymentRelation}
+        dataMain={paymentRelationDummy}
         columnMain={columnMain}
         tablePadding={"small"}
         fontSize={"small"}
