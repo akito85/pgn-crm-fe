@@ -29,6 +29,8 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
     "/account-management/account-standard/financial-information/payment-relation/details",
   CREATE_PAYMENT_RELATION:
     "/account-management/account-standard/financial-information/payment-relation/create",
+  UPDATE_PAYMENT_RELATION:
+    "/account-management/account-standard/financial-information/payment-relation/update",
 
   //Detail Service Agreement
   VIEW_DETAIL_SERVICE_AGREEMENT:
