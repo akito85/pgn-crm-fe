@@ -8,7 +8,7 @@ const BaseContainer = ({ header,subHeader, children, type, element }) => {
           <div className="p-4">{element}</div>
         </>
       ) : (
-        <>
+        (header || subHeader) && <>
           <div className="p-4">
             <div className="text-primary text-xs font-bold uppercase">
               {header}
