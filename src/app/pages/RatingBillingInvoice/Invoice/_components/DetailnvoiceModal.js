@@ -21,25 +21,25 @@ const StatusTag = ({ status }) => {
       Terkirim: {
         color: "success",
         icon: "✅",
-        text: "Terkirim",
+        text: "Sent",
       },
       Gagal: {
         color: "error",
         icon: "❌",
-        text: "Gagal",
+        text: "Failed",
       },
       Menunggu: {
         color: "warning",
         icon: "⏳",
-        text: "Menunggu",
+        text: "Scheduled",
       },
       "Belum Diproses": {
         color: "default",
         icon: "📋",
-        text: "Belum Diproses",
+        text: "Not Processed",
       },
     };
-    return configs[status] || configs["Belum Diproses"];
+    return configs[status] || configs["Not Processed"];
   };
 
   const config = getStatusConfig(status);
@@ -77,7 +77,7 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
         id: "789",
         channel: "Email",
         recipient: "cs@ptmakmur.com",
-        status: "Terkirim",
+        status: "Sent",
         sentTime: "01/10/2025 10:10",
         hasLog: true,
       },
@@ -85,7 +85,7 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
         id: "790",
         channel: "WhatsApp",
         recipient: "+628123456789",
-        status: "Gagal",
+        status: "Failed",
         sentTime: "01/10/2025 10:11",
         hasLog: true,
         canResend: true,
@@ -126,7 +126,7 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
       width={900}
       footer={[
         <Button key="close" type="primary" size="large" onClick={onCancel}>
-          Tutup
+          Close
         </Button>,
       ]}
       style={{ top: 20 }}
@@ -151,7 +151,7 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
                   marginBottom: "4px",
                 }}
               >
-                Pelanggan
+                Customer
               </div>
               <div
                 style={{
@@ -171,7 +171,7 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
                   marginBottom: "4px",
                 }}
               >
-                Total Tagihan
+                Total Amount
               </div>
               <div
                 style={{
@@ -193,7 +193,7 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
                   marginBottom: "4px",
                 }}
               >
-                Tanggal Invoice
+                Invoice Date
               </div>
               <div
                 style={{
@@ -213,7 +213,7 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
                   marginBottom: "4px",
                 }}
               >
-                Tanggal Jatuh Tempo
+                Due Date
               </div>
               <div
                 style={{
@@ -234,7 +234,7 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
         orientation="left"
         style={{ fontWeight: "600", fontSize: "15px" }}
       >
-        📨 Riwayat Pengiriman
+        📨 Delivery History
       </Divider>
 
       <div style={{ marginTop: "16px" }}>
@@ -274,7 +274,7 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
               </Col>
               <Col span={6}>
                 <div style={{ fontSize: "12px", color: "#8c8c8c" }}>
-                  Penerima
+                  Receipt
                 </div>
                 <div
                   style={{
@@ -294,7 +294,7 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
               </Col>
               <Col span={5}>
                 <div style={{ fontSize: "12px", color: "#8c8c8c" }}>
-                  Waktu Kirim
+                  Sent Time
                 </div>
                 <div
                   style={{
@@ -318,7 +318,7 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
                       onClick={() => handleViewLog(delivery)}
                       style={{ width: "100%", fontSize: "12px" }}
                     >
-                      Lihat Log
+                      View Log
                     </Button>
                   )}
                   {delivery.canResend && (
@@ -330,7 +330,7 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
                       onClick={() => handleResend(delivery)}
                       style={{ width: "100%", fontSize: "12px" }}
                     >
-                      Kirim Ulang
+                      Resend
                     </Button>
                   )}
                 </Space>
