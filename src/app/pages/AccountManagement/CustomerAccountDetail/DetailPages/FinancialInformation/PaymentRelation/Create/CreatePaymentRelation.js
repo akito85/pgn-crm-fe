@@ -233,18 +233,8 @@ const CreatePaymentRelation = (props) => {
   
   const steps = [
     {
-      title: "Service Request",
+      title: "Payment Relation",
       content: <InformationForm />,
-      disabled: false
-    },
-    {
-      title: "Contact",
-      content: <ContactForm />,
-      disabled: false
-    },    
-    {
-      title: "Pre-Requisite",
-      content: <PreRequisiteForm />,
       disabled: false
     },
     {
