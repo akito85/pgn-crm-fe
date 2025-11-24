@@ -11,8 +11,6 @@ import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import { CloseOutlined, PauseCircleOutlined, PlayCircleOutlined, LockOutlined, PlusOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
-import { getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
-
 
 const CustomerServiceRequestDetailInfo = ({
   data = [],
@@ -46,10 +44,6 @@ const CustomerServiceRequestDetailInfo = ({
   const navigate = useNavigate();
   const location = useLocation();
   const id = location?.state?.id;
-  
-  useEffect(() => {
-    dispatch(getGrantedAccessAccount('/account-management/customers'))
-  }, [dispatch])
 
   useEffect(() => {
     if (id) {
