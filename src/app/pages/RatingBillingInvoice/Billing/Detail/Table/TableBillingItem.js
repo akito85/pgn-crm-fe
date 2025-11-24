@@ -1,4 +1,8 @@
-import { hasValue, renderColumn, separatorNumber } from "../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  separatorNumber,
+} from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
 export const columnsBillingItem = (
@@ -8,7 +12,7 @@ export const columnsBillingItem = (
   searchedColumnBI,
   searchTextBI,
   handleSearchBI = () => {},
-  searchBI,
+  searchBI
 ) => [
   {
     key: "no",
@@ -200,7 +204,7 @@ export const columnsBillingItem = (
   },
   {
     key: "discountAmount",
-    title: "DISCOUNT MOUNT",
+    title: "DISCOUNT AMOUNT",
     dataIndex: "discountAmount",
     sorter: true,
     align: "right",
