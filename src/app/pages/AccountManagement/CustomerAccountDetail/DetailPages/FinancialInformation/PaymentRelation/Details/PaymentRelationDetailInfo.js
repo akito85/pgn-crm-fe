@@ -91,24 +91,13 @@ const CustomerServiceRequestDetailInfo = ({
   };
 
   const ServiceRequestDummy = {
-    serviceRequestNumber: "SR20240800000002",
-    serviceRequestReference: "SR20240800000004",
-    costCenter: "015 - AREA BOGOR",
-    type: "Field Service",
-    category: "Gas Management",
-    subCategory: "Gas Termination",
-    channel: "Manual",
-    priority: "High",
-    requestSource: "Customer",
-    requestDate: "21 Jan 2022 12:34:34",
-    openDate: "21 Jan 2022 12:34:34",
-    resolvedDate: "21 Jan 2022 12:34:34",
-    closedDate: "21 Jan 2022 12:34:34",
-    ageHour: "3.4",
-    statusApproval: "Approved",
-    statusPreRequisite: "Completed",
-    status: "Open",
-    description: "-"
+    accountNumber: "2027635461",
+    accountName: "PT XYZ",
+    priority: "1",
+    startDate: "22 Aug 2022",
+    endDate: "22 Aug 2022",
+    status: "Active",
+    description: "Lorem ipsum dolor sit amet consectetur. Malesuada turpis arcu morbi elit sed lorem at adipiscing imperdiet. Aliquam quis tempus feugiat amet. Viverra metus tincidunt nibh mauris nisi. At et etiam non dignissim ultricies tellus in lacus fermentum. Sollicitudin purus viverra tincidunt proin."
   };
 
   // Use dummy data if no data provided
@@ -187,122 +176,19 @@ const CustomerServiceRequestDetailInfo = ({
 
   return (
     <Fragment>
-      <div className="flex items-center justify-between">
-        {/* Left Side Buttons Group */}
-        <div className="flex items-center gap-3">
-          {/* Cancel Button */}
-          {SRStatus !== "canceled" && SRStatus !== "closed" && SRStatus !== "resolved" && (
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {setSRStatus("canceled")}}
-              icon={<CloseOutlined className="text-2xl" />}
-            >
-              Cancel
-            </ButtonComponent>
-          )}
-
-          {/* On Hold Button */}
-          {SRStatus !== "canceled" && SRStatus !== "closed" && SRStatus !== "on-hold" && SRStatus !== "resolved" && (
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {setSRStatus("on-hold")}}
-              icon={<PauseCircleOutlined className="text-2xl" />}
-            >
-              Marks as On Hold
-            </ButtonComponent>
-          )}
-        </div>
-
-        {/* Right Side Buttons Group */}
-        <div className="flex items-center gap-3">
-          {/* Marks as Open Button */}
-          {SRStatus !== "canceled" && SRStatus !== "closed" && (SRStatus === "on-hold" || SRStatus === "in-progress" || SRStatus === "resolved") && (
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {setSRStatus("open")}}
-              icon={<PlayCircleOutlined className="text-2xl" />}
-            >
-              Marks as Open
-            </ButtonComponent>
-          )}
-
-          {/* Marks as In Progress Button */}
-          {SRStatus !== "canceled" && SRStatus !== "closed" && SRStatus !== "in-progress" && (
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {setSRStatus("in-progress")}}
-              icon={<PlayCircleOutlined className="text-2xl" />}
-            >
-              Marks as In Progress
-            </ButtonComponent>
-          )}
-
-          {/* Mark as Resolved Button */}
-          {SRStatus !== "canceled" && SRStatus !== "closed" && SRStatus !== "resolved" && (
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {setSRStatus("resolved")}}
-              icon={<CheckCircleOutlined className="text-2xl" />}
-            >
-              Mark as Resolved
-            </ButtonComponent>
-          )}
-
-          {/* Mark as Closed Button */}
-          {SRStatus !== "canceled" && SRStatus !== "closed" && (
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {setSRStatus("closed")}}
-              icon={<LockOutlined className="text-2xl text-white" />}
-              className="bg-[#0075bf] text-white hover:bg-[#0075bf]/90 transition-colors"
-            >
-              Mark as Closed
-            </ButtonComponent>
-          )}
-        </div>
-      </div>
-      
-      <BaseContainer header={"SERVICE REQUEST"}>
-        <div className="w-full grid grid-cols-4 gap-4">
-          {/* Service Request Information */}
-          <DetailText label="Service Request Number">{data?.serviceRequestNumber || ServiceRequestDummy.serviceRequestNumber}</DetailText>
-          <DetailText label="Service Request Reference"><u>{data?.serviceRequestReference || ServiceRequestDummy.serviceRequestReference}</u></DetailText>
-          <DetailText label="Cost Center">{data?.costCenter || ServiceRequestDummy.costCenter}</DetailText>
-          <DetailText label="Type">{data?.type || ServiceRequestDummy.type}</DetailText>
-          <DetailText label="Category">{data?.category || ServiceRequestDummy.category}</DetailText>
-          <DetailText label="Sub Category">{data?.subCategory || ServiceRequestDummy.subCategory}</DetailText>
-          <DetailText label="Channel">{data?.channel || ServiceRequestDummy.channel}</DetailText>
-          <DetailText label="Priority">{data?.priority || ServiceRequestDummy.priority}</DetailText>
-          <DetailText label="Request Source">{data?.requestSource || ServiceRequestDummy.requestSource}</DetailText>
-          <DetailText label="Request Date">{data?.requestDate || ServiceRequestDummy.requestDate}</DetailText>
-          <DetailText label="Open Date">{data?.openDate || ServiceRequestDummy.openDate}</DetailText>
-          <DetailText label="Resolved Date">{data?.resolvedDate || ServiceRequestDummy.resolvedDate}</DetailText>
-          <DetailText label="Closed Date">{data?.closedDate || ServiceRequestDummy.closedDate}</DetailText>
-          <DetailText label="Age (Hour)">{data?.ageHour || ServiceRequestDummy.ageHour}</DetailText>
-          <DetailText label="Status Approval">{data?.statusApproval || ServiceRequestDummy.statusApproval}</DetailText>
-          <DetailText label="Status Pre-Requisite">{data?.statusPreRequisite || ServiceRequestDummy.statusPreRequisite}</DetailText>
-          <DetailText label="Status">{data?.status || ServiceRequestDummy.status}</DetailText>
+      <BaseContainer header={"PAYMENT RELATION"}>
+        <div className="w-full grid grid-cols-3 gap-4">
+          {/* Payment Relation Information */}
+          <DetailText label="Account Number">{data?.accountNumber || ServiceRequestDummy.accountNumber}</DetailText>
+          <DetailText label="Account Name">{data?.accountName || ServiceRequestDummy.accountName}</DetailText>
+          <DetailText label="Cost Center">{data?.priority || ServiceRequestDummy.priority}</DetailText>
+          <DetailText label="Type">{data?.startDate || ServiceRequestDummy.startDate}</DetailText>
+          <DetailText label="Category">{data?.endDate || ServiceRequestDummy.endDate}</DetailText>
+          <DetailText label="Sub Category">{data?.status || ServiceRequestDummy.status}</DetailText>
         </div>
         <div className="w-full">
           <DetailText label="Description">{data?.description || ServiceRequestDummy.description}</DetailText>
         </div>
-      </BaseContainer>
-
-      <BaseContainer header={"ACTION LOG"}>
-        <TablePagination
-          dataSource={tableData.map((item, idx) => ({
-            ...item,
-            key: item.id || idx,
-          }))}
-          totalData={sanitizedTotalElement}
-          current={sanitizedPage}
-          pageSize={sanitizedPageSize}
-          onChange={handleChange}
-          onSizeChanger={handleChangeSize}
-          tableScrolled={{ y: 525, x: 1500 }}
-          onSort={onSort}
-          columns={columns}
-        />
       </BaseContainer>
 
       <BaseContainer header={"HISTORY LOG INFORMATION"}>
