@@ -6,16 +6,8 @@ import React, {
   useCallback,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  Spin,
-  Tooltip,
-  Dropdown,
-  message,
-} from "antd";
-import {
-  MoreOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+import { Spin, Tooltip, Dropdown, message } from "antd";
+import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
 import moment from "moment";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -31,6 +23,7 @@ import ModalUploadEFaktur from "./ModalEfaktur/ModalUploadEFaktur";
 import ModalApprovalEFaktur from "./ModalEfaktur/ModalApprovalEFaktur ";
 import ModalReplaceEFaktur from "./ModalEfaktur/ModalReplaceEFaktur";
 import ModalCancelEFaktur from "./ModalEfaktur/ModalCancelEFaktur ";
+import ModalBulkRequestApproval from "./ModalEfaktur/ModalBulkRequestApproval"; // NEW MODAL
 import LogAktivitasEFaktur from "./LogAktivitasEFaktur";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
@@ -74,13 +67,14 @@ const ViewFaktur = () => {
   const [logAktivitasOpen, setLogAktivitasOpen] = useState(false);
   const [modalReplaceFaktur, setModalReplaceFaktur] = useState(false);
   const [modalCancelFaktur, setModalCancelFaktur] = useState(false);
+  const [modalBulkRequest, setModalBulkRequest] = useState(false); // NEW STATE
 
   const [selectedBilling, setSelectedBilling] = useState(null);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["efakturStatus","action"],
+    right: ["efakturStatus", "action"],
   }));
 
   // Breadcrumbs
@@ -212,6 +206,11 @@ const ViewFaktur = () => {
     setLogAktivitasOpen(true);
   };
 
+  // NEW: Handle Bulk Request
+  const handleBulkRequest = () => {
+    setModalBulkRequest(true);
+  };
+
   const handleRefresh = () => {
     dispatch(
       getListEFaktur({
@@ -248,7 +247,7 @@ const ViewFaktur = () => {
     setModalApproval(false);
     setSelectedBilling(null);
   };
-  
+
   const closeModalReplaceFaktur = () => {
     setModalReplaceFaktur(false);
     setSelectedBilling(null);
@@ -261,6 +260,11 @@ const ViewFaktur = () => {
   const closeLogAktivitas = () => {
     setLogAktivitasOpen(false);
     setSelectedBilling(null);
+  };
+
+  // NEW: Close Bulk Request Modal
+  const closeModalBulkRequest = () => {
+    setModalBulkRequest(false);
   };
 
   // Columns Definition
@@ -357,6 +361,123 @@ const ViewFaktur = () => {
             search
           ),
       },
+      // NEW: SOR Column
+      {
+        key: "sor",
+        title: "SOR",
+        dataIndex: "sor",
+        width: 150,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.sor] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "sor",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "sor",
+            hasValue(search["sor"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Cost Center Column
+      {
+        key: "costCenter",
+        title: "COST CENTER",
+        dataIndex: "costCenter",
+        width: 150,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.costCenter] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "costCenter",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "costCenter",
+            hasValue(search["costCenter"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Meter Reading Column
+      {
+        key: "meterReading",
+        title: "METER READING",
+        dataIndex: "meterReading",
+        width: 150,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.meterReading] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "meterReading",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "meterReading",
+            hasValue(search["meterReading"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Account Name Column
+      {
+        key: "accountName",
+        title: "ACCOUNT NAME",
+        dataIndex: "accountName",
+        width: 250,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.accountName] || null,
+        ellipsis: { showTitle: false },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "accountName",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "accountName",
+            hasValue(search["accountName"]),
+            searchText,
+            text || "-",
+            true,
+            "input",
+            search
+          ),
+      },
       {
         key: "typePpn",
         title: "TYPE PPN",
@@ -387,7 +508,7 @@ const ViewFaktur = () => {
       },
       {
         key: "customerName",
-        title: "CUSTOMER",
+        title: "CUSTOMER NAME",
         dataIndex: "customerName",
         width: 250,
         align: "left",
@@ -410,6 +531,64 @@ const ViewFaktur = () => {
             searchText,
             text,
             true,
+            "input",
+            search
+          ),
+      },
+      // NEW: Segment Column
+      {
+        key: "segment",
+        title: "SEGMENT",
+        dataIndex: "segment",
+        width: 150,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.segment] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "segment",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "segment",
+            hasValue(search["segment"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Account Group Type Column
+      {
+        key: "accountGroupType",
+        title: "ACCOUNT GROUP TYPE",
+        dataIndex: "accountGroupType",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.accountGroupType] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "accountGroupType",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "accountGroupType",
+            hasValue(search["accountGroupType"]),
+            searchText,
+            text || "-",
+            false,
             "input",
             search
           ),
@@ -437,6 +616,181 @@ const ViewFaktur = () => {
             hasValue(search["accountNumber"]),
             searchText,
             text,
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Customer Identification Number Column
+      {
+        key: "customerIdentificationNumber",
+        title: "CUSTOMER IDENTIFICATION NUMBER",
+        dataIndex: "customerIdentificationNumber",
+        width: 220,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.customerIdentificationNumber] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "customerIdentificationNumber",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "customerIdentificationNumber",
+            hasValue(search["customerIdentificationNumber"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Tax Address Column
+      {
+        key: "taxAddress",
+        title: "TAX ADDRESS",
+        dataIndex: "taxAddress",
+        width: 300,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.taxAddress] || null,
+        ellipsis: { showTitle: false },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "taxAddress",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "taxAddress",
+            hasValue(search["taxAddress"]),
+            searchText,
+            text || "-",
+            true,
+            "input",
+            search
+          ),
+      },
+      // NEW: Jenis Identitas Column
+      {
+        key: "jenisIdentitas",
+        title: "JENIS IDENTITAS",
+        dataIndex: "jenisIdentitas",
+        width: 150,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.jenisIdentitas] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "jenisIdentitas",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "jenisIdentitas",
+            hasValue(search["jenisIdentitas"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Nomor Identitas Column
+      {
+        key: "nomorIdentitas",
+        title: "NOMOR IDENTITAS",
+        dataIndex: "nomorIdentitas",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.nomorIdentitas] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "nomorIdentitas",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "nomorIdentitas",
+            hasValue(search["nomorIdentitas"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Jenis Wajib Pajak Column
+      {
+        key: "jenisWajibPajak",
+        title: "JENIS WAJIB PAJAK",
+        dataIndex: "jenisWajibPajak",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.jenisWajibPajak] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "jenisWajibPajak",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "jenisWajibPajak",
+            hasValue(search["jenisWajibPajak"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: NITKU Column
+      {
+        key: "nitku",
+        title: "NITKU",
+        dataIndex: "nitku",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.nitku] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "nitku",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "nitku",
+            hasValue(search["nitku"]),
+            searchText,
+            text || "-",
             false,
             "input",
             search
@@ -551,7 +905,8 @@ const ViewFaktur = () => {
           const statusColors = {
             APPROVED: "bg-green-100 text-green-800 border-green-300",
             PROCESSING: "bg-blue-100 text-blue-800 border-blue-300",
-            AWAITING_APPROVAL: "bg-orange-100 text-orange-800 border-orange-300",
+            AWAITING_APPROVAL:
+              "bg-orange-100 text-orange-800 border-orange-300",
             FAILED: "bg-red-100 text-red-800 border-red-300",
             REJECTED: "bg-red-100 text-red-800 border-red-300",
             SUCCESS_UPLOAD: "bg-green-100 text-green-800 border-green-300",
@@ -659,6 +1014,20 @@ const ViewFaktur = () => {
           onClick={() => setModalApproval(true)}
         >
           Approval
+        </ButtonComponent>
+      ),
+    },
+
+    // NEW: Bulk Request Approval Button
+    {
+      action: "Request",
+      render: (
+        <ButtonComponent
+          icon={<SVGIcon name="IconButtonCreate" width={24} />}
+          type="submit"
+          onClick={handleBulkRequest}
+        >
+          Request Approval
         </ButtonComponent>
       ),
     },
@@ -799,7 +1168,7 @@ const ViewFaktur = () => {
             }
           );
         }
-        
+
         if (
           record.efakturStatus === "SUCCESS" ||
           record.efakturStatus === "SUCCESS_UPLOAD" ||
@@ -904,7 +1273,7 @@ const ViewFaktur = () => {
   ];
 
   const actionCols = useColumnActionPermission(
-    ["view", "update"],
+    ["view", "update", "request"], // UPDATED: tambah "request"
     itemGrantAccess
   );
 
@@ -1023,6 +1392,16 @@ const ViewFaktur = () => {
           billingData={selectedBilling}
           onSuccess={() => {
             closeModalCancelFaktur();
+            handleRefresh();
+          }}
+        />
+
+        {/* NEW: Modal Bulk Request Approval */}
+        <ModalBulkRequestApproval
+          isOpen={modalBulkRequest}
+          handleClose={closeModalBulkRequest}
+          onSuccess={() => {
+            closeModalBulkRequest();
             handleRefresh();
           }}
         />
