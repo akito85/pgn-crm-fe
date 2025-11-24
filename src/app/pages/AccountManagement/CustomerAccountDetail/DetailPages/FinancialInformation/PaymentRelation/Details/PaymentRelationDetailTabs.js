@@ -5,7 +5,7 @@ import PaymentRelationDetailInfo from "./PaymentRelationDetailInfo";
 
 const dataTabs = {
   sreqi: "Service Request",
-  contact: "Contact",
+  attch: "Attachment",
 };
 
 const CustomerServiceRequestDetailTabs = ({
@@ -16,7 +16,7 @@ const CustomerServiceRequestDetailTabs = ({
   // Use provided options or fall back to default tabs
   const tabOptions = options.length > 0 ? options : [
     { value: "sreqi", label: "Service Request" },
-    { value: "contact", label: "Contact" },
+    { value: "attch", label: "Attachment" },
   ];
 
 
