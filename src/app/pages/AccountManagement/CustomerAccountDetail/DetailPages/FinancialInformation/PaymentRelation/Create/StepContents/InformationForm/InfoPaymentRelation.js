@@ -14,7 +14,7 @@ import { requiredMessage, toTitleCase } from "../../../../../../../../../../util
 
 import moment from "moment";
 
-export default function InfoServiceRequest({
+export default function InfoPaymentRelation({
   totalElement = 0,
   page = 1,
   pageSize = 10,
@@ -26,7 +26,7 @@ export default function InfoServiceRequest({
   handleSearch
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [ServiceRequest, setServiceRequest] = useState([])
+  const [paymentRelation, setPaymentRelation] = useState([])
   
   const navigate = useNavigate();
 
@@ -53,7 +53,7 @@ export default function InfoServiceRequest({
   // Modify
   const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
   const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
-  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : ServiceRequest.length;
+  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : paymentRelation.length;
   const renderSimpleDate = (date) => {
     if (date) {
       return moment(date).format("DD MMM YYYY");
