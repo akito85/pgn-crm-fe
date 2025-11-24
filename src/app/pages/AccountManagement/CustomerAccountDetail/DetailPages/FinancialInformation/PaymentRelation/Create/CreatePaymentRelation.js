@@ -201,30 +201,6 @@ const CreatePaymentRelation = (props) => {
     });
   }, [data, formCreate]);
 
-  // Populate form with Account Standard/OneTime information
-  useEffect(() => {
-    if (data_accountDetail?.accountInformation) {
-      const accountInfo = data_accountDetail.accountInformation;
-      formCreate.setFieldsValue({
-        account: accountInfo?.accountId || "",
-        accountType: accountInfo?.accountType || "",
-        longitude: accountInfo?.longitude || "",
-        accountSegment: accountInfo?.accountSegment || "",
-        city: accountInfo?.city || "",
-        accountCostCenter: accountInfo?.costCenter || "",
-        subdistrict: accountInfo?.subDistrict || "",
-        meterReadingCode: accountInfo?.mrc || "",
-        district: accountInfo?.district || "",
-        accountSOR: accountInfo?.sor || "",
-        premiseAddress: accountInfo?.premiseAddress || "",
-        latitude: accountInfo?.latitude || "",
-        accountGroupType: accountInfo?.accountGroupType || "",
-        country: accountInfo?.country || "",
-      });
-    }
-    console.log(data_accountDetail.accountInformation)
-  }, [data_accountDetail, formCreate]);
-
   const handleChangeName = (e, type) => {
     switch (type) {
       case "firstName":
@@ -243,10 +219,15 @@ const CreatePaymentRelation = (props) => {
 
   const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}` 
   
+  const setAccount = (accountNumber, accountName) => {
+    formCreate.setFieldValue("accountNumber", accountNumber);
+    formCreate.setFieldValue("accountName", accountName);
+  }
+
   const steps = [
     {
       title: "Payment Relation",
-      content: <InformationForm />,
+      content: <InformationForm setAccount={setAccount} />,
       disabled: false
     },
     {

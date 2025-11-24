@@ -26,7 +26,8 @@ export default function InfoPaymentRelation({
   onSort = () => {},
   getColumnSearchProps = () => {},
   searchInput,
-  handleSearch
+  handleSearch,
+  setAccount,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [paymentRelation, setPaymentRelation] = useState([])
@@ -163,7 +164,10 @@ export default function InfoPaymentRelation({
                   name="IconActionCreate"
                   color={"#0075bf"}
                   width={20}
-                  onClick={() => {}}
+                  onClick={() => {
+                    setAccount(r?.customerNumber, r?.customerName)
+                    setIsOpen(false);
+                  }}
                 />
               </div>
             </Tooltip>
@@ -193,38 +197,37 @@ export default function InfoPaymentRelation({
   <Fragment>
     <NxPanel title={"PAYMENT RELATION INFORMATION"} removeBottomMargin>
       <div className="w-full grid grid-cols-3 gap-4">
-        <Form.Item
-          key="accountNumber"
-          name={"accountNumber"}
-          label={"Account Number"}
-          className="no-margin-form"
-          rules={[
-            {
-              required: true,
-            }
-          ]}
-        >
-          <div className="flex gap-2 items-center">
-            <InputComponent disabled className="flex-1" />
-            <Button
-              type="primary"
-              className="h-9 px-4 justify-center items-center"
-              style={{
-                backgroundColor: "#0075bf",
-                borderColor: "#0075bf",
-                borderRadius: "5px",
-                minWidth: "112px",
-              }}
-              onClick={() => {
-                // Add your select logic here
-                setIsOpen(true)
-                console.log("Select button clicked");
-              }}
-            >
-              Select
-            </Button>
-          </div>
-        </Form.Item>
+        <div className="flex gap-2 items-end">
+          <Form.Item
+            key="accountNumber"
+            name={"accountNumber"}
+            label={"Account Number"}
+            className="no-margin-form"
+            rules={[
+              {
+                required: true,
+              }
+            ]}
+          >
+            <InputComponent disabled />
+          </Form.Item>
+          <Button
+            type="primary"
+            className="h-9 px-4 justify-center items-center"
+            style={{
+              backgroundColor: "#0075bf",
+              borderColor: "#0075bf",
+              borderRadius: "5px",
+              minWidth: "112px",
+            }}
+            onClick={() => {
+              // Add your select logic here
+              setIsOpen(true)
+            }}
+          >
+            Select
+          </Button>
+        </div>
 
         <Form.Item
           key="accountName"
@@ -317,7 +320,6 @@ export default function InfoPaymentRelation({
         tableScrolled={{ y: 525, x: 3000 }}
         columns={columnMain}
       />
-
     </ModalCustom>
   </Fragment>
   )

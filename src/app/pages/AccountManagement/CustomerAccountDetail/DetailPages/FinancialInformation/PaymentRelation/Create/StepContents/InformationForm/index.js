@@ -1,6 +1,8 @@
 import InfoPaymentRelation from "./InfoPaymentRelation";
 
-export default function InformationForm() {
+export default function InformationForm({
+  setAccount,
+}) {
 
-  return <InfoPaymentRelation />;
+  return <InfoPaymentRelation setAccount={setAccount} />;
 }
