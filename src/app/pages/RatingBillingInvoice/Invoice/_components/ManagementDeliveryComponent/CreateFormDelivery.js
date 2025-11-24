@@ -22,7 +22,6 @@ const CreateFormDelivery = ({ visible, onCancel }) => {
 
   const [isScheduled, setIsScheduled] = useState(false);
 
-  console.log("Billing Period Data:", data_billingPeriod);
   // Fetch Billing Period ketika modal dibuka
   useEffect(() => {
     if (visible) {
@@ -45,8 +44,6 @@ const CreateFormDelivery = ({ visible, onCancel }) => {
         scheduleTime: formattedScheduledAt,
         remark: values.remark || "",
       };
-
-      console.log("Payload:", payload);
 
       await dispatch(createDeliveryJob(payload)).unwrap();
 
