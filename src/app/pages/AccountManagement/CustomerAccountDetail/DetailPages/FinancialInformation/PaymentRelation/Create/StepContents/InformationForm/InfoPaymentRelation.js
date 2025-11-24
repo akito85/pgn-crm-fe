@@ -303,7 +303,7 @@ export default function InfoPaymentRelation({
 
   return(
   <Fragment>
-    <NxPanel title={"PAYMENT RELATION INFORMATION"}>
+    <NxPanel title={"PAYMENT RELATION INFORMATION"} removeBottomMargin>
       <div className="w-full grid grid-cols-3 gap-4">
         <Form.Item
           key="accountNumber"

@@ -338,146 +338,147 @@ const CreatePaymentRelation = (props) => {
 
   return (
     <LayoutMenu>
-      <BreadCrumb routes={routes} />
-      <BaseContainer>
-        <div className="flex flex-col gap-y-5">
-          {/* Customer Information */}
-          <div className="text-primary text-xs font-bold uppercase">
-            CUSTOMER INFORMATION
-          </div>
-          <div className="w-full grid grid-cols-4 gap-x-5">
-            <DetailText label="Customer Number">{data_customerDetail?.customerNumber || CustomerInformationDummy.customerNumber}</DetailText>
-            <DetailText label="Identification Type">{data_customerDetail?.identificationType || CustomerInformationDummy.identificationType}</DetailText>
-            <DetailText label="Customer Identification Number">{data_customerDetail?.customerIdentificationNumber || CustomerInformationDummy.customerIdentificationNumber}</DetailText>
-            <DetailText label="Customer Name">{data_customerDetail?.customerName || CustomerInformationDummy.customerName}</DetailText>
-            <DetailText label="Customer Type">{data_customerDetail?.customerType || CustomerInformationDummy.customerType}</DetailText>
-            <DetailText label="Description">{data_customerDetail?.description || CustomerInformationDummy.description}</DetailText>
-            <DetailText label="Birth/Founded Date">{data_customerDetail?.birthFoundedDate ? renderDate(data_customerDetail.birthFoundedDate) : renderDate(CustomerInformationDummy.birthFoundedDate)}</DetailText>
-            <DetailText label="Birth/Founded Place">{data_customerDetail?.birthFoundedPlace || CustomerInformationDummy.birthFoundedPlace}</DetailText>
-            <DetailText label="Sex">{data_customerDetail?.sex || CustomerInformationDummy.sex}</DetailText>
-            <DetailText label="Maritial Status">{data_customerDetail?.maritialStatus || CustomerInformationDummy.maritialStatus}</DetailText>
-            <DetailText label="Search Key">{data_customerDetail?.searchKey || CustomerInformationDummy.searchKey}</DetailText>
-          </div>
+      <div className="flex flex-col gap-y-5">
+        <BreadCrumb routes={routes} />
+        <BaseContainer removeTopMargin>
+          <div className="flex flex-col gap-y-5">
+            {/* Customer Information */}
+            <div className="text-primary text-xs font-bold uppercase">
+              CUSTOMER INFORMATION
+            </div>
+            <div className="w-full grid grid-cols-4 gap-x-5">
+              <DetailText label="Customer Number">{data_customerDetail?.customerNumber || CustomerInformationDummy.customerNumber}</DetailText>
+              <DetailText label="Identification Type">{data_customerDetail?.identificationType || CustomerInformationDummy.identificationType}</DetailText>
+              <DetailText label="Customer Identification Number">{data_customerDetail?.customerIdentificationNumber || CustomerInformationDummy.customerIdentificationNumber}</DetailText>
+              <DetailText label="Customer Name">{data_customerDetail?.customerName || CustomerInformationDummy.customerName}</DetailText>
+              <DetailText label="Customer Type">{data_customerDetail?.customerType || CustomerInformationDummy.customerType}</DetailText>
+              <DetailText label="Description">{data_customerDetail?.description || CustomerInformationDummy.description}</DetailText>
+              <DetailText label="Birth/Founded Date">{data_customerDetail?.birthFoundedDate ? renderDate(data_customerDetail.birthFoundedDate) : renderDate(CustomerInformationDummy.birthFoundedDate)}</DetailText>
+              <DetailText label="Birth/Founded Place">{data_customerDetail?.birthFoundedPlace || CustomerInformationDummy.birthFoundedPlace}</DetailText>
+              <DetailText label="Sex">{data_customerDetail?.sex || CustomerInformationDummy.sex}</DetailText>
+              <DetailText label="Maritial Status">{data_customerDetail?.maritialStatus || CustomerInformationDummy.maritialStatus}</DetailText>
+              <DetailText label="Search Key">{data_customerDetail?.searchKey || CustomerInformationDummy.searchKey}</DetailText>
+            </div>
 
-          {/* Account Information */}
-          <div className="text-primary text-xs font-bold uppercase">
-            ACCOUNT INFORMATION
+            {/* Account Information */}
+            <div className="text-primary text-xs font-bold uppercase">
+              ACCOUNT INFORMATION
+            </div>
+            <div className="w-full grid grid-cols-4 gap-x-4">
+              <DetailText label="Account Number">{data_accountDetail?.accountNumber || AccountInformationDummy.accountNumber}</DetailText>
+              <DetailText label="Registration Number">{data_accountDetail?.registrationNumber || AccountInformationDummy.registrationNumber}</DetailText>
+              <DetailText label="Account Name">{data_accountDetail?.accountName || AccountInformationDummy.accountName}</DetailText>
+              <DetailText label="Category">{data_accountDetail?.category || AccountInformationDummy.category}</DetailText>
+              <DetailText label="SOR">{data_accountDetail?.sor || AccountInformationDummy.sor}</DetailText>
+              <DetailText label="Cost Center">{data_accountDetail?.costCenter || AccountInformationDummy.costCenter}</DetailText>
+              <DetailText label="Meter Reading Codes">{data_accountDetail?.meterReadingCodes ? renderDate(data_accountDetail.meterReadingCodes) : renderDate(AccountInformationDummy.birthFoundedDate)}</DetailText>
+              <DetailText label="Customer Management">{data_accountDetail?.customerManagement || AccountInformationDummy.customerManagement}</DetailText>
+              <DetailText label="Classification Type">{data_accountDetail?.classificationType || AccountInformationDummy.classificationType}</DetailText>
+              <DetailText label="Segment">{data_accountDetail?.segment || AccountInformationDummy.segment}</DetailText>
+              <DetailText label="Account Group Type">{data_accountDetail?.accountGroupType || AccountInformationDummy.accountGroupType}</DetailText>
+              <DetailText label="Premise Address">{data_accountDetail?.premiseAddress || AccountInformationDummy.premiseAddress}</DetailText>
+              <DetailText label="Subdistrict">{data_accountDetail?.subdistrict || AccountInformationDummy.subdistrict}</DetailText>
+              <DetailText label="District">{data_accountDetail?.district || AccountInformationDummy.district}</DetailText>
+              <DetailText label="City">{data_accountDetail?.city || AccountInformationDummy.city}</DetailText>
+              <DetailText label="Country">{data_accountDetail?.country || AccountInformationDummy.country}</DetailText>
+              <DetailText label="Longitude">{data_accountDetail?.longitude || AccountInformationDummy.longitude}</DetailText>
+              <DetailText label="Latitude">{data_accountDetail?.latitude || AccountInformationDummy.latitude}</DetailText>
+              <DetailText label="Status">{data_accountDetail?.status || AccountInformationDummy.status}</DetailText>    
+            </div>
           </div>
-          <div className="w-full grid grid-cols-4 gap-x-4">
-            <DetailText label="Account Number">{data_accountDetail?.accountNumber || AccountInformationDummy.accountNumber}</DetailText>
-            <DetailText label="Registration Number">{data_accountDetail?.registrationNumber || AccountInformationDummy.registrationNumber}</DetailText>
-            <DetailText label="Account Name">{data_accountDetail?.accountName || AccountInformationDummy.accountName}</DetailText>
-            <DetailText label="Category">{data_accountDetail?.category || AccountInformationDummy.category}</DetailText>
-            <DetailText label="SOR">{data_accountDetail?.sor || AccountInformationDummy.sor}</DetailText>
-            <DetailText label="Cost Center">{data_accountDetail?.costCenter || AccountInformationDummy.costCenter}</DetailText>
-            <DetailText label="Meter Reading Codes">{data_accountDetail?.meterReadingCodes ? renderDate(data_accountDetail.meterReadingCodes) : renderDate(AccountInformationDummy.birthFoundedDate)}</DetailText>
-            <DetailText label="Customer Management">{data_accountDetail?.customerManagement || AccountInformationDummy.customerManagement}</DetailText>
-            <DetailText label="Classification Type">{data_accountDetail?.classificationType || AccountInformationDummy.classificationType}</DetailText>
-            <DetailText label="Segment">{data_accountDetail?.segment || AccountInformationDummy.segment}</DetailText>
-            <DetailText label="Account Group Type">{data_accountDetail?.accountGroupType || AccountInformationDummy.accountGroupType}</DetailText>
-            <DetailText label="Premise Address">{data_accountDetail?.premiseAddress || AccountInformationDummy.premiseAddress}</DetailText>
-            <DetailText label="Subdistrict">{data_accountDetail?.subdistrict || AccountInformationDummy.subdistrict}</DetailText>
-            <DetailText label="District">{data_accountDetail?.district || AccountInformationDummy.district}</DetailText>
-            <DetailText label="City">{data_accountDetail?.city || AccountInformationDummy.city}</DetailText>
-            <DetailText label="Country">{data_accountDetail?.country || AccountInformationDummy.country}</DetailText>
-            <DetailText label="Longitude">{data_accountDetail?.longitude || AccountInformationDummy.longitude}</DetailText>
-            <DetailText label="Latitude">{data_accountDetail?.latitude || AccountInformationDummy.latitude}</DetailText>
-            <DetailText label="Status">{data_accountDetail?.status || AccountInformationDummy.status}</DetailText>    
-          </div>
-        </div>
-      </BaseContainer>
+        </BaseContainer>
 
-      <Form
-        id="accountForm"
-        form={formCreate}
-        layout={"vertical"}
-        onFinish={handleSubmitForm}
-        // onFinishFailed={handleErrorSubmit}
-        scrollToFirstError={true}
-      >
-        {/* Step Contents */}
-        <div className="flex flex-row gap-x-6 justify-center">
-          <span className="mt-[10px]">
-            <LeftCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollLeftHandler}/>
-          </span>
-          <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
-            <Steps current={current} items={items} labelPlacement="vertical" />
+        <Form
+          id="accountForm"
+          form={formCreate}
+          layout={"vertical"}
+          onFinish={handleSubmitForm}
+          // onFinishFailed={handleErrorSubmit}
+          scrollToFirstError={true}
+        >
+          {/* Step Contents */}
+          <div className="flex flex-row gap-x-6 justify-center">
+            <span className="mt-[10px]">
+              <LeftCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollLeftHandler}/>
+            </span>
+            <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
+              <Steps current={current} items={items} labelPlacement="vertical" />
+            </div>
+            <span className="mt-[10px]">
+              <RightCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollRightHandler}/>
+            </span>
           </div>
-          <span className="mt-[10px]">
-            <RightCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollRightHandler}/>
-          </span>
-        </div>
-        
-        <div className="steps-content my-6">{steps[current].content}</div>
+          
+          <div className="steps-content my-6">{steps[current].content}</div>
 
-        {/* Section Action Steps */}
-        <div className="steps-action my-8 flex w-full justify-between gap-x-2">
-          <ButtonComponent
-            type={"submit"}
-            icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-            onClick={()=>{setModalBack(true)}}
-          >
-            Back
-          </ButtonComponent>
-          <div className="flex w-full justify-end gap-x-4">
-            {current > 0 && (
-              <ButtonComponent
-                onClick={() => {
-                  prev();
-                  scrollLeftHandler();
-                }}
-                type={"submit"}
-                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              >
-                Previous
-              </ButtonComponent>
-            )}
-            {current < steps.length - 1 && (
-              <Button
-                onClick={handleButtonNext}
-                type="primary"
-                className="ant-btn ant-btn-submit flex w-full justify-center"
-                disabled={steps[current].disabled}
-              >
-                <span className="p-1 text-[18px] text-center">Next</span>
-                <RightOutlined
-                  style={{
-                    justifyItems: "center",
-                    fontSize: "18px",
-                    color: "#fff",
+          {/* Section Action Steps */}
+          <div className="steps-action my-8 flex w-full justify-between gap-x-2">
+            <ButtonComponent
+              type={"submit"}
+              icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
+              onClick={()=>{setModalBack(true)}}
+            >
+              Back
+            </ButtonComponent>
+            <div className="flex w-full justify-end gap-x-4">
+              {current > 0 && (
+                <ButtonComponent
+                  onClick={() => {
+                    prev();
+                    scrollLeftHandler();
                   }}
-                />
-              </Button>
-            )}
-            {current === steps.length - 1 && (
-              <ButtonComponent
-                onClick={() => message.success("Processing complete!")}
-                type={"submit"}
-                htmlType={"submit"}
-                icon={<SVGIcon name="IconArrowNarrowRight" width={24} />}
-              >
-                Save
-              </ButtonComponent>
-            )}
+                  type={"submit"}
+                  icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
+                >
+                  Previous
+                </ButtonComponent>
+              )}
+              {current < steps.length - 1 && (
+                <Button
+                  onClick={handleButtonNext}
+                  type="primary"
+                  className="ant-btn ant-btn-submit flex w-full justify-center"
+                  disabled={steps[current].disabled}
+                >
+                  <span className="p-1 text-[18px] text-center">Next</span>
+                  <RightOutlined
+                    style={{
+                      justifyItems: "center",
+                      fontSize: "18px",
+                      color: "#fff",
+                    }}
+                  />
+                </Button>
+              )}
+              {current === steps.length - 1 && (
+                <ButtonComponent
+                  onClick={() => message.success("Processing complete!")}
+                  type={"submit"}
+                  htmlType={"submit"}
+                  icon={<SVGIcon name="IconArrowNarrowRight" width={24} />}
+                >
+                  Save
+                </ButtonComponent>
+              )}
+            </div>
           </div>
-        </div>
-      </Form>
+        </Form>
 
-
-      {/* Modal Back */}
-      <ModalConfirm
-        isOpen={modalBack}
-        handleCancel={() => setModalBack(false)}
-        handleOk={() => navigate(-1)}
-        width={400}
-      >
-        <div className="flex justify-center mt-5 gap-[20px]">
-          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-          <p className="text-[18px] font-bold">
-            Are you sure you want to back?
-          </p>
-        </div>
-      </ModalConfirm>
+        {/* Modal Back */}
+        <ModalConfirm
+          isOpen={modalBack}
+          handleCancel={() => setModalBack(false)}
+          handleOk={() => navigate(-1)}
+          width={400}
+        >
+          <div className="flex justify-center mt-5 gap-[20px]">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className="text-[18px] font-bold">
+              Are you sure you want to back?
+            </p>
+          </div>
+        </ModalConfirm>
+      </div>
     </LayoutMenu>
   );
 };
