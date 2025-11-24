@@ -14,6 +14,8 @@ import { requiredMessage, toTitleCase } from "../../../../../../../../../../util
 
 import moment from "moment";
 import DateComponent from "../../../../../../../../../../components/DateComponent";
+import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
+import TablePagination from "../../../../../../../../../../components/TablePagination";
 
 export default function InfoPaymentRelation({
   totalElement = 0,
@@ -155,7 +157,7 @@ export default function InfoPaymentRelation({
       render: (v, r, i) => {
         return (
           <div className="flex w-full justify-center gap-4">
-            <Tooltip title="Detail">
+            <Tooltip title="Select">
               <div className="pt-1 cursor-pointer">
                 <SVGIcon
                   name="IconActionCreate"
@@ -308,14 +310,17 @@ export default function InfoPaymentRelation({
         </Button>,
       ]}
     >
-      <NxTable
-        className="border-[0.5px] border-[#c8cdd4] border-solid "
-        usePagination={true}
-        useSelect={true}
-        dataMain={paymentRelationDummy}
-        columnMain={columnMain}
-        tablePadding={"small"}
-        fontSize={"small"}
+      <TablePagination
+        dataSource={paymentRelationDummy.map((item, idx) => ({
+          ...item,
+          key: item.id || idx,
+        }))}
+        totalData={sanitizedTotalElement}
+        current={sanitizedPage}
+        pageSize={sanitizedPageSize}
+        onSort={onSort}
+        tableScrolled={{ y: 525, x: 3000 }}
+        columns={columnMain}
       />
 
     </ModalCustom>
