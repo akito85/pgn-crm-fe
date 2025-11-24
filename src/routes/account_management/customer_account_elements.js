@@ -48,7 +48,7 @@ import EquipmentForm from "../../app/pages/AccountManagement/CustomerAccountDeta
 import RawMaterialSourceForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/RawMaterialSource/RawMaterialSourceHistory/RawMaterialSourceForm";
 import ProductDistributionForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ProductDistribution/ProductDistributionHistory/ProductDistributionForm";
 import PaymentRelationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/Details/PaymentRelationDetails"; 
-import CreatePaymentRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/CreateUpdate/CreateUpdatePaymentRelation"
+import CreateUpdatePaymentRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/CreateUpdate/CreateUpdatePaymentRelation"
 
 export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Customer/Account List
@@ -101,7 +101,8 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
 
   // Payment Relation Detail
   VIEW_DETAIL_PAYMENT_RELATION_PAGE: <PaymentRelationDetails />,
-  CREATE_PAYMENT_RELATION_PAGE: <CreatePaymentRelation />,
+  CREATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation type={"create"} />,
+  UPDATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation type={"update"} />,
 
   // Gas Source
   DETAIL_GAS_SOURCE: <DetailGasSource />,
