@@ -3,14 +3,14 @@ import { Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Form, Select, Button, Tooltip } from "antd";
-import SVGIcon from "../../../../../../../../../assets/Icon/index";
+import SVGIcon from "../../../../../../../../../../assets/Icon/index";
 
-import InputComponent from "../../../../../../../../../components/InputComponent";
-import ModalCustom from "../../../../../../../../../components/Modal/ModalCustom";
-import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
-import NxTable from "../../../../../../../../../components/Nx/NxTable";
-import StatusComponent from "../../../../../../../../../components/StatusComponent";
-import { requiredMessage, toTitleCase } from "../../../../../../../../../utils";
+import InputComponent from "../../../../../../../../../../components/InputComponent";
+import ModalCustom from "../../../../../../../../../../components/Modal/ModalCustom";
+import NxPanel from "../../../../../../../../../../components/Nx/NxPanel";
+import NxTable from "../../../../../../../../../../components/Nx/NxTable";
+import StatusComponent from "../../../../../../../../../../components/StatusComponent";
+import { requiredMessage, toTitleCase } from "../../../../../../../../../../utils";
 
 import moment from "moment";
 

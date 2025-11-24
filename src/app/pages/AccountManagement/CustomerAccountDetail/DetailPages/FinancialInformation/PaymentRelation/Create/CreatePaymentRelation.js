@@ -19,7 +19,7 @@ import {
   ModalError,
   ModalSuccess,
 } from "../../../../../../../../components/Modal/ModalPopUp";
-import { bytesConverter } from "../../../../../../../utils/../bytesConverter";
+import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 
 import {
