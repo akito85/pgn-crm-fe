@@ -16,9 +16,6 @@ import { getGrantedAccessAccount } from "../../../../../../../../redux/slices/ac
 
 const tabs = [
   { value: "Service Request" },
-  { value: "Contact" },
-  { value: "Pre-Requisite" },
-  { value: "Work Order" },
   { value: "Attachment" },
 ];
 
@@ -107,7 +104,6 @@ const PaymentRelationDetails = ({
             handleChangeOption={handleDetailSection}
           />
         </div>
-
 
         <div>
           <div className="mb-5 flex">
