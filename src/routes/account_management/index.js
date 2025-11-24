@@ -1,3 +1,4 @@
+import { element } from "prop-types";
 import { ACCOUNT_MANAGEMENT_ELEMENTS } from "./customer_account_elements";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "./customer_account_routes";
 
@@ -112,6 +113,12 @@ export const account_management = [
   {
     path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION,
     element: ACCOUNT_MANAGEMENT_ELEMENTS.VIEW_DETAIL_PAYMENT_RELATION_PAGE,
+  },
+
+  // CREATE PAYMENT REALATION
+  {
+    path: ACCOUNT_MANAGEMENT_ROUTES.CREATE_PAYMENT_RELATION,
+    element: ACCOUNT_MANAGEMENT_ELEMENTS.CREATE_PAYMENT_RELATION_PAGE,
   },
 
   // CREATE ACCOUNT ADDRESS STANDARD

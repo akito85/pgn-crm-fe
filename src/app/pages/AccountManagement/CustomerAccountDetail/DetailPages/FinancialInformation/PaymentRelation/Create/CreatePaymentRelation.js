@@ -5,11 +5,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Steps, Button, message, Form } from "antd";
 import { LeftCircleOutlined, RightCircleOutlined, RightOutlined, WarningOutlined } from "@ant-design/icons";
 
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
-import BreadCrumb from "../../../../../../../components/BreadCrumb";
+import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
+import BreadCrumb from "../../../../../../../../components/BreadCrumb";
 import StepContents from "./StepContents";
-import SVGIcon from "../../../../../../../assets/Icon/index";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import SVGIcon from "../../../../../../../../assets/Icon/index";
+import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 
 // you fucking nasty using bulky moment lazy as fuck
 import moment from "moment";
@@ -18,9 +18,9 @@ import {
   ModalConfirm,
   ModalError,
   ModalSuccess,
-} from "../../../../../../../components/Modal/ModalPopUp";
-import { bytesConverter } from "../../../../../../../utils/bytesConverter";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
+} from "../../../../../../../../components/Modal/ModalPopUp";
+import { bytesConverter } from "../../../../../../../utils/../bytesConverter";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 
 import {
   getCustomerAttachment,
@@ -31,13 +31,13 @@ import {
   getGlobalSex,
   getListCategoryFile,
   updateCustomer,
-} from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
+} from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import {
   getAccountStandardDetail,
   getAccountOneTimeDetail,
-} from "../../../../../../../redux/slices/account_management/accountManagement";
+} from "../../../../../../../../redux/slices/account_management/accountManagement";
 
-const CreateCustomerServiceRequest = (props) => {
+const CreatePaymentRelation = (props) => {
   const containerRef = useRef(null);
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
@@ -107,8 +107,8 @@ const CreateCustomerServiceRequest = (props) => {
       breadcrumbName: "Detail Account",
     },
     {
-      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST,
-      breadcrumbName: "Service Requests",
+      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION,
+      breadcrumbName: "Payment Relation",
     },
     {
       path: "",
@@ -396,4 +396,4 @@ const CreateCustomerServiceRequest = (props) => {
   );
 };
 
-export default CreateCustomerServiceRequest;
+export default CreatePaymentRelation;
