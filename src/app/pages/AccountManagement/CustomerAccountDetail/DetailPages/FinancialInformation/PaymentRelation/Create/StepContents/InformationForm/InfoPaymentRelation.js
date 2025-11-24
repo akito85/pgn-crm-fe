@@ -13,6 +13,7 @@ import StatusComponent from "../../../../../../../../../../components/StatusComp
 import { requiredMessage, toTitleCase } from "../../../../../../../../../../utils";
 
 import moment from "moment";
+import DateComponent from "../../../../../../../../../../components/DateComponent";
 
 export default function InfoPaymentRelation({
   totalElement = 0,
@@ -302,212 +303,93 @@ export default function InfoPaymentRelation({
 
   return(
   <Fragment>
-    <NxPanel title={"SERVICE INFORMATION"}>
-      <div className="w-full grid grid-cols-2 gap-4">
-        {/* Left Column */}
-        <div className="space-y-4">
-          <Form.Item
-            key="serviceRequestReference"
-            name={"serviceRequestReference"}
-            label={"Service Request Reference"}
-            className="no-margin-form"
-          >
-            <div className="flex gap-2 items-center">
-              <InputComponent disabled className="flex-1" />
-              <Button
-                type="primary"
-                className="h-9 px-4 justify-center items-center"
-                style={{
-                  backgroundColor: "#0075bf",
-                  borderColor: "#0075bf",
-                  borderRadius: "5px",
-                  minWidth: "112px",
-                }}
-                onClick={() => {
-                  // Add your select logic here
-                  setIsOpen(true)
-                  console.log("Select button clicked");
-                }}
-              >
-                Select
-              </Button>
-            </div>
-          </Form.Item>
+    <NxPanel title={"PAYMENT RELATION INFORMATION"}>
+      <div className="w-full grid grid-cols-3 gap-4">
+        <Form.Item
+          key="accountNumber"
+          name={"accountNumber"}
+          label={"Account Number"}
+          className="no-margin-form"
+          rules={[
+            {
+              required: true,
+            }
+          ]}
+        >
+          <div className="flex gap-2 items-center">
+            <InputComponent disabled className="flex-1" />
+            <Button
+              type="primary"
+              className="h-9 px-4 justify-center items-center"
+              style={{
+                backgroundColor: "#0075bf",
+                borderColor: "#0075bf",
+                borderRadius: "5px",
+                minWidth: "112px",
+              }}
+              onClick={() => {
+                // Add your select logic here
+                setIsOpen(true)
+                console.log("Select button clicked");
+              }}
+            >
+              Select
+            </Button>
+          </div>
+        </Form.Item>
 
-          <Form.Item
-            key="category"
-            name={"category"}
-            label={"Category"}
-            rules={[
-              {
-                message: requiredMessage("Category"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <Select
-              placeholder="Select Category"
-              options={[
-                { value: 'technical', label: 'Technical' },
-                { value: 'billing', label: 'Billing' },
-                { value: 'customer_service', label: 'Customer Service' },
-                { value: 'maintenance', label: 'Maintenance' },
-                // Add more options as needed
-              ]}
-            />
-          </Form.Item>
+        <Form.Item
+          key="accountName"
+          name={"accountName"}
+          label={"Account Name"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
 
-          <Form.Item
-            key="priority"
-            name={"priority"}
-            label={"Priority"}
-            rules={[
-              {
-                message: requiredMessage("Priority"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <Select
-              placeholder="Select Priority"
-              options={[
-                { value: 'low', label: 'Low' },
-                { value: 'medium', label: 'Medium' },
-                { value: 'high', label: 'High' },
-                { value: 'urgent', label: 'Urgent' },
-              ]}
-            />
-          </Form.Item>
+        <Form.Item
+          key="priority"
+          name={"priority"}
+          label={"Priority"}
+          rules={[
+            {
+              message: requiredMessage("Priority"),
+              required: true,
+            },
+          ]}
+          className="no-margin-form"
+        >
+          <InputComponent />
+        </Form.Item>
 
-          <Form.Item
-            key="costCenter"
-            name={"costCenter"}
-            label={"Cost Center"}
-            rules={[
-              {
-                message: requiredMessage("Cost Center"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <InputComponent />
-          </Form.Item>
+        <Form.Item
+          key="startDate"
+          name={"startDate"}
+          label={"Start Date"}
+          rules={[
+            {
+              message: requiredMessage("Start Date"),
+              required: true,
+            },
+          ]}
+          className="no-margin-form"
+        >
+          <DateComponent />
+        </Form.Item>
 
-          <Form.Item
-            key="subCategory"
-            name={"subCategory"}
-            label={"Sub Category"}
-            rules={[
-              {
-                message: requiredMessage("Sub Category"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <Select
-              placeholder="Select Sub Category"
-              options={[
-                { value: 'installation', label: 'Installation' },
-                { value: 'repair', label: 'Repair' },
-                { value: 'inspection', label: 'Inspection' },
-                { value: 'replacement', label: 'Replacement' },
-                // Add more options as needed
-              ]}
-            />
-          </Form.Item>
-        </div>
-
-        {/* Right Column */}
-        <div className="space-y-4">
-          <Form.Item
-            key="requestSource"
-            name={"requestSource"}
-            label={"Request Source"}
-            rules={[
-              {
-                message: requiredMessage("Request Source"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <Select
-              placeholder="Select Request Source"
-              options={[
-                { value: 'phone', label: 'Phone' },
-                { value: 'email', label: 'Email' },
-                { value: 'web_portal', label: 'Web Portal' },
-                { value: 'mobile_app', label: 'Mobile App' },
-                { value: 'walk_in', label: 'Walk-in' },
-              ]}
-            />
-          </Form.Item>
-
-          <Form.Item
-            key="type"
-            name={"type"}
-            label={"Type"}
-            rules={[
-              {
-                message: requiredMessage("Type"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <Select
-              placeholder="Select Type"
-              options={[
-                { value: 'service_request', label: 'Service Request' },
-                { value: 'complaint', label: 'Complaint' },
-                { value: 'inquiry', label: 'Inquiry' },
-                { value: 'emergency', label: 'Emergency' },
-              ]}
-            />
-          </Form.Item>
-
-          <Form.Item
-            key="channel"
-            name={"channel"}
-            label={"Channel"}
-            rules={[
-              {
-                message: requiredMessage("Channel"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <Select
-              placeholder="Select Channel"
-              options={[
-                { value: 'direct', label: 'Direct' },
-                { value: 'partner', label: 'Partner' },
-                { value: 'agent', label: 'Agent' },
-                { value: 'online', label: 'Online' },
-              ]}
-            />
-          </Form.Item>
-
-          <Form.Item
-            key="requestDate"
-            name={"requestDate"}
-            label={"Request Date"}
-            rules={[
-              {
-                message: requiredMessage("Request Date"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <InputComponent />
-          </Form.Item>
-        </div>
+        <Form.Item
+          key="endDate"
+          name={"endDate"}
+          label={"End Date"}
+          rules={[
+            {
+              message: requiredMessage("End Date"),
+            },
+          ]}
+          className="no-margin-form"
+        >
+          <DateComponent />
+        </Form.Item>
       </div>
 
       {/* Description - Full Width */}
