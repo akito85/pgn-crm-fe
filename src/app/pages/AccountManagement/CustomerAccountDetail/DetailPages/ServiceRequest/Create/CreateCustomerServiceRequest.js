@@ -313,9 +313,16 @@ const CreateCustomerServiceRequest = (props) => {
         srFormCountry: data_country || "",
       });
     }
-    console.log(data_district)
+    console.log(data_district);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data_accountDetail, data_detail, data_district, data_subdistrict, data_city, data_country]);
+  }, [
+    data_accountDetail,
+    data_detail,
+    data_district,
+    data_subdistrict,
+    data_city,
+    data_country,
+  ]);
 
   const handleChangeName = (e, type) => {
     switch (type) {
