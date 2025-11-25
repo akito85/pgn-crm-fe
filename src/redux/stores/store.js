@@ -99,6 +99,7 @@ import templateRemindingReducer from "../slices/debt_and_collection/templateRemi
 import activityTypeReducer from "../slices/debt_and_collection/activityType";
 import activityActionReducer from "../slices/debt_and_collection/activityAction";
 import activitiesReducer from "../slices/debt_and_collection/activities";
+import transactionReportReducer from "../slices/debt_and_collection/transactionReport";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -226,6 +227,7 @@ const reducer = combineReducers({
   activityType: activityTypeReducer,
   activityAction: activityActionReducer,
   activities: activitiesReducer,
+  transactionReport: transactionReportReducer,
 
 });
 

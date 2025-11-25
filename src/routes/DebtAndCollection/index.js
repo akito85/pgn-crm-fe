@@ -92,7 +92,6 @@ export const debt_and_collection = [
     element: DEBT_AND_COLLECTION_ELEMENTS.UPDATE_ACTIVITY_ACTION_PAGE,
   },
 
-
   // Activities
   {
     path: DEBT_AND_COLLECTION_ROUTES.VIEW_ACTIVITIES,
@@ -111,6 +110,14 @@ export const debt_and_collection = [
     element: DEBT_AND_COLLECTION_ELEMENTS.UPDATE_ACTIVITIES_PAGE,
   },
 
+  // Transaction Report
+  {
+    path: DEBT_AND_COLLECTION_ROUTES.VIEW_TRANSACTION_REPORT,
+    element: DEBT_AND_COLLECTION_ELEMENTS.VIEW_TRANSACTION_REPORT_PAGE,
+  },
+  {
+    path: DEBT_AND_COLLECTION_ROUTES.DETAIL_TRANSACTION_REPORT,
+    element: DEBT_AND_COLLECTION_ELEMENTS.DETAIL_TRANSACTION_REPORT_PAGE,
 
   // Plan Activities
   {

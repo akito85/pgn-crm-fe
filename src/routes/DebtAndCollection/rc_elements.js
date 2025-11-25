@@ -22,6 +22,7 @@ import ViewActivities from "../../app/pages/DebtAndCollection/Activities/ViewAct
 import DetailActivities from "../../app/pages/DebtAndCollection/Activities/DetailActivies";
 import FormActivities from "../../app/pages/DebtAndCollection/Activities/FormActivies";
 
+import ViewTransactionReport from "../../app/pages/DebtAndCollection/TransactionReport/ViewTransactionReport";
 import ViewActivitiesPlan from "../../app/pages/DebtAndCollection/ActivitiesPlan/ViewActivitiesPlan";
 import DetailActivitiesPlan from "../../app/pages/DebtAndCollection/ActivitiesPlan/DetailActivitiesPlan";
 import FormActivitiesPlan from "../../app/pages/DebtAndCollection/ActivitiesPlan/FormActivitiesPlan";
@@ -62,6 +63,9 @@ export const DEBT_AND_COLLECTION_ELEMENTS = {
   DETAIL_ACTIVITIES_PAGE: <DetailActivities />,
   CREATE_ACTIVITIES_PAGE: <FormActivities type="create" />,
   UPDATE_ACTIVITIES_PAGE: <FormActivities type="update" />,
+  
+  // Transaction Report
+  VIEW_TRANSACTION_REPORT_PAGE: <ViewTransactionReport />,
 
   // Plan Activities
   VIEW_ACTIVITIES_PLAN_PAGE: <ViewActivitiesPlan />,

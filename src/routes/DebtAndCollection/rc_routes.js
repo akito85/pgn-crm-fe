@@ -35,6 +35,10 @@ export const DEBT_AND_COLLECTION_ROUTES = {
   CREATE_ACTIVITIES: "/debt-and-collection/activities/create",
   DETAIL_ACTIVITIES: "/debt-and-collection/activities/view",
   UPDATE_ACTIVITIES: "/debt-and-collection/activities/update",
+  
+  // Transaction Report
+  VIEW_TRANSACTION_REPORT: "/debt-and-collection/transaction-report",
+  DETAIL_TRANSACTION_REPORT: "/debt-and-collection/transaction-report/view",
 
   
   // Plan Activity

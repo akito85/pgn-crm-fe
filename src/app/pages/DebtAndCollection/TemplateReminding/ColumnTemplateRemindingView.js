@@ -17,7 +17,7 @@ export const columns = (
     {
       key: "no",
       title: "NO",
-      width: 5,
+      width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
