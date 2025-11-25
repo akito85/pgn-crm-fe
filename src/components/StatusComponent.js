@@ -22,7 +22,6 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "success":
       case "completed":
       case "complete":
-      case "open":
       case "full payment":
       case "true":
       case "paid":
@@ -32,6 +31,11 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         tColor = "text-white";
         break;
 
+      case "open":
+        bgColor = "status-active";
+        tColor = "text-white";
+        break;
+        
       case "inactive":
       case "rejected":
       case "failed":
@@ -57,8 +61,8 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         tColor = "text-yellow-700";
         break;
 
-        case "in progress":
-        case "INPROGRESS":
+      case "in progress":
+      case "INPROGRESS":
         bgColor = "bg-yellow-500";
         tColor = "text-white";
         break;

@@ -288,7 +288,7 @@ const BillingPage = () => {
               <SVGIcon
                 name="IconLogHistory"
                 color={"#0075bf"}
-                width={24}
+                width={20}
                 onClick={() => handleApprovalHistory(record)}
               />
             </div>
