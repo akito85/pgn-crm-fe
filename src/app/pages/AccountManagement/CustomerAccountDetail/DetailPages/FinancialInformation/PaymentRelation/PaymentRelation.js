@@ -383,6 +383,7 @@ const PaymentRelation = ({
           handleDetail={() => navigate("/account-management/account-standard/financial-information/payment-relation/details")}
           setModalDetail={setModalDetail}
           rowSelection={isApproval ? rowSelection : undefined}
+          isApproval={isApproval}
         />
       </div>
     </Fragment>  
