@@ -261,37 +261,35 @@ const BillingPage = () => {
         </ButtonComponent>
       ),
     },
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Detail">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDetail"
-                width={24}
-                onClick={() => handleDetail(record)}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
+    // {
+    //   action: "View",
+    //   type: "table",
+    //   render: (record) => {
+    //     return (
+    //       <Tooltip title="Detail">
+    //         <div className="pt-1">
+    //           <SVGIcon
+    //             name="IconDetail"
+    //             width={24}
+    //             onClick={() => handleDetail(record)}
+    //           />
+    //         </div>
+    //       </Tooltip>
+    //     );
+    //   },
+    // },
     {
       action: "History",
       type: "table",
       render: (record) => {
         return (
           <Tooltip title="Approval Hierarchy">
-            <div className="pt-1">
               <SVGIcon
                 name="IconLogHistory"
                 color={"#0075bf"}
-                width={24}
+                width={20}
                 onClick={() => handleApprovalHistory(record)}
               />
-            </div>
           </Tooltip>
         );
       },
@@ -439,26 +437,26 @@ const BillingPage = () => {
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={loading}
-              // onRow={(record) => ({
-              //   onClick: () => handleDetail(record),
-              //   style: {
-              //     cursor: 'pointer',
-              //     backgroundColor: activeRowKey === (record.billingCode || record.invoiceNumber)
-              //       ? '#bae7ff'
-              //       : 'transparent',
-              //     transition: 'background-color 0.2s ease',
-              //   },
-              //   onMouseEnter: (e) => {
-              //     if (activeRowKey !== (record.billingCode || record.invoiceNumber)) {
-              //       e.currentTarget.style.backgroundColor = '#f5f5f5';
-              //     }
-              //   },
-              //   onMouseLeave: (e) => {
-              //     if (activeRowKey !== (record.billingCode || record.invoiceNumber)) {
-              //       e.currentTarget.style.backgroundColor = 'transparent';
-              //     }
-              //   },
-              // })}
+              onRow={(record) => ({
+                onClick: () => handleDetail(record),
+                style: {
+                  cursor: 'pointer',
+                  backgroundColor: activeRowKey === (record.billingCode || record.invoiceNumber)
+                    ? '#bae7ff'
+                    : 'transparent',
+                  transition: 'background-color 0.2s ease',
+                },
+                onMouseEnter: (e) => {
+                  if (activeRowKey !== (record.billingCode || record.invoiceNumber)) {
+                    e.currentTarget.style.backgroundColor = '#f5f5f5';
+                  }
+                },
+                onMouseLeave: (e) => {
+                  if (activeRowKey !== (record.billingCode || record.invoiceNumber)) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                },
+              })}
             />
           </div>
         </CardContainer>

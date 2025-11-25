@@ -7,6 +7,7 @@ import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColum
 import { getDetailPrabillingLog } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
+import moment from "moment";
 
 const PrabillingDetailLog = ({ data, tabHeader }) => {
   const { detail_prabilling_log, loading_log } = useSelector(
@@ -64,34 +65,6 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         : "";
     
     setSort(dataSort);
-  };
-
-  const renderStatus = (status, isHighlight, searchValue) => {
-    if (!status) return <Tag color="default">INFO</Tag>;
-
-    let color;
-    const statusUpper = status.toUpperCase();
-
-    switch (statusUpper) {
-      case "SUCCESS":
-        color = "success";
-        break;
-      case "ERROR":
-      case "FAILED":
-        color = "error";
-        break;
-      case "WARNING":
-        color = "warning";
-        break;
-      case "PROCESSING":
-      case "IN_PROGRESS":
-        color = "processing";
-        break;
-      default:
-        color = "default";
-    }
-
-    return <Tag color={color}>{statusUpper}</Tag>;
   };
 
   const baseColumns = useMemo(
@@ -202,8 +175,38 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
           handleSearch,
           true
         ),
-        render: (status) =>
-          renderStatus(status, hasValue(search["status"]), searchText),
+        render: (status) => {
+          // Mapping status text to match the Prabilling page format
+          const statusUpper = status ? status.toUpperCase() : "INFO";
+          
+          // Map status to the same format as Prabilling page
+          const statusConfig = {
+            "SUCCESS": { text: "Success", type: "status" },
+            "ERROR": { text: "Failed", type: "status" },
+            "FAILED": { text: "Failed", type: "status" },
+            "WARNING": { text: "In Progress", type: "status" },
+            "PROCESSING": { text: "In Progress", type: "status" },
+            "IN_PROGRESS": { text: "In Progress", type: "status" },
+            "INFO": { text: "Open", type: "status" },
+          };
+          
+          const config = statusConfig[statusUpper] || {
+            text: "Unknown",
+            type: "status",
+          };
+          
+          const displayText = config.text;
+          
+          return renderColumn(
+            "status",
+            hasValue(search["status"]),
+            searchText,
+            displayText,
+            false,
+            "status",
+            search
+          );
+        },
       },
       {
         key: "message",
@@ -254,27 +257,17 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
           "datetime"
         ),
         render: (text) => {
-          if (!text) return "-";
-          try {
-            const formattedDate = new Date(text).toLocaleString("id-ID", {
-              year: "numeric",
-              month: "short",
-              day: "2-digit",
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-            });
-            return renderDateColumn(
-              "createdDtm",
-              hasValue(search["createdDtm"]),
-              searchText,
-              formattedDate,
-              "datetime",
-              search
-            );
-          } catch (e) {
-            return text;
-          }
+          const formattedDate = text
+            ? moment(text).format("DD MMM YYYY HH:mm:ss")
+            : "-";
+          return renderDateColumn(
+            "createdDtm",
+            hasValue(search["createdDtm"]),
+            searchText,
+            formattedDate,
+            "datetime",
+            search
+          );
         },
       },
       {
