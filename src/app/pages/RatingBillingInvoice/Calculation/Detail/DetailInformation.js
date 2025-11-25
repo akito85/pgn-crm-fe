@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
 import RadioTabs from "../../../../../components/RadioTabs";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -19,6 +18,7 @@ import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import { columnsRecalculate } from "./Table/TableRecalculate";
 import { columnsCalculation } from "./Table/TableCalculation";
+import CardContainer from "../../../../../components/CardContainer";
 
 const DetailInformation = ({ data, tabHeader }) => {
   // Selector
@@ -602,7 +602,7 @@ const DetailInformation = ({ data, tabHeader }) => {
   return (
     <>
       <Spin spinning={loadingModal}>
-        <BaseContainer header={"Calculation Information"}>
+        <CardContainer subHeader={"Calculation Information"}>
           <div className={"w-full grid grid-cols-4 gap-2"}>
             <DetailText label={"Calculation Code"}>{data?.calCode}</DetailText>
             <DetailText label={"Type"}>{data?.calculationType}</DetailText>
@@ -634,9 +634,9 @@ const DetailInformation = ({ data, tabHeader }) => {
               {renderStatus(data?.status)}
             </DetailText>
           </div>
-        </BaseContainer>
+        </CardContainer>
 
-        <BaseContainer header={"parameter information"}>
+        <CardContainer subHeader={"parameter information"}>
           <div className={"w-full grid grid-cols-4 gap-2"}>
             <DetailText label={"Service Type"}>{data?.serviceType}</DetailText>
             <DetailText label={"SOR"}>{data?.sor}</DetailText>
@@ -655,22 +655,22 @@ const DetailInformation = ({ data, tabHeader }) => {
               {data?.specCustacc}
             </DetailText>
           </div>
-        </BaseContainer>
+        </CardContainer>
 
-        <BaseContainer header={"schedule information"}>
+        <CardContainer subHeader={"schedule information"}>
           <div className={"w-full grid grid-cols-4"}>
             <DetailText label={"Type"}>{data?.scheduleType}</DetailText>
             <div className="col-span-3">
               <DetailText label={"Remark"}>{data?.remark}</DetailText>
             </div>
           </div>
-        </BaseContainer>
+        </CardContainer>
 
-        <BaseContainer header={"calculation result"}>
+        <CardContainer subHeader={"calculation result"}>
           {tempTabs}
 
           {renderSection(segmentedPage)}
-        </BaseContainer>
+        </CardContainer>
 
         {/* retry modal */}
         <ModalApproveOrReject

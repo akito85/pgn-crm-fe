@@ -49,10 +49,10 @@ const RatingPage = () => {
   useEffect(() => {
     if (pageDetail && activeRowKey && detailRef.current) {
       setTimeout(() => {
-        detailRef.current.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start',
-          inline: 'nearest'
+        detailRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "nearest",
         });
       }, 100);
     }
@@ -126,7 +126,7 @@ const RatingPage = () => {
 
   const handleDetail = (record) => {
     const recordKey = record.ratingCode;
-    
+
     if (activeRowKey === recordKey && pageDetail) {
       setPageDetail(false);
       setActiveRowKey(null);
@@ -176,7 +176,7 @@ const RatingPage = () => {
   const dataSourceWithKeys = useMemo(() => {
     return dataSource?.map((item) => ({
       ...item,
-      key: item.ratingCode, 
+      key: item.ratingCode,
     }));
   }, [dataSource]);
 
@@ -243,7 +243,7 @@ const RatingPage = () => {
           <div className="my-5">
             <TableRBI
               size="small"
-              dataSource={dataSourceWithKeys} 
+              dataSource={dataSourceWithKeys}
               columns={processedColumns}
               current={page}
               pageSize={pageSize}
@@ -260,20 +260,21 @@ const RatingPage = () => {
               onRow={(record) => ({
                 onClick: () => handleDetail(record),
                 style: {
-                  cursor: 'pointer',
-                  backgroundColor: activeRowKey === record.ratingCode 
-                    ? '#bae7ff'
-                    : 'transparent',
-                  transition: 'background-color 0.2s ease',
+                  cursor: "pointer",
+                  backgroundColor:
+                    activeRowKey === record.ratingCode
+                      ? "#bae7ff"
+                      : "transparent",
+                  transition: "background-color 0.2s ease",
                 },
                 onMouseEnter: (e) => {
                   if (activeRowKey !== record.ratingCode) {
-                    e.currentTarget.style.backgroundColor = '#f5f5f5';
+                    e.currentTarget.style.backgroundColor = "#f5f5f5";
                   }
                 },
                 onMouseLeave: (e) => {
                   if (activeRowKey !== record.ratingCode) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.backgroundColor = "transparent";
                   }
                 },
               })}
@@ -282,13 +283,13 @@ const RatingPage = () => {
         </CardContainer>
 
         {pageDetail && (
-          <div 
+          <div
             ref={detailRef}
-            className="mt-6 border-t-4 border-blue-500 pt-4 bg-blue-50/30 rounded-lg p-4"
+            className="mt-6 border-t-4 border-blue-500 bg-blue-50/30 rounded-lg p-4"
           >
-            <div className="flex justify-between items-center mb-4 pb-3 border-b border-blue-200">
+            <div className="flex justify-between items-center border-b border-blue-200">
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-lg text-blue-700">
+                <h3 className="font-bold text-lg text-primary">
                   Rating Detail: {ratingCode}
                 </h3>
               </div>
@@ -306,7 +307,7 @@ const RatingPage = () => {
                 ✕
               </button>
             </div>
-            
+
             <RatingDetail
               calculationCode={calculationCode}
               SAId={saNumberId}

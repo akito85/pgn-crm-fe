@@ -111,9 +111,9 @@ const GenerateInvoicePage = () => {
   }, []);
 
   useEffect(() => {
-    if (data_billing?.data?.result) {
+    if (data_billing) {
       setDataTable(
-        data_billing.data.result.map((item, index) => ({
+        data_billing.map((item, index) => ({
           // prefer stable id if server provides it
           key: item.id ?? item.invoiceNumber ?? index + 1,
           ...item,
@@ -297,7 +297,7 @@ const GenerateInvoicePage = () => {
             <TableRBI
               idTable="generate-invoice"
               dataSource={dataTable}
-              totalData={data_billing?.page?.totalElements || dataTable.length}
+              totalData={data_billing?.length || 0}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
