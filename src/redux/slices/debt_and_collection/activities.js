@@ -368,6 +368,135 @@ export const validateBulkActivity = createAsyncThunk(
 );
 
 
+// Activity Plan Detail
+export const getAllActivityPlanDetailByAccountNumePaginate = createAsyncThunk(
+  "GET_ALL_ACTIVITY_PLAN_BY_ACCOUNT_NUM_PAGINATE",
+  async ({ accountNum, page, pageSize, sort, search }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/activity/get-list-by-account-plan?accountNum=${accountNum}&page=${page}&size=${pageSize}&sort=${
+        sort || "createdDate~desc"
+      }&searchs=${search}`;
+      const response = await debtAndCollectionHttpService.getPagination(url);
+      return response.data;
+    } catch (error) {
+      console.log(error, " = error slice");
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+// Download Bulk Template Activity Plan
+export const downloadTemplateBulkActivityPlan = createAsyncThunk(
+  "DOWNLOAD_TEMPLATE_BULK_ACTIVITY",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/activity/download-template-bulk-activity-plan`;
+      await debtAndCollectionHttpService.downloadData(url);
+
+      // thunkAPI.dispatch(showModalSuccess({
+      //   title: "Successful",
+      //   description: "Your file has been downloaded.",
+      //   return: false,
+      // }));
+
+      // return hanya serializable
+      return { success: true };
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_TEMPLATE_BULK_ACTIVITY",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Upload Bulk Activity Plan
+export const createBulkAcitivityPlan = createAsyncThunk(
+  "BULK_ACTIVITY_PLAN",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/activity/insert-bulk-activity-plan`;
+      const data = await debtAndCollectionHttpService.upload(url, body);
+      const message = data.message;
+      const successMessage = {
+        title: "Successfull",
+        description: `${message}`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return data.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not bulk . ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+// Validate Upload Bulk Activity Plan
+export const validateBulkActivityPlan = createAsyncThunk(
+  "VALIDATE_BULK_ACTIVITY_PLAN",
+  async (formData, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/activity/validate-upload-bulk-plan`;
+      const data = await debtAndCollectionHttpService.upload(url, formData);
+      return data.data; // SUCCESS
+    } catch (error) {
+      const errRes = error?.response?.data;
+
+      // Backup message
+      const defaultMsg =
+        errRes?.message ||
+        error?.message ||
+        "Something went wrong";
+
+      const beanErrors = Array.isArray(errRes?.data) ? errRes.data : null;
+
+      if (beanErrors) {
+        const messageList = beanErrors
+          .map((e) => {
+            const field = Object.keys(e)[0];
+            const msg = e[field];
+            return `${field}: ${msg}`;
+          })
+          .join("\n");
+
+        thunkAPI.dispatch(
+          showModalError({
+            title: "Validation Error",
+            description: messageList,
+          })
+        );
+      } else {
+        thunkAPI.dispatch(
+          showModalError({
+            title: "Failed",
+            description: `Your data was not upload bulk. ${defaultMsg}`,
+          })
+        );
+      }
+
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+
 const activitiesSlice = createSlice({
   name: "activities",
   initialState,
@@ -551,6 +680,63 @@ const activitiesSlice = createSlice({
       state.data = action.payload;
     },
     [validateBulkActivity.rejected]: (state, action) => {
+      state.loading = false;
+      state.data = action.payload;
+    },
+
+    // Activity Plan Detail
+    [getAllActivityPlanDetailByAccountNumePaginate.pending]: (state, action) => {
+      state.loading = true;
+      state.dataActivities = action.payload;
+    },
+    [getAllActivityPlanDetailByAccountNumePaginate.fulfilled]: (state, action) => {
+      state.dataActivities = action.payload;
+      state.loading = false;
+    },
+    [getAllActivityPlanDetailByAccountNumePaginate.rejected]: (state, action) => {
+      state.dataActivities = action.payload;
+      state.loading = false;
+    },
+
+    // Download Bulk Template Activity Plan
+    [downloadTemplateBulkActivityPlan.pending]: (state, action) => {
+      state.loading = true;
+      state.data = action.payload;
+    },
+    [downloadTemplateBulkActivityPlan.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data = action.payload;
+    },
+    [downloadTemplateBulkActivityPlan.rejected]: (state, action) => {
+      state.loading = false;
+      state.data = action.payload;
+    },
+
+
+    // Create Bulk Activity Plan
+    [createBulkAcitivityPlan.pending]: (state, action) => {
+      state.loading = true;
+      state.data = action.payload;
+    },
+    [createBulkAcitivityPlan.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data = action.payload;
+    },
+    [createBulkAcitivityPlan.rejected]: (state, action) => {
+      state.loading = false;
+      state.data = action.payload;
+    },
+
+    // Validate Bulk Activity Plan
+    [validateBulkActivityPlan.pending]: (state, action) => {
+      state.loading = true;
+      state.data = action.payload;
+    },
+    [validateBulkActivityPlan.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data = action.payload;
+    },
+    [validateBulkActivityPlan.rejected]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },

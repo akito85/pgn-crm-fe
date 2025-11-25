@@ -23,6 +23,9 @@ import DetailActivities from "../../app/pages/DebtAndCollection/Activities/Detai
 import FormActivities from "../../app/pages/DebtAndCollection/Activities/FormActivies";
 
 import ViewTransactionReport from "../../app/pages/DebtAndCollection/TransactionReport/ViewTransactionReport";
+import ViewActivitiesPlan from "../../app/pages/DebtAndCollection/ActivitiesPlan/ViewActivitiesPlan";
+import DetailActivitiesPlan from "../../app/pages/DebtAndCollection/ActivitiesPlan/DetailActivitiesPlan";
+import FormActivitiesPlan from "../../app/pages/DebtAndCollection/ActivitiesPlan/FormActivitiesPlan";
 
 export const DEBT_AND_COLLECTION_ELEMENTS = {
   // Grace Period
@@ -63,4 +66,10 @@ export const DEBT_AND_COLLECTION_ELEMENTS = {
   
   // Transaction Report
   VIEW_TRANSACTION_REPORT_PAGE: <ViewTransactionReport />,
+
+  // Plan Activities
+  VIEW_ACTIVITIES_PLAN_PAGE: <ViewActivitiesPlan />,
+  DETAIL_ACTIVITIES_PLAN_PAGE: <DetailActivitiesPlan />,
+  CREATE_ACTIVITIES_PLAN_PAGE: <FormActivitiesPlan type="create" />,
+  UPDATE_ACTIVITIES_PLAN_PAGE: <FormActivitiesPlan type="update" />,
 };
