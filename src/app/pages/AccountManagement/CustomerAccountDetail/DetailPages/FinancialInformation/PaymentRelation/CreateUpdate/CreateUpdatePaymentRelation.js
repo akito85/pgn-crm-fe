@@ -40,11 +40,10 @@ import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../../../../../utils";
 
-const CreatePaymentRelation = (props) => {
+const CreatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const { type } = props;
 
   const dispatch = useDispatch();
   const {

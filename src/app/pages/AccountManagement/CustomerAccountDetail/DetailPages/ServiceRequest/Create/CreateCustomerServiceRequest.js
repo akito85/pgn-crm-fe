@@ -37,11 +37,10 @@ import {
   getAccountOneTimeDetail,
 } from "../../../../../../../redux/slices/account_management/accountManagement";
 
-const CreateCustomerServiceRequest = (props) => {
+const CreateCustomerServiceRequest = ({ type }) => {
   const containerRef = useRef(null);
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const { type } = props;
 
   const dispatch = useDispatch();
   const {
@@ -83,10 +82,6 @@ const CreateCustomerServiceRequest = (props) => {
   const [bodyError, setBodyError] = useState({});
 
   const [customerType, setCustomerType] = useState(0);
-  const [identificationDdlValue, setIdentificationDdlValue] = useState([]);
-  const [firstName, setFirstName] = useState("");
-  const [middleName, setMiddleName] = useState("");
-  const [lastName, setLastName] = useState("");
 
   const isLoading = loading || loadingForm || loadingAccount;
 
@@ -156,9 +151,6 @@ const CreateCustomerServiceRequest = (props) => {
       customerName: (e?.customerName || "").toUpperCase(),
       description: e?.description,
     });
-    setFirstName((temp[0] || "").toUpperCase());
-    setMiddleName((temp[1] || "").toUpperCase());
-    setLastName((temp[2] || "").toUpperCase());
   };
 
   useEffect(() => {
@@ -167,21 +159,6 @@ const CreateCustomerServiceRequest = (props) => {
       handleSetData(data_customerDetail);
     }
   }, [data_customerDetail]);
-
-  useEffect(() => {
-    if(customerType === 58){
-
-      setIdentificationDdlValue(data_globalIdentificationType?.filter(item => item?.id !== 1123))
-    } else {
-      setIdentificationDdlValue(data_globalIdentificationType)
-    }
-  },[customerType, data_globalIdentificationType])
-
-  useEffect(() => {
-    formCreate.setFieldsValue({
-      customerName: `${firstName}${middleName ? ` ${middleName}` : ""}${lastName ? ` ${lastName}` : ""}`,
-    });
-  },[firstName, middleName, lastName])
 
   useEffect(() => {
     formCreate.setFieldsValue({
@@ -212,22 +189,6 @@ const CreateCustomerServiceRequest = (props) => {
     }
     console.log(data_accountDetail.accountInformation)
   }, [data_accountDetail, formCreate]);
-
-  const handleChangeName = (e, type) => {
-    switch (type) {
-      case "firstName":
-        setFirstName(e.target.value);
-        break;
-      case "middleName":
-        setMiddleName(e.target.value);
-        break;
-      case "lastName":
-        setLastName(e.target.value);
-        break;
-      default:
-        break;
-    }
-  }
 
   const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}` 
   
