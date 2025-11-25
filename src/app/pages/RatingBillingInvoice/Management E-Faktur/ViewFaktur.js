@@ -6,24 +6,8 @@ import React, {
   useCallback,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  Spin,
-  Tooltip,
-  Input,
-  Select,
-  DatePicker,
-  Button,
-  Row,
-  Col,
-  Dropdown,
-  message,
-} from "antd";
-import {
-  SearchOutlined,
-  MoreOutlined,
-  PlusOutlined,
-  CheckCircleOutlined,
-} from "@ant-design/icons";
+import { Spin, Tooltip, Dropdown, message } from "antd";
+import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
 import moment from "moment";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -39,18 +23,18 @@ import ModalUploadEFaktur from "./ModalEfaktur/ModalUploadEFaktur";
 import ModalApprovalEFaktur from "./ModalEfaktur/ModalApprovalEFaktur ";
 import ModalReplaceEFaktur from "./ModalEfaktur/ModalReplaceEFaktur";
 import ModalCancelEFaktur from "./ModalEfaktur/ModalCancelEFaktur ";
+import ModalBulkRequestApproval from "./ModalEfaktur/ModalBulkRequestApproval"; // NEW MODAL
 import LogAktivitasEFaktur from "./LogAktivitasEFaktur";
+import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import {
   getListEFaktur,
   downloadEFakturList,
   getApprovalHistory,
-  getAllEFakturApprovePaginate,
 } from "../../../../redux/slices/rating_billing_invoice/efakturSlice";
-
-const { RangePicker } = DatePicker;
-const { Option } = Select;
 
 const ViewFaktur = () => {
   // Selector
@@ -71,10 +55,9 @@ const ViewFaktur = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState("invoiceDate~desc");
-
-  const [filterSearch, setFilterSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
-  const [filterDateRange, setFilterDateRange] = useState(null);
+  const [search, setSearch] = useState({});
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
 
   const [modalGenerateEFaktur, setModalGenerateEFaktur] = useState(false);
   const [modalGenerateXML, setModalGenerateXML] = useState(false);
@@ -84,15 +67,15 @@ const ViewFaktur = () => {
   const [logAktivitasOpen, setLogAktivitasOpen] = useState(false);
   const [modalReplaceFaktur, setModalReplaceFaktur] = useState(false);
   const [modalCancelFaktur, setModalCancelFaktur] = useState(false);
+  const [modalBulkRequest, setModalBulkRequest] = useState(false); // NEW STATE
 
   const [selectedBilling, setSelectedBilling] = useState(null);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
 
-  const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
-    efakturStatus: "right",
-    action: "right",
-  });
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["efakturStatus", "action"],
+  }));
 
   // Breadcrumbs
   const routes = [
@@ -106,39 +89,17 @@ const ViewFaktur = () => {
     },
   ];
 
-  const fetchDataWithCurrentFilters = useCallback(() => {
-    const filters = {
-      ...(filterSearch && { search: filterSearch }),
-      ...(filterStatus && { efakturStatus: filterStatus }),
-      ...(filterDateRange &&
-        filterDateRange[0] &&
-        filterDateRange[1] && {
-          startDate: moment(filterDateRange[0]).format("YYYY-MM-DD"),
-          endDate: moment(filterDateRange[1]).format("YYYY-MM-DD"),
-        }),
-    };
-
+  // Fetch data with filters
+  useEffect(() => {
     dispatch(
       getListEFaktur({
-        page: page,
-        pageSize: pageSize,
-        sort: sort,
-        filters: filters,
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
       })
     );
-  }, [
-    dispatch,
-    page,
-    pageSize,
-    sort,
-    filterSearch,
-    filterStatus,
-    filterDateRange,
-  ]);
-
-  useEffect(() => {
-    fetchDataWithCurrentFilters();
-  }, [page, pageSize, sort]);
+  }, [dispatch, search, page, pageSize, sort]);
 
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
@@ -152,74 +113,48 @@ const ViewFaktur = () => {
     }
   }, [data_approval_history]);
 
-  const handleFilter = () => {
-    setPage(1);
-    const filters = {
-      ...(filterSearch && { search: filterSearch }),
-      ...(filterStatus && { efakturStatus: filterStatus }),
-      ...(filterDateRange &&
-        filterDateRange[0] &&
-        filterDateRange[1] && {
-          startDate: moment(filterDateRange[0]).format("YYYY-MM-DD"),
-          endDate: moment(filterDateRange[1]).format("YYYY-MM-DD"),
-        }),
-    };
-
-    dispatch(
-      getListEFaktur({
-        page: 1,
-        pageSize: pageSize,
-        sort: sort,
-        filters: filters,
-      })
-    );
-  };
-
-  const handleResetFilter = () => {
-    setFilterSearch("");
-    setFilterStatus("");
-    setFilterDateRange(null);
-    setPage(1);
-
-    dispatch(
-      getListEFaktur({
-        page: 1,
-        pageSize: pageSize,
-        sort: sort,
-        filters: {},
-      })
-    );
+  // Handle Search
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(1);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
   };
 
   // Handle Change Page
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+  const handleChangePage = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
   // Sort Table
-  const onSortApi = (_, __, sortInfo) => {
+  const onSort = (_, __, sorter) => {
     const dataSort =
-      sortInfo.order !== undefined
-        ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
+      sorter && sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
 
   // Handle Download
   const handleDownload = () => {
-    const filters = {
-      ...(filterSearch && { search: filterSearch }),
-      ...(filterStatus && { efakturStatus: filterStatus }),
-      ...(filterDateRange &&
-        filterDateRange[0] &&
-        filterDateRange[1] && {
-          startDate: moment(filterDateRange[0]).format("YYYY-MM-DD"),
-          endDate: moment(filterDateRange[1]).format("YYYY-MM-DD"),
-        }),
-    };
-
-    dispatch(downloadEFakturList({ filters, page, pageSize, sort }));
+    dispatch(
+      downloadEFakturList({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      })
+    );
   };
 
   // Handle Actions
@@ -271,8 +206,20 @@ const ViewFaktur = () => {
     setLogAktivitasOpen(true);
   };
 
+  // NEW: Handle Bulk Request
+  const handleBulkRequest = () => {
+    setModalBulkRequest(true);
+  };
+
   const handleRefresh = () => {
-    fetchDataWithCurrentFilters();
+    dispatch(
+      getListEFaktur({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      })
+    );
   };
 
   // Close Modal Functions
@@ -300,6 +247,7 @@ const ViewFaktur = () => {
     setModalApproval(false);
     setSelectedBilling(null);
   };
+
   const closeModalReplaceFaktur = () => {
     setModalReplaceFaktur(false);
     setSelectedBilling(null);
@@ -314,161 +262,749 @@ const ViewFaktur = () => {
     setSelectedBilling(null);
   };
 
+  // NEW: Close Bulk Request Modal
+  const closeModalBulkRequest = () => {
+    setModalBulkRequest(false);
+  };
+
   // Columns Definition
-  const baseColumns = [
-    {
-      title: "NO",
-      dataIndex: "no",
-      key: "no",
-      width: 60,
-      render: (_, __, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "NO. E-FAKTUR",
-      dataIndex: "efakturNo",
-      key: "efakturNo",
-      width: 180,
-      render: (text) => text || "-",
-    },
-    {
-      title: "INVOICE NUMBER",
-      dataIndex: "invoiceNumber",
-      key: "invoiceNumber",
-      width: 180,
-      render: (text) => text || "-",
-    },
-    {
-      title: "BILLING CODE",
-      dataIndex: "billingCode",
-      key: "billingCode",
-      width: 180,
-    },
-    {
-      title: "Type PPN",
-      dataIndex: "typePpn",
-      key: "typePpn",
-      width: 180,
-    },
-    {
-      title: "CUSTOMER",
-      dataIndex: "customerName",
-      key: "customerName",
-      width: 250,
-    },
-    {
-      title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
-      key: "accountNumber",
-      width: 150,
-    },
-    {
-      title: "BILLING PERIOD",
-      dataIndex: "billingPeriod",
-      key: "billingPeriod",
-      width: 120,
-    },
-    {
-      title: "INVOICE DATE",
-      dataIndex: "invoiceDate",
-      key: "invoiceDate",
-      width: 120,
-      sorter: true,
-      render: (text) => {
-        if (!text) return "-";
-        return moment(text).format("DD-MM-YYYY");
+  const baseColumns = useMemo(
+    () => [
+      {
+        key: "no",
+        title: "NO",
+        width: 60,
+        align: "center",
+        render: (_, __, index) => (page - 1) * pageSize + index + 1,
       },
-    },
-    {
-      title: "TOTAL AMOUNT (IDR)",
-      dataIndex: "totalAmountEqvIdr",
-      key: "totalAmountEqvIdr",
-      width: 180,
-      align: "right",
-      render: (value) => `Rp ${value?.toLocaleString("id-ID") || 0}`,
-    },
-    {
-      title: "STATUS E-FAKTUR",
-      dataIndex: "efakturStatus",
-      key: "efakturStatus",
-      width: 180,
-      align: "center",
-      render: (status) => {
-        const statusColors = {
-          APPROVED: "bg-green-100 text-green-800 border-green-300",
-          PROCESSING: "bg-blue-100 text-blue-800 border-blue-300",
-          AWAITING_APPROVAL: "bg-orange-100 text-orange-800 border-orange-300",
-          FAILED: "bg-red-100 text-red-800 border-red-300",
-          REJECTED: "bg-red-100 text-red-800 border-red-300",
-          SUCCESS_UPLOAD: "bg-green-100 text-green-800 border-green-300",
-          NOT_GENERATED: "bg-gray-100 text-gray-800 border-gray-300",
-        };
-
-        const displayStatus = status || "NOT_GENERATED";
-
-        return (
-          <div className="flex justify-center">
-            <span
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
-                statusColors[displayStatus] ||
-                "bg-gray-100 text-gray-800 border-gray-300"
-              }`}
-            >
-              {displayStatus.replace(/_/g, " ")}
-            </span>
-          </div>
-        );
+      {
+        key: "efakturNo",
+        title: "KODE FAKTUR",
+        dataIndex: "efakturNo",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.efakturNo] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "efakturNo",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "efakturNo",
+            hasValue(search["efakturNo"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
       },
-    },
-    {
-      title: "REPLACEMENT",
-      dataIndex: "replacement",
-      key: "replacement",
-      width: 120,
-      align: "center",
-      render: (replacement) => {
-        if (!replacement) {
+      {
+        key: "invoiceNumber",
+        title: "INVOICE NUMBER",
+        dataIndex: "invoiceNumber",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.invoiceNumber] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "invoiceNumber",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "invoiceNumber",
+            hasValue(search["invoiceNumber"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "billingCode",
+        title: "BILLING CODE",
+        dataIndex: "billingCode",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.billingCode] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "billingCode",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "billingCode",
+            hasValue(search["billingCode"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: SOR Column
+      {
+        key: "sor",
+        title: "SOR",
+        dataIndex: "sor",
+        width: 150,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.sor] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "sor",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "sor",
+            hasValue(search["sor"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Cost Center Column
+      {
+        key: "costCenter",
+        title: "COST CENTER",
+        dataIndex: "costCenter",
+        width: 150,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.costCenter] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "costCenter",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "costCenter",
+            hasValue(search["costCenter"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Meter Reading Column
+      {
+        key: "meterReading",
+        title: "METER READING",
+        dataIndex: "meterReading",
+        width: 150,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.meterReading] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "meterReading",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "meterReading",
+            hasValue(search["meterReading"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Account Name Column
+      {
+        key: "accountName",
+        title: "ACCOUNT NAME",
+        dataIndex: "accountName",
+        width: 250,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.accountName] || null,
+        ellipsis: { showTitle: false },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "accountName",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "accountName",
+            hasValue(search["accountName"]),
+            searchText,
+            text || "-",
+            true,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "typePpn",
+        title: "TYPE PPN",
+        dataIndex: "typePpn",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.typePpn] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "typePpn",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "typePpn",
+            hasValue(search["typePpn"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "customerName",
+        title: "CUSTOMER NAME",
+        dataIndex: "customerName",
+        width: 250,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.customerName] || null,
+        ellipsis: { showTitle: false },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "customerName",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "customerName",
+            hasValue(search["customerName"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
+      },
+      // NEW: Segment Column
+      {
+        key: "segment",
+        title: "SEGMENT",
+        dataIndex: "segment",
+        width: 150,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.segment] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "segment",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "segment",
+            hasValue(search["segment"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Account Group Type Column
+      {
+        key: "accountGroupType",
+        title: "ACCOUNT GROUP TYPE",
+        dataIndex: "accountGroupType",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.accountGroupType] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "accountGroupType",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "accountGroupType",
+            hasValue(search["accountGroupType"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "accountNumber",
+        title: "ACCOUNT NUMBER",
+        dataIndex: "accountNumber",
+        width: 150,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.accountNumber] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "accountNumber",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "accountNumber",
+            hasValue(search["accountNumber"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Customer Identification Number Column
+      {
+        key: "customerIdentificationNumber",
+        title: "CUSTOMER IDENTIFICATION NUMBER",
+        dataIndex: "customerIdentificationNumber",
+        width: 220,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.customerIdentificationNumber] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "customerIdentificationNumber",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "customerIdentificationNumber",
+            hasValue(search["customerIdentificationNumber"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Tax Address Column
+      {
+        key: "taxAddress",
+        title: "TAX ADDRESS",
+        dataIndex: "taxAddress",
+        width: 300,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.taxAddress] || null,
+        ellipsis: { showTitle: false },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "taxAddress",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "taxAddress",
+            hasValue(search["taxAddress"]),
+            searchText,
+            text || "-",
+            true,
+            "input",
+            search
+          ),
+      },
+      // NEW: Jenis Identitas Column
+      {
+        key: "jenisIdentitas",
+        title: "JENIS IDENTITAS",
+        dataIndex: "jenisIdentitas",
+        width: 150,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.jenisIdentitas] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "jenisIdentitas",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "jenisIdentitas",
+            hasValue(search["jenisIdentitas"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Nomor Identitas Column
+      {
+        key: "nomorIdentitas",
+        title: "NOMOR IDENTITAS",
+        dataIndex: "nomorIdentitas",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.nomorIdentitas] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "nomorIdentitas",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "nomorIdentitas",
+            hasValue(search["nomorIdentitas"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: Jenis Wajib Pajak Column
+      {
+        key: "jenisWajibPajak",
+        title: "JENIS WAJIB PAJAK",
+        dataIndex: "jenisWajibPajak",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.jenisWajibPajak] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "jenisWajibPajak",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "jenisWajibPajak",
+            hasValue(search["jenisWajibPajak"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      // NEW: NITKU Column
+      {
+        key: "nitku",
+        title: "NITKU",
+        dataIndex: "nitku",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.nitku] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "nitku",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "nitku",
+            hasValue(search["nitku"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "billingPeriod",
+        title: "BILLING PERIOD",
+        dataIndex: "billingPeriod",
+        width: 120,
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.billingPeriod] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "billingPeriod",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+          "datePeriod"
+        ),
+        render: (text) =>
+          renderDateColumn(
+            "billingPeriod",
+            hasValue(search["billingPeriod"]),
+            searchText,
+            text,
+            "datePeriod",
+            search
+          ),
+      },
+      {
+        key: "invoiceDate",
+        title: "INVOICE DATE",
+        dataIndex: "invoiceDate",
+        width: 120,
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.invoiceDate] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "invoiceDate",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+          "date"
+        ),
+        render: (text) => {
+          const formattedDate = text ? moment(text).format("DD-MM-YYYY") : "-";
+          return renderDateColumn(
+            "invoiceDate",
+            hasValue(search["invoiceDate"]),
+            searchText,
+            formattedDate,
+            "date",
+            search
+          );
+        },
+      },
+      {
+        key: "totalAmountEqvIdr",
+        title: "TOTAL AMOUNT (IDR)",
+        dataIndex: "totalAmountEqvIdr",
+        width: 180,
+        align: "right",
+        sorter: true,
+        filteredValue: [search?.totalAmountEqvIdr] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "totalAmountEqvIdr",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (value) => {
+          const displayText = `Rp ${value?.toLocaleString("id-ID") || 0}`;
+          return renderColumn(
+            "totalAmountEqvIdr",
+            hasValue(search["totalAmountEqvIdr"]),
+            searchText,
+            displayText,
+            false,
+            "input",
+            search
+          );
+        },
+      },
+      {
+        key: "efakturStatus",
+        title: "STATUS E-FAKTUR",
+        dataIndex: "efakturStatus",
+        width: 180,
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.efakturStatus] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "efakturStatus",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (status) => {
+          const statusColors = {
+            APPROVED: "bg-green-100 text-green-800 border-green-300",
+            PROCESSING: "bg-blue-100 text-blue-800 border-blue-300",
+            AWAITING_APPROVAL:
+              "bg-orange-100 text-orange-800 border-orange-300",
+            FAILED: "bg-red-100 text-red-800 border-red-300",
+            REJECTED: "bg-red-100 text-red-800 border-red-300",
+            SUCCESS_UPLOAD: "bg-green-100 text-green-800 border-green-300",
+            NOT_GENERATED: "bg-gray-100 text-gray-800 border-gray-300",
+          };
+
+          const displayStatus = status || "NOT_GENERATED";
+          const statusLabel = displayStatus.replace(/_/g, " ");
+
+          return (
+            <div className="flex justify-center">
+              <span
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                  statusColors[displayStatus] ||
+                  "bg-gray-100 text-gray-800 border-gray-300"
+                }`}
+              >
+                {renderColumn(
+                  "efakturStatus",
+                  hasValue(search["efakturStatus"]),
+                  searchText,
+                  statusLabel,
+                  false,
+                  "status",
+                  search
+                )}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        key: "replacement",
+        title: "REPLACEMENT",
+        dataIndex: "replacement",
+        width: 120,
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.replacement] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "replacement",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (replacement) => {
+          if (!replacement) {
+            return <span className="text-gray-400">-</span>;
+          }
+
+          if (replacement === "Y") {
+            return (
+              <Tooltip title="Faktur ini sudah diganti dengan faktur baru">
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-800 border border-orange-300">
+                  {renderColumn(
+                    "replacement",
+                    hasValue(search["replacement"]),
+                    searchText,
+                    "REPLACED",
+                    false,
+                    "input",
+                    search
+                  )}
+                </span>
+              </Tooltip>
+            );
+          }
+
+          if (replacement === "N") {
+            return (
+              <Tooltip title="Faktur pengganti terbaru">
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-300">
+                  {renderColumn(
+                    "replacement",
+                    hasValue(search["replacement"]),
+                    searchText,
+                    "LATEST",
+                    false,
+                    "input",
+                    search
+                  )}
+                </span>
+              </Tooltip>
+            );
+          }
+
           return <span className="text-gray-400">-</span>;
-        }
-
-        if (replacement === "Y") {
-          return (
-            <Tooltip title="Faktur ini sudah diganti dengan faktur baru">
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-800 border border-orange-300">
-                REPLACED
-              </span>
-            </Tooltip>
-          );
-        }
-
-        if (replacement === "N") {
-          return (
-            <Tooltip title="Faktur pengganti terbaru">
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-300">
-                LATEST
-              </span>
-            </Tooltip>
-          );
-        }
-
-        return <span className="text-gray-400">-</span>;
+        },
       },
-    },
-  ];
+    ],
+    [page, pageSize, search, searchText, searchedColumn]
+  );
 
   // Item Grant Access untuk action columns
   const itemGrantAccess = [
-    // {
-    //   action: "Download",
-    //   render: (
-    //     <ButtonComponent
-    //       icon={<SVGIcon name="IconButtonDownload" width={24} />}
-    //       type="submit"
-    //       onClick={handleDownload}
-    //     >
-    //       Export Data
-    //     </ButtonComponent>
-    //   ),
-    // },
     {
       action: "Approval",
       render: (
@@ -478,6 +1014,20 @@ const ViewFaktur = () => {
           onClick={() => setModalApproval(true)}
         >
           Approval
+        </ButtonComponent>
+      ),
+    },
+
+    // NEW: Bulk Request Approval Button
+    {
+      action: "Request",
+      render: (
+        <ButtonComponent
+          icon={<SVGIcon name="IconButtonCreate" width={24} />}
+          type="submit"
+          onClick={handleBulkRequest}
+        >
+          Request Approval
         </ButtonComponent>
       ),
     },
@@ -618,6 +1168,7 @@ const ViewFaktur = () => {
             }
           );
         }
+
         if (
           record.efakturStatus === "SUCCESS" ||
           record.efakturStatus === "SUCCESS_UPLOAD" ||
@@ -722,7 +1273,7 @@ const ViewFaktur = () => {
   ];
 
   const actionCols = useColumnActionPermission(
-    ["view", "update", "download"],
+    ["view", "update", "request"], // UPDATED: tambah "request"
     itemGrantAccess
   );
 
@@ -732,7 +1283,7 @@ const ViewFaktur = () => {
       key: col.key || col.dataIndex || col.title,
     }));
     return columnsWithKeys;
-  }, [actionCols]);
+  }, [baseColumns, actionCols]);
 
   const processedColumns = useMemo(() => {
     return applyFixedColumns(allColumns, fixedColumns);
@@ -753,41 +1304,30 @@ const ViewFaktur = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">Manajemen E-Faktur</p>
-              <div className="flex gap-2">
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name="IconRequestApproval"
-                      width={24}
-                      color="#FFF"
-                    />
-                  }
-                  type="submit"
-                  onClick={() => setModalApproval(true)}
-                >
-                  Approval
-                </ButtonComponent>
+              <p className="mt-[15px] font-bold">E-Faktur Management</p>
+              <div className="mt-[15px]">
+                <Toolbar items={itemGrantAccess} />
               </div>
             </div>
           }
         >
           {/* Table Section */}
-          <div className="w-full">
+          <div className="my-5">
             <TableRBI
               dataSource={dataSource}
               columns={processedColumns}
               current={page}
               pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
+              onChange={handleChangePage}
+              onSizeChanger={handleChangePage}
               totalData={pagination?.totalElements || 0}
-              tableScrolled={{ y: 525, x: 2500 }}
-              onSort={onSortApi}
+              tableScrolled={{ x: 2500, y: 525 }}
+              onSort={onSort}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
+              loading={loading}
             />
           </div>
         </CardContainer>
@@ -852,6 +1392,16 @@ const ViewFaktur = () => {
           billingData={selectedBilling}
           onSuccess={() => {
             closeModalCancelFaktur();
+            handleRefresh();
+          }}
+        />
+
+        {/* NEW: Modal Bulk Request Approval */}
+        <ModalBulkRequestApproval
+          isOpen={modalBulkRequest}
+          handleClose={closeModalBulkRequest}
+          onSuccess={() => {
+            closeModalBulkRequest();
             handleRefresh();
           }}
         />

@@ -264,7 +264,7 @@ const PrabillingPage = () => {
             hasValue(search["createdDtm"]),
             searchText,
             formattedDate,
-            "date",
+            "datetime",
             search
           );
         },

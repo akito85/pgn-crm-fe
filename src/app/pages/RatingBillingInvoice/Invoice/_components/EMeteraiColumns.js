@@ -26,7 +26,7 @@ export const getEMeteraiColumns = ({
     {
       key: "customer",
       title: "Customer",
-      dataIndex: "customer",
+      dataIndex: "customerName",
       width: 220,
       ellipsis: true,
     },
@@ -59,11 +59,11 @@ export const getEMeteraiColumns = ({
     {
       key: "amount",
       title: "Amount (IDR)",
-      dataIndex: "amount",
+      dataIndex: "totalAmountEqvIdr",
       width: 150,
       align: "right",
       render: (amount) => (
-        <span style={{ fontWeight: "600", color: "#1890ff" }}>
+        <span style={{ fontWeight: "600" }}>
           {new Intl.NumberFormat("id-ID").format(amount)}
         </span>
       ),

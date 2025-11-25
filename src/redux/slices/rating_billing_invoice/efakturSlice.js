@@ -6,7 +6,6 @@ import {
   showModalError,
 } from "../general_slice";
 
-
 const transformBillingItems = (items) => {
   if (!items || items.length === 0) return [];
 
@@ -30,18 +29,26 @@ const transformBillingItems = (items) => {
 
 const buildSearchParams = (filters) => {
   const params = [];
-  
+
   if (filters?.search) params.push(filters.search);
-  if (filters?.efakturStatus) params.push(`efakturStatus~${filters.efakturStatus}`);
-  if (filters?.invoiceNumber) params.push(`invoiceNumber~${filters.invoiceNumber}`);
+  if (filters?.efakturStatus)
+    params.push(`efakturStatus~${filters.efakturStatus}`);
+  if (filters?.invoiceNumber)
+    params.push(`invoiceNumber~${filters.invoiceNumber}`);
   if (filters?.billingCode) params.push(`billingCode~${filters.billingCode}`);
-  if (filters?.customerName) params.push(`customerName~${filters.customerName}`);
-  
+  if (filters?.customerName)
+    params.push(`customerName~${filters.customerName}`);
+
   return params.join(",");
 };
 
-const handleApiError = (error, thunkAPI, defaultMessage = "Terjadi kesalahan") => {
-  const message = error?.response?.data?.message || error?.message || error?.toString();
+const handleApiError = (
+  error,
+  thunkAPI,
+  defaultMessage = "Terjadi kesalahan"
+) => {
+  const message =
+    error?.response?.data?.message || error?.message || error?.toString();
   const errorCode = error?.response?.data?.code;
 
   if (errorCode === 500 || errorCode === 419) {
@@ -65,7 +72,7 @@ const initialState = {
   loading_detail: false,
   loading_approval_history: false,
   loading_log: false,
-  
+
   dataListCategory: [],
   data_approval: [],
   data_approval_list: [],
@@ -73,22 +80,26 @@ const initialState = {
   data_billingItem: [],
   detail_efaktur: null,
   log_activity: [],
-  
+
+  data_eligible_efaktur: [],
+  loading_eligible: false,
+  error_eligible: null,
+
   data_approval_history: {
     dataHistory: {},
     dataApprover: {},
   },
-  
+
   upload_progress: 0,
   upload_results: [],
-  
+
   pagination: {
     totalElements: 0,
     totalPages: 0,
     size: 10,
     number: 0,
   },
-  
+
   pagination_log: {
     totalElements: 0,
     totalPages: 0,
@@ -100,7 +111,10 @@ const initialState = {
 // GET - List Operations
 export const getListEFaktur = createAsyncThunk(
   "EFAKTUR/GET_LIST_EFAKTUR",
-  async ({ page = 1, pageSize = 10, sort = "invoiceDate~desc", filters = {} }, thunkAPI) => {
+  async (
+    { page = 1, pageSize = 10, sort = "invoiceDate~desc", filters = {} },
+    thunkAPI
+  ) => {
     try {
       const searchParam = buildSearchParams(filters);
       const url = `/v1/dbs/api/rbi/e-invoice?page=${page}&size=${pageSize}&sort=${sort}${
@@ -139,7 +153,9 @@ export const getAllApprovalList = createAsyncThunk(
       const url = "/v1/dbs/api/rbi/e-invoice/approval-hierarchy-list";
       const response = await ratingBillingHttpService.getAll(url);
 
-      return Array.isArray(response.data) ? response.data : response.data?.result || [];
+      return Array.isArray(response.data)
+        ? response.data
+        : response.data?.result || [];
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal mengambil approval list");
     }
@@ -165,7 +181,7 @@ export const getAllBillingItemPaginate = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/billing/billing-item/${billingCode}?page=0&size=999&sort=lineNumber~asc`;
       const response = await ratingBillingHttpService.getPagination(url);
-      
+
       return transformBillingItems(response.data?.result || []);
     } catch (error) {
       return handleApiError(error, thunkAPI, "Gagal mengambil billing items");
@@ -191,12 +207,17 @@ export const getLogActivity = createAsyncThunk(
   "EFAKTUR/GET_LOG_ACTIVITY",
   async ({ efakturId, page = 1, size = 10 }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/e-invoice/logs/${efakturId}?page=${page - 1}&size=${size}`;
+      const url = `/v1/dbs/api/rbi/e-invoice/logs/${efakturId}?page=${
+        page - 1
+      }&size=${size}`;
       const response = await ratingBillingHttpService.getPagination(url);
       return response.data || { result: [], page: {} };
     } catch (error) {
       if (error?.response?.status === 404) {
-        return { result: [], page: { size: 10, totalElements: 0, totalPages: 0, number: 0 } };
+        return {
+          result: [],
+          page: { size: 10, totalElements: 0, totalPages: 0, number: 0 },
+        };
       }
       return handleApiError(error, thunkAPI, "Gagal mengambil log aktivitas");
     }
@@ -214,7 +235,11 @@ export const getApprovalHistory = createAsyncThunk(
       if (error?.response?.status === 404) {
         return { dataHistory: {}, dataApprover: {} };
       }
-      return handleApiError(error, thunkAPI, "Gagal mengambil approval history");
+      return handleApiError(
+        error,
+        thunkAPI,
+        "Gagal mengambil approval history"
+      );
     }
   }
 );
@@ -234,8 +259,7 @@ export const generateEFakturWithAttachments = createAsyncThunk(
 
       const createResponse = await ratingBillingHttpService.createData(
         createUrl,
-        requestBody,
-      
+        requestBody
       );
 
       if (!createResponse.success) {
@@ -250,7 +274,9 @@ export const generateEFakturWithAttachments = createAsyncThunk(
       }
 
       const uploadResults = [];
-      const newAttachments = attachments.filter((item) => item.dataType !== "exist");
+      const newAttachments = attachments.filter(
+        (item) => item.dataType !== "exist"
+      );
 
       if (newAttachments.length > 0) {
         for (let i = 0; i < newAttachments.length; i++) {
@@ -261,7 +287,9 @@ export const generateEFakturWithAttachments = createAsyncThunk(
               throw new Error(`File tidak ditemukan untuk attachment ${i + 1}`);
             }
             if (!attachment.fileCategoryId) {
-              throw new Error(`Category tidak dipilih untuk attachment ${i + 1}`);
+              throw new Error(
+                `Category tidak dipilih untuk attachment ${i + 1}`
+              );
             }
 
             const formData = new FormData();
@@ -270,16 +298,21 @@ export const generateEFakturWithAttachments = createAsyncThunk(
             formData.append("categoryId", attachment.fileCategoryId);
 
             const uploadUrl = "/v1/dbs/api/rbi/e-invoice/upload-attachment";
-            const uploadResponse = await ratingBillingHttpService.uploadAttachment(
-              uploadUrl,
-              formData,
-              (progressPercent) => {
-                const baseProgress = 70;
-                const uploadProgress = (30 / newAttachments.length) * (i + progressPercent / 100);
-                thunkAPI.dispatch(updateUploadProgress(Math.min(baseProgress + uploadProgress, 100)));
-              },
-            
-            );
+            const uploadResponse =
+              await ratingBillingHttpService.uploadAttachment(
+                uploadUrl,
+                formData,
+                (progressPercent) => {
+                  const baseProgress = 70;
+                  const uploadProgress =
+                    (30 / newAttachments.length) * (i + progressPercent / 100);
+                  thunkAPI.dispatch(
+                    updateUploadProgress(
+                      Math.min(baseProgress + uploadProgress, 100)
+                    )
+                  );
+                }
+              );
 
             uploadResults.push({
               index: i + 1,
@@ -292,7 +325,10 @@ export const generateEFakturWithAttachments = createAsyncThunk(
               index: i + 1,
               fileName: attachment.file?.name || "Unknown file",
               success: false,
-              error: uploadError?.response?.data?.message || uploadError?.message || "Upload failed",
+              error:
+                uploadError?.response?.data?.message ||
+                uploadError?.message ||
+                "Upload failed",
             });
           }
         }
@@ -313,11 +349,13 @@ export const generateEFakturWithAttachments = createAsyncThunk(
         }
       }
 
-      thunkAPI.dispatch(showModalSuccess({
-        title: "Success",
-        description: successMessage,
-        return: false,
-      }));
+      thunkAPI.dispatch(
+        showModalSuccess({
+          title: "Success",
+          description: successMessage,
+          return: false,
+        })
+      );
 
       return {
         efaktur: efakturResult,
@@ -347,8 +385,7 @@ export const uploadAttachment = createAsyncThunk(
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
         formData,
-        onProgress || (() => {}),
-      
+        onProgress || (() => {})
       );
 
       return {
@@ -359,7 +396,8 @@ export const uploadAttachment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue({
         fileName: file.name,
-        error: error?.response?.data?.message || error?.message || "Upload failed",
+        error:
+          error?.response?.data?.message || error?.message || "Upload failed",
       });
     }
   }
@@ -371,10 +409,16 @@ export const getAllEFakturApprovePaginate = createAsyncThunk(
     try {
       const url = "/v1/dbs/api/rbi/e-invoice/approval-efaktur-list";
       const response = await ratingBillingHttpService.getAll(url);
-      
-      return Array.isArray(response.data) ? response.data : response.data?.result || [];
+
+      return Array.isArray(response.data)
+        ? response.data
+        : response.data?.result || [];
     } catch (error) {
-      return handleApiError(error, thunkAPI, "Gagal mengambil list E-Faktur approval");
+      return handleApiError(
+        error,
+        thunkAPI,
+        "Gagal mengambil list E-Faktur approval"
+      );
     }
   }
 );
@@ -384,21 +428,27 @@ export const approvedEfaktur = createAsyncThunk(
   async ({ body, action: actionType }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/e-invoice/approval`;
-      
+
       const requestBody = {
         detailApproves: body.detailApproves,
         action: body.action,
         description: body.description || "",
       };
 
-      const response = await ratingBillingHttpService.createData(url, requestBody);
+      const response = await ratingBillingHttpService.createData(
+        url,
+        requestBody
+      );
 
       if (response.success) {
-        thunkAPI.dispatch(showModalSuccess({
-          title: "Success",
-          description: response.message || `E-Faktur berhasil di-${actionType}`,
-          return: false,
-        }));
+        thunkAPI.dispatch(
+          showModalSuccess({
+            title: "Success",
+            description:
+              response.message || `E-Faktur berhasil di-${actionType}`,
+            return: false,
+          })
+        );
 
         return {
           action: body.action,
@@ -408,13 +458,19 @@ export const approvedEfaktur = createAsyncThunk(
         throw new Error(response.message || `Gagal ${actionType} E-Faktur`);
       }
     } catch (error) {
-      const message = error?.response?.data?.message || error?.message || error?.toString();
-      
-      if (!error?.response || Math.floor((error?.response?.data?.code || 0) / 100) !== 5) {
-        thunkAPI.dispatch(showModalError({
-          title: "Failed",
-          description: `Gagal ${actionType} E-Faktur: ${message}`,
-        }));
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+
+      if (
+        !error?.response ||
+        Math.floor((error?.response?.data?.code || 0) / 100) !== 5
+      ) {
+        thunkAPI.dispatch(
+          showModalError({
+            title: "Failed",
+            description: `Gagal ${actionType} E-Faktur: ${message}`,
+          })
+        );
       }
 
       return thunkAPI.rejectWithValue({
@@ -427,41 +483,50 @@ export const approvedEfaktur = createAsyncThunk(
 
 export const cancelEFaktur = createAsyncThunk(
   "EFAKTUR/CANCEL_EFAKTUR",
-  async ({ efakturId, reason, appHierId }, thunkAPI) => { 
+  async ({ efakturId, reason, appHierId }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/e-invoice/${efakturId}/cancellation`;
-      const requestBody = { 
+      const requestBody = {
         reason,
-        appHierId: 620
+        appHierId: 620,
       };
 
-      const response = await ratingBillingHttpService.createData(url, requestBody);
+      const response = await ratingBillingHttpService.createData(
+        url,
+        requestBody
+      );
 
       if (response.success) {
-        thunkAPI.dispatch(showModalSuccess({
-          title: "Success",
-          description: response.message || "E-Faktur berhasil dibatalkan",
-          return: false,
-        }));
+        thunkAPI.dispatch(
+          showModalSuccess({
+            title: "Success",
+            description: response.message || "E-Faktur berhasil dibatalkan",
+            return: false,
+          })
+        );
 
         return { efakturId };
       } else {
         throw new Error(response.message || "Gagal membatalkan E-Faktur");
       }
     } catch (error) {
-      const message = error?.response?.data?.message || error?.message || error?.toString();
-      
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+
       let errorMessage = message;
       if (message.toLowerCase().includes("already cancelled")) {
         errorMessage = "E-Faktur sudah dibatalkan sebelumnya";
       } else if (error?.response?.status === 500) {
-        errorMessage = "Terjadi kesalahan pada server PJAP. Silakan coba lagi nanti.";
+        errorMessage =
+          "Terjadi kesalahan pada server PJAP. Silakan coba lagi nanti.";
       }
 
-      thunkAPI.dispatch(showModalError({
-        title: "Failed",
-        description: `Gagal membatalkan E-Faktur: ${errorMessage}`,
-      }));
+      thunkAPI.dispatch(
+        showModalError({
+          title: "Failed",
+          description: `Gagal membatalkan E-Faktur: ${errorMessage}`,
+        })
+      );
 
       return thunkAPI.rejectWithValue({ message: errorMessage, efakturId });
     }
@@ -470,7 +535,7 @@ export const cancelEFaktur = createAsyncThunk(
 
 export const replaceEFaktur = createAsyncThunk(
   "EFAKTUR/REPLACE_EFAKTUR",
-  async ({ efakturId, reason, appHierId }, thunkAPI) => { 
+  async ({ efakturId, reason, appHierId }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/e-invoice/replacement`;
       const requestBody = {
@@ -479,14 +544,21 @@ export const replaceEFaktur = createAsyncThunk(
         appHierId: 620,
       };
 
-      const response = await ratingBillingHttpService.createData(url, requestBody);
+      const response = await ratingBillingHttpService.createData(
+        url,
+        requestBody
+      );
 
       if (response.success) {
-        thunkAPI.dispatch(showModalSuccess({
-          title: "Success",
-          description: response.message || "Faktur pengganti berhasil dibuat, silakan tunggu proses selesai",
-          return: false,
-        }));
+        thunkAPI.dispatch(
+          showModalSuccess({
+            title: "Success",
+            description:
+              response.message ||
+              "Faktur pengganti berhasil dibuat, silakan tunggu proses selesai",
+            return: false,
+          })
+        );
 
         return { efakturId };
       } else {
@@ -505,14 +577,20 @@ export const generateXMLEFaktur = createAsyncThunk(
       const url = "/v1/dbs/api/rbi/e-invoice/generate-xml";
       const requestBody = { efakturId };
 
-      const response = await ratingBillingHttpService.createData(url, requestBody);
+      const response = await ratingBillingHttpService.createData(
+        url,
+        requestBody
+      );
 
       // Extract XML content
       let xmlContent = "";
       if (typeof response === "string") {
         xmlContent = response;
       } else if (response?.data) {
-        xmlContent = typeof response.data === "string" ? response.data : response.data?.xml || "";
+        xmlContent =
+          typeof response.data === "string"
+            ? response.data
+            : response.data?.xml || "";
       }
 
       // Validate XML
@@ -522,22 +600,28 @@ export const generateXMLEFaktur = createAsyncThunk(
       }
 
       // Download XML file
-      const blob = new Blob([xmlContent], { type: "application/xml;charset=utf-8" });
+      const blob = new Blob([xmlContent], {
+        type: "application/xml;charset=utf-8",
+      });
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
-      
+
       link.href = downloadUrl;
-      link.download = `E-Faktur_${invoiceNumber || efakturId}_${new Date().getTime()}.xml`;
+      link.download = `E-Faktur_${
+        invoiceNumber || efakturId
+      }_${new Date().getTime()}.xml`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(downloadUrl);
 
-      thunkAPI.dispatch(showModalSuccess({
-        title: "Success",
-        description: "XML E-Faktur berhasil di-generate dan di-download",
-        return: false,
-      }));
+      thunkAPI.dispatch(
+        showModalSuccess({
+          title: "Success",
+          description: "XML E-Faktur berhasil di-generate dan di-download",
+          return: false,
+        })
+      );
 
       return {
         xmlContent,
@@ -562,14 +646,16 @@ export const uploadManualEFaktur = createAsyncThunk(
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
         formData,
-        () => {},     
+        () => {}
       );
 
-      thunkAPI.dispatch(showModalSuccess({
-        title: "Success",
-        description: response.message || "E-Faktur manual berhasil diupload",
-        return: false,
-      }));
+      thunkAPI.dispatch(
+        showModalSuccess({
+          title: "Success",
+          description: response.message || "E-Faktur manual berhasil diupload",
+          return: false,
+        })
+      );
 
       return response.data;
     } catch (error) {
@@ -580,10 +666,15 @@ export const uploadManualEFaktur = createAsyncThunk(
 
 export const downloadEFakturList = createAsyncThunk(
   "EFAKTUR/DOWNLOAD_LIST",
-  async ({ filters = {}, page = 1, pageSize = 10, sort = "invoiceDate~desc" }, thunkAPI) => {
+  async (
+    { filters = {}, page = 1, pageSize = 10, sort = "invoiceDate~desc" },
+    thunkAPI
+  ) => {
     try {
       const searchParam = buildSearchParams(filters);
-      const url = `/v1/dbs/api/rbi/e-invoice/download?page=${page - 1}&size=${pageSize}&sort=${sort}${
+      const url = `/v1/dbs/api/rbi/e-invoice/download?page=${
+        page - 1
+      }&size=${pageSize}&sort=${sort}${
         searchParam ? `&search=${searchParam}` : ""
       }`;
 
@@ -591,6 +682,188 @@ export const downloadEFakturList = createAsyncThunk(
       return response.data;
     } catch (error) {
       return handleApiError(error, thunkAPI, "Download gagal");
+    }
+  }
+);
+
+/**
+ * Get Eligible E-Faktur for Bulk Request Approval
+ */
+export const getEligibleEFakturForRequest = createAsyncThunk(
+  "EFAKTUR/GET_ELIGIBLE_FOR_REQUEST",
+  async (
+    { page = 1, pageSize = 10, sort = "invoiceDate~desc", filters = {} },
+    thunkAPI
+  ) => {
+    try {
+      const searchParam = buildSearchParams(filters);
+      const url = `/v1/dbs/api/rbi/e-invoice/eligible-for-request?page=${page}&size=${pageSize}&sort=${sort}${
+        searchParam ? `&search=${searchParam}` : ""
+      }`;
+
+      const response = await ratingBillingHttpService.getPagination(url);
+      return response.data || { result: [], page: {} };
+    } catch (error) {
+      return handleApiError(
+        error,
+        thunkAPI,
+        "Gagal mengambil list E-Faktur eligible"
+      );
+    }
+  }
+);
+
+/**
+ * Bulk Request Approval E-Faktur with Attachments
+ */
+export const bulkRequestApprovalEFaktur = createAsyncThunk(
+  "EFAKTUR/BULK_REQUEST_APPROVAL",
+  async ({ requestData, attachments = [] }, thunkAPI) => {
+    try {
+      // Step 1: Submit bulk request approval
+      thunkAPI.dispatch(updateUploadProgress(30));
+
+      const url = "/v1/dbs/api/rbi/e-invoice/bulk-request-approval";
+      const requestBody = {
+        efakturIds: requestData.efakturIds,
+        apphierId: String(requestData.apphierId),
+        remark: requestData.remark || "",
+      };
+
+      const response = await ratingBillingHttpService.createData(
+        url,
+        requestBody
+      );
+
+      if (!response.success) {
+        throw new Error(
+          response.message || "Gagal submit bulk request approval"
+        );
+      }
+
+      const result = response.data;
+      const requestId = result.requestId;
+
+      if (!requestId) {
+        throw new Error("requestId tidak ditemukan di response");
+      }
+
+      thunkAPI.dispatch(updateUploadProgress(60));
+
+      // Step 2: Upload attachments if any
+      const uploadResults = [];
+      const newAttachments = attachments.filter(
+        (item) => item.dataType !== "exist"
+      );
+
+      if (newAttachments.length > 0) {
+        const totalFiles = newAttachments.length;
+
+        for (let i = 0; i < newAttachments.length; i++) {
+          const attachment = newAttachments[i];
+
+          try {
+            if (!attachment.file) {
+              throw new Error(`File tidak ditemukan untuk attachment ${i + 1}`);
+            }
+            if (!attachment.fileCategoryId) {
+              throw new Error(
+                `Category tidak dipilih untuk attachment ${i + 1}`
+              );
+            }
+
+            const formData = new FormData();
+            formData.append("files", attachment.file);
+            formData.append("refId", requestId);
+            formData.append("categoryId", attachment.fileCategoryId);
+
+            const uploadUrl =
+              "/v1/dbs/api/rbi/e-invoice/bulk-request/upload-attachment";
+            const uploadResponse =
+              await ratingBillingHttpService.uploadAttachment(
+                uploadUrl,
+                formData,
+                (progressPercent) => {
+                  const baseProgress = 60;
+                  const uploadProgress =
+                    (40 / totalFiles) * (i + progressPercent / 100);
+                  thunkAPI.dispatch(
+                    updateUploadProgress(
+                      Math.min(baseProgress + uploadProgress, 100)
+                    )
+                  );
+                }
+              );
+
+            uploadResults.push({
+              index: i + 1,
+              fileName: attachment.file.name,
+              success: true,
+              message: uploadResponse?.message || "Success",
+            });
+          } catch (uploadError) {
+            uploadResults.push({
+              index: i + 1,
+              fileName: attachment.file?.name || "Unknown file",
+              success: false,
+              error:
+                uploadError?.response?.data?.message ||
+                uploadError?.message ||
+                "Upload failed",
+            });
+          }
+
+          const progress = 60 + ((i + 1) / totalFiles) * 40;
+          thunkAPI.dispatch(updateUploadProgress(Math.floor(progress)));
+        }
+      }
+
+      thunkAPI.dispatch(updateUploadProgress(100));
+
+      // Step 3: Build success message
+      const failedUploads = uploadResults.filter((r) => !r.success);
+      const successUploads = uploadResults.filter((r) => r.success);
+
+      let successMessage =
+        response.message || "Bulk request approval berhasil disubmit";
+      if (uploadResults.length > 0) {
+        if (failedUploads.length === 0) {
+          successMessage += ` dengan ${successUploads.length} attachment.`;
+        } else if (successUploads.length > 0) {
+          successMessage += `. ${successUploads.length} attachment berhasil, ${failedUploads.length} gagal.`;
+        } else {
+          successMessage += `, namun semua attachment gagal diupload.`;
+        }
+      }
+
+      thunkAPI.dispatch(
+        showModalSuccess({
+          title: "Success",
+          description: successMessage,
+          return: false,
+        })
+      );
+
+      return {
+        ...result,
+        uploadResults,
+        summary: {
+          totalRequested:
+            result.totalRequested || requestData.efakturIds.length,
+          successCount: result.successCount || 0,
+          failedCount: result.failedCount || 0,
+          totalAttachments: uploadResults.length,
+          attachmentSuccess: successUploads.length,
+          attachmentFailed: failedUploads.length,
+        },
+      };
+    } catch (error) {
+      thunkAPI.dispatch(updateUploadProgress(0));
+      return handleApiError(
+        error,
+        thunkAPI,
+        "Gagal submit bulk request approval"
+      );
     }
   }
 );
@@ -648,10 +921,10 @@ const efakturSlice = createSlice({
     },
     [getAllEFakturApprovePaginate.fulfilled]: (state, action) => {
       state.loading = false;
-      const data = Array.isArray(action.payload) 
-        ? action.payload 
+      const data = Array.isArray(action.payload)
+        ? action.payload
         : action.payload?.result || [];
-      
+
       state.list_efaktur_approval = data;
     },
     [getAllEFakturApprovePaginate.rejected]: (state) => {
@@ -749,7 +1022,7 @@ const efakturSlice = createSlice({
       state.loading_modal = false;
       state.upload_progress = 100;
       state.upload_results = action.payload.uploadResults || [];
-      
+
       const efakturResult = action.payload.efaktur;
       state.list_efaktur = state.list_efaktur.map((item) =>
         item.billingCode === efakturResult.billingCode
@@ -777,7 +1050,8 @@ const efakturSlice = createSlice({
         item.efakturId === action.payload.efakturId
           ? {
               ...item,
-              efakturStatus: action.payload.action === "APPROVE" ? "APPROVED" : "REJECTED",
+              efakturStatus:
+                action.payload.action === "APPROVE" ? "APPROVED" : "REJECTED",
             }
           : item
       );
@@ -857,6 +1131,52 @@ const efakturSlice = createSlice({
     },
     [downloadEFakturList.rejected]: (state) => {
       state.loading = false;
+    },
+
+    // GET ELIGIBLE E-FAKTUR FOR REQUEST
+    [getEligibleEFakturForRequest.pending]: (state) => {
+      state.loading_eligible = true;
+      state.error_eligible = null;
+    },
+    [getEligibleEFakturForRequest.fulfilled]: (state, action) => {
+      state.loading_eligible = false;
+      state.data_eligible_efaktur = action.payload.result || [];
+      state.pagination = action.payload.page || initialState.pagination;
+    },
+    [getEligibleEFakturForRequest.rejected]: (state, action) => {
+      state.loading_eligible = false;
+      state.error_eligible = action.payload;
+      state.data_eligible_efaktur = [];
+    },
+
+    // BULK REQUEST APPROVAL E-FAKTUR
+    [bulkRequestApprovalEFaktur.pending]: (state) => {
+      state.loading_modal = true;
+      state.upload_progress = 0;
+      state.upload_results = [];
+    },
+    [bulkRequestApprovalEFaktur.fulfilled]: (state, action) => {
+      state.loading_modal = false;
+      state.upload_progress = 100;
+      state.upload_results = action.payload.uploadResults || [];
+
+      // Update status e-faktur yang berhasil di-request
+      if (action.payload.efakturRequests) {
+        action.payload.efakturRequests.forEach((req) => {
+          if (req.status === "AWAITING_APPROVAL") {
+            state.list_efaktur = state.list_efaktur.map((item) =>
+              item.efakturId === req.efakturId
+                ? { ...item, efakturStatus: "AWAITING_APPROVAL" }
+                : item
+            );
+          }
+        });
+      }
+    },
+    [bulkRequestApprovalEFaktur.rejected]: (state) => {
+      state.loading_modal = false;
+      state.upload_progress = 0;
+      state.upload_results = [];
     },
   },
 });

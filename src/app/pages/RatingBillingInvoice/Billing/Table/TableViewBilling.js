@@ -1,5 +1,6 @@
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import { currencyFormatting, numberFormatting } from "../../../../../utils/formatCurrency";
 
 export const columnsBilling = (
   page = 1,
@@ -664,13 +665,6 @@ export const columnsBilling = (
     dataIndex: "minContract",
     sorter: true,
     align: "right",
-    // ...getColumnSearchPropsPaging(
-    //   "minContract",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "minContract",
@@ -680,16 +674,20 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
-        "minContract",
-        hasValue(search["minContract"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
+    render: (text) => {
+      if (hasValue(search["minContract"])) {
+        return renderColumn(
+          "minContract",
+          true,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        );
+      }
+      return numberFormatting(text);
+    },
   },
   {
     key: "maxContract",
@@ -697,13 +695,6 @@ export const columnsBilling = (
     dataIndex: "maxContract",
     sorter: true,
     align: "right",
-    // ...getColumnSearchPropsPaging(
-    //   "maxContract",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "maxContract",
@@ -713,16 +704,20 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
-        "maxContract",
-        hasValue(search["maxContract"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
+    render: (text) => {
+      if (hasValue(search["maxContract"])) {
+        return renderColumn(
+          "maxContract",
+          true,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        );
+      }
+      return numberFormatting(text);
+    },
   },
   {
     key: "totalUsage",
@@ -739,23 +734,20 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
-        "totalUsage",
-        hasValue(search["totalUsage"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-    // ...getColumnSearchPropsPaging(
-    //   "totalUsage",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
+    render: (text) => {
+      if (hasValue(search["totalUsage"])) {
+        return renderColumn(
+          "totalUsage",
+          true,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        );
+      }
+      return numberFormatting(text);
+    },
   },
   {
     key: "totalUsageConvM3",
@@ -763,13 +755,6 @@ export const columnsBilling = (
     dataIndex: "totalUsageConvM3",
     sorter: true,
     align: "right",
-    // ...getColumnSearchPropsPaging(
-    //   "totalUsageConvM3",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalUsageConvM3",
@@ -779,16 +764,20 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
-        "totalUsageConvM3",
-        hasValue(search["totalUsageConvM3"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
+    render: (text) => {
+      if (hasValue(search["totalUsageConvM3"])) {
+        return renderColumn(
+          "totalUsageConvM3",
+          true,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        );
+      }
+      return numberFormatting(text);
+    },
   },
   {
     key: "totalUsageConvMmbtu",
@@ -796,13 +785,6 @@ export const columnsBilling = (
     dataIndex: "totalUsageConvMmbtu",
     sorter: true,
     align: "right",
-    // ...getColumnSearchPropsPaging(
-    //   "totalUsageConvMmbtu",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalUsageConvMmbtu",
@@ -812,30 +794,29 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
-        "totalUsageConvMmbtu",
-        hasValue(search["totalUsageConvMmbtu"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
+    render: (text) => {
+      if (hasValue(search["totalUsageConvMmbtu"])) {
+        return renderColumn(
+          "totalUsageConvMmbtu",
+          true,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        );
+      }
+      return numberFormatting(text);
+    },
   },
+
+  // KOLOM CURRENCY IDR
   {
     key: "basicBillingIdr",
     title: "BASIC BILL IDR",
     dataIndex: "basicBillingIdr",
     sorter: true,
     align: "right",
-    // ...getColumnSearchPropsPaging(
-    //   "basicBillingIdr",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "basicBillingIdr",
@@ -845,30 +826,29 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
-        "basicBillingIdr",
-        hasValue(search["basicBillingIdr"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
+    render: (text) => {
+      if (hasValue(search["basicBillingIdr"])) {
+        return renderColumn(
+          "basicBillingIdr",
+          true,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        );
+      }
+      return currencyFormatting(text, "idr");
+    },
   },
+
+  // KOLOM CURRENCY USD
   {
     key: "basicBillingUsd",
     title: "BASIC BILL USD",
     dataIndex: "basicBillingUsd",
     sorter: true,
     align: "right",
-    // ...getColumnSearchPropsPaging(
-    //   "basicBillingUsd",
-    //   searchInput,
-    //   searchedColumn,
-    //   searchText,
-    //   handleSearch
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "basicBillingUsd",
@@ -878,16 +858,20 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
-      renderColumn(
-        "basicBillingUsd",
-        hasValue(search["basicBillingUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
+    render: (text) => {
+      if (hasValue(search["basicBillingUsd"])) {
+        return renderColumn(
+          "basicBillingUsd",
+          true,
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        );
+      }
+      return currencyFormatting(text, "usd");
+    },
   },
   {
     key: "totalBasicBillEqvIdr",

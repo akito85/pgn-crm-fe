@@ -154,23 +154,23 @@ const RatingPage = () => {
   };
 
   const itemGrantAccess = [
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Detail">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDetail"
-                width={24}
-                onClick={() => handleDetail(record)}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
+    // {
+    //   action: "View",
+    //   type: "table",
+    //   render: (record) => {
+    //     return (
+    //       <Tooltip title="Detail">
+    //         <div className="pt-1">
+    //           <SVGIcon
+    //             name="IconDetail"
+    //             width={24}
+    //             onClick={() => handleDetail(record)}
+    //           />
+    //         </div>
+    //       </Tooltip>
+    //     );
+    //   },
+    // },
   ];
 
   const dataSourceWithKeys = useMemo(() => {
@@ -251,7 +251,7 @@ const RatingPage = () => {
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ y: 525, x: 3500 }}
+              tableScrolled={{ y: 525, x: 4500 }}
               onSort={onSortApi}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}

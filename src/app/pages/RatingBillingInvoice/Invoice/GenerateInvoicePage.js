@@ -11,6 +11,8 @@ import {
   getBillingApproval,
   createGenerate,
 } from "../../../../redux/slices/rating_billing_invoice/invoice";
+import { useNavigate } from "react-router-dom";
+import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -61,6 +63,7 @@ const ScheduleSchedule = ({ schedule, setSchedule, remark, setRemark }) => (
 
 const GenerateInvoicePage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { data_billing } = useSelector((s) => s.invoice);
   const [form] = Form.useForm();
   const searchInput = useRef(null);
@@ -111,9 +114,9 @@ const GenerateInvoicePage = () => {
   }, []);
 
   useEffect(() => {
-    if (data_billing) {
+    if (data_billing && Array.isArray(data_billing)) {
       setDataTable(
-        data_billing.map((item, index) => ({
+        data_billing?.map((item, index) => ({
           // prefer stable id if server provides it
           key: item.id ?? item.invoiceNumber ?? index + 1,
           ...item,
@@ -237,14 +240,16 @@ const GenerateInvoicePage = () => {
         setLoading(true);
         dispatch(createGenerate(body))
           .unwrap()
-          .then(() => {
+          .then((response) => {
             message.success("Invoice generated successfully");
             setLoading(false);
             form.resetFields();
             setSelectedRowKeys([]);
             setFilterRowSelected([]);
             setRemark("");
-            fetchBillingData();
+
+            // Navigate to view page
+            navigate(INVOICE_ROUTES.GENERATE_INVOICE_VIEW);
           })
           .catch((error) => {
             setLoading(false);
