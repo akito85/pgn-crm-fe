@@ -26,6 +26,7 @@ import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import { configApp } from "../../../../constants/configApp";
 import { tokenHeader } from "../../../../utils/tokenHeader";
+import { NavLink } from "react-router-dom";
 
 const ViewInvoice = () => {
   // Selector
@@ -361,16 +362,14 @@ const ViewInvoice = () => {
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">Invoice List</p>
               <div className="flex gap-2">
-                <ButtonComponent
-                  icon={<SVGIcon name="IconButtonCreate" width={24} />}
-                  type="submit"
-                  onClick={() => {
-                    window.location.href =
-                      "/invoice/generate-invoice/generate-form-invoice";
-                  }}
-                >
-                  Generate Invoice
-                </ButtonComponent>
+                <NavLink to={INVOICE_ROUTES.GENERATE_INVOICE_FORM}>
+                  <ButtonComponent
+                    icon={<SVGIcon name="IconButtonCreate" width={24} />}
+                    type="submit"
+                  >
+                    Generate Invoice
+                  </ButtonComponent>
+                </NavLink>
               </div>
             </div>
           }
