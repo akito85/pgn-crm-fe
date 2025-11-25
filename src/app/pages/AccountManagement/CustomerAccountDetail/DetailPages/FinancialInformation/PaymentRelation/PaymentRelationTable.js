@@ -138,7 +138,20 @@ const PaymentRelationTable = ({
                 />
               </div>
             </Tooltip>
-            
+            {
+              isApproval && (
+                <Tooltip title="Detail">
+                  <div className="pt-1">
+                    <SVGIcon
+                      name="IconLogHistory"
+                      color={"#0075bf"}
+                      width={24}
+                      onClick={() => {}}
+                    />
+                  </div>
+                </Tooltip>
+              )
+            }
           </div>
         );
       },
