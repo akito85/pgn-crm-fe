@@ -8,91 +8,64 @@ import {
   Col,
   Divider,
   Space,
-  Tag,
   message,
+  Spin,
 } from "antd";
-import { FileTextOutlined } from "@ant-design/icons";
+import { FileTextOutlined, LoadingOutlined } from "@ant-design/icons";
 import LogDetailModal from "./ManagementDeliveryComponent/LogDetailModal";
+import StatusComponent from "../../../../../components/StatusComponent";
 
-// Status Tag Component
-const StatusTag = ({ status }) => {
-  const getStatusConfig = (status) => {
-    const configs = {
-      Terkirim: {
-        color: "success",
-        icon: "✅",
-        text: "Sent",
-      },
-      Gagal: {
-        color: "error",
-        icon: "❌",
-        text: "Failed",
-      },
-      Menunggu: {
-        color: "warning",
-        icon: "⏳",
-        text: "Scheduled",
-      },
-      "Belum Diproses": {
-        color: "default",
-        icon: "📋",
-        text: "Not Processed",
-      },
-    };
-    return configs[status] || configs["Not Processed"];
-  };
-
-  const config = getStatusConfig(status);
-
-  return (
-    <Tag
-      color={config.color}
-      style={{
-        fontWeight: "500",
-        padding: "4px 12px",
-        fontSize: "13px",
-        borderRadius: "6px",
-      }}
-    >
-      {config.icon} {config.text}
-    </Tag>
-  );
+// Channel Icon Helper
+const getChannelIcon = (channel) => {
+  const channelLower = channel?.toLowerCase() || "";
+  if (channelLower.includes("email")) return "📧";
+  if (channelLower.includes("whatsapp") || channelLower.includes("wa"))
+    return "📱";
+  if (channelLower.includes("sms")) return "💬";
+  return "📮";
 };
 
 const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
   const [logModalVisible, setLogModalVisible] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   if (!invoiceData) return null;
 
-  // Mock detailed data - Replace with actual API data
-  const detailData = {
-    invoiceNo: invoiceData.invoiceNo,
-    customer: invoiceData.customer,
-    totalAmount: "Rp 2.500.000",
-    invoiceDate: "01/10/2025",
-    dueDate: "20/10/2025",
-    deliveries: [
-      {
-        id: "789",
-        channel: "Email",
-        recipient: "cs@ptmakmur.com",
-        status: "Sent",
-        sentTime: "01/10/2025 10:10",
-        hasLog: true,
-      },
-      {
-        id: "790",
-        channel: "WhatsApp",
-        recipient: "+628123456789",
-        status: "Failed",
-        sentTime: "01/10/2025 10:11",
-        hasLog: true,
-        canResend: true,
-        errorNote:
-          'Aksi "Kirim Ulang" hanya muncul jika status pengiriman adalah "Gagal".',
-      },
-    ],
+  // Format currency
+  const formatCurrency = (amount) => {
+    if (!amount) return "Rp 0";
+    return `Rp ${Number(amount).toLocaleString("id-ID")}`;
+  };
+
+  // Format date
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  // Format datetime
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    return date.toLocaleString("id-ID", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  // Check if status is failed
+  const isFailedStatus = (status) => {
+    const statusLower = status?.toLowerCase() || "";
+    return statusLower.includes("failed") || statusLower.includes("gagal");
   };
 
   const handleViewLog = (delivery) => {
@@ -103,12 +76,19 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
   const handleResend = (delivery) => {
     Modal.confirm({
       title: "Konfirmasi Kirim Ulang",
-      content: `Apakah Anda yakin ingin mengirim ulang invoice ke ${delivery.recipient} via ${delivery.channel}?`,
+      content: `Apakah Anda yakin ingin mengirim ulang invoice ke ${
+        delivery.recipientAddress || delivery.contactInfo
+      } via ${delivery.deliveryChannel}?`,
       okText: "Ya, Kirim Ulang",
       cancelText: "Batal",
       onOk() {
-        message.success("Invoice berhasil dikirim ulang!");
-        // Implement actual resend logic here
+        setLoading(true);
+        // TODO: Implement actual resend API call
+        setTimeout(() => {
+          message.success("Invoice berhasil dikirim ulang!");
+          setLoading(false);
+          // Refresh data here if needed
+        }, 1000);
       },
     });
   };
@@ -118,7 +98,7 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
       title={
         <div style={{ fontSize: "18px", fontWeight: "600", color: "#262626" }}>
           <FileTextOutlined style={{ marginRight: "8px", color: "#1890ff" }} />
-          Detail Invoice: {detailData.invoiceNo}
+          Detail Invoice: {invoiceData.invoiceNumber || invoiceData.invoiceNo}
         </div>
       }
       open={visible}
@@ -129,123 +109,131 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
           Close
         </Button>,
       ]}
+      closable={false}
       style={{ top: 20 }}
       bodyStyle={{ maxHeight: "calc(100vh - 200px)", overflowY: "auto" }}
     >
-      {/* Invoice Information */}
-      <Card
-        style={{
-          marginBottom: "16px",
-          backgroundColor: "#f9fafb",
-          border: "1px solid #e5e7eb",
-          padding: "16px",
-        }}
-      >
-        <Row gutter={[16, 16]}>
-          <Col span={12}>
-            <div style={{ marginBottom: "12px" }}>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#8c8c8c",
-                  marginBottom: "4px",
-                }}
-              >
-                Customer
+      <Spin spinning={loading} indicator={<LoadingOutlined spin />}>
+        {/* Invoice Information */}
+        <Card
+          style={{
+            marginBottom: "16px",
+            backgroundColor: "#f9fafb",
+            border: "1px solid #e5e7eb",
+            padding: "16px",
+          }}
+        >
+          <Row gutter={[16, 16]}>
+            <Col span={12}>
+              <div style={{ marginBottom: "12px" }}>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#8c8c8c",
+                    marginBottom: "4px",
+                  }}
+                >
+                  Customer
+                </div>
+                <div
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    color: "#262626",
+                  }}
+                >
+                  {invoiceData.accountName || invoiceData.customer || "-"}
+                </div>
               </div>
-              <div
-                style={{
-                  fontSize: "16px",
-                  fontWeight: "600",
-                  color: "#262626",
-                }}
-              >
-                {detailData.customer}
+              <div style={{ marginBottom: "12px" }}>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#8c8c8c",
+                    marginBottom: "4px",
+                  }}
+                >
+                  Total Amount
+                </div>
+                <div
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    color: "#1890ff",
+                  }}
+                >
+                  {formatCurrency(
+                    invoiceData.totalAmount || invoiceData.amount
+                  )}
+                </div>
               </div>
-            </div>
-            <div style={{ marginBottom: "12px" }}>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#8c8c8c",
-                  marginBottom: "4px",
-                }}
-              >
-                Total Amount
+            </Col>
+            <Col span={12}>
+              <div style={{ marginBottom: "12px" }}>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#8c8c8c",
+                    marginBottom: "4px",
+                  }}
+                >
+                  Invoice Date
+                </div>
+                <div
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    color: "#262626",
+                  }}
+                >
+                  📅{" "}
+                  {formatDate(
+                    invoiceData.invoiceDate || invoiceData.createdDate
+                  )}
+                </div>
               </div>
-              <div
-                style={{
-                  fontSize: "16px",
-                  fontWeight: "600",
-                  color: "#1890ff",
-                }}
-              >
-                {detailData.totalAmount}
+              <div style={{ marginBottom: "12px" }}>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#8c8c8c",
+                    marginBottom: "4px",
+                  }}
+                >
+                  Due Date
+                </div>
+                <div
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    color: "#262626",
+                  }}
+                >
+                  📅 {formatDate(invoiceData.dueDate)}
+                </div>
               </div>
-            </div>
-          </Col>
-          <Col span={12}>
-            <div style={{ marginBottom: "12px" }}>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#8c8c8c",
-                  marginBottom: "4px",
-                }}
-              >
-                Invoice Date
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "500",
-                  color: "#262626",
-                }}
-              >
-                📅 {detailData.invoiceDate}
-              </div>
-            </div>
-            <div style={{ marginBottom: "12px" }}>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#8c8c8c",
-                  marginBottom: "4px",
-                }}
-              >
-                Due Date
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "500",
-                  color: "#262626",
-                }}
-              >
-                📅 {detailData.dueDate}
-              </div>
-            </div>
-          </Col>
-        </Row>
-      </Card>
+            </Col>
+          </Row>
+        </Card>
 
-      {/* Delivery History */}
-      <Divider
-        orientation="left"
-        style={{ fontWeight: "600", fontSize: "15px" }}
-      >
-        📨 Delivery History
-      </Divider>
+        {/* Delivery History */}
+        <Divider
+          orientation="left"
+          style={{ fontWeight: "600", fontSize: "15px" }}
+        >
+          📨 Delivery History
+        </Divider>
 
-      <div style={{ marginTop: "16px" }}>
-        {detailData.deliveries.map((delivery) => (
+        <div style={{ marginTop: "16px" }}>
+          {/* Single delivery info from list data */}
           <Card
-            key={delivery.id}
             style={{
               marginBottom: "12px",
               border: "1px solid #e5e7eb",
               borderLeft: `4px solid ${
-                delivery.status === "Terkirim" ? "#52c41a" : "#ff4d4f"
+                isFailedStatus(invoiceData.deliveryStatus)
+                  ? "#ff4d4f"
+                  : "#52c41a"
               }`,
               padding: "16px",
             }}
@@ -261,20 +249,21 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
                     textAlign: "center",
                   }}
                 >
-                  #{delivery.id}
+                  #{invoiceData.id || "001"}
                 </div>
               </Col>
               <Col span={4}>
-                <div style={{ fontSize: "12px", color: "#8c8c8c" }}>Kanal</div>
+                <div style={{ fontSize: "12px", color: "#8c8c8c" }}>
+                  Channel
+                </div>
                 <div style={{ fontWeight: "500", marginTop: "2px" }}>
-                  {delivery.channel === "Email" && "📧 Email"}
-                  {delivery.channel === "WhatsApp" && "📱 WhatsApp"}
-                  {delivery.channel === "SMS" && "💬 SMS"}
+                  {getChannelIcon(invoiceData.deliveryChannel)}{" "}
+                  {invoiceData.deliveryChannel || "-"}
                 </div>
               </Col>
               <Col span={6}>
                 <div style={{ fontSize: "12px", color: "#8c8c8c" }}>
-                  Receipt
+                  Recipient
                 </div>
                 <div
                   style={{
@@ -283,13 +272,15 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
                     fontSize: "13px",
                   }}
                 >
-                  {delivery.recipient}
+                  {invoiceData.recipientAddress || "-"}
                 </div>
               </Col>
               <Col span={4}>
                 <div style={{ fontSize: "12px", color: "#8c8c8c" }}>Status</div>
                 <div style={{ marginTop: "2px" }}>
-                  <StatusTag status={delivery.status} />
+                  <StatusComponent colour={invoiceData.deliveryStatus}>
+                    {invoiceData.deliveryStatus}
+                  </StatusComponent>
                 </div>
               </Col>
               <Col span={5}>
@@ -303,7 +294,10 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
                     marginTop: "2px",
                   }}
                 >
-                  🕐 {delivery.sentTime}
+                  🕐{" "}
+                  {formatDateTime(
+                    invoiceData.sentDate || invoiceData.deliveryDate
+                  )}
                 </div>
               </Col>
               <Col span={3}>
@@ -312,22 +306,21 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
                   size="small"
                   style={{ width: "100%" }}
                 >
-                  {delivery.hasLog && (
-                    <Button
-                      size="small"
-                      onClick={() => handleViewLog(delivery)}
-                      style={{ width: "100%", fontSize: "12px" }}
-                    >
-                      View Log
-                    </Button>
-                  )}
-                  {delivery.canResend && (
+                  <Button
+                    size="small"
+                    onClick={() => handleViewLog(invoiceData)}
+                    style={{ width: "100%", fontSize: "12px" }}
+                    disabled
+                  >
+                    View Log
+                  </Button>
+
+                  {isFailedStatus(invoiceData.deliveryStatus) && (
                     <Button
                       type="primary"
                       danger
                       size="small"
-                      //   icon={<ReloadOutlined />}
-                      onClick={() => handleResend(delivery)}
+                      onClick={() => handleResend(invoiceData)}
                       style={{ width: "100%", fontSize: "12px" }}
                     >
                       Resend
@@ -338,34 +331,52 @@ const DetailInvoiceModal = ({ visible, onCancel, invoiceData }) => {
             </Row>
 
             {/* Error Note - Only shown for failed deliveries */}
-            {delivery.errorNote && (
+            {isFailedStatus(invoiceData.deliveryStatus) &&
+              invoiceData.errorMessage && (
+                <div
+                  style={{
+                    marginTop: "12px",
+                    padding: "8px 12px",
+                    backgroundColor: "#fff7e6",
+                    border: "1px solid #ffd591",
+                    borderRadius: "4px",
+                    fontSize: "12px",
+                    color: "#ad6800",
+                  }}
+                >
+                  <strong>Error:</strong> {invoiceData.errorMessage}
+                </div>
+              )}
+
+            {/* Additional Notes */}
+            {invoiceData.notes && (
               <div
                 style={{
                   marginTop: "12px",
                   padding: "8px 12px",
-                  backgroundColor: "#fff7e6",
-                  border: "1px solid #ffd591",
+                  backgroundColor: "#e6f7ff",
+                  border: "1px solid #91d5ff",
                   borderRadius: "4px",
                   fontSize: "12px",
-                  color: "#ad6800",
+                  color: "#0050b3",
                 }}
               >
-                <strong>Note:</strong> {delivery.errorNote}
+                <strong>Note:</strong> {invoiceData.notes}
               </div>
             )}
           </Card>
-        ))}
-      </div>
+        </div>
 
-      {/* Log Detail Modal - Nested Modal */}
-      <LogDetailModal
-        visible={logModalVisible}
-        onCancel={() => {
-          setLogModalVisible(false);
-          setSelectedLog(null);
-        }}
-        logData={selectedLog}
-      />
+        {/* Log Detail Modal - Nested Modal */}
+        <LogDetailModal
+          visible={logModalVisible}
+          onCancel={() => {
+            setLogModalVisible(false);
+            setSelectedLog(null);
+          }}
+          logData={selectedLog}
+        />
+      </Spin>
     </Modal>
   );
 };
