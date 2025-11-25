@@ -97,6 +97,9 @@ import gracePeriodReducer from "../slices/debt_and_collection/gracePeriod";
 import activityNameReducer from "../slices/debt_and_collection/activityName";
 import templateRemindingReducer from "../slices/debt_and_collection/templateReminding";
 import activityTypeReducer from "../slices/debt_and_collection/activityType";
+import activityActionReducer from "../slices/debt_and_collection/activityAction";
+import activitiesReducer from "../slices/debt_and_collection/activities";
+import transactionReportReducer from "../slices/debt_and_collection/transactionReport";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -222,6 +225,9 @@ const reducer = combineReducers({
   activityName: activityNameReducer,
   templateReminding: templateRemindingReducer,
   activityType: activityTypeReducer,
+  activityAction: activityActionReducer,
+  activities: activitiesReducer,
+  transactionReport: transactionReportReducer,
 
 });
 

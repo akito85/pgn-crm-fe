@@ -2,7 +2,7 @@ import { getColumnSearchPropsUseFilteredValue} from "../../../../utils/getColumn
 import { hasValue, renderColumn } from "../../../../utils";
 import { key } from "localforage";
 
-export const columns = (
+export const columnsAccount = (
   search,
   page = 1,
   pageSize = 10,
@@ -17,19 +17,19 @@ export const columns = (
     {
       key: "no",
       title: "NO",
-      width: 5,
+      width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      key: "remindingType",
-      title: "TYPE",
+      key: "accountNum",
+      title: "Account Number",
       sorter: true,
       align: "left",
-      dataIndex: "remindingType",
+      dataIndex: "accountNum",
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "remindingType",
+        "accountNum",
         searchInput,
         searchedColumn,
         searchText,
@@ -38,8 +38,8 @@ export const columns = (
       ),
       render: (text) =>
         renderColumn(
-          "remindingType",
-          hasValue(search["remindingType"]),
+          "accountNum",
+          hasValue(search["accountNum"]),
           searchText,
           text,
           false,
@@ -48,16 +48,14 @@ export const columns = (
         ),
     },
     {
-      key: "content",
-      title: "CONTENT",
+      key: "accountName",
+      title: "Account Name",
       sorter: true,
-      dataIndex: "content",
-      ellipsis: {
-        showTitle: false,
-      },
+      align: "left",
+      dataIndex: "accountName",
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "content",
+        "accountName",
         searchInput,
         searchedColumn,
         searchText,
@@ -66,8 +64,36 @@ export const columns = (
       ),
       render: (text) =>
         renderColumn(
-          "content",
-          hasValue(search["content"]),
+          "accountName",
+          hasValue(search["accountName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "accReceivable",
+      title: "Account Receivable",
+      sorter: true,
+      dataIndex: "accReceivable",
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accReceivable",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "accReceivable",
+          hasValue(search["accReceivable"]),
           searchText,
           text,
           true,
@@ -76,66 +102,16 @@ export const columns = (
         ),
     },
     {
-      key: "emailBody",
-      title: "EMAIL SUBJECT",
+      key: "accPayable",
+      title: "Account Payable",
       sorter: true,
-      dataIndex: "emailSubject",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "emailSubject",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "emailSubject",
-          hasValue(search["emailSubject"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      key: "emailBody",
-      title: "EMAIL BODY",
-      sorter: true,
-      dataIndex: "emailBody",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "emailBody",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "emailBody",
-          hasValue(search["emailBody"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      key: "templateCode",
-      title: "TEMPLATE CODE",
-      sorter: true,
-      dataIndex: "templateCode",
+      dataIndex: "accPayable",
       ellipsis: {
         showTitle: false,
       },
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "templateCode",
+        "accPayable",
         searchInput,
         searchedColumn,
         searchText,
@@ -144,8 +120,8 @@ export const columns = (
       ),
       render: (text) =>
         renderColumn(
-          "templateCode",
-          hasValue(search["templateCode"]),
+          "accPayable",
+          hasValue(search["accPayable"]),
           searchText,
           text,
           true,

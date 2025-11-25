@@ -1,5 +1,5 @@
 import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
-import { Form, Input, Spin,InputNumber } from "antd";
+import { Form, Input, Spin,Select} from "antd";
 import SVGIcon from "../../../../assets/Icon/index";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,58 +10,61 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
+import SelectComponent from "../../../../components/SelectComponent";
 import {
-  getDetailActivityNamePaginate,
-  createUpdateActivityName,
-  validateCreateUpdateActivityName
-} from "../../../../redux/slices/debt_and_collection/activityName";
+  getDetailActivityActionPaginate,
+  createActivityAction,
+  updateActivityAction,
+  getActivityNameList
+} from "../../../../redux/slices/debt_and_collection/activityAction";
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../routes/DebtAndCollection/rc_routes.js";
 import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import { formMessageRequired, hasValue } from "../../../../utils";
-import InputComponent from "../../../../components/InputComponent";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
+const { Option } = Select;
 
-const FormActivityName = (props) => {
+
+const FormActivityAction = (props) => {
   const { type } = props;
-  const { dataDetailActivityName,  loading } = useSelector((state) => state.activityName);
-
+  const { dataDetailActivityAction, dataActivityName, loading } = useSelector((state) => state.activityAction);
 
   const location = useLocation();
-
-  // console.log("location", location);
   const dispatch = useDispatch();
-
   const [form] = Form.useForm();
   const [openModal, setOpenModal] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const navigate = useNavigate();
+  console.log("Location state:", location?.state);
   const id = location?.state?.id;
   const [payload, setPayload] = useState({});
 
   const assert = () => {
-    // console.log("dataDetail", dataDetailActivityName);
+    console.log("dataDetail", dataDetailActivityAction);
     form.setFieldsValue({
-      name: dataDetailActivityName?.name,
-      exception: dataDetailActivityName?.exception,
-      urutan: dataDetailActivityName?.urutan,
-      dueDateRule: dataDetailActivityName?.dueDateRule,
+      activityId: dataDetailActivityAction?.activityId,
+      resultCode: dataDetailActivityAction?.resultCode,
+      description: dataDetailActivityAction?.description
     });
   };
+  
+  useEffect(() => {
+    dispatch(getActivityNameList());
+  }, [dispatch])
 
-  // call id 
+  // Fetch detail data when in update mode
   useEffect(() => {
     if (id) {
-      // console.log("id", id);
-      dispatch(getDetailActivityNamePaginate(id));
+      dispatch(getDetailActivityActionPaginate(id));
     }
   }, [dispatch, id]);
 
+  // Set form values when detail data is available
   useEffect(() => {
-    // jika type update maka set form dengan data detail
-    if (type === 'update') {
+    if (type === 'update' ) {
+      console.log("Detail data received, setting form values:", dataDetailActivityAction);
       assert();
     }
-  }, [dataDetailActivityName, form, type]);
+  }, [dataDetailActivityAction, form, type]);
 
 
   const routes = [
@@ -70,12 +73,12 @@ const FormActivityName = (props) => {
       breadcrumbName: "Debt & Collection",
     },
     {
-      path: DEBT_AND_COLLECTION_ROUTES.VIEW_ACTIVITY_NAME,
-      breadcrumbName: "Activity Name",
+      path: DEBT_AND_COLLECTION_ROUTES.VIEW_ACTIVITY_ACTION,
+      breadcrumbName: "Activity Action",
     },
     {
       path: "",
-      breadcrumbName: `${type === "update" ? "Update Activity Name" : "Create Activity Name"}`,
+      breadcrumbName: `${type === "update" ? "Update Activity Action" : "Create Activity Action"}`,
     },
   ];
 
@@ -84,13 +87,10 @@ const FormActivityName = (props) => {
     try {
       setOpenModal(false);
       if (type === "update") {
-        const bodyUpdate = {
-          ...payload?.body,
-          id: dataDetailActivityName?.id,
-        };
-        await dispatch(createUpdateActivityName(bodyUpdate))?.unwrap()
+        
+        await dispatch(updateActivityAction({ body: payload?.body, id: id }))?.unwrap()
       }else{
-        await dispatch(createUpdateActivityName(payload?.body))?.unwrap()
+        await dispatch(createActivityAction(payload?.body))?.unwrap()
       }
     } catch (error) {
       setOpenModal(false);
@@ -99,49 +99,8 @@ const FormActivityName = (props) => {
 
   const onFinish = async (formValue) => {
     try {
-      const dataValue = {
-        name: formValue.name,
-        exception: formValue.exception,
-        urutan: formValue.urutan,
-        dueDateRule: formValue.dueDateRule
-      };
-      
-      const bodyValidasiUpdate = {
-        ...dataValue,
-        id: dataDetailActivityName?.id,
-      };
-
-      setPayload(
-        {
-          body: formValue
-        }
-      )
-      if (type !== "update") {
-        dispatch(validateCreateUpdateActivityName(dataValue))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setOpenModal(false);
-            }
-            setOpenModal(true);
-          });
-      }else{
-        dispatch(validateCreateUpdateActivityName(bodyValidasiUpdate))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setOpenModal(false);
-            }
-            setOpenModal(true);
-          });
-
-      }
-
-      
-
-      // console.log("payload", { body: formValue });
+      setPayload({ body: formValue });
+      setOpenModal(true);
     } catch (error) {
       setOpenModal(false);
     }
@@ -158,14 +117,18 @@ const FormActivityName = (props) => {
     if (type === "create") {
       form.resetFields();
     } else {
-      assert();
+        assert();
     }
   };
 
 
   const handleRetry = () => {
     handleCancelTryAgain()
-    dispatch(createUpdateActivityName(payload?.body));
+    if (type === "update") {
+        dispatch(updateActivityAction({ body: payload?.body, id: id }))?.unwrap()
+    }else{
+        dispatch(createActivityAction(payload?.body))?.unwrap()
+    }
   };
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
@@ -182,64 +145,48 @@ const FormActivityName = (props) => {
         >
           <div className={"flex w-full gap-12 mt-5"}>
             <BaseContainer
-              header={type === "update" ? "UPDATE ACTIVITY NAME" : "CREATE ACTIVITY NAME"}
+              header={type === "update" ? "UPDATE ACTIVITY ACTION" : "CREATE ACTIVITY ACTION"}
             >
               <div className="flex flex-col w-full gap-3">
                 <div className={"flex w-full gap-3"}>
                   <div className={"flex flex-col w-full"}>
                     <Form.Item
-                      label={"Name"}
-                      name={"name"}
-                      rules={formMessageRequired("Name")}
+                      label={"Activity Name"}
+                      name={"activityId"}
+                      className="no-margin-form"
+                      rules={formMessageRequired('Activity Name')}
+                    >
+                      <SelectComponent
+                      >
+                        {dataActivityName?.data?.map((index, key) => (
+                          <Option key={key} value={index.id}>
+                            {index.name}
+                          </Option>
+                        ))}
+                      </SelectComponent>
+                    </Form.Item>
+                  </div>
+                  <div className={"flex flex-col w-full"}>
+                    <Form.Item
+                      label={"Result Code"}
+                      name={"resultCode"}
+                      rules={formMessageRequired("Result Code")}
                       className={"w-full no-margin-form"}
                     >
                       <Input
-                        // disabled={type === "update"} 
                         onInput={(e) =>
                           (e.target.value = e.target.value.trimStart())
                         }
                       />
                     </Form.Item>
                   </div>
+                  
 
                   <div className={"flex flex-col w-full"}>
                     <Form.Item
-                      label={"Exception"}
-                      name={"exception"}
-                      // rules={formMessageRequired("Exception")}
+                      label={"Description"}
+                      name={"description"}
                       className={"w-full no-margin-form"}
-                    >
-                      <Input
-                        onInput={(e) =>
-                          (e.target.value = e.target.value.trimStart())
-                        }
-                      />
-                    </Form.Item>
-                  </div>
-                </div>
-                <div className={"flex w-full gap-3"}>
-                  <div className={"flex flex-col w-full"}>
-                    <Form.Item
-                      label={"Urutan"}
-                      name={"urutan"}
-                      // rules={formMessageRequired("Urutan")}
-                      className={"w-full no-margin-form"}
-                    >
-                      <InputNumber
-                        type="number"
-                        controls={false}
-                        style={{
-                          width: "100%",
-                        }}
-                      />
-                    </Form.Item>
-                  </div>
-                  <div className={"flex flex-col w-full"}>
-                    <Form.Item
-                      label={"Due Date Rule"}
-                      name={"dueDateRule"}
-                      // rules={formMessageRequired("Description")}
-                      className="w-full"
                     >
                       <Input
                         onInput={(e) =>
@@ -301,21 +248,18 @@ const FormActivityName = (props) => {
       >
         <div className="w-full flex flex-col flex-wrap gap-y-3">
           <div className="w-full">
-            <span className="text-primary uppercase">Activity Name</span>
+            <span className="text-primary uppercase">Activity Action</span>
           </div>
           <div className={"w-full flex"}>
             <div className={"w-full flex-col"}>
-              <DetailText label={"Name"}>{payload?.body?.name}</DetailText>
+              <DetailText label={"Activity Name"}>{payload?.body?.activityId}</DetailText>
             </div>
             <div className={"w-full flex-col"}>
-              <DetailText label={"Exception"}>{payload?.body?.exception}</DetailText>
+              <DetailText label={"Result Code"}>{payload?.body?.resultCode}</DetailText>
             </div>
             <div className={"w-full flex-col"}>
-              <DetailText label={"Urutan"}>{payload?.body?.urutan}</DetailText>
+              <DetailText label={"Description"}>{payload?.body?.description}</DetailText>
             </div>
-          </div>
-          <div className="w-full">
-            <DetailText label={"Due Date Rule"}>{payload?.body?.dueDateRule}</DetailText>
           </div>
         </div>
         <div className="flex justify-end gap-5">
@@ -349,4 +293,4 @@ const FormActivityName = (props) => {
   );
 };
 
-export default FormActivityName;
+export default FormActivityAction;

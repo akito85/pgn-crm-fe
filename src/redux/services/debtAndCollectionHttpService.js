@@ -4,6 +4,17 @@ import { tokenHeader } from "../../utils/tokenHeader";
 import FileSaver from "file-saver";
 import { errorCode, hasValue } from "../../utils";
 
+const get = async (url) => {
+  try {
+    const response = await axios.get(configApp.PAYMENT_SERVICE + url, {
+      headers: tokenHeader(),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const getAll = async (url) => {
   try {
     const response = await axios.get(configApp.PAYMENT_SERVICE + url, {
@@ -41,20 +52,22 @@ const downloadData = async (url) => {
       headers: tokenHeader(),
       responseType: "blob",
     });
-    if (hasValue(response.headers?.get("content-disposition"))) {
-      const filename = response.headers
-        .get("content-disposition")
+
+    const disposition = response.headers["content-disposition"];
+
+    if (disposition) {
+      const filename = disposition
         .split(";")
         .find((n) => n.includes("filename="))
         .replace("filename=", "")
+        .replace(/"/g, "")
         .trim();
 
-      const blob = await response?.data;
+      const blob = response.data;
       FileSaver.saveAs(blob, filename);
-    } else if (errorCode(response) === 204) {
-      throw response;
     }
-    return response;
+
+    return true; // 👉 return boleh serializable
   } catch (error) {
     throw error;
   }
@@ -92,7 +105,7 @@ const activationWithRemarkPost = async (url, body) => {
     throw error;
   }
 };
-const uploadImage = async (url, data) => {
+const upload = async (url, data) => {
   try {
     const response = await axios.post(configApp.PAYMENT_SERVICE + url, data, {
       headers: {
@@ -180,7 +193,19 @@ const deleteData = async (url) => {
     throw error;
   }
 };
+
+const getPaginationPost = async (url,body) => {
+  try {
+    const response = await axios.post(configApp.PAYMENT_SERVICE + url,body, {
+      headers: tokenHeader(),
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
 const debtAndCollectionHttpService = {
+  get,
   getAll,
   inactiveWithApproval,
   getDetail,
@@ -188,13 +213,14 @@ const debtAndCollectionHttpService = {
   createData,
   downloadData,
   activationWithRemark,
-  uploadImage,
+  upload,
   activationWithRemarkPost,
   updateData,
   updateDataTransaction,
   updateDataPost,
   uploadBulk,
   deleteData,
+  getPaginationPost
 };
 
 export default debtAndCollectionHttpService;

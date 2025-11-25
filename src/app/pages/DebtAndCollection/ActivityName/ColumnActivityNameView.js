@@ -1,5 +1,6 @@
 import { getColumnSearchPropsUseFilteredValue} from "../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn } from "../../../../utils";
+import { key } from "localforage";
 
 export const columns = (
   search,
@@ -14,14 +15,15 @@ export const columns = (
 ) => {
   return [
     {
+      key: "no",
       title: "NO",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
+      key: "name",
       title: "Name",
-      width: 100,
       sorter: true,
       align: "left",
       dataIndex: "name",
@@ -46,8 +48,8 @@ export const columns = (
         ),
     },
     {
+      key: "exception",
       title: "Exception",
-      width: 50,
       sorter: true,
       dataIndex: "exception",
       ellipsis: {
@@ -74,8 +76,8 @@ export const columns = (
         ),
     },
     {
+      key: "urutan",
       title: "Urutan",
-      width: 100,
       sorter: true,
       dataIndex: "urutan",
       ...getColumnSearchPropsUseFilteredValue(
@@ -99,8 +101,8 @@ export const columns = (
         ),
     },
     {
+      key: "dueDateRule",
       title: "DUE DATE RULE",
-      width: 150,
       sorter: true,
       dataIndex: "dueDateRule",
       ellipsis: {

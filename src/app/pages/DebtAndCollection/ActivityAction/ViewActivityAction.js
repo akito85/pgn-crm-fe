@@ -7,14 +7,14 @@ import { Link, NavLink } from "react-router-dom";
 import SVGIcon from "../../../../assets/Icon/index";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getAllActivityNamePaginate,deleteActivityName
-} from "../../../../redux/slices/debt_and_collection/activityName";
+  getAllActivityActionPaginate,deleteActivityAction
+} from "../../../../redux/slices/debt_and_collection/activityAction";
 import BaseContainer from "../../../../components/BaseContainer";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../routes/DebtAndCollection/rc_routes";
-import { columns } from "./ColumnActivityNameView";
+import { columns } from "./ColumnActivityActionView";
 import { ModalConfirm } from '../../../../components/Modal/ModalPopUp';
 import { WarningOutlined } from '@ant-design/icons'
 
@@ -25,18 +25,24 @@ const routes = [
     breadcrumbName: "Debt & Collection",
   },
   {
-    path: DEBT_AND_COLLECTION_ROUTES.VIEW_ACTIVITY_NAME,
-    breadcrumbName: "Activity Name",
+    path: DEBT_AND_COLLECTION_ROUTES.VIEW_ACTIVITY_ACTION,
+    breadcrumbName: "Activity Action",
   },
 ];
 
 
-const ViewActivityName = () => {
+const ViewActivityAction = () => {
   const dispatch = useDispatch();
+  // const fullState = useSelector((state) => state);
+  // console.log("🌐 Full Redux State:", fullState);
+
   const {
-    dataActivityName,
+    dataActivityAction,
     loading = false
-  } = useSelector((state) => state.activityName);
+  } = useSelector((state) => state.activityAction);
+
+
+
   const searchInput = useRef(null);
   const [dataTable, setDataTable] = useState([]);
   const [page, setPage] = useState(1);
@@ -58,11 +64,11 @@ const ViewActivityName = () => {
 
   const handleConfirmModalDelete = () => {
     setOpenModalDelete(false);
-    dispatch(deleteActivityName({ id: idSelected }))
+    dispatch(deleteActivityAction({ id: idSelected }))
     .unwrap()
     .then((data) => {
       dispatch(
-        getAllActivityNamePaginate({
+        getAllActivityActionPaginate({
           page,
           pageSize,
           search: encodeURIComponent(JSON.stringify(search)),
@@ -81,7 +87,7 @@ const ViewActivityName = () => {
       action: "Create",
       render: (
         <NavLink
-          to={DEBT_AND_COLLECTION_ROUTES.CREATE_ACTIVITY_NAME}
+          to={DEBT_AND_COLLECTION_ROUTES.CREATE_ACTIVITY_ACTION}
           state={{ prevPage: "table-product" }}
         >
           <ButtonComponent
@@ -102,8 +108,8 @@ const ViewActivityName = () => {
         return (
           <Tooltip title="Detail">
             <Link
-              to={DEBT_AND_COLLECTION_ROUTES.DETAIL_ACTIVITY_NAME}
-              state={{ id: record?.id }}
+              to={DEBT_AND_COLLECTION_ROUTES.DETAIL_ACTIVITY_ACTION}
+              state={{ id: record?.mpMActivityResultOptId }}
             >
               <SVGIcon name="IconDetail" width={24} />
             </Link>
@@ -118,8 +124,8 @@ const ViewActivityName = () => {
           return (
             <Tooltip title="Update">
               <Link
-                to={DEBT_AND_COLLECTION_ROUTES.UPDATE_ACTIVITY_NAME}
-                state={{ id: record?.id }}
+                to={DEBT_AND_COLLECTION_ROUTES.UPDATE_ACTIVITY_ACTION}
+                state={{ id: record?.mpMActivityResultOptId }}
               >
                 <SVGIcon
                   name="IconEdit"
@@ -140,7 +146,7 @@ const ViewActivityName = () => {
                 <SVGIcon
                   name="IconDelete"
                   width={24}
-                  onClick={() => handleOpenDelete(record?.id)}
+                  onClick={() => handleOpenDelete(record?.mpMActivityResultOptId)}
                 />
               </div>
             </Tooltip>
@@ -151,7 +157,7 @@ const ViewActivityName = () => {
 
   useEffect(() => {
     dispatch(
-      getAllActivityNamePaginate({
+      getAllActivityActionPaginate({
         page,
         pageSize,
         search: encodeURIComponent(JSON.stringify(search)),
@@ -161,13 +167,13 @@ const ViewActivityName = () => {
   }, [dispatch, page, pageSize, search, sort]);
 
   useEffect(() => {
-    if (dataActivityName) {
-      let result = dataActivityName?.result || [];
-      const totalData = dataActivityName?.page?.totalElements || 0;
+    if (dataActivityAction) {
+      let result = dataActivityAction?.result || [];
+      const totalData = dataActivityAction?.page?.totalElements || 0;
       setDataTable(result);
       setTotalElement(totalData);
     }
-  }, [dataActivityName]);
+  }, [dataActivityAction]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -203,6 +209,7 @@ const ViewActivityName = () => {
   
 
   
+
   return (
     <LayoutMenu>
       <Spin
@@ -217,7 +224,7 @@ const ViewActivityName = () => {
               dataUser,
             )}
           />
-          <BaseContainer header={"Activity Name List"}>
+          <BaseContainer header={"Activity Action List"}>
             <TablePaginationNew
               dataSource={dataTable}
               totalData={totalElements}
@@ -274,4 +281,4 @@ const ViewActivityName = () => {
   );
 };
 
-export default ViewActivityName;
+export default ViewActivityAction;

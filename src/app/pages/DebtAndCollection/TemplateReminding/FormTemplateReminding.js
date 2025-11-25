@@ -39,7 +39,7 @@ const FormTemplateReminding = (props) => {
   const [payload, setPayload] = useState({});
 
   const assert = () => {
-    console.log("dataDetail", dataDetailTemplateReminding);
+    // console.log("dataDetail", dataDetailTemplateReminding);
     form.setFieldsValue({
       remindingType: dataDetailTemplateReminding?.remindingType,
       content: dataDetailTemplateReminding?.content,
@@ -128,8 +128,8 @@ const FormTemplateReminding = (props) => {
             }
             setOpenModal(true);
           });
-      }
-      dispatch(validateCreateUpdateTemplateReminding(bodyValidasiUpdate))
+      }else{
+        dispatch(validateCreateUpdateTemplateReminding(bodyValidasiUpdate))
         .unwrap()
         .then(async (data) => {
           const sukses = data?.success;
@@ -138,6 +138,8 @@ const FormTemplateReminding = (props) => {
           }
           setOpenModal(true);
         });
+      }
+      
 
       
 

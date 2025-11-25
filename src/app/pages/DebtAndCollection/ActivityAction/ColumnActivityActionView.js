@@ -22,14 +22,14 @@ export const columns = (
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      key: "activityType",
-      title: "Activity Type",
+      key: "activityName",
+      title: "Activity",
       sorter: true,
       align: "left",
-      dataIndex: "activityType",
+      dataIndex: "activityName",
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "activityType",
+        "activityName",
         searchInput,
         searchedColumn,
         searchText,
@@ -38,8 +38,34 @@ export const columns = (
       ),
       render: (text) =>
         renderColumn(
-          "activityType",
-          hasValue(search["activityType"]),
+          "activityName",
+          hasValue(search["activityName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "resultCode",
+      title: "Result Code",
+      sorter: true,
+      align: "left",
+      dataIndex: "resultCode",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "resultCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "resultCode",
+          hasValue(search["resultCode"]),
           searchText,
           text,
           false,
