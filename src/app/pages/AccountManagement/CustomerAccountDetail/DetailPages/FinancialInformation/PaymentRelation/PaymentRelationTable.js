@@ -119,9 +119,7 @@ const PaymentRelationTable = ({
                   name="IconActionDropdown"
                   color={"#0075bf"}
                   width={24}
-                  onClick={() => {
-                    handleDetail(r);
-                  }}
+                  onClick={() => {}}
                 />
               </div>
             </Tooltip>
