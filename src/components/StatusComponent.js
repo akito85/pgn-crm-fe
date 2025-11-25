@@ -57,8 +57,8 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         tColor = "text-yellow-700";
         break;
 
-        case "in progress":
-        case "INPROGRESS":
+      case "in progress":
+      case "INPROGRESS":
         bgColor = "bg-yellow-500";
         tColor = "text-white";
         break;
@@ -209,16 +209,16 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
   if (!children) return null;
 
   return (
-    <p
+    <div
       className={
         type === "status"
-          ? `flex gap-2 items-center ${bgcolor} ${textColor} px-3 my-1 rounded-3xl text-center w-fit`
+          ? `flex gap-2 justify-center items-center ${bgcolor} ${textColor} px-3 py-0 rounded-3xl text-center w-fit`
           : `${textColor} font-semibold`
       }
     >
       {renderIconStatus()}
       {children}
-    </p>
+    </div>
   );
 };
 
