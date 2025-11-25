@@ -234,7 +234,7 @@ const PaymentRelation = ({ id = 0, isApproval = false, setIsApproval = () => {}}
   return (
     <Fragment>
       <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-        {"Payment Relation LIST"}
+        {"PAYMENT RELATION LIST"}
       </div>
 
       <div>
