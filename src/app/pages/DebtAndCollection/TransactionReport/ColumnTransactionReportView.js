@@ -35,7 +35,7 @@ export const columns = (onClickDetail) => [
               <Tooltip title="Lihat Detail">
                 <span
                   className="cursor-pointer text-blue-600"
-                  onClick={() => onClickDetail(record, "In Period Collection")}
+                  onClick={() => onClickDetail(record, "V_1_M")}
                 >
                   {value}
                 </span>
@@ -62,7 +62,7 @@ export const columns = (onClickDetail) => [
               <Tooltip title="Lihat Detail">
                 <span
                   className="cursor-pointer text-blue-600"
-                  onClick={() => onClickDetail(record, "Post Period Collection")}
+                  onClick={() => onClickDetail(record, "V_2_3_M")}
                 >
                   {value}
                 </span>
@@ -90,7 +90,7 @@ export const columns = (onClickDetail) => [
                 <span
                   className="cursor-pointer text-blue-600"
                   onClick={() =>
-                    onClickDetail(record, "Visiting and Inviting Collection")
+                    onClickDetail(record, "V_4_6_M")
                   }
                 >
                   {value}
@@ -118,7 +118,7 @@ export const columns = (onClickDetail) => [
               <Tooltip title="Lihat Detail">
                 <span
                   className="cursor-pointer text-blue-600"
-                  onClick={() => onClickDetail(record, "Non Litigasi")}
+                  onClick={() => onClickDetail(record, "V_7_12_M")}
                 >
                   {value}
                 </span>
@@ -145,7 +145,7 @@ export const columns = (onClickDetail) => [
               <Tooltip title="Lihat Detail">
                 <span
                   className="cursor-pointer text-blue-600"
-                  onClick={() => onClickDetail(record, "Litigasi")}
+                  onClick={() => onClickDetail(record, "V_12M")}
                 >
                   {value}
                 </span>

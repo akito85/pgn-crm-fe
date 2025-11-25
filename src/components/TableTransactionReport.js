@@ -99,7 +99,7 @@ const TableTransactionReport = ({
         dataSource={rows}
         loading={loading}
         bordered
-        rowKey={(row, idx) => idx}
+        // rowKey={(row, idx) => idx}
         tableLayout="fixed"
         scroll={{ x: "max-content" }}
         pagination={{

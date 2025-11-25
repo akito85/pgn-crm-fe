@@ -22,11 +22,11 @@ export const getTransactionReport = createAsyncThunk(
 
 export const getDetailTransactionReport = createAsyncThunk(
   "transactionReport/getDetailTransactionReport",
-  async (params, thunkAPI) => {
+  async ({arAge,accountType,area}, thunkAPI) => {
     try {
       // params = { arAge, accountType, area }
-      const url = `/v1/dbs/api/report/transaction/detail?arAge=V_1_M&accountType=RT&area=JAKARTA`;
-      const response = await debtAndCollectionHttpService.get(url, { params });
+      const url = `/v1/dbs/api/report/transaction/detail?arAge=${arAge}&accountType=${accountType}&area=${area}`;
+      const response = await debtAndCollectionHttpService.get(url);
       return response;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data);
@@ -41,14 +41,14 @@ const transactionReportSlice = createSlice({
     builder
       // Get Transaction Report
       .addCase(getTransactionReport.pending, (state) => {
-        state.loading = true;
+        // state.loading = true;
       })
       .addCase(getTransactionReport.fulfilled, (state, action) => {
-        state.loading = false;
+        // state.loading = false;
         state.dataTransactionReport = action.payload;
       })
       .addCase(getTransactionReport.rejected, (state) => {
-        state.loading = false;
+        // state.loading = false;
         state.dataTransactionReport = null;
       })
 
