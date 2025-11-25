@@ -21,6 +21,7 @@ const PaymentRelationTable = ({
   getColumnSearchProps = () => {},
   handleDetail,
   rowSelection,
+  isApproval = false,
 }) => {
   const columns = [
     {
@@ -113,16 +114,18 @@ const PaymentRelationTable = ({
       render: (v, r, i) => {
         return (
           <div className="flex w-full justify-center gap-6">
-            <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconActionDropdown"
-                  color={"#0075bf"}
-                  width={24}
-                  onClick={() => {}}
-                />
-              </div>
-            </Tooltip>
+            {!isApproval && (
+              <Tooltip title="Detail">
+                <div className="pt-1">
+                  <SVGIcon
+                    name="IconActionDropdown"
+                    color={"#0075bf"}
+                    width={24}
+                    onClick={() => {}}
+                  />
+                </div>
+              </Tooltip>
+            )}
             <Tooltip title="Detail">
               <div className="pt-1">
                 <SVGIcon
@@ -135,6 +138,7 @@ const PaymentRelationTable = ({
                 />
               </div>
             </Tooltip>
+            
           </div>
         );
       },
