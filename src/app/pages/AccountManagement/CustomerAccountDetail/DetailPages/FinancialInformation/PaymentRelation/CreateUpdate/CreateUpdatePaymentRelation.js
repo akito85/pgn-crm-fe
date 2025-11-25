@@ -230,15 +230,15 @@ const CreatePaymentRelation = ({ type }) => {
       disabled: false
     },
     {
+      title: "Approval",
+      content: <ApprovalForm />,
+      disabled: false
+    },
+    {
       title: "Attachment",
       content: <AttachmentForm />,
       disabled: false
     },
-    {
-      title: "Approval",
-      content: <ApprovalForm />,
-      disabled: false
-    }
   ];
   
 
