@@ -19,7 +19,8 @@ const PaymentRelationTable = ({
   searchedColumn,
   onSort = {},
   getColumnSearchProps = () => {},
-  handleDetail
+  handleDetail,
+  rowSelection,
 }) => {
   const columns = [
     {
@@ -142,6 +143,7 @@ const PaymentRelationTable = ({
         tableScrolled={{ y: 525, x: 2200 }}
         onSort={onSort}
         columns={columns}
+        rowSelection={rowSelection}
       />
     </Fragment>
   );
