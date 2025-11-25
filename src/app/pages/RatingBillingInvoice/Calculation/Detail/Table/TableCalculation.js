@@ -203,7 +203,7 @@ export const columnsCalculation = (
     // },
   },
   {
-    title: "Created Date",
+    title: "CREATED DATE",
     dataIndex: "createdDate",
     align: "left",
     sorter: true,
@@ -239,7 +239,7 @@ export const columnsCalculation = (
       ),
   },
   {
-    title: "Updated Date",
+    title: "UPDATED DATE",
     dataIndex: "updatedDate",
     align: "left",
     sorter: true,

@@ -153,6 +153,7 @@ const TableRBI = ({
         onHeaderCell: (column) => ({
           width: columnWidths[colKey] || col.width || 150,
           onResize: handleResize(colKey),
+          style: { textTransform: "uppercase" },
         }),
         onCell: () => ({
           style: {
@@ -255,7 +256,7 @@ const TableRBI = ({
         onChange={onSort}
         rowSelection={rowSelection}
         onRow={onRow}
-        rowClassName={rowClassName} 
+        rowClassName={rowClassName}
       />
 
       {usePagination ? (

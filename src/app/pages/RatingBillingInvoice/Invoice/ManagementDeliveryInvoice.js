@@ -160,7 +160,6 @@ const ManagementDeliveryInvoice = () => {
     setPageSize(size);
   };
 
-  console.log(data_summary, "summary");
   return (
     <LayoutMenu>
       <CardContainer
