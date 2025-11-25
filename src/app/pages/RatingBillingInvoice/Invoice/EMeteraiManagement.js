@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import dayjs from "dayjs";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import CardContainer from "../../../../components/CardContainer";
@@ -260,7 +259,7 @@ const EMeteraiManagement = () => {
         {/* Table with TableRBI */}
         <TableRBI
           idTable="emeterai-management-table"
-          dataSource={DATA_INVOICE.result || []}
+          dataSource={DATA_INVOICE || []}
           columns={columnDefinitions}
           loading={loading}
           pageSize={pageSize}

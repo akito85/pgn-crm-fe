@@ -80,19 +80,19 @@ const ManagementDeliveryInvoice = () => {
     {
       key: "customerName",
       title: "CUSTOMER",
-      dataIndex: "customerName",
+      dataIndex: "accountName",
       width: 220,
     },
     {
-      key: "deliveryService",
-      title: "DELIVERY SERVICE",
-      dataIndex: "deliveryService",
+      key: "deliveryChannel",
+      title: "DELIVERY CHANNEL",
+      dataIndex: "deliveryChannel",
       width: 150,
     },
     {
       key: "status",
       title: "STATUS",
-      dataIndex: "status",
+      dataIndex: "deliveryStatus",
       width: 120,
       render: (status) => (
         <div className="flex justify-center">
