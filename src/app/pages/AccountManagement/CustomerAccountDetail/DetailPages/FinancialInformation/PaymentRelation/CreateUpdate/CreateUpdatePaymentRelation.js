@@ -224,6 +224,8 @@ const CreatePaymentRelation = ({ type }) => {
     formCreate.setFieldValue("accountName", accountName);
   }
 
+  const [dummyAttachmentList, setDummyAttachmentList] = useState([{}]);
+
   const steps = [
     {
       title: "Payment Relation",
@@ -242,7 +244,15 @@ const CreatePaymentRelation = ({ type }) => {
     },
     {
       title: "Attachment",
-      content: <AttachmentForm />,
+      content: (
+        <AttachmentForm
+          type={type}
+          data={dummyAttachmentList}
+          updateData={setDummyAttachmentList}
+          dispatch={dispatch}
+          mandatory={true}
+        />
+      ),
       disabled: false
     },
   ];
