@@ -1264,9 +1264,7 @@ const CalculationPage = () => {
             state={{ id: record?.calJobId }}
           >
             <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
+                <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         );

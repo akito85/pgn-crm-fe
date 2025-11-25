@@ -258,11 +258,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         ellipsis: {
           showTitle: false,
         },
-        render: (text) => (
-          <Tooltip title={text}>
-            {text || "-"}
-          </Tooltip>
-        ),
+        render: (text) => <Tooltip title={text}>{text || "-"}</Tooltip>,
       },
       {
         key: "meterReadingCode",
@@ -281,11 +277,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         ellipsis: {
           showTitle: false,
         },
-        render: (text) => (
-          <Tooltip title={text}>
-            {text || "-"}
-          </Tooltip>
-        ),
+        render: (text) => <Tooltip title={text}>{text || "-"}</Tooltip>,
       },
       {
         key: "accountGroupType",
@@ -347,11 +339,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         ellipsis: {
           showTitle: false,
         },
-        render: (text) => (
-          <Tooltip title={text}>
-            {text || "-"}
-          </Tooltip>
-        ),
+        render: (text) => <Tooltip title={text}>{text || "-"}</Tooltip>,
       },
       {
         key: "minUsage",
@@ -504,7 +492,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           </div>
         }
       >
-        <div className={"w-full grid grid-cols-4 gap-2"}>
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(5,auto)] gap-x-8 gap-y-2 sm:gap-y-1">
           <DetailText label={"Init Code"}>{data?.initCode || "-"}</DetailText>
           <DetailText label={"Process Name"}>
             {data?.processName || "-"}
@@ -515,7 +503,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           <DetailText label={"Billing Period"}>
             {data?.billPeriod || "-"}
           </DetailText>
-
           <DetailText label={"SOR"}>{data?.sor || "-"}</DetailText>
           <DetailText label={"Total Customer"}>
             {data?.totalCustomer || 0}
@@ -526,15 +513,11 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
               ? moment(data.createdDtm).format("DD MMM YYYY HH:mm:ss")
               : "-"}
           </DetailText>
-
           <DetailText label={"Status"}>{renderStatus(data?.status)}</DetailText>
-          <div className="col-span-3">
-            <DetailText label={"Message"}>{data?.message || "-"}</DetailText>
-          </div>
-
-          <div className="col-span-4">
-            <DetailText label={"Remark"}>{data?.remark || "-"}</DetailText>
-          </div>
+          <DetailText label={"Message"}>{data?.message || "-"}</DetailText>
+          <DetailText label={"Remark"} className="col-span-2">
+            {data?.remark || "-"}
+          </DetailText>
         </div>
       </CardContainer>
 
