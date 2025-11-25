@@ -1,34 +1,48 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   FilterOutlined,
   DownloadOutlined,
   CheckOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { Collapse, Space, Switch, Form, DatePicker, Input, Spin } from "antd";
+import { DatePicker, Input, Spin } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getTaxImplication,
-  getDetailTaxImplication,
+  approveOrRejectAllPaymentRelation,
+  getPaymentRelation,
+  getPrApprovalHistory,
+  inactivatePaymentRelation,
 } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { useNavigate, useLocation } from "react-router-dom";
-import DetailTaxImplication from "./DetailPaymentRelation";
+import { Link, useNavigate } from "react-router-dom";
+import ModalConfirmationApprovalPaymentRelation from "./ModalConfirmationApprovalPaymentRelation";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
+import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
+import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
 
 // getDetailTaxImplication
 // detail_taxImplication
 
-const PaymentRelation = ({ id = 0 }) => {
+const PaymentRelation = ({
+  id = 0,
+  idCustomer = 0,
+  isActive = false,
+  isApproval = false,
+  setIsApproval = () => {},
+  setShowApprovalButton = () => {},
+  submitApprovalCondition = "",
+  setSubmitApprovalCondition = () => {},
+}) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { data_paymentRelation, detail_paymentRelation, loading } = useSelector(
+  const { data_paymentRelation, loading, data_prApprovalHistory } = useSelector(
     (state) => state.financialInformation,
   );
 
@@ -43,26 +57,115 @@ const PaymentRelation = ({ id = 0 }) => {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, updateSearch] = useState({});
-  const [modalDetail, setModalDetail] = useState(false);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+
+  const [showInactiveModal, setShowInactiveModal] = useState(false);
+  const [inactivatePrId, setInactivatePrId] = useState(0);
+  const [inactivatePrAppHierId, setInactivatePrAppHierId] = useState(0);
+
+  const [showApprovalHistoryModal, setShowApprovalHistoryModal] =
+    useState(false);
+  const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
+
+  const handleCancelApprovalModal = () => {
+    setShowApprovalModal(false);
+    setSubmitApprovalCondition("");
+  };
+
+  const handleConfirmApprovalModal = (
+    description,
+    submitApprovalCondition,
+    handleClear,
+  ) => {
+    const body = selectedRows
+      .filter(
+        (row) =>
+          row.statusApproval === "WAITING_APPROVAL" && row.status === "DRAFT",
+      )
+      .map((row) => ({
+        id: row.id,
+        approvalId: row.tappId,
+        action: submitApprovalCondition.toUpperCase(),
+        description,
+      }));
+
+    const inactiveBody = selectedRows
+      .filter(
+        (row) =>
+          row.statusApproval === "WAITING_APPROVAL" && row.status === "ACTIVE",
+      )
+      .map((row) => ({
+        id: row.id,
+        approvalId: row.tappId,
+        action: submitApprovalCondition.toUpperCase(),
+        description,
+      }));
+
+    dispatch(approveOrRejectAllPaymentRelation({ body, inactiveBody }))
+      .unwrap()
+      .then(() => {
+        handleClear();
+        setSelectedRowKeys([]);
+        setSelectedRows([]);
+        setIsApproval(false);
+        setSubmitApprovalCondition("");
+        setShowApprovalButton(false);
+        setShowApprovalModal(false);
+
+        const body = {
+          page,
+          size: pageSize,
+          sort,
+          searches: search,
+        };
+
+        dispatch(getPaymentRelation({ id, body }));
+      })
+      .catch(() => {});
+  };
+
+  const handleInactivePrModal = (show, prId = 0, prAppHierId = 0) => {
+    if (show) {
+      setInactivatePrId(prId);
+      setInactivatePrAppHierId(prAppHierId);
+      setShowInactiveModal(true);
+    } else {
+      setInactivatePrId(0);
+      setInactivatePrAppHierId(0);
+      setShowInactiveModal(false);
+    }
+  };
+
+  const handleInactivatePr = (remark, handleClear) => {
+    const body = {
+      id: inactivatePrId,
+      appHierId: inactivatePrAppHierId,
+      remark,
+    };
+
+    dispatch(
+      inactivatePaymentRelation({
+        body,
+      }),
+    )
+      .unwrap()
+      .then(() => {
+        setShowInactiveModal(false);
+        handleClear();
+      })
+      .catch(() => {});
+  };
 
   useEffect(() => {
-    if (id) {
-      let tempSearch = "";
-      for (const dataIndex in search) {
-        if (Object.hasOwnProperty.call(search, dataIndex)) {
-          const tempSearchText = search[dataIndex];
-          if (tempSearchText) {
-            tempSearch += `${dataIndex}~${tempSearchText},`;
-          }
-        }
-      }
-      tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-      const reqSearch = encodeURIComponent(JSON.stringify(search));
-      dispatch(
-        getTaxImplication({ id, page, pageSize, sort, search: reqSearch }),
-      );
-    }
-  }, [dispatch, id, page, pageSize, sort, search]);
+    const body = {
+      page,
+      size: pageSize,
+      sort,
+      searches: search,
+    };
+
+    dispatch(getPaymentRelation({ id, body }));
+  }, [page, pageSize, sort, search]);
 
   useEffect(() => {
     if (
@@ -73,15 +176,6 @@ const PaymentRelation = ({ id = 0 }) => {
       setTotalElement(data_paymentRelation?.page?.totalElements);
     }
   }, [data_paymentRelation]);
-
-  const handleDetail = (record) => {
-    const id = record.id;
-    setModalDetail(true);
-    dispatch(getDetailTaxImplication(id))
-      .unwrap()
-      .then((data) => {})
-      .catch((err) => {});
-  };
 
   //handle on-changes listener
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -184,192 +278,259 @@ const PaymentRelation = ({ id = 0 }) => {
     setSort(dataSort);
   };
 
-  // Dummy data
-  const data = [
-    {
-      accountNumber: "2027635461",
-      accountName: "PT XYZ",
-      priority: 1,
-      startDate: "2022-08-22",
-      endDate: "2022-08-22",
-      statusApproval: "approved",
-      status: "active",
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (newSelectedRowKeys, newSelectedRows) => {
+      setSelectedRowKeys([...newSelectedRowKeys]);
+      setSelectedRows(
+        newSelectedRows.map((newSelectedRow) => ({ ...newSelectedRow })),
+      );
+      if (!newSelectedRowKeys.length) setShowApprovalButton(false);
+      else setShowApprovalButton(true);
     },
-    {
-      accountNumber: "2027635461",
-      accountName: "PT KERAMIK INTI 1",
-      priority: 4,
-      startDate: "2022-08-22",
-      endDate: "2022-08-22",
-      statusApproval: "approved",
-      status: "active",
-    },
-    {
-      accountNumber: "2027635461",
-      accountName: "PT XYZ",
-      priority: 4,
-      startDate: "2022-08-22",
-      endDate: "2022-08-22",
-      statusApproval: "waitingApproval",
-      status: "inactive",
-    },
-    {
-      accountNumber: "2027635461",
-      accountName: "PT XYZ",
-      priority: 4,
-      startDate: "2022-08-22",
-      endDate: "2022-08-22",
-      statusApproval: "rejected",
-      status: "inactive",
-    },
-    {
-      accountNumber: "2027635461",
-      accountName: "PT XYZ",
-      priority: 4,
-      startDate: "2022-08-22",
-      endDate: "2022-08-22",
-      statusApproval: "approved",
-      status: "inactive",
-    },
-  ];
+    type: "checkbox",
+  };
+
+  const handleApprovalHistoryOptions = () => {
+    const data = dataApprovalHistoryFix?.dataApprover || {};
+    const keyData = Object.keys(data);
+    return keyData.map((item) => ({
+      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+    }));
+  };
+
+  const handleApprovalHistoryModal = (show, prId = 0) => {
+    if (show) {
+      dispatch(getPrApprovalHistory(prId));
+      setShowApprovalHistoryModal(true);
+    } else {
+      setShowApprovalHistoryModal(false);
+    }
+  };
+
+  // Listen to approve or reject button on the parent component
+  useEffect(() => {
+    if (isActive) {
+      if (submitApprovalCondition === "approve") {
+        setShowApprovalModal(true);
+      } else if (submitApprovalCondition === "reject") {
+        setShowApprovalModal(true);
+      }
+    }
+  }, [submitApprovalCondition]);
+
+  // Reset accordian when it's not the current one that's opened
+  useEffect(() => {
+    if (!isActive) {
+      setSelectedRowKeys([]);
+      setSelectedRows([]);
+      setIsApproval(false);
+      setSubmitApprovalCondition("");
+      setShowApprovalButton(false);
+    }
+  }, [isActive]);
+
+  useEffect(() => {
+    if (data_prApprovalHistory && data_prApprovalHistory?.dataApprover) {
+      const temp = {
+        dataApprover: {
+          create: data_prApprovalHistory?.dataApprover?.PRICING || [],
+          inactive:
+            data_prApprovalHistory?.dataApprover?.INACTIVE_PRICING || [],
+        },
+        dataHistory: {
+          create: data_prApprovalHistory?.dataHistory?.PRICING || [],
+          inactive: data_prApprovalHistory?.dataHistory?.INACTIVE_PRICING || [],
+        },
+      };
+
+      setDataApprovalHistoryFix(temp);
+    } else {
+      setDataApprovalHistoryFix({});
+    }
+  }, [data_prApprovalHistory]);
 
   return (
-    <Fragment>
-      <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-        {"Payment Relation LIST"}
-      </div>
-
-      <div>
-        <div className="flex justify-between items-center gap-5 mb-5">
-          {/* Filter Button - Left side */}
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <FilterOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 20,
-                }}
-              />
-            }
-            style={{
-              backgroundColor: "#0075bf",
-              color: "#fff",
-              borderColor: "#0075bf",
-              border: "1px solid #0075bf",
-              width: "128px",
-              height: "48px",
-              borderRadius: "5px",
-            }}
-          >
-            Filters
-          </ButtonComponent>
-
-          {/* Right side buttons container */}
-          <div className="flex justify-end items-center gap-2.5">
-            {/* Download List Button */}
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {}}
-              icon={
-                <DownloadOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                borderRadius: "5px",
-                height: "48px",
-              }}
-            >
-              Download List
-            </ButtonComponent>
-
-            {/* Approval Button */}
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {}}
-              icon={
-                <CheckOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                borderRadius: "5px",
-                height: "48px",
-              }}
-            >
-              Approval
-            </ButtonComponent>
-
-            {/* Create Button */}
-            <ButtonComponent
-              type={"submit"}
-              onClick={() =>
-                navigate(
-                  "/account-management/customers/view/service-requests/create",
-                )
-              }
-              icon={
-                <PlusOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                borderRadius: "5px",
-                height: "48px",
-              }}
-            >
-              Create
-            </ButtonComponent>
-          </div>
+    <Spin spinning={loading}>
+      <Fragment>
+        <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
+          {"PAYMENT RELATION LIST"}
         </div>
-        <PaymentRelationTable
-          // data={data_paymentRelation?.result}
-          data={data}
-          handleChange={handleChange}
-          handleChangeSize={handleChangeSize}
-          totalElement={totalElement}
-          page={page}
-          pageSize={pageSize}
-          searchText={searchText}
-          searchedColumn={searchedColumn}
-          onSort={onSort}
-          getColumnSearchProps={getColumnSearchProps}
-          handleDetail={() => navigate("/account-management/account-standard/financial-information/payment-relation/details")}
-          setModalDetail={setModalDetail}
-        />
-      </div>
 
-      {/* Modal detail tax implication */}
-      {modalDetail ? (
-        <PaymentRelationTable
-          setModalDetail={setModalDetail}
-          modalDetail={modalDetail}
+        <div>
+          {!isApproval && (
+            <div className="flex justify-between items-center gap-5 mb-5">
+              {/* Filter Button - Left side */}
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => navigate(-1)}
+                icon={
+                  <FilterOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 20,
+                    }}
+                  />
+                }
+                style={{
+                  backgroundColor: "#0075bf",
+                  color: "#fff",
+                  borderColor: "#0075bf",
+                  border: "1px solid #0075bf",
+                  width: "128px",
+                  height: "48px",
+                  borderRadius: "5px",
+                }}
+              >
+                Filters
+              </ButtonComponent>
+
+              {/* Right side buttons container */}
+              <div className="flex justify-end items-center gap-2.5">
+                {/* Download List Button */}
+                <ButtonComponent
+                  type={"submit"}
+                  onClick={() => {}}
+                  icon={
+                    <DownloadOutlined
+                      style={{
+                        color: "#fff",
+                        fontSize: 20,
+                      }}
+                    />
+                  }
+                  style={{
+                    backgroundColor: "#0075bf",
+                    color: "#fff",
+                    borderColor: "#0075bf",
+                    border: "1px solid #0075bf",
+                    borderRadius: "5px",
+                    height: "48px",
+                  }}
+                >
+                  Download List
+                </ButtonComponent>
+
+                {/* Approval Button */}
+                <ButtonComponent
+                  type={"submit"}
+                  onClick={() => setIsApproval(!isApproval)}
+                  icon={
+                    <CheckOutlined
+                      style={{
+                        color: "#fff",
+                        fontSize: 20,
+                      }}
+                    />
+                  }
+                  style={{
+                    backgroundColor: "#0075bf",
+                    color: "#fff",
+                    borderColor: "#0075bf",
+                    border: "1px solid #0075bf",
+                    borderRadius: "5px",
+                    height: "48px",
+                  }}
+                >
+                  Approval
+                </ButtonComponent>
+
+                {/* Create Button */}
+                <Link
+                  to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_PAYMENT_RELATION}
+                  state={{
+                    idAccount: id,
+                    idCustomer,
+                  }}
+                >
+                  <ButtonComponent
+                    type={"submit"}
+                    icon={
+                      <PlusOutlined
+                        style={{
+                          color: "#fff",
+                          fontSize: 20,
+                        }}
+                      />
+                    }
+                    style={{
+                      backgroundColor: "#0075bf",
+                      color: "#fff",
+                      borderColor: "#0075bf",
+                      border: "1px solid #0075bf",
+                      borderRadius: "5px",
+                      height: "48px",
+                    }}
+                  >
+                    Create
+                  </ButtonComponent>
+                </Link>
+              </div>
+            </div>
+          )}
+          <PaymentRelationTable
+            data={data_paymentRelation?.result?.map(
+              (paymentRelation, index) => ({
+                ...paymentRelation,
+                key: `payment-relation-${index}`,
+              }),
+            )}
+            idAccount={id}
+            idCustomer={idCustomer}
+            handleChange={handleChange}
+            handleChangeSize={handleChangeSize}
+            totalElement={totalElement}
+            page={page}
+            pageSize={pageSize}
+            onSort={onSort}
+            getColumnSearchProps={getColumnSearchProps}
+            rowSelection={isApproval ? rowSelection : undefined}
+            isApproval={isApproval}
+            handleInactivePrModal={handleInactivePrModal}
+            handleApprovalHistoryModal={handleApprovalHistoryModal}
+          />
+        </div>
+        <ModalConfirmationApprovalPaymentRelation
+          dataSource={selectedRows}
+          isOpen={showApprovalModal}
+          setIsOpen={setShowApprovalModal}
+          getColumnSearchProps={getColumnSearchProps}
+          handleCloseModal={handleCancelApprovalModal}
+          onFinish={({ remark }, handleClear) =>
+            handleConfirmApprovalModal(
+              remark,
+              submitApprovalCondition,
+              handleClear,
+            )
+          }
         />
-      ) : null}
-    </Fragment>
+
+        {/* Inactivate Modal */}
+        <ModalApproveOrReject
+          isOpen={showInactiveModal}
+          header={"INACTIVATE"}
+          handleCloseModal={() => handleInactivePrModal(false)}
+          customMessage={`Are you sure you want to inactivate payment relation - ${inactivatePrId}?`}
+          onFinish={({ remark }, handleClear) =>
+            handleInactivatePr(remark, handleClear)
+          }
+        />
+
+        {/* Approval History Modal */}
+        <ModalHistory
+          isOpen={showApprovalHistoryModal}
+          handleClose={() => handleApprovalHistoryModal(false)}
+          header={"Approval History"}
+          width={850}
+          tabOptions={handleApprovalHistoryOptions()}
+          dataApprover={dataApprovalHistoryFix?.dataApprover}
+          dataHistory={dataApprovalHistoryFix?.dataHistory}
+        />
+      </Fragment>
+    </Spin>
   );
 };
 

@@ -51,6 +51,7 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
 
   //state
   const [tabs, setTabs] = useState([]);
+  const [isApproval, setIsApproval] = useState(false);
 
   useEffect(() => {
     if (type != "standard") {
@@ -129,21 +130,15 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
               type={type}
               setTypeAccountInfoDetailSection={setTypeAccountInfoDetailSection}
               dispatch={dispatch}
+              isApproval={isApproval}
+              setIsApproval={setIsApproval}
               // handleChangeInteraction={handleSetType}
             />
-            <div className="my-5 flex">
-              <Link
-                to={
-                  type === "standard"
-                    ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
-                    : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME
-                }
-              >
+            <div className="my-5 flex justify-between">
+              {isApproval ? (
                 <ButtonComponent
                   type={"submit"}
-                  // onClick={() => {
-                  //   navigate(-1)
-                  // }}
+                  onClick={() => setIsApproval(false)}
                   icon={
                     <LeftOutlined
                       style={{
@@ -156,7 +151,44 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
                 >
                   Back
                 </ButtonComponent>
-              </Link>
+              ) : (
+                <Link
+                  to={
+                    type === "standard"
+                      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
+                      : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME
+                  }
+                >
+                  <ButtonComponent
+                    type={"submit"}
+                    // onClick={() => {
+                    //   navigate(-1)
+                    // }}
+                    icon={
+                      <LeftOutlined
+                        style={{
+                          color: "#fff",
+                          fontSize: 24,
+                          justifyItems: "center",
+                        }}
+                      />
+                    }
+                  >
+                    Back
+                  </ButtonComponent>
+                </Link>
+              )}
+
+              {isApproval && (
+                <div className={"w-full flex justify-end gap-5"}>
+                  <ButtonComponent type="reject" onClick={() => {}}>
+                    Reject
+                  </ButtonComponent>
+                  <ButtonComponent type="approve" onClick={() => {}}>
+                    Approve
+                  </ButtonComponent>
+                </div>
+              )}
             </div>
           </div>
           {/* ) : (

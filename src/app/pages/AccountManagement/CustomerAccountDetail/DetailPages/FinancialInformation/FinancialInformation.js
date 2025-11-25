@@ -1,7 +1,6 @@
-import React, { useEffect } from "react";
-
+import { useEffect } from "react";
 import { Collapse, Space } from "antd";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Fragment } from "react";
 import MiniBaseContainer from "../../../../../../components/MiniBaseContainer";
@@ -11,18 +10,23 @@ import TaxIdentifierAndRelation from "./TaxIdentifier/TaxIdentifierAndRelation";
 import AccountingRule from "./AccountingRule/AccountingRule";
 import TaxImplication from "./TaxImplication/TaxImplication";
 import BillingBucket from "./BillingBucket/BillingBucket";
+import PaymentRelation from "./PaymentRelation/PaymentRelation";
 import { useDispatch, useSelector } from "react-redux";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 
 const { Panel } = Collapse;
 
-const FinancialInformation = ({ id = 0 }) => {
+const FinancialInformation = ({
+  id = 0,
+  idCustomer = 0,
+  isApproval = false,
+  setIsApproval = () => {},
+  setShowApprovalButton = () => {},
+  submitApprovalCondition = "",
+  setSubmitApprovalCondition = () => {},
+}) => {
   //   // const dispatch = useDispatch();
   //   const { data, data_detail, loading } = useSelector((state) => state.tos);
-  const [page, setPage] = useState(1);
-  const navigate = useNavigate;
-  const [pageSize, setPageSize] = useState(10);
-  const [status, setStatus] = useState();
   const [current, setCurrent] = useState(0);
   const dispatch = useDispatch();
   const location = useLocation();
@@ -81,7 +85,18 @@ const FinancialInformation = ({ id = 0 }) => {
     },
     {
       header: "Payment Relation",
-      children: <PaymentRelation id={id} />,
+      children: (
+        <PaymentRelation
+          id={id}
+          idCustomer={idCustomer}
+          isActive={current === 6}
+          isApproval={isApproval}
+          setIsApproval={setIsApproval}
+          setShowApprovalButton={setShowApprovalButton}
+          submitApprovalCondition={submitApprovalCondition}
+          setSubmitApprovalCondition={setSubmitApprovalCondition}
+        />
+      ),
     },
   ];
 
