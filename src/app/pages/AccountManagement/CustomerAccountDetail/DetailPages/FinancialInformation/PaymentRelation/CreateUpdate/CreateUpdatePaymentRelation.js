@@ -89,6 +89,7 @@ const CreatePaymentRelation = ({ type }) => {
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [selectedHierarchy, setSelectedHierarchy] = useState();
 
   const isLoading = loading || loadingForm || loadingAccount;
 
@@ -231,7 +232,12 @@ const CreatePaymentRelation = ({ type }) => {
     },
     {
       title: "Approval",
-      content: <ApprovalForm />,
+      content: (
+        <ApprovalForm
+          selectedHierarchy={selectedHierarchy}
+          updateSelectedHierarchy={setSelectedHierarchy}
+        />
+      ),
       disabled: false
     },
     {
