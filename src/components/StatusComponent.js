@@ -32,7 +32,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         break;
 
       case "open":
-        bgColor = "status-active";
+        bgColor = "bg-gray-600";
         tColor = "text-white";
         break;
         

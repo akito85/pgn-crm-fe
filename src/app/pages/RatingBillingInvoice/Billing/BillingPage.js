@@ -284,14 +284,12 @@ const BillingPage = () => {
       render: (record) => {
         return (
           <Tooltip title="Approval Hierarchy">
-            <div className="pt-1">
               <SVGIcon
                 name="IconLogHistory"
                 color={"#0075bf"}
                 width={20}
                 onClick={() => handleApprovalHistory(record)}
               />
-            </div>
           </Tooltip>
         );
       },
