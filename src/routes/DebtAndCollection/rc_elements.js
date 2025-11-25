@@ -18,10 +18,13 @@ import ViewActivityAction from "../../app/pages/DebtAndCollection/ActivityAction
 import DetailActivityAction from "../../app/pages/DebtAndCollection/ActivityAction/DetailActivityAction";
 import FormActivityAction from "../../app/pages/DebtAndCollection/ActivityAction/FormActivityAction";
 
-
 import ViewActivities from "../../app/pages/DebtAndCollection/Activities/ViewActivies";
 import DetailActivities from "../../app/pages/DebtAndCollection/Activities/DetailActivies";
 import FormActivities from "../../app/pages/DebtAndCollection/Activities/FormActivies";
+
+import ViewActivitiesPlan from "../../app/pages/DebtAndCollection/ActivitiesPlan/ViewActivitiesPlan";
+import DetailActivitiesPlan from "../../app/pages/DebtAndCollection/ActivitiesPlan/DetailActivitiesPlan";
+import FormActivitiesPlan from "../../app/pages/DebtAndCollection/ActivitiesPlan/FormActivitiesPlan";
 
 export const DEBT_AND_COLLECTION_ELEMENTS = {
   // Grace Period
@@ -59,4 +62,10 @@ export const DEBT_AND_COLLECTION_ELEMENTS = {
   DETAIL_ACTIVITIES_PAGE: <DetailActivities />,
   CREATE_ACTIVITIES_PAGE: <FormActivities type="create" />,
   UPDATE_ACTIVITIES_PAGE: <FormActivities type="update" />,
+
+  // Plan Activities
+  VIEW_ACTIVITIES_PLAN_PAGE: <ViewActivitiesPlan />,
+  DETAIL_ACTIVITIES_PLAN_PAGE: <DetailActivitiesPlan />,
+  CREATE_ACTIVITIES_PLAN_PAGE: <FormActivitiesPlan type="create" />,
+  UPDATE_ACTIVITIES_PLAN_PAGE: <FormActivitiesPlan type="update" />,
 };
