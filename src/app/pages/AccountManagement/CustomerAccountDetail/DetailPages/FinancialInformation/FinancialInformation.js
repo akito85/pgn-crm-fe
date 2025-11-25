@@ -29,7 +29,13 @@ import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_
 
 const { Panel } = Collapse;
 
-const FinancialInformation = ({id = 0, isApproval = false, setIsApproval = () => {}}) => {
+const FinancialInformation = ({
+  id = 0,
+  isApproval = false,
+  setIsApproval = () => {},
+  submitApprovalCondition = "",
+  setSubmitApprovalCondition = () => {},
+}) => {
   //   // const dispatch = useDispatch();
   //   const { data, data_detail, loading } = useSelector((state) => state.tos);
   const [page, setPage] = useState(1);
@@ -88,7 +94,16 @@ const FinancialInformation = ({id = 0, isApproval = false, setIsApproval = () =>
     },
     {
       header: "Payment Relation",
-      children: <PaymentRelation id={id} isApproval={isApproval} setIsApproval={setIsApproval} />,
+      children: (
+        <PaymentRelation
+          id={id}
+          isActive={current === 6}
+          isApproval={isApproval}
+          setIsApproval={setIsApproval}
+          submitApprovalCondition={submitApprovalCondition}
+          setSubmitApprovalCondition={setSubmitApprovalCondition}
+        />
+      ),
     },
   ];
 

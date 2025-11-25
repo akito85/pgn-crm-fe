@@ -59,10 +59,10 @@ const AccountDetailInformation = ({
   // handleChangeInteraction = () => {},
   isApproval = false,
   setIsApproval = () => {},
+  submitApprovalCondition = "",
+  setSubmitApprovalCondition = () => {},
 }) => {
   const { path } = usePrevLocContext();
-  console.log(path);
-
   // useEffect(() => {
   //   switch (section) {
   //     case dataTabs.adi:
@@ -263,7 +263,15 @@ const AccountDetailInformation = ({
           />
         );
       case dataTabs.fi:
-        return <FinancialInformation id={id} isApproval={isApproval} setIsApproval={setIsApproval} />;
+        return (
+          <FinancialInformation
+            id={id}
+            isApproval={isApproval}
+            setIsApproval={setIsApproval}
+            submitApprovalCondition={submitApprovalCondition}
+            setSubmitApprovalCondition={setSubmitApprovalCondition}
+          />
+        )
       case dataTabs.accountAddress:
         return <AccountAddress id={id} idCustomer={idCustomer} type={type} />;
       case dataTabs.accountContact:

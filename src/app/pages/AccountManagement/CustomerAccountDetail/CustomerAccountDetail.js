@@ -53,6 +53,7 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
   //state
   const [tabs, setTabs] = useState([]);
   const [isApproval, setIsApproval] = useState(false);
+  const [submitApprovalCondition, setSubmitApprovalCondition] = useState("");
 
   useEffect(() => {
     if (type != "standard") {
@@ -133,6 +134,8 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
               dispatch = {dispatch}
               isApproval={isApproval}
               setIsApproval={setIsApproval}
+              submitApprovalCondition={submitApprovalCondition}
+              setSubmitApprovalCondition={setSubmitApprovalCondition}
               // handleChangeInteraction={handleSetType}
             />
             <div className="my-5 flex justify-between">
@@ -184,15 +187,15 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
               <div className={"w-full flex justify-end gap-5"}>
                 <ButtonComponent
                   type="reject"
-                  onClick={() => {
-                  }}
+                  onClick={() => setSubmitApprovalCondition("reject")}
+                  disabled={!!submitApprovalCondition}
                 >
                   Reject
                 </ButtonComponent>
                 <ButtonComponent
                   type="approve"
-                  onClick={() => {
-                  }}
+                  onClick={() => setSubmitApprovalCondition("approve")}
+                  disabled={!!submitApprovalCondition}
                 >
                   Approve
                 </ButtonComponent>
