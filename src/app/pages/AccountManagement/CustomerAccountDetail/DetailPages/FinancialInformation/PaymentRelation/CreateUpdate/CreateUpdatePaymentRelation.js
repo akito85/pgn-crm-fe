@@ -407,7 +407,14 @@ const CreatePaymentRelation = ({ type }) => {
               Back
             </ButtonComponent>
             <div className="flex w-full justify-end gap-x-4">
-              {current > 0 && (
+              <ButtonComponent
+                onClick={() => {}}
+                type={"submit"}
+                icon={<SVGIcon name="IconButtonClear" width={24} />}
+              >
+                Clear
+              </ButtonComponent>
+              {current > 0 && current !== (steps.length-1) && (
                 <ButtonComponent
                   onClick={() => {
                     prev();
@@ -437,14 +444,22 @@ const CreatePaymentRelation = ({ type }) => {
                 </Button>
               )}
               {current === steps.length - 1 && (
-                <ButtonComponent
-                  onClick={() => message.success("Processing complete!")}
-                  type={"submit"}
-                  htmlType={"submit"}
-                  icon={<SVGIcon name="IconArrowNarrowRight" width={24} />}
-                >
-                  Save
-                </ButtonComponent>
+                <>
+                  <ButtonComponent
+                    onClick={() => message.success("Processing complete!")}
+                    type={"submit"}
+                    htmlType={"submit"}
+                  >
+                    Save as Draft
+                  </ButtonComponent>
+                  <ButtonComponent
+                    onClick={() => message.success("Processing complete!")}
+                    type={"submit"}
+                    htmlType={"submit"}
+                  >
+                    Save & Submit
+                  </ButtonComponent>
+                </>
               )}
             </div>
           </div>
