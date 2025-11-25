@@ -1,13 +1,10 @@
 import ApprovalPaymentRelation from "./ApprovalPaymentRelation";
 
 export default function ApprovalForm({
-  dataTable = [],
-  dataOption = [],
-  selectedHierarchy = "",
-  updateSelectedHierarchy = () => {},
-  showSelect = true,
-  disableSelect = false,
-  approvalName = "",
+  dataTable,
+  dataOption,
+  selectedHierarchy,
+  updateSelectedHierarchy,
 }){
   return (
     <ApprovalPaymentRelation
@@ -15,9 +12,6 @@ export default function ApprovalForm({
       dataOption={dataOption}
       selectedHierarchy={selectedHierarchy}
       updateSelectedHierarchy={updateSelectedHierarchy}
-      showSelect={showSelect}
-      disableSelect={disableSelect}
-      approvalName={approvalName}
     />
   )
 }
