@@ -117,7 +117,8 @@ export const debt_and_collection = [
   },
   {
     path: DEBT_AND_COLLECTION_ROUTES.DETAIL_TRANSACTION_REPORT,
-    element: DEBT_AND_COLLECTION_ELEMENTS.DETAIL_TRANSACTION_REPORT_PAGE,
+    // element: DEBT_AND_COLLECTION_ELEMENTS.DETAIL_TRANSACTION_REPORT_PAGE,
+  },
 
   // Plan Activities
   {
