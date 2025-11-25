@@ -154,23 +154,23 @@ const RatingPage = () => {
   };
 
   const itemGrantAccess = [
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Detail">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDetail"
-                width={24}
-                onClick={() => handleDetail(record)}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
+    // {
+    //   action: "View",
+    //   type: "table",
+    //   render: (record) => {
+    //     return (
+    //       <Tooltip title="Detail">
+    //         <div className="pt-1">
+    //           <SVGIcon
+    //             name="IconDetail"
+    //             width={24}
+    //             onClick={() => handleDetail(record)}
+    //           />
+    //         </div>
+    //       </Tooltip>
+    //     );
+    //   },
+    // },
   ];
 
   const dataSourceWithKeys = useMemo(() => {
