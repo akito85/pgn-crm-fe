@@ -114,7 +114,7 @@ const CreatePaymentRelation = ({ type }) => {
     },
     {
       path: "",
-      breadcrumbName: "Create",
+      breadcrumbName: (type === "create") ? "Create" : (type === "update") ? "Update" : "",
     },
   ];
 
