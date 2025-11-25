@@ -20,7 +20,14 @@ import { useNavigate, useLocation } from "react-router-dom"
 // getDetailTaxImplication
 // detail_taxImplication
 
-const PaymentRelation = ({ id = 0, isApproval = false, setIsApproval = () => {}}) => {
+const PaymentRelation = ({
+  id = 0,
+  isActive = false,
+  isApproval = false,
+  setIsApproval = () => {},
+  submitApprovalCondition = "",
+  setSubmitApprovalCondition = () => {},
+}) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -176,6 +183,26 @@ const PaymentRelation = ({ id = 0, isApproval = false, setIsApproval = () => {}}
     onChange: (newSelectedRowKeys) => setSelectedRowKeys(newSelectedRowKeys),
     type: "checkbox",
   }
+
+  const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const handleSubmitApproval = async (condition) => {
+
+    await wait(2000);
+    
+    setSubmitApprovalCondition("");
+  }
+
+  // Listen to submit approval
+  useEffect(() => {
+    if (isActive) {
+      if (submitApprovalCondition === "approve") {
+        handleSubmitApproval(submitApprovalCondition)
+      } else if (submitApprovalCondition === "reject") {
+        handleSubmitApproval(submitApprovalCondition)
+      }
+    }
+  }, [submitApprovalCondition]);
 
   // Dummy data
   const data = [
