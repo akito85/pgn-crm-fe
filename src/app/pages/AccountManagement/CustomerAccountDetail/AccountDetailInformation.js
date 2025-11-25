@@ -57,6 +57,8 @@ const AccountDetailInformation = ({
   setTypeAccountInfoDetailSection = () => {},
   dispatch,
   // handleChangeInteraction = () => {},
+  isApproval = false,
+  setIsApproval = () => {},
 }) => {
   const { path } = usePrevLocContext();
   console.log(path);
@@ -261,7 +263,7 @@ const AccountDetailInformation = ({
           />
         );
       case dataTabs.fi:
-        return <FinancialInformation id={id} />;
+        return <FinancialInformation id={id} isApproval={isApproval} setIsApproval={setIsApproval} />;
       case dataTabs.accountAddress:
         return <AccountAddress id={id} idCustomer={idCustomer} type={type} />;
       case dataTabs.accountContact:

@@ -20,7 +20,7 @@ import { useNavigate, useLocation } from "react-router-dom"
 // getDetailTaxImplication
 // detail_taxImplication
 
-const PaymentRelation = ({ id = 0 }) => {
+const PaymentRelation = ({ id = 0, isApproval = false, setIsApproval = () => {}}) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -169,9 +169,18 @@ const PaymentRelation = ({ id = 0 }) => {
     setSort(dataSort);
   };
 
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (newSelectedRowKeys) => setSelectedRowKeys(newSelectedRowKeys),
+    type: "checkbox",
+  }
+
   // Dummy data
   const data = [
     {
+      key: "1",
       accountNumber: "2027635461",
       accountName: "PT XYZ",
       priority: 1,
@@ -181,6 +190,7 @@ const PaymentRelation = ({ id = 0 }) => {
       status: "active",
     },
     {
+      key: "2",
       accountNumber: "2027635461",
       accountName: "PT KERAMIK INTI 1",
       priority: 4,
@@ -190,6 +200,7 @@ const PaymentRelation = ({ id = 0 }) => {
       status: "active",
     },
     {
+      key: "3",
       accountNumber: "2027635461",
       accountName: "PT XYZ",
       priority: 4,
@@ -199,6 +210,7 @@ const PaymentRelation = ({ id = 0 }) => {
       status: "inactive",
     },
     {
+      key: "4",
       accountNumber: "2027635461",
       accountName: "PT XYZ",
       priority: 4,
@@ -208,6 +220,7 @@ const PaymentRelation = ({ id = 0 }) => {
       status: "inactive",
     },
     {
+      key: "5",
       accountNumber: "2027635461",
       accountName: "PT XYZ",
       priority: 4,
@@ -225,107 +238,109 @@ const PaymentRelation = ({ id = 0 }) => {
       </div>
 
       <div>
-        <div className="flex justify-between items-center gap-5 mb-5">
-          {/* Filter Button - Left side */}
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <FilterOutlined
+        {!isApproval && (
+          <div className="flex justify-between items-center gap-5 mb-5">
+            {/* Filter Button - Left side */}
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => navigate(-1)}
+              icon={
+                <FilterOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 20,
+                  }}
+                />
+              }
+              style={{
+                backgroundColor: "#0075bf",
+                color: "#fff",
+                borderColor: "#0075bf",
+                border: "1px solid #0075bf",
+                width: "128px",
+                height: "48px",
+                borderRadius: "5px"
+              }}
+            >
+              Filters
+            </ButtonComponent>
+            
+            {/* Right side buttons container */}
+            <div className="flex justify-end items-center gap-2.5">
+              {/* Download List Button */}
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => {}}
+                icon={
+                  <DownloadOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 20,
+                    }}
+                  />
+                }
                 style={{
+                  backgroundColor: "#0075bf",
                   color: "#fff",
-                  fontSize: 20,
+                  borderColor: "#0075bf",
+                  border: "1px solid #0075bf",
+                  borderRadius: "5px",
+                  height: "48px"
                 }}
-              />
-            }
-            style={{
-              backgroundColor: "#0075bf",
-              color: "#fff",
-              borderColor: "#0075bf",
-              border: "1px solid #0075bf",
-              width: "128px",
-              height: "48px",
-              borderRadius: "5px"
-            }}
-          >
-            Filters
-          </ButtonComponent>
-          
-          {/* Right side buttons container */}
-          <div className="flex justify-end items-center gap-2.5">
-            {/* Download List Button */}
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {}}
-              icon={
-                <DownloadOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                borderRadius: "5px",
-                height: "48px"
-              }}
-            >
-              Download List
-            </ButtonComponent>
+              >
+                Download List
+              </ButtonComponent>
 
-            {/* Approval Button */}
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {}}
-              icon={
-                <CheckOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                borderRadius: "5px",
-                height: "48px"
-              }}
-            >
-              Approval
-            </ButtonComponent>
+              {/* Approval Button */}
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => setIsApproval(!isApproval)}
+                icon={
+                  <CheckOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 20,
+                    }}
+                  />
+                }
+                style={{
+                  backgroundColor: "#0075bf",
+                  color: "#fff",
+                  borderColor: "#0075bf",
+                  border: "1px solid #0075bf",
+                  borderRadius: "5px",
+                  height: "48px"
+                }}
+              >
+                Approval
+              </ButtonComponent>
 
-            {/* Create Button */}
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate("/account-management/customers/view/service-requests/create")}
-              icon={
-                <PlusOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                borderRadius: "5px",
-                height: "48px"
-              }}
-            >
-              Create
-            </ButtonComponent>
+              {/* Create Button */}
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => navigate("/account-management/customers/view/service-requests/create")}
+                icon={
+                  <PlusOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 20,
+                    }}
+                  />
+                }
+                style={{
+                  backgroundColor: "#0075bf",
+                  color: "#fff",
+                  borderColor: "#0075bf",
+                  border: "1px solid #0075bf",
+                  borderRadius: "5px",
+                  height: "48px"
+                }}
+              >
+                Create
+              </ButtonComponent>
+            </div>
           </div>
-        </div>
+        )}
         <PaymentRelationTable
           // data={data_paymentRelation?.result}
           data={data}
@@ -340,6 +355,7 @@ const PaymentRelation = ({ id = 0 }) => {
           getColumnSearchProps={getColumnSearchProps}
           handleDetail={() => navigate("/account-management/account-standard/financial-information/payment-relation/details")}
           setModalDetail={setModalDetail}
+          rowSelection={isApproval ? rowSelection : undefined}
         />
       </div>
     </Fragment>  
