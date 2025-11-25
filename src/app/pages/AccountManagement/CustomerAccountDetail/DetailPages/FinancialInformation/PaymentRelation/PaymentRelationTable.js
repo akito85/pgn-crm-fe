@@ -116,6 +116,18 @@ const PaymentRelationTable = ({
             <Tooltip title="Detail">
               <div className="pt-1">
                 <SVGIcon
+                  name="IconActionDropdown"
+                  color={"#0075bf"}
+                  width={24}
+                  onClick={() => {
+                    handleDetail(r);
+                  }}
+                />
+              </div>
+            </Tooltip>
+            <Tooltip title="Detail">
+              <div className="pt-1">
+                <SVGIcon
                   name="IconDetail"
                   color={"#0075bf"}
                   width={24}
