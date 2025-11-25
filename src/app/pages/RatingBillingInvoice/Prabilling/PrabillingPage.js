@@ -16,6 +16,7 @@ import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import moment from "moment";
 import CardContainer from "../../../../components/CardContainer";
+import { EyeOutlined } from "@ant-design/icons";
 
 const PrabillingPage = () => {
   const { loading, list_prabilling_init, prabilling_pagination } = useSelector(
@@ -441,9 +442,7 @@ const PrabillingPage = () => {
           state={{ id: record?.initCode }}
         >
           <Tooltip title="Detail">
-            <div className="pt-1">
-              <SVGIcon name="IconDetail" width={24} />
-            </div>
+            <EyeOutlined style={{ fontSize: "20px" }} />
           </Tooltip>
         </Link>
       ),
@@ -479,7 +478,9 @@ const PrabillingPage = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">PRABILLING LIST</p>
+              <p className="mt-[15px] font-bold text-primary">
+                PRABILLING LIST
+              </p>
               <div className="mt-[15px]">
                 <Toolbar items={itemGrantAccess} />
               </div>
