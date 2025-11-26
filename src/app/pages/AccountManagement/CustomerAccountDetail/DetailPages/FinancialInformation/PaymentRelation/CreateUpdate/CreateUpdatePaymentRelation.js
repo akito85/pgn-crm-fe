@@ -39,6 +39,8 @@ import {
 import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../../../../../utils";
+import ModalCustom from "../../../../../../../../components/Modal/ModalCustom";
+import ContentModalConfirmation from "./ContentModalConfirmation";
 
 const CreatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -90,6 +92,7 @@ const CreatePaymentRelation = ({ type }) => {
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
   const [selectedHierarchy, setSelectedHierarchy] = useState();
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
   const isLoading = loading || loadingForm || loadingAccount;
 
@@ -456,7 +459,7 @@ const CreatePaymentRelation = ({ type }) => {
               {current === steps.length - 1 && (
                 <>
                   <ButtonComponent
-                    onClick={() => message.success("Processing complete!")}
+                    onClick={() => setShowConfirmationModal(true)}
                     type={"submit"}
                     htmlType={"submit"}
                   >
@@ -474,6 +477,31 @@ const CreatePaymentRelation = ({ type }) => {
             </div>
           </div>
         </Form>
+
+        <ModalCustom
+          isOpen={showConfirmationModal}
+          handleCancel={() => {}}
+          header={"Confirmation"}
+          width={1000}
+          type={"confirmation"}
+          footer={
+            <div className="w-full flex justify-end gap-5 p-4">
+              <ButtonComponent
+                onClick={() => {}}
+                type="default"
+              >
+                Cancel
+              </ButtonComponent>
+              <ButtonComponent
+                type="submit"
+                onClick={() => {}}
+              >
+                Confirm
+              </ButtonComponent>
+            </div>
+          }
+        >
+        </ModalCustom>
 
         {/* Modal Back */}
         <ModalConfirm
