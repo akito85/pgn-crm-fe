@@ -93,6 +93,13 @@ import prabillingLogReducer from "../slices/rating_billing_invoice/prabillingLog
 import jobSlice from "../slices/system_setup/jobSlice";
 import loggingReducer from "../slices/system_setup/logging";
 import emeteraiReducer from "../slices/rating_billing_invoice/emeterai";
+import gracePeriodReducer from "../slices/debt_and_collection/gracePeriod";
+import activityNameReducer from "../slices/debt_and_collection/activityName";
+import templateRemindingReducer from "../slices/debt_and_collection/templateReminding";
+import activityTypeReducer from "../slices/debt_and_collection/activityType";
+import activityActionReducer from "../slices/debt_and_collection/activityAction";
+import activitiesReducer from "../slices/debt_and_collection/activities";
+import transactionReportReducer from "../slices/debt_and_collection/transactionReport";
 import managementDeliveryInvoiceReducer from "../slices/rating_billing_invoice/managementDeliveryInvoice";
 
 const reducer = combineReducers({
@@ -213,6 +220,17 @@ const reducer = combineReducers({
   [reportCustomerSlice.reducerPath]: reportCustomerSlice.reducer,
   [reportCustomerAgreementSlice.reducerPath]:
     reportCustomerAgreementSlice.reducer,
+
+
+  // debt and collection
+  gracePeriod: gracePeriodReducer,
+  activityName: activityNameReducer,
+  templateReminding: templateRemindingReducer,
+  activityType: activityTypeReducer,
+  activityAction: activityActionReducer,
+  activities: activitiesReducer,
+  transactionReport: transactionReportReducer,
+
 });
 
 // add throttle middlewares
