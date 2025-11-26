@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ModalConfirmationApproval from "../../../../../../../../components/Modal/ModalConfirmationApproval";
 import moment from "moment";
 import { dateFormatting, toTitleCase } from "../../../../../../../../utils";
@@ -21,11 +21,35 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelation = ({
   handleOk,
   getColumnSearchProps,
 }) => {
-  const [typeDetailSection, setTypeDetailSection] = useState(tabs[0].value);
+  const [currentTab, setCurrentTab] = useState(0);
+  const [typeDetailSection, setTypeDetailSection] = useState(tabs[currentTab].value);
 
   const handleDetailSection = (e) => {
     setTypeDetailSection(e.target.value);
+    setCurrentTab(tabs.findIndex(tab => tab.value === e.target.value))
   };
+
+  /**
+   * @param {"next" | "prev"} type 
+   */
+  const handleChangeTab = (type) => {
+    if (type === "next" && currentTab < (tabs.length -1)) {
+      console.log(tabs[currentTab + 1].value);
+      setTypeDetailSection(tabs[currentTab + 1].value);
+      setCurrentTab(currentTab + 1);
+    }
+    else if (type === "prev" && currentTab >= 0) {
+      setTypeDetailSection(tabs[currentTab - 1].value);
+      setCurrentTab(currentTab - 1);
+    }
+  }
+
+  useEffect(() => {
+    if (!isOpen) {
+      setTypeDetailSection(tabs[0].value);
+      setCurrentTab(0);
+    }
+  }, [isOpen])
 
   return (
     <ModalCustom
@@ -33,14 +57,27 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelation = ({
       width={1000}
       header={"CONFIRMATION PAYMENT RELATION"}
       type={"confirmation"}
+      handleCancel={handleCancel}
       footer={[
         <div className={"w-full justify-end flex gap-[20px]"}>
-          <ButtonComponent type={"default"} onClick={handleCancel}>
-            Cancel
-          </ButtonComponent>
-          <ButtonComponent type={"submit"} onClick={handleOk}>
-            Next
-          </ButtonComponent>
+          {currentTab > 0 ? (
+            <ButtonComponent type={"default"} onClick={() => handleChangeTab("prev")}>
+              Previous
+            </ButtonComponent>
+          ) : (
+            <ButtonComponent type={"default"} onClick={handleCancel}>
+              Cancel
+            </ButtonComponent>
+          )}
+          {currentTab < (tabs.length - 1)  ? (
+            <ButtonComponent type={"submit"} onClick={() => handleChangeTab("next")}>
+              Next
+            </ButtonComponent>
+          ) : (
+            <ButtonComponent type={"submit"} onClick={handleOk}>
+              Submit
+            </ButtonComponent>
+          )}
         </div>,
       ]}
     >
