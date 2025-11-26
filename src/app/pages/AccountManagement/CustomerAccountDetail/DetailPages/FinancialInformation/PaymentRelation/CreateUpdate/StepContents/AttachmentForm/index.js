@@ -16,7 +16,6 @@ export default function AttachmentForm({
       updateData={updateData}
       typeSelector={typeSelector}
       dispatch={dispatch}
-      getAPICategory={getAPICategory}
       mandatory={mandatory}
     />
   )
