@@ -29,7 +29,6 @@ import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../components/StatusComponent";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import {
   getListEFaktur,
@@ -903,14 +902,38 @@ const ViewFaktur = () => {
           true
         ),
         render: (status) => {
+          const statusColors = {
+            APPROVED: "bg-green-100 text-green-800 border-green-300",
+            PROCESSING: "bg-blue-100 text-blue-800 border-blue-300",
+            AWAITING_APPROVAL:
+              "bg-orange-100 text-orange-800 border-orange-300",
+            FAILED: "bg-red-100 text-red-800 border-red-300",
+            REJECTED: "bg-red-100 text-red-800 border-red-300",
+            SUCCESS_UPLOAD: "bg-green-100 text-green-800 border-green-300",
+            NOT_GENERATED: "bg-gray-100 text-gray-800 border-gray-300",
+          };
+
           const displayStatus = status || "NOT_GENERATED";
           const statusLabel = displayStatus.replace(/_/g, " ");
 
           return (
             <div className="flex justify-center">
-              <StatusComponent colour={displayStatus} type="status">
-                {statusLabel}
-              </StatusComponent>
+              <span
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                  statusColors[displayStatus] ||
+                  "bg-gray-100 text-gray-800 border-gray-300"
+                }`}
+              >
+                {renderColumn(
+                  "efakturStatus",
+                  hasValue(search["efakturStatus"]),
+                  searchText,
+                  statusLabel,
+                  false,
+                  "status",
+                  search
+                )}
+              </span>
             </div>
           );
         },
@@ -1017,7 +1040,7 @@ const ViewFaktur = () => {
         return (
           <Tooltip title="Approval History">
             <div
-              className="cursor-pointer"
+              className="pt-1 cursor-pointer"
               onClick={() => handleApprovalHistory(record)}
             >
               <SVGIcon name="IconLogHistory" color="#0075bf" width={20} />
