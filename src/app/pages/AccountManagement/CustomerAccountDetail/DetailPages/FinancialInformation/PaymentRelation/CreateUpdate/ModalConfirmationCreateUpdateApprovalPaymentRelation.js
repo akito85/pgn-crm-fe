@@ -3,6 +3,14 @@ import ModalConfirmationApproval from "../../../../../../../../components/Modal/
 import moment from "moment";
 import { dateFormatting, toTitleCase } from "../../../../../../../../utils";
 import StatusComponent from "../../../../../../../../components/StatusComponent";
+import ModalConfirmationCreateUpdateApprovalPaymentRelationTabs from "./ModalConfirmationCreateUpdateApprovalPaymentRelationTabs";
+import { ModalConfirm } from "../../../../../../../../components/Modal/ModalPopUp";
+
+const tabs = [
+  { value: "Payment Relation Information" },
+  { value: "Approval" },
+  { value: "Attachment" },
+];
 
 const ModalConfirmationCreateUpdateApprovalPaymentRelation = ({
   dataSource,
@@ -11,111 +19,25 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelation = ({
   handleOk,
   getColumnSearchProps,
 }) => {
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [typeDetailSection, setTypeDetailSection] = useState(tabs[0].value);
 
-  const handleChangeDetail = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  const handleDetailSection = (e) => {
+    setTypeDetailSection(e.target.value);
   };
 
-  const columns = [
-    {
-      title: "NO",
-      width: 50,
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("accountNumber"),
-    },
-    {
-      title: "PRIORITY",
-      dataIndex: "priorty",
-      width: 100,
-      sorter: true,
-      ...getColumnSearchProps("priorty"),
-    },
-    {
-      title: "START DATE",
-      dataIndex: "startDate",
-      width: 150,
-      align: "center",
-      ...getColumnSearchProps("startDate", "date"),
-      render: (startDate) => moment(startDate).format(dateFormatting.date),
-    },
-    {
-      title: "END DATE",
-      dataIndex: "endDate",
-      width: 150,
-      align: "center",
-      ...getColumnSearchProps("endDate", "date"),
-      render: (endDate) => moment(endDate).format(dateFormatting.date),
-    },
-    {
-      title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
-      width: 100,
-      sorter: true,
-      align: "center",
-      fixed: "right",
-      ...getColumnSearchProps("statusApproval"),
-      render: (status) => {
-        const displayText = {
-          "approved": "Approved",
-          "waitingApproval": "Waiting Approval",
-          "pending": "Pending",
-          "rejected": "Rejected"
-        };
-        return (
-          <div className="flex justify-center">
-            <StatusComponent colour={status}>
-              {displayText[status] || toTitleCase(String(status || "")) || "-"}
-            </StatusComponent>
-          </div>
-        );
-      },
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      sorter: true,
-      fixed: "right",
-      width: 100,
-      ...getColumnSearchProps("status"),
-      render: (status) => {
-        const displayText = {
-          "active": "Active",
-          "inactive": "inactive",
-        };
-
-        return (
-          <div className={" flex justify-center"}>
-            <StatusComponent colour={status}>
-              {displayText[status] || toTitleCase(String(status || "")) || "-"}
-            </StatusComponent>
-          </div>
-        )
-      },
-    },
-  ];
-
   return (
-    <ModalConfirmationApproval
-      columns={columns}
-      dataSource={dataSource}
+    <ModalConfirm
       isOpen={isOpen}
-      page={page}
-      pageSize={pageSize}
-      handleChangeDetail={handleChangeDetail}
       handleCancel={handleCancel}
       handleOk={handleOk}
-    />
+      width={1000}
+    >
+      <ModalConfirmationCreateUpdateApprovalPaymentRelationTabs
+        options={tabs}
+        handleChangeOption={handleDetailSection}
+        section={typeDetailSection}
+      />
+    </ModalConfirm>
   )
 }
 

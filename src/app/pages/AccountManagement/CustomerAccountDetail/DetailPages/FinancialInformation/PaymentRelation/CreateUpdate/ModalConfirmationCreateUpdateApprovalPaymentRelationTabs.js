@@ -1,0 +1,54 @@
+import React, { Fragment } from "react";
+import RadioTabs from "../../../../../../../.././components/RadioTabs";
+
+const dataTabs = {
+  info: "Payment Relation Information",
+  apprv: "Approval",
+  attch: "Attachment",
+};
+
+const ModalConfirmationCreateUpdateApprovalPaymentRelationTabs = ({
+  section = "",
+  options = [],
+  handleChangeOption = () => {},
+}) => {
+  // Use provided options or fall back to default tabs
+  const tabOptions = options.length > 0 ? options : [
+    { value: "info", label: "Payment Relation Information" },
+    { value: "apprv", label: "Approval" },
+    { value: "attch", label: "Attachment" },
+  ];
+
+  const renderSection = () => {
+    switch (section) {
+      case dataTabs.info:
+        return "Payment Relation Information";
+      case dataTabs.apprv:
+        return "Approval"
+      case dataTabs.attch:
+        return "Attachment";
+      default:
+        return "Payment Relation Information";
+    }
+  };
+
+  return (
+    <Fragment>
+      <div className="flex flex-col gap-4">
+        {/* Wrapper div to ensure proper styling */}
+        <div className="self-stretch inline-flex justify-start items-center gap-2.5">
+          <div className="w-full">
+            <RadioTabs
+              currentPosition={section}
+              data={tabOptions}
+              onChange={handleChangeOption}
+            />
+          </div>
+        </div>
+        {renderSection()}
+      </div>
+    </Fragment>
+  );
+};
+
+export default ModalConfirmationCreateUpdateApprovalPaymentRelationTabs;
