@@ -16,6 +16,7 @@ const ConfirmationModalTabs = ({
   handleChangeOption = () => {},
   selectedHierarchy,
   hierarchyTableData,
+  hieararchyOptionData,
   dispatch
 }) => {
   // Use provided options or fall back to default tabs
@@ -34,6 +35,7 @@ const ConfirmationModalTabs = ({
         <ConfirmationModalApproval
           dataTable={hierarchyTableData}
           selectedHierarchy={selectedHierarchy}
+          dataOption={hieararchyOptionData}
         />
         )
       case dataTabs.attch:

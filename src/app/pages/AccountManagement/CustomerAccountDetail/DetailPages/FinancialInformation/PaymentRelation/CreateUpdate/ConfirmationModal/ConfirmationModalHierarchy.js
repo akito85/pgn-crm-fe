@@ -218,6 +218,7 @@ const expandedRowRender = (record) => {
 
 const ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy = ({
   dataTable = [],
+  dataOption = [],
   selectedHierarchy,
   searchInput,
   searchedColumn,
@@ -226,6 +227,10 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy = ({
 }) => {
   return (
     <Fragment>
+      <div className="flex flex-col gap-y-1">
+        <span className="font-bold">Approval Hieararchy</span>
+        <span>{dataOption[selectedHierarchy]?.name}</span>
+      </div>
       {selectedHierarchy && dataTable.length > 0 ? (
         <TablePagination
           useSelect={false}
