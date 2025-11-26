@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, Fragment } from "react";
 import ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy from "./ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy";
 
 const ModalConfirmationCreateUpdateApprovalPaymentRelationApproval = ({
@@ -15,7 +15,10 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationApproval = ({
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <Fragment>
+      <div className="text-primary text-xs font-bold uppercase">
+        APPROVAL
+      </div>
       <ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy
         dataTable={dataTable}
         selectedHierarchy={selectedHierarchy}
@@ -24,7 +27,7 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationApproval = ({
         searchText={searchText}
         handleSearch={handleSearch}
       />
-    </div>
+    </Fragment>
   );
 };
 
