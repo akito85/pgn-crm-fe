@@ -1,8 +1,8 @@
 import React, { Fragment } from "react";
 import RadioTabs from "../../../../../../../../../components/RadioTabs";
-import ModalConfirmationCreateUpdateApprovalPaymentRelationInfo from "./ConfirmationModalInfo";
-import ModalConfirmationCreateUpdateApprovalPaymentRelationApproval from "./ConfirmationModalApproval";
-import ModalConfirmationCreateUpdateApprovalPaymentRelationAttachment from "./ConfirmationModalAttachment";
+import ConfirmationModalInfo from "./ConfirmationModalInfo";
+import ConfirmationModalApproval from "./ConfirmationModalApproval";
+import ConfirmationModalAttachment from "./ConfirmationModalAttachment";
 
 const dataTabs = {
   info: "Payment Relation Information",
@@ -10,11 +10,12 @@ const dataTabs = {
   attch: "Attachment",
 };
 
-const ModalConfirmationCreateUpdateApprovalPaymentRelationTabs = ({
+const ConfirmationModalTabs = ({
   section = "",
   options = [],
   handleChangeOption = () => {},
   selectedHierarchy,
+  hierarchyTableData,
   dispatch
 }) => {
   // Use provided options or fall back to default tabs
@@ -27,15 +28,16 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationTabs = ({
   const renderSection = () => {
     switch (section) {
       case dataTabs.info:
-        return <ModalConfirmationCreateUpdateApprovalPaymentRelationInfo />;
+        return <ConfirmationModalInfo />;
       case dataTabs.apprv:
         return (
-        <ModalConfirmationCreateUpdateApprovalPaymentRelationApproval
+        <ConfirmationModalApproval
+          dataTable={hierarchyTableData}
           selectedHierarchy={selectedHierarchy}
         />
         )
       case dataTabs.attch:
-        return <ModalConfirmationCreateUpdateApprovalPaymentRelationAttachment
+        return <ConfirmationModalAttachment
           data={[{}]}
           dispatch={dispatch}
         />;
@@ -63,4 +65,4 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationTabs = ({
   );
 };
 
-export default ModalConfirmationCreateUpdateApprovalPaymentRelationTabs;
+export default ConfirmationModalTabs;

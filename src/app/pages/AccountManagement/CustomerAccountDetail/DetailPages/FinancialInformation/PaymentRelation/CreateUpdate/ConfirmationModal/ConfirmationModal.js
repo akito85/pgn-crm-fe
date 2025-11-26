@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import ModalConfirmationCreateUpdateApprovalPaymentRelationTabs from "./ConfirmationModalTabs";
+import ConfirmationModalTabs from "./ConfirmationModalTabs";
 import ModalCustom from "../../../../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 
@@ -9,12 +9,13 @@ const tabs = [
   { value: "Attachment" },
 ];
 
-const ModalConfirmationCreateUpdateApprovalPaymentRelation = ({
+const ConfirmationModal = ({
   dataSource,
   isOpen,
   handleCancel,
   handleOk,
   selectedHierarchy,
+  hierarchyTableData,
 }) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [typeDetailSection, setTypeDetailSection] = useState(tabs[currentTab].value);
@@ -76,14 +77,15 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelation = ({
         </div>,
       ]}
     >
-      <ModalConfirmationCreateUpdateApprovalPaymentRelationTabs
+      <ConfirmationModalTabs
         options={tabs}
         handleChangeOption={handleDetailSection}
         section={typeDetailSection}
         selectedHierarchy={selectedHierarchy}
+        hierarchyTableData={hierarchyTableData}
       />
     </ModalCustom>
   )
 }
 
-export default ModalConfirmationCreateUpdateApprovalPaymentRelation;
+export default ConfirmationModal;

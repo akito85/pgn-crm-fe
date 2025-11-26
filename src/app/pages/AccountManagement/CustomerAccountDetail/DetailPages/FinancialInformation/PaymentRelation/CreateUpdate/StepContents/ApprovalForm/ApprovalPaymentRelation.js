@@ -2,8 +2,8 @@ import React, { useRef, useState } from "react";
 import ApprovalHierarchy from "./ApprovalHierarchy";
 
 const ApprovalSectionForm = ({
-  dataTable = [],
-  dataOption = [],
+  dataTable,
+  dataOption,
   selectedHierarchy = "",
   updateSelectedHierarchy = () => {},
   showSelect = true,
