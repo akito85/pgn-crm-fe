@@ -230,6 +230,60 @@ const CreatePaymentRelation = ({ type }) => {
 
   const [dummyAttachmentList, setDummyAttachmentList] = useState([{}]);
 
+  const dummyHieararchyOptions = [
+    {
+      name: "Data 1",
+      value: 1,
+    },
+    {
+      name: "Data 2",
+      value: 2,
+    },
+    {
+      name: "Data 3",
+      value: 3,
+    },
+  ];
+
+  const dummyHierarchyTableData = [
+    {
+      key: 1,
+      approvalLevel: "Data 1 Hierarchy",
+      position: "Data 1 Position",
+      dataExpand: [
+        {
+          employeeName: "Abimana",
+        },
+        {
+          employeeName: "Arya",
+        },
+      ],
+    },
+    {
+      key: 2,
+      approvalLevel: "Data 2 Hierarchy",
+      position: "Data 2 Position",
+      dataExpand: [
+        {
+          employeeName: "Juno",
+        },
+        {
+          employeeName: "Mamat",
+        },
+      ],
+    },
+    {
+      key: 3,
+      approvalLevel: "Data 3 Hierarchy",
+      position: "Data 3 Position",
+      dataExpand: [
+        {
+          employeeName: "Agus",
+        },
+      ],
+    },
+  ];
+
   const steps = [
     {
       title: "Payment Relation",
@@ -240,6 +294,8 @@ const CreatePaymentRelation = ({ type }) => {
       title: "Approval",
       content: (
         <ApprovalForm
+          dataTable={dummyHierarchyTableData}
+          dataOption={dummyHieararchyOptions}
           selectedHierarchy={selectedHierarchy}
           updateSelectedHierarchy={setSelectedHierarchy}
         />
@@ -484,6 +540,7 @@ const CreatePaymentRelation = ({ type }) => {
           handleCancel={() => setShowConfirmationModal(false)}
           handleOk={() => setShowConfirmationModal(false)}
           selectedHierarchy={selectedHierarchy}
+          hierarchyTableData={dummyHierarchyTableData}
         />
 
         {/* Modal Back */}
