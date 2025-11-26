@@ -77,7 +77,7 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationInfo = ({
         PAYMENT RELATION INFORMATION
       </div>
       <div className="w-full grid grid-cols-3 gap-x-5">
-        <DetailText label="Account Numbe">{InfoDummy.customerNumber}</DetailText>
+        <DetailText label="Account Number">{InfoDummy.customerNumber}</DetailText>
         <DetailText label="Account Name">{InfoDummy.identificationType}</DetailText>
         <DetailText label="Priority">{InfoDummy.customerIdentificationNumber}</DetailText>
         <DetailText label="Start Date">{renderDate(InfoDummy.startDate)}</DetailText>
