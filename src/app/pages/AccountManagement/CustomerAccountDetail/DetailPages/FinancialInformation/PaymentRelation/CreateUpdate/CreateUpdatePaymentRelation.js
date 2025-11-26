@@ -40,7 +40,8 @@ import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../../../../../utils";
 import ModalCustom from "../../../../../../../../components/Modal/ModalCustom";
-import ContentModalConfirmation from "./ContentModalConfirmation";
+import ModalConfirmationApprovalPaymentRelation from "../ModalConfirmationApprovalPaymentRelation";
+import ModalConfirmationCreateUpdateApprovalPaymentRelation from "./ModalConfirmationCreateUpdateApprovalPaymentRelation";
 
 const CreatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -478,30 +479,11 @@ const CreatePaymentRelation = ({ type }) => {
           </div>
         </Form>
 
-        <ModalCustom
+        <ModalConfirmationCreateUpdateApprovalPaymentRelation
           isOpen={showConfirmationModal}
-          handleCancel={() => {}}
-          header={"Confirmation"}
-          width={1000}
-          type={"confirmation"}
-          footer={
-            <div className="w-full flex justify-end gap-5 p-4">
-              <ButtonComponent
-                onClick={() => {}}
-                type="default"
-              >
-                Cancel
-              </ButtonComponent>
-              <ButtonComponent
-                type="submit"
-                onClick={() => {}}
-              >
-                Confirm
-              </ButtonComponent>
-            </div>
-          }
-        >
-        </ModalCustom>
+          handleCancel={() => setShowConfirmationModal(false)}
+          handleOk={() => setShowConfirmationModal(false)}
+        />
 
         {/* Modal Back */}
         <ModalConfirm
