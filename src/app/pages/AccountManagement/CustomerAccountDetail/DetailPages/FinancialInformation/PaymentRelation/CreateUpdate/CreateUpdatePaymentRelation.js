@@ -458,7 +458,7 @@ const CreatePaymentRelation = ({ type }) => {
               <LeftCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollLeftHandler}/>
             </span>
             <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
-              <Steps current={current} items={items} labelPlacement="vertical" />
+              <Steps current={current} onChange={(newCurrent) => setCurrent(newCurrent)} items={items} labelPlacement="vertical" />
             </div>
             <span className="mt-[10px]">
               <RightCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollRightHandler}/>
