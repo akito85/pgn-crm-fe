@@ -1,12 +1,6 @@
-import { Form, Input, Select } from "antd";
-import React, { Fragment, useRef, useState } from "react";
-import SelectComponent from "../../../../../../../../../../components/SelectComponent";
-import { FilterOutlined } from "@ant-design/icons";
-import Highlighter from "react-highlight-words";
-import TablePagination from "../../../../../../../../../../components/TablePagination";
-import { requiredMessage } from "../../../../../../../../../../utils";
-import { getColumnSearchProps } from "../../../../../../../../../../utils/getColumnSearchProps";
-import DetailText from "../../../../../../../../../../components/DetailText";
+import { Fragment, useRef, useState } from "react";
+import TablePagination from "../../../../../../../../components/TablePagination";
+import { getColumnSearchProps } from "../../../../../../../../utils/getColumnSearchProps";
 
 const dummyOptions = [
   {
@@ -222,48 +216,16 @@ const expandedRowRender = (record) => {
   return <DataExpand list={dataExpand} />;
 };
 
-const ApprovalHierarchy = ({
+const ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy = ({
   dataTable = [],
-  dataOption = [],
-  updateSelectHierarchy = () => {},
   selectedHierarchy,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  showSelect = true,
-  disableSelect = false,
-  approvalName,
 }) => {
-  const handleSelectHiararchy = (value) => {
-    updateSelectHierarchy(value);
-    return value;
-  };
   return (
     <Fragment>
-      {showSelect ? (
-        <Form.Item
-          name={"approvalHierarchy"}
-          rules={[
-            { message: requiredMessage("Approval Hierarchy"), required: true },
-          ]}
-          className="no-margin-form w-1/3"
-          getValueFromEvent={handleSelectHiararchy}
-          label={"Approval Hierarchy"}
-          required
-        >
-          <SelectComponent onChange={updateSelectHierarchy}>
-            {dataOption.map((data, index) => (
-              <Select.Option key={index} value={data.value}>
-                {data.name}
-              </Select.Option>
-            ))}
-          </SelectComponent>
-        </Form.Item>
-      ) : null}
-      {!showSelect && disableSelect ? (
-        <DetailText label={"Approval Hierarchy:"}>{approvalName}</DetailText>
-      ) : null}
       {selectedHierarchy && dataTable.length > 0 ? (
         <TablePagination
           useSelect={false}
@@ -284,4 +246,4 @@ const ApprovalHierarchy = ({
   );
 };
 
-export default ApprovalHierarchy;
+export default ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy;

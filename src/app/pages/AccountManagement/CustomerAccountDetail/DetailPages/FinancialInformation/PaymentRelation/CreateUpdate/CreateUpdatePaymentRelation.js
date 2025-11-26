@@ -483,6 +483,7 @@ const CreatePaymentRelation = ({ type }) => {
           isOpen={showConfirmationModal}
           handleCancel={() => setShowConfirmationModal(false)}
           handleOk={() => setShowConfirmationModal(false)}
+          selectedHierarchy={selectedHierarchy}
         />
 
         {/* Modal Back */}

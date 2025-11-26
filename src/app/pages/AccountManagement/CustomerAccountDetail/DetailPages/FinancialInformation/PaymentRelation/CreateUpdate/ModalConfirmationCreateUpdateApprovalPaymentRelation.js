@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import ModalConfirmationApproval from "../../../../../../../../components/Modal/ModalConfirmationApproval";
-import moment from "moment";
-import { dateFormatting, toTitleCase } from "../../../../../../../../utils";
-import StatusComponent from "../../../../../../../../components/StatusComponent";
 import ModalConfirmationCreateUpdateApprovalPaymentRelationTabs from "./ModalConfirmationCreateUpdateApprovalPaymentRelationTabs";
-import { ModalConfirm } from "../../../../../../../../components/Modal/ModalPopUp";
 import ModalCustom from "../../../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 
@@ -19,7 +14,7 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelation = ({
   isOpen,
   handleCancel,
   handleOk,
-  getColumnSearchProps,
+  selectedHierarchy,
 }) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [typeDetailSection, setTypeDetailSection] = useState(tabs[currentTab].value);
@@ -85,6 +80,7 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelation = ({
         options={tabs}
         handleChangeOption={handleDetailSection}
         section={typeDetailSection}
+        selectedHierarchy={selectedHierarchy}
       />
     </ModalCustom>
   )
