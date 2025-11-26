@@ -541,6 +541,7 @@ const CreatePaymentRelation = ({ type }) => {
           handleOk={() => setShowConfirmationModal(false)}
           selectedHierarchy={selectedHierarchy}
           hierarchyTableData={dummyHierarchyTableData}
+          hieararchyOptionData={dummyHieararchyOptions}
         />
 
         {/* Modal Back */}

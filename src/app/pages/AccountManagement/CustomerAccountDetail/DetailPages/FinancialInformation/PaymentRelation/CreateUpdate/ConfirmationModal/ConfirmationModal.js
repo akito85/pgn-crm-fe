@@ -15,6 +15,7 @@ const ConfirmationModal = ({
   handleCancel,
   handleOk,
   selectedHierarchy,
+  hieararchyOptionData,
   hierarchyTableData,
 }) => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -83,6 +84,7 @@ const ConfirmationModal = ({
         section={typeDetailSection}
         selectedHierarchy={selectedHierarchy}
         hierarchyTableData={hierarchyTableData}
+        hieararchyOptionData={hieararchyOptionData}
       />
     </ModalCustom>
   )

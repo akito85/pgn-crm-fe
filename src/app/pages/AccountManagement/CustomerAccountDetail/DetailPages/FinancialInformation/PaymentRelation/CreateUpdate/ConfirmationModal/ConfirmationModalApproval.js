@@ -1,9 +1,10 @@
 import { useState, useRef, Fragment } from "react";
-import ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy from "./ConfirmationModalHierarchy";
+import ConfirmationModalHierarchy from "./ConfirmationModalHierarchy";
 
-const ModalConfirmationCreateUpdateApprovalPaymentRelationApproval = ({
+const ConfirmationModalApproval = ({
   dataTable = [],
   selectedHierarchy = "",
+  dataOption = [],
 }) => {
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -19,16 +20,17 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationApproval = ({
       <div className="text-primary text-xs font-bold uppercase">
         APPROVAL
       </div>
-      <ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy
+      <ConfirmationModalHierarchy
         dataTable={dataTable}
         selectedHierarchy={selectedHierarchy}
         searchInput={searchInput}
         searchedColumn={searchedColumn}
         searchText={searchText}
         handleSearch={handleSearch}
+        dataOption={dataOption}
       />
     </Fragment>
   );
 };
 
-export default ModalConfirmationCreateUpdateApprovalPaymentRelationApproval;
+export default ConfirmationModalApproval;
