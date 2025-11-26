@@ -1,8 +1,8 @@
 import React, { Fragment } from "react";
-import RadioTabs from "../../../../../../../.././components/RadioTabs";
-import ModalConfirmationCreateUpdateApprovalPaymentRelationInfo from "./ModalConfirmationCreateUpdateApprovalPaymentRelationInfo";
-import ModalConfirmationCreateUpdateApprovalPaymentRelationApproval from "./ModalConfirmationCreateUpdateApprovalPaymentRelationApproval";
-import ModalConfirmationCreateUpdateApprovalPaymentRelationAttachment from "./ModalConfirmationCreateUpdateApprovalPaymentRelationAttachment";
+import RadioTabs from "../../../../../../../../../components/RadioTabs";
+import ModalConfirmationCreateUpdateApprovalPaymentRelationInfo from "./ConfirmationModalInfo";
+import ModalConfirmationCreateUpdateApprovalPaymentRelationApproval from "./ConfirmationModalApproval";
+import ModalConfirmationCreateUpdateApprovalPaymentRelationAttachment from "./ConfirmationModalAttachment";
 
 const dataTabs = {
   info: "Payment Relation Information",

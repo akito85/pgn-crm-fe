@@ -1,5 +1,5 @@
 import { useState, useRef, Fragment } from "react";
-import ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy from "./ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy";
+import ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy from "./ConfirmationModalHierarchy";
 
 const ModalConfirmationCreateUpdateApprovalPaymentRelationApproval = ({
   dataTable = [],

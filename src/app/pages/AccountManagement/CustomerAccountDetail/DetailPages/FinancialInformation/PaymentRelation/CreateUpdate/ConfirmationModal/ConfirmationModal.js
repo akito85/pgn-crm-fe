@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import ModalConfirmationCreateUpdateApprovalPaymentRelationTabs from "./ModalConfirmationCreateUpdateApprovalPaymentRelationTabs";
-import ModalCustom from "../../../../../../../../components/Modal/ModalCustom";
-import ButtonComponent from "../../../../../../../../components/ButtonComponent";
+import ModalConfirmationCreateUpdateApprovalPaymentRelationTabs from "./ConfirmationModalTabs";
+import ModalCustom from "../../../../../../../../../components/Modal/ModalCustom";
+import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 
 const tabs = [
   { value: "Payment Relation Information" },

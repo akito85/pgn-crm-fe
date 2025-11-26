@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
-import ButtonComponent from "../../../../../../../../components/ButtonComponent";
+import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import { Spin, Tooltip } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
-import SVGIcon from "../../../../../../../../assets/Icon/index";
+import SVGIcon from "../../../../../../../../../assets/Icon/index";
 import { useSelector } from "react-redux";
-import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
-import { getColumnSearchPropsPaging } from "../../../../../../../../utils/getColumnSearchProps";
+import { previewFileAttachment } from "../../../../../../../../../utils/previewFileAttachment";
+import { getColumnSearchPropsPaging } from "../../../../../../../../../utils/getColumnSearchProps";
 import moment from "moment";
-import productPromoHttpService from "../../../../../../../../redux/services/productPromoHttpService";
-import { getBase64 } from "../../../../../../../../utils/getBase64";
-import { tokenHeader } from "../../../../../../../../utils/tokenHeader";
+import productPromoHttpService from "../../../../../../../../../redux/services/productPromoHttpService";
+import { getBase64 } from "../../../../../../../../../utils/getBase64";
+import { tokenHeader } from "../../../../../../../../../utils/tokenHeader";
 import axios from "axios";
 import FileSaver from "file-saver";
-import { configApp } from "../../../../../../../../constants/configApp";
-import { getGlobalPropertiesAttachment } from "../../../../../../../../redux/slices/product_promo/product";
-import TablePaginationNew from "../../../../../../../../components/TablePaginationNew";
+import { configApp } from "../../../../../../../../../constants/configApp";
+import { getGlobalPropertiesAttachment } from "../../../../../../../../../redux/slices/product_promo/product";
+import TablePaginationNew from "../../../../../../../../../components/TablePaginationNew";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
