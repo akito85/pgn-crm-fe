@@ -1,5 +1,6 @@
 import React, { Fragment } from "react";
 import RadioTabs from "../../../../../../../.././components/RadioTabs";
+import ModalConfirmationCreateUpdateApprovalPaymentRelationInfo from "./ModalConfirmationCreateUpdateApprovalPaymentRelationInfo";
 
 const dataTabs = {
   info: "Payment Relation Information",
@@ -22,7 +23,7 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationTabs = ({
   const renderSection = () => {
     switch (section) {
       case dataTabs.info:
-        return "Payment Relation Information";
+        return <ModalConfirmationCreateUpdateApprovalPaymentRelationInfo />;
       case dataTabs.apprv:
         return "Approval"
       case dataTabs.attch:
