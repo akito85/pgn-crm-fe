@@ -1,10 +1,25 @@
+import { useState } from "react";
 import ModalConfirmationApproval from "../../../../../../../components/Modal/ModalConfirmationApproval";
+import moment from "moment";
+import { dateFormatting, toTitleCase } from "../../../../../../../utils";
+import StatusComponent from "../../../../../../../components/StatusComponent";
 
 const ModalConfirmationApprovalPaymentRelation = ({
   dataSource,
   isOpen,
-  setIsOpen,
+  handleCancel,
+  handleOk,
+  getColumnSearchProps,
 }) => {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const handleChangeDetail = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
+    setPageSize(pageSizeChange);
+  };
+
   const columns = [
     {
       title: "NO",
@@ -88,56 +103,6 @@ const ModalConfirmationApprovalPaymentRelation = ({
         )
       },
     },
-    {
-      title: "ACTION",
-      align: "center",
-      width: 75,
-      fixed: "right",
-      render: (v, r, i) => {
-        return (
-          <div className="flex w-full justify-center gap-6">
-            {!isApproval && (
-              <Tooltip title="Detail">
-                <div className="pt-1">
-                  <SVGIcon
-                    name="IconActionDropdown"
-                    color={"#0075bf"}
-                    width={24}
-                    onClick={() => {}}
-                  />
-                </div>
-              </Tooltip>
-            )}
-            <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconDetail"
-                  color={"#0075bf"}
-                  width={24}
-                  onClick={() => {
-                    handleDetail(r);
-                  }}
-                />
-              </div>
-            </Tooltip>
-            {
-              isApproval && (
-                <Tooltip title="Detail">
-                  <div className="pt-1">
-                    <SVGIcon
-                      name="IconLogHistory"
-                      color={"#0075bf"}
-                      width={24}
-                      onClick={() => {}}
-                    />
-                  </div>
-                </Tooltip>
-              )
-            }
-          </div>
-        );
-      },
-    },
   ];
 
   return (
@@ -145,7 +110,11 @@ const ModalConfirmationApprovalPaymentRelation = ({
       columns={columns}
       dataSource={dataSource}
       isOpen={isOpen}
-      setIsOpen={setIsOpen}
+      page={page}
+      pageSize={pageSize}
+      handleChangeDetail={handleChangeDetail}
+      handleCancel={handleCancel}
+      handleOk={handleOk}
     />
   )
 }
