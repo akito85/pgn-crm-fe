@@ -2,6 +2,7 @@ import React, { Fragment } from "react";
 import RadioTabs from "../../../../../../../.././components/RadioTabs";
 import ModalConfirmationCreateUpdateApprovalPaymentRelationInfo from "./ModalConfirmationCreateUpdateApprovalPaymentRelationInfo";
 import ModalConfirmationCreateUpdateApprovalPaymentRelationApproval from "./ModalConfirmationCreateUpdateApprovalPaymentRelationApproval";
+import ModalConfirmationCreateUpdateApprovalPaymentRelationAttachment from "./ModalConfirmationCreateUpdateApprovalPaymentRelationAttachment";
 
 const dataTabs = {
   info: "Payment Relation Information",
@@ -14,6 +15,7 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationTabs = ({
   options = [],
   handleChangeOption = () => {},
   selectedHierarchy,
+  dispatch
 }) => {
   // Use provided options or fall back to default tabs
   const tabOptions = options.length > 0 ? options : [
@@ -33,7 +35,10 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationTabs = ({
         />
         )
       case dataTabs.attch:
-        return "Attachment";
+        return <ModalConfirmationCreateUpdateApprovalPaymentRelationAttachment
+          data={[{}]}
+          dispatch={dispatch}
+        />;
       default:
         return "Payment Relation Information";
     }
