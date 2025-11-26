@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
 import {
   columnsApprovalPromo,
   columnsExpandApprovalPromo,
 } from "../Table/TableApprovalPromo";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import TablePagination from "../../../../../components/TablePagination";
 import SelectComponent from "../../../../../components/SelectComponent";
 import { Form } from "antd";

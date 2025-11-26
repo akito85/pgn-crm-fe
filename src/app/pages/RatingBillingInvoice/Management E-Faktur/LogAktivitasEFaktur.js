@@ -23,8 +23,6 @@ const LogAktivitasEFaktur = ({
 
   useEffect(() => {
     if (isOpen && billingData?.efakturId) {
-      console.log("📥 Fetching log activity for efakturId:", billingData.efakturId);
-      
       dispatch(
         getLogActivity({
           efakturId: billingData.efakturId,
@@ -77,21 +75,15 @@ const LogAktivitasEFaktur = ({
       dataIndex: "activity",
       key: "activity",
       width: 300,
-      render: (text) => (
-        <div className="text-sm">
-          {text || "-"}
-        </div>
-      ),
+      render: (text) => <div className="text-sm">{text || "-"}</div>,
     },
     {
       title: "PESAN / CATATAN",
-      dataIndex: "message", 
+      dataIndex: "message",
       key: "message",
       width: 300,
       render: (text) => (
-        <div className="text-sm text-gray-600">
-          {text || "-"}
-        </div>
+        <div className="text-sm text-gray-600">{text || "-"}</div>
       ),
     },
   ];
@@ -111,11 +103,17 @@ const LogAktivitasEFaktur = ({
               {billingData && (
                 <div className="flex gap-4 text-sm text-gray-600">
                   <span>
-                    Billing Code: <strong className="text-gray-800">{billingData.billingCode}</strong>
+                    Billing Code:{" "}
+                    <strong className="text-gray-800">
+                      {billingData.billingCode}
+                    </strong>
                   </span>
                   {billingData.invoiceNumber && (
                     <span>
-                      Invoice: <strong className="text-gray-800">{billingData.invoiceNumber}</strong>
+                      Invoice:{" "}
+                      <strong className="text-gray-800">
+                        {billingData.invoiceNumber}
+                      </strong>
                     </span>
                   )}
                 </div>
@@ -131,24 +129,6 @@ const LogAktivitasEFaktur = ({
 
           {/* Content */}
           <div className="flex-1 px-6 py-6 overflow-y-auto">
-            {/* Info Banner */}
-            {!billingData?.efakturId ? (
-              <Alert
-                message="E-Faktur Belum Dibuat"
-                description="Log aktivitas hanya tersedia untuk E-Faktur yang sudah dibuat."
-                type="warning"
-                showIcon
-                className="mb-4"
-              />
-            ) : (
-              <div className="mb-4">
-                <p className="text-sm text-gray-600">
-                  Menampilkan riwayat semua aktivitas yang dilakukan pada E-Faktur ini.
-                  Total aktivitas: <strong>{pagination_log?.totalElements || 0}</strong>
-                </p>
-              </div>
-            )}
-
             {/* Tabel Log Aktivitas */}
             <div className="border border-gray-200 rounded-lg overflow-hidden">
               <Table
@@ -176,67 +156,10 @@ const LogAktivitasEFaktur = ({
                 }}
               />
             </div>
-
-            {/* Summary Info */}
-            {log_activity && log_activity.length > 0 && (
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h4 className="text-sm font-semibold text-blue-800 mb-2">
-                  Informasi Log
-                </h4>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <span className="text-gray-600">Total Aktivitas:</span>
-                    <span className="ml-2 font-semibold text-gray-800">
-                      {pagination_log?.totalElements || 0}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Aktivitas Pertama:</span>
-                    <span className="ml-2 font-semibold text-gray-800">
-                      {log_activity[log_activity.length - 1]?.createdDtm
-                        ? moment(log_activity[log_activity.length - 1].createdDtm).format(
-                            "DD-MM-YYYY HH:mm"
-                          )
-                        : "-"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Aktivitas Terakhir:</span>
-                    <span className="ml-2 font-semibold text-gray-800">
-                      {log_activity[0]?.createdDtm
-                        ? moment(log_activity[0].createdDtm).format("DD-MM-YYYY HH:mm")
-                        : "-"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">User Terakhir:</span>
-                    <span className="ml-2 font-semibold text-gray-800">
-                      {log_activity[0]?.createdBy || "-"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Footer */}
           <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center">
-            <div className="text-sm text-gray-600">
-              {billingData?.efakturStatus && (
-                <span>
-                  Status E-Faktur: 
-                  <strong className={`ml-2 ${
-                    billingData.efakturStatus === 'SUCCESS_UPLOAD' 
-                      ? 'text-green-600' 
-                      : billingData.efakturStatus === 'FAILED'
-                      ? 'text-red-600'
-                      : 'text-orange-600'
-                  }`}>
-                    {billingData.efakturStatus}
-                  </strong>
-                </span>
-              )}
-            </div>
             <ButtonComponent
               type="default"
               onClick={handleClose}

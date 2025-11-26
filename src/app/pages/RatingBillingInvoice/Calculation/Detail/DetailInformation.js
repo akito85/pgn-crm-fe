@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
 import RadioTabs from "../../../../../components/RadioTabs";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -9,7 +8,6 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import { Form, Spin, Steps } from "antd";
 import InputComponent from "../../../../../components/InputComponent";
-import { requiredMessage } from "../../../../../utils";
 import {
   getDetailCalculationResult,
   getDetailCalculationResultNoPaging,
@@ -20,6 +18,7 @@ import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import { columnsRecalculate } from "./Table/TableRecalculate";
 import { columnsCalculation } from "./Table/TableCalculation";
+import CardContainer from "../../../../../components/CardContainer";
 
 const DetailInformation = ({ data, tabHeader }) => {
   // Selector
@@ -336,7 +335,6 @@ const DetailInformation = ({ data, tabHeader }) => {
     },
   };
 
-
   const next = () => {
     setCurrent(current + 1);
   };
@@ -364,7 +362,7 @@ const DetailInformation = ({ data, tabHeader }) => {
     setPageSizeCal(10);
     setSearchTextCal("");
     setSearchedColumnCal("");
-    handleResetFilter()
+    handleResetFilter();
   };
 
   const handleButtonNext = () => {
@@ -374,16 +372,16 @@ const DetailInformation = ({ data, tabHeader }) => {
     setPageSizeCal(10);
     setSearchTextCal("");
     setSearchedColumnCal("");
-    handleResetFilter()
+    handleResetFilter();
   };
 
   const handleResetFilter = () => {
     setPageCal(1);
     setPageSizeCal(10);
-    setSearchedColumnCal("")
+    setSearchedColumnCal("");
     setSearchTextCal("");
-    setSearchRecalculate({})
-  }
+    setSearchRecalculate({});
+  };
 
   const filterDataByPage = (data = [], type = "data") => {
     let result = [...data]?.map((item, index) => ({
@@ -394,7 +392,6 @@ const DetailInformation = ({ data, tabHeader }) => {
 
     return type === "data" ? result : result.length;
   };
-
 
   const steps = () => {
     let temp = [
@@ -410,13 +407,16 @@ const DetailInformation = ({ data, tabHeader }) => {
                 <TablePaginationNew
                   type="FE"
                   dataSource={filterDataByPage(
-                    (list_calculation_no_paging || []).filter(
-                      (item) => item.calType !== 624 && !item.isTry
-                    )?.map(item => {
-                      return Object.fromEntries(
-                        Object.entries(item).map(([key, value]) => [key, value === null ? "" : value])
-                      );
-                    }),
+                    (list_calculation_no_paging || [])
+                      .filter((item) => item.calType !== 624 && !item.isTry)
+                      ?.map((item) => {
+                        return Object.fromEntries(
+                          Object.entries(item).map(([key, value]) => [
+                            key,
+                            value === null ? "" : value,
+                          ])
+                        );
+                      }),
                     "data"
                   )}
                   columns={columnsRecalculate(
@@ -498,7 +498,7 @@ const DetailInformation = ({ data, tabHeader }) => {
     setCurrent(0);
     setKeyTableSelected([]);
     setTableSelected([]);
-    handleResetFilter()
+    handleResetFilter();
   };
 
   const clearRetry = () => {
@@ -506,11 +506,7 @@ const DetailInformation = ({ data, tabHeader }) => {
     setOpenRetry(false);
   };
 
-  console.log(tableSelected);
-
   const handleSave = () => {
-
-
     const accNumb = tableSelected?.map((item) => {
       return item?.accNumb;
     });
@@ -520,7 +516,9 @@ const DetailInformation = ({ data, tabHeader }) => {
       calCode: data?.calCode,
       calType: segmentedPage === "Rating Result" ? 621 : 623,
       remark: forceObj?.remark,
-      resultId: tableSelected?.filter(item => keyTableSelected?.includes(item?.key))?.map(item => item?.resultId),
+      resultId: tableSelected
+        ?.filter((item) => keyTableSelected?.includes(item?.key))
+        ?.map((item) => item?.resultId),
     };
     dispatch(recalculateData(body))
       .unwrap()
@@ -578,7 +576,7 @@ const DetailInformation = ({ data, tabHeader }) => {
           })
         );
         clearRetry();
-        handleClear()
+        handleClear();
       });
   };
 
@@ -604,7 +602,7 @@ const DetailInformation = ({ data, tabHeader }) => {
   return (
     <>
       <Spin spinning={loadingModal}>
-        <BaseContainer header={"Calculation Information"}>
+        <CardContainer subHeader={"Calculation Information"}>
           <div className={"w-full grid grid-cols-4 gap-2"}>
             <DetailText label={"Calculation Code"}>{data?.calCode}</DetailText>
             <DetailText label={"Type"}>{data?.calculationType}</DetailText>
@@ -629,13 +627,16 @@ const DetailInformation = ({ data, tabHeader }) => {
             <DetailText label={"Generate Date"}>
               {data?.generateDate}
             </DetailText>
+            <DetailText label={"Compeletion Date"}>
+              21 Nov 2025 17:49:31
+            </DetailText>
             <DetailText label={"Status"}>
               {renderStatus(data?.status)}
             </DetailText>
           </div>
-        </BaseContainer>
+        </CardContainer>
 
-        <BaseContainer header={"parameter information"}>
+        <CardContainer subHeader={"parameter information"}>
           <div className={"w-full grid grid-cols-4 gap-2"}>
             <DetailText label={"Service Type"}>{data?.serviceType}</DetailText>
             <DetailText label={"SOR"}>{data?.sor}</DetailText>
@@ -654,22 +655,22 @@ const DetailInformation = ({ data, tabHeader }) => {
               {data?.specCustacc}
             </DetailText>
           </div>
-        </BaseContainer>
+        </CardContainer>
 
-        <BaseContainer header={"schedule information"}>
+        <CardContainer subHeader={"schedule information"}>
           <div className={"w-full grid grid-cols-4"}>
             <DetailText label={"Type"}>{data?.scheduleType}</DetailText>
             <div className="col-span-3">
               <DetailText label={"Remark"}>{data?.remark}</DetailText>
             </div>
           </div>
-        </BaseContainer>
+        </CardContainer>
 
-        <BaseContainer header={"calculation result"}>
+        <CardContainer subHeader={"calculation result"}>
           {tempTabs}
 
           {renderSection(segmentedPage)}
-        </BaseContainer>
+        </CardContainer>
 
         {/* retry modal */}
         <ModalApproveOrReject

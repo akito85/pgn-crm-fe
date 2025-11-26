@@ -100,6 +100,7 @@ import activityTypeReducer from "../slices/debt_and_collection/activityType";
 import activityActionReducer from "../slices/debt_and_collection/activityAction";
 import activitiesReducer from "../slices/debt_and_collection/activities";
 import transactionReportReducer from "../slices/debt_and_collection/transactionReport";
+import managementDeliveryInvoiceReducer from "../slices/rating_billing_invoice/managementDeliveryInvoice";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -198,6 +199,7 @@ const reducer = combineReducers({
   top: termsofPaymentReducer,
   tax_code: taxCodeReducer,
   emeterai: emeteraiReducer,
+  managementDeliveryInvoice: managementDeliveryInvoiceReducer,
 
   //receipt and collection
   receipt: receiptReducer,

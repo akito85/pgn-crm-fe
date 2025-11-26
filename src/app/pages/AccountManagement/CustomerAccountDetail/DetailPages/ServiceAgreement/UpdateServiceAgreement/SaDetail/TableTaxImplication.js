@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import TablePagination from "../../../../../../../../components/TablePagination";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn } from "../../../../../../../../utils";
 import TablePaginationNew from "../../../../../../../../components/TablePaginationNew";

@@ -1,11 +1,10 @@
-import { Form, Modal, Progress, Select, Spin, Typography } from "antd";
+import { Form, Progress, Select, Spin, Typography } from "antd";
 import React, { useState, useCallback, useEffect } from "react";
 import SelectComponent from "../../../../../components/SelectComponent";
 import Dragger from "antd/lib/upload/Dragger";
 import {
   CloseOutlined,
   FileOutlined,
-  InboxOutlined,
   LeftOutlined,
   UndoOutlined,
   UploadOutlined,
@@ -16,13 +15,11 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import { bytesConverter } from "../../../../../utils/bytesConverter";
 import { getBase64 } from "../../../../../utils/getBase64";
 import SVGIcon from "../../../../../assets/Icon/index";
-import ExtensionFile from "../../../../../utils/ExtensionFile";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getBankDDLMaintain,
-  getListBank,
   getListType,
   uploadBank,
 } from "../../../../../redux/slices/receipt_collection/electrionicBank";
@@ -30,7 +27,6 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import { useNavigate } from "react-router-dom";
-import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { showModalSuccess } from "../../../../../redux/slices/general_slice";
 import { formMessageRequired } from "../../../../../utils";
 
@@ -177,7 +173,7 @@ const UploadMaintainElectronicBankStatement = (updateData = () => {}) => {
   const handleUploadLink = async (e) => {
     e.stopPropagation();
     const url = urlLink;
-    if (!!url) {
+    if (url) {
       try {
         const fileName = url.split("/").pop();
         const result = await fetch(url);

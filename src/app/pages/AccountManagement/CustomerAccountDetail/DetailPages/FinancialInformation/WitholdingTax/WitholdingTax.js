@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { FilterOutlined } from "@ant-design/icons";
-import { Collapse, DatePicker, Form, Input, Space, Spin, Switch } from "antd";
+import { DatePicker, Form, Input, Spin, Switch } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
 import DetailText from "../../../../../../../components/DetailText";
@@ -19,7 +19,6 @@ import {
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 import { requiredMessage } from "../../../../../../../utils";
 import DateComponent from "../../../../../../../components/DateComponent";
-import InputComponent from "../../../../../../../components/InputComponent";
 import moment from "moment";
 import { ModalError } from "../../../../../../../components/Modal/ModalPopUp";
 import Highlighter from "react-highlight-words";

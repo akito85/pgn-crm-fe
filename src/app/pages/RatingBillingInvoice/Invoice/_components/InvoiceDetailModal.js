@@ -120,7 +120,6 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
       invoice.invoiceNumber &&
       invoice.invoiceNumber !== "-"
     ) {
-      console.log("🔄 Fetching activity logs for:", invoice.invoiceNumber);
       dispatch(
         getInvoiceActivityLogs({
           invoiceNumber: invoice.invoiceNumber,
@@ -192,11 +191,6 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
     setDownloadingDoc(docType);
 
     try {
-      console.log(
-        `📥 Downloading ${docType} document for:`,
-        invoice.invoiceNumber
-      );
-
       switch (docType) {
         case "original":
           await dispatch(
@@ -216,8 +210,6 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
         default:
           console.error("❌ Unknown document type:", docType);
       }
-
-      console.log(`✅ ${docType} document downloaded successfully`);
     } catch (error) {
       console.error(`❌ Error downloading ${docType} document:`, error);
       // Error message already handled in slice

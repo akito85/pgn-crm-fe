@@ -56,7 +56,7 @@ const ProfilePage = () => {
                     'Change Password')
             ))
             tabPages = filteredTabsLDAP
-        };
+        }
 
         // switch (data?.data?.authType) {
         //     case "LDAP":

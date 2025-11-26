@@ -1,11 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import thunk from "redux-thunk";
 import receiptCollectionHttpService from "../../services/receiptCollectionHttpService";
-import {
-  showModalError,
-  showModalSuccess,
-  validateError,
-} from "../general_slice";
+import { validateError } from "../general_slice";
 
 const initialState = {
   loading: false,

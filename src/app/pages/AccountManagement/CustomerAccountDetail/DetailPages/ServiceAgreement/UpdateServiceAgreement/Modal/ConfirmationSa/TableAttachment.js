@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from 'react'
 import { bytesConverter } from "../../../../../../../.././../utils/bytesConverter";
-import BaseContainer from '../../../../../../../../../components/BaseContainer';
 import TablePagination from '../../../../../../../../../components/TablePagination';
 
 const TableAttachment = ({data, saRecordData}) => {

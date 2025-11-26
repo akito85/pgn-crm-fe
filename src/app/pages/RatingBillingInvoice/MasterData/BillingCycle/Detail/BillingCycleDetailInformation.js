@@ -9,8 +9,6 @@ import { TablePeriodInformation } from "../Table/TablePeriodInformation";
 import {
   getBillingPeriodList,
   getDetailPeriod,
-  getHistoryPeriod,
-  getInfoDetail,
   openClosePeriodBilling,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/billingCycle";
 import DynamicTableInlineBillingCycle from "../Table/DynamicTableInlineBillingCycle";

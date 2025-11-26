@@ -13,10 +13,8 @@ import HeaderDetail from "../../../../../HeaderDetail";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../../routes/account_management/customer_account_routes";
 import {
   dateFormatting,
-  requiredMessage,
 } from "../../../../../../../../../utils";
 import ModalApproveOrReject from "../../../../../../../../../components/Modal/ModalApproveOrReject";
-import InputComponent from "../../../../../../../../../components/InputComponent";
 import AttachmentSectionForm from "../../../../../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 import { useDispatch, useSelector } from "react-redux";
 import TableDetailTos from "../../../../TosSubmission/CreateTosSubmission/TableDetailTos";

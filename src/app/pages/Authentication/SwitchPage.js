@@ -1,21 +1,17 @@
-import { Card, Carousel, Col, Row, Space, Spin } from "antd";
-import React, { useEffect, useRef, useState } from "react";
-import { pgnLogo, pgnLogoKecil } from "../../../assets/img";
-import { Link, Navigate, NavLink, useNavigate } from "react-router-dom";
+import { Spin } from "antd";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { LeftOutlined, } from "@ant-design/icons";
 import {
-    getListEntity,
     getListSwitchEntity,
     getListSwitchPosition,
     logout,
 } from "../../../redux/slices/user_management/auth";
 import ButtonComponent from "../../../components/ButtonComponent";
-import { clearMessage } from "../../../redux/slices/message";
 import ModalCustom from "../../../components/Modal/ModalCustom";
 import { useDispatch, useSelector } from "react-redux";
 import CarouselListSelection from "./CarouselListSelection";
 import Timer from "../../../components/Timer";
-import ModalNotification from "../../../components/Modal/ModalNotification";
 
 const SwitchPage = (props) => {
     const { type } = props;

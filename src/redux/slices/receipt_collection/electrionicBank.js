@@ -1,12 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import thunk from "redux-thunk";
 import receiptCollectionHttpService from "../../services/receiptCollectionHttpService";
-import {
-  setBodyError,
-  showModalError,
-  showModalSuccess,
-  validateError,
-} from "../general_slice";
+import { setBodyError, showModalError, validateError } from "../general_slice";
 
 const initialState = {
   loading: false,
@@ -180,7 +174,7 @@ export const getCustomerInfo = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/receipt/account/combo-box?search=${searchParams}&page=${page}&size=${pageSize}&sort=createdDate~desc`;
+      const url = `/v1/dbs/api/receipt/account/combo-box?search=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const data = await receiptCollectionHttpService.getAll(url);
       return data;
     } catch (error) {
@@ -286,7 +280,6 @@ export const uploadBank = createAsyncThunk(
     try {
       const url = "/v1/dbs/api/bank/statement/upload-bulk";
       const data = await receiptCollectionHttpService.uploadImage(url, body);
-      const message = data.message;
       // const successMessage = {
       //   title: "Successfull",
       //   description: `${message}`,
@@ -570,59 +563,59 @@ const electronicSlice = createSlice({
     },
 
     // get detail
-    [getElectronicDetail.pending]: (state, action) => {
+    [getElectronicDetail.pending]: (state) => {
       state.loading = true;
     },
     [getElectronicDetail.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getElectronicDetail.rejected]: (state, action) => {
+    [getElectronicDetail.rejected]: (state) => {
       state.loading = true;
     },
     //DETAIL MATCH TABLE
-    [getTableMatch.pending]: (state, action) => {
+    [getTableMatch.pending]: (state) => {
       state.loading = true;
     },
     [getTableMatch.fulfilled]: (state, action) => {
       state.data_match = action.payload;
       state.loading = false;
     },
-    [getTableMatch.rejected]: (state, action) => {
+    [getTableMatch.rejected]: (state) => {
       state.loading = true;
     },
 
     //DETAIL MATCH FORCE
-    [getTableForce.pending]: (state, action) => {
+    [getTableForce.pending]: (state) => {
       state.loading = true;
     },
     [getTableForce.fulfilled]: (state, action) => {
       state.data_force = action.payload;
       state.loading = false;
     },
-    [getTableForce.rejected]: (state, action) => {
+    [getTableForce.rejected]: (state) => {
       state.loading = true;
     },
     //DETAIL MATCH FORCE
-    [getTableForceSelect.pending]: (state, action) => {
+    [getTableForceSelect.pending]: (state) => {
       state.loading = true;
     },
     [getTableForceSelect.fulfilled]: (state, action) => {
       state.data_force_select = action.payload;
       state.loading = false;
     },
-    [getTableForceSelect.rejected]: (state, action) => {
+    [getTableForceSelect.rejected]: (state) => {
       state.loading = true;
     },
     //DETAIL MATCH REVERSE
-    [getTableReverse.pending]: (state, action) => {
+    [getTableReverse.pending]: (state) => {
       state.loading = true;
     },
     [getTableReverse.fulfilled]: (state, action) => {
       state.data_reverse = action.payload;
       state.loading = false;
     },
-    [getTableReverse.rejected]: (state, action) => {
+    [getTableReverse.rejected]: (state) => {
       state.loading = true;
     },
     // bank upload
@@ -640,30 +633,30 @@ const electronicSlice = createSlice({
     },
 
     //DETAIL MATCH SUNDRY
-    [getTableSundry.pending]: (state, action) => {
+    [getTableSundry.pending]: (state) => {
       state.loading = true;
     },
     [getTableSundry.fulfilled]: (state, action) => {
       state.data_sundry = action.payload;
       state.loading = false;
     },
-    [getTableSundry.rejected]: (state, action) => {
+    [getTableSundry.rejected]: (state) => {
       state.loading = true;
     },
     //DETAIL MATCH pasrsing
-    [getTableParsing.pending]: (state, action) => {
+    [getTableParsing.pending]: (state) => {
       state.loading = true;
     },
     [getTableParsing.fulfilled]: (state, action) => {
       state.data_parsing = action.payload;
       state.loading = false;
     },
-    [getTableParsing.rejected]: (state, action) => {
+    [getTableParsing.rejected]: (state) => {
       state.loading = true;
     },
 
     //Get list  bank
-    [getListBank.pending]: (state, action) => {
+    [getListBank.pending]: (state) => {
       state.loading = true;
     },
     [getListBank.fulfilled]: (state, action) => {
@@ -671,12 +664,12 @@ const electronicSlice = createSlice({
       state.data_bank = action.payload;
       state.loading = false;
     },
-    [getListBank.rejected]: (state, action) => {
+    [getListBank.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
     //Get list  type
-    [getListType.pending]: (state, action) => {
+    [getListType.pending]: (state) => {
       state.loading = true;
     },
     [getListType.fulfilled]: (state, action) => {
@@ -684,7 +677,7 @@ const electronicSlice = createSlice({
       state.data_type = action.payload;
       state.loading = false;
     },
-    [getListType.rejected]: (state, action) => {
+    [getListType.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
@@ -744,14 +737,14 @@ const electronicSlice = createSlice({
     },
 
     //DETAIL MATCH Reverse SElect
-    [getTableReverseSelect.pending]: (state, action) => {
+    [getTableReverseSelect.pending]: (state) => {
       state.loading = true;
     },
     [getTableReverseSelect.fulfilled]: (state, action) => {
       state.data_reverse_select = action.payload;
       state.loading = false;
     },
-    [getTableReverseSelect.rejected]: (state, action) => {
+    [getTableReverseSelect.rejected]: (state) => {
       state.loading = true;
     },
 
@@ -770,7 +763,7 @@ const electronicSlice = createSlice({
     },
 
     //Get customer info
-    [getCustomerInfo.pending]: (state, action) => {
+    [getCustomerInfo.pending]: (state) => {
       state.loading = true;
     },
     [getCustomerInfo.fulfilled]: (state, action) => {
@@ -778,7 +771,7 @@ const electronicSlice = createSlice({
       state.data_customer = action.payload;
       state.loading = false;
     },
-    [getCustomerInfo.rejected]: (state, action) => {
+    [getCustomerInfo.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },

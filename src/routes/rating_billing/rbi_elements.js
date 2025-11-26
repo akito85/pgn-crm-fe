@@ -8,7 +8,6 @@ import CalculationPage from "../../app/pages/RatingBillingInvoice/Calculation/Ca
 import RatingPage from "../../app/pages/RatingBillingInvoice/Rating/RatingPage";
 import MonitoringUsagePage from "../../app/pages/RatingBillingInvoice/MonitoringUsage/MonitoringUsagePage";
 import MonitoringUsageUpdate from "../../app/pages/RatingBillingInvoice/MonitoringUsage/MonitoringUsageUpdate";
-import DetailPage from "../../app/pages/RatingBillingInvoice/MonitoringUsage/Detail/DetailPage";
 import UploadPage from "../../app/pages/RatingBillingInvoice/MonitoringUsage/Upload/UploadPage";
 import AdjustmentBillingPage from "../../app/pages/RatingBillingInvoice/AdjustmentBilling/AdjustmentBillingPage";
 import PosPage from "../../app/pages/RatingBillingInvoice/POS/PosPage";
@@ -35,7 +34,6 @@ import BillingBucketForm from "../../app/pages/RatingBillingInvoice/MasterData/B
 import BillingBucketDetail from "../../app/pages/RatingBillingInvoice/MasterData/BillingBucket/BillingBucketDetail";
 import TopView from "../../app/pages/RatingBillingInvoice/MasterData/TermsOfPayment/TopView";
 import ListCreateForm from "../../app/pages/RatingBillingInvoice/MasterData/TermsOfPayment/Create/ListCreateForm";
-import DetailTOP from "../../app/pages/RatingBillingInvoice/MasterData/TermsOfPayment/DetailTOP";
 import ListDetailTOP from "../../app/pages/RatingBillingInvoice/MasterData/TermsOfPayment/ListDetailTOP";
 import BillingCycleView from "../../app/pages/RatingBillingInvoice/MasterData/BillingCycle/Page/BillingCycleView";
 import BillingCycleForm from "../../app/pages/RatingBillingInvoice/MasterData/BillingCycle/Page/BillingCycleForm";

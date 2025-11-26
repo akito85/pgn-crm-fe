@@ -1,9 +1,10 @@
 import React from "react";
-import { Input, Button, Space, Tooltip, Tag } from "antd";
-import { SearchOutlined, SyncOutlined, FileTextOutlined } from "@ant-design/icons";
-import Highlighter from "react-highlight-words";
+import { Tooltip } from "antd";
+import SVGIcon from "../../../../../assets/Icon/index";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import { hasValue, renderColumn } from "../../../../../utils";
 
-export const columnsGapPraBillingMaster = (
+export const getColumnsGapPraBillingMaster = (
   page,
   pageSize,
   searchInput,
@@ -14,170 +15,277 @@ export const columnsGapPraBillingMaster = (
   handleSyncData,
   handleCreateTicket
 ) => {
-  const getColumnSearchProps = (dataIndex, name) => ({
-    filterDropdown: ({
-      setSelectedKeys,
-      selectedKeys,
-      confirm,
-      clearFilters,
-    }) => (
-      <div style={{ padding: 8 }}>
-        <Input
-          ref={searchInput}
-          placeholder={`Search ${name}`}
-          value={selectedKeys[0]}
-          onChange={(e) =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
-          }
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{ marginBottom: 8, display: "block" }}
-        />
-        <Space>
-          <Button
-            type="primary"
-            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
-            icon={<SearchOutlined />}
-            size="small"
-            style={{ width: 90 }}
-          >
-            Search
-          </Button>
-          <Button
-            onClick={() => {
-              clearFilters();
-              handleSearch([""], confirm, dataIndex);
-            }}
-            size="small"
-            style={{ width: 90 }}
-          >
-            Reset
-          </Button>
-        </Space>
-      </div>
-    ),
-    filterIcon: (filtered) => (
-      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-    ),
-    onFilter: (value, record) =>
-      record[dataIndex]
-        ? record[dataIndex]
-            .toString()
-            .toLowerCase()
-            .includes(value.toLowerCase())
-        : "",
-    onFilterDropdownVisibleChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 100);
-      }
-    },
-    render: (text) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text
-      ),
-  });
-
   return [
     {
-      title: "No",
-      dataIndex: "no",
       key: "no",
+      title: "NO",
       width: 60,
-      fixed: "left",
+      align: "center",
       render: (text, record, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "Customer ID",
-      dataIndex: "customerId",
       key: "customerId",
-      width: 130,
-      fixed: "left",
+      title: "CUSTOMER ID",
+      dataIndex: "customerId",
       sorter: true,
-      ...getColumnSearchProps("customerId", "Customer ID"),
+      align: "left",
+      width: 150,
+      filteredValue: [search?.customerId] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "customerId",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "customerId",
+          hasValue(search["customerId"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
-      title: "Name",
-      dataIndex: "customerName",
       key: "customerName",
-      width: 200,
+      title: "CUSTOMER NAME",
+      dataIndex: "customerName",
       sorter: true,
-      ...getColumnSearchProps("customerName", "Name"),
+      align: "left",
+      width: 250,
+      filteredValue: [search?.customerName] || null,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "customerName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "customerName",
+          hasValue(search["customerName"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
     },
     {
-      title: "Billing Period",
-      dataIndex: "billingPeriod",
       key: "billingPeriod",
-      width: 130,
+      title: "BILLING PERIOD",
+      dataIndex: "billingPeriod",
       sorter: true,
       align: "center",
+      width: 150,
+      filteredValue: [search?.billingPeriod] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "billingPeriod",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "billingPeriod",
+          hasValue(search["billingPeriod"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
-      title: "Field Mismatch",
-      dataIndex: "fieldMismatch",
       key: "fieldMismatch",
-      width: 180,
+      title: "FIELD MISMATCH",
+      dataIndex: "fieldMismatch",
       sorter: true,
-      render: (text) => text || "-",
+      align: "left",
+      width: 200,
+      filteredValue: [search?.fieldMismatch] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "fieldMismatch",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "fieldMismatch",
+          hasValue(search["fieldMismatch"]),
+          searchText,
+          text || "-",
+          false,
+          "input",
+          search
+        ),
     },
     {
-      title: "Pra-Billing Value",
-      dataIndex: "praBillingValue",
       key: "praBillingValue",
-      width: 200,
+      title: "PRA-BILLING VALUE",
+      dataIndex: "praBillingValue",
       sorter: true,
+      align: "left",
+      width: 220,
+      filteredValue: [search?.praBillingValue] || null,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "praBillingValue",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
       render: (text) => (
         <span style={{ fontWeight: 500, color: "#fa8c16" }}>
-          {text || "-"}
+          {renderColumn(
+            "praBillingValue",
+            hasValue(search["praBillingValue"]),
+            searchText,
+            text || "-",
+            true,
+            "input",
+            search
+          )}
         </span>
       ),
     },
     {
-      title: "Master Value",
-      dataIndex: "masterValue",
       key: "masterValue",
-      width: 200,
+      title: "MASTER VALUE",
+      dataIndex: "masterValue",
       sorter: true,
+      align: "left",
+      width: 220,
+      filteredValue: [search?.masterValue] || null,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "masterValue",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
       render: (text) => (
         <span style={{ fontWeight: 500, color: "#52c41a" }}>
-          {text || "-"}
+          {renderColumn(
+            "masterValue",
+            hasValue(search["masterValue"]),
+            searchText,
+            text || "-",
+            true,
+            "input",
+            search
+          )}
         </span>
       ),
     },
     {
-      title: "Action",
-      key: "action",
-      width: 180,
-      fixed: "right",
+      key: "area",
+      title: "AREA",
+      dataIndex: "area",
+      sorter: true,
       align: "center",
-      render: (text, record) => (
-        <Space size="small">
+      width: 130,
+      filteredValue: [search?.area] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "area",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "area",
+          hasValue(search["area"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "status",
+      title: "STATUS",
+      dataIndex: "status",
+      sorter: true,
+      align: "center",
+      width: 150,
+      filteredValue: [search?.status] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "status",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "status",
+          hasValue(search["status"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "action",
+      title: "ACTION",
+      width: 120,
+      align: "center",
+      render: (record) => (
+        <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
           <Tooltip title="Sync dengan Master Data">
-            <Button
-              type="primary"
-              size="small"
-              icon={<SyncOutlined />}
+            <div 
+              className="cursor-pointer"
               onClick={() => handleSyncData(record)}
             >
-              Sync
-            </Button>
+              <SVGIcon name="IconSync" width={20} />
+            </div>
           </Tooltip>
           <Tooltip title="Buat Tiket">
-            <Button
-              type="default"
-              size="small"
-              icon={<FileTextOutlined />}
+            <div 
+              className="cursor-pointer"
               onClick={() => handleCreateTicket(record)}
             >
-              Tiket
-            </Button>
+              <SVGIcon name="IconTicket" width={20} />
+            </div>
           </Tooltip>
-        </Space>
+        </div>
       ),
     },
   ];

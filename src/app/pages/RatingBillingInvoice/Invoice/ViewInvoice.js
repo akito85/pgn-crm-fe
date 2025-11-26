@@ -1,7 +1,7 @@
 // ViewInvoice.js
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Form, Select, Tooltip } from "antd";
+import { Spin, Form, Select } from "antd";
 import axios from "axios";
 import DocViewer from "react-doc-viewer";
 import SelectComponent from "../../../../components/SelectComponent";
@@ -22,17 +22,11 @@ import {
 } from "../../../../redux/slices/rating_billing_invoice/invoice";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
-import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
-import {
-  DownloadOutlined,
-  EyeOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import { configApp } from "../../../../constants/configApp";
 import { tokenHeader } from "../../../../utils/tokenHeader";
-import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
+import { NavLink } from "react-router-dom";
 
 const ViewInvoice = () => {
   // Selector
@@ -60,18 +54,17 @@ const ViewInvoice = () => {
   const [modalError, setModalError] = useState(false);
   const [modalReGenerate, setModalReGenerate] = useState(false);
   const [modalGenerate, setModalGenerate] = useState(false);
+  const [popoverVisible, setPopoverVisible] = useState({});
 
-  // ✅ State untuk fix column (dengan localStorage persistence)
+  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
     const saved = localStorage.getItem("invoiceFixedColumns");
     return saved
       ? JSON.parse(saved)
       : {
-          no: "left",
-          invoiceNumber: "left",
-          status: "right",
-          action: "right",
-        }; // Default fix invoice number
+          left: ["no"],
+          right: ["action", "status"],
+        };
   });
 
   // ✅ Save to localStorage when fixedColumns change
@@ -213,7 +206,6 @@ const ViewInvoice = () => {
           viewerContainer
         );
       }
-      console.log("Preview");
     } catch (error) {
       console.error("Error fetching document:", error);
     }
@@ -292,103 +284,7 @@ const ViewInvoice = () => {
     );
   };
 
-  const itemGrantAccess = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={handleDownload}
-        >
-          Export Data
-        </ButtonComponent>
-      ),
-    },
-    {
-      action: "Create",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonCreate" width={24} />}
-          type="submit"
-          onClick={() => {
-            window.location.href =
-              "/invoice/generate-invoice/generate-form-invoice";
-          }}
-        >
-          Generate Invoice
-        </ButtonComponent>
-      ),
-    },
-
-    // Column Action Table
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Detail Invoice Log">
-            <div
-              className="pt-1 cursor-pointer"
-              onClick={() => {
-                handleDetail(record);
-                setTimeout(
-                  () =>
-                    window.scrollTo({
-                      top: document.body.scrollHeight,
-                      behavior: "smooth",
-                    }),
-                  100
-                );
-              }}
-            >
-              <EyeOutlined style={{ fontSize: "20px" }} />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Regenerate",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Re-Generate">
-            <div
-              className="pt-1 cursor-pointer"
-              onClick={() => handleReGenerate(record)}
-            >
-              <ReloadOutlined style={{ fontSize: "20px" }} />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Preview",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Download">
-            <div
-              className="pt-1 cursor-pointer"
-              onClick={() => handlePreviewFile(record)}
-            >
-              <DownloadOutlined style={{ fontSize: "25px" }} />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-  ];
-
-  // ✅ Call hook at component level (not inside useMemo)
-  const actionCols = useColumnActionPermission(
-    ["view", "preview", "regenerate"],
-    itemGrantAccess
-  );
-
-  // ✅ Get base columns and add 'key' property to each column
+  // ✅ Get base columns with key property
   const baseColumns = useMemo(() => {
     const invoiceCols = columnsInvoice(
       search,
@@ -397,30 +293,64 @@ const ViewInvoice = () => {
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
+      handleDetail,
+      handleReGenerate,
+      handlePreviewFile,
+      popoverVisible,
+      setPopoverVisible
     );
 
     // Add 'key' property to columns that don't have it
-    const columnsWithKeys = [...invoiceCols, ...actionCols].map((col) => ({
+    const columnsWithKeys = invoiceCols.map((col) => ({
       ...col,
-      key: col.key || col.dataIndex || col.title, // Fallback to dataIndex or title if no key
+      key: col.key || col.dataIndex || col.title,
     }));
 
     return columnsWithKeys;
-  }, [search, page, pageSize, searchedColumn, searchText, actionCols]);
+  }, [search, page, pageSize, searchedColumn, searchText, popoverVisible]);
 
-  // ✅ Apply fixed columns using useMemo
-  const processedColumns = useMemo(() => {
-    return applyFixedColumns(baseColumns, fixedColumns);
-  }, [baseColumns, fixedColumns]);
-
-  // ✅ Extract column definitions for ColumnFixDropdown (with key and title only)
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
       title: col.title,
     }));
   }, [baseColumns]);
+
+  const columns = useMemo(() => {
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    baseColumns.forEach((col) => {
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        leftFixed.push(col);
+      } else if (fixedColumns.right.includes(colKey)) {
+        rightFixed.push(col);
+      } else {
+        normal.push(col);
+      }
+    });
+
+    const reorderedColumns = [...leftFixed, ...normal, ...rightFixed];
+
+    return reorderedColumns.map((col) => {
+      const newCol = { ...col };
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        newCol.fixed = "left";
+      } else if (fixedColumns.right.includes(colKey)) {
+        newCol.fixed = "right";
+      } else {
+        delete newCol.fixed;
+      }
+
+      return newCol;
+    });
+  }, [baseColumns, fixedColumns]);
 
   return (
     <LayoutMenu>
@@ -432,16 +362,14 @@ const ViewInvoice = () => {
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">Invoice List</p>
               <div className="flex gap-2">
-                <ButtonComponent
-                  icon={<SVGIcon name="IconButtonCreate" width={24} />}
-                  type="submit"
-                  onClick={() => {
-                    window.location.href =
-                      "/invoice/generate-invoice/generate-form-invoice";
-                  }}
-                >
-                  Generate Invoice
-                </ButtonComponent>
+                <NavLink to={INVOICE_ROUTES.GENERATE_INVOICE_FORM}>
+                  <ButtonComponent
+                    icon={<SVGIcon name="IconButtonCreate" width={24} />}
+                    type="submit"
+                  >
+                    Generate Invoice
+                  </ButtonComponent>
+                </NavLink>
               </div>
             </div>
           }
@@ -449,13 +377,13 @@ const ViewInvoice = () => {
           <div className="w-full">
             <TableRBI
               dataSource={dataSource}
-              columns={processedColumns}
+              columns={columns}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements}
-              tableScrolled={{ y: 525, x: 2000 }}
+              tableScrolled={{ y: 525, x: 7000 }}
               onSort={onSortApi}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}

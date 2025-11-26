@@ -6,21 +6,19 @@ import {
   showModalError,
 } from "../general_slice";
 
-const CUSTOM_BASE_URL = 'https://b5c5b57639b7.ngrok-free.app';
-
 const initialState = {
   loading: false,
   error: null,
-  
+
   summaryData: {
     pendingTransactions: 0,
     pendingApprovals: 0,
     gapRatingBilling: 0,
     gapPraBillingMaster: 0,
   },
-  
+
   trendData: [],
-  
+
   list_billing_period: [],
 
   priorityList: {
@@ -29,7 +27,7 @@ const initialState = {
     priorGapRatingBilling: [],
     priorGapPrabillingMaster: [],
   },
-  
+
   pendingTransactionsData: {
     result: [],
     page: {
@@ -37,7 +35,7 @@ const initialState = {
       totalPages: 0,
     },
   },
-  
+
   pendingApprovalsData: {
     result: [],
     page: {
@@ -45,7 +43,7 @@ const initialState = {
       totalPages: 0,
     },
   },
-  
+
   gapRatingBillingData: {
     result: [],
     page: {
@@ -53,7 +51,7 @@ const initialState = {
       totalPages: 0,
     },
   },
-  
+
   gapPraBillingMasterData: {
     result: [],
     page: {
@@ -63,14 +61,13 @@ const initialState = {
   },
 };
 
-
 export const getSummaryData = createAsyncThunk(
   "GET_MONITORING_SUMMARY",
   async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/monitoringcustomer/summary`;
-      const response = await ratingBillingHttpService.getAll(url, CUSTOM_BASE_URL);
-      
+      const response = await ratingBillingHttpService.getAll(url);
+
       return {
         pendingTransactions: response.data.summaryPendingTransaction,
         pendingApprovals: response.data.summaryPendingApproval,
@@ -101,17 +98,58 @@ export const getTrendData = createAsyncThunk(
   "GET_MONITORING_TREND",
   async (period, thunkAPI) => {
     try {
-
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve([
-            { date: "2025-09-14", pendingTransactions: 3, pendingApprovals: 2, gapRatingBilling: 5, gapPraBillingMaster: 4 },
-            { date: "2025-09-15", pendingTransactions: 5, pendingApprovals: 3, gapRatingBilling: 4, gapPraBillingMaster: 6 },
-            { date: "2025-09-16", pendingTransactions: 4, pendingApprovals: 1, gapRatingBilling: 6, gapPraBillingMaster: 5 },
-            { date: "2025-09-17", pendingTransactions: 6, pendingApprovals: 4, gapRatingBilling: 3, gapPraBillingMaster: 7 },
-            { date: "2025-09-18", pendingTransactions: 2, pendingApprovals: 2, gapRatingBilling: 5, gapPraBillingMaster: 4 },
-            { date: "2025-09-19", pendingTransactions: 5, pendingApprovals: 5, gapRatingBilling: 2, gapPraBillingMaster: 3 },
-            { date: "2025-09-20", pendingTransactions: 5, pendingApprovals: 3, gapRatingBilling: 4, gapPraBillingMaster: 6 },
+            {
+              date: "2025-09-14",
+              pendingTransactions: 3,
+              pendingApprovals: 2,
+              gapRatingBilling: 5,
+              gapPraBillingMaster: 4,
+            },
+            {
+              date: "2025-09-15",
+              pendingTransactions: 5,
+              pendingApprovals: 3,
+              gapRatingBilling: 4,
+              gapPraBillingMaster: 6,
+            },
+            {
+              date: "2025-09-16",
+              pendingTransactions: 4,
+              pendingApprovals: 1,
+              gapRatingBilling: 6,
+              gapPraBillingMaster: 5,
+            },
+            {
+              date: "2025-09-17",
+              pendingTransactions: 6,
+              pendingApprovals: 4,
+              gapRatingBilling: 3,
+              gapPraBillingMaster: 7,
+            },
+            {
+              date: "2025-09-18",
+              pendingTransactions: 2,
+              pendingApprovals: 2,
+              gapRatingBilling: 5,
+              gapPraBillingMaster: 4,
+            },
+            {
+              date: "2025-09-19",
+              pendingTransactions: 5,
+              pendingApprovals: 5,
+              gapRatingBilling: 2,
+              gapPraBillingMaster: 3,
+            },
+            {
+              date: "2025-09-20",
+              pendingTransactions: 5,
+              pendingApprovals: 3,
+              gapRatingBilling: 4,
+              gapPraBillingMaster: 6,
+            },
           ]);
         }, 500);
       });
@@ -140,8 +178,8 @@ export const getPriorityList = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/monitoringcustomer/anomalies-top5`;
-      const response = await ratingBillingHttpService.getAll(url, CUSTOM_BASE_URL);
-      
+      const response = await ratingBillingHttpService.getAll(url);
+
       return {
         priorPendingTransactions: response.data.priorPendingTransactions || [],
         priorApprovalBatches: response.data.priorApprovalBatches || [],
@@ -202,22 +240,25 @@ export const getPendingTransactions = createAsyncThunk(
       const searchParams = search || "";
       const sortParams = sort || "receivedAt~desc";
       const url = `/v1/dbs/api/monitoringcustomer/list-pending-trans?period=${period}&sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
-      const response = await ratingBillingHttpService.getPagination(url, CUSTOM_BASE_URL);
-      
+      const response = await ratingBillingHttpService.getPagination(url);
+
       return {
-        result: response.data.content.map(item => ({
+        result: response.data.content.map((item) => ({
           id: item.id,
           customerId: item.accountNum,
-          customerName: item.customerName || "-", 
-          address: item.address || "-", 
+          customerName: item.customerName || "-",
+          address: item.address || "-",
           type: item.type || "-",
           period: item.period,
           volume: item.volumeM3,
-          receivedAt: item.receivedAt ? new Date(item.receivedAt).toLocaleDateString('id-ID') : "-",
+          receivedAt: item.receivedAt
+            ? new Date(item.receivedAt).toLocaleDateString("id-ID")
+            : "-",
           status: item.status,
         })),
         page: {
-          totalElements: response.data.totalElements || response.data.content.length,
+          totalElements:
+            response.data.totalElements || response.data.content.length,
           totalPages: response.data.totalPages || 1,
         },
       };
@@ -247,15 +288,16 @@ export const updateInvestigationFlag = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/monitoringcustomer/update-flag`;
       const body = { id };
-      const response = await ratingBillingHttpService.createData(url, body, CUSTOM_BASE_URL);
-      
+      const response = await ratingBillingHttpService.createData(url, body);
+
       const successBody = {
         title: "Successful",
-        description: response?.message || "Investigation flag updated successfully",
+        description:
+          response?.message || "Investigation flag updated successfully",
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
-      
+
       return response.data;
     } catch (error) {
       const message =
@@ -281,20 +323,22 @@ export const getPendingApprovals = createAsyncThunk(
       const searchParams = search || "";
       const sortParams = sort || "createdAt~desc";
       const apiPage = page - 1;
-      
+
       const url = `/v1/dbs/api/monitoringcustomer/list-pending-approvals?sort=${sortParams}&size=${pageSize}&page=${apiPage}&searchs=${searchParams}`;
-      const response = await ratingBillingHttpService.getPagination(url, CUSTOM_BASE_URL);
-      
+      const response = await ratingBillingHttpService.getPagination(url);
+
       return {
-        result: response.data.content.map(item => ({
+        result: response.data.content.map((item) => ({
           id: item.id,
-          batchId: `BATCH-${item.id}`, 
+          batchId: `BATCH-${item.id}`,
           billingPeriod: item.billingPeriod,
           accountNumber: item.accountNum,
-          totalCustomers: null, 
+          totalCustomers: null,
           estimatedAmount: item.estimatedAmount,
           createdBy: item.createdBy,
-          createdAt: item.createdAt ? new Date(item.createdAt).toLocaleString('id-ID') : "-",
+          createdAt: item.createdAt
+            ? new Date(item.createdAt).toLocaleString("id-ID")
+            : "-",
           status: item.status,
         })),
         page: {
@@ -329,25 +373,28 @@ export const getGapRatingBilling = createAsyncThunk(
       const searchParams = search || "";
       const sortParams = sort || "detectedAt~desc";
       const apiPage = page - 1;
-      
+
       const url = `/v1/dbs/api/monitoringcustomer/list-gap-rating-billing?sort=${sortParams}&size=${pageSize}&page=${apiPage}&searchs=${searchParams}`;
-      const response = await ratingBillingHttpService.getPagination(url, CUSTOM_BASE_URL);
-      
+      const response = await ratingBillingHttpService.getPagination(url);
+
       return {
-        result: response.data.content.map(item => ({
+        result: response.data.content.map((item) => ({
           id: item.id,
           accountNumber: item.accountNum,
-          customerName: item.customerName || "-", 
+          customerName: item.customerName || "-",
           billingPeriod: item.period,
-          ratingCode: item.ratingCode || "-", 
+          ratingCode: item.ratingCode || "-",
           ratingValue: item.valueRating,
-          billingCode: item.billingCode || "-", 
+          billingCode: item.billingCode || "-",
           billingValue: item.valueBilling,
           gap: item.diff,
-          detectedAt: item.detectedAt ? new Date(item.detectedAt).toLocaleString('id-ID') : "-",
-          gapPercentage: item.valueRating && item.valueBilling 
-            ? (((item.diff) / item.valueRating) * 100).toFixed(2)
-            : 0,
+          detectedAt: item.detectedAt
+            ? new Date(item.detectedAt).toLocaleString("id-ID")
+            : "-",
+          gapPercentage:
+            item.valueRating && item.valueBilling
+              ? ((item.diff / item.valueRating) * 100).toFixed(2)
+              : 0,
         })),
         page: {
           totalElements: response.data.totalElements,
@@ -376,9 +423,8 @@ export const getGapRatingBilling = createAsyncThunk(
 
 export const getGapPraBillingMaster = createAsyncThunk(
   "GET_GAP_PRABIL_MASTER",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
-
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve({
@@ -467,10 +513,8 @@ export const getGapPraBillingMaster = createAsyncThunk(
 
 export const downloadPendingTransactions = createAsyncThunk(
   "DOWNLOAD_PENDING_TRANSACTIONS",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
-      
-      console.log("Download Pending Transactions");
       return null;
     } catch (error) {
       const message =
@@ -487,9 +531,8 @@ export const downloadPendingTransactions = createAsyncThunk(
 
 export const downloadPendingApprovals = createAsyncThunk(
   "DOWNLOAD_PENDING_APPROVALS",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
-      console.log("Download Pending Approvals");
       return null;
     } catch (error) {
       const message =
@@ -506,9 +549,8 @@ export const downloadPendingApprovals = createAsyncThunk(
 
 export const downloadGapRatingBilling = createAsyncThunk(
   "DOWNLOAD_GAP_RATING_BILLING",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
-      console.log("Download Gap Rating Billing");
       return null;
     } catch (error) {
       const message =
@@ -525,9 +567,8 @@ export const downloadGapRatingBilling = createAsyncThunk(
 
 export const downloadGapPraBillingMaster = createAsyncThunk(
   "DOWNLOAD_GAP_PRABIL_MASTER",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
-      console.log("Download Gap Pra-Billing Master");
       return null;
     } catch (error) {
       const message =
@@ -542,12 +583,10 @@ export const downloadGapPraBillingMaster = createAsyncThunk(
   }
 );
 
-
 export const asyncDataMart = createAsyncThunk(
   "ASYNC_DATA_MART",
   async (_, thunkAPI) => {
     try {
-
       return new Promise((resolve) => {
         setTimeout(() => {
           const successBody = {
@@ -581,7 +620,6 @@ const monitoringSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: {
-
     // Get List Billing Period
     [getListBillingPeriod.pending]: (state) => {
       state.loading = true;
@@ -619,7 +657,7 @@ const monitoringSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    
+
     // Get Trend Data
     [getTrendData.pending]: (state) => {
       state.loading = true;
@@ -632,7 +670,7 @@ const monitoringSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    
+
     // Get Priority List
     [getPriorityList.pending]: (state) => {
       state.loading = true;
@@ -645,7 +683,7 @@ const monitoringSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    
+
     // Get Pending Transactions
     [getPendingTransactions.pending]: (state) => {
       state.loading = true;
@@ -658,7 +696,7 @@ const monitoringSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    
+
     // Get Pending Approvals
     [getPendingApprovals.pending]: (state) => {
       state.loading = true;
@@ -671,7 +709,7 @@ const monitoringSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    
+
     // Get Gap Rating Billing
     [getGapRatingBilling.pending]: (state) => {
       state.loading = true;
@@ -684,7 +722,7 @@ const monitoringSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    
+
     // Get Gap Pra-Billing Master
     [getGapPraBillingMaster.pending]: (state) => {
       state.loading = true;
@@ -697,7 +735,7 @@ const monitoringSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    
+
     // Download Pending Transactions
     [downloadPendingTransactions.pending]: (state) => {
       state.loading = true;
@@ -709,7 +747,7 @@ const monitoringSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    
+
     // Download Pending Approvals
     [downloadPendingApprovals.pending]: (state) => {
       state.loading = true;
@@ -721,7 +759,7 @@ const monitoringSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    
+
     // Download Gap Rating Billing
     [downloadGapRatingBilling.pending]: (state) => {
       state.loading = true;
@@ -733,7 +771,7 @@ const monitoringSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    
+
     // Download Gap Pra-Billing Master
     [downloadGapPraBillingMaster.pending]: (state) => {
       state.loading = true;
@@ -745,7 +783,7 @@ const monitoringSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    
+
     // Async Data Mart
     [asyncDataMart.pending]: (state) => {
       state.loading = true;

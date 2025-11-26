@@ -1,23 +1,13 @@
-import React, { useEffect, useRef } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React from "react";
 import {
-  Spin,
-  Input,
-  Form,
-  Alert,
-  Popover,
-  Checkbox,
   Tooltip,
-  DatePicker,
 } from "antd";
-import Highlighter from "react-highlight-words";
-import { Link, NavLink, Route, Routes, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import TablePagination from "../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { Fragment } from "react";
 import moment from "moment";
-import { FilterOutlined } from "@ant-design/icons";
 
 const AttachmentTable = ({
   data = [],

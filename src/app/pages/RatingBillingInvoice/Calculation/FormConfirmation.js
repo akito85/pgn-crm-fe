@@ -97,10 +97,6 @@ const FormConfirmation = ({ data }) => {
       (result, current) => result?.concat(current?.dtoList),
       []
     );
-    console.log(
-      "🚀 ~ file: FormConfirmation.js:80 ~ getMrcName ~ mergeMrcDto:",
-      mergeMrcDto
-    );
     const mrcName =
       mergeMrcDto && mergeMrcDto?.filter((item) => item?.id === val);
     if (mrcName === undefined) {

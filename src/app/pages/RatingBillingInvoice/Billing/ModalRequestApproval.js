@@ -1,8 +1,7 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form, Select, Checkbox } from "antd";
 import { RightOutlined } from "@ant-design/icons";
-import moment from "moment";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -22,19 +21,22 @@ import {
 import DetailText from "../../../../components/DetailText";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../utils/Icon";
+import TableRBI from "../../../../components/TableRBI";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const ModalRequestApproval = ({
   isOpen,
-  handleCancel = () => { },
-  handleRefresh = () => { },
-  handleOpenModal = () => { },
+  handleCancel = () => {},
+  handleRefresh = () => {},
+  handleOpenModal = () => {},
 }) => {
   // Selector
   const {
     data_approval,
     data_approval_list,
     data_list_billing_request_approval,
+    loading,
   } = useSelector((state) => state.billing);
 
   // Declaration
@@ -63,11 +65,15 @@ const ModalRequestApproval = ({
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
 
+  const [fixedColumns, setFixedColumns] = useState({
+    no: "left",
+  });
+
   // Use Effect
   useEffect(() => {
     dispatch(getAllApprovalList());
     dispatch(getAllBillingRequestPaginate());
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     if (boolean === true) {
@@ -83,7 +89,7 @@ const ModalRequestApproval = ({
         setDataTable(data);
       }
     }
-  }, [data_approval_list]);
+  }, [data_approval_list, boolean]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -124,7 +130,7 @@ const ModalRequestApproval = ({
     onChange: onSelectChange,
   };
 
-  // Step - Updated to 3 steps
+  // Step - 3 steps
   const steps = [
     {
       title: "BILLING INFORMATION",
@@ -245,8 +251,6 @@ const ModalRequestApproval = ({
           setModalError(true);
         }
       });
-
-    console.log(body, "body");
   };
 
   const filterDataByPage = (type = "data") => {
@@ -256,6 +260,39 @@ const ModalRequestApproval = ({
     }));
     return type === "data" ? result : result.length;
   };
+
+  const baseColumns = useMemo(
+    () =>
+      columnsRequestBilling(
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    [page, pageSize, searchedColumn, searchText]
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
 
   return (
     <div>
@@ -334,28 +371,28 @@ const ModalRequestApproval = ({
         >
           {/* STEP 1: BILLING INFORMATION */}
           <div
-            className={`steps-content my-[30px] ${current !== 0 ? "hidden" : ""}`}
+            className={`steps-content my-[30px] ${
+              current !== 0 ? "hidden" : ""
+            }`}
           >
             <div className="w-full grid grid-cols-1 gap-x-4">
-              <p className="text-primary uppercase font-bold">Billing List</p>
-              <TablePaginationNew
-                type="FE"
+              <p className="text-primary uppercase font-bold mb-4">
+                Billing List
+              </p>
+              <TableRBI
                 dataSource={filterDataByPage("data")}
-                columns={columnsRequestBilling(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                )}
+                columns={processedColumns}
                 current={page}
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
                 totalData={filterDataByPage("length")}
-                onSort={onSort}
                 tableScrolled={{ y: 525, x: 15000 }}
+                onSort={onSort}
+                columnDefinitions={columnDefinitions}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                loading={loading}
                 rowSelection={rowSelection}
               />
               <div className="pt-[30px]">
@@ -366,8 +403,7 @@ const ModalRequestApproval = ({
                     Generate Invoice
                   </Checkbox>
                   <p className="text-[#4B465C] text-[8px]">
-                    Click or tap this checkbox to automatically generate
-                    invoice
+                    Click or tap this checkbox to automatically generate invoice
                   </p>
                 </Form.Item>
                 <Form.Item
@@ -391,7 +427,9 @@ const ModalRequestApproval = ({
 
           {/* STEP 2: APPROVAL INFORMATION */}
           <div
-            className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
+            className={`steps-content my-[30px] ${
+              current !== 1 ? "hidden" : ""
+            }`}
           >
             <div className="w-full grid grid-cols-1 gap-x-4">
               <p className="text-primary uppercase font-bold">
@@ -473,29 +511,29 @@ const ModalRequestApproval = ({
 
           {/* STEP 3: CONFIRMATION */}
           <div
-            className={`steps-content my-[30px] ${current !== 2 ? "hidden" : ""}`}
+            className={`steps-content my-[30px] ${
+              current !== 2 ? "hidden" : ""
+            }`}
           >
             {/* Billing Information Review */}
             <div className="w-full grid grid-cols-1 gap-x-4 mb-8">
-              <p className="text-primary uppercase font-bold">Billing List</p>
-              <TablePaginationNew
-                type="FE"
+              <p className="text-primary uppercase font-bold mb-4">
+                Billing List
+              </p>
+              <TableRBI
                 dataSource={dataTableSelect}
-                columns={columnsRequestBilling(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                )}
+                columns={processedColumns}
                 current={page}
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
                 totalData={dataTableSelect.length || 0}
-                onSort={onSort}
                 tableScrolled={{ y: 525, x: 15000 }}
+                onSort={onSort}
+                columnDefinitions={columnDefinitions}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                loading={false}
               />
               <div className="pt-[30px]">
                 <DetailText label={"Generate Invoice"}>

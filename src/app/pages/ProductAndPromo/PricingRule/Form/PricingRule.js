@@ -28,7 +28,6 @@ import moment from "moment";
 import { showModalError } from "../../../../../redux/slices/general_slice";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";
 import { columnsTableCriteriaAll } from "../../UtilsProduct/TableCriteriaAllProduct";
-import FunctionalCriteria from "../../../../../components/Criteria/FunctionalCriteria";
 
 const PricingRule = ({
   form,

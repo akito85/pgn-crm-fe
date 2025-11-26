@@ -1,28 +1,74 @@
-// TableRBI.js
-import {
-  DeleteOutlined,
-  DownloadOutlined,
-  DownOutlined,
-  FilterOutlined,
-} from "@ant-design/icons";
-import {
-  Button,
-  Input,
-  Pagination,
-  Select,
-  Table,
-  Dropdown,
-  Checkbox,
-  Modal,
-} from "antd";
-import { useState, useMemo } from "react";
-import ColumnFixDropdown from "./ColumnFixDropdown/ColumnFixDropdown";
+// TableRBI.js (with resizable columns)
+import React, { useMemo, useState, useCallback } from "react";
+import { DownloadOutlined, FilterOutlined } from "@ant-design/icons";
+import { Button, Pagination, Select, Table } from "antd";
+import ColumnSettings from "./ColumnSettings/ColumnSettings";
+import SearchBar from "./SearchBar";
+import AdvanceSearch from "./AdvanceSearch";
+
 const { Option } = Select;
+
+// Resizable Title Component
+const ResizableTitle = (props) => {
+  const { onResize, width, ...restProps } = props;
+
+  if (!width) {
+    return <th {...restProps} />;
+  }
+
+  return (
+    <th {...restProps} style={{ ...restProps.style, position: "relative" }}>
+      {restProps.children}
+      <div
+        style={{
+          position: "absolute",
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: "10px",
+          cursor: "col-resize",
+          userSelect: "none",
+          zIndex: 1,
+        }}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          const startX = e.pageX;
+          const startWidth = width;
+
+          const handleMouseMove = (e) => {
+            const newWidth = startWidth + (e.pageX - startX);
+            if (newWidth > 50) {
+              onResize(newWidth);
+            }
+          };
+
+          const handleMouseUp = () => {
+            document.removeEventListener("mousemove", handleMouseMove);
+            document.removeEventListener("mouseup", handleMouseUp);
+            document.body.style.cursor = "default";
+            document.body.style.userSelect = "auto";
+          };
+
+          document.addEventListener("mousemove", handleMouseMove);
+          document.addEventListener("mouseup", handleMouseUp);
+          document.body.style.cursor = "col-resize";
+          document.body.style.userSelect = "none";
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.borderRight = "2px solid #1890ff";
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.borderRight = "none";
+        }}
+      />
+    </th>
+  );
+};
 
 const TableRBI = ({
   idTable,
   dataSource,
-  columns,
+  columns = [],
   pageSize,
   current,
   loading,
@@ -40,149 +86,165 @@ const TableRBI = ({
   onSort = () => {},
   handleDownload = () => {},
   columnDefinitions,
-  fixedColumns,
-  setFixedColumns,
+  fixedColumns = { left: [], right: [] },
+  setFixedColumns = () => {},
+  onAdvanceSearch = () => {},
+  onRow,
+  rowClassName,
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
-  const [searchText, setSearchText] = useState("");
-  const [dropdownVisible, setDropdownVisible] = useState(false);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
 
-  // ✅ Filter columns based on visibility (hide/show)
-  const filterColumns = () => {
-    return columns.filter((col) => {
-      return !optionSelectedCol.includes(col.title);
-    });
-  };
+  // State untuk menyimpan width setiap column
+  const [columnWidths, setColumnWidths] = useState({});
 
-  // ✅ Filtered columns for search in dropdown
-  const filteredColumns = useMemo(() => {
-    if (!searchText) return columns;
-    return columns.filter((col) =>
-      col.title?.toLowerCase().includes(searchText.toLowerCase())
-    );
-  }, [columns, searchText]);
-
-  const onCheckboxChange = (e, title) => {
-    const checked = e.target.checked;
-    let newSelected;
-    if (checked) {
-      newSelected = optionSelectedCol.filter((col) => col !== title);
-    } else {
-      newSelected = [...optionSelectedCol, title];
-    }
-    setOptionSelectedCol(newSelected);
-  };
-
-  const menu = (
-    <div
-      style={{
-        padding: 10,
-        width: 250,
-        background: "white",
-        border: "1px solid #ddd",
-        borderRadius: 4,
-      }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div style={{ fontWeight: "bold", marginBottom: 8 }}>Visibility</div>
-      <Input
-        placeholder="Search column..."
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        style={{ marginBottom: 8 }}
-        allowClear
-      />
-      <div
-        style={{
-          maxHeight: 200,
-          overflowY: "auto",
-          borderTop: "1px solid #eee",
-          paddingTop: 8,
-        }}
-      >
-        {filteredColumns.map((col, index) => (
-          <div key={col.title || index} style={{ marginBottom: 4 }}>
-            <Checkbox
-              checked={!optionSelectedCol.includes(col.title)}
-              onChange={(e) => onCheckboxChange(e, col.title)}
-            >
-              {col.title}
-            </Checkbox>
-          </div>
-        ))}
-      </div>
-    </div>
+  // Handler untuk resize column
+  const handleResize = useCallback(
+    (key) => (newWidth) => {
+      setColumnWidths((prev) => ({
+        ...prev,
+        [key]: newWidth,
+      }));
+    },
+    []
   );
+
+  // Build visible + fixed-applied columns with resizable feature
+  const displayedColumns = useMemo(() => {
+    const cols = (columns || []).map((c) => ({
+      ...c,
+      key: c.key || c.dataIndex || c.title,
+    }));
+
+    // Filter out hidden columns
+    const visible = cols.filter((col) => !optionSelectedCol.includes(col.key));
+
+    // Separate into left, normal, right
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    visible.forEach((col) => {
+      if (
+        Array.isArray(fixedColumns.left) &&
+        fixedColumns.left.includes(col.key)
+      ) {
+        leftFixed.push(col);
+      } else if (
+        Array.isArray(fixedColumns.right) &&
+        fixedColumns.right.includes(col.key)
+      ) {
+        rightFixed.push(col);
+      } else {
+        normal.push(col);
+      }
+    });
+
+    // Apply fixed property and resizable width
+    const applyColumnProps = (col, fixedPos) => {
+      const colKey = col.key || col.dataIndex || col.title;
+      const newCol = {
+        ...col,
+        width: columnWidths[colKey] || col.width || 150,
+        align: "center",
+        ellipsis: {
+          showTitle: true,
+        },
+        onHeaderCell: (column) => ({
+          width: columnWidths[colKey] || col.width || 150,
+          onResize: handleResize(colKey),
+          style: { textTransform: "uppercase" },
+        }),
+        onCell: () => ({
+          style: {
+            textAlign: "center",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          },
+        }),
+      };
+      if (fixedPos) newCol.fixed = fixedPos;
+      else delete newCol.fixed;
+      return newCol;
+    };
+
+    const finalCols = [
+      ...leftFixed.map((c) => applyColumnProps(c, "left")),
+      ...normal.map((c) => applyColumnProps(c, undefined)),
+      ...rightFixed.map((c) => applyColumnProps(c, "right")),
+    ];
+
+    return finalCols;
+  }, [columns, optionSelectedCol, fixedColumns, columnWidths, handleResize]);
+
+  const handleAdvanceSearch = (searchData) => {
+    onAdvanceSearch(searchData);
+    setIsAdvanceOpen(false);
+  };
+
+  const handleClearFilter = () => {
+    onAdvanceSearch(null);
+  };
+
+  // Components untuk Ant Design Table
+  const components = {
+    header: {
+      cell: ResizableTitle,
+    },
+  };
 
   return (
     <div className={"flex flex-col w-full"}>
       {useSelect ? (
         <div className={"w-full flex mb-5 justify-between items-center"}>
-          <Dropdown
-            overlay={menu}
-            trigger={["click"]}
-            visible={dropdownVisible}
-            onVisibleChange={(flag) => setDropdownVisible(flag)}
-          >
-            <Button
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                border: "1px solid #BDBDBD",
-                height: "40px",
-                color: "black",
-              }}
-            >
-              Show / Hide Column <DownOutlined style={{ fontSize: "15px" }} />
-            </Button>
-          </Dropdown>
+          <ColumnSettings
+            columns={columnDefinitions || columns}
+            hiddenColumns={optionSelectedCol}
+            onHiddenColumnsChange={setOptionSelectedCol}
+            fixedColumns={fixedColumns}
+            onFixedColumnsChange={setFixedColumns}
+            buttonText="Column Settings"
+            buttonStyle={{ height: "40px" }}
+          />
 
-          {/* ✅ Add ColumnFixDropdown button */}
-          <div className="w-md">
-            <ColumnFixDropdown
-              columns={columnDefinitions}
-              fixedColumns={fixedColumns}
-              onFixedColumnsChange={setFixedColumns}
-              buttonText="Fix Columns"
-              buttonStyle={{ height: "40px" }}
-              showCount={true}
-            />
-          </div>
-
-          <div className="w-full flex justify-end gap-2 hidden">
+          <div className="w-full flex justify-end gap-2">
             <Button
               icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
+              onClick={handleDownload}
               style={{
                 border: "1px solid #BDBDBD",
                 color: "black",
+                borderRadius: "8px",
                 height: "40px",
               }}
             >
-              Export List
+              Export
             </Button>
 
-            {/* button trigger modal */}
             <Button
               onClick={() => setIsAdvanceOpen(true)}
               style={{
                 border: "1px solid #BDBDBD",
                 color: "black",
+                borderRadius: "8px",
                 height: "40px",
               }}
             >
               <FilterOutlined style={{ fontSize: "20px" }} />
-              Advance Filter
+              Advance Search
             </Button>
+
+            <SearchBar />
           </div>
         </div>
       ) : null}
 
-      {/* Table */}
+      {/* Table with Resizable Columns */}
       <Table
         dataSource={dataSource}
-        columns={filterColumns()} // ✅ Apply filtered columns (without spread operator to preserve fixed prop)
+        columns={displayedColumns}
+        components={components}
         scroll={tableScrolled}
         bordered
         pagination={false}
@@ -193,9 +255,10 @@ const TableRBI = ({
         id={idTable}
         onChange={onSort}
         rowSelection={rowSelection}
+        onRow={onRow}
+        rowClassName={rowClassName}
       />
 
-      {/* Pagination */}
       {usePagination ? (
         <div className={"w-full flex justify-between mt-5 items-center"}>
           <div className="flex items-center gap-3">
@@ -229,98 +292,14 @@ const TableRBI = ({
         </div>
       ) : null}
 
-      {/* Advance Search Modal */}
-      <Modal
+      <AdvanceSearch
         visible={isAdvanceOpen}
-        footer={null}
-        onCancel={() => setIsAdvanceOpen(false)}
-        width={700}
-        bodyStyle={{ padding: "40px" }}
-      >
-        <div className="flex gap-4 mb-4">
-          <Select
-            defaultValue="Periode"
-            className="w-1/3 rounded-lg border border-gray-300"
-            dropdownClassName="rounded-lg"
-          >
-            <Option value="Periode">Periode</Option>
-            <Option value="Customer">Customer</Option>
-          </Select>
-          <Select
-            defaultValue="Contains"
-            className="w-1/3 rounded-lg border border-gray-300"
-            dropdownClassName="rounded-lg"
-          >
-            <Option value="Contains">Contains</Option>
-            <Option value="Equals">Equals</Option>
-          </Select>
-          <Select
-            defaultValue="Limit Row"
-            className="w-1/3 rounded-lg border border-gray-300"
-            dropdownClassName="rounded-lg"
-          >
-            <Option value="10">10</Option>
-            <Option value="50">50</Option>
-          </Select>
-        </div>
-
-        <div className="flex gap-4">
-          <Input.TextArea
-            rows={6}
-            placeholder="Enter a formula..."
-            className="flex-1 rounded-lg border border-gray-300 p-2"
-          />
-          <div className="flex flex-col gap-2">
-            <Button
-              style={{
-                backgroundColor: "#E6F4FA",
-                color: "#0175BF",
-                border: "none",
-                height: "40px",
-              }}
-            >
-              + AND
-            </Button>
-            <Button
-              style={{
-                backgroundColor: "#E6F4FA",
-                color: "#0175BF",
-                border: "none",
-                height: "40px",
-              }}
-            >
-              + OR
-            </Button>
-          </div>
-        </div>
-
-        <p className="text-gray-400 text-sm mt-2 mb-4">
-          Hint/Tips will be placed here.
-        </p>
-
-        <div className="flex justify-between bg-[#F5F5F5] -mx-[40px] -mb-[40px] px-[40px] py-[10px] gap-2">
-          <Button
-            style={{
-              border: "none",
-              color: "#D32F2F",
-              backgroundColor: "#FFEBEE",
-            }}
-          >
-            <DeleteOutlined
-              style={{
-                display: "flex",
-                alignItems: "center",
-                fontSize: "20px",
-                height: "40px",
-              }}
-            />
-            Clear Filter
-          </Button>
-          <Button type="primary" style={{ height: "42px", fontSize: "16px" }}>
-            Search
-          </Button>
-        </div>
-      </Modal>
+        onClose={() => setIsAdvanceOpen(false)}
+        onSearch={handleAdvanceSearch}
+        onClear={handleClearFilter}
+        columns={columnDefinitions || columns}
+        modalWidth={600}
+      />
     </div>
   );
 };

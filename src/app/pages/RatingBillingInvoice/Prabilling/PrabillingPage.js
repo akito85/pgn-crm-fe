@@ -4,17 +4,19 @@ import { Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import BaseContainer from "../../../../components/BaseContainer";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import { getListPrabillingInitPopulate } from "../../../../redux/slices/rating_billing_invoice/praBilling";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import moment from "moment";
+import CardContainer from "../../../../components/CardContainer";
+import { EyeOutlined } from "@ant-design/icons";
 
 const PrabillingPage = () => {
   const { loading, list_prabilling_init, prabilling_pagination } = useSelector(
@@ -30,6 +32,11 @@ const PrabillingPage = () => {
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status", "action"],
+  }));
 
   useEffect(() => {
     dispatch(
@@ -57,7 +64,7 @@ const PrabillingPage = () => {
     });
   };
 
-  const allColumnDefinitions = useMemo(
+  const baseColumns = useMemo(
     () => [
       {
         key: "no",
@@ -102,9 +109,7 @@ const PrabillingPage = () => {
         sorter: true,
         width: 300,
         filteredValue: [search?.sor] || null,
-        ellipsis: {
-          showTitle: false,
-        },
+        ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "sor",
@@ -251,13 +256,15 @@ const PrabillingPage = () => {
           "date"
         ),
         render: (text) => {
-          const formattedDate = text ? moment(text).format("DD MMM YYYY HH:mm:ss") : "-";
+          const formattedDate = text
+            ? moment(text).format("DD MMM YYYY HH:mm:ss")
+            : "-";
           return renderDateColumn(
             "createdDtm",
             hasValue(search["createdDtm"]),
             searchText,
             formattedDate,
-            "date",
+            "datetime",
             search
           );
         },
@@ -269,9 +276,7 @@ const PrabillingPage = () => {
         align: "left",
         sorter: true,
         filteredValue: [search?.message] || null,
-        ellipsis: {
-          showTitle: false,
-        },
+        ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "message",
@@ -328,9 +333,7 @@ const PrabillingPage = () => {
         align: "left",
         sorter: true,
         filteredValue: [search?.remark] || null,
-        ellipsis: {
-          showTitle: false,
-        },
+        ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "remark",
@@ -376,14 +379,11 @@ const PrabillingPage = () => {
             3: { text: "Failed", color: "#f5222d" },
             5: { text: "Open", color: "#1890ff" },
           };
-
           const config = statusConfig[status] || {
             text: "Unknown",
             color: "#d9d9d9",
           };
-
           const displayText = config.text;
-
           return renderColumn(
             "status",
             hasValue(search["status"]),
@@ -400,14 +400,8 @@ const PrabillingPage = () => {
   );
 
   const routes = [
-    {
-      path: "",
-      breadcrumbName: "Rating Billing",
-    },
-    {
-      path: "",
-      breadcrumbName: "Prabilling",
-    },
+    { path: "", breadcrumbName: "Rating Billing" },
+    { path: "", breadcrumbName: "Prabilling" },
   ];
 
   const handleChangePage = (pageChange, pageSizeChange) => {
@@ -418,10 +412,9 @@ const PrabillingPage = () => {
 
   const onSort = (_, __, sorter) => {
     const dataSort =
-      sorter.order !== undefined
+      sorter && sorter.order !== undefined
         ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
-    
     setSort(dataSort);
   };
 
@@ -443,64 +436,75 @@ const PrabillingPage = () => {
     {
       action: "View",
       type: "table",
-      render: (record) => {
-        return (
-          <Link
-            to={RBI_ROUTES.PRABILLING_DETAIL}
-            state={{ id: record?.initCode }}
-          >
-            <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
-            </Tooltip>
-          </Link>
-        );
-      },
+      render: (record) => (
+        <Link
+          to={RBI_ROUTES.PRABILLING_DETAIL}
+          state={{ id: record?.initCode }}
+        >
+          <Tooltip title="Detail">
+            <EyeOutlined style={{ fontSize: "20px" }} />
+          </Tooltip>
+        </Link>
+      ),
     },
   ];
 
-  const columnActionPermission = useColumnActionPermission(
-    ["view"],
-    itemGrantAccess
-  );
+  const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
 
-  const columns = useMemo(() => {
-    return [...allColumnDefinitions, ...columnActionPermission];
-  }, [allColumnDefinitions, columnActionPermission]);
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
 
   return (
     <Spin spinning={loading}>
       <LayoutMenu>
         <BreadCrumb routes={routes} />
 
-        <div className="w-full justify-end flex gap-2">
-          <Toolbar items={itemGrantAccess} />
-        </div>
-
-        <BaseContainer header={"PRABILLING LIST"}>
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold text-primary">
+                PRABILLING LIST
+              </p>
+              <div className="mt-[15px]">
+                <Toolbar items={itemGrantAccess} />
+              </div>
+            </div>
+          }
+        >
           <div className="my-5">
-            <TablePaginationNew
-              columns={columns}
+            <TableRBI
               dataSource={list_prabilling_init}
-              totalData={prabilling_pagination.totalElements}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
               onChange={handleChangePage}
-              onSort={onSort}
+              onSizeChanger={handleChangePage}
+              totalData={prabilling_pagination?.totalElements || 0}
               tableScrolled={{ x: 2500, y: 525 }}
-              rowKey={(record) => record.initId}
-              useFixColumn={true}
-              defaultFixedColumns={{
-                no: "left",
-                status: "right",
-                action: "right",
-              }}
-              type="BE"
+              onSort={onSort}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
               loading={loading}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
       </LayoutMenu>
     </Spin>
   );

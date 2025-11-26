@@ -1,6 +1,5 @@
 import {
   ExclamationCircleOutlined,
-  FilterOutlined,
   LeftOutlined,
   MoreOutlined,
   RightOutlined,
@@ -8,10 +7,7 @@ import {
 import {
   Alert,
   Checkbox,
-  DatePicker,
   Form,
-  Input,
-  message,
   Popover,
   Select,
   Space,
@@ -24,12 +20,10 @@ import React, { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { useDispatch, useSelector } from "react-redux";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import DetailText from "../../../../../../components/DetailText";
 import InputComponent from "../../../../../../components/InputComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import StatusComponent from "../../../../../../components/StatusComponent";
-import TablePagination from "../../../../../../components/TablePagination";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
   showModalError,
@@ -51,8 +45,6 @@ import {
   getColumnSearchPropsPaging,
 } from "../../../../../../utils/getColumnSearchProps";
 import ApprovalSectionForm from "../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
-import AttachmentSectionForm from "../../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
-import ContentModalConfirmStatment from "../ContentModalConfirmStatment";
 import ContentModalConfirmSundry from "../ContentModalConfirmSundry";
 import TableSundryFE from "./TableSundryFE";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";

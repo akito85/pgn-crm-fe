@@ -1,11 +1,8 @@
 import React,{useState, useEffect, useRef} from 'react'
-import { useDispatch, useSelector } from "react-redux";
 
-import BaseContainer from '../../../../../../../../components/BaseContainer'
 import TablePagination from '../../../../../../../../components/TablePagination'
 import { Form, Input, Select, Spin } from 'antd';
 import SelectComponent from '../../../../../../../../components/SelectComponent';
-import { getListApprovalById } from "../../../../../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 import { FilterOutlined } from '@ant-design/icons';
 import Highlighter from 'react-highlight-words';
 

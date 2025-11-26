@@ -1,6 +1,5 @@
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 import {
-  dateFormatting,
   hasValue,
   renderColumn,
   renderDateColumn,

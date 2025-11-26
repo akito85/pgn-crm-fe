@@ -1,9 +1,5 @@
-import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn, toTitleCase } from "../../../../../utils";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../../components/StatusComponent";
-import Highlighter from "react-highlight-words";
-import { Tooltip } from "antd";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
 
 export const tableApproval = (
   search,

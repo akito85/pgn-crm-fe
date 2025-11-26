@@ -11,7 +11,6 @@ import { formMessageRequired } from "../../../../../../utils";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ModalConfirm } from "../../../../../../components/Modal/ModalPopUp";
-import CardComponent from "../../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../../components/DetailText";
 import { useDispatch, useSelector } from "react-redux";
 import {

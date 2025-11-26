@@ -45,7 +45,6 @@ import { handleMandatory, isDateString, renderDate } from "../Utils";
 import { showModalError } from "../../../../../redux/slices/general_slice";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import BaseContainer from "../../../../../components/BaseContainer";
-import { list } from "postcss";
 
 const PosForm = ({ type }) => {
   const {

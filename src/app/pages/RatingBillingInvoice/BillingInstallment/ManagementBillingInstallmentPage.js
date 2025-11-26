@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { Spin, Input, Select, Button, Table, Tag, Space, Tooltip } from "antd";
 import {
   SearchOutlined,
-  DownloadOutlined,
   PlusOutlined,
   EyeOutlined,
   FileTextOutlined,
@@ -88,20 +86,8 @@ const ManagementBillingInstallmentPage = () => {
     }
   };
 
-  const handleViewDetail = (record) => {
-    console.log("View detail:", record);
-  };
-
-  const handleViewDocument = (record) => {
-    console.log("View document:", record);
-  };
-
   const handleNewRequest = () => {
     navigate(RBI_ROUTES.MANAGEMENT_BILLING_INSTALLMENT_CREATE);
-  };
-
-  const handleExport = () => {
-    console.log("Export data");
   };
 
   // Table columns
@@ -151,20 +137,10 @@ const ManagementBillingInstallmentPage = () => {
       render: (text, record) => (
         <Space size="small">
           <Tooltip title="View Details">
-            <Button
-              type="default"
-              icon={<EyeOutlined />}
-              size="small"
-              onClick={() => handleViewDetail(record)}
-            />
+            <Button type="default" icon={<EyeOutlined />} size="small" />
           </Tooltip>
           <Tooltip title="View Document">
-            <Button
-              type="default"
-              icon={<FileTextOutlined />}
-              size="small"
-              onClick={() => handleViewDocument(record)}
-            />
+            <Button type="default" icon={<FileTextOutlined />} size="small" />
           </Tooltip>
         </Space>
       ),

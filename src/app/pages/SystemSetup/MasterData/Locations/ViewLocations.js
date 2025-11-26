@@ -16,7 +16,6 @@ import { activationLocation, downloadLocation, getDetailLocation, getLocationPag
 import { getColumnSearchPropsUseFilteredValue } from '../../../../../utils/getColumnSearchProps';
 import SVGIcon from "../../../../../assets/Icon/index";
 import { useRef } from 'react';
-import StatusComponent from '../../../../../components/StatusComponent';
 import ModalCustom from '../../../../../components/Modal/ModalCustom';
 import CardComponent from '../../../../../components/Card/CardComponent';
 import { dateFormatting, formMessageRequired, hasValue, renderColumn, toTitleCase } from '../../../../../utils';

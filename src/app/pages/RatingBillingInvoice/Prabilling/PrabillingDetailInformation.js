@@ -1,22 +1,21 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Tooltip, Tabs } from "antd";
+import { Spin, Tooltip } from "antd";
 import { Link } from "react-router-dom";
 import moment from "moment";
-import BaseContainer from "../../../../components/BaseContainer";
+import CardContainer from "../../../../components/CardContainer";
 import DetailText from "../../../../components/DetailText";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import TableRBI from "../../../../components/TableRBI";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
-import { hasValue, renderColumn } from "../../../../utils";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import {
   getDetailPrabillingResult,
   downloadPrabillingResult,
 } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
-
-const { TabPane } = Tabs;
 
 const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const { detail_prabilling_result, loading } = useSelector(
@@ -26,22 +25,18 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
-  // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [activeTab, setActiveTab] = useState("account_group");
 
-  // Tab States untuk pagination per tab
-  const [accountGroupPage, setAccountGroupPage] = useState(1);
-  const [accountSegmentPage, setAccountSegmentPage] = useState(1);
-  const [costCenterPage, setCostCenterPage] = useState(1);
-  const [meterReadingPage, setMeterReadingPage] = useState(1);
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no", "customerNumber"],
+    right: ["action"],
+  }));
 
-  // Fetch data - unified useEffect
   useEffect(() => {
     if (tabHeader === "Prabilling Information" && data?.initCode) {
       dispatch(
@@ -73,7 +68,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
 
   const handleDownload = () => {
     if (!data?.initCode) {
-      console.error("No initCode available for download");
       return;
     }
 
@@ -84,14 +78,13 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
     );
   };
 
-  const resultColumns = useMemo(
+  const baseResultColumns = useMemo(
     () => [
       {
         key: "no",
         title: "NO",
         width: 60,
         align: "center",
-        fixed: "left",
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
       {
@@ -100,8 +93,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         dataIndex: "customerNumber",
         width: 150,
         sorter: true,
-        fixed: "left",
-        filteredValue: search?.customerNumber ? [search.customerNumber] : null,
+        filteredValue: [search?.customerNumber] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "customerNumber",
@@ -128,7 +120,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         dataIndex: "customerName",
         width: 200,
         sorter: true,
-        filteredValue: search?.customerName ? [search.customerName] : null,
+        filteredValue: [search?.customerName] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "customerName",
@@ -150,22 +142,13 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           ),
       },
       {
-        key: "customerTypeId",
-        title: "CUSTOMER TYPE ID",
-        dataIndex: "customerTypeId",
-        width: 150,
-        align: "center",
-        sorter: true,
-        render: (text) => text || "-",
-      },
-      {
         key: "billingCycle",
         title: "BILLING CYCLE",
         dataIndex: "billingCycle",
         width: 150,
         align: "center",
         sorter: true,
-        filteredValue: search?.billingCycle ? [search.billingCycle] : null,
+        filteredValue: [search?.billingCycle] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "billingCycle",
@@ -201,7 +184,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         dataIndex: "accountNumber",
         width: 150,
         sorter: true,
-        filteredValue: search?.accountNumber ? [search.accountNumber] : null,
+        filteredValue: [search?.accountNumber] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "accountNumber",
@@ -228,7 +211,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         dataIndex: "accountName",
         width: 200,
         sorter: true,
-        filteredValue: search?.accountName ? [search.accountName] : null,
+        filteredValue: [search?.accountName] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "accountName",
@@ -272,7 +255,10 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         dataIndex: "costCenter",
         width: 200,
         sorter: true,
-        render: (text) => text || "-",
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (text) => <Tooltip title={text}>{text || "-"}</Tooltip>,
       },
       {
         key: "meterReadingCode",
@@ -288,7 +274,10 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         dataIndex: "sor",
         width: 200,
         sorter: true,
-        render: (text) => text || "-",
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (text) => <Tooltip title={text}>{text || "-"}</Tooltip>,
       },
       {
         key: "accountGroupType",
@@ -347,7 +336,10 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         dataIndex: "fullPriceCode",
         width: 250,
         sorter: true,
-        render: (text) => text || "-",
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (text) => <Tooltip title={text}>{text || "-"}</Tooltip>,
       },
       {
         key: "minUsage",
@@ -413,64 +405,10 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         render: (text) => text || "-",
       },
       {
-        key: "avgCalorie",
-        title: "AVG CALORIE",
-        dataIndex: "avgCalorie",
-        width: 120,
-        align: "right",
-        sorter: true,
-        render: (text) => (text != null ? text.toFixed(4) : "-"),
-      },
-      {
-        key: "firstMeasDate",
-        title: "FIRST MEAS DATE",
-        dataIndex: "firstMeasDate",
-        width: 150,
-        align: "center",
-        sorter: true,
-        render: (text) => (text ? moment(text).format("DD MMM YYYY") : "-"),
-      },
-      {
-        key: "lastMeasDate",
-        title: "LAST MEAS DATE",
-        dataIndex: "lastMeasDate",
-        width: 150,
-        align: "center",
-        sorter: true,
-        render: (text) => (text ? moment(text).format("DD MMM YYYY") : "-"),
-      },
-      {
-        key: "totalVol27",
-        title: "TOTAL VOL 27",
-        dataIndex: "totalVol27",
-        width: 150,
-        align: "right",
-        sorter: true,
-        render: (text) => (text != null ? text.toLocaleString() : "-"),
-      },
-      {
-        key: "totalVol60",
-        title: "TOTAL VOL 60",
-        dataIndex: "totalVol60",
-        width: 150,
-        align: "right",
-        sorter: true,
-        render: (text) => (text != null ? text.toLocaleString() : "-"),
-      },
-      {
-        key: "mpricingCode",
-        title: "MPRICING CODE",
-        dataIndex: "mpricingCode",
-        width: 150,
-        sorter: true,
-        render: (text) => text || "-",
-      },
-      {
-        title: "ACTION",
         key: "action",
+        title: "ACTION",
         width: 80,
         align: "center",
-        fixed: "right",
         render: (text, record) => (
           <Link
             to={RBI_ROUTES.PRABILLING_DETAIL_CUSTOMER}
@@ -494,183 +432,29 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
     [page, pageSize, search, searchText, searchedColumn, data]
   );
 
-  // Columns untuk tabs (tidak berubah)
-  const accountGroupColumns = useMemo(
-    () => [
-      {
-        title: "NO",
-        width: 60,
-        align: "center",
-        render: (text, object, index) =>
-          (accountGroupPage - 1) * pageSize + index + 1,
-      },
-      {
-        title: "ACCOUNT GROUP TYPE ID",
-        dataIndex: "accountGroupType",
-        width: 200,
-        sorter: true,
-      },
-      {
-        title: "CREATED BY",
-        dataIndex: "createdBy",
-        width: 150,
-      },
-      {
-        title: "CREATED DATE",
-        dataIndex: "createdDate",
-        width: 180,
-        render: (text) =>
-          text ? moment(text).format("DD MMM YYYY HH:mm:ss") : "-",
-      },
-      {
-        title: "UPDATED BY",
-        dataIndex: "updatedBy",
-        width: 150,
-      },
-      {
-        title: "UPDATED DATE",
-        dataIndex: "updatedDate",
-        width: 180,
-        render: (text) =>
-          text ? moment(text).format("DD MMM YYYY HH:mm:ss") : "-",
-      },
-    ],
-    [accountGroupPage, pageSize]
-  );
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseResultColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseResultColumns]);
 
-  const accountSegmentColumns = useMemo(
-    () => [
-      {
-        title: "NO",
-        width: 60,
-        align: "center",
-        render: (text, object, index) =>
-          (accountSegmentPage - 1) * pageSize + index + 1,
-      },
-      {
-        title: "SEGMENT ID",
-        dataIndex: "accountSegment",
-        width: 200,
-        sorter: true,
-      },
-      {
-        title: "CREATED BY",
-        dataIndex: "createdBy",
-        width: 150,
-      },
-      {
-        title: "CREATED DATE",
-        dataIndex: "createdDate",
-        width: 180,
-        render: (text) =>
-          text ? moment(text).format("DD MMM YYYY HH:mm:ss") : "-",
-      },
-      {
-        title: "UPDATED BY",
-        dataIndex: "updatedBy",
-        width: 150,
-      },
-      {
-        title: "UPDATED DATE",
-        dataIndex: "updatedDate",
-        width: 180,
-        render: (text) =>
-          text ? moment(text).format("DD MMM YYYY HH:mm:ss") : "-",
-      },
-    ],
-    [accountSegmentPage, pageSize]
-  );
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
 
-  const costCenterColumns = useMemo(
-    () => [
-      {
-        title: "NO",
-        width: 60,
-        align: "center",
-        render: (text, object, index) =>
-          (costCenterPage - 1) * pageSize + index + 1,
-      },
-      {
-        title: "COST CENTER ID",
-        dataIndex: "costCenter",
-        width: 200,
-        sorter: true,
-      },
-      {
-        title: "CREATED BY",
-        dataIndex: "createdBy",
-        width: 150,
-      },
-      {
-        title: "CREATED DATE",
-        dataIndex: "createdDate",
-        width: 180,
-        render: (text) =>
-          text ? moment(text).format("DD MMM YYYY HH:mm:ss") : "-",
-      },
-      {
-        title: "UPDATED BY",
-        dataIndex: "updatedBy",
-        width: 150,
-      },
-      {
-        title: "UPDATED DATE",
-        dataIndex: "updatedDate",
-        width: 180,
-        render: (text) =>
-          text ? moment(text).format("DD MMM YYYY HH:mm:ss") : "-",
-      },
-    ],
-    [costCenterPage, pageSize]
-  );
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
 
-  const meterReadingColumns = useMemo(
-    () => [
-      {
-        title: "NO",
-        width: 60,
-        align: "center",
-        render: (text, object, index) =>
-          (meterReadingPage - 1) * pageSize + index + 1,
-      },
-      {
-        title: "METER READING CODE",
-        dataIndex: "meterReadingCode",
-        width: 200,
-        sorter: true,
-      },
-      {
-        title: "CREATED BY",
-        dataIndex: "createdBy",
-        width: 150,
-      },
-      {
-        title: "CREATED DATE",
-        dataIndex: "createdDate",
-        width: 180,
-        render: (text) =>
-          text ? moment(text).format("DD MMM YYYY HH:mm:ss") : "-",
-      },
-      {
-        title: "UPDATED BY",
-        dataIndex: "updatedBy",
-        width: 150,
-      },
-      {
-        title: "UPDATED DATE",
-        dataIndex: "updatedDate",
-        width: 180,
-        render: (text) =>
-          text ? moment(text).format("DD MMM YYYY HH:mm:ss") : "-",
-      },
-    ],
-    [meterReadingPage, pageSize]
-  );
-
-  const onSort = (_, __, sort) => {
+  const onSort = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -678,26 +462,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const handleChangePage = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
     setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
-  const handleAccountGroupPageChange = (pageChange, pageSizeChange) => {
-    setAccountGroupPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
-
-  const handleAccountSegmentPageChange = (pageChange, pageSizeChange) => {
-    setAccountSegmentPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
-
-  const handleCostCenterPageChange = (pageChange, pageSizeChange) => {
-    setCostCenterPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
-
-  const handleMeterReadingPageChange = (pageChange, pageSizeChange) => {
-    setMeterReadingPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
   };
 
@@ -716,19 +480,19 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
     }
   };
 
-  // Extract data dengan struktur baru
   const resultData = detail_prabilling_result?.result || [];
   const pageInfo = detail_prabilling_result?.page || {};
 
-  const accountGroupData = data?.accountGroupType || [];
-  const accountSegmentData = data?.accountSegment || [];
-  const costCenterData = data?.costCenter || [];
-  const meterReadingData = data?.meterReadingCode || [];
-
   return (
     <Spin spinning={loading}>
-      <BaseContainer header={"Prabilling Information"}>
-        <div className={"w-full grid grid-cols-4 gap-2"}>
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">PRABILLING INFORMATION</p>
+          </div>
+        }
+      >
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(5,auto)] gap-x-8 gap-y-2 sm:gap-y-1">
           <DetailText label={"Init Code"}>{data?.initCode || "-"}</DetailText>
           <DetailText label={"Process Name"}>
             {data?.processName || "-"}
@@ -739,7 +503,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           <DetailText label={"Billing Period"}>
             {data?.billPeriod || "-"}
           </DetailText>
-
           <DetailText label={"SOR"}>{data?.sor || "-"}</DetailText>
           <DetailText label={"Total Customer"}>
             {data?.totalCustomer || 0}
@@ -750,137 +513,43 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
               ? moment(data.createdDtm).format("DD MMM YYYY HH:mm:ss")
               : "-"}
           </DetailText>
-
           <DetailText label={"Status"}>{renderStatus(data?.status)}</DetailText>
-          <div className="col-span-3">
-            <DetailText label={"Message"}>{data?.message || "-"}</DetailText>
-          </div>
-
-          <div className="col-span-4">
-            <DetailText label={"Remark"}>{data?.remark || "-"}</DetailText>
-          </div>
+          <DetailText label={"Message"}>{data?.message || "-"}</DetailText>
+          <DetailText label={"Remark"} className="col-span-2">
+            {data?.remark || "-"}
+          </DetailText>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"Prabilling Detail"}>
-        <Tabs activeKey={activeTab} onChange={setActiveTab} type="card">
-          <TabPane
-            tab={`Account Group Type (${accountGroupData.length})`}
-            key="account_group"
-          >
-            <div className="my-5">
-              <TablePaginationNew
-                columns={accountGroupColumns}
-                dataSource={accountGroupData}
-                totalData={accountGroupData.length}
-                current={accountGroupPage}
-                pageSize={pageSize}
-                onChange={handleAccountGroupPageChange}
-                tableScrolled={{ x: 1200, y: 400 }}
-                onSort={onSort}
-                rowKey={(record) => `account-group-${record.id}`}
-              />
-            </div>
-          </TabPane>
-
-          <TabPane
-            tab={`Account Segment (${accountSegmentData.length})`}
-            key="account_segment"
-          >
-            <div className="my-5">
-              <TablePaginationNew
-                columns={accountSegmentColumns}
-                dataSource={accountSegmentData}
-                totalData={accountSegmentData.length}
-                current={accountSegmentPage}
-                pageSize={pageSize}
-                onChange={handleAccountSegmentPageChange}
-                tableScrolled={{ x: 1200, y: 400 }}
-                onSort={onSort}
-                rowKey={(record) => `account-segment-${record.id}`}
-              />
-            </div>
-          </TabPane>
-
-          <TabPane
-            tab={`Cost Center (${costCenterData.length})`}
-            key="cost_center"
-          >
-            <div className="my-5">
-              <TablePaginationNew
-                columns={costCenterColumns}
-                dataSource={costCenterData}
-                totalData={costCenterData.length}
-                current={costCenterPage}
-                pageSize={pageSize}
-                onChange={handleCostCenterPageChange}
-                tableScrolled={{ x: 1200, y: 400 }}
-                onSort={onSort}
-                rowKey={(record) => `cost-center-${record.id}`}
-              />
-            </div>
-          </TabPane>
-
-          <TabPane
-            tab={`Meter Reading Code (${meterReadingData.length})`}
-            key="meter_reading"
-          >
-            <div className="my-5">
-              <TablePaginationNew
-                columns={meterReadingColumns}
-                dataSource={meterReadingData}
-                totalData={meterReadingData.length}
-                current={meterReadingPage}
-                pageSize={pageSize}
-                onChange={handleMeterReadingPageChange}
-                tableScrolled={{ x: 1200, y: 400 }}
-                onSort={onSort}
-                rowKey={(record) => `meter-reading-${record.id}`}
-              />
-            </div>
-          </TabPane>
-        </Tabs>
-      </BaseContainer>
-
-      <BaseContainer header={"Prabilling Result"}>
-        <div className={"w-full flex justify-between items-center my-2"}>
-          <div className="text-sm text-gray-600">
-            Total Records: {pageInfo?.totalElements || 0}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">PRABILLING RESULT</p>
           </div>
-          <ButtonComponent
-            type={"submit"}
-            border={false}
-            icon={<SVGIcon name={"IconButtonDownload"} width={24} />}
-            onClick={handleDownload}
-            disabled={resultData.length === 0}
-          >
-            Download
-          </ButtonComponent>
-        </div>
-
+        }
+      >
         <div className="my-5">
-          <TablePaginationNew
-            columns={resultColumns}
+          <TableRBI
             dataSource={resultData}
-            totalData={pageInfo?.totalElements || 0}
+            columns={processedColumns}
             current={page}
             pageSize={pageSize}
             onChange={handleChangePage}
+            onSizeChanger={handleChangePage}
+            totalData={pageInfo?.totalElements || 0}
             tableScrolled={{ x: 5500, y: 600 }}
             onSort={onSort}
+            handleDownload={handleDownload}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
             rowKey={(record, index) =>
               `${record.customerNumber}-${record.accountNumber}-${index}`
             }
-            useFixColumn={true}
-            defaultFixedColumns={{
-              no: "left",
-              action: "right",
-            }}
-            type="BE"
-            loading={loading}
           />
         </div>
-      </BaseContainer>
+      </CardContainer>
     </Spin>
   );
 };

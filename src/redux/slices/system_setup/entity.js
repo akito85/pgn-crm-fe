@@ -1,13 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import userHttpService from "../../services/userHttpService";
-import {  showModalSuccess, validateError } from "../general_slice";
+import { showModalSuccess, validateError } from "../general_slice";
 import { errorBody, errorCode, errorMessage } from "../../../utils";
 const initialState = {
   data: [],
   data_detail: null,
   data_tax: null,
   loading: false,
-  allow_file:null
+  allow_file: null,
 };
 
 export const getListEntity = createAsyncThunk(
@@ -18,7 +18,9 @@ export const getListEntity = createAsyncThunk(
       const response = await userHttpService.getAll(url);
       return response;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_LIST_ENTITY", back: false }))
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_LIST_ENTITY", back: false })
+      );
 
       return thunkAPI.rejectWithValue(error.response);
     }
@@ -35,7 +37,13 @@ export const getAllEntityPaginate = createAsyncThunk(
       const response = await userHttpService.getPagination(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_ALL_ENTITY_PAGINATE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_ALL_ENTITY_PAGINATE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -53,7 +61,13 @@ export const createEntity = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_ENTITY", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "CREATE_ENTITY",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -61,7 +75,7 @@ export const createEntity = createAsyncThunk(
 export const inactiveEntity = createAsyncThunk(
   "INACTIVE_ENTITY",
   async (body, thunkAPI) => {
-    let status = body?.status === 'ACTIVE' ? 'inactivated' : 'activated';
+    let status = body?.status === "ACTIVE" ? "inactivated" : "activated";
     try {
       const url = `/v1/dbs/api/entity/inactive/active`;
       const data = await userHttpService.activationWithRemark(url, body);
@@ -73,7 +87,13 @@ export const inactiveEntity = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), status, errorMessage(error)), action: "INACTIVE_ENTITY", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), status, errorMessage(error)),
+          action: "INACTIVE_ENTITY",
+          back: false,
+        })
+      );
 
       // const message =
       //   (error.response &&
@@ -102,7 +122,13 @@ export const getDetailEntity = createAsyncThunk(
       const data = await userHttpService.getDetail(url);
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "GET_DETAIL_ENTITY", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_DETAIL_ENTITY",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -115,7 +141,9 @@ export const deleteEntity = createAsyncThunk(
       const response = await userHttpService.deleteData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DELETE_ENTITY", back: false }))
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "DELETE_ENTITY", back: false })
+      );
 
       // const message =
       //   (error.response && error.response.data && error.response.data.message) ||
@@ -147,7 +175,13 @@ export const updateEntity = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'updated', errorMessage(error)), action: "UPDATE_ENTITY", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "updated", errorMessage(error)),
+          action: "UPDATE_ENTITY",
+          back: false,
+        })
+      );
 
       // const message =
       //   (error.response &&
@@ -179,7 +213,13 @@ export const downloadExcel = createAsyncThunk(
       const response = await userHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI?.dispatch(validateError({ error: error, action:'DOWNLOAD_ENTITY_EXCEL', back: false}))
+      thunkAPI?.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_ENTITY_EXCEL",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -192,7 +232,13 @@ export const getDetailTaxEntity = createAsyncThunk(
       const data = await userHttpService.getDetail(url);
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DETAIL_TAX_ENTITY", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DETAIL_TAX_ENTITY",
+          back: false,
+        })
+      );
 
       // const message =
       //   (error.response && error.response.data && error.response.data.message) ||
@@ -220,7 +266,13 @@ export const inactiveTax = createAsyncThunk(
       const data = await userHttpService.deleteData(url);
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'updated', errorMessage(error)), action: "INACTIVE_TAX", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "updated", errorMessage(error)),
+          action: "INACTIVE_TAX",
+          back: false,
+        })
+      );
 
       // const message =
       //   (error.response && error.response.data && error.response.data.message) ||
@@ -240,15 +292,21 @@ export const inactiveTax = createAsyncThunk(
   }
 );
 
-
-export const checkAllowingFile = createAsyncThunk("CHECK_ALLOWING_FILE",
-  async ( thunkAPI) => {
+export const checkAllowingFile = createAsyncThunk(
+  "CHECK_ALLOWING_FILE",
+  async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/entity/config-file`;
       const data = await userHttpService.getAll(url);
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "CHECK_ALLOWING_FILE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "CHECK_ALLOWING_FILE",
+          back: false,
+        })
+      );
 
       // const message =
       //   (error.response && error.response.data && error.response.data.message) ||
@@ -266,7 +324,7 @@ export const checkAllowingFile = createAsyncThunk("CHECK_ALLOWING_FILE",
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
-)
+);
 const entitySlice = createSlice({
   name: "entity",
   initialState,
@@ -276,11 +334,11 @@ const entitySlice = createSlice({
       state.data = action.payload.result;
       state.loading = false;
     },
-    [getListEntity.rejected]: (state, action) => {
+    [getListEntity.rejected]: (state) => {
       state.data = null;
       state.loading = false;
     },
-    [getListEntity.pending]: (state, action) => {
+    [getListEntity.pending]: (state) => {
       state.loading = true;
     },
     // get all entity paginate
@@ -310,13 +368,13 @@ const entitySlice = createSlice({
       state.loading = false;
     },
     // inactive entity
-    [inactiveEntity.pending]: (state, action) => {
+    [inactiveEntity.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveEntity.fulfilled]: (state, action) => {
+    [inactiveEntity.fulfilled]: (state) => {
       state.loading = false;
     },
-    [inactiveEntity.rejected]: (state, action) => {
+    [inactiveEntity.rejected]: (state) => {
       state.loading = false;
     },
     // detail entity
@@ -334,13 +392,13 @@ const entitySlice = createSlice({
       state.loading = false;
     },
     // delete entity
-    [deleteEntity.pending]: (state, action) => {
+    [deleteEntity.pending]: (state) => {
       state.loading = true;
     },
-    [deleteEntity.fulfilled]: (state, action) => {
+    [deleteEntity.fulfilled]: (state) => {
       state.loading = false;
     },
-    [deleteEntity.rejected]: (state, action) => {
+    [deleteEntity.rejected]: (state) => {
       state.loading = false;
     },
     // update entity
@@ -360,7 +418,7 @@ const entitySlice = createSlice({
     [downloadExcel.pending]: (state) => {
       state.loading = true;
     },
-    [downloadExcel.fulfilled]: (state, action) => {
+    [downloadExcel.fulfilled]: (state) => {
       state.loading = false;
     },
     [downloadExcel.rejected]: (state) => {
@@ -389,7 +447,7 @@ const entitySlice = createSlice({
     },
 
     // check allowing file
-    [checkAllowingFile.pending]: (state, action) => {
+    [checkAllowingFile.pending]: (state) => {
       state.loading = true;
     },
     [checkAllowingFile.fulfilled]: (state, action) => {
@@ -399,7 +457,7 @@ const entitySlice = createSlice({
     [checkAllowingFile.rejected]: (state, action) => {
       state.loading = false;
       state.allow_file = action.payload;
-    }
+    },
   },
 });
 

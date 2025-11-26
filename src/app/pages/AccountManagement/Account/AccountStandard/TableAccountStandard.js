@@ -3,10 +3,7 @@ import { Input, DatePicker, Tooltip } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
 import moment from "moment";
 import { dateFormatting } from "../../../../../utils";
-import { Link } from "react-router-dom";
 import StatusComponent from "../../../../../components/StatusComponent";
-import SVGIcon from "../../../../../assets/Icon/index";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 
 const getColumnSearchProps = (
   dataIndex,

@@ -1,8 +1,9 @@
-import Highlighter from "react-highlight-words";
-import moment from "moment";
-import { Tooltip } from "antd";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn, separatorNumber } from "../../../../../../utils";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import {
+  hasValue,
+  renderColumn,
+  separatorNumber,
+} from "../../../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
 export const columnsBillingItem = (
   pageBI = 1,
@@ -11,26 +12,21 @@ export const columnsBillingItem = (
   searchedColumnBI,
   searchTextBI,
   handleSearchBI = () => {},
-  searchBI,
+  searchBI
 ) => [
   {
+    key: "no",
     title: "NO",
     align: "center",
     width: 60,
     render: (text, object, index) => (pageBI - 1) * pageSizeBI + index + 1,
   },
   {
+    key: "item",
     title: "ITEM",
     dataIndex: "item",
     sorter: true,
     align: "left",
-    // ...getColumnSearchPropsPaging(
-    //   "item",
-    //   searchInput,
-    //   searchedColumnBI,
-    //   searchTextBI,
-    //   handleSearchBI
-    // ),
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
       "item",
@@ -52,6 +48,7 @@ export const columnsBillingItem = (
       ),
   },
   {
+    key: "quantity",
     title: "QUANTITY",
     dataIndex: "quantity",
     sorter: true,
@@ -77,6 +74,7 @@ export const columnsBillingItem = (
       ),
   },
   {
+    key: "uom",
     title: "UOM",
     dataIndex: "uom",
     sorter: true,
@@ -102,6 +100,7 @@ export const columnsBillingItem = (
       ),
   },
   {
+    key: "currency",
     title: "CURRENCY",
     dataIndex: "currency",
     sorter: true,
@@ -127,6 +126,7 @@ export const columnsBillingItem = (
       ),
   },
   {
+    key: "priceCode",
     title: "PRICE CODE",
     dataIndex: "priceCode",
     sorter: true,
@@ -151,6 +151,7 @@ export const columnsBillingItem = (
       ),
   },
   {
+    key: "price",
     title: "PRICE",
     dataIndex: "price",
     sorter: true,
@@ -176,6 +177,7 @@ export const columnsBillingItem = (
       ),
   },
   {
+    key: "amount",
     title: "AMOUNT",
     dataIndex: "amount",
     sorter: true,
@@ -201,7 +203,8 @@ export const columnsBillingItem = (
       ),
   },
   {
-    title: "DISCOUNT MOUNT",
+    key: "discountAmount",
+    title: "DISCOUNT AMOUNT",
     dataIndex: "discountAmount",
     sorter: true,
     align: "right",
@@ -226,6 +229,7 @@ export const columnsBillingItem = (
       ),
   },
   {
+    key: "totalAmount",
     title: "TOTAL AMOUNT",
     dataIndex: "totalAmount",
     sorter: true,
@@ -251,6 +255,7 @@ export const columnsBillingItem = (
       ),
   },
   {
+    key: "totalAmountEqvIdr",
     title: "TOTAL AMOUNT EQV IDR",
     dataIndex: "totalAmountEqvIdr",
     sorter: true,
@@ -276,6 +281,7 @@ export const columnsBillingItem = (
       ),
   },
   {
+    key: "totalAmountEqvUsd",
     title: "TOTAL AMOUNT EQV USD",
     dataIndex: "totalAmountEqvUsd",
     sorter: true,
@@ -300,102 +306,8 @@ export const columnsBillingItem = (
         searchBI
       ),
   },
-  // {
-  //   title: "RATE TYPE", //
-  //   dataIndex: "rateType",
-  //   sorter: true,
-  //   align: "center",
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     searchBI,
-  //     "rateType",
-  //     searchInput,
-  //     searchedColumnBI,
-  //     searchTextBI,
-  //     handleSearchBI,
-  //     true
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "rateType",
-  //       hasValue(searchBI["rateType"]),
-  //       searchTextBI,
-  //       text,
-  //       false,
-  //       "input",
-  //       searchBI
-  //     ),
-  // },
-  // {
-  //   title: "RATE", //
-  //   dataIndex: "rate",
-  //   sorter: true,
-  //   align: "right",
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     searchBI,
-  //     "rate",
-  //     searchInput,
-  //     searchedColumnBI,
-  //     searchTextBI,
-  //     handleSearchBI,
-  //     true
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "rate",
-  //       hasValue(searchBI["rate"]),
-  //       searchTextBI,
-  //       text,
-  //       false,
-  //       "input",
-  //       searchBI
-  //     ),
-  // },
-  // {
-  //   title: "RATE DATE", //
-  //   sorter: true,
-  //   align: "center",
-  //   dataIndex: "rateDate",
-  //   ...getColumnSearchPropsUseFilteredValue(
-  //     searchBI,
-  //     "rateDate",
-  //     searchInput,
-  //     searchedColumnBI,
-  //     searchTextBI,
-  //     handleSearchBI,
-  //     true,
-  //     "date"
-  //   ),
-  //   render: (text) =>
-  //     renderDateColumn(
-  //       "rateDate",
-  //       hasValue(searchBI["rateDate"]),
-  //       searchTextBI,
-  //       text,
-  //       "date",
-  //       searchBI
-  //     ),
-  //   // render: (text) =>
-  //   //   searchedColumnBI === "rateDate" ? (
-  //   //     <Highlighter
-  //   //       highlightStyle={{
-  //   //         backgroundColor: "#ffc069",
-  //   //         padding: 0,
-  //   //       }}
-  //   //       searchWords={[
-  //   //         searchTextBI
-  //   //           ? moment(searchTextBI, "YYYY-MM-DD").format(dateFormatting.date)
-  //   //           : "",
-  //   //       ]}
-  //   //       autoEscape
-  //   //       textToHighlight={text ? moment(text).format(dateFormatting.date) : ""}
-  //   //     />
-  //   //   ) : text === null ? (
-  //   //     ""
-  //   //   ) : (
-  //   //     moment(text).format(dateFormatting.date)
-  //   //   ),
-  // },
   {
+    key: "reference",
     title: "REFERENCE",
     dataIndex: "reference",
     sorter: true,
@@ -420,6 +332,7 @@ export const columnsBillingItem = (
       ),
   },
   {
+    key: "typeBasis",
     title: "TYPE BASIS",
     dataIndex: "typeBasis",
     sorter: true,
@@ -445,6 +358,7 @@ export const columnsBillingItem = (
       ),
   },
   {
+    key: "description",
     sorter: true,
     title: "DESCRIPTION",
     dataIndex: "description",
@@ -470,24 +384,5 @@ export const columnsBillingItem = (
         "input",
         searchBI
       ),
-    // ...getColumnSearchPropsPaging("description"),
-    // render: (text) =>
-    //   searchedColumnBI === "description" ? (
-    //     <Highlighter
-    //       highlightStyle={{
-    //         backgroundColor: "#ffc069",
-    //         padding: 0,
-    //       }}
-    //       searchWords={[searchTextBI]}
-    //       autoEscape
-    //       textToHighlight={text ? text.toString() : ""}
-    //     />
-    //   ) : text ? (
-    //     <Tooltip placement="topLeft" title={text}>
-    //       {text}
-    //     </Tooltip>
-    //   ) : (
-    //     ""
-    //   ),
   },
 ];

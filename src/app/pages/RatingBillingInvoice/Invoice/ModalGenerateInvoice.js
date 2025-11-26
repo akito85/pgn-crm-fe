@@ -5,7 +5,6 @@ import { RightOutlined } from "@ant-design/icons";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import SVGIcon from "../../../../assets/Icon/index";
-import TablePagination from "../../../../components/TableRBI";
 import InputComponent from "../../../../components/InputComponent";
 import { columnsGenerateInvoice } from "./TableGenerateInvoice";
 import DetailText from "../../../../components/DetailText";

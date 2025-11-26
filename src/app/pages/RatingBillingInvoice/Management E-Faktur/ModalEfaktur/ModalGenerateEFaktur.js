@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Table, Alert, Progress, Spin, Steps, Select  } from "antd";
+import { Form, Table, Alert, Progress, Spin, Steps, Select } from "antd";
 import {
-  ThunderboltOutlined,
+  SaveOutlined,
   CheckCircleOutlined,
   RightOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import SelectComponent from "../../../../../components/SelectComponent";
 import DetailText from "../../../../../components/DetailText";
 import SVGIcon from "../../../../../assets/Icon/index";
 import {
@@ -33,6 +33,7 @@ import {
 } from "../../Billing/Detail/Table/TableApproval";
 import { configApp } from "../../../../../constants/configApp";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
+import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 
 const ModalGenerateEFaktur = ({
   isOpen = false,
@@ -42,7 +43,6 @@ const ModalGenerateEFaktur = ({
 }) => {
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const containerRef = useRef(null);
   const searchInput = useRef(null);
 
   const {
@@ -53,8 +53,8 @@ const ModalGenerateEFaktur = ({
     data_approval,
     data_approval_list,
     data_billingItem,
-    upload_progress, 
-    upload_results, 
+    upload_progress,
+    upload_results,
   } = useSelector((state) => state.efaktur);
 
   const [existingEFaktur, setExistingEFaktur] = useState(null);
@@ -72,31 +72,78 @@ const ModalGenerateEFaktur = ({
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [saveType, setSaveType] = useState(""); // 'SUBMIT' or 'DRAFT'
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  
+  // State untuk data detail E-Faktur (NPWP, NIK, Email, Alamat)
+  const [detailData, setDetailData] = useState({
+    npwp: null,
+    nikPasp: null,
+    email: null,
+    alamat: null,
+  });
 
   useEffect(() => {
     if (isOpen) {
       dispatch(getAllApprovalList());
       dispatch(getListCategory());
-      dispatch(resetUploadProgress()); 
+      dispatch(resetUploadProgress());
+      setIsDataLoaded(false);
     }
   }, [isOpen, dispatch]);
 
   useEffect(() => {
-    if (isOpen && billingData?.billingCode) {
-      dispatch(getAllBillingItemPaginate(billingData.billingCode));
+    if (isOpen && billingData && !isDataLoaded) {
+      setIsDataLoaded(true);
 
-      dispatch(getDetailEFaktur(billingData.billingCode))
-        .unwrap()
-        .then((result) => {
-          if (result && result.efakturId) {
-            setExistingEFaktur(result);
-          }
-        })
-        .catch(() => {
-          setExistingEFaktur(null);
-        });
+      // Load billing items
+      if (billingData.billingCode) {
+        dispatch(getAllBillingItemPaginate(billingData.billingCode));
+      }
+
+      // Load detail E-Faktur jika efakturId tersedia
+      if (billingData.efakturId) {
+        dispatch(getDetailEFaktur(billingData.efakturId))
+          .unwrap()
+          .then((result) => {
+            if (result && result.efakturId) {
+              setExistingEFaktur(result);
+              setIsExistingEFaktur(true);
+              
+              // Set detail data dari existing e-faktur
+              setDetailData({
+                npwp: result.npwp,
+                nikPasp: result.nikPasp,
+                email: result.email,
+                alamat: result.alamat,
+              });
+            } else {
+              setExistingEFaktur(null);
+              setIsExistingEFaktur(false);
+              setDetailDataFromBilling();
+            }
+          })
+          .catch(() => {
+            setExistingEFaktur(null);
+            setIsExistingEFaktur(false);
+            setDetailDataFromBilling();
+          });
+      } else {
+        // Jika tidak ada efakturId, gunakan data dari billingData
+        setDetailDataFromBilling();
+      }
     }
-  }, [isOpen, billingData, dispatch]);
+  }, [isOpen, billingData, dispatch, isDataLoaded]);
+
+  // Function untuk set detail data dari billingData jika tidak ada efakturId
+  const setDetailDataFromBilling = () => {
+    setDetailData({
+      npwp: billingData?.npwp || null,
+      nikPasp: billingData?.nikPasp || null,
+      email: billingData?.email || null,
+      alamat: billingData?.alamat || billingData?.address || null,
+    });
+  };
 
   useEffect(() => {
     if (data_billingItem && data_billingItem.length > 0) {
@@ -137,19 +184,6 @@ const ModalGenerateEFaktur = ({
 
   const next = () => setCurrent(current + 1);
   const prev = () => setCurrent(current - 1);
-
-  const scrollLeftHandler = () => {
-    if (containerRef.current) containerRef.current.scrollLeft -= 250;
-  };
-
-  const scrollRightHandler = () => {
-    if (containerRef.current) containerRef.current.scrollLeft += 250;
-  };
-
-  const handleButtonNext = () => {
-    next();
-    scrollRightHandler();
-  };
 
   const handleSelect = (e) => {
     dispatch(getListApprovalById(e));
@@ -239,7 +273,7 @@ const ModalGenerateEFaktur = ({
     },
     {
       title: "Total",
-      dataIndex: "total", 
+      dataIndex: "total",
       key: "total",
       width: 180,
       align: "right",
@@ -285,7 +319,9 @@ const ModalGenerateEFaktur = ({
   const totals = calculateTotals();
   const currency = billingItems[0]?.currency || "IDR";
 
-  const handleGenerate = async (formValues) => {
+  const handleGenerate = async (status) => {
+    const formValues = form.getFieldsValue();
+
     if (!billingData) {
       setErrorMessage("Data billing tidak ditemukan");
       setModalError(true);
@@ -298,9 +334,10 @@ const ModalGenerateEFaktur = ({
       return;
     }
 
-    if (listDataAttachment.length === 0) {
+    // Validasi attachment hanya untuk SUBMIT
+    if (status === "SUBMIT" && listDataAttachment.length === 0) {
       setErrorMessage(
-        "Attachment is mandatory. Please upload at least one file."
+        "Attachment is mandatory for submission. Please upload at least one file."
       );
       setModalError(true);
       return;
@@ -309,21 +346,19 @@ const ModalGenerateEFaktur = ({
     const efakturData = {
       apphierId: formValues.apphierId,
       billingCode: billingData.billingCode,
-      invoiceNumber: billingData.invoiceNumber || billingData.billingCode,
-      invoiceDate: billingData.invoiceDate,
-      invoiceDueDate: billingData.dueDate || billingData.invoiceDate,
-      dpp: totals.totalDpp,
-      ppn: totals.totalPpn,
-      totalAmount: totals.total,
-      remark: formValues.remark || "Generated via system",
-      status: "SUBMIT",
+      remark:
+        formValues.remark ||
+        (status === "DRAFT" ? "Saved as draft" : "Generated via system"),
+      status: status,
     };
 
     try {
+      setSaveType(status);
+
       const result = await dispatch(
         generateEFakturWithAttachments({
           efakturData,
-          attachments: listDataAttachment,
+          attachments: status === "SUBMIT" ? listDataAttachment : [],
         })
       ).unwrap();
 
@@ -341,7 +376,9 @@ const ModalGenerateEFaktur = ({
 
       setModalSuccess(true);
     } catch (error) {
-      const errorMsg = error?.message || "Gagal generate E-Faktur";
+      const errorMsg =
+        error?.message ||
+        `Gagal ${status === "DRAFT" ? "menyimpan draft" : "generate"} E-Faktur`;
       setErrorMessage(errorMsg);
       setModalError(true);
     }
@@ -357,6 +394,14 @@ const ModalGenerateEFaktur = ({
     setExistingEFaktur(null);
     setIsExistingEFaktur(false);
     setCurrent(0);
+    setIsDataLoaded(false);
+    setSaveType("");
+    setDetailData({
+      npwp: null,
+      nikPasp: null,
+      email: null,
+      alamat: null,
+    });
     dispatch(resetUploadProgress());
     handleClose();
   };
@@ -372,7 +417,7 @@ const ModalGenerateEFaktur = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Generate E-Faktur ke PJAP dengan Approval"
+        header="Generate E-Faktur"
         handleCancel={handleCancel}
         width={800}
         footer={
@@ -388,10 +433,7 @@ const ModalGenerateEFaktur = ({
             )}
             {current > 0 && current < steps.length - 1 && (
               <ButtonComponent
-                onClick={() => {
-                  prev();
-                  scrollLeftHandler();
-                }}
+                onClick={prev}
                 type="submit"
                 icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
                 disabled={loading_modal}
@@ -401,7 +443,7 @@ const ModalGenerateEFaktur = ({
             )}
             {current < steps.length - 1 && (
               <ButtonComponent
-                onClick={handleButtonNext}
+                onClick={next}
                 type="submit"
                 disabled={steps[current].disabled || loading_modal}
               >
@@ -410,45 +452,49 @@ const ModalGenerateEFaktur = ({
               </ButtonComponent>
             )}
             {current === steps.length - 1 && (
-              <ButtonComponent
-                type="submit"
-                htmlType="submit"
-                form="formGenerateEfaktur"
-                loading={loading_modal}
-                disabled={loading_modal}
-                icon={<ThunderboltOutlined />}
-              >
-                {loading_modal ? "Generating..." : "Generate & Kirim"}
-              </ButtonComponent>
+              <>
+                <ButtonComponent
+                  type="default"
+                  onClick={() => handleGenerate("DRAFT")}
+                  loading={loading_modal && saveType === "DRAFT"}
+                  disabled={loading_modal}
+                  icon={<FileTextOutlined />}
+                >
+                  {loading_modal && saveType === "DRAFT"
+                    ? "Saving..."
+                    : "Save as Draft"}
+                </ButtonComponent>
+                <ButtonComponent
+                  type="submit"
+                  onClick={() => handleGenerate("SUBMIT")}
+                  loading={loading_modal && saveType === "SUBMIT"}
+                  disabled={loading_modal}
+                  icon={<SaveOutlined />}
+                >
+                  {loading_modal && saveType === "SUBMIT"
+                    ? "Submitting..."
+                    : "Save & Submit"}
+                </ButtonComponent>
+              </>
             )}
           </div>
         }
       >
         <Spin spinning={loading || loading_detail}>
           <div className="my-6">
-            <div className="flex flex-row justify-center mb-6">
-              <div
-                ref={containerRef}
-                className="overflow-x-scroll scrollStepsCstm"
-              >
-                <div className="flex flex-row justify-center mb-6 px-32">
-                  <div className="w-full max-w-xl">
-                    <Steps
-                      current={current}
-                      items={items}
-                      labelPlacement="vertical"
-                    />
-                  </div>
-                </div>
-              </div>
+            {/* FIXED STEPS SECTION */}
+            <div className="mb-8">
+              <Steps
+                current={current}
+                items={items}
+                labelPlacement="vertical"
+                size="small"
+                className="custom-steps"
+              />
             </div>
 
-            <Form
-              layout="vertical"
-              form={form}
-              id="formGenerateEfaktur"
-              onFinish={handleGenerate}
-            >
+            <Form layout="vertical" form={form} id="formGenerateEfaktur">
+              {/* STEP 1: BILLING INFORMATION */}
               <div className={`${current !== 0 ? "hidden" : ""}`}>
                 {isExistingEFaktur && existingEFaktur && (
                   <Alert
@@ -514,6 +560,22 @@ const ModalGenerateEFaktur = ({
                       <DetailText label="Billing Period">
                         {billingData.billingPeriod || "-"}
                       </DetailText>
+                      
+                      {/* Detail data tambahan dari endpoint detail e-faktur */}
+                      {/* <DetailText label="NPWP">
+                        {detailData.npwp || "-"}
+                      </DetailText>
+                      <DetailText label="NIK/PASP">
+                        {detailData.nikPasp || "-"}
+                      </DetailText>
+                      <DetailText label="Email">
+                        {detailData.email || "-"}
+                      </DetailText>
+                      <div className="col-span-2">
+                        <DetailText label="Alamat">
+                          {detailData.alamat || "-"}
+                        </DetailText>
+                      </div> */}
                     </div>
                   </div>
                 )}
@@ -582,6 +644,7 @@ const ModalGenerateEFaktur = ({
                 )}
               </div>
 
+              {/* STEP 2: APPROVAL INFORMATION */}
               <div className={`${current !== 1 ? "hidden" : ""}`}>
                 <div className="w-full grid grid-cols-1 gap-x-4">
                   <p className="text-primary uppercase font-bold mb-4">
@@ -599,23 +662,26 @@ const ModalGenerateEFaktur = ({
                         },
                       ]}
                     >
-                      <Select 
+                      <Select
                         onChange={handleSelect}
                         placeholder="Select approval hierarchy"
                         loading={loading}
                         showSearch
                         filterOption={(input, option) =>
-                          (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                          (option?.children ?? "")
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
                         }
                       >
-                        {data_approval && data_approval.map((data, index) => (
-                          <Select.Option
-                            value={data.appHierId}
-                            key={data.appHierId}
-                          >
-                            {data.approvalName}
-                          </Select.Option>
-                        ))}
+                        {data_approval &&
+                          data_approval.map((data, index) => (
+                            <Select.Option
+                              value={data.appHierId}
+                              key={data.appHierId}
+                            >
+                              {data.approvalName}
+                            </Select.Option>
+                          ))}
                       </Select>
                     </Form.Item>
                   </div>
@@ -663,6 +729,7 @@ const ModalGenerateEFaktur = ({
                 </div>
               </div>
 
+              {/* STEP 3: ATTACHMENT */}
               <div className={`${current !== 2 ? "hidden" : ""}`}>
                 <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
                   <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
@@ -675,13 +742,16 @@ const ModalGenerateEFaktur = ({
                     dispatch={dispatch}
                     getAPICategory={getListCategory}
                     typeSelector="efaktur"
+                    service={ratingBillingHttpService}
                     configApplication={configApp.RATING_BILLING_SERVICE}
                     getAPIGuard={getConfigFileRBIData}
-                    typeRBI={"data"}
+                    typeRBI={"efaktur"}
+                    mandatory={true}
                   />
                 </div>
               </div>
 
+              {/* STEP 4: CONFIRMATION & GENERATE */}
               <div className={`${current !== 3 ? "hidden" : ""}`}>
                 {!loading_modal && !generatedData && (
                   <>
@@ -700,6 +770,12 @@ const ModalGenerateEFaktur = ({
                           {currency === "USD" ? "$" : "Rp"}{" "}
                           {totals.total.toLocaleString("id-ID")}
                         </DetailText>
+                        {/* <DetailText label="NPWP">
+                          {detailData.npwp || "-"}
+                        </DetailText>
+                        <DetailText label="Email">
+                          {detailData.email || "-"}
+                        </DetailText> */}
                       </div>
                     </div>
 
@@ -736,20 +812,17 @@ const ModalGenerateEFaktur = ({
                         </div>
                       )}
                     </div>
-
-                    <Alert
-                      message="Ready to Generate"
-                      description="Semua data sudah lengkap. Klik tombol 'Generate & Kirim' untuk memproses E-Faktur ke PJAP."
-                      type="info"
-                      showIcon
-                    />
                   </>
                 )}
 
                 {loading_modal && (
                   <div className="mb-6">
                     <p className="text-sm font-medium text-gray-700 mb-2">
-                      Progress Generate E-Faktur:
+                      Progress{" "}
+                      {saveType === "DRAFT"
+                        ? "Save Draft"
+                        : "Generate E-Faktur"}
+                      :
                     </p>
                     <Progress
                       percent={Math.floor(upload_progress)}
@@ -763,7 +836,11 @@ const ModalGenerateEFaktur = ({
                       {upload_progress < 30 && "Memproses data billing..."}
                       {upload_progress >= 30 &&
                         upload_progress < 50 &&
-                        "Membuat E-Faktur..."}
+                        `${
+                          saveType === "DRAFT"
+                            ? "Menyimpan draft"
+                            : "Membuat E-Faktur"
+                        }...`}
                       {upload_progress >= 50 &&
                         upload_progress < 70 &&
                         "Mengirim ke sistem..."}
@@ -777,7 +854,11 @@ const ModalGenerateEFaktur = ({
 
                 {generatedData && (
                   <Alert
-                    message="E-Faktur Berhasil Di-generate!"
+                    message={
+                      saveType === "DRAFT"
+                        ? "Draft Berhasil Disimpan!"
+                        : "E-Faktur Berhasil Di-generate!"
+                    }
                     description={
                       <div>
                         <p>
@@ -792,12 +873,18 @@ const ModalGenerateEFaktur = ({
                         )}
                         <p>
                           Status:{" "}
-                          <strong className="text-orange-600">
+                          <strong
+                            className={
+                              saveType === "DRAFT"
+                                ? "text-gray-600"
+                                : "text-orange-600"
+                            }
+                          >
                             {generatedData.status}
                           </strong>
                         </p>
 
-                        {generatedData.summary && (
+                        {generatedData.summary && saveType === "SUBMIT" && (
                           <div className="mt-3 pt-3 border-t">
                             <p className="text-sm font-semibold">
                               Upload Summary:
@@ -833,7 +920,9 @@ const ModalGenerateEFaktur = ({
             <p className="text-[18px] font-bold">Success</p>
           </div>
           <p className="pl-[70px]">
-            E-Faktur berhasil di-generate dan dikirim untuk approval.
+            {saveType === "DRAFT"
+              ? "E-Faktur berhasil disimpan sebagai draft."
+              : "E-Faktur berhasil di-generate dan dikirim untuk approval."}
           </p>
           {generatedData?.invoiceNumber && (
             <p className="pl-[70px]">
@@ -843,13 +932,17 @@ const ModalGenerateEFaktur = ({
           {generatedData?.status && (
             <p className="pl-[70px]">
               Status:{" "}
-              <strong className="text-orange-600">
+              <strong
+                className={
+                  saveType === "DRAFT" ? "text-gray-600" : "text-orange-600"
+                }
+              >
                 {generatedData.status}
               </strong>
             </p>
           )}
 
-          {generatedData?.summary && (
+          {generatedData?.summary && saveType === "SUBMIT" && (
             <div className="pl-[70px] mt-3">
               <p className="text-sm">
                 Attachment: {generatedData.summary.successCount} berhasil

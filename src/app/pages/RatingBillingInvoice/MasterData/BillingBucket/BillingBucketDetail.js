@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { LeftOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Spin, Form } from "antd";
+import { Spin } from "antd";
 import moment from "moment";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
@@ -405,7 +405,6 @@ const BillingBucketDetail = () => {
           setModalErrorServer(true);
         }
       });
-    console.log(data);
   };
 
   return (

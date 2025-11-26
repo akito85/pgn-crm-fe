@@ -1,21 +1,11 @@
 import {
-  DatePicker,
   Form,
   Input,
-  Pagination,
   Select,
-  Table,
-  Tooltip,
 } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
-import { columnsTableCriteria } from "../../columnTableCriteria";
-import { useRef } from "react";
-import { FilterOutlined } from "@ant-design/icons";
-import Highlighter from "react-highlight-words";
-import moment from "moment";
-import { NumericFormat } from "react-number-format";
 import { requiredMessage } from "../../../../../../utils";
 import InputComponent from "../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../components/SelectComponent";
@@ -37,7 +27,6 @@ import {
   getSelectCriteria,
 } from "../../../../../../redux/slices/product_promo/product";
 import { useSelector } from "react-redux";
-import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 import FunctionalCriteriaProduct from "../../../UtilsProduct/FunctionalCriteriaProduct";
 import { columnsTableCriteriaAll } from "../../../UtilsProduct/TableCriteriaAllProduct";
 

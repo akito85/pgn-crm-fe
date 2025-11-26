@@ -2,10 +2,8 @@ import { DatePicker, Input, TimePicker, Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import SVGIcon from "../../../../../../assets/Icon/index";
-import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
 import { FilterOutlined } from "@ant-design/icons";
-import { render } from "@testing-library/react";
 
 const getColumnSearchPropsUseFilteredValueFE = (
   search,

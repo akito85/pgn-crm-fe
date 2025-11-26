@@ -10,16 +10,13 @@ import TablePagination from "../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import GasSourceDetail from "./GasSourceDetail";
 import { dateFormatting, formMessageRequired, hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
-import GasSourceActiveOrInactive from "./GasSourceActiveOrInactive";
-import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
-import { getColumnSearchPropsPaging, getColumnSearchProps, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchProps, getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import {
   getAllAccountGasSourcePaginate,
   getDetailAccountGasSource,
   InactiveAccountGasSource,
 } from "../../../../../../redux/slices/account_management/detailAccount/accountGasSource";
 import DateComponent from "../../../../../../components/DateComponent";
-import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import { useColumnActionPermissionAccount } from "../../../ComponentAccount/ColumnActionPermissionAccount";
 import InputComponent from "../../../../../../components/InputComponent";
 import ModalActivationDynamic from "../../../../../../components/Modal/ModalActivationDynamic";

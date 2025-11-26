@@ -7,7 +7,6 @@ import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
-import TablePagination from "../../../../components/TablePagination";
 import { dateFormatting, hasValue } from "../../../../utils";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";

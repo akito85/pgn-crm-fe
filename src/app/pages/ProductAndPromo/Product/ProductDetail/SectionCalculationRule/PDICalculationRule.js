@@ -1,7 +1,6 @@
 import React, { Fragment, useRef, useState } from "react";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 import { Tooltip } from "antd";
-import Highlighter from "react-highlight-words";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../components/ButtonComponent";

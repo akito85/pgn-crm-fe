@@ -61,8 +61,8 @@ const ColumnFixDropdown = ({
       style={{
         padding: "12px",
         marginTop: "20px",
-        minWidth: "320px",
-        maxHeight: "400px",
+        minWidth: "120px",
+        maxHeight: "100px",
         overflowY: "auto",
         border: "1px solid #ddd",
         borderRadius: "6px",

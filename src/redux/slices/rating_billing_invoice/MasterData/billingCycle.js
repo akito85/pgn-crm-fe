@@ -67,7 +67,13 @@ export const downloadBillingCycle = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_BILLING_CYCLE_TEMPLATE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_BILLING_CYCLE_TEMPLATE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
@@ -408,7 +414,7 @@ export const updatePeriodInformation = createAsyncThunk(
         return: false,
         index: 1,
         api: api,
-        loadPage: true
+        loadPage: true,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunk.rejectWithValue(error.response.data);
@@ -445,7 +451,7 @@ export const createPeriodInformation = createAsyncThunk(
         return: false,
         index: 1,
         api: api,
-        loadPage: true
+        loadPage: true,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunk.rejectWithValue(error);
@@ -579,7 +585,7 @@ const billingCycleSlice = createSlice({
     [downloadBillingCycle.pending]: (state) => {
       state.loading = true;
     },
-    [downloadBillingCycle.fulfilled]: (state, action) => {
+    [downloadBillingCycle.fulfilled]: (state) => {
       state.loading = false;
     },
     [downloadBillingCycle.rejected]: (state) => {
@@ -671,26 +677,26 @@ const billingCycleSlice = createSlice({
     [getBillingPeriodList.rejected]: (state) => {
       state.dataInfoDetail = false;
     },
-    [createBillingCycle.pending]: (state, action) => {
+    [createBillingCycle.pending]: (state) => {
       state.loading = true;
     },
     [createBillingCycle.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataForm = action.payload;
     },
-    [createBillingCycle.rejected]: (state, action) => {
+    [createBillingCycle.rejected]: (state) => {
       state.loading = false;
     },
 
     // update Billing Cycle
-    [updateBillingCycle.pending]: (state, action) => {
+    [updateBillingCycle.pending]: (state) => {
       state.loading = true;
     },
     [updateBillingCycle.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataForm = action.payload;
     },
-    [updateBillingCycle.rejected]: (state, action) => {
+    [updateBillingCycle.rejected]: (state) => {
       state.loading = false;
     },
 
@@ -703,7 +709,7 @@ const billingCycleSlice = createSlice({
       state.data = action.payload;
       state.isSuccess = false;
     },
-    [createPeriodInformation.rejected]: (state, action) => {
+    [createPeriodInformation.rejected]: (state) => {
       state.isFailed = false;
     },
 
@@ -716,43 +722,43 @@ const billingCycleSlice = createSlice({
       state.data = action.payload;
       state.isSuccess = false;
     },
-    [updatePeriodInformation.rejected]: (state, action) => {
+    [updatePeriodInformation.rejected]: (state) => {
       state.isFailed = false;
     },
 
     //get detail period
-    [getDetailPeriod.pending]: (state, action) => {
+    [getDetailPeriod.pending]: (state) => {
       state.loading = true;
     },
     [getDetailPeriod.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getDetailPeriod.rejected]: (state, action) => {
+    [getDetailPeriod.rejected]: (state) => {
       state.loading = true;
     },
 
     //history period information
-    [getHistoryPeriod.pending]: (state, action) => {
+    [getHistoryPeriod.pending]: (state) => {
       state.loading = true;
     },
     [getHistoryPeriod.fulfilled]: (state, action) => {
       state.dataHistory = action.payload;
       state.loading = false;
     },
-    [getHistoryPeriod.rejected]: (state, action) => {
+    [getHistoryPeriod.rejected]: (state) => {
       state.loading = true;
     },
 
     // open close
-    [openClosePeriodBilling.pending]: (state, action) => {
+    [openClosePeriodBilling.pending]: (state) => {
       state.loading = true;
     },
-    [openClosePeriodBilling.fulfilled]: (state, action) => {
+    [openClosePeriodBilling.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [openClosePeriodBilling.rejected]: (state, action) => {
+    [openClosePeriodBilling.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },

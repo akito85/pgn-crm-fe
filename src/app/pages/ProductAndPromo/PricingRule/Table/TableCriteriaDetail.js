@@ -1,7 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Pagination, Select, Table } from "antd";
-import { useDispatch, useSelector } from "react-redux";
-import { getListCriteriaDetail } from "../../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 import { columnsTableCriteria } from "./TableCriteria";
 
 const TableCriteriaDetail = ({ type, dataCriteria = [], listCriteria = [] }) => {

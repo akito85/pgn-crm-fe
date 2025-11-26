@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  DatePicker,
   Form,
-  Input,
   Pagination,
   Select,
   Space,
@@ -13,9 +11,7 @@ import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getColumnSearchProps } from "../../../../../../utils/getColumnSearchProps";
 import moment from "moment";
-import Highlighter from "react-highlight-words";
 import { columnsTableCriteriaTOP } from "./TableCriteriaTOP";
 import DateComponent from "../../../../../../components/DateComponent";
 import {

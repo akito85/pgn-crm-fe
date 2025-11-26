@@ -11,7 +11,6 @@ import TablePagination from '../../../../../components/TablePagination';
 import { useDispatch, useSelector } from 'react-redux';
 import { activationAccountingRules, downloadAccountingRules, getAccountingRulesPaginate, getDetailAccountingRules } from '../../../../../redux/slices/account_management/MasterData/accounting_rules';
 import { getColumnSearchPropsPaging } from '../../../../../utils/getColumnSearchProps';
-import StatusComponent from '../../../../../components/StatusComponent';
 import SVGIcon from "../../../../../assets/Icon/index";
 import ModalCustom from '../../../../../components/Modal/ModalCustom';
 import CardComponent from '../../../../../components/Card/CardComponent';

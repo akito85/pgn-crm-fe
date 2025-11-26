@@ -8,7 +8,6 @@ import SVGIcon from "../../../../../../assets/Icon/index";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import {
   getListCalculationType,
-  getListName,
   getListNameCalculationRule,
   getListUnit,
   getListUnitVAT,

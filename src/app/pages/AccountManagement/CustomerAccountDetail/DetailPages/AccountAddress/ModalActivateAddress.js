@@ -1,8 +1,6 @@
-import React, {useState} from 'react'
-import ModalCustom from '../../../../../../components/Modal/ModalCustom';
-import { Alert, Form } from 'antd';
+import React from 'react'
+import { Form } from 'antd';
 import ButtonComponent from '../../../../../../components/ButtonComponent';
-import { InfoCircleOutlined } from '@ant-design/icons';
 import InputComponent from '../../../../../../components/InputComponent';
 import ModalApproveOrReject from '../../../../../../components/Modal/ModalApproveOrReject';
 

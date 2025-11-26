@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Checkbox, Tooltip } from "antd";
 import StatusComponent from "../../../../../../components/StatusComponent";
 import { useState } from "react";
@@ -10,7 +10,6 @@ import ServicePointAssetDetail from "./ServicePointAssetDetail";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import { useColumnActionPermissionAccount } from "../../../ComponentAccount/ColumnActionPermissionAccount";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";

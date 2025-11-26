@@ -1,13 +1,9 @@
-import Highlighter from "react-highlight-words";
-import moment from "moment";
 import {
-  dateFormatting,
   hasValue,
   renderColumn,
   renderDateColumn,
 } from "../../../../../../utils";
 import {
-  getColumnSearchPropsPaging,
   getColumnSearchPropsUseFilteredValue,
 } from "../../../../../../utils/getColumnSearchProps";
 
@@ -121,6 +117,118 @@ export const columnsPayment = (
       renderColumn(
         "currency",
         hasValue(search["currency"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "EQUIVALENT IDR",
+    dataIndex: "equivalentIdr",
+    sorter: true,
+    filteredValue: search?.["equivalentIdr"]
+      ? [search?.["equivalentIdr"]]
+      : null,
+    align: "center",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "equivalentIdr",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "equivalentIdr",
+        hasValue(search["equivalentIdr"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "EQUIVALENT USD",
+    dataIndex: "equivalentUsd",
+    sorter: true,
+    filteredValue: search?.["equivalentUsd"]
+      ? [search?.["equivalentUsd"]]
+      : null,
+    align: "center",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "equivalentUsd",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "equivalentUsd",
+        hasValue(search["equivalentUsd"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "TOTAL PAYMENT EQV IDR",
+    dataIndex: "totalequivalentIdr",
+    sorter: true,
+    filteredValue: search?.["totalequivalentIdr"]
+      ? [search?.["totalequivalentIdr"]]
+      : null,
+    align: "center",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "totalequivalentIdr",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "totalequivalentIdr",
+        hasValue(search["totalequivalentIdr"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "TOTAL PAYMENT EQV USD",
+    dataIndex: "totalequivalentUsd",
+    sorter: true,
+    filteredValue: search?.["totalequivalentUsd"]
+      ? [search?.["totalequivalentUsd"]]
+      : null,
+    align: "center",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "totalequivalentUsd",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "totalequivalentUsd",
+        hasValue(search["totalequivalentUsd"]),
         searchText,
         text,
         false,

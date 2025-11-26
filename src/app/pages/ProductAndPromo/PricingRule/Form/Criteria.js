@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import FunctionalTableCriteria from "../Table/FunctionalTableCriteria";
 
 const Criteria = (props) => {

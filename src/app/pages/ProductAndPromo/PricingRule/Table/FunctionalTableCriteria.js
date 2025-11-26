@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { columnsTableCriteria } from "./TableCriteria";
-import { Form, Input, Pagination, Select, Space, Table, Tooltip } from "antd";
+import { Form, Select, Space, Table, Tooltip } from "antd";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { useRef } from "react";

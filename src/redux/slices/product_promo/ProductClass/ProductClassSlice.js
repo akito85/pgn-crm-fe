@@ -1,5 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { setBodyError, showModalError, validateError } from "../../general_slice";
+import {
+  setBodyError,
+  showModalError,
+  validateError,
+} from "../../general_slice";
 import { showModalSuccess } from "../../general_slice";
 import productPromoHttpService from "../../../services/productPromoHttpService";
 
@@ -43,7 +47,9 @@ export const getDetailProductClass = createAsyncThunk(
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
-      thunkAPI.dispatch(validateError({ error, action: "DOWNLOAD_PRODUCT_CLASS", back : false }));
+      thunkAPI.dispatch(
+        validateError({ error, action: "DOWNLOAD_PRODUCT_CLASS", back: false })
+      );
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -158,8 +164,12 @@ export const downloadProductClass = createAsyncThunk(
       const response = await productPromoHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error, action: "DOWNLOAD_PRODUCT_CLASS", back : false }));
-      return thunkAPI.rejectWithValue(error.response.data.code === 419 ? null : error.response.data)
+      thunkAPI.dispatch(
+        validateError({ error, action: "DOWNLOAD_PRODUCT_CLASS", back: false })
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data
+      );
     }
   }
 );
@@ -201,14 +211,14 @@ const productClassSlice = createSlice({
     },
 
     // Create Product Class
-    [createProductClass.pending]: (state, action) => {
+    [createProductClass.pending]: (state) => {
       state.loading = true;
     },
-    [createProductClass.fulfilled]: (state, action) => {
+    [createProductClass.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [createProductClass.rejected]: (state, action) => {
+    [createProductClass.rejected]: (state) => {
       state.loading = false;
       state.isFailed = true;
     },
@@ -230,10 +240,10 @@ const productClassSlice = createSlice({
     },
 
     // Inactive Product Class
-    [inactiveProductClass.pending]: (state, action) => {
+    [inactiveProductClass.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveProductClass.fulfilled]: (state, action) => {
+    [inactiveProductClass.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -244,13 +254,13 @@ const productClassSlice = createSlice({
     },
 
     // Download Product Class
-    [downloadProductClass.pending]: (state, action) => {
+    [downloadProductClass.pending]: (state) => {
       state.loading = true;
     },
-    [downloadProductClass.fulfilled]: (state, action) => {
+    [downloadProductClass.fulfilled]: (state) => {
       state.loading = false;
     },
-    [downloadProductClass.rejected]: (state, action) => {
+    [downloadProductClass.rejected]: (state) => {
       state.loading = false;
     },
   },
