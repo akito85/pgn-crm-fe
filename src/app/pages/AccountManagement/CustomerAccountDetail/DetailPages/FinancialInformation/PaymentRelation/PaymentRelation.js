@@ -16,6 +16,7 @@ import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import { useNavigate, useLocation } from "react-router-dom"
+import ModalConfirmationApprovalPaymentRelation from "./ModalConfirmationApprovalPaymentRelation";
 
 // getDetailTaxImplication
 // detail_taxImplication
@@ -47,6 +48,14 @@ const PaymentRelation = ({
   const [sort, setSort] = useState("");
   const [search, updateSearch] = useState({});
   const [modalDetail, setModalDetail] = useState(false);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+
+  const handleCancelApprovalModal = () => {
+    setShowApprovalModal(false);
+  }
+  const handleConfirmApprovalModal = (submitApprovalCondition) => {
+    setShowApprovalModal(false);
+  }
 
   useEffect(() => {
     if (id) {
@@ -177,10 +186,15 @@ const PaymentRelation = ({
   };
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
 
   const rowSelection = {
     selectedRowKeys,
-    onChange: (newSelectedRowKeys) => setSelectedRowKeys(newSelectedRowKeys),
+    onChange: (newSelectedRowKeys, newSelectedRows) => {
+      setSelectedRowKeys([...newSelectedRowKeys]);
+      console.log("newSelectedRows", newSelectedRows);
+      setSelectedRows(newSelectedRows.map(newSelectedRow => ({...newSelectedRow})));
+    },
     type: "checkbox",
   }
 
@@ -197,9 +211,9 @@ const PaymentRelation = ({
   useEffect(() => {
     if (isActive) {
       if (submitApprovalCondition === "approve") {
-        handleSubmitApproval(submitApprovalCondition)
+        setShowApprovalModal(true);
       } else if (submitApprovalCondition === "reject") {
-        handleSubmitApproval(submitApprovalCondition)
+        setShowApprovalModal(true);
       }
     }
   }, [submitApprovalCondition]);
@@ -386,6 +400,14 @@ const PaymentRelation = ({
           isApproval={isApproval}
         />
       </div>
+      <ModalConfirmationApprovalPaymentRelation
+        dataSource={selectedRows}
+        isOpen={showApprovalModal}
+        setIsOpen={setShowApprovalModal}
+        getColumnSearchProps={getColumnSearchProps}
+        handleCancel={handleCancelApprovalModal}
+        handleOk={() => handleConfirmApprovalModal(submitApprovalCondition)}
+      />
     </Fragment>  
   );
 };

@@ -5,27 +5,22 @@ const ModalConfirmationApproval = ({
   dataSource = [],
   columns = [],
   isOpen = false,
-  setIsOpen = (state) => {},
+  handleOk = () => {},
+  handleCancel = () => {},
+  page = 1,
+  pageSize = 10,
+  handleChangeDetail = () => {},
 }) => {
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
-  const handleChangeDetail = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
   return (
     <ModalConfirm
       isOpen={isOpen}
-      handleCancel={setIsOpen(false)}
-      handleOk={setIsOpen(false)}
-      width={400}
+      handleCancel={handleCancel}
+      handleOk={handleOk}
+      width={1000}
     >
       <TablePaginationNew
         dataSource={dataSource}
-        pageSize={10}
+        pageSize={pageSize}
         totalData={dataSource.length}
         columns={columns}
         onChange={handleChangeDetail}
