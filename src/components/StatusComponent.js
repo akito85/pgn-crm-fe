@@ -4,6 +4,8 @@ import {
   ClockCircleFilled,
   CloseCircleFilled,
   Loading3QuartersOutlined,
+  ExclamationCircleFilled,
+  MinusCircleOutlined,
 } from "@ant-design/icons";
 import React, { useMemo } from "react";
 
@@ -27,6 +29,8 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "paid":
       case "complete billing":
       case "sent":
+      case "approved": // E-Faktur status
+      case "success_upload": // E-Faktur status
         bgColor = "status-active";
         tColor = "text-white";
         break;
@@ -48,6 +52,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "failed billing":
       case "fail":
       case "not_paid":
+      case "cancelled": // E-Faktur status
         bgColor = "status-inactive";
         tColor = "text-white";
         break;
@@ -57,22 +62,24 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "waiting_approval":
       case "partial payment":
       case "waiting to release":
+      case "awaiting_approval": // E-Faktur status
         bgColor = "status-waiting";
         tColor = "text-yellow-700";
         break;
 
       case "in progress":
-      case "INPROGRESS":
+      case "inprogress":
+      case "processing": // E-Faktur status
         bgColor = "bg-yellow-500";
         tColor = "text-white";
         break;
 
       case "draft":
+      case "not_generated": // E-Faktur status
         bgColor = "status-draft";
         tColor = "text-gray-700";
         break;
 
-      case "approved":
       case "main":
         bgColor = "status-active";
         tColor = "text-white";
@@ -191,20 +198,28 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "sent":
       case "approved":
       case "paid":
-        return <CheckCircleFilled style={{ fontSize: "15px" }} />;
+      case "success_upload":
+        return <CheckCircleFilled style={{ fontSize: "12px" }} />;
       case "generating":
       case "in progress":
       case "inprogress":
-      case "INPROGRESS":
+      case "processing":
+      case "awaiting_approval":
       case "waiting approval":
       case "waiting_approval":
-        return <Loading3QuartersOutlined style={{ fontSize: "15px" }} />;
+        return <Loading3QuartersOutlined style={{ fontSize: "12px" }} />;
       case "failed":
       case "not paid":
       case "not_paid":
-        return <CloseCircleFilled style={{ fontSize: "15px" }} />;
+      case "rejected":
+      case "cancelled":
+        return <CloseCircleFilled style={{ fontSize: "12px" }} />;
       case "scheduled":
-        return <ClockCircleFilled style={{ fontSize: "15px" }} />;
+        return <ClockCircleFilled style={{ fontSize: "12px" }} />;
+      case "draft":
+        return <MinusCircleOutlined style={{ fontSize: "12px" }} />;
+      case "not_generated":
+        return null; // No icon for not_generated
       default:
         return null;
     }
@@ -216,7 +231,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
     <div
       className={
         type === "status"
-          ? `flex gap-2 justify-center items-center ${bgcolor} ${textColor} px-3 py-0 rounded-3xl text-center w-fit`
+          ? `flex gap-1.5 justify-center items-center ${bgcolor} ${textColor} px-2.5 py-0.5 rounded-full text-xs text-center w-fit`
           : `${textColor} font-semibold`
       }
     >
