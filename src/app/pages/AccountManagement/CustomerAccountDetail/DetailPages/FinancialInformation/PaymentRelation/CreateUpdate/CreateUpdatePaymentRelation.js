@@ -41,7 +41,7 @@ import BaseContainer from "../../../../../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../../../../../utils";
 import ModalCustom from "../../../../../../../../components/Modal/ModalCustom";
 import ModalConfirmationApprovalPaymentRelation from "../ModalConfirmationApprovalPaymentRelation";
-import ModalConfirmationCreateUpdateApprovalPaymentRelation from "./ModalConfirmationCreateUpdateApprovalPaymentRelation";
+import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 
 const CreatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -479,7 +479,7 @@ const CreatePaymentRelation = ({ type }) => {
           </div>
         </Form>
 
-        <ModalConfirmationCreateUpdateApprovalPaymentRelation
+        <ConfirmationModal
           isOpen={showConfirmationModal}
           handleCancel={() => setShowConfirmationModal(false)}
           handleOk={() => setShowConfirmationModal(false)}
