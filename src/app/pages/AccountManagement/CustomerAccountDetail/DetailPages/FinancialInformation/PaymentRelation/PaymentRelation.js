@@ -22,7 +22,6 @@ import ModalConfirmationApprovalPaymentRelation from "./ModalConfirmationApprova
 // detail_taxImplication
 
 const PaymentRelation = ({
-  id = 0,
   isActive = false,
   isApproval = false,
   setIsApproval = () => {},
