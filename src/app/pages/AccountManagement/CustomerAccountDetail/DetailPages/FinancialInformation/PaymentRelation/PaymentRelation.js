@@ -223,60 +223,6 @@ const PaymentRelation = ({
     navigate("/account-management/account-standard/financial-information/payment-relation/details");
   }
 
-  // Dummy data
-  const data = [
-    {
-      key: "1",
-      accountNumber: "2027635461",
-      accountName: "PT XYZ",
-      priority: 1,
-      startDate: "2022-08-22",
-      endDate: "2022-08-22",
-      statusApproval: "approved",
-      status: "active",
-    },
-    {
-      key: "2",
-      accountNumber: "2027635461",
-      accountName: "PT KERAMIK INTI 1",
-      priority: 4,
-      startDate: "2022-08-22",
-      endDate: "2022-08-22",
-      statusApproval: "approved",
-      status: "active",
-    },
-    {
-      key: "3",
-      accountNumber: "2027635461",
-      accountName: "PT XYZ",
-      priority: 4,
-      startDate: "2022-08-22",
-      endDate: "2022-08-22",
-      statusApproval: "waitingApproval",
-      status: "inactive",
-    },
-    {
-      key: "4",
-      accountNumber: "2027635461",
-      accountName: "PT XYZ",
-      priority: 4,
-      startDate: "2022-08-22",
-      endDate: "2022-08-22",
-      statusApproval: "rejected",
-      status: "inactive",
-    },
-    {
-      key: "5",
-      accountNumber: "2027635461",
-      accountName: "PT XYZ",
-      priority: 4,
-      startDate: "2022-08-22",
-      endDate: "2022-08-22",
-      statusApproval: "approved",
-      status: "inactive",
-    },
-  ]
-
   return (
     <Spin spinning={loading}>
       <Fragment>
