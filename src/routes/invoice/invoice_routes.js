@@ -14,6 +14,6 @@ export const INVOICE_ROUTES = {
   MANAGEMENT_DELIVERY_INVOICE: "/invoice/management-delivery-invoice",
 
   //E-Faktur
-  EFAKTUR_VIEW: "/invoice/e-faktur",
+  EFAKTUR_VIEW: "/invoice/e-faktur-management",
   EFAKTUR_VIEW_DETAIL: "/invoice/e-faktur/view",
 };
