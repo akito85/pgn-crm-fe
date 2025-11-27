@@ -23,7 +23,7 @@ import {
 
 
 const PaymentRelationDetailAttch = ({
-  data = [],
+  dataDetail = {},
   handleChange = () => {},
   handleChangeSize = () => {},
   totalElement = 0,
@@ -36,10 +36,6 @@ const PaymentRelationDetailAttch = ({
   searchInput,
   handleSearch
 }) => {
-  // State
-  const [modalDetail, setModalDetail] = useState(false);
-  const [dataDetail, setDataDetail] = useState({});
-
   // Dummy data
   const dummyData = [
     {
@@ -77,16 +73,12 @@ const PaymentRelationDetailAttch = ({
   const navigate = useNavigate();
 
   // Use dummy data if no data provided
-  const tableData = (Array.isArray(data) && data.length > 0) ? data : dummyData;
+  const tableData = (Array.isArray(dataDetail) && dataDetail.length > 0) ? dataDetail : dummyData;
 
   // Sanitize pagination values to prevent NaN
   const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
   const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
   const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : tableData.length;
-
-  const handleDetail = (value) => {
-    setDataDetail(value);
-  };
 
   const handleViewFile = (fileData) => {
     // Placeholder for view file action

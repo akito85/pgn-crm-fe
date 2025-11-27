@@ -43,7 +43,7 @@ const PaymentRelationDetailTabs = ({
       case dataTabs.sreqi:
         return <PaymentRelationDetailInfo dataDetail={dataDetail} type={AccountType}/>;
       case dataTabs.attch:
-        return <PaymentRelationDetailAttch />;
+        return <PaymentRelationDetailAttch dataDetail={dataDetail} />;
       default:
         return <PaymentRelationDetailInfo />;
     }
