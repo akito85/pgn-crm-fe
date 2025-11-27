@@ -1,32 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Tooltip } from "antd";
-import TablePagination from "../../../../../../../../components/TablePagination";
-import SVGIcon from "../../../../../../../../assets/Icon/index";
+import { useLocation } from 'react-router-dom';
 import { Fragment } from "react";
-import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
-import { CloseOutlined, PauseCircleOutlined, PlayCircleOutlined, LockOutlined, PlusOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
 
 const CustomerServiceRequestDetailInfo = ({
-  data = [],
   dataDetail = {},
 }) => {
   // State
   const dispatch = useDispatch();
-
-  const { data_customerDetail, loading, loadingAccount } = useSelector(
-    (state) => state.customerAccount
-    );
-  const { access_account } = useSelector(
-    (state) => state.accountManagement
-  );
-  
-  const isLoading = loading || loadingAccount;
 
   //declare
   const location = useLocation();
