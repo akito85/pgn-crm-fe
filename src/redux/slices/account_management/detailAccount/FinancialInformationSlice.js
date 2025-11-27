@@ -414,24 +414,11 @@ export const getPaymentRelation = createAsyncThunk(
   }
 );
 
-export const getDetailInfoPaymentRelation = createAsyncThunk(
-  "GET_DETAIL_INFO_PAYMENT_RELATION",
+export const getDetailPaymentRelation = createAsyncThunk(
+  "GET_DETAIL_PAYMENT_RELATION",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/payment-relation/info/${id}`;
-      const response = await accountManagementService.getDetail(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-export const getDetailAttachmentPaymentRelation = createAsyncThunk(
-  "GET_DETAIL_ATTACHMENT_PAYMENT_RELATION",
-  async (id, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/payment-relation/attachment/${id}`;
+      const url = `/v1/dbs/api/payment-relation/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -648,49 +635,17 @@ const financialInformationSlice = createSlice({
       state.loading = false;
     },
 
-    /** Detail Info Payment Relation */
-    [getDetailInfoPaymentRelation.pending]: (state, action) => {
-      state.detail_paymentRelation = {
-        ...state.detail_paymentRelation,
-        ...action.payload
-      };
+    /** Detail Payment Relation */
+    [getDetailPaymentRelation.pending]: (state, action) => {
+      state.data_paymentRelation = action.payload;
       state.loading = true;
     },
-    [getDetailInfoPaymentRelation.fulfilled]: (state, action) => {
-      state.detail_paymentRelation = {
-        ...state.detail_paymentRelation,
-        ...action.payload
-      };
+    [getDetailPaymentRelation.fulfilled]: (state, action) => {
+      state.data_paymentRelation = action.payload;
       state.loading = false;
     },
-    [getDetailInfoPaymentRelation.rejected]: (state, action) => {
-      state.detail_paymentRelation = {
-        ...state.detail_paymentRelation,
-        ...action.payload
-      };
-      state.loading = false;
-    },
-
-    /** Detail Attachment Payment Relation */
-    [getDetailAttachmentPaymentRelation.pending]: (state, action) => {
-      state.detail_paymentRelation = {
-        ...state.detail_paymentRelation,
-        ...action.payload
-      };
-      state.loading = true;
-    },
-    [getDetailAttachmentPaymentRelation.fulfilled]: (state, action) => {
-      state.detail_paymentRelation = {
-        ...state.detail_paymentRelation,
-        ...action.payload
-      };
-      state.loading = false;
-    },
-    [getDetailAttachmentPaymentRelation.rejected]: (state, action) => {
-      state.detail_paymentRelation = {
-        ...state.detail_paymentRelation,
-        ...action.payload
-      };
+    [getDetailPaymentRelation.rejected]: (state, action) => {
+      state.data_paymentRelation = action.payload;
       state.loading = false;
     },
 
