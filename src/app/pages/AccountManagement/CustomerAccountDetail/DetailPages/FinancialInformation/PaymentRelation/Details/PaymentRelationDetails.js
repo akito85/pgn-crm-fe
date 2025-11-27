@@ -25,6 +25,11 @@ const PaymentRelationDetails = ({
   type = "standard"
 }) => {
   const dispatch = useDispatch();
+
+  const { detail_paymentRelation } = useSelector(
+    (state) => state.financialInformation
+  )
+
   const { data_customerDetail, loading, loadingAccount } = useSelector(
     (state) => state.customerAccount
   );
@@ -194,10 +199,10 @@ const PaymentRelationDetails = ({
 
         <div className="my-5">
           <PaymentRelationDetailTabs
-            id={id}
             section={typeDetailSection}
             options={tabs}
             handleChangeOption={handleDetailSection}
+            dataDetail={detail_paymentRelation}
           />
         </div>
 

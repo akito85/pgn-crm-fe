@@ -8,7 +8,8 @@ const dataTabs = {
   attch: "Attachment",
 };
 
-const CustomerServiceRequestDetailTabs = ({
+const PaymentRelationDetailTabs = ({
+  dataDetail = {},
   section = "",
   options = [],
   handleChangeOption = () => {},
@@ -18,7 +19,6 @@ const CustomerServiceRequestDetailTabs = ({
     { value: "sreqi", label: "Service Request" },
     { value: "attch", label: "Attachment" },
   ];
-
 
   const AccountType = () => {
     // Path form URL
@@ -41,7 +41,7 @@ const CustomerServiceRequestDetailTabs = ({
   const renderSection = () => {
     switch (section) {
       case dataTabs.sreqi:
-        return <PaymentRelationDetailInfo type={AccountType}/>;
+        return <PaymentRelationDetailInfo dataDetail={dataDetail} type={AccountType}/>;
       case dataTabs.attch:
         return <PaymentRelationDetailAttch />;
       default:
@@ -68,4 +68,4 @@ const CustomerServiceRequestDetailTabs = ({
   );
 };
 
-export default CustomerServiceRequestDetailTabs;
+export default PaymentRelationDetailTabs;
