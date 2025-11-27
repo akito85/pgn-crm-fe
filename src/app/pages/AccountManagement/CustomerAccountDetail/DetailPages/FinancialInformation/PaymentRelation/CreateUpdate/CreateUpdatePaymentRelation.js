@@ -23,6 +23,7 @@ import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 
 import {
+  getCustomerAccount,
   getCustomerAttachment,
   getCustomerDetail,
   getGlobalCustomerType,
@@ -35,6 +36,7 @@ import {
 import {
   getAccountStandardDetail,
   getAccountOneTimeDetail,
+  getAccountDetail,
 } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
@@ -99,6 +101,16 @@ const CreatePaymentRelation = ({ type }) => {
 
  
   const { InformationForm, AttachmentForm, ApprovalForm, ContactForm, PreRequisiteForm } = StepContents;
+
+  useEffect(() => {
+    if (idCustomer)
+      getCustomerDetail(idCustomer);
+  }, [idCustomer]);
+
+  useEffect(() => {
+    if (idAccount)
+      getAccountDetail(idAccount);
+  }, [idAccount]);
 
   const routes = [
     {
@@ -356,42 +368,6 @@ const CreatePaymentRelation = ({ type }) => {
     setModalConfirm(true);
   };
 
-  const CustomerInformationDummy = {
-    customerNumber: "CST009425",
-    identificationType: "NPWP",
-    customerIdentificationNumber: "9809149088941",
-    customerName: "KERAMIK INTI",
-    customerType: "Organization",
-    description: "-",
-    birthFoundedDate: "22-08-2022",
-    birthFoundedPlace: "Jakarta",
-    sex: "Male",
-    maritialStatus: "Married",
-    searchKey: "Keramik Inti Pusat",
-  };
-
-  const AccountInformationDummy = {
-    accountNumber: "00899849211",
-    registrationNumber: "00899849211467",
-    accountName: "PT KERAMIK INTI 1",
-    category: "External",
-    sor: "SOR 3",
-    costCenter: "015 - AREA BOGOR",
-    meterReadingCodes: "0054",
-    customerManagement: "CM Bogor 2",
-    classificationType: "Related Party",
-    segment: "KI",
-    accountGroupType: "BRONZE1",
-    premiseAddress: "JL. KEMBANG BULAN, No. 90, RT. 90, RW. 7, CIKINI, MENTENG, JAKARTA PUSAT, DKI JAKARTA, INDONESIA, 38963",
-    subdistrict: "CIKINI",
-    district: "MENTENG",
-    city: "JAKARTA PUSAT",
-    country: "INDONESIA",
-    longitude: "-6.15330388502638",
-    latitude: "106.74036886669953",
-    status: "Active",
-  };
-
   return (
     <LayoutMenu>
       <div className="flex flex-col gap-y-5">
@@ -403,17 +379,17 @@ const CreatePaymentRelation = ({ type }) => {
               CUSTOMER INFORMATION
             </div>
             <div className="w-full grid grid-cols-4 gap-x-5">
-              <DetailText label="Customer Number">{data_customerDetail?.customerNumber || CustomerInformationDummy.customerNumber}</DetailText>
-              <DetailText label="Identification Type">{data_customerDetail?.identificationType || CustomerInformationDummy.identificationType}</DetailText>
-              <DetailText label="Customer Identification Number">{data_customerDetail?.customerIdentificationNumber || CustomerInformationDummy.customerIdentificationNumber}</DetailText>
-              <DetailText label="Customer Name">{data_customerDetail?.customerName || CustomerInformationDummy.customerName}</DetailText>
-              <DetailText label="Customer Type">{data_customerDetail?.customerType || CustomerInformationDummy.customerType}</DetailText>
-              <DetailText label="Description">{data_customerDetail?.description || CustomerInformationDummy.description}</DetailText>
-              <DetailText label="Birth/Founded Date">{data_customerDetail?.birthFoundedDate ? renderDate(data_customerDetail.birthFoundedDate) : renderDate(CustomerInformationDummy.birthFoundedDate)}</DetailText>
-              <DetailText label="Birth/Founded Place">{data_customerDetail?.birthFoundedPlace || CustomerInformationDummy.birthFoundedPlace}</DetailText>
-              <DetailText label="Sex">{data_customerDetail?.sex || CustomerInformationDummy.sex}</DetailText>
-              <DetailText label="Maritial Status">{data_customerDetail?.maritialStatus || CustomerInformationDummy.maritialStatus}</DetailText>
-              <DetailText label="Search Key">{data_customerDetail?.searchKey || CustomerInformationDummy.searchKey}</DetailText>
+              <DetailText label="Customer Number">{data_customerDetail?.customerNumber}</DetailText>
+              <DetailText label="Identification Type">{data_customerDetail?.identificationType}</DetailText>
+              <DetailText label="Customer Identification Number">{data_customerDetail?.customerIdentificationNumber}</DetailText>
+              <DetailText label="Customer Name">{data_customerDetail?.customerName}</DetailText>
+              <DetailText label="Customer Type">{data_customerDetail?.customerType}</DetailText>
+              <DetailText label="Description">{data_customerDetail?.description}</DetailText>
+              <DetailText label="Birth/Founded Date">{renderDate(data_customerDetail?.birthFoundedDate)}</DetailText>
+              <DetailText label="Birth/Founded Place">{data_customerDetail?.birthFoundedPlace}</DetailText>
+              <DetailText label="Sex">{data_customerDetail?.sex}</DetailText>
+              <DetailText label="Maritial Status">{data_customerDetail?.maritialStatus}</DetailText>
+              <DetailText label="Search Key">{data_customerDetail?.searchKey}</DetailText>
             </div>
 
             {/* Account Information */}
@@ -421,25 +397,25 @@ const CreatePaymentRelation = ({ type }) => {
               ACCOUNT INFORMATION
             </div>
             <div className="w-full grid grid-cols-4 gap-x-4">
-              <DetailText label="Account Number">{data_accountDetail?.accountNumber || AccountInformationDummy.accountNumber}</DetailText>
-              <DetailText label="Registration Number">{data_accountDetail?.registrationNumber || AccountInformationDummy.registrationNumber}</DetailText>
-              <DetailText label="Account Name">{data_accountDetail?.accountName || AccountInformationDummy.accountName}</DetailText>
-              <DetailText label="Category">{data_accountDetail?.category || AccountInformationDummy.category}</DetailText>
-              <DetailText label="SOR">{data_accountDetail?.sor || AccountInformationDummy.sor}</DetailText>
-              <DetailText label="Cost Center">{data_accountDetail?.costCenter || AccountInformationDummy.costCenter}</DetailText>
-              <DetailText label="Meter Reading Codes">{data_accountDetail?.meterReadingCodes ? renderDate(data_accountDetail.meterReadingCodes) : renderDate(AccountInformationDummy.birthFoundedDate)}</DetailText>
-              <DetailText label="Customer Management">{data_accountDetail?.customerManagement || AccountInformationDummy.customerManagement}</DetailText>
-              <DetailText label="Classification Type">{data_accountDetail?.classificationType || AccountInformationDummy.classificationType}</DetailText>
-              <DetailText label="Segment">{data_accountDetail?.segment || AccountInformationDummy.segment}</DetailText>
-              <DetailText label="Account Group Type">{data_accountDetail?.accountGroupType || AccountInformationDummy.accountGroupType}</DetailText>
-              <DetailText label="Premise Address">{data_accountDetail?.premiseAddress || AccountInformationDummy.premiseAddress}</DetailText>
-              <DetailText label="Subdistrict">{data_accountDetail?.subdistrict || AccountInformationDummy.subdistrict}</DetailText>
-              <DetailText label="District">{data_accountDetail?.district || AccountInformationDummy.district}</DetailText>
-              <DetailText label="City">{data_accountDetail?.city || AccountInformationDummy.city}</DetailText>
-              <DetailText label="Country">{data_accountDetail?.country || AccountInformationDummy.country}</DetailText>
-              <DetailText label="Longitude">{data_accountDetail?.longitude || AccountInformationDummy.longitude}</DetailText>
-              <DetailText label="Latitude">{data_accountDetail?.latitude || AccountInformationDummy.latitude}</DetailText>
-              <DetailText label="Status">{data_accountDetail?.status || AccountInformationDummy.status}</DetailText>    
+              <DetailText label="Account Number">{data_accountDetail?.accountNumber}</DetailText>
+              <DetailText label="Registration Number">{data_accountDetail?.registrationNumber}</DetailText>
+              <DetailText label="Account Name">{data_accountDetail?.accountName}</DetailText>
+              <DetailText label="Category">{data_accountDetail?.category}</DetailText>
+              <DetailText label="SOR">{data_accountDetail?.sor}</DetailText>
+              <DetailText label="Cost Center">{data_accountDetail?.costCenter}</DetailText>
+              <DetailText label="Meter Reading Codes">{renderDate(data_accountDetail?.meterReadingCodes || "")}</DetailText>
+              <DetailText label="Customer Management">{data_accountDetail?.customerManagement}</DetailText>
+              <DetailText label="Classification Type">{data_accountDetail?.classificationType}</DetailText>
+              <DetailText label="Segment">{data_accountDetail?.segment}</DetailText>
+              <DetailText label="Account Group Type">{data_accountDetail?.accountGroupType}</DetailText>
+              <DetailText label="Premise Address">{data_accountDetail?.premiseAddress}</DetailText>
+              <DetailText label="Subdistrict">{data_accountDetail?.subdistrict}</DetailText>
+              <DetailText label="District">{data_accountDetail?.district}</DetailText>
+              <DetailText label="City">{data_accountDetail?.city}</DetailText>
+              <DetailText label="Country">{data_accountDetail?.country}</DetailText>
+              <DetailText label="Longitude">{data_accountDetail?.longitude}</DetailText>
+              <DetailText label="Latitude">{data_accountDetail?.latitude}</DetailText>
+              <DetailText label="Status">{data_accountDetail?.status}</DetailText>    
             </div>
           </div>
         </BaseContainer>

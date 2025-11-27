@@ -18,6 +18,7 @@ const { Panel } = Collapse;
 
 const FinancialInformation = ({
   id = 0,
+  idCustomer = 0,
   isApproval = false,
   setIsApproval = () => {},
   submitApprovalCondition = "",
@@ -80,6 +81,7 @@ const FinancialInformation = ({
       children: (
         <PaymentRelation
           id={id}
+          idCustomer={idCustomer}
           isActive={current === 6}
           isApproval={isApproval}
           setIsApproval={setIsApproval}
