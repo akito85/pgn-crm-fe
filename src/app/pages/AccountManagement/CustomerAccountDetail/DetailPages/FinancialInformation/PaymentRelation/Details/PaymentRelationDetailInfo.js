@@ -14,22 +14,10 @@ import { getCustomerDetail } from "../../../../../../../../redux/slices/account_
 
 const CustomerServiceRequestDetailInfo = ({
   data = [],
-  handleChange = () => {},
-  handleChangeSize = () => {},
-  totalElement = 0,
-  page = 1,
-  pageSize = 10,
-  searchText = "",
-  searchedColumn = "",
-  onSort = () => {},
-  getColumnSearchProps = () => {},
-  searchInput,
-  handleSearch
+  dataDetail = {},
 }) => {
   // State
-  const [dataDetail, setDataDetail] = useState({});
   const dispatch = useDispatch();
-  const [SRStatus, setSRStatus] = useState(null);
 
   const { data_customerDetail, loading, loadingAccount } = useSelector(
     (state) => state.customerAccount
@@ -41,7 +29,6 @@ const CustomerServiceRequestDetailInfo = ({
   const isLoading = loading || loadingAccount;
 
   //declare
-  const navigate = useNavigate();
   const location = useLocation();
   const id = location?.state?.id;
 
@@ -54,34 +41,6 @@ const CustomerServiceRequestDetailInfo = ({
 
   const log = []
 
-  // Updated dummy data based on fikri.susilo extracted table data
-  const dummyData = [
-    {
-      id: "1",
-      date: "22 Jan 2022 19:35:23",
-      username: "fikri.susilo",
-      remark: "Update status to \"Closed\", remark: \"sudah selesai\""
-    },
-    {
-      id: "2", 
-      date: "22 Jan 2022 19:35:23",
-      username: "fikri.susilo",
-      remark: "Update status to \"Resolved\", remark: \"lanjut\""
-    },
-    {
-      id: "3",
-      date: "22 Jan 2022 19:35:23",
-      username: "fikri.susilo",
-      remark: "Update status to \"In Progress\", remark: \"lanjut\""
-    },
-    {
-      id: "4",
-      date: "22 Jan 2022 19:35:23",
-      username: "fikri.susilo",
-      remark: "Create service request"
-    }
-  ];
-
   const HistoryLogDummy = {
     recordId: "491",
     createdDate: "21 Dec 2021 23:11:09",
@@ -90,104 +49,20 @@ const CustomerServiceRequestDetailInfo = ({
     updatedBy: "Annisa"
   };
 
-  const ServiceRequestDummy = {
-    accountNumber: "2027635461",
-    accountName: "PT XYZ",
-    priority: "1",
-    startDate: "22 Aug 2022",
-    endDate: "22 Aug 2022",
-    status: "Active",
-    description: "Lorem ipsum dolor sit amet consectetur. Malesuada turpis arcu morbi elit sed lorem at adipiscing imperdiet. Aliquam quis tempus feugiat amet. Viverra metus tincidunt nibh mauris nisi. At et etiam non dignissim ultricies tellus in lacus fermentum. Sollicitudin purus viverra tincidunt proin."
-  };
-
-  // Use dummy data if no data provided
-  const tableData = (Array.isArray(data) && data.length > 0) ? data : dummyData;
-
-  // Sanitize pagination values to prevent NaN
-  const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
-  const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
-  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : tableData.length;
-
-  const handleDetail = (value) => {
-    setDataDetail(value);
-  };
-
-  const handleViewFile = (fileData) => {
-    // Placeholder for view file action
-    console.log("View file:", fileData);
-    // Add your file viewing logic here
-  };
-
-  const columns = [
-    {
-      title: "NO",
-      width: 80,
-      align: "center",
-      render: (text, object, index) => (sanitizedPage - 1) * sanitizedPageSize + index + 1,
-    },
-    {
-      title: "DATE",
-      dataIndex: "date",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("date"),
-    },
-    {
-      title: "USERNAME", 
-      dataIndex: "username",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("username"),
-    },
-    {
-      title: "REMARK",
-      dataIndex: "remark",
-      width: 400,
-      sorter: true,
-      ...getColumnSearchProps("remark"),
-    },
-    {
-      title: "ACTION",
-      align: "center",
-      width: 100,
-      fixed: "right",
-      render: (v, r, i) => {
-        return (
-          <div className="flex w-full justify-center gap-6">
-            <Tooltip title="View">
-              <div className="pt-1 cursor-pointer">
-                <SVGIcon
-                  name="IconEye"
-                  color={"#0075bf"}
-                  width={24}
-                  onClick={() => {
-                    handleViewFile(r);
-                  }}
-                />
-              </div>
-            </Tooltip>
-          </div>
-        );
-      },
-    },
-  ];
-
-  console.log(SRStatus)
-
   return (
     <Fragment>
       <BaseContainer header={"PAYMENT RELATION"}>
         <div className="w-full grid grid-cols-3 gap-4">
           {/* Payment Relation Information */}
-          <DetailText label="Account Number">{data?.accountNumber || ServiceRequestDummy.accountNumber}</DetailText>
-          <DetailText label="Account Name">{data?.accountName || ServiceRequestDummy.accountName}</DetailText>
-          <DetailText label="Cost Center">{data?.priority || ServiceRequestDummy.priority}</DetailText>
-          <DetailText label="Type">{data?.startDate || ServiceRequestDummy.startDate}</DetailText>
-          <DetailText label="Category">{data?.endDate || ServiceRequestDummy.endDate}</DetailText>
-          <DetailText label="Sub Category">{data?.status || ServiceRequestDummy.status}</DetailText>
+          <DetailText label="Account Number">{dataDetail?.accountNumber}</DetailText>
+          <DetailText label="Account Name">{dataDetail?.accountName}</DetailText>
+          <DetailText label="Cost Center">{dataDetail?.priority}</DetailText>
+          <DetailText label="Type">{dataDetail?.startDate}</DetailText>
+          <DetailText label="Category">{dataDetail?.endDate}</DetailText>
+          <DetailText label="Sub Category">{dataDetail?.status}</DetailText>
         </div>
         <div className="w-full">
-          <DetailText label="Description">{data?.description || ServiceRequestDummy.description}</DetailText>
+          <DetailText label="Description">{dataDetail?.description}</DetailText>
         </div>
       </BaseContainer>
 
