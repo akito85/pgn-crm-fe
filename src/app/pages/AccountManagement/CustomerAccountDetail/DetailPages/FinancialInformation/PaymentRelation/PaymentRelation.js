@@ -10,7 +10,7 @@ import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { getTaxImplication, getDetailTaxImplication } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { getTaxImplication, getDetailTaxImplication, getPaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
@@ -58,21 +58,19 @@ const PaymentRelation = ({
   }
 
   useEffect(() => {
-    if (id) {
-      let tempSearch = "";
-      for (const dataIndex in search) {
-        if (Object.hasOwnProperty.call(search, dataIndex)) {
-          const tempSearchText = search[dataIndex];
-          if (tempSearchText) {
-            tempSearch += `${dataIndex}~${tempSearchText},`;
-          }
+    let tempSearch = "";
+    for (const dataIndex in search) {
+      if (Object.hasOwnProperty.call(search, dataIndex)) {
+        const tempSearchText = search[dataIndex];
+        if (tempSearchText) {
+          tempSearch += `${dataIndex}~${tempSearchText},`;
         }
       }
-      tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-      const reqSearch = encodeURIComponent(JSON.stringify(search));
-      dispatch(getTaxImplication({ id, page, pageSize, sort, search: reqSearch }));
     }
-  }, [dispatch, id, page, pageSize, sort, search]);
+    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
+    dispatch(getPaymentRelation({ page, pageSize, sort, search: reqSearch }));
+  }, [dispatch, page, pageSize, sort, search]);
 
   useEffect(() => {
     if (
