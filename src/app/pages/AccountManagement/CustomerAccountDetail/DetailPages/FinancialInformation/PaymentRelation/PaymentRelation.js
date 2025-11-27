@@ -271,141 +271,143 @@ const PaymentRelation = ({
   ]
 
   return (
-    <Fragment>
-      <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-        {"PAYMENT RELATION LIST"}
-      </div>
+    <Spin spinning={loading}>
+      <Fragment>
+        <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
+          {"PAYMENT RELATION LIST"}
+        </div>
 
-      <div>
-        {!isApproval && (
-          <div className="flex justify-between items-center gap-5 mb-5">
-            {/* Filter Button - Left side */}
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate(-1)}
-              icon={
-                <FilterOutlined
+        <div>
+          {!isApproval && (
+            <div className="flex justify-between items-center gap-5 mb-5">
+              {/* Filter Button - Left side */}
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => navigate(-1)}
+                icon={
+                  <FilterOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 20,
+                    }}
+                  />
+                }
+                style={{
+                  backgroundColor: "#0075bf",
+                  color: "#fff",
+                  borderColor: "#0075bf",
+                  border: "1px solid #0075bf",
+                  width: "128px",
+                  height: "48px",
+                  borderRadius: "5px"
+                }}
+              >
+                Filters
+              </ButtonComponent>
+              
+              {/* Right side buttons container */}
+              <div className="flex justify-end items-center gap-2.5">
+                {/* Download List Button */}
+                <ButtonComponent
+                  type={"submit"}
+                  onClick={() => {}}
+                  icon={
+                    <DownloadOutlined
+                      style={{
+                        color: "#fff",
+                        fontSize: 20,
+                      }}
+                    />
+                  }
                   style={{
+                    backgroundColor: "#0075bf",
                     color: "#fff",
-                    fontSize: 20,
+                    borderColor: "#0075bf",
+                    border: "1px solid #0075bf",
+                    borderRadius: "5px",
+                    height: "48px"
                   }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                width: "128px",
-                height: "48px",
-                borderRadius: "5px"
-              }}
-            >
-              Filters
-            </ButtonComponent>
-            
-            {/* Right side buttons container */}
-            <div className="flex justify-end items-center gap-2.5">
-              {/* Download List Button */}
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => {}}
-                icon={
-                  <DownloadOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 20,
-                    }}
-                  />
-                }
-                style={{
-                  backgroundColor: "#0075bf",
-                  color: "#fff",
-                  borderColor: "#0075bf",
-                  border: "1px solid #0075bf",
-                  borderRadius: "5px",
-                  height: "48px"
-                }}
-              >
-                Download List
-              </ButtonComponent>
+                >
+                  Download List
+                </ButtonComponent>
 
-              {/* Approval Button */}
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => setIsApproval(!isApproval)}
-                icon={
-                  <CheckOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 20,
-                    }}
-                  />
-                }
-                style={{
-                  backgroundColor: "#0075bf",
-                  color: "#fff",
-                  borderColor: "#0075bf",
-                  border: "1px solid #0075bf",
-                  borderRadius: "5px",
-                  height: "48px"
-                }}
-              >
-                Approval
-              </ButtonComponent>
+                {/* Approval Button */}
+                <ButtonComponent
+                  type={"submit"}
+                  onClick={() => setIsApproval(!isApproval)}
+                  icon={
+                    <CheckOutlined
+                      style={{
+                        color: "#fff",
+                        fontSize: 20,
+                      }}
+                    />
+                  }
+                  style={{
+                    backgroundColor: "#0075bf",
+                    color: "#fff",
+                    borderColor: "#0075bf",
+                    border: "1px solid #0075bf",
+                    borderRadius: "5px",
+                    height: "48px"
+                  }}
+                >
+                  Approval
+                </ButtonComponent>
 
-              {/* Create Button */}
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => navigate("/account-management/customers/view/service-requests/create")}
-                icon={
-                  <PlusOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 20,
-                    }}
-                  />
-                }
-                style={{
-                  backgroundColor: "#0075bf",
-                  color: "#fff",
-                  borderColor: "#0075bf",
-                  border: "1px solid #0075bf",
-                  borderRadius: "5px",
-                  height: "48px"
-                }}
-              >
-                Create
-              </ButtonComponent>
+                {/* Create Button */}
+                <ButtonComponent
+                  type={"submit"}
+                  onClick={() => navigate("/account-management/customers/view/service-requests/create")}
+                  icon={
+                    <PlusOutlined
+                      style={{
+                        color: "#fff",
+                        fontSize: 20,
+                      }}
+                    />
+                  }
+                  style={{
+                    backgroundColor: "#0075bf",
+                    color: "#fff",
+                    borderColor: "#0075bf",
+                    border: "1px solid #0075bf",
+                    borderRadius: "5px",
+                    height: "48px"
+                  }}
+                >
+                  Create
+                </ButtonComponent>
+              </div>
             </div>
-          </div>
-        )}
-        <PaymentRelationTable
-          data={data_paymentRelation?.result}
-          handleChange={handleChange}
-          handleChangeSize={handleChangeSize}
-          totalElement={totalElement}
-          page={page}
-          pageSize={pageSize}
-          searchText={searchText}
-          searchedColumn={searchedColumn}
-          onSort={onSort}
+          )}
+          <PaymentRelationTable
+            data={data_paymentRelation?.result}
+            handleChange={handleChange}
+            handleChangeSize={handleChangeSize}
+            totalElement={totalElement}
+            page={page}
+            pageSize={pageSize}
+            searchText={searchText}
+            searchedColumn={searchedColumn}
+            onSort={onSort}
+            getColumnSearchProps={getColumnSearchProps}
+            handleDetail={() => navigate("/account-management/account-standard/financial-information/payment-relation/details")}
+            setModalDetail={setModalDetail}
+            rowSelection={isApproval ? rowSelection : undefined}
+            isApproval={isApproval}
+          />
+        </div>
+        <ModalConfirmationApprovalPaymentRelation
+          dataSource={selectedRows}
+          isOpen={showApprovalModal}
+          setIsOpen={setShowApprovalModal}
           getColumnSearchProps={getColumnSearchProps}
-          handleDetail={() => navigate("/account-management/account-standard/financial-information/payment-relation/details")}
-          setModalDetail={setModalDetail}
-          rowSelection={isApproval ? rowSelection : undefined}
-          isApproval={isApproval}
+          handleCancel={handleCancelApprovalModal}
+          handleOk={() => handleConfirmApprovalModal(submitApprovalCondition)}
         />
-      </div>
-      <ModalConfirmationApprovalPaymentRelation
-        dataSource={selectedRows}
-        isOpen={showApprovalModal}
-        setIsOpen={setShowApprovalModal}
-        getColumnSearchProps={getColumnSearchProps}
-        handleCancel={handleCancelApprovalModal}
-        handleOk={() => handleConfirmApprovalModal(submitApprovalCondition)}
-      />
-    </Fragment>  
+      </Fragment>  
+    </Spin>
   );
 };
 
