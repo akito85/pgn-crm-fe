@@ -1,21 +1,9 @@
-import React, { useEffect, useRef } from "react";
-import {
-  DownloadOutlined,
-  PlusOutlined,
-  UnorderedListOutlined,
-  EditOutlined,
-  WarningOutlined,
-  MoreOutlined,
-  ExclamationCircleOutlined,
-  CheckSquareOutlined,
-  CheckSquareFilled,
-} from "@ant-design/icons";
+import { useEffect } from "react";
 import { Collapse, Space } from "antd";
-import { Link, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Fragment } from "react";
 import MiniBaseContainer from "../../../../../../components/MiniBaseContainer";
-import HeaderDetail from "../../HeaderDetail";
 import WitholdingTax from "./WitholdingTax/WitholdingTax";
 import PaymentChannel from "./Payment Channel/PaymentChannel";
 import TaxIdentifierAndRelation from "./TaxIdentifier/TaxIdentifierAndRelation";
@@ -23,7 +11,6 @@ import AccountingRule from "./AccountingRule/AccountingRule";
 import TaxImplication from "./TaxImplication/TaxImplication";
 import BillingBucket from "./BillingBucket/BillingBucket";
 import PaymentRelation from "./PaymentRelation/PaymentRelation";
-import useGrantAccessHooks from "../../../../../../components/useGrantAccessHooks";
 import { useDispatch, useSelector } from "react-redux";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 
