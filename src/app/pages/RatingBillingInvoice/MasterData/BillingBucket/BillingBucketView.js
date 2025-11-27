@@ -54,7 +54,12 @@ const BillingBucketView = () => {
   // Use Effect
   useEffect(() => {
     dispatch(
-      getAllBillingBucketPaginate({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort })
+      getAllBillingBucketPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      })
     );
   }, [search, sort, page, pageSize, dispatch]);
 
@@ -285,11 +290,24 @@ const BillingBucketView = () => {
         const linkContent =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={isEditable ? "#0075bf" : "#8D91A0"} width={24} />}
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={24}
+                />
+              }
               border={false}
               disabled={!isEditable}
             >
-              <span className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"}`}> Update</span>
+              <span
+                className={`ml-3 ${
+                  isEditable ? "text-black " : "text-[#8D91A0]"
+                }`}
+              >
+                {" "}
+                Update
+              </span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
@@ -381,7 +399,7 @@ const BillingBucketView = () => {
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
               border={false}
-              onClick={() => handleApprovalHistory(record.id)}
+              onClick={() => handleApprovalHistory(record.billingBucketCode)}
             >
               <span className={"text-black ml-3"}>Approval History</span>
             </ButtonComponent>
@@ -392,7 +410,9 @@ const BillingBucketView = () => {
                   name="IconLogHistory"
                   color={"#0075bf"}
                   width={24}
-                  onClick={() => handleApprovalHistory(record.id)}
+                  onClick={() =>
+                    handleApprovalHistory(record.billingBucketCode)
+                  }
                 />
               </div>
             </Tooltip>
@@ -401,7 +421,6 @@ const BillingBucketView = () => {
         return Content;
       },
     },
-
   ];
 
   return (
@@ -460,8 +479,9 @@ const BillingBucketView = () => {
           dispatch={dispatch}
           getAPIOption={getListApprovalHierarchy}
           getAPIDetail={getListApprovalHierarchyDetail}
-          alertMessage={`Are you sure you want to inactivate this Billing Bucket with name ${chooseId?.billingBucketCode || ""
-            }?`}
+          alertMessage={`Are you sure you want to inactivate this Billing Bucket with name ${
+            chooseId?.billingBucketCode || ""
+          }?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
