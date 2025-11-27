@@ -16,7 +16,7 @@ const SVG = ({
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g clip-path="url(#clip0_2990_88521)">
+    <g clipPath="url(#clip0_2990_88521)">
       <path
         d="M46.5 24C46.5 36.4264 36.4264 46.5 24 46.5C11.5736 46.5 1.5 36.4264 1.5 24C1.5 11.5736 11.5736 1.5 24 1.5C36.4264 1.5 46.5 11.5736 46.5 24Z"
         fill="#BE3036"
@@ -31,8 +31,8 @@ const SVG = ({
       />
       <circle cx="24" cy="24" r="13" fill="white" />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M20 20L28 28L20 20ZM28 20L20 28L28 20Z"
         fill="white"
       />
