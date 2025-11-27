@@ -4,6 +4,8 @@ import {
   ClockCircleFilled,
   CloseCircleFilled,
   Loading3QuartersOutlined,
+  ExclamationCircleFilled,
+  MinusCircleFilled,
 } from "@ant-design/icons";
 import React, { useMemo } from "react";
 
@@ -27,6 +29,8 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "paid":
       case "complete billing":
       case "sent":
+      case "approved": // E-Faktur status
+      case "success_upload": // E-Faktur status
         bgColor = "status-active";
         tColor = "text-white";
         break;
@@ -57,28 +61,33 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "waiting_approval":
       case "partial payment":
       case "waiting to release":
+      case "awaiting_approval": // E-Faktur status
+      case "awaiting approval": // E-Faktur status
         bgColor = "status-waiting";
         tColor = "text-yellow-700";
         break;
 
       case "in progress":
       case "INPROGRESS":
+      case "processing": // E-Faktur status
         bgColor = "bg-yellow-500";
         tColor = "text-white";
         break;
 
       case "draft":
-        bgColor = "status-draft";
-        tColor = "text-gray-700";
+      case "not_generated": // E-Faktur status
+      case "not generated": // E-Faktur status
+        bgColor = "bg-gray-600";
+        tColor = "text-white";
         break;
 
-      case "approved":
       case "main":
         bgColor = "status-active";
         tColor = "text-white";
         break;
 
       case "expire":
+      case "cancelled": // E-Faktur status
         bgColor = "status-expire";
         tColor = "text-red-700";
         break;
@@ -175,6 +184,17 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         bgColor = "bg-[#F57C00]";
         tColor = "text-white";
         break;
+
+      // E-Faktur specific statuses
+      case "replaced": // Replacement status
+        bgColor = "bg-orange-100";
+        tColor = "text-orange-800";
+        break;
+
+      case "latest": // Replacement status
+        bgColor = "bg-green-100";
+        tColor = "text-green-800";
+        break;
     }
 
     return { bgcolor: bgColor, textColor: tColor };
@@ -191,20 +211,30 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "sent":
       case "approved":
       case "paid":
+      case "success_upload":
+      case "latest":
         return <CheckCircleFilled style={{ fontSize: "15px" }} />;
       case "generating":
       case "in progress":
       case "inprogress":
       case "INPROGRESS":
+      case "processing":
       case "waiting approval":
       case "waiting_approval":
+      case "awaiting_approval":
+      case "awaiting approval":
         return <Loading3QuartersOutlined style={{ fontSize: "15px" }} />;
       case "failed":
       case "not paid":
       case "not_paid":
+      case "rejected":
         return <CloseCircleFilled style={{ fontSize: "15px" }} />;
       case "scheduled":
         return <ClockCircleFilled style={{ fontSize: "15px" }} />;
+      case "cancelled":
+        return <MinusCircleFilled style={{ fontSize: "15px" }} />;
+      case "replaced":
+        return <ExclamationCircleFilled style={{ fontSize: "15px" }} />;
       default:
         return null;
     }

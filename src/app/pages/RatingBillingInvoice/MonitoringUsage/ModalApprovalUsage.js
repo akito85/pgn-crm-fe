@@ -356,7 +356,7 @@ const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh
               pageSize={pageSize}
               onChange={handleChange}
               totalData={dataTableSelect.length}
-              tableScrolled={{ x: 8500, y: 300 }}
+              tableScrolled={{ x: 9000, y: 300 }}
             />
             <div className="pt-[30px]">
               <DetailText label={"Remark"}>

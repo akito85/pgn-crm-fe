@@ -23,7 +23,7 @@ import ModalUploadEFaktur from "./ModalEfaktur/ModalUploadEFaktur";
 import ModalApprovalEFaktur from "./ModalEfaktur/ModalApprovalEFaktur ";
 import ModalReplaceEFaktur from "./ModalEfaktur/ModalReplaceEFaktur";
 import ModalCancelEFaktur from "./ModalEfaktur/ModalCancelEFaktur ";
-import ModalBulkRequestApproval from "./ModalEfaktur/ModalBulkRequestApproval"; // NEW MODAL
+import ModalBulkRequestApproval from "./ModalEfaktur/ModalBulkRequestApproval";
 import LogAktivitasEFaktur from "./LogAktivitasEFaktur";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
@@ -35,6 +35,8 @@ import {
   downloadEFakturList,
   getApprovalHistory,
 } from "../../../../redux/slices/rating_billing_invoice/efakturSlice";
+import { currencyFormatting } from "../../../../utils/formatCurrency";
+import StatusComponent from "../../../../components/StatusComponent";
 
 const ViewFaktur = () => {
   // Selector
@@ -872,12 +874,15 @@ const ViewFaktur = () => {
           true
         ),
         render: (value) => {
-          const displayText = `Rp ${value?.toLocaleString("id-ID") || 0}`;
+          const formattedValue = (
+            <span>Rp {currencyFormatting(value, "idr")}</span>
+          );
+
           return renderColumn(
             "totalAmountEqvIdr",
             hasValue(search["totalAmountEqvIdr"]),
             searchText,
-            displayText,
+            formattedValue,
             false,
             "input",
             search
@@ -902,28 +907,12 @@ const ViewFaktur = () => {
           true
         ),
         render: (status) => {
-          const statusColors = {
-            APPROVED: "bg-green-100 text-green-800 border-green-300",
-            PROCESSING: "bg-blue-100 text-blue-800 border-blue-300",
-            AWAITING_APPROVAL:
-              "bg-orange-100 text-orange-800 border-orange-300",
-            FAILED: "bg-red-100 text-red-800 border-red-300",
-            REJECTED: "bg-red-100 text-red-800 border-red-300",
-            SUCCESS_UPLOAD: "bg-green-100 text-green-800 border-green-300",
-            NOT_GENERATED: "bg-gray-100 text-gray-800 border-gray-300",
-          };
-
           const displayStatus = status || "NOT_GENERATED";
           const statusLabel = displayStatus.replace(/_/g, " ");
 
           return (
             <div className="flex justify-center">
-              <span
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
-                  statusColors[displayStatus] ||
-                  "bg-gray-100 text-gray-800 border-gray-300"
-                }`}
-              >
+              <StatusComponent colour={displayStatus.toLowerCase()}>
                 {renderColumn(
                   "efakturStatus",
                   hasValue(search["efakturStatus"]),
@@ -933,7 +922,7 @@ const ViewFaktur = () => {
                   "status",
                   search
                 )}
-              </span>
+              </StatusComponent>
             </div>
           );
         },
@@ -963,17 +952,19 @@ const ViewFaktur = () => {
           if (replacement === "Y") {
             return (
               <Tooltip title="Faktur ini sudah diganti dengan faktur baru">
-                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-800 border border-orange-300">
-                  {renderColumn(
-                    "replacement",
-                    hasValue(search["replacement"]),
-                    searchText,
-                    "REPLACED",
-                    false,
-                    "input",
-                    search
-                  )}
-                </span>
+                <div className="flex justify-center">
+                  <StatusComponent colour="replaced">
+                    {renderColumn(
+                      "replacement",
+                      hasValue(search["replacement"]),
+                      searchText,
+                      "REPLACED",
+                      false,
+                      "input",
+                      search
+                    )}
+                  </StatusComponent>
+                </div>
               </Tooltip>
             );
           }
@@ -981,17 +972,19 @@ const ViewFaktur = () => {
           if (replacement === "N") {
             return (
               <Tooltip title="Faktur pengganti terbaru">
-                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-300">
-                  {renderColumn(
-                    "replacement",
-                    hasValue(search["replacement"]),
-                    searchText,
-                    "LATEST",
-                    false,
-                    "input",
-                    search
-                  )}
-                </span>
+                <div className="flex justify-center">
+                  <StatusComponent colour="latest">
+                    {renderColumn(
+                      "replacement",
+                      hasValue(search["replacement"]),
+                      searchText,
+                      "LATEST",
+                      false,
+                      "input",
+                      search
+                    )}
+                  </StatusComponent>
+                </div>
               </Tooltip>
             );
           }
