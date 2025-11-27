@@ -662,7 +662,7 @@ export const getApprovalHistory = createAsyncThunk(
   "GET_APPROVAL_HISTORY",
   async (id, thunkAPI) => {
     try {
-      const url = `v1/dbs/api/rbi/billing-bucket/approval-history/${id}`;
+      const url = `/v1/dbs/api/rbi/billing-bucket/approval-history/${id}`;
       const response = await ratingBillingHttpService.getDetail(url);
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
