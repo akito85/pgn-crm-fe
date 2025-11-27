@@ -10,7 +10,7 @@ import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { getPaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { getDetailPaymentRelation, getPaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
@@ -214,6 +214,15 @@ const PaymentRelation = ({
     }
   }, [submitApprovalCondition]);
 
+  const handleDetail = (record) => {
+    const id = record.id
+    console.log("record", record);
+    // dispatch(
+    //   getDetailPaymentRelation(id)
+    // );
+    navigate("/account-management/account-standard/financial-information/payment-relation/details");
+  }
+
   // Dummy data
   const data = [
     {
@@ -390,7 +399,7 @@ const PaymentRelation = ({
             searchedColumn={searchedColumn}
             onSort={onSort}
             getColumnSearchProps={getColumnSearchProps}
-            handleDetail={() => navigate("/account-management/account-standard/financial-information/payment-relation/details")}
+            handleDetail={handleDetail}
             rowSelection={isApproval ? rowSelection : undefined}
             isApproval={isApproval}
           />
