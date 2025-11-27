@@ -38,10 +38,6 @@ const FinancialInformation = ({
 }) => {
   //   // const dispatch = useDispatch();
   //   const { data, data_detail, loading } = useSelector((state) => state.tos);
-  const [page, setPage] = useState(1);
-  const navigate = useNavigate;
-  const [pageSize, setPageSize] = useState(10);
-  const [status, setStatus] = useState();
 	const [current, setCurrent] = useState(0)
   const dispatch = useDispatch();
   const location = useLocation();
