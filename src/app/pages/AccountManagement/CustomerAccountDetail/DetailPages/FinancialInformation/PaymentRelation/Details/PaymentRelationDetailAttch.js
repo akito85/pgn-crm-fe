@@ -1,5 +1,3 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 import { Tooltip } from "antd";
 import TablePagination from "../../../../../../../../components/TablePagination";
@@ -8,17 +6,8 @@ import { Fragment } from "react";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import { 
-  CloseOutlined, 
-  PauseCircleOutlined, 
-  PlayCircleOutlined, 
-  LockOutlined, 
-  PlusOutlined, 
-  CheckCircleOutlined,
   FilterOutlined,
   DownloadOutlined,
-  EyeOutlined,
-  EditOutlined,
-  MoreOutlined
 } from "@ant-design/icons";
 
 
@@ -33,7 +22,6 @@ const PaymentRelationDetailAttch = ({
   searchedColumn = "",
   onSort = () => {},
   getColumnSearchProps = () => {},
-  searchInput,
   handleSearch
 }) => {
   // Dummy data
@@ -69,8 +57,6 @@ const PaymentRelationDetailAttch = ({
       fileSize: "1.2 MB"
     }
   ];
-  // nav
-  const navigate = useNavigate();
 
   // Use dummy data if no data provided
   const tableData = (Array.isArray(dataDetail) && dataDetail.length > 0) ? dataDetail : dummyData;
