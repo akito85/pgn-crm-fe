@@ -365,7 +365,7 @@ const PaymentRelation = ({
                 {/* Create Button */}
                 <ButtonComponent
                   type={"submit"}
-                  onClick={() => navigate("/account-management/customers/view/service-requests/create")}
+                  onClick={() => navigate("/account-management/account-standard/financial-information/payment-relation/create")}
                   icon={
                     <PlusOutlined
                       style={{
