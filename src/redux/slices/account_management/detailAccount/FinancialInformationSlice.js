@@ -399,6 +399,34 @@ export const getDetailTaxImplication = createAsyncThunk(
   }
 );
 
+export const getPaymentRelation = createAsyncThunk(
+  "GET_PAYMENT_RELATION",
+  async ({page, pageSize, sort, search }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/list?page=${page}&size=${pageSize}${
+        sort ? `&sort=${sort}` : ""
+      }${search ? `&searchs=${search}` : ""}`;
+      const response = await accountManagementService.getPagination(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getDetailPaymentRelation = createAsyncThunk(
+  "GET_DETAIL_PAYMENT_RELATION",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 export const getBillingBucket = createAsyncThunk(
   "GET_BILLING_BUCKET",
   async ({ id, page, pageSize, sort, search }, thunkAPI) => {
@@ -590,6 +618,34 @@ const financialInformationSlice = createSlice({
     },
     [getDetailTaxImplication.rejected]: (state, action) => {
       state.detail_taxImplication = action.payload;
+      state.loading = false;
+    },
+
+    /** Payment Relation */
+    [getPaymentRelation.pending]: (state, action) => {
+      state.data_paymentRelation = action.payload;
+      state.loading = false;
+    },
+    [getPaymentRelation.fulfilled]: (state, action) => {
+      state.data_paymentRelation = action.payload;
+      state.loading = false;
+    },
+    [getPaymentRelation.rejected]: (state, action) => {
+      state.data_paymentRelation = action.payload;
+      state.loading = false;
+    },
+
+    /** Detail Payment Relation */
+    [getDetailPaymentRelation.pending]: (state, action) => {
+      state.data_paymentRelation = action.payload;
+      state.loading = false;
+    },
+    [getDetailPaymentRelation.fulfilled]: (state, action) => {
+      state.data_paymentRelation = action.payload;
+      state.loading = false;
+    },
+    [getDetailPaymentRelation.rejected]: (state, action) => {
+      state.data_paymentRelation = action.payload;
       state.loading = false;
     },
 
