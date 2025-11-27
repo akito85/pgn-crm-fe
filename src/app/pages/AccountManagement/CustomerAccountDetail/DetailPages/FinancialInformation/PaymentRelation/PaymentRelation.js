@@ -1,21 +1,21 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   FilterOutlined,
   DownloadOutlined, 
   CheckOutlined, 
   PlusOutlined 
 } from "@ant-design/icons";
-import { Collapse, Space, Switch, Form, DatePicker, Input, Spin } from "antd";
+import { DatePicker, Input, Spin } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { getTaxImplication, getDetailTaxImplication, getPaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { getPaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { useNavigate, useLocation } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import ModalConfirmationApprovalPaymentRelation from "./ModalConfirmationApprovalPaymentRelation";
 
 // getDetailTaxImplication
