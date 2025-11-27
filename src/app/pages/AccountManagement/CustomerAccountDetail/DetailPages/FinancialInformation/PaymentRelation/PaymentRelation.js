@@ -46,7 +46,6 @@ const PaymentRelation = ({
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, updateSearch] = useState({});
-  const [modalDetail, setModalDetail] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
 
   const handleCancelApprovalModal = () => {
@@ -392,7 +391,6 @@ const PaymentRelation = ({
             onSort={onSort}
             getColumnSearchProps={getColumnSearchProps}
             handleDetail={() => navigate("/account-management/account-standard/financial-information/payment-relation/details")}
-            setModalDetail={setModalDetail}
             rowSelection={isApproval ? rowSelection : undefined}
             isApproval={isApproval}
           />
