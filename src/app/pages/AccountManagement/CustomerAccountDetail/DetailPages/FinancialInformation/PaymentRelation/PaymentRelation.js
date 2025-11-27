@@ -15,13 +15,15 @@ import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import ModalConfirmationApprovalPaymentRelation from "./ModalConfirmationApprovalPaymentRelation";
 
 // getDetailTaxImplication
 // detail_taxImplication
 
 const PaymentRelation = ({
+  id = 0,
+  idCustomer = 0,
   isActive = false,
   isApproval = false,
   setIsApproval = () => {},
@@ -30,6 +32,8 @@ const PaymentRelation = ({
 }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state;
 
   const { data_paymentRelation, detail_paymentRelation, loading } = useSelector(
     (state) => state.financialInformation
@@ -220,7 +224,7 @@ const PaymentRelation = ({
     // dispatch(
     //   getDetailPaymentRelation(id)
     // );
-    navigate("/account-management/account-standard/financial-information/payment-relation/details");
+    navigate("/account-management/account-standard/financial-information/payment-relation/details", { state });
   }
 
   return (
