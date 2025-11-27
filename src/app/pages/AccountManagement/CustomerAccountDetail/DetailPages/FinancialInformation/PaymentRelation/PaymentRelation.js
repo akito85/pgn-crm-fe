@@ -381,8 +381,7 @@ const PaymentRelation = ({
           </div>
         )}
         <PaymentRelationTable
-          // data={data_paymentRelation?.result}
-          data={data}
+          data={data_paymentRelation?.result}
           handleChange={handleChange}
           handleChangeSize={handleChangeSize}
           totalElement={totalElement}
