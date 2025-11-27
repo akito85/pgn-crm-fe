@@ -624,7 +624,7 @@ const financialInformationSlice = createSlice({
     /** Payment Relation */
     [getPaymentRelation.pending]: (state, action) => {
       state.data_paymentRelation = action.payload;
-      state.loading = false;
+      state.loading = true;
     },
     [getPaymentRelation.fulfilled]: (state, action) => {
       state.data_paymentRelation = action.payload;
@@ -638,7 +638,7 @@ const financialInformationSlice = createSlice({
     /** Detail Payment Relation */
     [getDetailPaymentRelation.pending]: (state, action) => {
       state.data_paymentRelation = action.payload;
-      state.loading = false;
+      state.loading = true;
     },
     [getDetailPaymentRelation.fulfilled]: (state, action) => {
       state.data_paymentRelation = action.payload;
