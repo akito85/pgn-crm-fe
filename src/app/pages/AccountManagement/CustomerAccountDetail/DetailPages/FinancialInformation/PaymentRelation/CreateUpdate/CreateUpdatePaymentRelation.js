@@ -52,12 +52,8 @@ const CreatePaymentRelation = ({ type }) => {
 
   const dispatch = useDispatch();
   const {
-    data_customerDetailAttachment,
     data_customerDetail,
-    data_globalCustomerType,
     data_globalIdentificationType,
-    data_globalSex,
-    data_globalMartialStatus,
     loading,
   } = useSelector((state) => state.customerAccount);
 
@@ -216,22 +212,6 @@ const CreatePaymentRelation = ({ type }) => {
       ...data,
     });
   }, [data, formCreate]);
-
-  const handleChangeName = (e, type) => {
-    switch (type) {
-      case "firstName":
-        setFirstName(e.target.value);
-        break;
-      case "middleName":
-        setMiddleName(e.target.value);
-        break;
-      case "lastName":
-        setLastName(e.target.value);
-        break;
-      default:
-        break;
-    }
-  }
 
   const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}` 
   
