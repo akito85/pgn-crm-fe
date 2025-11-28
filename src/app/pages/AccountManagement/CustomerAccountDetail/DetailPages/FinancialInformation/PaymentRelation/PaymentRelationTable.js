@@ -19,11 +19,8 @@ const PaymentRelationTable = ({
   totalElement = {},
   page = {},
   pageSize = {},
-  searchText,
-  searchedColumn,
   onSort = {},
   getColumnSearchProps = () => {},
-  handleDetail,
   rowSelection,
   isApproval = false,
 }) => {
