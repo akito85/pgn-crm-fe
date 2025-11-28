@@ -289,7 +289,7 @@ const BillingPage = () => {
                 e.stopPropagation();
                 handleApprovalHistory(record);
               }}
-              style={{ cursor: "pointer", display: "inline-block" }}
+              style={{ cursor: "pointer", display: "inline-block",lineHeight: 0 }}
             >
               <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
             </div>
@@ -302,7 +302,11 @@ const BillingPage = () => {
   const actionCols = useColumnActionPermission(
     ["view", "history"],
     itemGrantAccess
-  );
+  ).map((col) => ({
+    ...col,
+    width: 80,
+    align: "center",
+  }));
 
   const baseColumns = useMemo(() => {
     if (valueTab === "All") {

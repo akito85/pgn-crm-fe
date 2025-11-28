@@ -212,6 +212,7 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
           <BaseContainer header={"RATING RESULT INFORMATION"}>
             <div className="w-full">
               <TableRBI
+                size="small"
                 dataSource={dataSourceRR}
                 columns={processedColumnsRR}
                 current={page}
@@ -275,6 +276,7 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
         </div>
         <div className="w-full">
           <TableRBI
+            size="small"
             dataSource={dataSourceBI}
             columns={processedColumnsBI}
             current={pageBI}
