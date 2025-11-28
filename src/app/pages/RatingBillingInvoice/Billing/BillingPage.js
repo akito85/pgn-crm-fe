@@ -284,12 +284,15 @@ const BillingPage = () => {
       render: (record) => {
         return (
           <Tooltip title="Approval Hierarchy">
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={20}
-                onClick={() => handleApprovalHistory(record)}
-              />
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                handleApprovalHistory(record);
+              }}
+              style={{ cursor: "pointer", display: "inline-block" }}
+            >
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
+            </div>
           </Tooltip>
         );
       },
@@ -440,20 +443,28 @@ const BillingPage = () => {
               onRow={(record) => ({
                 onClick: () => handleDetail(record),
                 style: {
-                  cursor: 'pointer',
-                  backgroundColor: activeRowKey === (record.billingCode || record.invoiceNumber)
-                    ? '#bae7ff'
-                    : 'transparent',
-                  transition: 'background-color 0.2s ease',
+                  cursor: "pointer",
+                  backgroundColor:
+                    activeRowKey ===
+                    (record.billingCode || record.invoiceNumber)
+                      ? "#bae7ff"
+                      : "transparent",
+                  transition: "background-color 0.2s ease",
                 },
                 onMouseEnter: (e) => {
-                  if (activeRowKey !== (record.billingCode || record.invoiceNumber)) {
-                    e.currentTarget.style.backgroundColor = '#f5f5f5';
+                  if (
+                    activeRowKey !==
+                    (record.billingCode || record.invoiceNumber)
+                  ) {
+                    e.currentTarget.style.backgroundColor = "#f5f5f5";
                   }
                 },
                 onMouseLeave: (e) => {
-                  if (activeRowKey !== (record.billingCode || record.invoiceNumber)) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
+                  if (
+                    activeRowKey !==
+                    (record.billingCode || record.invoiceNumber)
+                  ) {
+                    e.currentTarget.style.backgroundColor = "transparent";
                   }
                 },
               })}
@@ -468,7 +479,7 @@ const BillingPage = () => {
           >
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-blue-200">
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-lg text-blue-700">
+                <h3 className="font-bold text-lg text-blue-500">
                   Billing Detail: {billingCode}
                 </h3>
               </div>

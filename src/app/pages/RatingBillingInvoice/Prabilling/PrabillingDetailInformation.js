@@ -421,9 +421,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             }}
           >
             <Tooltip title="View Account Detail">
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
+                <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         ),
