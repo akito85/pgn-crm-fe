@@ -23,15 +23,7 @@ import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 
 import {
-  getCustomerAccount,
-  getCustomerAttachment,
   getCustomerDetail,
-  getGlobalCustomerType,
-  getGlobalIdentificationType,
-  getGlobalMartialStatus,
-  getGlobalSex,
-  getListCategoryFile,
-  updateCustomer,
 } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import {
   getAccountStandardDetail,
@@ -41,8 +33,6 @@ import {
 import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../../../../../utils";
-import ModalCustom from "../../../../../../../../components/Modal/ModalCustom";
-import ModalConfirmationApprovalPaymentRelation from "../ModalConfirmationApprovalPaymentRelation";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 
 const CreatePaymentRelation = ({ type }) => {
@@ -85,18 +75,27 @@ const CreatePaymentRelation = ({ type }) => {
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
 
-  const [customerType, setCustomerType] = useState(0);
-  const [identificationDdlValue, setIdentificationDdlValue] = useState([]);
-  const [firstName, setFirstName] = useState("");
-  const [middleName, setMiddleName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
   const isLoading = loading || loadingForm || loadingAccount;
 
+  const formFields = [
+    [
+      "accountNumber",
+      "accountName",
+      "priority",
+      "startDate",
+      "endDate",
+      "description",
+    ],
+    [
+      "appHierId",
+    ],
+    []
+  ]
  
-  const { InformationForm, AttachmentForm, ApprovalForm, ContactForm, PreRequisiteForm } = StepContents;
+  const { InformationForm, AttachmentForm, ApprovalForm } = StepContents;
 
   useEffect(() => {
     if (idCustomer)
@@ -155,63 +154,6 @@ const CreatePaymentRelation = ({ type }) => {
       dispatch(getCustomerDetail(id));
     }
   }, [dispatch, id]);
-
-  useEffect(() => {
-    dispatch(getGlobalCustomerType());
-    dispatch(getGlobalIdentificationType());
-    dispatch(getGlobalSex());
-    dispatch(getGlobalMartialStatus());
-  }, [dispatch]);
-
-  const handleSetData = (e) => {
-    const temp = (e?.customerName || "").split(" ");
-    setData({
-      foundedBirthDate: e.foundedBirthDate ? moment(e.foundedBirthDate) : null,
-      foundedBirthPlace: e?.foundedBirthPlace,
-      customerType: e?.customerTypeId,
-      identificationType: e?.identificationTypeId,
-      customerIdentificationNumber: e?.customerIdentificationNumber,
-      sex: e?.sexId,
-      maritalStatus: e?.maritalStatusId,
-      searchKey: e?.searchKey,
-      firstName: (temp[0] || "").toUpperCase(),
-      middleName: (temp[1] || "").toUpperCase(),
-      lastName: (temp[2] || "").toUpperCase(),
-      customerName: (e?.customerName || "").toUpperCase(),
-      description: e?.description,
-    });
-    setFirstName((temp[0] || "").toUpperCase());
-    setMiddleName((temp[1] || "").toUpperCase());
-    setLastName((temp[2] || "").toUpperCase());
-  };
-
-  useEffect(() => {
-    if (data_customerDetail) {
-      setCustomerType(data_customerDetail?.customerTypeId);
-      handleSetData(data_customerDetail);
-    }
-  }, [data_customerDetail]);
-
-  useEffect(() => {
-    if(customerType === 58){
-
-      setIdentificationDdlValue(data_globalIdentificationType?.filter(item => item?.id !== 1123))
-    } else {
-      setIdentificationDdlValue(data_globalIdentificationType)
-    }
-  },[customerType, data_globalIdentificationType])
-
-  useEffect(() => {
-    formCreate.setFieldsValue({
-      customerName: `${firstName}${middleName ? ` ${middleName}` : ""}${lastName ? ` ${lastName}` : ""}`,
-    });
-  },[firstName, middleName, lastName])
-
-  useEffect(() => {
-    formCreate.setFieldsValue({
-      ...data,
-    });
-  }, [data, formCreate]);
 
   const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}` 
   
@@ -302,7 +244,6 @@ const CreatePaymentRelation = ({ type }) => {
           data={dummyAttachmentList}
           updateData={setDummyAttachmentList}
           dispatch={dispatch}
-          mandatory={true}
         />
       ),
       disabled: false
@@ -311,7 +252,14 @@ const CreatePaymentRelation = ({ type }) => {
   
 
   const navigate = useNavigate();
-  const next = () => {
+  const next = async () => {
+    try {
+      const values = await formCreate.validateFields(formFields[current]);
+      console.log(values);
+    } catch (err) {
+      return;
+    }
+    
     setCurrent(current + 1);
   };
   const prev = () => {
@@ -322,8 +270,8 @@ const CreatePaymentRelation = ({ type }) => {
       containerRef.current.scrollLeft += 250;
     }
   };
-  const handleButtonNext = () => {
-    next();
+  const handleButtonNext = async () => {
+    await next();
     scrollRightHandler()
   }
   
