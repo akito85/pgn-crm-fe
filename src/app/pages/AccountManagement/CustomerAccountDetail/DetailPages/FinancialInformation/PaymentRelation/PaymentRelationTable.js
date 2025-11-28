@@ -7,9 +7,13 @@ import SVGIcon from "../../../../../../../assets/Icon/index";
 import moment from "moment";
 import { dateFormatting, toTitleCase } from "../../../../../../../utils";
 import StatusComponent from "../../../../../../../components/StatusComponent";
+import { Link } from "react-router-dom";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 
 const PaymentRelationTable = ({
   data = [],
+  idAccount = 0,
+  idCustomer = 0,
   handleChange = {},
   handleChangeSize = {},
   totalElement = {},
@@ -115,7 +119,7 @@ const PaymentRelationTable = ({
         return (
           <div className="flex w-full justify-center gap-6">
             {!isApproval && (
-              <Tooltip title="Detail">
+              <Tooltip>
                 <div className="pt-1">
                   <SVGIcon
                     name="IconActionDropdown"
@@ -126,18 +130,21 @@ const PaymentRelationTable = ({
                 </div>
               </Tooltip>
             )}
-            <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconDetail"
-                  color={"#0075bf"}
-                  width={24}
-                  onClick={() => {
-                    handleDetail(r);
-                  }}
-                />
-              </div>
-            </Tooltip>
+            <Link to={ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION} state={{
+              idPR: r.id,
+              idAccount,
+              idCustomer,
+            }}>
+              <Tooltip title="Detail">
+                <div className="pt-1">
+                  <SVGIcon
+                    name="IconDetail"
+                    color={"#0075bf"}
+                    width={24}
+                  />
+                </div>
+              </Tooltip>
+            </Link>
             {
               isApproval && (
                 <Tooltip title="Detail">

@@ -50,6 +50,7 @@ const AccountDetailInformation = ({
   section = "",
   options = [],
   handleChangeOption = () => {},
+  idAccount = 0,
   idCustomer = 0,
   type = "",
   setTypeAccountInfoDetailSection = () => {},
@@ -264,6 +265,7 @@ const AccountDetailInformation = ({
         return (
           <FinancialInformation
             id={id}
+            idCustomer={idCustomer}
             isApproval={isApproval}
             setIsApproval={setIsApproval}
             submitApprovalCondition={submitApprovalCondition}

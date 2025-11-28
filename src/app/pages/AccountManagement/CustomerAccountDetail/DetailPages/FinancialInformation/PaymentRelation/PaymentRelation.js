@@ -340,6 +340,8 @@ const PaymentRelation = ({
           )}
           <PaymentRelationTable
             data={data_paymentRelation?.result}
+            idAccount={id}
+            idCustomer={idCustomer}
             handleChange={handleChange}
             handleChangeSize={handleChangeSize}
             totalElement={totalElement}
