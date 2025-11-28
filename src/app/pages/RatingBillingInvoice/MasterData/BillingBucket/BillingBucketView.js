@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
 import { Checkbox, Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
-import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
@@ -18,12 +17,13 @@ import {
   inactiveBillingBucket,
   getListApprovalHierarchyDetail,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../components/TableRBI";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import CardContainer from "../../../../../components/CardContainer";
 
 const BillingBucketView = () => {
   // Selector
@@ -50,6 +50,25 @@ const BillingBucketView = () => {
   const [bodyError, setBodyError] = useState({});
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [chooseId, setChooseId] = useState();
+
+  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    const saved = localStorage.getItem("billingBucketFixedColumns");
+    return saved
+      ? JSON.parse(saved)
+      : {
+          left: ["no"],
+          right: ["action"],
+        };
+  });
+
+  // ✅ Save to localStorage when fixedColumns change
+  useEffect(() => {
+    localStorage.setItem(
+      "billingBucketFixedColumns",
+      JSON.stringify(fixedColumns)
+    );
+  }, [fixedColumns]);
 
   // Use Effect
   useEffect(() => {
@@ -234,7 +253,7 @@ const BillingBucketView = () => {
     );
   };
 
-  // Grant Access Item
+  // Grant Access Item - moved outside useMemo
   const itemGrantAccess = [
     {
       action: "Download",
@@ -270,9 +289,7 @@ const BillingBucketView = () => {
         return (
           <Link to={RBI_ROUTES.BILLING_BUCKET_DETAIL} state={{ id: record.id }}>
             <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
+              <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         );
@@ -423,44 +440,112 @@ const BillingBucketView = () => {
     },
   ];
 
+  // ✅ Call useColumnActionPermission hook at component level
+  const actionColumns = useColumnActionPermission(
+    ["view", "activate", "update", "history"],
+    itemGrantAccess
+  );
+
+  // ✅ Get base columns with key property
+  const baseColumns = useMemo(() => {
+    const billingBucketCols = [
+      ...columnsBillingBucket(
+        search,
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      ...actionColumns,
+    ];
+
+    // Add 'key' property to columns that don't have it
+    const columnsWithKeys = billingBucketCols.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+
+    return columnsWithKeys;
+  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return baseColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [baseColumns]);
+
+  const columns = useMemo(() => {
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    baseColumns.forEach((col) => {
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        leftFixed.push(col);
+      } else if (fixedColumns.right.includes(colKey)) {
+        rightFixed.push(col);
+      } else {
+        normal.push(col);
+      }
+    });
+
+    const reorderedColumns = [...leftFixed, ...normal, ...rightFixed];
+
+    return reorderedColumns.map((col) => {
+      const newCol = { ...col };
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        newCol.fixed = "left";
+      } else if (fixedColumns.right.includes(colKey)) {
+        newCol.fixed = "right";
+      } else {
+        delete newCol.fixed;
+      }
+
+      return newCol;
+    });
+  }, [baseColumns, fixedColumns]);
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <div className="flex w-full justify-end my-5 gap-2">
-          <Toolbar items={itemGrantAccess} />
-        </div>
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="w-full mt-[15px] font-bold text-primary">
+                BILLING BUCKET LIST
+              </p>
 
-        <BaseContainer header={"BILLING BUCKET LIST"}>
+              <Toolbar items={itemGrantAccess} />
+            </div>
+          }
+        >
           <div className={"w-full"}>
-            <TablePaginationNew
+            <TableRBI
               dataSource={dataSource}
-              columns={[
-                ...columnsBillingBucket(
-                  search,
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                ),
-                ...useColumnActionPermission(
-                  ["view", "activate", "update", "history"],
-                  itemGrantAccess
-                ),
-              ]}
+              columns={columns}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements || 0}
               onSort={onSort}
-              tableScrolled={{ y: 525, x: 2000 }}
+              tableScrolled={{ y: 525, x: 1000 }}
+              handleDownload={handleDownload}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         {/* Modal Approval History */}
         <ModalHistory

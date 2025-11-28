@@ -1,5 +1,8 @@
-
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
 export const columnsBillingBucket = (
@@ -9,7 +12,7 @@ export const columnsBillingBucket = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { },
+  handleSearch = () => {}
 ) => {
   return [
     {
@@ -30,7 +33,16 @@ export const columnsBillingBucket = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('billingBucketCode', hasValue(search['billingBucketCode']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "billingBucketCode",
+          hasValue(search["billingBucketCode"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
       title: "NAME",
@@ -44,7 +56,16 @@ export const columnsBillingBucket = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('billingBucketName', hasValue(search['billingBucketName']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "billingBucketName",
+          hasValue(search["billingBucketName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
       title: "PRIORITY PERIOD",
@@ -59,7 +80,16 @@ export const columnsBillingBucket = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('priorityPeriod', hasValue(search['priorityPeriod']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "priorityPeriod",
+          hasValue(search["priorityPeriod"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
       title: "START DATE",
@@ -76,7 +106,15 @@ export const columnsBillingBucket = (
         true,
         "dateCapital"
       ),
-      render: (text) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "startDate",
+          hasValue(search["startDate"]),
+          searchText,
+          text,
+          "date",
+          search
+        ),
     },
     {
       title: "END DATE",
@@ -93,7 +131,15 @@ export const columnsBillingBucket = (
         true,
         "dateCapital"
       ),
-      render: (text) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "endDate",
+          hasValue(search["endDate"]),
+          searchText,
+          text,
+          "date",
+          search
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -111,13 +157,22 @@ export const columnsBillingBucket = (
         showTitle: false,
       },
       sorter: true,
-      render: (text) => renderColumn('description', hasValue(search['description']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          hasValue(search["description"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
     },
     {
       title: "STATUS",
       dataIndex: "status",
       fixed: "right",
-      width: 150,
+      width: 100,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -139,15 +194,22 @@ export const columnsBillingBucket = (
               : index;
             break;
         }
-        return renderColumn('status', hasValue(search['status']), searchText, text, false, 'status', search)
-
+        return renderColumn(
+          "status",
+          hasValue(search["status"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search
+        );
       },
     },
     {
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
       fixed: "right",
-      width: 200,
+      width: 150,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -169,7 +231,15 @@ export const columnsBillingBucket = (
               : index;
             break;
         }
-        return renderColumn('statusApproval', hasValue(search['statusApproval']), searchText, text, false, 'status', search)
+        return renderColumn(
+          "statusApproval",
+          hasValue(search["statusApproval"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search
+        );
       },
     },
   ];

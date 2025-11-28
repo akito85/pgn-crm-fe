@@ -1,5 +1,4 @@
 export const RBI_ROUTES = {
-
   // prabilling routes
   PRABILLING_VIEW: "/rating-billing/pra-billing",
   PRABILLING_DETAIL: "/rating-billing/pra-billing/view",
@@ -7,7 +6,6 @@ export const RBI_ROUTES = {
   PRABILLING_UPDATE: "/rating-billing/pra-billing/update",
   PRABILLING_VIEW_LOG: "/rating-billing/pra-billing/log",
   PRABILLING_DETAIL_CUSTOMER: "/rating-billing/pra-billing/preview",
-
 
   // calculation routes
   CALCULATION_VIEW: "/rating-billing/calculation",
@@ -109,4 +107,9 @@ export const RBI_ROUTES = {
     "/rating-billing/management-billing-installment",
   MANAGEMENT_BILLING_INSTALLMENT_CREATE:
     "/rating-billing/management-billing-installment/create",
+
+  EFAKTUR_CODE: "/system-setup/efaktur-code",
+  EFAKTUR_CODE_CREATE: "/system-setup/efaktur-code/create",
+  EFAKTUR_CODE_UPDATE: "/system-setup/efaktur-code/update",
+  EFAKTUR_CODE_DETAIL: "/system-setup/efaktur-code/view",
 };
