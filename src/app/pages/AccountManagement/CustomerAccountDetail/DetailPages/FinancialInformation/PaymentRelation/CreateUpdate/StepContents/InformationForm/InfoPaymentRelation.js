@@ -205,6 +205,7 @@ export default function InfoPaymentRelation({
             className="no-margin-form"
             rules={[
               {
+                message: requiredMessage("Account Number"),
                 required: true,
               }
             ]}

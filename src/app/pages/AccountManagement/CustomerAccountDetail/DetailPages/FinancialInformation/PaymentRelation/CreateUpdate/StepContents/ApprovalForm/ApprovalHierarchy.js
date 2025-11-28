@@ -243,7 +243,7 @@ const ApprovalHierarchy = ({
     <Fragment>
       {showSelect ? (
         <Form.Item
-          name={"approvalHierarchy"}
+          name={"appHierId"}
           rules={[
             { message: requiredMessage("Approval Hierarchy"), required: true },
           ]}
