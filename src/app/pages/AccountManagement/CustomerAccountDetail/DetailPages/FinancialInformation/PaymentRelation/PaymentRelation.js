@@ -10,12 +10,12 @@ import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { getDetailPaymentRelation, getPaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { getPaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import ModalConfirmationApprovalPaymentRelation from "./ModalConfirmationApprovalPaymentRelation";
 
 // getDetailTaxImplication
@@ -32,8 +32,6 @@ const PaymentRelation = ({
 }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
-  const state = location.state;
 
   const { data_paymentRelation, detail_paymentRelation, loading } = useSelector(
     (state) => state.financialInformation
@@ -218,15 +216,6 @@ const PaymentRelation = ({
     }
   }, [submitApprovalCondition]);
 
-  const handleDetail = (record) => {
-    const id = record.id
-    console.log("record", record);
-    // dispatch(
-    //   getDetailPaymentRelation(id)
-    // );
-    navigate("/account-management/account-standard/financial-information/payment-relation/details", { state });
-  }
-
   return (
     <Spin spinning={loading}>
       <Fragment>
@@ -347,11 +336,8 @@ const PaymentRelation = ({
             totalElement={totalElement}
             page={page}
             pageSize={pageSize}
-            searchText={searchText}
-            searchedColumn={searchedColumn}
             onSort={onSort}
             getColumnSearchProps={getColumnSearchProps}
-            handleDetail={handleDetail}
             rowSelection={isApproval ? rowSelection : undefined}
             isApproval={isApproval}
           />
