@@ -241,8 +241,9 @@ const CreatePaymentRelation = ({ type }) => {
       content: (
         <AttachmentForm
           type={type}
-          data={dummyAttachmentList}
-          updateData={setDummyAttachmentList}
+          typeSelector={"financialInformation"}
+          data={dataAttachment}
+          updateData={setDataAttachment}
           dispatch={dispatch}
         />
       ),

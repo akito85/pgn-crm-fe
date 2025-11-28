@@ -237,8 +237,9 @@ const AttachmentSectionForm = ({
   const [modalUpload, setModalUpload] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [loadingDownload, setLoadingDownload] = useState(false);
-  const { dataListCategory, getConfigFile } = useSelector((state) => state[typeSelector]);
-  // console.log("🚀 ~ dataListCategory:", dataListCategory)
+  const { paymentRelation } = useSelector((state) => state[typeSelector]);
+  console.log("paymentRelation", paymentRelation);
+  const dataListCategory = paymentRelation?.dataListCategory;
   const { dataGlobalPropAttachment } = useSelector((state) => state.product);
 
   useEffect(() => {
