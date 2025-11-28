@@ -15,8 +15,9 @@ import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import ModalConfirmationApprovalPaymentRelation from "./ModalConfirmationApprovalPaymentRelation";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 
 // getDetailTaxImplication
 // detail_taxImplication
@@ -302,28 +303,32 @@ const PaymentRelation = ({
                 </ButtonComponent>
 
                 {/* Create Button */}
-                <ButtonComponent
-                  type={"submit"}
-                  onClick={() => navigate("/account-management/account-standard/financial-information/payment-relation/create")}
-                  icon={
-                    <PlusOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 20,
-                      }}
-                    />
-                  }
-                  style={{
-                    backgroundColor: "#0075bf",
-                    color: "#fff",
-                    borderColor: "#0075bf",
-                    border: "1px solid #0075bf",
-                    borderRadius: "5px",
-                    height: "48px"
-                  }}
-                >
-                  Create
-                </ButtonComponent>
+                <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_PAYMENT_RELATION} state={{
+                  idAccount: id,
+                  idCustomer,
+                }}>
+                  <ButtonComponent
+                    type={"submit"}
+                    icon={
+                      <PlusOutlined
+                        style={{
+                          color: "#fff",
+                          fontSize: 20,
+                        }}
+                      />
+                    }
+                    style={{
+                      backgroundColor: "#0075bf",
+                      color: "#fff",
+                      borderColor: "#0075bf",
+                      border: "1px solid #0075bf",
+                      borderRadius: "5px",
+                      height: "48px"
+                    }}
+                  >
+                    Create
+                  </ButtonComponent>
+                </Link>
               </div>
             </div>
           )}
