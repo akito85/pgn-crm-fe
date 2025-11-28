@@ -287,31 +287,17 @@ const RatingPage = () => {
             ref={detailRef}
             className="mt-6 border-t-4 border-blue-500 bg-blue-50/30 rounded-lg p-4"
           >
-            <div className="flex justify-between items-center border-b border-blue-200">
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-lg text-primary">
-                  Rating Detail: {ratingCode}
-                </h3>
-              </div>
-              <button
-                onClick={() => {
-                  setPageDetail(false);
-                  setActiveRowKey(null);
-                  setRatingCode("");
-                  setCalculationCode("");
-                  setSANumberId("");
-                }}
-                className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
-                title="Close Detail"
-              >
-                ✕
-              </button>
-            </div>
-
             <RatingDetail
               calculationCode={calculationCode}
               SAId={saNumberId}
               ratingCodeId={ratingCode}
+              onClose={() => {
+                setPageDetail(false);
+                setActiveRowKey(null);
+                setRatingCode("");
+                setCalculationCode("");
+                setSANumberId("");
+              }}
             />
           </div>
         )}

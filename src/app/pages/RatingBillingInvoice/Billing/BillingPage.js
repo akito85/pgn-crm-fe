@@ -475,37 +475,23 @@ const BillingPage = () => {
         {pageDetail && (
           <div
             ref={detailRef}
-            className="mt-6 border-t-4 border-blue-500 pt-4 bg-blue-50/30 rounded-lg p-4"
+            className="mt-6 border-t-4 border-blue-500 bg-blue-50/30 rounded-lg p-4"
           >
-            <div className="flex justify-between items-center mb-4 pb-3 border-b border-blue-200">
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-lg text-blue-500">
-                  Billing Detail: {billingCode}
-                </h3>
-              </div>
-              <button
-                onClick={() => {
-                  setPageDetail(false);
-                  setActiveRowKey(null);
-                  setBillingCode("");
-                  setRatingCode("");
-                  setAccountNumberId("");
-                  setSANumberId("");
-                  setCalculationCodeId("");
-                }}
-                className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
-                title="Close Detail"
-              >
-                ✕
-              </button>
-            </div>
-
             <BillingDetail
               billingCodeId={billingCode}
               ratingCodeId={ratingCode}
               saNumberId={saNumberId}
               accountNumberId={accountNumberId}
               calculationCodeId={calculationCodeId}
+              onClose={() => {
+                setPageDetail(false);
+                setActiveRowKey(null);
+                setBillingCode("");
+                setRatingCode("");
+                setAccountNumberId("");
+                setSANumberId("");
+                setCalculationCodeId("");
+              }}
             />
           </div>
         )}

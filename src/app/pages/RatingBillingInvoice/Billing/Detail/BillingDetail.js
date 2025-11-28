@@ -11,6 +11,7 @@ const BillingDetail = ({
   ratingCodeId,
   saNumberId,
   accountNumberId,
+  onClose,
 }) => {
   const [tabHeader, setTabHeader] = useState("Billing Item");
   const detailRef = useRef(null);
@@ -92,15 +93,24 @@ const BillingDetail = ({
   };
 
   return (
-    <div ref={detailRef} className="pt-[30px] scroll-mt-4">
-      <Radio.Group
-        options={dataTabs}
-        onChange={changeTabHeader}
-        value={tabHeader}
-        optionType="button"
-        buttonStyle="solid"
-        style={{ gap: 12, display: "flex" }}
-      />
+    <div ref={detailRef} className="scroll-mt-4">
+      <div className="flex justify-between items-center mb-4">
+        <Radio.Group
+          options={dataTabs}
+          onChange={changeTabHeader}
+          value={tabHeader}
+          optionType="button"
+          buttonStyle="solid"
+          style={{ gap: 12, display: "flex" }}
+        />
+        <button
+          onClick={onClose}
+          className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors ml-4"
+          title="Close Detail"
+        >
+          ✕
+        </button>
+      </div>
       {renderLayout(tabHeader)}
     </div>
   );

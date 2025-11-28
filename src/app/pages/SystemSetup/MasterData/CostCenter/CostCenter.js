@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllCostCenter,
@@ -7,22 +7,22 @@ import {
   downloadMasterCostCenter,
 } from "../../../../../redux/slices/system_setup/master_data/master_cost_center";
 import { Spin, Checkbox, Form, Tooltip } from "antd";
-import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import { DownloadOutlined } from "@ant-design/icons";
 import { NavLink, Link } from "react-router-dom";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes";
-import TablePagination from "../../../../../components/TablePagination";
 import DetailCostCenter from "./DetailCostCenter";
-import { renderColumn } from "../../../../../utils";
+import { hasValue, renderColumn } from "../../../../../utils";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import TableRBI from "../../../../../components/TableRBI";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import CardContainer from "../../../../../components/CardContainer";
 
 const CostCenter = () => {
   const dispatch = useDispatch();
@@ -31,7 +31,6 @@ const CostCenter = () => {
     (state) => state.master_cost_center
   );
   const { bodyError } = useSelector(state => state?.general);
-
 
   // use state
   const searchInput = useRef(null);
@@ -48,18 +47,25 @@ const CostCenter = () => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [body, setBody] = useState({});
   const [record, setRecord] = useState({});
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status", "action"],
+  }));
 
   // handle fetch
   const handleFetch = useCallback(() => {
-    dispatch(getAllCostCenter({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }));
+    dispatch(getAllCostCenter({ 
+      search: encodeURIComponent(JSON.stringify(search)), 
+      page, 
+      pageSize, 
+      sort 
+    }));
   }, [dispatch, page, pageSize, search, sort]);
-
 
   // use effect
   useEffect(() => {
     handleFetch()
   }, [handleFetch]);
-
 
   // handle search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -77,9 +83,10 @@ const CostCenter = () => {
     });
   };
 
-  // column
-  const columns = [
+  // base columns
+  const baseColumns = useMemo(() => [
     {
+      key: "no",
       title: "NO",
       dataIndex: "key",
       align: "center",
@@ -87,124 +94,197 @@ const CostCenter = () => {
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
+      key: "code",
       title: "CODE",
       dataIndex: "code",
       align: "center",
-      key: "code",
-      // width: 250,
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.code] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "code",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true
       ),
-      render: (text) => renderColumn('code', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) => renderColumn(
+        'code', 
+        hasValue(search["code"]), 
+        searchText, 
+        text, 
+        false, 
+        'input', 
+        search
+      )
     },
     {
+      key: "name",
       title: "COST CENTER NAME",
       dataIndex: "name",
       align: "left",
-      key: "name",
       width: 250,
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.name] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "name",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true
       ),
-      render: (text) => renderColumn('name', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) => renderColumn(
+        'name', 
+        hasValue(search["name"]), 
+        searchText, 
+        text, 
+        false, 
+        'input', 
+        search
+      )
     },
     {
+      key: "ccType",
       title: "TYPE",
       dataIndex: "ccType",
       align: "center",
-      key: "ccType",
-      // width: 250,
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.ccType] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "ccType",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true
       ),
-      render: (text) => renderColumn('ccType', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) => renderColumn(
+        'ccType', 
+        hasValue(search["ccType"]), 
+        searchText, 
+        text, 
+        false, 
+        'input', 
+        search
+      )
     },
     {
+      key: "valName",
       title: "VALUE NAME",
       dataIndex: "valName",
       align: "left",
-      key: "valName",
-      // width: 250,
       ellipsis: {
         showTitle: false,
       },
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.valName] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "valName",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true
       ),
-      render: (text) => renderColumn('valName', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) => renderColumn(
+        'valName', 
+        hasValue(search["valName"]), 
+        searchText, 
+        text, 
+        true, 
+        'input', 
+        search
+      )
     },
     {
+      key: "valCode",
       title: "VALUE CODE",
       dataIndex: "valCode",
       align: "center",
-      key: "valCode",
-      // width: 250,
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.valCode] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "valCode",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true
       ),
-      render: (text) => renderColumn('valCode', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) => renderColumn(
+        'valCode', 
+        hasValue(search["valCode"]), 
+        searchText, 
+        text, 
+        false, 
+        'input', 
+        search
+      )
     },
     {
+      key: "description",
       title: "DESCRIPTION",
       dataIndex: "description",
       align: "left",
-      key: "description",
       width: 300,
       sorter: true,
       ellipsis: {
         showTitle: false,
       },
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.description] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "description",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true
       ),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
+      render: (text) => renderColumn(
+        'description', 
+        hasValue(search["description"]), 
+        searchText, 
+        text, 
+        true, 
+        'input', 
+        search
+      )
     },
     {
+      key: "status",
       title: "STATUS",
       dataIndex: "status",
-      align: "right",
+      align: "center",
       width: 100,
       sorter: true,
-      fixed: "right",
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.status] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "status",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true
       ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+      render: (text) => renderColumn(
+        'status', 
+        hasValue(search["status"]), 
+        searchText, 
+        text, 
+        false, 
+        'status', 
+        search
+      )
     }
-  ];
+  ], [page, pageSize, search, searchText, searchedColumn]);
 
   // breadcrumb routes
   const routes = [
@@ -223,7 +303,7 @@ const CostCenter = () => {
   ];
 
   // change pagination
-  const handleChangePagin = (pageChange, pageSizeChange) => {
+  const handleChangePage = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
     setPage(tempPage);
     setPageSize(pageSizeChange);
@@ -251,11 +331,9 @@ const CostCenter = () => {
     setRecord({})
   };
 
-
   // handle confirm activation
   const handleConfirm = async (formValue, handleCancel) => {
     try {
-
       const data = {
         id: costCenterId,
         remark: formValue?.remark,
@@ -282,29 +360,26 @@ const CostCenter = () => {
     }
   };
 
-
-
   // sorting
-  const onSort = (_, __, sort) => {
+  const onSort = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
 
   // handle download
-  const handleDownlaod = async () => {
-    await dispatch(
+  const handleDownload = () => {
+    dispatch(
       downloadMasterCostCenter({
         search: encodeURIComponent(JSON.stringify(search)),
         page,
         pageSize,
         sort,
       })
-    )?.unwrap();
+    );
   };
-
 
   // handle retry modal error
   const handleRetry = () => {
@@ -312,7 +387,7 @@ const CostCenter = () => {
       if (bodyError?.action === "ACTIVATE_COST_CENTER") {
         dispatch(activateCostCenter({ body: body }));
       } else if (bodyError?.action === "DOWNLOAD_MASTER_COST_CENTER") {
-        handleDownlaod();
+        handleDownload();
       } else {
         dispatch(getCostCenterDetail(body))
       }
@@ -328,18 +403,6 @@ const CostCenter = () => {
   // item action
   const itemActions = [
     // toolbar items
-    {
-      action: 'Download',
-      render: (
-        <ButtonComponent
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-          type={"submit"}
-          onClick={handleDownlaod}
-        >
-          Download List
-        </ButtonComponent>
-      )
-    },
     {
       action: 'Create',
       render: (
@@ -418,51 +481,92 @@ const CostCenter = () => {
     }
   ];
 
+  const actionCols = useColumnActionPermission(
+    ['view', 'update', 'activate'], 
+    itemActions
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map(
+      (col) => ({
+        ...col,
+        key: col.key || col.dataIndex || col.title,
+      })
+    );
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
   return (
-    <LayoutMenu>
-      <Spin spinning={loading} className="w-full top-20">
+    <Spin spinning={loading}>
+      <LayoutMenu>
         <BreadCrumb routes={routes} />
-        <Toolbar items={itemActions} />
-        <BaseContainer header={"COST CENTER LIST"}>
-          <div className={"w-full"}>
-            <TablePagination
+
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">COST CENTER LIST</p>
+              <div className="mt-[15px] flex gap-[20px]">
+                <Toolbar items={itemActions} />
+              </div>
+            </div>
+          }
+        >
+          <div className="my-5">
+            <TableRBI
               dataSource={dataSource}
-              columns={[...columns, ...useColumnActionPermission(['view', 'update', 'activate'], itemActions)]}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
-              totalData={data?.page?.totalElements}
-              onChange={handleChangePagin}
-              onSort={onSort}
+              onChange={handleChangePage}
+              onSizeChanger={handleChangePage}
+              totalData={data?.page?.totalElements || 0}
               tableScrolled={{ x: 1700, y: 525 }}
+              onSort={onSort}
+              columnDefinitions={columnDefinitions}
+              handleDownload={handleDownload}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
-      </Spin>
-      {/* Modal Detail */}
-      <DetailCostCenter
-        data={data_detail?.data}
-        openModal={modalDetail}
-        closeModal={handleCancelModal}
-      />
+        {/* Modal Detail */}
+        <DetailCostCenter
+          data={data_detail?.data}
+          openModal={modalDetail}
+          closeModal={handleCancelModal}
+        />
 
-      {/* Modal Active/Inactive */}
-      <ModalApproveOrReject
-        isOpen={modalConfirm}
-        handleCloseModal={handleCancelModal}
-        onFinish={handleConfirm}
-        header={activeOrInactive === "INACTIVE" ? "activate" : "inactivate"}
-        approveOrReject={
-          activeOrInactive === "INACTIVE" ? "activate" : "inactivate"
-        }
-        menu={"Cost Center"}
-        named={record?.name}
-        width={800}
-      />
+        {/* Modal Active/Inactive */}
+        <ModalApproveOrReject
+          isOpen={modalConfirm}
+          handleCloseModal={handleCancelModal}
+          onFinish={handleConfirm}
+          header={activeOrInactive === "INACTIVE" ? "activate" : "inactivate"}
+          approveOrReject={
+            activeOrInactive === "INACTIVE" ? "activate" : "inactivate"
+          }
+          menu={"Cost Center"}
+          named={record?.name}
+          width={800}
+        />
 
-      {/* modal try again */}
-      {renderModal()}
-    </LayoutMenu>
+        {/* modal try again */}
+        {renderModal()}
+      </LayoutMenu>
+    </Spin>
   );
 };
 
