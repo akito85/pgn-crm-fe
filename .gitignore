@@ -42,6 +42,24 @@ build.zip
 logs/
 
 .claude/
+# Documentation and notes
 *.md
+*.txt
+*.text
+*.doc
+*.docx
+*.pdf
+
+# Shell scripts and configuration
 *.sh
-&.txt
+*.bash
+*.zsh
+*.command
+*.bat
+*.ps1
+
+# Configuration and temporary files
+*.tmp
+*.temp
+*.log
+.DS_Store
