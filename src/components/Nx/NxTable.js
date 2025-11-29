@@ -139,6 +139,19 @@ const NxTable = ({
   deleteConfirmTitle = 'Are you sure you want to delete this row?',
   deleteConfirmOkText = 'Yes',
   deleteConfirmCancelText = 'No',
+  // ============================================
+  // NEW: Checkbox selection props
+  // ============================================
+  useCheckbox = false,                    // Enable/disable checkbox selection
+  onSelectionChange = () => {},           // Callback when selection changes: (selectedRowKeys, selectedRows) => void
+  selectedRowKeys: controlledSelectedKeys, // Controlled selected row keys (optional)
+  rowKey = 'key',                         // Key field to identify rows (default: 'key', can be 'id' or any field)
+  checkboxColumnTitle = '',               // Title for checkbox column
+  checkboxColumnWidth = 50,               // Width of checkbox column
+  checkboxFixed = false,                  // Fix checkbox column to left
+  getCheckboxProps = () => ({}),          // Function to set checkbox props per row (disabled, etc.)
+  preserveSelectedRowKeys = false,        // Preserve selection when data changes
+  hideSelectAll = false,                  // Hide "select all" checkbox in header
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [searchText, setSearchText] = useState('');
@@ -147,6 +160,16 @@ const NxTable = ({
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef(null);
   const [loadingRows, setLoadingRows] = useState(new Set());
+  
+  // ============================================
+  // NEW: Internal state for checkbox selection
+  // ============================================
+  const [internalSelectedKeys, setInternalSelectedKeys] = useState([]);
+  
+  // Use controlled keys if provided, otherwise use internal state
+  const selectedKeys = controlledSelectedKeys !== undefined 
+    ? controlledSelectedKeys 
+    : internalSelectedKeys;
 
   // Smart row click handler that prevents clicks on action buttons
   const handleRowClick = async (record, rowIndex, event) => {
@@ -171,8 +194,8 @@ const NxTable = ({
     }
 
     if (onRowClickedAsync) {
-      const rowKey = record.key || record.id;
-      setLoadingRows(prev => new Set(prev).add(rowKey));
+      const rowKeyValue = record[rowKey] || record.key || record.id;
+      setLoadingRows(prev => new Set(prev).add(rowKeyValue));
 
       try {
         await onRowClickedAsync(record, rowIndex, event);
@@ -181,7 +204,7 @@ const NxTable = ({
       } finally {
         setLoadingRows(prev => {
           const newSet = new Set(prev);
-          newSet.delete(rowKey);
+          newSet.delete(rowKeyValue);
           return newSet;
         });
       }
@@ -368,6 +391,64 @@ const NxTable = ({
   const handleDelete = (record) => {
     console.log('NxTable delete: Deleting record:', record);
     onDeleteRow(record);
+  };
+
+  // ============================================
+  // NEW: Helper to get row key value
+  // ============================================
+  const getRowKeyValue = (record) => {
+    if (typeof rowKey === 'function') {
+      return rowKey(record);
+    }
+    return record[rowKey] || record.key || record.id;
+  };
+
+  // ============================================
+  // NEW: Checkbox selection handler
+  // ============================================
+  const handleCheckboxSelectionChange = (newSelectedRowKeys, selectedRows) => {
+    // Update internal state if not controlled
+    if (controlledSelectedKeys === undefined) {
+      setInternalSelectedKeys(newSelectedRowKeys);
+    }
+    
+    // Get full row data for all selected rows
+    const fullSelectedRows = dataMain?.filter(record => 
+      newSelectedRowKeys.includes(getRowKeyValue(record))
+    ) || [];
+    
+    // Call the callback with selected keys and full row data
+    onSelectionChange(newSelectedRowKeys, fullSelectedRows);
+  };
+
+  // ============================================
+  // NEW: Build rowSelection config for checkbox
+  // ============================================
+  const buildCheckboxRowSelection = () => {
+    if (!useCheckbox) return rowSelection; // Use original rowSelection if checkbox not enabled
+    
+    return {
+      type: 'checkbox',
+      selectedRowKeys: selectedKeys,
+      onChange: handleCheckboxSelectionChange,
+      columnTitle: hideSelectAll ? '' : checkboxColumnTitle,
+      columnWidth: checkboxColumnWidth,
+      fixed: checkboxFixed ? 'left' : undefined,
+      getCheckboxProps: (record) => ({
+        ...getCheckboxProps(record),
+        // Add data attributes for easy identification
+        'data-row-key': getRowKeyValue(record),
+      }),
+      preserveSelectedRowKeys,
+      // Provide selections for bulk actions (select all, select none, etc.)
+      selections: hideSelectAll ? false : [
+        Table.SELECTION_ALL,
+        Table.SELECTION_INVERT,
+        Table.SELECTION_NONE,
+      ],
+      // Override with any custom rowSelection props if provided
+      ...rowSelection,
+    };
   };
 
   // Filter and enhance columns with search capabilities
@@ -595,6 +676,13 @@ const NxTable = ({
     },
   };
 
+  // ============================================
+  // FIXED: Check if expandable feature should be enabled
+  // Only enable expandable when both dataExpand AND columnExpand are provided
+  // ============================================
+  const hasExpandableData = dataExpand != null && columnExpand != null && 
+    Array.isArray(columnExpand) && columnExpand.length > 0;
+
   // Render the expanded row content
   const expandedRowRender = (record) => {
     // Get expand data for this record
@@ -724,6 +812,40 @@ const NxTable = ({
     </div>
   );
 
+  // ============================================
+  // FIXED: Build expandable config only when data is available
+  // ============================================
+  const buildExpandableConfig = () => {
+    if (!hasExpandableData) {
+      return undefined; // No expandable feature
+    }
+
+    return {
+      expandedRowRender,
+      expandIcon,
+      defaultExpandedRowKeys,
+      expandedRowKeys,
+      onExpand: (expanded, record) => {
+        onExpand(expanded, record);
+      },
+      expandRowByClick,
+      rowExpandable: (record) => {
+        // Check if this record has expandable data
+        const expandData = dataExpand
+          ? Array.isArray(dataExpand)
+            ? dataExpand.filter((item) => item.parentKey === record.key)
+            : dataExpand[record.key] || []
+          : [];
+        return expandData && expandData.length > 0;
+      },
+    };
+  };
+
+  // ============================================
+  // Determine which rowSelection to use
+  // ============================================
+  const effectiveRowSelection = useCheckbox ? buildCheckboxRowSelection() : rowSelection;
+
   return (
     <div className="flex flex-col w-full nx-table-container">
       {/* Styling for table striping and hover effects */}
@@ -826,6 +948,27 @@ const NxTable = ({
         .nx-table-container .ant-table-tbody .action-button {
           cursor: pointer !important;
         }
+
+        /* Checkbox selection styling */
+        .nx-table-container .ant-table-selection-column {
+          padding: 8px !important;
+        }
+        .nx-table-container .ant-checkbox-wrapper {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .nx-table-container .ant-table-selection {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .nx-table-container .ant-table-selection .ant-table-selection-extra {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4px 8px 4px 18px;
+        }
       `}} />
 
       {/* Top Controls: Column Selector, Search, Pagination */}
@@ -910,21 +1053,22 @@ const NxTable = ({
             <Table
               dataSource={dataMain}
               columns={mergedColumns}
-              expandable={undefined}
+              expandable={buildExpandableConfig()}
               pagination={false}
               loading={loading}
               tableLayout="fixed"
               id={idTable}
+              rowKey={rowKey}
               onChange={(pagination, filters, sorter, extra) => {
                 onChange(pagination, filters, sorter, extra);
                 onSort(pagination, filters, sorter, extra);
               }}
-              rowSelection={rowSelection}
+              rowSelection={effectiveRowSelection}
               scroll={tableScrolled || { x: 'max-content' }}
               rowClassName={getRowClassName}
               onRow={(record, rowIndex) => {
-                const rowKey = record.key || record.id;
-                const isLoading = loadingRows.has(rowKey);
+                const rowKeyValue = getRowKeyValue(record);
+                const isLoading = loadingRows.has(rowKeyValue);
 
                 return {
                   onClick: (event) => {
@@ -934,6 +1078,8 @@ const NxTable = ({
                     cursor: isLoading ? 'wait' : (onRowClicked || onRowClickedAsync ? 'pointer' : 'default'),
                     opacity: isLoading ? 0.6 : 1,
                   },
+                  'data-row-key': rowKeyValue,
+                  'data-row-index': rowIndex,
                 };
               }}
               style={{ width: '100%', fontSize: fontSizeValue }}
@@ -944,36 +1090,23 @@ const NxTable = ({
           <Table
             dataSource={dataMain}
             columns={filterColumns()}
-            expandable={{
-              expandedRowRender,
-              expandIcon,
-              defaultExpandedRowKeys,
-              expandedRowKeys,
-              onExpand: (expanded, record) => {
-                onExpand(expanded, record);
-              },
-              expandRowByClick,
-              // Always show expand icon - will display empty state if no data
-              rowExpandable: (record) => {
-                // Always expandable to show empty state when needed
-                return true;
-              },
-            }}
+            expandable={buildExpandableConfig()}
             pagination={false}
             loading={loading}
             tableLayout="fixed"
             id={idTable}
+            rowKey={rowKey}
             onChange={(pagination, filters, sorter, extra) => {
               onChange(pagination, filters, sorter, extra);
               onSort(pagination, filters, sorter, extra);
             }}
-            rowSelection={rowSelection}
+            rowSelection={effectiveRowSelection}
             scroll={tableScrolled || { x: 'max-content' }}
             // Apply striped row classes
             rowClassName={getRowClassName}
             onRow={(record, rowIndex) => {
-              const rowKey = record.key || record.id;
-              const isLoading = loadingRows.has(rowKey);
+              const rowKeyValue = getRowKeyValue(record);
+              const isLoading = loadingRows.has(rowKeyValue);
 
               return {
                 onClick: (event) => {
@@ -983,6 +1116,8 @@ const NxTable = ({
                   cursor: isLoading ? 'wait' : (onRowClicked || onRowClickedAsync ? 'pointer' : 'default'),
                   opacity: isLoading ? 0.6 : 1,
                 },
+                'data-row-key': rowKeyValue,
+                'data-row-index': rowIndex,
               };
             }}
             style={{ width: '100%', fontSize: fontSizeValue }}
