@@ -60,7 +60,6 @@ const CreatePaymentRelation = ({ type }) => {
   //declare
   const location = useLocation();
   const [formCreate] = Form.useForm();
-  const id = location?.state?.id;
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const accountType = location?.state?.type; // "standard" or "onetime"
@@ -169,12 +168,6 @@ const CreatePaymentRelation = ({ type }) => {
       }
     }
   }, [dispatch, idAccount, idCustomer, accountType]);
-
-  useEffect(() => {
-    if (id) {
-      dispatch(getCustomerDetail(id));
-    }
-  }, [dispatch, id]);
 
   useEffect(() => {
     formCreate.setFieldValue("attachments", dataAttachment);
@@ -339,9 +332,15 @@ const CreatePaymentRelation = ({ type }) => {
 
     dispatch(createPaymentRelation({ body }));
 
-    navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, { state: {
-      
-    } });
+    navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+      {
+        state: {
+          idAccount,
+          idCustomer,
+        }
+      }
+    );
   };
 
   return (
