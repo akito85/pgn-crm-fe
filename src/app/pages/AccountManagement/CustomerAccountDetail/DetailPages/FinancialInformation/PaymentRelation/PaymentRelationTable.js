@@ -128,7 +128,7 @@ const PaymentRelationTable = ({
               </Tooltip>
             )}
             <Link to={ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION} state={{
-              idPR: r.id,
+              idPr: r.id,
               idAccount,
               idCustomer,
             }}>
