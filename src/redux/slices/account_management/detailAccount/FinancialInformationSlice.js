@@ -729,12 +729,10 @@ const financialInformationSlice = createSlice({
     [createPaymentRelation.pending]: (state) => {
       state.loading = true;
     },
-    [createPaymentRelation.fulfilled]: (state, action) => {
-      state.detail_paymentRelation = action.payload;
+    [createPaymentRelation.fulfilled]: (state) => {
       state.loading = false;
     },
     [createPaymentRelation.pending]: (state) => {
-      state.detail_paymentRelation = {};
       state.loading = false;
     },
 
