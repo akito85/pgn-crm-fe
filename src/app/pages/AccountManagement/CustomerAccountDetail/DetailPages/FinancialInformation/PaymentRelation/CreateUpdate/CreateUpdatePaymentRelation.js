@@ -221,7 +221,7 @@ const CreatePaymentRelation = ({ type }) => {
   const steps = [
     {
       title: "Payment Relation",
-      content: <InformationForm setAccount={setAccount} />,
+      content: <InformationForm setAccount={setAccount} className={`${current !== 0 ? "hidden" : ""}`} />,
       disabled: false
     },
     {
@@ -232,6 +232,7 @@ const CreatePaymentRelation = ({ type }) => {
           dataOption={dummyHieararchyOptions}
           selectedHierarchy={selectedHierarchy}
           updateSelectedHierarchy={setSelectedHierarchy}
+          className={`${current !== 1 ? "hidden" : ""}`}
         />
       ),
       disabled: false
@@ -241,10 +242,10 @@ const CreatePaymentRelation = ({ type }) => {
       content: (
         <AttachmentForm
           type={type}
-          typeSelector={"financialInformation"}
           data={dataAttachment}
           updateData={setDataAttachment}
           dispatch={dispatch}
+          className={`${current !== 2 ? "hidden" : ""}`}
         />
       ),
       disabled: false
@@ -266,6 +267,20 @@ const CreatePaymentRelation = ({ type }) => {
   const prev = () => {
     setCurrent(current - 1);
   };
+
+  const handleSetCurrent = async (newCurrent) => {
+    for (let i = current; i < newCurrent; i++) {
+      try {
+        await formCreate.validateFields(formFields[i]);
+      } catch (err) {
+        setCurrent(i);
+        return;
+      }
+    }
+
+    setCurrent(newCurrent);
+  }
+
   const scrollRightHandler = () => {
     if (containerRef.current) {
       containerRef.current.scrollLeft += 250;
@@ -363,14 +378,18 @@ const CreatePaymentRelation = ({ type }) => {
               <LeftCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollLeftHandler}/>
             </span>
             <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
-              <Steps current={current} onChange={(newCurrent) => setCurrent(newCurrent)} items={items} labelPlacement="vertical" />
+              <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
             </div>
             <span className="mt-[10px]">
               <RightCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollRightHandler}/>
             </span>
           </div>
-          
-          <div className="steps-content my-6">{steps[current].content}</div>
+          steps[current].content
+          <div className="steps-content my-6">
+          {
+            steps.map((step) => step.content)
+          }
+          </div>
 
           {/* Section Action Steps */}
           <div className="steps-action my-8 flex w-full justify-between gap-x-2">

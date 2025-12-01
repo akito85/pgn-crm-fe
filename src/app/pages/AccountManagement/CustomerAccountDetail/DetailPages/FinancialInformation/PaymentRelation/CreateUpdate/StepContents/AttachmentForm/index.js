@@ -8,6 +8,7 @@ export default function AttachmentForm({
   dispatch,
   getAPICategory,
   mandatory,
+  className,
 }){
   return(
     <AttachmentPaymentRelation
@@ -17,6 +18,7 @@ export default function AttachmentForm({
       typeSelector={typeSelector}
       dispatch={dispatch}
       mandatory={mandatory}
+      className={className}
     />
   )
 }

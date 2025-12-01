@@ -5,6 +5,7 @@ export default function ApprovalForm({
   dataOption,
   selectedHierarchy,
   updateSelectedHierarchy,
+  className,
 }){
   return (
     <ApprovalPaymentRelation
@@ -12,6 +13,7 @@ export default function ApprovalForm({
       dataOption={dataOption}
       selectedHierarchy={selectedHierarchy}
       updateSelectedHierarchy={updateSelectedHierarchy}
+      className={className}
     />
   )
 }
