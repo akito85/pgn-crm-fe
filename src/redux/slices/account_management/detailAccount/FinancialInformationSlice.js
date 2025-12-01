@@ -17,6 +17,7 @@ const initialState = {
   data_paymentRelation: [],
   data_firstIndexIdentifier: [],
   data_taxRelationFirstIndex: [],
+  data_approvalHierarchy: [],
   detail_taxImplication: {},
   detail_paymentRelation: {},
 };
@@ -455,6 +456,19 @@ export const getAccountingRule = createAsyncThunk(
   }
 );
 
+export const getPrApprovalHierarchy = createAsyncThunk(
+  "GET_PR_APPROVAL_HIERARCHY",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/approval-hierarchies`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+)
+
 const financialInformationSlice = createSlice({
   name: "financialInformation",
   initialState,
@@ -673,6 +687,19 @@ const financialInformationSlice = createSlice({
     },
     [getAccountingRule.rejected]: (state, action) => {
       state.data_accountingRule = action.payload;
+      state.loading = false;
+    },
+
+    /** Approval Hierarchy */
+    [getPrApprovalHierarchy.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPrApprovalHierarchy.fulfilled]: (state, action) => {
+      state.data_approvalHierarchy = action.payload;
+      state.loading = false;
+    },
+    [getPrApprovalHierarchy.pending]: (state) => {
+      state.data_approvalHierarchy = [];
       state.loading = false;
     },
   },
