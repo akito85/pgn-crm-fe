@@ -447,6 +447,37 @@ export const createPaymentRelation = createAsyncThunk(
   }
 );
 
+export const updatePaymentRelation = createAsyncThunk(
+  "UPDATE_PAYMENT_RELATION",
+  async ({ id, body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/${id}`;
+      const response = await accountManagementService.updateData(url, body);
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${body?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody))
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 export const getDetailPaymentRelation = createAsyncThunk(
   "GET_DETAIL_PAYMENT_RELATION",
   async (id, thunkAPI) => {
@@ -704,6 +735,17 @@ const financialInformationSlice = createSlice({
     },
     [createPaymentRelation.pending]: (state) => {
       state.detail_paymentRelation = {};
+      state.loading = false;
+    },
+
+    /** Update Payment Relation */
+    [updatePaymentRelation.pending]: (state) => {
+      state.loading = true;
+    },
+    [updatePaymentRelation.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [updatePaymentRelation.pending]: (state) => {
       state.loading = false;
     },
 
