@@ -17,7 +17,8 @@ const ConfirmationModalTabs = ({
   selectedHierarchy,
   hierarchyTableData,
   hieararchyOptionData,
-  dispatch
+  dispatch,
+  dataAttachment,
 }) => {
   // Use provided options or fall back to default tabs
   const tabOptions = options.length > 0 ? options : [
@@ -40,7 +41,7 @@ const ConfirmationModalTabs = ({
         )
       case dataTabs.attch:
         return <ConfirmationModalAttachment
-          data={[{}]}
+          data={dataAttachment}
           dispatch={dispatch}
         />;
       default:

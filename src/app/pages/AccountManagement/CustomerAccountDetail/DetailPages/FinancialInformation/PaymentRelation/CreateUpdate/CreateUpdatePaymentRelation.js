@@ -57,14 +57,6 @@ const CreatePaymentRelation = ({ type }) => {
     data_approvalHierarchy,
   } = useSelector((state) => state.financialInformation);
 
-  useEffect(() => {
-    dispatch(getPrApprovalHierarchy())
-  }, [])
-
-  useEffect(() => {
-    console.log("data_approvalHierarchy", data_approvalHierarchy);
-  }, [data_approvalHierarchy]);
-
   //declare
   const location = useLocation();
   const [formCreate] = Form.useForm();
@@ -89,7 +81,7 @@ const CreatePaymentRelation = ({ type }) => {
 
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [confirmationModalType, setConfirmationModalType] = useState("");
+  const [confirmationType, setConfirmationType] = useState("");
 
   const isLoading = loading || loadingForm || loadingAccount;
 
@@ -119,6 +111,10 @@ const CreatePaymentRelation = ({ type }) => {
     if (idAccount)
       getAccountDetail(idAccount);
   }, [idAccount]);
+  
+  useEffect(() => {
+    dispatch(getPrApprovalHierarchy())
+  }, []);
 
   const routes = [
     {
@@ -158,9 +154,9 @@ const CreatePaymentRelation = ({ type }) => {
   const handleSetShowConfirmationModal = (show, type) => {
     setShowConfirmationModal(show);
     if (show)
-      setConfirmationModalType(type);
+      setConfirmationType(type);
     else
-      setConfirmationModalType("");
+      setConfirmationType("");
   }
 
   // Fetch Account Standard/OneTime Detail
@@ -282,7 +278,6 @@ const CreatePaymentRelation = ({ type }) => {
   const next = async () => {
     try {
       const values = await formCreate.validateFields(formFields[current]);
-      console.log(values);
     } catch (err) {
       return;
     }
@@ -333,7 +328,10 @@ const CreatePaymentRelation = ({ type }) => {
     }
   };
 
-  const handleSubmitForm = (value) => {
+  const handleSubmitForm = () => {
+    console.log("confirmationType", confirmationType);
+    console.log(formCreate.getFieldsValue());
+    setShowConfirmationModal(false);
   };
 
   return (
@@ -389,7 +387,7 @@ const CreatePaymentRelation = ({ type }) => {
         </BaseContainer>
 
         <Form
-          id="accountForm"
+          id="paymentRelationForm"
           form={formCreate}
           layout={"vertical"}
           onFinish={handleSubmitForm}
@@ -465,14 +463,12 @@ const CreatePaymentRelation = ({ type }) => {
                   <ButtonComponent
                     onClick={() => handleSetShowConfirmationModal(true, "draft")}
                     type={"submit"}
-                    htmlType={"submit"}
                   >
                     Save as Draft
                   </ButtonComponent>
                   <ButtonComponent
                     onClick={() => handleSetShowConfirmationModal(true, "submit")}
                     type={"submit"}
-                    htmlType={"submit"}
                   >
                     Save & Submit
                   </ButtonComponent>
@@ -483,13 +479,14 @@ const CreatePaymentRelation = ({ type }) => {
         </Form>
 
         <ConfirmationModal
+          form={"paymentRelationForm"}
           isOpen={showConfirmationModal}
           handleCancel={() => handleSetShowConfirmationModal(false)}
           handleOk={() => handleSetShowConfirmationModal(false)}
           selectedHierarchy={selectedHierarchy}
           hierarchyTableData={dummyHierarchyTableData}
           hieararchyOptionData={dummyHieararchyOptions}
-          type={confirmationModalType}
+          type={confirmationType}
         />
       </div>
     </LayoutMenu>
