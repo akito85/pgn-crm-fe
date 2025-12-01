@@ -10,6 +10,7 @@ const tabs = [
 ];
 
 const ConfirmationModal = ({
+  form,
   dataSource,
   isOpen,
   handleCancel,
@@ -17,6 +18,7 @@ const ConfirmationModal = ({
   selectedHierarchy,
   hieararchyOptionData,
   hierarchyTableData,
+  dataAttachment,
   type = "",
 }) => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -32,7 +34,6 @@ const ConfirmationModal = ({
    */
   const handleChangeTab = (type) => {
     if (type === "next" && currentTab < (tabs.length -1)) {
-      console.log(tabs[currentTab + 1].value);
       setTypeDetailSection(tabs[currentTab + 1].value);
       setCurrentTab(currentTab + 1);
     }
@@ -57,7 +58,7 @@ const ConfirmationModal = ({
       type={"confirmation"}
       handleCancel={handleCancel}
       footer={[
-        <div className={"w-full justify-end flex gap-[20px]"}>
+        <div className={"w-full justify-end flex gap-[20px]"} key={`footer-1`}>
           {currentTab > 0 ? (
             <ButtonComponent type={"default"} onClick={() => handleChangeTab("prev")}>
               Previous
@@ -67,20 +68,16 @@ const ConfirmationModal = ({
               Cancel
             </ButtonComponent>
           )}
-          {currentTab < (tabs.length - 1)  ? (
+          {currentTab < (tabs.length - 1)  && (
             <ButtonComponent type={"submit"} onClick={() => handleChangeTab("next")}>
               Next
             </ButtonComponent>
-          ) : type === "submit" ? (
-            <ButtonComponent type={"submit"} onClick={handleOk}>
-              Submit
+          )}
+          {currentTab === (tabs.length - 1) && (
+            <ButtonComponent type={"submit"} form={form} htmlType={"submit"} >
+              {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
             </ButtonComponent>
-          ) : type === "draft" ? (
-            <ButtonComponent type={"submit"} onClick={handleOk}>
-              Save as Draft
-            </ButtonComponent>
-          ) : <></>
-          }
+          )}
         </div>,
       ]}
     >
@@ -91,6 +88,7 @@ const ConfirmationModal = ({
         selectedHierarchy={selectedHierarchy}
         hierarchyTableData={hierarchyTableData}
         hieararchyOptionData={hieararchyOptionData}
+        dataAttachment={dataAttachment}
       />
     </ModalCustom>
   )

@@ -195,7 +195,7 @@ const columnAttachmentData = (
     )
     : res;
 };
-const ModalConfirmationCreateUpdateApprovalPaymentRelationAttachmentTable = ({
+const ConfirmationModalAttachmentTable = ({
   data = [],
   type,
   dispatch = () => { },
@@ -279,4 +279,4 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationAttachmentTable = ({
   );
 };
 
-export default ModalConfirmationCreateUpdateApprovalPaymentRelationAttachmentTable;
+export default ConfirmationModalAttachmentTable;

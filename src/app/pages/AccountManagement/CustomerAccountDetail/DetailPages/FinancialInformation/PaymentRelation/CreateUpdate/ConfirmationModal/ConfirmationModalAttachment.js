@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import ModalConfirmationCreateUpdateApprovalPaymentRelationAttachmentTable from "./ConfirmationModalAttachmentTable";
+import ConfirmationModalAttachmentTable from "./ConfirmationModalAttachmentTable";
 
 const ModalConfirmationCreateUpdateApprovalPaymentRelationAttachment = ({
   data = [],
@@ -11,7 +11,7 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationAttachment = ({
       <div className="text-primary text-xs font-bold uppercase">
         ATTACHMENT
       </div>
-      <ModalConfirmationCreateUpdateApprovalPaymentRelationAttachmentTable
+      <ConfirmationModalAttachmentTable
         type={type}
         data={data}
         dispatch={dispatch}
