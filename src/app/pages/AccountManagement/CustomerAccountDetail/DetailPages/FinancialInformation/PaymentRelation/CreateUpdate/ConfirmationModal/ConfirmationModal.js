@@ -17,6 +17,7 @@ const ConfirmationModal = ({
   selectedHierarchy,
   hieararchyOptionData,
   hierarchyTableData,
+  type = "",
 }) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [typeDetailSection, setTypeDetailSection] = useState(tabs[currentTab].value);
@@ -70,11 +71,16 @@ const ConfirmationModal = ({
             <ButtonComponent type={"submit"} onClick={() => handleChangeTab("next")}>
               Next
             </ButtonComponent>
-          ) : (
+          ) : type === "submit" ? (
             <ButtonComponent type={"submit"} onClick={handleOk}>
               Submit
             </ButtonComponent>
-          )}
+          ) : type === "draft" ? (
+            <ButtonComponent type={"submit"} onClick={handleOk}>
+              Save as Draft
+            </ButtonComponent>
+          ) : <></>
+          }
         </div>,
       ]}
     >

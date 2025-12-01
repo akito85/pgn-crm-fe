@@ -89,6 +89,7 @@ const CreatePaymentRelation = ({ type }) => {
 
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [confirmationModalType, setConfirmationModalType] = useState("");
 
   const isLoading = loading || loadingForm || loadingAccount;
 
@@ -149,6 +150,18 @@ const CreatePaymentRelation = ({ type }) => {
       return "";
     }
   };
+
+  /**
+   * @param {boolean} show 
+   * @param {"draft" | "submit"} type
+   */
+  const handleSetShowConfirmationModal = (show, type) => {
+    setShowConfirmationModal(show);
+    if (show)
+      setConfirmationModalType(type);
+    else
+      setConfirmationModalType("");
+  }
 
   // Fetch Account Standard/OneTime Detail
   useEffect(() => {
@@ -450,14 +463,14 @@ const CreatePaymentRelation = ({ type }) => {
               {current === steps.length - 1 && (
                 <>
                   <ButtonComponent
-                    onClick={() => setShowConfirmationModal(true)}
+                    onClick={() => handleSetShowConfirmationModal(true, "draft")}
                     type={"submit"}
                     htmlType={"submit"}
                   >
                     Save as Draft
                   </ButtonComponent>
                   <ButtonComponent
-                    onClick={() => message.success("Processing complete!")}
+                    onClick={() => handleSetShowConfirmationModal(true, "submit")}
                     type={"submit"}
                     htmlType={"submit"}
                   >
@@ -471,11 +484,12 @@ const CreatePaymentRelation = ({ type }) => {
 
         <ConfirmationModal
           isOpen={showConfirmationModal}
-          handleCancel={() => setShowConfirmationModal(false)}
-          handleOk={() => setShowConfirmationModal(false)}
+          handleCancel={() => handleSetShowConfirmationModal(false)}
+          handleOk={() => handleSetShowConfirmationModal(false)}
           selectedHierarchy={selectedHierarchy}
           hierarchyTableData={dummyHierarchyTableData}
           hieararchyOptionData={dummyHieararchyOptions}
+          type={confirmationModalType}
         />
       </div>
     </LayoutMenu>
