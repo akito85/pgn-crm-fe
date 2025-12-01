@@ -313,27 +313,29 @@ const AttachmentSectionForm = ({
             ATTACHMENT
           </span>
           {type !== "detail" && type !== "preview" ? (
-            <div className="flex flex-col w-full gap-2">
-              <p className="text-[13px] mb-0 text-dg-grey-dark">
-                Attach File:
-                {mandatory ? (
+            <div className="flex flex-col w-full gap-2 items-end">
+              <div className="flex flex-col gap-y-1 justify-start">
+                <p className="text-[13px] mb-0 text-dg-grey-dark">
+                  Attach File:
+                  {mandatory ? (
                   <span className={"pl-1"} style={{ color: "red" }}>
                     *
                   </span>
                 ) : null}
-              </p>
-              <div className="flex flex-row gap-2 items-center">
-                <ButtonComponent
-                  fontSizeClassname="text-[11px]"
-                  size="small"
-                  type="default"
-                  onClick={handleOpenModal}
-                >
-                  Choose File
-                </ButtonComponent>
-                <p className="text-[11px] text-dg-grey-dark mb-0">
-                  No file choosen
                 </p>
+                <div className="flex flex-row gap-2 items-center">
+                  <ButtonComponent
+                    fontSizeClassname="text-[11px]"
+                    size="small"
+                    type="default"
+                    onClick={handleOpenModal}
+                  >
+                    Choose File
+                  </ButtonComponent>
+                  <p className="text-[11px] text-dg-grey-dark mb-0">
+                    No file choosen
+                  </p>
+                </div>
               </div>
             </div>
           ) : null}
