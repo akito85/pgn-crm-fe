@@ -16,6 +16,7 @@ import FileSaver from "file-saver";
 import { configApp } from "../../../../../../../../../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../../../../../../../../../redux/slices/product_promo/product";
 import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
+import BaseContainer from "../../../../../../../../../../components/BaseContainer";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -305,9 +306,12 @@ const AttachmentSectionForm = ({
   };
 
   return (
-    <div className={className}>
+    <div className={`${className} drop-shadow-lg bg-white rounded-lg w-full p-9`}>
       <Spin spinning={loadingDownload}>
-        <div className="flex flex-col w-full gap-3">
+        <div className="flex flex-col w-full gap-5">
+          <span className="text-primary text-sm font-bold uppercase">
+            ATTACHMENT
+          </span>
           {type !== "detail" && type !== "preview" ? (
             <div className="flex flex-col w-full gap-2">
               <p className="text-[13px] mb-0 text-dg-grey-dark">
@@ -367,7 +371,7 @@ const AttachmentSectionForm = ({
           />
         </div>
       </Spin>
-    </div>
+    </div>  
   );
 };
 
