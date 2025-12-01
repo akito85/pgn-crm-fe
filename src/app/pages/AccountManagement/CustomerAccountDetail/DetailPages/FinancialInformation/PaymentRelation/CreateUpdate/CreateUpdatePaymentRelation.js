@@ -34,7 +34,7 @@ import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../../../../../utils";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
-import { createPaymentRelation, getPrApprovalHierarchy } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { createPaymentRelation, getPrApprovalHierarchy, updatePaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 
 const CreatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -55,6 +55,8 @@ const CreatePaymentRelation = ({ type }) => {
 
   const {
     data_approvalHierarchy,
+    isPrSuccess,
+    isPrFailed,
   } = useSelector((state) => state.financialInformation);
 
   //declare
@@ -62,6 +64,7 @@ const CreatePaymentRelation = ({ type }) => {
   const [formCreate] = Form.useForm();
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
+  const idPr = location?.state?.idPr;
   const accountType = location?.state?.type; // "standard" or "onetime"
   // const id = 7;
     
@@ -330,18 +333,27 @@ const CreatePaymentRelation = ({ type }) => {
   const handleSubmitForm = () => {
     const body = formCreate.getFieldsValue();
 
-    dispatch(createPaymentRelation({ body }));
-
-    navigate(
-      ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
-      {
-        state: {
-          idAccount,
-          idCustomer,
-        }
-      }
-    );
+    if (type === "create")
+      dispatch(createPaymentRelation({ body }));
+    else if (type === "update")
+      dispatch(updatePaymentRelation({ id: idPr, body }));
   };
+
+  useEffect(() => {
+    if (isPrSuccess) {
+      setTimeout(() => {
+        navigate(
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+          {
+            state: {
+              idAccount,
+              idCustomer,
+            }
+          }
+        );
+      }, 2000)
+    }
+  }, [isPrSuccess])
 
   return (
     <LayoutMenu>

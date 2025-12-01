@@ -21,6 +21,7 @@ const initialState = {
   data_approvalHierarchy: [],
   detail_taxImplication: {},
   detail_paymentRelation: {},
+  isPrSuccess: false,
 };
 
 export const getGlobalTypeTaxIdentifier= createAsyncThunk(
@@ -455,7 +456,7 @@ export const updatePaymentRelation = createAsyncThunk(
       const response = await accountManagementService.updateData(url, body);
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${body?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
+        description: `Your data has been ${body?.action === "DRAFT" ? 'drafted' : 'updated'}.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
       return response.data;
@@ -469,7 +470,7 @@ export const updatePaymentRelation = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
+          description: `Your data was not ${body?.action === "DRAFT" ? 'drafted' : 'updated'}. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -727,23 +728,29 @@ const financialInformationSlice = createSlice({
 
     /** Create Payment Relation */
     [createPaymentRelation.pending]: (state) => {
+      state.isPrSuccess = false;
       state.loading = true;
     },
     [createPaymentRelation.fulfilled]: (state) => {
+      state.isPrSuccess = true;
       state.loading = false;
     },
     [createPaymentRelation.pending]: (state) => {
+      state.isPrSuccess = false;
       state.loading = false;
     },
 
     /** Update Payment Relation */
     [updatePaymentRelation.pending]: (state) => {
+      state.isPrSuccess = false;
       state.loading = true;
     },
     [updatePaymentRelation.fulfilled]: (state) => {
+      state.isPrSuccess = true;
       state.loading = false;
     },
     [updatePaymentRelation.pending]: (state) => {
+      state.isPrSuccess = false;
       state.loading = false;
     },
 
