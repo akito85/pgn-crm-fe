@@ -3,6 +3,7 @@ import accountManagementService from "../../../services/account_management/accou
 import { showModalError, showModalSuccess } from "../../general_slice";
 
 const initialState = {
+  loading: false,
   data_withHoldingTax: [],
   data_taxIdentifier: [],
   data_taxRelation: [],
@@ -415,6 +416,37 @@ export const getPaymentRelation = createAsyncThunk(
   }
 );
 
+export const createPaymentRelation = createAsyncThunk(
+  "CREATE_PAYMENT_RELATION",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-relation/create";
+      const response = await accountManagementService.createData(url, body);
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${body?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody))
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 export const getDetailPaymentRelation = createAsyncThunk(
   "GET_DETAIL_PAYMENT_RELATION",
   async (id, thunkAPI) => {
@@ -635,7 +667,7 @@ const financialInformationSlice = createSlice({
       state.loading = false;
     },
 
-    /** Payment Relation */
+    /** Get Payment Relation */
     [getPaymentRelation.pending]: (state) => {
       state.loading = true;
     },
@@ -648,7 +680,7 @@ const financialInformationSlice = createSlice({
       state.loading = false;
     },
 
-    /** Detail Payment Relation */
+    /** Get Detail Payment Relation */
     [getDetailPaymentRelation.pending]: (state, action) => {
       state.data_paymentRelation = action.payload;
       state.loading = true;
@@ -659,6 +691,19 @@ const financialInformationSlice = createSlice({
     },
     [getDetailPaymentRelation.rejected]: (state, action) => {
       state.data_paymentRelation = action.payload;
+      state.loading = false;
+    },
+
+    /** Create Payment Relation */
+    [createPaymentRelation.pending]: (state) => {
+      state.loading = true;
+    },
+    [createPaymentRelation.fulfilled]: (state, action) => {
+      state.detail_paymentRelation = action.payload;
+      state.loading = false;
+    },
+    [createPaymentRelation.pending]: (state) => {
+      state.detail_paymentRelation = {};
       state.loading = false;
     },
 
