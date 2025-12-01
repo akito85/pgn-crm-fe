@@ -67,7 +67,6 @@ const CreatePaymentRelation = ({ type }) => {
   const [dataSend, setDataSend] = useState({});
   const [modalSuccess, setModalSuccess] = useState(false);
   const [loadingForm, setLoadingForm] = useState(false);
-  const [modalConfirm, setModalConfirm] = useState(false);
   const [dataConfirm, setDataConfirm] = useState({});
   const [btnConfirm, setBtnConfirm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
@@ -161,8 +160,6 @@ const CreatePaymentRelation = ({ type }) => {
     formCreate.setFieldValue("accountNumber", accountNumber);
     formCreate.setFieldValue("accountName", accountName);
   }
-
-  const [dummyAttachmentList, setDummyAttachmentList] = useState([{}]);
 
   const dummyHieararchyOptions = [
     {
@@ -309,7 +306,6 @@ const CreatePaymentRelation = ({ type }) => {
   };
 
   const handleSubmitForm = (value) => {
-    setModalConfirm(true);
   };
 
   return (
@@ -467,21 +463,6 @@ const CreatePaymentRelation = ({ type }) => {
           hierarchyTableData={dummyHierarchyTableData}
           hieararchyOptionData={dummyHieararchyOptions}
         />
-
-        {/* Modal Back */}
-        <ModalConfirm
-          isOpen={modalBack}
-          handleCancel={() => setModalBack(false)}
-          handleOk={() => navigate(-1)}
-          width={400}
-        >
-          <div className="flex justify-center mt-5 gap-[20px]">
-            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className="text-[18px] font-bold">
-              Are you sure you want to back?
-            </p>
-          </div>
-        </ModalConfirm>
       </div>
     </LayoutMenu>
   );
