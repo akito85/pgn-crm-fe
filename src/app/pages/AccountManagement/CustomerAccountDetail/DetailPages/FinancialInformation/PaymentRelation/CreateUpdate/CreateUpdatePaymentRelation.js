@@ -417,15 +417,9 @@ const CreatePaymentRelation = ({ type }) => {
         >
           {/* Step Contents */}
           <div className="flex flex-row gap-x-6 justify-center">
-            <span className="mt-[10px]">
-              <LeftCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollLeftHandler}/>
-            </span>
             <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
               <Steps current={current} onChange={handleSetCurrent} items={items} labelPlacement="vertical" />
             </div>
-            <span className="mt-[10px]">
-              <RightCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollRightHandler}/>
-            </span>
           </div>
           <div className="steps-content my-6">
           {
