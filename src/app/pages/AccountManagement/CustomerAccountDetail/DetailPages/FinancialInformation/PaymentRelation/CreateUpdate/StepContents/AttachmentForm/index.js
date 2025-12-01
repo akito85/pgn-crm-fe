@@ -1,9 +1,10 @@
+import { Form } from "antd";
 import AttachmentPaymentRelation from "./AttachmentPaymentRelation";
 
 export default function AttachmentForm({
   type,
-  data,
-  updateData,
+  value,
+  onChange,
   typeSelector,
   dispatch,
   getAPICategory,
@@ -11,14 +12,18 @@ export default function AttachmentForm({
   className,
 }){
   return(
-    <AttachmentPaymentRelation
-      type={type}
-      data={data}
-      updateData={updateData}
-      typeSelector={typeSelector}
-      dispatch={dispatch}
-      mandatory={mandatory}
-      className={className}
-    />
+    <Form.Item
+      name={"attachments"}
+    >
+      <AttachmentPaymentRelation
+        type={type}
+        value={value}
+        onChange={onChange}
+        typeSelector={typeSelector}
+        dispatch={dispatch}
+        mandatory={mandatory}
+        className={className}
+      />
+    </Form.Item>
   )
 }

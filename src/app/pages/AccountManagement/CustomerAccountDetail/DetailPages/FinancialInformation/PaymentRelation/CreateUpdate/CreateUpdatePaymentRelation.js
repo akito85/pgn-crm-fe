@@ -176,6 +176,11 @@ const CreatePaymentRelation = ({ type }) => {
     }
   }, [dispatch, id]);
 
+  useEffect(() => {
+    formCreate.setFieldValue("attachments", dataAttachment);
+    console.log("dataAttachment", dataAttachment)
+  }, [dataAttachment]);
+
   const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}` 
   
   const setAccount = (accountNumber, accountName) => {
