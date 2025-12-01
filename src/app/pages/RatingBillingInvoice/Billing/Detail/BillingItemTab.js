@@ -229,27 +229,22 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     <div className="space-y-6">
       {/* Billing Item Information Section */}
       <div>
-        <div className="mb-4">
-          <h3 className="text-sm font-bold text-primary uppercase mb-3">
-            Billing Item Information
-          </h3>
-          <div className="flex flex-row items-center gap-4 mb-4">
-            <div className="flex items-center gap-2">
-              <p className="text-[13px] font-medium text-gray-600">
-                Calculation Code:
-              </p>
-              <p className="text-[13px] font-semibold text-primary">
-                {calculationCodeId || "-"}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <p className="text-[13px] font-medium text-gray-600">
-                Billing Code:
-              </p>
-              <p className="text-[13px] font-semibold text-primary">
-                {billingCodeId || "-"}
-              </p>
-            </div>
+        <h3 className="text-sm font-bold text-primary uppercase mb-4">
+          Billing Item Information
+        </h3>
+
+        <div className="grid grid-cols-2 gap-x-8 gap-y-4 mb-4">
+          <div>
+            <p className="text-[13px] text-gray-600 mb-1">Calculation Code</p>
+            <p className="text-[15px] font-semibold text-primary">
+              {calculationCodeId || "-"}
+            </p>
+          </div>
+          <div>
+            <p className="text-[13px] text-gray-600 mb-1">Billing Code</p>
+            <p className="text-[15px] font-semibold text-primary">
+              {billingCodeId || "-"}
+            </p>
           </div>
         </div>
 
