@@ -34,6 +34,7 @@ import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../../../../../utils";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
+import { getPrApprovalHierarchy } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 
 const CreatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -51,6 +52,18 @@ const CreatePaymentRelation = ({ type }) => {
     data_accountDetail,
     loading: loadingAccount,
   } = useSelector((state) => state.accountManagement);
+
+  const {
+    data_approvalHierarchy,
+  } = useSelector((state) => state.financialInformation);
+
+  useEffect(() => {
+    dispatch(getPrApprovalHierarchy())
+  }, [])
+
+  useEffect(() => {
+    console.log("data_approvalHierarchy", data_approvalHierarchy);
+  }, [data_approvalHierarchy]);
 
   //declare
   const location = useLocation();
@@ -218,7 +231,7 @@ const CreatePaymentRelation = ({ type }) => {
   const steps = [
     {
       title: "Payment Relation",
-      content: <InformationForm setAccount={setAccount} className={`${current !== 0 ? "hidden" : ""}`} />,
+      content: <InformationForm setAccount={setAccount} className={`${current !== 0 ? "hidden" : ""}`} key={`payment-relation-tab-0`} />,
       disabled: false
     },
     {
@@ -230,6 +243,7 @@ const CreatePaymentRelation = ({ type }) => {
           selectedHierarchy={selectedHierarchy}
           updateSelectedHierarchy={setSelectedHierarchy}
           className={`${current !== 1 ? "hidden" : ""}`}
+          key={`payment-relation-tab-1`}
         />
       ),
       disabled: false
@@ -243,6 +257,7 @@ const CreatePaymentRelation = ({ type }) => {
           updateData={setDataAttachment}
           dispatch={dispatch}
           className={`${current !== 2 ? "hidden" : ""}`}
+          key={`payment-relation-tab-2`}
         />
       ),
       disabled: false
@@ -380,7 +395,6 @@ const CreatePaymentRelation = ({ type }) => {
               <RightCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollRightHandler}/>
             </span>
           </div>
-          steps[current].content
           <div className="steps-content my-6">
           {
             steps.map((step) => step.content)
