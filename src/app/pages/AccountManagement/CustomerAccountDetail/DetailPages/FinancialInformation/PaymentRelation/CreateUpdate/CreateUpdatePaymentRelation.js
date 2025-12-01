@@ -34,7 +34,7 @@ import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../../../../../utils";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
-import { getPrApprovalHierarchy } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { createPaymentRelation, getPrApprovalHierarchy } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 
 const CreatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -280,6 +280,7 @@ const CreatePaymentRelation = ({ type }) => {
   
 
   const navigate = useNavigate();
+  
   const next = async () => {
     try {
       const values = await formCreate.validateFields(formFields[current]);
@@ -334,9 +335,13 @@ const CreatePaymentRelation = ({ type }) => {
   };
 
   const handleSubmitForm = () => {
-    console.log("confirmationType", confirmationType);
-    console.log(formCreate.getFieldsValue());
-    setShowConfirmationModal(false);
+    const body = formCreate.getFieldsValue();
+
+    dispatch(createPaymentRelation({ body }));
+
+    navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, { state: {
+      
+    } });
   };
 
   return (
