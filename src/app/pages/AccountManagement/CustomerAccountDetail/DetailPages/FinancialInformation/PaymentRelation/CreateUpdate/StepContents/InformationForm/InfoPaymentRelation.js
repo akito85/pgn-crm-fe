@@ -28,6 +28,7 @@ export default function InfoPaymentRelation({
   searchInput,
   handleSearch,
   setAccount,
+  className,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [paymentRelation, setPaymentRelation] = useState([])
@@ -194,134 +195,134 @@ export default function InfoPaymentRelation({
   ]
 
   return(
-  <Fragment>
-    <NxPanel title={"PAYMENT RELATION INFORMATION"} removeBottomMargin>
-      <div className="w-full grid grid-cols-3 gap-4">
-        <div className="flex gap-2 items-end">
+    <div className={className}>
+      <NxPanel title={"PAYMENT RELATION INFORMATION"} removeBottomMargin>
+        <div className="w-full grid grid-cols-3 gap-4">
+          <div className="flex gap-2 items-end">
+            <Form.Item
+              key="accountNumber"
+              name={"accountNumber"}
+              label={"Account Number"}
+              className="no-margin-form"
+              rules={[
+                {
+                  message: requiredMessage("Account Number"),
+                  required: true,
+                }
+              ]}
+            >
+              <InputComponent disabled />
+            </Form.Item>
+            <Button
+              type="primary"
+              className="h-9 px-4 justify-center items-center"
+              style={{
+                backgroundColor: "#0075bf",
+                borderColor: "#0075bf",
+                borderRadius: "5px",
+                minWidth: "112px",
+              }}
+              onClick={() => {
+                // Add your select logic here
+                setIsOpen(true)
+              }}
+            >
+              Select
+            </Button>
+          </div>
+
           <Form.Item
-            key="accountNumber"
-            name={"accountNumber"}
-            label={"Account Number"}
+            key="accountName"
+            name={"accountName"}
+            label={"Account Name"}
             className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Account Number"),
-                required: true,
-              }
-            ]}
           >
             <InputComponent disabled />
           </Form.Item>
-          <Button
-            type="primary"
-            className="h-9 px-4 justify-center items-center"
-            style={{
-              backgroundColor: "#0075bf",
-              borderColor: "#0075bf",
-              borderRadius: "5px",
-              minWidth: "112px",
-            }}
-            onClick={() => {
-              // Add your select logic here
-              setIsOpen(true)
-            }}
+
+          <Form.Item
+            key="priority"
+            name={"priority"}
+            label={"Priority"}
+            rules={[
+              {
+                message: requiredMessage("Priority"),
+                required: true,
+              },
+            ]}
+            className="no-margin-form"
           >
-            Select
-          </Button>
+            <InputComponent />
+          </Form.Item>
+
+          <Form.Item
+            key="startDate"
+            name={"startDate"}
+            label={"Start Date"}
+            rules={[
+              {
+                message: requiredMessage("Start Date"),
+                required: true,
+              },
+            ]}
+            className="no-margin-form"
+          >
+            <DateComponent />
+          </Form.Item>
+
+          <Form.Item
+            key="endDate"
+            name={"endDate"}
+            label={"End Date"}
+            className="no-margin-form"
+          >
+            <DateComponent />
+          </Form.Item>
         </div>
 
-        <Form.Item
-          key="accountName"
-          name={"accountName"}
-          label={"Account Name"}
-          className="no-margin-form"
-        >
-          <InputComponent disabled />
-        </Form.Item>
+        <div className="w-full my-5">
+          <Form.Item
+            key="description"
+            name={"description"}
+            label={"Description"}
+            className="no-margin-form"
+          >
+            <InputComponent
+              type={"textarea"}
+              rows={4}
+              placeholder="Asset meter baru PGN"
+              maxLength={255}
+            />
+          </Form.Item>
+        </div>
+      </NxPanel>
 
-        <Form.Item
-          key="priority"
-          name={"priority"}
-          label={"Priority"}
-          rules={[
-            {
-              message: requiredMessage("Priority"),
-              required: true,
-            },
-          ]}
-          className="no-margin-form"
-        >
-          <InputComponent />
-        </Form.Item>
-
-        <Form.Item
-          key="startDate"
-          name={"startDate"}
-          label={"Start Date"}
-          rules={[
-            {
-              message: requiredMessage("Start Date"),
-              required: true,
-            },
-          ]}
-          className="no-margin-form"
-        >
-          <DateComponent />
-        </Form.Item>
-
-        <Form.Item
-          key="endDate"
-          name={"endDate"}
-          label={"End Date"}
-          className="no-margin-form"
-        >
-          <DateComponent />
-        </Form.Item>
-      </div>
-
-      <div className="w-full my-5">
-        <Form.Item
-          key="description"
-          name={"description"}
-          label={"Description"}
-          className="no-margin-form"
-        >
-          <InputComponent
-            type={"textarea"}
-            rows={4}
-            placeholder="Asset meter baru PGN"
-            maxLength={255}
-          />
-        </Form.Item>
-      </div>
-    </NxPanel>
-
-    <ModalCustom
-      isOpen={isOpen}
-      handleCancel={handleCancel}
-      handleOk={handleOk}
-      header={"CHOOSE SERVICE REQUEST REFERENCE"}
-      width={1100}
-      type={"custom"}
-      footer={[
-        <Button key="close" onClick={handleClose}>
-          Close
-        </Button>,
-      ]}
-    >
-      <TablePagination
-        dataSource={paymentRelationDummy.map((item, idx) => ({
-          ...item,
-          key: item.id || idx,
-        }))}
-        totalData={sanitizedTotalElement}
-        current={sanitizedPage}
-        pageSize={sanitizedPageSize}
-        onSort={onSort}
-        tableScrolled={{ y: 525, x: 3000 }}
-        columns={columnMain}
-      />
-    </ModalCustom>
-  </Fragment>
+      <ModalCustom
+        isOpen={isOpen}
+        handleCancel={handleCancel}
+        handleOk={handleOk}
+        header={"CHOOSE SERVICE REQUEST REFERENCE"}
+        width={1100}
+        type={"custom"}
+        footer={[
+          <Button key="close" onClick={handleClose}>
+            Close
+          </Button>,
+        ]}
+      >
+        <TablePagination
+          dataSource={paymentRelationDummy.map((item, idx) => ({
+            ...item,
+            key: item.id || idx,
+          }))}
+          totalData={sanitizedTotalElement}
+          current={sanitizedPage}
+          pageSize={sanitizedPageSize}
+          onSort={onSort}
+          tableScrolled={{ y: 525, x: 3000 }}
+          columns={columnMain}
+        />
+      </ModalCustom>
+    </div>
   )
 }

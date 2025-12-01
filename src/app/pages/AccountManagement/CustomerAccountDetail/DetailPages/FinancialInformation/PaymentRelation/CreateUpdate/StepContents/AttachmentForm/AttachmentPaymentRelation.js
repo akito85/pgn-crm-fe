@@ -79,7 +79,7 @@ const columnAttachmentData = (
   handleSearch = () => { },
   handleDelete = () => { },
   type,
-  handleShow
+  handleShow,
 ) => {
   const res = [
     {
@@ -226,6 +226,7 @@ const AttachmentSectionForm = ({
   configApplication = configApp.MASTER_MANAGEMENT,
   getAPIGuard = getGlobalPropertiesAttachment,
   mandatory = false,
+  className,
 }) => {
 
 
@@ -237,9 +238,8 @@ const AttachmentSectionForm = ({
   const [modalUpload, setModalUpload] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [loadingDownload, setLoadingDownload] = useState(false);
-  const { paymentRelation } = useSelector((state) => state[typeSelector]);
-  console.log("paymentRelation", paymentRelation);
-  const dataListCategory = paymentRelation?.dataListCategory;
+  const { dataListCategory, getConfigFile } = useSelector((state) => state[typeSelector]);
+  // console.log("🚀 ~ dataListCategory:", dataListCategory)
   const { dataGlobalPropAttachment } = useSelector((state) => state.product);
 
   useEffect(() => {
@@ -305,67 +305,69 @@ const AttachmentSectionForm = ({
   };
 
   return (
-    <Spin spinning={loadingDownload}>
-      <div className="flex flex-col w-full gap-3">
-        {type !== "detail" && type !== "preview" ? (
-          <div className="flex flex-col w-full gap-2">
-            <p className="text-[13px] mb-0 text-dg-grey-dark">
-              Attach File:
-              {mandatory ? (
-                <span className={"pl-1"} style={{ color: "red" }}>
-                  *
-                </span>
-              ) : null}
-            </p>
-            <div className="flex flex-row gap-2 items-center">
-              <ButtonComponent
-                fontSizeClassname="text-[11px]"
-                size="small"
-                type="default"
-                onClick={handleOpenModal}
-              >
-                Choose File
-              </ButtonComponent>
-              <p className="text-[11px] text-dg-grey-dark mb-0">
-                No file choosen
+    <div className={className}>
+      <Spin spinning={loadingDownload}>
+        <div className="flex flex-col w-full gap-3">
+          {type !== "detail" && type !== "preview" ? (
+            <div className="flex flex-col w-full gap-2">
+              <p className="text-[13px] mb-0 text-dg-grey-dark">
+                Attach File:
+                {mandatory ? (
+                  <span className={"pl-1"} style={{ color: "red" }}>
+                    *
+                  </span>
+                ) : null}
               </p>
+              <div className="flex flex-row gap-2 items-center">
+                <ButtonComponent
+                  fontSizeClassname="text-[11px]"
+                  size="small"
+                  type="default"
+                  onClick={handleOpenModal}
+                >
+                  Choose File
+                </ButtonComponent>
+                <p className="text-[11px] text-dg-grey-dark mb-0">
+                  No file choosen
+                </p>
+              </div>
             </div>
-          </div>
-        ) : null}
-        <TablePaginationNew
-          type="FE"
-          dataSource={data}
-          totalData={data.length}
-          current={page}
-          pageSize={pageSize}
-          tableScrolled={{ y: 300, x: 1500 }}
-          onChange={handleChangeSize}
-          columns={columnAttachmentData(
-            page,
-            pageSize,
-            searchInput,
-            searchedColumn,
-            searchText,
-            handleSearch,
-            handleDelete,
-            type,
-            handleShow
-          )}
-        />
-        <ModalAttachment
-          openUpload={modalUpload}
-          updateData={updateData}
-          categoryOptions={categoryOptions}
-          handleCancel={() => setModalUpload(false)}
-          valueGuard={
-            configApplication === configApp.MASTER_MANAGEMENT
-              ? dataGlobalPropAttachment
-              : {}
-          }
-          withLink
-        />
-      </div>
-    </Spin>
+          ) : null}
+          <TablePaginationNew
+            type="FE"
+            dataSource={data}
+            totalData={data.length}
+            current={page}
+            pageSize={pageSize}
+            tableScrolled={{ y: 300, x: 1500 }}
+            onChange={handleChangeSize}
+            columns={columnAttachmentData(
+              page,
+              pageSize,
+              searchInput,
+              searchedColumn,
+              searchText,
+              handleSearch,
+              handleDelete,
+              type,
+              handleShow
+            )}
+          />
+          <ModalAttachment
+            openUpload={modalUpload}
+            updateData={updateData}
+            categoryOptions={categoryOptions}
+            handleCancel={() => setModalUpload(false)}
+            valueGuard={
+              configApplication === configApp.MASTER_MANAGEMENT
+                ? dataGlobalPropAttachment
+                : {}
+            }
+            withLink
+          />
+        </div>
+      </Spin>
+    </div>
   );
 };
 

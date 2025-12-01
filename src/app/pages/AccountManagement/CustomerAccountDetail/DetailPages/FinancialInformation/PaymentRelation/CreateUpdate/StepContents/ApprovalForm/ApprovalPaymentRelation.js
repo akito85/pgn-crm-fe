@@ -9,6 +9,7 @@ const ApprovalSectionForm = ({
   showSelect = true,
   disableSelect = false,
   approvalName = "",
+  className,
 }) => {
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -22,7 +23,7 @@ const ApprovalSectionForm = ({
     updateSelectedHierarchy(val);
   };
   return (
-    <div className="flex flex-col gap-3">
+    <div className={`flex flex-col gap-3 ${className}`}>
       <ApprovalHierarchy
         dataTable={dataTable}
         dataOption={dataOption}
