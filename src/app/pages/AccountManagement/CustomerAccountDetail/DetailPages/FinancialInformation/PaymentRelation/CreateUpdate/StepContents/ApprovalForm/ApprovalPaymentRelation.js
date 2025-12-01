@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import ApprovalHierarchy from "./ApprovalHierarchy";
+import BaseContainer from "../../../../../../../../../../components/BaseContainer";
 
 const ApprovalSectionForm = ({
   dataTable,
@@ -23,7 +24,10 @@ const ApprovalSectionForm = ({
     updateSelectedHierarchy(val);
   };
   return (
-    <div className={`flex flex-col gap-3 ${className}`}>
+    <div className={`flex flex-col gap-y-5 ${className} drop-shadow-lg bg-white rounded-lg w-full p-9`} >
+      <span className="text-primary text-sm font-bold uppercase">
+        APPROVAL
+      </span>
       <ApprovalHierarchy
         dataTable={dataTable}
         dataOption={dataOption}
