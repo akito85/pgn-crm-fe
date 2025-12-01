@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Spin, Table, Tabs, Empty, message } from "antd";
+import { Spin, Tabs, Empty, message } from "antd";
 import { LeftOutlined, DownloadOutlined } from "@ant-design/icons";
 import moment from "moment";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import BaseContainer from "../../../../components/BaseContainer";
+import CardContainer from "../../../../components/CardContainer";
+import TableRBI from "../../../../components/TableRBI";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import ModalBuatFakturPengganti from "./ModalEfaktur/ModalBuatFakturPengganti";
 import ModalGenerateXML from "./ModalEfaktur/ModalGenerateXML";
@@ -16,6 +17,9 @@ import {
   getLogActivity,
   resetEFakturState,
 } from "../../../../redux/slices/rating_billing_invoice/efakturSlice";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const { TabPane } = Tabs;
 
@@ -23,6 +27,7 @@ const DetailEFaktur = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+  const searchInput = useRef(null);
 
   const searchParams = new URLSearchParams(location.search);
   const efakturId = searchParams.get("efakturId");
@@ -43,44 +48,19 @@ const DetailEFaktur = () => {
   const [pageLog, setPageLog] = useState(1);
   const [pageSizeLog, setPageSizeLog] = useState(10);
   const [hasLoadedLog, setHasLoadedLog] = useState(false);
-
-  const statusConfig = {
-    APPROVED: {
-      bg: "bg-green-100",
-      text: "text-green-800",
-      border: "border-green-300",
-    },
-    PROCESSING: {
-      bg: "bg-blue-100",
-      text: "text-blue-800",
-      border: "border-blue-300",
-    },
-    AWAITING_APPROVAL: {
-      bg: "bg-orange-100",
-      text: "text-orange-800",
-      border: "border-orange-300",
-    },
-    FAILED: {
-      bg: "bg-red-100",
-      text: "text-red-800",
-      border: "border-red-300",
-    },
-    REJECTED: {
-      bg: "bg-red-100",
-      text: "text-red-800",
-      border: "border-red-300",
-    },
-    SUCCESS_UPLOAD: {
-      bg: "bg-green-100",
-      text: "text-green-800",
-      border: "border-green-300",
-    },
-    NOT_GENERATED: {
-      bg: "bg-gray-100",
-      text: "text-gray-800",
-      border: "border-gray-300",
-    },
-  };
+  const [pageAttachment, setPageAttachment] = useState(1);
+  const [pageSizeAttachment, setPageSizeAttachment] = useState(10);
+  const [search, setSearch] = useState({});
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [fixedColumnsAttachment, setFixedColumnsAttachment] = useState(() => ({
+    left: ["no"],
+    right: ["action"],
+  }));
+  const [fixedColumnsLog, setFixedColumnsLog] = useState(() => ({
+    left: ["no"],
+    right: [],
+  }));
 
   const routes = [
     {
@@ -141,6 +121,11 @@ const DetailEFaktur = () => {
     setPageSizeLog(pageSize);
   };
 
+  const handleAttachmentPaginationChange = (page, pageSize) => {
+    setPageAttachment(page);
+    setPageSizeAttachment(pageSize);
+  };
+
   const handleKirimKePelanggan = () => {
     message.info("Fitur kirim ke pelanggan akan segera tersedia");
   };
@@ -174,188 +159,462 @@ const DetailEFaktur = () => {
 
   const handleDownloadAttachment = (attachment) => {
     if (attachment.downloadUrl) {
-      const fullUrl = `${process.env.REACT_APP_BASE_URL || ""}${attachment.downloadUrl}`;
+      const fullUrl = `${process.env.REACT_APP_BASE_URL || ""}${
+        attachment.downloadUrl
+      }`;
       window.open(fullUrl, "_blank");
     } else {
       message.error("URL download tidak tersedia");
     }
   };
 
-  const columnsLog = [
-    {
-      title: "#",
-      dataIndex: "key",
-      key: "key",
-      width: 60,
-      align: "center",
-      render: (_, __, index) => (pageLog - 1) * pageSizeLog + index + 1,
-    },
-    {
-      title: "WAKTU",
-      dataIndex: "createdDtm",
-      key: "createdDtm",
-      width: 180,
-      render: (text) => {
-        if (!text) return "-";
-        return moment(text).format("DD-MM-YYYY HH:mm:ss");
-      },
-    },
-    {
-      title: "PENGGUNA",
-      dataIndex: "createdBy",
-      key: "createdBy",
-      width: 150,
-      render: (text) => text || "-",
-    },
-    {
-      title: "AKTIVITAS",
-      dataIndex: "activity",
-      key: "activity",
-      width: 300,
-      render: (text) => (
-        <div className="text-sm">
-          {text || "-"}
-        </div>
-      ),
-    },
-    {
-      title: "PESAN / CATATAN",
-      dataIndex: "message",
-      key: "message",
-      width: 300,
-      render: (text) => (
-        <div className="text-sm text-gray-600">
-          {text || "-"}
-        </div>
-      ),
-    },
-  ];
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
+  };
 
-  const columnsAttachments = [
-    {
-      title: "#",
-      dataIndex: "id",
-      key: "id",
-      width: 60,
-      align: "center",
-      render: (_, __, index) => index + 1,
-    },
-    {
-      title: "Nama File",
-      dataIndex: "fileName",
-      key: "fileName",
-      render: (text, record) => (
-        <div>
-          <div className="font-medium text-blue-600">{text}</div>
-          {record.fileCategoryName && (
-            <div className="text-xs text-gray-500 mt-1">
-              <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700">
-                {record.fileCategoryName}
-              </span>
-            </div>
-          )}
-          {record.description && (
-            <div className="text-xs text-gray-400 mt-1">
-              {record.description}
-            </div>
-          )}
-        </div>
-      ),
-    },
-    {
-      title: "Filetype",
-      dataIndex: "type",
-      key: "type",
-      width: 150,
-      render: (text) => {
-        if (!text) return "-";
-        
-        const getTypeColor = (type) => {
-          if (type.includes("pdf")) return "text-red-600 bg-red-50";
-          if (type.includes("image")) return "text-green-600 bg-green-50";
-          if (type.includes("excel") || type.includes("spreadsheet")) return "text-green-600 bg-green-50";
-          if (type.includes("word") || type.includes("document")) return "text-blue-600 bg-blue-50";
-          return "text-gray-600 bg-gray-50";
-        };
-        
-        const displayType = text.split("/").pop().toUpperCase();
-        
-        return (
-          <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getTypeColor(text)}`}>
-            {displayType}
-          </span>
-        );
+  // Columns for Log Activity
+  const baseColumnsLog = useMemo(
+    () => [
+      {
+        key: "no",
+        title: "NO",
+        width: 60,
+        align: "center",
+        render: (_, __, index) => (pageLog - 1) * pageSizeLog + index + 1,
       },
-    },
-    {
-      title: "Ukuran File",
-      dataIndex: "fileSize",
-      key: "fileSize",
-      width: 120,
-      align: "right",
-      render: (size) => {
-        if (!size) return "-";
-        const kb = size / 1024;
-        if (kb < 1024) return `${kb.toFixed(2)} KB`;
-        return `${(kb / 1024).toFixed(2)} MB`;
+      {
+        key: "createdDtm",
+        title: "TIME",
+        dataIndex: "createdDtm",
+        width: 180,
+        sorter: true,
+        filteredValue: [search?.createdDtm] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "createdDtm",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+          "date"
+        ),
+        render: (text) => {
+          if (!text) return "-";
+          const formatted = moment(text).format("DD-MM-YYYY HH:mm:ss");
+          return renderDateColumn(
+            "createdDtm",
+            hasValue(search["createdDtm"]),
+            searchText,
+            formatted,
+            "date",
+            search
+          );
+        },
       },
-    },
-    {
-      title: "Upload Oleh",
-      dataIndex: "createdBy",
-      key: "createdBy",
-      width: 150,
-      render: (text) => (
-        <div className="text-sm">
-          <div className="font-medium text-gray-900">{text || "System"}</div>
-        </div>
-      ),
-    },
-    {
-      title: "Tanggal Upload",
-      dataIndex: "createdDate",
-      key: "createdDate",
-      width: 180,
-      render: (text) => {
-        if (!text) return "-";
-        return (
-          <div className="text-sm">
-            <div className="font-medium text-gray-900">
-              {moment(text).format("DD MMM YYYY")}
-            </div>
-            <div className="text-xs text-gray-500">
-              {moment(text).format("HH:mm:ss")}
-            </div>
-          </div>
-        );
+      {
+        key: "createdBy",
+        title: "USERS",
+        dataIndex: "createdBy",
+        width: 150,
+        sorter: true,
+        filteredValue: [search?.createdBy] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "createdBy",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "createdBy",
+            hasValue(search["createdBy"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
       },
-    },
-    {
-      title: "Aksi",
-      key: "action",
-      width: 120,
-      align: "center",
-      fixed: "right",
-      render: (_, record) => (
-        <ButtonComponent
-          type="primary"
-          size="small"
-          icon={<DownloadOutlined />}
-          onClick={() => handleDownloadAttachment(record)}
-          className="w-full"
-        >
-          Download
-        </ButtonComponent>
-      ),
-    },
-  ];
+      {
+        key: "activity",
+        title: "ACTIVITY",
+        dataIndex: "activity",
+        width: 300,
+        sorter: true,
+        filteredValue: [search?.activity] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "activity",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "activity",
+            hasValue(search["activity"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "message",
+        title: "MESSAGE / NOTE",
+        dataIndex: "message",
+        width: 300,
+        sorter: true,
+        filteredValue: [search?.message] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "message",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "message",
+            hasValue(search["message"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+    ],
+    [pageLog, pageSizeLog, search, searchText, searchedColumn]
+  );
+
+  const processedColumnsLog = useMemo(() => {
+    return applyFixedColumns(baseColumnsLog, fixedColumnsLog);
+  }, [baseColumnsLog, fixedColumnsLog]);
+
+  const columnDefinitionsLog = useMemo(() => {
+    return baseColumnsLog.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [baseColumnsLog]);
+
+  // Columns for Attachments
+  const baseColumnsAttachments = useMemo(
+    () => [
+      {
+        key: "no",
+        title: "NO",
+        width: 60,
+        align: "center",
+        render: (_, __, index) =>
+          (pageAttachment - 1) * pageSizeAttachment + index + 1,
+      },
+      {
+        key: "fileName",
+        title: "FILE NAME",
+        dataIndex: "fileName",
+        width: 300,
+        sorter: true,
+        filteredValue: [search?.fileName] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "fileName",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text, record) => {
+          const fileName = renderColumn(
+            "fileName",
+            hasValue(search["fileName"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          );
+
+          return (
+            <div>
+              <div className="font-medium text-blue-600">{fileName}</div>
+              {record.fileCategoryName && (
+                <div className="text-xs text-gray-500 mt-1">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700">
+                    {record.fileCategoryName}
+                  </span>
+                </div>
+              )}
+              {record.description && (
+                <div className="text-xs text-gray-400 mt-1">
+                  {record.description}
+                </div>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        key: "type",
+        title: "CATEGORY",
+        dataIndex: "fileCategoryName",
+        width: 150,
+        sorter: true,
+        filteredValue: [search?.fileCategoryName] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "fileCategoryName",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) => {
+          if (!text) return "-";
+
+          const getCategoryColor = (category) => {
+            if (category.toLowerCase().includes("berita acara"))
+              return "bg-green-100 text-green-800 border-green-300";
+            if (category.toLowerCase().includes("surat"))
+              return "bg-blue-100 text-blue-800 border-blue-300";
+            if (category.toLowerCase().includes("sk1"))
+              return "bg-orange-100 text-orange-800 border-orange-300";
+            return "bg-gray-100 text-gray-800 border-gray-300";
+          };
+
+          return (
+            <span
+              className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border ${getCategoryColor(
+                text
+              )}`}
+            >
+              {renderColumn(
+                "fileCategoryName",
+                hasValue(search["fileCategoryName"]),
+                searchText,
+                text,
+                false,
+                "input",
+                search
+              )}
+            </span>
+          );
+        },
+      },
+      {
+        key: "fileType",
+        title: "FILE TYPE",
+        dataIndex: "type",
+        width: 150,
+        sorter: true,
+        filteredValue: [search?.type] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "type",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) => {
+          if (!text) return "-";
+
+          const getTypeColor = (type) => {
+            if (type.includes("pdf")) return "text-red-600 bg-red-50";
+            if (type.includes("image")) return "text-green-600 bg-green-50";
+            if (type.includes("excel") || type.includes("spreadsheet"))
+              return "text-green-600 bg-green-50";
+            if (type.includes("word") || type.includes("document"))
+              return "text-blue-600 bg-blue-50";
+            return "text-gray-600 bg-gray-50";
+          };
+
+          const displayType = text.split("/").pop().toUpperCase();
+
+          return (
+            <span
+              className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getTypeColor(
+                text
+              )}`}
+            >
+              {renderColumn(
+                "type",
+                hasValue(search["type"]),
+                searchText,
+                displayType,
+                false,
+                "input",
+                search
+              )}
+            </span>
+          );
+        },
+      },
+      {
+        key: "fileSize",
+        title: "FILE SIZE",
+        dataIndex: "fileSize",
+        width: 120,
+        align: "right",
+        sorter: true,
+        filteredValue: [search?.fileSize] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "fileSize",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (size) => {
+          if (!size) return "-";
+          const kb = size / 1024;
+          const formatted =
+            kb < 1024 ? `${kb.toFixed(2)} KB` : `${(kb / 1024).toFixed(2)} MB`;
+          return renderColumn(
+            "fileSize",
+            hasValue(search["fileSize"]),
+            searchText,
+            formatted,
+            false,
+            "input",
+            search
+          );
+        },
+      },
+      {
+        key: "createdBy",
+        title: "UPLOAD BY",
+        dataIndex: "createdBy",
+        width: 150,
+        sorter: true,
+        filteredValue: [search?.createdBy] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "createdBy",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) => {
+          const displayText = text || "System";
+          return (
+            <div className="text-sm">
+              <div className="font-medium text-gray-900">
+                {renderColumn(
+                  "createdBy",
+                  hasValue(search["createdBy"]),
+                  searchText,
+                  displayText,
+                  false,
+                  "input",
+                  search
+                )}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        key: "createdDate",
+        title: "UPLOAD DATE",
+        dataIndex: "createdDate",
+        width: 180,
+        sorter: true,
+        filteredValue: [search?.createdDate] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "createdDate",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+          "date"
+        ),
+        render: (text) => {
+          if (!text) return "-";
+          return (
+            <div className="text-sm">
+              <div className="font-medium text-gray-900">
+                {renderDateColumn(
+                  "createdDate",
+                  hasValue(search["createdDate"]),
+                  searchText,
+                  moment(text).format("DD MMM YYYY"),
+                  "date",
+                  search
+                )}
+              </div>
+              <div className="text-xs text-gray-500">
+                {moment(text).format("HH:mm:ss")}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        key: "action",
+        title: "ACTION",
+        width: 120,
+        align: "center",
+        render: (_, record) => (
+          <ButtonComponent
+            type="primary"
+            size="small"
+            icon={<DownloadOutlined />}
+            onClick={() => handleDownloadAttachment(record)}
+            className="w-full"
+          >
+            Download
+          </ButtonComponent>
+        ),
+      },
+    ],
+    [pageAttachment, pageSizeAttachment, search, searchText, searchedColumn]
+  );
+
+  const processedColumnsAttachment = useMemo(() => {
+    return applyFixedColumns(baseColumnsAttachments, fixedColumnsAttachment);
+  }, [baseColumnsAttachments, fixedColumnsAttachment]);
+
+  const columnDefinitionsAttachment = useMemo(() => {
+    return baseColumnsAttachments.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [baseColumnsAttachments]);
 
   if (loading_detail && !detail_efaktur) {
     return (
       <LayoutMenu>
         <div className="flex flex-col justify-center items-center h-screen">
           <Spin size="large" />
-          <p className="mt-4 text-gray-600 text-base">Memuat detail E-Faktur...</p>
+          <p className="mt-4 text-gray-600 text-base">
+            Memuat detail E-Faktur...
+          </p>
           <p className="mt-2 text-gray-400 text-sm">Mohon tunggu sebentar</p>
         </div>
       </LayoutMenu>
@@ -366,7 +625,7 @@ const DetailEFaktur = () => {
     return (
       <LayoutMenu>
         <BreadCrumb routes={routes} />
-        <BaseContainer header="Detail E-Faktur">
+        <CardContainer header="Detail E-Faktur">
           <Empty
             description="Data E-Faktur tidak ditemukan"
             image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -378,13 +637,12 @@ const DetailEFaktur = () => {
               Kembali ke List
             </ButtonComponent>
           </Empty>
-        </BaseContainer>
+        </CardContainer>
       </LayoutMenu>
     );
   }
 
   const displayStatus = detail_efaktur?.efakturStatus || "NOT_GENERATED";
-  const statusStyle = statusConfig[displayStatus] || statusConfig.NOT_GENERATED;
 
   const billingDataForModal = detail_efaktur
     ? {
@@ -401,206 +659,131 @@ const DetailEFaktur = () => {
       }
     : null;
 
+  const attachmentCount = detail_efaktur?.attachments?.length || 0;
+  const logCount = pagination_log?.totalElements || 0;
+
   return (
     <LayoutMenu>
       <BreadCrumb routes={routes} />
 
-      <BaseContainer
-        header={`Detail E-Faktur: ${
-          detail_efaktur?.efakturNo || detail_efaktur?.invoiceNumber || ""
-        }`}
-      >
-        <div className="mb-6">
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-3">
-              <div className="flex justify-between items-center">
-                <h3 className="text-white font-semibold text-base">
-                  Informasi Faktur
-                </h3>
-                <div className="flex gap-2">
-                  {(displayStatus === "APPROVED" || 
-                    displayStatus === "PROCESSING" || 
-                    displayStatus === "SUCCESS_UPLOAD") && (
-                    <>
-                      <ButtonComponent
-                        type="default"
-                        onClick={handleGenerateXML}
-                        size="small"
-                      >
-                        Generate XML
-                      </ButtonComponent>
-                      <ButtonComponent
-                        type="default"
-                        onClick={handleUnduhPDF}
-                        size="small"
-                        disabled={!detail_efaktur?.manualUploadDoc && !detail_efaktur?.finalUploadDoc}
-                      >
-                        Unduh PDF
-                      </ButtonComponent>
-                    </>
-                  )}
-                  {(displayStatus === "APPROVED" || displayStatus === "SUCCESS_UPLOAD") && (
-                    <>
-                      <ButtonComponent
-                        type="primary"
-                        onClick={handleKirimKePelanggan}
-                        size="small"
-                      >
-                        Kirim ke Pelanggan
-                      </ButtonComponent>
-                      <ButtonComponent
-                        type="default"
-                        onClick={handleBuatFakturPengganti}
-                        size="small"
-                      >
-                        Buat Faktur Pengganti
-                      </ButtonComponent>
-                    </>
-                  )}
-                </div>
-              </div>
+      <CardContainer header="E-FAKTUR INFORMATION">
+        {/* Header Info Section */}
+        <div className="grid grid-cols-4 gap-6 mb-6">
+          <div>
+            <div className="text-xs font-medium text-gray-500 mb-2">
+              E-Faktur Status
             </div>
+            <div>
+              <span className="inline-block px-3 py-1.5 rounded text-xs font-semibold bg-blue-100 text-blue-800">
+                {displayStatus.replace(/_/g, " ")}
+              </span>
+            </div>
+          </div>
 
-            <div className="p-6">
-              <div className="grid grid-cols-4 gap-6">
-                <div>
-                  <div className="text-xs font-medium text-gray-500 mb-2">
-                    Status E-Faktur
-                  </div>
-                  <span
-                    className={`inline-block px-3 py-1.5 rounded-full text-xs font-semibold ${statusStyle.bg} ${statusStyle.text} border ${statusStyle.border}`}
-                  >
-                    {displayStatus.replace(/_/g, " ")}
-                  </span>
-                </div>
+          <div>
+            <div className="text-xs font-medium text-gray-500 mb-2">
+              Customer
+            </div>
+            <div className="font-semibold text-gray-900 text-sm">
+              {detail_efaktur?.customerName || "-"}
+            </div>
+          </div>
 
-                <div>
-                  <div className="text-xs font-medium text-gray-500 mb-2">
-                    Pelanggan
-                  </div>
-                  <div className="font-semibold text-gray-900">
-                    {detail_efaktur?.customerName || "-"}
-                  </div>
-                </div>
+          <div>
+            <div className="text-xs font-medium text-gray-500 mb-2">
+              Account Number
+            </div>
+            <div className="font-semibold text-gray-900 text-sm">
+              {detail_efaktur?.accountNumber || "-"}
+            </div>
+          </div>
 
-                <div>
-                  <div className="text-xs font-medium text-gray-500 mb-2">
-                    Customer Number
-                  </div>
-                  <div className="font-semibold text-gray-900">
-                    {detail_efaktur?.customerNumber || "-"}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-xs font-medium text-gray-500 mb-2">
-                    Total Tagihan
-                  </div>
-                  <div className="font-bold text-2xl text-blue-600">
-                    Rp{" "}
-                    {detail_efaktur?.totalAmountEqvIdr?.toLocaleString(
-                      "id-ID"
-                    ) || 0}
-                  </div>
-                </div>
-              </div>
+          <div>
+            <div className="text-xs font-medium text-gray-500 mb-2">
+              Total Billing
+            </div>
+            <div className="font-bold text-xl text-blue-600">
+              {detail_efaktur?.totalAmountEqvIdr?.toLocaleString("id-ID", {
+                style: "currency",
+                currency: "IDR",
+              }) || "Rp 0"}
             </div>
           </div>
         </div>
+      </CardContainer>
 
-        <Tabs activeKey={activeTab} onChange={handleTabChange}>
-          <TabPane tab="Rincian Faktur" key="1">
-            <div className="space-y-8">
-              <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-bold text-blue-700 mb-5">
-                  Informasi Umum
+      <CardContainer header="E-FAKTUR DETAIL">
+        <Tabs
+          activeKey={activeTab}
+          onChange={handleTabChange}
+          tabBarExtraContent={
+            <ButtonComponent
+              type="default"
+              border={false}
+              icon={<LeftOutlined style={{ fontSize: "12px" }} />}
+              onClick={() => navigate(INVOICE_ROUTES.EFAKTUR_VIEW)}
+              size="small"
+            >
+              Back
+            </ButtonComponent>
+          }
+        >
+          {/* Tab 1: Invoice Detail */}
+          <TabPane
+            tab={
+              <span>
+                Invoice Detail
+                <span className="ml-2 px-2 py-0.5 text-xs font-semibold text-gray-700 bg-gray-100 rounded-full">
+                  10
+                </span>
+              </span>
+            }
+            key="1"
+          >
+            <div className="space-y-6">
+              {/* General Info Section */}
+              <div>
+                <h3 className="text-sm font-bold text-gray-700 mb-4 pb-2 border-b">
+                  GENERAL INFORMATION
                 </h3>
-                <div className="grid grid-cols-2 gap-x-8 gap-y-5">
+                <div className="grid grid-cols-4 gap-x-8 gap-y-4">
                   <div>
-                    <div className="text-sm font-medium text-gray-600 mb-1">
-                      Billing Code
-                    </div>
-                    <div className="font-semibold text-gray-900">
-                      {detail_efaktur?.billingCode || "-"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 mb-1">
-                      No. E-Faktur
-                    </div>
-                    <div className="font-semibold text-gray-900">
-                      {detail_efaktur?.efakturNo || "-"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 mb-1">
+                    <div className="text-xs font-medium text-gray-500 mb-1">
                       Invoice Number
                     </div>
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-gray-900 text-sm">
                       {detail_efaktur?.invoiceNumber || "-"}
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-gray-600 mb-1">
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      E-Faktur Number
+                    </div>
+                    <div className="font-semibold text-gray-900 text-sm">
+                      {detail_efaktur?.efakturNo || "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      Billing Code
+                    </div>
+                    <div className="font-semibold text-gray-900 text-sm">
+                      {detail_efaktur?.billingCode || "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
                       Type PPN
                     </div>
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-gray-900 text-sm">
                       {detail_efaktur?.typePpn || "-"}
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-gray-600 mb-1">
-                      Account Number
-                    </div>
-                    <div className="font-semibold text-gray-900">
-                      {detail_efaktur?.accountNumber || "-"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 mb-1">
-                      Account Name
-                    </div>
-                    <div className="font-semibold text-gray-900">
-                      {detail_efaktur?.accountName || "-"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 mb-1">
-                      NPWP
-                    </div>
-                    <div className="font-semibold text-gray-900">
-                      {detail_efaktur?.npwp || "-"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 mb-1">
-                      NIK/Passport
-                    </div>
-                    <div className="font-semibold text-gray-900">
-                      {detail_efaktur?.nikPasp || "-"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 mb-1">
-                      Email
-                    </div>
-                    <div className="font-semibold text-gray-900">
-                      {detail_efaktur?.email || "-"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 mb-1">
-                      Billing Period
-                    </div>
-                    <div className="font-semibold text-gray-900">
-                      {detail_efaktur?.billingPeriod || "-"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 mb-1">
+                    <div className="text-xs font-medium text-gray-500 mb-1">
                       Invoice Date
                     </div>
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-gray-900 text-sm">
                       {detail_efaktur?.invoiceDate
                         ? moment(detail_efaktur.invoiceDate).format(
                             "DD MMMM YYYY"
@@ -609,10 +792,10 @@ const DetailEFaktur = () => {
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-gray-600 mb-1">
+                    <div className="text-xs font-medium text-gray-500 mb-1">
                       E-Faktur Date
                     </div>
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-gray-900 text-sm">
                       {detail_efaktur?.efakturDate
                         ? moment(detail_efaktur.efakturDate).format(
                             "DD MMMM YYYY, HH:mm"
@@ -621,128 +804,217 @@ const DetailEFaktur = () => {
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-gray-600 mb-1">
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      Billing Period
+                    </div>
+                    <div className="font-semibold text-gray-900 text-sm">
+                      {detail_efaktur?.billingPeriod || "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
                       E-Faktur Type
                     </div>
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-gray-900 text-sm">
                       {detail_efaktur?.efakturType || "-"}
                     </div>
                   </div>
-                  <div className="col-span-2">
-                    <div className="text-sm font-medium text-gray-600 mb-1">
-                      Alamat
+                </div>
+              </div>
+
+              {/* Customer Info Section */}
+              <div>
+                <h3 className="text-sm font-bold text-gray-700 mb-4 pb-2 border-b">
+                  CUSTOMER INFORMATION
+                </h3>
+                <div className="grid grid-cols-4 gap-x-8 gap-y-4">
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      Customer Name
                     </div>
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-gray-900 text-sm">
+                      {detail_efaktur?.customerName || "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      Account Number
+                    </div>
+                    <div className="font-semibold text-gray-900 text-sm">
+                      {detail_efaktur?.accountNumber || "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      Account Name
+                    </div>
+                    <div className="font-semibold text-gray-900 text-sm">
+                      {detail_efaktur?.accountName || "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      NPWP
+                    </div>
+                    <div className="font-semibold text-gray-900 text-sm">
+                      {detail_efaktur?.npwp || "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      NIK/Passport
+                    </div>
+                    <div className="font-semibold text-gray-900 text-sm">
+                      {detail_efaktur?.nikPasp || "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      Email
+                    </div>
+                    <div className="font-semibold text-gray-900 text-sm">
+                      {detail_efaktur?.email || "-"}
+                    </div>
+                  </div>
+                  <div className="col-span-2">
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      Address
+                    </div>
+                    <div className="font-semibold text-gray-900 text-sm">
                       {detail_efaktur?.alamat || "-"}
                     </div>
                   </div>
-                  {detail_efaktur?.remark && (
-                    <div className="col-span-2">
-                      <div className="text-sm font-medium text-gray-600 mb-1">
-                        Catatan
-                      </div>
-                      <div className="font-semibold text-gray-900">
-                        {detail_efaktur.remark}
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
+
+              {/* Summary Section */}
+              <div>
+                <h3 className="text-sm font-bold text-gray-700 mb-4 pb-2 border-b">
+                  SUMMARY
+                </h3>
+                <div className="grid grid-cols-4 gap-x-8 gap-y-4">
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      DPP
+                    </div>
+                    <div className="font-bold text-gray-900 text-sm">
+                      {detail_efaktur?.dpp?.toLocaleString("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                      }) || "Rp 0"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      PPN
+                    </div>
+                    <div className="font-bold text-gray-900 text-sm">
+                      {detail_efaktur?.ppn?.toLocaleString("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                      }) || "Rp 0"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      Total
+                    </div>
+                    <div className="font-bold text-gray-900 text-sm">
+                      {detail_efaktur?.totalAmountEqvIdr?.toLocaleString(
+                        "id-ID",
+                        {
+                          style: "currency",
+                          currency: "IDR",
+                        }
+                      ) || "Rp 0"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {detail_efaktur?.remark && (
+                <div>
+                  <h3 className="text-sm font-bold text-gray-700 mb-4 pb-2 border-b">
+                    NOTES
+                  </h3>
+                  <div className="bg-gray-50 p-4 rounded">
+                    <div className="text-sm text-gray-900">
+                      {detail_efaktur.remark}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </TabPane>
 
-          <TabPane 
+          {/* Tab 2: Document Attachment */}
+          <TabPane
             tab={
               <span>
-                Lampiran Dokumen
-                {detail_efaktur?.attachments && detail_efaktur.attachments.length > 0 && (
-                  <span className="ml-2 px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">
-                    {detail_efaktur.attachments.length}
+                Document Attachment
+                {attachmentCount > 0 && (
+                  <span className="ml-2 px-2 py-0.5 text-xs font-semibold text-white bg-blue-500 rounded-full">
+                    {attachmentCount}
                   </span>
                 )}
               </span>
-            } 
+            }
             key="2"
           >
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-blue-700">
-                  Daftar Lampiran Dokumen
-                </h3>
-                {detail_efaktur?.attachments && detail_efaktur.attachments.length > 0 && (
-                  <span className="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">
-                    Total: {detail_efaktur.attachments.length} File
+            <TableRBI
+              dataSource={
+                detail_efaktur?.attachments
+                  ? detail_efaktur.attachments.map((item) => ({
+                      ...item,
+                      key: item.id,
+                    }))
+                  : []
+              }
+              columns={processedColumnsAttachment}
+              current={pageAttachment}
+              pageSize={pageSizeAttachment}
+              onChange={handleAttachmentPaginationChange}
+              onSizeChanger={handleAttachmentPaginationChange}
+              totalData={attachmentCount}
+              tableScrolled={{ x: 1200, y: 400 }}
+              loading={loading_detail}
+              columnDefinitions={columnDefinitionsAttachment}
+              fixedColumns={fixedColumnsAttachment}
+              setFixedColumns={setFixedColumnsAttachment}
+            />
+          </TabPane>
+
+          {/* Tab 3: Log Activity */}
+          <TabPane
+            tab={
+              <span>
+                Log Activity
+                {logCount > 0 && (
+                  <span className="ml-2 px-2 py-0.5 text-xs font-semibold text-white bg-blue-500 rounded-full">
+                    {logCount}
                   </span>
                 )}
-              </div>
-              <Table
-                dataSource={
-                  detail_efaktur?.attachments
-                    ? detail_efaktur.attachments.map((item) => ({
-                        ...item,
-                        key: item.id,
-                      }))
-                    : []
-                }
-                columns={columnsAttachments}
-                pagination={false}
-                size="middle"
-                bordered
-                scroll={{ x: 1000 }}
-                locale={{
-                  emptyText: "Tidak ada lampiran dokumen",
-                }}
-              />
-            </div>
-          </TabPane>
-
-          <TabPane tab="Log Aktivitas" key="3">
-            <div>
-              <h3 className="text-lg font-bold text-blue-700 mb-4">
-                Riwayat Aktivitas
-              </h3>
-              <Table
-                dataSource={log_activity || []}
-                columns={columnsLog}
-                pagination={{
-                  current: pageLog,
-                  pageSize: pageSizeLog,
-                  total: pagination_log?.totalElements || 0,
-                  showSizeChanger: true,
-                  showTotal: (total) => `Total ${total} aktivitas`,
-                  onChange: handleLogPaginationChange,
-                  onShowSizeChange: handleLogPaginationChange,
-                }}
-                size="middle"
-                bordered
-                scroll={{ x: 800 }}
-                loading={loading_log}
-                locale={{
-                  emptyText: "Belum ada aktivitas",
-                }}
-              />
-            </div>
+              </span>
+            }
+            key="3"
+          >
+            <TableRBI
+              dataSource={log_activity || []}
+              columns={processedColumnsLog}
+              current={pageLog}
+              pageSize={pageSizeLog}
+              onChange={handleLogPaginationChange}
+              onSizeChanger={handleLogPaginationChange}
+              totalData={pagination_log?.totalElements || 0}
+              tableScrolled={{ x: 1000, y: 400 }}
+              loading={loading_log}
+              columnDefinitions={columnDefinitionsLog}
+              fixedColumns={fixedColumnsLog}
+              setFixedColumns={setFixedColumnsLog}
+            />
           </TabPane>
         </Tabs>
-
-        <div className="w-full flex justify-start mt-6">
-          <ButtonComponent
-            type="submit"
-            border={false}
-            icon={
-              <LeftOutlined
-                style={{
-                  fontSize: "14px",
-                  marginRight: "8px",
-                }}
-              />
-            }
-            onClick={() => navigate(INVOICE_ROUTES.EFAKTUR_VIEW)}
-          >
-            Kembali
-          </ButtonComponent>
-        </div>
-      </BaseContainer>
+      </CardContainer>
 
       {/* Modals */}
       <ModalBuatFakturPengganti

@@ -1,13 +1,12 @@
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form, Select, Checkbox } from "antd";
-import { RightOutlined } from "@ant-design/icons";
+import { DownOutlined, RightOutlined } from "@ant-design/icons";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import InputComponent from "../../../../components/InputComponent";
 import { columnsRequestBilling } from "./Table/TableRequestBilling";
-import SelectComponent from "../../../../components/SelectComponent";
 import {
   getAllApprovalList,
   getAllBillingRequestPaginate,
@@ -282,7 +281,6 @@ const ModalRequestApproval = ({
     return columnsWithKeys;
   }, [baseColumns]);
 
-
   const processedColumns = useMemo(() => {
     return applyFixedColumns(allColumns, fixedColumns);
   }, [allColumns, fixedColumns]);
@@ -301,7 +299,7 @@ const ModalRequestApproval = ({
         type="confirmation"
         header="Request Approval"
         handleCancel={handleCancelForm}
-        width={1200}
+        width={1000}
         footer={
           <div className="flex w-full justify-end gap-x-5">
             {current < steps.length - 1 && (
@@ -432,83 +430,123 @@ const ModalRequestApproval = ({
             }`}
           >
             <div className="w-full grid grid-cols-1 gap-x-4">
-              <p className="text-primary uppercase font-bold">
+              <p className="text-primary uppercase font-bold mb-4">
                 Approval Information
               </p>
 
-              <div className="w-full grid grid-cols-1 gap-2">
-                <div className="w-1/3">
-                  <Form.Item
-                    label="Approval Hierarchy"
-                    name="apphierId"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Please input your Approval Hierarchy!",
-                      },
-                    ]}
-                  >
-                    <SelectComponent onChange={(e) => handleSelect(e)}>
-                      {data_approval &&
-                        data_approval?.map((data, index) => (
-                          <Select.Option value={data.appHierId} key={index}>
-                            {data.approvalName}
-                          </Select.Option>
-                        ))}
-                    </SelectComponent>
-                  </Form.Item>
-                </div>
-              </div>
-            </div>
+              {/* Hidden Form.Item untuk validasi */}
+              <Form.Item
+                name="apphierId"
+                hidden
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your Approval Hierarchy!",
+                  },
+                ]}
+              >
+                <input type="hidden" />
+              </Form.Item>
 
-            <div className="w-full">
-              {boolean === true ? (
-                <TablePaginationNew
-                  type="FE"
-                  dataSource={
-                    data_approval_list && data_approval_list.length === 0
-                      ? null
-                      : dataTable
-                  }
-                  columns={columnsApproval(
-                    page,
-                    pageSize,
-                    searchInput,
-                    searchedColumn,
-                    searchText,
-                    handleSearch
-                  )}
-                  expandable={{
-                    expandedRowRender: (record) => (
-                      <div>
-                        <p className="text-primary text-xs font-bold uppercase pt-4">
-                          EMPLOYEE INFORMATION
-                        </p>
-                        <TablePaginationNew
-                          type="FE"
-                          useSelect={false}
-                          usePagination={false}
-                          dataSource={record?.employeeDetail}
-                          columns={columnsExpandApproval(
-                            page,
-                            pageSize,
-                            searchInput,
-                            searchedColumn,
-                            searchText,
-                            handleSearch
-                          )}
-                          className={"mb-4"}
-                        />
-                      </div>
-                    ),
-                  }}
-                  useSelect={false}
-                  usePagination={false}
-                />
-              ) : null}
+              {/* Tabel dengan Dropdown di Header */}
+              <TableRBI
+                dataSource={dataTable}
+                columns={columnsApproval(
+                  page,
+                  pageSize,
+                  searchInput,
+                  searchedColumn,
+                  searchText,
+                  handleSearch
+                )}
+                expandable={{
+                  expandedRowRender: (record) => (
+                    <div>
+                      <p className="text-primary text-xs font-bold uppercase pt-4">
+                        EMPLOYEE INFORMATION
+                      </p>
+                      <TableRBI
+                        dataSource={record?.employeeDetail || []}
+                        columns={columnsExpandApproval(
+                          page,
+                          pageSize,
+                          searchInput,
+                          searchedColumn,
+                          searchText,
+                          handleSearch
+                        )}
+                        className={"mb-4"}
+                        useSelect={false}
+                        usePagination={false}
+                      />
+                    </div>
+                  ),
+                }}
+                usePagination={false}
+                loading={loading}
+                // Custom Header Left - Select dengan inline styles
+                customHeaderLeft={
+                  <div style={{ position: "relative" }}>
+                    <style>{`
+            .approval-hierarchy-select .ant-select-selector {
+              display: flex !important;
+              align-items: center !important;
+              gap: 8px !important;
+              border: 1px solid #BDBDBD !important;
+              height: 40px !important;
+              color: black !important;
+              border-radius: 6px !important;
+              font-size: 14px !important;
+              font-weight: 500 !important;
+              padding: 0 11px !important;
+              background: white !important;
+            }
+            .approval-hierarchy-select .ant-select-selection-placeholder {
+              color: rgba(0, 0, 0, 0.25) !important;
+              line-height: 40px !important;
+              font-size: 14px !important;
+              font-weight: 500 !important;
+            }
+            .approval-hierarchy-select .ant-select-selection-item {
+              line-height: 40px !important;
+              font-size: 14px !important;
+              font-weight: 500 !important;
+              color: black !important;
+            }
+            .approval-hierarchy-select .ant-select-arrow {
+              color: black !important;
+              font-size: 12px !important;
+            }
+            .approval-hierarchy-select:not(.ant-select-disabled):hover .ant-select-selector {
+              border-color: #BDBDBD !important;
+            }
+            .approval-hierarchy-select.ant-select-focused .ant-select-selector {
+              border-color: #40a9ff !important;
+              box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+            }
+          `}</style>
+                    <Select
+                      value={form.getFieldValue("apphierId")}
+                      onChange={(value) => {
+                        form.setFieldsValue({ apphierId: value });
+                        handleSelect(value);
+                      }}
+                      placeholder="Approval Hierarchy"
+                      suffixIcon={<DownOutlined style={{ fontSize: "12px" }} />}
+                      style={{ minWidth: 200 }}
+                      className="approval-hierarchy-select"
+                    >
+                      {data_approval?.map((data, index) => (
+                        <Select.Option value={data.appHierId} key={index}>
+                          {data.approvalName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </div>
+                }
+              />
             </div>
           </div>
-
           {/* STEP 3: CONFIRMATION */}
           <div
             className={`steps-content my-[30px] ${

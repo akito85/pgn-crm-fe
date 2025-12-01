@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Radio } from "antd";
+import { Tabs } from "antd";
+import CardContainer from "../../../../../components/CardContainer";
 import BillingItemTab from "./BillingItemTab";
 import PaymentTab from "./PaymentTab";
 import PrevBillingTab from "./PrevBillingTab";
@@ -13,13 +14,13 @@ const BillingDetail = ({
   accountNumberId,
   onClose,
 }) => {
-  const [tabHeader, setTabHeader] = useState("Billing Item");
+  const [activeTab, setActiveTab] = useState("1");
   const detailRef = useRef(null);
 
   // Use Effect untuk scroll otomatis saat komponen muncul
   useEffect(() => {
     if (billingCodeId && detailRef.current) {
-      setTabHeader("Billing Item");
+      setActiveTab("1");
       
       // Gunakan requestAnimationFrame untuk scroll lebih smooth
       requestAnimationFrame(() => {
@@ -34,84 +35,71 @@ const BillingDetail = ({
     }
   }, [billingCodeId]);
 
-  // data tabs
-  const dataTabs = [
+  const items = [
     {
+      key: "1",
       label: "Billing Item",
-      value: "Billing Item",
+      children: (
+        <BillingItemTab
+          billingCodeId={billingCodeId}
+          ratingCodeId={ratingCodeId}
+          calculationCodeId={calculationCodeId}
+        />
+      ),
     },
     {
+      key: "2",
       label: "Payment",
-      value: "Payment",
+      children: (
+        <PaymentTab
+          billingCodeId={billingCodeId}
+          calculationCodeId={calculationCodeId}
+        />
+      ),
     },
     {
+      key: "3",
       label: "Previous Billing",
-      value: "Previous Billing",
+      children: (
+        <PrevBillingTab
+          billingCodeId={billingCodeId}
+          saNumberId={saNumberId}
+          accountNumberId={accountNumberId}
+        />
+      ),
     },
     {
+      key: "4",
       label: "Previous Payment",
-      value: "Previous Payment",
+      children: <PrevPaymentTab billingCodeId={billingCodeId} />,
     },
   ];
 
-  // change tabs
-  const changeTabHeader = (e) => {
-    setTabHeader(e.target.value);
-  };
-
-  // render tabs item
-  const renderLayout = (valueTab) => {
-    switch (valueTab) {
-      case "Billing Item":
-        return (
-          <BillingItemTab
-            billingCodeId={billingCodeId}
-            ratingCodeId={ratingCodeId}
-            calculationCodeId={calculationCodeId}
-          />
-        );
-      case "Payment":
-        return (
-          <PaymentTab
-            billingCodeId={billingCodeId}
-            calculationCodeId={calculationCodeId}
-          />
-        );
-      case "Previous Billing":
-        return (
-          <PrevBillingTab
-            billingCodeId={billingCodeId}
-            saNumberId={saNumberId}
-            accountNumberId={accountNumberId}
-          />
-        );
-      case "Previous Payment":
-        return <PrevPaymentTab billingCodeId={billingCodeId} />;
-      default:
-        return <BillingItemTab billingCodeId={billingCodeId} />;
-    }
-  };
-
   return (
     <div ref={detailRef} className="scroll-mt-4">
-      <div className="flex justify-between items-center mb-4">
-        <Radio.Group
-          options={dataTabs}
-          onChange={changeTabHeader}
-          value={tabHeader}
-          optionType="button"
-          buttonStyle="solid"
-          style={{ gap: 12, display: "flex" }}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold text-primary uppercase">Billing Detail</p>
+            <button
+              onClick={onClose}
+              className="mt-[15px] text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+              title="Close Detail"
+            >
+              ✕
+            </button>
+          </div>
+        }
+      >
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={items}
+          type="line"
+          className="billing-detail-tabs"
+          style={{ marginTop: -12, marginBottom: 0 }}
         />
-        <button
-          onClick={onClose}
-          className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors ml-4"
-          title="Close Detail"
-        >
-          ✕
-        </button>
-      </div>
-      {renderLayout(tabHeader)}
+      </CardContainer>
     </div>
   );
 };

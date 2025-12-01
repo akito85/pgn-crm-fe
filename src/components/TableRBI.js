@@ -1,4 +1,4 @@
-// TableRBI.js (with resizable columns)
+// TableRBI.js (with resizable columns + customHeaderLeft)
 import React, { useMemo, useState, useCallback } from "react";
 import { DownloadOutlined, FilterOutlined } from "@ant-design/icons";
 import { Button, Pagination, Select, Table } from "antd";
@@ -91,6 +91,7 @@ const TableRBI = ({
   onAdvanceSearch = () => {},
   onRow,
   rowClassName,
+  customHeaderLeft, // PROPS BARU untuk custom content di kiri header
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -198,17 +199,24 @@ const TableRBI = ({
     <div className={"flex flex-col w-full"}>
       {useSelect ? (
         <div className={"w-full flex mb-5 justify-between items-center"}>
-          <ColumnSettings
-            columns={columnDefinitions || columns}
-            hiddenColumns={optionSelectedCol}
-            onHiddenColumnsChange={setOptionSelectedCol}
-            fixedColumns={fixedColumns}
-            onFixedColumnsChange={setFixedColumns}
-            buttonText="Column Settings"
-            buttonStyle={{ height: "40px" }}
-          />
+          {/* BAGIAN KIRI: Column Settings + Custom Header Left */}
+          <div className="flex items-center gap-4">
+            <ColumnSettings
+              columns={columnDefinitions || columns}
+              hiddenColumns={optionSelectedCol}
+              onHiddenColumnsChange={setOptionSelectedCol}
+              fixedColumns={fixedColumns}
+              onFixedColumnsChange={setFixedColumns}
+              buttonText="Column Settings"
+              buttonStyle={{ height: "40px" }}
+            />
 
-          <div className="w-full flex justify-end gap-2">
+            {/* Custom Header Left - untuk Approval Hierarchy dropdown */}
+            {customHeaderLeft && customHeaderLeft}
+          </div>
+
+          {/* BAGIAN KANAN: Export, Advance Search, Search Bar */}
+          <div className="flex justify-end gap-2">
             <Button
               icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
               onClick={handleDownload}
