@@ -47,14 +47,11 @@ const ModalHistory = (props) => {
         historyData = dataHistory || [];
       }
       
-      // Ambil data SUBMIT untuk accordion SUBMITTER DATA
       const submitData = historyData.find(h => h.status === "SUBMIT");
       setSubmitterData(submitData);
       
-      // Set data approver untuk tabel
       setDataApproverFinal(approverData);
       
-      // Tentukan status approver (apakah masih waiting atau sudah selesai)
       const hasWaiting = approverData.some(a => a.status === null);
       const hasReject = approverData.some(a => a.status === "REJECT");
       
@@ -66,7 +63,6 @@ const ModalHistory = (props) => {
         setApproverStatus("APPROVED");
       }
       
-      // Auto expand first item (SUBMITTER DATA)
       setActiveKeys(['0']);
     } else {
       setDataApproverFinal([]);
@@ -84,14 +80,11 @@ const ModalHistory = (props) => {
     const approverData = dataApprover[tempTab] || [];
     const historyData = dataHistory[tempTab] || [];
     
-    // Ambil data SUBMIT untuk accordion SUBMITTER DATA
     const submitData = historyData.find(h => h.status === "SUBMIT");
     setSubmitterData(submitData);
     
-    // Set data approver untuk tabel
     setDataApproverFinal(approverData);
     
-    // Tentukan status approver
     const hasWaiting = approverData.some(a => a.status === null);
     const hasReject = approverData.some(a => a.status === "REJECT");
     
@@ -147,9 +140,7 @@ const ModalHistory = (props) => {
       );
     };
 
-    // Merge data approver dengan history untuk mendapatkan date dan hierarchy
     const enrichedApprovers = dataApproverFinal.map((approver) => {
-      // Cari di dataHistory yang match dengan name dan status
       let historyMatch = null;
       
       if (tabActive) {
