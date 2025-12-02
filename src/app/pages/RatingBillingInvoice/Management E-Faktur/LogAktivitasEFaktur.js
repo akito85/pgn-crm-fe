@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Table, Alert } from "antd";
-import { CloseOutlined } from "@ant-design/icons";
-import moment from "moment";
-import ButtonComponent from "../../../../components/ButtonComponent";
+import { Divider } from "antd";
 import SVGIcon from "../../../../assets/Icon/index";
+import ButtonComponent from "../../../../components/ButtonComponent";
+import TableRBI from "../../../../components/TableRBI";
+import ModalCustom from "../../../../components/Modal/ModalCustom";
 import { getLogActivity } from "../../../../redux/slices/rating_billing_invoice/efakturSlice";
+import moment from "moment";
 
 const LogAktivitasEFaktur = ({
   isOpen = false,
@@ -39,138 +40,208 @@ const LogAktivitasEFaktur = ({
     }
   }, [isOpen]);
 
-  const handleTableChange = (pagination) => {
-    setPage(pagination.current);
-    setPageSize(pagination.pageSize);
+  const handleChangePage = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
+    setPageSize(pageSizeChange);
   };
+
+  // Calculate log information
+  const logInformation = useMemo(() => {
+    if (!log_activity || log_activity.length === 0) {
+      return {
+        totalActivity: 0,
+        firstActivity: null,
+        lastActivity: null,
+        lastUser: null,
+      };
+    }
+
+    const sortedLogs = [...log_activity].sort(
+      (a, b) => new Date(a.createdDtm) - new Date(b.createdDtm)
+    );
+
+    return {
+      totalActivity: pagination_log?.totalElements || log_activity.length,
+      firstActivity: sortedLogs[0]?.createdDtm,
+      lastActivity: sortedLogs[sortedLogs.length - 1]?.createdDtm,
+      lastUser: sortedLogs[sortedLogs.length - 1]?.createdBy,
+    };
+  }, [log_activity, pagination_log]);
 
   const columnsLog = [
     {
-      title: "#",
-      dataIndex: "key",
-      key: "key",
+      key: "no",
+      title: "NO",
       width: 60,
       align: "center",
       render: (_, __, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "WAKTU",
+      key: "time",
+      title: "TIME",
       dataIndex: "createdDtm",
-      key: "createdDtm",
       width: 180,
+      align: "left",
       render: (text) => {
         if (!text) return "-";
         return moment(text).format("DD-MM-YYYY HH:mm:ss");
       },
     },
     {
-      title: "PENGGUNA",
-      dataIndex: "createdBy", //
-      key: "createdBy",
-      width: 150,
+      key: "user",
+      title: "USER",
+      dataIndex: "createdBy",
+      width: 200,
+      align: "left",
       render: (text) => text || "-",
     },
     {
-      title: "AKTIVITAS",
-      dataIndex: "activity",
       key: "activity",
+      title: "ACTIVITY",
+      dataIndex: "activity",
       width: 300,
+      align: "left",
       render: (text) => <div className="text-sm">{text || "-"}</div>,
     },
     {
-      title: "PESAN / CATATAN",
-      dataIndex: "message",
       key: "message",
-      width: 300,
+      title: "MESSAGE / NOTE",
+      dataIndex: "message",
+      width: 350,
+      align: "left",
       render: (text) => (
         <div className="text-sm text-gray-600">{text || "-"}</div>
       ),
     },
   ];
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000] p-5">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-[1100px] max-h-[90vh] flex flex-col overflow-hidden">
-        <Spin spinning={loading_log}>
-          {/* Header */}
-          <div className="flex justify-between items-center px-6 py-5 border-b border-gray-200 bg-gray-50">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-xl font-bold text-primary">
-                Log Aktivitas E-Faktur
-              </h2>
-              {billingData && (
-                <div className="flex gap-4 text-sm text-gray-600">
-                  <span>
-                    Billing Code:{" "}
-                    <strong className="text-gray-800">
-                      {billingData.billingCode}
-                    </strong>
-                  </span>
-                  {billingData.invoiceNumber && (
-                    <span>
-                      Invoice:{" "}
-                      <strong className="text-gray-800">
-                        {billingData.invoiceNumber}
-                      </strong>
-                    </span>
-                  )}
+    <ModalCustom
+      isOpen={isOpen}
+      type="view"
+      header="E-Faktur Log Activity"
+      handleCancel={handleClose}
+      width={1000}
+      footer={
+        <div className="flex w-full justify-start">
+          <ButtonComponent type="default" onClick={handleClose}>
+            Back
+          </ButtonComponent>
+        </div>
+      }
+    >
+      <div className="w-full">
+        {/* Billing Information */}
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold text-primary mb-3 uppercase">
+            Billing Information
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs text-gray-500 block mb-1">
+                Billing code
+              </label>
+              <div className="text-sm font-medium text-gray-800">
+                {billingData?.billingCode || "-"}
+              </div>
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 block mb-1">
+                Invoice Number
+              </label>
+              <div className="text-sm font-medium text-gray-800">
+                {billingData?.invoiceNumber || "-"}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Divider className="my-4" />
+
+        {/* Item Detail/Services - Table Section */}
+        <div className="mb-4">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-sm font-semibold text-primary uppercase">
+              Item Detail/Services
+            </h3>
+          </div>
+
+          {/* Table with TableRBI */}
+          <TableRBI
+            dataSource={log_activity || []}
+            columns={columnsLog}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChangePage}
+            onSizeChanger={handleChangePage}
+            totalData={pagination_log?.totalElements || 0}
+            tableScrolled={{ x: 1000, y: 300 }}
+            loading={loading_log}
+            showDownload={false}
+            rowKey="id"
+          />
+        </div>
+
+        <Divider className="my-4" />
+
+        {/* Log Information */}
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+            <h3 className="text-sm font-semibold text-primary uppercase">
+              Log Information
+            </h3>
+          </div>
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <div className="mb-3">
+                <label className="text-xs text-gray-500 block mb-1">
+                  Total Activity
+                </label>
+                <div className="text-sm font-medium text-gray-800">
+                  {logInformation.totalActivity}
                 </div>
-              )}
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">
+                  Last Activity
+                </label>
+                <div className="text-sm font-medium text-gray-800">
+                  {logInformation.lastActivity
+                    ? moment(logInformation.lastActivity).format(
+                        "DD-MM-YYYY HH:mm:ss"
+                      )
+                    : "-"}
+                </div>
+              </div>
             </div>
-            <ButtonComponent
-              type="text"
-              icon={<CloseOutlined style={{ fontSize: 20 }} />}
-              onClick={handleClose}
-              className="hover:bg-gray-200 rounded-full"
-            />
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 px-6 py-6 overflow-y-auto">
-            {/* Tabel Log Aktivitas */}
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
-              <Table
-                dataSource={log_activity}
-                columns={columnsLog}
-                loading={loading_log}
-                pagination={{
-                  current: page,
-                  pageSize: pageSize,
-                  total: pagination_log?.totalElements || 0,
-                  showSizeChanger: true,
-                  showTotal: (total, range) =>
-                    `${range[0]}-${range[1]} dari ${total} aktivitas`,
-                  pageSizeOptions: ["10", "20", "50"],
-                }}
-                onChange={handleTableChange}
-                scroll={{ y: 400, x: 1000 }}
-                size="small"
-                bordered
-                rowKey="id"
-                locale={{
-                  emptyText: billingData?.efakturId
-                    ? "Belum ada log aktivitas untuk E-Faktur ini"
-                    : "Pilih E-Faktur terlebih dahulu",
-                }}
-              />
+            <div>
+              <div className="mb-3">
+                <label className="text-xs text-gray-500 block mb-1">
+                  First Activity
+                </label>
+                <div className="text-sm font-medium text-gray-800">
+                  {logInformation.firstActivity
+                    ? moment(logInformation.firstActivity).format(
+                        "DD-MM-YYYY HH:mm:ss"
+                      )
+                    : "-"}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">
+                  Last User
+                </label>
+                <div className="text-sm font-medium text-gray-800">
+                  {logInformation.lastUser || "-"}
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* Footer */}
-          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center">
-            <ButtonComponent
-              type="default"
-              onClick={handleClose}
-              icon={<SVGIcon name="IconArrowNarrowLeft" width={20} />}
-            >
-              Tutup
-            </ButtonComponent>
-          </div>
-        </Spin>
+        </div>
       </div>
-    </div>
+    </ModalCustom>
   );
 };
 

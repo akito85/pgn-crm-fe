@@ -1,11 +1,9 @@
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form } from "antd";
-import { RightOutlined } from "@ant-design/icons";
+import { Form } from "antd";
 import SVGIcon from "../../../../../assets/Icon/index";
 import InputComponent from "../../../../../components/InputComponent";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import DetailText from "../../../../../components/DetailText";
 import {
   approvedEfaktur,
   getAllEFakturApprovePaginate,
@@ -35,8 +33,6 @@ const ModalApprovalEFaktur = ({
   const dataSource = list_efaktur_approval;
 
   // State
-  const [current, setCurrent] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -94,50 +90,6 @@ const ModalApprovalEFaktur = ({
     onChange: onSelectChange,
   };
 
-  // Steps
-  const steps = [
-    {
-      title: "E-FAKTUR INFORMATION",
-      disabled: dataTableSelect.length === 0 || !form.getFieldValue().remark,
-    },
-    {
-      title: "CONFIRMATION",
-    },
-  ];
-
-  // Navigation
-  const next = () => setCurrent(current + 1);
-  const prev = () => setCurrent(current - 1);
-
-  // Scroll Handlers
-  const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
-  };
-
-  const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
-  };
-
-  const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
-    }
-  };
-
-  const handleButtonNext = () => {
-    next();
-    scrollRightHandler();
-  };
-
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
-
   // Handle Cancel Form
   const handleCancelForm = () => {
     handleClose();
@@ -145,7 +97,6 @@ const ModalApprovalEFaktur = ({
     setDataTableSelect([]);
     setRemark("");
     setAction("");
-    setCurrent(0);
     form.resetFields();
   };
 
@@ -189,7 +140,6 @@ const ModalApprovalEFaktur = ({
       .unwrap()
       .then(() => {
         onSuccess();
-        setCurrent(0);
         form.resetFields();
         setRemark("");
         setAction("");
@@ -237,10 +187,46 @@ const ModalApprovalEFaktur = ({
         render: (_, __, index) => (page - 1) * pageSize + index + 1,
       },
       {
-        key: "efakturNo",
-        title: "NO. E-FAKTUR",
+        key: "efakturCode",
+        title: "FAKTUR CODE",
         dataIndex: "efakturNo",
-        width: 180,
+        width: 150,
+        render: (text) => text || "-",
+      },
+      {
+        key: "efakturType",
+        title: "FAKTUR TYPE",
+        dataIndex: "efakturType",
+        width: 140,
+        align: "center",
+        render: (text) => text || "-",
+      },
+      {
+        key: "billingCode",
+        title: "BILLING CODE",
+        dataIndex: "billingCode",
+        width: 150,
+        render: (text) => text || "-",
+      },
+      {
+        key: "invoiceNumber",
+        title: "INVOICE NUMBER",
+        dataIndex: "invoiceNumber",
+        width: 150,
+        render: (text) => text || "-",
+      },
+      {
+        key: "accountNumber",
+        title: "ACCOUNT NUMBER",
+        dataIndex: "accountNumber",
+        width: 150,
+        render: (text) => text || "-",
+      },
+      {
+        key: "accountName",
+        title: "ACCOUNT NAME",
+        dataIndex: "accountName",
+        width: 200,
         render: (text) => text || "-",
       },
       {
@@ -260,28 +246,6 @@ const ModalApprovalEFaktur = ({
         },
       },
       {
-        key: "efakturType",
-        title: "TIPE E-FAKTUR",
-        dataIndex: "efakturType",
-        width: 140,
-        align: "center",
-        render: (text) => text || "-",
-      },
-      {
-        key: "invoiceNumber",
-        title: "INVOICE NUMBER",
-        dataIndex: "invoiceNumber",
-        width: 180,
-        render: (text) => text || "-",
-      },
-      {
-        key: "billingCode",
-        title: "BILLING CODE",
-        dataIndex: "billingCode",
-        width: 180,
-        render: (text) => text || "-",
-      },
-      {
         key: "customerNumber",
         title: "CUSTOMER NUMBER",
         dataIndex: "customerNumber",
@@ -292,20 +256,6 @@ const ModalApprovalEFaktur = ({
         key: "customerName",
         title: "CUSTOMER",
         dataIndex: "customerName",
-        width: 250,
-        render: (text) => text || "-",
-      },
-      {
-        key: "accountNumber",
-        title: "ACCOUNT NUMBER",
-        dataIndex: "accountNumber",
-        width: 180,
-        render: (text) => text || "-",
-      },
-      {
-        key: "accountName",
-        title: "ACCOUNT NAME",
-        dataIndex: "accountName",
         width: 250,
         render: (text) => text || "-",
       },
@@ -469,100 +419,56 @@ const ModalApprovalEFaktur = ({
     }));
   }, [allColumns]);
 
+  // Check if form is valid for submission
+  const isFormValid = useMemo(() => {
+    return dataTableSelect.length > 0 && remark.trim() !== "";
+  }, [dataTableSelect, remark]);
+
   return (
     <div>
       <ModalCustom
         isOpen={isOpen}
         type={"confirmation"}
-        header="Approval E-Faktur"
+        header="APPROVAL E-FAKTUR"
         handleCancel={handleCancelForm}
-        width={1200}
+        width={1000}
         footer={
-          <div className="flex w-full justify-end gap-5">
-            {current < steps.length - 1 && (
-              <ButtonComponent type={"default"} onClick={handleCancelForm}>
-                Cancel
-              </ButtonComponent>
-            )}
-            {current > 0 && (
-              <ButtonComponent
-                onClick={() => {
-                  prev();
-                  scrollLeftHandler();
-                }}
-                type={"submit"}
-                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              >
-                Previous
-              </ButtonComponent>
-            )}
-
-            {current < steps.length - 1 && (
-              <ButtonComponent
-                onClick={handleButtonNext}
-                type={"submit"}
-                className="ant-btn ant-btn-submit flex w-full justify-center"
-                disabled={steps[current].disabled}
-              >
-                <span className="p-1 text-[18px] text-center">Next</span>
-                <RightOutlined
-                  style={{
-                    justifyItems: "center",
-                    fontSize: "18px",
-                    color: "#fff",
-                  }}
-                />
-              </ButtonComponent>
-            )}
-            {current === steps.length - 1 && (
-              <>
-                <ButtonComponent
-                  type={"reject"}
-                  htmlType={"submit"}
-                  form={"formApproveEFaktur"}
-                  onClick={() => setAction("REJECT")}
-                  loading={loading_modal}
-                >
-                  Reject
-                </ButtonComponent>
-                <ButtonComponent
-                  type={"approve"}
-                  htmlType={"submit"}
-                  form={"formApproveEFaktur"}
-                  onClick={() => setAction("APPROVE")}
-                  loading={loading_modal}
-                >
-                  Approve
-                </ButtonComponent>
-              </>
-            )}
+          <div className="flex w-full justify-end gap-3">
+            <ButtonComponent type={"default"} onClick={handleCancelForm}>
+              Cancel
+            </ButtonComponent>
+            <ButtonComponent
+              type={"reject"}
+              htmlType={"submit"}
+              form={"formApproveEFaktur"}
+              onClick={() => setAction("REJECT")}
+              loading={loading_modal}
+              disabled={!isFormValid}
+            >
+              Reject
+            </ButtonComponent>
+            <ButtonComponent
+              type={"approve"}
+              htmlType={"submit"}
+              form={"formApproveEFaktur"}
+              onClick={() => setAction("APPROVE")}
+              loading={loading_modal}
+              disabled={!isFormValid}
+            >
+              Approve
+            </ButtonComponent>
           </div>
         }
       >
-        <div className="flex flex-row justify-center">
-          <div
-            onScroll={handleScroll}
-            ref={containerRef}
-            className="overflow-x-scroll scrollStepsCstm"
-          >
-            <Steps current={current} items={items} labelPlacement="vertical" />
-          </div>
-        </div>
-
-        {/* STEP 1: E-FAKTUR INFORMATION */}
-        <div
-          className={`steps-content my-[30px] ${current !== 0 ? "hidden" : ""}`}
+        <Form
+          layout="vertical"
+          form={form}
+          id={"formApproveEFaktur"}
+          onFinish={handleSave}
         >
-          <Form
-            layout="vertical"
-            form={form}
-            id={"formApproveEFaktur"}
-            onFinish={handleSave}
-          >
-            <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-              <p className="text-primary uppercase font-bold mb-4">
-                E-Faktur List - Ready to Approve
-              </p>
+          <div className="w-full grid grid-cols-1 gap-4">
+            {/* Table Section */}
+            <div>
               <TableRBI
                 dataSource={filterDataByPage("data")}
                 columns={processedColumns}
@@ -571,66 +477,37 @@ const ModalApprovalEFaktur = ({
                 onChange={handleChange}
                 onSizeChanger={handleChange}
                 totalData={filterDataByPage("length")}
-                tableScrolled={{ y: 525, x: 2000 }}
+                tableScrolled={{ y: 400, x: 2000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitions}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
                 loading={loading_modal}
                 rowSelection={rowSelection}
+                showExport={false}
               />
-              <div className="pt-[30px]">
-                <Form.Item
-                  label={"Remark"}
-                  name={"remark"}
-                  rules={[
-                    { required: true, message: "Please input your Remark!" },
-                  ]}
-                >
-                  <InputComponent
-                    rows={3}
-                    type="textarea"
-                    value={remark}
-                    onChange={(e) => setRemark(e.target.value)}
-                    placeholder={"Type your remark for approval/rejection"}
-                  />
-                </Form.Item>
-              </div>
             </div>
-          </Form>
-        </div>
 
-        {/* STEP 2: CONFIRMATION */}
-        <div
-          className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
-        >
-          <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-            <p className="text-primary uppercase font-bold mb-4">
-              Review - E-Faktur yang Akan Di-
-              {action === "APPROVE" ? "Approve" : "Reject"}
-            </p>
-            <TableRBI
-              dataSource={dataTableSelect}
-              columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
-              totalData={dataTableSelect.length || 0}
-              tableScrolled={{ y: 525, x: 2000 }}
-              onSort={onSort}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={false}
-            />
-            <div className="pt-[30px]">
-              <DetailText label={"Remark"}>
-                {form.getFieldValue().remark}
-              </DetailText>
+            {/* Remark Section */}
+            <div className="pt-4">
+              <Form.Item
+                label={<span className="font-medium">Remark*</span>}
+                name={"remark"}
+                rules={[
+                  { required: true, message: "Please input your Remark!" },
+                ]}
+              >
+                <InputComponent
+                  rows={3}
+                  type="textarea"
+                  value={remark}
+                  onChange={(e) => setRemark(e.target.value)}
+                  placeholder={"Remark"}
+                />
+              </Form.Item>
             </div>
           </div>
-        </div>
+        </Form>
       </ModalCustom>
 
       {/* Modal Error */}

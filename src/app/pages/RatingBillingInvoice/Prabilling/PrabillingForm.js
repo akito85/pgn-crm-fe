@@ -36,6 +36,7 @@ import {
   getUserProfile,
 } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import { IconModal } from "../../../../utils/Icon";
+import CardContainer from "../../../../components/CardContainer";
 
 const PrabillingForm = ({ type }) => {
   const {
@@ -551,7 +552,15 @@ const handleSave = async () => {
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout={"vertical"} form={form} onFinish={onFinish}>
-          <BaseContainer header={"BIlling Cycle Information"}>
+          <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold text-primary">
+                Billing Cycle Information
+              </p>
+            </div>
+          }
+        >
             <div className={"w-full grid grid-cols-2 gap-2"}>
               <Form.Item
                 label={"Billing Cycle"}
@@ -588,7 +597,7 @@ const handleSave = async () => {
                 />
               </Form.Item>
             </div>
-          </BaseContainer>
+          </CardContainer>
           <BaseContainer header={"Input Parameter Information"}>
             <div className={"w-full grid grid-cols-2 gap-2"}>
               <div className="col-span-2">

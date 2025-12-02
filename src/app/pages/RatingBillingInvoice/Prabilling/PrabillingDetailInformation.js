@@ -419,11 +419,10 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
               accNumber: record?.accountNumber,
               saNumber: record?.saNumber,
             }}
+            style={{ lineHeight: 0 }}
           >
             <Tooltip title="View Account Detail">
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
+              <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         ),

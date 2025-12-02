@@ -3,11 +3,9 @@ import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import { Alert, Checkbox, Form, Select, Spin, Tooltip } from 'antd';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import ButtonComponent from '../../../../../components/ButtonComponent';
-import { DownloadOutlined, InfoCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { Link, NavLink } from 'react-router-dom';
 import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../routes/account_management/customer_account_routes';
-import BaseContainer from '../../../../../components/BaseContainer';
-import TablePagination from '../../../../../components/TablePagination';
 import SelectComponent from '../../../../../components/SelectComponent';
 import { useDispatch, useSelector } from 'react-redux';
 import { useState } from 'react';
@@ -27,7 +25,10 @@ import { clearBodyMessage } from '../../../../../redux/slices/general_slice';
 import { usePrevLocContext } from '../../../../../utils/usePrevLoc';
 import Toolbar from '../../../../../components/Toolbar';
 import { useColumnActionPermission } from '../../../../../components/ColumnActionPermission';
-
+import { useMemo } from 'react';
+import TableRBI from '../../../../../components/TableRBI';
+import { applyFixedColumns } from '../../../../../utils/applyFixedColumns';
+import CardContainer from '../../../../../components/CardContainer';
 
 const ViewLocations = () => {
     const { data, loading, data_detail, data_location_type } = useSelector((state) => state.location);
@@ -56,15 +57,18 @@ const ViewLocations = () => {
     const { remark } = form.getFieldsValue();
     const { path } = usePrevLocContext();
     const [filteredInfo, setFilteredInfo] = useState({});
+    const [fixedColumns, setFixedColumns] = useState(() => ({
+        left: ["no"],
+        right: ["status", "action"],
+    }));
 
     // use effect get location type
     useEffect(() => {
         dispatch(getLocationType());
     }, [path, dispatch]);
+
     // set location type state
     useEffect(() => {
-
-        // if (dataLocation?.length > 0 && path && typeof path?.state === 'object' && hasValue(path?.state?.currentLocation) === false) {
         if (hasValue(path?.state) === false) {
             setSelectedLocationType(dataLocation?.filter(item => item?.value === 2346)[0]?.value || 2346);
         } else {
@@ -81,14 +85,12 @@ const ViewLocations = () => {
         }
     }, [dispatch, page, pageSize, search, sort, selectedLocationType]);
 
-    
     // trigger modal try again
     useEffect(() => {
         if (bodyError?.response?.data?.code === 500) {
             setModalError(true)
         }
     }, [bodyError]);
-
 
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
@@ -120,6 +122,7 @@ const ViewLocations = () => {
           nameParent: record?.locationParent,
         });
     }
+
     // handle detail
     const handleDetail = async(record, selectedLocationType) => {
         let id = '';
@@ -168,19 +171,11 @@ const ViewLocations = () => {
         }
     }
 
-    const columns = (
-        selectedLocationType,
-        page = 1,
-        pageSize = 10,
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch = () => { },
-        handleActiveOrInactive = () => { },
-        handleDetail = () => { }
-    ) => {
+    // Base columns with useMemo
+    const baseColumns = useMemo(() => {
         let arrayCols = [
             {
+                key: "no",
                 title: "NO",
                 width: 60,
                 align: "center",
@@ -188,6 +183,7 @@ const ViewLocations = () => {
                 render: (text, object, index) => (page - 1) * pageSize + index + 1,
             },
             {
+                key: "locationCode",
                 title: "CODE",
                 dataIndex: "locationCode",
                 filteredValue: [search?.locationCode] || null,
@@ -198,11 +194,13 @@ const ViewLocations = () => {
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
+                    true
                 ),
-                render: (text) => renderColumn('locationCode', searchedColumn, searchText, text, false, 'input', search)
+                render: (text) => renderColumn('locationCode', hasValue(search["locationCode"]), searchText, text, false, 'input', search)
             },
             {
+                key: "country",
                 title: "COUNTRY",
                 dataIndex: "country",
                 sorter: true,
@@ -213,11 +211,13 @@ const ViewLocations = () => {
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
+                    true
                 ),
-                render: (text) => renderColumn('country', searchedColumn, searchText, text, false, 'input', search)
+                render: (text) => renderColumn('country', hasValue(search["country"]), searchText, text, false, 'input', search)
             },
             {
+                key: "province",
                 title: "PROVINCE",
                 dataIndex: "province",
                 sorter: true,
@@ -228,11 +228,13 @@ const ViewLocations = () => {
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
+                    true
                 ),
-                render: (text) => renderColumn('province', searchedColumn, searchText, text, false, 'input', search)
+                render: (text) => renderColumn('province', hasValue(search["province"]), searchText, text, false, 'input', search)
             },
             {
+                key: "city",
                 title: "CITY",
                 dataIndex: "city",
                 sorter: true,
@@ -243,11 +245,13 @@ const ViewLocations = () => {
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
+                    true
                 ),
-                render: (text) => renderColumn('city', searchedColumn, searchText, text, false, 'input', search)
+                render: (text) => renderColumn('city', hasValue(search["city"]), searchText, text, false, 'input', search)
             },
             {
+                key: "district",
                 title: "DISTRICT",
                 dataIndex: "district",
                 sorter: true,
@@ -258,11 +262,13 @@ const ViewLocations = () => {
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
+                    true
                 ),
-                render: (text) => renderColumn('district', searchedColumn, searchText, text, false, 'input', search)
+                render: (text) => renderColumn('district', hasValue(search["district"]), searchText, text, false, 'input', search)
             },
             {
+                key: "subDistrict",
                 title: "SUB DISTRICT",
                 dataIndex: "subDistrict",
                 sorter: true,
@@ -273,11 +279,13 @@ const ViewLocations = () => {
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
+                    true
                 ),
-                render: (text) => renderColumn('subDistrict', searchedColumn, searchText, text, false, 'input', search)
+                render: (text) => renderColumn('subDistrict', hasValue(search["subDistrict"]), searchText, text, false, 'input', search)
             },
             {
+                key: "postalCode",
                 title: "POSTAL CODE",
                 dataIndex: "postalCode",
                 sorter: true,
@@ -288,11 +296,13 @@ const ViewLocations = () => {
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
+                    true
                 ),
-                render: (text) => renderColumn('postalCode', searchedColumn, searchText, text, false, 'input', search)
+                render: (text) => renderColumn('postalCode', hasValue(search["postalCode"]), searchText, text, false, 'input', search)
             },
             {
+                key: "locationType",
                 title: "LOCATION TYPE",
                 dataIndex: "locationType",
                 sorter: true,
@@ -303,11 +313,13 @@ const ViewLocations = () => {
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
+                    true
                 ),
-                render: (text) => renderColumn('locationType', searchedColumn, searchText, text?.toUpperCase(), false, 'input', search)
+                render: (text) => renderColumn('locationType', hasValue(search["locationType"]), searchText, text?.toUpperCase(), false, 'input', search)
             },
             {
+                key: "locationName",
                 title: "LOCATION NAME",
                 dataIndex: "locationName",
                 sorter: true,
@@ -318,11 +330,13 @@ const ViewLocations = () => {
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
+                    true
                 ),
-                render: (text) => renderColumn('locationName', searchedColumn, searchText, text, false, 'input', search)
+                render: (text) => renderColumn('locationName', hasValue(search["locationName"]), searchText, text, false, 'input', search)
             },
             {
+                key: "locationParent",
                 title: "LOCATION PARENT",
                 dataIndex: "locationParent",
                 sorter: true,
@@ -333,27 +347,31 @@ const ViewLocations = () => {
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
+                    true
                 ),
-                render: (text) => renderColumn('locationParent', searchedColumn, searchText, text, false, 'input', search)
+                render: (text) => renderColumn('locationParent', hasValue(search["locationParent"]), searchText, text, false, 'input', search)
             },
             {
+                key: "locationParentType",
                 title: "LOCATION PARENT TYPE",
                 dataIndex: "locationParentType",
                 sorter: true,
                 filteredValue: [search?.locationParentType] || null,
                 ...getColumnSearchPropsUseFilteredValue(
                     search,
-                    "locationParent",
+                    "locationParentType",
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
+                    true
                 ),
-                render: (text) => renderColumn('locationParentType', searchedColumn, searchText, text, false, 'input', search)
+                render: (text) => renderColumn('locationParentType', hasValue(search["locationParentType"]), searchText, text, false, 'input', search)
 
             },
             {
+                key: "locationReference",
                 title: "LOCATION REFERENCE",
                 dataIndex: "locationReference",
                 sorter: true,
@@ -364,17 +382,18 @@ const ViewLocations = () => {
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
+                    true
                 ),
-                render: (text) => renderColumn('locationReference', searchedColumn, searchText, text, false, 'input', search)
+                render: (text) => renderColumn('locationReference', hasValue(search["locationReference"]), searchText, text, false, 'input', search)
 
             },
             {
+                key: "status",
                 title: "STATUS",
                 dataIndex: "status",
                 sorter: true,
                 filteredValue: [search?.status] || null,
-                fixed: 'right',
                 width: 120,
                 ...getColumnSearchPropsUseFilteredValue(
                     search,
@@ -382,18 +401,20 @@ const ViewLocations = () => {
                     searchInput,
                     searchedColumn,
                     searchText,
-                    handleSearch
+                    handleSearch,
+                    true
                 ),
-                render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
+                render: (text) => renderColumn('status', hasValue(search["status"]), searchText, text, false, 'status', search)
             },
         ];
 
         if (selectedLocationType !== 2346) {
-            return arrayCols?.filter(item => (item?.dataIndex === 'no' || item.dataIndex === 'locationName' || item.dataIndex === 'locationType' || item?.dataIndex === 'locationParent' || item?.dataIndex === "locationParentType" || item.dataIndex === 'locationReference' || item?.dataIndex === 'locationCode' || item?.dataIndex === 'status' || item?.dataIndex === 'action'));
+            return arrayCols?.filter(item => (item?.dataIndex === 'no' || item.dataIndex === 'locationName' || item.dataIndex === 'locationType' || item?.dataIndex === 'locationParent' || item?.dataIndex === "locationParentType" || item.dataIndex === 'locationReference' || item?.dataIndex === 'locationCode' || item?.dataIndex === 'status'));
         } else {
             return arrayCols?.filter(item => (item?.dataIndex === 'no' || item?.dataIndex === 'country' || item?.dataIndex === 'province' || item?.dataIndex === 'city' || item?.dataIndex === 'district' || item?.dataIndex === 'subDistrict' || item?.dataIndex === 'postalCode'));
         }
-    }
+    }, [page, pageSize, search, searchText, searchedColumn, selectedLocationType]);
+
     // Breadcrumbs
     const routes = [
         {
@@ -410,21 +431,21 @@ const ViewLocations = () => {
         },
     ];
 
-    // handle cancel
-    const handleChange = (pageChange, pageSizeChange) => {
+    // handle change pagination
+    const handleChangePage = (pageChange, pageSizeChange) => {
         const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
         setPage(tempPage);
         setPageSize(pageSizeChange);
     };
+
     // onsort
-    const onSort = (_, __, sort) => {
+    const onSort = (_, __, sorter) => {
         const dataSort =
-            sort.order !== undefined
-                ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+            sorter.order !== undefined
+                ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
                 : "";
         setSort(dataSort);
     };
-
 
     const RenderLayoutDetail = ({ selectedLocationType }) => {
         if (selectedLocationType === 2346) {
@@ -474,7 +495,6 @@ const ViewLocations = () => {
     };
 
     const handleConfirm = () => {
-        // dispatch(getLocationType());
         if (bodyError?.action === "GET_LOCATION_PAGINATE") {
             const reqSearch = encodeURIComponent(JSON.stringify(search))
             dispatch(getLocationPaginate({ typeId: selectedLocationType, search: reqSearch, sort, page, pageSize }))
@@ -484,7 +504,6 @@ const ViewLocations = () => {
             handleSaveActivation()
         }
         dispatch(clearBodyMessage());
-
     }
 
     // handle retry
@@ -498,7 +517,6 @@ const ViewLocations = () => {
     const handleCloseModalError = () => {
         setModalError(false);
         dispatch(clearBodyMessage());
-        // setBodyError({});
     };
 
     // handle download 
@@ -507,129 +525,134 @@ const ViewLocations = () => {
         dispatch(downloadLocation({ parentType: selectedLocationType, search: reqSearch, page, pageSize }))
     }
 
-    const itemActions =
-        [
-            //action toolbar
-            {
-                action: 'Download',
-                render: (
+    const itemActions = [
+        //action toolbar
+        {
+            action: 'Upload',
+            render: (
+                <NavLink to={''}>
                     <ButtonComponent
-                        icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+                        icon={<UploadOutlined style={{ fontSize: "24px" }} />}
                         type="submit"
-                        onClick={handleDownload}
                     >
-                        Download List
+                        Upload
                     </ButtonComponent>
+                </NavLink>
+            )
+        },
+        {
+            action: 'Create',
+            render: (
+                <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_LOCATIONS} state={{ currentLocation: selectedLocationType }}>
+                    <ButtonComponent
+                        icon={<PlusOutlined style={{ fontSize: "24px" }} />}
+                        type="submit"
+                    >
+                        Create Location
+                    </ButtonComponent>
+                </NavLink>
+            )
+        },
+
+        // Column Action Table
+        {
+            action: "View",
+            type: "table",
+            render: (record, data) => {
+                return (
+                    <Tooltip title="Detail">
+                        <div onClick={() => { handleDetail(record, selectedLocationType) }}>
+                            <SVGIcon name="IconDetail" width={24} />
+                        </div>
+                    </Tooltip>
                 )
-            },
-            {
-                action: 'Upload',
-                render: (
-                    <NavLink to={''}>
-                        <ButtonComponent
-                            icon={<UploadOutlined style={{ fontSize: "24px" }} />}
-                            type="submit"
-                        >
-                            Upload
-                        </ButtonComponent>
-                    </NavLink>
-                )
-            },
-            {
-                action: 'Create',
-                render: (
-                    <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_LOCATIONS} state={{ currentLocation: selectedLocationType }}>
-                        <ButtonComponent
-                            icon={<PlusOutlined style={{ fontSize: "24px" }} />}
-                            type="submit"
-                        >
-                            Create Location
-                        </ButtonComponent>
-                    </NavLink>
-                )
-            },
-
-            // Column Action Table
-            {
-                action: "View",
-                type: "table",
-                render: (record, data) => {
-                    return (
-                        <Tooltip title="Detail">
-                            {/* <Link> */}
-                            <div
-                                onClick={() => { handleDetail(record, selectedLocationType) }}
-                            >
-                                <SVGIcon name="IconDetail" width={24} />
-                            </div>
-                            {/* </Link> */}
-                        </Tooltip>
-                    )
-                }
-            },
-
-            {
-                action: "Update",
-                type: "table",
-                render: (record, data) => {
-                    return (
-                        <Tooltip title="Update">
-                            {record?.status === "INACTIVE" ?
-                                <Link>
-                                    <div
-                                        className={"cursor-not-allowed"}>
-                                        <SVGIcon name="IconEdit" width={24} color={"#C0BEC6"} className={"cursor-not-allowed"} />
-                                    </div>
-                                </Link>
-                                :
-                                <Link
-                                    to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_LOCATIONS}
-                                    state={{ id: record?.locationId, currentLocation: selectedLocationType }}
-                                >
-                                    <div>
-                                        <SVGIcon name="IconEdit" width={24} />
-                                    </div>
-                                </Link>
-                            }
-                        </Tooltip>
-                    )
-                }
-            },
-
-            {
-                action: "Activate",
-                type: "table",
-                render: (record, data) => {
-                    return (
-                        <Tooltip
-                            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-                        >
-
-                            <div>
-                                <Checkbox
-                                    onClick={() => {
-                                        handleActiveOrInactive(record)
-                                    }}
-                                    checked={record?.status === "ACTIVE" ? false : true}
-                                />
-                            </div>
-                        </Tooltip>
-                    )
-                }
             }
-        ]
+        },
+        {
+            action: "Update",
+            type: "table",
+            render: (record, data) => {
+                return (
+                    <Tooltip title="Update">
+                        {record?.status === "INACTIVE" ?
+                            <Link>
+                                <div className={"cursor-not-allowed"}>
+                                    <SVGIcon name="IconEdit" width={24} color={"#C0BEC6"} className={"cursor-not-allowed"} />
+                                </div>
+                            </Link>
+                            :
+                            <Link
+                                to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_LOCATIONS}
+                                state={{ id: record?.locationId, currentLocation: selectedLocationType }}
+                            >
+                                <div>
+                                    <SVGIcon name="IconEdit" width={24} />
+                                </div>
+                            </Link>
+                        }
+                    </Tooltip>
+                )
+            }
+        },
+        {
+            action: "Activate",
+            type: "table",
+            render: (record, data) => {
+                return (
+                    <Tooltip title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}>
+                        <div>
+                            <Checkbox
+                                onClick={() => { handleActiveOrInactive(record) }}
+                                checked={record?.status === "ACTIVE" ? false : true}
+                            />
+                        </div>
+                    </Tooltip>
+                )
+            }
+        }
+    ];
 
+    const actionCols = useColumnActionPermission(
+        ["Activate", "View", "Update"],
+        selectedLocationType !== 2346 ? itemActions : []
+    );
+
+    const allColumns = useMemo(() => {
+        const columnsWithKeys = [...baseColumns, ...actionCols].map(
+            (col) => ({
+                ...col,
+                key: col.key || col.dataIndex || col.title,
+            })
+        );
+        return columnsWithKeys;
+    }, [baseColumns, actionCols]);
+
+    const processedColumns = useMemo(() => {
+        return applyFixedColumns(allColumns, fixedColumns);
+    }, [allColumns, fixedColumns]);
+
+    const columnDefinitions = useMemo(() => {
+        return allColumns.map((col) => ({
+            key: col.key || col.dataIndex || col.title,
+            title: col.title,
+        }));
+    }, [allColumns]);
 
     return (
-      <LayoutMenu>
-        <Spin spinning={loading}>
+      <Spin spinning={loading}>
+        <LayoutMenu>
           <BreadCrumb routes={routes} />
 
-          <div className="flex w-full justify-end gap-3">
-            <Toolbar items={itemActions} />
-          </div>
-
-          <BaseContainer header={"Location List"}>
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px] font-bold">LOCATION LIST</p>
+                <div className="mt-[15px] flex gap-[20px]">
+                  <Toolbar items={itemActions} />
+                </div>
+              </div>
+            }
+          >
             <div className="w-1/3 mb-5">
               <SelectComponent
                 value={selectedLocationType}
@@ -637,144 +660,140 @@ const ViewLocations = () => {
                 label={"Location Type"}
               >
                 {dataLocation?.map((item) => (
-                  <Select.Option value={item?.value}>
+                  <Select.Option key={item?.value} value={item?.value}>
                     {item?.name}
                   </Select.Option>
                 ))}
               </SelectComponent>
             </div>
-            <div className="w-full">
-              <TablePagination
+
+            <div className="my-5">
+              <TableRBI
                 dataSource={data?.result}
-                columns={[
-                  ...columns(
-                    selectedLocationType,
-                    page,
-                    pageSize,
-                    searchInput,
-                    searchedColumn,
-                    searchText,
-                    handleSearch,
-                    handleActiveOrInactive,
-                    handleDetail
-                  ),
-                  ...useColumnActionPermission(
-                    ["Activate", "View", "Update"],
-                    selectedLocationType !== 2346 ? itemActions : []
-                  ),
-                ]}
+                columns={processedColumns}
                 current={page}
                 pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
-                onSort={onSort}
-                totalData={data?.page?.totalElements}
+                onChange={handleChangePage}
+                onSizeChanger={handleChangePage}
+                totalData={data?.page?.totalElements || 0}
                 tableScrolled={
                   selectedLocationType === 2346
-                    ? {
-                        x: 1500,
-                        y: 500,
-                      }
-                    : {
-                        x: 1800,
-                        y: 500,
-                      }
+                    ? { x: 1500, y: 525 }
+                    : { x: 1800, y: 525 }
                 }
+                onSort={onSort}
+                columnDefinitions={columnDefinitions}
+                handleDownload={handleDownload}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                loading={loading}
               />
             </div>
-          </BaseContainer>
-        </Spin>
-        <ModalCustom
-          isOpen={openModal}
-          handleCancel={handleCancel}
-          type={"detail"}
-          header={"location detail"}
-          width={1000}
-          footer={
-            <ButtonComponent onClick={handleCancel}>Cancel</ButtonComponent>
-          }
-        >
-          <RenderLayoutDetail selectedLocationType={selectedLocationType} />
-        </ModalCustom>
-        {openModalActivation ? (
-            <ModalCustom
-            isOpen={openModalActivation}
-            header={`${
-              typeStatus === "ACTIVE" ? "INACTIVATE" : "ACTIVATE"
-            } INFORMATION`}
-            width={1000}
-            type={"confirmation"}
+          </CardContainer>
+
+          <ModalCustom
+            isOpen={openModal}
             handleCancel={handleCancel}
+            type={"detail"}
+            header={"location detail"}
+            width={1000}
             footer={
-              <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
-                <ButtonComponent onClick={handleCancel} type="default">
-                  Cancel
-                </ButtonComponent>
-                <ButtonComponent
-                  form="inactivateForm"
-                  type="submit"
-                  htmlType="submit"
-                >
-                  Confirm
-                </ButtonComponent>
-              </div>
+              <ButtonComponent onClick={handleCancel}>Cancel</ButtonComponent>
             }
           >
-            <Form
-              id="inactivateForm"
-              form={form}
-              onFinish={handleSaveActivation}
-              layout="vertical"
-            >
-              <div className="flex flex-col gap-6">
-                <Alert
-                  message={`Are you sure want to ${
-                    typeStatus === "ACTIVE" ? "inactivate" : "activate"
-                  } ${
-                    selectedLocationType === 2346 || selectedLocationType === 103
-                      ? `location named ${(additionalLabel?.name || "")?.toLowerCase()}`
-                      : `location named ${(additionalLabel?.name || "")?.toLowerCase()} of parent ${(additionalLabel?.nameParentType || "")?.toLowerCase()} named ${(additionalLabel?.nameParent || "")?.toLowerCase()}`
-                  }?`}
-                  icon={<InfoCircleOutlined />}
-                  type={"warning"}
-                  showIcon
-                  className="inactivate-alert"
-                />
-                <Form.Item
-                  name={"remark"}
-                  label={"Remark"}
-                  rules={formMessageRequired("remark")}
-                  className="w-full"
-                >
-                  <InputComponent
-                    group
-                    rows={1}
-                    type="textarea"
-                    placeholder={"Type your remark"}
-                  />
-                </Form.Item>
-              </div>
-            </Form>
+            <RenderLayoutDetail selectedLocationType={selectedLocationType} />
           </ModalCustom>
-        ): null}
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-          customText={"Try Again"}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
+
+          {openModalActivation ? (
+            <ModalCustom
+              isOpen={openModalActivation}
+              header={`${
+                typeStatus === "ACTIVE" ? "INACTIVATE" : "ACTIVATE"
+              } INFORMATION`}
+              width={1000}
+              type={"confirmation"}
+              handleCancel={handleCancel}
+              footer={
+                <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
+                  <ButtonComponent onClick={handleCancel} type="default">
+                    Cancel
+                  </ButtonComponent>
+                  <ButtonComponent
+                    form="inactivateForm"
+                    type="submit"
+                    htmlType="submit"
+                  >
+                    Confirm
+                  </ButtonComponent>
+                </div>
+              }
+            >
+              <Form
+                id="inactivateForm"
+                form={form}
+                onFinish={handleSaveActivation}
+                layout="vertical"
+              >
+                <div className="flex flex-col gap-6">
+                  <Alert
+                    message={`Are you sure want to ${
+                      typeStatus === "ACTIVE" ? "inactivate" : "activate"
+                    } ${
+                      selectedLocationType === 2346 ||
+                      selectedLocationType === 103
+                        ? `location named ${(
+                            additionalLabel?.name || ""
+                          )?.toLowerCase()}`
+                        : `location named ${(
+                            additionalLabel?.name || ""
+                          )?.toLowerCase()} of parent ${(
+                            additionalLabel?.nameParentType || ""
+                          )?.toLowerCase()} named ${(
+                            additionalLabel?.nameParent || ""
+                          )?.toLowerCase()}`
+                    }?`}
+                    icon={<InfoCircleOutlined />}
+                    type={"warning"}
+                    showIcon
+                    className="inactivate-alert"
+                  />
+                  <Form.Item
+                    name={"remark"}
+                    label={"Remark"}
+                    rules={formMessageRequired("remark")}
+                    className="w-full"
+                  >
+                    <InputComponent
+                      group
+                      rows={1}
+                      type="textarea"
+                      placeholder={"Type your remark"}
+                    />
+                  </Form.Item>
+                </div>
+              </Form>
+            </ModalCustom>
+          ) : null}
+
+          <ModalError
+            isOpen={modalError}
+            handleOk={handleRetry}
+            handleCancel={handleCloseModalError}
+            customText={"Try Again"}
+          >
+            <div className="px-5 pt-5 pb-[10px] justify-center">
+              <div className="w-full flex gap-[20px]">
+                <SVGIcon name="IconFailed" width={48} />
+                <p className="text-[18px] font-bold">{"Failed"}</p>
+              </div>
+              <p className="pl-[70px]">
+                {bodyError?.response?.data?.message?.toString()}
+              </p>
+              <p className="pl-[70px]">Please try again.</p>
             </div>
-            <p className="pl-[70px]">
-              {bodyError?.response?.data?.message?.toString()}
-            </p>
-            <p className="pl-[70px]">Please try again.</p>
-          </div>
-        </ModalError>
-      </LayoutMenu>
+          </ModalError>
+        </LayoutMenu>
+      </Spin>
     );
 }
 

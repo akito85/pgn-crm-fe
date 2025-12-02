@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Radio } from "antd";
-import BaseContainer from "../../../../../components/BaseContainer";
+import { Tabs } from "antd";
 import TableRBI from "../../../../../components/TableRBI";
 import {
   getAllBillingItemPaginate,
@@ -35,7 +34,7 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
   const [sortBI, setSortBI] = useState("");
   const [searchBI, setSearchBI] = useState({});
 
-  const [tabHeader, setTabHeader] = useState("Rating Result");
+  const [activeTab, setActiveTab] = useState("1");
 
   const [fixedColumnsBI, setFixedColumnsBI] = useState(() => ({
     left: ["no"],
@@ -189,119 +188,93 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     }));
   }, [allColumnsRR]);
 
-  const dataTabs = [
+  const ratingTabItems = [
     {
+      key: "1",
       label: "Rating Result",
-      value: "Rating Result",
-    },
-    {
-      label: "Promo",
-      value: "Promo",
-      disabled: true,
-    },
-  ];
-
-  const changeTabHeader = ({ target: { value } }) => {
-    setTabHeader(value);
-  };
-
-  const renderLayout = (valueTab) => {
-    switch (valueTab) {
-      case "Rating Result":
-        return (
-          <BaseContainer header={"RATING RESULT INFORMATION"}>
-            <div className="w-full">
-              <TableRBI
-                dataSource={dataSourceRR}
-                columns={processedColumnsRR}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChangePage}
-                onSizeChanger={handleChangePage}
-                totalData={data_ratingResult?.page?.totalElements || 0}
-                tableScrolled={{ x: 1200, y: 525 }}
-                onSort={onSort}
-                columnDefinitions={columnDefinitionsRR}
-                fixedColumns={fixedColumnsRR}
-                setFixedColumns={setFixedColumnsRR}
-                loading={false}
-              />
-            </div>
-          </BaseContainer>
-        );
-      case "Promo":
-        return <BaseContainer header={"Promo Information"}></BaseContainer>;
-      default:
-        return (
-          <BaseContainer header={"RATING RESULT INFORMATION"}>
-            <div className="w-full">
-              <TableRBI
-                dataSource={dataSourceRR}
-                columns={processedColumnsRR}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChangePage}
-                onSizeChanger={handleChangePage}
-                totalData={data_ratingResult?.page?.totalElements || 0}
-                tableScrolled={{ x: 1200, y: 525 }}
-                onSort={onSort}
-                columnDefinitions={columnDefinitionsRR}
-                fixedColumns={fixedColumnsRR}
-                setFixedColumns={setFixedColumnsRR}
-                loading={false}
-              />
-            </div>
-          </BaseContainer>
-        );
-    }
-  };
-
-  return (
-    <div>
-      <BaseContainer header={"billing item information"}>
-        <div className="flex flex-row align-middle gap-2">
-          <p className="text-[15px] font-semibold text-text-color-semibold">
-            Calculation Code:
-          </p>
-          <p className="text-[15px] font-semibold text-primary">
-            {calculationCodeId}
-          </p>
-          <p className="text-[15px] font-semibold text-text-color-semibold">
-            Billing Code:
-          </p>
-          <p className="text-[15px] font-semibold text-primary">
-            {billingCodeId}
-          </p>
-        </div>
-        <div className="w-full">
+      children: (
+        <div className="pt-4">
           <TableRBI
-            dataSource={dataSourceBI}
-            columns={processedColumnsBI}
-            current={pageBI}
-            pageSize={pageSizeBI}
-            onChange={handleChangePageBI}
-            onSizeChanger={handleChangePageBI}
-            totalData={data_billingItem?.page?.totalElements || 0}
-            tableScrolled={{ x: 4500, y: 525 }}
-            onSort={onSortBI}
-            columnDefinitions={columnDefinitionsBI}
-            fixedColumns={fixedColumnsBI}
-            setFixedColumns={setFixedColumnsBI}
+            size="small"
+            dataSource={dataSourceRR}
+            columns={processedColumnsRR}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChangePage}
+            onSizeChanger={handleChangePage}
+            totalData={data_ratingResult?.page?.totalElements || 0}
+            tableScrolled={{ x: 1200, y: 525 }}
+            onSort={onSort}
+            columnDefinitions={columnDefinitionsRR}
+            fixedColumns={fixedColumnsRR}
+            setFixedColumns={setFixedColumnsRR}
             loading={false}
           />
         </div>
-      </BaseContainer>
+      ),
+    },
+    {
+      key: "2",
+      label: "Promo",
+      disabled: true,
+      children: (
+        <div className="pt-4">
+          <p className="text-center text-gray-500">Promo information coming soon</p>
+        </div>
+      ),
+    },
+  ];
 
-      <div className="pt-[30px]">
-        <Radio.Group
-          options={dataTabs}
-          onChange={changeTabHeader}
-          value={tabHeader}
-          optionType="button"
-          buttonStyle="solid"
-          style={{ gap: 12, display: "flex" }}
+  return (
+    <div className="space-y-6">
+      {/* Billing Item Information Section */}
+      <div>
+        <h3 className="text-sm font-bold text-primary uppercase mb-4">
+          Billing Item Information
+        </h3>
+
+        <div className="grid grid-cols-2 gap-x-8 gap-y-4 mb-4">
+          <div>
+            <p className="text-[13px] text-gray-600 mb-1">Calculation Code</p>
+            <p className="text-[15px] font-semibold text-primary">
+              {calculationCodeId || "-"}
+            </p>
+          </div>
+          <div>
+            <p className="text-[13px] text-gray-600 mb-1">Billing Code</p>
+            <p className="text-[15px] font-semibold text-primary">
+              {billingCodeId || "-"}
+            </p>
+          </div>
+        </div>
+
+        <TableRBI
+          size="small"
+          dataSource={dataSourceBI}
+          columns={processedColumnsBI}
+          current={pageBI}
+          pageSize={pageSizeBI}
+          onChange={handleChangePageBI}
+          onSizeChanger={handleChangePageBI}
+          totalData={data_billingItem?.page?.totalElements || 0}
+          tableScrolled={{ x: 4500, y: 525 }}
+          onSort={onSortBI}
+          columnDefinitions={columnDefinitionsBI}
+          fixedColumns={fixedColumnsBI}
+          setFixedColumns={setFixedColumnsBI}
+          loading={false}
         />
-        {renderLayout(tabHeader)}
+      </div>
+
+      {/* Rating Result / Promo Section with Tabs */}
+      <div className="mt-6">
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={ratingTabItems}
+          type="line"
+          className="rating-result-tabs"
+        />
       </div>
     </div>
   );

@@ -1262,9 +1262,10 @@ const CalculationPage = () => {
           <Link
             to={RBI_ROUTES.CALCULATION_DETAIL}
             state={{ id: record?.calJobId }}
+            style={{ lineHeight: 0 }}
           >
             <Tooltip title="Detail">
-                <SVGIcon name="IconDetail" width={20} />
+              <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         );
@@ -1272,7 +1273,13 @@ const CalculationPage = () => {
     },
   ];
 
-  const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
+  const actionCols = useColumnActionPermission(["view"], itemGrantAccess).map(
+    (col) => ({
+      ...col,
+      width: 80,
+      align: "center",
+    })
+  );
 
   const allColumns = useMemo(() => {
     const currentBaseColumns =
@@ -1322,6 +1329,7 @@ const CalculationPage = () => {
           />
           <div className="my-5">
             <TableRBI
+              size="small"
               dataSource={data_calculation.result}
               columns={processedColumns}
               current={page}

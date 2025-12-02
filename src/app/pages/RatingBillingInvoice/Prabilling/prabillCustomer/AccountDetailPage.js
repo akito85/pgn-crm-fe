@@ -127,7 +127,7 @@ const AccountDetailPage = () => {
 
   const renderValue = (val) => {
     if (val === null || val === undefined || val === "") {
-      return <Tag color="default">NULL</Tag>;
+      return "-";
     }
     return val;
   };
@@ -187,7 +187,7 @@ const AccountDetailPage = () => {
                 {headerData.accountStatus}
               </Tag>
             ) : (
-              <Tag color="default">NULL</Tag>
+              <Tag color="default">-</Tag>
             )}
           </DetailText>
           <DetailText label="Account Group">
@@ -277,7 +277,7 @@ const AccountDetailPage = () => {
           {headerData.idrValue ? (
             `IDR ${parseFloat(headerData.idrValue).toLocaleString()}`
           ) : (
-            <Tag color="default">NULL</Tag>
+            <Tag color="default">-</Tag>
           )}
         </DetailText>
         <DetailText label="USD UOM">
@@ -287,7 +287,7 @@ const AccountDetailPage = () => {
           {headerData.usdValue ? (
             `$ ${parseFloat(headerData.usdValue).toLocaleString()}`
           ) : (
-            <Tag color="default">NULL</Tag>
+            <Tag color="default">-</Tag>
           )}
         </DetailText>
         <DetailText label="Product Name">
@@ -391,7 +391,7 @@ const AccountDetailPage = () => {
           {headerData.totalAmount ? (
             parseFloat(headerData.totalAmount).toLocaleString()
           ) : (
-            <Tag color="default">NULL</Tag>
+            <Tag color="default">-</Tag>
           )}
         </DetailText>
         <DetailText label="Bill Status">
@@ -517,7 +517,7 @@ const AccountDetailPage = () => {
               maximumFractionDigits: 4,
             })
           ) : (
-            <Tag color="default">NULL</Tag>
+            <Tag color="default">-</Tag>
           ),
       },
       {
@@ -553,7 +553,7 @@ const AccountDetailPage = () => {
           val ? (
             parseFloat(val).toLocaleString()
           ) : (
-            <Tag color="default">NULL</Tag>
+            <Tag color="default">-</Tag>
           ),
       },
       {
@@ -566,7 +566,7 @@ const AccountDetailPage = () => {
           val ? (
             parseFloat(val).toLocaleString()
           ) : (
-            <Tag color="default">NULL</Tag>
+            <Tag color="default">-</Tag>
           ),
       },
       {
@@ -579,7 +579,7 @@ const AccountDetailPage = () => {
           val ? (
             parseFloat(val).toLocaleString()
           ) : (
-            <Tag color="default">NULL</Tag>
+            <Tag color="default">-</Tag>
           ),
       },
       {
@@ -610,7 +610,7 @@ const AccountDetailPage = () => {
               maximumFractionDigits: 4,
             })
           ) : (
-            <Tag color="default">NULL</Tag>
+            <Tag color="default">-</Tag>
           ),
       },
       {
@@ -719,7 +719,7 @@ const AccountDetailPage = () => {
           val ? (
             parseFloat(val).toLocaleString()
           ) : (
-            <Tag color="default">NULL</Tag>
+            <Tag color="default">-</Tag>
           ),
       },
       {
@@ -729,7 +729,7 @@ const AccountDetailPage = () => {
         width: 120,
         align: "right",
         render: (val) => {
-          if (!val) return <Tag color="default">NULL</Tag>;
+          if (!val) return <Tag color="default">-</Tag>;
           if (isNaN(val)) return val;
           if (val === "0" || parseFloat(val) === 0) return "Unlimited";
           return parseFloat(val).toLocaleString();
@@ -762,7 +762,7 @@ const AccountDetailPage = () => {
               maximumFractionDigits: 4,
             })
           ) : (
-            <Tag color="default">NULL</Tag>
+            <Tag color="default">-</Tag>
           ),
       },
       {

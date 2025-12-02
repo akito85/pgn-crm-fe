@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { Checkbox, Spin, Tooltip } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
@@ -8,8 +8,6 @@ import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
 import ModalHistory from "../../../../../../components/Modal/ModalHistory";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
-import BaseContainer from "../../../../../../components/BaseContainer";
 import GeneralTemplateTableView from "../Table/GeneralTemplateTableView";
 import { Link, NavLink } from "react-router-dom";
 import ModalInactivateWithHierarchy from "../../../../../../components/Modal/ModalInactivateWithHierarchy";
@@ -23,12 +21,17 @@ import {
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/general_template";
 import Toolbar from "../../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
+import TableRBI from "../../../../../../components/TableRBI";
+import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
+import CardContainer from "../../../../../../components/CardContainer";
+import { clearBodyMessage } from "../../../../../../redux/slices/general_slice";
 
 const GeneralTemplateView = () => {
   // Selector
   const { data_list, data_approval_history, loading } = useSelector(
     (state) => state.general_template
   );
+  const { bodyError: bodyErrorGeneral } = useSelector((state) => state?.general);
 
   // Declaration
   const searchInput = useRef(null);
@@ -41,9 +44,12 @@ const GeneralTemplateView = () => {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["statusApproval", "action"],
+  }));
 
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
-
   const [dataInactivate, setDataInactivate] = useState({});
 
   //modal
@@ -65,6 +71,13 @@ const GeneralTemplateView = () => {
       })
     );
   }, [dispatch, page, pageSize, sort, search]);
+
+  // trigger modal try again from general slice
+  useEffect(() => {
+    if (bodyErrorGeneral?.response?.data?.code === 500) {
+      setModalError(true);
+    }
+  }, [bodyErrorGeneral]);
 
   //approval history
   useEffect(() => {
@@ -125,23 +138,33 @@ const GeneralTemplateView = () => {
     });
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+  const handleChangePage = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
-  const onSort = (_, __, sort) => {
+  const onSort = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
 
   const handleRetry = () => {
-    onFinishInactive(bodyError.value);
+    if (bodyError?.value) {
+      onFinishInactive(bodyError.value);
+    }
     setModalError(false);
     setBodyError({});
+    dispatch(clearBodyMessage());
+  };
+
+  const handleCloseModalError = () => {
+    setModalError(false);
+    setBodyError({});
+    dispatch(clearBodyMessage());
   };
 
   //handle approval history section
@@ -211,6 +234,7 @@ const GeneralTemplateView = () => {
         }
       });
   };
+
   // routes
   const routes = [
     {
@@ -229,21 +253,6 @@ const GeneralTemplateView = () => {
 
   // Grant Access Item
   const itemGrantAccess = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          type={"submit"}
-          border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          onClick={() => {
-            handleDownload();
-          }}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
     {
       action: "Create",
       render: (
@@ -272,7 +281,7 @@ const GeneralTemplateView = () => {
             }}
           >
             <Tooltip title="Detail">
-              <div className="pt-1">
+              <div>
                 <SVGIcon name="IconDetail" width={24} />
               </div>
             </Tooltip>
@@ -300,7 +309,7 @@ const GeneralTemplateView = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
-              <div className="pt-1">
+              <div>
                 <SVGIcon
                   name="IconEdit"
                   width={24}
@@ -363,7 +372,7 @@ const GeneralTemplateView = () => {
             <Tooltip
               title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
             >
-              <div className="pt-1">
+              <div>
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleOpenModalInactivate(record)}
@@ -394,7 +403,7 @@ const GeneralTemplateView = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
-              <div className="pt-1">
+              <div>
                 <SVGIcon
                   name="IconLogHistory"
                   color={"#0075bf"}
@@ -410,43 +419,79 @@ const GeneralTemplateView = () => {
     },
   ];
 
+  // Get base columns from GeneralTemplateTableView
+  const baseColumns = useMemo(() => {
+    return GeneralTemplateTableView(
+      search,
+      page,
+      pageSize,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    );
+  }, [search, page, pageSize, searchedColumn, searchText]);
+
+  const actionCols = useColumnActionPermission(
+    ["view", "activate", "update", "history"],
+    itemGrantAccess
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map(
+      (col) => ({
+        ...col,
+        key: col.key || col.dataIndex || col.title,
+      })
+    );
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <div className={"w-full flex justify-end gap-[20px]"}>
-          <Toolbar items={itemGrantAccess} />
-        </div>
 
-        <BaseContainer header={"General Template List"}>
-          <div className="w-full">
-            <TablePaginationNew
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">GENERAL TEMPLATE LIST</p>
+              <div className="mt-[15px] flex gap-[20px]">
+                <Toolbar items={itemGrantAccess} />
+              </div>
+            </div>
+          }
+        >
+          <div className="my-5">
+            <TableRBI
               dataSource={data_list?.result || []}
-              columns={[
-                ...GeneralTemplateTableView(
-                  search,
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                ),
-                ...useColumnActionPermission(
-                  ["view", "activate", "update", "history"],
-                  itemGrantAccess
-                ),
-              ]}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
+              onChange={handleChangePage}
+              onSizeChanger={handleChangePage}
               totalData={data_list?.page?.totalElements || 0}
+              tableScrolled={{ x: 2000, y: 525 }}
               onSort={onSort}
-              tableScrolled={{ y: 525, x: 2000 }}
+              columnDefinitions={columnDefinitions}
+              handleDownload={handleDownload}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         {ModalHistory ? (
           <ModalHistory
@@ -465,9 +510,7 @@ const GeneralTemplateView = () => {
           <ModalError
             isOpen={modalError}
             handleOk={handleRetry}
-            handleCancel={() => {
-              setModalError(false);
-            }}
+            handleCancel={handleCloseModalError}
             customText={"Try Again"}
           >
             <div className="px-5 pt-5 pb-[10px] justify-center">
@@ -475,7 +518,7 @@ const GeneralTemplateView = () => {
                 <SVGIcon name="IconFailed" width={48} />
                 <p className="text-[18px] font-bold">{"Failed"}</p>
               </div>
-              <p className="pl-[70px]">{`${bodyError?.message}`}</p>
+              <p className="pl-[70px]">{bodyError?.message || bodyErrorGeneral?.response?.data?.message?.toString()}</p>
               <p className="pl-[70px]">Please try again.</p>
             </div>
           </ModalError>
@@ -484,8 +527,8 @@ const GeneralTemplateView = () => {
         {modalInactivate ? (
           <ModalInactivateWithHierarchy
             dispatch={dispatch}
-            getAPIOption={getApprovalList} // ddl
-            getAPIDetail={getApprovalListDetail} //table
+            getAPIOption={getApprovalList}
+            getAPIDetail={getApprovalListDetail}
             alertMessage={`Are you sure you want to inactivate General Template with name ${
               dataInactivate?.templateName || ""
             }?`}

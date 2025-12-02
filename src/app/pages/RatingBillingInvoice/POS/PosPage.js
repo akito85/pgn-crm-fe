@@ -269,7 +269,7 @@ const PosPage = () => {
           icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={24} />}
           type={"submit"}
           border={false}
-          disabled={true}
+          disabled={false}
         >
           Upload
         </ButtonComponent>

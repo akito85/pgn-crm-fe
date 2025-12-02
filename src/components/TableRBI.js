@@ -1,4 +1,4 @@
-// TableRBI.js (with resizable columns)
+// TableRBI.js (with resizable columns + customHeaderLeft + showExport control)
 import React, { useMemo, useState, useCallback } from "react";
 import { DownloadOutlined, FilterOutlined } from "@ant-design/icons";
 import { Button, Pagination, Select, Table } from "antd";
@@ -91,6 +91,10 @@ const TableRBI = ({
   onAdvanceSearch = () => {},
   onRow,
   rowClassName,
+  customHeaderLeft, // PROPS BARU untuk custom content di kiri header
+  showExport = true, // PROPS BARU untuk mengontrol tampilan tombol Export
+  showAdvanceSearch = true, // PROPS BARU untuk mengontrol tampilan tombol Advance Search
+  showSearchBar = true, // PROPS BARU untuk mengontrol tampilan Search Bar
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -194,49 +198,65 @@ const TableRBI = ({
     },
   };
 
+  // Check if any right side controls should be shown
+  const hasRightControls = showExport || showAdvanceSearch || showSearchBar;
+
   return (
     <div className={"flex flex-col w-full"}>
       {useSelect ? (
         <div className={"w-full flex mb-5 justify-between items-center"}>
-          <ColumnSettings
-            columns={columnDefinitions || columns}
-            hiddenColumns={optionSelectedCol}
-            onHiddenColumnsChange={setOptionSelectedCol}
-            fixedColumns={fixedColumns}
-            onFixedColumnsChange={setFixedColumns}
-            buttonText="Column Settings"
-            buttonStyle={{ height: "40px" }}
-          />
+          {/* BAGIAN KIRI: Column Settings + Custom Header Left */}
+          <div className="flex items-center gap-4">
+            <ColumnSettings
+              columns={columnDefinitions || columns}
+              hiddenColumns={optionSelectedCol}
+              onHiddenColumnsChange={setOptionSelectedCol}
+              fixedColumns={fixedColumns}
+              onFixedColumnsChange={setFixedColumns}
+              buttonText="Column Settings"
+              buttonStyle={{ height: "40px" }}
+            />
 
-          <div className="w-full flex justify-end gap-2">
-            <Button
-              icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
-              onClick={handleDownload}
-              style={{
-                border: "1px solid #BDBDBD",
-                color: "black",
-                borderRadius: "8px",
-                height: "40px",
-              }}
-            >
-              Export
-            </Button>
-
-            <Button
-              onClick={() => setIsAdvanceOpen(true)}
-              style={{
-                border: "1px solid #BDBDBD",
-                color: "black",
-                borderRadius: "8px",
-                height: "40px",
-              }}
-            >
-              <FilterOutlined style={{ fontSize: "20px" }} />
-              Advance Search
-            </Button>
-
-            <SearchBar />
+            {/* Custom Header Left - untuk Approval Hierarchy dropdown */}
+            {customHeaderLeft && customHeaderLeft}
           </div>
+
+          {/* BAGIAN KANAN: Export, Advance Search, Search Bar */}
+          {hasRightControls && (
+            <div className="flex justify-end gap-2">
+              {showExport && (
+                <Button
+                  icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
+                  onClick={handleDownload}
+                  style={{
+                    border: "1px solid #BDBDBD",
+                    color: "black",
+                    borderRadius: "8px",
+                    height: "40px",
+                  }}
+                >
+                  Export
+                </Button>
+              )}
+
+              {showAdvanceSearch && (
+                <Button
+                  onClick={() => setIsAdvanceOpen(true)}
+                  style={{
+                    border: "1px solid #BDBDBD",
+                    color: "black",
+                    borderRadius: "8px",
+                    height: "40px",
+                  }}
+                >
+                  <FilterOutlined style={{ fontSize: "20px" }} />
+                  Advance Search
+                </Button>
+              )}
+
+              {showSearchBar && <SearchBar />}
+            </div>
+          )}
         </div>
       ) : null}
 
