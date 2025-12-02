@@ -54,8 +54,8 @@ const CreatePaymentRelation = ({ type }) => {
   } = useSelector((state) => state.accountManagement);
 
   const {
-    data_approvalHierarchy,
-    detail_approvalHierarchy,
+    data_prApprovalHierarchy,
+    detail_prApprovalHierarchy,
     detail_paymentRelation,
     isPrSuccess,
   } = useSelector((state) => state.financialInformation);
@@ -220,7 +220,7 @@ const CreatePaymentRelation = ({ type }) => {
       title: "Approval",
       content: (
         <ApprovalForm
-          dataTable={detail_approvalHierarchy.map((detail, index) => ({
+          dataTable={detail_prApprovalHierarchy.map((detail, index) => ({
             ...detail,
             employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
               ...employeeDetail,
@@ -228,7 +228,7 @@ const CreatePaymentRelation = ({ type }) => {
             })),
             key: `detail-detail-${index}`,
           }))}
-          dataOption={data_approvalHierarchy}
+          dataOption={data_prApprovalHierarchy}
           selectedHierarchy={selectedHierarchy}
           handleSelectHiararchy={handleSelectHiararchy}
           className={`${current !== 1 ? "hidden" : ""}`}
@@ -478,11 +478,15 @@ const CreatePaymentRelation = ({ type }) => {
           handleCancel={() => handleSetShowConfirmationModal(false)}
           handleOk={() => handleSetShowConfirmationModal(false)}
           selectedHierarchy={selectedHierarchy}
-          hierarchyTableData={detail_approvalHierarchy.map((detail) => ({
+          hierarchyTableData={detail_prApprovalHierarchy.map((detail, index) => ({
             ...detail,
-            key: detail.appHierId,
+            employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
+              ...employeeDetail,
+              key: `employee-detail-${index}`
+            })),
+            key: `detail-detail-${index}`,
           }))}
-          hieararchyOptionData={data_approvalHierarchy}
+          hieararchyOptionData={data_prApprovalHierarchy}
           type={confirmationType}
         />
       </div>
