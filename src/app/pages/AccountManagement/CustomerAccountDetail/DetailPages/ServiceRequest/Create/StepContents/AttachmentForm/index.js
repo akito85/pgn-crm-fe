@@ -1,8 +1,8 @@
-import AttachmentForm from "../../../../../../CreateCustomerAccount/Standard/Form/CustomerAccountInformation/AttachmentForm";
+import AttachmentForm from "./AttachmentForm";
 
 /**
- * Wrapper component for AttachmentForm in Service Request Step 4
- * Reuses the attachment component from CreateCustomerAccount/Standard
+ * AttachmentForm for Service Request Step 4
+ * Copied from CreateCustomerAccount/Standard for customization
  */
 export default function AttachmentFormStep({
   attachmentsData = [],
@@ -14,7 +14,7 @@ export default function AttachmentFormStep({
       data={attachmentsData}
       updateData={setAttachmentsData}
       type="create"
-      typeSelector="account"  // Uses account slice for category data
+      typeSelector="account"
       dispatch={dispatch}
     />
   );
