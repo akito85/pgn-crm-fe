@@ -34,7 +34,7 @@ import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../../../../../utils";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
-import { createPaymentRelation, getPrApprovalHierarchy, updatePaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { createPaymentRelation, getDetailPaymentRelation, getPaymentRelation, getPrApprovalHierarchy, updatePaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 
 const CreatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -55,8 +55,8 @@ const CreatePaymentRelation = ({ type }) => {
 
   const {
     data_approvalHierarchy,
+    detail_paymentRelation,
     isPrSuccess,
-    isPrFailed,
   } = useSelector((state) => state.financialInformation);
 
   //declare
@@ -110,6 +110,35 @@ const CreatePaymentRelation = ({ type }) => {
     if (idAccount)
       getAccountDetail(idAccount);
   }, [idAccount]);
+
+  useEffect(() => {
+    if (type === "update" && idPr) {
+      getDetailPaymentRelation(idPr);
+    }
+  }, [idPr]);
+
+  useEffect(() => {
+    if (detail_paymentRelation) {
+      const {
+        accountNumber,
+        accountName,
+        priority,
+        startDate,
+        endDate,
+        description,
+        attachments,
+      } = detail_paymentRelation;
+      formCreate.setFieldsValue({
+        accountNumber,
+        accountName,
+        priority,
+        startDate,
+        endDate,
+        description,
+        attachments,
+      })
+    }
+  }, [detail_paymentRelation])
   
   useEffect(() => {
     dispatch(getPrApprovalHierarchy())

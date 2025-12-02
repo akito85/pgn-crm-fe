@@ -265,6 +265,10 @@ export default function InfoPaymentRelation({
                 required: true,
               },
             ]}
+            getValueFromEvent={(dateMoment) => dateMoment ? dateMoment.format("DD-MM-YYYY") : null}
+            getValueProps={(dateString) => ({
+              value: dateString ? moment(dateString, "DD-MM-YYYY") : null
+            })}
             className="no-margin-form"
           >
             <DateComponent />
