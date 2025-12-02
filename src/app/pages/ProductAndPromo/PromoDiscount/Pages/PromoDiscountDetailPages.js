@@ -38,7 +38,7 @@ const PromoDiscountDetailPages = ({ dataPromo }) => {
         <div className="w-full grid grid-cols-3 gap-3">
           <DetailText label="Name">{dataPromo?.name || ""}</DetailText>
           <DetailText label="Category">{dataPromo?.categoryName}</DetailText>
-          <DetailText label="Promo Type">{dataPromo?.typeName}</DetailText>
+          <DetailText label="Type">{dataPromo?.typeName}</DetailText>
           <DetailText label="Promotion Type">{dataPromo?.promotionTypeName}</DetailText>
           <DetailText label="Start Date">
             {dataPromo?.startDate
