@@ -6,7 +6,7 @@ const ApprovalSectionForm = ({
   dataTable,
   dataOption,
   selectedHierarchy = "",
-  updateSelectedHierarchy = () => {},
+  handleSelectHiararchy = () => {},
   showSelect = true,
   disableSelect = false,
   approvalName = "",
@@ -20,9 +20,6 @@ const ApprovalSectionForm = ({
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
-  const handleUpdateSelectHierarchy = (val) => {
-    updateSelectedHierarchy(val);
-  };
   return (
     <div className={`flex flex-col gap-y-5 ${className} drop-shadow-lg bg-white rounded-lg w-full p-9`} >
       <span className="text-primary text-sm font-bold uppercase">
@@ -31,7 +28,7 @@ const ApprovalSectionForm = ({
       <ApprovalHierarchy
         dataTable={dataTable}
         dataOption={dataOption}
-        updateSelectHierarchy={handleUpdateSelectHierarchy}
+        handleSelectHiararchy={handleSelectHiararchy}
         selectedHierarchy={selectedHierarchy}
         searchInput={searchInput}
         searchedColumn={searchedColumn}

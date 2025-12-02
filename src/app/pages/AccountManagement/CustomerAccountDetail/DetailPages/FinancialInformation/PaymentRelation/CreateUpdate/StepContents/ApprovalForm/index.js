@@ -4,7 +4,7 @@ export default function ApprovalForm({
   dataTable,
   dataOption,
   selectedHierarchy,
-  updateSelectedHierarchy,
+  handleSelectHiararchy,
   className,
 }){
   return (
@@ -12,7 +12,7 @@ export default function ApprovalForm({
       dataTable={dataTable}
       dataOption={dataOption}
       selectedHierarchy={selectedHierarchy}
-      updateSelectedHierarchy={updateSelectedHierarchy}
+      handleSelectHiararchy={handleSelectHiararchy}
       className={className}
     />
   )
