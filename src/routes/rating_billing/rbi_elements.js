@@ -47,6 +47,7 @@ import CreateBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/B
 import PrabillingDetail from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingDetail";
 import MonitoringCustomerPage from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/MonitoringCustomerPage";
 import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/prabillCustomer/AccountDetailPage";
+import EFakturCodeView from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeView";
 
 export const RBI_ELEMENTS = {
   // prabilling elements render
@@ -153,4 +154,7 @@ export const RBI_ELEMENTS = {
   MANAGEMENT_BILLING_INSTALLMENT_CREATE_ELEMENT: (
     <CreateBillingInstallmentPage />
   ),
+
+  // efaktur-code
+  EFAKTUR_CODE_VIEW_ELEMENT: <EFakturCodeView />,
 };
