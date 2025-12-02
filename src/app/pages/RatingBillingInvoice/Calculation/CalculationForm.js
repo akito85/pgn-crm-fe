@@ -37,6 +37,7 @@ import {
 import { IconModal } from "../../../../utils/Icon";
 import { validateCreateUpdate } from "../../../../redux/slices/general_slice";
 import ratingBillingHttpService from "../../../../redux/services/ratingBillingHttpService";
+import CardContainer from "../../../../components/CardContainer";
 
 const CalculationForm = ({ type }) => {
   // Selector
@@ -268,9 +269,10 @@ const CalculationForm = ({ type }) => {
     const tempDataFinal = {
       billingCycle: formValue?.billing_cycle,
       billingPeriod: formValue?.billing_period,
-      billingPeriodName: list_billing_period?.data?.find(
-      item => item.id === formValue?.billing_period
-    )?.name || null,
+      billingPeriodName:
+        list_billing_period?.data?.find(
+          (item) => item.id === formValue?.billing_period
+        )?.name || null,
       serviceType: formValue?.serviceType,
       sor: formValue?.sor,
       scheduleType: formValue?.type,
@@ -555,12 +557,21 @@ const CalculationForm = ({ type }) => {
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout={"vertical"} form={form} onFinish={onFinish}>
-          <BaseContainer header={"BIlling Cycle Information"}>
-            <div className={"w-full grid grid-cols-2 gap-2"}>
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px] font-bold text-primary">
+                  Billing Cycle Information
+                </p>
+              </div>
+            }
+          >
+            <div className={"w-full grid grid-cols-1 gap-2"}>
               <Form.Item
                 label={"Billing Cycle"}
                 name={"billing_cycle"}
                 rules={formMessageRequired("Billing Cycle")}
+                style={{ marginBottom: 0 }}
               >
                 <SelectComponent
                   onChange={handleChangeBillingCycle}
@@ -576,6 +587,7 @@ const CalculationForm = ({ type }) => {
                 label={"Billing Period"}
                 name={"billing_period"}
                 rules={formMessageRequired("Billing Period")}
+                style={{ marginBottom: 4 }}
               >
                 <SelectComponent
                   disabled={!billingCycle}
@@ -589,16 +601,26 @@ const CalculationForm = ({ type }) => {
                         })
                       : []
                   }
+                  l
                 />
               </Form.Item>
             </div>
-          </BaseContainer>
-          <BaseContainer header={"Input Parameter Information"}>
-            <div className={"w-full grid grid-cols-2 gap-2"}>
+          </CardContainer>
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px] font-bold text-primary">
+                  INPUT PARAMETER INFORMATION
+                </p>
+              </div>
+            }
+          >
+            <div className={"w-full grid grid-cols-1 gap-2"}>
               <Form.Item
                 label={"Calculation Type"}
                 name={"calculation_type"}
                 rules={formMessageRequired("Calculation Type")}
+                style={{ marginBottom: 1 }}
               >
                 <SelectComponent
                   options={list_calculation_type?.map((item) => {
@@ -613,6 +635,7 @@ const CalculationForm = ({ type }) => {
                 label={"Service Type"}
                 name={"serviceType"}
                 rules={formMessageRequired("Service Type")}
+                style={{ marginBottom: 1 }}
               >
                 <SelectComponent
                   options={list_service_type?.map((item) => {
@@ -623,27 +646,36 @@ const CalculationForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <div className="col-span-2">
-                <Form.Item
-                  label={"SOR"}
-                  name={"sor"}
-                  rules={formMessageRequired("SOR")}
-                >
-                  <SelectComponent
-                    onChange={handleChangeSOR}
-                    options={list_sor?.data?.map((item) => {
-                      return {
-                        label: item?.name,
-                        value: item?.id,
-                      };
-                    })}
-                    disabled={defaultData?.sor}
-                  />
-                </Form.Item>
-              </div>
-              <Form.Item label={"Cost Center"} name={"costCenter"}>
+              <Form.Item
+                label={"SOR"}
+                name={"sor"}
+                rules={formMessageRequired("SOR")}
+                style={{ marginBottom: 1 }}
+              >
+                <SelectComponent
+                  onChange={handleChangeSOR}
+                  options={list_sor?.data?.map((item) => {
+                    return {
+                      label: item?.name,
+                      value: item?.id,
+                    };
+                  })}
+                  disabled={defaultData?.sor}
+                />
+              </Form.Item>
+              <Form.Item
+                label={"Cost Center"}
+                name={"costCenter"}
+                style={{ marginBottom: 1 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
+                  className="[&_.ant-select-selector]:!min-h-[100px] 
+               [&_.ant-select-selector]:!h-auto 
+               [&_.ant-select-selector]:!items-start 
+               [&_.ant-select-selector]:!pt-1
+               [&_.ant-select-selection-overflow]:max-h-[100px]
+               [&_.ant-select-selection-overflow]:overflow-y-auto"
                   onChange={handleChangeCostCenter}
                   disabled={defaultData?.costCenter?.length !== 0}
                   options={list_cost_center?.data?.map((item) => {
@@ -654,7 +686,11 @@ const CalculationForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <Form.Item label={"Meter Reading Code"} name={"meterReading"}>
+              <Form.Item
+                label={"Meter Reading Code"}
+                name={"meterReading"}
+                style={{ marginBottom: 1 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleMeterReadingRoute}
@@ -670,10 +706,20 @@ const CalculationForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <Form.Item label={"Account Segment"} name={"accountSegment"}>
+              <Form.Item
+                label={"Account Segment"}
+                name={"accountSegment"}
+                style={{ marginBottom: 1 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountSegment}
+                  className="[&_.ant-select-selector]:!min-h-[100px] 
+               [&_.ant-select-selector]:!h-auto 
+               [&_.ant-select-selector]:!items-start 
+               [&_.ant-select-selector]:!pt-1
+               [&_.ant-select-selection-overflow]:max-h-[100px]
+               [&_.ant-select-selection-overflow]:overflow-y-auto"
                   options={(list_customer_segment?.Data || []).map((item) => {
                     return {
                       label: item?.name,
@@ -682,10 +728,20 @@ const CalculationForm = ({ type }) => {
                   })}
                 />
               </Form.Item>
-              <Form.Item label={"Account Group Type"} name={"accountGroupType"}>
+              <Form.Item
+                label={"Account Group Type"}
+                name={"accountGroupType"}
+                style={{ marginBottom: 1 }}
+              >
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountGroup}
+                  className="[&_.ant-select-selector]:!min-h-[100px] 
+               [&_.ant-select-selector]:!h-auto 
+               [&_.ant-select-selector]:!items-start 
+               [&_.ant-select-selector]:!pt-1
+               [&_.ant-select-selection-overflow]:max-h-[100px]
+               [&_.ant-select-selection-overflow]:overflow-y-auto"
                   disabled={
                     !dataSpecificCustomer?.accountSegmentId ||
                     dataSpecificCustomer?.accountSegmentId?.length === 0
@@ -693,96 +749,114 @@ const CalculationForm = ({ type }) => {
                   options={(list_account_group || [])?.map((item) => {
                     return {
                       label: item?.glb_VALUE || item?.name,
-                      value: item?.glb_TYPE_VAL_ID || item?.id,
+                      value: item?.glbTypeValId,
                     };
                   })}
                 />
               </Form.Item>
-              <div className="col-span-2">
-                <Form.Item
-                  label={"Specific Customer Account"}
-                  name={"specificCustomer"}
-                  help={
-                    specific_customer_message && (
-                      <span className="text-blue-600 text-xs">
-                        {specific_customer_message}
-                      </span>
+              <Form.Item
+                label={"Specific Customer Account"}
+                name={"specificCustomer"}
+                help={
+                  specific_customer_message && (
+                    <span className="text-blue-600 text-xs">
+                      {specific_customer_message}
+                    </span>
+                  )
+                }
+                style={{ marginBottom: 4 }}
+              >
+                <Select
+                  mode={"multiple"}
+                  className="[&_.ant-select-selector]:!min-h-[100px] 
+                              [&_.ant-select-selector]:!h-auto 
+                              [&_.ant-select-selector]:!items-start 
+                              [&_.ant-select-selector]:!pt-1
+                              [&_.ant-select-selection-overflow]:max-h-[100px]
+                              [&_.ant-select-selection-overflow]:overflow-y-auto
+                              [&_.ant-select-selection-placeholder]:!absolute
+                              [&_.ant-select-selection-placeholder]:!top-4
+                              [&_.ant-select-selection-placeholder]:!left-3"
+                  disabled={!dataSpecificCustomer?.sorId}
+                  loading={loading_specific_customer}
+                  showSearch
+                  filterOption={false}
+                  onSearch={handleSearchCustomer}
+                  searchValue={searchCustomerValue}
+                  maxLength={MAX_SEARCH_LENGTH}
+                  onClear={() => {
+                    setSearchCustomerValue("");
+                    setFilteredCustomerList([]);
+                    setDataSpecificCustomer((prevState) => ({
+                      ...prevState,
+                      search: "",
+                      limit: DEFAULT_SEARCH_LIMIT,
+                    }));
+                  }}
+                  allowClear
+                  placeholder={`Type at least 3 characters to search (max ${MAX_SEARCH_LENGTH} chars)...`}
+                  notFoundContent={
+                    loading_specific_customer ? (
+                      <div className="flex justify-center py-4">
+                        <Spin size="small" />
+                      </div>
+                    ) : searchCustomerValue.length > 0 &&
+                      searchCustomerValue.length < 3 ? (
+                      <div className="text-center py-4 text-gray-500">
+                        Please enter at least 3 characters
+                      </div>
+                    ) : (
+                      "No data"
                     )
                   }
+                  dropdownRender={(menu) => (
+                    <>
+                      {menu}
+                      {specific_customer_message && (
+                        <div className="px-2 py-2 border-t text-xs text-gray-500">
+                          {specific_customer_message}
+                        </div>
+                      )}
+                      {searchCustomerValue.length > 0 && (
+                        <div className="px-2 py-1 border-t text-xs text-right">
+                          <span
+                            className={
+                              searchCustomerValue.length >= MAX_SEARCH_LENGTH
+                                ? "text-red-500 font-semibold"
+                                : "text-gray-500"
+                            }
+                          >
+                            {searchCustomerValue.length}/{MAX_SEARCH_LENGTH}{" "}
+                            characters
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  )}
                 >
-                  <Select
-                    mode={"multiple"}
-                    disabled={!dataSpecificCustomer?.sorId}
-                    loading={loading_specific_customer}
-                    showSearch
-                    filterOption={false}
-                    onSearch={handleSearchCustomer}
-                    searchValue={searchCustomerValue}
-                    maxLength={MAX_SEARCH_LENGTH}
-                    onClear={() => {
-                      setSearchCustomerValue("");
-                      setFilteredCustomerList([]);
-                      setDataSpecificCustomer((prevState) => ({
-                        ...prevState,
-                        search: "",
-                        limit: DEFAULT_SEARCH_LIMIT,
-                      }));
-                    }}
-                    allowClear
-                    placeholder={`Type at least 3 characters to search (max ${MAX_SEARCH_LENGTH} chars)...`}
-                    notFoundContent={
-                      loading_specific_customer ? (
-                        <div className="flex justify-center py-4">
-                          <Spin size="small" />
-                        </div>
-                      ) : searchCustomerValue.length > 0 &&
-                        searchCustomerValue.length < 3 ? (
-                        <div className="text-center py-4 text-gray-500">
-                          Please enter at least 3 characters
-                        </div>
-                      ) : (
-                        "No data"
-                      )
-                    }
-                    dropdownRender={(menu) => (
-                      <>
-                        {menu}
-                        {specific_customer_message && (
-                          <div className="px-2 py-2 border-t text-xs text-gray-500">
-                            {specific_customer_message}
-                          </div>
-                        )}
-                        {searchCustomerValue.length > 0 && (
-                          <div className="px-2 py-1 border-t text-xs text-right">
-                            <span
-                              className={
-                                searchCustomerValue.length >= MAX_SEARCH_LENGTH
-                                  ? "text-red-500 font-semibold"
-                                  : "text-gray-500"
-                              }
-                            >
-                              {searchCustomerValue.length}/{MAX_SEARCH_LENGTH}{" "}
-                              characters
-                            </span>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  >
-                    {(filteredCustomerList || []).map((item) => (
-                      <Select.Option
-                        key={item.accountNumber || item.code}
-                        value={item.accountNumber || item.code}
-                      >
-                        {item.accountName || item.name} - {item.accountNumber || item.code}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </div>
+                  {(filteredCustomerList || []).map((item) => (
+                    <Select.Option
+                      key={item.accountNumber || item.code}
+                      value={item.accountNumber || item.code}
+                    >
+                      {item.accountName || item.name} -{" "}
+                      {item.accountNumber || item.code}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
             </div>
-          </BaseContainer>
-          <BaseContainer header={"Scheduler Information"}>
+          </CardContainer>
+
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px] font-bold text-primary">
+                  SCHEDULER INFORMATION
+                </p>
+              </div>
+            }
+          >
             <Form.Item
               label={"Type"}
               name={"type"}
@@ -832,7 +906,7 @@ const CalculationForm = ({ type }) => {
                 onChange={(e) => setRemark(e.target.value)}
               />
             </Form.Item>
-          </BaseContainer>
+          </CardContainer>
           <div className={"w-full flex mt-5"}>
             <div className={"w-full justify-start"}>
               <Form.Item>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Tooltip } from "antd";
+import { Spin, Tooltip, Tabs } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -1220,14 +1220,13 @@ const CalculationPage = () => {
   };
 
   const tabs = [
-    { value: "Calculation List" },
-    { value: "Calculation History" },
+    { key: "Calculation List", label: "Calculation List" },
+    { key: "Calculation History", label: "Calculation History" },
   ];
 
-  const changeTab = (e) => {
+  const changeTab = (key) => {
     setTabHeader((prevState) => {
-      const tempTab = e.target.value;
-      if (prevState !== tempTab) {
+      if (prevState !== key) {
         setPage(1);
         setPageSize(10);
         setSearch({});
@@ -1235,7 +1234,7 @@ const CalculationPage = () => {
         setSearchText("");
         setSearchedColumn("");
       }
-      return tempTab;
+      return key;
     });
   };
 
@@ -1322,30 +1321,55 @@ const CalculationPage = () => {
             </div>
           }
         >
-          <RadioTabs
-            data={tabs}
+          <Tabs
+            activeKey={tabHeader}
             onChange={changeTab}
-            currentPosition={tabHeader}
-          />
-          <div className="my-5">
-            <TableRBI
-              size="small"
-              dataSource={data_calculation.result}
-              columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
-              totalData={data_calculation?.page?.totalElements || 0}
-              tableScrolled={{ x: 4000, y: 525 }}
-              onSort={onSort}
-              columnDefinitions={columnDefinitions}
-              handleDownload={handleDownload}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
-            />
-          </div>
+            type="line"
+            size="small" 
+          >
+            <Tabs.TabPane tab="Calculation List" key="Calculation List">
+              <div className="my-5">
+                <TableRBI
+                  size="small"
+                  dataSource={data_calculation.result}
+                  columns={processedColumns}
+                  current={page}
+                  pageSize={pageSize}
+                  onChange={handleChangePage}
+                  onSizeChanger={handleChangePage}
+                  totalData={data_calculation?.page?.totalElements || 0}
+                  tableScrolled={{ x: 4000, y: 525 }}
+                  onSort={onSort}
+                  columnDefinitions={columnDefinitions}
+                  handleDownload={handleDownload}
+                  fixedColumns={fixedColumns}
+                  setFixedColumns={setFixedColumns}
+                  loading={loading}
+                />
+              </div>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab="Calculation History" key="Calculation History">
+              <div className="my-5">
+                <TableRBI
+                  size="small"
+                  dataSource={data_calculation.result} // Pastikan dataSource sesuai dengan history jika berbeda
+                  columns={processedColumns}
+                  current={page}
+                  pageSize={pageSize}
+                  onChange={handleChangePage}
+                  onSizeChanger={handleChangePage}
+                  totalData={data_calculation?.page?.totalElements || 0}
+                  tableScrolled={{ x: 4000, y: 525 }}
+                  onSort={onSort}
+                  columnDefinitions={columnDefinitions}
+                  handleDownload={handleDownload}
+                  fixedColumns={fixedColumns}
+                  setFixedColumns={setFixedColumns}
+                  loading={loading}
+                />
+              </div>
+            </Tabs.TabPane>
+          </Tabs>
         </CardContainer>
       </LayoutMenu>
     </Spin>

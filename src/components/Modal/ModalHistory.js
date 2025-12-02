@@ -14,71 +14,6 @@ import RadioTabs from "../RadioTabs";
 
 const { Panel } = Collapse;
 
-const defaultValueHistory = [
-  {
-    type: "SUBMIT",
-    icon: <SVGIcon name="IconSubmitApprover" width={20} />,
-    textColor: "#0063A2",
-    bgColor: "#E3F2FD",
-    borderColor: "#0063A230",
-    label: "SUBMITTER DATA",
-  },
-  {
-    type: "APPROVE",
-    icon: <CheckCircleFilled style={{ color: "#52C41A", fontSize: 20 }} />,
-    textColor: "#52C41A",
-    bgColor: "#F6FFED",
-    borderColor: "#52C41A30",
-    label: "APPROVER",
-  },
-  {
-    type: "REJECT",
-    icon: <CloseCircleFilled style={{ color: "#FF4D4F", fontSize: 20 }} />,
-    textColor: "#FF4D4F",
-    bgColor: "#FFF1F0",
-    borderColor: "#FF4D4F30",
-    label: "APPROVER",
-  },
-  {
-    type: "Released",
-    icon: <SVGIcon name="IconReleaseApprover" width={20} />,
-    textColor: "#118B76",
-    bgColor: "rgba(17, 139, 118, 0.15)",
-    borderColor: "#118B7630",
-    label: "RELEASED",
-  },
-  {
-    type: "WAITING",
-    icon: <ClockCircleOutlined style={{ color: "#FAAD14", fontSize: 20 }} />,
-    textColor: "#FAAD14",
-    bgColor: "#FFFBE6",
-    borderColor: "#FAAD1430",
-    label: "APPROVER",
-  },
-];
-
-const getStatusConfig = (status) => {
-  const statusUpper = status?.toUpperCase() || "";
-  
-  if (statusUpper.includes("SUBMIT")) {
-    return defaultValueHistory.find((v) => v.type === "SUBMIT");
-  }
-  if (statusUpper.includes("APPROVE")) {
-    return defaultValueHistory.find((v) => v.type === "APPROVE");
-  }
-  if (statusUpper.includes("REJECT")) {
-    return defaultValueHistory.find((v) => v.type === "REJECT");
-  }
-  if (statusUpper.includes("RELEASE")) {
-    return defaultValueHistory.find((v) => v.type === "Released");
-  }
-  if (statusUpper.includes("WAITING")) {
-    return defaultValueHistory.find((v) => v.type === "WAITING");
-  }
-  
-  return defaultValueHistory[0]; // default to SUBMIT
-};
-
 const ModalHistory = (props) => {
   const {
     isOpen,
@@ -92,34 +27,47 @@ const ModalHistory = (props) => {
 
   const [tabActive, setTabActive] = useState("");
   const [dataApproverFinal, setDataApproverFinal] = useState([]);
-  const [dataHistoryFinal, setDataHistoryFinal] = useState([]);
+  const [submitterData, setSubmitterData] = useState(null);
+  const [approverStatus, setApproverStatus] = useState("WAITING");
   const [activeKeys, setActiveKeys] = useState([]);
 
   useEffect(() => {
     if (isOpen && dataApprover && dataHistory) {
       const useTabs = tabOptions && (tabOptions?.length > 0 || false);
       let historyData = [];
+      let approverData = [];
       
       if (useTabs) {
         const tempTab = tabOptions[0].value.toLowerCase();
         setTabActive(tabOptions[0].value);
-        setDataApproverFinal(dataApprover[tempTab] || []);
+        approverData = dataApprover[tempTab] || [];
         historyData = dataHistory[tempTab] || [];
       } else {
-        setDataApproverFinal(dataApprover || []);
+        approverData = dataApprover || [];
         historyData = dataHistory || [];
       }
       
-      // Reverse the order - newest first
-      setDataHistoryFinal([...historyData].reverse());
+      const submitData = historyData.find(h => h.status === "SUBMIT");
+      setSubmitterData(submitData);
       
-      // Auto expand first item (which is now the newest)
-      if (historyData.length > 0) {
-        setActiveKeys(['0']);
+      setDataApproverFinal(approverData);
+      
+      const hasWaiting = approverData.some(a => a.status === null);
+      const hasReject = approverData.some(a => a.status === "REJECT");
+      
+      if (hasReject) {
+        setApproverStatus("REJECTED");
+      } else if (hasWaiting) {
+        setApproverStatus("WAITING");
+      } else {
+        setApproverStatus("APPROVED");
       }
+      
+      setActiveKeys(['0']);
     } else {
       setDataApproverFinal([]);
-      setDataHistoryFinal([]);
+      setSubmitterData(null);
+      setApproverStatus("WAITING");
       setActiveKeys([]);
     }
   }, [isOpen, tabOptions, dataApprover, dataHistory]);
@@ -128,12 +76,27 @@ const ModalHistory = (props) => {
     const value = e.target.value;
     const tempTab = value.toLowerCase();
     setTabActive(value);
-    setDataApproverFinal(dataApprover[tempTab] || []);
     
-    // Reverse the order when changing tabs
+    const approverData = dataApprover[tempTab] || [];
     const historyData = dataHistory[tempTab] || [];
-    setDataHistoryFinal([...historyData].reverse());
-    setActiveKeys(['0']); // Reset to first item when changing tabs
+    
+    const submitData = historyData.find(h => h.status === "SUBMIT");
+    setSubmitterData(submitData);
+    
+    setDataApproverFinal(approverData);
+    
+    const hasWaiting = approverData.some(a => a.status === null);
+    const hasReject = approverData.some(a => a.status === "REJECT");
+    
+    if (hasReject) {
+      setApproverStatus("REJECTED");
+    } else if (hasWaiting) {
+      setApproverStatus("WAITING");
+    } else {
+      setApproverStatus("APPROVED");
+    }
+    
+    setActiveKeys(['0']);
   };
 
   const formatDate = (date) => {
@@ -141,103 +104,229 @@ const ModalHistory = (props) => {
     return moment(date).format(dateFormatting.dateTime);
   };
 
-  const formatStatusText = (status) => {
-    if (!status) return "";
-    
-    // Mapping status text untuk display
-    const statusMap = {
-      "APPROVE": "APPROVED",
-      "REJECT": "REJECTED",
-      "SUBMIT": "SUBMITTED",
-      "WAITING": "WAITING FOR APPROVAL",
-      "Released": "RELEASED"
-    };
-    
-    // Cek apakah status exact match dengan key
-    if (statusMap[status]) {
-      return statusMap[status];
-    }
-    
-    // Cek apakah status mengandung key
-    for (const key in statusMap) {
-      if (status.toUpperCase().includes(key)) {
-        return statusMap[key];
-      }
-    }
-    
-    return status; // Return original jika tidak ada mapping
-  };
+  const renderApproverTable = () => {
+    if (!dataApproverFinal || dataApproverFinal.length === 0) return null;
 
-  const renderPanelHeader = (item) => {
-    const config = getStatusConfig(item.status);
+    const getStatusBadge = (status) => {
+      if (status === "APPROVE") {
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+            <CheckCircleFilled style={{ fontSize: 12 }} />
+            Approved
+          </span>
+        );
+      }
+      if (status === "REJECT") {
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-red-50 text-red-700 border border-red-200">
+            <CloseCircleFilled style={{ fontSize: 12 }} />
+            Rejected
+          </span>
+        );
+      }
+      if (status === "SUBMIT") {
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+            <CheckCircleFilled style={{ fontSize: 12 }} />
+            Submitted
+          </span>
+        );
+      }
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">
+          <ClockCircleOutlined style={{ fontSize: 12 }} />
+          Waiting
+        </span>
+      );
+    };
+
+    const enrichedApprovers = dataApproverFinal.map((approver) => {
+      let historyMatch = null;
+      
+      if (tabActive) {
+        const tempTab = tabActive.toLowerCase();
+        const historyData = dataHistory[tempTab] || [];
+        historyMatch = historyData.find(
+          h => h.name === approver.name && h.status === approver.status
+        );
+      } else {
+        historyMatch = dataHistory?.find(
+          h => h.name === approver.name && h.status === approver.status
+        );
+      }
+      
+      return {
+        ...approver,
+        taskDate: historyMatch?.taskDate || submitterData?.taskDate || null,
+        actionDate: historyMatch?.actionDate || null,
+        hierarchy: historyMatch?.hierarchy || "-",
+      };
+    });
 
     return (
-      <div className="flex items-center justify-between w-full pr-4">
-        <div className="flex items-center gap-3">
-          <span>{config.icon}</span>
-          <span 
-            className="font-semibold text-sm"
-            style={{ color: config.textColor }}
-          >
-            {config.label}
-          </span>
+      <div className="p-4">
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs border border-gray-200">
+            <thead>
+              <tr className="bg-blue-600 text-white">
+                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">NO</th>
+                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">TASK SUBMITTED DATE</th>
+                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">ACTION DATE</th>
+                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">HIERARCHY</th>
+                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">ACTION BY</th>
+                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">POSITION</th>
+                <th className="py-2 px-3 text-center font-semibold">STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {enrichedApprovers.map((approver, index) => (
+                <tr 
+                  key={index}
+                  className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
+                >
+                  <td className="py-2 px-3 border-b border-r border-gray-200">{index + 1}</td>
+                  <td className="py-2 px-3 border-b border-r border-gray-200">
+                    {formatDate(approver.taskDate)}
+                  </td>
+                  <td className="py-2 px-3 border-b border-r border-gray-200">
+                    {formatDate(approver.actionDate)}
+                  </td>
+                  <td className="py-2 px-3 border-b border-r border-gray-200">
+                    {approver.hierarchy}
+                  </td>
+                  <td className="py-2 px-3 border-b border-r border-gray-200 font-medium">
+                    {approver.name || "-"}
+                  </td>
+                  <td className="py-2 px-3 border-b border-r border-gray-200">
+                    {approver.role || "-"}
+                  </td>
+                  <td className="py-2 px-3 border-b text-center">
+                    {getStatusBadge(approver.status)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-        <span 
-          className="text-xs font-medium"
-          style={{ color: config.textColor }}
-        >
-          {formatStatusText(item.status)}
-        </span>
       </div>
     );
   };
 
-  const renderPanelContent = (item) => {
-    return (
-      <div className="grid grid-cols-2 gap-4 p-4">
-        <div>
-          <p className="text-xs text-gray-500 mb-1">Task Submitted Date</p>
-          <p className="text-sm font-medium">{formatDate(item.taskDate)}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 mb-1">Action Date</p>
-          <p className="text-sm font-medium">{formatDate(item.actionDate)}</p>
-        </div>
-        
-        <div className="col-span-2">
-          <p className="text-xs font-semibold text-gray-700 mb-2">DETAIL</p>
-          
-          <div className="space-y-2">
-            {item.hierarchy && (
-              <div className="flex">
-                <span className="text-xs text-gray-600 w-32">Hierarchy</span>
-                <span className="text-xs font-medium">{item.hierarchy}</span>
-              </div>
-            )}
-            
-            {item.name && (
-              <div className="flex">
-                <span className="text-xs text-gray-600 w-32">Action By</span>
-                <span className="text-xs font-medium">{item.name}</span>
-              </div>
-            )}
-            
-            {item.role && (
-              <div className="flex">
-                <span className="text-xs text-gray-600 w-32">Position</span>
-                <span className="text-xs font-medium">{item.role}</span>
-              </div>
-            )}
-          </div>
-        </div>
+  const renderSubmitterPanel = () => {
+    if (!submitterData) return null;
 
-        {item.description && item.status !== "SUBMIT" && (
-          <div className="col-span-2">
-            <p className="text-xs font-semibold text-gray-700 mb-1">MESSAGE</p>
-            <p className="text-xs p-2">{item.description}</p>
+    return (
+      <Panel 
+        header={
+          <div className="flex items-center justify-between w-full pr-4">
+            <div className="flex items-center gap-3">
+              <SVGIcon name="IconSubmitApprover" width={20} />
+              <span className="font-semibold text-sm" style={{ color: "#0063A2" }}>
+                SUBMITTER DATA
+              </span>
+            </div>
+            <span className="text-xs font-medium" style={{ color: "#0063A2" }}>
+              SUBMITTED
+            </span>
           </div>
-        )}
-      </div>
+        }
+        key="0"
+        style={{
+          marginBottom: 12,
+          border: '1px solid #d9d9d9',
+          borderRadius: 6,
+          overflow: 'hidden',
+          backgroundColor: '#ffffff'
+        }}
+        className="approval-history-panel"
+      >
+        <div className="p-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Task Submitted Date</p>
+              <p className="text-sm font-medium">{formatDate(submitterData.taskDate)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Action Date</p>
+              <p className="text-sm font-medium">{formatDate(submitterData.actionDate)}</p>
+            </div>
+            
+            <div className="col-span-2">
+              <p className="text-xs font-semibold text-gray-700 mb-2">DETAIL</p>
+              
+              <div className="space-y-2">
+                <div className="flex">
+                  <span className="text-xs text-gray-600 w-32">Hierarchy</span>
+                  <span className="text-xs font-medium">{submitterData.hierarchy || "-"}</span>
+                </div>
+                
+                <div className="flex">
+                  <span className="text-xs text-gray-600 w-32">Action By</span>
+                  <span className="text-xs font-medium">{submitterData.name || "-"}</span>
+                </div>
+                
+                <div className="flex">
+                  <span className="text-xs text-gray-600 w-32">Position</span>
+                  <span className="text-xs font-medium">{submitterData.role || "-"}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Panel>
+    );
+  };
+
+  const renderApproverPanel = () => {
+    const getApproverIcon = () => {
+      if (approverStatus === "APPROVED") {
+        return <CheckCircleFilled style={{ color: "#52C41A", fontSize: 20 }} />;
+      }
+      if (approverStatus === "REJECTED") {
+        return <CloseCircleFilled style={{ color: "#FF4D4F", fontSize: 20 }} />;
+      }
+      return <ClockCircleOutlined style={{ color: "#FAAD14", fontSize: 20 }} />;
+    };
+
+    const getApproverColor = () => {
+      if (approverStatus === "APPROVED") return "#52C41A";
+      if (approverStatus === "REJECTED") return "#FF4D4F";
+      return "#FAAD14";
+    };
+
+    const getApproverText = () => {
+      if (approverStatus === "APPROVED") return "APPROVED";
+      if (approverStatus === "REJECTED") return "REJECTED";
+      return "WAITING FOR APPROVAL";
+    };
+
+    return (
+      <Panel 
+        header={
+          <div className="flex items-center justify-between w-full pr-4">
+            <div className="flex items-center gap-3">
+              {getApproverIcon()}
+              <span className="font-semibold text-sm" style={{ color: getApproverColor() }}>
+                APPROVER
+              </span>
+            </div>
+            <span className="text-xs font-medium" style={{ color: getApproverColor() }}>
+              {getApproverText()}
+            </span>
+          </div>
+        }
+        key="1"
+        style={{
+          marginBottom: 12,
+          border: '1px solid #d9d9d9',
+          borderRadius: 6,
+          overflow: 'hidden',
+          backgroundColor: '#ffffff'
+        }}
+        className="approval-history-panel"
+      >
+        {renderApproverTable()}
+      </Panel>
     );
   };
 
@@ -276,7 +365,7 @@ const ModalHistory = (props) => {
             <RadioTabs data={tabOptions} onChange={handleTabs} />
           ) : null}
           
-          {/* Collapse Accordion */}
+          {/* Collapse Accordion - SELALU 2 ACCORDION */}
           <div className="space-y-3">
             <Collapse
               activeKey={activeKeys}
@@ -293,25 +382,14 @@ const ModalHistory = (props) => {
                 border: 'none'
               }}
             >
-              {dataHistoryFinal.map((item, index) => (
-                <Panel 
-                  header={renderPanelHeader(item)} 
-                  key={index.toString()}
-                  style={{
-                    marginBottom: 12,
-                    border: '1px solid #d9d9d9',
-                    borderRadius: 6,
-                    overflow: 'hidden',
-                    backgroundColor: '#ffffff'
-                  }}
-                  className="approval-history-panel"
-                >
-                  {renderPanelContent(item)}
-                </Panel>
-              ))}
+              {/* ACCORDION 1: SUBMITTER DATA */}
+              {renderSubmitterPanel()}
+              
+              {/* ACCORDION 2: APPROVER */}
+              {renderApproverPanel()}
             </Collapse>
 
-            {dataHistoryFinal.length === 0 && (
+            {!submitterData && (
               <div className="text-center py-8 text-gray-400">
                 <p>No approval history available</p>
               </div>
