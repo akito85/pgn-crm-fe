@@ -6,8 +6,7 @@ import AttachmentForm from "./AttachmentForm";
  */
 export default function AttachmentFormStep({
   attachmentsData = [],
-  setAttachmentsData = () => {},
-  dispatch = () => {}
+  setAttachmentsData = () => {}
 }) {
   return (
     <AttachmentForm
@@ -15,7 +14,6 @@ export default function AttachmentFormStep({
       updateData={setAttachmentsData}
       type="create"
       typeSelector="account"
-      dispatch={dispatch}
     />
   );
 }

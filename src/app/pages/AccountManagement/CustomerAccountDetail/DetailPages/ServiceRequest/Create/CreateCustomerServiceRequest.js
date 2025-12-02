@@ -396,7 +396,6 @@ const CreateCustomerServiceRequest = (props) => {
         <AttachmentForm
           attachmentsData={attachmentsData}
           setAttachmentsData={setAttachmentsData}
-          dispatch={dispatch}
         />
       ),
       disabled: false,

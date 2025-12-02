@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../../../../../components/TablePagination";
 import { Input, Spin, Tooltip } from "antd";
@@ -154,11 +154,12 @@ const AttachmentForm = ({
   updateData = () => {},
   type,
   typeSelector = "account",
-  dispatch = () => {},
 }) => {
-  // Selector
+  // Redux hooks
+  const dispatch = useDispatch();
   const { data_categoryAttachment } = useSelector((state) => state[typeSelector]);
   const { dataGlobalPropAttachment } = useSelector((state) => state.product);
+
   // Declaration
   const searchInput = useRef(null);
 
