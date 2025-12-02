@@ -1,4 +1,4 @@
-// TableRBI.js (with resizable columns + customHeaderLeft)
+// TableRBI.js (with resizable columns + customHeaderLeft + showExport control)
 import React, { useMemo, useState, useCallback } from "react";
 import { DownloadOutlined, FilterOutlined } from "@ant-design/icons";
 import { Button, Pagination, Select, Table } from "antd";
@@ -92,6 +92,9 @@ const TableRBI = ({
   onRow,
   rowClassName,
   customHeaderLeft, // PROPS BARU untuk custom content di kiri header
+  showExport = true, // PROPS BARU untuk mengontrol tampilan tombol Export
+  showAdvanceSearch = true, // PROPS BARU untuk mengontrol tampilan tombol Advance Search
+  showSearchBar = true, // PROPS BARU untuk mengontrol tampilan Search Bar
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -195,6 +198,9 @@ const TableRBI = ({
     },
   };
 
+  // Check if any right side controls should be shown
+  const hasRightControls = showExport || showAdvanceSearch || showSearchBar;
+
   return (
     <div className={"flex flex-col w-full"}>
       {useSelect ? (
@@ -216,35 +222,41 @@ const TableRBI = ({
           </div>
 
           {/* BAGIAN KANAN: Export, Advance Search, Search Bar */}
-          <div className="flex justify-end gap-2">
-            <Button
-              icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
-              onClick={handleDownload}
-              style={{
-                border: "1px solid #BDBDBD",
-                color: "black",
-                borderRadius: "8px",
-                height: "40px",
-              }}
-            >
-              Export
-            </Button>
+          {hasRightControls && (
+            <div className="flex justify-end gap-2">
+              {showExport && (
+                <Button
+                  icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
+                  onClick={handleDownload}
+                  style={{
+                    border: "1px solid #BDBDBD",
+                    color: "black",
+                    borderRadius: "8px",
+                    height: "40px",
+                  }}
+                >
+                  Export
+                </Button>
+              )}
 
-            <Button
-              onClick={() => setIsAdvanceOpen(true)}
-              style={{
-                border: "1px solid #BDBDBD",
-                color: "black",
-                borderRadius: "8px",
-                height: "40px",
-              }}
-            >
-              <FilterOutlined style={{ fontSize: "20px" }} />
-              Advance Search
-            </Button>
+              {showAdvanceSearch && (
+                <Button
+                  onClick={() => setIsAdvanceOpen(true)}
+                  style={{
+                    border: "1px solid #BDBDBD",
+                    color: "black",
+                    borderRadius: "8px",
+                    height: "40px",
+                  }}
+                >
+                  <FilterOutlined style={{ fontSize: "20px" }} />
+                  Advance Search
+                </Button>
+              )}
 
-            <SearchBar />
-          </div>
+              {showSearchBar && <SearchBar />}
+            </div>
+          )}
         </div>
       ) : null}
 
