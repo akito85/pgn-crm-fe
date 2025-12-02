@@ -560,11 +560,12 @@ const PrabillingForm = ({ type }) => {
               </div>
             }
           >
-            <div className={"w-full grid grid-cols-2 gap-2"}>
+            <div className={"w-full grid grid-cols-1 gap-2"}>
               <Form.Item
                 label={"Billing Cycle"}
                 name={"billing_cycle"}
                 rules={formMessageRequired("Billing Cycle")}
+                style={{ marginBottom: 0 }}
               >
                 <SelectComponent
                   onChange={handleChangeBillingCycle}
@@ -580,6 +581,7 @@ const PrabillingForm = ({ type }) => {
                 label={"Billing Period"}
                 name={"billing_period"}
                 rules={formMessageRequired("Billing Period")}
+                style={{ marginBottom: 4 }}
               >
                 <SelectComponent
                   disabled={!billingCycle}
@@ -676,8 +678,8 @@ const PrabillingForm = ({ type }) => {
                   }
                   options={(list_account_group || [])?.map((item) => {
                     return {
-                      label: item?.glb_VALUE || item?.name,
-                      value: item?.glb_TYPE_VAL_ID,
+                      label: item?.glbValue || item?.name,
+                      value: item?.glbTypeValId,
                     };
                   })}
                 />
@@ -686,6 +688,7 @@ const PrabillingForm = ({ type }) => {
                 <Form.Item
                   label={"Specific Customer Account"}
                   name={"specificCustomer"}
+                  style={{ marginBottom: 4 }}
                   help={
                     specific_customer_message && (
                       <span className="text-blue-600 text-xs">
@@ -821,6 +824,7 @@ const PrabillingForm = ({ type }) => {
               <InputComponent
                 type="textarea"
                 value={remark}
+                style={{ marginBottom: 4 }}
                 onChange={(e) => setRemark(e.target.value)}
               />
             </Form.Item>

@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-
+import CardContainer from "../../../../components/CardContainer";
 import DetailText from "../../../../components/DetailText";
 
 const FormConfirmation = ({ data }) => {
@@ -32,8 +32,8 @@ const FormConfirmation = ({ data }) => {
 
   const getBillingCycleName = (val) => {
     const billingCycleName =
-      list_billing_cycle?.data &&
-      list_billing_cycle?.data?.filter((item) => item?.id === val);
+      list_billing_cycle &&
+      list_billing_cycle?.filter((item) => item?.id === val);
     if (billingCycleName === undefined) {
       return "-";
     }
@@ -45,11 +45,11 @@ const FormConfirmation = ({ data }) => {
 
   const getGroupTypeName = (val) => {
     const groupTypeName = list_account_group?.find(
-      (item) => item?.glb_TYPE_VAL_ID === val
+      (item) => item?.glbTypeValId === val 
     );
-    
+
     if (groupTypeName) {
-      return groupTypeName.glb_VALUE || groupTypeName.name || "-";
+      return groupTypeName.glbValue || groupTypeName.name || "-"; 
     }
     return "-";
   };
@@ -128,11 +128,11 @@ const FormConfirmation = ({ data }) => {
 
   const renderSpecificCustomer = () => {
     const specificCustomers = data?.rRbiCalculationSpecificCustomer || [];
-    
+
     if (specificCustomers.length === 0) {
       return (
         <div className="flex items-start gap-2">
-          <span className=" font-medium">
+          <span className="font-medium">
             All customers matching filter criteria
           </span>
         </div>
@@ -156,7 +156,9 @@ const FormConfirmation = ({ data }) => {
           </div>
         )}
         <div className="text-[12px] text-gray-500 mt-2 pt-2 border-t border-gray-200">
-          Total: <span className="font-semibold">{specificCustomers.length}</span> customer
+          Total:{" "}
+          <span className="font-semibold">{specificCustomers.length}</span>{" "}
+          customer
           {specificCustomers.length > 1 ? "s" : ""} selected
         </div>
       </div>
@@ -164,104 +166,122 @@ const FormConfirmation = ({ data }) => {
   };
 
   return (
-    <div className={"w-full"}>
-      <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-        {"ACCOUNT TAX RELATION CONFIRMATION"}
-      </div>
-      <div className={"pl-5 w-full grid grid-cols-2 gap-y-3"}>
-        <DetailText label={"Billing Cycle"}>
-          {getBillingCycleName(data?.billingCycle)}
-        </DetailText>
-        <DetailText label={"Billing Period"}>
-          {getPeriodName(data?.billingPeriod)}
-        </DetailText>
-      </div>
-
-      <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-        {"INPUT PARAMETER INFORMATION"}
-      </div>
-      <div className={"pl-5 w-full grid grid-cols-2 gap-y-3"}>
-        <DetailText label={"Sor"}>{getSorName(data?.sor)}</DetailText>
-        
-        <DetailText label={"Cost Center"}>
-          {data?.rRbiCalculationCostCenter?.length > 0 ? (
-            data?.rRbiCalculationCostCenter?.map((item, index, array) => (
-              <span key={index + 1}>
-                {getCostCenterName(item.costCenter)}
-                {index < array.length - 1 && ", "}
-              </span>
-            ))
-          ) : (
-            "-"
-          )}
-        </DetailText>
-
-        <DetailText label={"Meter Reading Code"}>
-          {data?.rRbiCalculationMeterReadingCode?.length > 0 ? (
-            data?.rRbiCalculationMeterReadingCode?.map((item, index, array) => (
-              <span key={index + 1}>
-                {getMrcName(item.mreadingCode)}
-                {index < array.length - 1 && ", "}
-              </span>
-            ))
-          ) : (
-            "-"
-          )}
-        </DetailText>
-
-        <DetailText label={"Account Segment"}>
-          {data?.rRbiCalculationAccountSegment?.length > 0 ? (
-            data?.rRbiCalculationAccountSegment?.map((item, index, array) => (
-              <span key={index + 1}>
-                {getAccSegmentName(item.accSegment)}
-                {index < array.length - 1 && ", "}
-              </span>
-            ))
-          ) : (
-            "-"
-          )}
-        </DetailText>
-
-        <DetailText label={"Account Group Type"}>
-          {data?.rRbiCalculationAccountGroupType?.length > 0 ? (
-            data?.rRbiCalculationAccountGroupType?.map((item, index, array) => (
-              <span key={index + 1}>
-                {getGroupTypeName(item.accGroupType)}
-                {index < array.length - 1 && ", "}
-              </span>
-            ))
-          ) : (
-            "-"
-          )}
-        </DetailText>
-
-        {/* <div className="col-span-2"> */}
-          <DetailText label={"Specific Customer Account"}>
-            {renderSpecificCustomer()}
+    <div className="w-full space-y-4">
+      {/* Billing Cycle Information */}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold text-primary text-xs uppercase">
+              Billing Cycle Information
+            </p>
+          </div>
+        }
+      >
+        <div className="w-full grid grid-cols-2 gap-x-8 gap-y-2">
+          <DetailText label="Billing Cycle">
+            {getBillingCycleName(data?.billingCycle)}
           </DetailText>
-        {/* </div> */}
-      </div>
-
-      <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-        {"SCHEDULE INFORMATION"}
-      </div>
-      <div className={"pl-5 w-full grid grid-cols-2 gap-y-3"}>
-        <DetailText label={"Type"}>
-          {getScheduleTypeName(data?.scheduleType)}
-        </DetailText>
-        
-        {data?.scheduleDateTime && (
-          <DetailText label={"Schedule Date Time"}>
-            {data?.scheduleDateTime}
-          </DetailText>
-        )}
-
-        <div className="col-span-2">
-          <DetailText label={"Remark"}>
-            {data?.remark || "-"}
+          <DetailText label="Billing Period">
+            {getPeriodName(data?.billingPeriod)}
           </DetailText>
         </div>
-      </div>
+      </CardContainer>
+
+      {/* Input Parameter Information */}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold text-primary text-xs uppercase">
+              Input Parameter Information
+            </p>
+          </div>
+        }
+      >
+        <div className="w-full grid grid-cols-2 gap-x-8 gap-y-2">
+          <DetailText label="SOR">{getSorName(data?.sor)}</DetailText>
+
+          <DetailText label="Cost Center">
+            {data?.rRbiCalculationCostCenter?.length > 0
+              ? data?.rRbiCalculationCostCenter?.map((item, index, array) => (
+                  <span key={index + 1}>
+                    {getCostCenterName(item.costCenter)}
+                    {index < array.length - 1 && ", "}
+                  </span>
+                ))
+              : "-"}
+          </DetailText>
+
+          <DetailText label="Meter Reading Code">
+            {data?.rRbiCalculationMeterReadingCode?.length > 0
+              ? data?.rRbiCalculationMeterReadingCode?.map(
+                  (item, index, array) => (
+                    <span key={index + 1}>
+                      {getMrcName(item.mreadingCode)}
+                      {index < array.length - 1 && ", "}
+                    </span>
+                  )
+                )
+              : "-"}
+          </DetailText>
+
+          <DetailText label="Account Segment">
+            {data?.rRbiCalculationAccountSegment?.length > 0
+              ? data?.rRbiCalculationAccountSegment?.map(
+                  (item, index, array) => (
+                    <span key={index + 1}>
+                      {getAccSegmentName(item.accSegment)}
+                      {index < array.length - 1 && ", "}
+                    </span>
+                  )
+                )
+              : "-"}
+          </DetailText>
+
+          <DetailText label="Account Group Type">
+            {data?.rRbiCalculationAccountGroupType?.length > 0
+              ? data?.rRbiCalculationAccountGroupType?.map(
+                  (item, index, array) => (
+                    <span key={index + 1}>
+                      {getGroupTypeName(item.accGroupType)}
+                      {index < array.length - 1 && ", "}
+                    </span>
+                  )
+                )
+              : "-"}
+          </DetailText>
+
+          <DetailText label="Specific Customer Account">
+            {renderSpecificCustomer()}
+          </DetailText>
+        </div>
+      </CardContainer>
+
+      {/* Schedule Information */}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold text-primary text-xs uppercase">
+              Schedule Information
+            </p>
+          </div>
+        }
+      >
+        <div className="w-full grid grid-cols-2 gap-x-8 gap-y-2">
+          <DetailText label="Type">
+            {getScheduleTypeName(data?.scheduleType)}
+          </DetailText>
+
+          {data?.scheduleDateTime && (
+            <DetailText label="Schedule Date Time">
+              {data?.scheduleDateTime}
+            </DetailText>
+          )}
+
+          <div className="col-span-2">
+            <DetailText label="Remark">{data?.remark || "-"}</DetailText>
+          </div>
+        </div>
+      </CardContainer>
     </div>
   );
 };
