@@ -15,6 +15,7 @@ import { dateFormatting } from "../../../../../../../../utils";
 import { getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import DetailText from "../../../../../../../../components/DetailText";
+import { getDetailPaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 
 const tabs = [
   { value: "Service Request" },
@@ -43,21 +44,35 @@ const PaymentRelationDetails = ({
   //declare
   const navigate = useNavigate();
   const location = useLocation();
-  const id = location?.state?.id;
-  // const id = 7;
+  const idAccount = location?.state?.idAccount;
+  const idCustomer = location?.state?.idCustomer;
+  const idPr = location?.state?.idPr;
 
   //state
   const [typeDetailSection, setTypeDetailSection] = useState(tabs[0].value);
+  const [isApproval, setIsApproval] = useState(false);
 
   useEffect(() => {
     dispatch(getGrantedAccessAccount('/account-management/customers/view/service-requests/details'))
-  }, [dispatch])
+  }, [dispatch]);
 
   useEffect(() => {
-    if (id) {
-      dispatch(getCustomerDetail(id));
+    if (idCustomer) {
+      dispatch(getCustomerDetail(idCustomer));
     }
-  }, [dispatch, id]);
+  }, [dispatch, idCustomer]);
+
+  useEffect(() => {
+    if (idPr) {
+      dispatch(getDetailPaymentRelation(idPr));
+    }
+  }, [idPr])
+
+  useEffect(() => {
+    if (detail_paymentRelation) {
+      
+    }
+  }, [detail_paymentRelation])
 
   //handle
   const handleDetailSection = (e) => {
@@ -165,7 +180,7 @@ const PaymentRelationDetails = ({
         </div>
 
         <div>
-          <div className="mb-5 flex">
+          <div className="flex justify-between">
             <ButtonComponent
               type={"submit"}
               onClick={() => navigate(-1)}
@@ -181,6 +196,22 @@ const PaymentRelationDetails = ({
             >
               Back
             </ButtonComponent>
+            {isApproval && (
+              <div className={"w-full flex justify-end gap-5"}>
+                <ButtonComponent
+                  type="reject"
+                  onClick={() => {}}
+                >
+                  Reject
+                </ButtonComponent>
+                <ButtonComponent
+                  type="approve"
+                  onClick={() => {}}
+                >
+                  Approve
+                </ButtonComponent>
+              </div>
+            )}
           </div>
         </div>
       </Spin>
