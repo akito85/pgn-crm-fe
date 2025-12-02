@@ -440,6 +440,7 @@ const PrabillingPage = () => {
         <Link
           to={RBI_ROUTES.PRABILLING_DETAIL}
           state={{ id: record?.initCode }}
+          style={{ lineHeight: 0 }}
         >
           <Tooltip title="Detail">
             <EyeOutlined style={{ fontSize: "20px" }} />
@@ -449,7 +450,14 @@ const PrabillingPage = () => {
     },
   ];
 
-  const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
+  const actionCols = useColumnActionPermission(["view"], 
+    itemGrantAccess).map(
+    (col) => ({
+      ...col,
+      width: 80,
+      align: "center",
+    })
+  );
 
   const allColumns = useMemo(() => {
     const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
@@ -481,9 +489,8 @@ const PrabillingPage = () => {
               <p className="mt-[15px] font-bold text-primary">
                 PRABILLING LIST
               </p>
-              <div className="mt-[15px]">
-                <Toolbar items={itemGrantAccess} />
-              </div>
+
+              <Toolbar items={itemGrantAccess} />
             </div>
           }
         >

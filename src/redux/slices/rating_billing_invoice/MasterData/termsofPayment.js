@@ -322,7 +322,7 @@ export const downloadTOPS = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/rbi/top/download-list?page=${page}&size=${pageSize}&search=${searchParams}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/rbi/top/download-list?page=${page}&size=${pageSize}&searchs=${searchParams}&sort=${sortParams}`;
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (response) {

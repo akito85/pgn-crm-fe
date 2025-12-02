@@ -5,7 +5,7 @@ import {
 } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
-export const columnsBillingBucket = (
+export const columnsDigitalSignature = (
   search,
   page,
   pageSize,
@@ -22,35 +22,12 @@ export const columnsBillingBucket = (
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "BILLING BUCKET CODE",
-      dataIndex: "billingBucketCode",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "billingBucketCode",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text) =>
-        renderColumn(
-          "billingBucketCode",
-          hasValue(search["billingBucketCode"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-    },
-    {
       title: "NAME",
-      dataIndex: "billingBucketName",
+      dataIndex: "name",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "billingBucketName",
+        "name",
         searchInput,
         searchedColumn,
         searchText,
@@ -58,8 +35,8 @@ export const columnsBillingBucket = (
       ),
       render: (text) =>
         renderColumn(
-          "billingBucketName",
-          hasValue(search["billingBucketName"]),
+          "name",
+          hasValue(search["name"]),
           searchText,
           text,
           false,
@@ -68,13 +45,12 @@ export const columnsBillingBucket = (
         ),
     },
     {
-      title: "PRIORITY PERIOD",
-      dataIndex: "priorityPeriod",
+      title: "POSITION",
+      dataIndex: "position",
       sorter: true,
-      align: "center",
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "priorityPeriod",
+        "position",
         searchInput,
         searchedColumn,
         searchText,
@@ -82,8 +58,8 @@ export const columnsBillingBucket = (
       ),
       render: (text) =>
         renderColumn(
-          "priorityPeriod",
-          hasValue(search["priorityPeriod"]),
+          "position",
+          hasValue(search["position"]),
           searchText,
           text,
           false,
@@ -92,78 +68,24 @@ export const columnsBillingBucket = (
         ),
     },
     {
-      title: "START DATE",
+      title: "EMPLOYEE",
+      dataIndex: "employee",
       sorter: true,
-      align: "center",
-      dataIndex: "startDate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "startDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "dateCapital"
-      ),
-      render: (text) =>
-        renderDateColumn(
-          "startDate",
-          hasValue(search["startDate"]),
-          searchText,
-          text,
-          "date",
-          search
-        ),
-    },
-    {
-      title: "END DATE",
-      sorter: true,
-      align: "center",
-      dataIndex: "endDate",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "endDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "dateCapital"
-      ),
-      render: (text) =>
-        renderDateColumn(
-          "endDate",
-          hasValue(search["endDate"]),
-          searchText,
-          text,
-          "date",
-          search
-        ),
-    },
-    {
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      align: "left",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "description",
+        "employee",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
       ),
-      ellipsis: {
-        showTitle: false,
-      },
-      sorter: true,
       render: (text) =>
         renderColumn(
-          "description",
-          hasValue(search["description"]),
+          "employee",
+          hasValue(search["employee"]),
           searchText,
           text,
-          true,
+          false,
           "input",
           search
         ),

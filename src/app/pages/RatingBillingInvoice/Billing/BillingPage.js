@@ -284,12 +284,15 @@ const BillingPage = () => {
       render: (record) => {
         return (
           <Tooltip title="Approval Hierarchy">
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={20}
-                onClick={() => handleApprovalHistory(record)}
-              />
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                handleApprovalHistory(record);
+              }}
+              style={{ cursor: "pointer", display: "inline-block",lineHeight: 0 }}
+            >
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
+            </div>
           </Tooltip>
         );
       },
@@ -299,7 +302,11 @@ const BillingPage = () => {
   const actionCols = useColumnActionPermission(
     ["view", "history"],
     itemGrantAccess
-  );
+  ).map((col) => ({
+    ...col,
+    width: 80,
+    align: "center",
+  }));
 
   const baseColumns = useMemo(() => {
     if (valueTab === "All") {
@@ -440,20 +447,28 @@ const BillingPage = () => {
               onRow={(record) => ({
                 onClick: () => handleDetail(record),
                 style: {
-                  cursor: 'pointer',
-                  backgroundColor: activeRowKey === (record.billingCode || record.invoiceNumber)
-                    ? '#bae7ff'
-                    : 'transparent',
-                  transition: 'background-color 0.2s ease',
+                  cursor: "pointer",
+                  backgroundColor:
+                    activeRowKey ===
+                    (record.billingCode || record.invoiceNumber)
+                      ? "#bae7ff"
+                      : "transparent",
+                  transition: "background-color 0.2s ease",
                 },
                 onMouseEnter: (e) => {
-                  if (activeRowKey !== (record.billingCode || record.invoiceNumber)) {
-                    e.currentTarget.style.backgroundColor = '#f5f5f5';
+                  if (
+                    activeRowKey !==
+                    (record.billingCode || record.invoiceNumber)
+                  ) {
+                    e.currentTarget.style.backgroundColor = "#f5f5f5";
                   }
                 },
                 onMouseLeave: (e) => {
-                  if (activeRowKey !== (record.billingCode || record.invoiceNumber)) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
+                  if (
+                    activeRowKey !==
+                    (record.billingCode || record.invoiceNumber)
+                  ) {
+                    e.currentTarget.style.backgroundColor = "transparent";
                   }
                 },
               })}
@@ -464,37 +479,23 @@ const BillingPage = () => {
         {pageDetail && (
           <div
             ref={detailRef}
-            className="mt-6 border-t-4 border-blue-500 pt-4 bg-blue-50/30 rounded-lg p-4"
+            className="mt-6 border-t-4 border-blue-500 bg-blue-50/30 rounded-lg p-4"
           >
-            <div className="flex justify-between items-center mb-4 pb-3 border-b border-blue-200">
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-lg text-blue-700">
-                  Billing Detail: {billingCode}
-                </h3>
-              </div>
-              <button
-                onClick={() => {
-                  setPageDetail(false);
-                  setActiveRowKey(null);
-                  setBillingCode("");
-                  setRatingCode("");
-                  setAccountNumberId("");
-                  setSANumberId("");
-                  setCalculationCodeId("");
-                }}
-                className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
-                title="Close Detail"
-              >
-                ✕
-              </button>
-            </div>
-
             <BillingDetail
               billingCodeId={billingCode}
               ratingCodeId={ratingCode}
               saNumberId={saNumberId}
               accountNumberId={accountNumberId}
               calculationCodeId={calculationCodeId}
+              onClose={() => {
+                setPageDetail(false);
+                setActiveRowKey(null);
+                setBillingCode("");
+                setRatingCode("");
+                setAccountNumberId("");
+                setSANumberId("");
+                setCalculationCodeId("");
+              }}
             />
           </div>
         )}

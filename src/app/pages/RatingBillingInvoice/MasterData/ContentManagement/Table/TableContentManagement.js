@@ -5,7 +5,7 @@ import {
 } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
-export const columnsBillingBucket = (
+export const columnsContentManagement = (
   search,
   page,
   pageSize,
@@ -22,12 +22,12 @@ export const columnsBillingBucket = (
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "BILLING BUCKET CODE",
-      dataIndex: "billingBucketCode",
+      title: "CODE",
+      dataIndex: "contentCode",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "billingBucketCode",
+        "contentCode",
         searchInput,
         searchedColumn,
         searchText,
@@ -35,135 +35,34 @@ export const columnsBillingBucket = (
       ),
       render: (text) =>
         renderColumn(
-          "billingBucketCode",
-          hasValue(search["billingBucketCode"]),
+          "contentCode",
+          hasValue(search["contentCode"]),
           searchText,
           text,
           false,
           "input",
-          search
-        ),
-    },
-    {
-      title: "NAME",
-      dataIndex: "billingBucketName",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "billingBucketName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text) =>
-        renderColumn(
-          "billingBucketName",
-          hasValue(search["billingBucketName"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "PRIORITY PERIOD",
-      dataIndex: "priorityPeriod",
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "priorityPeriod",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text) =>
-        renderColumn(
-          "priorityPeriod",
-          hasValue(search["priorityPeriod"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "START DATE",
-      sorter: true,
-      align: "center",
-      dataIndex: "startDate",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "startDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "dateCapital"
-      ),
-      render: (text) =>
-        renderDateColumn(
-          "startDate",
-          hasValue(search["startDate"]),
-          searchText,
-          text,
-          "date",
-          search
-        ),
-    },
-    {
-      title: "END DATE",
-      sorter: true,
-      align: "center",
-      dataIndex: "endDate",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "endDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "dateCapital"
-      ),
-      render: (text) =>
-        renderDateColumn(
-          "endDate",
-          hasValue(search["endDate"]),
-          searchText,
-          text,
-          "date",
           search
         ),
     },
     {
       title: "DESCRIPTION",
-      dataIndex: "description",
-      align: "left",
+      dataIndex: "contentName",
+      sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "description",
+        "contentName",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
       ),
-      ellipsis: {
-        showTitle: false,
-      },
-      sorter: true,
       render: (text) =>
         renderColumn(
-          "description",
-          hasValue(search["description"]),
+          "contentName",
+          hasValue(search["contentName"]),
           searchText,
           text,
-          true,
+          false,
           "input",
           search
         ),

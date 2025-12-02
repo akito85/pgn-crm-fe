@@ -1,12 +1,10 @@
 import { Checkbox, Spin, Tooltip } from "antd";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import BaseContainer from "../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
@@ -23,11 +21,18 @@ import {
 } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import TableRBI from "../../../../../components/TableRBI";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import CardContainer from "../../../../../components/CardContainer";
+import { clearBodyMessage } from "../../../../../redux/slices/general_slice";
 
 const BillingItemView = () => {
   // Selector
   const { data_view, data_ApprovalHistory, loading } = useSelector(
     (state) => state.billing_item
+  );
+  const { bodyError: bodyErrorGeneral } = useSelector(
+    (state) => state?.general
   );
 
   // Declaration
@@ -41,6 +46,10 @@ const BillingItemView = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status", "statusApproval", "action"],
+  }));
 
   const [modalInactive, setModalInactive] = useState(false);
   const [modalError, setModalError] = useState(false);
@@ -59,6 +68,13 @@ const BillingItemView = () => {
       })
     );
   }, [dispatch, search, page, pageSize, sort]);
+
+  // trigger modal try again from general slice
+  useEffect(() => {
+    if (bodyErrorGeneral?.response?.data?.code === 500) {
+      setModalError(true);
+    }
+  }, [bodyErrorGeneral]);
 
   const routes = [
     {
@@ -110,7 +126,7 @@ const BillingItemView = () => {
     });
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
+  const handleChangePage = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
     setPage(tempPage);
     setPageSize(pageSizeChange);
@@ -129,10 +145,10 @@ const BillingItemView = () => {
     setModalApprovalHistory(true);
   };
 
-  const onSort = (_, __, sort) => {
+  const onSort = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -154,14 +170,18 @@ const BillingItemView = () => {
   };
 
   const handleRetry = () => {
-    handleOk(bodyError?.body, bodyError?.handleClear);
+    if (bodyError?.body && bodyError?.handleClear) {
+      handleOk(bodyError?.body, bodyError?.handleClear);
+    }
     setModalError(false);
     setBodyError({});
+    dispatch(clearBodyMessage());
   };
 
   const handleCloseModalError = () => {
     setModalError(false);
     setBodyError({});
+    dispatch(clearBodyMessage());
   };
 
   const handleInactive = (data) => {
@@ -206,18 +226,6 @@ const BillingItemView = () => {
   // Grant Access Item
   const itemGrantAccess = [
     {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type={"submit"}
-          onClick={() => handleDownload()}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
-    {
       action: "Create",
       render: (
         <NavLink to={RBI_ROUTES.BILLING_ITEM_CREATE}>
@@ -233,6 +241,24 @@ const BillingItemView = () => {
 
     // Column Action Table
     {
+      action: "View",
+      type: "table",
+      render: (record) => {
+        return (
+          <Link
+            to={RBI_ROUTES.BILLING_ITEM_DETAIL}
+            state={{ id: record.billingItemCode }}
+          >
+            <Tooltip title="Detail">
+              <div>
+                <SVGIcon name="IconDetail" width={24} />
+              </div>
+            </Tooltip>
+          </Link>
+        );
+      },
+    },
+    {
       action: "Update",
       type: "table",
       render: (record, data) => {
@@ -244,15 +270,28 @@ const BillingItemView = () => {
         const linkContent =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={isEditable ? "#0075bf" : "#8D91A0"} width={24} />}
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={24}
+                />
+              }
               border={false}
               disabled={!isEditable}
             >
-              <span className="text-black ml-3"> Update</span>
+              <span
+                className={`ml-3 ${
+                  isEditable ? "text-black" : "text-[#8D91A0]"
+                }`}
+              >
+                {" "}
+                Update
+              </span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
-              <div className="pt-1">
+              <div>
                 <SVGIcon
                   name="IconEdit"
                   width={24}
@@ -313,7 +352,7 @@ const BillingItemView = () => {
             <Tooltip
               title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
             >
-              <div className="pt-1">
+              <div>
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
@@ -331,89 +370,109 @@ const BillingItemView = () => {
       action: "History",
       type: "table",
       render: (record, data) => {
-        const Content =  data > 3 ? (
-          <ButtonComponent
-            icon={
-              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-            }
-            border={false}
-            onClick={() => handleApprovalHistory(record.id)}
-          >
-            <span className={"text-black ml-3"}>Approval History</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title="Approval History">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={24}
-                onClick={() => handleApprovalHistory(record.id)}
-              />
-            </div>
-          </Tooltip>
-        );
-        return Content
-      },
-    },
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Link
-            to={RBI_ROUTES.BILLING_ITEM_DETAIL}
-            state={{ id: record.billingItemCode }}
-          >
-            <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+              }
+              border={false}
+              onClick={() => handleApprovalHistory(record.id)}
+            >
+              <span className={"text-black ml-3"}>Approval History</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Approval History">
+              <div>
+                <SVGIcon
+                  name="IconLogHistory"
+                  color={"#0075bf"}
+                  width={24}
+                  onClick={() => handleApprovalHistory(record.id)}
+                />
               </div>
             </Tooltip>
-          </Link>
-        );
+          );
+        return Content;
       },
     },
   ];
+
+  // Get base columns from TableBillingItem
+  const baseColumns = useMemo(() => {
+    return columns(
+      search,
+      page,
+      pageSize,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    );
+  }, [search, page, pageSize, searchedColumn, searchText]);
+
+  const actionCols = useColumnActionPermission(
+    ["view", "activate", "update", "history"],
+    itemGrantAccess
+  ).map((col) => ({
+    ...col,
+    width: 100,
+    align: "center",
+  }));
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
 
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <div className={"w-full flex justify-end gap-[20px]"}>
-          <Toolbar items={itemGrantAccess} />
-        </div>
-
-        <BaseContainer header={"BILLING ITEM list"}>
-          <div className={"w-full"}>
-            <TablePaginationNew
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">BILLING ITEM LIST</p>
+              <div className="mt-[15px] flex gap-[20px]">
+                <Toolbar items={itemGrantAccess} />
+              </div>
+            </div>
+          }
+        >
+          <div className="my-5">
+            <TableRBI
               dataSource={data_view?.result}
-              columns={[
-                ...columns(
-                  search,
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                ),
-                ...useColumnActionPermission(
-                  ["view", "activate", "update", "history"],
-                  itemGrantAccess
-                ),
-              ]}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
+              onChange={handleChangePage}
+              onSizeChanger={handleChangePage}
               totalData={data_view?.page?.totalElements || 0}
+              tableScrolled={{ x: 2300, y: 525 }}
               onSort={onSort}
-              tableScrolled={{ y: 525, x: 3300 }}
+              columnDefinitions={columnDefinitions}
+              handleDownload={handleDownload}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         {/* Modal Inactive */}
         {modalInactive ? (
@@ -454,7 +513,10 @@ const BillingItemView = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">
+              {bodyError?.message ||
+                bodyErrorGeneral?.response?.data?.message?.toString()}
+            </p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

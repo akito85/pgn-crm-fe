@@ -275,7 +275,7 @@ const ModalApprovalBilling = ({
         header="Approval Billing Information"
         handleCancel={handleCancelForm}
         onFinish={handleSave}
-        width={1200}
+        width={1000}
         footer={
           <div className="flex w-full justify-end gap-5">
             {current < steps.length - 1 && (
