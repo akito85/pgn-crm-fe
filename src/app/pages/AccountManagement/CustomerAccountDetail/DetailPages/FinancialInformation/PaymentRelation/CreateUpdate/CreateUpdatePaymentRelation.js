@@ -78,9 +78,6 @@ const CreatePaymentRelation = ({ type }) => {
   const [btnConfirm, setBtnConfirm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
 
-  const [modalError, setModalError] = useState(false);
-  const [bodyError, setBodyError] = useState({});
-
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
@@ -432,7 +429,7 @@ const CreatePaymentRelation = ({ type }) => {
             <ButtonComponent
               type={"submit"}
               icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              onClick={()=>{setModalBack(true)}}
+              onClick={()=>{navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD)}}
             >
               Back
             </ButtonComponent>
