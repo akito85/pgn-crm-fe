@@ -34,7 +34,14 @@ import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../../../../../utils";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
-import { createPaymentRelation, getDetailPaymentRelation, getDetailPrApprovalHierarchy, getPaymentRelation, getPrApprovalHierarchy, updatePaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import {
+  createPaymentRelation,
+  getDetailPaymentRelation,
+  getDetailPrApprovalHierarchy,
+  getPrApprovalHierarchy,
+  getPrAttachmentCategory,
+  updatePaymentRelation
+} from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 
 const CreatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -44,7 +51,6 @@ const CreatePaymentRelation = ({ type }) => {
   const dispatch = useDispatch();
   const {
     data_customerDetail,
-    data_globalIdentificationType,
     loading,
   } = useSelector((state) => state.customerAccount);
 
@@ -126,7 +132,6 @@ const CreatePaymentRelation = ({ type }) => {
         startDate,
         endDate,
         description,
-        attachments,
       } = detail_paymentRelation;
       formCreate.setFieldsValue({
         accountNumber,
@@ -135,13 +140,12 @@ const CreatePaymentRelation = ({ type }) => {
         startDate,
         endDate,
         description,
-        attachments,
       })
     }
-  }, [detail_paymentRelation])
+  }, [detail_paymentRelation]);
   
   useEffect(() => {
-    dispatch(getPrApprovalHierarchy())
+    dispatch(getPrApprovalHierarchy());
   }, []);
 
   const routes = [
@@ -247,18 +251,18 @@ const CreatePaymentRelation = ({ type }) => {
           dispatch={dispatch}
           className={`${current !== 2 ? "hidden" : ""}`}
           key={`payment-relation-tab-2`}
+          getAPICategory={getPrAttachmentCategory}
         />
       ),
       disabled: false
     },
   ];
-  
 
   const navigate = useNavigate();
   
   const next = async () => {
     try {
-      const values = await formCreate.validateFields(formFields[current]);
+      await formCreate.validateFields(formFields[current]);
     } catch (err) {
       return;
     }

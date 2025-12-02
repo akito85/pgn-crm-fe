@@ -4,8 +4,8 @@ import AttachmentPaymentRelation from "./AttachmentPaymentRelation";
 export default function AttachmentForm({
   type,
   value,
-  onChange,
-  typeSelector,
+  data,
+  updateData,
   dispatch,
   getAPICategory,
   mandatory,
@@ -18,11 +18,12 @@ export default function AttachmentForm({
       <AttachmentPaymentRelation
         type={type}
         value={value}
-        onChange={onChange}
-        typeSelector={typeSelector}
+        updateData={updateData}
         dispatch={dispatch}
         mandatory={mandatory}
         className={className}
+        getAPICategory={getAPICategory}
+        data={data}
       />
     </Form.Item>
   )
