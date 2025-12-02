@@ -1,5 +1,5 @@
 import { Form, Input, Select } from "antd";
-import React, { Fragment, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import SelectComponent from "../../../../../../../../../../components/SelectComponent";
 import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
@@ -225,7 +225,7 @@ const expandedRowRender = (record) => {
 const ApprovalHierarchy = ({
   dataTable = [],
   dataOption = [],
-  updateSelectHierarchy = () => {},
+  handleSelectHiararchy = () => {},
   selectedHierarchy,
   searchInput,
   searchedColumn,
@@ -235,10 +235,6 @@ const ApprovalHierarchy = ({
   disableSelect = false,
   approvalName,
 }) => {
-  const handleSelectHiararchy = (value) => {
-    updateSelectHierarchy(value);
-    return value;
-  };
   return (
     <Fragment>
       {showSelect ? (
@@ -248,14 +244,13 @@ const ApprovalHierarchy = ({
             { message: requiredMessage("Approval Hierarchy"), required: true },
           ]}
           className="no-margin-form w-1/3"
-          getValueFromEvent={handleSelectHiararchy}
           label={"Approval Hierarchy"}
           required
         >
-          <SelectComponent onChange={updateSelectHierarchy}>
+          <SelectComponent onChange={handleSelectHiararchy} value={selectedHierarchy}>
             {dataOption.map((data, index) => (
-              <Select.Option key={index} value={data.value}>
-                {data.name}
+              <Select.Option key={index} value={data.appHierId}>
+                {data.approvalName}
               </Select.Option>
             ))}
           </SelectComponent>

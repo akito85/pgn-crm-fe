@@ -34,7 +34,7 @@ import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../../../../../utils";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
-import { createPaymentRelation, getDetailPaymentRelation, getPaymentRelation, getPrApprovalHierarchy, updatePaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { createPaymentRelation, getDetailPaymentRelation, getDetailPrApprovalHierarchy, getPaymentRelation, getPrApprovalHierarchy, updatePaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 
 const CreatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -55,6 +55,7 @@ const CreatePaymentRelation = ({ type }) => {
 
   const {
     data_approvalHierarchy,
+    detail_approvalHierarchy,
     detail_paymentRelation,
     isPrSuccess,
   } = useSelector((state) => state.financialInformation);
@@ -66,8 +67,7 @@ const CreatePaymentRelation = ({ type }) => {
   const idCustomer = location?.state?.idCustomer;
   const idPr = location?.state?.idPr;
   const accountType = location?.state?.type; // "standard" or "onetime"
-  // const id = 7;
-    
+
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
   const [data, setData] = useState({});
@@ -198,11 +198,6 @@ const CreatePaymentRelation = ({ type }) => {
     }
   }, [dispatch, idAccount, idCustomer, accountType]);
 
-  useEffect(() => {
-    formCreate.setFieldValue("attachments", dataAttachment);
-    console.log("dataAttachment", dataAttachment)
-  }, [dataAttachment]);
-
   const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}` 
   
   const setAccount = (accountNumber, accountName) => {
@@ -210,59 +205,10 @@ const CreatePaymentRelation = ({ type }) => {
     formCreate.setFieldValue("accountName", accountName);
   }
 
-  const dummyHieararchyOptions = [
-    {
-      name: "Data 1",
-      value: 1,
-    },
-    {
-      name: "Data 2",
-      value: 2,
-    },
-    {
-      name: "Data 3",
-      value: 3,
-    },
-  ];
-
-  const dummyHierarchyTableData = [
-    {
-      key: 1,
-      approvalLevel: "Data 1 Hierarchy",
-      position: "Data 1 Position",
-      dataExpand: [
-        {
-          employeeName: "Abimana",
-        },
-        {
-          employeeName: "Arya",
-        },
-      ],
-    },
-    {
-      key: 2,
-      approvalLevel: "Data 2 Hierarchy",
-      position: "Data 2 Position",
-      dataExpand: [
-        {
-          employeeName: "Juno",
-        },
-        {
-          employeeName: "Mamat",
-        },
-      ],
-    },
-    {
-      key: 3,
-      approvalLevel: "Data 3 Hierarchy",
-      position: "Data 3 Position",
-      dataExpand: [
-        {
-          employeeName: "Agus",
-        },
-      ],
-    },
-  ];
+  const handleSelectHiararchy = (appHierId) => {
+    dispatch(getDetailPrApprovalHierarchy({id: appHierId}));
+    setSelectedHierarchy(appHierId);
+  }
 
   const steps = [
     {
@@ -274,10 +220,17 @@ const CreatePaymentRelation = ({ type }) => {
       title: "Approval",
       content: (
         <ApprovalForm
-          dataTable={dummyHierarchyTableData}
-          dataOption={dummyHieararchyOptions}
+          dataTable={detail_approvalHierarchy.map((detail, index) => ({
+            ...detail,
+            employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
+              ...employeeDetail,
+              key: `employee-detail-${index}`
+            })),
+            key: `detail-detail-${index}`,
+          }))}
+          dataOption={data_approvalHierarchy}
           selectedHierarchy={selectedHierarchy}
-          updateSelectedHierarchy={setSelectedHierarchy}
+          handleSelectHiararchy={handleSelectHiararchy}
           className={`${current !== 1 ? "hidden" : ""}`}
           key={`payment-relation-tab-1`}
         />
@@ -525,8 +478,11 @@ const CreatePaymentRelation = ({ type }) => {
           handleCancel={() => handleSetShowConfirmationModal(false)}
           handleOk={() => handleSetShowConfirmationModal(false)}
           selectedHierarchy={selectedHierarchy}
-          hierarchyTableData={dummyHierarchyTableData}
-          hieararchyOptionData={dummyHieararchyOptions}
+          hierarchyTableData={detail_approvalHierarchy.map((detail) => ({
+            ...detail,
+            key: detail.appHierId,
+          }))}
+          hieararchyOptionData={data_approvalHierarchy}
           type={confirmationType}
         />
       </div>
