@@ -31,7 +31,9 @@ const GeneralTemplateView = () => {
   const { data_list, data_approval_history, loading } = useSelector(
     (state) => state.general_template
   );
-  const { bodyError: bodyErrorGeneral } = useSelector((state) => state?.general);
+  const { bodyError: bodyErrorGeneral } = useSelector(
+    (state) => state?.general
+  );
 
   // Declaration
   const searchInput = useRef(null);
@@ -301,11 +303,24 @@ const GeneralTemplateView = () => {
         const linkContent =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={isEditable ? "#0075bf" : "#8D91A0"} width={24} />}
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={24}
+                />
+              }
               border={false}
               disabled={!isEditable}
             >
-              <span className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"}`}> Update</span>
+              <span
+                className={`ml-3 ${
+                  isEditable ? "text-black " : "text-[#8D91A0]"
+                }`}
+              >
+                {" "}
+                Update
+              </span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
@@ -438,12 +453,10 @@ const GeneralTemplateView = () => {
   );
 
   const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns, ...actionCols].map(
-      (col) => ({
-        ...col,
-        key: col.key || col.dataIndex || col.title,
-      })
-    );
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
     return columnsWithKeys;
   }, [baseColumns, actionCols]);
 
@@ -467,7 +480,7 @@ const GeneralTemplateView = () => {
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">GENERAL TEMPLATE LIST</p>
-              <div className="mt-[15px] flex gap-[20px]">
+              <div className="flex gap-[20px]">
                 <Toolbar items={itemGrantAccess} />
               </div>
             </div>
@@ -518,7 +531,10 @@ const GeneralTemplateView = () => {
                 <SVGIcon name="IconFailed" width={48} />
                 <p className="text-[18px] font-bold">{"Failed"}</p>
               </div>
-              <p className="pl-[70px]">{bodyError?.message || bodyErrorGeneral?.response?.data?.message?.toString()}</p>
+              <p className="pl-[70px]">
+                {bodyError?.message ||
+                  bodyErrorGeneral?.response?.data?.message?.toString()}
+              </p>
               <p className="pl-[70px]">Please try again.</p>
             </div>
           </ModalError>

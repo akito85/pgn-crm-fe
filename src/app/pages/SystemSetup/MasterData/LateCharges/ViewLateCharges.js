@@ -3,7 +3,11 @@ import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { Alert, Checkbox, Form, Spin, Tooltip } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import { InfoCircleOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import {
+  InfoCircleOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { Link, NavLink } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,15 +19,19 @@ import {
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
-import { formMessageRequired, hasValue, renderColumn } from '../../../../../utils';
-import { clearBodyMessage } from '../../../../../redux/slices/general_slice';
-import { useColumnActionPermission } from '../../../../../components/ColumnActionPermission';
-import Toolbar from '../../../../../components/Toolbar';
-import TableRBI from '../../../../../components/TableRBI';
-import { applyFixedColumns } from '../../../../../utils/applyFixedColumns';
-import CardContainer from '../../../../../components/CardContainer';
-import ModalCustom from '../../../../../components/Modal/ModalCustom';
-import InputComponent from '../../../../../components/InputComponent';
+import {
+  formMessageRequired,
+  hasValue,
+  renderColumn,
+} from "../../../../../utils";
+import { clearBodyMessage } from "../../../../../redux/slices/general_slice";
+import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import Toolbar from "../../../../../components/Toolbar";
+import TableRBI from "../../../../../components/TableRBI";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import CardContainer from "../../../../../components/CardContainer";
+import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import InputComponent from "../../../../../components/InputComponent";
 
 const ViewLateCharges = () => {
   const { data, loading } = useSelector((state) => state.late_charge);
@@ -38,9 +46,9 @@ const ViewLateCharges = () => {
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [openModalActivation, setOpenModalActivation] = useState(false);
-  const [typeStatus, setTypeStatus] = useState('');
+  const [typeStatus, setTypeStatus] = useState("");
   const [lateChargeId, setLateChargeId] = useState(null);
-  const [lateChargeName, setLateChargeName] = useState('');
+  const [lateChargeName, setLateChargeName] = useState("");
   const [modalError, setModalError] = useState(false);
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
@@ -52,7 +60,9 @@ const ViewLateCharges = () => {
   // use effect
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(getLateChargePaginate({ search: reqSearch, sort, page, pageSize }));
+    dispatch(
+      getLateChargePaginate({ search: reqSearch, sort, page, pageSize })
+    );
   }, [dispatch, page, pageSize, search, sort]);
 
   // trigger modal try again
@@ -95,223 +105,238 @@ const ViewLateCharges = () => {
   const handleSaveActivation = async (formValue) => {
     const body = {
       ...formValue,
-      lateChargeId: lateChargeId
+      lateChargeId: lateChargeId,
     };
-    const activeOrInactive = typeStatus === "ACTIVE" ? "inactivate" : "activate";
-    await dispatch(activeInactiveLateCharge({ body, activeOrInactive })).unwrap();
+    const activeOrInactive =
+      typeStatus === "ACTIVE" ? "inactivate" : "activate";
+    await dispatch(
+      activeInactiveLateCharge({ body, activeOrInactive })
+    ).unwrap();
     setOpenModalActivation(false);
     const reqSearch = encodeURIComponent(JSON.stringify(search));
-    await dispatch(getLateChargePaginate({ page, pageSize, sort, search: reqSearch })).unwrap();
+    await dispatch(
+      getLateChargePaginate({ page, pageSize, sort, search: reqSearch })
+    ).unwrap();
     form.resetFields();
   };
 
   // base columns with useMemo
-  const baseColumns = useMemo(() => [
-    {
-      key: "no",
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      key: "name",
-      title: "LATE CHARGE NAME",
-      dataIndex: "name",
-      sorter: true,
-      width: 240,
-      ellipsis: {
-        showTitle: false,
+  const baseColumns = useMemo(
+    () => [
+      {
+        key: "no",
+        title: "NO",
+        width: 60,
+        align: "center",
+        render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
-      filteredValue: [search?.name] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "name",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'name',
-        hasValue(search["name"]),
-        searchText,
-        text,
-        true,
-        'input',
-        search
-      )
-    },
-    {
-      key: "currency",
-      title: "CURRENCY",
-      dataIndex: "currency",
-      align: "center",
-      sorter: true,
-      width: 140,
-      filteredValue: [search?.currency] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "currency",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'currency',
-        hasValue(search["currency"]),
-        searchText,
-        text,
-        false,
-        'input',
-        search
-      )
-    },
-    {
-      key: "criteria",
-      title: "CRITERIA",
-      dataIndex: "criteria",
-      align: "left",
-      sorter: true,
-      width: 240,
-      ellipsis: {
-        showTitle: false,
+      {
+        key: "name",
+        title: "LATE CHARGE NAME",
+        dataIndex: "name",
+        sorter: true,
+        width: 240,
+        ellipsis: {
+          showTitle: false,
+        },
+        filteredValue: [search?.name] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "name",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "name",
+            hasValue(search["name"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
       },
-      filteredValue: [search?.criteria] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "criteria",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'criteria',
-        hasValue(search["criteria"]),
-        searchText,
-        text,
-        true,
-        'input',
-        search
-      )
-    },
-    {
-      key: "maxAmount",
-      title: "LATE CHARGE MAXIMUM AMOUNT",
-      dataIndex: "maxAmount",
-      align: "right",
-      sorter: true,
-      width: 320,
-      filteredValue: [search?.maxAmountReal] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "maxAmountReal",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'maxAmount',
-        hasValue(search["maxAmountReal"]),
-        searchText,
-        text,
-        true,
-        'input',
-        search
-      )
-    },
-    {
-      key: "formula",
-      title: "LATE CHARGE RULE FORMULA",
-      dataIndex: "formula",
-      sorter: true,
-      width: 320,
-      ellipsis: {
-        showTitle: false,
+      {
+        key: "currency",
+        title: "CURRENCY",
+        dataIndex: "currency",
+        align: "center",
+        sorter: true,
+        width: 140,
+        filteredValue: [search?.currency] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "currency",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "currency",
+            hasValue(search["currency"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
       },
-      filteredValue: [search?.formula] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "formula",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'formula',
-        hasValue(search["formula"]),
-        searchText,
-        text,
-        true,
-        'input',
-        search
-      )
-    },
-    {
-      key: "description",
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      sorter: true,
-      width: 240,
-      ellipsis: {
-        showTitle: false,
+      {
+        key: "criteria",
+        title: "CRITERIA",
+        dataIndex: "criteria",
+        align: "left",
+        sorter: true,
+        width: 240,
+        ellipsis: {
+          showTitle: false,
+        },
+        filteredValue: [search?.criteria] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "criteria",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "criteria",
+            hasValue(search["criteria"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
       },
-      filteredValue: [search?.description] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "description",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'description',
-        hasValue(search["description"]),
-        searchText,
-        text,
-        true,
-        'input',
-        search
-      )
-    },
-    {
-      key: "status",
-      title: "STATUS",
-      dataIndex: "status",
-      sorter: true,
-      width: 120,
-      filteredValue: [search?.status] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn(
-        'status',
-        hasValue(search["status"]),
-        searchText,
-        text,
-        false,
-        'status',
-        search
-      )
-    },
-  ], [page, pageSize, search, searchText, searchedColumn]);
+      {
+        key: "maxAmount",
+        title: "LATE CHARGE MAXIMUM AMOUNT",
+        dataIndex: "maxAmount",
+        align: "right",
+        sorter: true,
+        width: 320,
+        filteredValue: [search?.maxAmountReal] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "maxAmountReal",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "maxAmount",
+            hasValue(search["maxAmountReal"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "formula",
+        title: "LATE CHARGE RULE FORMULA",
+        dataIndex: "formula",
+        sorter: true,
+        width: 320,
+        ellipsis: {
+          showTitle: false,
+        },
+        filteredValue: [search?.formula] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "formula",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "formula",
+            hasValue(search["formula"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "description",
+        title: "DESCRIPTION",
+        dataIndex: "description",
+        sorter: true,
+        width: 240,
+        ellipsis: {
+          showTitle: false,
+        },
+        filteredValue: [search?.description] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "description",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "description",
+            hasValue(search["description"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "status",
+        title: "STATUS",
+        dataIndex: "status",
+        sorter: true,
+        width: 120,
+        filteredValue: [search?.status] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "status",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "status",
+            hasValue(search["status"]),
+            searchText,
+            text,
+            false,
+            "status",
+            search
+          ),
+      },
+    ],
+    [page, pageSize, search, searchText, searchedColumn]
+  );
 
   // Breadcrumbs
   const routes = [
@@ -339,7 +364,9 @@ const ViewLateCharges = () => {
   const onSort = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined
-        ? `${sorter.field === "maxAmount" ? "maxAmountReal" : sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        ? `${sorter.field === "maxAmount" ? "maxAmountReal" : sorter.field}~${
+            sorter.order === "ascend" ? "asc" : "desc"
+          }`
         : "";
     setSort(dataSort);
   };
@@ -354,7 +381,9 @@ const ViewLateCharges = () => {
   const handleConfirm = () => {
     if (bodyError?.action === "GET_LATE_CHARGE_PAGINATE") {
       const reqSearch = encodeURIComponent(JSON.stringify(search));
-      dispatch(getLateChargePaginate({ search: reqSearch, sort, page, pageSize }));
+      dispatch(
+        getLateChargePaginate({ search: reqSearch, sort, page, pageSize })
+      );
     } else if (bodyError?.action === "DOWNLOAD_LATE_CHARGE") {
       handleDownload();
     } else {
@@ -379,7 +408,7 @@ const ViewLateCharges = () => {
   const itemActions = [
     //action toolbar
     {
-      action: 'Upload',
+      action: "Upload",
       render: (
         <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.UPLOAD_LATE_CHARGES}>
           <ButtonComponent
@@ -389,10 +418,10 @@ const ViewLateCharges = () => {
             Upload
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_LATE_CHARGES}>
           <ButtonComponent
@@ -402,7 +431,7 @@ const ViewLateCharges = () => {
             Create Late Charge
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // Column Action Table
@@ -421,8 +450,8 @@ const ViewLateCharges = () => {
               </div>
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
       action: "Update",
@@ -430,11 +459,16 @@ const ViewLateCharges = () => {
       render: (record, data) => {
         return (
           <Tooltip title="Update">
-            {record?.status === "INACTIVE" ?
+            {record?.status === "INACTIVE" ? (
               <div className={"cursor-not-allowed"}>
-                <SVGIcon name="IconEdit" width={24} color={"#C0BEC6"} className={"cursor-not-allowed"} />
+                <SVGIcon
+                  name="IconEdit"
+                  width={24}
+                  color={"#C0BEC6"}
+                  className={"cursor-not-allowed"}
+                />
               </div>
-              :
+            ) : (
               <Link
                 to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_LATE_CHARGES}
                 state={{ id: record?.lateChargeId }}
@@ -443,27 +477,31 @@ const ViewLateCharges = () => {
                   <SVGIcon name="IconEdit" width={24} />
                 </div>
               </Link>
-            }
+            )}
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
       action: "Activate",
       type: "table",
       render: (record, data) => {
         return (
-          <Tooltip title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}>
+          <Tooltip
+            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+          >
             <div>
               <Checkbox
-                onClick={() => { handleActiveOrInactive(record) }}
+                onClick={() => {
+                  handleActiveOrInactive(record);
+                }}
                 checked={record?.status === "ACTIVE" ? false : true}
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
+        );
+      },
+    },
   ];
 
   const actionCols = useColumnActionPermission(
@@ -472,12 +510,10 @@ const ViewLateCharges = () => {
   );
 
   const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns, ...actionCols].map(
-      (col) => ({
-        ...col,
-        key: col.key || col.dataIndex || col.title,
-      })
-    );
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
     return columnsWithKeys;
   }, [baseColumns, actionCols]);
 
@@ -501,7 +537,7 @@ const ViewLateCharges = () => {
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">LATE CHARGE LIST</p>
-              <div className="mt-[15px] flex gap-[20px]">
+              <div className="flex gap-[20px]">
                 <Toolbar items={itemActions} />
               </div>
             </div>
@@ -529,7 +565,9 @@ const ViewLateCharges = () => {
 
         <ModalCustom
           isOpen={openModalActivation}
-          header={`${typeStatus === "ACTIVE" ? "INACTIVATE" : "ACTIVATE"} INFORMATION`}
+          header={`${
+            typeStatus === "ACTIVE" ? "INACTIVATE" : "ACTIVATE"
+          } INFORMATION`}
           width={700}
           type={"confirmation"}
           handleCancel={handleCancel}
@@ -552,11 +590,13 @@ const ViewLateCharges = () => {
             id="inactivateForm"
             form={form}
             onFinish={handleSaveActivation}
-            layout='vertical'
+            layout="vertical"
           >
             <div className="flex flex-col gap-6">
               <Alert
-                message={`Are you sure want to ${typeStatus === "ACTIVE" ? "inactivate" : "activate"} late charge named ${lateChargeName}?`}
+                message={`Are you sure want to ${
+                  typeStatus === "ACTIVE" ? "inactivate" : "activate"
+                } late charge named ${lateChargeName}?`}
                 icon={<InfoCircleOutlined />}
                 type={"warning"}
                 showIcon
@@ -564,7 +604,7 @@ const ViewLateCharges = () => {
               />
               <Form.Item
                 name={"remark"}
-                label={'Remark'}
+                label={"Remark"}
                 rules={formMessageRequired("remark")}
                 className="w-full"
               >
@@ -590,7 +630,9 @@ const ViewLateCharges = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{bodyError?.response?.data?.message?.toString()}</p>
+            <p className="pl-[70px]">
+              {bodyError?.response?.data?.message?.toString()}
+            </p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

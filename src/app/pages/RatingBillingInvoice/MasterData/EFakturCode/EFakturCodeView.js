@@ -1,52 +1,53 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
-import BreadCrumb from "../../../../../../components/BreadCrumb";
-import SVGIcon from "../../../../../../assets/Icon";
-import ButtonComponent from "../../../../../../components/ButtonComponent";
+import React, { useEffect, useState, useRef, useMemo } from "react";
+import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { Checkbox, Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
-import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
+import BreadCrumb from "../../../../../components/BreadCrumb";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getBillingCycleList,
-  downloadBillingCycle,
-  getApprovalHierarchy,
-  getDetailApproval,
-  inactiveBillingCycle,
-} from "../../../../../../redux/slices/rating_billing_invoice/MasterData/billingCycle";
-import { Checkbox, Form, Spin, Tooltip } from "antd";
-import TableRBI from "../../../../../../components/TableRBI";
-import ModalInactivateWithHierarchy from "../../../../../../components/Modal/ModalInactivateWithHierarchy";
-import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
-import { columnsBillingCycleList } from "../Table/TableBillingCycleList";
-import ModalHistory from "../../../../../../components/Modal/ModalHistory";
-import { getApprovalHistory } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/billingCycle";
-import Toolbar from "../../../../../../components/Toolbar";
-import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
-import CardContainer from "../../../../../../components/CardContainer";
+import SVGIcon from "../../../../../assets/Icon/index";
+import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
+import { columnsEFakturCode } from "./Table/TableEFakturCode";
+// import { getAllEFakturCodePaginate, downloadEFakturCode, getApprovalHistory, getListApprovalHierarchy, getListApprovalHierarchyDetail, inactiveEFakturCode } from "../../../../../redux/slices/rating_billing_invoice/MasterData/efakturCode"; // Placeholder for future slice
+import TableRBI from "../../../../../components/TableRBI";
+import ModalHistory from "../../../../../components/Modal/ModalHistory";
+import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
+import { ModalError } from "../../../../../components/Modal/ModalPopUp";
+import Toolbar from "../../../../../components/Toolbar";
+import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import CardContainer from "../../../../../components/CardContainer";
 
-const BillingCycleView = ({ type }) => {
-  const searchInput = useRef(null);
+const EFakturCodeView = () => {
+  // Placeholder for selector - replace with actual slice when available
+  // const { data, loading, data_approval_history } = useSelector((state) => state.efaktur_code);
+  const data = { result: [], page: { totalElements: 0 } }; // Dummy data
+  const loading = false;
+  const data_approval_history = null;
+
+  // Declaration
   const dispatch = useDispatch();
-  const [form] = Form.useForm();
+  const searchInput = useRef(null);
+  const dataSource = data?.result;
+
+  // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [sort, setSort] = useState("");
-  const [search, setSearch] = useState({});
-  const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [search, setSearch] = useState({});
+  const [sort, setSort] = useState("");
+
   const [modalInactive, setModalInactive] = useState(false);
-  const [modalError, setModalError] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
-  const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
+  const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
+  const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [chooseId, setChooseId] = useState();
-  const { data_list_billing_cycle, loading, dataApprovalHistory } = useSelector(
-    (state) => state.billingCycle
-  );
 
   // ✅ State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
-    const saved = localStorage.getItem("billingCycleFixedColumns");
+    const saved = localStorage.getItem("efakturCodeFixedColumns");
     return saved
       ? JSON.parse(saved)
       : {
@@ -58,11 +59,37 @@ const BillingCycleView = ({ type }) => {
   // ✅ Save to localStorage when fixedColumns change
   useEffect(() => {
     localStorage.setItem(
-      "billingCycleFixedColumns",
+      "efakturCodeFixedColumns",
       JSON.stringify(fixedColumns)
     );
   }, [fixedColumns]);
 
+  // Use Effect - Placeholder for data fetching
+  useEffect(() => {
+    // dispatch(getAllEFakturCodePaginate({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }));
+  }, [search, sort, page, pageSize, dispatch]);
+
+  useEffect(() => {
+    if (data_approval_history) {
+      const temp = {
+        dataApprover: {
+          create: data_approval_history?.dataApprover?.EFAKTUR_CODE || [],
+          inactive:
+            data_approval_history?.dataApprover?.INACTIVE_EFAKTUR_CODE || [],
+        },
+        dataHistory: {
+          create: data_approval_history?.dataHistory?.EFAKTUR_CODE || [],
+          inactive:
+            data_approval_history?.dataHistory?.INACTIVE_EFAKTUR_CODE || [],
+        },
+      };
+      setDataApprovalHistory(temp);
+    } else {
+      setDataApprovalHistory({});
+    }
+  }, [data_approval_history]);
+
+  // Breadcrumbs
   const routes = [
     {
       path: "",
@@ -73,46 +100,12 @@ const BillingCycleView = ({ type }) => {
       breadcrumbName: "Master Data",
     },
     {
-      path: "",
-      breadcrumbName: "Billing Cycle",
+      path: RBI_ROUTES.EFAKTUR_CODE,
+      breadcrumbName: "E-Faktur Code",
     },
   ];
 
-  const handleDownload = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(
-      downloadBillingCycle({ search: tempSearch, page, pageSize, sort })
-    );
-  };
-
-  const handleApprovalHistory = (r) => {
-    dispatch(getApprovalHistory(r));
-    setModalApprovalHistory(true);
-  };
-
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
-  const onSort = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
-  };
-
+  // Handle Search Table
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -128,45 +121,11 @@ const BillingCycleView = ({ type }) => {
     });
   };
 
-  useEffect(() => {
-    dispatch(
-      getBillingCycleList({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [dispatch, search, page, pageSize, sort]);
-
-  useEffect(() => {
-    if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
-      const temp = {
-        dataApprover: {
-          create: dataApprovalHistory?.dataApprover?.BILLING_CYCLE || [],
-          inactive:
-            dataApprovalHistory?.dataApprover?.INACTIVE_BILLING_CYCLE || [],
-        },
-        dataHistory: {
-          create: dataApprovalHistory?.dataHistory?.BILLING_CYCLE || [],
-          inactive:
-            dataApprovalHistory?.dataHistory?.INACTIVE_BILLING_CYCLE || [],
-        },
-      };
-      setDataApprovalHistoryFix(temp);
-    } else {
-      setDataApprovalHistoryFix({});
-    }
-  }, [dataApprovalHistory]);
-
-  const handleInactive = (data) => {
-    setChooseId(data);
-    setModalInactive(true);
-  };
-
-  const handleCancel = () => {
-    setChooseId();
-    setModalInactive(false);
+  // Handle Change Page Table
+  const handleChange = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
+    setPageSize(pageSizeChange);
   };
 
   const handleRetry = () => {
@@ -180,8 +139,17 @@ const BillingCycleView = ({ type }) => {
     setBodyError({});
   };
 
+  // Handle Sort Table
+  const onSort = (_, __, sort) => {
+    const dataSort =
+      sort.order !== undefined
+        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
+  };
+
   const handleOptions = () => {
-    const data = dataApprovalHistoryFix?.dataApprover || {};
+    const data = dataApprovalHistory?.dataApprover || {};
     const keyData = Object.keys(data);
     return keyData.map((item) => ({
       value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
@@ -189,58 +157,44 @@ const BillingCycleView = ({ type }) => {
   };
 
   const handleOk = (res, handleClear) => {
-    const dataValue = {
-      billingCycleId: chooseId.billingCycleId,
-      appHierId: res.approvalHierarchy,
-      remark: res.remark,
-    };
-    dispatch(inactiveBillingCycle(dataValue))
-      .unwrap()
-      .then(() => {
-        handleClear();
-        handleCancel();
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-        dispatch(
-          getBillingCycleList({
-            search: tempSearch,
-            page,
-            pageSize,
-            sort,
-          })
-        );
-      })
-      .catch((error) => {
-        if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-          const message =
-            (error.response &&
-              error.response.data &&
-              error.response.data.message) ||
-            error.message ||
-            error.toString();
-          setBodyError({ body: { ...res }, handleClear, message });
-          setModalError(true);
-        }
-      });
+    // Placeholder for inactive action
+    // const dataValue = { efakturCode: chooseId.efakturCode, apphierId: res.approvalHierarchy, remark: res.remark };
+    // dispatch(inactiveEFakturCode(dataValue)).unwrap().then(() => { handleClear(); handleCancel(); ... });
   };
 
-  // Grant Access Item
+  // Handle Approval History
+  const handleApprovalHistory = (id) => {
+    // dispatch(getApprovalHistory(id));
+    setModalApprovalHistory(true);
+  };
+
+  // Handle Modal Confirmation Inactive
+  const handleInactive = (data) => {
+    setChooseId(data);
+    setModalInactive(true);
+  };
+
+  // Handle Cancel Modal Confirmation Inactive
+  const handleCancel = () => {
+    setChooseId();
+    setModalInactive(false);
+  };
+
+  // Handle Download
+  const handleDownload = () => {
+    // Placeholder for download
+    // let tempSearch = ""; ... dispatch(downloadEFakturCode({ page, pageSize, sort, search: tempSearch }));
+  };
+
+  // Grant Access Item - moved outside useMemo
   const itemGrantAccess = [
     // {
     //   action: "Download",
     //   render: (
     //     <ButtonComponent
     //       type={"submit"}
-    //       border={false}
-    //       icon={<SVGIcon name="IconButtonDownload" width={24} />}
+    //       icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+    //       onClick={() => handleDownload()}
     //     >
     //       Download List
     //     </ButtonComponent>
@@ -249,13 +203,12 @@ const BillingCycleView = ({ type }) => {
     {
       action: "Create",
       render: (
-        <NavLink to={RBI_ROUTES.BILLING_CYCLE_CREATE}>
+        <NavLink to={RBI_ROUTES.EFAKTUR_CODE_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
-            type={"submit"}
-            border={false}
+            icon={<PlusOutlined style={{ fontSize: "24px" }} />}
+            type="submit"
           >
-            Create Billing Cycle
+            Create E-Faktur Code
           </ButtonComponent>
         </NavLink>
       ),
@@ -267,18 +220,9 @@ const BillingCycleView = ({ type }) => {
       type: "table",
       render: (record) => {
         return (
-          <Link
-            to={RBI_ROUTES.BILLING_CYCLE_DETAIL}
-            state={{
-              id: record.billingCycleId,
-              action: record.status,
-              statusApproval: record.statusApproval,
-            }}
-          >
+          <Link to={RBI_ROUTES.EFAKTUR_CODE_DETAIL} state={{ id: record.id }}>
             <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
+              <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         );
@@ -330,11 +274,11 @@ const BillingCycleView = ({ type }) => {
 
         return isEditable ? (
           <Link
-            to={RBI_ROUTES.BILLING_CYCLE_UPDATE}
+            to={RBI_ROUTES.EFAKTUR_CODE_UPDATE}
             state={{
-              status: record?.status,
-              statusApproval: record?.statusApproval,
-              id: record?.billingCycleId,
+              id: record.id,
+              status: record.status,
+              statusApproval: record.statusApproval,
             }}
           >
             {linkContent}
@@ -405,7 +349,7 @@ const BillingCycleView = ({ type }) => {
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
               border={false}
-              onClick={() => handleApprovalHistory(record.billingCycleId)}
+              onClick={() => handleApprovalHistory(record.efakturCode)}
             >
               <span className={"text-black ml-3"}>Approval History</span>
             </ButtonComponent>
@@ -416,7 +360,7 @@ const BillingCycleView = ({ type }) => {
                   name="IconLogHistory"
                   color={"#0075bf"}
                   width={24}
-                  onClick={() => handleApprovalHistory(record.billingCycleId)}
+                  onClick={() => handleApprovalHistory(record.efakturCode)}
                 />
               </div>
             </Tooltip>
@@ -429,29 +373,27 @@ const BillingCycleView = ({ type }) => {
 
   // ✅ Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
-    ["activate", "view", "update", "history"],
+    ["view", "activate", "update", "history"],
     itemGrantAccess
   );
 
   // ✅ Get base columns with key property
   const baseColumns = useMemo(() => {
-    const billingCycleCols = [
-      ...columnsBillingCycleList(
+    const efakturCodeCols = [
+      ...columnsEFakturCode(
         search,
         page,
         pageSize,
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
-        handleApprovalHistory,
-        handleInactive
+        handleSearch
       ),
       ...actionColumns,
     ];
 
     // Add 'key' property to columns that don't have it
-    const columnsWithKeys = billingCycleCols.map((col) => ({
+    const columnsWithKeys = efakturCodeCols.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
@@ -492,7 +434,7 @@ const BillingCycleView = ({ type }) => {
       if (fixedColumns.left.includes(colKey)) {
         newCol.fixed = "left";
       } else if (fixedColumns.right.includes(colKey)) {
-        newCol.fixed = "right";
+        delete newCol.fixed;
       } else {
         delete newCol.fixed;
       }
@@ -509,22 +451,25 @@ const BillingCycleView = ({ type }) => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold w-full">BILLING CYCLE LIST</p>
+              <p className="w-full mt-[15px] font-bold text-primary">
+                E-FAKTUR CODE LIST
+              </p>
+
               <Toolbar items={itemGrantAccess} />
             </div>
           }
         >
-          <div className="w-full">
+          <div className={"w-full"}>
             <TableRBI
-              dataSource={data_list_billing_cycle?.result}
+              dataSource={dataSource}
               columns={columns}
               current={page}
               pageSize={pageSize}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
-              totalData={data_list_billing_cycle?.page?.totalElements}
-              tableScrolled={{ y: 525, x: 2200 }}
+              onChange={handleChange}
+              onSizeChanger={handleChange}
+              totalData={data?.page?.totalElements || 0}
               onSort={onSort}
+              tableScrolled={{ y: 525, x: 1000 }}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
@@ -533,30 +478,32 @@ const BillingCycleView = ({ type }) => {
           </div>
         </CardContainer>
 
-        {/* Modal approval history */}
-        <ModalHistory
-          isOpen={modalApprovalHistory && dataApprovalHistoryFix}
+        {/* Modal Approval History */}
+        {/* <ModalHistory
+          isOpen={modalApprovalHistory && dataApprovalHistory}
           handleClose={() => setModalApprovalHistory(false)}
           header={"Approval History"}
-          width={850}
+          width={1000}
           tabOptions={handleOptions()}
-          dataApprover={dataApprovalHistoryFix?.dataApprover}
-          dataHistory={dataApprovalHistoryFix?.dataHistory}
-        />
+          dataApprover={dataApprovalHistory?.dataApprover}
+          dataHistory={dataApprovalHistory?.dataHistory}
+        /> */}
 
-        <ModalInactivateWithHierarchy
-          selector={"billingCycle"}
+        {/* Modal Inactive */}
+        {/* <ModalInactivateWithHierarchy
+          selector={"efaktur_code"} // Placeholder
           dispatch={dispatch}
-          getAPIOption={getApprovalHierarchy}
-          getAPIDetail={getDetailApproval}
-          alertMessage={`Are you sure you want to inactivate this Billing Cycle with Begin Cycle ${
-            chooseId?.beginCycle || ""
+          getAPIOption={() => {}} // Placeholder
+          getAPIDetail={() => {}} // Placeholder
+          alertMessage={`Are you sure you want to inactivate this E-Faktur Code with name ${
+            chooseId?.efakturCode || ""
           }?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
-        />
+        /> */}
 
+        {/* Modal Modal Error Inactive */}
         <ModalError
           isOpen={modalError}
           handleOk={handleRetry}
@@ -577,4 +524,4 @@ const BillingCycleView = ({ type }) => {
   );
 };
 
-export default BillingCycleView;
+export default EFakturCodeView;
