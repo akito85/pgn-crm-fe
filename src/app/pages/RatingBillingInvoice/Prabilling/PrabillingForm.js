@@ -255,47 +255,46 @@ const PrabillingForm = ({ type }) => {
           calCode: null,
           mreadingCode: id,
         };
-      }
-    ),
-    rRbiCalculationAccountSegment: (formValue?.accountSegment || []).map(
-      (id) => {
-        return {
-          id: null,
-          calCode: null,
-          accSegment: id,
-        };
-      }
-    ),
-    rRbiCalculationAccountGroupType: (formValue?.accountGroupType || []).map(
-      (id) => {
-        return {
-          id: null,
-          calCode: null,
-          accGroupType: id,
-        };
-      }
-    ),
-    rRbiCalculationSpecificCustomer: (formValue?.specificCustomer || []).map(
-      (id) => {
-        return {
-          id: null,
-          calCode: null,
-          custNumb: id,
-        };
-      }
-    ),
+      }),
+      rRbiCalculationAccountSegment: (formValue?.accountSegment || []).map(
+        (id) => {
+          return {
+            id: null,
+            calCode: null,
+            accSegment: id,
+          };
+        }
+      ),
+      rRbiCalculationAccountGroupType: (formValue?.accountGroupType || []).map(
+        (id) => {
+          return {
+            id: null,
+            calCode: null,
+            accGroupType: id,
+          };
+        }
+      ),
+      rRbiCalculationSpecificCustomer: (formValue?.specificCustomer || []).map(
+        (id) => {
+          return {
+            id: null,
+            calCode: null,
+            custNumb: id,
+          };
+        }
+      ),
+    };
+
+    const hasSpecificCustomer = (formValue?.specificCustomer || []).length > 0;
+
+    if (!hasSpecificCustomer) {
+      setPendingDataFinal(tempDataFinal);
+      setOpenWarningPopulate(true);
+    } else {
+      setDataFinal(tempDataFinal);
+      setOpenModal(true);
+    }
   };
-
-  const hasSpecificCustomer = (formValue?.specificCustomer || []).length > 0;
-
-  if (!hasSpecificCustomer) {
-    setPendingDataFinal(tempDataFinal);
-    setOpenWarningPopulate(true);
-  } else {
-    setDataFinal(tempDataFinal);
-    setOpenModal(true);
-  }
-};
 
   const handleConfirmPopulateAll = () => {
     setOpenWarningPopulate(false);
@@ -308,88 +307,88 @@ const PrabillingForm = ({ type }) => {
     setPendingDataFinal(null);
   };
 
-const handleSave = async () => {
-  const selectedBillingCycle = (list_billing_cycle || []).find(
-    (item) => item.id === dataFinal?.billingCycle
-  );
+  const handleSave = async () => {
+    const selectedBillingCycle = (list_billing_cycle || []).find(
+      (item) => item.id === dataFinal?.billingCycle
+    );
 
-  const selectedBillingPeriod = list_billing_period?.data?.find(
-    (item) => item.id === dataFinal?.billingPeriod
-  );
+    const selectedBillingPeriod = list_billing_period?.data?.find(
+      (item) => item.id === dataFinal?.billingPeriod
+    );
 
-  const selectedSor = list_sor?.data?.find(
-    (item) => item.id === dataFinal?.sor
-  );
+    const selectedSor = list_sor?.data?.find(
+      (item) => item.id === dataFinal?.sor
+    );
 
-  const selectedSchedulerType = list_scheduler_type?.find(
-    (item) => item.id === dataFinal?.scheduleType
-  );
+    const selectedSchedulerType = list_scheduler_type?.find(
+      (item) => item.id === dataFinal?.scheduleType
+    );
 
-  if (!user_profile) {
-    setBodyError({
-      message: "User profile is not loaded. Please refresh the page.",
-    });
-    setModalError(true);
-    return;
-  }
+    if (!user_profile) {
+      setBodyError({
+        message: "User profile is not loaded. Please refresh the page.",
+      });
+      setModalError(true);
+      return;
+    }
 
-  const finalSpecificAccounts = (
-    dataFinal?.rRbiCalculationSpecificCustomer || []
-  )
-    .filter((item) => item.custNumb)
-    .map((item) => item.custNumb);
+    const finalSpecificAccounts = (
+      dataFinal?.rRbiCalculationSpecificCustomer || []
+    )
+      .filter((item) => item.custNumb)
+      .map((item) => item.custNumb);
 
-  const tempBody = {
-    billingCycle:
-      selectedBillingCycle?.name || selectedBillingCycle?.code || "",
-    billPeriod:
-      selectedBillingPeriod?.name || selectedBillingPeriod?.code || "",
-    sor: selectedSor?.name || "",
-    costCenter: (dataFinal?.rRbiCalculationCostCenter || []).map(
-      (item) => item.costCenter
-    ),
-    meterReadingCode: (dataFinal?.rRbiCalculationMeterReadingCode || []).map(
-      (item) => item.mreadingCode
-    ),
-    accountSegment: (dataFinal?.rRbiCalculationAccountSegment || []).map(
-      (item) => item.accSegment
-    ),
-    accountGroupType: (dataFinal?.rRbiCalculationAccountGroupType || []).map(
-      (item) => item.accGroupType
-    ),
+    const tempBody = {
+      billingCycle:
+        selectedBillingCycle?.name || selectedBillingCycle?.code || "",
+      billPeriod:
+        selectedBillingPeriod?.name || selectedBillingPeriod?.code || "",
+      sor: selectedSor?.name || "",
+      costCenter: (dataFinal?.rRbiCalculationCostCenter || []).map(
+        (item) => item.costCenter
+      ),
+      meterReadingCode: (dataFinal?.rRbiCalculationMeterReadingCode || []).map(
+        (item) => item.mreadingCode
+      ),
+      accountSegment: (dataFinal?.rRbiCalculationAccountSegment || []).map(
+        (item) => item.accSegment
+      ),
+      accountGroupType: (dataFinal?.rRbiCalculationAccountGroupType || []).map(
+        (item) => item.accGroupType
+      ),
 
-    billingCycleId: dataFinal?.billingCycle,
-    billPeriodId: dataFinal?.billingPeriod,
-    
-    scheduleType: selectedSchedulerType?.name || "",
-    specificAccount: finalSpecificAccounts,
-    schedulerTime: dataFinal?.scheduleDateTime || "",
+      billingCycleId: dataFinal?.billingCycle,
+      billPeriodId: dataFinal?.billingPeriod,
 
-    serviceTypeId: dataFinal?.serviceType,
-    sorId: dataFinal?.sor,
-    calculationTypeId: dataFinal?.calculationType,
-    remark: dataFinal?.remark,
-    createdBy: user_profile.username || "",
+      scheduleType: selectedSchedulerType?.name || "",
+      specificAccount: finalSpecificAccounts,
+      schedulerTime: dataFinal?.scheduleDateTime || "",
+
+      serviceTypeId: dataFinal?.serviceType,
+      sorId: dataFinal?.sor,
+      calculationTypeId: dataFinal?.calculationType,
+      remark: dataFinal?.remark,
+      createdBy: user_profile.username || "",
+    };
+
+    dispatch(createPrabilling({ body: tempBody }))
+      .unwrap()
+      .then((data) => {
+        if (data) {
+          setModalSuccess(true);
+        }
+      })
+      .catch((error) => {
+        if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
+          const message =
+            error?.response?.data?.message ||
+            error?.message ||
+            error?.toString();
+          setBodyError({ message });
+          setModalError(true);
+        }
+      });
   };
-
-  dispatch(createPrabilling({ body: tempBody }))
-    .unwrap()
-    .then((data) => {
-      if (data) {
-        setModalSuccess(true);
-      }
-    })
-    .catch((error) => {
-      if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
-        const message =
-          error?.response?.data?.message ||
-          error?.message ||
-          error?.toString();
-        setBodyError({ message });
-        setModalError(true);
-      }
-    });
-};
 
   const handleBackPage = () => {
     if (Object.values(formValue).length > 0) {
@@ -553,14 +552,14 @@ const handleSave = async () => {
       <Spin spinning={loading}>
         <Form layout={"vertical"} form={form} onFinish={onFinish}>
           <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold text-primary">
-                Billing Cycle Information
-              </p>
-            </div>
-          }
-        >
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px] font-bold text-primary">
+                  Billing Cycle Information
+                </p>
+              </div>
+            }
+          >
             <div className={"w-full grid grid-cols-2 gap-2"}>
               <Form.Item
                 label={"Billing Cycle"}
@@ -598,7 +597,15 @@ const handleSave = async () => {
               </Form.Item>
             </div>
           </CardContainer>
-          <BaseContainer header={"Input Parameter Information"}>
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px] font-bold text-primary">
+                  INPUT PARAMETER INFORMATION
+                </p>
+              </div>
+            }
+          >
             <div className={"w-full grid grid-cols-2 gap-2"}>
               <div className="col-span-2">
                 <Form.Item
@@ -755,11 +762,19 @@ const handleSave = async () => {
                       </Select.Option>
                     ))}
                   </Select>
-                </Form.Item> 
-              </div> 
+                </Form.Item>
+              </div>
             </div>
-          </BaseContainer>
-          <BaseContainer header={"Scheduler Information"}>
+          </CardContainer>
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px] font-bold text-primary">
+                  SCHEDULER INFORMATION
+                </p>
+              </div>
+            }
+          >
             <Form.Item
               label={"Type"}
               name={"type"}
@@ -809,7 +824,7 @@ const handleSave = async () => {
                 onChange={(e) => setRemark(e.target.value)}
               />
             </Form.Item>
-          </BaseContainer>
+          </CardContainer>
           <div className={"w-full flex mt-5"}>
             <div className={"w-full justify-start"}>
               <Form.Item>
