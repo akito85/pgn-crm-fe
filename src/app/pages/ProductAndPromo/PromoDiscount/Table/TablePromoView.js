@@ -52,7 +52,7 @@ export const TablePromoView = (
       ),
   },
   {
-    title: "PROMO TYPE",
+    title: "TYPE",
     dataIndex: "typeName",
     sorter: true,
     align: "center",
