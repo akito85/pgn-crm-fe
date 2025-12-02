@@ -1,5 +1,5 @@
 import { LeftCircleFilled, RightCircleFilled } from "@ant-design/icons";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import AccountInformation from "./DetailPages/AccountInformation/AccountInformation";
 import LastActivity from "./DetailPages/LastActivity";
 import ServiceRequest from "./DetailPages/ServiceRequest/ServiceRequest";
@@ -20,8 +20,6 @@ import EquipmentPage from "./DetailPages/Equipment/Equipment";
 import ProductDistribution from "./DetailPages/ProductDistribution/ProductDistribution";
 import RawMaterialSource from "./DetailPages/RawMaterialSource/RawMaterialSource";
 import GasUtilization from "./DetailPages/GasUtilization/GasUtilization";
-import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
-import { Switch } from "antd";
 
 const dataTabs = {
   // ci: "Customer Information",

@@ -15,12 +15,10 @@ import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { configApp } from "../../../../../../constants/configApp";
 import ratingBillingHttpService from "../../../../../../redux/services/ratingBillingHttpService";
 import {
-  getConfigFileRBIData,
   getConfigFileRBIGeneralTemplate,
 } from "../../../../../../redux/slices/attachmentSlice";
 import {
   showModalError,
-  showModalSuccess,
   validateCreateUpdate,
 } from "../../../../../../redux/slices/general_slice";
 import {
@@ -36,7 +34,6 @@ import {
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/termsofPayment";
 import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
 import { dateFormatting, hasValue } from "../../../../../../utils";
-import { bytesConverter } from "../../../../../../utils/bytesConverter";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { columnsTableCriteriaTOP } from "../TableCriteria/TableCriteriaTOP";
 import CreateTOP from "./CreateTOP";

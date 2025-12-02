@@ -1,11 +1,15 @@
 import { WarningOutlined } from "@ant-design/icons";
 import { Alert, Form, Input } from "antd";
-import React from "react";
 import ButtonComponent from "../ButtonComponent";
 import { formMessageRequired } from "../../utils";
 
 const ModalRemarkConfirmation = (props) => {
-  const { onFinish = () => { }, handleOpen = () => { }, handleCancel = () => { }, message } = props;
+  const {
+    onFinish = () => {},
+    handleOpen = () => {},
+    handleCancel = () => {},
+    message,
+  } = props;
   const [form] = Form.useForm();
   return (
     <div className={"w-full justify-center my-4 flex flex-col text-sm"}>
@@ -23,7 +27,7 @@ const ModalRemarkConfirmation = (props) => {
           className="mt-3"
           onFinish={onFinish}
         >
-          <Form.Item name={"remark"} rules={formMessageRequired('Remark')}>
+          <Form.Item name={"remark"} rules={formMessageRequired("Remark")}>
             <Input placeholder="Type your remark" />
           </Form.Item>
           <div className={"w-full flex justify-end gap-2"}>

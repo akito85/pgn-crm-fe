@@ -1,10 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Table } from "antd";
+import { Steps, Form } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../utils/Icon";
-import { useMonitoringList } from "./useMonirotingList";
 import {
   approveRejectData,
   getListApproval,
@@ -357,7 +356,7 @@ const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh
               pageSize={pageSize}
               onChange={handleChange}
               totalData={dataTableSelect.length}
-              tableScrolled={{ x: 8500, y: 300 }}
+              tableScrolled={{ x: 9000, y: 300 }}
             />
             <div className="pt-[30px]">
               <DetailText label={"Remark"}>

@@ -1,4 +1,4 @@
-import { Form, Input, Pagination, Select, Table, Tooltip } from "antd";
+import { Form, Pagination, Select, Table, Tooltip } from "antd";
 import React, { useEffect, useState } from "react";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { useRef } from "react";

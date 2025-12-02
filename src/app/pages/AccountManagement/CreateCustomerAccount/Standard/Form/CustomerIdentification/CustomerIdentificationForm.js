@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Form, Spin, Select, InputNumber } from "antd";
+import { Form, Select } from "antd";
 import { useSelector } from "react-redux";
 import InputComponent from "../../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../../components/SelectComponent";

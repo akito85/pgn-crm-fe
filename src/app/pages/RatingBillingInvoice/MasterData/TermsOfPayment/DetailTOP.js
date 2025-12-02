@@ -1,9 +1,7 @@
 import moment from "moment";
 import React from "react";
-import { useDispatch } from "react-redux";
 import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { dateFormatting } from "../../../../../utils";
 import FunctionalTableCriteriaTOP from "./TableCriteria/FunctionalTableCriteriaTOP";
 

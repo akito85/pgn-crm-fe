@@ -7,7 +7,6 @@ import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes
 import { Form, Spin } from "antd";
 import PricingRule from "./Form/PricingRule";
 import Approval from "./Form/Approval";
-import Attachment from "./Form/Attachment";
 import RadioTabs from "../../../../components/RadioTabs";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";

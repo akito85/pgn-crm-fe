@@ -1,9 +1,9 @@
 import { Fragment, useState } from "react";
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import DetailText from "../../../../../../components/DetailText";
 import CardComponent from "../../../../../../components/Card/CardComponent";
 import moment from "moment";
-import { dateFormatting, renderColumn, toTitleCase } from "../../../../../../utils";
+import { dateFormatting, renderColumn } from "../../../../../../utils";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { sorterFunction } from "../../../../../../utils/sorterFunction";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";

@@ -1,14 +1,12 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Tooltip } from "antd";
 import { useState } from "react";
 import TablePagination from "../../../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import { Fragment } from "react";
-import StatusComponent from "../../../../../../../../components/StatusComponent";
 import TaxIdentifierDetail from "./TaxIdentifierDetail";
 import ModalCustom from "../../../../../../../../components/Modal/ModalCustom";
 import moment from "moment";
-import Highlighter from "react-highlight-words";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import { useColumnActionPermissionAccount } from "../../../../../ComponentAccount/ColumnActionPermissionAccount";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../../utils/getColumnSearchProps";

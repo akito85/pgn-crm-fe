@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from "react";
-import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import ButtonComponent from "../../../../../components/ButtonComponent";
 import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import DailyRateView from "./DailyRates/DailyRateView";
 import RateTypeView from "./RatesType/RateTypeView";
-import SVGIcon from "../../../../../assets/Icon/index";
-import { Spin } from "antd";
 import { usePrevLocContext } from "../../../../../utils/usePrevLoc";
 import { useDispatch } from "react-redux";
 

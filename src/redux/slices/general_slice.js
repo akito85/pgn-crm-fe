@@ -10,67 +10,76 @@ const initialState = {
   data_grant_access: null,
   isLeaving: false,
   isLoading: false,
-  grant_access_detail: null
+  grant_access_detail: null,
 };
-export const validateError = createAsyncThunk("VALIDATE_ERROR", async ({ error, action, back = false, load = false }, thunkAPI) => {
-  const message = errorMessage(error)
-  const errorLog = errorCode(error);
-  if (errorLog === 401) {
-    thunkAPI.dispatch(logoutTokenExpired());
-  } else if (errorLog === 500 || errorLog === 419) {
-    thunkAPI.dispatch(setBodyError({ ...error, action: action }));
-  } else if (errorLog === 503 || (errorLog === 404 && error?.response?.data?.data?.isGranted === false)) {
-    if (action !== "CHECK_GRANTED_ACCESS" ) {
-      thunkAPI.dispatch(grantedAccessDetail(error))
+export const validateError = createAsyncThunk(
+  "VALIDATE_ERROR",
+  async ({ error, action, back = false, load = false }, thunkAPI) => {
+    const message = errorMessage(error);
+    const errorLog = errorCode(error);
+    if (errorLog === 401) {
+      thunkAPI.dispatch(logoutTokenExpired());
+    } else if (errorLog === 500 || errorLog === 419) {
+      thunkAPI.dispatch(setBodyError({ ...error, action: action }));
+    } else if (
+      errorLog === 503 ||
+      (errorLog === 404 && error?.response?.data?.data?.isGranted === false)
+    ) {
+      if (action !== "CHECK_GRANTED_ACCESS") {
+        thunkAPI.dispatch(grantedAccessDetail(error));
+      } else {
+        thunkAPI.dispatch(grantedAccess(error));
+      }
+    } else if (errorLog === 204) {
+      const errorBody = {
+        title: "Failed",
+        description: `Can't download data, data is empty`,
+        code: errorLog,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+    } else if (message?.toLowerCase() === "network error") {
+      const errorBody = {
+        title: "Failed",
+        message: `${message}`,
+        code: 500,
+      };
+      thunkAPI.dispatch(setBodyError(errorBody));
     } else {
-      thunkAPI.dispatch(grantedAccess(error))
+      const errorBody = {
+        title: "Failed",
+        description: message + " Please try again.",
+        code: errorLog,
+        return: back,
+        loadPage: load,
+        action: action || error?.action,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
     }
-  } else if (errorLog === 204) {
-    const errorBody = {
-      title: "Failed",
-      description: `Can't download data, data is empty`,
-      code: errorLog
-    };
-    thunkAPI.dispatch(showModalError(errorBody));
-   } else if (message?.toLowerCase() === 'network error') {
-    const errorBody = {
-      title: "Failed",
-      message: `${message}`,
-      code: 500
-    };
-    thunkAPI.dispatch(setBodyError(errorBody));
-  } else {
-    const errorBody = {
-      title: "Failed",
-      description: message + ' Please try again.',
-      code: errorLog,
-      return: back,
-      loadPage: load,
-      action: action || error?.action
-    };
-    thunkAPI.dispatch(showModalError(errorBody));
   }
-});
+);
 
-
-export const validateCreateUpdate = createAsyncThunk('VALIDATE_CREATE_UPDATE', async({ body, services, endPoint, type}, thunkAPI) => {
-  
+export const validateCreateUpdate = createAsyncThunk(
+  "VALIDATE_CREATE_UPDATE",
+  async ({ body, services, endPoint, type }, thunkAPI) => {
     try {
       const response = await services?.createData(endPoint, body);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), type === 'update' ? 'updated' : 'created', errorMessage(error)), action: "VALIDATE_CREATE_UPDATE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(
+            errorCode(error),
+            type === "update" ? "updated" : "created",
+            errorMessage(error)
+          ),
+          action: "VALIDATE_CREATE_UPDATE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
-    }    
-});
-
-export const checkGrantedAccessDetail = createAsyncThunk('CHECK_GRANTED_ACCESS_DETAIL', async (_, thunkAPI) => {
-  try {
-    
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error);
+    }
   }
-})
+);
 
 const generalSlice = createSlice({
   name: "general",
@@ -101,7 +110,7 @@ const generalSlice = createSlice({
     grantedAccessDetail: (state, action) => {
       state.grant_access_detail = action.payload;
     },
-    userIsLeaving: (state, action) => {
+    userIsLeaving: (state) => {
       state.data_grant_access = true;
     },
     setBodyError: (state, action) => {
@@ -110,19 +119,19 @@ const generalSlice = createSlice({
     clearBodyMessage: (state) => {
       state.bodyError = null;
       state.bodySuccess = null;
-    }
+    },
   },
   extraReducers: {
-    [validateCreateUpdate.pending]: (state, action) => {
+    [validateCreateUpdate.pending]: (state) => {
       state.isLoading = true;
     },
-    [validateCreateUpdate.fulfilled]: (state, action) => {
+    [validateCreateUpdate.fulfilled]: (state) => {
       state.isLoading = false;
     },
-    [validateCreateUpdate.rejected]: (state, action) => {
+    [validateCreateUpdate.rejected]: (state) => {
       state.isLoading = false;
     },
-  }
+  },
 });
 
 export const {
@@ -134,6 +143,6 @@ export const {
   userIsLeaving,
   setBodyError,
   clearBodyMessage,
-  grantedAccessDetail
+  grantedAccessDetail,
 } = generalSlice.actions;
 export default generalSlice.reducer;

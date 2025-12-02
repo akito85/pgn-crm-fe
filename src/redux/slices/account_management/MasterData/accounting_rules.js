@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import accountManagementService from "../../../services/account_management/accountManagementService";
-import { setBodyError, showModalError, showModalSuccess, validateError } from "../../general_slice";
+import { showModalSuccess, validateError } from "../../general_slice";
 import { errorBody, errorCode, errorMessage } from "../../../../utils";
 
 const initialState = {

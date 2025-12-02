@@ -1,29 +1,19 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 import DetailText from "../../../../components/DetailText";
 import BaseContainer from "../../../../components/BaseContainer";
-import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Spin, Input, DatePicker, Tooltip } from "antd";
-import { NumericFormat } from "react-number-format";
+import { useNavigate } from "react-router-dom";
+import { Spin, Tooltip } from "antd";
 import moment from "moment";
-import { dateFormat, dateFormatting, toTitleCase } from "../../../../utils";
+import { dateFormatting, toTitleCase } from "../../../../utils";
 import Highlighter from "react-highlight-words";
-import TablePagination from "../../../../components/TablePagination";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllocation,
-  getReceiptDetail,
 } from "../../../../redux/slices/receipt_collection/receipt";
 import {
-  getColumnSearchProps,
   getColumnSearchPropsPaging,
 } from "../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../components/StatusComponent";
-import AllocationSection from "./Table/AllocationSection";
 import CreateAllocation from "./Table/CreateAllocation";
 import { sorterFunction } from "../../../../utils/sorterFunction";
 

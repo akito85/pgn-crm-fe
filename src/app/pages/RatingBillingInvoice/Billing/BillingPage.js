@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Radio, Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -6,7 +6,6 @@ import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import SVGIcon from "../../../../assets/Icon/index";
-import BaseContainer from "../../../../components/BaseContainer";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import {
   downloadBillingList,
@@ -16,25 +15,26 @@ import {
   getApprovalHistory,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
 import { columnsBilling } from "./Table/TableViewBilling";
+import { columnsAllBilling } from "./Table/TableViewAllBilling";
 import BillingDetail from "./Detail/BillingDetail";
 import ModalRequestApproval from "./ModalRequestApproval";
 import ModalApprovalBilling from "./ModalApprovalBilling";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
+import CardContainer from "../../../../components/CardContainer";
 
 const BillingPage = () => {
-  // Selector
   const { data, loading, data_approval_history } = useSelector(
     (state) => state.billing
   );
 
-  // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data?.result;
+  const detailRef = useRef(null);
 
-  // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -53,8 +53,25 @@ const BillingPage = () => {
   const [saNumberId, setSANumberId] = useState("");
   const [calculationCodeId, setCalculationCodeId] = useState("");
   const [accountNumberId, setAccountNumberId] = useState("");
+  const [activeRowKey, setActiveRowKey] = useState(null);
 
-  // Use Effect
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["statusApproval", "action"],
+  }));
+
+  useEffect(() => {
+    if (pageDetail && activeRowKey && detailRef.current) {
+      setTimeout(() => {
+        detailRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "nearest",
+        });
+      }, 100);
+    }
+  }, [activeRowKey, pageDetail]);
+
   useEffect(() => {
     dispatch(
       getAllBillingPaginate({
@@ -78,7 +95,6 @@ const BillingPage = () => {
     }
   }, [data_approval_history]);
 
-  // Breadcrumbs
   const routes = [
     {
       path: "",
@@ -90,7 +106,6 @@ const BillingPage = () => {
     },
   ];
 
-  // Value Tab
   const tabBilling = [
     {
       label: "Billing Gas",
@@ -104,11 +119,9 @@ const BillingPage = () => {
     {
       label: "All",
       value: "All",
-      disabled: true,
     },
   ];
 
-  // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -124,22 +137,20 @@ const BillingPage = () => {
     });
   };
 
-  // Handle Change Page
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+  const handleChangePage = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
-  // Sort Table
-  const onSortApi = (_, __, sort) => {
+  const onSort = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
 
-  // Handle Download
   const handleDownload = () => {
     let tempSearch = "";
     for (const dataIndex in search) {
@@ -161,28 +172,39 @@ const BillingPage = () => {
     );
   };
 
-  // Handle Detail
   const handleDetail = (record) => {
-    setPageDetail(true);
-    setBillingCode(record.billingCode);
-    setRatingCode(record.ratingCode);
-    setAccountNumberId(record.accountNumber);
-    setSANumberId(record.saNumber);
-    setCalculationCodeId(record.calculationCode);
+    const recordKey = record.billingCode || record.invoiceNumber;
+
+    if (activeRowKey === recordKey && pageDetail) {
+      setPageDetail(false);
+      setActiveRowKey(null);
+      setBillingCode("");
+      setRatingCode("");
+      setAccountNumberId("");
+      setSANumberId("");
+      setCalculationCodeId("");
+    } else {
+      setBillingCode(recordKey);
+      setRatingCode(record.ratingCode);
+      setAccountNumberId(record.accountNumber);
+      setSANumberId(record.saNumber);
+      setCalculationCodeId(record.calculationCode);
+      setActiveRowKey(recordKey);
+      setPageDetail(true);
+    }
   };
 
-  // Handle Approval History
   const handleApprovalHistory = (record) => {
-    dispatch(getApprovalHistory(record.billingCode));
+    dispatch(getApprovalHistory(record.billingCode || record.invoiceNumber));
     setModalApprovalHistory(true);
   };
 
-  // Handle Value Tab
   const onChangeTab = ({ target: { value } }) => {
     setValueTab(value);
+    setSearch({});
+    setPage(1);
   };
 
-  // Handle Refresh
   const handleRefresh = () => {
     let tempSearch = "";
     for (const dataIndex in search) {
@@ -203,18 +225,18 @@ const BillingPage = () => {
   };
 
   const itemGrantAccess = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={handleDownload}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
+    // {
+    //   action: "Download",
+    //   render: (
+    //     <ButtonComponent
+    //       icon={<SVGIcon name="IconButtonDownload" width={24} />}
+    //       type="submit"
+    //       onClick={handleDownload}
+    //     >
+    //       Download List
+    //     </ButtonComponent>
+    //   ),
+    // },
     {
       action: "Approval",
       render: (
@@ -239,38 +261,37 @@ const BillingPage = () => {
         </ButtonComponent>
       ),
     },
-
-    // Column Action Table
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Detail">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDetail"
-                width={24}
-                onClick={() => handleDetail(record)}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
+    // {
+    //   action: "View",
+    //   type: "table",
+    //   render: (record) => {
+    //     return (
+    //       <Tooltip title="Detail">
+    //         <div className="pt-1">
+    //           <SVGIcon
+    //             name="IconDetail"
+    //             width={24}
+    //             onClick={() => handleDetail(record)}
+    //           />
+    //         </div>
+    //       </Tooltip>
+    //     );
+    //   },
+    // },
     {
       action: "History",
       type: "table",
       render: (record) => {
         return (
           <Tooltip title="Approval Hierarchy">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={24}
-                onClick={() => handleApprovalHistory(record)}
-              />
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                handleApprovalHistory(record);
+              }}
+              style={{ cursor: "pointer", display: "inline-block",lineHeight: 0 }}
+            >
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
             </div>
           </Tooltip>
         );
@@ -278,17 +299,121 @@ const BillingPage = () => {
     },
   ];
 
+  const actionCols = useColumnActionPermission(
+    ["view", "history"],
+    itemGrantAccess
+  ).map((col) => ({
+    ...col,
+    width: 80,
+    align: "center",
+  }));
+
+  const baseColumns = useMemo(() => {
+    if (valueTab === "All") {
+      return columnsAllBilling(
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        search
+      );
+    }
+    return columnsBilling(
+      page,
+      pageSize,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      search
+    );
+  }, [
+    valueTab,
+    page,
+    pageSize,
+    searchInput,
+    searchedColumn,
+    searchText,
+    search,
+  ]);
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSource?.map((item) => ({
+      ...item,
+      key: item.billingCode || item.invoiceNumber,
+    }));
+  }, [dataSource]);
+
+  const dataSourceForTab = useMemo(() => {
+    if (valueTab === "All") {
+      return [
+        {
+          key: "INV-2024-001",
+          invoiceNumber: "INV-2024-001",
+          billingType: "Gas",
+          quantity: 1500,
+          totalAmountIdr: 75000000,
+          transactionDate: "2024-01-15",
+          remark: "Regular monthly billing for gas supply",
+        },
+        {
+          key: "INV-2024-002",
+          invoiceNumber: "INV-2024-002",
+          billingType: "Non Gas",
+          quantity: 500,
+          totalAmountIdr: 25000000,
+          transactionDate: "2024-01-20",
+          remark: "Additional service charges",
+        },
+        {
+          key: "INV-2024-003",
+          invoiceNumber: "INV-2024-003",
+          billingType: "Gas",
+          quantity: 2000,
+          totalAmountIdr: 100000000,
+          transactionDate: "2024-02-01",
+          remark: "Peak season billing",
+        },
+      ];
+    }
+    return dataSourceWithKeys;
+  }, [valueTab, dataSourceWithKeys]);
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <div className="w-full flex justify-end gap-[20px]">
-          <Toolbar items={itemGrantAccess} />
-        </div>
-
-        <BaseContainer
-          header={"Billing List"}
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">Billing List</p>
+              <div className="mt-[15px] flex gap-[20px]">
+                <Toolbar items={itemGrantAccess} />
+              </div>
+            </div>
+          }
           type="tabs"
           element={
             <Radio.Group
@@ -301,49 +426,80 @@ const BillingPage = () => {
             />
           }
         >
-          <div className="w-full">
-            <TablePaginationNew
-              dataSource={dataSource}
-              columns={[
-                ...columnsBilling(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch,
-                  search,
-                  // handleDetail,
-                  // handleApprovalHistory
-                ),
-                ...useColumnActionPermission(
-                  ["view", "history"],
-                  itemGrantAccess
-                ),
-              ]}
+          <div className="my-5">
+            <TableRBI
+              dataSource={dataSourceForTab}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
-              totalData={data?.page?.totalElements || 0}
-              onSort={onSortApi}
-              tableScrolled={{ y: 525, x: 16000 }}
+              onChange={handleChangePage}
+              onSizeChanger={handleChangePage}
+              totalData={
+                valueTab === "All" ? 3 : data?.page?.totalElements || 0
+              }
+              tableScrolled={{ x: valueTab === "All" ? 1500 : 3500, y: 525 }}
+              onSort={onSort}
+              handleDownload={handleDownload}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
+              onRow={(record) => ({
+                onClick: () => handleDetail(record),
+                style: {
+                  cursor: "pointer",
+                  backgroundColor:
+                    activeRowKey ===
+                    (record.billingCode || record.invoiceNumber)
+                      ? "#bae7ff"
+                      : "transparent",
+                  transition: "background-color 0.2s ease",
+                },
+                onMouseEnter: (e) => {
+                  if (
+                    activeRowKey !==
+                    (record.billingCode || record.invoiceNumber)
+                  ) {
+                    e.currentTarget.style.backgroundColor = "#f5f5f5";
+                  }
+                },
+                onMouseLeave: (e) => {
+                  if (
+                    activeRowKey !==
+                    (record.billingCode || record.invoiceNumber)
+                  ) {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                  }
+                },
+              })}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
-        {/* Detail Billing */}
-        {pageDetail === true ? (
-          <BillingDetail
-            billingCodeId={billingCode}
-            ratingCodeId={ratingCode}
-            saNumberId={saNumberId}
-            accountNumberId={accountNumberId}
-            calculationCodeId={calculationCodeId}
-          />
-        ) : null}
+        {pageDetail && (
+          <div
+            ref={detailRef}
+            className="mt-6 border-t-4 border-blue-500 bg-blue-50/30 rounded-lg p-4"
+          >
+            <BillingDetail
+              billingCodeId={billingCode}
+              ratingCodeId={ratingCode}
+              saNumberId={saNumberId}
+              accountNumberId={accountNumberId}
+              calculationCodeId={calculationCodeId}
+              onClose={() => {
+                setPageDetail(false);
+                setActiveRowKey(null);
+                setBillingCode("");
+                setRatingCode("");
+                setAccountNumberId("");
+                setSANumberId("");
+                setCalculationCodeId("");
+              }}
+            />
+          </div>
+        )}
 
-        {/* Modal Approval History */}
         <ModalHistory
           isOpen={modalApprovalHistory && dataApprovalHistory}
           handleClose={() => setModalApprovalHistory(false)}
@@ -353,7 +509,6 @@ const BillingPage = () => {
           dataHistory={dataApprovalHistory?.dataHistory}
         />
 
-        {/* Modal Request Approval */}
         <ModalRequestApproval
           isOpen={modalRequest}
           handleCancel={() => setModalRequest(false)}
@@ -361,7 +516,6 @@ const BillingPage = () => {
           handleOpenModal={() => setModalRequest(true)}
         />
 
-        {/* Modal Approval */}
         <ModalApprovalBilling
           isOpen={modalApproval}
           handleCancel={() => setModalApproval(false)}

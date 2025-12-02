@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import SVGIcon from "../../../../../../assets/Icon";
@@ -14,8 +14,7 @@ import {
   inactiveBillingCycle,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/billingCycle";
 import { Checkbox, Form, Spin, Tooltip } from "antd";
-import BaseContainer from "../../../../../../components/BaseContainer";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../../components/TableRBI";
 import ModalInactivateWithHierarchy from "../../../../../../components/Modal/ModalInactivateWithHierarchy";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
 import { columnsBillingCycleList } from "../Table/TableBillingCycleList";
@@ -23,6 +22,7 @@ import ModalHistory from "../../../../../../components/Modal/ModalHistory";
 import { getApprovalHistory } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/billingCycle";
 import Toolbar from "../../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const BillingCycleView = ({ type }) => {
   const searchInput = useRef(null);
@@ -43,6 +43,26 @@ const BillingCycleView = ({ type }) => {
   const { data_list_billing_cycle, loading, dataApprovalHistory } = useSelector(
     (state) => state.billingCycle
   );
+
+  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    const saved = localStorage.getItem("billingCycleFixedColumns");
+    return saved
+      ? JSON.parse(saved)
+      : {
+          left: ["no"],
+          right: ["action"],
+        };
+  });
+
+  // ✅ Save to localStorage when fixedColumns change
+  useEffect(() => {
+    localStorage.setItem(
+      "billingCycleFixedColumns",
+      JSON.stringify(fixedColumns)
+    );
+  }, [fixedColumns]);
+
   const routes = [
     {
       path: "",
@@ -109,7 +129,14 @@ const BillingCycleView = ({ type }) => {
   };
 
   useEffect(() => {
-    dispatch(getBillingCycleList({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }));
+    dispatch(
+      getBillingCycleList({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      })
+    );
   }, [dispatch, search, page, pageSize, sort]);
 
   useEffect(() => {
@@ -207,21 +234,18 @@ const BillingCycleView = ({ type }) => {
 
   // Grant Access Item
   const itemGrantAccess = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          type={"submit"}
-          border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          onClick={() => {
-            handleDownload();
-          }}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
+    // {
+    //   action: "Download",
+    //   render: (
+    //     <ButtonComponent
+    //       type={"submit"}
+    //       border={false}
+    //       icon={<SVGIcon name="IconButtonDownload" width={24} />}
+    //     >
+    //       Download List
+    //     </ButtonComponent>
+    //   ),
+    // },
     {
       action: "Create",
       render: (
@@ -272,11 +296,24 @@ const BillingCycleView = ({ type }) => {
         const linkContent =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={isEditable ? "#0075bf" : "#8D91A0"} width={24} />}
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={24}
+                />
+              }
               border={false}
               disabled={!isEditable}
             >
-              <span className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"}`}> Update</span>
+              <span
+                className={`ml-3 ${
+                  isEditable ? "text-black " : "text-[#8D91A0]"
+                }`}
+              >
+                {" "}
+                Update
+              </span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
@@ -390,44 +427,111 @@ const BillingCycleView = ({ type }) => {
     },
   ];
 
+  // ✅ Call useColumnActionPermission hook at component level
+  const actionColumns = useColumnActionPermission(
+    ["activate", "view", "update", "history"],
+    itemGrantAccess
+  );
+
+  // ✅ Get base columns with key property
+  const baseColumns = useMemo(() => {
+    const billingCycleCols = [
+      ...columnsBillingCycleList(
+        search,
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        handleApprovalHistory,
+        handleInactive
+      ),
+      ...actionColumns,
+    ];
+
+    // Add 'key' property to columns that don't have it
+    const columnsWithKeys = billingCycleCols.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+
+    return columnsWithKeys;
+  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return baseColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [baseColumns]);
+
+  const columns = useMemo(() => {
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    baseColumns.forEach((col) => {
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        leftFixed.push(col);
+      } else if (fixedColumns.right.includes(colKey)) {
+        rightFixed.push(col);
+      } else {
+        normal.push(col);
+      }
+    });
+
+    const reorderedColumns = [...leftFixed, ...normal, ...rightFixed];
+
+    return reorderedColumns.map((col) => {
+      const newCol = { ...col };
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        newCol.fixed = "left";
+      } else if (fixedColumns.right.includes(colKey)) {
+        newCol.fixed = "right";
+      } else {
+        delete newCol.fixed;
+      }
+
+      return newCol;
+    });
+  }, [baseColumns, fixedColumns]);
+
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <div className={"w-full flex justify-end gap-2"}>
-          <Toolbar items={itemGrantAccess} />
-        </div>
 
-        <BaseContainer header={"BILLING CYCLE LIST"}>
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold w-full">BILLING CYCLE LIST</p>
+              <Toolbar items={itemGrantAccess} />
+            </div>
+          }
+        >
           <div className="w-full">
-            <TablePaginationNew
+            <TableRBI
               dataSource={data_list_billing_cycle?.result}
-              totalData={data_list_billing_cycle?.page?.totalElements}
+              columns={columns}
               current={page}
               pageSize={pageSize}
               onChange={handleChangePage}
-              onSort={onSort}
-              columns={[
-                ...columnsBillingCycleList(
-                  search,
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch,
-                  handleApprovalHistory,
-                  handleInactive
-                ),
-                ...useColumnActionPermission(
-                  ["activate", "view", "update", "history"],
-                  itemGrantAccess
-                ),
-              ]}
+              onSizeChanger={handleChangePage}
+              totalData={data_list_billing_cycle?.page?.totalElements}
               tableScrolled={{ y: 525, x: 2200 }}
+              onSort={onSort}
+              handleDownload={handleDownload}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         {/* Modal approval history */}
         <ModalHistory

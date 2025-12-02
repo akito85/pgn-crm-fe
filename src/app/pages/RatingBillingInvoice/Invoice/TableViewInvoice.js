@@ -1,9 +1,18 @@
-import Highlighter from "react-highlight-words";
-import { Tooltip } from "antd";
-import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn, toTitleCase } from "../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+  toTitleCase,
+} from "../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../components/StatusComponent";
+import { Popover, Button } from "antd";
+import {
+  MoreOutlined,
+  EyeOutlined,
+  ReloadOutlined,
+  DownloadOutlined,
+} from "@ant-design/icons";
 
 export const columnsInvoice = (
   search,
@@ -12,17 +21,81 @@ export const columnsInvoice = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { },
-) => [
+  handleSearch = () => {},
+  handleDetail = () => {},
+  handleReGenerate = () => {},
+  handlePreviewFile = () => {},
+  popoverVisible = {},
+  setPopoverVisible = () => {}
+) => {
+  const getPopoverContent = (record) => (
+    <div className="flex flex-col gap-2 w-fit">
+      <Button
+        type="text"
+        icon={<EyeOutlined />}
+        className="flex items-center justify-start w-fit"
+        onClick={() => {
+          setPopoverVisible((prev) => ({
+            ...prev,
+            [record.invoiceNumber]: false,
+          }));
+          handleDetail(record);
+          setTimeout(
+            () =>
+              window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: "smooth",
+              }),
+            100
+          );
+        }}
+      >
+        View Detail
+      </Button>
+      <Button
+        type="text"
+        icon={<ReloadOutlined />}
+        className="flex items-center justify-start w-fit"
+        onClick={() => {
+          setPopoverVisible((prev) => ({
+            ...prev,
+            [record.invoiceNumber]: false,
+          }));
+          handleReGenerate(record);
+        }}
+      >
+        Regenerate
+      </Button>
+      <Button
+        type="text"
+        icon={<DownloadOutlined />}
+        className="flex items-center justify-start w-fit"
+        onClick={() => {
+          setPopoverVisible((prev) => ({
+            ...prev,
+            [record.invoiceNumber]: false,
+          }));
+          handlePreviewFile(record);
+        }}
+      >
+        Download
+      </Button>
+    </div>
+  );
+
+  return [
     {
+      key: "no",
       title: "NO",
       align: "center",
       width: 60,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
+      key: "invoiceNumber",
       title: "INVOICE NUMBER",
       dataIndex: "invoiceNumber",
+      width: 200,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -32,11 +105,22 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('invoiceNumber', hasValue(search['invoiceNumber']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "invoiceNumber",
+          hasValue(search["invoiceNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "templateName",
       title: "TEMPLATE",
       dataIndex: "templateName",
+      width: 200,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -46,11 +130,22 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('templateName', hasValue(search['templateName']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "templateName",
+          hasValue(search["templateName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "billingCycle",
       title: "BILLING CYCLE",
       dataIndex: "billingCycle",
+      width: 150,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -60,12 +155,23 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('billingCycle', hasValue(search['billingCycle']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "billingCycle",
+          hasValue(search["billingCycle"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "billingPeriodName",
       title: "BILLING PERIOD",
       sorter: true,
       align: "center",
+      width: 180,
       dataIndex: "billingPeriodName",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -77,11 +183,21 @@ export const columnsInvoice = (
         true,
         "datePeriod"
       ),
-      render: (text) => renderDateColumn('billingPeriodName', hasValue(search['billingPeriodName']), searchText, text, 'datePeriod', search)
+      render: (text) =>
+        renderDateColumn(
+          "billingPeriodName",
+          hasValue(search["billingPeriodName"]),
+          searchText,
+          text,
+          "datePeriod",
+          search
+        ),
     },
     {
+      key: "billingCode",
       title: "BILLING CODE",
       dataIndex: "billingCode",
+      width: 180,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -91,11 +207,22 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('billingCode', hasValue(search['billingCode']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "billingCode",
+          hasValue(search["billingCode"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "customerNumber",
       title: "CUSTOMER NUMBER",
       dataIndex: "customerNumber",
+      width: 180,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -105,11 +232,22 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('customerNumber', hasValue(search['customerNumber']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "customerNumber",
+          hasValue(search["customerNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "customerName",
       title: "CUSTOMER NAME",
       dataIndex: "customerName",
+      width: 250,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -119,11 +257,22 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('customerName', hasValue(search['customerName']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "customerName",
+          hasValue(search["customerName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "accountNumber",
       title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
+      width: 200,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -133,11 +282,22 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('accountNumber', hasValue(search['accountNumber']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "accountNumber",
+          hasValue(search["accountNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "accountName",
       title: "ACCOUNT NAME",
       dataIndex: "accountName",
+      width: 250,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -147,10 +307,21 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('accountName', hasValue(search['accountName']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "accountName",
+          hasValue(search["accountName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "accountGroupType",
       title: "ACCOUNT GROUP TYPE",
+      width: 180,
       dataIndex: "accountGroupType",
       align: "center",
       sorter: true,
@@ -162,12 +333,23 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('accountGroupType', hasValue(search['accountGroupType']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "accountGroupType",
+          hasValue(search["accountGroupType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "serviceType",
       title: "SERVICE TYPE",
       dataIndex: "serviceType",
       align: "center",
+      width: 150,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -177,10 +359,21 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('serviceType', hasValue(search['serviceType']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "serviceType",
+          hasValue(search["serviceType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "sor",
       title: "SOR",
+      width: 250,
       dataIndex: "sor",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -191,11 +384,22 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('sor', hasValue(search['sor']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "sor",
+          hasValue(search["sor"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "costCenter",
       title: "COST CENTER",
       dataIndex: "costCenter",
+      width: 180,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -205,12 +409,23 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('costCenter', hasValue(search['costCenter']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "costCenter",
+          hasValue(search["costCenter"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "accountSegment",
       title: "ACCOUNT SEGMENT",
       dataIndex: "accountSegment",
       align: "center",
+      width: 150,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -220,11 +435,22 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('accountSegment', hasValue(search['accountSegment']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "accountSegment",
+          hasValue(search["accountSegment"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "meterReadingCode",
       title: "METER READING CODE",
       dataIndex: "meterReadingCode",
+      width: 150,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -234,86 +460,23 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('meterReadingCode', hasValue(search['meterReadingCode']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "meterReadingCode",
+          hasValue(search["meterReadingCode"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
-    // {
-    //   title: "CURRENCY", //
-    //   dataIndex: "currency",
-    //   align: "center",
-    //   sorter: true,
-    //   ...getColumnSearchPropsUseFilteredValue(
-    //     search,
-    //     "currency",
-    //     searchInput,
-    //     searchedColumn,
-    //     searchText,
-    //     handleSearch
-    //   ),
-    //   render: (text) => renderColumn('currency', hasValue(search['currency']), searchText, text, false, 'input', search)
-    // },
-    // {
-    //   title: "AMOUNT",
-    //   sorter: true,
-    //   align: "right",
-    //   dataIndex: "amount",
-    //   ...getColumnSearchPropsUseFilteredValue(
-    //    search,
-    //     "amount",
-    //     searchInput,
-    //     searchedColumn,
-    //     searchText,
-    //     handleSearch,
-    //   )
-    // },
-    // {
-    //   title: "AMOUNT IDR", //
-    //   sorter: true,
-    //   align: "right",
-    //   dataIndex: "amountIdr",
-    //   ...getColumnSearchPropsUseFilteredValue(
-    //     search,
-    //     "amountIdr",
-    //     searchInput,
-    //     searchedColumn,
-    //     searchText,
-    //     handleSearch,
-    //   ),
-    //   render: (text) => renderColumn('amountIdr', hasValue(search['amountIdr']), searchText, text, false, 'input', search)
-    // },
-    // {
-    //   title: "AMOUNT USD", //
-    //   sorter: true,
-    //   align: "right",
-    //   dataIndex: "amountUsd",
-    //   ...getColumnSearchPropsUseFilteredValue(
-    //     search,
-    //     "amountUsd",
-    //     searchInput,
-    //     searchedColumn,
-    //     searchText,
-    //     handleSearch,
-    //   ),
-    //   render: (text) => renderColumn('amountUsd', hasValue(search['amountUsd']), searchText, text, false, 'input', search)
-    // },
-    // {
-    //   title: "TAX BASIS",//
-    //   sorter: true,
-    //   align: "right",
-    //   dataIndex: "taxBasis",
-    //   ...getColumnSearchPropsUseFilteredValue(
-    //     search,
-    //     "taxBasis",
-    //     searchInput,
-    //     searchedColumn,
-    //     searchText,
-    //     handleSearch,
-    //   ),
-    //   render: (text) => renderColumn('taxBasis', hasValue(search['taxBasis']), searchText, text, false, 'input', search)
-    // },
     {
+      key: "taxBasicEqvIdr",
       title: "TAX BASIS EQV IDR",
       sorter: true,
       align: "right",
+      width: 200,
       dataIndex: "taxBasicEqvIdr",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -321,29 +484,25 @@ export const columnsInvoice = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
+        handleSearch
       ),
-      render: (text) => renderColumn('taxBasicEqvIdr', hasValue(search['taxBasicEqvIdr']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "taxBasicEqvIdr",
+          hasValue(search["taxBasicEqvIdr"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
-    // {
-    //   title: "VAT",
-    //   sorter: true,
-    //   align: "right",
-    //   dataIndex: "vat", //
-    //   ...getColumnSearchPropsUseFilteredValue(
-    //     search,
-    //     "vat",
-    //     searchInput,
-    //     searchedColumn,
-    //     searchText,
-    //     handleSearch,
-    //   ),
-    //   render: (text) => renderColumn('vat', hasValue(search['vat']), searchText, text, false, 'input', search)
-    // },
     {
+      key: "vatEqvIdr",
       title: "VAT EQV IDR",
       sorter: true,
       align: "right",
+      width: 200,
       dataIndex: "vatEqvIdr",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -351,14 +510,25 @@ export const columnsInvoice = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
+        handleSearch
       ),
-      render: (text) => renderColumn('vatEqvIdr', hasValue(search['vatEqvIdr']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "vatEqvIdr",
+          hasValue(search["vatEqvIdr"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "withHoldingTax",
       title: "WITHHOLDING TAX",
       sorter: true,
       align: "right",
+      width: 200,
       dataIndex: "withHoldingTax",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -369,13 +539,23 @@ export const columnsInvoice = (
         handleSearch,
         true
       ),
-      render: (text) => renderColumn('withHoldingTax', hasValue(search['withHoldingTax']), searchText, text, false, 'input', search)
-
+      render: (text) =>
+        renderColumn(
+          "withHoldingTax",
+          hasValue(search["withHoldingTax"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "taxRateType",
       title: "TAX RATE TYPE",
       dataIndex: "taxRateType",
       align: "center",
+      width: 150,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -385,12 +565,23 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('taxRateType', hasValue(search['taxRateType']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "taxRateType",
+          hasValue(search["taxRateType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "taxRate",
       title: "TAX RATE",
       sorter: true,
       align: "right",
+      width: 150,
       dataIndex: "taxRate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -398,14 +589,25 @@ export const columnsInvoice = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
+        handleSearch
       ),
-      render: (text) => renderColumn('taxRate', hasValue(search['taxRate']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "taxRate",
+          hasValue(search["taxRate"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "taxRateDate",
       title: "TAX RATE DATE",
       sorter: true,
       align: "center",
+      width: 150,
       dataIndex: "taxRateDate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -417,57 +619,22 @@ export const columnsInvoice = (
         true,
         "date"
       ),
-      render: (text) => renderDateColumn('taxRateDate', hasValue(search['taxRateDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "taxRateDate",
+          hasValue(search["taxRateDate"]),
+          searchText,
+          text,
+          "date",
+          search
+        ),
     },
-    // {
-    //   title: "DISCOUNT AMOUNT", //
-    //   sorter: true,
-    //   align: "right",
-    //   dataIndex: "discountAmount",
-    //   ...getColumnSearchPropsUseFilteredValue(
-    //     search,
-    //     "discountAmount",
-    //     searchInput,
-    //     searchedColumn,
-    //     searchText,
-    //     handleSearch,
-    //   ),
-    //   render: (text) => renderColumn('taxRate', hasValue(search['taxRate']), searchText, text, false, 'input', search)
-    // },
-    // {
-    //   title: "DISCOUNT AMOUNT IDR",//
-    //   sorter: true,
-    //   align: "right",
-    //   dataIndex: "discountAmountIdr",
-    //   ...getColumnSearchPropsUseFilteredValue(
-    //     search,
-    //     "discountAmountIdr",
-    //     searchInput,
-    //     searchedColumn,
-    //     searchText,
-    //     handleSearch,
-    //   ),
-    //   render: (text) => renderColumn('discountAmountIdr', hasValue(search['discountAmountIdr']), searchText, text, false, 'input', search)
-    // },
-    // {
-    //   title: "DISCOUNT AMOUNT USD", //
-    //   sorter: true,
-    //   align: "right",
-    //   dataIndex: "discountAmountUsd",
-    //   ...getColumnSearchPropsUseFilteredValue(
-    //     search,
-    //     "discountAmountUsd",
-    //     searchInput,
-    //     searchedColumn,
-    //     searchText,
-    //     handleSearch,
-    //   ),
-    //   render: (text) => renderColumn('discountAmountUsd', hasValue(search['discountAmountUsd']), searchText, text, false, 'input', search)
-    // },
     {
+      key: "totalAmountIdr",
       title: "TOTAL AMOUNT IDR",
       sorter: true,
       align: "right",
+      width: 200,
       dataIndex: "totalAmountIdr",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -475,14 +642,25 @@ export const columnsInvoice = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
+        handleSearch
       ),
-      render: (text) => renderColumn('totalAmountIdr', hasValue(search['totalAmountIdr']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "totalAmountIdr",
+          hasValue(search["totalAmountIdr"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "totalAmountUsd",
       title: "TOTAL AMOUNT USD",
       sorter: true,
       align: "right",
+      width: 200,
       dataIndex: "totalAmountUsd",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -490,13 +668,24 @@ export const columnsInvoice = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
+        handleSearch
       ),
-      render: (text) => renderColumn('totalAmountUsd', hasValue(search['totalAmountUsd']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "totalAmountUsd",
+          hasValue(search["totalAmountUsd"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "termOfPayment",
       title: "TERMS OF PAYMENT",
       dataIndex: "termOfPayment",
+      width: 180,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -506,12 +695,23 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('termOfPayment', hasValue(search['termOfPayment']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "termOfPayment",
+          hasValue(search["termOfPayment"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "transactionDate",
       title: "TRANSACTION DATE",
       sorter: true,
       align: "center",
+      width: 180,
       dataIndex: "transactionDate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -523,12 +723,22 @@ export const columnsInvoice = (
         true,
         "date"
       ),
-      render: (text) => renderDateColumn('transactionDate', hasValue(search['transactionDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "transactionDate",
+          hasValue(search["transactionDate"]),
+          searchText,
+          text,
+          "date",
+          search
+        ),
     },
     {
+      key: "invoiceDate",
       title: "INVOICE DATE",
       sorter: true,
       align: "center",
+      width: 180,
       dataIndex: "invoiceDate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -540,12 +750,22 @@ export const columnsInvoice = (
         true,
         "date"
       ),
-      render: (text) => renderDateColumn('invoiceDate', hasValue(search['invoiceDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "invoiceDate",
+          hasValue(search["invoiceDate"]),
+          searchText,
+          text,
+          "date",
+          search
+        ),
     },
     {
+      key: "dueDate",
       title: "DUE DATE",
       sorter: true,
       align: "center",
+      width: 180,
       dataIndex: "dueDate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -557,12 +777,22 @@ export const columnsInvoice = (
         true,
         "date"
       ),
-      render: (text) => renderDateColumn('dueDate', hasValue(search['dueDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "dueDate",
+          hasValue(search["dueDate"]),
+          searchText,
+          text,
+          "date",
+          search
+        ),
     },
     {
+      key: "rateType",
       title: "RATE TYPE",
       sorter: true,
       align: "center",
+      width: 150,
       dataIndex: "rateType",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -572,13 +802,23 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('rateType', hasValue(search['rateType']), searchText, text, false, 'input', search)
-
+      render: (text) =>
+        renderColumn(
+          "rateType",
+          hasValue(search["rateType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "rate",
       title: "RATE",
       sorter: true,
       align: "right",
+      width: 180,
       dataIndex: "rate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -586,15 +826,26 @@ export const columnsInvoice = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
+        handleSearch
       ),
-      render: (text) => renderColumn('rate', hasValue(search['rate']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "rate",
+          hasValue(search["rate"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "rateDate",
       title: "RATE DATE",
       sorter: true,
       align: "center",
-      dataIndex: "transactionDate",
+      width: 180,
+      dataIndex: "rateDate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "rateDate",
@@ -605,54 +856,95 @@ export const columnsInvoice = (
         true,
         "date"
       ),
-      render: (text) => renderDateColumn('transactionDate', hasValue(search['transactionDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "rateDate",
+          hasValue(search["rateDate"]),
+          searchText,
+          text,
+          "date",
+          search
+        ),
     },
     {
+      key: "totalAmountEqvIdr",
       title: "TOTAL AMOUNT EQV IDR",
       sorter: true,
       align: "right",
+      width: 200,
       dataIndex: "totalAmountEqvIdr",
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "totalAmountIdr",
+        "totalAmountEqvIdr",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
+        handleSearch
       ),
-      render: (text) => renderColumn('totalAmountEqvIdr', hasValue(search['totalAmountEqvIdr']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "totalAmountEqvIdr",
+          hasValue(search["totalAmountEqvIdr"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "totalAmountEqvUsd",
       title: "TOTAL AMOUNT EQV USD",
       sorter: true,
       align: "right",
+      width: 200,
       dataIndex: "totalAmountEqvUsd",
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "totalAmountIdr",
+        "totalAmountEqvUsd",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
+        handleSearch
       ),
-      render: (text) => renderColumn('totalAmountEqvUsd', hasValue(search['totalAmountEqvUsd']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "totalAmountEqvUsd",
+          hasValue(search["totalAmountEqvUsd"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
+      key: "remark",
       sorter: true,
       title: "REMARK",
       dataIndex: "remark",
+      width: 250,
       ellipsis: {
         showTitle: false,
       },
-      ...getColumnSearchPropsUseFilteredValue(
-        search, "remark"),
-      render: (text) => renderColumn('remark', hasValue(search['remark']), searchText, text, true, 'input', search)
+      ...getColumnSearchPropsUseFilteredValue(search, "remark"),
+      render: (text) =>
+        renderColumn(
+          "remark",
+          hasValue(search["remark"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
     },
     {
+      key: "status",
       title: "STATUS",
       dataIndex: "status",
-      fixed: "right",
       width: 150,
+      align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -662,6 +954,47 @@ export const columnsInvoice = (
         searchText,
         handleSearch
       ),
-      render: (text) => renderColumn('status', hasValue(search['status']), searchText, text?.toLowerCase() === "inprogress" ? "in progress" : text?.toLowerCase(), false, 'status', search)
+      render: (text) => (
+        <StatusComponent
+          colour={
+            text?.toLowerCase() === "inprogress"
+              ? "in progress"
+              : text?.toLowerCase()
+          }
+        >
+          {toTitleCase(
+            text?.toLowerCase() === "inprogress"
+              ? "in progress"
+              : text?.toLowerCase()
+          )}
+        </StatusComponent>
+      ),
+    },
+    {
+      key: "action",
+      title: "ACTION",
+      fixed: "right",
+      width: 80,
+      align: "center",
+      render: (_, record) => (
+        <Popover
+          content={getPopoverContent(record)}
+          trigger="click"
+          placement="bottomRight"
+          open={popoverVisible[record.invoiceNumber]}
+          onOpenChange={(visible) =>
+            setPopoverVisible((prev) => ({
+              ...prev,
+              [record.invoiceNumber]: visible,
+            }))
+          }
+        >
+          <MoreOutlined
+            style={{ fontSize: "20px", cursor: "pointer" }}
+            className="rotate-90"
+          />
+        </Popover>
+      ),
     },
   ];
+};

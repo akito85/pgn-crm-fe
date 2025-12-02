@@ -1,15 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import BaseContainer from "../../../../../../components/BaseContainer";
-import { Input, Form, DatePicker } from "antd";
+import { Form } from "antd";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import { FilterOutlined } from "@ant-design/icons";
 import {
   Link,
-  NavLink,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
 } from "react-router-dom";
 import { useState } from "react";
 import SVGIcon from "../../../../../../assets/Icon/index";
@@ -18,11 +12,9 @@ import ServicePointAssetTable from "./ServicePointAssetTable";
 import DetailText from "../../../../../../components/DetailText";
 import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 import { requiredMessage } from "../../../../../../utils";
-import InputComponent from "../../../../../../components/InputComponent";
 import DateComponent from "../../../../../../components/DateComponent";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import { useSelector } from "react-redux";
-import Highlighter from "react-highlight-words";
 import { dateFormatting } from "../../../../../../utils";
 import moment from "moment";
 import {
@@ -30,8 +22,6 @@ import {
   inActiveAsset,
 } from "../../../../../../redux/slices/account_management/detailAccount/ServicePoint";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
-import UtilsDate from "./Asset/UtilsDate";
-import Toolbar from "../../../../../../components/Toolbar";
 import ToolbarAccount from "../../../ComponentAccount/ToolbarAccount";
 
 const ServicePointAsset = ({

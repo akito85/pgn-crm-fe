@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   Input,
-  Space,
   Checkbox,
   Tooltip,
   Form,
@@ -16,17 +15,14 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
 import StatusComponent from "../../../../components/StatusComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { Link, NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import SVGIcon from "../../../../assets/Icon/index";
 import { FilterOutlined, DownloadOutlined } from "@ant-design/icons";
 import BaseContainer from "../../../../components/BaseContainer";
-import { requiredMessage } from "../../../../utils";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
-import InputComponent from "../../../../components/InputComponent";
 import { useDispatch, useSelector } from "react-redux";
 import {
   downloadCustomer,
-  getCustomerAccount,
   getCustomerAccountAdvancedFilter,
   getGlobalSearchColumn,
   getGlobalSearchCondition,

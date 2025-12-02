@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import BaseContainer from "../../../../components/BaseContainer";
 import SVGIcon from "../../../../assets/Icon/index";
 import CustomerInformation from "./DetailPages/CustomerInformation";
@@ -10,7 +10,6 @@ import AttachmentCustomer from "./DetailPages/Attachment.js/AttachmentCustomer";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
 import { NavLink } from "react-router-dom";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
-import Toolbar from "../../../../components/Toolbar";
 import ToolbarAccount from "../ComponentAccount/ToolbarAccount";
 
 const listCustomerPage = [

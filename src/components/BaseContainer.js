@@ -1,9 +1,9 @@
 import React from "react";
 
-const BaseContainer = ({ header,subHeader, children, type, element }) => {
+const BaseContainer = ({ header, subHeader, children, type, element }) => {
   return (
     <div className="drop-shadow-lg bg-white rounded-lg w-full mt-[30px] p-[20px]">
-      {type === "profile" || type === 'tab' ? (
+      {type === "profile" || type === "tab" ? (
         <>
           <div className="p-4">{element}</div>
         </>

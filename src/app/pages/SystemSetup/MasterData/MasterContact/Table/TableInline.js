@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 
 import {
-    DeleteOutlined,
     MoreOutlined,
     PlusOutlined,
     InfoCircleOutlined,
@@ -24,10 +23,8 @@ import {
 import moment from "moment";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import InputComponent from "../../../../../../components/InputComponent";
-import { formMessageRequired, hasValue } from "../../../../../../utils";
+import { hasValue } from "../../../../../../utils";
 import { useDispatch } from "react-redux";
-import { getZoneContact } from "../../../../../../redux/slices/receipt_collection/bankSlice";
-import { rule } from "postcss";
 const EditableCell = ({
     editing,
     dataIndex,

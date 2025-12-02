@@ -9,13 +9,7 @@ import {
   DeleteOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import {
-  Alert,
-  Form,
-  Select,
-  Spin,
-  Tooltip,
-} from "antd";
+import { Alert, Form, Select, Spin, Tooltip } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
@@ -40,7 +34,12 @@ import {
   ModalConfirm,
 } from "../../../../components/Modal/ModalPopUp";
 import HierarchyDataAccess from "./HierarchyDataAccess";
-import { dateFormatting, formMessageRequired, hasValue, renderColumn } from "../../../../utils";
+import {
+  dateFormatting,
+  formMessageRequired,
+  hasValue,
+  renderColumn,
+} from "../../../../utils";
 import InputComponent from "../../../../components/InputComponent";
 import SelectComponent from "../../../../components/SelectComponent";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
@@ -51,12 +50,10 @@ const { Option } = Select;
 
 const FormDataAccessHierarchy = (props) => {
   const { type } = props;
-  const {
-    cost_center_data,
-    data_detail,
-    loading,
-  } = useSelector((state) => state.data_access);
-  const { bodyError } = useSelector(state => state?.general);
+  const { cost_center_data, data_detail, loading } = useSelector(
+    (state) => state.data_access
+  );
+  const { bodyError } = useSelector((state) => state?.general);
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -93,63 +90,69 @@ const FormDataAccessHierarchy = (props) => {
   const [payload, setPayload] = useState({});
 
   // assert callback (include render hierarchy)
-  const assert = useCallback((data_detail, cost_center_data) => {
-    if (data_detail && cost_center_data) {
-      const mappedParent = data_detail?.rDataAccessHierarchy?.map(
-        (item) => item.costCenter
-      );
-      const filteredParent = cost_center_data?.filter((item) =>
-        mappedParent?.includes(item?.name)
-      );
+  const assert = useCallback(
+    (data_detail, cost_center_data) => {
+      if (data_detail && cost_center_data) {
+        const mappedParent = data_detail?.rDataAccessHierarchy?.map(
+          (item) => item.costCenter
+        );
+        const filteredParent = cost_center_data?.filter((item) =>
+          mappedParent?.includes(item?.name)
+        );
 
-      setParents(filteredParent);
-      formHeader.setFieldsValue({
-        id: data_detail?.dahId,
-        name: data_detail?.name,
-        startDate:
-          data_detail?.startDate !== null
-            ? moment(data_detail?.startDate).clone()
-            : moment(),
-        endDate:
-          data_detail?.endDate !== null
-            ? moment(data_detail?.endDate).clone()
-            : moment(),
-        saveAs: data_detail?.status,
-        descriptionHierarchy: data_detail?.description,
-      });
-      const filteredCostCenters = cost_center_data?.filter(
-        (costCenter) =>
-          !data_detail?.rDataAccessHierarchy?.some(
-            (dataCostCenter) =>
-              dataCostCenter?.costCenter === costCenter?.name
-          )
-      );
-      setCostCenters(filteredCostCenters);
+        setParents(filteredParent);
+        formHeader.setFieldsValue({
+          id: data_detail?.dahId,
+          name: data_detail?.name,
+          startDate:
+            data_detail?.startDate !== null
+              ? moment(data_detail?.startDate).clone()
+              : moment(),
+          endDate:
+            data_detail?.endDate !== null
+              ? moment(data_detail?.endDate).clone()
+              : moment(),
+          saveAs: data_detail?.status,
+          descriptionHierarchy: data_detail?.description,
+        });
+        const filteredCostCenters = cost_center_data?.filter(
+          (costCenter) =>
+            !data_detail?.rDataAccessHierarchy?.some(
+              (dataCostCenter) =>
+                dataCostCenter?.costCenter === costCenter?.name
+            )
+        );
+        setCostCenters(filteredCostCenters);
 
-      setData(
-        data_detail?.rDataAccessHierarchy?.map((item, index) => {
-          return {
-            id: item?.rDahId,
-            costCenter: item?.costCenter,
-            key: item?.parent === "" ? "1" : (index + 2).toString(),
-            parent: item?.parent,
-            sibling: Array.isArray(item?.sibling)
-              ? item.sibling.map((item) => {
-                return item?.sibling;
-              })
-              : [],
-            description: item?.description,
-            status: item?.status,
-            createdDate: hasValue(item?.createdDate) && moment(item?.createdDate).format(dateFormatting.dateTime),
-            updatedDate: hasValue(item?.updatedDate) && moment(item?.updatedDate).format(dateFormatting.dateTime),
-            createdBy: item?.createdBy,
-            updatedBy: item?.updatedBy
-          };
-        }) || []
-      );
-
-    }
-  }, [formHeader]);
+        setData(
+          data_detail?.rDataAccessHierarchy?.map((item, index) => {
+            return {
+              id: item?.rDahId,
+              costCenter: item?.costCenter,
+              key: item?.parent === "" ? "1" : (index + 2).toString(),
+              parent: item?.parent,
+              sibling: Array.isArray(item?.sibling)
+                ? item.sibling.map((item) => {
+                    return item?.sibling;
+                  })
+                : [],
+              description: item?.description,
+              status: item?.status,
+              createdDate:
+                hasValue(item?.createdDate) &&
+                moment(item?.createdDate).format(dateFormatting.dateTime),
+              updatedDate:
+                hasValue(item?.updatedDate) &&
+                moment(item?.updatedDate).format(dateFormatting.dateTime),
+              createdBy: item?.createdBy,
+              updatedBy: item?.updatedBy,
+            };
+          }) || []
+        );
+      }
+    },
+    [formHeader]
+  );
 
   // use effect get data
   useEffect(() => {
@@ -221,25 +224,37 @@ const FormDataAccessHierarchy = (props) => {
   };
 
   // handleUpdate row data access
-  const handleUpdateRow = useCallback((key) => {
-    const selectData = data.filter((item) => item.key === key);
-    const costCenter = data.filter((item) => item.key === key)[0]?.costCenter;
-    const hasChildren = data.filter((item) => item.parent === costCenter);
-    const filteredBySelectedCostCenter = parents.filter(item => item?.name !== costCenter);
-    if (key === "1" || hasChildren.length > 0 || selectData[0]?.sibling?.length > 0) {
-      setDisabledParent(true);
-    } else {
-      setDisabledParent(false);
-    }
-    const rowSelected = Object.assign({}, ...selectData);
-    setSelectedData(selectData);
-    setSibling(data?.filter(item => item?.parent === rowSelected?.parent)?.filter(item => item?.costCenter !== rowSelected?.costCenter));
-    setUpdateTree(true);
-    setDisabledButtonAdd(false);
-    setParents(filteredBySelectedCostCenter);
-    form.getFieldValue("costCenter");
-  }, [data, form, parents]);
-
+  const handleUpdateRow = useCallback(
+    (key) => {
+      const selectData = data.filter((item) => item.key === key);
+      const costCenter = data.filter((item) => item.key === key)[0]?.costCenter;
+      const hasChildren = data.filter((item) => item.parent === costCenter);
+      const filteredBySelectedCostCenter = parents.filter(
+        (item) => item?.name !== costCenter
+      );
+      if (
+        key === "1" ||
+        hasChildren.length > 0 ||
+        selectData[0]?.sibling?.length > 0
+      ) {
+        setDisabledParent(true);
+      } else {
+        setDisabledParent(false);
+      }
+      const rowSelected = Object.assign({}, ...selectData);
+      setSelectedData(selectData);
+      setSibling(
+        data
+          ?.filter((item) => item?.parent === rowSelected?.parent)
+          ?.filter((item) => item?.costCenter !== rowSelected?.costCenter)
+      );
+      setUpdateTree(true);
+      setDisabledButtonAdd(false);
+      setParents(filteredBySelectedCostCenter);
+      form.getFieldValue("costCenter");
+    },
+    [data, form, parents]
+  );
 
   // add & update hierarchy
   const onFinnish = () => {
@@ -273,17 +288,17 @@ const FormDataAccessHierarchy = (props) => {
       const values =
         type === "create"
           ? {
-            key: (maxId + 1).toString(),
-            parent:
-              formValue?.parent === undefined ? null : formValue?.parent,
-            ...formValue,
-          }
+              key: (maxId + 1).toString(),
+              parent:
+                formValue?.parent === undefined ? null : formValue?.parent,
+              ...formValue,
+            }
           : {
-            id: null,
-            key: (maxId + 1).toString(),
-            ...formValue,
-            status: "ACTIVE",
-          };
+              id: null,
+              key: (maxId + 1).toString(),
+              ...formValue,
+              status: "ACTIVE",
+            };
       if (data?.length === 0) {
         dataTable = [...data, values];
         newParent = [...parents, selectedParent];
@@ -302,7 +317,10 @@ const FormDataAccessHierarchy = (props) => {
         });
         setInputCostCenterAlert(false);
         setInputParentAlert(false);
-      } else if (formValue?.costCenter === undefined && formValue?.parent === undefined) {
+      } else if (
+        formValue?.costCenter === undefined &&
+        formValue?.parent === undefined
+      ) {
         dataTable = data;
         newParent = parents;
         updatedCostCenters = costCenters;
@@ -326,46 +344,46 @@ const FormDataAccessHierarchy = (props) => {
     }
     setCostCenters(updatedCostCenters);
     form.resetFields();
-    setDisabledParent(false)
+    setDisabledParent(false);
     // setDisabledButtonAdd(true)
-
   };
 
-
   // delete hierarchy
-  const handleDelete = useCallback((key, costCenter, parentsData) => {
-    const findIndex = data.findIndex((item) => item.key === key);
-    if (findIndex === 0 || key === 1) {
-      setParents([]);
-      const filteredCostCenter = parentsData.filter(
-        (item) => item?.value || item?.name !== null
-      );
-      setCostCenters([...costCenters, ...filteredCostCenter]);
-      setData([]);
-    } else {
-      const item = data[findIndex];
-      const setCostCenter = item.costCenter;
-      const filteredCostCenter = parentsData.filter(
-        (item) => item.name === setCostCenter
-      );
-      const setParent = item.parent;
-      const newData = [...data];
-      const updatedParent = { parent: setParent };
-      newData.forEach((item, index) => {
-        if (index !== findIndex && item.parent === setCostCenter) {
-          newData[index] = { ...item, ...updatedParent };
-        }
-      });
-      const updatedData = newData.filter((item) => item.key !== key);
-      setData(updatedData);
-      setParents(parents.filter((item) => item.name !== setCostCenter));
-      setCostCenters([...costCenters, ...filteredCostCenter]);
-    }
-    setIsSame(false);
-    setDisabledParent(false);
-    form.resetFields();
-  }, [costCenters, data, form, parents]);
-
+  const handleDelete = useCallback(
+    (key, costCenter, parentsData) => {
+      const findIndex = data.findIndex((item) => item.key === key);
+      if (findIndex === 0 || key === 1) {
+        setParents([]);
+        const filteredCostCenter = parentsData.filter(
+          (item) => item?.value || item?.name !== null
+        );
+        setCostCenters([...costCenters, ...filteredCostCenter]);
+        setData([]);
+      } else {
+        const item = data[findIndex];
+        const setCostCenter = item.costCenter;
+        const filteredCostCenter = parentsData.filter(
+          (item) => item.name === setCostCenter
+        );
+        const setParent = item.parent;
+        const newData = [...data];
+        const updatedParent = { parent: setParent };
+        newData.forEach((item, index) => {
+          if (index !== findIndex && item.parent === setCostCenter) {
+            newData[index] = { ...item, ...updatedParent };
+          }
+        });
+        const updatedData = newData.filter((item) => item.key !== key);
+        setData(updatedData);
+        setParents(parents.filter((item) => item.name !== setCostCenter));
+        setCostCenters([...costCenters, ...filteredCostCenter]);
+      }
+      setIsSame(false);
+      setDisabledParent(false);
+      form.resetFields();
+    },
+    [costCenters, data, form, parents]
+  );
 
   // func detail cost centers
   const handleDetail = (record) => {
@@ -374,15 +392,14 @@ const FormDataAccessHierarchy = (props) => {
     if (record?.id === undefined || record?.id === null) {
       setSelectedDetail(record);
     } else {
-      setSelectedDetail(record)
+      setSelectedDetail(record);
     }
   };
-
 
   // activation
   const handleActivation = async () => {
     try {
-      setPayload(recordId)
+      setPayload(recordId);
       await dispatch(activationCostCenter({ id: recordId }))?.unwrap();
       await dispatch(getDetailDataAccess(id))?.unwrap();
     } catch (error) {
@@ -418,25 +435,24 @@ const FormDataAccessHierarchy = (props) => {
     const nodes = {};
     const rootNodeIds = new Set();
     if (data?.length === 0) {
-      return [{ name: 'No Data', children: [] }];
+      return [{ name: "No Data", children: [] }];
     } else {
       data?.forEach((node) => {
         const { costCenter, parent } = node;
         nodes[costCenter] = { ...node, children: [] };
-        if (parent === null || parent === '' || parent === undefined) {
+        if (parent === null || parent === "" || parent === undefined) {
           rootNodeIds?.add(costCenter);
         }
       });
       data?.forEach((node) => {
         const { costCenter, parent } = node;
-        if (parent !== null || parent === '' || parent === undefined) {
+        if (parent !== null || parent === "" || parent === undefined) {
           nodes[parent]?.children?.push(nodes[costCenter]);
         }
       });
     }
     return Array.from(rootNodeIds).map((rootId) => nodes[rootId]);
   };
-
 
   const hasChildren = useCallback((data, filterId) => {
     const findMatchingObject = (items) => {
@@ -455,142 +471,199 @@ const FormDataAccessHierarchy = (props) => {
         }
       }
       return null;
-    }
+    };
     return findMatchingObject(data) !== null ? findMatchingObject(data) : false;
   }, []);
 
   // column
-  const column = useCallback((transformData) => [
-    {
-      key: "no",
-      title: "NO",
-      dataIndex: "no",
-      width: "5%",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "COST CENTER",
-      dataIndex: "costCenter",
-      ...getColumnSearchProps(
-        "costCenter",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      ellipsis: {
-        showTitle: false,
+  const column = useCallback(
+    (transformData) => [
+      {
+        key: "no",
+        title: "NO",
+        dataIndex: "no",
+        width: "5%",
+        render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
-      sorter: (a, b) => sorterFunction('costCenter', a, b),
-      render: (text) => renderColumn('costCenter', searchedColumn, searchText, text, true, 'input', search)
-    },
-    {
-      title: "PARENT",
-      dataIndex: "parent",
-      ...getColumnSearchProps(
-        "parent",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      ellipsis: {
-        showTitle: false,
+      {
+        title: "COST CENTER",
+        dataIndex: "costCenter",
+        ...getColumnSearchProps(
+          "costCenter",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        ellipsis: {
+          showTitle: false,
+        },
+        sorter: (a, b) => sorterFunction("costCenter", a, b),
+        render: (text) =>
+          renderColumn(
+            "costCenter",
+            searchedColumn,
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
       },
-      sorter: (a, b) => sorterFunction('parent', a, b),
-      render: (text) => renderColumn('parent', searchedColumn, searchText, text, true, 'input', search)
-    },
-    {
-      title: "SIBLING",
-      dataIndex: "sibling",
-      ellipsis: {
-        showTitle: false,
+      {
+        title: "PARENT",
+        dataIndex: "parent",
+        ...getColumnSearchProps(
+          "parent",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        ellipsis: {
+          showTitle: false,
+        },
+        sorter: (a, b) => sorterFunction("parent", a, b),
+        render: (text) =>
+          renderColumn(
+            "parent",
+            searchedColumn,
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
       },
-      sorter: (a, b) => {
-        const aSiblingText = a.sibling?.join(", ");
-        const bSiblingText = b.sibling?.join(", ");
-        return sorterFunction('sibling', aSiblingText, bSiblingText)
+      {
+        title: "SIBLING",
+        dataIndex: "sibling",
+        ellipsis: {
+          showTitle: false,
+        },
+        sorter: (a, b) => {
+          const aSiblingText = a.sibling?.join(", ");
+          const bSiblingText = b.sibling?.join(", ");
+          return sorterFunction("sibling", aSiblingText, bSiblingText);
+        },
+        ...getColumnSearchProps(
+          "sibling",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) => {
+          const texts = text?.join(", ");
+          return renderColumn(
+            "sibling",
+            searchedColumn,
+            searchText,
+            texts,
+            true,
+            "input",
+            search
+          );
+        },
       },
-      ...getColumnSearchProps(
-        "sibling",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => {
-        const texts = text?.join(', ')
-        return renderColumn('sibling', searchedColumn, searchText, texts, true, 'input', search)
+      {
+        title: "DESCRIPTION",
+        dataIndex: "description",
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchProps(
+          "description",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        sorter: (a, b) => a.description?.localeCompare(b.description),
+        render: (text) =>
+          renderColumn(
+            "description",
+            searchedColumn,
+            searchText,
+            text,
+            true,
+            "input",
+            search
+          ),
       },
-    },
-    {
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      ellipsis: {
-        showTitle: false,
+      {
+        key: "no",
+        title: "ACTION",
+        fixed: "right",
+        width: 160,
+        render: (_, record, data) => {
+          const isDisabled = hasChildren(transformData, record?.key);
+          return (
+            <div className="w-full flex justify-center gap-4 mt-1 items-start">
+              <Tooltip title={"Detail"}>
+                <div
+                  border={false}
+                  onClick={() => {
+                    handleDetail(record);
+                  }}
+                >
+                  <UnorderedListOutlined
+                    style={{ fontSize: "24px", color: "#0075bf" }}
+                  />
+                </div>
+              </Tooltip>
+              <Tooltip title={"Update"}>
+                <div onClick={() => handleUpdateRow(record.key)}>
+                  <SVGIcon name="IconEdit" width={24} />
+                </div>
+              </Tooltip>
+              <Tooltip title={"Delete"}>
+                <div
+                  className={isDisabled ? " cursor-not-allowed" : ""}
+                  onClick={() => {
+                    isDisabled === false &&
+                      handleDelete(record.key, record, parents);
+                  }}
+                >
+                  <DeleteOutlined
+                    style={{
+                      color: isDisabled ? "#8D91A0" : "#BE3036",
+                      fontSize: 24,
+                      cursor: isDisabled ? "not-allowed" : "pointer",
+                    }}
+                  />
+                </div>
+              </Tooltip>
+            </div>
+          );
+        },
       },
-      ...getColumnSearchProps(
-        "description",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      sorter: (a, b) => a.description?.localeCompare(b.description),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search),
-    },
-    {
-      key: "no",
-      title: "ACTION",
-      fixed: "right",
-      width: 160,
-      render: (_, record, data) => {
-        const isDisabled = hasChildren(transformData, record?.key);
-        return (
-          <div className="w-full flex justify-center gap-4 mt-1 items-start">
-            <Tooltip title={"Detail"}>
-              <div
-                border={false}
-                onClick={() => {
-                  handleDetail(record);
-                }}
-              >
-                <UnorderedListOutlined
-                  style={{ fontSize: "24px", color: "#0075bf" }}
-                />
-              </div>
-            </Tooltip>
-            <Tooltip title={"Update"}>
-              <div onClick={() => handleUpdateRow(record.key)}>
-                <SVGIcon name="IconEdit" width={24} />
-              </div>
-            </Tooltip>
-            <Tooltip title={"Delete"}>
-              <div
-                className={
-                  isDisabled ? " cursor-not-allowed" : ""
-                }
-                onClick={() => {
-                  isDisabled === false && handleDelete(record.key, record, parents)
-                }}
-              >
-                <DeleteOutlined style={{ color: isDisabled ? "#8D91A0" : '#BE3036', fontSize: 24, cursor: isDisabled ? 'not-allowed' : 'pointer'  }} />
-              </div>
-            </Tooltip>
-          </div>
-        );
-      },
-    },
-  ], [handleDelete, handleUpdateRow, hasChildren, page, pageSize, parents, search, searchText, searchedColumn]);
+    ],
+    [
+      handleDelete,
+      handleUpdateRow,
+      hasChildren,
+      page,
+      pageSize,
+      parents,
+      search,
+      searchText,
+      searchedColumn,
+    ]
+  );
 
   // filtering column
-  let columnEdit = useMemo(() => column(transformDataToTree(data)).filter(function (item) {
-    return item?.dataIndex !== "status";
-  }), [column, data]);
+  let columnEdit = useMemo(
+    () =>
+      column(transformDataToTree(data)).filter(function (item) {
+        return item?.dataIndex !== "status";
+      }),
+    [column, data]
+  );
 
   // routes breadcrumb
   const routes = [
@@ -610,7 +683,6 @@ const FormDataAccessHierarchy = (props) => {
           : "Update Data Access Hierarchy",
     },
   ];
-
 
   // render detail layout
   const renderDetailLayout = () => {
@@ -656,33 +728,36 @@ const FormDataAccessHierarchy = (props) => {
     setInputParentAlert(false);
     setInputCostCenterAlert(false);
     // setDisabledButtonAdd(true)
-    setParents(cost_center_data?.filter(itemCostCenter => data?.some(item => item?.costCenter === itemCostCenter?.name)))
-    setPayload({})
+    setParents(
+      cost_center_data?.filter((itemCostCenter) =>
+        data?.some((item) => item?.costCenter === itemCostCenter?.name)
+      )
+    );
+    setPayload({});
   };
-
 
   // update data pagination
-  const updateDataPagination = (type = "data") => {
-    let result = [...data];
-    if (searchedColumn && hasValue(searchText)) {
-      const fixSearchText = searchText?.toLowerCase();
-      result = result?.filter((item) => {
-        if (searchedColumn === "createdDate") {
-          const tempDate =
-            moment(item[searchedColumn])?.format(dateFormatting.dateTime) || "";
-          return tempDate?.toLowerCase().includes(fixSearchText);
-        } else if (searchedColumn === 'sibling') {
-          return item[searchedColumn]?.map(item => item)?.join(', ')?.toLowerCase()?.includes(fixSearchText);
-        } else {
-          return item[searchedColumn].toLowerCase().includes(fixSearchText);
-        }
-      });
-    } else {
-      result = data;
-    }
-    const fix = result?.slice((page - 1) * pageSize, page * pageSize);
-    return type === "data" ? fix : result.length;
-  };
+  // const updateDataPagination = (type = "data") => {
+  //   let result = [...data];
+  //   if (searchedColumn && hasValue(searchText)) {
+  //     const fixSearchText = searchText?.toLowerCase();
+  //     result = result?.filter((item) => {
+  //       if (searchedColumn === "createdDate") {
+  //         const tempDate =
+  //           moment(item[searchedColumn])?.format(dateFormatting.dateTime) || "";
+  //         return tempDate?.toLowerCase().includes(fixSearchText);
+  //       } else if (searchedColumn === 'sibling') {
+  //         return item[searchedColumn]?.map(item => item)?.join(', ')?.toLowerCase()?.includes(fixSearchText);
+  //       } else {
+  //         return item[searchedColumn].toLowerCase().includes(fixSearchText);
+  //       }
+  //     });
+  //   } else {
+  //     result = data;
+  //   }
+  //   const fix = result?.slice((page - 1) * pageSize, page * pageSize);
+  //   return type === "data" ? fix : result.length;
+  // };
 
   // handle change pagination
   const handleChange = (page, pageSizeChange) => {
@@ -694,45 +769,46 @@ const FormDataAccessHierarchy = (props) => {
   // handle change sibling
   const handleChangeSibling = (e) => {
     if (e?.length === 0) {
-      setDisabledParent(false)
+      setDisabledParent(false);
     } else {
-      setDisabledParent(true)
+      setDisabledParent(true);
     }
-  }
-
+  };
 
   const handleRetry = () => {
-    handleCancelTryAgain()
-    if (bodyError?.action === 'CREATE_DATA_ACCESS') {
-      dispatch(createDataAccess(payload))
-    } else if (bodyError?.action === 'UPDATE_DATA_ACCES') {
-      dispatch(updateDataAccess(payload))
-    } else if (bodyError?.action === 'GET_DETAIL_DATA_ACCESS') {
-      dispatch(getDetailDataAccess(location?.state?.id))
-    } else if (bodyError?.action === 'ACTIVATION_COST_CENTER') {
-      dispatch(activationCostCenter({ id: payload }))
+    handleCancelTryAgain();
+    if (bodyError?.action === "CREATE_DATA_ACCESS") {
+      dispatch(createDataAccess(payload));
+    } else if (bodyError?.action === "UPDATE_DATA_ACCES") {
+      dispatch(updateDataAccess(payload));
+    } else if (bodyError?.action === "GET_DETAIL_DATA_ACCESS") {
+      dispatch(getDetailDataAccess(location?.state?.id));
+    } else if (bodyError?.action === "ACTIVATION_COST_CENTER") {
+      dispatch(activationCostCenter({ id: payload }));
     } else {
       dispatch(getAllCostCenter());
     }
   };
 
-
   // render required input parent
   const isRequired = useMemo(() => {
     let rules;
-    if (selectedData?.filter(item => item?.key === "1")?.length === 1 && updateTree === true) {
+    if (
+      selectedData?.filter((item) => item?.key === "1")?.length === 1 &&
+      updateTree === true
+    ) {
       rules = false;
     } else if (data?.length > 0 && updateTree === false) {
       rules = true;
     } else if (data?.length > 0) {
       return true;
-    };
+    }
     return rules;
   }, [data?.length, selectedData, updateTree]);
 
-  console.log(data, ' data');
+  console.log(data, " data");
 
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
     <LayoutMenu>
       <BreadCrumb routes={routes} />
@@ -751,10 +827,17 @@ const FormDataAccessHierarchy = (props) => {
                     <span> Area Bagan Hierarchy</span>
                   </div>
                 ) : (
-                  <HierarchyDataAccess data={transformDataToTree(data)} onClick={handleUpdateRow} />
+                  <HierarchyDataAccess
+                    data={transformDataToTree(data)}
+                    onClick={handleUpdateRow}
+                  />
                 )}
                 <div className={"w-full"}>
-                  <Form.Item label={"Cost Center"} name={"costCenter"} rules={formMessageRequired('Cost Center')}>
+                  <Form.Item
+                    label={"Cost Center"}
+                    name={"costCenter"}
+                    rules={formMessageRequired("Cost Center")}
+                  >
                     <SelectComponent
                       value={selectedParent?.name}
                       onChange={(e) => handleChangeCostCenter(e)}
@@ -778,7 +861,7 @@ const FormDataAccessHierarchy = (props) => {
                   <Form.Item
                     label={"Parent"}
                     name={"parent"}
-                    rules={isRequired ? formMessageRequired('Parent') : null}
+                    rules={isRequired ? formMessageRequired("Parent") : null}
                   >
                     <SelectComponent
                       onChange={(e) => handleParentChange(e)}
@@ -807,7 +890,10 @@ const FormDataAccessHierarchy = (props) => {
                   </span>
                   <span className="text-red-600 text-uppercase my-2"></span>
                   <Form.Item label={"Siblings"} name={"sibling"}>
-                    <SelectComponent mode={"multiple"} onChange={handleChangeSibling}>
+                    <SelectComponent
+                      mode={"multiple"}
+                      onChange={handleChangeSibling}
+                    >
                       {sibling?.map((item, key) => {
                         return (
                           <Option value={item?.costCenter} key={key}>
@@ -847,7 +933,11 @@ const FormDataAccessHierarchy = (props) => {
             <BaseContainer header={"COST CENTER LIST"}>
               <TablePaginationNew
                 type="FE"
-                columns={type === "update" ? column(transformDataToTree(data)) : columnEdit}
+                columns={
+                  type === "update"
+                    ? column(transformDataToTree(data))
+                    : columnEdit
+                }
                 pageSize={pageSize}
                 current={page}
                 dataSource={data}
@@ -918,10 +1008,14 @@ const FormDataAccessHierarchy = (props) => {
           handleCancel={() => setOpenModal(false)}
           width={1000}
           footer={
-            modalType !== 'confirmation' &&
-            <ButtonComponent type={"submit"} onClick={() => setOpenModal(false)}>
-              Back
-            </ButtonComponent>
+            modalType !== "confirmation" && (
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => setOpenModal(false)}
+              >
+                Back
+              </ButtonComponent>
+            )
           }
         >
           {modalType === "confirmation" ? (

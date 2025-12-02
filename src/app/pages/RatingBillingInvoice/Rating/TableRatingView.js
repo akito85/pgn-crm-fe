@@ -1,9 +1,5 @@
-import Highlighter from "react-highlight-words";
-import { Tooltip } from "antd";
-import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../utils";
-import SVGIcon from "../../../../assets/Icon/index";
-import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 
 export const columnsRating = (
   search,
@@ -16,15 +12,18 @@ export const columnsRating = (
   // handleDetail = () => {}
 ) => [
   {
+    key: "no",
     title: "NO",
     align: "center",
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
+    key: "calculationCode",
     title: "CALCULATION CODE",
     dataIndex: "calculationCode",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "calculationCode",
@@ -36,9 +35,11 @@ export const columnsRating = (
     render: (text) => renderColumn('calculationCode', hasValue(search['calculationCode']), searchText, text, false, 'input', search)
   },
   {
+    key: "ratingCode",
     title: "RATING CODE",
     dataIndex: "ratingCode",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "ratingCode",
@@ -50,9 +51,11 @@ export const columnsRating = (
     render: (text) => renderColumn('ratingCode', hasValue(search['ratingCode']), searchText, text, false, 'input', search)
   },
   {
+    key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerNumber",
@@ -64,9 +67,11 @@ export const columnsRating = (
     render: (text) => renderColumn('customerNumber', hasValue(search['customerNumber']), searchText, text, false, 'input', search)
   },
   {
+    key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerName",
@@ -78,9 +83,11 @@ export const columnsRating = (
     render: (text) => renderColumn('customerName', hasValue(search['customerName']), searchText, text, false, 'input', search)
   },
   {
+    key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountNumber",
@@ -92,9 +99,11 @@ export const columnsRating = (
     render: (text) => renderColumn('accountNumber', hasValue(search['accountNumber']), searchText, text, false, 'input', search)
   },
   {
+    key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountName",
@@ -106,6 +115,7 @@ export const columnsRating = (
     render: (text) => renderColumn('accountName', hasValue(search['accountName']), searchText, text, false, 'input', search)
   },
   {
+    key: "accGroupType",
     title: "ACCOUNT GROUP TYPE",
     dataIndex: "accGroupType",
     sorter: true,
@@ -121,6 +131,7 @@ export const columnsRating = (
     render: (text) => renderColumn('accGroupType', hasValue(search['accGroupType']), searchText, text, false, 'input', search)
   },
   {
+    key: "serviceType",
     title: "SERVICE TYPE",
     dataIndex: "serviceType",
     sorter: true,
@@ -136,9 +147,11 @@ export const columnsRating = (
     render: (text) => renderColumn('serviceType', hasValue(search['serviceType']), searchText, text, false, 'input', search)
   },
   {
+    key: "sor",
     title: "SOR",
     dataIndex: "sor",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "sor",
@@ -150,9 +163,11 @@ export const columnsRating = (
     render: (text) => renderColumn('sor', hasValue(search['sor']), searchText, text, false, 'input', search)
   },
   {
+    key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "costCenter",
@@ -164,6 +179,7 @@ export const columnsRating = (
     render: (text) => renderColumn('costCenter', hasValue(search['costCenter']), searchText, text, false, 'input', search)
   },
   {
+    key: "accountSegment",
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
     sorter: true,
@@ -179,9 +195,11 @@ export const columnsRating = (
     render: (text) => renderColumn('accountSegment', hasValue(search['accountSegment']), searchText, text, false, 'input', search)
   },
   {
+    key: "mreadingCode",
     title: "METER READING CODE",
     dataIndex: "mreadingCode",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "mreadingCode",
@@ -193,6 +211,7 @@ export const columnsRating = (
     render: (text) => renderColumn('mreadingCode', hasValue(search['mreadingCode']), searchText, text, false, 'input', search)
   },
   {
+    key: "billingCycle",
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
     sorter: true,
@@ -208,6 +227,7 @@ export const columnsRating = (
     render: (text) => renderColumn('billingCycle', hasValue(search['billingCycle']), searchText, text, false, 'input', search)
   },
   {
+    key: "billingPeriod",
     title: "BILLING PERIOD",
     sorter: true,
     align: "center",
@@ -225,9 +245,11 @@ export const columnsRating = (
     render: (text) => renderDateColumn('billingPeriod', hasValue(search['billingPeriod']), searchText, text, 'datePeriod', search)
   },
   {
+    key: "saNumber",
     title: "SA NUMBER",
     dataIndex: "saNumber",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "saNumber",
@@ -239,9 +261,11 @@ export const columnsRating = (
     render: (text) => renderColumn('saNumber', hasValue(search['saNumber']), searchText, text, false, 'input', search)
   },
   {
+    key: "product",
     title: "PRODUCT",
     dataIndex: "product",
     sorter: true,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "product",
@@ -253,10 +277,11 @@ export const columnsRating = (
     render: (text) => renderColumn('product', hasValue(search['product']), searchText, text, false, 'input', search)
   },
   {
+    key: "minContract",
     title: "MIN CONTRACT",
     dataIndex: "minContract",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "minContract",
@@ -268,10 +293,11 @@ export const columnsRating = (
     render: (text) => renderColumn('minContract', hasValue(search['minContract']), searchText, text, false, 'input', search)
   },
   {
+    key: "maxContract",
     title: "MAX CONTRACT",
     dataIndex: "maxContract",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "maxContract",
@@ -283,6 +309,7 @@ export const columnsRating = (
     render: (text) => renderColumn('maxContract', hasValue(search['maxContract']), searchText, text, false, 'input', search)
   },
   {
+    key: "uom",
     title: "UOM",
     dataIndex: "uom",
     sorter: true,
@@ -298,6 +325,7 @@ export const columnsRating = (
     render: (text) => renderColumn('uom', hasValue(search['uom']), searchText, text, false, 'input', search)
   },
   {
+    key: "timeUnitContract",
     title: "CONTRACT TIME UNIT",
     dataIndex: "timeUnitContract",
     sorter: true,
@@ -313,10 +341,11 @@ export const columnsRating = (
     render: (text) => renderColumn('timeUnitContract', hasValue(search['timeUnitContract']), searchText, text, false, 'input', search)
   },
   {
+    key: "usage",
     title: "USAGE",
     dataIndex: "usage",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "usage",
@@ -328,10 +357,11 @@ export const columnsRating = (
     render: (text) => renderColumn('usage', hasValue(search['usage']), searchText, text, false, 'input', search)
   },
   {
+    key: "convUsageM3",
     title: "CONVERTED USAGE M3",
     dataIndex: "convUsageM3",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convUsageM3",
@@ -343,10 +373,11 @@ export const columnsRating = (
     render: (text) => renderColumn('convUsageM3', hasValue(search['convUsageM3']), searchText, text, false, 'input', search)
   },
   {
+    key: "convUsageMmbtu",
     title: "CONVERTED USAGE MMBTU",
     dataIndex: "convUsageMmbtu",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convUsageMmbtu",
@@ -358,10 +389,11 @@ export const columnsRating = (
     render: (text) => renderColumn('convUsageMmbtu', hasValue(search['convUsageMmbtu']), searchText, text, false, 'input', search)
   },
   {
+    key: "discountUsage",
     title: "DISCOUNT USAGE",
     dataIndex: "discountUsage",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "discountUsage",
@@ -373,10 +405,11 @@ export const columnsRating = (
     render: (text) => renderColumn('discountUsage', hasValue(search['discountUsage']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalUsage",
     title: "TOTAL USAGE",
     dataIndex: "totalUsage",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalUsage",
@@ -388,10 +421,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalUsage', hasValue(search['totalUsage']), searchText, text, false, 'input', search)
   },
   {
+    key: "convTotalUsageM3",
     title: "CONVERTED TOTAL USAGE M3",
     dataIndex: "convTotalUsageM3",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convTotalUsageM3",
@@ -403,10 +437,11 @@ export const columnsRating = (
     render: (text) => renderColumn('convTotalUsageM3', hasValue(search['convTotalUsageM3']), searchText, text, false, 'input', search)
   },
   {
+    key: "convTotalUsageMmbtu",
     title: "CONVERTED TOTAL USAGE MMBTU",
     dataIndex: "convTotalUsageMmbtu",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convTotalUsageMmbtu",
@@ -418,10 +453,11 @@ export const columnsRating = (
     render: (text) => renderColumn('convTotalUsageMmbtu', hasValue(search['convTotalUsageMmbtu']), searchText, text, false, 'input', search)
   },
   {
+    key: "minimumUsage",
     title: "MINIMUM USAGE",
     dataIndex: "minimumUsage",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "minimumUsage",
@@ -433,10 +469,11 @@ export const columnsRating = (
     render: (text) => renderColumn('minimumUsage', hasValue(search['minimumUsage']), searchText, text, false, 'input', search)
   },
   {
+    key: "convMinimumUsageM3",
     title: "CONVERTED MINIMUM USAGE M3",
     dataIndex: "convMinimumUsageM3",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convMinimumUsageM3",
@@ -448,10 +485,11 @@ export const columnsRating = (
     render: (text) => renderColumn('convMinimumUsageM3', hasValue(search['convMinimumUsageM3']), searchText, text, false, 'input', search)
   },
   {
+    key: "convMinimumUsageMmbtu",
     title: "CONVERTED MINIMUM USAGE MMBTU",
     dataIndex: "convMinimumUsageMmbtu",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convMinimumUsageMmbtu",
@@ -463,10 +501,11 @@ export const columnsRating = (
     render: (text) => renderColumn('convMinimumUsageMmbtu', hasValue(search['convMinimumUsageMmbtu']), searchText, text, false, 'input', search)
   },
   {
+    key: "normalUsage",
     title: "NORMAL USAGE",
     dataIndex: "normalUsage",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "normalUsage",
@@ -478,10 +517,11 @@ export const columnsRating = (
     render: (text) => renderColumn('normalUsage', hasValue(search['normalUsage']), searchText, text, false, 'input', search)
   },
   {
+    key: "convNormalUsageM3",
     title: "CONVERTED NORMAL USAGE M3",
     dataIndex: "convNormalUsageM3",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convNormalUsageM3",
@@ -493,10 +533,11 @@ export const columnsRating = (
     render: (text) => renderColumn('convNormalUsageM3', hasValue(search['convNormalUsageM3']), searchText, text, false, 'input', search)
   },
   {
+    key: "convNormalUsageMmbtu",
     title: "CONVERTED NORMAL USAGE MMBTU",
     dataIndex: "convNormalUsageMmbtu",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convNormalUsageMmbtu",
@@ -508,10 +549,11 @@ export const columnsRating = (
     render: (text) => renderColumn('convNormalUsageMmbtu', hasValue(search['convNormalUsageMmbtu']), searchText, text, false, 'input', search)
   },
   {
+    key: "oup",
     title: "OUP",
     dataIndex: "oup",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "oup",
@@ -523,10 +565,11 @@ export const columnsRating = (
     render: (text) => renderColumn('oup', hasValue(search['oup']), searchText, text, false, 'input', search)
   },
   {
+    key: "convOupM3",
     title: "CONVERTED OUP M3",
     dataIndex: "convOupM3",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convOupM3",
@@ -538,10 +581,11 @@ export const columnsRating = (
     render: (text) => renderColumn('convOupM3', hasValue(search['convOupM3']), searchText, text, false, 'input', search)
   },
   {
+    key: "convOupMmbtu",
     title: "CONVERTED OUP MMBTU",
     dataIndex: "convOupMmbtu",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convOupMmbtu",
@@ -553,10 +597,11 @@ export const columnsRating = (
     render: (text) => renderColumn('convOupMmbtu', hasValue(search['convOupMmbtu']), searchText, text, false, 'input', search)
   },
   {
+    key: "calculatedUsage",
     title: "CALCULATED USAGE",
     dataIndex: "calculatedUsage",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "calculatedUsage",
@@ -568,10 +613,11 @@ export const columnsRating = (
     render: (text) => renderColumn('calculatedUsage', hasValue(search['calculatedUsage']), searchText, text, false, 'input', search)
   },
   {
+    key: "convCalculatedUsageM3",
     title: "CONVERTED CALCULATED USAGE M3",
     dataIndex: "convCalculatedUsageM3",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convCalculatedUsageM3",
@@ -583,10 +629,11 @@ export const columnsRating = (
     render: (text) => renderColumn('convCalculatedUsageM3', hasValue(search['convCalculatedUsageM3']), searchText, text, false, 'input', search)
   },
   {
+    key: "convCalculatedUsageMmbtu",
     title: "CONVERTED CALCULATED USAGE MMBTU",
     dataIndex: "convCalculatedUsageMmbtu",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convCalculatedUsageMmbtu",
@@ -598,6 +645,7 @@ export const columnsRating = (
     render: (text) => renderColumn('convCalculatedUsageMmbtu', hasValue(search['convCalculatedUsageMmbtu']), searchText, text, false, 'input', search)
   },
   {
+    key: "currency",
     title: "CURRENCY",
     dataIndex: "currency",
     sorter: true,
@@ -613,10 +661,11 @@ export const columnsRating = (
     render: (text) => renderColumn('currency', hasValue(search['currency']), searchText, text, false, 'input', search)
   },
   {
+    key: "rate",
     title: "RATE",
     dataIndex: "rate",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rate",
@@ -628,6 +677,7 @@ export const columnsRating = (
     render: (text) => renderColumn('rate', hasValue(search['rate']), searchText, text, false, 'input', search)
   },
   {
+    key: "rateDate",
     title: "RATE DATE",
     sorter: true,
     align: "center",
@@ -645,10 +695,11 @@ export const columnsRating = (
     render: (text) => renderDateColumn('rateDate', hasValue(search['rateDate']), searchText, text, 'date', search)
   },
   {
+    key: "totalAmountMinIdr",
     title: "TOTAL AMOUNT MINIMUM IDR",
     dataIndex: "totalAmountMinIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountMinIdr",
@@ -660,10 +711,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountMinIdr', hasValue(search['totalAmountMinIdr']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalAmountMinUsd",
     title: "TOTAL AMOUNT MINIMUM USD",
     dataIndex: "totalAmountMinUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountMinUsd",
@@ -675,10 +727,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountMinUsd', hasValue(search['totalAmountMinUsd']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalAmountMinEqvIdr",
     title: "TOTAL AMOUNT MINIMUM EQV IDR",
     dataIndex: "totalAmountMinEqvIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountMinEqvIdr",
@@ -690,10 +743,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountMinEqvIdr', hasValue(search['totalAmountMinEqvIdr']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalAmountMinEqvUsd",
     title: "TOTAL AMOUNT MINIMUM EQV USD",
     dataIndex: "totalAmountMinEqvUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountMinEqvUsd",
@@ -705,10 +759,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountMinEqvUsd', hasValue(search['totalAmountMinEqvUsd']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalAmountNormalIdr",
     title: "TOTAL AMOUNT NORMAL IDR",
     dataIndex: "totalAmountNormalIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountNormalIdr",
@@ -720,10 +775,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountNormalIdr', hasValue(search['totalAmountNormalIdr']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalAmountNormalUsd",
     title: "TOTAL AMOUNT NORMAL USD",
     dataIndex: "totalAmountNormalUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountNormalUsd",
@@ -735,10 +791,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountNormalUsd', hasValue(search['totalAmountNormalUsd']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalAmountNormalEqvIdr",
     title: "TOTAL AMOUNT NORMAL EQV IDR",
     dataIndex: "totalAmountNormalEqvIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountNormalEqvIdr",
@@ -750,10 +807,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountNormalEqvIdr', hasValue(search['totalAmountNormalEqvIdr']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalAmountNormalEqvUsd",
     title: "TOTAL AMOUNT NORMAL EQV USD",
     dataIndex: "totalAmountNormalEqvUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountNormalEqvUsd",
@@ -765,10 +823,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountNormalEqvUsd', hasValue(search['totalAmountNormalEqvUsd']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalAmountOupIdr",
     title: "TOTAL AMOUNT OUP IDR",
     dataIndex: "totalAmountOupIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountOupIdr",
@@ -780,10 +839,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountOupIdr', hasValue(search['totalAmountOupIdr']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalAmountOupUsd",
     title: "TOTAL AMOUNT OUP USD",
     dataIndex: "totalAmountOupUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountOupUsd",
@@ -795,10 +855,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountOupUsd', hasValue(search['totalAmountOupUsd']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalAmountOupEqvIdr",
     title: "TOTAL AMOUNT OUP EQV IDR",
     dataIndex: "totalAmountOupEqvIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountOupEqvIdr",
@@ -810,10 +871,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountOupEqvIdr', hasValue(search['totalAmountOupEqvIdr']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalAmountOupEqvUsd",
     title: "TOTAL AMOUNT OUP EQV USD",
     dataIndex: "totalAmountOupEqvUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountOupEqvUsd",
@@ -825,10 +887,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountOupEqvUsd', hasValue(search['totalAmountOupEqvUsd']), searchText, text, false, 'input', search)
   },
   {
+    key: "amountIdr",
     title: "AMOUNT IDR",
     dataIndex: "amountIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "amountIdr",
@@ -840,10 +903,11 @@ export const columnsRating = (
     render: (text) => renderColumn('amountIdr', hasValue(search['amountIdr']), searchText, text, false, 'input', search)
   },
   {
+    key: "amountUsd",
     title: "AMOUNT USD",
     dataIndex: "amountUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "amountUsd",
@@ -855,10 +919,11 @@ export const columnsRating = (
     render: (text) => renderColumn('amountUsd', hasValue(search['amountUsd']), searchText, text, false, 'input', search)
   },
   {
+    key: "amountEqvIdr",
     title: "AMOUNT EQV IDR",
     dataIndex: "amountEqvIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "amountEqvIdr",
@@ -870,10 +935,11 @@ export const columnsRating = (
     render: (text) => renderColumn('amountEqvIdr', hasValue(search['amountEqvIdr']), searchText, text, false, 'input', search)
   },
   {
+    key: "amountEqvUsd",
     title: "AMOUNT EQV USD",
     dataIndex: "amountEqvUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "amountEqvUsd",
@@ -885,10 +951,11 @@ export const columnsRating = (
     render: (text) => renderColumn('amountEqvUsd', hasValue(search['amountEqvUsd']), searchText, text, false, 'input', search)
   },
   {
+    key: "discountAmount",
     title: "DISCOUNT AMOUNT",
     dataIndex: "discountAmount",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "discountAmount",
@@ -900,10 +967,11 @@ export const columnsRating = (
     render: (text) => renderColumn('discountAmount', hasValue(search['discountAmount']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalAmountIdr",
     title: "TOTAL AMOUNT IDR",
     dataIndex: "totalAmountIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountIdr",
@@ -915,10 +983,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountIdr', hasValue(search['totalAmountIdr']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalAmountUsd",
     title: "TOTAL AMOUNT USD",
     dataIndex: "totalAmountUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountUsd",
@@ -930,10 +999,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountUsd', hasValue(search['totalAmountUsd']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalAmountEqvIdr",
     title: "TOTAL AMOUNT EQV IDR",
     dataIndex: "totalAmountEqvIdr",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountEqvIdr",
@@ -945,10 +1015,11 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountEqvIdr', hasValue(search['totalAmountEqvIdr']), searchText, text, false, 'input', search)
   },
   {
+    key: "totalAmountEqvUsd",
     title: "TOTAL AMOUNT EQV USD",
     dataIndex: "totalAmountEqvUsd",
     sorter: true,
-    align: "right",
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountEqvUsd",
@@ -960,6 +1031,7 @@ export const columnsRating = (
     render: (text) => renderColumn('totalAmountEqvUsd', hasValue(search['totalAmountEqvUsd']), searchText, text, false, 'input', search)
   },
   {
+    key: "transactionDate",
     title: "TRANSACTION DATE",
     sorter: true,
     align: "center",
@@ -976,21 +1048,22 @@ export const columnsRating = (
     ),
     render: (text) => renderDateColumn('transactionDate', hasValue(search['transactionDate']), searchText, text, 'date', search)
   },
-  {
-    title: "ACCOUNTING DATE",
-    sorter: true,
-    align: "center",
-    dataIndex: "accountingDate",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "accountingDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (text) => renderDateColumn('accountingDate', hasValue(search['accountingDate']), searchText, text, 'date', search)
-  },
+  // {
+  //   key: "accountingDate",
+  //   title: "ACCOUNTING DATE",
+  //   sorter: true,
+  //   align: "center",
+  //   dataIndex: "accountingDate",
+  //   ...getColumnSearchPropsUseFilteredValue(
+  //     search,
+  //     "accountingDate",
+  //     searchInput,
+  //     searchedColumn,
+  //     searchText,
+  //     handleSearch,
+  //     true,
+  //     "date"
+  //   ),
+  //   render: (text) => renderDateColumn('accountingDate', hasValue(search['accountingDate']), searchText, text, 'date', search)
+  // },
 ];

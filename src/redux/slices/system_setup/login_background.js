@@ -88,11 +88,10 @@ export const inactiveBackground = createAsyncThunk(
 export const getDetailBackground = createAsyncThunk(
   "GET_DETAIL_BACKGROUND",
   async (id, thunkAPI) => {
-    console.log("test");
     try {
       const url = `/v1/dbs/api/background/detail/${id}`;
       const response = await userHttpService.getDetail(url);
-      console.log("Response:", response);
+
       return response.data;
     } catch (error) {
       const message =
@@ -126,7 +125,13 @@ export const createBackground = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(error, 'created', errorMessage(error)), action:"CREATE_BACKGROUND", back : false}))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(error, "created", errorMessage(error)),
+          action: "CREATE_BACKGROUND",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -145,7 +150,13 @@ export const updateBackground = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(error, 'updated', errorMessage(error)), action: "UPDATE_BACKGROUND", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(error, "updated", errorMessage(error)),
+          action: "UPDATE_BACKGROUND",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error);
     }
   }
@@ -200,25 +211,25 @@ const loginBackgroundSlice = createSlice({
   initialState,
   extraReducers: {
     // paging login background
-    [getPagingBackground.pending]: (state, action) => {
+    [getPagingBackground.pending]: (state) => {
       state.loading = true;
     },
     [getPagingBackground.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_Background = action.payload;
     },
-    [getPagingBackground.rejected]: (state, action) => {
+    [getPagingBackground.rejected]: (state) => {
       state.loading = false;
     },
     // inactive login background
-    [inactiveBackground.pending]: (state, action) => {
+    [inactiveBackground.pending]: (state) => {
       state.loading = true;
     },
     [inactiveBackground.fulfilled]: (state, action) => {
       state.loading = false;
       state.inactive_Background = action.payload;
     },
-    [inactiveBackground.rejected]: (state, action) => {
+    [inactiveBackground.rejected]: (state) => {
       state.loading = false;
     },
     // detail login background
@@ -236,36 +247,36 @@ const loginBackgroundSlice = createSlice({
       state.loading = false;
     },
     // create login background
-    [createBackground.pending]: (state, action) => {
+    [createBackground.pending]: (state) => {
       state.loading = true;
     },
     [createBackground.fulfilled]: (state, action) => {
       state.loading = false;
       state.create_Background = action.payload;
     },
-    [createBackground.rejected]: (state, action) => {
+    [createBackground.rejected]: (state) => {
       state.loading = false;
     },
     // update login background
-    [updateBackground.pending]: (state, action) => {
+    [updateBackground.pending]: (state) => {
       state.loading = true;
     },
     [updateBackground.fulfilled]: (state, action) => {
       state.loading = false;
       state.update_Background = action.payload;
     },
-    [updateBackground.rejected]: (state, action) => {
+    [updateBackground.rejected]: (state) => {
       state.loading = false;
     },
     // check login background
-    [checkLoginBackground.pending]: (state, action) => {
+    [checkLoginBackground.pending]: (state) => {
       state.loading = true;
     },
     [checkLoginBackground.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [checkLoginBackground.rejected]: (state, action) => {
+    [checkLoginBackground.rejected]: (state) => {
       state.loading = false;
     },
   },

@@ -1,11 +1,10 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
 import InputComponent from "../../../../components/InputComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import { columnsRequestBilling } from "./Table/TableRequestBilling";
 import DetailText from "../../../../components/DetailText";
 import {
@@ -14,17 +13,20 @@ import {
 } from "../../../../redux/slices/rating_billing_invoice/billing";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../utils/Icon";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import TableRBI from "../../../../components/TableRBI";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const ModalApprovalBilling = ({
   isOpen,
-  handleCancel = () => { },
-  handleRefresh = () => { },
-  handleOpenModal = () => { },
+  handleCancel = () => {},
+  handleRefresh = () => {},
+  handleOpenModal = () => {},
 }) => {
   // Selector
-  const { data_list_billing_approval } = useSelector((state) => state.billing);
+  const { data_list_billing_approval, loading } = useSelector(
+    (state) => state.billing
+  );
 
   // Declaration
   const containerRef = useRef(null);
@@ -50,6 +52,10 @@ const ModalApprovalBilling = ({
   const [dataTableSelect, setDataTableSelect] = useState([]);
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
+
+  const [fixedColumns, setFixedColumns] = useState({
+    no: "left",
+  });
 
   // Use State
   useEffect(() => {
@@ -156,6 +162,7 @@ const ModalApprovalBilling = ({
     setDataTableSelect([]);
     setGenerateInvoice(false);
     setRemark("");
+    setCurrent(0);
     form.resetFields();
   };
 
@@ -205,8 +212,6 @@ const ModalApprovalBilling = ({
           setModalError(true);
         }
       });
-
-    console.log(body, "body");
   };
 
   const handleCloseModalError = () => {
@@ -214,6 +219,7 @@ const ModalApprovalBilling = ({
     handleOpenModal();
     setBodyError({});
   };
+
   const handleRetry = () => {
     handleSave();
     setModalError(false);
@@ -228,6 +234,39 @@ const ModalApprovalBilling = ({
     return type === "data" ? result : result.length;
   };
 
+  const baseColumns = useMemo(
+    () =>
+      columnsRequestBilling(
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    [page, pageSize, searchedColumn, searchText]
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
   return (
     <div>
       <ModalCustom
@@ -236,7 +275,7 @@ const ModalApprovalBilling = ({
         header="Approval Billing Information"
         handleCancel={handleCancelForm}
         onFinish={handleSave}
-        width={1200}
+        width={1000}
         footer={
           <div className="flex w-full justify-end gap-5">
             {current < steps.length - 1 && (
@@ -283,6 +322,7 @@ const ModalApprovalBilling = ({
                   htmlType={"submit"}
                   form={"formApprove"}
                   onClick={() => setAction("REJECT")}
+                  loading={loading}
                 >
                   Reject
                 </ButtonComponent>
@@ -291,6 +331,7 @@ const ModalApprovalBilling = ({
                   htmlType={"submit"}
                   form={"formApprove"}
                   onClick={() => setAction("APPROVE")}
+                  loading={loading}
                 >
                   Approve
                 </ButtonComponent>
@@ -309,6 +350,7 @@ const ModalApprovalBilling = ({
           </div>
         </div>
 
+        {/* STEP 1: BILLING INFORMATION */}
         <div
           className={`steps-content my-[30px] ${current !== 0 ? "hidden" : ""}`}
         >
@@ -319,25 +361,23 @@ const ModalApprovalBilling = ({
             onFinish={handleSave}
           >
             <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-              <p className="text-primary uppercase font-bold">Billing List</p>
-              <TablePaginationNew
-                type="FE"
+              <p className="text-primary uppercase font-bold mb-4">
+                Billing List - Ready to Approve
+              </p>
+              <TableRBI
                 dataSource={filterDataByPage("data")}
-                columns={columnsRequestBilling(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                )}
+                columns={processedColumns}
                 current={page}
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
                 totalData={filterDataByPage("length")}
-                onSort={onSort}
                 tableScrolled={{ y: 525, x: 15000 }}
+                onSort={onSort}
+                columnDefinitions={columnDefinitions}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                loading={loading}
                 rowSelection={rowSelection}
               />
               <div className="pt-[30px]">
@@ -353,7 +393,7 @@ const ModalApprovalBilling = ({
                     type="textarea"
                     value={remark}
                     onChange={(e) => setRemark(e.target.value)}
-                    placeholder={"Type your remark"}
+                    placeholder={"Type your remark for approval/rejection"}
                   />
                 </Form.Item>
               </div>
@@ -361,30 +401,25 @@ const ModalApprovalBilling = ({
           </Form>
         </div>
 
-        {/* Confirmation */}
+        {/* STEP 2: CONFIRMATION */}
         <div
           className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
         >
           <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-            <p className="text-primary uppercase font-bold">Billing List</p>
-            <TablePaginationNew
-              type="FE"
+            <TableRBI
               dataSource={dataTableSelect}
-              columns={columnsRequestBilling(
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch
-              )}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={dataTableSelect.length || 0}
-              onSort={onSort}
               tableScrolled={{ y: 525, x: 15000 }}
+              onSort={onSort}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={false}
             />
             <div className="pt-[30px]">
               <DetailText label={"Remark"}>
@@ -409,8 +444,9 @@ const ModalApprovalBilling = ({
               : IconModal["icon_error_default"]}
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`Your data was not ${action === "APPROVE" ? "approved" : "rejected"
-            }. ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">{`Your data was not ${
+            action === "APPROVE" ? "approved" : "rejected"
+          }. ${bodyError.message}.`}</p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>

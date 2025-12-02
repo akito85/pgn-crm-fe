@@ -1,4 +1,4 @@
-import { LeftOutlined, SyncOutlined, WarningOutlined } from "@ant-design/icons";
+import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
 import { Form, Spin } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -6,17 +6,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumbAdvanced from "../../../../../components/BreadCrumbAdvanced";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import InputComponent from "../../../../../components/InputComponent";
-import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
-  approveOrRejectInactiveBank,
   createAccountInformation,
   createValidasiBankAccount,
   getAllApprovalList,
-  getBankDetail,
   getDetailAccountInformation,
   getGLAccount,
   getListApprovalById,
@@ -27,14 +23,11 @@ import {
   getTypeList,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
-import ApprovalSectionForm from "../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 import AccountForm from "./AccountForm";
-import ContentModalConfirmBank from "./ContentModalConfirmBank";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ConfirmModalBankAccount from "./ConfirmModalBankAccount";
-import { columnsTableCriteria } from "./Table/TableCriteriaPayment";
 import moment from "moment";
 import { dateFormatting } from "../../../../../utils";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
@@ -43,7 +36,6 @@ import {
   showModalSuccess,
 } from "../../../../../redux/slices/general_slice";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
-import { bytesConverter } from "../../../../../utils/bytesConverter";
 const AccountInformation = ({ type, bankId }) => {
   const {
     dataEntity,

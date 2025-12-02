@@ -1,24 +1,21 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import BaseContainer from "../../../../../../../components/BaseContainer";
-import { Alert, Checkbox, Form, Input, Select, Spin } from "antd";
+import { Alert, Checkbox, Form, Select, Spin } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
 import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import SelectComponent from "../../../../../../../components/SelectComponent";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";
-import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 import ModalChooseAddress from "./ModalChooseAddress";
 import ModalConfirmationAddress from "./ModalConfirmationAddress";
 import ModalCreateNewAddress from "./ModalCreateNewAddress";
 import HeaderDetail from "../../../HeaderDetail";
 // import { Wrapper, GoogleMap, Marker, Map } from "@googlemaps/react-wrapper";
-import { useJsApiLoader } from "@react-google-maps/api";
-import GoogleMapsCustom from "../GoogleMapsCustom";
 
 import {
   getListChooseAddress,

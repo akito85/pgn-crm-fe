@@ -1,5 +1,5 @@
 import { FilterOutlined } from "@ant-design/icons";
-import { DatePicker, Input, TimePicker } from "antd";
+import { DatePicker, Input, TimePicker, Select  } from "antd";
 import Highlighter from "react-highlight-words";
 import { dateFormatting, hasValue } from ".";
 import moment from "moment";
@@ -325,7 +325,8 @@ export const getColumnSearchPropsUseFilteredValue = (
   searchText,
   handleSearch,
   excludeRender = false,
-  typeFilter = "input"
+  typeFilter = "input",
+  selectOptions = [] // tambahkan parameter baru untuk options
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
@@ -359,6 +360,26 @@ export const getColumnSearchPropsUseFilteredValue = (
           {typeFilter === "hour" ? (
             <TimePicker format={dateFormatting?.hour_format} onChange={onDataChange} />
           ) : null}
+          {/* TAMBAHKAN CASE SELECT INI */}
+          {typeFilter === "select" ? (
+            <Select
+              ref={searchInput}
+              placeholder="Select Status"
+              value={selectedKeys[0]}
+              onChange={(value) => {
+                setSelectedKeys(value ? [value] : []);
+                handleSearch(value ? [value] : [], confirm, dataIndex);
+              }}
+              style={{ width: 200, marginBottom: 8, display: "block" }}
+              allowClear
+            >
+              {selectOptions.map((option) => (
+                <Select.Option key={option.value} value={option.value}>
+                  {option.label}
+                </Select.Option>
+              ))}
+            </Select>
+          ) : null}
           {typeFilter === "input" ? (
             <Input
               ref={searchInput}
@@ -386,8 +407,7 @@ export const getColumnSearchPropsUseFilteredValue = (
               }
               onInput={(e) => {
                 e.target.value = e.target.value.replace(/[^YyNn]/g, "")?.charAt(0)
-              }
-              }
+              }}
               onPressEnter={() =>
                 handleSearch(selectedKeys, confirm, dataIndex)
               }
@@ -408,8 +428,7 @@ export const getColumnSearchPropsUseFilteredValue = (
               }
               onInput={(e) => {
                 e.target.value = e.target.value.replace(/[^yesnoYESNO]/g, "");
-              }
-              }
+              }}
               onPressEnter={() =>
                 handleSearch(selectedKeys, confirm, dataIndex)
               }
@@ -450,9 +469,16 @@ export const getColumnSearchPropsUseFilteredValue = (
         text || ""
       ),
   };
+  
   if (excludeRender) {
     delete obj.render;
   }
+  
+  // Tambahkan filteredValue untuk select
+  if (typeFilter === "select") {
+    obj.filteredValue = search[dataIndex] ? [search[dataIndex]] : null;
+  }
+  
   return obj;
 };
 

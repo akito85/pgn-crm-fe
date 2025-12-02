@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
-import { MoreOutlined, PlusOutlined, WarningOutlined } from "@ant-design/icons";
+import { PlusOutlined, WarningOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { ModalConfirm, ModalError } from "../../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../../utils/Icon";
@@ -14,7 +14,7 @@ import {
   deleteLateChargeRule
 } from "../../../../../../redux/slices/account_management/MasterData/late_charges";
 import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
-import { Alert, Checkbox, Popover, Tooltip } from "antd";
+import { Checkbox, Tooltip } from "antd";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import StatusComponent from "../../../../../../components/StatusComponent";
 import Highlighter from "react-highlight-words";

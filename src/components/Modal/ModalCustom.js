@@ -20,7 +20,7 @@ const ModalCustom = (props) => {
           <div className="">
             {/* header section */}
             <div
-              style={{ background: "#E6F1F9" }}
+              style={{ background: "#F5F5F5" }}
               className={"rounded-tl-[5px] rounded-tr-[5px] p-4"}
             >
               <div className={"flex gap-x-1.5 items-center"}>
@@ -28,7 +28,7 @@ const ModalCustom = (props) => {
                 {/* <span className="text-primary">{header}</span> */}
                 <span
                   style={{
-                    color: "#4B465C",
+                    color: "#0075bf",
                     fontWeight: "600",
                     fontSize: "14px",
                     textTransform: "uppercase"

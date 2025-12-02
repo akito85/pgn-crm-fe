@@ -7,16 +7,13 @@ import moment from "moment";
 import { dateFormatting, hasValue } from "../../../../../utils";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import TablePagination from "../../../../../components/TablePagination";
-import { Spin, Table } from "antd";
+import { Spin } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllocationRecomendationList,
-  setDataAllocation,
 } from "../../../../../redux/slices/receipt_collection/receipt";
-import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import {
   showModalError,
-  validateError,
 } from "../../../../../redux/slices/general_slice";
 import { columnRecommendation } from "./ColumnRecomendation";
 import { updatePagination } from "../../../../../utils/updatePagination";

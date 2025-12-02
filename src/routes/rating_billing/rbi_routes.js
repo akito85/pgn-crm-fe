@@ -1,4 +1,12 @@
 export const RBI_ROUTES = {
+  // prabilling routes
+  PRABILLING_VIEW: "/rating-billing/pra-billing",
+  PRABILLING_DETAIL: "/rating-billing/pra-billing/view",
+  PRABILLING_CREATE: "/rating-billing/pra-billing/create",
+  PRABILLING_UPDATE: "/rating-billing/pra-billing/update",
+  PRABILLING_VIEW_LOG: "/rating-billing/pra-billing/log",
+  PRABILLING_DETAIL_CUSTOMER: "/rating-billing/pra-billing/preview",
+
   // calculation routes
   CALCULATION_VIEW: "/rating-billing/calculation",
   CALCULATION_DETAIL: "/rating-billing/calculation/view",
@@ -16,6 +24,12 @@ export const RBI_ROUTES = {
   RATING_VIEW_DETAIL: "/rating-billing/rating/view",
   RATING_CREATE: "/rating-billing/rating/create",
   RATING_UPDATE: "/rating-billing/rating/update",
+
+  // monitoring customer
+  MONITORING_CUSTOMER_VIEW: "/rating-billing/monitoring-customer",
+  MONITORING_CUSTOMER_UPLOAD: "/rating-billing/monitoring-customer/upload",
+  MONITORING_CUSTOMER_DETAIL: "/rating-billing/monitoring-customer/view",
+  MONITORING_CUSTOMER_LIST_UPDATE: "/rating-billing/monitoring-customer/update",
 
   // monitoring usage
   MONITORING_USAGE_VIEW: "/rating-billing/monitoring-usage",
@@ -88,5 +102,24 @@ export const RBI_ROUTES = {
   TAX_CODE_UPDATE: "/system-setup/tax-code/update",
   TAX_CODE_DETAIL: "/system-setup/tax-code/view",
 
+  // MANAGEMENT BILLING INSTALLMENT
+  MANAGEMENT_BILLING_INSTALLMENT_VIEW:
+    "/rating-billing/management-billing-installment",
+  MANAGEMENT_BILLING_INSTALLMENT_CREATE:
+    "/rating-billing/management-billing-installment/create",
 
+  EFAKTUR_CODE: "/system-setup/efaktur-code",
+  EFAKTUR_CODE_CREATE: "/system-setup/efaktur-code/create",
+  EFAKTUR_CODE_UPDATE: "/system-setup/efaktur-code/update",
+  EFAKTUR_CODE_DETAIL: "/system-setup/efaktur-code/view",
+
+  DIGITAL_SIGNATURE: "/system-setup/digital-signature",
+  DIGITAL_SIGNATURE_CREATE: "/system-setup/digital-signature/create",
+  DIGITAL_SIGNATURE_UPDATE: "/system-setup/digital-signature/update",
+  DIGITAL_SIGNATURE_DETAIL: "/system-setup/digital-signature/view",
+
+  CONTENT_MANAGEMENT: "/system-setup/content-management",
+  CONTENT_MANAGEMENT_CREATE: "/system-setup/content-management/create",
+  CONTENT_MANAGEMENT_UPDATE: "/system-setup/content-management/update",
+  CONTENT_MANAGEMENT_DETAIL: "/system-setup/content-management/view",
 };

@@ -1,10 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import thunk from "redux-thunk";
 import userHttpService from "../../services/userHttpService";
-import {
-  showModalSuccess,
-  validateError,
-} from "../general_slice";
+import { showModalSuccess, validateError } from "../general_slice";
 import { errorBody, errorCode, errorMessage, hasValue } from "../../../utils";
 
 const initialState = {
@@ -84,7 +81,7 @@ export const getEmployeeDetail = createAsyncThunk(
         validateError({
           error: error,
           action: "GET_EMPLOYEE_DETAIL",
-          back: true
+          back: true,
         })
       );
       return thunkAPI.rejectWithValue(error.response.data);
@@ -153,12 +150,10 @@ export const getTo = createAsyncThunk("GET_TO", async (id, thunkAPI) => {
     const url = `/v1/dbs/api/forward-task/forward-to/${id}`;
     if (hasValue(id)) {
       const response = await userHttpService.getDetail(url);
-      return response?.data?.toPosition?.map(item => (
-        {
-          ...item,
-          uniqueId: item?.employeeCodeForward + item?.positionIdForward
-        }
-      ))
+      return response?.data?.toPosition?.map((item) => ({
+        ...item,
+        uniqueId: item?.employeeCodeForward + item?.positionIdForward,
+      }));
     }
   } catch (error) {
     thunkAPI.dispatch(validateError({ error, action: "GET_TO" }));
@@ -181,7 +176,13 @@ export const createForwardTask = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_FORWARD_TASK", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "CREATE_FORWARD_TASK",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -220,7 +221,13 @@ export const createEmployee = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'created', errorMessage(error)), action: "CREATE_EMPLOYEE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          action: "CREATE_EMPLOYEE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -239,7 +246,13 @@ export const updateEmployee = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'updated', errorMessage(error)), action: "UPDATE_EMPLOYEE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "updated", errorMessage(error)),
+          action: "UPDATE_EMPLOYEE",
+          back: false,
+        })
+      );
       return thunk.rejectWithValue(error.response.data);
     }
   }
@@ -259,7 +272,13 @@ export const terminateEmployee = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'terminated', errorMessage(error)), action: "TERMINATE_EMPLOYEE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "terminated", errorMessage(error)),
+          action: "TERMINATE_EMPLOYEE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -360,7 +379,13 @@ export const uploadEmployee = createAsyncThunk(
       );
       return data;
     } catch (e) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(e), 'updated', errorMessage(e)), action: "UPLOAD_EMPLOYEE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(e), "updated", errorMessage(e)),
+          action: "UPLOAD_EMPLOYEE",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(e?.response);
     }
   }
@@ -379,7 +404,13 @@ export const saveUploadEmployee = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), 'uploaded', errorMessage(error)), action: "SAVE_UPLOAD_EMPLOYEE", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(error), "uploaded", errorMessage(error)),
+          action: "SAVE_UPLOAD_EMPLOYEE",
+          back: false,
+        })
+      );
       return thunk.rejectWithValue(error.response.data);
     }
   }
@@ -389,7 +420,7 @@ const employeeSlice = createSlice({
   name: "employee",
   initialState,
   reducers: {
-    setClearDataUpload: (state, action) => {
+    setClearDataUpload: (state) => {
       state.data_list_upload = null;
     },
   },
@@ -428,70 +459,70 @@ const employeeSlice = createSlice({
     // },
 
     // get employee detail
-    [getEmployeeDetail.pending]: (state, action) => {
+    [getEmployeeDetail.pending]: (state) => {
       state.loading = true;
     },
     [getEmployeeDetail.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getEmployeeDetail.rejected]: (state, action) => {
+    [getEmployeeDetail.rejected]: (state) => {
       state.loading = false;
     },
 
     // get assignment detail
-    [getAssignmentDetail.pending]: (state, action) => {
+    [getAssignmentDetail.pending]: (state) => {
       state.loading = true;
     },
     [getAssignmentDetail.fulfilled]: (state, action) => {
       state.data_ass = action.payload;
       state.loading = false;
     },
-    [getAssignmentDetail.rejected]: (state, action) => {
+    [getAssignmentDetail.rejected]: (state) => {
       state.loading = false;
     },
 
     // get detail forward task
-    [getForwardTaskDetail.pending]: (state, action) => {
+    [getForwardTaskDetail.pending]: (state) => {
       state.loading = true;
     },
     [getForwardTaskDetail.fulfilled]: (state, action) => {
       state.data_info = action.payload;
       state.loading = false;
     },
-    [getForwardTaskDetail.rejected]: (state, action) => {
+    [getForwardTaskDetail.rejected]: (state) => {
       state.loading = false;
     },
 
     // get Pending forward task
-    [getPendingTask.pending]: (state, action) => {
+    [getPendingTask.pending]: (state) => {
       state.loading = true;
     },
     [getPendingTask.fulfilled]: (state, action) => {
       state.data_pending = action.payload;
       state.loading = false;
     },
-    [getPendingTask.rejected]: (state, action) => {
+    [getPendingTask.rejected]: (state) => {
       state.loading = false;
     },
 
     // get To Forward Task
-    [getTo.pending]: (state, action) => {
+    [getTo.pending]: (state) => {
       state.loading = true;
     },
     [getTo.fulfilled]: (state, action) => {
       state.data_to = action.payload;
       state.loading = false;
     },
-    [getTo.rejected]: (state, action) => {
+    [getTo.rejected]: (state) => {
       state.loading = false;
     },
 
     // terminate employee
-    [terminateEmployee.pending]: (state, action) => {
+    [terminateEmployee.pending]: (state) => {
       state.loading = true;
     },
-    [terminateEmployee.fulfilled]: (state, action) => {
+    [terminateEmployee.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -516,14 +547,14 @@ const employeeSlice = createSlice({
     },
 
     // update action
-    [updateEmployee.pending]: (state, action) => {
+    [updateEmployee.pending]: (state) => {
       state.loading = true;
     },
     [updateEmployee.fulfilled]: (state, action) => {
       state.data = action.payload;
       state.isSuccess = false;
     },
-    [updateEmployee.rejected]: (state, action) => {
+    [updateEmployee.rejected]: (state) => {
       state.loading = false;
     },
 
@@ -539,7 +570,7 @@ const employeeSlice = createSlice({
       state.data_download = action.payload;
       state.loading = false;
     },
-    [downloadEmployee.pending]: (state, action) => {
+    [downloadEmployee.pending]: (state) => {
       state.loading = true;
     },
     //DOWNLOAD TEMPLATE
@@ -553,12 +584,12 @@ const employeeSlice = createSlice({
       state.data_downloadTemp = action.payload;
       state.loading = false;
     },
-    [downloadEmpTemlpate.pending]: (state, action) => {
+    [downloadEmpTemlpate.pending]: (state) => {
       state.loading = true;
     },
 
     //Get list  employee
-    [getListEmpType.pending]: (state, action) => {
+    [getListEmpType.pending]: (state) => {
       state.loading = true;
     },
     [getListEmpType.fulfilled]: (state, action) => {
@@ -566,13 +597,13 @@ const employeeSlice = createSlice({
       state.data_emp = action.payload;
       state.loading = false;
     },
-    [getListEmpType.rejected]: (state, action) => {
+    [getListEmpType.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
 
     //Get list  position
-    [getListPosition.pending]: (state, action) => {
+    [getListPosition.pending]: (state) => {
       state.loading = true;
     },
     [getListPosition.fulfilled]: (state, action) => {
@@ -580,12 +611,12 @@ const employeeSlice = createSlice({
       state.data_post = action.payload;
       state.loading = false;
     },
-    [getListPosition.rejected]: (state, action) => {
+    [getListPosition.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
     //Get list  job
-    [getListJob.pending]: (state, action) => {
+    [getListJob.pending]: (state) => {
       state.loading = true;
     },
     [getListJob.fulfilled]: (state, action) => {
@@ -593,7 +624,7 @@ const employeeSlice = createSlice({
       state.data_job = action.payload;
       state.loading = false;
     },
-    [getListJob.rejected]: (state, action) => {
+    [getListJob.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },

@@ -1,51 +1,31 @@
 import moment from "moment";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../utils";
-import { getColumnSearchProps, getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
-
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../utils";
+import {
+  getColumnSearchPropsUseFilteredValueFE,
+} from "../../../../utils/getColumnSearchProps";
 
 const sorter = (fieldSort, a, b) => {
-  // console.log(fieldSort, a, b, "sprter");
   const handleDataSort = (obj) => {
     switch (fieldSort) {
-      case "startDate":
-      case "endDate":
+      case "billingPeriod":
       case "taxRateDate":
       case "transactionDate":
       case "invoiceDate":
       case "dueDate":
       case "rateDate":
-      case "billingPeriodDate":
-        return obj[fieldSort]
-          ? moment(obj[fieldSort])
-          : "";
-      case "price":
-      case "quantity":
-      case "amount":
-      case "amountEqvIdr":
-      case "amountEqvUsd":
-      case "eqvIdr":
-      case "discount":
-      case "total":
-      case "totalEqvIdr":
-      case "totalEqvUsd":
-      case "amountIdr":
-      case "amountUsd":
-      case "taxBasisIdr":
-      case "taxBasisUsd":
-      case "taxBasisEqvIdr":
-      case "vatIdr":
-      case "vatUsd":
-      case "vatEqvIdr":
-      case "withholdingTax":
-      case "taxRate":
-      case "discountAmount":
-      case "discountAmountIdr":
-      case "discountAmountUsd":
+        return obj[fieldSort] ? moment(obj[fieldSort]) : "";
       case "totalAmountIdr":
       case "totalAmountUsd":
-      case "rate":
-      case "totalAmountEqvIdr":
-      case "totalAmountEqvUsd":
+      case "totalUsage":
+      case "calculatedUsage":
+      case "convertedCalculatedUsage":
+      case "convertedTotalUsage":
+      case "maxContract":
+      case "minContract":
         return obj[fieldSort]
           ? (obj[fieldSort] || 0)?.toString()?.toLowerCase()
           : "0";
@@ -59,50 +39,28 @@ const sorter = (fieldSort, a, b) => {
 
   const handleCompare = (a, b) => {
     switch (fieldSort) {
-      case "startDate":
-      case "endDate":
+      case "billingPeriod":
       case "taxRateDate":
       case "transactionDate":
       case "invoiceDate":
       case "dueDate":
       case "rateDate":
-      case "billingPeriodDate":
         if (a && b) {
           if (a.isBefore(b)) return -1;
           if (a.isAfter(b)) return 1;
           return 0;
         }
-        return 0; // Handle null cases if necessary
-      case "price":
-      case "quantity":
-      case "amount":
-      case "amountEqvIdr":
-      case "amountEqvUsd":
-      case "eqvIdr":
-      case "discount":
-      case "total":
-      case "totalEqvIdr":
-      case "totalEqvUsd":
-      case "amountIdr":
-      case "amountUsd":
-      case "taxBasisIdr":
-      case "taxBasisUsd":
-      case "taxBasisEqvIdr":
-      case "vatIdr":
-      case "vatUsd":
-      case "vatEqvIdr":
-      case "withholdingTax":
-      case "taxRate":
-      case "discountAmount":
-      case "discountAmountIdr":
-      case "discountAmountUsd":
+        return 0;
       case "totalAmountIdr":
       case "totalAmountUsd":
-      case "rate":
-      case "totalAmountEqvIdr":
-      case "totalAmountEqvUsd":
+      case "totalUsage":
+      case "calculatedUsage":
+      case "convertedCalculatedUsage":
+      case "convertedTotalUsage":
+      case "maxContract":
+      case "minContract":
         return Math.sign(
-          parseInt(a.replace(/,/g, "")) - parseInt(b.replace(/,/g, ""))
+          parseFloat(a.replace(/,/g, "")) - parseFloat(b.replace(/,/g, ""))
         );
       default:
         return a.localeCompare(b);
@@ -119,7 +77,7 @@ export const columnsGenerateInvoice = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
+  handleSearch = () => {}
 ) => [
   {
     title: "NO",
@@ -130,9 +88,10 @@ export const columnsGenerateInvoice = (
   {
     title: "INVOICE NUMBER",
     dataIndex: "invoiceNumber",
-    // sorter: true,
     sorter: (a, b) => sorter("invoiceNumber", a, b),
-    filteredValue: search?.["invoiceNumber"] ? [search?.["invoiceNumber"]] : null,
+    filteredValue: search?.["invoiceNumber"]
+      ? [search?.["invoiceNumber"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "invoiceNumber",
@@ -156,7 +115,6 @@ export const columnsGenerateInvoice = (
   {
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
-    // sorter: true,
     sorter: (a, b) => sorter("billingCycle", a, b),
     filteredValue: search?.["billingCycle"] ? [search?.["billingCycle"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
@@ -182,12 +140,11 @@ export const columnsGenerateInvoice = (
   {
     title: "BILLING PERIOD",
     dataIndex: "billingPeriod",
-    // sorter: true,
-    align:"center",
+    align: "center",
     sorter: (a, b) => sorter("billingPeriod", a, b),
     filteredValue: search?.["billingPeriod"]
-    ? [search?.["billingPeriod"]]
-    : null,
+      ? [search?.["billingPeriod"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "billingPeriod",
@@ -211,7 +168,6 @@ export const columnsGenerateInvoice = (
   {
     title: "BILLING CODE",
     dataIndex: "billingCode",
-    // sorter: true,
     sorter: (a, b) => sorter("billingCode", a, b),
     filteredValue: search?.["billingCode"] ? [search?.["billingCode"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
@@ -238,7 +194,9 @@ export const columnsGenerateInvoice = (
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
     sorter: (a, b) => sorter("customerNumber", a, b),
-    filteredValue: search?.["customerNumber"] ? [search?.["customerNumber"]] : null,
+    filteredValue: search?.["customerNumber"]
+      ? [search?.["customerNumber"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "customerNumber",
@@ -262,7 +220,6 @@ export const columnsGenerateInvoice = (
   {
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
-    // sorter: true,
     sorter: (a, b) => sorter("customerName", a, b),
     filteredValue: search?.["customerName"] ? [search?.["customerName"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
@@ -289,7 +246,9 @@ export const columnsGenerateInvoice = (
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
     sorter: (a, b) => sorter("accountNumber", a, b),
-    filteredValue: search?.["accountNumber"] ? [search?.["accountNumber"]] : null,
+    filteredValue: search?.["accountNumber"]
+      ? [search?.["accountNumber"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "accountNumber",
@@ -311,37 +270,13 @@ export const columnsGenerateInvoice = (
       ),
   },
   {
-    title: "ACCOUNT NAME",
-    dataIndex: "accountName",
-    sorter: (a, b) => sorter("accountName", a, b),
-    filteredValue: search?.["accountName"] ? [search?.["accountName"]] : null,
-    ...getColumnSearchPropsUseFilteredValueFE(
-      search,
-      "accountName",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) =>
-      renderColumn(
-        "accountName",
-        hasValue(search["accountName"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
     title: "ACCOUNT GROUP TYPE",
     dataIndex: "accountGroupType",
-    // sorter: true,
     align: "center",
     sorter: (a, b) => sorter("accountGroupType", a, b),
-    filteredValue: search?.["accountGroupType"] ? [search?.["accountGroupType"]] : null,
+    filteredValue: search?.["accountGroupType"]
+      ? [search?.["accountGroupType"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "accountGroupType",
@@ -365,7 +300,7 @@ export const columnsGenerateInvoice = (
   {
     title: "SERVICE TYPE",
     dataIndex: "serviceType",
-    align:'center',
+    align: "center",
     sorter: (a, b) => sorter("serviceType", a, b),
     filteredValue: search?.["serviceType"] ? [search?.["serviceType"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
@@ -389,14 +324,14 @@ export const columnsGenerateInvoice = (
       ),
   },
   {
-    title: "SOR",
-    dataIndex: "sor",
-    // sorter: true,
-    sorter: (a, b) => sorter("sor", a, b),
-    filteredValue: search?.["sor"] ? [search?.["sor"]] : null,
+    title: "AREA CODE",
+    dataIndex: "areaCode",
+    align: "center",
+    sorter: (a, b) => sorter("areaCode", a, b),
+    filteredValue: search?.["areaCode"] ? [search?.["areaCode"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
-      "sor",
+      "areaCode",
       searchInput,
       searchedColumn,
       searchText,
@@ -405,8 +340,8 @@ export const columnsGenerateInvoice = (
     ),
     render: (text) =>
       renderColumn(
-        "sor",
-        hasValue(search["sor"]),
+        "areaCode",
+        hasValue(search["areaCode"]),
         searchText,
         text,
         false,
@@ -415,14 +350,15 @@ export const columnsGenerateInvoice = (
       ),
   },
   {
-    title: "COST CENTER",
-    dataIndex: "costCenter",
-    // sorter: true,
-    sorter: (a, b) => sorter("costCenter", a, b),
-    filteredValue: search?.["costCenter"] ? [search?.["costCenter"]] : null,
+    title: "CALCULATION CODE",
+    dataIndex: "calculationCode",
+    sorter: (a, b) => sorter("calculationCode", a, b),
+    filteredValue: search?.["calculationCode"]
+      ? [search?.["calculationCode"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
-      "costCenter",
+      "calculationCode",
       searchInput,
       searchedColumn,
       searchText,
@@ -431,8 +367,8 @@ export const columnsGenerateInvoice = (
     ),
     render: (text) =>
       renderColumn(
-        "costCenter",
-        hasValue(search["costCenter"]),
+        "calculationCode",
+        hasValue(search["calculationCode"]),
         searchText,
         text,
         false,
@@ -441,13 +377,14 @@ export const columnsGenerateInvoice = (
       ),
   },
   {
-    title: "ACCOUNT SEGMENT",
-    dataIndex: "accountSegment",
-    sorter: (a, b) => sorter("accountSegment", a, b),
-    filteredValue: search?.["accountSegment"] ? [search?.["accountSegment"]] : null,
+    title: "TIME UNIT",
+    dataIndex: "timeUnit",
+    align: "center",
+    sorter: (a, b) => sorter("timeUnit", a, b),
+    filteredValue: search?.["timeUnit"] ? [search?.["timeUnit"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
-      "accountSegment",
+      "timeUnit",
       searchInput,
       searchedColumn,
       searchText,
@@ -456,8 +393,8 @@ export const columnsGenerateInvoice = (
     ),
     render: (text) =>
       renderColumn(
-        "accountSegment",
-        hasValue(search["accountSegment"]),
+        "timeUnit",
+        hasValue(search["timeUnit"]),
         searchText,
         text,
         false,
@@ -466,14 +403,14 @@ export const columnsGenerateInvoice = (
       ),
   },
   {
-    title: "METER READING CODE",
-    dataIndex: "meterReadingCode",
-    // sorter: true,
-    sorter: (a, b) => sorter("meterReadingCode", a, b),
-    filteredValue: search?.["meterReadingCode"] ? [search?.["meterReadingCode"]] : null,
+    title: "UOM",
+    dataIndex: "uom",
+    align: "center",
+    sorter: (a, b) => sorter("uom", a, b),
+    filteredValue: search?.["uom"] ? [search?.["uom"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
-      "meterReadingCode",
+      "uom",
       searchInput,
       searchedColumn,
       searchText,
@@ -482,8 +419,8 @@ export const columnsGenerateInvoice = (
     ),
     render: (text) =>
       renderColumn(
-        "meterReadingCode",
-        hasValue(search["meterReadingCode"]),
+        "uom",
+        hasValue(search["uom"]),
         searchText,
         text,
         false,
@@ -492,25 +429,24 @@ export const columnsGenerateInvoice = (
       ),
   },
   {
-    title: "AMOUNT IDR",
-    dataIndex: "amountIdr",
+    title: "TOTAL USAGE",
+    dataIndex: "totalUsage",
     align: "right",
-    // sorter: true,
-    sorter: (a, b) => sorter("amountIdr", a, b),
-    filteredValue: search?.["amountIdr"] ? [search?.["amountIdr"]] : null,
+    sorter: (a, b) => sorter("totalUsage", a, b),
+    filteredValue: search?.["totalUsage"] ? [search?.["totalUsage"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
-      "amountIdr",
+      "totalUsage",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true,
+      true
     ),
     render: (text) =>
       renderColumn(
-        "amountIdr",
-        hasValue(search["amountIdr"]),
+        "totalUsage",
+        hasValue(search["totalUsage"]),
         searchText,
         text,
         false,
@@ -519,25 +455,26 @@ export const columnsGenerateInvoice = (
       ),
   },
   {
-    title: "AMOUNT USD",
-    dataIndex: "amountUsd",
+    title: "CALCULATED USAGE",
+    dataIndex: "calculatedUsage",
     align: "right",
-    // sorter: true,
-    sorter: (a, b) => sorter("amountUsd", a, b),
-    filteredValue: search?.["amountUsd"] ? [search?.["amountUsd"]] : null,
+    sorter: (a, b) => sorter("calculatedUsage", a, b),
+    filteredValue: search?.["calculatedUsage"]
+      ? [search?.["calculatedUsage"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
-      "amountUsd",
+      "calculatedUsage",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true,
+      true
     ),
     render: (text) =>
       renderColumn(
-        "amountUsd",
-        hasValue(search["amountUsd"]),
+        "calculatedUsage",
+        hasValue(search["calculatedUsage"]),
         searchText,
         text,
         false,
@@ -545,52 +482,53 @@ export const columnsGenerateInvoice = (
         search
       ),
   },
-  // {
-  //   title: "TAX BASIS",
-  //   dataIndex: "taxBasis",
-  //   align: "right",
-  //   // sorter: true,
-  //   sorter: (a, b) => sorter("taxBasis", a, b),
-  //   filteredValue: search?.["taxBasis"] ? [search?.["taxBasis"]] : null,
-  //   ...getColumnSearchPropsUseFilteredValueFE(
-  //     search,
-  //     "taxBasis",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch,
-  //     true,
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "taxBasis",
-  //       hasValue(search["taxBasis"]),
-  //       searchText,
-  //       text,
-  //       false,
-  //       "input",
-  //       search
-  //     ),
-  // },
   {
-    title: "TAX BASIS EQV IDR",
-    dataIndex: "taxBasicIdr",
+    title: "CONVERTED UOM",
+    dataIndex: "convertedUom",
+    align: "center",
+    sorter: (a, b) => sorter("convertedUom", a, b),
+    filteredValue: search?.["convertedUom"] ? [search?.["convertedUom"]] : null,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "convertedUom",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "convertedUom",
+        hasValue(search["convertedUom"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    title: "CONVERTED TOTAL USAGE",
+    dataIndex: "convertedTotalUsage",
     align: "right",
-    sorter: (a, b) => sorter("taxBasicIdr", a, b),
-    filteredValue: search?.["taxBasicIdr"] ? [search?.["taxBasicIdr"]] : null,
+    sorter: (a, b) => sorter("convertedTotalUsage", a, b),
+    filteredValue: search?.["convertedTotalUsage"]
+      ? [search?.["convertedTotalUsage"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
-      "taxBasicIdr",
+      "convertedTotalUsage",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true,
+      true
     ),
     render: (text) =>
       renderColumn(
-        "taxBasicIdr",
-        hasValue(search["taxBasicIdr"]),
+        "convertedTotalUsage",
+        hasValue(search["convertedTotalUsage"]),
         searchText,
         text,
         false,
@@ -598,52 +536,27 @@ export const columnsGenerateInvoice = (
         search
       ),
   },
-  // {
-  //   title: "VAT",
-  //   dataIndex: "vat",
-  //   align: "right",
-  //   sorter: (a, b) => sorter("vat", a, b),
-  //   filteredValue: search?.["vat"] ? [search?.["vat"]] : null,
-  //   ...getColumnSearchPropsUseFilteredValueFE(
-  //     search,
-  //     "vat",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch,
-  //     true,
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "vat",
-  //       hasValue(search["vat"]),
-  //       searchText,
-  //       text,
-  //       false,
-  //       "input",
-  //       search
-  //     ),
-  // },
   {
-    title: "VAT EQV IDR",
-    dataIndex: "vatIdr",
+    title: "CONVERTED CALCULATED USAGE",
+    dataIndex: "convertedCalculatedUsage",
     align: "right",
-    // sorter: true,
-    sorter: (a, b) => sorter("vatIdr", a, b),
-    filteredValue: search?.["vatIdr"] ? [search?.["vatIdr"]] : null,
+    sorter: (a, b) => sorter("convertedCalculatedUsage", a, b),
+    filteredValue: search?.["convertedCalculatedUsage"]
+      ? [search?.["convertedCalculatedUsage"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
-      "vatIdr",
+      "convertedCalculatedUsage",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true,
+      true
     ),
     render: (text) =>
       renderColumn(
-        "vatIdr",
-        hasValue(search["vatIdr"]),
+        "convertedCalculatedUsage",
+        hasValue(search["convertedCalculatedUsage"]),
         searchText,
         text,
         false,
@@ -651,26 +564,25 @@ export const columnsGenerateInvoice = (
         search
       ),
   },
- 
   {
-    title: "WITHOLDING TAX",
-    dataIndex: "withHoldingTax",
+    title: "MIN CONTRACT",
+    dataIndex: "minContract",
     align: "right",
-    sorter: (a, b) => sorter("withHoldingTax", a, b),
-    filteredValue: search?.["withHoldingTax"] ? [search?.["withHoldingTax"]] : null,
+    sorter: (a, b) => sorter("minContract", a, b),
+    filteredValue: search?.["minContract"] ? [search?.["minContract"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
-      "withHoldingTax",
+      "minContract",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true,
+      true
     ),
     render: (text) =>
       renderColumn(
-        "withHoldingTax",
-        hasValue(search["withHoldingTax"]),
+        "minContract",
+        hasValue(search["minContract"]),
         searchText,
         text,
         false,
@@ -679,51 +591,24 @@ export const columnsGenerateInvoice = (
       ),
   },
   {
-    title: "TAX RATE TYPE",
-    dataIndex: "taxRateType",
-    align:'center',
-    sorter: (a, b) => sorter("taxRateType", a, b),
-    filteredValue: search?.["taxRateType"] ? [search?.["taxRateType"]] : null,
-    ...getColumnSearchPropsUseFilteredValueFE(
-      search,
-      "taxRateType",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (text) =>
-      renderColumn(
-        "taxRateType",
-        hasValue(search["taxRateType"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "TAX RATE",
-    dataIndex: "taxRate",
+    title: "MAX CONTRACT",
+    dataIndex: "maxContract",
     align: "right",
-    // sorter: true,
-    sorter: (a, b) => sorter("taxRate", a, b),
-    filteredValue: search?.["taxRate"] ? [search?.["taxRate"]] : null,
+    sorter: (a, b) => sorter("maxContract", a, b),
+    filteredValue: search?.["maxContract"] ? [search?.["maxContract"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
-      "taxRate",
+      "maxContract",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true,
+      true
     ),
     render: (text) =>
       renderColumn(
-        "taxRate",
-        hasValue(search["taxRate"]),
+        "maxContract",
+        hasValue(search["maxContract"]),
         searchText,
         text,
         false,
@@ -731,95 +616,14 @@ export const columnsGenerateInvoice = (
         search
       ),
   },
-  {
-    title: "TAX RATE DATE",
-    dataIndex: "taxRateDate",
-    align: 'center',
-    sorter: (a, b) => sorter("taxRateDate", a, b),
-    filteredValue: search?.["taxRateDate"]
-    ? [search?.["taxRateDate"]]
-    : null,
-    ...getColumnSearchPropsUseFilteredValueFE(
-      search,
-      "taxRateDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (text) =>
-      renderDateColumn(
-        "taxRateDate",
-        hasValue(search["taxRateDate"]),
-        searchText,
-        text,
-        "date",
-        search
-      ),
-  },
-  // {
-  //   title: "DISCOUNT AMOUNT IDR",
-  //   dataIndex: "discAmountIdr",
-  //   align: "right",
-  //   sorter: (a, b) => sorter("discAmountIdr", a, b),
-  //   filteredValue: search?.["discAmountIdr"] ? [search?.["discAmountIdr"]] : null,
-  //   ...getColumnSearchPropsUseFilteredValueFE(
-  //     search,
-  //     "discAmountIdr",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch,
-  //     true,
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "discAmountIdr",
-  //       hasValue(search["discAmountIdr"]),
-  //       searchText,
-  //       text,
-  //       false,
-  //       "input",
-  //       search
-  //     ),
-  // },
-  // {
-  //   title: "DISCOUNT AMOUNT USD",
-  //   dataIndex: "discAmountUsd",
-  //   align: "right",
-  //   sorter: (a, b) => sorter("discAmountUsd", a, b),
-  //   filteredValue: search?.["discAmountUsd"] ? [search?.["discAmountUsd"]] : null,
-  //   ...getColumnSearchPropsUseFilteredValueFE(
-  //     search,
-  //     "discAmountUsd",
-  //     searchInput,
-  //     searchedColumn,
-  //     searchText,
-  //     handleSearch,
-  //     true,
-  //   ),
-  //   render: (text) =>
-  //     renderColumn(
-  //       "discAmountUsd",
-  //       hasValue(search["discAmountUsd"]),
-  //       searchText,
-  //       text,
-  //       false,
-  //       "input",
-  //       search
-  //     ),
-  // },
- 
   {
     title: "TOTAL AMOUNT IDR",
-    // sorter: true,
-    // align: "right",
     dataIndex: "totalAmountIdr",
     align: "right",
     sorter: (a, b) => sorter("totalAmountIdr", a, b),
-    filteredValue: search?.["totalAmountIdr"] ? [search?.["totalAmountIdr"]] : null,
+    filteredValue: search?.["totalAmountIdr"]
+      ? [search?.["totalAmountIdr"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "totalAmountIdr",
@@ -827,7 +631,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true,
+      true
     ),
     render: (text) =>
       renderColumn(
@@ -842,11 +646,12 @@ export const columnsGenerateInvoice = (
   },
   {
     title: "TOTAL AMOUNT USD",
-    // sorter: true,
-    align: "right",
     dataIndex: "totalAmountUsd",
+    align: "right",
     sorter: (a, b) => sorter("totalAmountUsd", a, b),
-    filteredValue: search?.["totalAmountUsd"] ? [search?.["totalAmountUsd"]] : null,
+    filteredValue: search?.["totalAmountUsd"]
+      ? [search?.["totalAmountUsd"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "totalAmountUsd",
@@ -854,7 +659,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true,
+      true
     ),
     render: (text) =>
       renderColumn(
@@ -868,25 +673,26 @@ export const columnsGenerateInvoice = (
       ),
   },
   {
-    title: "TERMS OF PAYMENT",
-    dataIndex: "termOfPayment",
-    // sorter: true,
+    title: "STATUS APPROVAL",
+    dataIndex: "statusApproval",
     align: "center",
-    sorter: (a, b) => sorter("termOfPayment", a, b),
-    filteredValue: search?.["termOfPayment"] ? [search?.["termOfPayment"]] : null,
+    sorter: (a, b) => sorter("statusApproval", a, b),
+    filteredValue: search?.["statusApproval"]
+      ? [search?.["statusApproval"]]
+      : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
-      "termOfPayment",
+      "statusApproval",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true,
+      true
     ),
     render: (text) =>
       renderColumn(
-        "termOfPayment",
-        hasValue(search["termOfPayment"]),
+        "statusApproval",
+        hasValue(search["statusApproval"]),
         searchText,
         text,
         false,
@@ -895,112 +701,24 @@ export const columnsGenerateInvoice = (
       ),
   },
   {
-    // sorter: true,
-    title: "TRANSACTION DATE",
-    dataIndex: "transactionDate",
+    title: "TEMPLATE",
+    dataIndex: "template",
     align: "center",
-    sorter: (a, b) => sorter("transactionDate", a, b),
-    filteredValue: search?.["transactionDate"]
-    ? [search?.["transactionDate"]]
-    : null,
+    sorter: (a, b) => sorter("template", a, b),
+    filteredValue: search?.["template"] ? [search?.["template"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
-      "transactionDate",
+      "template",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true,
-      "date"
-    ),
-    render: (text) =>
-      renderDateColumn(
-        "transactionDate",
-        hasValue(search["transactionDate"]),
-        searchText,
-        text,
-        "date",
-        search
-      ),
-  },
-  {
-    // sorter: true,
-    title: "INVOICE DATE",
-    dataIndex: "invoiceDate",
-    align: "center",
-    sorter: (a, b) => sorter("invoiceDate", a, b),
-    filteredValue: search?.["invoiceDate"]
-    ? [search?.["invoiceDate"]]
-    : null,
-    ...getColumnSearchPropsUseFilteredValueFE(
-      search,
-      "invoiceDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (text) =>
-      renderDateColumn(
-        "invoiceDate",
-        hasValue(search["invoiceDate"]),
-        searchText,
-        text,
-        "date",
-        search
-      ),
-  },
-  {
-    // sorter: true,
-    title: "DUE DATE",
-    dataIndex: "dueDate",
-    align: "center",
-    sorter: (a, b) => sorter("dueDate", a, b),
-    filteredValue: search?.["dueDate"]
-    ? [search?.["dueDate"]]
-    : null,
-    ...getColumnSearchPropsUseFilteredValueFE(
-      search,
-      "dueDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (text) =>
-      renderDateColumn(
-        "dueDate",
-        hasValue(search["dueDate"]),
-        searchText,
-        text,
-        "date",
-        search
-      ),
-  },
-  {
-    // sorter: true,
-    title: "RATE TYPE",
-    dataIndex: "rateType",
-    align:'center',
-    sorter: (a, b) => sorter("rateType", a, b),
-    filteredValue: search?.["rateType"] ? [search?.["rateType"]] : null,
-    ...getColumnSearchPropsUseFilteredValueFE(
-      search,
-      "rateType",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
+      true
     ),
     render: (text) =>
       renderColumn(
-        "rateType",
-        hasValue(search["rateType"]),
+        "template",
+        hasValue(search["template"]),
         searchText,
         text,
         false,
@@ -1009,108 +727,23 @@ export const columnsGenerateInvoice = (
       ),
   },
   {
-    // sorter: true,
-    title: "RATE",
-    dataIndex: "rate",
-    align:"right",
-    sorter: (a, b) => sorter("rate", a, b),
-    filteredValue: search?.["rate"] ? [search?.["rate"]] : null,
+    title: "DESCRIPTION",
+    dataIndex: "description",
+    sorter: (a, b) => sorter("description", a, b),
+    filteredValue: search?.["description"] ? [search?.["description"]] : null,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
-      "rate",
+      "description",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true,
+      true
     ),
     render: (text) =>
       renderColumn(
-        "rate",
-        hasValue(search["rate"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    // sorter: true,
-    title: "RATE DATE",
-    dataIndex: "rateDate",
-    align: 'center',
-    sorter: (a, b) => sorter("rateDate", a, b),
-    filteredValue: search?.["rateDate"]
-    ? [search?.["rateDate"]]
-    : null,
-    ...getColumnSearchPropsUseFilteredValueFE(
-      search,
-      "rateDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (text) =>
-      renderDateColumn(
-        "rateDate",
-        hasValue(search["rateDate"]),
-        searchText,
-        text,
-        "date",
-        search
-      ),
-  },
-  {
-    // sorter: true,
-    title: "TOTAL AMOUNT EQUIVALENT IDR",
-    dataIndex: "totalAmountEqvIdr",
-    align:"right",
-    sorter: (a, b) => sorter("totalAmountEqvIdr", a, b),
-    filteredValue: search?.["totalAmountEqvIdr"] ? [search?.["totalAmountEqvIdr"]] : null,
-    ...getColumnSearchPropsUseFilteredValueFE(
-      search,
-      "totalAmountEqvIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountEqvIdr",
-        hasValue(search["totalAmountEqvIdr"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    // sorter: true,
-    title: "TOTAL AMOUNT EQUIVALENT USD",
-    dataIndex: "totalAmountEqvUsd",
-    align:"right",
-    sorter: (a, b) => sorter("totalAmountEqvUsd", a, b),
-    filteredValue: search?.["totalAmountEqvUsd"] ? [search?.["totalAmountEqvUsd"]] : null,
-    ...getColumnSearchPropsUseFilteredValueFE(
-      search,
-      "totalAmountEqvUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (text) =>
-      renderColumn(
-        "totalAmountEqvUsd",
-        hasValue(search["totalAmountEqvUsd"]),
+        "description",
+        hasValue(search["description"]),
         searchText,
         text,
         false,

@@ -1,9 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import DetailText from "../../../../../../../components/DetailText";
-import DateComponent from "../../../../../../../components/DateComponent";
 import { Fragment } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import InputComponent from "../../../../../../../components/InputComponent";
 import { Form, Select } from "antd";
 import { requiredMessage } from "../../../../../../../utils";
 import SelectComponent from "../../../../../../../components/SelectComponent";

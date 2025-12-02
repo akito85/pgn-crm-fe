@@ -1,5 +1,5 @@
-import React, {useState} from 'react'
-import { GoogleMap, LoadScript, MarkerF, useJsApiLoader } from '@react-google-maps/api'
+import React from 'react'
+import { GoogleMap, MarkerF, useJsApiLoader } from '@react-google-maps/api'
 
 const GoogleMapsCustom = ({
   zoom,

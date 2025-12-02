@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Checkbox, Tooltip } from "antd";
 import { useState } from "react";
 import TablePagination from "../../../../../../components/TablePagination";
@@ -6,12 +6,8 @@ import SVGIcon from "../../../../../../assets/Icon/index";
 import { Fragment } from "react";
 import moment from "moment";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
-import StatusComponent from "../../../../../../components/StatusComponent";
 import DistributionMediaDetail from "./DistributionMediaDetail";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import Highlighter from "react-highlight-words";
-import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
-import { Link } from "react-router-dom";
 import { useColumnActionPermissionAccount } from "../../../ComponentAccount/ColumnActionPermissionAccount";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";

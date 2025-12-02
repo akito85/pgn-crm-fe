@@ -10,20 +10,16 @@ import {
   getDetailDraftLateChargeRule,
   getDetailLateCharge,
   getDetailLateChargeRule,
-  getListCategory,
 } from "../../../../../../redux/slices/account_management/MasterData/late_charges";
 import BreadCrumbAdvanced from "../../../../../../components/BreadCrumbAdvanced";
 import moment from "moment";
-import { dateFormatting, requiredMessage } from "../../../../../../utils";
+import { dateFormatting } from "../../../../../../utils";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import RadioTabs from "../../../../../../components/RadioTabs";
 import DetailText from "../../../../../../components/DetailText";
-import AttachmentSectionForm from "../../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
-import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import { LeftOutlined } from "@ant-design/icons";
 import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
-import InputComponent from "../../../../../../components/InputComponent";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { bytesConverter } from "../../../../../../utils/bytesConverter";

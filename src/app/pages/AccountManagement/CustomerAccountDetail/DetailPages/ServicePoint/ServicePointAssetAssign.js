@@ -1,22 +1,17 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import {
   WarningOutlined,
   LeftOutlined,
-  CloseCircleOutlined,
 } from "@ant-design/icons";
 import {
-  Link,
-  NavLink,
-  Route,
-  Routes,
   useLocation,
   useNavigate,
 } from "react-router-dom";
 import { useState } from "react";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
-import { Alert, Form, Select, Spin } from "antd";
+import { Alert, Form, Spin } from "antd";
 import AssignPage from "./Asset/AssignPage";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import AssignChoosePage from "./Asset/AssignChoosePage";
@@ -46,7 +41,6 @@ import {
 import moment from "moment";
 import { validateCreateUpdate } from "../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";
-import { dateFormatting } from "../../../../../../utils";
 
 const ServicePointAssetAssign = ({ }) => {
   const dispatch = useDispatch();

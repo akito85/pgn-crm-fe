@@ -17,8 +17,7 @@ import {
 import { FilterOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
-import { dateFormatting, formMessageRequired, hasValue, renderColumn, renderDateColumn, toTitleCase } from "../../../../../../utils";
-import StatusComponent from "../../../../../../components/StatusComponent";
+import { dateFormatting, formMessageRequired, hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import InputComponent from "../../../../../../components/InputComponent";
 import DateComponent from "../../../../../../components/DateComponent";

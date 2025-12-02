@@ -1,4 +1,3 @@
-import Highlighter from "react-highlight-words";
 import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 
 export const columnsApproval = (

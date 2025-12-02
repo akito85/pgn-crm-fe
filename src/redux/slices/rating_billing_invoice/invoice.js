@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import ratingBillingHttpService from "../../services/ratingBillingHttpService";
 import { showModalError, validateError } from "../general_slice";
 import { showModalSuccess } from "../general_slice";
+import axios from "axios";
 
 const initialState = {
   data: [],
@@ -11,17 +12,17 @@ const initialState = {
   message: "",
   data_detail: null,
   data_format: null,
-  data_billing: null
+  data_billing: [],
 };
 
 export const getAllInvoicePaginate = createAsyncThunk(
   "GET_ALL_INVOICE_PAGINATE",
   async ({ page, pageSize, search, sort }, thunkAPI) => {
     try {
-      // const searchParams = search === undefined ? "" : search;
+      const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/rbi/invoice?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${search}`;
+      const url = `/v1/dbs/api/rbi/invoice?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {
@@ -36,6 +37,7 @@ export const getDetailInvoice = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/invoice/${id}`;
       const response = await ratingBillingHttpService.getDetail(url);
       return response;
+      // return Array.isArray(response) ? response : [response];
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -67,14 +69,14 @@ export const getBillingApproval = createAsyncThunk(
 );
 export const createRegenerate = createAsyncThunk(
   "CREATE_REGENRATE",
-  async ({id, body}, thunkAPI) => {
+  async ({ id, body }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/invoice/${id}/regenerate`;
       const response = await ratingBillingHttpService.createData(url, body);
       const successMessage = {
         title: "Successful",
         description: "Your data has been created",
-        return: false
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response;
@@ -103,7 +105,7 @@ export const createGenerate = createAsyncThunk(
       const successMessage = {
         title: "Successful",
         description: "Your data has been created",
-        return : false
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response;
@@ -126,89 +128,111 @@ export const createGenerate = createAsyncThunk(
 
 export const getDownloadList = createAsyncThunk(
   "DOWNLOAD_INVOICE_LIST",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ page, pageSize, search, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/rbi/invoice/download-filter?search=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-      const response = await ratingBillingHttpService.downloadData(url);
-      return response.data;
-    } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_INVOICE_LIST", back: false }))
-      return thunkAPI.rejectWithValue(response.response.data);
+      const url = `/v1/dbs/api/rbi/invoice/download-filter?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+
+      const response = await ratingBillingHttpService.downloadXlsx(
+        url,
+        "invoice_list"
+      );
+
+      return response;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error.message || error.toString();
+
+      thunkAPI.dispatch(
+        validateError({
+          error: error?.response,
+          action: "DOWNLOAD_INVOICE_LIST",
+          back: false,
+        })
+      );
+
+      const errorBody = {
+        title: "Failed",
+        description: `Failed to download list. ${message}`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );
+
 const invoiceSlice = createSlice({
   name: "invoice",
   initialState,
   extraReducers: {
     // Get All Billing Item Pagination
-    [getAllInvoicePaginate.pending]: (state, action) => {
+    [getAllInvoicePaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAllInvoicePaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [getAllInvoicePaginate.rejected]: (state, action) => {
+    [getAllInvoicePaginate.rejected]: (state) => {
       state.loading = false;
     },
     // get detail
-    [getDetailInvoice.pending]: (state, action) => {
+    [getDetailInvoice.pending]: (state) => {
       state.loading = true;
     },
     [getDetailInvoice.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_detail = action.payload;
     },
-    [getDetailInvoice.rejected]: (state, action) => {
+    [getDetailInvoice.rejected]: (state) => {
       state.loading = false;
     },
     // get format type
-    [getFormatType.pending]: (state, action) => {
+    [getFormatType.pending]: (state) => {
       state.loading = true;
     },
     [getFormatType.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_format = action.payload;
     },
-    [getFormatType.rejected]: (state, action) => {
+    [getFormatType.rejected]: (state) => {
       state.loading = false;
     },
     // get billing approval
-    [getBillingApproval.pending]: (state, action) => {
+    [getBillingApproval.pending]: (state) => {
       state.loading = true;
     },
     [getBillingApproval.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data_billing = action.payload;
+      state.data_billing = action.payload.data;
     },
-    [getBillingApproval.rejected]: (state, action) => {
+    [getBillingApproval.rejected]: (state) => {
       state.loading = false;
     },
     // create generate
-    [createGenerate.pending]: (state, action) => {
+    [createGenerate.pending]: (state) => {
       state.loading = true;
     },
     [createGenerate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_billing = action.payload;
     },
-    [createGenerate.rejected]: (state, action) => {
+    [createGenerate.rejected]: (state) => {
       state.loading = false;
     },
 
     // download list invoice
-    [getDownloadList.pending]: (state, action) => {
+    [getDownloadList.pending]: (state) => {
       state.loading = true;
     },
     [getDownloadList.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_billing = action.payload;
     },
-    [getDownloadList.rejected]: (state, action) => {
+    [getDownloadList.rejected]: (state) => {
       state.loading = false;
     },
   },

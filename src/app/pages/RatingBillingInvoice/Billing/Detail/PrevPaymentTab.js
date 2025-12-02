@@ -1,14 +1,12 @@
-import React, { useEffect, useRef, useState, Fragment, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import moment from "moment";
-import BaseContainer from "../../../../../components/BaseContainer";
-import DetailText from "../../../../../components/DetailText";
+import TableRBI from "../../../../../components/TableRBI";
 import {
   getPrevPaymentBilling,
 } from "../../../../../redux/slices/rating_billing_invoice/billing";
 import { columnsPayment } from "./Table/TablePayment";
 import { currencyFormatting } from "../../../../../utils/formatCurrency";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const PrevPaymentTab = ({ billingCodeId }) => {
   // Selector
@@ -17,25 +15,22 @@ const PrevPaymentTab = ({ billingCodeId }) => {
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = useMemo(() => data_PrevPayment?.receiptDetails || [], [data_PrevPayment?.receiptDetails]);
+  const dataSource = data_PrevPayment?.receiptDetails || [];
 
   // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [totalElements, setTotalElement] = useState(0);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [fieldSort, setFieldSort] = useState("");
-  const [orderSort, setOrderSort] = useState("");
-  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: [],
+  }));
 
   // Use Effect
-  useEffect(() => {
-    if (dataSource.length > 0) {
-      setTotalElement(dataSource.length);
-    }
-  }, [dataSource]);
-
   useEffect(() => {
     dispatch(getPrevPaymentBilling(billingCodeId));
   }, [dispatch, billingCodeId]);
@@ -44,7 +39,7 @@ const PrevPaymentTab = ({ billingCodeId }) => {
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
@@ -56,100 +51,119 @@ const PrevPaymentTab = ({ billingCodeId }) => {
     });
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+  const handleChangePage = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
-  const onSort = (_, __, sort) => {
-    if (sort.order) {
-      setFieldSort(sort.field);
-      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
-    } else {
-      setFieldSort("");
-      setOrderSort("");
-    }
+  const onSort = (_, __, sorter) => {
+    const dataSort =
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
   };
 
-  const filterDataByPage = () => {
-    let result = [...dataSource];
-    if (searchedColumn) {
-      result = result.filter((item) => {
-        return item[searchedColumn]
-          ?.toLowerCase()
-          .includes(searchText.toLowerCase());
-      });
-    }
-    const handleDataSort = (obj) => {
-      switch (fieldSort) {
-        case "startDate":
-        case "endDate":
-          const date = obj[fieldSort]
-            ? moment(obj[fieldSort]).format("DD MMM YYYY")
-            : "";
-          return date.toString().toLowerCase();
-        default:
-          return obj[fieldSort].toString().toLowerCase();
-      }
-    };
-    if (fieldSort) {
-      result.sort((a, b) => {
-        let fa = handleDataSort(a);
-        let fb = handleDataSort(b);
-        if (fa < fb) {
-          return orderSort === "asc" ? -1 : 1;
-        }
-        if (fa > fb) {
-          return orderSort === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return result.slice((page - 1) * pageSize, page * pageSize);
-  };
+  const baseColumns = useMemo(() => {
+    return columnsPayment(
+      page,
+      pageSize,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      search
+    );
+  }, [page, pageSize, searchedColumn, searchText, search]);
+
+  const allColumns = useMemo(() => {
+    return baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+  }, [baseColumns]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
 
   return (
-    <Fragment>
-      <BaseContainer header={"payment information"}>
-        <div className={"w-full grid grid-cols-4 gap-4"}>
-          <DetailText label={"Total Payment IDR"}>
-            {currencyFormatting(data_PrevPayment?.totalIdr, "idr")}
-          </DetailText>
-          <DetailText label={"Total Payment USD"}>
-            {currencyFormatting(data_PrevPayment?.totalUsd, "usd")}
-          </DetailText>
-          <DetailText label={"Total Payment Eqv IDR"}>
-            {currencyFormatting(data_PrevPayment?.totalEqvIdr, "idr")}
-          </DetailText>
-          <DetailText label={"Total Payment Eqv USD"}>
-            {currencyFormatting(data_PrevPayment?.totalEqvUsd, "usd")}
-          </DetailText>
-        </div>
-      </BaseContainer>
+    <div className="space-y-6">
+      {/* Payment Information Section */}
+      <div>
+        <h3 className="text-sm font-bold text-primary uppercase mb-4">
+          Payment Information
+        </h3>
 
-      <BaseContainer header={"payment detail information"}>
-        <div className="w-full">
-          <TablePaginationNew
-            dataSource={filterDataByPage()}
-            totalData={totalElements || 0}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChange}
-            columns={columnsPayment(
-              page,
-              pageSize,
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearch,
-              search
-            )}
-            onSort={onSort}
-            tableScrolled={{ y: 525, x: 5000 }}
-          />
+        <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+          {/* Left Column */}
+          <div className="space-y-4">
+            <div>
+              <p className="text-[13px] text-gray-600 mb-1">Total Payment IDR</p>
+              <p className="text-[15px] font-normal text-gray-900">
+                {currencyFormatting(data_PrevPayment?.totalIdr, "idr") || "0.00 IDR"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-[13px] text-gray-600 mb-1">Total Payment EQV IDR</p>
+              <p className="text-[15px] font-normal text-gray-900">
+                {currencyFormatting(data_PrevPayment?.totalEqvIdr, "idr") || "0.00 IDR"}
+              </p>
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-4">
+            <div>
+              <p className="text-[13px] text-gray-600 mb-1">Total Payment USD</p>
+              <p className="text-[15px] font-normal text-gray-900">
+                {currencyFormatting(data_PrevPayment?.totalUsd, "usd") || "0.00 USD"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-[13px] text-gray-600 mb-1">Total Payment EQV USD</p>
+              <p className="text-[15px] font-normal text-gray-900">
+                {currencyFormatting(data_PrevPayment?.totalEqvUsd, "usd") || "0.00 USD"}
+              </p>
+            </div>
+          </div>
         </div>
-      </BaseContainer>
-    </Fragment>
+      </div>
+
+      {/* Payment Detail Information Section */}
+      <div>
+        <h3 className="text-sm font-bold text-primary uppercase mb-3">
+          Payment Detail Information
+        </h3>
+
+        <TableRBI
+          size="small"
+          dataSource={dataSource}
+          columns={processedColumns}
+          current={page}
+          pageSize={pageSize}
+          onChange={handleChangePage}
+          onSizeChanger={handleChangePage}
+          totalData={dataSource?.length || 0}
+          tableScrolled={{ x: 5000, y: 525 }}
+          onSort={onSort}
+          columnDefinitions={columnDefinitions}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          loading={false}
+        />
+      </div>
+    </div>
   );
 };
 

@@ -14,7 +14,7 @@ import masterJobReducer from "../slices/system_setup/master_data/master_job";
 import loginBackgroundReducer from "../slices/system_setup/login_background";
 import announcementReducer from "../slices/system_setup/announcement";
 import maintenanceModeReducer from "../slices/system_setup/maintenanceMode";
-import delegationReducer from "../slices/user_management/delegation"
+import delegationReducer from "../slices/user_management/delegation";
 import userLevelReducer from "../slices/user_management/user_level_slice";
 import dataReducer from "../slices/data_slice";
 import profileReducer from "../slices/user_management/profile";
@@ -32,6 +32,9 @@ import pricingAdjustReducer from "../slices/product_promo/pricingAdjust";
 import tosReducer from "../slices/product_promo/tos";
 import acccountManagerReducer from "../slices/account_management/accountManagement";
 import calculationReducer from "../slices/rating_billing_invoice/calculation";
+import prabillingReducer from "../slices/rating_billing_invoice/praBilling";
+import monitoringReducer from "../slices/rating_billing_invoice/monitoringSlice";
+import efakturReducer from "../slices/rating_billing_invoice/efakturSlice";
 import receiptReducer from "../slices/receipt_collection/receipt";
 import acccountAddressReducer from "../slices/account_management/detailAccount/accountAddressSlice";
 import accountGasSourceReducer from "../slices/account_management/detailAccount/accountGasSource";
@@ -76,18 +79,32 @@ import invoiceTemplateReducer from "../slices/rating_billing_invoice/MasterData/
 import termsofPaymentReducer from "../slices/rating_billing_invoice/MasterData/termsofPayment";
 import taxCodeReducer from "../slices/rating_billing_invoice/MasterData/taxCode";
 import promoReducer from "../slices/product_promo/promoSlice";
-import positionHierarchyReducer from '../slices/user_management/position_hirarchy';
-import rawMaterialSourceReducer from "../slices/account_management/detailAccount/RawMaterialDistributionSlice"
-import productDistributionReducer from "../slices/account_management/detailAccount/ProductDistributionSlice"
-import accountGasUtilizationReducer from '../slices/account_management/detailAccount/gasUtilizationSlice';
+import positionHierarchyReducer from "../slices/user_management/position_hirarchy";
+import rawMaterialSourceReducer from "../slices/account_management/detailAccount/RawMaterialDistributionSlice";
+import productDistributionReducer from "../slices/account_management/detailAccount/ProductDistributionSlice";
+import accountGasUtilizationReducer from "../slices/account_management/detailAccount/gasUtilizationSlice";
 import additionalInfoReducer from "../slices/account_management/detailAccount/additionalInformation";
 import equpmentReducer from "../slices/account_management/detailAccount/equpmentSlice";
-import criteriaReducer from '../slices/criteria_slice';
+import criteriaReducer from "../slices/criteria_slice";
 import { reportCustomerSlice } from "../slices/report/report_customer_slice";
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
-import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement"; 
+import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement";
+import prabillingLogReducer from "../slices/rating_billing_invoice/prabillingLog";
+import jobSlice from "../slices/system_setup/jobSlice";
+import loggingReducer from "../slices/system_setup/logging";
+import emeteraiReducer from "../slices/rating_billing_invoice/emeterai";
+import gracePeriodReducer from "../slices/debt_and_collection/gracePeriod";
+import activityNameReducer from "../slices/debt_and_collection/activityName";
+import templateRemindingReducer from "../slices/debt_and_collection/templateReminding";
+import activityTypeReducer from "../slices/debt_and_collection/activityType";
+import activityActionReducer from "../slices/debt_and_collection/activityAction";
+import activitiesReducer from "../slices/debt_and_collection/activities";
+import transactionReportReducer from "../slices/debt_and_collection/transactionReport";
+import managementDeliveryInvoiceReducer from "../slices/rating_billing_invoice/managementDeliveryInvoice";
 
 const reducer = combineReducers({
+  job: jobSlice,
+  logging: loggingReducer,
   auth: authReducer,
   message: messageReducer,
   entity: entityReducer,
@@ -160,7 +177,11 @@ const reducer = combineReducers({
   assets: assetsReducer,
 
   // RBI reducer
+  prabillingLog: prabillingLogReducer,
   rbi_calculation: calculationReducer,
+  rbi_prabilling: prabillingReducer,
+  monitoring: monitoringReducer,
+  efaktur: efakturReducer,
   monitoring_usage: monitoringUsageReducer,
   billing: billingReducer,
   adjustmentBilling: adjustmentBillingReducer,
@@ -177,6 +198,8 @@ const reducer = combineReducers({
   invoice_template: invoiceTemplateReducer,
   top: termsofPaymentReducer,
   tax_code: taxCodeReducer,
+  emeterai: emeteraiReducer,
+  managementDeliveryInvoice: managementDeliveryInvoiceReducer,
 
   //receipt and collection
   receipt: receiptReducer,
@@ -195,7 +218,18 @@ const reducer = combineReducers({
 
   // report
   [reportCustomerSlice.reducerPath]: reportCustomerSlice.reducer,
-  [reportCustomerAgreementSlice.reducerPath] : reportCustomerAgreementSlice.reducer
+  [reportCustomerAgreementSlice.reducerPath]:
+    reportCustomerAgreementSlice.reducer,
+
+
+  // debt and collection
+  gracePeriod: gracePeriodReducer,
+  activityName: activityNameReducer,
+  templateReminding: templateRemindingReducer,
+  activityType: activityTypeReducer,
+  activityAction: activityActionReducer,
+  activities: activitiesReducer,
+  transactionReport: transactionReportReducer,
 
 });
 
@@ -209,5 +243,5 @@ const store = configureStore({
     getDefaultMiddleware().concat(reportCustomerSlice.middleware),
 });
 
-setupListeners(store.dispatch)
+setupListeners(store.dispatch);
 export default store;

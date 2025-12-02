@@ -1,133 +1,259 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
+/* eslint-disable default-case */
+import {
+  CheckCircleFilled,
+  ClockCircleFilled,
+  CloseCircleFilled,
+  Loading3QuartersOutlined,
+  ExclamationCircleFilled,
+  MinusCircleFilled,
+} from "@ant-design/icons";
+import React, { useMemo } from "react";
 
 const StatusComponent = ({ children, colour, type = "status" }) => {
-  const [bgcolor, setBgColor] = useState("");
-  const [color, setColor] = useState("");
-
-  useEffect(() => {
-    if (colour) {
-      switch (colour.toLowerCase()) {
-        case "active":
-        case "success":
-        case "completed":
-        case "complete":
-        case "open":
-        case "full payment":
-        case "true":
-        case "paid":
-        case "complete billing":
-          setBgColor("status-active");
-          setColor("text-[#14a38b]");
-          break;
-        case "inactive":
-        case "rejected":
-        case "failed":
-        case "close":
-        case "no payment":
-        case "false":
-        case "unpaid":
-        case "reject":
-        case "not paid":
-        case "failed billing":
-        case "fail":
-          setBgColor("status-inactive");
-          setColor("text-[#be3036]");
-          break;
-        case "waiting":
-        case "waiting approval":
-        case "WAITING_APPROVAL":
-        case "in progress":
-        case "inprogress":
-        case "partial payment":
-        case "waiting to release":
-          setBgColor("status-waiting");
-          break;
-        case "draft":
-          setBgColor("status-draft");
-          break;
-        case "approved":
-        case "main":
-          setBgColor("status-approved");
-          break;
-        case "expire":
-          setBgColor("status-expire");
-          break;
-        case "expire10":
-        case "need review":
-          setBgColor("status-expire10");
-          break;
-        case "expire30":
-          setBgColor("status-expire30");
-          break;
-        case "pending":
-        case "assigned":
-          setBgColor("status-pending");
-          break;
-        case "primary":
-        case "Primary":
-        case "refund":
-        case "unapplied":
-        case "hold":
-        case "rating":
-        case "standby":
-          setBgColor("bg-blue-500");
-          break;
-        case "applied":
-          setBgColor("bg-[#ACC424]");
-          break;
-        case "reverse":
-          setBgColor("bg-[#910000]");
-          break;
-        case "non-primary":
-        case "Non Primary":
-          setBgColor("bg-gray-500");
-          break;
-        case "rating and billing":
-          setBgColor("rating-billing-pils");
-          break;
-        case "billing":
-          setBgColor("billing-pils");
-          break;
-        case "pre paid":
-          setBgColor("bg-lime-600");
-          break;
-        case "registered":
-          setBgColor("bg-[#0075BF]");
-          break;
-        case "pra-active":
-          setBgColor("bg-[#4D6AFE]");
-          break;
-        case "suspended":
-          setBgColor("bg-[#F2D957]");
-          break;
-        case "terminated":
-          setBgColor("bg-[#BE3036]");
-          break;
-        case "prospect":
-          setBgColor("bg-[#8D91A0]");
-          break;
-        case "partially paid":
-          setBgColor("bg-[#C6D681]");
-          break;
-        default:
-          setBgColor("bg-slate-600");
-          break;
-      }
+  const { bgcolor, textColor } = useMemo(() => {
+    if (!colour || typeof colour !== "string") {
+      return { bgcolor: "bg-slate-600", textColor: "text-white" };
     }
+
+    const lowerColour = colour.toLowerCase();
+    let bgColor = "bg-slate-600";
+    let tColor = "text-white";
+
+    switch (lowerColour) {
+      case "active":
+      case "success":
+      case "completed":
+      case "complete":
+      case "full payment":
+      case "true":
+      case "paid":
+      case "complete billing":
+      case "sent":
+      case "approved": // E-Faktur status
+      case "success_upload": // E-Faktur status
+        bgColor = "status-active";
+        tColor = "text-white";
+        break;
+
+      case "open":
+        bgColor = "bg-gray-600";
+        tColor = "text-white";
+        break;
+        
+      case "inactive":
+      case "rejected":
+      case "failed":
+      case "close":
+      case "no payment":
+      case "false":
+      case "unpaid":
+      case "reject":
+      case "not paid":
+      case "failed billing":
+      case "fail":
+      case "not_paid":
+        bgColor = "status-inactive";
+        tColor = "text-white";
+        break;
+
+      case "waiting":
+      case "waiting approval":
+      case "waiting_approval":
+      case "partial payment":
+      case "waiting to release":
+      case "awaiting_approval": // E-Faktur status
+      case "awaiting approval": // E-Faktur status
+        bgColor = "status-waiting";
+        tColor = "text-yellow-700";
+        break;
+
+      case "in progress":
+      case "INPROGRESS":
+      case "processing": // E-Faktur status
+        bgColor = "bg-yellow-500";
+        tColor = "text-white";
+        break;
+
+      case "draft":
+      case "not_generated": // E-Faktur status
+      case "not generated": // E-Faktur status
+        bgColor = "bg-gray-600";
+        tColor = "text-white";
+        break;
+
+      case "main":
+        bgColor = "status-active";
+        tColor = "text-white";
+        break;
+
+      case "expire":
+      case "cancelled": // E-Faktur status
+        bgColor = "status-expire";
+        tColor = "text-red-700";
+        break;
+
+      case "expire10":
+      case "need review":
+        bgColor = "status-expire10";
+        break;
+
+      case "expire30":
+        bgColor = "status-expire30";
+        break;
+
+      case "pending":
+      case "assigned":
+        bgColor = "status-pending";
+        tColor = "text-yellow-800";
+        break;
+
+      case "scheduled":
+        bgColor = "bg-[#EEEEEE]";
+        tColor = "text-[#000]";
+        break;
+
+      case "primary":
+      case "refund":
+      case "unapplied":
+      case "hold":
+      case "rating":
+      case "standby":
+        bgColor = "bg-blue-500";
+        tColor = "text-white";
+        break;
+
+      case "applied":
+        bgColor = "bg-[#ACC424]";
+        tColor = "text-white";
+        break;
+
+      case "reverse":
+        bgColor = "bg-[#910000]";
+        tColor = "text-white";
+        break;
+
+      case "non-primary":
+        bgColor = "bg-gray-500";
+        tColor = "text-white";
+        break;
+
+      case "rating and billing":
+        bgColor = "rating-billing-pils";
+        break;
+
+      case "billing":
+        bgColor = "billing-pils";
+        break;
+
+      case "pre paid":
+        bgColor = "bg-lime-600";
+        tColor = "text-white";
+        break;
+
+      case "registered":
+        bgColor = "bg-[#0075BF]";
+        tColor = "text-white";
+        break;
+
+      case "pra-active":
+        bgColor = "bg-[#4D6AFE]";
+        tColor = "text-white";
+        break;
+
+      case "suspended":
+        bgColor = "bg-[#F2D957]";
+        tColor = "text-black";
+        break;
+
+      case "terminated":
+        bgColor = "bg-white";
+        tColor = "text-white";
+        break;
+
+      case "prospect":
+        bgColor = "bg-[#8D91A0]";
+        tColor = "text-white";
+        break;
+
+      case "partially paid":
+        bgColor = "bg-[#C6D681]";
+        tColor = "text-black";
+        break;
+
+      case "generating":
+        bgColor = "bg-[#F57C00]";
+        tColor = "text-white";
+        break;
+
+      // E-Faktur specific statuses
+      case "replaced": // Replacement status
+        bgColor = "bg-orange-100";
+        tColor = "text-orange-800";
+        break;
+
+      case "latest": // Replacement status
+        bgColor = "bg-green-100";
+        tColor = "text-green-800";
+        break;
+    }
+
+    return { bgcolor: bgColor, textColor: tColor };
   }, [colour]);
 
+  const renderIconStatus = () => {
+    if (!colour || typeof colour !== "string") return null;
+
+    const lowerColour = colour.toLowerCase();
+
+    switch (lowerColour) {
+      case "completed":
+      case "success":
+      case "sent":
+      case "approved":
+      case "paid":
+      case "success_upload":
+      case "latest":
+        return <CheckCircleFilled style={{ fontSize: "15px" }} />;
+      case "generating":
+      case "in progress":
+      case "inprogress":
+      case "INPROGRESS":
+      case "processing":
+      case "waiting approval":
+      case "waiting_approval":
+      case "awaiting_approval":
+      case "awaiting approval":
+        return <Loading3QuartersOutlined style={{ fontSize: "15px" }} />;
+      case "failed":
+      case "not paid":
+      case "not_paid":
+      case "rejected":
+        return <CloseCircleFilled style={{ fontSize: "15px" }} />;
+      case "scheduled":
+        return <ClockCircleFilled style={{ fontSize: "15px" }} />;
+      case "cancelled":
+        return <MinusCircleFilled style={{ fontSize: "15px" }} />;
+      case "replaced":
+        return <ExclamationCircleFilled style={{ fontSize: "15px" }} />;
+      default:
+        return null;
+    }
+  };
+
+  if (!children) return null;
+
   return (
-    <p
-      // className={`text-white ${bg} mx-8 my-0 p-1 rounded-2xl text-center w-40`}
+    <div
       className={
         type === "status"
-          ? `text-white ${bgcolor} my-0 py-1 px-2 rounded-2xl text-center w-auto`
-          : `${color} font-semibold`
+          ? `flex gap-2 justify-center items-center ${bgcolor} ${textColor} px-3 py-0 rounded-3xl text-center w-fit`
+          : `${textColor} font-semibold`
       }
     >
+      {renderIconStatus()}
       {children}
-    </p>
+    </div>
   );
 };
+
 export default StatusComponent;

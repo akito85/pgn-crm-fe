@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { PricingAdjustPriceInfo } from "./PricingAdjustPriceInfo";
 import ApprovalSectionForm from "../Pricing/Form/ApprovalSectionForm";
 import AttachmentSectionForm from "../Pricing/Form/AttachmentSectionForm";
-import PricingAdjustTableDetail from "./PricingAdjustTableDetail";
 import DetailText from "../../../../components/DetailText";
 import { Fragment } from "react";
 import RadioTabs from "../../../../components/RadioTabs";

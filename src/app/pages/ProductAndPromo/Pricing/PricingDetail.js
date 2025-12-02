@@ -12,7 +12,6 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import { LeftOutlined } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
-import InputComponent from "../../../../components/InputComponent";
 import PricingInactiveRequest from "./Detail/PricingInactiveRequest";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -28,7 +27,7 @@ import ModalEndDateHistory from "./Detail/ModalEndDateHistory";
 import LayoutContentTab from "./Detail/LayoutContentTab";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../assets/Icon/index";
-import { dateFormatting, requiredMessage } from "../../../../utils";
+import { dateFormatting } from "../../../../utils";
 
 const routes = [
   {

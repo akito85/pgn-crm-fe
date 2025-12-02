@@ -1,6 +1,7 @@
-import { Select, Table } from "antd";
-import React, { useEffect } from "react";
-import { useState } from "react";
+import { Select, Table, Button, Dropdown, Checkbox, Input } from "antd";
+import React, { useEffect, useState, useMemo } from "react";
+import { DownOutlined } from "@ant-design/icons";
+
 const { Option } = Select;
 
 const TablePaginationNew = ({
@@ -26,6 +27,9 @@ const TablePaginationNew = ({
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [totalDataFE, setTotalDataFE] = useState(0);
+  const [searchText, setSearchText] = useState("");
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+
   useEffect(() => {
     if (type !== "BE") {
       setTotalDataFE(dataSource?.length || 0);
@@ -35,71 +39,131 @@ const TablePaginationNew = ({
   const handleDisplayColumn = (value) => {
     setOptionSelectedCol(value);
   };
+
   const handleDelete = (index) => {
     onDelete(index);
   };
+
+  // Filter columns berdasarkan show/hide
   const filterColumns = () => {
     return columns.filter((col) => {
       return !optionSelectedCol.includes(col.title);
     });
   };
+
+  // Processed columns tanpa fixed position
+  const processedColumns = useMemo(() => {
+    return filterColumns();
+  }, [columns, optionSelectedCol]);
+
   const onChangeFE = (_, __, ___, extra) => {
     setTotalDataFE(extra?.currentDataSource?.length || 0);
   };
+
+  // Filtered columns untuk search
+  const filteredColumns = useMemo(() => {
+    if (!searchText) return columns;
+    return columns.filter((col) =>
+      col.title.toLowerCase().includes(searchText.toLowerCase())
+    );
+  }, [columns, searchText]);
+
+  // Handler untuk checkbox change
+  const onCheckboxChange = (e, title) => {
+    const checked = e.target.checked;
+    let newSelected;
+    if (checked) {
+      newSelected = optionSelectedCol.filter((col) => col !== title);
+    } else {
+      newSelected = [...optionSelectedCol, title];
+    }
+    setOptionSelectedCol(newSelected);
+  };
+
+  // Menu untuk Show/Hide Column
+  const showHideMenu = (
+    <div
+      style={{
+        padding: 10,
+        width: 250,
+        background: "white",
+        border: "1px solid #ddd",
+        borderRadius: 4,
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div style={{ fontWeight: "bold", marginBottom: 8 }}>Visibility</div>
+      <Input
+        placeholder="Search column..."
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        style={{ marginBottom: 8 }}
+        allowClear
+      />
+      <div
+        style={{
+          maxHeight: 200,
+          overflowY: "auto",
+          borderTop: "1px solid #eee",
+          paddingTop: 8,
+        }}
+      >
+        {filteredColumns.map((col) => (
+          <div key={col.title} style={{ marginBottom: 4 }}>
+            <Checkbox
+              checked={!optionSelectedCol.includes(col.title)}
+              onChange={(e) => onCheckboxChange(e, col.title)}
+            >
+              {col.title}
+            </Checkbox>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <div className={"relative flex flex-col w-full"}>
-      {useSelect ? (
-        <div
-          className={`${
-            (type === "BE" ? totalData : totalDataFE) !== 0
-              ? "z-[1] absolute mt-4"
-              : "my-4"
-          } w-1/4 flex`}
-        >
-          {useSelect ? (
-            <Select
-              mode="multiple"
-              placeholder="Show All Column"
-              className={"w-full"}
-              maxTagCount={"responsive"}
-              onChange={handleDisplayColumn}
+      <div className="flex gap-2 justify-between items-center mb-4">
+        {/* Show/Hide Column Button */}
+        {useSelect && (type === "BE" ? totalData : totalDataFE) !== 0 && (
+          <Dropdown
+            overlay={showHideMenu}
+            trigger={["click"]}
+            visible={dropdownVisible}
+            onVisibleChange={(flag) => setDropdownVisible(flag)}
+          >
+            <Button
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                border: "1px solid #BDBDBD",
+                height: "40px",
+                color: "black",
+              }}
             >
-              {columns
-                .map((col) => (
-                  <Option
-                    key={col.title}
-                    value={col.title}
-                    disabled={
-                      optionSelectedCol.length > 3
-                        ? optionSelectedCol.includes(col.title)
-                          ? false
-                          : true
-                        : false
-                    }
-                  >
-                    {col.title}
-                  </Option>
-                ))
-                .splice(1)}
-            </Select>
-          ) : null}
-        </div>
-      ) : null}
+              Show / Hide Column <DownOutlined style={{ fontSize: "15px" }} />
+            </Button>
+          </Dropdown>
+        )}
+      </div>
+
       <Table
         dataSource={dataSource}
-        columns={[...filterColumns()]}
+        columns={processedColumns}
         scroll={tableScrolled}
         bordered
         pagination={
           !usePagination
             ? false
             : {
-                position: ["topRight"],
+                position: ["bottomRight"],
                 current: current,
                 pageSize: pageSize,
                 total: type === "BE" ? totalData : undefined,
                 onChange: onChange,
-                className: "pr-1 w-3/4",
+                className: "pr-1",
                 style: { marginLeft: "auto", marginRight: 0 },
                 showSizeChanger: true,
                 showTotal: (total, range) =>

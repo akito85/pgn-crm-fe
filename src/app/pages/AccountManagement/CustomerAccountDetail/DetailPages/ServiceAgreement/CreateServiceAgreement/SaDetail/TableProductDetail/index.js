@@ -1,4 +1,4 @@
-import React, {useState, useRef, useCallback, useEffect} from "react";
+import React, {useState, useRef, useEffect} from "react";
 import { useSelector } from "react-redux";
 import { getListChargingMethod, getListNameProductDetail, getListPaymentType, getListUnit } from "../../../../../../../../../redux/slices/product_promo/product";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";

@@ -1,26 +1,21 @@
 import {
   ExclamationCircleOutlined,
-  FilterOutlined,
   LeftOutlined,
   RightOutlined,
 } from "@ant-design/icons";
-import { Alert, DatePicker, Form, Input, Steps, Tooltip } from "antd";
+import { Alert, Form, Steps } from "antd";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
-import Highlighter from "react-highlight-words";
 import { useDispatch, useSelector } from "react-redux";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import InputComponent from "../../../../../../components/InputComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
-import StatusComponent from "../../../../../../components/StatusComponent";
-import TablePagination from "../../../../../../components/TablePagination";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
   showModalError,
   showModalSuccess,
 } from "../../../../../../redux/slices/general_slice";
 import {
-  approveOrRejectStatment,
   getAllApprovalList,
   getListApprovalById,
   getListCategory,
@@ -29,16 +24,12 @@ import {
   requestApprove,
   requestModal,
 } from "../../../../../../redux/slices/receipt_collection/electrionicBank";
-import { dateFormatting, formMessageRequired } from "../../../../../../utils";
-import {
-  getColumnSearchProps,
-  getColumnSearchPropsPaging,
-} from "../../../../../../utils/getColumnSearchProps";
+import { formMessageRequired } from "../../../../../../utils";
+
+
 import ApprovalSectionForm from "../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
-import AttachmentSectionForm from "../../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 import ContentModalConfirmReverse from "../ContentModalConfirmReverse";
 import TableReverseFE from "./TableReverseFE";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { configApp } from "../../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../../components/Attachment/AttachmentComponent";
 import { columnsReverseTab } from "./ColumnReverseTab";

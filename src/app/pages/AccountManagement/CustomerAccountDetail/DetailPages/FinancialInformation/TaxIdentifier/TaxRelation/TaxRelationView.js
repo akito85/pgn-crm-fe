@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { PlusOutlined, FilterOutlined } from "@ant-design/icons";
-import { Collapse, Space, Switch, Form, DatePicker, Input } from "antd";
+import { Form, DatePicker, Input } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
@@ -14,7 +14,6 @@ import moment from "moment";
 import ModalApproveOrReject from "../../../../../../../../components/Modal/ModalApproveOrReject";
 import { requiredMessage } from "../../../../../../../../utils";
 import DateComponent from "../../../../../../../../components/DateComponent";
-import InputComponent from "../../../../../../../../components/InputComponent";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createTaxRelation,

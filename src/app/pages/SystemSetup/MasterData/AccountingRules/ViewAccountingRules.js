@@ -1,17 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import { Alert, Checkbox, Form, Spin, Tooltip } from 'antd';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import ButtonComponent from '../../../../../components/ButtonComponent';
-import { DownloadOutlined, InfoCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { Link, NavLink } from 'react-router-dom';
 import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../routes/account_management/customer_account_routes';
-import BaseContainer from '../../../../../components/BaseContainer';
-import TablePagination from '../../../../../components/TablePagination';
 import { useDispatch, useSelector } from 'react-redux';
 import { activationAccountingRules, downloadAccountingRules, getAccountingRulesPaginate, getDetailAccountingRules } from '../../../../../redux/slices/account_management/MasterData/accounting_rules';
-import { getColumnSearchPropsPaging } from '../../../../../utils/getColumnSearchProps';
-import StatusComponent from '../../../../../components/StatusComponent';
+import { getColumnSearchPropsUseFilteredValue } from '../../../../../utils/getColumnSearchProps';
 import SVGIcon from "../../../../../assets/Icon/index";
 import ModalCustom from '../../../../../components/Modal/ModalCustom';
 import CardComponent from '../../../../../components/Card/CardComponent';
@@ -23,12 +20,15 @@ import { ModalError } from '../../../../../components/Modal/ModalPopUp';
 import { clearBodyMessage } from '../../../../../redux/slices/general_slice';
 import { useColumnActionPermission } from '../../../../../components/ColumnActionPermission';
 import Toolbar from '../../../../../components/Toolbar';
-
+import TableRBI from '../../../../../components/TableRBI';
+import { applyFixedColumns } from '../../../../../utils/applyFixedColumns';
+import CardContainer from '../../../../../components/CardContainer';
 
 const ViewAccountingRules = () => {
     const { data, data_detail, loading } = useSelector(state => state.accounting_rules);
     const { bodyError } = useSelector((state) => state?.general);
     const dispatch = useDispatch();
+
     // Use State
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -42,9 +42,14 @@ const ViewAccountingRules = () => {
     const [accountingRuleId, setAccountingRuleId] = useState(null);
     const [accountingName, setAccountingName] = useState('');
     const [modalError, setModalError] = useState(false);
+    const [fixedColumns, setFixedColumns] = useState(() => ({
+        left: ["no"],
+        right: ["status", "action"],
+    }));
     const searchInput = useRef(null);
     const [form] = Form.useForm();
     const { remark } = form.getFieldsValue();
+
     // use effect
     useEffect(() => {
         const reqSearch = encodeURIComponent(JSON.stringify(search));
@@ -57,7 +62,6 @@ const ViewAccountingRules = () => {
             setModalError(true)
         }
     }, [bodyError]);
-
 
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
@@ -73,6 +77,7 @@ const ViewAccountingRules = () => {
             };
         });
     };
+
     // handle activation
     const handleActiveOrInactive = (record) => {
         setOpenModalActivation(true);
@@ -80,6 +85,7 @@ const ViewAccountingRules = () => {
         setAccountingRuleId(record?.masterAccountingRuleId);
         setAccountingName(record?.classificationTypeName)
     };
+
     // handle detail
     const handleDetail = async (id) => {
         setOpenModal(true);
@@ -106,113 +112,176 @@ const ViewAccountingRules = () => {
         form.resetFields();
     };
 
-    // columns
-    const columns = (
-        page = 1,
-        pageSize = 10,
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch = () => { },
-        handleActiveOrInactive = () => { }
-    ) => {
-        return [
-            {
-                title: "NO",
-                width: 60,
-                align: "center",
-                render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    // base columns with useMemo
+    const baseColumns = useMemo(() => [
+        {
+            key: "no",
+            title: "NO",
+            width: 60,
+            align: "center",
+            render: (text, object, index) => (page - 1) * pageSize + index + 1,
+        },
+        {
+            key: "classificationTypeName",
+            title: "CLASSIFICATION TYPE",
+            dataIndex: "classificationTypeName",
+            sorter: true,
+            width: 400,
+            filteredValue: [search?.classificationTypeName] || null,
+            ...getColumnSearchPropsUseFilteredValue(
+                search,
+                "classificationTypeName",
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                true
+            ),
+            render: (text) => renderColumn(
+                'classificationTypeName', 
+                hasValue(search["classificationTypeName"]), 
+                searchText, 
+                text, 
+                false, 
+                'input', 
+                search
+            )
+        },
+        {
+            key: "code",
+            title: "CODE",
+            dataIndex: "code",
+            sorter: true,
+            width: 200,
+            filteredValue: [search?.code] || null,
+            ...getColumnSearchPropsUseFilteredValue(
+                search,
+                "code",
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                true
+            ),
+            render: (text) => renderColumn(
+                'code', 
+                hasValue(search["code"]), 
+                searchText, 
+                text, 
+                false, 
+                'input', 
+                search
+            )
+        },
+        {
+            key: "receivableAccount",
+            title: "RECEIVABLE ACCOUNT",
+            dataIndex: "receivableAccount",
+            sorter: true,
+            width: 300,
+            filteredValue: [search?.receivableAccount] || null,
+            ...getColumnSearchPropsUseFilteredValue(
+                search,
+                "receivableAccount",
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                true
+            ),
+            render: (text) => renderColumn(
+                'receivableAccount', 
+                hasValue(search["receivableAccount"]), 
+                searchText, 
+                text, 
+                false, 
+                'input', 
+                search
+            )
+        },
+        {
+            key: "revenueAccount",
+            title: "REVENUE ACCOUNT",
+            dataIndex: "revenueAccount",
+            sorter: true,
+            width: 300,
+            filteredValue: [search?.revenueAccount] || null,
+            ...getColumnSearchPropsUseFilteredValue(
+                search,
+                "revenueAccount",
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                true
+            ),
+            render: (text) => renderColumn(
+                'revenueAccount', 
+                hasValue(search["revenueAccount"]), 
+                searchText, 
+                text, 
+                false, 
+                'input', 
+                search
+            )
+        },
+        {
+            key: "description",
+            title: "DESCRIPTION",
+            dataIndex: "description",
+            sorter: true,
+            width: 450,
+            ellipsis: {
+                showTitle: false,
             },
-            {
-                title: "CLASSIFICATION TYPE",
-                dataIndex: "classificationTypeName",
-                sorter: true,
-                width: 400,
-                ...getColumnSearchPropsPaging(
-                    "classificationTypeName",
-                    searchInput,
-                    searchedColumn,
-                    searchText,
-                    handleSearch
-                ),
-                render: (text) => renderColumn('classificationTypeName', searchedColumn, searchText, text, false, 'input', search)
-            },
-            {
-                title: "CODE",
-                dataIndex: "code",
-                sorter: true,
-                width: 200,
-                ...getColumnSearchPropsPaging(
-                    "code",
-                    searchInput,
-                    searchedColumn,
-                    searchText,
-                    handleSearch
-                ),
-                render: (text) => renderColumn('code', searchedColumn, searchText, text, false, 'input', search)
-            },
-            {
-                title: "RECEIVABLE ACCOUNT",
-                dataIndex: "receivableAccount",
-                sorter: true,
-                width: 300,
-                ...getColumnSearchPropsPaging(
-                    "receivableAccount",
-                    searchInput,
-                    searchedColumn,
-                    searchText,
-                    handleSearch
-                ),
-                render: (text) => renderColumn('receivableAccount', searchedColumn, searchText, text, false, 'input', search)
-            },
-            {
-                title: "REVENUE ACCOUNT",
-                dataIndex: "revenueAccount",
-                sorter: true,
-                width: 300,
-                ...getColumnSearchPropsPaging(
-                    "revenueAccount",
-                    searchInput,
-                    searchedColumn,
-                    searchText,
-                    handleSearch
-                ),
-                render: (text) => renderColumn('revenueAccount', searchedColumn, searchText, text, false, 'input', search)
-            },
-            {
-                title: "DESCRIPTION",
-                dataIndex: "description",
-                sorter: true,
-                width: 450,
-                ellipsis: {
-                    showTitle: false,
-                },
-                ...getColumnSearchPropsPaging(
-                    "description",
-                    searchInput,
-                    searchedColumn,
-                    searchText,
-                    handleSearch
-                ),
-                render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
-            },
-            {
-                title: "STATUS",
-                dataIndex: "status",
-                sorter: true,
-                width: 120,
-                fixed: 'right',
-                ...getColumnSearchPropsPaging(
-                    "status",
-                    searchInput,
-                    searchedColumn,
-                    searchText,
-                    handleSearch
-                ),
-                render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
-            },
-        ]
-    }
+            filteredValue: [search?.description] || null,
+            ...getColumnSearchPropsUseFilteredValue(
+                search,
+                "description",
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                true
+            ),
+            render: (text) => renderColumn(
+                'description', 
+                hasValue(search["description"]), 
+                searchText, 
+                text, 
+                true, 
+                'input', 
+                search
+            )
+        },
+        {
+            key: "status",
+            title: "STATUS",
+            dataIndex: "status",
+            sorter: true,
+            width: 120,
+            filteredValue: [search?.status] || null,
+            ...getColumnSearchPropsUseFilteredValue(
+                search,
+                "status",
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                true
+            ),
+            render: (text) => renderColumn(
+                'status', 
+                hasValue(search["status"]), 
+                searchText, 
+                text, 
+                false, 
+                'status', 
+                search
+            )
+        },
+    ], [page, pageSize, search, searchText, searchedColumn]);
+
     // Breadcrumbs
     const routes = [
         {
@@ -229,34 +298,23 @@ const ViewAccountingRules = () => {
         },
     ];
 
-    const handleChange = (pageChange, pageSizeChange) => {
+    const handleChangePage = (pageChange, pageSizeChange) => {
         const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
         setPage(tempPage);
         setPageSize(pageSizeChange);
     };
 
     // onsort
-    const onSort = (_, __, sort) => {
+    const onSort = (_, __, sorter) => {
         const dataSort =
-            sort.order !== undefined
-                ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+            sorter.order !== undefined
+                ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
                 : "";
         setSort(dataSort);
     };
 
-
     // handle download
     const handleDownload = () => {
-        let tempSearch = "";
-        for (const dataIndex in search) {
-            if (Object.hasOwnProperty.call(search, dataIndex)) {
-                const tempSearchText = search[dataIndex];
-                if (tempSearchText) {
-                    tempSearch += `${dataIndex}~${tempSearchText},`;
-                }
-            }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
         const reqSearch = encodeURIComponent(JSON.stringify(search))
         dispatch(downloadAccountingRules({ search: reqSearch, sort, page, pageSize }))
     };
@@ -276,8 +334,8 @@ const ViewAccountingRules = () => {
             handleSaveActivation();
         }
         dispatch(clearBodyMessage());
-
     }
+
     // handle retry
     const handleRetry = () => {
         handleConfirm();
@@ -294,19 +352,6 @@ const ViewAccountingRules = () => {
     const itemActions = [
         //action toolbar
         {
-            action: 'Download',
-            render: (
-                <ButtonComponent
-                    icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-                    type="submit"
-                    onClick={handleDownload}
-                >
-                    Download List
-                </ButtonComponent>
-
-            )
-        },
-        {
             action: 'Upload',
             render: (
                 <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.UPLOAD_ACCOUNTING_RULES}>
@@ -317,7 +362,6 @@ const ViewAccountingRules = () => {
                         Upload
                     </ButtonComponent>
                 </NavLink>
-
             )
         },
         {
@@ -341,20 +385,13 @@ const ViewAccountingRules = () => {
             render: (record, data) => {
                 return (
                     <Tooltip title="Detail">
-                        <Link>
-                            <div
-                                onClick={() => {
-                                    handleDetail(record?.masterAccountingRuleId);
-                                }}
-                            >
-                                <SVGIcon name="IconDetail" width={24} />
-                            </div>
-                        </Link>
+                        <div onClick={() => { handleDetail(record?.masterAccountingRuleId); }}>
+                            <SVGIcon name="IconDetail" width={24} />
+                        </div>
                     </Tooltip>
                 )
             }
         },
-
         {
             action: "Update",
             type: "table",
@@ -362,12 +399,9 @@ const ViewAccountingRules = () => {
                 return (
                     <Tooltip title="Update">
                         {record?.status === "INACTIVE" ?
-                            <Link>
-                                <div
-                                    className={"cursor-not-allowed"}>
-                                    <SVGIcon name="IconEdit" width={24} color={"#C0BEC6"} className={"cursor-not-allowed"} />
-                                </div>
-                            </Link>
+                            <div className={"cursor-not-allowed"}>
+                                <SVGIcon name="IconEdit" width={24} color={"#C0BEC6"} className={"cursor-not-allowed"} />
+                            </div>
                             :
                             <Link
                                 to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_ACCOUNTING_RULES}
@@ -382,177 +416,186 @@ const ViewAccountingRules = () => {
                 )
             }
         },
-
         {
             action: "Activate",
             type: "table",
             render: (record, data) => {
                 return (
-                    <Tooltip
-                        title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-                    >
-                        <Link>
-                            <div>
-                                <Checkbox
-                                    onClick={() => {
-                                        handleActiveOrInactive(record)
-                                    }}
-                                    checked={record?.status === "ACTIVE" ? false : true}
-                                />
-                            </div>
-                        </Link>
+                    <Tooltip title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}>
+                        <div>
+                            <Checkbox
+                                onClick={() => { handleActiveOrInactive(record) }}
+                                checked={record?.status === "ACTIVE" ? false : true}
+                            />
+                        </div>
                     </Tooltip>
                 )
             }
         }
+    ];
 
-    ]
+    const actionCols = useColumnActionPermission(
+        ["Activate", "View", "Update"],
+        itemActions
+    );
+
+    const allColumns = useMemo(() => {
+        const columnsWithKeys = [...baseColumns, ...actionCols].map(
+            (col) => ({
+                ...col,
+                key: col.key || col.dataIndex || col.title,
+            })
+        );
+        return columnsWithKeys;
+    }, [baseColumns, actionCols]);
+
+    const processedColumns = useMemo(() => {
+        return applyFixedColumns(allColumns, fixedColumns);
+    }, [allColumns, fixedColumns]);
+
+    const columnDefinitions = useMemo(() => {
+        return allColumns.map((col) => ({
+            key: col.key || col.dataIndex || col.title,
+            title: col.title,
+        }));
+    }, [allColumns]);
 
     return (
-        <LayoutMenu>
-            <Spin spinning={loading}>
+        <Spin spinning={loading}>
+            <LayoutMenu>
                 <BreadCrumb routes={routes} />
 
-                <Toolbar items={itemActions} />
-
-                <BaseContainer header={"Accounting Rules List"}>
-                    <div className="w-full">
-                        <TablePagination
-                            dataSource={
-                                data?.result
-                            }
-                            columns={[
-                                ...columns(
-                                    page,
-                                    pageSize,
-                                    searchInput,
-                                    searchedColumn,
-                                    searchText,
-                                    handleSearch,
-                                    handleActiveOrInactive
-                                ),
-                                ...useColumnActionPermission(
-                                    ["Activate", "View", "Update"],
-                                    itemActions
-                                ),
-                            ]}
+                <CardContainer
+                    header={
+                        <div className="flex -my-4 justify-between items-center">
+                            <p className="mt-[15px] font-bold">ACCOUNTING RULES LIST</p>
+                            <div className="mt-[15px] flex gap-[20px]">
+                                <Toolbar items={itemActions} />
+                            </div>
+                        </div>
+                    }
+                >
+                    <div className="my-5">
+                        <TableRBI
+                            dataSource={data?.result}
+                            columns={processedColumns}
                             current={page}
                             pageSize={pageSize}
-                            onChange={handleChange}
-                            onSizeChanger={handleChange}
+                            onChange={handleChangePage}
+                            onSizeChanger={handleChangePage}
+                            totalData={data?.page?.totalElements || 0}
+                            tableScrolled={{ x: 2000, y: 525 }}
                             onSort={onSort}
-                            totalData={data?.page?.totalElements}
-                            tableScrolled={{
-                                x: 2000,
-                                y: 500,
-                            }}
+                            columnDefinitions={columnDefinitions}
+                            handleDownload={handleDownload}
+                            fixedColumns={fixedColumns}
+                            setFixedColumns={setFixedColumns}
+                            loading={loading}
                         />
                     </div>
-                </BaseContainer>
-            </Spin>
-            <ModalCustom
-                isOpen={openModal}
-                type={'detail'}
-                header={'accounting rules detail'}
-                width={850}
-                handleCancel={handleCancel}
-                footer={
-                    <ButtonComponent onClick={handleCancel}>
-                        Cancel
-                    </ButtonComponent>
-                }>
-                <CardComponent header={'Accounting rules information'}>
-                    <div className='w-full grid grid-cols-4'>
-                        <DetailText label={'Classification Type'}>{data_detail?.classificationTypeName}</DetailText>
-                        <DetailText label={'Code'}>{data_detail?.code}</DetailText>
-                        <DetailText label={'Receivable Account'}>{data_detail?.receivableAccount}</DetailText>
-                        <DetailText label={'Revenue Account'}>{data_detail?.revenueAccount}</DetailText>
-                    </div>
-                    <DetailText label={'Status'}>{toTitleCase(data_detail?.status)}</DetailText>
-                    <div className='w-full'>
-                        <DetailText label={'Description'}>{data_detail?.description}</DetailText>
-                    </div>
-                </CardComponent>
-                <CardComponent header={'history log information'} cols={5}>
-                    <DetailText label={'Record ID'}>{data_detail?.masterAccountingRuleId}</DetailText>
-                    <DetailText label={'Created Date'}>{hasValue(data_detail?.createdDate) && moment(data_detail?.createdDate)?.format(dateFormatting?.dateTime)}</DetailText>
-                    <DetailText label={'Created By'}>{data_detail?.createdBy}</DetailText>
-                    <DetailText label={'Updated Date'}>{hasValue(data_detail?.updatedDate) && moment(data_detail?.updatedDate).format(dateFormatting?.dateTime)}</DetailText>
-                    <DetailText label={'Updated By'}>{data_detail?.updatedBy}</DetailText>
-                </CardComponent>
-            </ModalCustom>
-            <ModalCustom
-                isOpen={openModalActivation}
-                header={`${typeStatus === "ACTIVE" ? "INACTIVATE" : "ACTIVATE"
-                    } INFORMATION`}
-                width={700}
-                type={"confirmation"}
-                handleCancel={handleCancel}
-                footer={
-                    <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
-                        <ButtonComponent
-                            onClick={handleCancel}
-                            type="default"
-                        >
+                </CardContainer>
+
+                <ModalCustom
+                    isOpen={openModal}
+                    type={'detail'}
+                    header={'accounting rules detail'}
+                    width={850}
+                    handleCancel={handleCancel}
+                    footer={
+                        <ButtonComponent onClick={handleCancel}>
                             Cancel
                         </ButtonComponent>
-                        <ButtonComponent
-                            form="inactivateForm"
-                            type="submit"
-                            htmlType="submit"
-                        >
-                            Confirm
-                        </ButtonComponent>
-                    </div>
-                }
-            >
-                <Form
-                    id="inactivateForm"
-                    form={form}
-                    onFinish={handleSaveActivation}
-                    layout='vertical'
+                    }>
+                    <CardComponent header={'Accounting rules information'}>
+                        <div className='w-full grid grid-cols-4'>
+                            <DetailText label={'Classification Type'}>{data_detail?.classificationTypeName}</DetailText>
+                            <DetailText label={'Code'}>{data_detail?.code}</DetailText>
+                            <DetailText label={'Receivable Account'}>{data_detail?.receivableAccount}</DetailText>
+                            <DetailText label={'Revenue Account'}>{data_detail?.revenueAccount}</DetailText>
+                        </div>
+                        <DetailText label={'Status'}>{toTitleCase(data_detail?.status)}</DetailText>
+                        <div className='w-full'>
+                            <DetailText label={'Description'}>{data_detail?.description}</DetailText>
+                        </div>
+                    </CardComponent>
+                    <CardComponent header={'history log information'} cols={5}>
+                        <DetailText label={'Record ID'}>{data_detail?.masterAccountingRuleId}</DetailText>
+                        <DetailText label={'Created Date'}>{hasValue(data_detail?.createdDate) && moment(data_detail?.createdDate)?.format(dateFormatting?.dateTime)}</DetailText>
+                        <DetailText label={'Created By'}>{data_detail?.createdBy}</DetailText>
+                        <DetailText label={'Updated Date'}>{hasValue(data_detail?.updatedDate) && moment(data_detail?.updatedDate).format(dateFormatting?.dateTime)}</DetailText>
+                        <DetailText label={'Updated By'}>{data_detail?.updatedBy}</DetailText>
+                    </CardComponent>
+                </ModalCustom>
+
+                <ModalCustom
+                    isOpen={openModalActivation}
+                    header={`${typeStatus === "ACTIVE" ? "INACTIVATE" : "ACTIVATE"} INFORMATION`}
+                    width={700}
+                    type={"confirmation"}
+                    handleCancel={handleCancel}
+                    footer={
+                        <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
+                            <ButtonComponent onClick={handleCancel} type="default">
+                                Cancel
+                            </ButtonComponent>
+                            <ButtonComponent
+                                form="inactivateForm"
+                                type="submit"
+                                htmlType="submit"
+                            >
+                                Confirm
+                            </ButtonComponent>
+                        </div>
+                    }
                 >
-                    <div className="flex flex-col gap-6">
-                        <Alert
-                            message={`Are you sure want to ${typeStatus === "ACTIVE" ? "inactivate" : "activate"
-                                } accounting rule named ${accountingName}?`}
-                            icon={<InfoCircleOutlined />}
-                            type={"warning"}
-                            showIcon
-                            className="inactivate-alert"
-                        />
-                        <Form.Item
-                            name={"remark"}
-                            label={'Remark'}
-                            rules={formMessageRequired("remark")}
-                            className="w-full"
-                        >
-                            <InputComponent
-                                group
-                                rows={1}
-                                type="textarea"
-                                placeholder={"Type your remark"}
+                    <Form
+                        id="inactivateForm"
+                        form={form}
+                        onFinish={handleSaveActivation}
+                        layout='vertical'
+                    >
+                        <div className="flex flex-col gap-6">
+                            <Alert
+                                message={`Are you sure want to ${typeStatus === "ACTIVE" ? "inactivate" : "activate"} accounting rule named ${accountingName}?`}
+                                icon={<InfoCircleOutlined />}
+                                type={"warning"}
+                                showIcon
+                                className="inactivate-alert"
                             />
-                        </Form.Item>
+                            <Form.Item
+                                name={"remark"}
+                                label={'Remark'}
+                                rules={formMessageRequired("remark")}
+                                className="w-full"
+                            >
+                                <InputComponent
+                                    group
+                                    rows={1}
+                                    type="textarea"
+                                    placeholder={"Type your remark"}
+                                />
+                            </Form.Item>
+                        </div>
+                    </Form>
+                </ModalCustom>
+
+                <ModalError
+                    isOpen={modalError}
+                    handleOk={handleRetry}
+                    handleCancel={handleCloseModalError}
+                    customText={"Try Again"}
+                >
+                    <div className="px-5 pt-5 pb-[10px] justify-center">
+                        <div className="w-full flex gap-[20px]">
+                            <SVGIcon name="IconFailed" width={48} />
+                            <p className="text-[18px] font-bold">{"Failed"}</p>
+                        </div>
+                        <p className="pl-[70px]">{bodyError?.response?.data?.message?.toString()}</p>
+                        <p className="pl-[70px]">Please try again.</p>
                     </div>
-                </Form>
-            </ModalCustom>
-            <ModalError
-                isOpen={modalError}
-                handleOk={handleRetry}
-                handleCancel={handleCloseModalError}
-                customText={"Try Again"}
-            >
-                <div className="px-5 pt-5 pb-[10px] justify-center">
-                    <div className="w-full flex gap-[20px]">
-                        <SVGIcon name="IconFailed" width={48} />
-                        <p className="text-[18px] font-bold">{"Failed"}</p>
-                    </div>
-                    <p className="pl-[70px]">{bodyError?.response?.data?.message?.toString()}</p>
-                    <p className="pl-[70px]">Please try again.</p>
-                </div>
-            </ModalError>
-        </LayoutMenu>
+                </ModalError>
+            </LayoutMenu>
+        </Spin>
     );
 }
 

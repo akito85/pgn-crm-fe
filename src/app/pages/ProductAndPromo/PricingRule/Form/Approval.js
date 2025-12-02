@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import BaseContainer from "../../../../../components/BaseContainer";
 import SelectComponent from "../../../../../components/SelectComponent";
 import { Form, Select } from "antd";

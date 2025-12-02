@@ -293,7 +293,13 @@ export const downloadAdjustmentBilling = createAsyncThunk(
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(validateError({ error: error, action: "DOWNLOAD_ADJUSTMENT_BILLING", back: false }))
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_ADJUSTMENT_BILLING",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -710,38 +716,38 @@ const adjustmentBillingSlice = createSlice({
   initialState,
   extraReducers: {
     // Create Adjustment Billing
-    [createAdjustmentBilling.pending]: (state, action) => {
+    [createAdjustmentBilling.pending]: (state) => {
       state.loading = true;
     },
     [createAdjustmentBilling.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataForm = action.payload;
     },
-    [createAdjustmentBilling.rejected]: (state, action) => {
+    [createAdjustmentBilling.rejected]: (state) => {
       state.loading = false;
     },
 
     // Update Adjustment Billing
-    [updateAdjustmentBilling.pending]: (state, action) => {
+    [updateAdjustmentBilling.pending]: (state) => {
       state.loading = true;
     },
     [updateAdjustmentBilling.fulfilled]: (state, action) => {
       state.loading = false;
       state.dataForm = action.payload;
     },
-    [updateAdjustmentBilling.rejected]: (state, action) => {
+    [updateAdjustmentBilling.rejected]: (state) => {
       state.loading = false;
     },
 
     // get pagination calculation
-    [getAdjustmentBillingPaginate.pending]: (state, action) => {
+    [getAdjustmentBillingPaginate.pending]: (state) => {
       state.loading = true;
     },
     [getAdjustmentBillingPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
-    [getAdjustmentBillingPaginate.rejected]: (state, action) => {
+    [getAdjustmentBillingPaginate.rejected]: (state) => {
       state.loading = false;
     },
 
@@ -788,10 +794,10 @@ const adjustmentBillingSlice = createSlice({
     },
 
     // Inactive Pricing Rule
-    [deleteAdjustmentBilling.pending]: (state, action) => {
+    [deleteAdjustmentBilling.pending]: (state) => {
       state.loading = true;
     },
-    [deleteAdjustmentBilling.fulfilled]: (state, action) => {
+    [deleteAdjustmentBilling.fulfilled]: (state) => {
       state.loading = false;
     },
     [deleteAdjustmentBilling.rejected]: (state, action) => {
@@ -814,13 +820,13 @@ const adjustmentBillingSlice = createSlice({
     },
 
     /* Download Pricing */
-    [downloadAdjustmentBilling.pending]: (state, action) => {
+    [downloadAdjustmentBilling.pending]: (state) => {
       state.loading = true;
     },
-    [downloadAdjustmentBilling.fulfilled]: (state, action) => {
+    [downloadAdjustmentBilling.fulfilled]: (state) => {
       state.loading = false;
     },
-    [downloadAdjustmentBilling.rejected]: (state, action) => {
+    [downloadAdjustmentBilling.rejected]: (state) => {
       state.loading = false;
     },
 
@@ -1021,10 +1027,10 @@ const adjustmentBillingSlice = createSlice({
     },
 
     // Approve Or Reject Adjustment Billing
-    [approveOrRejectAdjustmentBilling.pending]: (state, action) => {
+    [approveOrRejectAdjustmentBilling.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectAdjustmentBilling.fulfilled]: (state, action) => {
+    [approveOrRejectAdjustmentBilling.fulfilled]: (state) => {
       state.loading = false;
     },
     [approveOrRejectAdjustmentBilling.rejected]: (state, action) => {

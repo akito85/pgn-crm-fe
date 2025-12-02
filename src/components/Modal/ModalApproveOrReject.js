@@ -1,4 +1,4 @@
-import React, { Children, useState } from "react";
+import { useState } from "react";
 import { Alert, Form } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import ModalCustom from "./ModalCustom";
@@ -15,8 +15,8 @@ const ModalApproveOrReject = ({
   menu,
   named,
   children,
-  customMessage, 
-  width = 1000
+  customMessage,
+  width = 1000,
 }) => {
   const [form] = Form.useForm();
   const [remark, setRemark] = useState("");
@@ -66,7 +66,11 @@ const ModalApproveOrReject = ({
         {/* Alert Section */}
         <div className="flex flex-col justify-center gap-6">
           <Alert
-            message={customMessage ? customMessage : `Are you sure you want to ${approveOrReject} this ${menu} named ${named}?`}
+            message={
+              customMessage
+                ? customMessage
+                : `Are you sure you want to ${approveOrReject} this ${menu} named ${named}?`
+            }
             icon={
               <ExclamationCircleOutlined
                 style={{ fontSize: "24px", color: "#65481C" }}
@@ -78,7 +82,7 @@ const ModalApproveOrReject = ({
           />
 
           {children}
-          
+
           <Form.Item
             name={"remark"}
             label={"Remark"}
