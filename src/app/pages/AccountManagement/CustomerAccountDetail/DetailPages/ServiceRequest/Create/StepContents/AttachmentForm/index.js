@@ -1,4 +1,4 @@
-import AttachmentForm from "../../../../../../../../CreateCustomerAccount/Standard/Form/CustomerAccountInformation/AttachmentForm";
+import AttachmentForm from "../../../../../../CreateCustomerAccount/Standard/Form/CustomerAccountInformation/AttachmentForm";
 
 /**
  * Wrapper component for AttachmentForm in Service Request Step 4
