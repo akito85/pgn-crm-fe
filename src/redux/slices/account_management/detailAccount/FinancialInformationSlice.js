@@ -18,8 +18,8 @@ const initialState = {
   data_paymentRelation: [],
   data_firstIndexIdentifier: [],
   data_taxRelationFirstIndex: [],
-  data_approvalHierarchy: [],
-  detail_approvalHierarchy: [],
+  data_prApprovalHierarchy: [],
+  detail_prApprovalHierarchy: [],
   detail_taxImplication: {},
   detail_paymentRelation: {},
   isPrSuccess: false,
@@ -801,11 +801,11 @@ const financialInformationSlice = createSlice({
       state.loading = true;
     },
     [getPrApprovalHierarchy.fulfilled]: (state, action) => {
-      state.data_approvalHierarchy = action.payload;
+      state.data_prApprovalHierarchy = action.payload;
       state.loading = false;
     },
     [getPrApprovalHierarchy.rejected]: (state) => {
-      state.data_approvalHierarchy = [];
+      state.data_prApprovalHierarchy = [];
       state.loading = false;
     },
 
@@ -814,11 +814,11 @@ const financialInformationSlice = createSlice({
       state.loading = true;
     },
     [getDetailPrApprovalHierarchy.fulfilled]: (state, action) => {
-      state.detail_approvalHierarchy = action.payload;
+      state.detail_prApprovalHierarchy = action.payload;
       state.loading = false;
     },
     [getDetailPrApprovalHierarchy.rejected]: (state) => {
-      state.detail_approvalHierarchy = [];
+      state.detail_prApprovalHierarchy = [];
       state.loading = false;
     },
   },
