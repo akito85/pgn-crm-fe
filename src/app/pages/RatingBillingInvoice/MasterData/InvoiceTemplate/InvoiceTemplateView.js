@@ -23,6 +23,7 @@ import {
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import CardContainer from "../../../../../components/CardContainer";
 
 const InvoiceTemplateView = () => {
   // Selector
@@ -51,9 +52,13 @@ const InvoiceTemplateView = () => {
   const [chooseId, setChooseId] = useState();
 
   useEffect(() => {
-    
     dispatch(
-      getInvoiceTemplatePaginate({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort })
+      getInvoiceTemplatePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      })
     );
   }, [dispatch, search, page, pageSize, sort]);
 
@@ -215,18 +220,18 @@ const InvoiceTemplateView = () => {
 
   // Grant Access Item
   const itemGrantAccess = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={() => handleDownload()}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
+    // {
+    //   action: "Download",
+    //   render: (
+    //     <ButtonComponent
+    //       icon={<SVGIcon name="IconButtonDownload" width={24} />}
+    //       type="submit"
+    //       onClick={() => handleDownload()}
+    //     >
+    //       Download List
+    //     </ButtonComponent>
+    //   ),
+    // },
     {
       action: "Create",
       render: (
@@ -274,11 +279,24 @@ const InvoiceTemplateView = () => {
         const linkContent =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={isEditable ? "#0075bf" : "#8D91A0"} width={24} />}
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={24}
+                />
+              }
               border={false}
               disabled={!isEditable}
             >
-              <span className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"}`}> Update</span>
+              <span
+                className={`ml-3 ${
+                  isEditable ? "text-black " : "text-[#8D91A0]"
+                }`}
+              >
+                {" "}
+                Update
+              </span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
@@ -390,7 +408,6 @@ const InvoiceTemplateView = () => {
         return Content;
       },
     },
-   
   ];
 
   return (
@@ -398,11 +415,16 @@ const InvoiceTemplateView = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <div className="w-full flex justify-end gap-[20px]">
-          <Toolbar items={itemGrantAccess} />
-        </div>
-
-        <BaseContainer header={"Invoice Template List"}>
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold w-full">
+                INVOICE TEMPLATE LIST
+              </p>
+              <Toolbar items={itemGrantAccess} />
+            </div>
+          }
+        >
           <div className="w-full">
             <TablePaginationNew
               dataSource={dataSource}
@@ -430,7 +452,7 @@ const InvoiceTemplateView = () => {
               tableScrolled={{ y: 525, x: 2400 }}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         {/* Modal Inactive */}
         <ModalInactivateWithHierarchy

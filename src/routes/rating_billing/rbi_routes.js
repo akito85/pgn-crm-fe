@@ -112,4 +112,9 @@ export const RBI_ROUTES = {
   EFAKTUR_CODE_CREATE: "/system-setup/efaktur-code/create",
   EFAKTUR_CODE_UPDATE: "/system-setup/efaktur-code/update",
   EFAKTUR_CODE_DETAIL: "/system-setup/efaktur-code/view",
+
+  DIGITAL_SIGNATURE: "/system-setup/digital-signature",
+  DIGITAL_SIGNATURE_CREATE: "/system-setup/digital-signature/create",
+  DIGITAL_SIGNATURE_UPDATE: "/system-setup/digital-signature/update",
+  DIGITAL_SIGNATURE_DETAIL: "/system-setup/digital-signature/view",
 };

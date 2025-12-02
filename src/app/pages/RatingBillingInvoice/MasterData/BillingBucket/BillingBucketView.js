@@ -255,18 +255,18 @@ const BillingBucketView = () => {
 
   // Grant Access Item - moved outside useMemo
   const itemGrantAccess = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          type={"submit"}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-          onClick={() => handleDownload()}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
+    // {
+    //   action: "Download",
+    //   render: (
+    //     <ButtonComponent
+    //       type={"submit"}
+    //       icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+    //       onClick={() => handleDownload()}
+    //     >
+    //       Download List
+    //     </ButtonComponent>
+    //   ),
+    // },
     {
       action: "Create",
       render: (

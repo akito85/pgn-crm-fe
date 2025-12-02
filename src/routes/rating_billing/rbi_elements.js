@@ -48,6 +48,7 @@ import PrabillingDetail from "../../app/pages/RatingBillingInvoice/Prabilling/Pr
 import MonitoringCustomerPage from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/MonitoringCustomerPage";
 import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/prabillCustomer/AccountDetailPage";
 import EFakturCodeView from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeView";
+import DigitalSignatureView from "../../app/pages/RatingBillingInvoice/MasterData/DigitalSignature/DigitalSignatureView";
 
 export const RBI_ELEMENTS = {
   // prabilling elements render
@@ -157,4 +158,7 @@ export const RBI_ELEMENTS = {
 
   // efaktur-code
   EFAKTUR_CODE_VIEW_ELEMENT: <EFakturCodeView />,
+
+  // digital signature
+  DIGITAL_SIGNATURE_VIEW_ELEMENT: <DigitalSignatureView />,
 };

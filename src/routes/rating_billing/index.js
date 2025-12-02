@@ -290,4 +290,10 @@ export const rating_billing = [
     path: RBI_ROUTES.EFAKTUR_CODE,
     element: RBI_ELEMENTS.EFAKTUR_CODE_VIEW_ELEMENT,
   },
+
+  // signature digital
+  {
+    path: RBI_ROUTES.DIGITAL_SIGNATURE,
+    element: RBI_ELEMENTS.DIGITAL_SIGNATURE_VIEW_ELEMENT,
+  },
 ];
