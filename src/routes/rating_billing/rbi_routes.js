@@ -117,4 +117,9 @@ export const RBI_ROUTES = {
   DIGITAL_SIGNATURE_CREATE: "/system-setup/digital-signature/create",
   DIGITAL_SIGNATURE_UPDATE: "/system-setup/digital-signature/update",
   DIGITAL_SIGNATURE_DETAIL: "/system-setup/digital-signature/view",
+
+  CONTENT_MANAGEMENT: "/system-setup/content-management",
+  CONTENT_MANAGEMENT_CREATE: "/system-setup/content-management/create",
+  CONTENT_MANAGEMENT_UPDATE: "/system-setup/content-management/update",
+  CONTENT_MANAGEMENT_DETAIL: "/system-setup/content-management/view",
 };

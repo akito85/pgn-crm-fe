@@ -296,4 +296,10 @@ export const rating_billing = [
     path: RBI_ROUTES.DIGITAL_SIGNATURE,
     element: RBI_ELEMENTS.DIGITAL_SIGNATURE_VIEW_ELEMENT,
   },
+
+  // Content Management
+  {
+    path: RBI_ROUTES.CONTENT_MANAGEMENT,
+    element: RBI_ELEMENTS.CONTENT_MANAGEMENT_VIEW_ELEMENT,
+  },
 ];
