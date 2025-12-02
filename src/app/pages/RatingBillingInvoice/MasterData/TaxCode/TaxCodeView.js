@@ -6,8 +6,8 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { Link, NavLink } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
-import { useEffect, useRef, useState } from "react";
+import TableRBI from "../../../../../components/TableRBI";
+import { useEffect, useRef, useState, useMemo } from "react";
 import {
   downloadTaxCode,
   getApprovalHistory,
@@ -23,6 +23,8 @@ import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalI
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import CardContainer from "../../../../../components/CardContainer";
+
 const TaxCodeView = () => {
   const { data, loading, data_approval_history } = useSelector(
     (state) => state.tax_code
@@ -44,6 +46,22 @@ const TaxCodeView = () => {
   const [modalError, setModalError] = useState(false);
   const [modalInactive, setModalInactive] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
+
+  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    const saved = localStorage.getItem("taxCodeFixedColumns");
+    return saved
+      ? JSON.parse(saved)
+      : {
+          left: ["no"],
+          right: ["action"],
+        };
+  });
+
+  // ✅ Save to localStorage when fixedColumns change
+  useEffect(() => {
+    localStorage.setItem("taxCodeFixedColumns", JSON.stringify(fixedColumns));
+  }, [fixedColumns]);
 
   const routes = [
     {
@@ -91,9 +109,10 @@ const TaxCodeView = () => {
   }, [data_approval_history]);
 
   // Function Change Pagination
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
+  const handleChange = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
+    setPageSize(pageSizeChange);
   };
 
   // Function Sort Table
@@ -175,7 +194,6 @@ const TaxCodeView = () => {
     dispatch(inactiveTaxCode(dataValue))
       .unwrap()
       .then(() => {
-        // setModalInactive(true);
         handleClear();
         handleCancel();
         dispatch(
@@ -202,18 +220,18 @@ const TaxCodeView = () => {
   };
 
   const itemGrantAccess = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={() => handleDownload()}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
+    // {
+    //   action: "Download",
+    //   render: (
+    //     <ButtonComponent
+    //       icon={<SVGIcon name="IconButtonDownload" width={24} />}
+    //       type="submit"
+    //       onClick={() => handleDownload()}
+    //     >
+    //       Download List
+    //     </ButtonComponent>
+    //   ),
+    // },
     {
       action: "Create",
       render: (
@@ -261,11 +279,24 @@ const TaxCodeView = () => {
         const linkContent =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={isEditable ? "#0075bf" : "#8D91A0"} width={24} />}
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={24}
+                />
+              }
               border={false}
               disabled={!isEditable}
             >
-              <span className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"}`}> Update</span>
+              <span
+                className={`ml-3 ${
+                  isEditable ? "text-black " : "text-[#8D91A0]"
+                }`}
+              >
+                {" "}
+                Update
+              </span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
@@ -377,37 +408,97 @@ const TaxCodeView = () => {
         return Content;
       },
     },
-    
   ];
+
+  // ✅ Call useColumnActionPermission hook at component level
+  const actionColumns = useColumnActionPermission(
+    ["view", "activate", "update", "history"],
+    itemGrantAccess
+  );
+
+  // ✅ Get base columns with key property
+  const baseColumns = useMemo(() => {
+    const taxCodeCols = [
+      ...columnsTaxCodeList(
+        search,
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      ...actionColumns,
+    ];
+
+    // Add 'key' property to columns that don't have it
+    const columnsWithKeys = taxCodeCols.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+
+    return columnsWithKeys;
+  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return baseColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [baseColumns]);
+
+  const columns = useMemo(() => {
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    baseColumns.forEach((col) => {
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        leftFixed.push(col);
+      } else if (fixedColumns.right.includes(colKey)) {
+        rightFixed.push(col);
+      } else {
+        normal.push(col);
+      }
+    });
+
+    const reorderedColumns = [...leftFixed, ...normal, ...rightFixed];
+
+    return reorderedColumns.map((col) => {
+      const newCol = { ...col };
+      const colKey = col.key || col.dataIndex || col.title;
+
+      if (fixedColumns.left.includes(colKey)) {
+        newCol.fixed = "left";
+      } else if (fixedColumns.right.includes(colKey)) {
+        newCol.fixed = "right";
+      } else {
+        delete newCol.fixed;
+      }
+
+      return newCol;
+    });
+  }, [baseColumns, fixedColumns]);
 
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <div className="w-full flex justify-end gap-[20px]">
-          <Toolbar items={itemGrantAccess} />
-        </div>
-
-        <BaseContainer header={"TAX CODE LIST"}>
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold w-full">TAX CODE LIST</p>
+              <Toolbar items={itemGrantAccess} />
+            </div>
+          }
+        >
           <div className="w-full">
-            <TablePaginationNew
+            <TableRBI
               dataSource={data?.result}
-              columns={[
-                ...columnsTaxCodeList(
-                  search,
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch,
-                ),
-                ...useColumnActionPermission(
-                  ["view", "activate", "update", "history"],
-                  itemGrantAccess
-                ),
-              ]}
+              columns={columns}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
@@ -415,9 +506,13 @@ const TaxCodeView = () => {
               totalData={data?.page?.totalElements || 0}
               onSort={onSort}
               tableScrolled={{ y: 525, x: 2400 }}
+              handleDownload={handleDownload}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         <ModalInactivateWithHierarchy
           selector={"tax_code"}
@@ -462,4 +557,5 @@ const TaxCodeView = () => {
     </LayoutMenu>
   );
 };
+
 export default TaxCodeView;

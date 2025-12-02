@@ -2,12 +2,11 @@ import { RBI_ELEMENTS } from "./rbi_elements";
 import { RBI_ROUTES } from "./rbi_routes";
 
 export const rating_billing = [
-  
-   // prabilling
+  // prabilling
   {
     path: RBI_ROUTES.PRABILLING_VIEW,
     element: RBI_ELEMENTS.PRABILLING_VIEW_ELEMENTS,
-  },  
+  },
   {
     path: RBI_ROUTES.PRABILLING_CREATE,
     element: RBI_ELEMENTS.PRABILLING_CREATE_ELEMENTS,
@@ -284,5 +283,23 @@ export const rating_billing = [
   {
     path: RBI_ROUTES.MANAGEMENT_BILLING_INSTALLMENT_CREATE,
     element: RBI_ELEMENTS.MANAGEMENT_BILLING_INSTALLMENT_CREATE_ELEMENT,
+  },
+
+  // EFAKTUR CODE
+  {
+    path: RBI_ROUTES.EFAKTUR_CODE,
+    element: RBI_ELEMENTS.EFAKTUR_CODE_VIEW_ELEMENT,
+  },
+
+  // signature digital
+  {
+    path: RBI_ROUTES.DIGITAL_SIGNATURE,
+    element: RBI_ELEMENTS.DIGITAL_SIGNATURE_VIEW_ELEMENT,
+  },
+
+  // Content Management
+  {
+    path: RBI_ROUTES.CONTENT_MANAGEMENT,
+    element: RBI_ELEMENTS.CONTENT_MANAGEMENT_VIEW_ELEMENT,
   },
 ];

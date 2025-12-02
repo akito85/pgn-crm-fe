@@ -1,5 +1,4 @@
 export const RBI_ROUTES = {
-
   // prabilling routes
   PRABILLING_VIEW: "/rating-billing/pra-billing",
   PRABILLING_DETAIL: "/rating-billing/pra-billing/view",
@@ -7,7 +6,6 @@ export const RBI_ROUTES = {
   PRABILLING_UPDATE: "/rating-billing/pra-billing/update",
   PRABILLING_VIEW_LOG: "/rating-billing/pra-billing/log",
   PRABILLING_DETAIL_CUSTOMER: "/rating-billing/pra-billing/preview",
-
 
   // calculation routes
   CALCULATION_VIEW: "/rating-billing/calculation",
@@ -109,4 +107,19 @@ export const RBI_ROUTES = {
     "/rating-billing/management-billing-installment",
   MANAGEMENT_BILLING_INSTALLMENT_CREATE:
     "/rating-billing/management-billing-installment/create",
+
+  EFAKTUR_CODE: "/system-setup/efaktur-code",
+  EFAKTUR_CODE_CREATE: "/system-setup/efaktur-code/create",
+  EFAKTUR_CODE_UPDATE: "/system-setup/efaktur-code/update",
+  EFAKTUR_CODE_DETAIL: "/system-setup/efaktur-code/view",
+
+  DIGITAL_SIGNATURE: "/system-setup/digital-signature",
+  DIGITAL_SIGNATURE_CREATE: "/system-setup/digital-signature/create",
+  DIGITAL_SIGNATURE_UPDATE: "/system-setup/digital-signature/update",
+  DIGITAL_SIGNATURE_DETAIL: "/system-setup/digital-signature/view",
+
+  CONTENT_MANAGEMENT: "/system-setup/content-management",
+  CONTENT_MANAGEMENT_CREATE: "/system-setup/content-management/create",
+  CONTENT_MANAGEMENT_UPDATE: "/system-setup/content-management/update",
+  CONTENT_MANAGEMENT_DETAIL: "/system-setup/content-management/view",
 };

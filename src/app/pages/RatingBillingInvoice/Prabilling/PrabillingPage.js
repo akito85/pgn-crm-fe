@@ -489,9 +489,8 @@ const PrabillingPage = () => {
               <p className="mt-[15px] font-bold text-primary">
                 PRABILLING LIST
               </p>
-              <div className="mt-[15px]">
-                <Toolbar items={itemGrantAccess} />
-              </div>
+
+              <Toolbar items={itemGrantAccess} />
             </div>
           }
         >
