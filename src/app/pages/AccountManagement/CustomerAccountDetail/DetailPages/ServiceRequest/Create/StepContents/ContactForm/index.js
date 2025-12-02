@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react"
+import { Fragment, useState, useEffect } from "react"
 import { PlusOutlined } from "@ant-design/icons"
 
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent"
@@ -9,16 +9,9 @@ import ModalInformationContactDetail from "./ModalInformationContactDetail"
 import ModalListContact from "./ModalListContact"
 import ModalConfirmationContactDetail from "./ModalConfirmationContactDetail"
 
-// ============================================================================
-// STATIC DATA
-// ============================================================================
 const MOCK_CONTACT_LIST = []
 
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
-
-export default function ContactForm() {
+export default function ContactForm({ form }) {
   // --------------------------------------------------------------------------
   // STATE MANAGEMENT - Only modal visibility and main contact list
   // --------------------------------------------------------------------------
@@ -28,9 +21,16 @@ export default function ContactForm() {
   const [contactList, setContactList] = useState(MOCK_CONTACT_LIST)
   const [selectedContact, setSelectedContact] = useState(null)
 
-  // --------------------------------------------------------------------------
-  // COLUMN DEFINITIONS - Main Contact Table
-  // --------------------------------------------------------------------------
+  // Sync local state with form data on mount (for persistence across step navigation)
+  useEffect(() => {
+    if (form) {
+      const formData = form.getFieldValue('srFormContacts');
+      if (formData && formData.length > 0) {
+        setContactList(formData);
+      }
+    }
+  }, [form]);
+
   const columnMain = [
     {
       title: 'NO',
@@ -80,9 +80,6 @@ export default function ContactForm() {
     },
   ]
 
-  // --------------------------------------------------------------------------
-  // EVENT HANDLERS - Main Contact Table
-  // --------------------------------------------------------------------------
   const handleEdit = (record) => {
     console.log("edit", record)
   }
@@ -91,9 +88,6 @@ export default function ContactForm() {
     console.log("delete", record)
   }
 
-  // --------------------------------------------------------------------------
-  // EVENT HANDLERS - Modal Management
-  // --------------------------------------------------------------------------
   const handleOpenCreateContact = () => {
     setIsOpen(true)
   }
@@ -129,7 +123,14 @@ export default function ContactForm() {
       no: contactList.length + 1,
       ...contactData,
     }
-    setContactList([...contactList, newContact])
+    const updatedList = [...contactList, newContact];
+    setContactList(updatedList);
+
+    // Sync with parent form for persistence across steps
+    if (form) {
+      form.setFieldsValue({ srFormContacts: updatedList });
+    }
+
     setIsConfirmationContactModal(false)
     setSelectedContact(null)
   }
@@ -175,9 +176,6 @@ export default function ContactForm() {
           columnMain={columnMain}
         />
 
-        {/* ====================================================================
-            MODAL 1: ModalInformationContactDetail (Create/Edit Contact)
-            ==================================================================== */}
         <ModalInformationContactDetail
           isOpen={isOpen}
           onBack={handleCloseCreateContact}
@@ -186,18 +184,12 @@ export default function ContactForm() {
           onOpenSelectContact={handleOpenSelectContact}
         />
 
-        {/* ====================================================================
-            MODAL 2: ModalListContact (Choose Contact from Existing)
-            ==================================================================== */}
         <ModalListContact
           isOpen={isSelectContactModal}
           onBack={handleCloseSelectContact}
           onSelectContact={handleSelectContact}
         />
 
-        {/* ====================================================================
-            MODAL 3: ModalConfirmationContactDetail (Confirm Selected Contact)
-            ==================================================================== */}
         <ModalConfirmationContactDetail
           isOpen={isConfirmationContactModal}
           selectedContact={selectedContact}
@@ -208,10 +200,6 @@ export default function ContactForm() {
     </Fragment>
   )
 }
-
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
 
 // Export form values getter for wizard step retrieval
 export const getContactFormValues = () => {

@@ -2,7 +2,7 @@ import { useEffect,  useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Steps, Button, message, Form } from "antd";
+import { Steps, Button, message, Form, Spin } from "antd";
 import { LeftCircleOutlined, RightCircleOutlined, RightOutlined, WarningOutlined } from "@ant-design/icons";
 
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
@@ -30,12 +30,39 @@ import {
   getGlobalMartialStatus,
   getGlobalSex,
   getListCategoryFile,
-  updateCustomer,
+  updateCustomer
 } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
+
+import {
+  getDetailContact
+} from "../../../../../../../redux/slices/account_management/MasterData/contact_slice";
+
+import {
+  getListDetailAccountContact,
+  getDetailAccountContact,
+} from "../../../../../../../redux/slices/account_management/detailAccount/accountContactSlice";
+
+import {
+  getListDetailAccountAddress,
+  getListChooseAddress,
+} from "../../../../../../../redux/slices/account_management/detailAccount/accountAddressSlice";
+
 import {
   getAccountStandardDetail,
   getAccountOneTimeDetail,
 } from "../../../../../../../redux/slices/account_management/accountManagement";
+
+import {
+  getServiceRequestById,
+  getServiceRequestTypes,
+  getServiceRequestCategories,
+  getServiceRequestSubcategories,
+  getServiceRequestChannels,
+  getServiceRequestPriorities,
+  getServiceRequestSources,
+  getServiceRequestDataRequirements,
+  getServiceRequestPrerequisites
+} from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequest";
 
 const CreateCustomerServiceRequest = (props) => {
   const containerRef = useRef(null);
@@ -44,6 +71,7 @@ const CreateCustomerServiceRequest = (props) => {
   const { type } = props;
 
   const dispatch = useDispatch();
+
   const {
     data_customerDetailAttachment,
     data_customerDetail,
@@ -59,6 +87,26 @@ const CreateCustomerServiceRequest = (props) => {
     loading: loadingAccount,
   } = useSelector((state) => state.accountManagement);
 
+  const {
+    dropdowns,
+    serviceRequestDetail
+  } = useSelector((state) => state.serviceRequest);
+
+  const {
+    data_detail
+  } = useSelector((state) => state.accountContact); // Add this selector
+
+  const {
+    data_country,
+    data_province,
+    data_city,
+    data_district,
+    data_subdistrict,
+    data_postalcode,
+    data_type,
+    data_business_purpose
+  } = useSelector((state) => state.accountAddress);
+
   //declare
   const location = useLocation();
   const [formCreate] = Form.useForm();
@@ -67,7 +115,11 @@ const CreateCustomerServiceRequest = (props) => {
   const idCustomer = location?.state?.idCustomer;
   const accountType = location?.state?.type; // "standard" or "onetime"
   // const id = 7;
-    
+  
+  console.log("create ", idAccount, idCustomer, accountType)
+  console.log(data_detail)
+  console.log(dropdowns)
+
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
   const [data, setData] = useState({});
@@ -92,6 +144,7 @@ const CreateCustomerServiceRequest = (props) => {
 
  
   const { InformationForm, AttachmentForm, ApprovalForm, ContactForm, PreRequisiteForm } = StepContents;
+  const [dropdownsLoaded, setDropdownsLoaded] = useState(false);
 
   const routes = [
     {
@@ -129,15 +182,51 @@ const CreateCustomerServiceRequest = (props) => {
   useEffect(() => {
     if (id) {
       dispatch(getCustomerDetail(id));
+      // dispatch(getDetailContact(id));
     }
   }, [dispatch, id]);
+
+  useEffect(() => {
+    dispatch(getListDetailAccountContact({ 
+      id: idAccount, 
+      page: 1,
+      pageSize: 111,
+      sort: "createdDate~desc"
+    }));
+
+    dispatch(getDetailAccountContact(idCustomer));
+    // dispatch(getServiceRequestById(idAccount));
+  }, [dispatch, idAccount]);
 
   useEffect(() => {
     dispatch(getGlobalCustomerType());
     dispatch(getGlobalIdentificationType());
     dispatch(getGlobalSex());
     dispatch(getGlobalMartialStatus());
+    dispatch(getServiceRequestTypes());
+    dispatch(getServiceRequestSubcategories());
+    dispatch(getServiceRequestCategories());
+    dispatch(getServiceRequestPriorities());
+    dispatch(getServiceRequestChannels());
+    dispatch(getServiceRequestSources());
+    dispatch(getServiceRequestPrerequisites());
+    dispatch(getServiceRequestDataRequirements());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (dropdowns && 
+        dropdowns.serviceRequestTypes?.data && 
+        dropdowns.serviceRequestCategories?.data &&
+        dropdowns.serviceRequestSubcategories?.data &&
+        dropdowns.serviceRequestChannels?.data &&
+        dropdowns.serviceRequestPriorities?.data &&
+        dropdowns.serviceRequestSources?.data &&
+        dropdowns.serviceRequestPrerequisites?.data &&
+        dropdowns.serviceRequestDataRequirements?.data
+    ) {
+      setDropdownsLoaded(true);
+    }
+  }, [dropdowns]);
 
   const handleSetData = (e) => {
     const temp = (e?.customerName || "").split(" ");
@@ -193,25 +282,27 @@ const CreateCustomerServiceRequest = (props) => {
   useEffect(() => {
     if (data_accountDetail?.accountInformation) {
       const accountInfo = data_accountDetail.accountInformation;
+      const accountSums = data_accountDetail.accountSummary;
+
       formCreate.setFieldsValue({
-        account: accountInfo?.accountId || "",
-        accountType: accountInfo?.accountType || "",
-        longitude: accountInfo?.longitude || "",
-        accountSegment: accountInfo?.accountSegment || "",
-        city: accountInfo?.city || "",
-        accountCostCenter: accountInfo?.costCenter || "",
-        subdistrict: accountInfo?.subDistrict || "",
-        meterReadingCode: accountInfo?.mrc || "",
-        district: accountInfo?.district || "",
-        accountSOR: accountInfo?.sor || "",
-        premiseAddress: accountInfo?.premiseAddress || "",
-        latitude: accountInfo?.latitude || "",
         accountGroupType: accountInfo?.accountGroupType || "",
-        country: accountInfo?.country || "",
+        srFormAccountId: accountInfo?.accountId || "",
+        srFormAccountSor: accountInfo?.sor || "",
+        srFormAccountCostCenter: accountSums?.costCenter || "",
+        srFormMeterReadingCode: accountSums?.meterReadingCodes || "",
+        srFormAccountSegment: accountInfo?.segment || "",
+        srFormAccountGroupType: accountInfo?.accountGroupType || "",
+        srFormAccountType: accountInfo?.accountType || "",
+        srFormPremiseAddress: data_detail?.contactAddress || "",
+        srFormDistrict: data_district || "",
+        srFormSubdistrict: data_subdistrict || "",
+        srFormCity: data_city || "",
+        srFormCountry: data_country || "",
       });
     }
-    console.log(data_accountDetail.accountInformation)
   }, [data_accountDetail, formCreate]);
+
+  console.log(data_detail)
 
   const handleChangeName = (e, type) => {
     switch (type) {
@@ -229,17 +320,28 @@ const CreateCustomerServiceRequest = (props) => {
     }
   }
 
-  const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}` 
+  // const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}` 
   
   const steps = [
     {
       title: "Service Request",
-      content: <InformationForm />,
-      disabled: false
+      content: dropdownsLoaded ? (
+        <InformationForm
+          form={formCreate}
+          account={data_accountDetail}
+          customer={data_customerDetail}
+          dropdowns={dropdowns}
+        />
+      ) : (
+        <div className="flex justify-center items-center h-64">
+          <Spin size="large" tip="Loading dropdown data..." />
+        </div>
+      ),
+      disabled: !dropdownsLoaded
     },
     {
       title: "Contact",
-      content: <ContactForm />,
+      content: <ContactForm form={formCreate} />,
       disabled: false
     },    
     {
@@ -286,7 +388,7 @@ const CreateCustomerServiceRequest = (props) => {
     if (containerRef.current) {
       setScrollLeft(containerRef.current.scrollLeft);
     }
-  };
+  }
 
   const scrollLeftHandler = () => {
     if (containerRef.current) {
