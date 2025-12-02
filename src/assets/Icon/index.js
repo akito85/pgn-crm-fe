@@ -1,4 +1,3 @@
-import React from "react";
 import IconAccountManagement from "./IconAccountManagement";
 import IconActionCreate from "./IconActionCreate";
 import IconActionDropdown from "./IconActionDropdown";
@@ -64,7 +63,7 @@ import IconRatingRecalculate from "./IconRatingRecalculate";
 import IconMonitoring from './IconMonitoring';
 import { FileOutlined } from "@ant-design/icons";
 
-const Icon = (props) => {
+const SVGIcon = (props) => {
   switch (props.name) {
     case "IconAccountManagement":
       return <IconAccountManagement {...props} />;
@@ -199,4 +198,4 @@ const Icon = (props) => {
   }
 };
 
-export default Icon;
+export default SVGIcon;
