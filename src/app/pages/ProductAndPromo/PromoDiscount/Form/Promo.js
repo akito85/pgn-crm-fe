@@ -39,6 +39,7 @@ const Promo = ({
   type,
   criteriaOptionsFix = [],
   promoTypeOptions = [],
+  promotionTypeOptions = [],
   promoCategoryOptions = [],
   handleSelectCriteria,
   handleDeselectCriteria,
@@ -143,15 +144,31 @@ const Promo = ({
             </SelectComponent>
           </Form.Item>
           <Form.Item
-            label={"Promo Type"}
+            label={"Type"}
             name={"promoType"}
             className={"w-full"}
-            rules={formMessageRequired("Promo Type")}
+            rules={formMessageRequired("Type")}
           >
             <SelectComponent
               disabled={status === "ACTIVE" && type === "update"}
             >
               {(promoTypeOptions || [])?.map((data, index) => (
+                <Select.Option value={data.id} key={index}>
+                  {data.text}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+          <Form.Item
+            label={"Promotion Type"}
+            name={"promotionType"}
+            className={"w-full"}
+            rules={formMessageRequired("Promotion Type")}
+          >
+            <SelectComponent
+              disabled={status === "ACTIVE" && type === "update"}
+            >
+              {(promotionTypeOptions || [])?.map((data, index) => (
                 <Select.Option value={data.id} key={index}>
                   {data.text}
                 </Select.Option>

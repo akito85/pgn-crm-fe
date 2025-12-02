@@ -77,6 +77,31 @@ export const TablePromoView = (
       ),
   },
   {
+    title: "PROMOTION TYPE",
+    dataIndex: "promotionTypeName",
+    sorter: true,
+    align: "center",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "promotionTypeName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) =>
+      renderColumn(
+        "promotionTypeName",
+        hasValue(search["promotionTypeName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
     title: "PROMO CATEGORY",
     dataIndex: "categoryName",
     sorter: true,

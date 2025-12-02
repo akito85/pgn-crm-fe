@@ -43,6 +43,7 @@ const initialState = {
   data_condition_operator: [],
   data_condition_type: [],
   data_promo_type: [],
+  data_promotion_type: [],
   data_promo_category: [],
   data_from_item: [],
   data_tiering: [],
@@ -386,6 +387,24 @@ export const getListPromoType = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(
         validateError({ error, action: "GET_PROMO_TYPE_LIST" })
+      );
+      return thunkAPI.rejectWithValue(
+        error.response.data.code === 419 ? null : error.response.data
+      );
+    }
+  }
+);
+
+export const getListPromotionType = createAsyncThunk(
+  "GET_PROMOTION_TYPE_LIST",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/product-promo/promotion-type`;
+      const response = await productPromoHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_PROMOTION_TYPE_LIST" })
       );
       return thunkAPI.rejectWithValue(
         error.response.data.code === 419 ? null : error.response.data
@@ -1474,7 +1493,19 @@ const promoSlice = createSlice({
       state.data_promo_type = action.payload;
     },
 
-    [getListPromoCategory.pending]: (state, action) => {
+    [getListPromotionType.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListPromotionType.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_promotion_type = action.payload;
+    },
+    [getListPromotionType.rejected]: (state, action) => {
+      state.loading = false;
+      state.data_promotion_type = action.payload;
+    },
+
+    [getListPromoCategory.pending]: (state) => {
       state.loading = true;
     },
     [getListPromoCategory.fulfilled]: (state, action) => {
