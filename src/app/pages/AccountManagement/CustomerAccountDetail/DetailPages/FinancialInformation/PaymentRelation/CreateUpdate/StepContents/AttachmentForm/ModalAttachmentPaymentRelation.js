@@ -52,6 +52,10 @@ const ModalAttachment = ({
     return file.slice(((file.lastIndexOf(".") - 1) >>> 0) + 2)?.toLowerCase();
   };
 
+  useEffect(() => {
+    console.log("category", category);
+  }, [category])
+
   const handleClose = () => {
     setFileList([]);
     setCategory("");
@@ -206,6 +210,10 @@ const ModalAttachment = ({
     e.stopPropagation();
     setUrlLink(e.target.value);
   };
+
+  useEffect(() => {
+    console.log("categoryOptions", categoryOptions);
+  }, [categoryOptions])
 
   return (
     <Modal

@@ -20,6 +20,7 @@ const initialState = {
   data_taxRelationFirstIndex: [],
   data_prApprovalHierarchy: [],
   detail_prApprovalHierarchy: [],
+  data_prAttachmentCategory: [],
   detail_taxImplication: {},
   detail_paymentRelation: {},
   isPrSuccess: false,
@@ -420,13 +421,28 @@ export const getPaymentRelation = createAsyncThunk(
 
 export const createPaymentRelation = createAsyncThunk(
   "CREATE_PAYMENT_RELATION",
-  async ({ body }, thunkAPI) => {
+  async ({ body: createBody, attachments = [] }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/payment-relation/create";
-      const response = await accountManagementService.createData(url, body);
+      const createUrl = "/v1/dbs/api/payment-relation/create";
+      const response = await accountManagementService.createData(createUrl, createBody);
+
+      const { id } = response.data;
+
+      const uploadUrl = `/v1/dbs/api/payment-relation/${id}`;
+
+      const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
+        uploadUrl,
+        {
+          file:  attachment.file,
+          category: attachment.fileCategoryId,
+        }
+      ));
+
+      await Promise.all(uploadPromises);
+
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${body?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
+        description: `Your data has been ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
       return response.data;
@@ -440,7 +456,7 @@ export const createPaymentRelation = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
+          description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -540,6 +556,19 @@ export const getDetailPrApprovalHierarchy = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/payment-relation/approval-hierarchy/${id}`;
       const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+)
+
+export const getPrAttachmentCategory = createAsyncThunk(
+  "GET_PR_ATTACHMENT_CATEGORY",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/attachment-category`;
+      const response = await accountManagementService.getAll(url);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
@@ -818,6 +847,19 @@ const financialInformationSlice = createSlice({
       state.loading = false;
     },
     [getDetailPrApprovalHierarchy.rejected]: (state) => {
+      state.detail_prApprovalHierarchy = [];
+      state.loading = false;
+    },
+
+    /** Get Attachment Category */
+    [getPrAttachmentCategory.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPrAttachmentCategory.fulfilled]: (state, action) => {
+      state.data_prAttachmentCategory = action.payload;
+      state.loading = false;
+    },
+    [getPrAttachmentCategory.rejected]: (state) => {
       state.detail_prApprovalHierarchy = [];
       state.loading = false;
     },
