@@ -959,6 +959,14 @@ span.ant-tree-title {
     flex-direction: column !important;
 }
 
+.card-login .ant-card-body {
+    height: 100% !important;
+    position: relative !important;
+    display: flex !important;
+    justify-content: space-around !important;
+    flex-direction: column !important;
+}
+
 .card-login .ant-card-body::after {
     display: none !important;
     height: 100% !important;
@@ -966,4 +974,47 @@ span.ant-tree-title {
 .card-login .ant-card-body::before {
     display: none !important;
     height: 100% !important;
+}
+
+.custom-modal .ant-modal-header {
+    background-color: #e0f2fe;
+    color: #52525b;
+    border-radius: 16px 16px 0 0;
+    padding: 20px;
+    border-bottom: none;
+    font-family: "Public Sans", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    text-transform: uppercase;
+    line-height: 24px;
+}
+
+.custom-modal .ant-modal-footer,
+.custom-modal .ant-modal-body {
+    padding: 20px;
+}
+
+.custom-modal .ant-modal-content {
+    border-radius: 16px;
+}
+
+.custom-modal .ant-modal-close {
+    top: 15px;
+    right: 20px;
+}
+
+.custom-modal .ant-modal-close-x {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    border-radius: 50%;
+    background-color: rgba(239, 68, 68, 0.1);
+    font-size: 18px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.custom-modal .ant-modal-close-x:hover {
+    background-color: rgba(239, 68, 68, 0.2);
+    transform: scale(1.1);
 }
