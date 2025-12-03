@@ -80,7 +80,6 @@ export default function InfoPaymentRelation({
   };
 
   const handleChangeSize = (pageChange, pageSizeChange) => {
-    console.log({pageChange, pageSizeChange})
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
     setPage(tempPage);
     setPageSize(pageSizeChange);
@@ -154,8 +153,6 @@ export default function InfoPaymentRelation({
   });
 
   useEffect(() => {
-    console.log({page, pageSize, sort, search});
-
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(getPaginationPrAccountStandard({ page, pageSize, sort, search: reqSearch }));
   }, [page, pageSize, sort, search]);
