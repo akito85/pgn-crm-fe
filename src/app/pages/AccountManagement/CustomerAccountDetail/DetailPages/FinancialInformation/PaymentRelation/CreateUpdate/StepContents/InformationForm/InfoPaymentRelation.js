@@ -41,7 +41,7 @@ export default function InfoPaymentRelation({
 
   const [isOpen, setIsOpen] = useState(false);
   
-  const { data_prAccountStandard, } = useSelector(
+  const { data_paginationPrAccountStandard, } = useSelector(
     (state) => state.financialInformation
   );
   
@@ -159,19 +159,19 @@ export default function InfoPaymentRelation({
 
   useEffect(() => {
     if (
-      data_prAccountStandard && 
-      data_prAccountStandard.result &&
-      data_prAccountStandard.result.length > 0
+      data_paginationPrAccountStandard && 
+      data_paginationPrAccountStandard.result &&
+      data_paginationPrAccountStandard.result.length > 0
     ) {
-      setTotalElement(data_prAccountStandard?.page?.totalElements);
+      setTotalElement(data_paginationPrAccountStandard?.page?.totalElements);
     }
-  }, [data_prAccountStandard]);
+  }, [data_paginationPrAccountStandard]);
 
   // Sanitize pagination values to prevent NaN
   // Modify
   const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
   const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
-  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : (data_prAccountStandard?.result?.length || 0);
+  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : (data_paginationPrAccountStandard?.result?.length || 0);
 
   const columnMain = [
     {
@@ -414,7 +414,7 @@ export default function InfoPaymentRelation({
         ]}
       >
         <TablePaginationNew
-          dataSource={data_prAccountStandard?.result?.map((item, idx) => ({
+          dataSource={data_paginationPrAccountStandard?.result?.map((item, idx) => ({
             ...item,
             key: item.id || idx,
           }))}
