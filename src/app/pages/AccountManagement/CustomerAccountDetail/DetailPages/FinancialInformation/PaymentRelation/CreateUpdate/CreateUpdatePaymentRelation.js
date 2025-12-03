@@ -103,7 +103,7 @@ const CreatePaymentRelation = ({ type }) => {
       "appHierId",
     ],
     []
-  ]
+  ];
  
   const { InformationForm, AttachmentForm, ApprovalForm } = StepContents;
 
@@ -217,7 +217,13 @@ const CreatePaymentRelation = ({ type }) => {
   const steps = [
     {
       title: "Payment Relation",
-      content: <InformationForm setAccount={setAccount} className={`${current !== 0 ? "hidden" : ""}`} key={`payment-relation-tab-0`} />,
+      content: (
+        <InformationForm
+          setAccount={setAccount}
+          className={`${current !== 0 ? "hidden" : ""}`}
+          key={`payment-relation-tab-0`}
+        />
+      ),
       disabled: false
     },
     {
