@@ -4,11 +4,13 @@ import AccountList from "./DetailPages/Account/AccountList";
 import CustomerAddressList from "./DetailPages/Address/CustomerAddressList";
 import { Fragment } from "react";
 import CustomerContactList from "./DetailPages/Contact/CustomerContactList";
+import CustomerServiceRequestList from "./DetailPages/ServiceRequest/CustomerServiceRequestList";
 
 const dataTabs = {
   acc: "Account",
   add: "Address",
   con: "Contact",
+  sreq: "Service Request",
 };
 
 const CustomerDetailInformation = ({
@@ -35,6 +37,8 @@ const CustomerDetailInformation = ({
         return <CustomerAddressList id={id} dispatch={dispatch} />;
       case dataTabs.con:
         return <CustomerContactList id={id} dispatch={dispatch} />;
+      case dataTabs.sreq:
+        return <CustomerServiceRequestList id={id} dispatch={dispatch} />;
       default:
         return <></>;
     }

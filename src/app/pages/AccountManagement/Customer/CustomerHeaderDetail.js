@@ -88,7 +88,7 @@ const CustomerHeaderDetail = ({
           <ToolbarAccount items={itemActions} advancedAccess={access_account} />
         </div>
 
-        {/* <div className={"w-full flex justify-end mb-5"}>
+        <div className={"w-full flex justify-end mb-5"}>
           <NavLink
             to={data_detail?.isEditor ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_CUSTOMER : ''}
             state={{ id: id }}
@@ -102,7 +102,7 @@ const CustomerHeaderDetail = ({
               Update
             </ButtonComponent>
           </NavLink>
-        </div> */}
+        </div>
 
         <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
           {type ? "ATTACHMENT" : "CUSTOMER INFORMATION"}
