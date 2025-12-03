@@ -1,10 +1,5 @@
 import { FilterOutlined } from "@ant-design/icons";
 import { Input } from "antd";
-<<<<<<< HEAD
-||||||| (empty tree)
-=======
-import moment from "moment";
->>>>>>> 20b7779 (Init)
 import Highlighter from "react-highlight-words";
 
 const getColumnSearchProps = (
@@ -15,7 +10,7 @@ const getColumnSearchProps = (
   handleSearch,
   excludeRender = false,
   onFilter = (value, record) =>
-    record[dataIndex]?.toString()?.toLowerCase()?.includes(value.toLowerCase())
+    record[dataIndex]?.toString()?.toLowerCase()?.includes(value.toLowerCase()),
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
@@ -83,7 +78,7 @@ export const columnsTableCriteria = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
 ) => [
   {
     sorter: true,
@@ -101,7 +96,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -120,7 +115,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -139,7 +134,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -159,7 +154,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -178,7 +173,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -197,7 +192,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -216,7 +211,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -235,7 +230,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -254,7 +249,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -274,7 +269,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -294,7 +289,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -314,7 +309,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -333,7 +328,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -352,7 +347,7 @@ export const columnsTableCriteria = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
 ];
