@@ -8,7 +8,7 @@ export const tableApproval = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { }
+  handleSearch = () => {},
 ) => {
   const columns = [
     {
@@ -27,9 +27,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('recordId', hasValue(search['recordId']), searchText,text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "recordId",
+          hasValue(search["recordId"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "BATCH ID",
@@ -41,9 +50,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('batchId', hasValue(search['batchId']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "batchId",
+          hasValue(search["batchId"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "CUSTOMER NUMBER",
@@ -55,9 +73,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('customerNumber', hasValue(search['customerNumber']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "customerNumber",
+          hasValue(search["customerNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "CUSTOMER NAME",
@@ -69,9 +96,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('customerName', hasValue(search['customerName']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "customerName",
+          hasValue(search["customerName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACCOUNT NUMBER",
@@ -83,9 +119,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('accountNumber', hasValue(search['accountNumber']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "accountNumber",
+          hasValue(search["accountNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACCOUNT NAME",
@@ -97,10 +142,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('accountName', hasValue(search['accountName']), searchText, text, false, 'input', search)
-
+      render: (text) =>
+        renderColumn(
+          "accountName",
+          hasValue(search["accountName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACCOUNT SEGMENT",
@@ -113,9 +166,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('accountSegment', hasValue(search['accountSegment']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "accountSegment",
+          hasValue(search["accountSegment"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACCOUNT GROUP TYPE",
@@ -128,9 +190,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('accountGroupType', hasValue(search['accountGroupType']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "accountGroupType",
+          hasValue(search["accountGroupType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "SERVICE TYPE",
@@ -143,9 +214,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('serviceType', hasValue(search['serviceType']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "serviceType",
+          hasValue(search["serviceType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "BILLING CYCLE",
@@ -158,9 +238,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('billingCycleVal', hasValue(search['billingCycleVal']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "billingCycleVal",
+          hasValue(search["billingCycleVal"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "BILLING PERIOD",
@@ -175,9 +264,17 @@ export const tableApproval = (
         searchText,
         handleSearch,
         true,
-        'datePeriod'
+        "datePeriod",
       ),
-      render: (text) => renderDateColumn('billingPeriodVal', hasValue(search['billingPeriodVal']), searchText, text, 'datePeriod', search)
+      render: (text) =>
+        renderDateColumn(
+          "billingPeriodVal",
+          hasValue(search["billingPeriodVal"]),
+          searchText,
+          text,
+          "datePeriod",
+          search,
+        ),
     },
     {
       title: "SOR",
@@ -190,9 +287,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('sor', hasValue(search['sor']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "sor",
+          hasValue(search["sor"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "COST CENTER",
@@ -204,9 +310,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('costCenter', hasValue(search['costCenter']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "costCenter",
+          hasValue(search["costCenter"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "METER READING CODE",
@@ -218,9 +333,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('meterReadingCode', hasValue(search['meterReadingCode']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "meterReadingCode",
+          hasValue(search["meterReadingCode"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ASSET SERIAL NUMBER",
@@ -232,9 +356,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('assetSerialNum', hasValue(search['assetSerialNum']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "assetSerialNum",
+          hasValue(search["assetSerialNum"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ASSET TYPE",
@@ -247,9 +380,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('assetType', hasValue(search['assetType']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "assetType",
+          hasValue(search["assetType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "MEASUREMENT DATE",
@@ -263,9 +405,17 @@ export const tableApproval = (
         searchText,
         handleSearch,
         true,
-        'datetime'
+        "datetime",
       ),
-      render: (text) => renderDateColumn('measDate', hasValue(search['measDate']), searchText, text, 'datetime', search)
+      render: (text) =>
+        renderDateColumn(
+          "measDate",
+          hasValue(search["measDate"]),
+          searchText,
+          text,
+          "datetime",
+          search,
+        ),
     },
     {
       title: "DATE",
@@ -280,9 +430,17 @@ export const tableApproval = (
         searchText,
         handleSearch,
         true,
-        'date'
+        "date",
       ),
-      render: (text) => renderDateColumn('fdate', hasValue(search['fdate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "fdate",
+          hasValue(search["fdate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "HOUR",
@@ -297,9 +455,17 @@ export const tableApproval = (
         searchText,
         handleSearch,
         true,
-        'hour'
+        "hour",
       ),
-      render: (text) => renderDateColumn('fdate', hasValue(search['fdate']), searchText, text, 'hour', search)
+      render: (text) =>
+        renderDateColumn(
+          "fdate",
+          hasValue(search["fdate"]),
+          searchText,
+          text,
+          "hour",
+          search,
+        ),
     },
     {
       title: "STREAM ID",
@@ -310,9 +476,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('streamId', hasValue(search['streamId']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "streamId",
+          hasValue(search["streamId"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "BEGIN STAND",
@@ -325,9 +500,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('beginStand', hasValue(search['beginStand']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "beginStand",
+          hasValue(search["beginStand"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "END STAND",
@@ -340,9 +524,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('endStand', hasValue(search['endStand']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "endStand",
+          hasValue(search["endStand"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "UNCORRECTED VOL",
@@ -354,9 +547,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('uncorrectedValue', hasValue(search['uncorrectedValue']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "uncorrectedValue",
+          hasValue(search["uncorrectedValue"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "TEMPERATURE",
@@ -368,9 +570,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('temperature', hasValue(search['temperature']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "temperature",
+          hasValue(search["temperature"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "PRESSURE",
@@ -381,9 +592,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('pressure', hasValue(search['pressure']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "pressure",
+          hasValue(search["pressure"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "CORRECTION FACTOR",
@@ -395,11 +615,20 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('correctionFactor', hasValue(search['correctionFactor']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "correctionFactor",
+          hasValue(search["correctionFactor"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
-   
+
     {
       title: "VOLUME 27",
       dataIndex: "volMeasured27",
@@ -411,9 +640,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('volMeasured27', hasValue(search['volMeasured27']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "volMeasured27",
+          hasValue(search["volMeasured27"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "VOLUME 60",
@@ -426,9 +664,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('volMeasured60', hasValue(search['volMeasured60']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "volMeasured60",
+          hasValue(search["volMeasured60"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
 
     {
@@ -441,9 +688,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('volMscf', hasValue(search['volMscf']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "volMscf",
+          hasValue(search["volMscf"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "GHV",
@@ -455,12 +711,21 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('ghv', hasValue(search['ghv']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "ghv",
+          hasValue(search["ghv"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
-      title: 'CALORIE',
+      title: "CALORIE",
       dataIndex: "calorie",
       sorter: (a, b) => a?.calorie - b?.calorie,
       ...getColumnSearchPropsUseFilteredValueFE(
@@ -469,9 +734,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('calorie', hasValue(search['calorie']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "calorie",
+          hasValue(search["calorie"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ENG MEASURED",
@@ -484,9 +758,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('engMeasured', hasValue(search['engMeasured']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "engMeasured",
+          hasValue(search["engMeasured"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DATA SOURCE",
@@ -498,9 +781,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('fileSource', hasValue(search['fileSource']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "fileSource",
+          hasValue(search["fileSource"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "TAXATION ROW ID",
@@ -511,9 +803,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('taxationRowId', hasValue(search['taxationRowId']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "taxationRowId",
+          hasValue(search["taxationRowId"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "CREATION DATE",
@@ -527,9 +828,17 @@ export const tableApproval = (
         searchText,
         handleSearch,
         true,
-        'datetime'
+        "datetime",
       ),
-      render: (text) => renderDateColumn('createdDate', hasValue(search['createdDate']), searchText, text, 'datetime', search)
+      render: (text) =>
+        renderDateColumn(
+          "createdDate",
+          hasValue(search["createdDate"]),
+          searchText,
+          text,
+          "datetime",
+          search,
+        ),
     },
     {
       title: "SOURCE",
@@ -542,9 +851,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('source', hasValue(search['source']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "source",
+          hasValue(search["source"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -556,12 +874,21 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('description', hasValue(search['description']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          hasValue(search["description"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -573,9 +900,18 @@ export const tableApproval = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('status', hasValue(search['status']), searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          hasValue(search["status"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
   ];
 

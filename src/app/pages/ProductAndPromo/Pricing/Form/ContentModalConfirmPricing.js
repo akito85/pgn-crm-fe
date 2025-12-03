@@ -21,17 +21,17 @@ const ContentModalConfirmPricing = ({
   dataOption = [],
 }) => {
   const [typePricingInfo, setTypePricingInfo] = useState(
-    listSectionInfo[0].value
+    listSectionInfo[0].value,
   );
   const [typePricingDetail, setTypePricingDetail] = useState(
-    listSectionPricingDetail[0].value
+    listSectionPricingDetail[0].value,
   );
   const showSection = () => {
     switch (typePricingInfo) {
       case listSectionInfo[0].value:
         const criteria = listCriteria.reduce(
           (current, next) => current + `, ${next}`,
-          ""
+          "",
         );
         return (
           <div>
@@ -55,7 +55,7 @@ const ContentModalConfirmPricing = ({
             disableSelect={true}
             approvalName={
               (dataOption || []).filter(
-                (data) => data.value === selectedHierarchy
+                (data) => data.value === selectedHierarchy,
               )?.[0].name || ""
             }
             dataTable={listDataAppHierDetail}
@@ -109,11 +109,11 @@ const ContentModalConfirmPricing = ({
             //   dataCriteria={criteriaValues}
             // />
             <FunctionalCriteriaProduct
-            type={"preview"}
-            data={listDataCriteria}
-            dataCriteria={criteriaValues}
-            columnsTable={columnsTableCriteriaAll}
-          />
+              type={"preview"}
+              data={listDataCriteria}
+              dataCriteria={criteriaValues}
+              columnsTable={columnsTableCriteriaAll}
+            />
           )}
         </div>
       ) : null}

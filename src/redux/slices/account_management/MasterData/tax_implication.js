@@ -57,7 +57,7 @@ export const getTaxImplicationPaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailTaxImplication = createAsyncThunk(
@@ -70,7 +70,7 @@ export const getDetailTaxImplication = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const downloadTaxImplication = createAsyncThunk(
@@ -89,11 +89,11 @@ export const downloadTaxImplication = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_TAX_IMPLICATION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 // v1/dbs/api/tax-implication/download-filter?page=1&size=10&search=&sort=
 export const activeInactiveTaxImplication = createAsyncThunk(
@@ -103,7 +103,7 @@ export const activeInactiveTaxImplication = createAsyncThunk(
       const url = "/v1/dbs/api/tax-implication/inactive-taximplication";
       const response = await accountManagementService.activationWithOutRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: `Successful`,
@@ -125,7 +125,7 @@ export const activeInactiveTaxImplication = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 export const createTaxImplication = createAsyncThunk(
   "CREATE_TAX_IMPLICATION",
@@ -154,11 +154,11 @@ export const createTaxImplication = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "CREATE_TAX_IMPLICATION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 export const updateTaxImplication = createAsyncThunk(
   "UPDATE_TAX_IMPLICATION",
@@ -186,7 +186,7 @@ export const updateTaxImplication = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const activationTaxImplication = createAsyncThunk(
   "ACTIVATION_TAX_IMPLICATION",
@@ -216,7 +216,7 @@ export const activationTaxImplication = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getTaxImplicationRulePaginate = createAsyncThunk(
@@ -232,7 +232,7 @@ export const getTaxImplicationRulePaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListAppHier = createAsyncThunk(
@@ -251,7 +251,7 @@ export const getListAppHier = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListAppHierDetail = createAsyncThunk(
@@ -264,7 +264,7 @@ export const getListAppHierDetail = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 /** Get List Criteria */
@@ -283,7 +283,7 @@ export const getCountryList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getProvinceList = createAsyncThunk(
@@ -301,7 +301,7 @@ export const getProvinceList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCityList = createAsyncThunk(
@@ -319,7 +319,7 @@ export const getCityList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCostCenterList = createAsyncThunk(
@@ -337,7 +337,7 @@ export const getCostCenterList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSorList = createAsyncThunk(
@@ -355,7 +355,7 @@ export const getSorList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDistrictList = createAsyncThunk(
@@ -373,7 +373,7 @@ export const getDistrictList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSubDistrictList = createAsyncThunk(
@@ -391,7 +391,7 @@ export const getSubDistrictList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountNumberList = createAsyncThunk(
@@ -409,7 +409,7 @@ export const getAccountNumberList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getClassificationTypeList = createAsyncThunk(
@@ -427,7 +427,7 @@ export const getClassificationTypeList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountSegment = createAsyncThunk(
@@ -445,7 +445,7 @@ export const getAccountSegment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSATypeList = createAsyncThunk(
@@ -463,7 +463,7 @@ export const getSATypeList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountCategoryList = createAsyncThunk(
@@ -481,7 +481,7 @@ export const getAccountCategoryList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountGroupList = createAsyncThunk(
@@ -499,7 +499,7 @@ export const getAccountGroupList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountTypeList = createAsyncThunk(
@@ -517,7 +517,7 @@ export const getAccountTypeList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 /** Get List Category */
@@ -536,7 +536,7 @@ export const getCategoryList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 /** Get List Service Type */
@@ -555,7 +555,7 @@ export const getServiceTypeList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSelectCriteria = createAsyncThunk(
@@ -572,7 +572,7 @@ export const getSelectCriteria = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getConditionNameList = createAsyncThunk(
@@ -590,7 +590,7 @@ export const getConditionNameList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getOperatorConditionList = createAsyncThunk(
   "GET_OPERATOR_CONDITION_TAX_IMLICATION_LIST",
@@ -607,7 +607,7 @@ export const getOperatorConditionList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getImplicationTypeList = createAsyncThunk(
@@ -625,7 +625,7 @@ export const getImplicationTypeList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getOperationFormulaList = createAsyncThunk(
   "GET_OPERATION_FORMULA_TAX_IMPLICATION_LIST",
@@ -642,7 +642,7 @@ export const getOperationFormulaList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getListCategory = createAsyncThunk(
   "GET_LIST_CATEGORY_ATTACHMENT",
@@ -660,7 +660,7 @@ export const getListCategory = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const createTaxImplicationRuleBody = createAsyncThunk(
@@ -691,7 +691,7 @@ export const createTaxImplicationRuleBody = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateTaxImplicationRuleBody = createAsyncThunk(
@@ -722,7 +722,7 @@ export const updateTaxImplicationRuleBody = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getDetailTaxImplicationRule = createAsyncThunk(
@@ -735,7 +735,7 @@ export const getDetailTaxImplicationRule = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getDetailDraftTaxImplicationRule = createAsyncThunk(
@@ -748,7 +748,7 @@ export const getDetailDraftTaxImplicationRule = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const approvalCreateTaxImplicationRule = createAsyncThunk(
@@ -758,7 +758,7 @@ export const approvalCreateTaxImplicationRule = createAsyncThunk(
       const url = `/v1/dbs/api/tax-implication/approve-taximplication-rule`;
       const response = await accountManagementService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -788,7 +788,7 @@ export const approvalCreateTaxImplicationRule = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approvalInactiveTaxImplicationRule = createAsyncThunk(
@@ -798,7 +798,7 @@ export const approvalInactiveTaxImplicationRule = createAsyncThunk(
       const url = `/v1/dbs/api/tax-implication/approve-inactive-taximplication-rule`;
       const response = await accountManagementService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -828,7 +828,7 @@ export const approvalInactiveTaxImplicationRule = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -841,7 +841,7 @@ export const getApprovalHistory = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getTransactionCode = createAsyncThunk(
   "GET_TRANSACTION_CODE",
@@ -853,7 +853,7 @@ export const getTransactionCode = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const inactiveTaxImplicationRule = createAsyncThunk(
@@ -863,7 +863,7 @@ export const inactiveTaxImplicationRule = createAsyncThunk(
       const url = `/v1/dbs/api/tax-implication/inactive-taximplication-rule`;
       const response = await accountManagementService.activationWithOutRemark(
         url,
-        data
+        data,
       );
       const successBody = {
         title: "Successful",
@@ -885,7 +885,7 @@ export const inactiveTaxImplicationRule = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const deleteTaxImplicationRule = createAsyncThunk(
@@ -913,7 +913,7 @@ export const deleteTaxImplicationRule = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const checkStartDate = createAsyncThunk(
@@ -926,7 +926,7 @@ export const checkStartDate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const taxImplicationSlice = createSlice({

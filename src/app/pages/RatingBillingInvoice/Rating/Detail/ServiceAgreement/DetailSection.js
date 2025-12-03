@@ -12,8 +12,8 @@ export const columnsDetailServiceAgreement = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { },
-  search
+  handleSearch = () => {},
+  search,
 ) => [
   {
     title: "NO",
@@ -32,9 +32,18 @@ export const columnsDetailServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('name', hasValue(search['name']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "name",
+        hasValue(search["name"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "VALUE",
@@ -47,9 +56,18 @@ export const columnsDetailServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('value', hasValue(search['value']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "value",
+        hasValue(search["value"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "UNIT",
@@ -62,9 +80,18 @@ export const columnsDetailServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('unit', hasValue(search['unit']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "unit",
+        hasValue(search["unit"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
 ];
 
@@ -94,7 +121,7 @@ const DetailSection = ({ SAId }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [SAId, search, page, pageSize, sort, dispatch]);
 
@@ -141,7 +168,7 @@ const DetailSection = ({ SAId }) => {
             searchedColumn,
             searchText,
             handleSearch,
-            search
+            search,
           )}
           current={page}
           pageSize={pageSize}

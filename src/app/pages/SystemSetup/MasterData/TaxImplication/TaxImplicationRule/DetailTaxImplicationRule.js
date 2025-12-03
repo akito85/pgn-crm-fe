@@ -46,14 +46,14 @@ const routes = (id) => {
       breadcrumbName: "Detail Tax Implication",
       state: {
         id: id,
-      }
+      },
     },
     {
       path: "",
       breadcrumbName: "Detail Tax Implication Rule",
     },
   ];
-}
+};
 
 const type = "detail";
 
@@ -72,7 +72,7 @@ const DetailTaxImplicationRule = () => {
     { value: "Attachment" },
   ]);
   const [typeTaxImplicationInfo, setTypeTaxImplicationInfo] = useState(
-    listSectionInfo[0].value
+    listSectionInfo[0].value,
   );
 
   // Redux
@@ -81,7 +81,7 @@ const DetailTaxImplicationRule = () => {
     data_detail_tax_implication_rule = {},
     data_detail_draft_tax_implication_rule = {},
     loading = false,
-    transactionCodeData
+    transactionCodeData,
   } = useSelector((state) => state.tax_implication);
 
   const [modalConfirm, setModalConfirm] = useState(false);
@@ -89,7 +89,8 @@ const DetailTaxImplicationRule = () => {
   const [remark, setRemark] = useState("");
   const [dataLogInformation, setDataLogInformation] = useState({});
   const [dataTaxImplicationRule, setDataTaxImplicationRule] = useState({});
-  const [dataDraftTaxImplicationRule, setDataDraftTaxImplicationRule] = useState({});
+  const [dataDraftTaxImplicationRule, setDataDraftTaxImplicationRule] =
+    useState({});
   const [dataTaxImplication, setDataTaxImplication] = useState({});
   const [bodyApproval, setBodyApproval] = useState({
     isApprover: false,
@@ -102,7 +103,7 @@ const DetailTaxImplicationRule = () => {
   const [bodyError, setBodyError] = useState({});
   const showButtonApproval = useMemo(
     () => bodyApproval.isApprover !== null && bodyApproval.isApprover,
-    [bodyApproval]
+    [bodyApproval],
   );
 
   useEffect(() => {
@@ -130,7 +131,7 @@ const DetailTaxImplicationRule = () => {
         criteriaName: (data_detail?.criteria || []).reduce(
           (prev, current, index) =>
             prev + `${index === 0 ? current.label : ", " + current.label} `,
-          ""
+          "",
         ),
         isRuleActive: data_detail?.isRuleActive,
         createdDate: data_detail?.historyLog.createdDate,
@@ -142,18 +143,16 @@ const DetailTaxImplicationRule = () => {
     }
   }, [taxImplicationId, data_detail]);
 
-
-
   useEffect(() => {
     if (
       id &&
       data_detail_draft_tax_implication_rule?.taxImplicationRuleId === id &&
       data_detail_draft_tax_implication_rule?.taxImplicationRuleId ===
-      data_detail_tax_implication_rule?.taxImplicationRuleId &&
+        data_detail_tax_implication_rule?.taxImplicationRuleId &&
       data_detail_tax_implication_rule &&
       (!data_detail_tax_implication_rule.approvalType ||
         data_detail_tax_implication_rule.approvalType !==
-        "INACTIVE_TAX_IMPLICATION_RULE")
+          "INACTIVE_TAX_IMPLICATION_RULE")
     ) {
       const obj = {
         description: data_detail_draft_tax_implication_rule.description,
@@ -168,40 +167,50 @@ const DetailTaxImplicationRule = () => {
               : "",
             fileSize: bytesConverter(attachData.fileSize || 0),
             dataType: "exist",
-          })
-        )
+          }),
+        ),
       );
-      setListSectionInfo([{ value: "Tax Implication Rule" }, { value: "Draft" }, { value: "Attachment" }]);
+      setListSectionInfo([
+        { value: "Tax Implication Rule" },
+        { value: "Draft" },
+        { value: "Attachment" },
+      ]);
     }
-  }, [id, data_detail_tax_implication_rule, data_detail_draft_tax_implication_rule]);
+  }, [
+    id,
+    data_detail_tax_implication_rule,
+    data_detail_draft_tax_implication_rule,
+  ]);
 
   useEffect(() => {
     if (data_detail_tax_implication_rule?.taxImplicationRuleId === id) {
       const indexStatus = data_detail_tax_implication_rule.status;
       const status = indexStatus
         ? indexStatus.charAt(0).toUpperCase() +
-        indexStatus.slice(1).toLowerCase()
+          indexStatus.slice(1).toLowerCase()
         : indexStatus;
-      const indexStatusApproval = data_detail_tax_implication_rule.approvalStatus;
+      const indexStatusApproval =
+        data_detail_tax_implication_rule.approvalStatus;
       let approvalStatus;
       if (indexStatusApproval === "WAITING_APPROVAL") {
         approvalStatus = "Waiting Approval";
       } else {
         approvalStatus = indexStatusApproval
           ? indexStatusApproval.charAt(0).toUpperCase() +
-          indexStatusApproval.slice(1).toLowerCase()
+            indexStatusApproval.slice(1).toLowerCase()
           : indexStatusApproval;
       }
       setDataLogInformation({
-        taxImplicationRuleId: data_detail_tax_implication_rule.taxImplicationRuleId,
-        createdDate: moment(data_detail_tax_implication_rule.createdDate).format(
-          dateFormatting.dateTime
-        ),
+        taxImplicationRuleId:
+          data_detail_tax_implication_rule.taxImplicationRuleId,
+        createdDate: moment(
+          data_detail_tax_implication_rule.createdDate,
+        ).format(dateFormatting.dateTime),
         createdBy: data_detail_tax_implication_rule.createdBy,
         updatedDate: data_detail_tax_implication_rule.updatedDate
           ? moment(data_detail_tax_implication_rule.updatedDate).format(
-            dateFormatting.dateTime
-          )
+              dateFormatting.dateTime,
+            )
           : "",
         updatedBy: data_detail_tax_implication_rule.updatedBy,
       });
@@ -213,20 +222,24 @@ const DetailTaxImplicationRule = () => {
         startDate: data_detail_tax_implication_rule.startDate,
         endDate: data_detail_tax_implication_rule.endDate,
         implicationType: data_detail_tax_implication_rule.implicationType.name,
-        isVatInv: data_detail_tax_implication_rule.isVatInv === "Y" ? "Yes" : "No",
-        isGunggung: data_detail_tax_implication_rule.isGunggung === "Y" ? "Yes" : "No",
+        isVatInv:
+          data_detail_tax_implication_rule.isVatInv === "Y" ? "Yes" : "No",
+        isGunggung:
+          data_detail_tax_implication_rule.isGunggung === "Y" ? "Yes" : "No",
         transCode: data_detail_tax_implication_rule.transCodeName,
       };
       setDataTaxImplicationRule(obj);
       setListDataAttachment(
-        (data_detail_tax_implication_rule?.attachments || []).map((attachData) => ({
-          ...attachData,
-          createdDate: attachData.createdDate
-            ? moment(attachData.createdDate).format(dateFormatting.dateTime)
-            : "",
-          fileSize: bytesConverter(attachData.fileSize || 0),
-          dataType: "exist",
-        }))
+        (data_detail_tax_implication_rule?.attachments || []).map(
+          (attachData) => ({
+            ...attachData,
+            createdDate: attachData.createdDate
+              ? moment(attachData.createdDate).format(dateFormatting.dateTime)
+              : "",
+            fileSize: bytesConverter(attachData.fileSize || 0),
+            dataType: "exist",
+          }),
+        ),
       );
       setListDataDetailCondition(
         (data_detail_tax_implication_rule?.listRuleCondition || []).map(
@@ -248,8 +261,8 @@ const DetailTaxImplicationRule = () => {
             },
             value: item.value,
             typeData: "exist",
-          })
-        )
+          }),
+        ),
       );
       setListDataDetailFormula(
         (data_detail_tax_implication_rule?.listRuleFormula || []).map(
@@ -275,8 +288,8 @@ const DetailTaxImplicationRule = () => {
             },
             value: item.value,
             typeData: "exist",
-          })
-        )
+          }),
+        ),
       );
       setBodyApproval({
         isApprover: data_detail_tax_implication_rule.isApprover,
@@ -362,13 +375,16 @@ const DetailTaxImplicationRule = () => {
     setBodyError({});
   };
 
-
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
-        <BreadCrumbAdvanced routes={routes(taxImplicationId || data_detail_tax_implication_rule?.taxImplicationId)} />
+        <BreadCrumbAdvanced
+          routes={routes(
+            taxImplicationId ||
+              data_detail_tax_implication_rule?.taxImplicationId,
+          )}
+        />
         <div className="flex flex-col">
-
           {/* Tax Implication Information */}
           <BaseContainer header={"tax implication information"}>
             <div className="grid grid-cols-3 gap-2">
@@ -385,8 +401,9 @@ const DetailTaxImplicationRule = () => {
                 <DetailText label={"Criteria"}>
                   {(data_detail?.criteria || [])?.reduce(
                     (prev, current, index) =>
-                      prev + `${index === 0 ? current.label : ", " + current.label} `,
-                    ""
+                      prev +
+                      `${index === 0 ? current.label : ", " + current.label} `,
+                    "",
                   )}
                 </DetailText>
               </div>
@@ -401,15 +418,16 @@ const DetailTaxImplicationRule = () => {
           {/* Card Information Request */}
           {bodyApproval.isApprover && bodyApproval.approvalType ? (
             <BaseContainer
-              header={`${(bodyApproval.approvalDetail.remarks || "").split(" ")[0]
-                } REQUEST INFORMATION`}
+              header={`${
+                (bodyApproval.approvalDetail.remarks || "").split(" ")[0]
+              } REQUEST INFORMATION`}
             >
               <div className="grid grid-cols-4 w-full">
                 <DetailText label={"Requested Date"}>
                   {bodyApproval.approvalDetail.requestedDate
                     ? moment(bodyApproval.approvalDetail.requestedDate).format(
-                      dateFormatting.dateTime
-                    )
+                        dateFormatting.dateTime,
+                      )
                     : ""}
                 </DetailText>
                 <DetailText label={"Requested By"}>
@@ -478,8 +496,9 @@ const DetailTaxImplicationRule = () => {
           )}
 
           <div
-            className={`flex w-full${showButtonApproval ? " justify-between" : ""
-              } align-middle my-3`}
+            className={`flex w-full${
+              showButtonApproval ? " justify-between" : ""
+            } align-middle my-3`}
           >
             <ButtonComponent
               type={"submit"}
@@ -581,15 +600,15 @@ const DetailTaxImplicationRule = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "approved" : "rejected"
-              } ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              approveOrReject === "Approve" ? "approved" : "rejected"
+            } ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
-
       </Spin>
     </LayoutMenu>
-  )
-}
+  );
+};
 
-export default DetailTaxImplicationRule
+export default DetailTaxImplicationRule;

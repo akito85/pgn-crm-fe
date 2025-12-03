@@ -54,11 +54,11 @@ export const getAddressesPaginate = createAsyncThunk(
           error: error,
           action: "GET_ADDRESS_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const downloadAddress = createAsyncThunk(
@@ -77,11 +77,11 @@ export const downloadAddress = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_ADDRESS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getDetailAddress = createAsyncThunk(
@@ -97,11 +97,11 @@ export const getDetailAddress = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_ADDRESS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const createAddress = createAsyncThunk(
   "CREATE_ADDRESS",
@@ -122,11 +122,11 @@ export const createAddress = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_ADDRESS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const updateAddress = createAsyncThunk(
   "UPDATE_ADDRESS",
@@ -146,11 +146,11 @@ export const updateAddress = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_ADDRESS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const activationAddress = createAsyncThunk(
   "ACTIVATION_ADDRESS",
@@ -171,11 +171,11 @@ export const activationAddress = createAsyncThunk(
           error: error,
           action: "ACTIVATION_ADDRESS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // lov
@@ -207,7 +207,7 @@ export const getListCountry = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const getListProvince = createAsyncThunk(
   "GET_LIST_PROVINCE",
@@ -241,7 +241,7 @@ export const getListProvince = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getListCity = createAsyncThunk(
   "GET_LIST_CITY",
@@ -275,7 +275,7 @@ export const getListCity = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getListDistrict = createAsyncThunk(
   "GET_LIST_DISTRICT",
@@ -309,7 +309,7 @@ export const getListDistrict = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getListSubDistrict = createAsyncThunk(
   "GET_LIST_SUB_DISTRICT",
@@ -343,7 +343,7 @@ export const getListSubDistrict = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getListPostalCode = createAsyncThunk(
   "GET_LIST_POSTAL_CODE",
@@ -377,7 +377,7 @@ export const getListPostalCode = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getTypeAddress = createAsyncThunk(
   "GET_TYPE_ADDRESS",
@@ -407,7 +407,7 @@ export const getTypeAddress = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 const addressSlice = createSlice({

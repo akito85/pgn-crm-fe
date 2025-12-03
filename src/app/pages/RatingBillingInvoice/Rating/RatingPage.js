@@ -65,7 +65,7 @@ const RatingPage = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [search, page, pageSize, sort, dispatch]);
 
@@ -149,7 +149,7 @@ const RatingPage = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -189,9 +189,9 @@ const RatingPage = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-    [search, page, pageSize, searchedColumn, searchText]
+    [search, page, pageSize, searchedColumn, searchText],
   );
 
   const actionCols = useColumnActionPermission(["view"], itemGrantAccess);

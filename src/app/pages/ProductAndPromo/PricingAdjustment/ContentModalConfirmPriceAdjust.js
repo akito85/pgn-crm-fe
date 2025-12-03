@@ -25,7 +25,7 @@ const ContentModalConfirmPriceAdjust = ({
   dataOption = [],
 }) => {
   const [typePricingInfo, setTypePricingInfo] = useState(
-    listSectionInfo[0].value
+    listSectionInfo[0].value,
   );
   const handlePriceAdjustInfo = (e) => {
     setTypePricingInfo(e.target.value);
@@ -36,7 +36,7 @@ const ContentModalConfirmPriceAdjust = ({
       case listSectionInfo[0].value:
         const criteria = listCriteria.reduce(
           (current, next) => current + `, ${next}`,
-          ""
+          "",
         );
         return (
           <>
@@ -96,7 +96,7 @@ const ContentModalConfirmPriceAdjust = ({
               disableSelect={true}
               approvalName={
                 (dataOption || []).filter(
-                  (data) => data.value === selectedHierarchy
+                  (data) => data.value === selectedHierarchy,
                 )?.[0].name || ""
               }
               dataTable={listDataAppHierDetail}

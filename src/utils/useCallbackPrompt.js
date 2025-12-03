@@ -26,7 +26,7 @@ export function useCallbackPrompt(when) {
       }
       return true;
     },
-    [confirmedNavigation, location]
+    [confirmedNavigation, location],
   );
 
   const confirmNavigation = useCallback(() => {

@@ -11,7 +11,7 @@ const login = async (user, level) => {
   }
   const response = await axios.post(
     configApp.USER_MANAGEMENT_SERVICE + url,
-    user
+    user,
   );
   return response.data;
 };
@@ -20,7 +20,7 @@ const logout = async () => {
   const response = await axios.post(
     configApp.USER_MANAGEMENT_SERVICE + "/v1/dbs/api/auth/logout",
     null,
-    { headers: tokenHeader() }
+    { headers: tokenHeader() },
   );
   localStorage.clear();
   window.sessionStorage.clear();
@@ -30,7 +30,7 @@ const choosePosition = async (id) => {
   const response = await axios.post(
     configApp.USER_MANAGEMENT_SERVICE + "/v1/dbs/api/auth/choose-pos",
     { positionId: id },
-    { headers: tokenHeader() }
+    { headers: tokenHeader() },
   );
   localStorage.clear();
   window.sessionStorage.clear();
@@ -40,7 +40,7 @@ const chooseEntity = async (id) => {
   const response = await axios.post(
     configApp.USER_MANAGEMENT_SERVICE + "/v1/dbs/api/auth/choose-entity",
     { entityId: id },
-    { headers: tokenHeader() }
+    { headers: tokenHeader() },
   );
   localStorage.clear();
   window.sessionStorage.clear();
@@ -52,7 +52,7 @@ const checkGrantedAccess = async (body) => {
       configApp.USER_MANAGEMENT_SERVICE +
         "/v1/dbs/api/auth/check-granted-access",
       { pathUrl: body },
-      { headers: tokenHeader() }
+      { headers: tokenHeader() },
     );
 
     return response.data;
@@ -63,7 +63,7 @@ const checkGrantedAccess = async (body) => {
 const getAll = async () => {
   const response = await axios.get(
     configApp.USER_MANAGEMENT_SERVICE + "/v1/dbs/api/auth/get-list-entity",
-    { headers: tokenHeader() }
+    { headers: tokenHeader() },
   );
   return response.data;
 };

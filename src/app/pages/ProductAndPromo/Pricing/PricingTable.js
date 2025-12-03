@@ -32,7 +32,7 @@ const columns = (
   searchText,
   handleSearch,
   handleApprovalHistory,
-  handleOpenModalInactivate
+  handleOpenModalInactivate,
 ) => {
   return [
     {
@@ -56,7 +56,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -66,7 +66,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -84,7 +84,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -94,7 +94,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -112,7 +112,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -122,7 +122,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -140,7 +140,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -150,7 +150,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -168,7 +168,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -178,7 +178,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -196,7 +196,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -206,7 +206,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -223,7 +223,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         let text;
@@ -247,7 +247,7 @@ const columns = (
               text,
               false,
               "status",
-              search
+              search,
             )
           : text;
       },
@@ -266,7 +266,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (statusApproval) => {
         let text;
@@ -291,7 +291,7 @@ const columns = (
               text,
               false,
               "status",
-              search
+              search,
             )
           : text;
       },
@@ -428,7 +428,7 @@ const PricingTable = ({
 }) => {
   const searchInput = useRef(null);
   const { dataPricing, dataApprovalHistory } = useSelector(
-    (state) => state.pricing
+    (state) => state.pricing,
   );
   const [dataTable, setDataTable] = useState([]);
   const [openModalHistory, setOpenModalHistory] = useState(false);
@@ -455,7 +455,7 @@ const PricingTable = ({
         pageSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
-      })
+      }),
     );
   }, [dispatch, page, pageSize, sort, search]);
 
@@ -546,7 +546,7 @@ const PricingTable = ({
             pageSize,
             sort,
             search: encodeURIComponent(JSON.stringify(search)),
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -598,10 +598,10 @@ const PricingTable = ({
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
-              <Link
-                to={PRODUCT_PROMO_ROUTES.DETAIL_PRICING}
-                state={{ id: record?.id }}
-              >
+            <Link
+              to={PRODUCT_PROMO_ROUTES.DETAIL_PRICING}
+              state={{ id: record?.id }}
+            >
               <div className="pt-1">
                 <SVGIcon name="IconDetail" width={24} />
               </div>
@@ -618,7 +618,7 @@ const PricingTable = ({
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED" ||
           (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
-  
+
         const render =
           data_length > 3 ? (
             <ButtonComponent
@@ -642,16 +642,16 @@ const PricingTable = ({
               </div>
             </Tooltip>
           );
-  
+
         return isEditable ? (
           <Link
-          to={PRODUCT_PROMO_ROUTES.UPDATE_PRICING}
-          state={{
-            id: record?.id,
-            statusPricing: record?.status,
-            statusApprovalPricing: record?.statusApproval,
-          }}
-        >
+            to={PRODUCT_PROMO_ROUTES.UPDATE_PRICING}
+            state={{
+              id: record?.id,
+              statusPricing: record?.status,
+              statusApprovalPricing: record?.statusApproval,
+            }}
+          >
             {render}
           </Link>
         ) : (
@@ -664,10 +664,11 @@ const PricingTable = ({
       type: "table",
       render: (record, data_length) => {
         const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" && record.status === "ACTIVE") ||
+          (record.statusApproval === "APPROVED" &&
+            record.status === "ACTIVE") ||
           (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
           (record.statusApproval === "REJECTED" && record.status === "ACTIVE");
-  
+
         return data_length > 3 ? (
           <ButtonComponent
             icon={
@@ -707,7 +708,9 @@ const PricingTable = ({
       render: (record, data_length) => {
         return data_length > 3 ? (
           <ButtonComponent
-            icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
+            icon={
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+            }
             border={false}
             onClick={() => handleApprovalHistory(record)}
           >
@@ -739,20 +742,23 @@ const PricingTable = ({
         tableScrolled={{ y: 525, x: 2300 }}
         onChange={handleChangeSize}
         onSort={onSort}
-        columns={[...columns(
-          search,
-          page,
-          pageSize,
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          handleApprovalHistory,
-          handleOpenModalInactivate
-        ), ...useColumnActionPermission(
-          ["View", "Update", "Activate", "History"],
-          itemsActionView(handleOpenModalInactivate, handleApprovalHistory)
-        )]}
+        columns={[
+          ...columns(
+            search,
+            page,
+            pageSize,
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            handleApprovalHistory,
+            handleOpenModalInactivate,
+          ),
+          ...useColumnActionPermission(
+            ["View", "Update", "Activate", "History"],
+            itemsActionView(handleOpenModalInactivate, handleApprovalHistory),
+          ),
+        ]}
       />
       <ModalHistory
         isOpen={openModalHistory && dataApprovalHistoryFix}

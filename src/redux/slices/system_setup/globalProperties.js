@@ -29,7 +29,7 @@ export const getAllGlobalPropertiesPaginate = createAsyncThunk(
         searchParams,
         page,
         pageSize,
-        sortParams
+        sortParams,
       );
       return response.data;
     } catch (error) {
@@ -38,11 +38,11 @@ export const getAllGlobalPropertiesPaginate = createAsyncThunk(
           error: error,
           action: "GET_ALL_GLOBAL_PROPERTIES_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getGlobalPropertiesDetail = createAsyncThunk(
@@ -57,11 +57,11 @@ export const getGlobalPropertiesDetail = createAsyncThunk(
           error: error,
           action: "GET_GLOBAL_PROPERTIES_DETAIL",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getGlobalPropertiesDetailValue = createAsyncThunk(
@@ -80,11 +80,11 @@ export const getGlobalPropertiesDetailValue = createAsyncThunk(
           error: error,
           action: "GET_GLOBAL_PROPERTIES_DETAIL_VALUE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const inactiveGlobalProperties = createAsyncThunk(
@@ -108,11 +108,11 @@ export const inactiveGlobalProperties = createAsyncThunk(
           error: errorBody(errorCode(error), status, errorMessage(error)),
           action: "INACTIVE_GLOBAL_PROPERTIES",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const deleteGlobalProperties = createAsyncThunk(
@@ -127,11 +127,11 @@ export const deleteGlobalProperties = createAsyncThunk(
           error: error,
           action: "DELETE_GLOBAL_PROPERTIES",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const createGlobalProperties = createAsyncThunk(
@@ -148,11 +148,11 @@ export const createGlobalProperties = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_GLOBAL_PROPERTIES",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateGlobalProperties = createAsyncThunk(
@@ -169,11 +169,11 @@ export const updateGlobalProperties = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_GLOBAL_PROPERTIES",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getAllTypeGlobalProperties = createAsyncThunk(
@@ -188,11 +188,11 @@ export const getAllTypeGlobalProperties = createAsyncThunk(
           error: error,
           action: "GET_ALL_GLOBAL_PROPERTIES_TYPE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDataType = createAsyncThunk(
@@ -207,11 +207,11 @@ export const getDataType = createAsyncThunk(
           error: error,
           action: "GET_DATA_TYPE_GLOBAL_PROPERTIES",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Download
@@ -231,11 +231,11 @@ export const downloadExcelGlobalProperties = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_GLOBAL_PROPERTIES_EXCEL",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const gpSlice = createSlice({

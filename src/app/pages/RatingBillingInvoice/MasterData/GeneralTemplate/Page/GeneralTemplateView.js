@@ -29,10 +29,10 @@ import { clearBodyMessage } from "../../../../../../redux/slices/general_slice";
 const GeneralTemplateView = () => {
   // Selector
   const { data_list, data_approval_history, loading } = useSelector(
-    (state) => state.general_template
+    (state) => state.general_template,
   );
   const { bodyError: bodyErrorGeneral } = useSelector(
-    (state) => state?.general
+    (state) => state?.general,
   );
 
   // Declaration
@@ -70,7 +70,7 @@ const GeneralTemplateView = () => {
         pageSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
-      })
+      }),
     );
   }, [dispatch, page, pageSize, sort, search]);
 
@@ -121,7 +121,7 @@ const GeneralTemplateView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -219,7 +219,7 @@ const GeneralTemplateView = () => {
             pageSize,
             sort,
             search: tempSearch,
-          })
+          }),
         );
         setModalInactivate(false);
       })
@@ -443,13 +443,13 @@ const GeneralTemplateView = () => {
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     );
   }, [search, page, pageSize, searchedColumn, searchText]);
 
   const actionCols = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   const allColumns = useMemo(() => {

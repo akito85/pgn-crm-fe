@@ -19,7 +19,7 @@ const EmployeeList = (props) => {
     onChangeAssignmentEmployeeList = () => {},
   } = props;
   const { data_emp, data_post, data_job } = useSelector(
-    (state) => state.employee
+    (state) => state.employee,
   );
   const dispatch = useDispatch();
   const [page, setPage] = useState(1);

@@ -12,7 +12,7 @@ export const columnsCalculationUsage = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  handleDetail
+  handleDetail,
 ) => [
   {
     key: "no",
@@ -32,7 +32,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -47,7 +47,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -62,7 +62,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -77,7 +77,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -92,7 +92,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -107,7 +107,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -122,7 +122,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -137,7 +137,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -152,7 +152,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -167,7 +167,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -182,7 +182,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -196,7 +196,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -211,7 +211,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -226,7 +226,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -241,7 +241,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -256,7 +256,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -271,7 +271,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -286,7 +286,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -301,7 +301,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -316,7 +316,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -331,7 +331,7 @@ export const columnsCalculationUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -348,7 +348,7 @@ export const columnsCalculationUsage = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "createdDate" ? (
@@ -363,9 +363,7 @@ export const columnsCalculationUsage = (
               : "",
           ]}
           autoEscape
-          textToHighlight={
-            text ? moment(text).format(dateFormatting.date) : ""
-          }
+          textToHighlight={text ? moment(text).format(dateFormatting.date) : ""}
         />
       ) : text === null ? (
         "-"

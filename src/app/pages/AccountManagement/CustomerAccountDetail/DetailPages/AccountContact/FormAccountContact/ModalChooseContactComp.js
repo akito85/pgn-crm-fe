@@ -1,18 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  Input,
-  Tooltip,
-  Space,
-  DatePicker,
-} from "antd";
+import { Input, Tooltip, Space, DatePicker } from "antd";
 import Highlighter from "react-highlight-words";
 
 import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../../../components/TablePagination";
 import StatusComponent from "../../../../../../../components/StatusComponent";
-import { FilterOutlined, PlusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  FilterOutlined,
+  PlusCircleOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import { getListChooseContact } from "../../../../../../../redux/slices/account_management/detailAccount/accountContactSlice";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
@@ -65,10 +64,9 @@ const ModalChooseContactComp = ({
   isIdChoose,
   id,
 }) => {
-
   const dispatch = useDispatch();
   const { data_detail, loading } = useSelector(
-    (state) => state.accountManagement
+    (state) => state.accountManagement,
   );
 
   const searchInput = useRef(null);
@@ -84,9 +82,8 @@ const ModalChooseContactComp = ({
   const [typeModal, setTypeModal] = useState("");
   const [dataTable, setDataTable] = useState([]);
 
-
   useEffect(() => {
-    dispatch(getListChooseContact({ id:id, page, pageSize, sort, search }));
+    dispatch(getListChooseContact({ id: id, page, pageSize, sort, search }));
   }, [dispatch, id, page, pageSize, sort, search]);
 
   // mapping for push key data
@@ -186,7 +183,7 @@ const ModalChooseContactComp = ({
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -208,7 +205,6 @@ const ModalChooseContactComp = ({
         : "";
     setSort(dataSort);
   };
-
 
   const columns = [
     {

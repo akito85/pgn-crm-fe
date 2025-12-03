@@ -1,21 +1,21 @@
-import React,{ useState,useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from "react";
 
-import GridLayout from '../../../../../../../../components/GridLayout'
-import DetailText from '../../../../../../../../components/DetailText'
-import TablePagination from '../../../../../../../../components/TablePagination';
+import GridLayout from "../../../../../../../../components/GridLayout";
+import DetailText from "../../../../../../../../components/DetailText";
+import TablePagination from "../../../../../../../../components/TablePagination";
 // import { getColumnSearchProps } from "../../../../../../../../utils/getColumnSearchProps";
-import { NumericFormat } from 'react-number-format';
-import Highlighter from 'react-highlight-words';
-import { Input } from 'antd';
-import { hasValue, renderColumn } from '../../../../../../../../utils';
-import { FilterOutlined } from '@ant-design/icons';
+import { NumericFormat } from "react-number-format";
+import Highlighter from "react-highlight-words";
+import { Input } from "antd";
+import { hasValue, renderColumn } from "../../../../../../../../utils";
+import { FilterOutlined } from "@ant-design/icons";
 
 const separatorNumber = (text) => {
-	const thousandSeparator = ",";
-	return text?.toString()?.length > 0
-		? text?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator)
-		: "";
-}
+  const thousandSeparator = ",";
+  return text?.toString()?.length > 0
+    ? text?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator)
+    : "";
+};
 
 function filterData(array, filters) {
   return array.filter((item) => {
@@ -25,7 +25,7 @@ function filterData(array, filters) {
         const fixSearchText =
           key === "min" || key === "maximumName"
             ? filters[key]?.replace(/,/g, "")?.toLowerCase()
-            : filters[key]?.toLowerCase();    
+            : filters[key]?.toLowerCase();
         if (key === "value") {
           let temp;
           if (typeof item[key] === "number") {
@@ -50,74 +50,77 @@ function filterData(array, filters) {
 }
 
 const getColumnSearchProps = (
-	search,
-	dataIndex,
-	searchInput,
-	searchedColumn,
-	searchText,
-	handleSearch,
-	excludeRender = false,
-	// onFilter = (value, record) =>
-	// 	record[dataIndex]?.toString()?.toLowerCase()?.includes(value.toLowerCase())
+  search,
+  dataIndex,
+  searchInput,
+  searchedColumn,
+  searchText,
+  handleSearch,
+  excludeRender = false,
+  // onFilter = (value, record) =>
+  // 	record[dataIndex]?.toString()?.toLowerCase()?.includes(value.toLowerCase())
 ) => {
-	let obj = {
-		filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
-			<div
-				style={{
-					padding: 8,
-				}}
-				onKeyDown={(e) => e.stopPropagation()}
-			>
-				<Input
-					ref={searchInput}
-					placeholder={`Search`}
-					value={selectedKeys[0]}
-					onChange={(e) =>
-						setSelectedKeys(e.target.value ? [e.target.value] : [])
-					}
-					onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-					style={{
-						marginBottom: 8,
-						display: "block",
-					}}
-				/>
-			</div>
-		),
-		filterIcon: (filtered) => (
-			<FilterOutlined
-				style={{
-					color: filtered && hasValue(search[dataIndex]) === true ? "#1890ff" : undefined,
-				}}
-			/>
-		),
-		// onFilter: onFilter,
-		onFilterDropdownOpenChange: (visible) => {
-			if (visible) {
-				setTimeout(() => searchInput.current?.select(), 100);
-			}
-		},
-		render: (text) =>
-			searchedColumn === dataIndex ? (
-				<Highlighter
-					highlightStyle={{
-						backgroundColor: "#ffc069",
-						padding: 0,
-					}}
-					searchWords={[searchText]}
-					autoEscape
-					textToHighlight={text ? text.toString() : ""}
-				/>
-			) : (
-				text || ""
-			),
-	};
-	if (excludeRender) {
-		delete obj.render;
-	}
-	return obj;
+  let obj = {
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
+      <div
+        style={{
+          padding: 8,
+        }}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <Input
+          ref={searchInput}
+          placeholder={`Search`}
+          value={selectedKeys[0]}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{
+            marginBottom: 8,
+            display: "block",
+          }}
+        />
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <FilterOutlined
+        style={{
+          color:
+            filtered && hasValue(search[dataIndex]) === true
+              ? "#1890ff"
+              : undefined,
+        }}
+      />
+    ),
+    // onFilter: onFilter,
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: "#ffc069",
+            padding: 0,
+          }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ""}
+        />
+      ) : (
+        text || ""
+      ),
+  };
+  if (excludeRender) {
+    delete obj.render;
+  }
+  return obj;
 };
 
-const Pricing = ({data}) => {
+const Pricing = ({ data }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -128,20 +131,20 @@ const Pricing = ({data}) => {
   const [searchText, setSearchText] = useState("");
   const [dataTable, setDataTable] = useState([]);
   const [sort, setSort] = useState("");
-	const [search, setSearch] = useState("");
-	const [minimum, setMinimum] = useState(0);
+  const [search, setSearch] = useState("");
+  const [minimum, setMinimum] = useState(0);
 
   useEffect(() => {
-    if(data?.saPricing){
-      setTotalElement(data?.saPricing?.length)
-      let modifyData = data?.saPricing.map(item=> {
+    if (data?.saPricing) {
+      setTotalElement(data?.saPricing?.length);
+      let modifyData = data?.saPricing.map((item) => {
         return {
           ...item,
-          value: item.value !== null ? item.value.toString() : '',
-          max: item.max !== null ? item.max.toString() : '',
-          min: item.min !== null ? item.min.toString() : '',
-        }
-      })
+          value: item.value !== null ? item.value.toString() : "",
+          max: item.max !== null ? item.max.toString() : "",
+          min: item.min !== null ? item.min.toString() : "",
+        };
+      });
 
       //merge tables
       let result = [...modifyData];
@@ -150,19 +153,19 @@ const Pricing = ({data}) => {
         if (field === "value") {
           let temp;
           if (typeof obj[field] === "number") {
-          const dataTemp = new Intl.NumberFormat("de-DE", {
-            style: "currency",
-            currency: "EUR",
-          }).format(obj[field]);
-          temp = dataTemp.slice(0, dataTemp.length - 2);
+            const dataTemp = new Intl.NumberFormat("de-DE", {
+              style: "currency",
+              currency: "EUR",
+            }).format(obj[field]);
+            temp = dataTemp.slice(0, dataTemp.length - 2);
           } else {
-          temp = obj[field];
+            temp = obj[field];
           }
           return temp?.toLowerCase();
         } else {
           return obj[field]?.toString()?.toLowerCase();
         }
-        };
+      };
       if (sort) {
         const splitSort = sort.split("~");
         result.sort((a, b) => {
@@ -179,10 +182,7 @@ const Pricing = ({data}) => {
       }
       let map = new Map();
       for (let item of result) {
-        map.set(
-          `${item["priceCode"]}~${item["min"]}~${item["max"]}`,
-          item
-        );
+        map.set(`${item["priceCode"]}~${item["min"]}~${item["max"]}`, item);
       }
       let iteratorValues = map.values();
       let uniquePriceCode = [...iteratorValues];
@@ -191,9 +191,9 @@ const Pricing = ({data}) => {
         .slice((page - 1) * pageSize, page * pageSize)
         .map((item) => item.priceCodeName);
       const dataFix = result.filter((item) =>
-        dataFilter.includes(item.priceCodeName)
+        dataFilter.includes(item.priceCodeName),
       );
-  
+
       /** Function Merge Table */
       const uniquePriceCode2 = new Set();
       let pageNo = 0;
@@ -204,37 +204,39 @@ const Pricing = ({data}) => {
           uniquePriceCode2.clear();
           pageNo += 1;
         }
-        if (uniquePriceCode2.has(
-          `${rowData.priceCode}~${rowData.min}~${rowData.maximumName}`
-        )) {
+        if (
+          uniquePriceCode2.has(
+            `${rowData.priceCode}~${rowData.min}~${rowData.maximumName}`,
+          )
+        ) {
           updatedRowsData.rowSpan = 0;
         } else {
           const occurCount = dataFix
             .slice(pageNo * pageSize, (pageNo + 1) * pageSize)
-            .filter((data) => 
-              data.priceCode === rowData.priceCode &&
-              data.min === rowData.min &&
-              data.maximumName === rowData.maximumName
+            .filter(
+              (data) =>
+                data.priceCode === rowData.priceCode &&
+                data.min === rowData.min &&
+                data.maximumName === rowData.maximumName,
             ).length;
           updatedRowsData.rowSpan = Math.min(pageSize, occurCount);
           updatedRowsData.number = pageNumber;
           uniquePriceCode2.add(
-            `${rowData.priceCode}~${rowData.min}~${rowData.maximumName}`
+            `${rowData.priceCode}~${rowData.min}~${rowData.maximumName}`,
           );
           pageNumber++;
         }
         return updatedRowsData;
       });
-      setDataTable(mergedData)
+      setDataTable(mergedData);
     }
-  }, [data?.saPricing, page, pageSize, sort, search])
+  }, [data?.saPricing, page, pageSize, sort, search]);
 
   // useEffect(() => {
-  
+
   //     setDataTable(mergedData);
   // }, [data, page, pageSize, sort, search])
-  
-  
+
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
@@ -245,7 +247,7 @@ const Pricing = ({data}) => {
       const order = sort.order === "ascend" ? "asc" : "desc";
       setFieldSort(sort.field);
       setOrderSort(sort.order === "ascend" ? "asc" : "desc");
-			setSort(`${sort.field}~${order}`);
+      setSort(`${sort.field}~${order}`);
     } else {
       setFieldSort("");
       setOrderSort("");
@@ -262,20 +264,20 @@ const Pricing = ({data}) => {
     }
     setSearchedColumn(tempSearchColumn);
     setSearch((prevState) => {
-			if (prevState[dataIndex] !== selectedKeys[0]) {
-			  setPage(1);
-			}
-			let tempData = {
-			  ...prevState,
-			};
-	  
-			if (selectedKeys[0]) {
-			  tempData[dataIndex] = selectedKeys[0];
-			} else {
-			  delete tempData[dataIndex];
-			}
-			return tempData;
-		  });
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(1);
+      }
+      let tempData = {
+        ...prevState,
+      };
+
+      if (selectedKeys[0]) {
+        tempData[dataIndex] = selectedKeys[0];
+      } else {
+        delete tempData[dataIndex];
+      }
+      return tempData;
+    });
   };
 
   const filterDataByPage = () => {
@@ -334,9 +336,7 @@ const Pricing = ({data}) => {
         title: "MINIMUM",
         dataIndex: "min",
         width: 150,
-        filteredValue: search?.["min"]
-        ? [search?.["min"]]
-        : null,
+        filteredValue: search?.["min"] ? [search?.["min"]] : null,
         sorter: true,
         ...getColumnSearchProps(
           search,
@@ -345,7 +345,7 @@ const Pricing = ({data}) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text, row, index) => {
           let obj = {
@@ -356,8 +356,8 @@ const Pricing = ({data}) => {
               separatorNumber(text),
               false,
               "input",
-              search
-              ),
+              search,
+            ),
             props: {
               colSpan: 1,
               rowSpan: row.rowSpan,
@@ -371,10 +371,8 @@ const Pricing = ({data}) => {
         dataIndex: "max",
         width: 150,
         sorter: true,
-        align: 'right',
-        filteredValue: search?.["max"]
-        ? [search?.["max"]]
-        : null,
+        align: "right",
+        filteredValue: search?.["max"] ? [search?.["max"]] : null,
         ...getColumnSearchProps(
           search,
           "max",
@@ -382,7 +380,7 @@ const Pricing = ({data}) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text, row, index) => {
           let obj = {
@@ -393,8 +391,8 @@ const Pricing = ({data}) => {
               separatorNumber(text),
               false,
               "input",
-              search
-              ),
+              search,
+            ),
             props: {
               colSpan: 1,
               rowSpan: row.rowSpan,
@@ -408,8 +406,8 @@ const Pricing = ({data}) => {
         dataIndex: "priceCode",
         width: 150,
         filteredValue: search?.["priceCodeName"]
-        ? [search?.["priceCodeName"]]
-        : null,
+          ? [search?.["priceCodeName"]]
+          : null,
         sorter: true,
         ...getColumnSearchProps(
           search,
@@ -418,7 +416,7 @@ const Pricing = ({data}) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text, row, index) => {
           let obj = {
@@ -429,8 +427,8 @@ const Pricing = ({data}) => {
               text,
               false,
               "input",
-              search
-              ),
+              search,
+            ),
             props: {
               colSpan: 1,
               rowSpan: row.rowSpan,
@@ -443,8 +441,8 @@ const Pricing = ({data}) => {
         title: "PRICE DETAIL",
         children: [
           {
-            title: 'CURRENCY',
-            dataIndex: 'currency',
+            title: "CURRENCY",
+            dataIndex: "currency",
             width: 150,
             // sorter: true,
             // ...getColumnSearchProps(
@@ -456,8 +454,8 @@ const Pricing = ({data}) => {
             // ),
           },
           {
-            title: 'VALUE',
-            dataIndex: 'value',
+            title: "VALUE",
+            dataIndex: "value",
             width: 150,
             // sorter: true,
             // ...getColumnSearchProps(
@@ -480,8 +478,8 @@ const Pricing = ({data}) => {
             ),
           },
           {
-            title: 'UOM',
-            dataIndex: 'uom',
+            title: "UOM",
+            dataIndex: "uom",
             width: 150,
             // sorter: true,
             // ...getColumnSearchProps(
@@ -505,12 +503,10 @@ const Pricing = ({data}) => {
             //   handleSearch
             // ),
             render: (adjustment) => (
-              <span>
-                {adjustment && adjustment.adjustmentText}
-              </span>
+              <span>{adjustment && adjustment.adjustmentText}</span>
             ),
           },
-        ]
+        ],
       },
       {
         sorter: true,
@@ -518,8 +514,8 @@ const Pricing = ({data}) => {
         dataIndex: "description",
         align: "left",
         filteredValue: search?.["description"]
-        ? [search?.["description"]]
-        : null,
+          ? [search?.["description"]]
+          : null,
         ...getColumnSearchProps(
           search,
           "description",
@@ -527,7 +523,7 @@ const Pricing = ({data}) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         ellipsis: {
           showTitle: false,
@@ -541,8 +537,8 @@ const Pricing = ({data}) => {
               text,
               false,
               "input",
-              search
-              ),
+              search,
+            ),
             props: {
               colSpan: 1,
               rowSpan: row.rowSpan,
@@ -551,40 +547,41 @@ const Pricing = ({data}) => {
           return obj;
         },
       },
-    ]
-    return result
-  }
-  
-  const priceAdjustmentOne = data?.saInfo?.idrAdjustment?.adjustmentText ?? ''; 
-  const priceAdjustmentTwo = data?.saInfo?.usdAdjustment?.adjustmentText ?? ''; 
+    ];
+    return result;
+  };
+
+  const priceAdjustmentOne = data?.saInfo?.idrAdjustment?.adjustmentText ?? "";
+  const priceAdjustmentTwo = data?.saInfo?.usdAdjustment?.adjustmentText ?? "";
   const mergeAdjustment = `${priceAdjustmentOne} ${priceAdjustmentTwo}`;
-  
+
   return (
-    <div className='py-6'>
+    <div className="py-6">
       <GridLayout cols={2}>
         <div>
-          <div className='text-primary text-xs font-bold uppercase pb-6'>
+          <div className="text-primary text-xs font-bold uppercase pb-6">
             PRICE CODE
           </div>
-          <DetailText label={"Price Code"}>{`${data?.saInfo?.fullPriceCode}`}</DetailText>
+          <DetailText
+            label={"Price Code"}
+          >{`${data?.saInfo?.fullPriceCode}`}</DetailText>
         </div>
         <div>
-          <div className='text-primary text-xs font-bold uppercase pb-6'>
+          <div className="text-primary text-xs font-bold uppercase pb-6">
             PRICE ADJUSTMENT
           </div>
-          <DetailText label={"Price Adjustment"}>
-            {mergeAdjustment}
-          </DetailText>
+          <DetailText label={"Price Adjustment"}>{mergeAdjustment}</DetailText>
         </div>
         <div>
-          <div className='text-primary text-xs font-bold uppercase py-6'>
+          <div className="text-primary text-xs font-bold uppercase py-6">
             PRICING RULE
           </div>
           <DetailText label={"Pricing Rule"}>
-            {data?.saInfo?.isPricingRule == "Y" && data?.saInfo?.pricingRuleId == null 
-              ? 'Custom Tiering' 
+            {data?.saInfo?.isPricingRule == "Y" &&
+            data?.saInfo?.pricingRuleId == null
+              ? "Custom Tiering"
               : data?.saInfo?.pricingRuleName}
-            </DetailText>
+          </DetailText>
         </div>
       </GridLayout>
 
@@ -593,7 +590,7 @@ const Pricing = ({data}) => {
           pageSize={pageSize}
           current={page}
           dataSource={dataTable}
-          tableScrolled={{y: 525, x: 1500 }}
+          tableScrolled={{ y: 525, x: 1500 }}
           totalData={totalElement}
           onChange={handleChangeSize}
           onSort={onSort}
@@ -609,7 +606,7 @@ const Pricing = ({data}) => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Pricing
+export default Pricing;

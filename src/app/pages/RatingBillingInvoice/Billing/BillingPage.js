@@ -27,7 +27,7 @@ import CardContainer from "../../../../components/CardContainer";
 
 const BillingPage = () => {
   const { data, loading, data_approval_history } = useSelector(
-    (state) => state.billing
+    (state) => state.billing,
   );
 
   const dispatch = useDispatch();
@@ -79,7 +79,7 @@ const BillingPage = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [search, page, pageSize, sort, dispatch]);
 
@@ -168,7 +168,7 @@ const BillingPage = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -218,7 +218,7 @@ const BillingPage = () => {
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      getAllBillingPaginate({ search: reqSearch, page, pageSize, sort })
+      getAllBillingPaginate({ search: reqSearch, page, pageSize, sort }),
     );
     dispatch(getAllBillingRequestPaginate());
     dispatch(getAllBillingApprovePaginate());
@@ -289,7 +289,11 @@ const BillingPage = () => {
                 e.stopPropagation();
                 handleApprovalHistory(record);
               }}
-              style={{ cursor: "pointer", display: "inline-block",lineHeight: 0 }}
+              style={{
+                cursor: "pointer",
+                display: "inline-block",
+                lineHeight: 0,
+              }}
             >
               <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
             </div>
@@ -301,7 +305,7 @@ const BillingPage = () => {
 
   const actionCols = useColumnActionPermission(
     ["view", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   ).map((col) => ({
     ...col,
     width: 80,
@@ -317,7 +321,7 @@ const BillingPage = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        search
+        search,
       );
     }
     return columnsBilling(
@@ -327,7 +331,7 @@ const BillingPage = () => {
       searchedColumn,
       searchText,
       handleSearch,
-      search
+      search,
     );
   }, [
     valueTab,

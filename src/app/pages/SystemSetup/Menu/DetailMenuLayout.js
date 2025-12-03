@@ -40,7 +40,7 @@ const DetailMenuLayout = ({ data_detail }) => {
         <DetailText label={"Created Date"}>
           {hasValue(data_detail?.data?.createdDate) &&
             moment(data_detail?.data?.createdDate).format(
-              "DD MMM YYYY HH:mm:ss"
+              "DD MMM YYYY HH:mm:ss",
             )}
         </DetailText>
         <DetailText label={"Created By"}>
@@ -49,7 +49,7 @@ const DetailMenuLayout = ({ data_detail }) => {
         <DetailText label={"Update Date"}>
           {hasValue(data_detail?.data?.updatedDate) &&
             moment(data_detail?.data?.updatedDate).format(
-              "DD MMM YYYY HH:mm:ss"
+              "DD MMM YYYY HH:mm:ss",
             )}
         </DetailText>
         <DetailText label={"Updated By"}>

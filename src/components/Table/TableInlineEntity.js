@@ -612,7 +612,7 @@ const TableInlineEntity = ({
                     rules: col.rules,
                   }),
                 };
-              })
+              }),
             )}
             rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
             components={{
@@ -706,7 +706,7 @@ const TableInlineEntity = ({
                   maxLength: col.maxLength,
                 }),
               };
-            })
+            }),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

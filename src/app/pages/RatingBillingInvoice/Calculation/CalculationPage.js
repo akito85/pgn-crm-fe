@@ -29,7 +29,7 @@ import CardContainer from "../../../../components/CardContainer";
 
 const CalculationPage = () => {
   const { data: data_calculation, loading } = useSelector(
-    (state) => state.rbi_calculation
+    (state) => state.rbi_calculation,
   );
 
   const dispatch = useDispatch();
@@ -56,7 +56,7 @@ const CalculationPage = () => {
           page,
           pageSize,
           sort,
-        })
+        }),
       );
     } else {
       dispatch(
@@ -65,7 +65,7 @@ const CalculationPage = () => {
           page,
           pageSize,
           sort,
-        })
+        }),
       );
     }
   }, [dispatch, search, page, pageSize, sort, tabHeader]);
@@ -123,7 +123,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -133,7 +133,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -150,7 +150,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -160,7 +160,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -177,7 +177,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -187,7 +187,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -204,7 +204,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -214,7 +214,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -231,7 +231,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -241,7 +241,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -258,7 +258,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -268,7 +268,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -286,7 +286,7 @@ const CalculationPage = () => {
           searchText,
           handleSearch,
           true,
-          "datePeriod"
+          "datePeriod",
         ),
         render: (text) =>
           renderDateColumn(
@@ -295,7 +295,7 @@ const CalculationPage = () => {
             searchText,
             text,
             "datePeriod",
-            search
+            search,
           ),
       },
       {
@@ -312,7 +312,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -322,7 +322,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -339,7 +339,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -349,7 +349,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -369,7 +369,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -379,7 +379,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -399,7 +399,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -409,7 +409,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -429,7 +429,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -439,7 +439,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -459,7 +459,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -469,7 +469,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -489,7 +489,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -499,7 +499,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -516,7 +516,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -526,7 +526,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -544,7 +544,7 @@ const CalculationPage = () => {
           searchText,
           handleSearch,
           true,
-          "date"
+          "date",
         ),
         render: (text) =>
           renderDateColumn(
@@ -553,7 +553,7 @@ const CalculationPage = () => {
             searchText,
             text,
             "date",
-            search
+            search,
           ),
       },
       {
@@ -573,7 +573,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -583,7 +583,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -600,7 +600,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -610,7 +610,7 @@ const CalculationPage = () => {
             text,
             false,
             "status",
-            search
+            search,
           ),
       },
       {
@@ -628,7 +628,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (index) => {
           let text;
@@ -653,13 +653,13 @@ const CalculationPage = () => {
                 text,
                 false,
                 "status",
-                search
+                search,
               )
             : text;
         },
       },
     ],
-    [page, pageSize, search, searchText, searchedColumn]
+    [page, pageSize, search, searchText, searchedColumn],
   );
 
   const baseColumnHistory = useMemo(
@@ -684,7 +684,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -694,7 +694,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -713,7 +713,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -723,7 +723,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -739,7 +739,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -749,7 +749,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -765,7 +765,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -775,7 +775,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -791,7 +791,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -801,7 +801,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -821,7 +821,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -831,7 +831,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -848,7 +848,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -858,7 +858,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -875,7 +875,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -885,7 +885,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -904,7 +904,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -914,7 +914,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -933,7 +933,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -943,7 +943,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -960,7 +960,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -970,7 +970,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -987,7 +987,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -997,7 +997,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -1014,7 +1014,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -1024,7 +1024,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -1042,7 +1042,7 @@ const CalculationPage = () => {
           searchText,
           handleSearch,
           true,
-          "datePeriod"
+          "datePeriod",
         ),
         render: (text) =>
           renderDateColumn(
@@ -1051,7 +1051,7 @@ const CalculationPage = () => {
             searchText,
             text,
             "datePeriod",
-            search
+            search,
           ),
       },
       {
@@ -1071,7 +1071,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -1081,7 +1081,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -1099,7 +1099,7 @@ const CalculationPage = () => {
           searchText,
           handleSearch,
           true,
-          "datetime"
+          "datetime",
         ),
         render: (text) =>
           renderDateColumn(
@@ -1108,7 +1108,7 @@ const CalculationPage = () => {
             searchText,
             text,
             "datetime",
-            search
+            search,
           ),
       },
       {
@@ -1125,7 +1125,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) => {
           return renderColumn(
@@ -1135,7 +1135,7 @@ const CalculationPage = () => {
             text?.toString(),
             false,
             "status",
-            search
+            search,
           );
         },
       },
@@ -1154,7 +1154,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (index) => {
           return renderColumn(
@@ -1164,12 +1164,12 @@ const CalculationPage = () => {
             toTitleCase(index),
             false,
             "status",
-            search
+            search,
           );
         },
       },
     ],
-    [page, pageSize, search, searchText, searchedColumn]
+    [page, pageSize, search, searchText, searchedColumn],
   );
 
   const onSort = (_, __, sorter) => {
@@ -1199,7 +1199,7 @@ const CalculationPage = () => {
           pageSize,
           sort,
           search: encodeURIComponent(JSON.stringify(search)),
-        })
+        }),
       );
     } else {
       dispatch(
@@ -1208,7 +1208,7 @@ const CalculationPage = () => {
           pageSize,
           sort,
           search: encodeURIComponent(JSON.stringify(search)),
-        })
+        }),
       );
     }
   };
@@ -1277,7 +1277,7 @@ const CalculationPage = () => {
       ...col,
       width: 80,
       align: "center",
-    })
+    }),
   );
 
   const allColumns = useMemo(() => {
@@ -1290,7 +1290,7 @@ const CalculationPage = () => {
       (col) => ({
         ...col,
         key: col.key || col.dataIndex || col.title,
-      })
+      }),
     );
     return columnsWithKeys;
   }, [baseColumns, baseColumnHistory, actionCols, tabHeader]);
@@ -1325,7 +1325,7 @@ const CalculationPage = () => {
             activeKey={tabHeader}
             onChange={changeTab}
             type="line"
-            size="small" 
+            size="small"
           >
             <Tabs.TabPane tab="Calculation List" key="Calculation List">
               <div className="my-5">

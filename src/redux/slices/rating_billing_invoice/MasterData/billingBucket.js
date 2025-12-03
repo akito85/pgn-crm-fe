@@ -66,7 +66,7 @@ export const getAllBillingBucketPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListBillingItem = createAsyncThunk(
@@ -92,7 +92,7 @@ export const getListBillingItem = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListPriorityPeriod = createAsyncThunk(
@@ -118,7 +118,7 @@ export const getListPriorityPeriod = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListCurrency = createAsyncThunk(
@@ -144,7 +144,7 @@ export const getListCurrency = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getCriteria = createAsyncThunk(
@@ -170,7 +170,7 @@ export const getCriteria = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getIndustrialSector = createAsyncThunk(
@@ -196,7 +196,7 @@ export const getIndustrialSector = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getGsizes = createAsyncThunk("GET_GSIZES", async (thunkAPI) => {
@@ -245,7 +245,7 @@ export const getCostCenter = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getSor = createAsyncThunk("GET_SOR", async (thunkAPI) => {
@@ -294,7 +294,7 @@ export const getCustomerSegment = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAccountGroup = createAsyncThunk(
@@ -320,7 +320,7 @@ export const getAccountGroup = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAccountCategory = createAsyncThunk(
@@ -346,7 +346,7 @@ export const getAccountCategory = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getProvince = createAsyncThunk(
@@ -372,7 +372,7 @@ export const getProvince = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getCity = createAsyncThunk("GET_CITY", async (id, thunkAPI) => {
@@ -421,7 +421,7 @@ export const getDistrict = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getSubDistrict = createAsyncThunk(
@@ -447,7 +447,7 @@ export const getSubDistrict = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getServiceType = createAsyncThunk(
@@ -473,7 +473,7 @@ export const getServiceType = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getBudget = createAsyncThunk("GET_BUDGET", async (thunkAPI) => {
@@ -522,7 +522,7 @@ export const getCustomer = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getDetailBillingBucket = createAsyncThunk(
@@ -548,7 +548,7 @@ export const getDetailBillingBucket = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getDetailDraftBillingBucket = createAsyncThunk(
@@ -574,7 +574,7 @@ export const getDetailDraftBillingBucket = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAvailableApproval = createAsyncThunk(
@@ -600,7 +600,7 @@ export const getAvailableApproval = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getSelectedApproval = createAsyncThunk(
@@ -626,7 +626,7 @@ export const getSelectedApproval = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAttachmentCategory = createAsyncThunk(
@@ -655,7 +655,7 @@ export const getAttachmentCategory = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -681,7 +681,7 @@ export const getApprovalHistory = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListApprovalHierarchy = createAsyncThunk(
@@ -707,7 +707,7 @@ export const getListApprovalHierarchy = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListApprovalHierarchyDetail = createAsyncThunk(
@@ -733,7 +733,7 @@ export const getListApprovalHierarchyDetail = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const inactiveBillingBucket = createAsyncThunk(
@@ -743,7 +743,7 @@ export const inactiveBillingBucket = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/billing-bucket/inactive-billing-bucket`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -772,7 +772,7 @@ export const inactiveBillingBucket = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 export const approveRejectBillingBucket = createAsyncThunk(
@@ -782,7 +782,7 @@ export const approveRejectBillingBucket = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/billing-bucket/approval-billing-bucket`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successApprove = {
         title: `Successful`,
@@ -815,7 +815,7 @@ export const approveRejectBillingBucket = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 export const approveRejectInactiveBillingBucket = createAsyncThunk(
@@ -825,7 +825,7 @@ export const approveRejectInactiveBillingBucket = createAsyncThunk(
       const url = "/v1/dbs/api/rbi/billing-bucket/approval-inactive";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successApprove = {
         title: `Successful`,
@@ -858,7 +858,7 @@ export const approveRejectInactiveBillingBucket = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 export const updateBillingBucket = createAsyncThunk(
@@ -897,7 +897,7 @@ export const updateBillingBucket = createAsyncThunk(
         return thunkApi.rejectWithValue(response.response.data);
       }
     }
-  }
+  },
 );
 
 export const downloadBillingBucket = createAsyncThunk(
@@ -916,11 +916,11 @@ export const downloadBillingBucket = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_BILLING_BUCKET",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const createBillingBucket = createAsyncThunk(
@@ -959,7 +959,7 @@ export const createBillingBucket = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 const billingBucketSlice = createSlice({

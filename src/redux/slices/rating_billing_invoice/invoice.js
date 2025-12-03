@@ -28,7 +28,7 @@ export const getAllInvoicePaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getDetailInvoice = createAsyncThunk(
   "GET_DETAIL_INVOICE",
@@ -41,7 +41,7 @@ export const getDetailInvoice = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getFormatType = createAsyncThunk(
   "GET_FORMAT_TYPE",
@@ -53,7 +53,7 @@ export const getFormatType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getBillingApproval = createAsyncThunk(
   "GET_BILLING_APPROVAL",
@@ -65,7 +65,7 @@ export const getBillingApproval = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const createRegenerate = createAsyncThunk(
   "CREATE_REGENRATE",
@@ -94,7 +94,7 @@ export const createRegenerate = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const createGenerate = createAsyncThunk(
   "CREATE_GENERATE",
@@ -123,7 +123,7 @@ export const createGenerate = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDownloadList = createAsyncThunk(
@@ -137,7 +137,7 @@ export const getDownloadList = createAsyncThunk(
 
       const response = await ratingBillingHttpService.downloadXlsx(
         url,
-        "invoice_list"
+        "invoice_list",
       );
 
       return response;
@@ -150,7 +150,7 @@ export const getDownloadList = createAsyncThunk(
           error: error?.response,
           action: "DOWNLOAD_INVOICE_LIST",
           back: false,
-        })
+        }),
       );
 
       const errorBody = {
@@ -161,7 +161,7 @@ export const getDownloadList = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
-  }
+  },
 );
 
 const invoiceSlice = createSlice({

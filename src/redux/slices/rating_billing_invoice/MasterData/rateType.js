@@ -32,7 +32,7 @@ export const getRateTypePaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const createRateType = createAsyncThunk(
@@ -61,7 +61,7 @@ export const createRateType = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const inactiveMasterRateType = createAsyncThunk(
@@ -71,7 +71,7 @@ export const inactiveMasterRateType = createAsyncThunk(
       const url = `/v1/dbs/api/rate-type/inactive`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const message = response.message;
       const successMessage = {
@@ -96,7 +96,7 @@ export const inactiveMasterRateType = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const updateRateType = createAsyncThunk(
@@ -125,7 +125,7 @@ export const updateRateType = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getDetailRateType = createAsyncThunk(
@@ -138,7 +138,7 @@ export const getDetailRateType = createAsyncThunk(
     } catch (response) {
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getDowloadRateType = createAsyncThunk(
@@ -157,11 +157,11 @@ export const getDowloadRateType = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_RATE_TYPES",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 const rateTypeSlice = createSlice({

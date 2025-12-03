@@ -8,7 +8,7 @@ export const columnsCalculation = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  search
+  search,
 ) => [
   {
     title: "NO",
@@ -27,7 +27,7 @@ export const columnsCalculation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -37,7 +37,7 @@ export const columnsCalculation = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "custNumb",
@@ -58,7 +58,7 @@ export const columnsCalculation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -68,7 +68,7 @@ export const columnsCalculation = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "custName",
@@ -89,7 +89,7 @@ export const columnsCalculation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -99,7 +99,7 @@ export const columnsCalculation = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "accNumb",
@@ -120,7 +120,7 @@ export const columnsCalculation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -130,7 +130,7 @@ export const columnsCalculation = (
         text,
         false,
         "input",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "accName",
@@ -163,7 +163,7 @@ export const columnsCalculation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -173,7 +173,7 @@ export const columnsCalculation = (
         text,
         true,
         "input",
-        search
+        search,
       ),
     // render: (text) => {
     //   if (searchedColumn === "message") {
@@ -225,7 +225,7 @@ export const columnsCalculation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -235,7 +235,7 @@ export const columnsCalculation = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -261,7 +261,7 @@ export const columnsCalculation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -271,7 +271,7 @@ export const columnsCalculation = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -286,7 +286,7 @@ export const columnsCalculation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -296,7 +296,7 @@ export const columnsCalculation = (
         text?.toString(),
         false,
         "status",
-        search
+        search,
       ),
     // ...getColumnSearchPropsPaging(
     //   "isTry",

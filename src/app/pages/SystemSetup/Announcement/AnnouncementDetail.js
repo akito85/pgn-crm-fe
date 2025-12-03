@@ -17,7 +17,7 @@ import TablePaginationNew from "../../../../components/TablePaginationNew";
 
 const AnnouncementDetail = () => {
   const { loading, detail_Announcement } = useSelector(
-    (state) => state.announcement
+    (state) => state.announcement,
   );
 
   // Declaration
@@ -33,8 +33,7 @@ const AnnouncementDetail = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const [typeColumn, setTypeColumn] = useState("string")
-
+  const [typeColumn, setTypeColumn] = useState("string");
 
   const routes = [
     {
@@ -70,15 +69,15 @@ const AnnouncementDetail = () => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     switch (dataIndex) {
-      case 'createdDate':
-        setTypeColumn('datetime')
+      case "createdDate":
+        setTypeColumn("datetime");
         break;
-      case 'operation':
-        setTypeColumn('status')
+      case "operation":
+        setTypeColumn("status");
         break;
-    
+
       default:
-        setTypeColumn('string')
+        setTypeColumn("string");
         break;
     }
     setSearch((prevState) => {
@@ -114,13 +113,13 @@ const AnnouncementDetail = () => {
             <DetailText label="Name">{detail_Announcement?.annName}</DetailText>
             <DetailText label="Start Date">
               {moment(detail_Announcement?.startDate).format(
-                dateFormatting.date
+                dateFormatting.date,
               )}
             </DetailText>
             <DetailText label="End Date">
               {detail_Announcement.endDate
                 ? moment(detail_Announcement?.endDate).format(
-                    dateFormatting.date
+                    dateFormatting.date,
                   )
                 : ""}
             </DetailText>

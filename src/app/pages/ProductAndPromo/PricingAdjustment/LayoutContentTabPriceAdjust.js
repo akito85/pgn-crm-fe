@@ -57,17 +57,17 @@ const LayoutContentTabPriceAdjust = ({
           updateData={setListDataDetailPricingAdjust}
         /> */}
         <FunctionalCriteriaProduct
-            data={listDataDetailPricingAdjust} //data
-            dataCriteria={criteriaValues} //ddl
-            type={"detail"}
-            selector="pricingAdjust"
-            columnsTable={columnsTableCriteriaAll}
-            fixedColumn={[
-              "ADJUSTMENT TYPE",
-              "ADJUSTMENT VALUE",
-              // "DESCRIPTION",
-            ]}
-          />
+          data={listDataDetailPricingAdjust} //data
+          dataCriteria={criteriaValues} //ddl
+          type={"detail"}
+          selector="pricingAdjust"
+          columnsTable={columnsTableCriteriaAll}
+          fixedColumn={[
+            "ADJUSTMENT TYPE",
+            "ADJUSTMENT VALUE",
+            // "DESCRIPTION",
+          ]}
+        />
       </BaseContainer>
       <BaseContainer header={"HISTORY LOG INFORMATION"}>
         <PricingLogInformationDetail data={dataLogInformation} />

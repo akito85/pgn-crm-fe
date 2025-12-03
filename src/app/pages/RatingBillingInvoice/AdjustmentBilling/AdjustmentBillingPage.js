@@ -28,7 +28,7 @@ import { useColumnActionPermission } from "../../../../components/ColumnActionPe
 const AdjustmentBillingPage = () => {
   // Selector
   const { data, loading, data_approval_history, message } = useSelector(
-    (state) => state.adjustmentBilling
+    (state) => state.adjustmentBilling,
   );
 
   // Declaration
@@ -59,7 +59,7 @@ const AdjustmentBillingPage = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, search, page, pageSize, sort]);
 
@@ -127,7 +127,7 @@ const AdjustmentBillingPage = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -155,7 +155,7 @@ const AdjustmentBillingPage = () => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
         handleCancel();
         handleClear();
@@ -370,14 +370,14 @@ const AdjustmentBillingPage = () => {
                   searchedColumn,
                   searchText,
                   handleSearch,
-                  search
+                  search,
                   // handleApprovalHistory,
                   // handleDelete
                 ),
                 ...useColumnActionPermission(
                   ["view", "update", "delete", "history"],
                   itemGrantAccess,
-                  "Delete"
+                  "Delete",
                 ),
               ]}
               current={page}

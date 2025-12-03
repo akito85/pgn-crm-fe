@@ -40,7 +40,6 @@ const RelationshipCreateAndUpdate = ({
   const [modalConfirm, setModalConfirm] = useState(false);
   const [dataConfirm, setDataConfirm] = useState();
 
-
   useEffect(() => {
     if (obj && obj.id && type.action === "update") {
       form.setFieldsValue({
@@ -67,7 +66,6 @@ const RelationshipCreateAndUpdate = ({
     setDataConfirm(valueForm);
   };
 
-  
   const routes = [
     {
       path: "",
@@ -82,13 +80,17 @@ const RelationshipCreateAndUpdate = ({
       breadcrumbName: "Detail Customer",
     },
     {
-      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
       breadcrumbName: "Detail Account",
     },
     {
-      path: type === "create" ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP : ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP,
-      breadcrumbName: type === "create" ? "Create Relationship" : "Update Relationship",
-    }
+      path:
+        type === "create"
+          ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP
+          : ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP,
+      breadcrumbName:
+        type === "create" ? "Create Relationship" : "Update Relationship",
+    },
   ];
 
   return (

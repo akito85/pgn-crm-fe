@@ -31,7 +31,7 @@ const ModalConfirmationTOPS = ({
   const mapingCriteriaData = data?.criterias?.map((item) => item?.criteria);
   // find data criteria
   const matchedObjectsCriteria = apiCriteria?.filter((obj) =>
-    mapingCriteriaData?.includes(obj?.id)
+    mapingCriteriaData?.includes(obj?.id),
   );
 
   const matchedNamesCriteria = matchedObjectsCriteria
@@ -87,7 +87,7 @@ const ModalConfirmationTOPS = ({
             disableSelect={true}
             approvalName={
               (dataOption || []).filter(
-                (data) => data.value === selectedHierarchy
+                (data) => data.value === selectedHierarchy,
               )?.[0].name || ""
             }
             dataTable={listDataAppHierDetail}

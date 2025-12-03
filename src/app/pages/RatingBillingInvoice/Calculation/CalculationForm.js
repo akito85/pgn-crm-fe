@@ -173,7 +173,7 @@ const CalculationForm = ({ type }) => {
   useEffect(() => {
     let dataMrc = list_meter_reading_code?.reduce(
       (result, current) => result?.concat(current?.dtoList),
-      []
+      [],
     );
     setMergedArrayMrc(dataMrc);
   }, [dispatch, list_meter_reading_code]);
@@ -256,7 +256,7 @@ const CalculationForm = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -271,7 +271,7 @@ const CalculationForm = ({ type }) => {
       billingPeriod: formValue?.billing_period,
       billingPeriodName:
         list_billing_period?.data?.find(
-          (item) => item.id === formValue?.billing_period
+          (item) => item.id === formValue?.billing_period,
         )?.name || null,
       serviceType: formValue?.serviceType,
       sor: formValue?.sor,
@@ -295,7 +295,7 @@ const CalculationForm = ({ type }) => {
             calCode: null,
             mreadingCode: id,
           };
-        }
+        },
       ),
       rRbiCalculationAccountSegment: (formValue?.accountSegment || []).map(
         (id) => {
@@ -304,7 +304,7 @@ const CalculationForm = ({ type }) => {
             calCode: null,
             accSegment: id,
           };
-        }
+        },
       ),
       rRbiCalculationAccountGroupType: (formValue?.accountGroupType || []).map(
         (id) => {
@@ -313,7 +313,7 @@ const CalculationForm = ({ type }) => {
             calCode: null,
             accGroupType: id,
           };
-        }
+        },
       ),
       rRbiCalculationSpecificCustomer: (formValue?.specificCustomer || []).map(
         (id) => {
@@ -322,7 +322,7 @@ const CalculationForm = ({ type }) => {
             calCode: null,
             custNumb: id,
           };
-        }
+        },
       ),
     };
 
@@ -670,9 +670,9 @@ const CalculationForm = ({ type }) => {
               >
                 <SelectComponent
                   mode={"multiple"}
-                  className="[&_.ant-select-selector]:!min-h-[100px] 
-               [&_.ant-select-selector]:!h-auto 
-               [&_.ant-select-selector]:!items-start 
+                  className="[&_.ant-select-selector]:!min-h-[100px]
+               [&_.ant-select-selector]:!h-auto
+               [&_.ant-select-selector]:!items-start
                [&_.ant-select-selector]:!pt-1
                [&_.ant-select-selection-overflow]:max-h-[100px]
                [&_.ant-select-selection-overflow]:overflow-y-auto"
@@ -714,9 +714,9 @@ const CalculationForm = ({ type }) => {
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountSegment}
-                  className="[&_.ant-select-selector]:!min-h-[100px] 
-               [&_.ant-select-selector]:!h-auto 
-               [&_.ant-select-selector]:!items-start 
+                  className="[&_.ant-select-selector]:!min-h-[100px]
+               [&_.ant-select-selector]:!h-auto
+               [&_.ant-select-selector]:!items-start
                [&_.ant-select-selector]:!pt-1
                [&_.ant-select-selection-overflow]:max-h-[100px]
                [&_.ant-select-selection-overflow]:overflow-y-auto"
@@ -736,9 +736,9 @@ const CalculationForm = ({ type }) => {
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountGroup}
-                  className="[&_.ant-select-selector]:!min-h-[100px] 
-               [&_.ant-select-selector]:!h-auto 
-               [&_.ant-select-selector]:!items-start 
+                  className="[&_.ant-select-selector]:!min-h-[100px]
+               [&_.ant-select-selector]:!h-auto
+               [&_.ant-select-selector]:!items-start
                [&_.ant-select-selector]:!pt-1
                [&_.ant-select-selection-overflow]:max-h-[100px]
                [&_.ant-select-selection-overflow]:overflow-y-auto"
@@ -768,9 +768,9 @@ const CalculationForm = ({ type }) => {
               >
                 <Select
                   mode={"multiple"}
-                  className="[&_.ant-select-selector]:!min-h-[100px] 
-                              [&_.ant-select-selector]:!h-auto 
-                              [&_.ant-select-selector]:!items-start 
+                  className="[&_.ant-select-selector]:!min-h-[100px]
+                              [&_.ant-select-selector]:!h-auto
+                              [&_.ant-select-selector]:!items-start
                               [&_.ant-select-selector]:!pt-1
                               [&_.ant-select-selection-overflow]:max-h-[100px]
                               [&_.ant-select-selection-overflow]:overflow-y-auto
@@ -1010,7 +1010,7 @@ const CalculationForm = ({ type }) => {
                     </span>
                     <span className="text-[13px] text-gray-600">
                       {list_sor?.data?.find(
-                        (item) => item.id === pendingDataFinal?.sor
+                        (item) => item.id === pendingDataFinal?.sor,
                       )?.name || "All"}
                     </span>
                   </div>

@@ -23,11 +23,11 @@ const TaxIdentifierForm = ({
   tiObj = {},
   dataAddress,
   form,
-  setTiObj
+  setTiObj,
 }) => {
   // Selector
   const { loading, data_taxIdentifierType, data_account } = useSelector(
-    (state) => state.account
+    (state) => state.account,
   );
 
   // Declaration
@@ -52,9 +52,8 @@ const TaxIdentifierForm = ({
     dispatch(getTaxIdentifierType());
   }, []);
   useEffect(() => {
-    form.resetFields(["taxAddress"])
-  }, [dataAddress])
-  
+    form.resetFields(["taxAddress"]);
+  }, [dataAddress]);
 
   useEffect(() => {
     if (dataAccount !== 0) {
@@ -79,13 +78,13 @@ const TaxIdentifierForm = ({
         ?.find((b) => b.taxIdentifierName)?.taxIdentifierName;
 
       const findTaxAddress = dataSource
-      ?.filter((a) => a.accountId === dataAccount)
-      ?.find((b) => b.taxIdentifierAddressValue)?.taxIdentifierAddressValue;
-      
+        ?.filter((a) => a.accountId === dataAccount)
+        ?.find((b) => b.taxIdentifierAddressValue)?.taxIdentifierAddressValue;
+
       setAccountNumber(
         dataSource
           ?.filter((a) => a.accountId === dataAccount)
-          ?.find((b) => b.accountName)?.accountNumber
+          ?.find((b) => b.accountName)?.accountNumber,
       );
 
       form.setFieldsValue({
@@ -99,7 +98,7 @@ const TaxIdentifierForm = ({
         ratin2: findTaxName,
         ratia: findTaxAddress,
       });
-      handleTIObj(dataAccount,"accountId")
+      handleTIObj(dataAccount, "accountId");
     }
   }, [dataAccount]);
 
@@ -107,7 +106,7 @@ const TaxIdentifierForm = ({
     if (e === "" || e === undefined) {
       setDataAccount();
       setAccountNumber("");
-      handleTIObj(e,"accountId")
+      handleTIObj(e, "accountId");
       form.resetFields([
         "relatedAccountId",
         "customerNameTI",
@@ -212,7 +211,7 @@ const TaxIdentifierForm = ({
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -354,13 +353,17 @@ const TaxIdentifierForm = ({
             handleTIObj(
               e,
               "taxIdentifierType",
-              form.resetFields(["taxIdentifierName","taxIdentifierNumber", "taxAddress"]),
+              form.resetFields([
+                "taxIdentifierName",
+                "taxIdentifierNumber",
+                "taxAddress",
+              ]),
               setTiObj({
                 ...tiObj,
                 taxAddress: null,
                 taxIdentifierName: null,
-                taxIdentifierNumber: null
-              })
+                taxIdentifierNumber: null,
+              }),
             )
           }
         >

@@ -34,12 +34,12 @@ const MappingInformation = ({
         .filter(
           (dataCategoryItem) =>
             !dataTable.some(
-              (dataTableItem) => dataTableItem.category === dataCategoryItem.id
-            )
+              (dataTableItem) => dataTableItem.category === dataCategoryItem.id,
+            ),
         )
         ?.map((item) => {
           return { value: item?.id, label: item?.name };
-        })
+        }),
     );
   }, [dataTable, dataCategoryMapList]);
 
@@ -101,7 +101,7 @@ const MappingInformation = ({
     };
     let fa = handleDataSort(a);
     let fb = handleDataSort(b);
-  
+
     const handleCompare = (a, b) => {
       switch (fieldSort) {
         case "startDate":
@@ -130,12 +130,12 @@ const MappingInformation = ({
             !dataTable.some(
               (dataTableItem) =>
                 dataTableItem.category === dataCategoryItem.id &&
-                e.category !== dataCategoryItem.id
-            )
+                e.category !== dataCategoryItem.id,
+            ),
         )
         ?.map((item) => {
           return { value: item?.id, label: item?.name };
-        })
+        }),
     );
   };
 
@@ -159,7 +159,7 @@ const MappingInformation = ({
           () => {}, // no handleDetail
           onFilter,
           sorter,
-          dataCategoryMap //for ddl
+          dataCategoryMap, //for ddl
         )}
         scrollTable={{ x: 1500, y: 500 }}
         usePagination={true}

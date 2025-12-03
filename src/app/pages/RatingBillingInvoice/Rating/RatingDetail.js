@@ -80,7 +80,7 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
         );
     }
   };
-  
+
   // onchang tabs
   const onChangeTab = ({ target: { value } }) => {
     setTabSection(value);

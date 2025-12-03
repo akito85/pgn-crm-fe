@@ -3,13 +3,13 @@ import { Input, Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { hasValue, renderColumn } from "../../../../../utils";
-  
-  const separatorNumber = (text) => {
-		const thousandSeparator = ",";
-		return text?.toString()?.length > 0
-			? text?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator)
-			: "";
-  }
+
+const separatorNumber = (text) => {
+  const thousandSeparator = ",";
+  return text?.toString()?.length > 0
+    ? text?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator)
+    : "";
+};
 
 const getColumnSearchProps = (
   search,
@@ -18,7 +18,7 @@ const getColumnSearchProps = (
   searchedColumn,
   searchText,
   handleSearch,
-  excludeRender = false
+  excludeRender = false,
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
@@ -46,7 +46,10 @@ const getColumnSearchProps = (
     filterIcon: (filtered) => (
       <FilterOutlined
         style={{
-          color: filtered && hasValue(search[dataIndex]) === true ? "#1890ff" : undefined,
+          color:
+            filtered && hasValue(search[dataIndex]) === true
+              ? "#1890ff"
+              : undefined,
         }}
       />
     ),
@@ -89,7 +92,7 @@ export const columnsDetail = (
   handleDetailHistory = () => {},
   type,
   data,
-  minimums = new Set()
+  minimums = new Set(),
 ) => [
   {
     title: "NO",
@@ -111,9 +114,7 @@ export const columnsDetail = (
     dataIndex: "min",
     sorter: true,
     align: "right",
-    filteredValue: search?.["min"]
-    ? [search?.["min"]]
-    : null,
+    filteredValue: search?.["min"] ? [search?.["min"]] : null,
     ...getColumnSearchProps(
       search,
       "min",
@@ -121,7 +122,7 @@ export const columnsDetail = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text, row, index) => {
       let obj = {
@@ -132,7 +133,7 @@ export const columnsDetail = (
           separatorNumber(text),
           false,
           "input",
-          search
+          search,
         ),
         props: {
           colSpan: 1,
@@ -147,9 +148,7 @@ export const columnsDetail = (
     dataIndex: "maximumName",
     sorter: true,
     align: "right",
-    filteredValue: search?.["maximumName"]
-    ? [search?.["maximumName"]]
-    : null,
+    filteredValue: search?.["maximumName"] ? [search?.["maximumName"]] : null,
     ...getColumnSearchProps(
       search,
       "maximumName",
@@ -157,7 +156,7 @@ export const columnsDetail = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text, row, index) => {
       let obj = {
@@ -168,7 +167,7 @@ export const columnsDetail = (
           separatorNumber(text),
           false,
           "input",
-          search
+          search,
         ),
         props: {
           colSpan: 1,
@@ -184,15 +183,15 @@ export const columnsDetail = (
     sorter: true,
     align: "left",
     filteredValue: search?.["priceCodeName"]
-    ? [search?.["priceCodeName"]]
-    : null,
+      ? [search?.["priceCodeName"]]
+      : null,
     ...getColumnSearchProps(
       search,
       "priceCodeName",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text, row, index) => {
       let obj = {
@@ -203,7 +202,7 @@ export const columnsDetail = (
           text,
           false,
           "input",
-          search
+          search,
         ),
         props: {
           colSpan: 1,
@@ -262,9 +261,7 @@ export const columnsDetail = (
     dataIndex: "description",
     sorter: true,
     align: "left",
-    filteredValue: search?.["description"]
-    ? [search?.["description"]]
-    : null,
+    filteredValue: search?.["description"] ? [search?.["description"]] : null,
     ...getColumnSearchProps(
       search,
       "description",
@@ -272,7 +269,7 @@ export const columnsDetail = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -286,7 +283,7 @@ export const columnsDetail = (
           text,
           true,
           "input",
-          search
+          search,
         ),
         props: {
           colSpan: 1,
@@ -340,7 +337,7 @@ export const columnsDetail = (
                     r.type !== "exist"
                       ? () =>
                           handleDelete(
-                            `${r["priceCodeName"]}~${r["min"]}~${r["maximumName"]}`
+                            `${r["priceCodeName"]}~${r["min"]}~${r["maximumName"]}`,
                           )
                       : undefined
                   }

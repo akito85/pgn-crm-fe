@@ -32,7 +32,7 @@ export const getAllProductClassPaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailProductClass = createAsyncThunk(
@@ -48,11 +48,11 @@ export const getDetailProductClass = createAsyncThunk(
         thunkAPI.dispatch(setBodyError(error));
       }
       thunkAPI.dispatch(
-        validateError({ error, action: "DOWNLOAD_PRODUCT_CLASS", back: false })
+        validateError({ error, action: "DOWNLOAD_PRODUCT_CLASS", back: false }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const createProductClass = createAsyncThunk(
@@ -79,7 +79,7 @@ export const createProductClass = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateProductClass = createAsyncThunk(
@@ -89,7 +89,7 @@ export const updateProductClass = createAsyncThunk(
       const url = "/v1/dbs/api/productClass/update";
       const response = await productPromoHttpService.updateDataWithMethodPost(
         url,
-        body
+        body,
       );
       thunkAPI.dispatch(showModalSuccess(responseSuccess));
       return response.data;
@@ -109,7 +109,7 @@ export const updateProductClass = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const inactiveProductClass = createAsyncThunk(
@@ -119,7 +119,7 @@ export const inactiveProductClass = createAsyncThunk(
       const url = `/v1/dbs/api/productClass/${id}/activate`;
       const response = await productPromoHttpService.activationWithOutRemark(
         url,
-        id
+        id,
       );
       const successBody = {
         title: `Successful`,
@@ -150,7 +150,7 @@ export const inactiveProductClass = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const downloadProductClass = createAsyncThunk(
@@ -165,13 +165,13 @@ export const downloadProductClass = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "DOWNLOAD_PRODUCT_CLASS", back: false })
+        validateError({ error, action: "DOWNLOAD_PRODUCT_CLASS", back: false }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 const productClassSlice = createSlice({

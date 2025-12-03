@@ -217,13 +217,14 @@ const ContactOverview = ({
       title: "CONTACT ADDRESS",
       dataIndex: "contactAddress",
       sorter: true,
-      width:700,
+      width: 700,
       ellipsis: {
         showTitle: false,
       },
       ...getColumnSearchProps("contactAddress"),
       render: (contactAddress) => {
-        if (isNaN(contactAddress)) { //is not a number
+        if (isNaN(contactAddress)) {
+          //is not a number
           const name = dataAddress
             ?.filter((a) => a.tempId === contactAddress)
             ?.find((b) => b.fullAddress)?.fullAddress;
@@ -301,7 +302,7 @@ const ContactOverview = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch = () => {}
+      handleSearch = () => {},
     ) => {
       return [
         {
@@ -320,7 +321,7 @@ const ContactOverview = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
           render: (type) => {
             if (typeof type !== "string") {
@@ -345,40 +346,47 @@ const ContactOverview = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
-          render: (v,record,i) => {
+          render: (v, record, i) => {
             // console.log(value,"value")
             const prefixName1 =
               data_countryCode &&
               data_countryCode
-                ?.filter((a) => a.id === 
-                // prefix1[`${record.row}~${record.key}`]
-                record?.prefix1
+                ?.filter(
+                  (a) =>
+                    a.id ===
+                    // prefix1[`${record.row}~${record.key}`]
+                    record?.prefix1,
                 )
                 .find((b) => b.name)?.name;
 
             const prefixName2 =
               data_countryZone &&
               data_countryZone
-                ?.filter((a) => a.id === 
-                record?.prefix2
-                // prefix2[`${record.row}~${record.key}`]
+                ?.filter(
+                  (a) => a.id === record?.prefix2,
+                  // prefix2[`${record.row}~${record.key}`]
                 )
                 .find((b) => b.text)?.text;
 
             // console.log(`index ${record.row} valueOverview ${value[`${record.row}~${record.key}`]} prefixName1 ${prefixName1} prefixName2 ${prefixName2} suffix ${suffix[`${keyModal}~${record.key}`]} record ${record.type} record ${record.inputType} hasValue ${hasValue(prefixName1)}`);
             const tempValue = record?.value;
-            // value[`${record.row}~${record.key}`] || 
-            
+            // value[`${record.row}~${record.key}`] ||
 
-            if (prefixName1 !== undefined && prefixName1 !== null && prefixName1 !== "") {
+            if (
+              prefixName1 !== undefined &&
+              prefixName1 !== null &&
+              prefixName1 !== ""
+            ) {
               if (record.type === 741) {
                 if (record.inputType === 748) {
                   return (
-                    <span>{`(${prefixName1}) (${prefixName2}) - ${tempValue}  
+                    <span>{`(${prefixName1}) (${prefixName2}) - ${tempValue}
                     ${
-                      record.suffix === null || record.suffix === 0 ? "" : 'Ext. ' + record.suffix
+                      record.suffix === null || record.suffix === 0
+                        ? ""
+                        : "Ext. " + record.suffix
                       // suffix[`${record.row}~${record.key}`] ? suffix[`${record.row}~${record.key}`] : ""
                     }
                     `}</span>
@@ -395,7 +403,7 @@ const ContactOverview = ({
               }
               if (record.type === 745) {
                 return (
-                  <span>{`(${prefixName1}) (${prefixName2}) - ${tempValue} ${record.suffix === null  || record.suffix === 0  ? "" : 'Ext. ' + record.suffix}`}</span>
+                  <span>{`(${prefixName1}) (${prefixName2}) - ${tempValue} ${record.suffix === null || record.suffix === 0 ? "" : "Ext. " + record.suffix}`}</span>
                 );
               } else {
                 return <span>{tempValue}</span>;
@@ -478,17 +486,21 @@ const ContactOverview = ({
       for (let i = 1; i <= 4; i++) {
         if (resetField[0].key === i) {
           setContactTable((prevState) => {
-            let tempTable =  prevState.filter((e) => e.key !== r.key);
+            let tempTable = prevState.filter((e) => e.key !== r.key);
             const updatedObj = {};
 
             tempTable.forEach((item, index) => {
-              updatedObj[`contactAddress${index+1}`] = isNaN(item.contactAddress) ? item.contactAddress : parseInt(item.contactAddress);
-              updatedObj[`additionalNote${index+1}`] = item.additionalNote;
-              updatedObj[`description${index+1}`] = item.description;
+              updatedObj[`contactAddress${index + 1}`] = isNaN(
+                item.contactAddress,
+              )
+                ? item.contactAddress
+                : parseInt(item.contactAddress);
+              updatedObj[`additionalNote${index + 1}`] = item.additionalNote;
+              updatedObj[`description${index + 1}`] = item.description;
             });
             form.setFieldsValue({
-              ...updatedObj
-            })
+              ...updatedObj,
+            });
             // console.log("updatedObj", updatedObj);
             // const fieldsToReset = [
             //   `contactAddress${i}`,
@@ -510,11 +522,11 @@ const ContactOverview = ({
             }));
 
             form.resetFields([
-              `contactAddress${tempTable.length+1}`,
-              `additionalNote${tempTable.length+1}`, 
-              `description${tempTable.length+1}`
+              `contactAddress${tempTable.length + 1}`,
+              `additionalNote${tempTable.length + 1}`,
+              `description${tempTable.length + 1}`,
             ]);
-            
+
             return tempTable.map((item, index) => {
               return {
                 ...item,
@@ -522,7 +534,7 @@ const ContactOverview = ({
                 key: index + 1,
               };
             });
-          })
+          });
           // const fieldsToReset = [
           //   `contactAddress${i}`,
           //   `additionalNote${i}`,
@@ -541,7 +553,7 @@ const ContactOverview = ({
         }
       }
     },
-    [contactTable]
+    [contactTable],
   );
 
   return (

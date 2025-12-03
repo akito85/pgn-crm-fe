@@ -3,9 +3,7 @@ import {
   renderColumn,
   renderDateColumn,
 } from "../../../../../../utils";
-import {
-  getColumnSearchPropsUseFilteredValue,
-} from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
 export const columnsPayment = (
   page = 1,
@@ -14,7 +12,7 @@ export const columnsPayment = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  search
+  search,
 ) => [
   {
     title: "NO",
@@ -35,7 +33,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -45,15 +43,13 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     title: "RECEIPT DATE",
     sorter: true,
-    filteredValue: search?.["receiptDate"]
-      ? [search?.["receiptDate"]]
-      : null,
+    filteredValue: search?.["receiptDate"] ? [search?.["receiptDate"]] : null,
     align: "center",
     dataIndex: "receiptDate",
     ...getColumnSearchPropsUseFilteredValue(
@@ -64,7 +60,7 @@ export const columnsPayment = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -73,7 +69,7 @@ export const columnsPayment = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (text) =>
     //   searchedColumn === "receiptDate" ? (
@@ -100,9 +96,7 @@ export const columnsPayment = (
     title: "CURRENCY",
     dataIndex: "currency",
     sorter: true,
-    filteredValue: search?.["currency"]
-      ? [search?.["currency"]]
-      : null,
+    filteredValue: search?.["currency"] ? [search?.["currency"]] : null,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -111,7 +105,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -121,7 +115,7 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -139,7 +133,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -149,7 +143,7 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -167,7 +161,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -177,7 +171,7 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -195,7 +189,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -205,7 +199,7 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -223,7 +217,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -233,16 +227,14 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     title: "AMOUNT",
     dataIndex: "amount",
     sorter: true,
-    filteredValue: search?.["amount"]
-      ? [search?.["amount"]]
-      : null,
+    filteredValue: search?.["amount"] ? [search?.["amount"]] : null,
     align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -251,7 +243,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -261,16 +253,14 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     title: "PAYMENT TYPE",
     dataIndex: "paymentType",
     sorter: true,
-    filteredValue: search?.["paymentType"]
-      ? [search?.["paymentType"]]
-      : null,
+    filteredValue: search?.["paymentType"] ? [search?.["paymentType"]] : null,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -279,7 +269,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -289,16 +279,14 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     title: "METHOD",
     dataIndex: "method",
     sorter: true,
-    filteredValue: search?.["method"]
-      ? [search?.["method"]]
-      : null,
+    filteredValue: search?.["method"] ? [search?.["method"]] : null,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -307,7 +295,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -317,7 +305,7 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -334,7 +322,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -344,7 +332,7 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -362,7 +350,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -372,16 +360,14 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     title: "BANK",
     dataIndex: "bank",
     sorter: true,
-    filteredValue: search?.["bank"]
-      ? [search?.["bank"]]
-      : null,
+    filteredValue: search?.["bank"] ? [search?.["bank"]] : null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "bank",
@@ -389,7 +375,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -399,7 +385,7 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -417,7 +403,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -427,7 +413,7 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -445,7 +431,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -455,16 +441,14 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     title: "RATE TYPE",
     dataIndex: "rateType",
     sorter: true,
-    filteredValue: search?.["rateType"]
-      ? [search?.["rateType"]]
-      : null,
+    filteredValue: search?.["rateType"] ? [search?.["rateType"]] : null,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -473,7 +457,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -483,15 +467,13 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
     title: "RATE DATE",
     sorter: true,
-    filteredValue: search?.["rateDate"]
-      ? [search?.["rateDate"]]
-      : null,
+    filteredValue: search?.["rateDate"] ? [search?.["rateDate"]] : null,
     align: "center",
     dataIndex: "rateDate",
     ...getColumnSearchPropsUseFilteredValue(
@@ -502,7 +484,7 @@ export const columnsPayment = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -511,7 +493,7 @@ export const columnsPayment = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (text) =>
     //   searchedColumn === "rateDate" ? (
@@ -538,9 +520,7 @@ export const columnsPayment = (
     title: "RATE AMOUNT",
     dataIndex: "rateAmount",
     sorter: true,
-    filteredValue: search?.["rateAmount"]
-      ? [search?.["rateAmount"]]
-      : null,
+    filteredValue: search?.["rateAmount"] ? [search?.["rateAmount"]] : null,
     align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -549,7 +529,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -559,7 +539,7 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   // {
@@ -632,7 +612,7 @@ export const columnsPayment = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -642,7 +622,7 @@ export const columnsPayment = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -661,7 +641,7 @@ export const columnsPayment = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -670,7 +650,7 @@ export const columnsPayment = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (text) =>
     //   searchedColumn === "bankStatementDate" ? (
@@ -696,9 +676,7 @@ export const columnsPayment = (
   {
     title: "CREATED DATE",
     sorter: true,
-    filteredValue: search?.["createdDate"]
-      ? [search?.["createdDate"]]
-      : null,
+    filteredValue: search?.["createdDate"] ? [search?.["createdDate"]] : null,
     align: "center",
     dataIndex: "createdDate",
     ...getColumnSearchPropsUseFilteredValue(
@@ -709,7 +687,7 @@ export const columnsPayment = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -718,7 +696,7 @@ export const columnsPayment = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (text) =>
     //   searchedColumn === "createdDate" ? (

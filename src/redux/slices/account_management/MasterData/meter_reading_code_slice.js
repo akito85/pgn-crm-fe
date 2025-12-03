@@ -32,11 +32,11 @@ export const getMeterReadingCodePaginate = createAsyncThunk(
           error: error,
           action: "GET_METER_READING_CODE_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadMeterReadingCode = createAsyncThunk(
@@ -55,11 +55,11 @@ export const downloadMeterReadingCode = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_METER_READING_CODE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getDetailMeterReadingCode = createAsyncThunk(
@@ -75,11 +75,11 @@ export const getDetailMeterReadingCode = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_METER_READING_CODE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const createMeterReadingCode = createAsyncThunk(
   "CREATE_METER_READING_CODE",
@@ -100,11 +100,11 @@ export const createMeterReadingCode = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_METER_READING_CODE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const updateMeterReadingCode = createAsyncThunk(
   "UPDATE_METER_READING_CODE",
@@ -124,11 +124,11 @@ export const updateMeterReadingCode = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_METER_READING_CODE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const activationMeterReadingCode = createAsyncThunk(
   "ACTIVATION_METER_READING_CODE",
@@ -149,11 +149,11 @@ export const activationMeterReadingCode = createAsyncThunk(
           error: error,
           action: "ACTIVATION_METER_READING_CODE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListCostCenterMeterReading = createAsyncThunk(
@@ -180,7 +180,7 @@ export const getListCostCenterMeterReading = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const meterReadingCodeSlice = createSlice({

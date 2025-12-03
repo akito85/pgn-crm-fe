@@ -47,7 +47,7 @@ const EditableCell = ({
   ...restProps
 }) => {
   console.log(validateStartDate, validateEndDate);
-  
+
   // const [form] = Form.useForm();
   // const [visiblePassword, setVisiblePassword] = useState(false);
   const key = record?.key || 0;
@@ -68,25 +68,27 @@ const EditableCell = ({
 
   const handleDisableDate = (current) => {
     if (hasValue(validateEndDate) === false && hasValue(validateStartDate)) {
-      if (dataIndex === 'startDate') {
+      if (dataIndex === "startDate") {
         const startDate = moment(validateStartDate).startOf("day");
-        return current.isBefore(startDate)
+        return current.isBefore(startDate);
       } else {
         return current && current < moment(form.getFieldValue("startDate"));
       }
     } else if (validateStartDate && validateEndDate) {
       const startDate = moment(validateStartDate).startOf("day");
       const endDate = moment(validateEndDate).endOf("day");
-      if (dataIndex === 'startDate') {
-        return current.isBefore(startDate) || current.isAfter(endDate);        
+      if (dataIndex === "startDate") {
+        return current.isBefore(startDate) || current.isAfter(endDate);
       } else {
-        return  current < moment(form.getFieldValue("startDate")) || current.isAfter(endDate);
+        return (
+          current < moment(form.getFieldValue("startDate")) ||
+          current.isAfter(endDate)
+        );
       }
     } else {
       return current && current < moment().add(-1, "days");
     }
   };
-
 
   const getInputNode = (inputType, options) => {
     switch (inputType) {
@@ -234,8 +236,8 @@ const DynamicTableInlinePaymentAll = ({
   action,
   useSelect = false,
   usePagination = false,
-  onChangePage = () => { },
-  onSizeChanger = () => { },
+  onChangePage = () => {},
+  onSizeChanger = () => {},
   pageSize,
   current,
   totalData,
@@ -264,7 +266,7 @@ const DynamicTableInlinePaymentAll = ({
   const [statusAction, setStatusAction] = useState("");
   const [isSame, setIsSame] = useState(false);
   const [isValid, setIsValid] = useState(true);
-console.log(startDateHeader, 'start dtae', endDateHeader, 'end date header');
+  console.log(startDateHeader, "start dtae", endDateHeader, "end date header");
 
   // useEffect(() => {
   //   if (mode === "update") {
@@ -281,11 +283,11 @@ console.log(startDateHeader, 'start dtae', endDateHeader, 'end date header');
       startDate: moment(record.startDate),
       endDate: record.endDate ? moment(record.endDate) : undefined,
     });
-    onDataChange(tableData)
+    onDataChange(tableData);
     setEditingKey(record.key);
     setStoredData(true);
     setStatusAction("edit");
-    setIsInsert(true)
+    setIsInsert(true);
   };
   const cancel = (key) => {
     if (statusAction === "add") {
@@ -451,7 +453,7 @@ console.log(startDateHeader, 'start dtae', endDateHeader, 'end date header');
                             />
                           }
                           border={false}
-                        // onClick={() => onDetail(record?.id)}
+                          // onClick={() => onDetail(record?.id)}
                         >
                           <span className={"text-[#C0BEC6]"}> Detail</span>
                         </ButtonComponent>
@@ -646,10 +648,10 @@ console.log(startDateHeader, 'start dtae', endDateHeader, 'end date header');
                     onInput: col.onInput,
                     maxLength: col.maxLength,
                     validateStartDate: startDateHeader,
-                    validateEndDate: endDateHeader
+                    validateEndDate: endDateHeader,
                   }),
                 };
-              })
+              }),
             )}
             rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
             components={{
@@ -754,7 +756,7 @@ console.log(startDateHeader, 'start dtae', endDateHeader, 'end date header');
                   maxLength: col.maxLength,
                 }),
               };
-            })
+            }),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

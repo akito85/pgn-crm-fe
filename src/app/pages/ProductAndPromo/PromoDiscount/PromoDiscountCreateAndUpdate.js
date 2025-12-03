@@ -173,7 +173,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
             // urlFile1: `${urlLink(item?.id)}`,
             dataType: "exist",
           };
-        })
+        }),
       );
 
       form.setFieldsValue({
@@ -192,7 +192,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       setListDataCriteria(
         handleDisabledEachColumnCriteria({
           dataDetail: dataDetail?.productPromoCriteriaDataDtos.filter(
-            (data) => data?.allCriteria !== true
+            (data) => data?.allCriteria !== true,
           ),
           dataCompare: dataCompare,
           idName: "idPromo",
@@ -201,7 +201,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
           statusApproval: dataDetail?.statusApproval,
           columnsTable: columnsTableCriteriaPromo(),
           dataListCriteria: dataListCriteria,
-        })
+        }),
       );
       setListDataCondition(
         dataDetail?.productPromoConditionDtos?.map((item) => {
@@ -209,10 +209,10 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
             ...item,
             value: item?.adjustmentValue,
           };
-        })
+        }),
       );
     },
-    [form]
+    [form],
   );
 
   useEffect(() => {
@@ -239,7 +239,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
         handleAssertData(
           body,
           data_promoDiscountDetail?.productPromoCriteriaDataDtos || [],
-          dataListCriteria
+          dataListCriteria,
         );
       } else {
         handleAssertData(data_promoDiscountDetail, [], dataListCriteria);
@@ -381,7 +381,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
 
   const formatCriteria = (data = []) => {
     const tempArray = criteriaOptions.filter((item) =>
-      data.includes(item.value)
+      data.includes(item.value),
     );
     return tempArray
       .map((data) => data.name)
@@ -411,7 +411,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       };
       dispatch(showModalSuccess(successMessage));
     },
-    [dispatch]
+    [dispatch],
   );
 
   const handleBodyConfirm = useCallback(
@@ -423,7 +423,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
           columnsTable: columnsTableCriteriaPromo(),
           criteriaValues: criteriaValues,
           dataListCriteria: dataListCriteria,
-        })
+        }),
       );
 
       let criteriaArrayObject = bodyData.criteria.map((item) => {
@@ -483,7 +483,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       listDataCondition,
       listDataCriteria,
       type,
-    ]
+    ],
   );
 
   // Handle Save
@@ -528,10 +528,10 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
             setBodyData({
               ...formValue,
               typeName: data_promo_type?.find(
-                (item) => item?.id === formValue?.promoType
+                (item) => item?.id === formValue?.promoType,
               )?.text,
               categoryName: data_promo_category?.find(
-                (item) => item?.id === formValue?.promoCategory
+                (item) => item?.id === formValue?.promoCategory,
               )?.text,
               status:
                 type === "update"
@@ -559,10 +559,10 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
               body: handleBodyConfirm({
                 ...formValue,
                 typeName: data_promo_type?.find(
-                  (item) => item?.id === formValue?.promoType
+                  (item) => item?.id === formValue?.promoType,
                 )?.text,
                 categoryName: data_promo_category?.find(
-                  (item) => item?.id === formValue?.promoCategory
+                  (item) => item?.id === formValue?.promoCategory,
                 )?.text,
               }),
               services: productPromoHttpService,
@@ -591,7 +591,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       data_promo_category,
       handleBodyConfirm,
       type,
-    ]
+    ],
   );
 
   const handleConfirm = () => {
@@ -604,7 +604,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
         columnsTable: columnsTableCriteriaPromo(),
         criteriaValues: criteriaValues,
         dataListCriteria: dataListCriteria,
-      })
+      }),
     );
 
     let criteriaArrayObject = bodyData.criteria.map((item) => {
@@ -661,7 +661,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
         const idData = dataForm?.id;
         setLoadingForm(true);
         const filterDataAttach = listDataAttachment.filter(
-          (item) => item.dataType !== "exist"
+          (item) => item.dataType !== "exist",
         );
         for (let icon = 0; icon < filterDataAttach.length; icon++) {
           const element = filterDataAttach[icon];
@@ -672,7 +672,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
           };
           await productPromoHttpService.uploadAttachment(
             `/v1/dbs/api/product-promo/upload-attachment`,
-            body
+            body,
           );
         }
         setLoadingForm(false);
@@ -721,7 +721,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
             // urlFile1: `${urlLink(item?.id)}`,
             dataType: "exist",
           };
-        })
+        }),
       );
       if (
         //draft
@@ -737,7 +737,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
         handleAssertData(
           body,
           data_promoDiscountDetail?.productPromoCriteriaDataDtos || [],
-          dataListCriteria
+          dataListCriteria,
         );
       } else {
         handleAssertData(data_promoDiscountDetail, [], dataListCriteria);

@@ -24,13 +24,13 @@ export const getMaintenanceMode = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_MAINTENANCE_MODE" })
+        validateError({ error, action: "GET_MAINTENANCE_MODE" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getMaintenanceModeDetail = createAsyncThunk(
@@ -42,13 +42,13 @@ export const getMaintenanceModeDetail = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_MAINTENANCE_MODE_DETAIL" })
+        validateError({ error, action: "GET_MAINTENANCE_MODE_DETAIL" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const createMaintenanceMode = createAsyncThunk(
@@ -74,7 +74,7 @@ export const createMaintenanceMode = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "CREATE_MAINTENANCE_MODE" })
+            validateError({ error, action: "CREATE_MAINTENANCE_MODE" }),
           );
         } else {
           const errorBody = {
@@ -87,7 +87,7 @@ export const createMaintenanceMode = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateMaintenanceMode = createAsyncThunk(
@@ -113,7 +113,7 @@ export const updateMaintenanceMode = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "UPDATE_MAINTENANCE_MODE" })
+            validateError({ error, action: "UPDATE_MAINTENANCE_MODE" }),
           );
         } else {
           const errorBody = {
@@ -126,7 +126,7 @@ export const updateMaintenanceMode = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 const maintenanceModeSlice = createSlice({

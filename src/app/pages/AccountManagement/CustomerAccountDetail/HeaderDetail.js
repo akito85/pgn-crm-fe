@@ -1,8 +1,9 @@
 import { Fragment } from "react";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import DetailText from "../../../../components/DetailText";
 import BaseContainer from "../../../../components/BaseContainer";
-import { useSelector } from "react-redux";
+import StatusComponent from "../../../../components/StatusComponent";
+import { useDispatch, useSelector } from "react-redux";
 import {
   getAccountOneTimeDetail,
   getAccountStandardDetail,
@@ -17,8 +18,8 @@ const HeaderDetail = ({
   idAccount = 0,
 }) => {
   const { data_accountDetail } = useSelector(
-    (state) => state.accountManagement
-    );
+    (state) => state.accountManagement,
+  );
 
   useEffect(() => {
     if (idAccount && idCustomer && type) {
@@ -53,7 +54,7 @@ const HeaderDetail = ({
           <DetailText label="Birth/Founded Date">
             {renderDate(
               data_accountDetail?.accountSummary?.birthFoundedDate,
-              "date"
+              "date",
             )}
           </DetailText>
           <DetailText label="Birth/Founded Place">

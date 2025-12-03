@@ -61,7 +61,7 @@ const UploadLayout = ({
   const dispatch = useDispatch();
 
   const { list_usage_type, updatedData, deletedData } = useSelector(
-    (state) => state.monitoring_usage
+    (state) => state.monitoring_usage,
   );
   useEffect(() => {
     try {
@@ -96,7 +96,7 @@ const UploadLayout = ({
     const updatedData = { record };
     setDataSource((prevDataSource) => {
       return prevDataSource.map((data) =>
-        data.key === record.key ? { ...data, ...updatedData } : data
+        data.key === record.key ? { ...data, ...updatedData } : data,
       );
     });
     setSelectedRecord(null);
@@ -215,7 +215,7 @@ const UploadLayout = ({
             return { ...file, status: "error" };
           }
           return file;
-        })
+        }),
       );
     }
     setLoadingUpload(false);
@@ -237,7 +237,7 @@ const UploadLayout = ({
             return { ...file, status: "error" };
           }
           return file;
-        })
+        }),
       );
     }
   };
@@ -268,7 +268,7 @@ const UploadLayout = ({
         ...file,
         percent: 0,
         status: "uploading",
-      }))
+      })),
     );
     handleUpload();
   };

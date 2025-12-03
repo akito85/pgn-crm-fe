@@ -3,24 +3,38 @@ import React, { useEffect } from "react";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import FunctionalTableInlineAccount from "./FunctionalTableInlineAccount";
 import { Form, Spin } from "antd";
-import { additionalInformationTable, itemActionViewAdditionalInfoTable } from "./AdditionalInformationDetail";
+import {
+  additionalInformationTable,
+  itemActionViewAdditionalInfoTable,
+} from "./AdditionalInformationDetail";
 import { useDispatch, useSelector } from "react-redux";
-import {createUpdateAdditionalInfo, deleteAdditonalInfo, getAccountAdditionalInfo, getValueAdditionalInfoList } from "../../../../../../redux/slices/account_management/detailAccount/additionalInformation";
+import {
+  createUpdateAdditionalInfo,
+  deleteAdditonalInfo,
+  getAccountAdditionalInfo,
+  getValueAdditionalInfoList,
+} from "../../../../../../redux/slices/account_management/detailAccount/additionalInformation";
 import { dateFormatting, hasValue } from "../../../../../../utils";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";
-import { showModalSuccess, validateCreateUpdate } from "../../../../../../redux/slices/general_slice";
+import {
+  showModalSuccess,
+  validateCreateUpdate,
+} from "../../../../../../redux/slices/general_slice";
 import DetailText from "../../../../../../components/DetailText";
-import { ModalConfirm, ModalError } from "../../../../../../components/Modal/ModalPopUp";
+import {
+  ModalConfirm,
+  ModalError,
+} from "../../../../../../components/Modal/ModalPopUp";
 import { WarningOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import moment from "moment";
 import CardComponent from "../../../../../../components/Card/CardComponent";
 
-const AdditionalInformation = ({idAccount = 0}) => {
+const AdditionalInformation = ({ idAccount = 0 }) => {
   const { data, data_category, data_value, loading } = useSelector(
-    (state) => state.additionalInformation
+    (state) => state.additionalInformation,
   );
 
   const dispatch = useDispatch();
@@ -47,48 +61,60 @@ const AdditionalInformation = ({idAccount = 0}) => {
   }, [dispatch, idAccount]);
 
   useEffect(() => {
-    setListAdditionalInfo(data?.map((item, index) => {
-      return {
-        key: index + 1,
-        id: item?.id || null,
-        category: {
-          value: item?.informationType,
-          label: item?.informationTypeVal
-        },
-        value: !hasValue(item.valueStr) ? ({
-          value: item?.valueIntDdl?.id,
-          label: item?.valueIntDdl?.value
-        }) : item.valueStr,
-        createdDate: moment(item?.createdDate).format(dateFormatting.dateTime),
-        createdBy: item?.createdBy,
-        updatedDate: item?.updatedDate ? moment(item?.updatedDate).format(dateFormatting.dateTime) : "",
-        updatedBy: item?.updatedBy,
-      }
-    }));
+    setListAdditionalInfo(
+      data?.map((item, index) => {
+        return {
+          key: index + 1,
+          id: item?.id || null,
+          category: {
+            value: item?.informationType,
+            label: item?.informationTypeVal,
+          },
+          value: !hasValue(item.valueStr)
+            ? {
+                value: item?.valueIntDdl?.id,
+                label: item?.valueIntDdl?.value,
+              }
+            : item.valueStr,
+          createdDate: moment(item?.createdDate).format(
+            dateFormatting.dateTime,
+          ),
+          createdBy: item?.createdBy,
+          updatedDate: item?.updatedDate
+            ? moment(item?.updatedDate).format(dateFormatting.dateTime)
+            : "",
+          updatedBy: item?.updatedBy,
+        };
+      }),
+    );
   }, [data]);
 
   useEffect(() => {
-    if(data_category && listAdditionalInfo && listAdditionalInfo.length > 0){
+    if (data_category && listAdditionalInfo && listAdditionalInfo.length > 0) {
       setFilteredCategoryList(
         data_category?.filter(
           (item) =>
-            !listAdditionalInfo?.map((data) => data?.category?.value)?.includes(item?.value)
-        )
+            !listAdditionalInfo
+              ?.map((data) => data?.category?.value)
+              ?.includes(item?.value),
+        ),
       );
     }
   }, [data_category, listAdditionalInfo]);
-  
+
   const handleDescriptionSuccess = useCallback(
     (flag) => {
-      setLoadingForm(false)
+      setLoadingForm(false);
       const successMessage = {
         title: "Successful",
-        description: hasValue(flag) ? "Your data has been updated" : "Your data has been created",
+        description: hasValue(flag)
+          ? "Your data has been updated"
+          : "Your data has been created",
         return: false,
       };
       dispatch(showModalSuccess(successMessage));
     },
-    [dispatch, setLoadingForm]
+    [dispatch, setLoadingForm],
   );
 
   // Function Save Data
@@ -100,8 +126,7 @@ const AdditionalInformation = ({idAccount = 0}) => {
           id: editDataRecord[key + "id"] || null,
           accountId: idAccount,
           informationType: editDataRecord[key + "category"],
-          valueStr:
-            typeof row?.value === "object" ? null : row?.value || null,
+          valueStr: typeof row?.value === "object" ? null : row?.value || null,
           valueIntDdl: {
             id: row?.value?.value || null,
             value: row?.value?.label || "",
@@ -109,7 +134,7 @@ const AdditionalInformation = ({idAccount = 0}) => {
         };
 
         setBodyData(body);
-        
+
         const validateValueObj = {
           body: {
             ...body,
@@ -126,7 +151,7 @@ const AdditionalInformation = ({idAccount = 0}) => {
         console.log("Validate Failed:", errInfo);
       }
     },
-    [formTable, editDataRecord, idAccount, statusAction, dispatch]
+    [formTable, editDataRecord, idAccount, statusAction, dispatch],
   );
 
   // Function Edit Data
@@ -135,21 +160,23 @@ const AdditionalInformation = ({idAccount = 0}) => {
       setFilteredCategoryList(
         data_category?.filter(
           (item) =>
-            !listAdditionalInfo?.map((data) => data?.category?.value)?.includes(item?.value) ||
-            item?.value === record?.category?.value
-        )
+            !listAdditionalInfo
+              ?.map((data) => data?.category?.value)
+              ?.includes(item?.value) ||
+            item?.value === record?.category?.value,
+        ),
       );
       setStoredData(true);
       setStatusAction("edit");
       formTable.setFieldsValue({
         ...record,
       });
-      
+
       const { key, ...extraProps } = record || {};
       const tempValue = { ...extraProps };
 
       const ddlHasAnyChild = data_category.find(
-        (item) => item.value === tempValue?.category.value
+        (item) => item.value === tempValue?.category.value,
       )?.isAnyChild;
 
       for (const attribute in tempValue) {
@@ -174,7 +201,7 @@ const AdditionalInformation = ({idAccount = 0}) => {
         dispatch(getValueAdditionalInfoList(record?.category?.value));
       }
     },
-    [data_category, formTable, data, dispatch]
+    [data_category, formTable, data, dispatch],
   );
 
   // Handle Edit Data Record
@@ -183,7 +210,8 @@ const AdditionalInformation = ({idAccount = 0}) => {
       const keyName = key + index;
       let value;
       switch (
-        additionalInformationTable().find((item) => item?.dataIndex === index)?.inputType
+        additionalInformationTable().find((item) => item?.dataIndex === index)
+          ?.inputType
       ) {
         case "input":
         case "number":
@@ -192,7 +220,7 @@ const AdditionalInformation = ({idAccount = 0}) => {
         case "select":
           value = data;
           break;
-        case "dynamic":          
+        case "dynamic":
           value = editDataRecord[key + "category"]?.isAnyChild
             ? data
             : data?.target?.value;
@@ -201,9 +229,9 @@ const AdditionalInformation = ({idAccount = 0}) => {
           value = data?.target?.value;
           break;
       }
-      
+
       const ddlHasAnyChild = data_category.find(
-        (item) => item.value === value.value
+        (item) => item.value === value.value,
       )?.isAnyChild;
 
       setEditDataRecord((prevState) => {
@@ -215,7 +243,7 @@ const AdditionalInformation = ({idAccount = 0}) => {
                   ...value,
                   isAnyChild: ddlHasAnyChild,
                 }
-              : {...value},
+              : { ...value },
         };
       });
 
@@ -233,77 +261,86 @@ const AdditionalInformation = ({idAccount = 0}) => {
       }
       return value;
     },
-    [dispatch, formTable, setEditDataRecord, editDataRecord]
+    [dispatch, formTable, setEditDataRecord, editDataRecord],
   );
-  
-  const handleConfirm = useCallback((bodyData) => {
-    const body = {
-      ...bodyData,
-      informationType: bodyData?.informationType?.value,
-    };
-    dispatch(createUpdateAdditionalInfo({body})).unwrap()
-    .then(async () => {
-      setLoadingForm(true)
-      setModalConfirm(false)
-      dispatch(getAccountAdditionalInfo(idAccount))
-      handleDescriptionSuccess(bodyData?.id);
-      setStatusAction("")
-      setStoredData(false)
-      setEditingKey("")
-    })
-    .catch((error) => {
-      if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-        const message =
-          (error.response &&
-            error.response.data &&
-            error.response.data.message) ||
-          error.message ||
-          error.toString();
-        setLoadingForm(false)
-        setBodyError({ message, body});
-        setModalError(true);
-      }
-    });
 
-  },[dispatch, handleDescriptionSuccess, idAccount]);
+  const handleConfirm = useCallback(
+    (bodyData) => {
+      const body = {
+        ...bodyData,
+        informationType: bodyData?.informationType?.value,
+      };
+      dispatch(createUpdateAdditionalInfo({ body }))
+        .unwrap()
+        .then(async () => {
+          setLoadingForm(true);
+          setModalConfirm(false);
+          dispatch(getAccountAdditionalInfo(idAccount));
+          handleDescriptionSuccess(bodyData?.id);
+          setStatusAction("");
+          setStoredData(false);
+          setEditingKey("");
+        })
+        .catch((error) => {
+          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+            const message =
+              (error.response &&
+                error.response.data &&
+                error.response.data.message) ||
+              error.message ||
+              error.toString();
+            setLoadingForm(false);
+            setBodyError({ message, body });
+            setModalError(true);
+          }
+        });
+    },
+    [dispatch, handleDescriptionSuccess, idAccount],
+  );
 
   const handleDeleted = useCallback((record) => {
-    setBodyData(record)
-    setModalDelete(true)
-  },[])
+    setBodyData(record);
+    setModalDelete(true);
+  }, []);
 
-  const deleted = useCallback((bodyData) => {
-    dispatch(deleteAdditonalInfo(bodyData?.id)).unwrap()
-    .then(async () => {
-      setModalDelete(false)
-      dispatch(getAccountAdditionalInfo(idAccount))
-      setStoredData(false)
-      setStatusAction("")
-      setEditingKey("")
-    })
-    .catch((error) => {
-      if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-        const message =
-          (error.response &&
-            error.response.data &&
-            error.response.data.message) ||
-          error.message ||
-          error.toString();
-        setLoadingForm(false)
-        setBodyError({ message, body: bodyData});
-        setModalError(true);
+  const deleted = useCallback(
+    (bodyData) => {
+      dispatch(deleteAdditonalInfo(bodyData?.id))
+        .unwrap()
+        .then(async () => {
+          setModalDelete(false);
+          dispatch(getAccountAdditionalInfo(idAccount));
+          setStoredData(false);
+          setStatusAction("");
+          setEditingKey("");
+        })
+        .catch((error) => {
+          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+            const message =
+              (error.response &&
+                error.response.data &&
+                error.response.data.message) ||
+              error.message ||
+              error.toString();
+            setLoadingForm(false);
+            setBodyError({ message, body: bodyData });
+            setModalError(true);
+          }
+        });
+    },
+    [dispatch, idAccount],
+  );
+
+  const handleRetry = useCallback(
+    (bodyError) => {
+      if (hasValue(statusAction)) {
+        handleConfirm(bodyError?.body);
+      } else {
+        deleted(bodyError?.body);
       }
-    });
-
-  },[dispatch, idAccount])
-
-  const handleRetry = useCallback((bodyError) => {
-    if(hasValue(statusAction)){
-      handleConfirm(bodyError?.body)
-    } else {
-      deleted(bodyError?.body)
-    }
-  },[statusAction, handleConfirm, deleted])
+    },
+    [statusAction, handleConfirm, deleted],
+  );
 
   const handleViewDetail = useCallback((record) => {
     return (
@@ -316,7 +353,7 @@ const AdditionalInformation = ({idAccount = 0}) => {
         </DetailText>
       </CardComponent>
     );
-  },[])
+  }, []);
 
   return (
     <Fragment>

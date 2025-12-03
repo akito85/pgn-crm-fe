@@ -31,12 +31,12 @@ export const getAllCostCenter = createAsyncThunk(
           error: error,
           action: "GET_ALL_MASTER_COST_CENTER",
           back: false,
-        })
+        }),
       );
 
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 // get update data cost center
 export const getUpdateCostCenter = createAsyncThunk(
@@ -51,11 +51,11 @@ export const getUpdateCostCenter = createAsyncThunk(
           error: error,
           action: "GET_UPDATE_COST_CENTER",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // create data cost center
@@ -77,11 +77,11 @@ export const createCostCenter = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_COST_CENTER",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // update data cost center
@@ -103,12 +103,12 @@ export const updateCostCenter = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_COST_CENTER",
           back: false,
-        })
+        }),
       );
 
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // get Hierarchy
@@ -121,11 +121,11 @@ export const getHierarchy = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_HIERARCHY", back: false })
+        validateError({ error: error, action: "GET_HIERARCHY", back: false }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // get Parent Hierarchy
@@ -136,7 +136,7 @@ export const getParent = createAsyncThunk("GET_PARENT", async (thunkAPI) => {
     return response.data;
   } catch (error) {
     thunkAPI.dispatch(
-      validateError({ error: error, action: "GET_PARENT", back: false })
+      validateError({ error: error, action: "GET_PARENT", back: false }),
     );
     return thunkAPI.rejectWithValue(error.response);
   }
@@ -150,7 +150,7 @@ export const getType = createAsyncThunk("GET_TYPE", async (thunkAPI) => {
     return data;
   } catch (error) {
     thunkAPI.dispatch(
-      validateError({ error: error, action: "GET_TYPE", back: false })
+      validateError({ error: error, action: "GET_TYPE", back: false }),
     );
     return thunkAPI.rejectWithValue(error.response);
   }
@@ -170,11 +170,11 @@ export const getSiblingByParent = createAsyncThunk(
           error: error,
           action: "GET_SIBLINGS_BY_PARENT_ID",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // slices get detail cost center
@@ -191,11 +191,11 @@ export const getCostCenterDetail = createAsyncThunk(
           error: error,
           action: "GET_COST_CENTER_DETAIL",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // slices get detail sibling
@@ -211,11 +211,11 @@ export const getSiblingDetail = createAsyncThunk(
           error: error,
           action: "GET_SIBLINGS_DETAIL",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // activate cost center slices
@@ -240,11 +240,11 @@ export const activateCostCenter = createAsyncThunk(
           error: errorBody(errorCode(response), status, errorMessage(response)),
           action: "INACTIVE_MASTER_JOB",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 // delete cost center
@@ -261,11 +261,11 @@ export const deleteCostCenter = createAsyncThunk(
           error: error,
           action: "DELETE_GLOBAL_TYPE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadMasterCostCenter = createAsyncThunk(
@@ -284,11 +284,11 @@ export const downloadMasterCostCenter = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_MASTER_COST_CENTER",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 const masterCostCenterSlice = createSlice({
   name: "master_cost_center",

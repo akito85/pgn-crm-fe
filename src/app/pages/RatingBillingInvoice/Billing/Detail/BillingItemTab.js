@@ -12,7 +12,7 @@ import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
   const { data_billingItem, data_ratingResult } = useSelector(
-    (state) => state.billing
+    (state) => state.billing,
   );
 
   const dispatch = useDispatch();
@@ -54,7 +54,7 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
         page: page,
         pageSize: pageSize,
         sort: sort,
-      })
+      }),
     );
   }, [dispatch, ratingCodeId, search, page, pageSize, sort]);
 
@@ -66,7 +66,7 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
         pageBI,
         pageSizeBI,
         sortBI,
-      })
+      }),
     );
   }, [dispatch, billingCodeId, searchBI, pageBI, pageSizeBI, sortBI]);
 
@@ -136,7 +136,7 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      searchBI
+      searchBI,
     );
   }, [pageBI, pageSizeBI, searchedColumnBI, searchTextBI, searchBI]);
 
@@ -166,7 +166,7 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
       searchedColumn,
       searchText,
       handleSearch,
-      search
+      search,
     );
   }, [page, pageSize, searchedColumn, searchText, search]);
 
@@ -219,7 +219,9 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
       disabled: true,
       children: (
         <div className="pt-4">
-          <p className="text-center text-gray-500">Promo information coming soon</p>
+          <p className="text-center text-gray-500">
+            Promo information coming soon
+          </p>
         </div>
       ),
     },

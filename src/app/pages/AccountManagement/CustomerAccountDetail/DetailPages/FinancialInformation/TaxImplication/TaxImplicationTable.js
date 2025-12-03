@@ -16,7 +16,7 @@ const TaxImplicationTable = ({
   searchedColumn,
   onSort = {},
   getColumnSearchProps = () => {},
-  handleDetail
+  handleDetail,
 }) => {
   const columns = [
     {
@@ -44,7 +44,7 @@ const TaxImplicationTable = ({
       dataIndex: "serviceType",
       width: 150,
       sorter: true,
-      align:"center",
+      align: "center",
       ...getColumnSearchProps("serviceType"),
     },
     {
@@ -52,7 +52,7 @@ const TaxImplicationTable = ({
       dataIndex: "type",
       width: 150,
       sorter: true,
-      align:"center",
+      align: "center",
       ...getColumnSearchProps("type"),
     },
     {
@@ -60,7 +60,7 @@ const TaxImplicationTable = ({
       dataIndex: "gunggung",
       width: 150,
       sorter: true,
-      align:"center",
+      align: "center",
       ...getColumnSearchProps("gunggung"),
     },
     {
@@ -68,7 +68,7 @@ const TaxImplicationTable = ({
       dataIndex: "vatInv",
       width: 175,
       sorter: true,
-      align:"center",
+      align: "center",
       ...getColumnSearchProps("vatInv"),
     },
     {
@@ -76,7 +76,7 @@ const TaxImplicationTable = ({
       dataIndex: "transCodeName",
       width: 150,
       sorter: true,
-      align:"center",
+      align: "center",
       ...getColumnSearchProps("transCodeName"),
     },
     {

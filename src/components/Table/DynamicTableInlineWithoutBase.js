@@ -911,7 +911,7 @@ const DynamicTableInlineWithoutBase = ({
         Object.values(row).some(
           (value) =>
             value === undefined ||
-            !checkValidationInside(selectDataRecord[`${key}type`], key)
+            !checkValidationInside(selectDataRecord[`${key}type`], key),
         )
       ) {
         setEmptyValueValidate(true);
@@ -1384,7 +1384,7 @@ const DynamicTableInlineWithoutBase = ({
                   getCountryZone: getCountryZone,
                 }),
               };
-            })
+            }),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

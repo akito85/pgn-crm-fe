@@ -1,5 +1,6 @@
+import { DownOutlined, UserOutlined } from "@ant-design/icons";
 import { Form, Table } from "antd";
-import { useState } from "react";
+import React, { useState } from "react";
 import BaseContainer from "../BaseContainer";
 import RadioTabs from "../RadioTabs";
 import CronDay from "./CronDay";

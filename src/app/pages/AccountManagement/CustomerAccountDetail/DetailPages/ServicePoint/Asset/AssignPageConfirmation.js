@@ -39,7 +39,9 @@ const AssignPageConfirmation = ({ data = {} }) => {
 
         {/* line3 */}
         <DetailText label="Brand">{data?.brandValue}</DetailText>
-        <DetailText label="Year">{moment(data?.year).format("YYYY")}</DetailText>
+        <DetailText label="Year">
+          {moment(data?.year).format("YYYY")}
+        </DetailText>
       </div>
 
       <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">

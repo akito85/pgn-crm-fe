@@ -177,7 +177,7 @@ const TableInlineCopied = (props) => {
   useEffect(() => {
     if (mode === "update") {
       setData(
-        tableData?.map((row, index) => ({ ...row, key: index.toString() }))
+        tableData?.map((row, index) => ({ ...row, key: index.toString() })),
       );
     }
   }, [mode, tableData]);

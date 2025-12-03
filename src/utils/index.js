@@ -162,7 +162,7 @@ export const renderDateColumn = (
   searchText,
   text,
   typeDate = "date",
-  search
+  search,
 ) => {
   if (searchedColumn) {
     return (
@@ -194,7 +194,7 @@ export const renderColumn = (
   text,
   useTooltip = false,
   type,
-  search = {}
+  search = {},
 ) => {
   // console.log(dataIndex, ' data index');
 
@@ -311,7 +311,7 @@ export const disabledActionByStatus = (action, status, statusApproval) => {
 export const countBadgeFieldsErrorMandatory = (
   setListSectionInfo = () => {},
   listDataAttachment,
-  errorFields
+  errorFields,
 ) => {
   setListSectionInfo((prevState) => {
     const res = prevState.map((item) => {
@@ -320,11 +320,11 @@ export const countBadgeFieldsErrorMandatory = (
           ? (errorFields || []).reduce(
               (current, next) =>
                 item.paramValue.includes(next.name[0]) ? current + 1 : current,
-              0
+              0,
             )
           : listDataAttachment.length < 1
-          ? 1
-          : 0;
+            ? 1
+            : 0;
       return {
         value: item.value,
         paramValue: item.paramValue,
@@ -345,7 +345,7 @@ export const convertToPascalCase = (str) => {
   return str
     .toLowerCase()
     .replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, (match, index) =>
-      match.toUpperCase().replace(/\s+/g, "")
+      match.toUpperCase().replace(/\s+/g, ""),
     );
 };
 export const convertToSnakeCase = (str) => {

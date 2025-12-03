@@ -119,7 +119,7 @@ const BillingCycleSectionForm = ({
                 (value && moment(startDate) <= moment(value)) || !value
                   ? Promise.resolve()
                   : Promise.reject(
-                      new Error("End date must before Start date")
+                      new Error("End date must before Start date"),
                     ),
             },
           ]}

@@ -27,7 +27,7 @@ const getColumnSearchProps = (
   handleSearch,
   excludeRender = false,
   onFilter = (value, record) =>
-    record[dataIndex]?.toString()?.toLowerCase()?.includes(value.toLowerCase())
+    record[dataIndex]?.toString()?.toLowerCase()?.includes(value.toLowerCase()),
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
@@ -93,7 +93,7 @@ const columnAttachment = (
   handleSearch = () => {},
   handleDelete = () => {},
   handleShow = () => {},
-  type
+  type,
 ) => {
   const res = [
     {
@@ -113,7 +113,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -129,7 +129,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (filename) => (
         <Tooltip placement="topLeft" title={filename}>
@@ -147,7 +147,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -160,7 +160,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -174,7 +174,7 @@ const columnAttachment = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (fileSize, r, i) => (
         <span>
@@ -221,7 +221,7 @@ const columnAttachment = (
   return type !== "detail"
     ? res.filter(
         (column) =>
-          column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate"
+          column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate",
       )
     : res;
 };
@@ -333,7 +333,7 @@ const Attachment = (props) => {
           {
             headers: tokenHeader(),
             responseType: "blob",
-          }
+          },
         );
         const base64 = await getBase64(response.data);
         setLoadingDownload(false);
@@ -381,7 +381,7 @@ const Attachment = (props) => {
                 handleSearch,
                 handleDelete,
                 handleShow,
-                type
+                type,
               )}
               onSort={onSort}
             />

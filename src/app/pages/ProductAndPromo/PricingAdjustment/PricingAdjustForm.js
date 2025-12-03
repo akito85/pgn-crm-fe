@@ -53,7 +53,10 @@ import ModalBack from "../../../../components/Modal/ModalBack";
 import moment from "moment";
 import { bytesConverter } from "../../../../utils/bytesConverter";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
-import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../redux/slices/general_slice";
 import { handleCheckCriteriaMissingValidation } from "../UtilsProduct/UtilsAllProduct";
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
 import FunctionalCriteriaProduct from "../UtilsProduct/FunctionalCriteriaProduct";
@@ -95,7 +98,7 @@ const PricingAdjustForm = (props) => {
     { value: "Attachment" },
   ]);
   const [typePriceAdjustInfo, setTypePriceAdjustInfo] = useState(
-    listSectionInfo[0].value
+    listSectionInfo[0].value,
   );
   const [storedDataInline, setStoredDataInline] = useState(false);
   const [bodyPricing, setBodyPricing] = useState({});
@@ -200,18 +203,16 @@ const PricingAdjustForm = (props) => {
             ...attachData,
             fileSize: bytesConverter(attachData.fileSize || 0),
             dataType: "exist",
-          })
-        )
+          }),
+        ),
       );
       setListDataDetailPricingAdjust(
         (dataDetailPricingAdjustGeneral?.mpricingAdjustmentDetails || [])
           .filter((item) => !item?.allCriteria || !item?.allCriteria !== true)
           .map((adjustData, index) => {
-            const listIndex = columnsTableCriteriaAll().filter(
-              (item) => !([1,2,3,4,5]).includes(item.indexValue)
-            ).map(
-              (item) => item.dataIndex
-            );
+            const listIndex = columnsTableCriteriaAll()
+              .filter((item) => ![1, 2, 3, 4, 5].includes(item.indexValue))
+              .map((item) => item.dataIndex);
             let obj = {
               adjustmentType: {
                 label: adjustData.adjustmentTypeName || "",
@@ -235,17 +236,17 @@ const PricingAdjustForm = (props) => {
               };
             });
             return obj;
-          })
+          }),
       );
     },
-    [form]
+    [form],
   );
 
   useEffect(() => {
     if (
       id &&
-      type === "update" && 
-      dataDetailPricingAdjustGeneral && 
+      type === "update" &&
+      dataDetailPricingAdjustGeneral &&
       dataDetailDraftPricingAdjustGeneral?.id === id
     ) {
       asserData({
@@ -276,7 +277,7 @@ const PricingAdjustForm = (props) => {
       const tempCriterias = dataListCriteria.map((criteria) => ({
         name: criteria.name,
         value: criteria.glbTypeValId,
-        code:criteria?.glbValue,
+        code: criteria?.glbValue,
       }));
       setCriteriaOptions(tempCriterias);
     }
@@ -361,7 +362,7 @@ const PricingAdjustForm = (props) => {
           currencyIds: priceData.currencyId,
           uomIds: priceData.uomId,
           startDate: moment(priceData.startDate, "DD-MM-YYYY").format(
-            "YYYY-MM-DD"
+            "YYYY-MM-DD",
           ),
           endDate: priceData.endDate
             ? moment(priceData.endDate, "DD-MM-YYYY").format("YYYY-MM-DD")
@@ -369,7 +370,7 @@ const PricingAdjustForm = (props) => {
           type: "exist",
           uomId: undefined,
           currencyId: undefined,
-        }))
+        })),
       );
     }
   }, [dataListPricingDetailActive]);
@@ -519,7 +520,7 @@ const PricingAdjustForm = (props) => {
             criteriaOptions,
             formValue?.criteria,
             listDataDetailPricingAdjust,
-            () => {}
+            () => {},
           )
         ) {
           const errorBody = {
@@ -570,7 +571,7 @@ const PricingAdjustForm = (props) => {
                 ).filter((data) => data.criteria === item);
               }
               const itemName = criteriaOptions.filter(
-                (criteria) => criteria.value === item
+                (criteria) => criteria.value === item,
               );
               return {
                 idPricing:
@@ -580,7 +581,7 @@ const PricingAdjustForm = (props) => {
                 criteriaName:
                   statusPriceAdjust === "ACTIVE" ? itemName[0].name : undefined,
               };
-            }
+            },
           );
           let mpricingAdjustmentDetails = listDataDetailPricingAdjust.map(
             (item) => {
@@ -606,18 +607,18 @@ const PricingAdjustForm = (props) => {
               delete obj.createdDate;
               delete obj.dataType;
               return obj;
-            }
+            },
           );
 
           const filteredCriteria = columnsTableCriteriaAll().filter(
             (item) =>
               !([...formValue.criteria, 1, 2, 3, 4, 5] || []).includes(
-                item.indexValue
-              )
+                item.indexValue,
+              ),
           );
 
           const filteredCriteria2 = columnsTableCriteriaAll().filter((item) =>
-            [...formValue.criteria].includes(item.indexValue)
+            [...formValue.criteria].includes(item.indexValue),
           ); // no need for startdate because already handled at body
 
           mpricingAdjustmentDetails = mpricingAdjustmentDetails.map((item) => {
@@ -658,8 +659,8 @@ const PricingAdjustForm = (props) => {
               type !== "update"
                 ? "DRAFT"
                 : id && dataDetailDraftPricingAdjustGeneral?.id === id
-                ? dataDetailDraftPricingAdjustGeneral.status
-                : dataDetailPricingAdjustGeneral.status,
+                  ? dataDetailDraftPricingAdjustGeneral.status
+                  : dataDetailPricingAdjustGeneral.status,
             description: formValue?.priceAdjustDescription || null,
             mpricingDetailId: mpricingDetailIdData(),
             appHierId: selectedHierarchy,
@@ -672,8 +673,8 @@ const PricingAdjustForm = (props) => {
               type !== "update"
                 ? undefined
                 : id && dataDetailDraftPricingAdjustGeneral?.id === id
-                ? dataDetailDraftPricingAdjustGeneral.pricingAdjustmentId
-                : dataDetailPricingAdjustGeneral.pricingAdjustmentId,
+                  ? dataDetailDraftPricingAdjustGeneral.pricingAdjustmentId
+                  : dataDetailPricingAdjustGeneral.pricingAdjustmentId,
           };
 
           const validateValueObj = {
@@ -710,7 +711,7 @@ const PricingAdjustForm = (props) => {
       typeSubmit,
       mPricingDetailsId,
       statusPriceAdjust,
-    ]
+    ],
   );
 
   const handleClear = () => {
@@ -762,11 +763,11 @@ const PricingAdjustForm = (props) => {
             ? dataDetailDraftPricingAdjustGeneral
             : dataDetailPricingAdjustGeneral;
         dataDefault = (tempData?.rcriteriaPricingAdjustments || []).filter(
-          (data) => data.criteria === item
+          (data) => data.criteria === item,
         );
       }
       const itemName = criteriaOptions.filter(
-        (criteria) => criteria.value === item
+        (criteria) => criteria.value === item,
       );
       return {
         idPricing:
@@ -803,11 +804,14 @@ const PricingAdjustForm = (props) => {
     });
 
     const filteredCriteria = columnsTableCriteriaAll().filter(
-      (item) => !([...formValue.criteria, 1,2,3,4,5] || []).includes(item.indexValue)
+      (item) =>
+        !([...formValue.criteria, 1, 2, 3, 4, 5] || []).includes(
+          item.indexValue,
+        ),
     );
 
     const filteredCriteria2 = columnsTableCriteriaAll().filter((item) =>
-      ([...formValue.criteria]).includes(item.indexValue)
+      [...formValue.criteria].includes(item.indexValue),
     ); // no need for startdate because already handled at body
 
     mpricingAdjustmentDetails = mpricingAdjustmentDetails.map((item) => {
@@ -816,7 +820,9 @@ const PricingAdjustForm = (props) => {
         pricingAdjustmentId: type === "update" ? id : null,
         adjustmentType: item.adjustmentType,
         adjustmentTypeName: item.adjustmentTypeName || undefined,
-        adjustmentValue: item.adjustmentValue ? parseFloat(item.adjustmentValue) : 0,
+        adjustmentValue: item.adjustmentValue
+          ? parseFloat(item.adjustmentValue)
+          : 0,
         startDate: item.startDate
           ? moment(item.startDate).format("DD-MM-YYYY")
           : "",
@@ -844,8 +850,8 @@ const PricingAdjustForm = (props) => {
         type !== "update"
           ? "DRAFT"
           : id && dataDetailDraftPricingAdjustGeneral?.id === id
-          ? dataDetailDraftPricingAdjustGeneral.status
-          : dataDetailPricingAdjustGeneral.status,
+            ? dataDetailDraftPricingAdjustGeneral.status
+            : dataDetailPricingAdjustGeneral.status,
       description: formValue?.priceAdjustDescription || null,
       mpricingDetailId: mpricingDetailIdData(),
       appHierId: selectedHierarchy,
@@ -858,8 +864,8 @@ const PricingAdjustForm = (props) => {
         type !== "update"
           ? undefined
           : id && dataDetailDraftPricingAdjustGeneral?.id === id
-          ? dataDetailDraftPricingAdjustGeneral.pricingAdjustmentId
-          : dataDetailPricingAdjustGeneral.pricingAdjustmentId,
+            ? dataDetailDraftPricingAdjustGeneral.pricingAdjustmentId
+            : dataDetailPricingAdjustGeneral.pricingAdjustmentId,
     };
     // console.log(payloadPriceAdjust);
     if (type === "create") {
@@ -876,7 +882,7 @@ const PricingAdjustForm = (props) => {
             };
             const response = await productPromoHttpService.uploadAttachment(
               `/v1/dbs/api/price-adjustment/uploadAttachment/${idPriceAdjust}`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -902,7 +908,7 @@ const PricingAdjustForm = (props) => {
         .then(async () => {
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
@@ -912,7 +918,7 @@ const PricingAdjustForm = (props) => {
             };
             const response = await productPromoHttpService.uploadAttachment(
               `/v1/dbs/api/price-adjustment/uploadAttachment/${id}`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -950,7 +956,7 @@ const PricingAdjustForm = (props) => {
         const errorBadge = errorFields.reduce(
           (current, next) =>
             item.paramValue.includes(next.name[0]) ? current + 1 : current,
-          0
+          0,
         );
         return {
           value: item.value,
@@ -981,7 +987,7 @@ const PricingAdjustForm = (props) => {
 
   const formatCriteria = (data = []) => {
     const tempArray = criteriaOptions.filter((item) =>
-      data.includes(item.value)
+      data.includes(item.value),
     );
     return tempArray.map((data) => data.name);
   };

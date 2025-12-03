@@ -7,12 +7,12 @@ const getAllGlobalPropertiesPaginate = async (
   searchParams,
   page,
   pageSize,
-  sortParams
+  sortParams,
 ) => {
   const response = await axios.get(
     configApp.USER_MANAGEMENT_SERVICE +
       `/v1/dbs/api/globalproperties/paging?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`,
-    { headers: tokenHeader() }
+    { headers: tokenHeader() },
   );
   return response?.data;
 };
@@ -21,7 +21,7 @@ const getGlobalPropertiesDetail = async (id) => {
   const response = await axios.get(
     configApp.USER_MANAGEMENT_SERVICE +
       `/v1/dbs/api/globalproperties/getDetail/${id}`,
-    { headers: tokenHeader() }
+    { headers: tokenHeader() },
   );
   return response?.data;
 };
@@ -30,7 +30,7 @@ const getGlobalPropertiesDetailValue = async (body) => {
   const response = await axios.get(
     configApp.USER_MANAGEMENT_SERVICE +
       `/v1/dbs/api/globalproperties/getDetailValue/${body.id}`,
-    { headers: tokenHeader() }
+    { headers: tokenHeader() },
   );
   return response?.data;
 };
@@ -39,7 +39,7 @@ const inactiveGlobalProperties = async (id) => {
   const response = await axios.delete(
     configApp.USER_MANAGEMENT_SERVICE +
       `/v1/dbs/api/globalproperties/inactive/detail/${id}`,
-    { headers: tokenHeader() }
+    { headers: tokenHeader() },
   );
   return response.data;
 };
@@ -47,7 +47,7 @@ const inactiveGlobalProperties = async (id) => {
 const deleteGlobalProperties = async (id) => {
   const response = await axios.delete(
     `${configApp.USER_MANAGEMENT_SERVICE}/v1/dbs/api/globalproperties/${id}/delete`,
-    { headers: tokenHeader() }
+    { headers: tokenHeader() },
   );
 
   return response;
@@ -57,7 +57,7 @@ const createGlobalProperties = async (body) => {
   const response = await axios.post(
     configApp.USER_MANAGEMENT_SERVICE + `/v1/dbs/api/globalproperties/create`,
     body,
-    { headers: tokenHeader() }
+    { headers: tokenHeader() },
   );
   return response.data;
 };
@@ -66,7 +66,7 @@ const updateGlobalProperties = async (body) => {
   const response = await axios.put(
     configApp.USER_MANAGEMENT_SERVICE + "/v1/dbs/api/globalproperties/update",
     body,
-    { headers: tokenHeader() }
+    { headers: tokenHeader() },
   );
   return response.data;
 };
@@ -74,7 +74,7 @@ const updateGlobalProperties = async (body) => {
 const getAllTypeGlobalProperties = async () => {
   const response = await axios.get(
     configApp.USER_MANAGEMENT_SERVICE + `/v1/dbs/api/globalproperties/type`,
-    { headers: tokenHeader() }
+    { headers: tokenHeader() },
   );
   return response?.data;
 };
@@ -83,7 +83,7 @@ const getDataType = async () => {
   const response = await axios.get(
     configApp.USER_MANAGEMENT_SERVICE +
       `/v1/dbs/api/globalproperties/data/type`,
-    { headers: tokenHeader() }
+    { headers: tokenHeader() },
   );
   return response?.data;
 };
@@ -91,7 +91,7 @@ const getDataType = async () => {
 const downloadExcelGlobalProperties = async () => {
   const response = await axios.get(
     configApp.USER_MANAGEMENT_SERVICE + "/v1/dbs/api/globalproperties/download",
-    { headers: tokenHeader(), responseType: "blob" }
+    { headers: tokenHeader(), responseType: "blob" },
   );
   const filename = response.headers
     .get("content-disposition")

@@ -12,7 +12,7 @@ const getColumnSearchProps = (
   searchText,
   handleSearch,
   type,
-  excludeRender = false
+  excludeRender = false,
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
@@ -95,7 +95,7 @@ export const columnsAccountStandard = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  handleDetail = () => {}
+  handleDetail = () => {},
 ) => [
   {
     title: "NO",
@@ -113,7 +113,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -126,7 +126,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -139,7 +139,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -152,7 +152,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -165,7 +165,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -178,7 +178,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -191,7 +191,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -204,7 +204,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -217,7 +217,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -233,7 +233,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       searchedColumn === "meterReadingCode" ? (
@@ -264,7 +264,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -277,7 +277,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -290,7 +290,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -303,7 +303,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -316,7 +316,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -329,7 +329,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -342,7 +342,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -355,7 +355,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -368,7 +368,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -381,7 +381,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -394,7 +394,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -407,7 +407,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -420,7 +420,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -436,7 +436,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       searchedColumn === "customerManagement" ? (
@@ -470,7 +470,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       searchedColumn === "customerManagementName" ? (
@@ -503,7 +503,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       searchedColumn === "accountDescription" ? (
@@ -535,7 +535,7 @@ export const columnsAccountStandard = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (index) => {
       const text = index

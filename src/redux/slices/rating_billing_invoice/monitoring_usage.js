@@ -55,7 +55,7 @@ export const getListUsagePaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getListBatchPaginate = createAsyncThunk(
   "GET_MONITORING_BATCH_PAGINATE",
@@ -84,7 +84,7 @@ export const getListBatchPaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // list approval
@@ -112,7 +112,7 @@ export const getListApproval = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getApprovalHierarchy = createAsyncThunk(
@@ -142,7 +142,7 @@ export const getApprovalHierarchy = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListApprovalById = createAsyncThunk(
@@ -169,7 +169,7 @@ export const getListApprovalById = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -196,7 +196,7 @@ export const getApprovalHistory = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailBatch = createAsyncThunk(
@@ -226,7 +226,7 @@ export const getDetailBatch = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getFormatUsageType = createAsyncThunk(
@@ -239,7 +239,7 @@ export const getFormatUsageType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAssetType = createAsyncThunk(
@@ -252,7 +252,7 @@ export const getAssetType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSource = createAsyncThunk("GET_SOURCE", async (thunkAPI) => {
@@ -275,7 +275,7 @@ export const getAccountNumber = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const approveRejectData = createAsyncThunk(
@@ -285,7 +285,7 @@ export const approveRejectData = createAsyncThunk(
       const url = "/v1/dbs/api/usage/approve-reject-usage";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        data
+        data,
       );
       const successMessage = {
         title: "Successfull",
@@ -314,7 +314,7 @@ export const approveRejectData = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const saveSubmitData = createAsyncThunk(
@@ -324,7 +324,7 @@ export const saveSubmitData = createAsyncThunk(
       const url = "/v1/dbs/api/usage/save-usage";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        data
+        data,
       );
       const successMessage = {
         title: "Successfull",
@@ -351,7 +351,7 @@ export const saveSubmitData = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getDownloadList = createAsyncThunk(
@@ -370,11 +370,11 @@ export const getDownloadList = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_MONITORING_USAGE_LIST",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getDownloadTemplate = createAsyncThunk(
@@ -385,7 +385,7 @@ export const getDownloadTemplate = createAsyncThunk(
 
       const response = await ratingBillingHttpService.downloadXlsx(
         url,
-        "monitoring_usage_template"
+        "monitoring_usage_template",
       );
 
       return response;
@@ -398,7 +398,7 @@ export const getDownloadTemplate = createAsyncThunk(
           error: error?.response,
           action: "DOWNLOAD_MONITORING_USAGE_TEMPLATE",
           back: false,
-        })
+        }),
       );
 
       const errorBody = {
@@ -409,7 +409,7 @@ export const getDownloadTemplate = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
-  }
+  },
 );
 
 export const getDownloadFailed = createAsyncThunk(
@@ -425,11 +425,11 @@ export const getDownloadFailed = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_MONITORING_USAGE_FAILED",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const uploadMonitoringUsage = createAsyncThunk(
@@ -445,7 +445,7 @@ export const uploadMonitoringUsage = createAsyncThunk(
       const data = await ratingBillingHttpService.uploadAttachment(
         url,
         dataRequest,
-        onProgress
+        onProgress,
       );
       const successMessage = {
         title: "Successfull",
@@ -462,7 +462,7 @@ export const uploadMonitoringUsage = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(e?.response);
     }
-  }
+  },
 );
 
 const monitoringUsageSlice = createSlice({
@@ -479,7 +479,7 @@ const monitoringUsageSlice = createSlice({
         description: "Your data has been submitted",
       };
       const existingIndex = state.updatedData.findIndex(
-        (item) => item.recordId === action.payload.recordId
+        (item) => item.recordId === action.payload.recordId,
       );
 
       if (existingIndex !== -1) {

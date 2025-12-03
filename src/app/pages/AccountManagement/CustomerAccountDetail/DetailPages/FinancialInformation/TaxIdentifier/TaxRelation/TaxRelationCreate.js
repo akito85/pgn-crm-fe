@@ -163,7 +163,7 @@ const TaxRelationCreate = ({
             rules={[
               {
                 message: requiredMessage(
-                  "Related Account Tax Identifier Address"
+                  "Related Account Tax Identifier Address",
                 ),
                 required: true,
               },

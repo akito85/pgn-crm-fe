@@ -27,11 +27,11 @@ export const getPositionHierarchyPaginate = createAsyncThunk(
           error: error,
           action: "GET_POSITION_HIERARCHY_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 
 // pagination position hierarchy
@@ -48,11 +48,11 @@ export const getPosition = createAsyncThunk(
       return mappingPosition;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_POSITION", back: false })
+        validateError({ error: error, action: "GET_POSITION", back: false }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // detail position hierarchy
@@ -69,11 +69,11 @@ export const getDetailHierarchy = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_HIERARCHY",
           back: true,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // get detail position
@@ -90,11 +90,11 @@ export const getDetailPosition = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_POSITION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // create func
@@ -116,11 +116,11 @@ export const createPositionHierarchy = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_POSITION_HIERARCHY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // update func
@@ -142,11 +142,11 @@ export const updatePositionHierarchy = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_POSITION_HIERARCHY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // duplicate func
@@ -169,11 +169,11 @@ export const duplicatePositionHierarchy = createAsyncThunk(
           error: errorBody(errorCode(error), "duplicated", errorMessage(error)),
           action: "DUPLICATE_POSITION_HIERARCHY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // activation hierarchy
@@ -196,11 +196,11 @@ export const activationPositionHierarchy = createAsyncThunk(
           error: errorBody(errorCode(error), "activated", errorMessage(error)),
           action: "ACTIVATION_POSITION_HIERARCHY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // download hierarchy
@@ -220,12 +220,12 @@ export const downloadPositionHierarchy = createAsyncThunk(
           error,
           action: "DOWNLOAD_POSITION_HIERARCHY",
           back: false,
-        })
+        }),
       );
 
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const positionHierarchySlice = createSlice({

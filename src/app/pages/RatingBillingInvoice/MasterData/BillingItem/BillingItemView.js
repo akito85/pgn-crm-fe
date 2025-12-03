@@ -29,10 +29,10 @@ import { clearBodyMessage } from "../../../../../redux/slices/general_slice";
 const BillingItemView = () => {
   // Selector
   const { data_view, data_ApprovalHistory, loading } = useSelector(
-    (state) => state.billing_item
+    (state) => state.billing_item,
   );
   const { bodyError: bodyErrorGeneral } = useSelector(
-    (state) => state?.general
+    (state) => state?.general,
   );
 
   // Declaration
@@ -65,7 +65,7 @@ const BillingItemView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, search, page, pageSize, sort]);
 
@@ -160,7 +160,7 @@ const BillingItemView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -206,7 +206,7 @@ const BillingItemView = () => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -407,13 +407,13 @@ const BillingItemView = () => {
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     );
   }, [search, page, pageSize, searchedColumn, searchText]);
 
   const actionCols = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   ).map((col) => ({
     ...col,
     width: 100,

@@ -45,7 +45,11 @@ import {
 import ModalConfirmManualReceipt from "./ModalConfirmManualReceipt";
 import { configApp } from "../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
-import { countBadgeFieldsErrorMandatory, dateFormatting, hasValue } from "../../../../../utils";
+import {
+  countBadgeFieldsErrorMandatory,
+  dateFormatting,
+  hasValue,
+} from "../../../../../utils";
 import moment from "moment";
 
 const ListRececiptForm = ({ type }) => {
@@ -185,7 +189,7 @@ const ListRececiptForm = ({ type }) => {
       // set default value
       if (rateTypeDDL?.data?.length > 0) {
         const rateType = rateTypeDDL?.data?.filter(
-          (item) => item?.name === "M"
+          (item) => item?.name === "M",
         )[0]?.id;
         form.setFieldsValue({
           rateType: rateType,
@@ -226,7 +230,7 @@ const ListRececiptForm = ({ type }) => {
       //   return formValue;
       // }
     },
-    []
+    [],
   );
 
   // use effect if requestBodyConvertedRate changed
@@ -250,15 +254,15 @@ const ListRececiptForm = ({ type }) => {
   const convertToInteger = (amount) => {
     return parseInt(amount.replace(/\./g, "").replace(",", "."));
   };
-  
 
   // console.log(formValue, "formValue");
 
-  console.log( hasValue(formValue?.convertedCurrency)  &&
-  hasValue(formValue?.currency) &&
-  hasValue(formValue?.rateAmount), "validasi");
-  
-  
+  console.log(
+    hasValue(formValue?.convertedCurrency) &&
+      hasValue(formValue?.currency) &&
+      hasValue(formValue?.rateAmount),
+    "validasi",
+  );
 
   useEffect(() => {
     if (
@@ -270,26 +274,31 @@ const ListRececiptForm = ({ type }) => {
         : 0;
 
       if (
-        hasValue(formValue?.convertedCurrency)  &&
+        hasValue(formValue?.convertedCurrency) &&
         hasValue(formValue?.currency) &&
         hasValue(formValue?.rateAmount)
       ) {
         if (formValue?.currency === 243) {
-          const eqAmountValue = data_converted_currency?.convertedRate * convertToInteger(convertedAmount);
+          const eqAmountValue =
+            data_converted_currency?.convertedRate *
+            convertToInteger(convertedAmount);
 
           form.setFieldsValue({
             rateAmount: data_converted_currency?.convertedRate?.toLocaleString(
               "en-US",
-              { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+              { minimumFractionDigits: 2, maximumFractionDigits: 2 },
             ),
-            eqAmount:eqAmountValue.toLocaleString("id-ID", {
-              minimumFractionDigits: 2, // Tambahkan dua angka desimal
-              maximumFractionDigits: 2,
-            }) || "0"
+            eqAmount:
+              eqAmountValue.toLocaleString("id-ID", {
+                minimumFractionDigits: 2, // Tambahkan dua angka desimal
+                maximumFractionDigits: 2,
+              }) || "0",
           });
         } else if (formValue?.currency === 244) {
-          const convertValue = convertToInteger(convertedAmount)
-          const eqAmountValue = roundToOneDecimal(convertValue /  data_converted_currency?.convertedRate)
+          const convertValue = convertToInteger(convertedAmount);
+          const eqAmountValue = roundToOneDecimal(
+            convertValue / data_converted_currency?.convertedRate,
+          );
 
           form.setFieldsValue({
             rateAmount: data_converted_currency?.convertedRate?.toLocaleString(
@@ -297,26 +306,23 @@ const ListRececiptForm = ({ type }) => {
               {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
-              }
+              },
             ),
-            eqAmount: eqAmountValue
-
+            eqAmount: eqAmountValue,
           });
         }
       } else {
         form.setFieldsValue({
           rateAmount: data_converted_currency?.convertedRate?.toLocaleString(
             "en-US",
-            { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+            { minimumFractionDigits: 2, maximumFractionDigits: 2 },
           ),
           eqAmount: 0,
         });
       }
-
     }
   }, [data_converted_currency, form, amount]);
 
-  
   //   if (
   //     hasValue(data_converted_currency) &&
   //     Object.keys(data_converted_currency).length !== 0
@@ -468,9 +474,9 @@ const ListRececiptForm = ({ type }) => {
       };
       dispatch(showModalError(errorBody));
     } else if (listDataAttachment?.length === 0) {
-     countBadgeFieldsErrorMandatory(setTabData, listDataAttachment)
+      countBadgeFieldsErrorMandatory(setTabData, listDataAttachment);
     } else {
-      countBadgeFieldsErrorMandatory(setTabData, listDataAttachment)
+      countBadgeFieldsErrorMandatory(setTabData, listDataAttachment);
       setModalConfirm(true);
       const dataValue = {
         // receiptId: ,
@@ -481,7 +487,7 @@ const ListRececiptForm = ({ type }) => {
         customerName: formValue?.cusName,
         segmentId: formValue?.segment,
         receiptDate: moment(formValue?.receiptDate).format(
-          dateFormatting.dateTime
+          dateFormatting.dateTime,
         ),
         currencyId: formValue?.currency,
         amount: formValue?.amount,
@@ -495,7 +501,7 @@ const ListRececiptForm = ({ type }) => {
         rateDate: moment(formValue?.rateDate).format(dateFormatting.date),
         rateAmount: convertAndTrimString(formValue?.rateAmount),
         convertedCurrency: currencyDDL?.data?.filter(
-          (item) => item?.id === formValue?.convertedCurrency
+          (item) => item?.id === formValue?.convertedCurrency,
         )[0]?.name,
         equivalentAmount: formValue?.eqAmount || 0,
         referenceNumber: formValue?.reference,
@@ -563,7 +569,7 @@ const ListRececiptForm = ({ type }) => {
           };
           await receiptCollectionHttpService.uploadImage(
             `/v1/dbs/api/receipt/upload-attachment-receipt`,
-            body
+            body,
           );
         }
         setLoadingForm(false);
@@ -576,7 +582,7 @@ const ListRececiptForm = ({ type }) => {
             error: error,
             actions: "UPLOAD_ATTACHMENT",
             back: false,
-          })
+          }),
         );
       });
   };
@@ -596,7 +602,7 @@ const ListRececiptForm = ({ type }) => {
       tabData?.map((item) => {
         const { errorBadge, ...keys } = item;
         return keys;
-      })
+      }),
     );
   };
 

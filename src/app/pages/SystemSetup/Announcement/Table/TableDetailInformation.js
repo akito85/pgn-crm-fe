@@ -10,7 +10,7 @@ export const detailAnnouncement = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  handleInactive = () => {}
+  handleInactive = () => {},
 ) => [
   {
     title: "NO",
@@ -31,9 +31,18 @@ export const detailAnnouncement = (
       searchedColumn,
       searchText,
       handleSearch,
-      false
+      false,
     ),
-    render :(text) => renderColumn('createdBy', searchedColumn, searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "createdBy",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "ACTION",
@@ -48,16 +57,25 @@ export const detailAnnouncement = (
       searchText,
       handleSearch,
       false,
-      'status'
+      "status",
     ),
-    render: (text) => renderColumn('operation', searchedColumn, searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "operation",
+        searchedColumn,
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "ACTION DATE",
     dataIndex: "createdDate",
     key: "createdDate",
     align: "center",
-    sorter: (a, b) => sorterFunction("createdDate", a, b, 'date'),
+    sorter: (a, b) => sorterFunction("createdDate", a, b, "date"),
     ...getColumnSearchProps(
       "createdDate",
       searchInput,
@@ -65,9 +83,17 @@ export const detailAnnouncement = (
       searchText,
       handleSearch,
       true,
-      "datetime"
+      "datetime",
     ),
-    render: (text) => renderDateColumn('createdDate', searchedColumn, searchText, text, 'datetime', search)
+    render: (text) =>
+      renderDateColumn(
+        "createdDate",
+        searchedColumn,
+        searchText,
+        text,
+        "datetime",
+        search,
+      ),
   },
   {
     title: "REMARK",
@@ -79,11 +105,20 @@ export const detailAnnouncement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,
     },
-    render: (text) => renderColumn('remark', searchedColumn, searchText, text, true, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "remark",
+        searchedColumn,
+        searchText,
+        text,
+        true,
+        "input",
+        search,
+      ),
   },
 ];

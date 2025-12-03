@@ -13,7 +13,7 @@ import { FilterOutlined } from "@ant-design/icons";
 const BillingBucket = ({ id = 0 }) => {
   const dispatch = useDispatch();
   const { data_billingBucket, loading } = useSelector(
-    (state) => state.financialInformation
+    (state) => state.financialInformation,
   );
 
   //declare
@@ -27,7 +27,7 @@ const BillingBucket = ({ id = 0 }) => {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  
+
   const [dataTable, setDataTable] = useState([]);
 
   //useEffect
@@ -44,15 +44,20 @@ const BillingBucket = ({ id = 0 }) => {
       }
       tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
       const reqSearch = encodeURIComponent(JSON.stringify(search));
-      dispatch(getBillingBucket({ id, page, pageSize, sort, search: reqSearch }));
+      dispatch(
+        getBillingBucket({ id, page, pageSize, sort, search: reqSearch }),
+      );
     }
   }, [dispatch, id, page, pageSize, sort, search]);
 
   //useEffect
   useEffect(() => {
-    if (id && data_billingBucket && data_billingBucket.result 
+    if (
+      id &&
+      data_billingBucket &&
+      data_billingBucket.result
       // && data_billingBucket.result.length > 0
-      ) {
+    ) {
       setTotalElement(data_billingBucket?.page?.totalElements);
       const data = data_billingBucket?.result?.map((billingBucket, index) => ({
         ...billingBucket,
@@ -62,12 +67,11 @@ const BillingBucket = ({ id = 0 }) => {
           key: index + 1,
         })),
       }));
-      setDataTable(data);  
-    }else{
-      setDataTable([]); 
+      setDataTable(data);
+    } else {
+      setDataTable([]);
     }
   }, [data_billingBucket]);
-
 
   // Search Column Table
   const getColumnSearchProps = (dataIndex, type) => ({

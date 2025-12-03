@@ -15,7 +15,10 @@ import {
   FilterOutlined,
 } from "@ant-design/icons";
 import SVGIcon from "../../../../../assets/Icon/index";
-import { ModalConfirm, ModalError } from "../../../../../components/Modal/ModalPopUp";
+import {
+  ModalConfirm,
+  ModalError,
+} from "../../../../../components/Modal/ModalPopUp";
 import moment from "moment";
 import ConfirmationLayout from "./Modal/ConfirmationLayout";
 import {
@@ -25,18 +28,26 @@ import {
   getUOM,
   updateGasSource,
 } from "../../../../../redux/slices/account_management/MasterData/gasSourceSlice";
-import { dateFormatting, formMessageRequired, hasValue } from "../../../../../utils";
+import {
+  dateFormatting,
+  formMessageRequired,
+  hasValue,
+} from "../../../../../utils";
 import Highlighter from "react-highlight-words";
-import { clearBodyMessage, showModalError, validateCreateUpdate } from "../../../../../redux/slices/general_slice";
+import {
+  clearBodyMessage,
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../../redux/slices/general_slice";
 import TableInlinegasSource from "./TableInlineGasSource";
 import accountManagementService from "../../../../../redux/services/account_management/accountManagementService";
 
 const CreateGasSource = ({ type }) => {
   // Selector
   const { loading, data_uom, data_cost_center, data_detail } = useSelector(
-    (state) => state.gasSource
+    (state) => state.gasSource,
   );
-  const { bodyError, isLoading} = useSelector(state => state?.general);
+  const { bodyError, isLoading } = useSelector((state) => state?.general);
 
   // Declaration
   const searchInput = useRef(null);
@@ -109,27 +120,35 @@ const CreateGasSource = ({ type }) => {
 
   useEffect(() => {
     if (tableData?.length > 0) {
-      setFilteredCostCenter(data_cost_center?.filter((item) => {
-        return !tableData?.some(tableItem => tableItem?.costCenterId === item?.costCenterId)
-      })?.map((item) => {
-        return {
-          value: item.costCenterId,
-          label: item.costCenterName,
-        };
-      }));
+      setFilteredCostCenter(
+        data_cost_center
+          ?.filter((item) => {
+            return !tableData?.some(
+              (tableItem) => tableItem?.costCenterId === item?.costCenterId,
+            );
+          })
+          ?.map((item) => {
+            return {
+              value: item.costCenterId,
+              label: item.costCenterName,
+            };
+          }),
+      );
     } else {
-      setFilteredCostCenter(data_cost_center?.map((item) => {
-        return {
-          value: item.costCenterId,
-          label: item.costCenterName,
-        };
-      }));
+      setFilteredCostCenter(
+        data_cost_center?.map((item) => {
+          return {
+            value: item.costCenterId,
+            label: item.costCenterName,
+          };
+        }),
+      );
     }
   }, [data_cost_center, tableData]);
   // trigger modal try again
   useEffect(() => {
     if (bodyError?.response?.data?.code === 500) {
-      setModalError(true)
+      setModalError(true);
     }
   }, [bodyError]);
 
@@ -141,7 +160,7 @@ const CreateGasSource = ({ type }) => {
         description: `Cost center already used, please choose another`,
       };
       dispatch(showModalError(errorBody));
-      setDoubleCostCenter(false)
+      setDoubleCostCenter(false);
     }
   }, [doubleCostCenter, dispatch]);
 
@@ -245,14 +264,12 @@ const CreateGasSource = ({ type }) => {
         {
           message: `Double cost center selected, please choose another!`,
           // required: true,
-        }
-      ]
+        },
+      ];
     } else {
-      return [
-        ...formMessageRequired(dataIndex)
-      ]
+      return [...formMessageRequired(dataIndex)];
     }
-  }
+  };
   const column = [
     {
       title: "NO",
@@ -268,7 +285,7 @@ const CreateGasSource = ({ type }) => {
       sorter: true,
       inputType: "select",
       options: dataCostCenter,
-      rules: formMessageRequired('Cost Center'),
+      rules: formMessageRequired("Cost Center"),
       ...getColumnSearchProps("costCenterId"),
       render: (costCenterId) => (
         <span>
@@ -287,9 +304,10 @@ const CreateGasSource = ({ type }) => {
       sorter: true,
       inputType: "date",
       align: "center",
-      rules: formMessageRequired('Start Date'),
+      rules: formMessageRequired("Start Date"),
       ...getColumnSearchProps("startDate", "date"),
-      render: (startDate) => hasValue(startDate) && moment(startDate).format(dateFormatting.date),
+      render: (startDate) =>
+        hasValue(startDate) && moment(startDate).format(dateFormatting.date),
     },
     {
       title: "END DATE",
@@ -299,7 +317,8 @@ const CreateGasSource = ({ type }) => {
       inputType: "date",
       align: "center",
       ...getColumnSearchProps("endDate", "date"),
-      render: (endDate) => hasValue(endDate) && moment(endDate).format(dateFormatting.date),
+      render: (endDate) =>
+        hasValue(endDate) && moment(endDate).format(dateFormatting.date),
     },
     {
       title: "DESCRIPTION",
@@ -308,14 +327,14 @@ const CreateGasSource = ({ type }) => {
       editable: true,
       sorter: true,
       ellipsis: {
-        showTitle: false
+        showTitle: false,
       },
       ...getColumnSearchProps("description"),
       render: (text) => (
         <Tooltip placement="topLeft" title={text}>
           {text}
         </Tooltip>
-      )
+      ),
     },
   ];
 
@@ -404,46 +423,47 @@ const CreateGasSource = ({ type }) => {
               type !== "create" ? obj?.gasSourceCriteriaId || null : undefined,
             costCenterId: obj.costCenterId,
             startDate: moment(obj.startDate).format(dateFormatting.date),
-            endDate: hasValue(obj.endDate) ? moment(obj.endDate).format(dateFormatting.date) : null,
+            endDate: hasValue(obj.endDate)
+              ? moment(obj.endDate).format(dateFormatting.date)
+              : null,
             description: obj.description,
           };
         });
 
-        if (type === 'update') {
+        if (type === "update") {
           body = {
             ...formValue,
             criteria: modifiedArray,
             gasSourceId: id,
-          }
+          };
           validateValueObj = {
             body: body,
             services: accountManagementService,
-            endPoint: '/v1/dbs/api/gas-source/validate-update',
-            type
-          }
+            endPoint: "/v1/dbs/api/gas-source/validate-update",
+            type,
+          };
         } else {
           body = {
             ...formValue,
             criteria: modifiedArray,
-          }
+          };
           validateValueObj = {
             body: body,
             services: accountManagementService,
-            endPoint: '/v1/dbs/api/gas-source/validate-create',
-            type
-          }
+            endPoint: "/v1/dbs/api/gas-source/validate-create",
+            type,
+          };
         }
-        await dispatch(validateCreateUpdate(validateValueObj))?.unwrap(0)
+        await dispatch(validateCreateUpdate(validateValueObj))?.unwrap(0);
         setData({
           body: body,
-          validateValue: validateValueObj
+          validateValue: validateValueObj,
         });
         setModalConfirm(true);
       }
     } catch (error) {
-        setModalConfirm(false);
+      setModalConfirm(false);
     }
-    
   };
 
   // handle Confirm
@@ -453,7 +473,7 @@ const CreateGasSource = ({ type }) => {
         .unwrap()
         .then(() => {
           form.resetFields();
-          setTableData([])
+          setTableData([]);
           setModalConfirm(false);
         })
         .catch(() => {
@@ -486,8 +506,8 @@ const CreateGasSource = ({ type }) => {
 
   const handleResetAndClear = () => {
     if (type === "create") {
-      form.resetFields()
-      setTableData([])
+      form.resetFields();
+      setTableData([]);
     } else {
       dispatch(getDetailGasSource(id));
     }
@@ -495,21 +515,24 @@ const CreateGasSource = ({ type }) => {
 
   // handle confirm
   const handleConfirmRetry = () => {
-    if (bodyError?.action === "UPDATE_GAS_SOURCE" || bodyError?.action === "CREATE_GAS_SOURCE") {
+    if (
+      bodyError?.action === "UPDATE_GAS_SOURCE" ||
+      bodyError?.action === "CREATE_GAS_SOURCE"
+    ) {
       handleConfirm();
     } else if (bodyError?.action === "GET_COST_CENTER") {
       dispatch(getCostCenter());
     } else if (bodyError?.action === "GET_UOM") {
-      dispatch(getUOM())
+      dispatch(getUOM());
     } else {
       dispatch(getDetailGasSource(id));
     }
 
     dispatch(clearBodyMessage());
-  }
+  };
   // handle retry
   const handleRetry = () => {
-    handleConfirmRetry()
+    handleConfirmRetry();
     setModalError(false);
     dispatch(clearBodyMessage());
   };
@@ -552,7 +575,7 @@ const CreateGasSource = ({ type }) => {
                 name={"uom"}
                 rules={[{ required: true, message: "Please input your UOM!" }]}
               >
-                <SelectComponent disabled={type === 'update'}>
+                <SelectComponent disabled={type === "update"}>
                   {data_uom &&
                     data_uom?.map((ta, index) => (
                       <Select.Option value={ta.uomId} key={index}>
@@ -618,7 +641,16 @@ const CreateGasSource = ({ type }) => {
             <div className={"w-full flex justify-end gap-5"}>
               <Form.Item>
                 <ButtonComponent
-                  icon={<SVGIcon name={type === "create" ? "IconButtonClear" : "IconButtonReset"} width={24} />}
+                  icon={
+                    <SVGIcon
+                      name={
+                        type === "create"
+                          ? "IconButtonClear"
+                          : "IconButtonReset"
+                      }
+                      width={24}
+                    />
+                  }
                   type="submit"
                   onClick={handleResetAndClear}
                   disabled={isInsertedValue}
@@ -627,7 +659,11 @@ const CreateGasSource = ({ type }) => {
                 </ButtonComponent>
               </Form.Item>
               <Form.Item>
-                <ButtonComponent type="submit" htmlType={"submit"} disabled={isInsertedValue}>
+                <ButtonComponent
+                  type="submit"
+                  htmlType={"submit"}
+                  disabled={isInsertedValue}
+                >
                   Save
                 </ButtonComponent>
               </Form.Item>
@@ -671,7 +707,9 @@ const CreateGasSource = ({ type }) => {
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{bodyError?.response?.data?.message?.toString()}</p>
+          <p className="pl-[70px]">
+            {bodyError?.response?.data?.message?.toString()}
+          </p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>

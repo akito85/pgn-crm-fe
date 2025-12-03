@@ -12,7 +12,9 @@ import TableRBI from "../../../../../components/TableRBI";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
-  const { data_serviceAgreement, loading } = useSelector((state) => state.rating);
+  const { data_serviceAgreement, loading } = useSelector(
+    (state) => state.rating,
+  );
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -42,17 +44,17 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [ratingCodeId, search, page, pageSize, sort, dispatch]);
 
   useEffect(() => {
     if (pageDetail && saDetailRef.current) {
       setTimeout(() => {
-        saDetailRef.current.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start',
-          inline: 'nearest'
+        saDetailRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "nearest",
         });
       }, 100);
     }
@@ -139,9 +141,9 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        handleDetail
+        handleDetail,
       ),
-    [page, pageSize, searchedColumn, searchText]
+    [page, pageSize, searchedColumn, searchText],
   );
 
   const allColumns = useMemo(() => {

@@ -221,7 +221,6 @@ const reducer = combineReducers({
   [reportCustomerAgreementSlice.reducerPath]:
     reportCustomerAgreementSlice.reducer,
 
-
   // debt and collection
   gracePeriod: gracePeriodReducer,
   activityName: activityNameReducer,
@@ -230,7 +229,6 @@ const reducer = combineReducers({
   activityAction: activityActionReducer,
   activities: activitiesReducer,
   transactionReport: transactionReportReducer,
-
 });
 
 // add throttle middlewares

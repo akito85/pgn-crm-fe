@@ -11,7 +11,7 @@ export const columnAllocation = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  handleInactive = () => {}
+  handleInactive = () => {},
 ) => {
   const columns = [
     {
@@ -30,7 +30,7 @@ export const columnAllocation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -42,7 +42,7 @@ export const columnAllocation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -54,7 +54,7 @@ export const columnAllocation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -66,7 +66,7 @@ export const columnAllocation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -78,7 +78,7 @@ export const columnAllocation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -91,7 +91,7 @@ export const columnAllocation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -104,7 +104,7 @@ export const columnAllocation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -120,7 +120,7 @@ export const columnAllocation = (
         searchText,
         handleSearch,
         false,
-        "datePeriod"
+        "datePeriod",
       ),
       render: (billingPeriod) =>
         hasValue(billingPeriod) &&
@@ -136,7 +136,7 @@ export const columnAllocation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         text.toLocaleString("en-US", {
@@ -153,7 +153,7 @@ export const columnAllocation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -168,7 +168,7 @@ export const columnAllocation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         text.toLocaleString("en-US", {
@@ -186,7 +186,7 @@ export const columnAllocation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         text.toLocaleString("en-US", {
@@ -203,7 +203,7 @@ export const columnAllocation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       // width: 120,
       render: (index) =>
@@ -234,7 +234,7 @@ export const columnAllocation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -247,7 +247,7 @@ export const columnAllocation = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         text.toLocaleString("en-US", {

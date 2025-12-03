@@ -82,7 +82,7 @@ const EditableCell = ({
                                   "prefix_1",
                                 ]);
                                 setLengthPrefix_1(
-                                  e?.label?.split(" ")?.at(-1)?.length
+                                  e?.label?.split(" ")?.at(-1)?.length,
                                 );
                               }}
                             />
@@ -97,7 +97,7 @@ const EditableCell = ({
                               onInput={(e) =>
                                 (e.target.value = e.target.value.replace(
                                   /[^\d]|^0+/g,
-                                  ""
+                                  "",
                                 ))
                               }
                             />
@@ -196,7 +196,7 @@ const EditableCell = ({
                                   "prefix_1",
                                 ]);
                                 setLengthPrefix_1(
-                                  e?.label?.split(" ")?.at(-1)?.length
+                                  e?.label?.split(" ")?.at(-1)?.length,
                                 );
                               }}
                             />
@@ -215,7 +215,7 @@ const EditableCell = ({
                                   "prefix_2",
                                 ]);
                                 setLengthPrefix_2(
-                                  e?.label?.split(" ")?.at(0)?.length
+                                  e?.label?.split(" ")?.at(0)?.length,
                                 );
                               }}
                               options={options?.country_zone}
@@ -232,7 +232,7 @@ const EditableCell = ({
                               onInput={(e) =>
                                 (e.target.value = e.target.value.replace(
                                   /[^\d]|^0+/g,
-                                  ""
+                                  "",
                                 ))
                               }
                             />
@@ -244,7 +244,7 @@ const EditableCell = ({
                               onInput={(e) =>
                                 (e.target.value = e.target.value.replace(
                                   /[^\d]/g,
-                                  ""
+                                  "",
                                 ))
                               }
                             />
@@ -272,7 +272,7 @@ const EditableCell = ({
                               ...formMessageRequired(
                                 formValue?.inputType?.value === 750
                                   ? "Email"
-                                  : "Value"
+                                  : "Value",
                               ),
                               formValue?.inputType?.value === 750 && {
                                 type: "email",
@@ -293,7 +293,7 @@ const EditableCell = ({
         }
       }
     },
-    [changePrefix, lengthPrefix_1, lengthPrefix_2, onCellClicked, record]
+    [changePrefix, lengthPrefix_1, lengthPrefix_2, onCellClicked, record],
   );
 
   if (dataIndex === "action" || dataIndex === "no" || dataIndex === "status") {
@@ -339,7 +339,7 @@ const TableContact = ({
     (record) => {
       return record?.key === editingKey;
     },
-    [editingKey]
+    [editingKey],
   );
 
   useEffect(() => {
@@ -399,7 +399,7 @@ const TableContact = ({
         console.log(error, " error");
       }
     },
-    [dataTable, form, setDataTable, setFullValue]
+    [dataTable, form, setDataTable, setFullValue],
   );
 
   const handleDetail = useCallback((record) => {
@@ -415,7 +415,7 @@ const TableContact = ({
       form.setFieldsValue(record);
       setStoredData(true);
     },
-    [editRecords, form]
+    [editRecords, form],
   );
 
   // handle inactive
@@ -432,7 +432,7 @@ const TableContact = ({
       setEditingKey("");
       setStatusStored("");
     },
-    [dataTable, form, setDataTable]
+    [dataTable, form, setDataTable],
   );
 
   // handle cancel
@@ -446,7 +446,7 @@ const TableContact = ({
       form.resetFields();
       setStoredData(false);
     },
-    [dataTable, form, setDataTable, statusStored]
+    [dataTable, form, setDataTable, statusStored],
   );
 
   const columnAction = useContactHooks(
@@ -457,7 +457,7 @@ const TableContact = ({
     handleDelete,
     handleCancel,
     handleSave,
-    actionButtons
+    actionButtons,
   );
 
   // column table
@@ -474,7 +474,7 @@ const TableContact = ({
 
         return { ...acc, fullValue: null };
       },
-      { key: newRowKey }
+      { key: newRowKey },
     );
 
     setDataTable((prev) => {
@@ -492,18 +492,18 @@ const TableContact = ({
   const handleFilterColumn = useCallback(
     (columns) => {
       const filteredColumn = columns?.filter(
-        (item) => !filterColumn?.includes(item?.title)
+        (item) => !filterColumn?.includes(item?.title),
       );
       return filteredColumn;
     },
-    [filterColumn]
+    [filterColumn],
   );
 
   const paginationTable = useCallback(
     (page, pageSize) => {
       return dataTable?.slice((page - 1) * pageSize, page * pageSize);
     },
-    [dataTable]
+    [dataTable],
   );
 
   const changeTable = (pagination, filters, sorter, extra) => {
@@ -593,7 +593,7 @@ const TableContact = ({
                 onCellClicked: item?.onClick,
                 changePrefix: changePrefix,
               }),
-            }))
+            })),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

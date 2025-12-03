@@ -1,4 +1,8 @@
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
 export const columnsUsage = (
@@ -8,7 +12,7 @@ export const columnsUsage = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     key: "no",
@@ -31,7 +35,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "datePeriod"
+      "datePeriod",
     ),
     render: (text) =>
       renderDateColumn(
@@ -40,7 +44,7 @@ export const columnsUsage = (
         searchText,
         text,
         "datePeriod",
-        search
+        search,
       ),
   },
   {
@@ -57,7 +61,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -67,7 +71,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -84,7 +88,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -94,7 +98,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -111,7 +115,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "datetime"
+      "datetime",
     ),
     render: (text) =>
       renderDateColumn(
@@ -120,7 +124,7 @@ export const columnsUsage = (
         searchText,
         text,
         "datetime",
-        search
+        search,
       ),
   },
   {
@@ -137,7 +141,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -146,7 +150,7 @@ export const columnsUsage = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -163,9 +167,18 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "hour"
+      "hour",
     ),
-    render: (creationDate) => renderColumn('fhour', hasValue(search['fhour']), searchText, creationDate, false, 'input', search)
+    render: (creationDate) =>
+      renderColumn(
+        "fhour",
+        hasValue(search["fhour"]),
+        searchText,
+        creationDate,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     key: "streamId",
@@ -181,7 +194,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -191,7 +204,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -208,7 +221,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -218,7 +231,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -235,7 +248,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -245,7 +258,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -262,7 +275,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -272,7 +285,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -298,7 +311,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -324,7 +337,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -350,7 +363,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -376,7 +389,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -402,7 +415,7 @@ export const columnsUsage = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -420,7 +433,16 @@ export const columnsUsage = (
       handleSearch,
       true,
     ),
-    render: (text) => renderColumn('engMeasured', hasValue(search['engMeasured']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "engMeasured",
+        hasValue(search["engMeasured"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     key: "ghv",
@@ -437,7 +459,16 @@ export const columnsUsage = (
       handleSearch,
       true,
     ),
-    render: (text) => renderColumn('ghv', hasValue(search['ghv']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "ghv",
+        hasValue(search["ghv"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     key: "fileSource",
@@ -454,9 +485,18 @@ export const columnsUsage = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
-    render: (text) => renderColumn('fileSource', hasValue(search['fileSource']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "fileSource",
+        hasValue(search["fileSource"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     key: "taxationRowId",
@@ -471,9 +511,18 @@ export const columnsUsage = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
-    render: (text) => renderColumn('taxationRowId', hasValue(search['taxationRowId']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "taxationRowId",
+        hasValue(search["taxationRowId"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     key: "createdDate",
@@ -489,9 +538,17 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      'date'
+      "date",
     ),
-    render: (creationDate) => renderDateColumn('createdDate', hasValue(search['createdDate']), searchText, creationDate, 'date', search)
+    render: (creationDate) =>
+      renderDateColumn(
+        "createdDate",
+        hasValue(search["createdDate"]),
+        searchText,
+        creationDate,
+        "date",
+        search,
+      ),
   },
   {
     key: "approvedBy",
@@ -505,9 +562,18 @@ export const columnsUsage = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
-    render: (text) => renderColumn('approvedBy', hasValue(search['approvedBy']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "approvedBy",
+        hasValue(search["approvedBy"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     key: "volMscf",
@@ -522,9 +588,18 @@ export const columnsUsage = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
-    render: (text) => renderColumn('volMscf', hasValue(search['volMscf']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "volMscf",
+        hasValue(search["volMscf"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     key: "uncorrectedValue",
@@ -541,7 +616,16 @@ export const columnsUsage = (
       handleSearch,
       true,
     ),
-    render: (text) => renderColumn('uncorrectedValue', hasValue(search['uncorrectedValue']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "uncorrectedValue",
+        hasValue(search["uncorrectedValue"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     key: "lastUpdatedDate",
@@ -557,9 +641,17 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      'date'
+      "date",
     ),
-    render: (text) => renderDateColumn('lastUpdatedDate', hasValue(search['lastUpdatedDate']), searchText, text, 'date', search)
+    render: (text) =>
+      renderDateColumn(
+        "lastUpdatedDate",
+        hasValue(search["lastUpdatedDate"]),
+        searchText,
+        text,
+        "date",
+        search,
+      ),
   },
   {
     key: "source",
@@ -572,7 +664,7 @@ export const columnsUsage = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -591,7 +683,7 @@ export const columnsUsage = (
       searchText,
       handleSearch,
       true,
-      "input"
+      "input",
     ),
     render: (text) =>
       renderColumn(
@@ -601,7 +693,7 @@ export const columnsUsage = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
 ];

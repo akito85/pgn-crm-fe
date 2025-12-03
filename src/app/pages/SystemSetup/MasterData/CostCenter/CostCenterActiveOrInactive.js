@@ -17,8 +17,8 @@ const CostCenterActiveOrInactive = (props) => {
     handleCancelFooter = () => {},
     handleConfirmFooter = () => {},
     remark,
-    onChange = () => { },
-    form
+    onChange = () => {},
+    form,
   } = props;
 
   return (
@@ -28,7 +28,7 @@ const CostCenterActiveOrInactive = (props) => {
       message={`Are you sure want to ${ActiveOrInactive} Cost Center?`}
       width={500}
       handleCancel={handleCancel}
-      type={'confirmation'}
+      type={"confirmation"}
       footer={
         <div className={"w-full flex justify-end gap-5"}>
           <ButtonComponent type={"default"} onClick={handleCancelFooter}>
@@ -51,8 +51,7 @@ const CostCenterActiveOrInactive = (props) => {
               style={{ fontSize: "24px", color: "#65481C" }}
             />
           }
-          message={`Are you sure you want to ${ActiveOrInactive
-            } cost center?`}
+          message={`Are you sure you want to ${ActiveOrInactive} cost center?`}
           type={"warning"}
           showIcon
           className={"alert-icon"}

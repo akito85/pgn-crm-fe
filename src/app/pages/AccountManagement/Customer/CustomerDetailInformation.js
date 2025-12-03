@@ -30,11 +30,11 @@ const CustomerDetailInformation = ({
   const renderSection = () => {
     switch (section) {
       case dataTabs.acc:
-        return <AccountList id={id} dispatch={dispatch}/>;
+        return <AccountList id={id} dispatch={dispatch} />;
       case dataTabs.add:
-        return <CustomerAddressList id={id} dispatch={dispatch}/>;
+        return <CustomerAddressList id={id} dispatch={dispatch} />;
       case dataTabs.con:
-        return <CustomerContactList id={id} dispatch={dispatch}/>;
+        return <CustomerContactList id={id} dispatch={dispatch} />;
       default:
         return <></>;
     }
@@ -42,21 +42,21 @@ const CustomerDetailInformation = ({
   return (
     <Fragment>
       <div className="flex flex-col gap-4">
-      <div className="relative flex justify-center items-center gap-4">
-        <div
-          className={
-            "flex gap-2 w-full h-full overflow-x-auto scroll whitespace-nowrap scroll-smooth no-scrollbar"
-          }
-        >
-          <RadioTabs
-            currentPosition={section}
-            data={options}
-            onChange={handleChangeOption}
-          />
+        <div className="relative flex justify-center items-center gap-4">
+          <div
+            className={
+              "flex gap-2 w-full h-full overflow-x-auto scroll whitespace-nowrap scroll-smooth no-scrollbar"
+            }
+          >
+            <RadioTabs
+              currentPosition={section}
+              data={options}
+              onChange={handleChangeOption}
+            />
+          </div>
         </div>
+        {renderSection()}
       </div>
-      {renderSection()}
-    </div>
     </Fragment>
   );
 };

@@ -17,7 +17,7 @@ import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
   // Selector
   const { data_prevBilling, data_billingItem } = useSelector(
-    (state) => state.billing
+    (state) => state.billing,
   );
 
   // Declaration
@@ -45,7 +45,7 @@ const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
         idBillingCode: billingCodeId,
         idAccountNumber: accountNumberId,
         idSaNumber: saNumberId,
-      })
+      }),
     );
   }, [accountNumberId, billingCodeId, dispatch, saNumberId]);
 
@@ -57,7 +57,7 @@ const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
         pageBI: page,
         pageSizeBI: pageSize,
         sortBI: sort,
-      })
+      }),
     );
   }, [dispatch, billingCodeId, search, page, pageSize, sort]);
 
@@ -101,7 +101,7 @@ const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
       searchedColumn,
       searchText,
       handleSearch,
-      search
+      search,
     );
   }, [page, pageSize, searchedColumn, searchText, search]);
 
@@ -148,7 +148,7 @@ const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
             value={
               data_prevBilling?.transactionDate
                 ? moment(data_prevBilling?.transactionDate).format(
-                    dateFormatting.date
+                    dateFormatting.date,
                   )
                 : "-"
             }
@@ -194,20 +194,29 @@ const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
             label="Withholding Tax"
             value={currencyFormatting(
               data_prevBilling?.withHoldingTax?.toString(),
-              "idr"
+              "idr",
             )}
           />
           <InfoField
             label="Prev Withholding Tax"
-            value={currencyFormatting(data_prevBilling?.prevWithHoldingTax, "idr")}
+            value={currencyFormatting(
+              data_prevBilling?.prevWithHoldingTax,
+              "idr",
+            )}
           />
           <InfoField
             label="Discount IDR"
-            value={currencyFormatting(data_prevBilling?.discountAmountIdr, "idr")}
+            value={currencyFormatting(
+              data_prevBilling?.discountAmountIdr,
+              "idr",
+            )}
           />
           <InfoField
             label="Discount USD"
-            value={currencyFormatting(data_prevBilling?.discountAmountUsd, "usd")}
+            value={currencyFormatting(
+              data_prevBilling?.discountAmountUsd,
+              "usd",
+            )}
           />
           <InfoField
             label="Tax Basis IDR"

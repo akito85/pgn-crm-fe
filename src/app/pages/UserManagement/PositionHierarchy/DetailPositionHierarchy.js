@@ -26,7 +26,7 @@ import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 const DetailPositionHierarchy = () => {
   const navigate = useNavigate();
   const { data_detail, loading, data_position, data } = useSelector(
-    (state) => state?.position_hierarchy
+    (state) => state?.position_hierarchy,
   );
   const { bodyError } = useSelector((state) => state?.general);
   const dispatch = useDispatch();
@@ -73,7 +73,7 @@ const DetailPositionHierarchy = () => {
             status: item?.status,
             remark: item?.description,
           };
-        }
+        },
       );
       setDataDiagram(transformDataTable);
     }

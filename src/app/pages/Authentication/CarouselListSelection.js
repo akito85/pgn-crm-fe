@@ -119,12 +119,12 @@ const CarouselListSelection = (props) => {
         return array;
       }
     },
-    [data]
+    [data],
   );
 
   const filterData = useMemo(
     () => filterByTypePage(type),
-    [filterByTypePage, type]
+    [filterByTypePage, type],
   );
 
   // Card component selection

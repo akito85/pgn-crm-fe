@@ -5,7 +5,11 @@ import { Form, Select } from "antd";
 import { requiredMessage } from "../../../../../../../utils";
 import SelectComponent from "../../../../../../../components/SelectComponent";
 
-const PaymentChannelUpdate = ({ btnType = {}, paymentType = {}, options = [] }) => {
+const PaymentChannelUpdate = ({
+  btnType = {},
+  paymentType = {},
+  options = [],
+}) => {
   return (
     <Fragment>
       <div className="text-primary text-xs font-bold uppercase mb-5">

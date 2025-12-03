@@ -30,7 +30,7 @@ import { useColumnActionPermission } from "../../../../components/ColumnActionPe
 const ProductClassView = () => {
   // Selector
   const { data, data_detail, loading } = useSelector(
-    (state) => state.productClass
+    (state) => state.productClass,
   );
 
   // Declaration
@@ -66,7 +66,7 @@ const ProductClassView = () => {
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
-      getAllProductClassPaginate({ search: tempSearch, sort, page, pageSize })
+      getAllProductClassPaginate({ search: tempSearch, sort, page, pageSize }),
     );
   }, [search, sort, page, pageSize]);
 
@@ -180,7 +180,7 @@ const ProductClassView = () => {
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
-      downloadProductClass({ search: tempSearch, page, pageSize, sort })
+      downloadProductClass({ search: tempSearch, page, pageSize, sort }),
     );
   };
 
@@ -198,7 +198,7 @@ const ProductClassView = () => {
         id: chooseId,
         activeOrInactive:
           activeOrInactive === "ACTIVE" ? "Inactivated" : "Activated",
-      })
+      }),
     )
       .unwrap()
       .then(() => {
@@ -219,7 +219,7 @@ const ProductClassView = () => {
             pageSize,
             search: tempSearch,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -257,7 +257,7 @@ const ProductClassView = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -267,7 +267,7 @@ const ProductClassView = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -284,7 +284,7 @@ const ProductClassView = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -294,7 +294,7 @@ const ProductClassView = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
 
       // render: (text) => {
@@ -337,7 +337,7 @@ const ProductClassView = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         let text;
@@ -359,7 +359,7 @@ const ProductClassView = () => {
               text,
               false,
               "status",
-              search
+              search,
             )
           : text;
       },
@@ -515,7 +515,7 @@ const ProductClassView = () => {
         return record?.status !== "INACTIVE" ? (
           <Link
             to={PRODUCT_PROMO_ROUTES.UPDATE_PRODUCT_CLASS}
-            state={{ id: record?.productClassId}}
+            state={{ id: record?.productClassId }}
           >
             {render}
           </Link>
@@ -605,7 +605,7 @@ const ProductClassView = () => {
                 ...columns,
                 ...useColumnActionPermission(
                   ["view", "Update", "Activate"],
-                  itemsActionView
+                  itemsActionView,
                 ),
               ]}
               current={page}

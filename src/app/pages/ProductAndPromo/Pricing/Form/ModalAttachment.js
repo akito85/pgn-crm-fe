@@ -103,7 +103,7 @@ const ModalAttachment = ({
         }
         return false;
       },
-      [category]
+      [category],
     ),
   };
 
@@ -117,7 +117,7 @@ const ModalAttachment = ({
               ? parseInt(current) + 1
               : parseInt(nextKey) + 1;
           },
-          [1]
+          [1],
         );
         let newData = fileList.map((file) => {
           return {
@@ -139,7 +139,7 @@ const ModalAttachment = ({
               ? parseInt(current) + 1
               : parseInt(nextKey) + 1;
           },
-          [1]
+          [1],
         );
         const data = {
           ...dataLink,
@@ -190,7 +190,7 @@ const ModalAttachment = ({
           setErrorMessage(
             res.size > dataGuard.size
               ? "The file size more than 5 MB"
-              : "Format file not valid"
+              : "Format file not valid",
           );
         }
       } catch (error) {

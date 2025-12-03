@@ -79,7 +79,9 @@ const sorter = (fieldSort, a, b) => {
         //     ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
         //       descimal
         //     : "";
-        return obj[fieldSort] ? (obj[fieldSort] || 0)?.toString()?.toLowerCase() : "0" ;
+        return obj[fieldSort]
+          ? (obj[fieldSort] || 0)?.toString()?.toLowerCase()
+          : "0";
       default:
         return obj[fieldSort]?.toLowerCase();
     }
@@ -100,11 +102,11 @@ const sorter = (fieldSort, a, b) => {
       case "total":
       case "totalEqvIdr":
       case "totalEqvUsd":
-        return Math.sign(parseInt(a) - parseInt(b))
+        return Math.sign(parseInt(a) - parseInt(b));
       default:
         return a.localeCompare(b);
     }
-  }
+  };
 
   return handleCompare(fa, fb);
 };
@@ -161,18 +163,20 @@ const PointOfSalesPageDetailPOS = ({
   useEffect(() => {
     setDataTemp(data);
   }, [data]);
-  
+
   //useEffect for product
   useEffect(() => {
-    if (type === 2144 
-      // && quantity && quantity > 0 
-      && hasValue(item)) {
+    if (
+      type === 2144 &&
+      // && quantity && quantity > 0
+      hasValue(item)
+    ) {
       const data = {
         account: dataPriority[0]?.data,
         itemId: item,
-        qty: hasValue(quantity) || quantity > 0 ?  parseInt(quantity) : null,
+        qty: hasValue(quantity) || quantity > 0 ? parseInt(quantity) : null,
         transactionDate: moment(dataPriority[2]?.data).format(
-          dateFormatting.dateFormal
+          dateFormatting.dateFormal,
         ),
       };
       dispatch(getCalculate({ ...data }));
@@ -192,7 +196,7 @@ const PointOfSalesPageDetailPOS = ({
         "totalEqvIdr",
         "amount",
       ]);
-    } 
+    }
     // else if (type !== "") {
     //   if (item === "" || amount === "" || quantity === "") {
     //     formCreate.resetFields([
@@ -222,7 +226,7 @@ const PointOfSalesPageDetailPOS = ({
         itemCode: item,
         amount: parseInt(amount),
         transactionDate: moment(dataPriority[2]?.data).format(
-          dateFormatting.dateFormal
+          dateFormatting.dateFormal,
         ),
       };
       dispatch(getCalculateBilling({ ...data }));
@@ -264,14 +268,19 @@ const PointOfSalesPageDetailPOS = ({
     // }
   }, [dispatch, amount, item]);
   console.log(data, "data");
-  
+
   useEffect(() => {
     if (data_calculate) {
-
       if (type === 2144) {
-        console.log(hasValue(data_calculate?.priceInformation?.discount) , data_calculate?.priceInformation?.discount);
-        console.log(hasValue(data_calculate?.priceInformation?.discount) && data_calculate?.priceInformation?.discount);
-        
+        console.log(
+          hasValue(data_calculate?.priceInformation?.discount),
+          data_calculate?.priceInformation?.discount,
+        );
+        console.log(
+          hasValue(data_calculate?.priceInformation?.discount) &&
+            data_calculate?.priceInformation?.discount,
+        );
+
         //product case
         formCreate.setFieldsValue({
           price: data_calculate?.priceInformation?.price || null,
@@ -289,7 +298,7 @@ const PointOfSalesPageDetailPOS = ({
           amountEqvUsd:
             hasValue(quantity) && data_calculate?.priceInformation?.amountEqvUsd
               ? Number(
-                  data_calculate?.priceInformation?.amountEqvUsd.toFixed(2)
+                  data_calculate?.priceInformation?.amountEqvUsd.toFixed(2),
                 )
               : null,
           amountEqvIdr:
@@ -301,7 +310,8 @@ const PointOfSalesPageDetailPOS = ({
               ? data_calculate?.priceInformation?.eqvIdr
               : null,
           discount:
-            hasValue(quantity) && data_calculate?.priceInformation?.discount >= 0
+            hasValue(quantity) &&
+            data_calculate?.priceInformation?.discount >= 0
               ? data_calculate?.priceInformation?.discount
               : null,
           total:
@@ -324,16 +334,16 @@ const PointOfSalesPageDetailPOS = ({
           reference: data_calculate?.priceInformation?.referenceName || null,
           uom: data_calculate?.priceInformation?.uom || null,
           currency: data_calculate?.priceInformation?.currency || null,
-          amountEqvUsd: data_calculate?.priceInformation?.amountEqvUsd ? Number(
-            data_calculate?.priceInformation?.amountEqvUsd.toFixed(2)
-          ) : null,
+          amountEqvUsd: data_calculate?.priceInformation?.amountEqvUsd
+            ? Number(data_calculate?.priceInformation?.amountEqvUsd.toFixed(2))
+            : null,
           amountEqvIdr: data_calculate?.priceInformation?.amountEqvIdr || null,
           eqvIdrTaxPurpose: data_calculate?.priceInformation?.eqvIdr || null,
           discount: data_calculate?.priceInformation?.discount || null,
           total: data_calculate?.priceInformation?.total || null,
-          totalEqvUsd: data_calculate?.priceInformation?.totalEqvUsd ? (
-            data_calculate?.priceInformation?.totalEqvUsd.toFixed(2)
-          ) : null,
+          totalEqvUsd: data_calculate?.priceInformation?.totalEqvUsd
+            ? data_calculate?.priceInformation?.totalEqvUsd.toFixed(2)
+            : null,
           totalEqvIdr: data_calculate?.priceInformation?.totalEqvIdr || null,
         });
       }
@@ -374,7 +384,7 @@ const PointOfSalesPageDetailPOS = ({
               ? dataItemProduct?.find(
                   (data) =>
                     data?.id ===
-                    (isNaN(item.itemId) ? item.itemId : parseInt(item.itemId))
+                    (isNaN(item.itemId) ? item.itemId : parseInt(item.itemId)),
                 )?.name
               : dataItemBilling?.find((data) => data?.id === item.itemId)?.name,
         }));
@@ -392,7 +402,7 @@ const PointOfSalesPageDetailPOS = ({
                 data?.id ===
                 (isNaN(isUpdate?.item)
                   ? isUpdate?.item
-                  : parseInt(isUpdate?.item))
+                  : parseInt(isUpdate?.item)),
             )
             .map((item) => ({ id: item.id, name: item.name })), //filter yg dipakai
         ]);
@@ -513,7 +523,7 @@ const PointOfSalesPageDetailPOS = ({
                 data.reference !==
                   (isNaN(isUpdate.item)
                     ? isUpdate.item
-                    : parseInt(isUpdate.item)))
+                    : parseInt(isUpdate.item))),
           );
           const tempAllNewData = [
             ...temp.slice(0, isUpdate.index + 1), // Include data up to the updated index
@@ -533,7 +543,9 @@ const PointOfSalesPageDetailPOS = ({
             .filter(
               (data) =>
                 data.reference !==
-                (isNaN(isUpdate.item) ? isUpdate.item : parseInt(isUpdate.item))
+                (isNaN(isUpdate.item)
+                  ? isUpdate.item
+                  : parseInt(isUpdate.item)),
             )
             .map((data, index) => ({ ...data, lineNumber: index + 1 }));
         }
@@ -588,7 +600,7 @@ const PointOfSalesPageDetailPOS = ({
   const handleDelete = (r) => {
     // console.log(r, "r");
     const temp = data.filter(
-      (data) => data.item !== r?.item && data.reference !== parseInt(r?.itemId)
+      (data) => data.item !== r?.item && data.reference !== parseInt(r?.itemId),
     );
     setData(temp);
   };
@@ -659,7 +671,7 @@ const PointOfSalesPageDetailPOS = ({
     setItem(
       e?.typeId === 2144
         ? dataItemProduct?.find((data) => data?.id === parseInt(e?.itemId))?.id
-        : dataItemBilling?.find((data) => data?.id === e?.itemId)?.id
+        : dataItemBilling?.find((data) => data?.id === e?.itemId)?.id,
     );
     setType(e?.typeId);
 
@@ -721,7 +733,7 @@ const PointOfSalesPageDetailPOS = ({
             onFilter,
             sorter,
             dataTemp,
-            "editable"
+            "editable",
           )}
         />
       </div>

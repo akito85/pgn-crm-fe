@@ -40,11 +40,11 @@ export const getAllEmployeePaginate = createAsyncThunk(
           error: error,
           action: "GET_ALL_EMPLOYEE_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadEmployee = createAsyncThunk(
@@ -63,11 +63,11 @@ export const downloadEmployee = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_ACTION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response);
     }
-  }
+  },
 );
 export const getEmployeeDetail = createAsyncThunk(
   "GET_EMPLOYEE_DETAIL",
@@ -82,11 +82,11 @@ export const getEmployeeDetail = createAsyncThunk(
           error: error,
           action: "GET_EMPLOYEE_DETAIL",
           back: true,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getAssignmentDetail = createAsyncThunk(
@@ -102,11 +102,11 @@ export const getAssignmentDetail = createAsyncThunk(
           error: error,
           action: "GET_ASSIGNMENT_DETAIL",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getForwardTaskDetail = createAsyncThunk(
@@ -118,11 +118,11 @@ export const getForwardTaskDetail = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_FORWARD_TASK_DETAIL" })
+        validateError({ error, action: "GET_FORWARD_TASK_DETAIL" }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getPendingTask = createAsyncThunk(
@@ -139,10 +139,10 @@ export const getPendingTask = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(validateError({ error, action: "GET_PENDING_TASK" }));
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getTo = createAsyncThunk("GET_TO", async (id, thunkAPI) => {
@@ -158,7 +158,7 @@ export const getTo = createAsyncThunk("GET_TO", async (id, thunkAPI) => {
   } catch (error) {
     thunkAPI.dispatch(validateError({ error, action: "GET_TO" }));
     return thunkAPI.rejectWithValue(
-      error.response.data.code === 419 ? null : error.response.data
+      error.response.data.code === 419 ? null : error.response.data,
     );
   }
 });
@@ -181,11 +181,11 @@ export const createForwardTask = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_FORWARD_TASK",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // export const getForwardTaskByEmp = createAsyncThunk(
@@ -226,11 +226,11 @@ export const createEmployee = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_EMPLOYEE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const updateEmployee = createAsyncThunk(
@@ -251,11 +251,11 @@ export const updateEmployee = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_EMPLOYEE",
           back: false,
-        })
+        }),
       );
       return thunk.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const terminateEmployee = createAsyncThunk(
@@ -277,11 +277,11 @@ export const terminateEmployee = createAsyncThunk(
           error: errorBody(errorCode(error), "terminated", errorMessage(error)),
           action: "TERMINATE_EMPLOYEE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListEmpType = createAsyncThunk(
@@ -297,11 +297,11 @@ export const getListEmpType = createAsyncThunk(
           error: error,
           action: "GET_LIST_EMPLOYEE_TYPE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListJob = createAsyncThunk(
@@ -317,11 +317,11 @@ export const getListJob = createAsyncThunk(
           error: error,
           action: "GET_LIST_EMPLOYEE_JOB",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const getListPosition = createAsyncThunk(
   "GET_LIST_EMPLOYEE_Position",
@@ -336,11 +336,11 @@ export const getListPosition = createAsyncThunk(
           error: error,
           action: "GET_LIST_EMPLOYEE_Position",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const downloadEmpTemlpate = createAsyncThunk(
@@ -356,11 +356,11 @@ export const downloadEmpTemlpate = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_TEMPLATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const uploadEmployee = createAsyncThunk(
@@ -375,7 +375,7 @@ export const uploadEmployee = createAsyncThunk(
       const data = await userHttpService.uploadImage(
         url,
         dataRequest,
-        onProgress
+        onProgress,
       );
       return data;
     } catch (e) {
@@ -384,11 +384,11 @@ export const uploadEmployee = createAsyncThunk(
           error: errorBody(errorCode(e), "updated", errorMessage(e)),
           action: "UPLOAD_EMPLOYEE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(e?.response);
     }
-  }
+  },
 );
 
 export const saveUploadEmployee = createAsyncThunk(
@@ -409,11 +409,11 @@ export const saveUploadEmployee = createAsyncThunk(
           error: errorBody(errorCode(error), "uploaded", errorMessage(error)),
           action: "SAVE_UPLOAD_EMPLOYEE",
           back: false,
-        })
+        }),
       );
       return thunk.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 const employeeSlice = createSlice({

@@ -33,7 +33,7 @@ const columns = (
   handleSearch,
   type,
   handleUpdate,
-  handleDelete
+  handleDelete,
 ) => {
   const result = [
     {
@@ -54,7 +54,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -98,7 +98,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -113,7 +113,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -128,7 +128,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -231,13 +231,13 @@ const PDIEligibilityProductForm = ({
   } = useSelector((state) => state.product);
 
   const tempProductType = (dataListProductType || []).filter(
-    (item) => item.value === (productObj.productType || 0)
+    (item) => item.value === (productObj.productType || 0),
   );
   const tempProductClass = (dataListProductClass || []).filter(
-    (item) => item.value === (productObj.productClass || 0)
+    (item) => item.value === (productObj.productClass || 0),
   );
   const tempServiceType = (dataListServiceType || []).filter(
-    (item) => item.value === (productObj.serviceType || 0)
+    (item) => item.value === (productObj.serviceType || 0),
   );
   const dataDetailProduct = {
     productName: productObj.productName,
@@ -313,7 +313,7 @@ const PDIEligibilityProductForm = ({
           handleSearch,
           type,
           handleUpdate,
-          handleDelete
+          handleDelete,
         )}
       />
       {modalForm ? (

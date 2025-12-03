@@ -27,13 +27,13 @@ export const getAnnouncementList = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_ANNOUNCEMENT_LIST" })
+        validateError({ error, action: "GET_ANNOUNCEMENT_LIST" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getAnnouncementDetail = createAsyncThunk(
@@ -45,13 +45,13 @@ export const getAnnouncementDetail = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_ANNOUNCEMENT_DETAIL" })
+        validateError({ error, action: "GET_ANNOUNCEMENT_DETAIL" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const inactiveAnnouncement = createAsyncThunk(
@@ -76,11 +76,11 @@ export const inactiveAnnouncement = createAsyncThunk(
           error: errorBody(errorCode(error), status, errorMessage(error)),
           action: "INACTIVE_ANNOUNCEMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const createHtmlAnnouncement = createAsyncThunk(
@@ -101,11 +101,11 @@ export const createHtmlAnnouncement = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_HTML_ANNOUNCEMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const createImageAnnouncement = createAsyncThunk(
@@ -133,7 +133,7 @@ export const createImageAnnouncement = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "CREATE_IMAGE_ANNOUNCEMENT" })
+            validateError({ error, action: "CREATE_IMAGE_ANNOUNCEMENT" }),
           );
         } else {
           const errorBody = {
@@ -148,7 +148,7 @@ export const createImageAnnouncement = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateHtmlAnnouncement = createAsyncThunk(
@@ -173,7 +173,7 @@ export const updateHtmlAnnouncement = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "UPDATE_HTML_ANNOUNCEMENT" })
+            validateError({ error, action: "UPDATE_HTML_ANNOUNCEMENT" }),
           );
         } else {
           const errorBody = {
@@ -185,7 +185,7 @@ export const updateHtmlAnnouncement = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateImageAnnouncement = createAsyncThunk(
@@ -213,7 +213,7 @@ export const updateImageAnnouncement = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "UPDATE_IMAGE_ANNOUNCEMENT" })
+            validateError({ error, action: "UPDATE_IMAGE_ANNOUNCEMENT" }),
           );
         } else {
           const errorBody = {
@@ -228,7 +228,7 @@ export const updateImageAnnouncement = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const checkAllowingFile = createAsyncThunk(
@@ -259,7 +259,7 @@ export const checkAllowingFile = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadAnnouncement = createAsyncThunk(
@@ -274,13 +274,13 @@ export const downloadAnnouncement = createAsyncThunk(
       return response.data;
     } catch (response) {
       thunkAPI.dispatch(
-        validateError({ response, action: "DOWNLOAD_ANNOUNCEMENT" })
+        validateError({ response, action: "DOWNLOAD_ANNOUNCEMENT" }),
       );
       return thunkAPI.rejectWithValue(
-        response.response.data.code === 419 ? null : response.response.data
+        response.response.data.code === 419 ? null : response.response.data,
       );
     }
-  }
+  },
 );
 
 const announcementSlice = createSlice({

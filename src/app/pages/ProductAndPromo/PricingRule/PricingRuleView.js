@@ -1,13 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, Link } from "react-router-dom";
-import {
-  Input,
-  Tooltip,
-  Spin,
-  Checkbox,
-  DatePicker,
-} from "antd";
+import { Input, Tooltip, Spin, Checkbox, DatePicker } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -49,7 +43,7 @@ const objType = {
 const PricingRuleView = () => {
   // Selector
   const { data, loading, data_approval_history } = useSelector(
-    (state) => state.pricingRule
+    (state) => state.pricingRule,
   );
 
   // Declaration
@@ -85,7 +79,7 @@ const PricingRuleView = () => {
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
-      getAllPricingRulePaginate({ search: tempSearch, page, pageSize, sort })
+      getAllPricingRulePaginate({ search: tempSearch, page, pageSize, sort }),
     );
   }, [dispatch, search, page, pageSize, sort]);
 
@@ -237,7 +231,7 @@ const PricingRuleView = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -247,7 +241,7 @@ const PricingRuleView = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -263,7 +257,7 @@ const PricingRuleView = () => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -272,7 +266,7 @@ const PricingRuleView = () => {
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -288,7 +282,7 @@ const PricingRuleView = () => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -297,7 +291,7 @@ const PricingRuleView = () => {
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -315,7 +309,7 @@ const PricingRuleView = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -325,7 +319,7 @@ const PricingRuleView = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -341,7 +335,7 @@ const PricingRuleView = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         let text;
@@ -366,7 +360,7 @@ const PricingRuleView = () => {
               text,
               false,
               "status",
-              search
+              search,
             )
           : text;
       },
@@ -384,7 +378,7 @@ const PricingRuleView = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (statusApproval) => {
         let text;
@@ -410,7 +404,7 @@ const PricingRuleView = () => {
               text,
               false,
               "status",
-              search
+              search,
             )
           : text;
       },
@@ -583,7 +577,7 @@ const PricingRuleView = () => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -706,10 +700,10 @@ const PricingRuleView = () => {
       type: "table",
       render: (record, data_length) => {
         const isActivateOrInactivate =
-          (record?.approvalStatus=== "APPROVED" &&
+          (record?.approvalStatus === "APPROVED" &&
             record?.status === "ACTIVE") ||
-          (record?.approvalStatus=== "DRAFT" && record?.status === "ACTIVE") ||
-          (record?.approvalStatus=== "REJECTED" &&
+          (record?.approvalStatus === "DRAFT" && record?.status === "ACTIVE") ||
+          (record?.approvalStatus === "REJECTED" &&
             record?.status === "ACTIVE");
 
         return data_length > 3 ? (
@@ -833,7 +827,7 @@ const PricingRuleView = () => {
                 ...columns,
                 ...useColumnActionPermission(
                   ["view", "Update", "Activate", "History"],
-                  itemsActionView
+                  itemsActionView,
                 ),
               ]}
               current={page}

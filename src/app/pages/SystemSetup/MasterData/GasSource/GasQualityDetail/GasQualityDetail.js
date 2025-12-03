@@ -17,7 +17,13 @@ import {
 import { FilterOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
-import { dateFormatting, formMessageRequired, hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import {
+  dateFormatting,
+  formMessageRequired,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import InputComponent from "../../../../../../components/InputComponent";
 import DateComponent from "../../../../../../components/DateComponent";
@@ -28,7 +34,7 @@ import {
   getDetailGasSourceQuality,
   activeOrInactiveGasSourceQuality,
   getAllGasSourceQualityPaginate,
-  updateEnDateGasSourceQuality
+  updateEnDateGasSourceQuality,
 } from "../../../../../../redux/slices/account_management/MasterData/gasSourceSlice";
 import { clearBodyMessage } from "../../../../../../redux/slices/general_slice";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
@@ -36,22 +42,22 @@ import ToolbarAccount from "../../../../AccountManagement/ComponentAccount/Toolb
 import { useColumnActionPermissionAccount } from "../../../../AccountManagement/ComponentAccount/ColumnActionPermissionAccount";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
-const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
+const GasQualityDetail = ({ id, uomName, dataDetail, actionList }) => {
   // Selector
   const { loading, data_detail_quality, dataQuality } = useSelector(
-    (state) => state.gasSource
+    (state) => state.gasSource,
   );
   const filteredArray = useMemo(() => {
     return {
-      actionList: actionList?.actionList?.filter(action =>
-        action.path.includes("/system-setup/gas-sources-quality/") &&
-        !action.path.includes("/system-setup/gas-sources/")
-      )
-    }
+      actionList: actionList?.actionList?.filter(
+        (action) =>
+          action.path.includes("/system-setup/gas-sources-quality/") &&
+          !action.path.includes("/system-setup/gas-sources/"),
+      ),
+    };
   }, [actionList]);
 
-
-  const { bodyError } = useSelector(state => state?.general);
+  const { bodyError } = useSelector((state) => state?.general);
 
   // Declaration
   const searchInput = useRef(null);
@@ -78,13 +84,13 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalDetail, setModalDetail] = useState(false);
   const [chooseId, setChooseId] = useState();
-  const [documentNumber, setDocumentNumber] = useState('');
+  const [documentNumber, setDocumentNumber] = useState("");
   const [modalError, setModalError] = useState(false);
-  const [gasQualityId, setGasQualityId] = useState('12310');
+  const [gasQualityId, setGasQualityId] = useState("12310");
   const [modalUpdate, setModalUpdate] = useState(false);
   const [modalValidateCreate, setModalValidateCreate] = useState(false);
   const [dataUpdate, setDataUpdate] = useState({});
-  const [type, setType] = useState('');
+  const [type, setType] = useState("");
 
   // //Use Effect
   // useEffect(() => {
@@ -93,18 +99,26 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
 
   useEffect(() => {
     dispatch(
-      getAllGasSourceQualityPaginate({ id, search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize })
+      getAllGasSourceQualityPaginate({
+        id,
+        search: encodeURIComponent(JSON.stringify(search)),
+        sort,
+        page,
+        pageSize,
+      }),
     );
   }, [id, search, sort, page, pageSize, dispatch]);
 
   // trigger modal try again
   useEffect(() => {
-    if (bodyError?.response?.data?.code === 500 && bodyError?.action !== "GET_DETAIL_GAS_SOURCE") {
-      setModalError(true)
-      setModalDetail(false)
+    if (
+      bodyError?.response?.data?.code === 500 &&
+      bodyError?.action !== "GET_DETAIL_GAS_SOURCE"
+    ) {
+      setModalError(true);
+      setModalDetail(false);
     }
   }, [bodyError]);
-
 
   // Search Column Table
   const getColumnSearchProps = (dataIndex, type) => ({
@@ -216,7 +230,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -226,7 +240,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchProps("documentNumber"),
     },
@@ -245,7 +259,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -254,7 +268,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -272,7 +286,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -281,7 +295,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -297,7 +311,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -307,7 +321,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -323,7 +337,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -333,7 +347,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -349,7 +363,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -359,7 +373,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -375,7 +389,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -385,7 +399,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -401,7 +415,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -411,7 +425,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -435,7 +449,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -445,15 +459,14 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
           text,
           true,
           "input",
-          search
+          search,
         ),
-
     },
     {
       title: "STATUS",
       dataIndex: "status",
       sorter: true,
-      fixed: 'right',
+      fixed: "right",
       width: 120,
       // ...getColumnSearchProps("status"),
       // render: (index) => (
@@ -468,7 +481,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         let text;
@@ -492,7 +505,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
               text,
               false,
               "status",
-              search
+              search,
             )
           : text;
       },
@@ -542,9 +555,9 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
   ];
 
   const handleUpdate = (r, id) => {
-    setDataUpdate(r)
-    setType('update')
-    setOpenModal(true)
+    setDataUpdate(r);
+    setType("update");
+    setOpenModal(true);
     // setModalUpdate(true)
     form.setFieldsValue({
       documentNumber: r.documentNumber,
@@ -555,36 +568,42 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
       sg: r.sg,
       btu: r.btu,
       co2: r.co2,
-      description: r.description
-    })
-  }
+      description: r.description,
+    });
+  };
   const handleConfirmUpdate = () => {
-    dispatch(updateEnDateGasSourceQuality(
-      {
+    dispatch(
+      updateEnDateGasSourceQuality({
         gasSourceDetailId: dataUpdate.gasSourceDetailId,
-        endDate: moment(formUpdate.endDate).format(dateFormatting.date)
-      }
-    ))
-    .unwrap()
-    .then(()=>{
-      dispatch(
-        getAllGasSourceQualityPaginate({ id, search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize })
-      );
-    })
-    .catch((e) => {
-      console.log("🚀 ~ handleConfirmUpdate ~ e:", e)
-    })
-  }
-  const handleCancelUpdate = () =>{
-    setModalUpdate(false)
-  }
-  const handleCreate = () =>{
-    setType('create')
-    setOpenModal(true)
+        endDate: moment(formUpdate.endDate).format(dateFormatting.date),
+      }),
+    )
+      .unwrap()
+      .then(() => {
+        dispatch(
+          getAllGasSourceQualityPaginate({
+            id,
+            search: encodeURIComponent(JSON.stringify(search)),
+            sort,
+            page,
+            pageSize,
+          }),
+        );
+      })
+      .catch((e) => {
+        console.log("🚀 ~ handleConfirmUpdate ~ e:", e);
+      });
+  };
+  const handleCancelUpdate = () => {
+    setModalUpdate(false);
+  };
+  const handleCreate = () => {
+    setType("create");
+    setOpenModal(true);
     // const isActive = dataSource.result.some(item => item.status === "ACTIVE");
     // const hasEmptyAndDate = dataSource.result.some(item => item.endDate === null);
     // hasEmptyAndDate && isActive ? setModalValidateCreate(true) : setOpenModal(true);
-  }
+  };
 
   const onSort = (_, __, sort) => {
     const dataSort =
@@ -621,8 +640,12 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
     const dataValue = {
       gasSourceId: id,
       documentNumber: formValue.documentNumber,
-      startDate: hasValue(formValue.startDate) ? moment(formValue.startDate).format(dateFormatting.date): null,
-      endDate: hasValue(formValue.endDate) ? moment(formValue.endDate).format(dateFormatting.date) : null,
+      startDate: hasValue(formValue.startDate)
+        ? moment(formValue.startDate).format(dateFormatting.date)
+        : null,
+      endDate: hasValue(formValue.endDate)
+        ? moment(formValue.endDate).format(dateFormatting.date)
+        : null,
       m3: formValue.m3,
       btu: formValue.btu,
       sg: formValue.sg,
@@ -632,7 +655,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
     };
     setBodyData(dataValue);
     setOpenModal(false);
-    setModalActiveOrInactive(false)
+    setModalActiveOrInactive(false);
   };
 
   // Handle Confirm Create
@@ -642,35 +665,42 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
       endDate: bodyData.endDate,
       startDate: bodyData?.startDate,
       description: bodyData.description,
-    }
+    };
     // type === "create" ?  dispatch(createGasSourceQuality({ body: bodyData })) : dispatch(updateEnDateGasSourceQuality(bodyDataUpdate))
-    const checkAction = type === "create" 
-    ? createGasSourceQuality({ body: bodyData }) 
-    : updateEnDateGasSourceQuality(bodyDataUpdate);
-   
+    const checkAction =
+      type === "create"
+        ? createGasSourceQuality({ body: bodyData })
+        : updateEnDateGasSourceQuality(bodyDataUpdate);
+
     dispatch(checkAction)
-    .unwrap()
-    .then(() => {
-      form.resetFields();
-      setModalConfirm(false);
-      dispatch(
-        getAllGasSourceQualityPaginate({ id, search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize })
-      );
-    })
-    .catch(() => {
-      setModalConfirm(false);
-      setOpenModal(true);
-    });
+      .unwrap()
+      .then(() => {
+        form.resetFields();
+        setModalConfirm(false);
+        dispatch(
+          getAllGasSourceQualityPaginate({
+            id,
+            search: encodeURIComponent(JSON.stringify(search)),
+            sort,
+            page,
+            pageSize,
+          }),
+        );
+      })
+      .catch(() => {
+        setModalConfirm(false);
+        setOpenModal(true);
+      });
   };
 
   // Handle Confirmation Active/Inactive
   const handleActiveOrInactive = (record) => {
     setModalActiveOrInactive(true);
     setActiveOrInactive(
-      record?.status === "ACTIVE" ? "Inactivate" : "Activate"
+      record?.status === "ACTIVE" ? "Inactivate" : "Activate",
     );
     setChooseId(record?.gasSourceDetailId);
-    setDocumentNumber(record?.documentNumber)
+    setDocumentNumber(record?.documentNumber);
     setOpenModal(false);
     setModalConfirm(false);
   };
@@ -692,14 +722,20 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
       activeOrInactiveGasSourceQuality({
         body: data,
         activeOrInactive: activeOrInactive,
-      })
+      }),
     )
       .unwrap()
       .then(() => {
         setModalActiveOrInactive(false);
         setRemark("");
         dispatch(
-          getAllGasSourceQualityPaginate({ id, search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize })
+          getAllGasSourceQualityPaginate({
+            id,
+            search: encodeURIComponent(JSON.stringify(search)),
+            sort,
+            page,
+            pageSize,
+          }),
         );
         formActivation.resetFields();
       })
@@ -716,29 +752,52 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
 
   const handleConfirmRetry = () => {
     if (bodyError?.action === "GET_ALL_GAS_SOURCE_QUALITY_PAGINATE") {
-      dispatch(getAllGasSourceQualityPaginate({ id, search, sort, page, pageSize }))
+      dispatch(
+        getAllGasSourceQualityPaginate({ id, search, sort, page, pageSize }),
+      );
     } else if (bodyError?.action === "GET_DETAIL_GAS_SOURCE_QUALITY") {
       dispatch(getDetailGasSourceQuality(gasQualityId));
       setModalDetail(true);
     } else if (bodyError?.action === "CREATE_GAS_SOURCE_QUALITY") {
-      dispatch(createGasSourceQuality({ body: bodyData }))
-      dispatch(getAllGasSourceQualityPaginate({ id, search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }))
+      dispatch(createGasSourceQuality({ body: bodyData }));
+      dispatch(
+        getAllGasSourceQualityPaginate({
+          id,
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort,
+          page,
+          pageSize,
+        }),
+      );
     } else {
       const setBodyRemark = {
         gasSourceDetailId: chooseId,
         remark: remark,
-      }
+      };
       const setStatus = {
         activeOrInactive: activeOrInactive,
-      }
-      dispatch(activeOrInactiveGasSourceQuality({ body: setBodyRemark, activeOrInactive: setStatus }))
-      dispatch(getAllGasSourceQualityPaginate({ id, search: encodeURIComponent(JSON.stringify(search)), sort, page, pageSize }))
+      };
+      dispatch(
+        activeOrInactiveGasSourceQuality({
+          body: setBodyRemark,
+          activeOrInactive: setStatus,
+        }),
+      );
+      dispatch(
+        getAllGasSourceQualityPaginate({
+          id,
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort,
+          page,
+          pageSize,
+        }),
+      );
     }
     dispatch(clearBodyMessage());
-  }
+  };
   // handle retry
   const handleRetry = () => {
-    handleConfirmRetry()
+    handleConfirmRetry();
     setModalError(false);
     dispatch(clearBodyMessage());
   };
@@ -753,19 +812,19 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
   const itemActions = [
     //action toolbar
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <ButtonComponent
           type={"submit"}
           onClick={() => {
-            handleCreate()
+            handleCreate();
           }}
           icon={<SVGIcon name="IconButtonCreate" width={24} />}
           disabled={dataDetail?.status === "INACTIVE"}
         >
           Create
         </ButtonComponent>
-      )
+      ),
     },
 
     // Column Action Table
@@ -783,8 +842,8 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
               />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
 
     {
@@ -801,8 +860,8 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
               />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
 
     {
@@ -810,7 +869,9 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
       type: "table",
       render: (record, data) => {
         return (
-          <Tooltip title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}>
+          <Tooltip
+            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+          >
             <div className="pt-1">
               <Checkbox
                 disabled={record.status === "INACTIVE"}
@@ -821,17 +882,20 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
               />
             </div>
           </Tooltip>
-        )
-      }
-    }
-  ]
+        );
+      },
+    },
+  ];
 
   return (
     <div>
       <Spin spinning={loading}>
         <BaseContainer header={"Gas Quality Detail"}>
           <div className="w-full flex justify-end mb-[30px]">
-            <ToolbarAccount items={itemActions} advancedAccess={filteredArray}/>
+            <ToolbarAccount
+              items={itemActions}
+              advancedAccess={filteredArray}
+            />
           </div>
 
           <div className="w-full">
@@ -842,7 +906,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
                 ...useColumnActionPermissionAccount(
                   ["Activate", "View", "Update"],
                   itemActions,
-                  filteredArray
+                  filteredArray,
                 ),
               ]}
               current={page}
@@ -863,7 +927,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
         <ModalCustom
           isOpen={openModal}
           type="confirmation"
-          header={`${type === 'create' ? 'CREATE' : 'UPDATE'} GAS QUALITY DETAIL`}
+          header={`${type === "create" ? "CREATE" : "UPDATE"} GAS QUALITY DETAIL`}
           width={800}
           handleCancel={handleCancel}
           footer={false}
@@ -880,7 +944,8 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
                   },
                   {
                     pattern: /^[a-zA-Z0-9\-/\.]+$/,
-                    message: "Invalid input. Only numbers, letters, (-), (/), and (.)",
+                    message:
+                      "Invalid input. Only numbers, letters, (-), (/), and (.)",
                   },
                 ]}
               >
@@ -900,27 +965,24 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
                 <DatePicker
                   format={"DD MMM YYYY"}
                   className="w-full"
-                  disabled={type === "update"} 
-                  onChange={() => form.resetFields(['endDate'])}
+                  disabled={type === "update"}
+                  onChange={() => form.resetFields(["endDate"])}
                 />
               </Form.Item>
-              <Form.Item
-                label={"End Date"}
-                name={"endDate"}
-              >
-                <DateComponent
-                  dateDisable={handleDisableEndDate}
-                />
+              <Form.Item label={"End Date"} name={"endDate"}>
+                <DateComponent dateDisable={handleDisableEndDate} />
               </Form.Item>
               <Form.Item
                 label={"Value (M3/MMBTU)"}
                 name={"m3"}
-                rules={uomName === "M3/MMBTU" && [
-                  {
-                    required: true,
-                    message: "Please input your Value (M3/MMBTU)!",
-                  },
-                ]}
+                rules={
+                  uomName === "M3/MMBTU" && [
+                    {
+                      required: true,
+                      message: "Please input your Value (M3/MMBTU)!",
+                    },
+                  ]
+                }
               >
                 <InputNumber
                   type="number"
@@ -928,18 +990,20 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
                   style={{
                     width: "100%",
                   }}
-                  disabled={type === "update"} 
+                  disabled={type === "update"}
                 />
               </Form.Item>
               <Form.Item
                 label={"Value (BTU/SCV (GHV)"}
                 name={"btu"}
-                rules={uomName === "BTU/SCF" && [
-                  {
-                    required: true,
-                    message: "Please input your Value ((BTU/SCV (GHV))!",
-                  },
-                ]}
+                rules={
+                  uomName === "BTU/SCF" && [
+                    {
+                      required: true,
+                      message: "Please input your Value ((BTU/SCV (GHV))!",
+                    },
+                  ]
+                }
               >
                 <InputNumber
                   type="number"
@@ -947,7 +1011,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
                   style={{
                     width: "100%",
                   }}
-                  disabled={type === "update"} 
+                  disabled={type === "update"}
                 />
               </Form.Item>
               <Form.Item label={"SG"} name={"sg"}>
@@ -957,7 +1021,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
                   style={{
                     width: "100%",
                   }}
-                  disabled={type === "update"} 
+                  disabled={type === "update"}
                 />
               </Form.Item>
               <Form.Item label={"N2"} name={"n2"}>
@@ -967,7 +1031,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
                   style={{
                     width: "100%",
                   }}
-                  disabled={type === "update"} 
+                  disabled={type === "update"}
                 />
               </Form.Item>
               <Form.Item label={"CO2"} name={"co2"}>
@@ -977,7 +1041,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
                   style={{
                     width: "100%",
                   }}
-                  disabled={type === "update"} 
+                  disabled={type === "update"}
                 />
               </Form.Item>
               <div className="col-span-3">
@@ -996,10 +1060,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
             </div>
             <div className={"w-full flex justify-end gap-5"}>
               <Form.Item>
-                <ButtonComponent
-                  type="default"
-                  onClick={handleCancel}
-                >
+                <ButtonComponent type="default" onClick={handleCancel}>
                   Cancel
                 </ButtonComponent>
               </Form.Item>
@@ -1051,10 +1112,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
           handleCancel={handleCancelInactive}
           footer={
             <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
-              <ButtonComponent
-                onClick={handleCancelInactive}
-                type="default"
-              >
+              <ButtonComponent onClick={handleCancelInactive} type="default">
                 Cancel
               </ButtonComponent>
               <ButtonComponent
@@ -1071,7 +1129,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
             id="inactivateForm"
             form={formActivation}
             onFinish={handleConfirmInactive}
-            layout='vertical'
+            layout="vertical"
           >
             <div className="flex flex-col gap-6">
               <Alert
@@ -1083,7 +1141,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
               />
               <Form.Item
                 name={"remark"}
-                label={'Remark'}
+                label={"Remark"}
                 rules={formMessageRequired("remark")}
                 className="w-full"
               >
@@ -1110,15 +1168,17 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{bodyError?.response?.data?.message?.toString()}</p>
+          <p className="pl-[70px]">
+            {bodyError?.response?.data?.message?.toString()}
+          </p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
 
       <ModalError
         isOpen={modalValidateCreate}
-        handleOk={()=>setModalValidateCreate(false)}
-        handleCancel={()=>setModalValidateCreate(false)}
+        handleOk={() => setModalValidateCreate(false)}
+        handleCancel={() => setModalValidateCreate(false)}
         customText={"Close"}
       >
         <div className="px-5 pt-5 pb-[10px] justify-center">
@@ -1126,61 +1186,55 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Warning"}</p>
           </div>
-          <p className="pl-[70px]">You must fill end date of latest gas quality detail before you can create new gas quality detail</p>
+          <p className="pl-[70px]">
+            You must fill end date of latest gas quality detail before you can
+            create new gas quality detail
+          </p>
         </div>
       </ModalError>
 
-
       {/* Modal Update */}
       <ModalCustom
-          isOpen={modalUpdate}
-          header={`UPDATE GAS QUALITY DETAIL INFORMATION`}
-          width={800}
-          type={"confirmation"}
-          handleCancel={handleCancelUpdate}
-          footer={
-            <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
-              <ButtonComponent
-                onClick={handleCancelUpdate}
-                type="default"
-              >
-                Cancel
-              </ButtonComponent>
-              <ButtonComponent
-                form="updateForm"
-                type="submit"
-                htmlType="submit"
-              >
-                Save
-              </ButtonComponent>
-            </div>
-          }
+        isOpen={modalUpdate}
+        header={`UPDATE GAS QUALITY DETAIL INFORMATION`}
+        width={800}
+        type={"confirmation"}
+        handleCancel={handleCancelUpdate}
+        footer={
+          <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
+            <ButtonComponent onClick={handleCancelUpdate} type="default">
+              Cancel
+            </ButtonComponent>
+            <ButtonComponent form="updateForm" type="submit" htmlType="submit">
+              Save
+            </ButtonComponent>
+          </div>
+        }
+      >
+        <Form
+          id="updateForm"
+          form={formUpdate}
+          onFinish={handleConfirmUpdate}
+          layout="vertical"
         >
-          <Form
-            id="updateForm"
-            form={formUpdate}
-            onFinish={handleConfirmUpdate}
-            layout='vertical'
-          >
-            <div className="flex flex-col gap-6">
-              <Form.Item
-                name={"endDate"}
-                label={'End Date'}
-                rules={formMessageRequired("endDate")}
-                className="w-full"
-              >
-                <DateComponent/>
-                {/* <InputComponent
+          <div className="flex flex-col gap-6">
+            <Form.Item
+              name={"endDate"}
+              label={"End Date"}
+              rules={formMessageRequired("endDate")}
+              className="w-full"
+            >
+              <DateComponent />
+              {/* <InputComponent
                   group
                   rows={1}
                   type="textarea"
                   placeholder={"Type your remark"}
                 /> */}
-              </Form.Item>
-            </div>
-          </Form>
+            </Form.Item>
+          </div>
+        </Form>
       </ModalCustom>
-
     </div>
   );
 };

@@ -48,7 +48,7 @@ import CardContainer from "../../../../../components/CardContainer";
 
 const ViewLocations = () => {
   const { data, loading, data_detail, data_location_type } = useSelector(
-    (state) => state.location
+    (state) => state.location,
   );
   const { bodyError } = useSelector((state) => state?.general);
   const dispatch = useDispatch();
@@ -92,13 +92,13 @@ const ViewLocations = () => {
   useEffect(() => {
     if (hasValue(path?.state) === false) {
       setSelectedLocationType(
-        dataLocation?.filter((item) => item?.value === 2346)[0]?.value || 2346
+        dataLocation?.filter((item) => item?.value === 2346)[0]?.value || 2346,
       );
     } else {
       setSelectedLocationType(
         dataLocation?.filter(
-          (item) => item?.value === path?.state?.currentLocation
-        )[0]?.value
+          (item) => item?.value === path?.state?.currentLocation,
+        )[0]?.value,
       );
       handleChangeLocationType(path?.state?.currentLocation);
     }
@@ -115,7 +115,7 @@ const ViewLocations = () => {
           sort,
           page,
           pageSize,
-        })
+        }),
       );
     }
   }, [dispatch, page, pageSize, search, sort, selectedLocationType]);
@@ -167,7 +167,7 @@ const ViewLocations = () => {
       id = record?.locationId;
     }
     await dispatch(
-      getDetailLocation({ id: id, locationType: selectedLocationType })
+      getDetailLocation({ id: id, locationType: selectedLocationType }),
     )?.unwrap();
     setOpenModal(true);
   };
@@ -195,7 +195,7 @@ const ViewLocations = () => {
         pageSize,
         sort,
         search: reqSearch,
-      })
+      }),
     )?.unwrap();
     form.resetFields();
   };
@@ -240,7 +240,7 @@ const ViewLocations = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -250,7 +250,7 @@ const ViewLocations = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -266,7 +266,7 @@ const ViewLocations = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -276,7 +276,7 @@ const ViewLocations = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -292,7 +292,7 @@ const ViewLocations = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -302,7 +302,7 @@ const ViewLocations = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -318,7 +318,7 @@ const ViewLocations = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -328,7 +328,7 @@ const ViewLocations = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -344,7 +344,7 @@ const ViewLocations = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -354,7 +354,7 @@ const ViewLocations = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -370,7 +370,7 @@ const ViewLocations = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -380,7 +380,7 @@ const ViewLocations = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -396,7 +396,7 @@ const ViewLocations = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -406,7 +406,7 @@ const ViewLocations = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -422,7 +422,7 @@ const ViewLocations = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -432,7 +432,7 @@ const ViewLocations = () => {
             text?.toUpperCase(),
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -448,7 +448,7 @@ const ViewLocations = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -458,7 +458,7 @@ const ViewLocations = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -474,7 +474,7 @@ const ViewLocations = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -484,7 +484,7 @@ const ViewLocations = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -500,7 +500,7 @@ const ViewLocations = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -510,7 +510,7 @@ const ViewLocations = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -526,7 +526,7 @@ const ViewLocations = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -536,7 +536,7 @@ const ViewLocations = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -553,7 +553,7 @@ const ViewLocations = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -563,7 +563,7 @@ const ViewLocations = () => {
             text,
             false,
             "status",
-            search
+            search,
           ),
       },
     ];
@@ -578,7 +578,7 @@ const ViewLocations = () => {
           item?.dataIndex === "locationParentType" ||
           item.dataIndex === "locationReference" ||
           item?.dataIndex === "locationCode" ||
-          item?.dataIndex === "status"
+          item?.dataIndex === "status",
       );
     } else {
       return arrayCols?.filter(
@@ -589,7 +589,7 @@ const ViewLocations = () => {
           item?.dataIndex === "city" ||
           item?.dataIndex === "district" ||
           item?.dataIndex === "subDistrict" ||
-          item?.dataIndex === "postalCode"
+          item?.dataIndex === "postalCode",
       );
     }
   }, [
@@ -660,7 +660,7 @@ const ViewLocations = () => {
             <DetailText label={"Created Date"}>
               {hasValue(data_detail?.createdDate) &&
                 moment(data_detail?.createdDate).format(
-                  dateFormatting?.dateTime
+                  dateFormatting?.dateTime,
                 )}
             </DetailText>
             <DetailText label={"Created By"}>
@@ -669,7 +669,7 @@ const ViewLocations = () => {
             <DetailText label={"Updated Date"}>
               {hasValue(data_detail?.updatedDate) &&
                 moment(data_detail?.updatedDate).format(
-                  dateFormatting?.dateTime
+                  dateFormatting?.dateTime,
                 )}
             </DetailText>
             <DetailText label={"Updated By"}>
@@ -709,7 +709,7 @@ const ViewLocations = () => {
             <DetailText label={"Created Date"}>
               {hasValue(data_detail?.createdDate) &&
                 moment(data_detail?.createdDate).format(
-                  dateFormatting?.dateTime
+                  dateFormatting?.dateTime,
                 )}
             </DetailText>
             <DetailText label={"Created By"}>
@@ -718,7 +718,7 @@ const ViewLocations = () => {
             <DetailText label={"Updated Date"}>
               {hasValue(data_detail?.updatedDate) &&
                 moment(data_detail?.updatedDate).format(
-                  dateFormatting?.dateTime
+                  dateFormatting?.dateTime,
                 )}
             </DetailText>
             <DetailText label={"Updated By"}>
@@ -740,7 +740,7 @@ const ViewLocations = () => {
           sort,
           page,
           pageSize,
-        })
+        }),
       );
     } else if (bodyError?.action === "DOWNLOAD_LOCATION") {
       handleDownload();
@@ -772,7 +772,7 @@ const ViewLocations = () => {
         search: reqSearch,
         page,
         pageSize,
-      })
+      }),
     );
   };
 
@@ -884,7 +884,7 @@ const ViewLocations = () => {
 
   const actionCols = useColumnActionPermission(
     ["Activate", "View", "Update"],
-    selectedLocationType !== 2346 ? itemActions : []
+    selectedLocationType !== 2346 ? itemActions : [],
   );
 
   const allColumns = useMemo(() => {

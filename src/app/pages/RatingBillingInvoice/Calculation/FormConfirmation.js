@@ -60,9 +60,9 @@ const FormConfirmation = ({ data }) => {
 
   const getGroupTypeName = (val) => {
     const groupTypeName = list_account_group?.find(
-      (item) => item?.glbTypeValId === val
+      (item) => item?.glbTypeValId === val,
     );
-    
+
     if (groupTypeName) {
       return groupTypeName.glbValue || groupTypeName.name || "-";
     }
@@ -73,7 +73,7 @@ const FormConfirmation = ({ data }) => {
     const customerName =
       list_specific_customer &&
       list_specific_customer?.filter(
-        (item) => item?.code === val || item?.accountNumber === val
+        (item) => item?.code === val || item?.accountNumber === val,
       );
     if (customerName === undefined) {
       return "-";
@@ -100,7 +100,7 @@ const FormConfirmation = ({ data }) => {
   const getMrcName = (val) => {
     let mergeMrcDto = list_meter_reading_code?.reduce(
       (result, current) => result?.concat(current?.dtoList),
-      []
+      [],
     );
     const mrcName =
       mergeMrcDto && mergeMrcDto?.filter((item) => item?.id === val);
@@ -205,64 +205,60 @@ const FormConfirmation = ({ data }) => {
           </DetailText>
           <DetailText label="SOR">{getSorName(data?.sor)}</DetailText>
           <DetailText label="Cost Center">
-            {data?.rRbiCalculationCostCenter?.length > 0 ? (
-              data.rRbiCalculationCostCenter.map((item, index, array) => (
-                <span key={index + 1}>
-                  {getCostCenterName(item.costCenter)}
-                  {index < array.length - 1 && ", "}
-                </span>
-              ))
-            ) : (
-              "-"
-            )}
+            {data?.rRbiCalculationCostCenter?.length > 0
+              ? data.rRbiCalculationCostCenter.map((item, index, array) => (
+                  <span key={index + 1}>
+                    {getCostCenterName(item.costCenter)}
+                    {index < array.length - 1 && ", "}
+                  </span>
+                ))
+              : "-"}
           </DetailText>
           <DetailText label="Meter Reading Code">
-            {data?.rRbiCalculationMeterReadingCode?.length > 0 ? (
-              data.rRbiCalculationMeterReadingCode.map((item, index, array) => (
-                <span key={index + 1}>
-                  {getMrcName(item.mreadingCode)}
-                  {index < array.length - 1 && ", "}
-                </span>
-              ))
-            ) : (
-              "All"
-            )}
+            {data?.rRbiCalculationMeterReadingCode?.length > 0
+              ? data.rRbiCalculationMeterReadingCode.map(
+                  (item, index, array) => (
+                    <span key={index + 1}>
+                      {getMrcName(item.mreadingCode)}
+                      {index < array.length - 1 && ", "}
+                    </span>
+                  ),
+                )
+              : "All"}
           </DetailText>
           <DetailText label="Account Segment">
-            {data?.rRbiCalculationAccountSegment?.length > 0 ? (
-              data.rRbiCalculationAccountSegment.map((item, index, array) => (
-                <span key={index + 1}>
-                  {getAccSegmentName(item.accSegment)}
-                  {index < array.length - 1 && ", "}
-                </span>
-              ))
-            ) : (
-              "-"
-            )}
+            {data?.rRbiCalculationAccountSegment?.length > 0
+              ? data.rRbiCalculationAccountSegment.map((item, index, array) => (
+                  <span key={index + 1}>
+                    {getAccSegmentName(item.accSegment)}
+                    {index < array.length - 1 && ", "}
+                  </span>
+                ))
+              : "-"}
           </DetailText>
           <DetailText label="Account Group Type">
-            {data?.rRbiCalculationAccountGroupType?.length > 0 ? (
-              data.rRbiCalculationAccountGroupType.map((item, index, array) => (
-                <span key={index + 1}>
-                  {getGroupTypeName(item.accGroupType)}
-                  {index < array.length - 1 && ", "}
-                </span>
-              ))
-            ) : (
-              "-"
-            )}
+            {data?.rRbiCalculationAccountGroupType?.length > 0
+              ? data.rRbiCalculationAccountGroupType.map(
+                  (item, index, array) => (
+                    <span key={index + 1}>
+                      {getGroupTypeName(item.accGroupType)}
+                      {index < array.length - 1 && ", "}
+                    </span>
+                  ),
+                )
+              : "-"}
           </DetailText>
           <DetailText label="Specific Customer Account">
-            {data?.rRbiCalculationSpecificCustomer?.length > 0 ? (
-              data.rRbiCalculationSpecificCustomer.map((item, index, array) => (
-                <span key={index + 1}>
-                  {getCustomerName(item.custNumb)}
-                  {index < array.length - 1 && ", "}
-                </span>
-              ))
-            ) : (
-              "All"
-            )}
+            {data?.rRbiCalculationSpecificCustomer?.length > 0
+              ? data.rRbiCalculationSpecificCustomer.map(
+                  (item, index, array) => (
+                    <span key={index + 1}>
+                      {getCustomerName(item.custNumb)}
+                      {index < array.length - 1 && ", "}
+                    </span>
+                  ),
+                )
+              : "All"}
           </DetailText>
         </div>
       </CardContainer>

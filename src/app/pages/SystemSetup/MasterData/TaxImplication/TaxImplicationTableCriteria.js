@@ -149,7 +149,7 @@ const EditableCell = ({
                   {
                     validator: (_, value) =>
                       endDateValidator(
-                        formTableCriteria.getFieldValue().startDate
+                        formTableCriteria.getFieldValue().startDate,
                       )(_, value),
                   },
                 ]
@@ -417,7 +417,7 @@ const TaxImplicationTableCriteria = ({
 
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -441,7 +441,7 @@ const TaxImplicationTableCriteria = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       {
         title: "ACTION",
@@ -544,7 +544,7 @@ const TaxImplicationTableCriteria = ({
       col.title !== "END DATE" &&
       col.title !== "DESCRIPTION"
         ? dataCriteria.includes(col.indexValue)
-        : true
+        : true,
     );
   };
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
@@ -631,7 +631,7 @@ const TaxImplicationTableCriteria = ({
                   required: col.required,
                   formTableCriteria: formTableCriteria,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],

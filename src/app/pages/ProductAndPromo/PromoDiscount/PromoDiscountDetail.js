@@ -77,15 +77,19 @@ const PromoDiscountDetail = () => {
           (current.idCriteriaName
             ? `${index !== 0 ? ", " : ""}${current.idCriteriaName}`
             : ""),
-        ""
+        "",
       ),
       dataCondition: dataDetail?.productPromoConditionDtos?.map((item) => {
         return {
           ...item,
-          startDate: item?.startDate ? moment(item?.startDate).format(dateFormatting.date) : undefined,
-          endDate: item?.endDate ? moment(item?.endDate).format(dateFormatting.date) : undefined,
+          startDate: item?.startDate
+            ? moment(item?.startDate).format(dateFormatting.date)
+            : undefined,
+          endDate: item?.endDate
+            ? moment(item?.endDate).format(dateFormatting.date)
+            : undefined,
           value: item?.adjustmentValue,
-        }
+        };
       }),
       dataCriteria: dataDetail?.productPromoCriteriaDataDtos,
       criteriaValues: dataDetail?.productPromoCriteriaDtos
@@ -105,7 +109,7 @@ const PromoDiscountDetail = () => {
       setShowButtonApproval(
         (data_promoDiscountDetail?.statusApproval === "WAITING APPROVAL" ||
           data_promoDiscountDetail?.statusApproval === "WAITING_APPROVAL") &&
-          data_promoDiscountDetail?.isApprover
+          data_promoDiscountDetail?.isApprover,
       );
       setListDataAttachment(
         (data_promoDiscountDetail?.attachmentListDto || []).map((item) => {
@@ -116,7 +120,7 @@ const PromoDiscountDetail = () => {
               : "",
             dataType: "exist",
           };
-        })
+        }),
       );
       setDataDetail(handleAssertData(data_promoDiscountDetail));
       if (
@@ -133,7 +137,7 @@ const PromoDiscountDetail = () => {
             ...data_promoDiscountDetailDraft,
             status: data_promoDiscountDetail?.status,
             statusApproval: data_promoDiscountDetail?.statusApproval,
-          })
+          }),
         );
         setPromoDiscountDetail([
           { value: "Promo Discount" },
@@ -190,7 +194,7 @@ const PromoDiscountDetail = () => {
     dispatch(
       data_promoDiscountDetail?.approvalType?.includes("INACTIVE")
         ? inactiveApprovePromo(body)
-        : approvePromo(body)
+        : approvePromo(body),
     )
       .unwrap()
       .then((res) => {

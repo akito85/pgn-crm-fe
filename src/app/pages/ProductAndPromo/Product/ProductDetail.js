@@ -71,11 +71,11 @@ const ProductDetail = () => {
   const [idProductActive, setIdProductActive] = useState(0);
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [typeProductInfo, setTypeProductInfo] = useState(
-    listSectionInfo[0].value
+    listSectionInfo[0].value,
   );
   const [typeProductDetail, setTypeProductDetail] = useState(245);
   const [typeProductDetailInfo, setTypeProductDetailInfo] = useState(
-    listSectionInfoDetail[0].value
+    listSectionInfoDetail[0].value,
   );
   const [typeProductInfoDetailSection, setTypeProductInfoDetailSection] =
     useState(listSectionInfoProductDetail(typeProductDetail)[0].value);
@@ -105,7 +105,7 @@ const ProductDetail = () => {
       dispatch(getDetailProduct({ id }));
       dispatch(getLockHistory({ id }));
       dispatch(getProductVersionList({ id }));
-      dispatch(getGrantedAccessProduct("/product-promo/detail-product"))
+      dispatch(getGrantedAccessProduct("/product-promo/detail-product"));
     }
     // dispatch(getExtendTerminateHistory({ id }));
   }, [dispatch, id]);
@@ -154,7 +154,7 @@ const ProductDetail = () => {
       dispatch(
         getExtendTerminateHistory({
           id: dataDetailProduct?.currentProductVersion?.id,
-        })
+        }),
       );
     }
   }, [dataDetailProduct, dispatch]);
@@ -192,7 +192,7 @@ const ProductDetail = () => {
             : "",
           fileSize: bytesConverter(attachData.fileSize || 0),
           dataType: "exist",
-        }))
+        })),
       );
     }
   }, [dataProductDetail]);
@@ -417,12 +417,12 @@ const ProductDetail = () => {
                   ...dataProductInfo,
                   startDate: dataProductInfo.startDate
                     ? moment(dataProductInfo.startDate, "DD MMM YYYY").format(
-                        "YYYY-MM-DD"
+                        "YYYY-MM-DD",
                       )
                     : "",
                   endDate: dataProductInfo.endDate
                     ? moment(dataProductInfo.endDate, "DD MMM YYYY").format(
-                        "YYYY-MM-DD"
+                        "YYYY-MM-DD",
                       )
                     : "",
                 }}
@@ -499,9 +499,11 @@ const ProductDetail = () => {
           onFinish={handleConfirm}
           header={`${approveOrReject}`}
           approveOrReject={approveOrReject}
-          menu={bodyApproval.approvalType === "INACTIVE_PRODUCT"
-          ? "Product"
-          : "Product Version"}
+          menu={
+            bodyApproval.approvalType === "INACTIVE_PRODUCT"
+              ? "Product"
+              : "Product Version"
+          }
           named={`${dataDetailProduct.productName}`}
           // isOpen={modalConfirm}
           // header={`${approveOrReject} information`}
@@ -531,7 +533,7 @@ const ProductDetail = () => {
           //   </div>
           // }
         />
-          {/* <Form name="formApproveReject" form={form} onFinish={handleConfirm}>
+        {/* <Form name="formApproveReject" form={form} onFinish={handleConfirm}>
             <Form.Item
               name={"remark"}
               rules={[{ message: requiredMessage("Remark"), required: true }]}

@@ -19,13 +19,16 @@ import {
   getPremise,
   inActiveServicePoint,
   updateServicePoint,
-  getListAddressPremise
+  getListAddressPremise,
 } from "../../../../../../redux/slices/account_management/detailAccount/Premise";
 import Highlighter from "react-highlight-words";
 import { dateFormatting } from "../../../../../../utils";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../../utils/Icon";
-import { getGrantedAccessAccount, getGrantedAccessAccountExtend } from "../../../../../../redux/slices/account_management/accountManagement";
+import {
+  getGrantedAccessAccount,
+  getGrantedAccessAccountExtend,
+} from "../../../../../../redux/slices/account_management/accountManagement";
 import ToolbarAccount from "../../../ComponentAccount/ToolbarAccount";
 import accountManagementService from "../../../../../../redux/services/account_management/accountManagementService";
 import { validateCreateUpdate } from "../../../../../../redux/slices/general_slice";
@@ -33,11 +36,14 @@ import { useLocation } from "react-router-dom";
 
 const Premise = ({ id = 0, idCustomer = 0, type = "" }) => {
   const dispatch = useDispatch();
-  const { data_premise, data_globalTypeServicePoint, loading, data_list_address_premise } = useSelector(
-    (state) => state.premise
-  );
+  const {
+    data_premise,
+    data_globalTypeServicePoint,
+    loading,
+    data_list_address_premise,
+  } = useSelector((state) => state.premise);
   const { access_account, access_account_extend } = useSelector(
-    (state) => state.accountManagement
+    (state) => state.accountManagement,
   );
 
   //declare
@@ -76,14 +82,22 @@ const Premise = ({ id = 0, idCustomer = 0, type = "" }) => {
 
   //useEffect
   useEffect(() => {
-    if(location?.pathname.includes('account-standard')) {
-      dispatch(getGrantedAccessAccount('/account-management/account-standard/premise'))
-      dispatch(getGrantedAccessAccountExtend('/account-management/account-standard/service-point'))
-    }else{
-      dispatch(getGrantedAccessAccount('/account-management/account-onetime/premise'))
+    if (location?.pathname.includes("account-standard")) {
+      dispatch(
+        getGrantedAccessAccount("/account-management/account-standard/premise"),
+      );
+      dispatch(
+        getGrantedAccessAccountExtend(
+          "/account-management/account-standard/service-point",
+        ),
+      );
+    } else {
+      dispatch(
+        getGrantedAccessAccount("/account-management/account-onetime/premise"),
+      );
     }
-  }, [dispatch])
-  
+  }, [dispatch]);
+
   useEffect(() => {
     if (id) {
       const reqSearch = encodeURIComponent(JSON.stringify(search));
@@ -93,7 +107,7 @@ const Premise = ({ id = 0, idCustomer = 0, type = "" }) => {
 
   useEffect(() => {
     dispatch(getGlobalTypeListServicePoint());
-    dispatch(getListAddressPremise({id}));
+    dispatch(getListAddressPremise({ id }));
   }, [dispatch]);
 
   useEffect(() => {
@@ -113,9 +127,9 @@ const Premise = ({ id = 0, idCustomer = 0, type = "" }) => {
               ...servicePoint,
               key: index + 1,
               parent: indexPremise + 1,
-            })
+            }),
           ),
-        })
+        }),
       );
       setDataTable(data);
       setBtnIsEnable(false);
@@ -129,7 +143,7 @@ const Premise = ({ id = 0, idCustomer = 0, type = "" }) => {
       ?.servicePoint?.filter((item) => item?.status === "ACTIVE")
       ?.map((item) => item?.servicePointName);
     setDataServicePoint(
-      data_globalTypeServicePoint.filter((item) => !temp?.includes(item?.text))
+      data_globalTypeServicePoint.filter((item) => !temp?.includes(item?.text)),
     );
   };
 
@@ -242,7 +256,7 @@ const Premise = ({ id = 0, idCustomer = 0, type = "" }) => {
     let url;
     let bodyRequest;
     const temp = data_globalTypeServicePoint.filter(
-      (item) => item?.id === e?.servicePointName
+      (item) => item?.id === e?.servicePointName,
     );
     setData({
       servicePointId: e?.servicePointName,
@@ -255,7 +269,7 @@ const Premise = ({ id = 0, idCustomer = 0, type = "" }) => {
       servicePointName: temp[0]?.text,
       description: e?.description,
       accountAddressId: data_list_address_premise?.filter(
-        (item) => item?.id === e?.premiseAddress
+        (item) => item?.id === e?.premiseAddress,
       )[0]?.value,
     });
     bodyRequest = {
@@ -264,7 +278,14 @@ const Premise = ({ id = 0, idCustomer = 0, type = "" }) => {
       accountAddressId: e.premiseAddress,
     };
     url = "/v1/dbs/api/premise/servicePoint/validate-create";
-    await dispatch(validateCreateUpdate({ body: bodyRequest, services: accountManagementService, endPoint: url, type }))?.unwrap();
+    await dispatch(
+      validateCreateUpdate({
+        body: bodyRequest,
+        services: accountManagementService,
+        endPoint: url,
+        type,
+      }),
+    )?.unwrap();
     setModalType(true);
   };
 
@@ -317,7 +338,7 @@ const Premise = ({ id = 0, idCustomer = 0, type = "" }) => {
     setDataInactive(value);
     setModalInactive(true);
     setTitleActiveOrInactive(
-      value?.status === "ACTIVE" ? "Inactivate" : "Activate"
+      value?.status === "ACTIVE" ? "Inactivate" : "Activate",
     );
     setPremiseName(value?.servicePointName);
   };
@@ -336,7 +357,7 @@ const Premise = ({ id = 0, idCustomer = 0, type = "" }) => {
         setModalUpdate(false);
         setModalType(false);
         // dispatch(getPremise({ id, page, pageSize }));
-        
+
         const reqSearch = encodeURIComponent(JSON.stringify(search));
         dispatch(getPremise({ id, page, pageSize, sort, search: reqSearch }));
       })
@@ -354,22 +375,22 @@ const Premise = ({ id = 0, idCustomer = 0, type = "" }) => {
           setModalError(true);
         }
       });
-  }
+  };
 
   const onFinishUpdate = (e) => {
     const temp = data_globalTypeServicePoint.filter(
-      (item) => item?.text === e?.servicePointName
+      (item) => item?.text === e?.servicePointName,
     );
     setDataUpdate({
       ...dataUpdate,
       description: e?.description,
-    })
+    });
     setDataConfirm({
       servicePointId: e?.servicePointName,
       servicePointName: temp[0]?.text,
       description: e?.description,
       accountAddressId: data_premise?.result?.filter(
-        (item) => item?.id === e?.premiseAddress
+        (item) => item?.id === e?.premiseAddress,
       )[0]?.address,
     });
     setModalType(true);
@@ -459,7 +480,7 @@ const Premise = ({ id = 0, idCustomer = 0, type = "" }) => {
   const itemActions = [
     //action toolbar
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <ButtonComponent
           onClick={() => {
@@ -475,23 +496,26 @@ const Premise = ({ id = 0, idCustomer = 0, type = "" }) => {
         >
           Create Service Point
         </ButtonComponent>
-
-      )
-    }
-  ]
+      ),
+    },
+  ];
 
   const accessServicePoint = {
-    actionList: access_account_extend?.actionList?.filter(item =>
-      item.path.includes("service-point") && !item.path.includes("asset") 
-    ) 
+    actionList: access_account_extend?.actionList?.filter(
+      (item) =>
+        item.path.includes("service-point") && !item.path.includes("asset"),
+    ),
   };
-  
+
   return (
     <Spin spinning={loading}>
       <Fragment>
         <BaseContainer header={"PREMISE LIST"}>
           <div className={"w-full flex justify-end mb-5"}>
-            <ToolbarAccount items={itemActions} advancedAccess={accessServicePoint}/>
+            <ToolbarAccount
+              items={itemActions}
+              advancedAccess={accessServicePoint}
+            />
           </div>
           <PremiseTable
             data={dataTable}

@@ -12,7 +12,7 @@ export const columnsServiceAgreement = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
-  handleDetail = () => {}
+  handleDetail = () => {},
 ) => [
   {
     key: "no",
@@ -33,7 +33,7 @@ export const columnsServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -48,7 +48,7 @@ export const columnsServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -62,7 +62,7 @@ export const columnsServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -76,7 +76,7 @@ export const columnsServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -93,7 +93,7 @@ export const columnsServiceAgreement = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "saDate" ? (
@@ -128,7 +128,7 @@ export const columnsServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -145,7 +145,7 @@ export const columnsServiceAgreement = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "startDate" ? (
@@ -182,7 +182,7 @@ export const columnsServiceAgreement = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "endDate" ? (
@@ -217,7 +217,7 @@ export const columnsServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -232,7 +232,7 @@ export const columnsServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -247,7 +247,7 @@ export const columnsServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {
@@ -261,7 +261,7 @@ export const columnsServiceAgreement = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
   },
   {

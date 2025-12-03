@@ -30,11 +30,11 @@ export const getAllActionPaginate = createAsyncThunk(
           error: error,
           action: "GET_ALL_ACTION_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getActionList = createAsyncThunk(
@@ -46,11 +46,11 @@ export const getActionList = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI?.dispatch(
-        validateError({ error: error, action: "GET_ACTION_LIST", back: false })
+        validateError({ error: error, action: "GET_ACTION_LIST", back: false }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const createAction = createAsyncThunk(
@@ -71,11 +71,11 @@ export const createAction = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_ACTION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const validateAction = createAsyncThunk(
@@ -97,15 +97,15 @@ export const validateAction = createAsyncThunk(
           error: errorBody(
             errorCode(error),
             type === "update" ? "updated" : "created",
-            errorMessage(error)
+            errorMessage(error),
           ),
           action: "VALIDATE_ACTION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getDetailAction = createAsyncThunk(
@@ -121,11 +121,11 @@ export const getDetailAction = createAsyncThunk(
           error: response,
           action: "GET_DETAIL_ACTION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const updateAction = createAsyncThunk(
@@ -146,11 +146,11 @@ export const updateAction = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_ACTION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const inactiveAction = createAsyncThunk(
@@ -174,11 +174,11 @@ export const inactiveAction = createAsyncThunk(
           error: errorBody(errorCode(error), statusData, errorMessage(error)),
           action: "INACTIVE_ACTION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const downloadAction = createAsyncThunk(
@@ -193,11 +193,11 @@ export const downloadAction = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI?.dispatch(
-        validateError({ error: error, action: "DOWNLOAD_ACTION", back: false })
+        validateError({ error: error, action: "DOWNLOAD_ACTION", back: false }),
       );
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
-  }
+  },
 );
 
 const actionSlice = createSlice({

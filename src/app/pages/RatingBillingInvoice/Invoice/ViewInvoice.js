@@ -31,7 +31,7 @@ import { NavLink } from "react-router-dom";
 const ViewInvoice = () => {
   // Selector
   const { data, loading, data_detail, data_format } = useSelector(
-    (state) => state.invoice
+    (state) => state.invoice,
   );
 
   // Declaration
@@ -95,7 +95,7 @@ const ViewInvoice = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [search, page, pageSize, sort, dispatch]);
 
@@ -158,7 +158,7 @@ const ViewInvoice = () => {
         pageSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
-      })
+      }),
     );
   };
 
@@ -184,7 +184,7 @@ const ViewInvoice = () => {
         {
           headers: tokenHeader(),
           responseType: "arraybuffer",
-        }
+        },
       );
       const responseBlob = await response.data;
       const blobText =
@@ -203,7 +203,7 @@ const ViewInvoice = () => {
         // eslint-disable-next-line no-undef
         ReactDOM.render(
           <DocViewer documents={[{ uri: blobUrl, type: contentType }]} />,
-          viewerContainer
+          viewerContainer,
         );
       }
     } catch (error) {
@@ -238,7 +238,7 @@ const ViewInvoice = () => {
         remark: res.remark,
       };
       await dispatch(
-        createRegenerate({ id: invoiceNumber, body: body })
+        createRegenerate({ id: invoiceNumber, body: body }),
       )?.unwrap();
       await handleClear();
       await dispatch(
@@ -247,7 +247,7 @@ const ViewInvoice = () => {
           page,
           pageSize,
           sort,
-        })
+        }),
       )?.unwrap();
     } catch (error) {
       if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -280,7 +280,7 @@ const ViewInvoice = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -298,7 +298,7 @@ const ViewInvoice = () => {
       handleReGenerate,
       handlePreviewFile,
       popoverVisible,
-      setPopoverVisible
+      setPopoverVisible,
     );
 
     // Add 'key' property to columns that don't have it

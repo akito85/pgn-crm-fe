@@ -27,7 +27,7 @@ import CardContainer from "../../../../../components/CardContainer";
 
 const TaxCodeView = () => {
   const { data, loading, data_approval_history } = useSelector(
-    (state) => state.tax_code
+    (state) => state.tax_code,
   );
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -85,7 +85,7 @@ const TaxCodeView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, search, page, pageSize, sort]);
 
@@ -157,7 +157,7 @@ const TaxCodeView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -202,7 +202,7 @@ const TaxCodeView = () => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -413,7 +413,7 @@ const TaxCodeView = () => {
   // ✅ Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   // ✅ Get base columns with key property
@@ -426,7 +426,7 @@ const TaxCodeView = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ...actionColumns,
     ];

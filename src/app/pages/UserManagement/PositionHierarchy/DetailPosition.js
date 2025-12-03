@@ -116,7 +116,7 @@ const DetailPosition = ({
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         searchedColumn === "empNumb" ? (
@@ -151,7 +151,7 @@ const DetailPosition = ({
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         searchedColumn === "empName" ? (
@@ -184,7 +184,7 @@ const DetailPosition = ({
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         searchedColumn === "periode" ? (
@@ -218,7 +218,7 @@ const DetailPosition = ({
         searchText,
         handleSearch,
         false,
-        "datetime"
+        "datetime",
       ),
       render: (text) =>
         searchedColumn === "createdDate" ? (
@@ -250,7 +250,7 @@ const DetailPosition = ({
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         searchedColumn === "createdBy" ? (
@@ -284,7 +284,7 @@ const DetailPosition = ({
         searchText,
         handleSearch,
         false,
-        "datetime"
+        "datetime",
       ),
       render: (text) =>
         searchedColumn === "updatedDate" ? (
@@ -316,7 +316,7 @@ const DetailPosition = ({
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         searchedColumn === "updatedBy" ? (
@@ -382,7 +382,7 @@ const DetailPosition = ({
                 searchText,
                 page,
                 pageSize,
-                typeColumn
+                typeColumn,
               )}
               totalData={updatePagination(
                 data?.employee,
@@ -391,7 +391,7 @@ const DetailPosition = ({
                 searchText,
                 page,
                 pageSize,
-                typeColumn
+                typeColumn,
               )}
               columns={column}
               current={page}

@@ -24,10 +24,10 @@ import { ModalError } from "../../../../../../../components/Modal/ModalPopUp";
 import Highlighter from "react-highlight-words";
 import { dateFormatting } from "../../../../../../../utils";
 
-const WitholdingTax = ({access, id = 0 }) => {
+const WitholdingTax = ({ access, id = 0 }) => {
   // Selector
   const { data_withHoldingTax, loading, data_withHoldingTaxFirstIndex } =
-  useSelector((state) => state.financialInformation);
+    useSelector((state) => state.financialInformation);
 
   // Declaration
   const dispatch = useDispatch();
@@ -55,7 +55,7 @@ const WitholdingTax = ({access, id = 0 }) => {
     if (id) {
       const reqSearch = encodeURIComponent(JSON.stringify(search));
       dispatch(
-        getWithHoldingTax({ id, page, pageSize, sort, search: reqSearch })
+        getWithHoldingTax({ id, page, pageSize, sort, search: reqSearch }),
       );
     }
   }, [dispatch, id, page, pageSize, sort, search]);
@@ -76,9 +76,11 @@ const WitholdingTax = ({access, id = 0 }) => {
       dispatch(getWithHoldingTaxFirstIndex(id))
         .unwrap()
         .then((data) => {
-          setStartDate(moment(data?.result[0]?.startDate)?.format(dateFormatting?.date));
+          setStartDate(
+            moment(data?.result[0]?.startDate)?.format(dateFormatting?.date),
+          );
           setModalInactive(true);
-        })
+        });
     } else {
       setModalCreate(true);
     }
@@ -102,52 +104,9 @@ const WitholdingTax = ({access, id = 0 }) => {
       };
       setModalCreate(false);
       dispatch(createWitholdingTax({ ...data }))
-      .unwrap()
-      .then((data) => {
-        if(data){
-          const reqSearch = encodeURIComponent(JSON.stringify(search));
-          dispatch(
-            getWithHoldingTax({ id, page, pageSize, sort, search: reqSearch })
-          );
-          formCreate.resetFields();
-          handleClear()
-          setModalCreate(false);
-        }
-      })
-      .catch((error) => {
-        formCreate.resetFields();
-        handleClear()
-        if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-          const message =
-            (error?.response &&
-              error?.response?.data &&
-              error?.response?.data?.message) ||
-            error?.message ||
-            error?.toString();
-          console.log(error);
-          setBodyError({ message, value: e });
-
-          setModalError(true);
-        }
-      });
-    } else {
-      //inactive wapu
-      dispatch(getWithHoldingTaxFirstIndex(id))
-      .unwrap()
-      .then((data) => {
-        const dataSend = {
-          id: data?.result[0]?.id,
-          endDate: moment(e.endDate).format("DD MMM YYYY"),
-          remark: e.remark,
-        };
-
-        setModalInactive(false);
-        dispatch(inActiveWitholdingTax({ ...dataSend }))
-          .unwrap()
-          .then(() => {
-            handleClear()
-            formCreate.resetFields();
-            setModalInactive(false);
+        .unwrap()
+        .then((data) => {
+          if (data) {
             const reqSearch = encodeURIComponent(JSON.stringify(search));
             dispatch(
               getWithHoldingTax({
@@ -156,26 +115,75 @@ const WitholdingTax = ({access, id = 0 }) => {
                 pageSize,
                 sort,
                 search: reqSearch,
-              })
+              }),
             );
-            // dispatch(getWithHoldingTax({ id, page, pageSize }));
-          })
-          .catch((error) => {
-            handleClear()
             formCreate.resetFields();
-            if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-              const message =
-                (error?.response &&
-                  error?.response?.data &&
-                  error?.response?.data?.message) ||
-                error?.message ||
-                error?.toString();
-              console.log(error);
-              setBodyError({ message, value: e });
-              setModalError(true);
-            }
-          });
-      });
+            handleClear();
+            setModalCreate(false);
+          }
+        })
+        .catch((error) => {
+          formCreate.resetFields();
+          handleClear();
+          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+            const message =
+              (error?.response &&
+                error?.response?.data &&
+                error?.response?.data?.message) ||
+              error?.message ||
+              error?.toString();
+            console.log(error);
+            setBodyError({ message, value: e });
+
+            setModalError(true);
+          }
+        });
+    } else {
+      //inactive wapu
+      dispatch(getWithHoldingTaxFirstIndex(id))
+        .unwrap()
+        .then((data) => {
+          const dataSend = {
+            id: data?.result[0]?.id,
+            endDate: moment(e.endDate).format("DD MMM YYYY"),
+            remark: e.remark,
+          };
+
+          setModalInactive(false);
+          dispatch(inActiveWitholdingTax({ ...dataSend }))
+            .unwrap()
+            .then(() => {
+              handleClear();
+              formCreate.resetFields();
+              setModalInactive(false);
+              const reqSearch = encodeURIComponent(JSON.stringify(search));
+              dispatch(
+                getWithHoldingTax({
+                  id,
+                  page,
+                  pageSize,
+                  sort,
+                  search: reqSearch,
+                }),
+              );
+              // dispatch(getWithHoldingTax({ id, page, pageSize }));
+            })
+            .catch((error) => {
+              handleClear();
+              formCreate.resetFields();
+              if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+                const message =
+                  (error?.response &&
+                    error?.response?.data &&
+                    error?.response?.data?.message) ||
+                  error?.message ||
+                  error?.toString();
+                console.log(error);
+                setBodyError({ message, value: e });
+                setModalError(true);
+              }
+            });
+        });
     }
   };
 
@@ -286,9 +294,9 @@ const WitholdingTax = ({access, id = 0 }) => {
     setSort(dataSort);
   };
 
-  const handleCancel = () =>{
+  const handleCancel = () => {
     setModalInactive(false);
-  }
+  };
   return (
     <Fragment>
       <Spin spinning={loading}>
@@ -296,18 +304,18 @@ const WitholdingTax = ({access, id = 0 }) => {
           {"Witholding Tax Information"}
         </div>
 
-      {access?.actionList?.some(action => action.name === 'Create' ) &&
-        <div className="flex flex-row gap-2">
-          <Switch checked={data_withHoldingTax?.status} onClick={onClick} />
-          <DetailText>WAPU</DetailText>
-        </div>
-      }
+        {access?.actionList?.some((action) => action.name === "Create") && (
+          <div className="flex flex-row gap-2">
+            <Switch checked={data_withHoldingTax?.status} onClick={onClick} />
+            <DetailText>WAPU</DetailText>
+          </div>
+        )}
 
         <div>
           {data_withHoldingTax?.status ? (
             <DetailText className="text-xs text-slate-500">
               {`Account Flagged as Wapu from ${moment(
-                data_withHoldingTax?.result?.slice(0)[0]?.startDate
+                data_withHoldingTax?.result?.slice(0)[0]?.startDate,
               ).format("DD MMM YYYY")}`}
             </DetailText>
           ) : null}
@@ -389,23 +397,23 @@ const WitholdingTax = ({access, id = 0 }) => {
           isOpen={modalInactive}
           children={
             <Form.Item
-            name={"endDate"}
-            label={"End Date"}
-            rules={[
-              {
-                validator: (_, value) =>
-                  (value && moment(startDate) < moment(value)) || !value
-                    ? Promise.resolve()
-                    : Promise.reject(
-                        new Error("End date must after Start date")
-                      ),
-              },
-              { message: requiredMessage("End Date"), required: true },
-            ]}
-            className="no-margin-form"
-          >
-            <DateComponent dateDisable={handleDisableEndDate} />
-          </Form.Item>
+              name={"endDate"}
+              label={"End Date"}
+              rules={[
+                {
+                  validator: (_, value) =>
+                    (value && moment(startDate) < moment(value)) || !value
+                      ? Promise.resolve()
+                      : Promise.reject(
+                          new Error("End date must after Start date"),
+                        ),
+                },
+                { message: requiredMessage("End Date"), required: true },
+              ]}
+              className="no-margin-form"
+            >
+              <DateComponent dateDisable={handleDisableEndDate} />
+            </Form.Item>
           }
         />
         {/* <ModalApproveOrReject
@@ -464,8 +472,8 @@ const WitholdingTax = ({access, id = 0 }) => {
               >
                 <DateComponent dateDisable={handleDisableEndDate} />
               </Form.Item>
-              <Form.Item 
-                name={"remark"} 
+              <Form.Item
+                name={"remark"}
                 label={"Remark"}
                 rules={[
                   {

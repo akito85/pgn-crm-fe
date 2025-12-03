@@ -90,7 +90,7 @@ const ProductClassUpdate = () => {
         console.log(error);
       }
     },
-    [dispatch, id]
+    [dispatch, id],
   );
 
   // Validation Button Back

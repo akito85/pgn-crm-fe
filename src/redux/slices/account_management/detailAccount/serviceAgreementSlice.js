@@ -49,7 +49,7 @@ export const getListServiceAgreement = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Detail  SA
@@ -63,7 +63,7 @@ export const getDetailServiceAgreement = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Detail  SA DRAFT
@@ -77,7 +77,7 @@ export const getDetailServiceAgreementDraft = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Inactivate SA
@@ -109,7 +109,7 @@ export const inactiveSa = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // Delete Draft  SA
@@ -141,7 +141,7 @@ export const deleteDraftSa = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // CREATE SA
@@ -177,7 +177,7 @@ export const createServiceAgreement = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // UPDATE SA
@@ -190,7 +190,7 @@ export const updateServiceAgreement = createAsyncThunk(
       const url = "/v1/dbs/api/sa/update";
       const response = await accountManagementService.updateDataWithMethodPost(
         url,
-        body
+        body,
       );
       const successBody = {
         title: `Successful`,
@@ -218,7 +218,7 @@ export const updateServiceAgreement = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Get Detail Product SA
@@ -232,7 +232,7 @@ export const getDetailProductSa = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Detail Product By Version
@@ -246,7 +246,7 @@ export const getDetailProductByVersion = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Approval History
@@ -260,7 +260,7 @@ export const getApprovalHistory = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const approveOrRejectInactiveServiceAgreement = createAsyncThunk(
@@ -270,7 +270,7 @@ export const approveOrRejectInactiveServiceAgreement = createAsyncThunk(
       const url = "/v1/dbs/api/sa/approveInactive";
       const response = await accountManagementService.activationWithRemark(
         url,
-        body
+        body,
       );
       thunkAPI.dispatch(showModalSuccess(responseSuccess));
       return response.data;
@@ -293,7 +293,7 @@ export const approveOrRejectInactiveServiceAgreement = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approveOrRejectServiceAgreement = createAsyncThunk(
@@ -303,7 +303,7 @@ export const approveOrRejectServiceAgreement = createAsyncThunk(
       const url = "/v1/dbs/api/sa/approve";
       const response = await accountManagementService.activationWithRemark(
         url,
-        body
+        body,
       );
       thunkAPI.dispatch(showModalSuccess(responseSuccess));
       return response.data;
@@ -326,7 +326,7 @@ export const approveOrRejectServiceAgreement = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // ========== Dropdown List ===========
@@ -341,7 +341,7 @@ export const getServiceType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 // Get Service Agreement Type
 export const getSaType = createAsyncThunk(
@@ -354,7 +354,7 @@ export const getSaType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 // Get Service Agreement Type
 export const getPjbg = createAsyncThunk("GET_PJBG_TYPE", async (thunkAPI) => {
@@ -378,7 +378,7 @@ export const getListProduct = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get List Product
@@ -392,7 +392,7 @@ export const getApprovalList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Detail Approval
@@ -408,7 +408,7 @@ export const getDetailApproval = createAsyncThunk(
         return thunkAPI.rejectWithValue(error?.response);
       }
     }
-  }
+  },
 );
 
 export const getDetailApprovalInactive = createAsyncThunk(
@@ -423,7 +423,7 @@ export const getDetailApprovalInactive = createAsyncThunk(
         return thunkAPI.rejectWithValue(error?.response);
       }
     }
-  }
+  },
 );
 
 // Get List Term of Payment
@@ -437,7 +437,7 @@ export const getListTermOfPayment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get List Billing Cycle
@@ -451,7 +451,7 @@ export const getListBillingCycle = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get List Invoice Template
@@ -465,7 +465,7 @@ export const getInvoiceTemplate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get List Invoice Template
@@ -479,7 +479,7 @@ export const getTaxImplication = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get List Price Code
@@ -493,7 +493,7 @@ export const getPriceCode = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get List Price Rule
@@ -507,7 +507,7 @@ export const getPriceRule = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get List Price Rule
@@ -521,7 +521,7 @@ export const getListPriceRuleById = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get List Choose Those
@@ -538,7 +538,7 @@ export const getListChooseTos = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get List Category Attachment
@@ -552,7 +552,7 @@ export const getListCategoryAttachment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getGlobalPropertiesAttachment = createAsyncThunk(
@@ -565,7 +565,7 @@ export const getGlobalPropertiesAttachment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // Get List Late Charge
@@ -579,7 +579,7 @@ export const getListLateCharge = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 // Get List Late Charge
 export const checkValidateCreateSa = createAsyncThunk(
@@ -592,7 +592,7 @@ export const checkValidateCreateSa = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const accountServiceAgreementSlice = createSlice({

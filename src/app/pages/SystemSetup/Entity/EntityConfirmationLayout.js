@@ -45,7 +45,7 @@ const EntityConfirmationLayout = (props) => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       width: 270,
       render: (text) => intToNPWP(text),
@@ -64,7 +64,7 @@ const EntityConfirmationLayout = (props) => {
         searchText,
         handleSearch,
         false,
-        'date'
+        "date",
       ),
       width: 160,
       render: (startDate) =>
@@ -84,7 +84,7 @@ const EntityConfirmationLayout = (props) => {
         searchText,
         handleSearch,
         false,
-        'date'
+        "date",
       ),
       width: 160,
       render: (endDate) => endDate || "",
@@ -101,7 +101,7 @@ const EntityConfirmationLayout = (props) => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       ellipsis: {
         showTitle: false,
@@ -140,16 +140,14 @@ const EntityConfirmationLayout = (props) => {
         searchText,
         handleSearch,
         false,
-        'status'
+        "status",
       ),
       render: (isMain) => {
         // const statusRender = isMain === true ? "Primary" : "Non Primary";
         // const colorRender = isMain === true ? "primary" : "non-primary";
         return (
           <div className={" flex justify-center"}>
-            <StatusComponent colour={isMain}>
-              {isMain}
-            </StatusComponent>
+            <StatusComponent colour={isMain}>{isMain}</StatusComponent>
           </div>
         );
       },
@@ -167,13 +165,15 @@ const EntityConfirmationLayout = (props) => {
         searchText,
         handleSearch,
         false,
-        'status'
+        "status",
       ),
       render: (status, i, render) => {
         const statusRender = i?.isMain === true ? "ACTIVE" : "INACTIVE";
         return (
           <div className={" flex justify-center"}>
-            <StatusComponent colour={status}>{toTitleCase(status)}</StatusComponent>
+            <StatusComponent colour={status}>
+              {toTitleCase(status)}
+            </StatusComponent>
           </div>
         );
       },
@@ -187,7 +187,12 @@ const EntityConfirmationLayout = (props) => {
 
   // pagination table
   const paginationTable = (page, pageSize) => {
-    return data?.taxIdentifier?.slice((page - 1) * pageSize, page * pageSize)?.map(item => ({ ...item, isMain: item?.isMain === true ? "Primary" : "Non Primary" }));
+    return data?.taxIdentifier
+      ?.slice((page - 1) * pageSize, page * pageSize)
+      ?.map((item) => ({
+        ...item,
+        isMain: item?.isMain === true ? "Primary" : "Non Primary",
+      }));
   };
 
   return (
@@ -207,7 +212,11 @@ const EntityConfirmationLayout = (props) => {
               {data?.logo === undefined ? (
                 <Image width={80} src={data?.urlImage} className="my-2" />
               ) : (
-                <Image width={80} src={`data:image/png;base64,${data?.logo}`} className="my-2" />
+                <Image
+                  width={80}
+                  src={`data:image/png;base64,${data?.logo}`}
+                  className="my-2"
+                />
               )}
             </DetailText>
           </div>

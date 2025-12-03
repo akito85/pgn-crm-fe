@@ -32,8 +32,15 @@ import {
   getType,
   createAccountAddress,
 } from "../../../../../../../redux/slices/account_management/detailAccount/accountAddressSlice";
-import { hasValue, requiredMessage, toTitleCase } from "../../../../../../../utils";
-import { ModalConfirm, ModalSuccess } from "../../../../../../../components/Modal/ModalPopUp";
+import {
+  hasValue,
+  requiredMessage,
+  toTitleCase,
+} from "../../../../../../../utils";
+import {
+  ModalConfirm,
+  ModalSuccess,
+} from "../../../../../../../components/Modal/ModalPopUp";
 import { validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
 import Maps from "../../../../../../../components/Maps";
@@ -44,7 +51,7 @@ const FormAccountAddress = ({ type }) => {
 
   const id = location.state?.accountId;
   const idUpdate = location?.state;
-  const accountAddressId = location?.state?.accountAddressId
+  const accountAddressId = location?.state?.accountAddressId;
   const idCustomer = location?.state?.idCustomer;
   const typeAccount = location?.state?.type;
 
@@ -63,7 +70,6 @@ const FormAccountAddress = ({ type }) => {
     data_type,
     loading,
   } = useSelector((state) => state.accountAddress);
-
 
   const [modalChooseAddress, setModalChooseAddress] = useState(false);
   const [modalConfirmationAddress, setModalConfirmationAddress] =
@@ -88,9 +94,9 @@ const FormAccountAddress = ({ type }) => {
 
   const [modalValidate, setModalValidate] = useState(false);
   const [modalCheckPrimaryExist, setModalCheckPrimaryExist] = useState(false);
-  const [typeValidation, setTypeValidation] = useState(true)
+  const [typeValidation, setTypeValidation] = useState(true);
   const [modalSuccess, setModalSuccess] = useState(false);
-  const [selectedMaps, setSelectedMaps] = useState('');
+  const [selectedMaps, setSelectedMaps] = useState("");
 
   const routes = (id) => {
     return [
@@ -104,7 +110,9 @@ const FormAccountAddress = ({ type }) => {
             ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
             : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME,
         breadcrumbName:
-          typeAccount === "standard" ? "Account - Standard" : "Account - One Time",
+          typeAccount === "standard"
+            ? "Account - Standard"
+            : "Account - One Time",
       },
       {
         path:
@@ -114,14 +122,14 @@ const FormAccountAddress = ({ type }) => {
         breadcrumbName: "Detail Account",
         state: {
           idAccount: id,
-        }
+        },
       },
       {
         path: ACCOUNT_MANAGEMENT_ROUTES.CREATE_ACCOUNT_ADDRESS,
         breadcrumbName: "Create Address",
       },
     ];
-  }
+  };
 
   // Use Effect
   useEffect(() => {
@@ -136,11 +144,16 @@ const FormAccountAddress = ({ type }) => {
             if (data) {
               dispatch(getCountry());
               dispatch(getBusinessPurpose());
-              if (data?.data?.country !== null) dispatch(getProvince(data?.data?.country?.id))
-              if (data?.data?.country !== null) dispatch(getCity(data?.data?.province?.id))
-              if (data?.data?.city !== null) dispatch(getDistrict(data?.data?.city?.id))
-              if (data?.data?.district !== null) dispatch(getSubDistrict(data?.data?.district?.id))
-              if (data?.data?.subDistrict !== null) dispatch(getPostalCode(data?.data?.subDistrict?.id))
+              if (data?.data?.country !== null)
+                dispatch(getProvince(data?.data?.country?.id));
+              if (data?.data?.country !== null)
+                dispatch(getCity(data?.data?.province?.id));
+              if (data?.data?.city !== null)
+                dispatch(getDistrict(data?.data?.city?.id));
+              if (data?.data?.district !== null)
+                dispatch(getSubDistrict(data?.data?.district?.id));
+              if (data?.data?.subDistrict !== null)
+                dispatch(getPostalCode(data?.data?.subDistrict?.id));
               setSelectedLocation({
                 lat: parseFloat(data?.data?.latitude),
                 lng: parseFloat(data?.data?.longitude),
@@ -157,10 +170,11 @@ const FormAccountAddress = ({ type }) => {
     }
   }, [dispatch, type]);
 
-
   useEffect(() => {
     if (id) {
-      dispatch(getListChooseAddress({ id: idCustomer, search, sort, page, pageSize }));
+      dispatch(
+        getListChooseAddress({ id: idCustomer, search, sort, page, pageSize }),
+      );
     }
   }, [dispatch, id, search, sort, page, pageSize, idCustomer]);
 
@@ -171,7 +185,7 @@ const FormAccountAddress = ({ type }) => {
         setDataDetail({
           ...data_detail?.data,
           businessPurpose: data_detail?.data?.businessPurpose,
-          additionalInfo: data_detail?.data?.additionalNote
+          additionalInfo: data_detail?.data?.additionalNote,
         });
         setIsCheckPremise(data_detail?.data?.premiseFlag);
         setCheckedPrimary(data_detail?.data?.primaryFlag);
@@ -179,11 +193,11 @@ const FormAccountAddress = ({ type }) => {
         setDataDetail({
           ...data_detail?.data,
           businessPurpose: data_detail?.data?.businessPurpose?.map(
-            (item) => item.id
+            (item) => item.id,
           ),
         });
-        setIsCheckPremise(false)
-        setCheckedPrimary(false)
+        setIsCheckPremise(false);
+        setCheckedPrimary(false);
         form.resetFields(["businessPurpose", "premiseFlag", "primaryFlag"]);
       } else {
         setDataDetail({});
@@ -224,14 +238,18 @@ const FormAccountAddress = ({ type }) => {
         descAddress: dataDetail?.descAddress,
         descAccountAddress: dataDetail?.descAccountAddress,
       });
-      setIsCheckPremise(dataDetail?.premiseFlag ? dataDetail?.premiseFlag : isCheckPremise);
-      setCheckedPrimary(dataDetail?.primaryFlag ? dataDetail?.primaryFlag : checkedPrimary);
+      setIsCheckPremise(
+        dataDetail?.premiseFlag ? dataDetail?.premiseFlag : isCheckPremise,
+      );
+      setCheckedPrimary(
+        dataDetail?.primaryFlag ? dataDetail?.primaryFlag : checkedPrimary,
+      );
       setFullAddressMain(dataDetail?.fullAddress);
       setSelectedLocation({
         lat: parseFloat(dataDetail?.latitude),
         lng: parseFloat(dataDetail?.longitude),
       });
-      setSelectedMaps(dataDetail?.source)
+      setSelectedMaps(dataDetail?.source);
     }
   }, [dataDetail]);
 
@@ -259,7 +277,11 @@ const FormAccountAddress = ({ type }) => {
       };
 
       setDataToSend(bodyUpdate);
-      bodyRequest = { ...bodyUpdate, primaryFlag: formValue?.primaryFlag, needValidation: formValue?.primaryFlag };
+      bodyRequest = {
+        ...bodyUpdate,
+        primaryFlag: formValue?.primaryFlag,
+        needValidation: formValue?.primaryFlag,
+      };
       url = "/v1/dbs/api/account/address/validate-update";
     } else {
       const body = {
@@ -282,7 +304,6 @@ const FormAccountAddress = ({ type }) => {
         additionalNote: formValue?.additionalInfo,
       };
 
-
       // replace if value undefined tobe null
       const outputObject = {};
       for (const key in body) {
@@ -295,11 +316,22 @@ const FormAccountAddress = ({ type }) => {
         }
       }
       setDataToSend(outputObject);
-      bodyRequest = { ...outputObject, primaryFlag: formValue?.primaryFlag, needValidation: formValue?.primaryFlag };
+      bodyRequest = {
+        ...outputObject,
+        primaryFlag: formValue?.primaryFlag,
+        needValidation: formValue?.primaryFlag,
+      };
       url = "/v1/dbs/api/account/address/validate-create";
     }
     try {
-      const res = await dispatch(validateCreateUpdate({ body: bodyRequest, services: accountManagementService, endPoint: url, type }))?.unwrap();
+      const res = await dispatch(
+        validateCreateUpdate({
+          body: bodyRequest,
+          services: accountManagementService,
+          endPoint: url,
+          type,
+        }),
+      )?.unwrap();
       if (res.success === false) {
         setModalCheckPrimaryExist(true);
         setTypeValidation(false);
@@ -309,8 +341,7 @@ const FormAccountAddress = ({ type }) => {
         setModalConfirmationAddress(true);
       }
     } catch (error) {
-      console.log(error)
-
+      console.log(error);
     }
   };
 
@@ -318,10 +349,14 @@ const FormAccountAddress = ({ type }) => {
     if (!idUpdate?.isCreate) {
       const bodyDataUpdate = {
         addressId: accountAddressId,
-        descriptionAddress: hasValue(dataToSend?.descAddress) ? dataToSend?.descAddress : null,
-        description: hasValue(dataToSend?.descAccountAddress) ? dataToSend?.descAccountAddress : null,
+        descriptionAddress: hasValue(dataToSend?.descAddress)
+          ? dataToSend?.descAddress
+          : null,
+        description: hasValue(dataToSend?.descAccountAddress)
+          ? dataToSend?.descAccountAddress
+          : null,
         primaryFlag: dataToSend?.primaryFlag,
-        needValidation: typeValidation
+        needValidation: typeValidation,
       };
       await dispatch(updateAccountAddress({ body: bodyDataUpdate }))
         .unwrap()
@@ -339,8 +374,8 @@ const FormAccountAddress = ({ type }) => {
       delete dataToSend.desc1;
       const body = {
         ...dataToSend,
-        needValidation: typeValidation
-      }
+        needValidation: typeValidation,
+      };
       await dispatch(createAccountAddress({ body }))
         .unwrap()
         .then((data) => {
@@ -423,7 +458,6 @@ const FormAccountAddress = ({ type }) => {
     }
   };
 
-
   // Populate data form main if create new
   useEffect(() => {
     if (dataCreatenew?.fullAddress !== undefined) {
@@ -466,11 +500,16 @@ const FormAccountAddress = ({ type }) => {
 
   const RenderMaps = useMemo(() => {
     if (hasValue(selectedMaps)) {
-      if (selectedMaps?.toLowerCase() === 'google maps') {
-        return <Maps keyword={fullAddressMain} setSelectedLocationFront={setSelectedLocation} />
+      if (selectedMaps?.toLowerCase() === "google maps") {
+        return (
+          <Maps
+            keyword={fullAddressMain}
+            setSelectedLocationFront={setSelectedLocation}
+          />
+        );
       }
     } else {
-      return <></>
+      return <></>;
     }
   }, [fullAddressMain]);
 
@@ -517,7 +556,7 @@ const FormAccountAddress = ({ type }) => {
                 >
                   <InputComponent
                     disabled
-                  // onChange={(e) => setDescription(e.target.value)}
+                    // onChange={(e) => setDescription(e.target.value)}
                   />
                 </Form.Item>
                 <Form.Item
@@ -532,7 +571,7 @@ const FormAccountAddress = ({ type }) => {
                 >
                   <InputComponent
                     disabled
-                  // onChange={(e) => setDescription(e.target.value)}
+                    // onChange={(e) => setDescription(e.target.value)}
                   />
                 </Form.Item>
                 <Form.Item
@@ -547,7 +586,7 @@ const FormAccountAddress = ({ type }) => {
                 >
                   <InputComponent
                     disabled
-                  // onChange={(e) => setDescription(e.target.value)}
+                    // onChange={(e) => setDescription(e.target.value)}
                   />
                 </Form.Item>
                 <Form.Item
@@ -562,7 +601,7 @@ const FormAccountAddress = ({ type }) => {
                 >
                   <InputComponent
                     disabled
-                  // onChange={(e) => setDescription(e.target.value)}
+                    // onChange={(e) => setDescription(e.target.value)}
                   />
                 </Form.Item>
                 <Form.Item
@@ -577,7 +616,7 @@ const FormAccountAddress = ({ type }) => {
                 >
                   <InputComponent
                     disabled
-                  // onChange={(e) => setDescription(e.target.value)}
+                    // onChange={(e) => setDescription(e.target.value)}
                   />
                 </Form.Item>
                 <Form.Item
@@ -592,7 +631,7 @@ const FormAccountAddress = ({ type }) => {
                 >
                   <InputComponent
                     disabled
-                  // onChange={(e) => setDescription(e.target.value)}
+                    // onChange={(e) => setDescription(e.target.value)}
                   />
                 </Form.Item>
                 <Form.Item name={"building"} label={"Building"}>
@@ -647,10 +686,7 @@ const FormAccountAddress = ({ type }) => {
                       ))}
                   </SelectComponent>
                 </Form.Item>
-                <Form.Item
-                  name={"additionalInfo"}
-                  label={"Additional Note"}
-                >
+                <Form.Item name={"additionalInfo"} label={"Additional Note"}>
                   <InputComponent type="text" disabled={true} />
                 </Form.Item>
               </div>
@@ -662,7 +698,7 @@ const FormAccountAddress = ({ type }) => {
                     type="textarea"
                     value={"description"}
                     disabled={true}
-                  // onChange={(e) => setDescription(e.target.value)}
+                    // onChange={(e) => setDescription(e.target.value)}
                   />
                 </Form.Item>
                 <div>
@@ -691,13 +727,14 @@ const FormAccountAddress = ({ type }) => {
                       },
                     ]}
                   >
-                    <SelectComponent
-                      disabled={true}
-                    >
+                    <SelectComponent disabled={true}>
                       <Select.Option key={"DIGIO"} value={"DIGIO"}>
                         Digio
                       </Select.Option>
-                      <Select.Option key={toTitleCase('google maps')} value={toTitleCase('Google Maps')}>
+                      <Select.Option
+                        key={toTitleCase("google maps")}
+                        value={toTitleCase("Google Maps")}
+                      >
                         Google Maps
                       </Select.Option>
                     </SelectComponent>
@@ -730,21 +767,21 @@ const FormAccountAddress = ({ type }) => {
                   <Form.Item
                     name={"altitude"}
                     label={"Altitude"}
-                  // rules={[
-                  //   {
-                  //     message: "This field is required",
-                  //     required: true,
-                  //   },
-                  // ]}
+                    // rules={[
+                    //   {
+                    //     message: "This field is required",
+                    //     required: true,
+                    //   },
+                    // ]}
                   >
                     <InputComponent type="text" disabled={true} />
                   </Form.Item>
                 </div>
                 <div className={"w-full grid grid-cols-1 gap-2"}>
-                  <span className="text-primary">Pinpoint address coordinate</span>
-                  <div className="w-full">
-                    {RenderMaps}
-                  </div>
+                  <span className="text-primary">
+                    Pinpoint address coordinate
+                  </span>
+                  <div className="w-full">{RenderMaps}</div>
                 </div>
                 {/* <div className="pt-8 pb-4">
                   <h1 className="text-xs">Pinpoint address coordinate</h1>
@@ -801,8 +838,8 @@ const FormAccountAddress = ({ type }) => {
                         disabled={type === "update"}
                         checked={isCheckPremise}
                         onChange={(e) => {
-                          setIsCheckPremise(e.target.checked)
-                          setShipTo(e)
+                          setIsCheckPremise(e.target.checked);
+                          setShipTo(e);
                         }}
                       >
                         Premise Address
@@ -822,7 +859,10 @@ const FormAccountAddress = ({ type }) => {
                   >
                     <div className="flex flex-col">
                       <Checkbox
-                        disabled={type === "update" && data_detail?.data?.primaryFlag === true}
+                        disabled={
+                          type === "update" &&
+                          data_detail?.data?.primaryFlag === true
+                        }
                         checked={checkedPrimary}
                         onChange={(e) => setCheckedPrimary(e.target.checked)}
                       >
@@ -843,7 +883,7 @@ const FormAccountAddress = ({ type }) => {
                     label={"Remark"}
                     type="textarea"
                     value={"description"}
-                  // onChange={(e) => setDescription(e.target.value)}
+                    // onChange={(e) => setDescription(e.target.value)}
                   />
                 </Form.Item>
               </div>
@@ -868,8 +908,8 @@ const FormAccountAddress = ({ type }) => {
                   <LeftOutlined style={{ fontSize: "24px", color: "#fff" }} />
                 }
                 type="submit"
-              // onClick={() => setModalBack(true)}
-              // onClick={() => navigate(-1)}
+                // onClick={() => setModalBack(true)}
+                // onClick={() => navigate(-1)}
               >
                 Back
               </ButtonComponent>
@@ -935,7 +975,6 @@ const FormAccountAddress = ({ type }) => {
         dataType={data_type}
         setModalCheckPrimaryExist={setModalCheckPrimaryExist}
         setTypeValidation={setTypeValidation}
-
       />
 
       <ModalCreateNewAddress
@@ -958,7 +997,7 @@ const FormAccountAddress = ({ type }) => {
         getPostalCode={getPostalCode}
         getType={getType}
         setDataCreatenew={setDataCreatenew}
-      // setFullAddressMain={setFullAddressMain}
+        // setFullAddressMain={setFullAddressMain}
       />
 
       {modalCheckPrimaryExist ? (
@@ -979,8 +1018,9 @@ const FormAccountAddress = ({ type }) => {
           <div className="flex justify-center gap-[20px] mt-6">
             <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
             <p className={"text-[18px] font-bold"}>
-              {`Are you sure want to ${type === "create" ? "create" : "update"
-                } new primary address ?`}
+              {`Are you sure want to ${
+                type === "create" ? "create" : "update"
+              } new primary address ?`}
             </p>
           </div>
           <Alert
@@ -1013,7 +1053,6 @@ const FormAccountAddress = ({ type }) => {
           </div>
         </ModalSuccess>
       ) : null}
-
     </div>
   );
 };

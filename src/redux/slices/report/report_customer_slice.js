@@ -52,7 +52,7 @@ export const reportCustomerSlice = createApi({
               action: "getCustomerDownload",
               back: false,
               load: false,
-            })
+            }),
           );
 
           return {

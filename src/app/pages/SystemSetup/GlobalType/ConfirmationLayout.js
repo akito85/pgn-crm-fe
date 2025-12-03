@@ -32,11 +32,11 @@ const ConfirmationLayout = (props) => {
         if (searchedColumn === "parentValue") {
           const data = item[searchedColumn] || 0;
           const matchingEntryA = dataParentAndGroup?.find((entry) =>
-            entry.parentValue.some((item) => item.glbTypeValId === data)
+            entry.parentValue.some((item) => item.glbTypeValId === data),
           );
           const textA =
             matchingEntryA?.parentValue.find(
-              (item) => item.glbTypeValId === data
+              (item) => item.glbTypeValId === data,
             ).text || "";
           return (textA || "").toLowerCase().includes(fixSearchText);
         }
@@ -69,7 +69,7 @@ const ConfirmationLayout = (props) => {
     }
     setSearchedColumn(tempSearchColumn);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -194,28 +194,32 @@ const ConfirmationLayout = (props) => {
       key: "parentValue",
       sorter: (a, b) => {
         const matchingEntryA = dataParentAndGroup?.find((entry) =>
-          entry.parentValue.some((item) => item.glbTypeValId === a?.parentValue)
+          entry.parentValue.some(
+            (item) => item.glbTypeValId === a?.parentValue,
+          ),
         );
         const textA =
           matchingEntryA?.parentValue.find(
-            (item) => item.glbTypeValId === a?.parentValue
+            (item) => item.glbTypeValId === a?.parentValue,
           ).text || "";
         const matchingEntryB = dataParentAndGroup?.find((entry) =>
-          entry.parentValue.some((item) => item.glbTypeValId === b?.parentValue)
+          entry.parentValue.some(
+            (item) => item.glbTypeValId === b?.parentValue,
+          ),
         );
         const textB =
           matchingEntryB?.parentValue.find(
-            (item) => item.glbTypeValId === b?.parentValue
+            (item) => item.glbTypeValId === b?.parentValue,
           ).text || "";
         return textA.localeCompare(textB);
       },
       ...getColumnSearchProps("parentValue"),
       render: (parentValue) => {
         const matchingEntry = dataParentAndGroup?.find((entry) =>
-          entry.parentValue.some((item) => item.glbTypeValId === parentValue)
+          entry.parentValue.some((item) => item.glbTypeValId === parentValue),
         );
         const text = matchingEntry?.parentValue.find(
-          (item) => item.glbTypeValId === parentValue
+          (item) => item.glbTypeValId === parentValue,
         ).text;
         return <span>{text}</span>;
       },
@@ -240,7 +244,7 @@ const ConfirmationLayout = (props) => {
       title: "STATUS",
       dataIndex: "status",
       key: "status",
-      fixed: 'right',
+      fixed: "right",
       ...getColumnSearchProps("status"),
       render: (text) => (
         <div className={" flex justify-center"}>

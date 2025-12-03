@@ -69,8 +69,8 @@ const CreateAllocation = ({
         // setDataRecomendation(updatedDataRecomendation);
         setDataRecomendation(
           dataRecomendation.filter(
-            (item) => !dataTable.some((obj) => obj.key === item.key)
-          )
+            (item) => !dataTable.some((obj) => obj.key === item.key),
+          ),
         );
       } else {
         setDataRecomendation(
@@ -78,12 +78,12 @@ const CreateAllocation = ({
             ...item,
             key: item?.id,
             billingPeriod: moment(item?.billingPeriod)?.format(
-              dateFormatting?.datePeriod
+              dateFormatting?.datePeriod,
             ),
             createdDate: moment(item.createdDate).format(
-              dateFormatting?.dateTime
+              dateFormatting?.dateTime,
             ),
-          }))
+          })),
         );
       }
     }
@@ -93,8 +93,8 @@ const CreateAllocation = ({
     if (openModalAllocation) {
       setSelectDataTable(
         dataRecomendation?.filter((item) =>
-          selectedRowKeys?.includes(item?.key)
-        )
+          selectedRowKeys?.includes(item?.key),
+        ),
       );
     }
   }, [selectedRowKeys, openModalAllocation, dataRecomendation]);
@@ -105,7 +105,7 @@ const CreateAllocation = ({
       setSelectedRowKeys(
         dataRecomendation
           ?.filter((item) => item?.allocationAmount !== 0)
-          ?.map((item) => item?.key)
+          ?.map((item) => item?.key),
       );
     }
   }, [dataRecomendation]);
@@ -123,13 +123,13 @@ const CreateAllocation = ({
       case "createdDate":
         setTypeColumn("datetime");
         setSearchText(
-          moment(selectedKeys[0])?.format(dateFormatting?.dateTime)
+          moment(selectedKeys[0])?.format(dateFormatting?.dateTime),
         );
         break;
       case "billingPeriod":
         setTypeColumn("datePeriod");
         setSearchText(
-          moment(selectedKeys[0])?.format(dateFormatting?.datePeriod)
+          moment(selectedKeys[0])?.format(dateFormatting?.datePeriod),
         );
         break;
       default:
@@ -217,7 +217,7 @@ const CreateAllocation = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           )}
           current={page}
           pageSize={pageSize}
@@ -233,7 +233,7 @@ const CreateAllocation = ({
             searchText,
             pageChoose,
             pageSizeChoose,
-            typeColumn
+            typeColumn,
           )}
           setInserted={setIsInsert}
           onDataChange={setDataTable}
@@ -244,7 +244,7 @@ const CreateAllocation = ({
             searchText,
             pageChoose,
             pageSizeChoose,
-            typeColumn
+            typeColumn,
           )}
           setUpdateSelectDataTable={setSelectDataTable}
           setUpdateSelectRowKeys={setSelectedRowKeys}
@@ -316,7 +316,7 @@ const CreateAllocation = ({
               searchInput,
               searchedColumn,
               searchText,
-              handleSearch
+              handleSearch,
             )}
             current={pageChoose}
             pageSize={pageSizeChoose}
@@ -327,7 +327,7 @@ const CreateAllocation = ({
               searchText,
               pageChoose,
               pageSizeChoose,
-              typeColumn
+              typeColumn,
             )}
             totalData={updatePagination(
               dataRecomendation,
@@ -336,7 +336,7 @@ const CreateAllocation = ({
               searchText,
               pageChoose,
               pageSizeChoose,
-              typeColumn
+              typeColumn,
             )}
             tableScrolled={{ x: 3500, y: 500 }}
             onChange={handleChange}

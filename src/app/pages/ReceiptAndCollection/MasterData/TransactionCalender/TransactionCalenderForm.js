@@ -1,6 +1,4 @@
-import {
-  LeftOutlined,
-} from "@ant-design/icons";
+import { LeftOutlined } from "@ant-design/icons";
 import { Form, Spin } from "antd";
 import moment from "moment";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -107,7 +105,7 @@ const TransactionCalenderForm = (props) => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -237,7 +235,7 @@ const TransactionCalenderForm = (props) => {
           ...attachData,
           fileSize: bytesConverter(attachData.fileSize || 0),
           dataType: "exist",
-        }))
+        })),
       );
 
       setSelectedHierarchy(data_detail?.calendarDetailDto?.appHierId);
@@ -251,8 +249,9 @@ const TransactionCalenderForm = (props) => {
             ? moment()
             : moment(data_detail?.calendarDetailDto?.startDate).clone(),
         endDate:
-          data_detail?.calendarDetailDto.endDate === null && data_detail?.calendarDetailDto.startDate
-            ? ''
+          data_detail?.calendarDetailDto.endDate === null &&
+          data_detail?.calendarDetailDto.startDate
+            ? ""
             : moment(data_detail?.calendarDetailDto?.endDate).clone(),
         description: data_detail?.calendarDetailDto?.description,
         transCriteria: mappingCriteria,
@@ -365,7 +364,7 @@ const TransactionCalenderForm = (props) => {
           dataDefault = tempData.filter((data) => data.value === item);
         } else {
           tempData = data_select_criteria.filter(
-            (criteria) => criteria.id === item
+            (criteria) => criteria.id === item,
           );
         }
         return {
@@ -379,7 +378,7 @@ const TransactionCalenderForm = (props) => {
 
     const dataCriteriaObject = mapListDataCriteria(
       listDataCriteria,
-      dateFormatting
+      dateFormatting,
     );
 
     const criteriaArrayObject = mapCriteriaArrayObject(bodyData, data_detail);
@@ -404,7 +403,7 @@ const TransactionCalenderForm = (props) => {
       description: formValue?.description,
     };
 
-    setKirimBody(body)
+    setKirimBody(body);
     return body;
   };
   // Check Validity
@@ -483,12 +482,12 @@ const TransactionCalenderForm = (props) => {
     criteriaValues,
     dataCriteria,
     listDataCriteria = [],
-    setMissingColumn = () => { },
-    minimumData = 0
+    setMissingColumn = () => {},
+    minimumData = 0,
   ) => {
     let missingColumn = [];
     const tempArray = criteriaValues.filter((item) =>
-      dataCriteria?.includes(item.value)
+      dataCriteria?.includes(item.value),
     );
     const tempNameCriteria = tempArray.map((data) => data.name);
     listDataCriteria?.map((item) => {
@@ -533,11 +532,11 @@ const TransactionCalenderForm = (props) => {
 
   const handleSubmitForm = async (formValue) => {
     let errorBody = {};
-console.log(formValue, 'form Value');
+    console.log(formValue, "form Value");
 
     const hasOverlapping = checkOverlappingData(
       { startDate: formValue?.startDate, endDate: formValue?.endDate },
-      listDataCriteria
+      listDataCriteria,
     );
 
     if (listDataCriteria.length === 0 && !formValue.criteria.includes(24)) {
@@ -558,8 +557,8 @@ console.log(formValue, 'form Value');
         criteriaOptions,
         formValue?.criteria,
         listDataCriteria,
-        () => { },
-        0
+        () => {},
+        0,
       )
     ) {
       const errorBody = {
@@ -573,8 +572,7 @@ console.log(formValue, 'form Value');
         description: `You can't add Criteria. Start date and enda date can't be overlap`,
       };
       dispatch(showModalError(errorBody));
-    }
-    else {
+    } else {
       const isDataValid = await checkDataValidity(formValue);
 
       if (isDataValid) {
@@ -616,7 +614,6 @@ console.log(formValue, 'form Value');
     setModalConfirm(false);
   };
 
-  
   const handleProcessModalConfirm = async () => {
     const successMessageCreate = {
       title: "Successfull",
@@ -629,7 +626,6 @@ console.log(formValue, 'form Value');
       description: `Your data has been submitted`,
       return: true,
     };
-
 
     if (type === "create") {
       dispatch(createTransactionCalender(kirimBody))
@@ -647,7 +643,7 @@ console.log(formValue, 'form Value');
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -676,7 +672,7 @@ console.log(formValue, 'form Value');
         .then(async () => {
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
@@ -688,7 +684,7 @@ console.log(formValue, 'form Value');
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -775,7 +771,7 @@ console.log(formValue, 'form Value');
         const errorBadge = errorFields.reduce(
           (current, next) =>
             item.paramValue.includes(next.name[0]) ? current + 1 : current,
-          0
+          0,
         );
         return {
           value: item.value,
@@ -804,8 +800,9 @@ console.log(formValue, 'form Value');
           onFinishFailed={handleError}
         >
           <div
-            className={`${valuePage !== "Transaction Calendar" ? "hidden" : ""
-              }`}
+            className={`${
+              valuePage !== "Transaction Calendar" ? "hidden" : ""
+            }`}
           >
             <TransactionCalenderInfromation
               //  data_detail={data_detail}

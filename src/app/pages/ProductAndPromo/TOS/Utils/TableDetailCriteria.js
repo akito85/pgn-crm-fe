@@ -68,7 +68,7 @@ const TableDetailCriteria = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     ];
     const filterCol =
@@ -76,7 +76,7 @@ const TableDetailCriteria = ({
     return filterCol.filter((col) =>
       col.title !== "NO" && col.title !== "ACTION"
         ? dataCriteria.includes(col.indexValue)
-        : true
+        : true,
     );
   };
 
@@ -161,7 +161,7 @@ const TableDetailCriteria = ({
               indexValue: col.indexValue,
               dependDataIndex: col.dependDataIndex,
             }),
-          }))
+          })),
         )}
         pagination={{
           position: ["topRight"],

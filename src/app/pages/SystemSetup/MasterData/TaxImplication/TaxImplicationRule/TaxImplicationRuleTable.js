@@ -37,7 +37,7 @@ const columns = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => {
   return [
     {
@@ -57,7 +57,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -71,7 +71,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -85,7 +85,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -99,7 +99,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -113,7 +113,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -129,7 +129,7 @@ const columns = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         searchedColumn === "startDate" ? (
@@ -163,7 +163,7 @@ const columns = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         searchedColumn === "endDate" ? (
@@ -195,7 +195,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -240,7 +240,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         let text;
@@ -276,7 +276,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         let text;
@@ -448,7 +448,7 @@ const columns = (
 const TaxImplicationRuleTable = ({ id, isRuleActive, access }) => {
   const dispatch = useDispatch();
   const { data_tax_implication_rule, dataApprovalHistory = {} } = useSelector(
-    (state) => state.tax_implication
+    (state) => state.tax_implication,
   );
 
   const [page, setPage] = useState(1);
@@ -507,7 +507,7 @@ const TaxImplicationRuleTable = ({ id, isRuleActive, access }) => {
         sort,
         page,
         pageSize,
-      })
+      }),
     );
   }, [dispatch, id, page, pageSize, search, sort]);
 
@@ -593,7 +593,7 @@ const TaxImplicationRuleTable = ({ id, isRuleActive, access }) => {
             pageSize,
             sort,
             search: tempSearch,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -652,7 +652,7 @@ const TaxImplicationRuleTable = ({ id, isRuleActive, access }) => {
               sort,
               page,
               pageSize,
-            })
+            }),
           );
         }
       })
@@ -952,13 +952,13 @@ const TaxImplicationRuleTable = ({ id, isRuleActive, access }) => {
               handleApprovalHistory,
               handleOpenModalInactivate,
               id,
-              openModalDeleteRule
+              openModalDeleteRule,
             ),
             ...useColumnActionPermissionAccount(
               ["Delete", "Activate", "View", "Update", "History"],
               itemActions,
               access,
-              "Delete"
+              "Delete",
             ),
           ]}
           current={page}

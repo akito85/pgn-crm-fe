@@ -35,7 +35,7 @@ export const columnDailyRate = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -57,7 +57,7 @@ export const columnDailyRate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -67,7 +67,7 @@ export const columnDailyRate = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -82,7 +82,7 @@ export const columnDailyRate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -92,7 +92,7 @@ export const columnDailyRate = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -107,7 +107,7 @@ export const columnDailyRate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -117,7 +117,7 @@ export const columnDailyRate = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -134,7 +134,7 @@ export const columnDailyRate = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -143,7 +143,7 @@ export const columnDailyRate = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -158,7 +158,7 @@ export const columnDailyRate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,
@@ -183,7 +183,7 @@ export const columnDailyRate = (
         value,
         true,
         "input",
-        search
+        search,
       );
     },
   },
@@ -198,7 +198,7 @@ export const columnDailyRate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,
@@ -211,7 +211,7 @@ export const columnDailyRate = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -227,7 +227,7 @@ export const columnDailyRate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (a) => {
       let text;
@@ -252,7 +252,7 @@ export const columnDailyRate = (
         text,
         false,
         "status",
-        search
+        search,
       );
     },
   },
@@ -269,7 +269,7 @@ export const columnDailyRate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (a) => {
       let text;
@@ -294,7 +294,7 @@ export const columnDailyRate = (
         text,
         false,
         "status",
-        search
+        search,
       );
     },
   },
@@ -302,7 +302,7 @@ export const columnDailyRate = (
 
 const DailyRateView = ({ dispatch }) => {
   const { data_list, dataApprovalHistory, loading } = useSelector(
-    (state) => state.daily_rate
+    (state) => state.daily_rate,
   );
 
   const [page, setPage] = useState(1);
@@ -357,7 +357,7 @@ const DailyRateView = ({ dispatch }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [search, page, pageSize, sort, dispatch]);
 
@@ -452,7 +452,7 @@ const DailyRateView = ({ dispatch }) => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       });
   };
@@ -474,7 +474,7 @@ const DailyRateView = ({ dispatch }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -673,7 +673,7 @@ const DailyRateView = ({ dispatch }) => {
   // ✅ Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   // ✅ Get base columns with key property
@@ -690,7 +690,7 @@ const DailyRateView = ({ dispatch }) => {
         handleInactive,
         handleApprovalHistory,
         formatRupiah,
-        disabledDate
+        disabledDate,
       ),
       ...actionColumns,
     ];

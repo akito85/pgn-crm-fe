@@ -1,9 +1,9 @@
-import React, {useState} from 'react'
-import TablePagination from '../../../../../../../../../components/TablePagination';
+import React, { useState } from "react";
+import TablePagination from "../../../../../../../../../components/TablePagination";
 
-const TableAttachment = ({data}) => {
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+const TableAttachment = ({ data }) => {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const columns = [
     {
@@ -40,11 +40,11 @@ const TableAttachment = ({data}) => {
         pageSize={pageSize}
         current={page}
         dataSource={data}
-        tableScrolled={{y: 525, x: 800 }}
+        tableScrolled={{ y: 525, x: 800 }}
         columns={columns}
         totalData={data?.length}
       />
     </div>
-  )
-}
-export default TableAttachment
+  );
+};
+export default TableAttachment;

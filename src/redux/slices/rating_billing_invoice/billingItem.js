@@ -36,13 +36,13 @@ export const getBillingItemList = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_BILLING_ITEM_LIST" })
+        validateError({ error, action: "GET_BILLING_ITEM_LIST" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getBillingItemCategory = createAsyncThunk(
@@ -54,13 +54,13 @@ export const getBillingItemCategory = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_BILLING_ITEM_LIST" })
+        validateError({ error, action: "GET_BILLING_ITEM_LIST" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getBillType = createAsyncThunk(
@@ -73,10 +73,10 @@ export const getBillType = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(validateError({ error, action: "GET_BILL_TYPE" }));
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getBillingItemCategoryDdl = createAsyncThunk(
@@ -91,13 +91,13 @@ export const getBillingItemCategoryDdl = createAsyncThunk(
         validateError({
           error,
           action: "GET_BILLING_ITEM_MAPPING_CATEGORY_DDL",
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getDetailMappingCategory = createAsyncThunk(
@@ -109,13 +109,13 @@ export const getDetailMappingCategory = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_DETAIL_MAPPING_CATEGORY" })
+        validateError({ error, action: "GET_DETAIL_MAPPING_CATEGORY" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getAvailableApproval = createAsyncThunk(
@@ -127,13 +127,13 @@ export const getAvailableApproval = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_AVAILABLE_APPROVAL" })
+        validateError({ error, action: "GET_AVAILABLE_APPROVAL" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getSelectedApproval = createAsyncThunk(
@@ -145,13 +145,13 @@ export const getSelectedApproval = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_SELECTED_APPROVAL" })
+        validateError({ error, action: "GET_SELECTED_APPROVAL" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getAttachmentTable = createAsyncThunk(
@@ -163,13 +163,13 @@ export const getAttachmentTable = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_ATTACHMENT_TABLE" })
+        validateError({ error, action: "GET_ATTACHMENT_TABLE" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getAttachmentCategory = createAsyncThunk(
@@ -184,13 +184,13 @@ export const getAttachmentCategory = createAsyncThunk(
       }));
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_ATTACHMENT_CATEGORY" })
+        validateError({ error, action: "GET_ATTACHMENT_CATEGORY" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getBillingItemDetail = createAsyncThunk(
@@ -202,13 +202,13 @@ export const getBillingItemDetail = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_BILLING_ITEM_DETAIL" })
+        validateError({ error, action: "GET_BILLING_ITEM_DETAIL" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getAttachmentDetail = createAsyncThunk(
@@ -220,13 +220,13 @@ export const getAttachmentDetail = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_ATTACHMENT_DETAIL" })
+        validateError({ error, action: "GET_ATTACHMENT_DETAIL" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const inactiveBillingItem = createAsyncThunk(
@@ -236,7 +236,7 @@ export const inactiveBillingItem = createAsyncThunk(
       const url = `/v1/dbs/api/billingitem/inactive`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -255,7 +255,7 @@ export const inactiveBillingItem = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "INACTIVE_BILLING_ITEM" })
+            validateError({ error, action: "INACTIVE_BILLING_ITEM" }),
           );
         } else {
           const errorBody = {
@@ -268,7 +268,7 @@ export const inactiveBillingItem = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -280,13 +280,13 @@ export const getApprovalHistory = createAsyncThunk(
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_APPROVAL_HISTORY" })
+        validateError({ error, action: "GET_APPROVAL_HISTORY" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const downloadBillingItem = createAsyncThunk(
@@ -305,11 +305,11 @@ export const downloadBillingItem = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_BILLING_ITEM",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const createBillingItem = createAsyncThunk(
@@ -337,7 +337,7 @@ export const createBillingItem = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "CREATE_BILLING_ITEM" })
+            validateError({ error, action: "CREATE_BILLING_ITEM" }),
           );
         } else {
           const errorBody = {
@@ -352,7 +352,7 @@ export const createBillingItem = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateBillingItem = createAsyncThunk(
@@ -380,7 +380,7 @@ export const updateBillingItem = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "UPDATE_BILLING_ITEM" })
+            validateError({ error, action: "UPDATE_BILLING_ITEM" }),
           );
         } else {
           const errorBody = {
@@ -395,7 +395,7 @@ export const updateBillingItem = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approvalRejectBillingItem = createAsyncThunk(
@@ -405,7 +405,7 @@ export const approvalRejectBillingItem = createAsyncThunk(
       const url = `/v1/dbs/api/billingitem/approve`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -432,7 +432,7 @@ export const approvalRejectBillingItem = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approvalInactiveBillingItem = createAsyncThunk(
@@ -442,7 +442,7 @@ export const approvalInactiveBillingItem = createAsyncThunk(
       const url = `/v1/dbs/api/billingitem/approve-inactive`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -460,7 +460,7 @@ export const approvalInactiveBillingItem = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "APPROVAL_INACTIVE_BILLING_ITEM" })
+            validateError({ error, action: "APPROVAL_INACTIVE_BILLING_ITEM" }),
           );
         } else {
           const errorBody = {
@@ -473,7 +473,7 @@ export const approvalInactiveBillingItem = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getDetailDraft = createAsyncThunk(
@@ -486,10 +486,10 @@ export const getDetailDraft = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(validateError({ error, action: "GET_DETAIL_DRAFT" }));
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 // RBI MASTER BILLING ITEM
@@ -502,10 +502,10 @@ export const getConfigFileRBIBillingItem = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 const billingItemSlice = createSlice({

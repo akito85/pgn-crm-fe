@@ -16,7 +16,7 @@ const columns = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -35,7 +35,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "sor" ? (
@@ -67,7 +67,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -102,7 +102,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -137,7 +137,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -197,7 +197,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -233,7 +233,7 @@ const columns = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "receiptDate" ? (
@@ -267,7 +267,7 @@ const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -296,14 +296,14 @@ const columns = (
     dataIndex: "statusApproval",
     align: "center",
     sorter: true,
-    fixed:'right',
+    fixed: "right",
     ...getColumnSearchPropsPaging(
       "statusApproval",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (approvalStatus) => {
       let text;
@@ -402,7 +402,7 @@ const DetailMatch = ({
         search: encodeURIComponent(JSON.stringify(search)),
         // search: tempSearch,
         sort,
-      })
+      }),
     );
   }, [search, page, pageSize, sort, dispatch, id]);
 
@@ -439,7 +439,7 @@ const DetailMatch = ({
             searchInput,
             searchedColumnMatch,
             searchTextMatch,
-            handleSearch
+            handleSearch,
           )}
           current={page}
           pageSize={pageSize}

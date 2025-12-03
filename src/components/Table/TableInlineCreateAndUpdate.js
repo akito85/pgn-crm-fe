@@ -229,7 +229,7 @@ const TableInlineCreateAndUpdate = (props) => {
   useEffect(() => {
     if (mode === "update") {
       setData(
-        tableData?.map((row, index) => ({ ...row, key: index.toString() }))
+        tableData?.map((row, index) => ({ ...row, key: index.toString() })),
       );
     }
     setData(tableData);
@@ -459,7 +459,7 @@ const TableInlineCreateAndUpdate = (props) => {
                 required: required,
                 disableDate,
               }),
-            }))
+            })),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

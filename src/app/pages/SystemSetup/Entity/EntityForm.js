@@ -35,19 +35,19 @@ import {
 import moment from "moment";
 import TaxIdentifierDetail from "./TaxIdentifierDetail";
 import StatusComponent from "../../../../components/StatusComponent";
-import {
-  ModalConfirm,
-} from "../../../../components/Modal/ModalPopUp";
+import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import { formMessageRequired, hasValue, toTitleCase } from "../../../../utils";
 import { intToNPWP } from "../../../../utils/npwp";
 import Highlighter from "react-highlight-words";
 import InputComponent from "../../../../components/InputComponent";
 import TableInlineEntity from "../../../../components/Table/TableInlineEntity";
-import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../redux/slices/general_slice";
 import { getColumnSearchProps } from "../../../../utils/getColumnSearchProps";
 import userHttpService from "../../../../redux/services/userHttpService";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
-
 
 const EntityForm = (props) => {
   const { type } = props;
@@ -55,7 +55,7 @@ const EntityForm = (props) => {
     data_detail: data_detail,
     loading,
     data_tax,
-    allow_file
+    allow_file,
   } = useSelector((state) => state.entity);
   const { bodyError, isLoading } = useSelector((state) => state?.general);
 
@@ -71,8 +71,7 @@ const EntityForm = (props) => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [messageValidate, setMessageValidate] = useState("");
-  const [payload, setPayload] = useState({})
-
+  const [payload, setPayload] = useState({});
 
   const taxData = (data_detail?.data?.taxIdentifierList || []).map(
     (item, index) => {
@@ -86,7 +85,7 @@ const EntityForm = (props) => {
         taxNumber: item.taxNumber,
         description: item.remark,
       };
-    }
+    },
   );
   const [tableData, setTableData] = useState([]);
   const [data, setData] = useState({});
@@ -132,18 +131,22 @@ const EntityForm = (props) => {
       setTableData(taxData);
       setMessageValidate("");
     }
-    setAcceptExtension(allow_file?.data?.fileExt?.toLowerCase()?.split(',')?.map(item => `.${item}`)?.join(', '))
+    setAcceptExtension(
+      allow_file?.data?.fileExt
+        ?.toLowerCase()
+        ?.split(",")
+        ?.map((item) => `.${item}`)
+        ?.join(", "),
+    );
   }, [id, form, data_detail, editingCell, allow_file]);
-
 
   // handle confirmation
   const handleConfirmation = async (formValue) => {
     try {
-
       const isDuplicateTax = tableData?.map((item) => item?.taxNumber);
       let message = "";
       if (tableData?.length === 0) {
-        message = "Please input your tax identifier"
+        message = "Please input your tax identifier";
       } else if (
         isDuplicateTax.some(function (item, idx) {
           return isDuplicateTax.indexOf(item) !== idx;
@@ -151,14 +154,16 @@ const EntityForm = (props) => {
       ) {
         let findRow = isDuplicateTax.filter((item, index) => {
           let ind = isDuplicateTax.findIndex(
-            (item2) => item?.taxNumber === item2?.taxNumber
+            (item2) => item?.taxNumber === item2?.taxNumber,
           );
           return index === ind;
         });
         message = `Tax identifier: ${findRow} is already exist`;
       } else if (
         tableData
-          .filter((item) => item.status === "ACTIVE" || item?.status === "INACTIVE")
+          .filter(
+            (item) => item.status === "ACTIVE" || item?.status === "INACTIVE",
+          )
           .filter((item) => item["isMain"] === true).length > 1
       ) {
         message = `There cannot be more than one or null primary`;
@@ -172,7 +177,9 @@ const EntityForm = (props) => {
           .filter((item) => item["isMain"] === true).length !== 1
       ) {
         message = "There cannot be more than one or null primary";
-      } else if (tableData.some((item) => !item?.taxNumber || !item?.startDate)) {
+      } else if (
+        tableData.some((item) => !item?.taxNumber || !item?.startDate)
+      ) {
         message = "Data Tax Identifier and Start Date must be filled";
       }
 
@@ -198,46 +205,56 @@ const EntityForm = (props) => {
         });
         let image = base64Image.split(",")[1];
 
-        if (type === 'update') {
+        if (type === "update") {
           body = {
             ...formValue,
             id: id,
-            phone: hasValue(formValue.phone) === false || formValue.phone === "-" ? null : `62${formValue.phone}`,
-            fax: hasValue(formValue.fax) === false || formValue?.fax === "-" ? null : `62${formValue.fax}`,
+            phone:
+              hasValue(formValue.phone) === false || formValue.phone === "-"
+                ? null
+                : `62${formValue.phone}`,
+            fax:
+              hasValue(formValue.fax) === false || formValue?.fax === "-"
+                ? null
+                : `62${formValue.fax}`,
             fileName: hasValue(fileName) ? fileName : data_detail?.data?.logo,
             logo: image,
             taxIdentifier: modifiedArray,
-          }
+          };
 
-          validateValueObj = { body: body, services: userHttpService, endPoint: '/v1/dbs/api/entity/validate-update', type }
+          validateValueObj = {
+            body: body,
+            services: userHttpService,
+            endPoint: "/v1/dbs/api/entity/validate-update",
+            type,
+          };
         } else {
           body = {
             ...formValue,
-            phone: hasValue(formValue?.phone) ? `62${formValue.phone}` : '',
-            fax:
-              hasValue(formValue?.fax)
-                ? `62${formValue.fax}`
-                : "",
+            phone: hasValue(formValue?.phone) ? `62${formValue.phone}` : "",
+            fax: hasValue(formValue?.fax) ? `62${formValue.fax}` : "",
             taxIdentifier: modifiedArray,
             logo: image,
             fileName: fileName,
-          }
-          validateValueObj = { body: body, services: userHttpService, endPoint: '/v1/dbs/api/entity/validate-create', type }
+          };
+          validateValueObj = {
+            body: body,
+            services: userHttpService,
+            endPoint: "/v1/dbs/api/entity/validate-create",
+            type,
+          };
         }
 
         setPayload({
           body: body,
-          validateValue: validateValueObj
+          validateValue: validateValueObj,
         });
 
-        await dispatch(validateCreateUpdate(validateValueObj))?.unwrap()
+        await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
         const data = {
           ...formValue,
-          phone: hasValue(formValue?.phone) ? `62${formValue.phone}` : '',
-          fax:
-            hasValue(formValue?.fax)
-              ? `62${formValue.fax}`
-              : "",
+          phone: hasValue(formValue?.phone) ? `62${formValue.phone}` : "",
+          fax: hasValue(formValue?.fax) ? `62${formValue.fax}` : "",
           taxIdentifier: modifiedArray,
           logo: image,
           fileName: fileName,
@@ -303,7 +320,6 @@ const EntityForm = (props) => {
         searchText,
         handleSearch,
         true,
-
       ),
       render: (text) => intToNPWP(text),
     },
@@ -329,7 +345,7 @@ const EntityForm = (props) => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (startDate) => moment(startDate).format("DD MMM YYYY"),
     },
@@ -348,7 +364,7 @@ const EntityForm = (props) => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (endDate) =>
         endDate ? moment(endDate).format("DD MMM YYYY") : null,
@@ -365,7 +381,7 @@ const EntityForm = (props) => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -404,7 +420,7 @@ const EntityForm = (props) => {
         searchText,
         handleSearch,
         true,
-        'boolean'
+        "boolean",
       ),
       render: (isMain) => <Checkbox checked={isMain} />,
     },
@@ -413,7 +429,7 @@ const EntityForm = (props) => {
       dataIndex: "status",
       editable: false,
       width: 120,
-      fixed: 'right',
+      fixed: "right",
       sorter: (a, b) => a.status?.localeCompare(b.status),
       ...getColumnSearchProps(
         "status",
@@ -422,13 +438,15 @@ const EntityForm = (props) => {
         searchText,
         handleSearch,
         true,
-        'status'
+        "status",
       ),
       render: (status, i, render) => {
         // const statusRender = i?.isMain === true ? 'ACTIVE' : 'INACTIVE'
         return (
           <div className={" flex justify-center"}>
-            <StatusComponent colour={status}>{toTitleCase(status)}</StatusComponent>
+            <StatusComponent colour={status}>
+              {toTitleCase(status)}
+            </StatusComponent>
           </div>
         );
       },
@@ -439,14 +457,14 @@ const EntityForm = (props) => {
     return item?.dataIndex !== "status";
   });
   const getFileExtension = (file) => {
-    return file.slice((file.lastIndexOf(".") - 1 >>> 0) + 2)?.toLowerCase();
+    return file.slice(((file.lastIndexOf(".") - 1) >>> 0) + 2)?.toLowerCase();
   };
 
   const handleChange = ({ fileList }) => {
     if (validateFile) {
       setFileList(fileList);
     } else {
-      setFileList([])
+      setFileList([]);
     }
   };
 
@@ -543,26 +561,24 @@ const EntityForm = (props) => {
     return true;
   };
 
-
   // handle retry
   const handleRetry = () => {
-    handleCancelTryAgain()
+    handleCancelTryAgain();
     if (bodyError?.action === "CREATE_ENTITY") {
-      dispatch(createEntity(payload?.body))
+      dispatch(createEntity(payload?.body));
     } else if (bodyError?.action === "UPDATE_ENTITY") {
-      dispatch(updateEntity(payload?.body))
+      dispatch(updateEntity(payload?.body));
     } else if (bodyError?.action === "VALIDATE_CREATE_UPDATE") {
-      dispatch(validateCreateUpdate(payload?.validateValue))
+      dispatch(validateCreateUpdate(payload?.validateValue));
     } else {
-      dispatch(getDetailEntity(id))
+      dispatch(getDetailEntity(id));
     }
   };
-
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
     <LayoutMenu>
-      <Spin spinning={loading || isLoading} >
+      <Spin spinning={loading || isLoading}>
         <BreadCrumb routes={routes} />
         <Form form={form} layout={"vertical"} onFinish={handleConfirmation}>
           <div className={"my-5"}>
@@ -586,8 +602,8 @@ const EntityForm = (props) => {
                     <InputComponent
                       disabled={
                         type === "create" ||
-                          form.getFieldValue("code") === null ||
-                          form.getFieldValue("code") === ""
+                        form.getFieldValue("code") === null ||
+                        form.getFieldValue("code") === ""
                           ? false
                           : true
                       }
@@ -597,10 +613,13 @@ const EntityForm = (props) => {
                     label={"Entity Email"}
                     name={"email"}
                     className={"w-full"}
-                    rules={[...formMessageRequired("Email"), {
-                      type: 'email',
-                      message: 'The input is not valid E-mail!',
-                    }]}
+                    rules={[
+                      ...formMessageRequired("Email"),
+                      {
+                        type: "email",
+                        message: "The input is not valid E-mail!",
+                      },
+                    ]}
                   >
                     <InputComponent maxLength={50} />
                   </Form.Item>
@@ -625,7 +644,10 @@ const EntityForm = (props) => {
                       addonBefore={"62"}
                       maxLength={11}
                       onInput={(e) =>
-                        (e.target.value = e.target.value.replace(/[^\d]|^0+/g, ''))
+                        (e.target.value = e.target.value.replace(
+                          /[^\d]|^0+/g,
+                          "",
+                        ))
                       }
                     />
                   </Form.Item>
@@ -639,7 +661,10 @@ const EntityForm = (props) => {
                       addonBefore={"62"}
                       maxLength={12}
                       onInput={(e) =>
-                        (e.target.value = e.target.value.replace(/[^\d]|^0+/g, ''))
+                        (e.target.value = e.target.value.replace(
+                          /[^\d]|^0+/g,
+                          "",
+                        ))
                       }
                       style={{
                         borderRadius: "6px",
@@ -665,7 +690,7 @@ const EntityForm = (props) => {
                       "logo",
                       fileList?.length > 0 && data_detail?.data?.logo !== null
                         ? false
-                        : true
+                        : true,
                     )}
                     className="w-full"
                   >
@@ -674,28 +699,38 @@ const EntityForm = (props) => {
                       accept={acceptExtension}
                       listType="picture"
                       beforeUpload={async (file) => {
-                        const allowed_file = allow_file?.data?.fileExt?.toLowerCase()?.split(',');
+                        const allowed_file = allow_file?.data?.fileExt
+                          ?.toLowerCase()
+                          ?.split(",");
                         const file_extension = getFileExtension(file?.name);
                         const max_allowed_file = allow_file?.data?.size;
                         const fileInMb = file.size / (1024 * 1024);
-                        if (allowed_file?.includes(file_extension) && fileInMb < max_allowed_file) {
-                          setValidateFile(true)
+                        if (
+                          allowed_file?.includes(file_extension) &&
+                          fileInMb < max_allowed_file
+                        ) {
+                          setValidateFile(true);
                           setFileName(file?.name);
                           const base64 = await getBase64(file);
                           const regex = "";
                           setBase64Image(base64.replace(regex, ""));
                           setFileList([...fileList, { ...file, percent: 0 }]);
                         } else {
-                          if (allowed_file?.includes(file_extension) === false) {
-                            setValidateFile(false)
+                          if (
+                            allowed_file?.includes(file_extension) === false
+                          ) {
+                            setValidateFile(false);
                             const errorBody = {
                               title: "Failed",
                               description: `Format file not valid`,
                             };
                             dispatch(showModalError(errorBody));
                           }
-                          if (allowed_file?.includes(file_extension) === true && fileInMb > max_allowed_file) {
-                            setValidateFile(false)
+                          if (
+                            allowed_file?.includes(file_extension) === true &&
+                            fileInMb > max_allowed_file
+                          ) {
+                            setValidateFile(false);
                             const errorBody = {
                               title: "Failed",
                               description: `File size not valid, file too large!`,
@@ -717,7 +752,7 @@ const EntityForm = (props) => {
                           Choose File
                         </Button>
                         {fileList.length === 0 &&
-                          data_detail?.data?.logo === null ? (
+                        data_detail?.data?.logo === null ? (
                           <span className={"text-gray-500 text-xs ml-2"}>
                             {" "}
                             No Image Choosen
@@ -772,8 +807,8 @@ const EntityForm = (props) => {
               ]}
               handleValidate={isValueSame}
               setInserted={setDisabledButton}
-            // messageValidate={messageValidate}
-            // setMessageValidate={setMessageValidate}
+              // messageValidate={messageValidate}
+              // setMessageValidate={setMessageValidate}
             />
           </div>
           <div className={"w-full my-5 flex gap-5"}>
@@ -804,7 +839,11 @@ const EntityForm = (props) => {
                 {type === "update" ? "Reset" : "Clear"}
               </ButtonComponent>
               <Form.Item>
-                <ButtonComponent type="submit" htmlType={"submit"} disabled={disabledButton}>
+                <ButtonComponent
+                  type="submit"
+                  htmlType={"submit"}
+                  disabled={disabledButton}
+                >
                   Save
                 </ButtonComponent>
               </Form.Item>
@@ -873,8 +912,9 @@ const EntityForm = (props) => {
           <div className={"w-full flex flex-row items-center px-10"}>
             <WarningOutlined style={{ color: "red" }} className={"text-4xl"} />
             <span className={"text-lg text-black font-bold h-auto mx-auto"}>
-              {`Are you sure want to ${inactiveData === "ACTIVE" ? "inactivate" : "activate"
-                }?`}
+              {`Are you sure want to ${
+                inactiveData === "ACTIVE" ? "inactivate" : "activate"
+              }?`}
             </span>
           </div>
         </div>

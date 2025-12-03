@@ -47,11 +47,11 @@ export const getSelectCriteria = createAsyncThunk(
           error: error,
           action: "GET_SELECT_CRITERIA",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 
 export const getCountry = createAsyncThunk(
@@ -62,11 +62,11 @@ export const getCountry = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_COUNTRY", back: false })
+        validateError({ error: error, action: "GET_COUNTRY", back: false }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 
 export const getProvince = createAsyncThunk(
@@ -83,11 +83,11 @@ export const getProvince = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_PROVINCE", back: false })
+        validateError({ error: error, action: "GET_PROVINCE", back: false }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 
 export const getCity = createAsyncThunk(
@@ -99,11 +99,11 @@ export const getCity = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_CITY", back: false })
+        validateError({ error: error, action: "GET_CITY", back: false }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 
 export const getDistrict = createAsyncThunk(
@@ -115,11 +115,11 @@ export const getDistrict = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_DISTRICT", back: false })
+        validateError({ error: error, action: "GET_DISTRICT", back: false }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 
 export const getSubDistrict = createAsyncThunk(
@@ -131,11 +131,11 @@ export const getSubDistrict = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_SUBDISTRICT", back: false })
+        validateError({ error: error, action: "GET_SUBDISTRICT", back: false }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getCostCenter = createAsyncThunk(
   "GET_COST_CENTER",
@@ -145,11 +145,11 @@ export const getCostCenter = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_COST_CENTER", back: false })
+        validateError({ error: error, action: "GET_COST_CENTER", back: false }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getSor = createAsyncThunk(
   "GET_SOR",
@@ -159,11 +159,11 @@ export const getSor = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_SOR", back: false })
+        validateError({ error: error, action: "GET_SOR", back: false }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getGsize = createAsyncThunk(
   "GET_GSIZE",
@@ -173,11 +173,11 @@ export const getGsize = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_GSIZE", back: false })
+        validateError({ error: error, action: "GET_GSIZE", back: false }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getServiceType = createAsyncThunk(
   "GET_SERVICE_TYPE",
@@ -187,11 +187,15 @@ export const getServiceType = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_SERVICE_TYPE", back: false })
+        validateError({
+          error: error,
+          action: "GET_SERVICE_TYPE",
+          back: false,
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getAccountCategory = createAsyncThunk(
   "GET_ACCOUNT_CATEFORY",
@@ -205,11 +209,11 @@ export const getAccountCategory = createAsyncThunk(
           error: error,
           action: "GET_ACCOUNT_CATEFORY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getAccount = createAsyncThunk(
   "GET_ACCOUNT",
@@ -219,11 +223,11 @@ export const getAccount = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_ACCOUNT", back: false })
+        validateError({ error: error, action: "GET_ACCOUNT", back: false }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getAccountGroupType = createAsyncThunk(
   "GET_ACCOUNT_GROUP_TYPE",
@@ -238,11 +242,11 @@ export const getAccountGroupType = createAsyncThunk(
           error: error,
           action: "GET_ACCOUNT_GROUP_TYPE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getIndustrialSector = createAsyncThunk(
   "GET_INDUSTRIAL_SECTOR",
@@ -256,11 +260,11 @@ export const getIndustrialSector = createAsyncThunk(
           error: error,
           action: "GET_INDUSTRIAL_SECTOR",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 
 export const getBudget = createAsyncThunk(
@@ -271,11 +275,11 @@ export const getBudget = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_BUDGET", back: false })
+        validateError({ error: error, action: "GET_BUDGET", back: false }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getBudgetType = createAsyncThunk(
   "GET_BUDGET_TYPE",
@@ -285,11 +289,11 @@ export const getBudgetType = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_BUDGET_TYPE", back: false })
+        validateError({ error: error, action: "GET_BUDGET_TYPE", back: false }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getCustomerSegment = createAsyncThunk(
   "GET_CUSTOMER_SEGMENT",
@@ -303,11 +307,11 @@ export const getCustomerSegment = createAsyncThunk(
           error: error,
           action: "GET_CUSTOMER_SEGMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getProduct = createAsyncThunk(
   "GET_PRODUCT",
@@ -317,11 +321,11 @@ export const getProduct = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_PRODUCT", back: false })
+        validateError({ error: error, action: "GET_PRODUCT", back: false }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getSAType = createAsyncThunk(
   "GET_SA_TYPE",
@@ -331,11 +335,11 @@ export const getSAType = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_SA_TYPE", back: false })
+        validateError({ error: error, action: "GET_SA_TYPE", back: false }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getAccountNumber = createAsyncThunk(
   "GET_ACCOUNT_NUMBER",
@@ -349,11 +353,11 @@ export const getAccountNumber = createAsyncThunk(
           error: error,
           action: "GET_ACCOUNT_NUMBER",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getAccountSegment = createAsyncThunk(
   "GET_ACCOUNT_SEGMENT",
@@ -367,11 +371,11 @@ export const getAccountSegment = createAsyncThunk(
           error: error,
           action: "GET_ACCOUNT_SEGMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getAccountType = createAsyncThunk(
   "GET_ACCOUNT_TYPE",
@@ -381,11 +385,15 @@ export const getAccountType = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_ACCOUNT_TYPE", back: false })
+        validateError({
+          error: error,
+          action: "GET_ACCOUNT_TYPE",
+          back: false,
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getClassificationType = createAsyncThunk(
   "GET_CLASSIFICATION_TYPE",
@@ -395,11 +403,15 @@ export const getClassificationType = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_ACCOUNT_TYPE", back: false })
+        validateError({
+          error: error,
+          action: "GET_ACCOUNT_TYPE",
+          back: false,
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 
 const criteriaSlice = createSlice({

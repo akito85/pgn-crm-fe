@@ -1,4 +1,4 @@
-import { Form, Pagination, Select, Table, Tooltip } from "antd";
+import { Form, Input, Pagination, Select, Table, Tooltip } from "antd";
 import React, { useEffect, useState } from "react";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { useRef } from "react";
@@ -184,7 +184,7 @@ const DistributionMediaTable = ({
 
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -203,7 +203,7 @@ const DistributionMediaTable = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       {
         title: "ACTIONS",
@@ -267,7 +267,7 @@ const DistributionMediaTable = ({
     return filterCol.filter((col) =>
       col.title !== "NO" && col.title !== "ACTIONS"
         ? dataCriteria.includes(col.indexValue)
-        : true
+        : true,
     );
   };
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
@@ -352,7 +352,7 @@ const DistributionMediaTable = ({
                 dataEditRecord: editDataRecord,
                 handleEditDataRecord: handleEditDataRecord,
               }),
-            }))
+            })),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           scroll={{ y: 525, x: true }}

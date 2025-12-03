@@ -27,7 +27,7 @@ const PremiseTable = ({
   idCustomer = 0,
   type = "",
   accessAccount,
-  accessServicePoint
+  accessServicePoint,
 }) => {
   const renderDate = (date) => {
     if (date) {
@@ -59,8 +59,8 @@ const PremiseTable = ({
               </Link>
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
       action: "Update",
@@ -84,14 +84,12 @@ const PremiseTable = ({
                     ? () => handleUpdate(record)
                     : undefined
                 }
-                color={
-                  record?.status === "INACTIVE" ? "#8D91A0" : "#ACC424"
-                }
+                color={record?.status === "INACTIVE" ? "#8D91A0" : "#ACC424"}
               />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
 
     {
@@ -100,9 +98,7 @@ const PremiseTable = ({
       render: (record, data) => {
         return (
           <Tooltip
-            title={`${
-              record?.status === "ACTIVE" ? "Inactive" : "Activate"
-            }`}
+            title={`${record?.status === "ACTIVE" ? "Inactive" : "Activate"}`}
           >
             <div className="pt-1">
               <Checkbox
@@ -114,21 +110,21 @@ const PremiseTable = ({
               ></Checkbox>
             </div>
           </Tooltip>
-        )
-      }
-    }
-  ]
+        );
+      },
+    },
+  ];
   const columnAdjust = useColumnActionPermissionAccount(
     ["Activate", "View", "Update"],
     itemActionExpand,
-    accessServicePoint
-  )
+    accessServicePoint,
+  );
   const expandedRowRender = (record) => {
     const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch = () => {}
+      handleSearch = () => {},
     ) => {
       return [
         {
@@ -146,7 +142,7 @@ const PremiseTable = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -158,7 +154,7 @@ const PremiseTable = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
           ellipsis: {
             showTitle: false,
@@ -233,7 +229,7 @@ const PremiseTable = ({
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
           render: (index) => {
             const text = index
@@ -317,7 +313,6 @@ const PremiseTable = ({
       ];
     };
 
-
     return (
       <div>
         <p className="text-primary text-xs font-bold uppercase">
@@ -327,10 +322,7 @@ const PremiseTable = ({
           useSelect={false}
           usePagination={false}
           dataSource={record?.servicePoint}
-          columns={[
-            ...columns(),
-            ...columnAdjust
-          ]}
+          columns={[...columns(), ...columnAdjust]}
           tableScrolled={{
             x: 1000,
           }}
@@ -423,7 +415,7 @@ const PremiseTable = ({
     //   },
     // },
   ];
-  
+
   const itemActions = [
     // Column Action Table
     {
@@ -446,10 +438,10 @@ const PremiseTable = ({
               </div>
             </Tooltip>
           </Link>
-        )
-      }
+        );
+      },
     },
-  ]
+  ];
 
   return (
     <Fragment>
@@ -471,7 +463,7 @@ const PremiseTable = ({
           ...useColumnActionPermissionAccount(
             ["Activate", "View", "Update"],
             itemActions,
-            accessAccount
+            accessAccount,
           ),
         ]}
       />

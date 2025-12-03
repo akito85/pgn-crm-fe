@@ -39,11 +39,11 @@ export const getPaginateCycle = createAsyncThunk(
           error: response,
           action: "GET_ALL_TRANSACTION_CALENDAR",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const createValidasiTransCal = createAsyncThunk(
@@ -69,7 +69,7 @@ export const createValidasiTransCal = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getTimeUnit = createAsyncThunk(
@@ -96,7 +96,7 @@ export const getTimeUnit = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListCriteria = createAsyncThunk(
@@ -123,7 +123,7 @@ export const getListCriteria = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const inactiveTransaction = createAsyncThunk(
@@ -133,7 +133,7 @@ export const inactiveTransaction = createAsyncThunk(
       const url = `/v1/dbs/api/calendar/active-inactive`;
       const response = await receiptCollectionHttpService.inactiveWithApproval(
         url,
-        data
+        data,
       );
       const successBody = {
         title: "Successful",
@@ -159,7 +159,7 @@ export const inactiveTransaction = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const openCloseTransCalender = createAsyncThunk(
@@ -175,7 +175,7 @@ export const openCloseTransCalender = createAsyncThunk(
       const response =
         await receiptCollectionHttpService.activationWithRemarkPost(
           url,
-          reqBody
+          reqBody,
         );
       const successBody = {
         title: "Successful",
@@ -203,7 +203,7 @@ export const openCloseTransCalender = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getAllBeginEnd = createAsyncThunk(
@@ -230,7 +230,7 @@ export const getAllBeginEnd = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAllApprovalList = createAsyncThunk(
@@ -257,7 +257,7 @@ export const getAllApprovalList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListApprovalById = createAsyncThunk(
@@ -284,7 +284,7 @@ export const getListApprovalById = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getDetailTransaction = createAsyncThunk(
@@ -311,7 +311,7 @@ export const getDetailTransaction = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getDetailTransactionDraft = createAsyncThunk(
@@ -338,7 +338,7 @@ export const getDetailTransactionDraft = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListCategory = createAsyncThunk(
@@ -369,7 +369,7 @@ export const getListCategory = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -385,11 +385,11 @@ export const getApprovalHistory = createAsyncThunk(
           error: error,
           action: "GET_APPROVAL_HISTORY_CALENDAR",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getTransPeriod = createAsyncThunk(
@@ -405,7 +405,7 @@ export const getTransPeriod = createAsyncThunk(
     } catch (error) {
       return error;
     }
-  }
+  },
 );
 
 export const updatePeriod = createAsyncThunk(
@@ -415,7 +415,7 @@ export const updatePeriod = createAsyncThunk(
       const url = `/v1/dbs/api/transactionperiod/update`;
       const data = await receiptCollectionHttpService.updateDataTransaction(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successfull",
@@ -440,7 +440,7 @@ export const updatePeriod = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunk.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const createTransPeriod = createAsyncThunk(
@@ -471,7 +471,7 @@ export const createTransPeriod = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const createTransactionCalender = createAsyncThunk(
@@ -496,7 +496,7 @@ export const createTransactionCalender = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const approveOrRejectInactiveTrans = createAsyncThunk(
@@ -533,7 +533,7 @@ export const approveOrRejectInactiveTrans = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approveOrRejectInactiveTransInactive = createAsyncThunk(
@@ -570,7 +570,7 @@ export const approveOrRejectInactiveTransInactive = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // export const getApprovalHistory = createAsyncThunk(
@@ -602,11 +602,11 @@ export const getDownloadTrans = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_ACTION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response);
     }
-  }
+  },
 );
 
 const cycleSlice = createSlice({

@@ -35,7 +35,7 @@ export const getListDetailAccountAddress = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // get list choose address
@@ -52,7 +52,7 @@ export const getListChooseAddress = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get detail after choose
@@ -66,7 +66,7 @@ export const getDetailAddressAfterChoose = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get detail
@@ -80,7 +80,7 @@ export const getDetailAddress = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const activationAccountAddress = createAsyncThunk(
@@ -111,7 +111,7 @@ export const activationAccountAddress = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // ===== GET LOCATION ===== //
@@ -138,7 +138,7 @@ export const getProvince = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get City
@@ -163,7 +163,7 @@ export const getDistrict = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Subdistrict
@@ -177,7 +177,7 @@ export const getSubDistrict = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Postal Code
@@ -191,7 +191,7 @@ export const getPostalCode = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Business Purpose
@@ -205,7 +205,7 @@ export const getBusinessPurpose = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Type
@@ -254,7 +254,7 @@ export const createAccountAddress = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const updateAccountAddress = createAsyncThunk(
@@ -287,7 +287,7 @@ export const updateAccountAddress = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 const accountAddressSlice = createSlice({
@@ -313,10 +313,10 @@ const accountAddressSlice = createSlice({
     },
 
     // Acivation Account Address
-    [activationAccountAddress.pending]: (state) => {
+    [activationAccountAddress.pending]: (state, action) => {
       state.loading = true;
     },
-    [activationAccountAddress.fulfilled]: (state) => {
+    [activationAccountAddress.fulfilled]: (state, action) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -477,26 +477,26 @@ const accountAddressSlice = createSlice({
       state.data_business_purpose = action.payload;
     },
     // Update Account Address
-    [updateAccountAddress.pending]: (state) => {
+    [updateAccountAddress.pending]: (state, action) => {
       state.loading = true;
     },
-    [updateAccountAddress.fulfilled]: (state) => {
+    [updateAccountAddress.fulfilled]: (state, action) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [updateAccountAddress.rejected]: (state) => {
+    [updateAccountAddress.rejected]: (state, action) => {
       state.loading = false;
       state.isFailed = true;
     },
     // Create Account Address
-    [createAccountAddress.pending]: (state) => {
+    [createAccountAddress.pending]: (state, action) => {
       state.loading = true;
     },
-    [createAccountAddress.fulfilled]: (state) => {
+    [createAccountAddress.fulfilled]: (state, action) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [createAccountAddress.rejected]: (state) => {
+    [createAccountAddress.rejected]: (state, action) => {
       state.loading = false;
       state.isFailed = true;
     },

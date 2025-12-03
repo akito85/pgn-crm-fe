@@ -1,7 +1,4 @@
-import {
-  LeftOutlined,
-  WarningOutlined,
-} from "@ant-design/icons";
+import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
 import { Form } from "antd";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
@@ -216,7 +213,7 @@ const ListFormPaymentItem = (props) => {
           ...attachData,
           fileSize: bytesConverter(attachData.fileSize || 0),
           dataType: "exist",
-        }))
+        })),
       );
     }
   }, [data_detail, data_GL, id]);
@@ -266,13 +263,13 @@ const ListFormPaymentItem = (props) => {
       let findRow = isDuplicateBank
         .filter((item, index) => {
           let ind = isDuplicateBank.findIndex(
-            (item2) => item?.item === item2?.item
+            (item2) => item?.item === item2?.item,
           );
           return index === ind;
         })
         ?.toString();
       const positionNameFiltered = dataBanks?.filter(
-        (a) => a.value === findRow
+        (a) => a.value === findRow,
       );
       message = `GL Account is already exist`;
     }
@@ -342,12 +339,12 @@ const ListFormPaymentItem = (props) => {
             setModalConfirm(false);
           }
           setModalConfirm(true);
-          setSendBody(bodyValidasiUpdate)
+          setSendBody(bodyValidasiUpdate);
         });
     }
   };
 
-  const handleResetStartDate = () => { };
+  const handleResetStartDate = () => {};
 
   const handleCancelModalConfirm = () => {
     setModalConfirm(false);
@@ -390,7 +387,7 @@ const ListFormPaymentItem = (props) => {
         const errorBadge = errorFields.reduce(
           (current, next) =>
             item.paramValue.includes(next.name[0]) ? current + 1 : current,
-          0
+          0,
         );
         return {
           value: item.value,
@@ -425,7 +422,7 @@ const ListFormPaymentItem = (props) => {
     if (!checked) {
       const newData = [...tableData];
       const isItemExists = newData.some(
-        (item) => item.bankAccountId === filterBank.id
+        (item) => item.bankAccountId === filterBank.id,
       );
       if (!isItemExists) {
         const dataValue = {
@@ -443,7 +440,7 @@ const ListFormPaymentItem = (props) => {
       const newData = [...tableData];
       // Hapus data yang telah ditambahkan saat kotak centang adalah false
       const indexToRemove = newData.findIndex(
-        (item) => item.bankAccountId === filterBank.id
+        (item) => item.bankAccountId === filterBank.id,
       );
       if (indexToRemove !== -1) {
         const keyToReplace = newData[indexToRemove + 1]?.key; // Get the key of the next item if it exists
@@ -463,129 +460,129 @@ const ListFormPaymentItem = (props) => {
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => { }
+    handleSearch = () => {},
   ) => [
-      {
-        title: "NO",
-        dataIndex: "no",
-        width: "5%",
-        align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    {
+      title: "NO",
+      dataIndex: "no",
+      width: "5%",
+      align: "center",
+      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
+      title: "BANK ACCOUNT",
+      dataIndex: "bankAccountId",
+      align: "",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "bankAccountId",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+      ),
+      sorter: (a, b) => a.bankAccount - b.bankAccount,
+      render: (dataBank) => (
+        <span>
+          {data_bank &&
+            data_bank?.filter((a) => a.id === dataBank).find((b) => b.name)
+              ?.name}
+        </span>
+      ),
+    },
+    {
+      title: "GL ACCOUNTT",
+      dataIndex: "glAccount",
+      align: "",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "glAccount",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+      ),
+    },
+    {
+      title: "START DATE",
+      dataIndex: "startDate",
+      inputType: "date",
+      align: "center",
+      editable: true,
+      key: "startDate",
+      ...getColumnSearchPropsPaging(
+        "startDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "date",
+      ),
+      sorter: (a, b) => a.startDate - b.startDate,
+      render: (index) => {
+        const text = index ? moment(index).format("DD MMM YYYY") : "";
+        if (searchedColumn === "startDate") {
+          return (
+            <Highlighter
+              highlightStyle={{
+                backgroundColor: "#ffc069",
+                padding: 0,
+              }}
+              searchWords={[
+                searchText
+                  ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
+                  : "",
+              ]}
+              autoEscape
+              textToHighlight={text ? text.toString() : ""}
+            />
+          );
+        } else {
+          return text || " ";
+        }
       },
-      {
-        title: "BANK ACCOUNT",
-        dataIndex: "bankAccountId",
-        align: "",
-        sorter: true,
-        ...getColumnSearchPropsPaging(
-          "bankAccountId",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch
-        ),
-        sorter: (a, b) => a.bankAccount - b.bankAccount,
-        render: (dataBank) => (
-          <span>
-            {data_bank &&
-              data_bank?.filter((a) => a.id === dataBank).find((b) => b.name)
-                ?.name}
-          </span>
-        ),
+    },
+    {
+      title: "END DATE",
+      dataIndex: "endDate",
+      inputType: "date",
+      align: "center",
+      editable: true,
+      ...getColumnSearchPropsPaging(
+        "endDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "date",
+      ),
+      sorter: true,
+      render: (index) => {
+        const text = index ? moment(index).format("DD MMM YYYY") : "";
+        if (searchedColumn === "endDate") {
+          return (
+            <Highlighter
+              highlightStyle={{
+                backgroundColor: "#ffc069",
+                padding: 0,
+              }}
+              searchWords={[
+                searchText
+                  ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
+                  : "",
+              ]}
+              autoEscape
+              textToHighlight={text ? text.toString() : ""}
+            />
+          );
+        } else {
+          return text || " ";
+        }
       },
-      {
-        title: "GL ACCOUNTT",
-        dataIndex: "glAccount",
-        align: "",
-        sorter: true,
-        ...getColumnSearchPropsPaging(
-          "glAccount",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch
-        ),
-      },
-      {
-        title: "START DATE",
-        dataIndex: "startDate",
-        inputType: "date",
-        align: "center",
-        editable: true,
-        key: "startDate",
-        ...getColumnSearchPropsPaging(
-          "startDate",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true,
-          "date"
-        ),
-        sorter: (a, b) => a.startDate - b.startDate,
-        render: (index) => {
-          const text = index ? moment(index).format("DD MMM YYYY") : "";
-          if (searchedColumn === "startDate") {
-            return (
-              <Highlighter
-                highlightStyle={{
-                  backgroundColor: "#ffc069",
-                  padding: 0,
-                }}
-                searchWords={[
-                  searchText
-                    ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
-                    : "",
-                ]}
-                autoEscape
-                textToHighlight={text ? text.toString() : ""}
-              />
-            );
-          } else {
-            return text || " ";
-          }
-        },
-      },
-      {
-        title: "END DATE",
-        dataIndex: "endDate",
-        inputType: "date",
-        align: "center",
-        editable: true,
-        ...getColumnSearchPropsPaging(
-          "endDate",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true,
-          "date"
-        ),
-        sorter: true,
-        render: (index) => {
-          const text = index ? moment(index).format("DD MMM YYYY") : "";
-          if (searchedColumn === "endDate") {
-            return (
-              <Highlighter
-                highlightStyle={{
-                  backgroundColor: "#ffc069",
-                  padding: 0,
-                }}
-                searchWords={[
-                  searchText
-                    ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
-                    : "",
-                ]}
-                autoEscape
-                textToHighlight={text ? text.toString() : ""}
-              />
-            );
-          } else {
-            return text || " ";
-          }
-        },
-      },
-    ];
+    },
+  ];
 
   const paginationTable = (typeData = "data") => {
     let result = [...tableData];
@@ -649,7 +646,7 @@ const ListFormPaymentItem = (props) => {
           const id = data_detail?.paymentItem?.id;
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
@@ -661,7 +658,7 @@ const ListFormPaymentItem = (props) => {
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -701,7 +698,7 @@ const ListFormPaymentItem = (props) => {
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -750,7 +747,7 @@ const ListFormPaymentItem = (props) => {
             checked={checked}
             formValue={formValue}
             form={form}
-          // tableData={tableData}
+            // tableData={tableData}
           />
           <TableGlInformation
             formValueHeader={formValue}
@@ -829,8 +826,8 @@ const ListFormPaymentItem = (props) => {
             <ButtonComponent
               htmlType="submit"
               type="submit"
-            // onClick={() => setModalConfirm(true)}
-            // disabled={disableSubmit}
+              // onClick={() => setModalConfirm(true)}
+              // disabled={disableSubmit}
             >
               Save & Submit
             </ButtonComponent>
@@ -866,7 +863,7 @@ const ListFormPaymentItem = (props) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           )}
           checked={checked}
           page={page}

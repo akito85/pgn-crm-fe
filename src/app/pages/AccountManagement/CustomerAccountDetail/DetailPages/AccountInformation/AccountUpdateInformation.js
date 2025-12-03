@@ -27,7 +27,7 @@ const AccountUpdateInformation = ({
   onChangeSegment = () => {},
 }) => {
   const filterData = (data) => {
-    return (data || []).map(item => {
+    return (data || []).map((item) => {
       if (item.children && item.children.length > 0) {
         return {
           ...item,
@@ -38,7 +38,7 @@ const AccountUpdateInformation = ({
         return item;
       }
     });
-  }
+  };
 
   return (
     <Fragment>
@@ -124,7 +124,7 @@ const AccountUpdateInformation = ({
         >
           <InputComponent
             mandatory
-            onInput = {onInputUpperCase}
+            onInput={onInputUpperCase}
             // onChange={(e) => setName(e.target.value)}
           />
         </Form.Item>
@@ -280,7 +280,7 @@ const AccountUpdateInformation = ({
             ))}
           </SelectComponent> */}
           <UtilsTreeSelect
-            treeData={filterData(optionsIndustrialSector )}
+            treeData={filterData(optionsIndustrialSector)}
             // treeCheckable={true} // Enable checkboxes for tree nodes
             // treeCheckStrictly={true} // Make checkboxes work independently, so you can check items with children
             // onChange={handleTreeSelect}

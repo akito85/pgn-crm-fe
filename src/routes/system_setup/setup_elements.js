@@ -39,7 +39,7 @@ import LoggingPage from "../../app/pages/SystemSetup/Logging/LoggingPage";
 export const SYSTEM_SETUP_ELEMENTS = {
   // logging
   VIEW_LOGGING_PAGE: <LoggingPage />,
-  
+
   // menu
   VIEW_MENU_PAGE: <Menu />,
   CREATE_MENU_PAGE: <FormMenu type={"create"} />,
@@ -48,7 +48,7 @@ export const SYSTEM_SETUP_ELEMENTS = {
   //Job Management
   VIEW_JOBM_PAGE: <ListJob />,
   CREATE_JOBM_PAGE: <FormJob type={"create"} />,
-  DETAIL_JOBM_PAGE: <FormJob type={"view"}/>,
+  DETAIL_JOBM_PAGE: <FormJob type={"view"} />,
 
   //Job Control
   VIEW_JOB_CONTROL_PAGE: <JobControlPage />,

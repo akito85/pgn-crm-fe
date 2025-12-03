@@ -26,7 +26,7 @@ import { bytesConverter } from "../../../../../../utils/bytesConverter";
 import LayoutDetailLateChargeRule from "./LayoutDetailLateChargeRule";
 import { AttachmentDetail } from "./AttachmentDetail";
 
-const routes = (id) =>{
+const routes = (id) => {
   return [
     {
       path: "",
@@ -45,14 +45,14 @@ const routes = (id) =>{
       breadcrumbName: "Detail Late Charge",
       state: {
         id: id,
-      }
+      },
     },
     {
       path: "",
       breadcrumbName: "Detail Late Charge Rule",
     },
   ];
-} 
+};
 
 const type = "detail";
 const DetailLateChargesRule = () => {
@@ -70,7 +70,7 @@ const DetailLateChargesRule = () => {
     { value: "Attachment" },
   ]);
   const [typeLateChargeInfo, setTypeLateChargeInfo] = useState(
-    listSectionInfo[0].value
+    listSectionInfo[0].value,
   );
   const {
     data_detail = {},
@@ -95,7 +95,7 @@ const DetailLateChargesRule = () => {
   const [bodyError, setBodyError] = useState({});
   const showButtonApproval = useMemo(
     () => bodyApproval.isApprover !== null && bodyApproval.isApprover,
-    [bodyApproval]
+    [bodyApproval],
   );
 
   useEffect(() => {
@@ -121,7 +121,7 @@ const DetailLateChargesRule = () => {
         criteriaName: (data_detail.criteria || []).reduce(
           (prev, current, index) =>
             prev + `${index === 0 ? current.label : ", " + current.label} `,
-          ""
+          "",
         ),
         createdDate: data_detail.historyLogInformation.createdDate,
         createdBy: data_detail.historyLogInformation.createdBy,
@@ -156,10 +156,14 @@ const DetailLateChargesRule = () => {
               : "",
             fileSize: bytesConverter(attachData.fileSize || 0),
             dataType: "exist",
-          })
-        )
+          }),
+        ),
       );
-      setListSectionInfo([{ value: "Late Charge Rule" }, { value: "Draft" }, { value: "Attachment" }]);
+      setListSectionInfo([
+        { value: "Late Charge Rule" },
+        { value: "Draft" },
+        { value: "Attachment" },
+      ]);
     }
   }, [id, data_detail_late_charge_rule, data_detail_draft_late_charge_rule]);
 
@@ -183,12 +187,12 @@ const DetailLateChargesRule = () => {
       setDataLogInformation({
         lateChargeRuleId: data_detail_late_charge_rule?.lateChargeRuleId,
         createdDate: moment(data_detail_late_charge_rule.createdDate).format(
-          dateFormatting.dateTime
+          dateFormatting.dateTime,
         ),
         createdBy: data_detail_late_charge_rule.createdBy,
         updatedDate: data_detail_late_charge_rule.updatedDate
           ? moment(data_detail_late_charge_rule.updatedDate).format(
-              dateFormatting.dateTime
+              dateFormatting.dateTime,
             )
           : "",
         updatedBy: data_detail_late_charge_rule.updatedBy,
@@ -211,7 +215,7 @@ const DetailLateChargesRule = () => {
             : "",
           fileSize: bytesConverter(attachData.fileSize || 0),
           dataType: "exist",
-        }))
+        })),
       );
       setListDataDetailCondition(
         (data_detail_late_charge_rule?.listRuleCondition || []).map(
@@ -233,8 +237,8 @@ const DetailLateChargesRule = () => {
             },
             value: item.value,
             typeData: "exist",
-          })
-        )
+          }),
+        ),
       );
       setListDataDetailFormula(
         (data_detail_late_charge_rule?.listRuleFormula || []).map(
@@ -260,8 +264,8 @@ const DetailLateChargesRule = () => {
             },
             value: item.value,
             typeData: "exist",
-          })
-        )
+          }),
+        ),
       );
       setBodyApproval({
         isApprover: data_detail_late_charge_rule.isApprover,
@@ -300,7 +304,7 @@ const DetailLateChargesRule = () => {
       dispatch(approvalInactiveLateChargeRule(obj))
         .unwrap()
         .then((res) => {
-          handleClear()
+          handleClear();
           handleCloseModalApproveReject();
         })
         .catch((error) => {
@@ -365,13 +369,14 @@ const DetailLateChargesRule = () => {
               </div>
             </div>
           </BaseContainer>
-          {bodyApproval.isApprover && bodyApproval.approvalType === "INACTIVE_LATE_CHARGE_RULE" ? (
+          {bodyApproval.isApprover &&
+          bodyApproval.approvalType === "INACTIVE_LATE_CHARGE_RULE" ? (
             <BaseContainer header={`INACTIVE REQUEST INFORMATION`}>
               <div className="grid grid-cols-4 w-full">
                 <DetailText label={"Requested Date"}>
                   {bodyApproval.approvalDetail.requestedDate
                     ? moment(bodyApproval.approvalDetail.requestedDate).format(
-                        dateFormatting.dateTime
+                        dateFormatting.dateTime,
                       )
                     : ""}
                 </DetailText>
@@ -406,7 +411,7 @@ const DetailLateChargesRule = () => {
               dataLogInformation={dataLogInformation}
               description={dataLateChargeRule.description || ""}
             />
-          )} 
+          )}
           {typeLateChargeInfo === "Draft" && (
             <LayoutDetailLateChargeRule
               key={"draft"}
@@ -523,8 +528,6 @@ const DetailLateChargesRule = () => {
           named={`${data_detail?.lateChargeName} - ${data_detail_late_charge_rule?.documentNumber}`}
           // customMessage={`Are you sure you want to ${approveOrReject} Late Charge Rule with document number ${data_detail_late_charge_rule?.documentNumber}?`}
         />
-
-
 
         {/** Modal Retry */}
         <ModalError

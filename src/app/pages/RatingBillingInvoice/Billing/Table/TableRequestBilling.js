@@ -10,7 +10,7 @@ export const columnsRequestBilling = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     key: "no",
@@ -30,7 +30,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["calculationCode"]
@@ -49,7 +49,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["ratingCode"]
@@ -68,7 +68,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["billingCode"]
@@ -87,7 +87,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["saNumber"]
@@ -107,7 +107,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["billingCycle"]
@@ -129,7 +129,7 @@ export const columnsRequestBilling = (
       searchText,
       handleSearch,
       true,
-      "datePeriod"
+      "datePeriod",
     ),
     render: (text) =>
       searchedColumn === "billingPeriod" ? (
@@ -170,7 +170,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["customerNumber"]
@@ -189,7 +189,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["customerName"]
@@ -208,7 +208,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["accountNumber"]
@@ -227,7 +227,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["accountName"]
@@ -247,7 +247,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["accountGroupType"]
@@ -267,7 +267,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["serviceType"]
@@ -286,13 +286,10 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
-      record["sor"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
+      record["sor"]?.toString().toLowerCase().includes(value.toLowerCase()),
   },
   {
     key: "costCenter",
@@ -305,7 +302,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["costCenter"]
@@ -325,7 +322,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["accountSegment"]
@@ -344,7 +341,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["meterReadingCode"]
@@ -363,13 +360,10 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
-      record["product"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
+      record["product"]?.toString().toLowerCase().includes(value.toLowerCase()),
   },
   {
     key: "timeUnitContract",
@@ -383,7 +377,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["timeUnitContract"]
@@ -403,13 +397,10 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
-      record["uom"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
+      record["uom"]?.toString().toLowerCase().includes(value.toLowerCase()),
   },
   {
     key: "minContract",
@@ -423,7 +414,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["minContract"]
@@ -443,7 +434,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["maxContract"]
@@ -463,7 +454,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["totalUsage"]
@@ -483,7 +474,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["totalUsageConvM3"]
@@ -504,7 +495,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["totalUsageConvMmbtu"]
@@ -524,7 +515,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["basicBillingIdr"]
@@ -544,7 +535,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["basicBillingUsd"]
@@ -565,7 +556,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["totalBasicBillEqvIdr"]
@@ -586,7 +577,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["totalBasicBillEqvUsd"]
@@ -606,7 +597,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["otherBillIdr"]
@@ -626,7 +617,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["otherBillUsd"]
@@ -647,7 +638,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["totalOtherBillEqvIdr"]
@@ -668,7 +659,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["totalOtherBillEqvUsd"]
@@ -688,7 +679,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["discountAmountIdr"]
@@ -708,7 +699,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["discountAmountUsd"]
@@ -728,7 +719,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["taxBasicIdr"]
@@ -748,7 +739,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["taxBasicUsd"]
@@ -768,7 +759,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["taxBasicEqvIdr"]
@@ -788,13 +779,10 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
-      record["vatIdr"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
+      record["vatIdr"]?.toString().toLowerCase().includes(value.toLowerCase()),
   },
   {
     key: "vatUsd",
@@ -808,13 +796,10 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
-      record["vatUsd"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
+      record["vatUsd"]?.toString().toLowerCase().includes(value.toLowerCase()),
   },
   {
     key: "vatEqvIdr",
@@ -828,7 +813,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["vatEqvIdr"]
@@ -848,7 +833,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["withHoldingTax"]
@@ -862,13 +847,14 @@ export const columnsRequestBilling = (
     dataIndex: "prevWithHoldingTax",
     width: 200,
     align: "right",
-    sorter: (a, b) => a?.prevWithHoldingTax?.localeCompare(b?.prevWithHoldingTax),
+    sorter: (a, b) =>
+      a?.prevWithHoldingTax?.localeCompare(b?.prevWithHoldingTax),
     ...getColumnSearchPropsPaging(
       "prevWithHoldingTax",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["prevWithHoldingTax"]
@@ -888,7 +874,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["taxRateType"]
@@ -908,13 +894,10 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
-      record["taxRate"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
+      record["taxRate"]?.toString().toLowerCase().includes(value.toLowerCase()),
   },
   {
     key: "taxRateDate",
@@ -930,7 +913,7 @@ export const columnsRequestBilling = (
       searchText,
       handleSearch,
       true,
-      "datePeriod"
+      "datePeriod",
     ),
     render: (text) =>
       searchedColumn === "taxRateDate" ? (
@@ -972,7 +955,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["totalAmountIdr"]
@@ -992,7 +975,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["totalAmountUsd"]
@@ -1012,7 +995,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["totalAmountEqvIdr"]
@@ -1032,7 +1015,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["totalAmountEqvUsd"]
@@ -1052,7 +1035,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["rateType"]
@@ -1072,13 +1055,10 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
-      record["rate"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
+      record["rate"]?.toString().toLowerCase().includes(value.toLowerCase()),
   },
   {
     key: "rateDate",
@@ -1094,7 +1074,7 @@ export const columnsRequestBilling = (
       searchText,
       handleSearch,
       true,
-      "datePeriod"
+      "datePeriod",
     ),
     render: (text) =>
       searchedColumn === "rateDate" ? (
@@ -1138,7 +1118,7 @@ export const columnsRequestBilling = (
       searchText,
       handleSearch,
       true,
-      "datePeriod"
+      "datePeriod",
     ),
     render: (text) =>
       searchedColumn === "transactionDate" ? (
@@ -1182,7 +1162,7 @@ export const columnsRequestBilling = (
       searchText,
       handleSearch,
       true,
-      "datePeriod"
+      "datePeriod",
     ),
     render: (text) =>
       searchedColumn === "accountDate" ? (
@@ -1226,7 +1206,7 @@ export const columnsRequestBilling = (
       searchText,
       handleSearch,
       true,
-      "datePeriod"
+      "datePeriod",
     ),
     render: (text) =>
       searchedColumn === "invoiceDate" ? (
@@ -1270,7 +1250,7 @@ export const columnsRequestBilling = (
       searchText,
       handleSearch,
       true,
-      "datePeriod"
+      "datePeriod",
     ),
     render: (text) =>
       searchedColumn === "dueDate" ? (
@@ -1295,10 +1275,7 @@ export const columnsRequestBilling = (
         moment(text).format(dateFormatting.datePeriod)
       ),
     onFilter: (value, record) =>
-      record["dueDate"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
+      record["dueDate"]?.toString().toLowerCase().includes(value.toLowerCase()),
   },
   {
     key: "remark",
@@ -1314,7 +1291,7 @@ export const columnsRequestBilling = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       searchedColumn === "remark" ? (
@@ -1335,9 +1312,6 @@ export const columnsRequestBilling = (
         ""
       ),
     onFilter: (value, record) =>
-      record["remark"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
+      record["remark"]?.toString().toLowerCase().includes(value.toLowerCase()),
   },
 ];

@@ -1,13 +1,11 @@
-import {
-    getColumnSearchPropsPaging,
-  } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 export const columnLateChargeHistories = (
   page = 1,
   pageSize = 10,
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -27,7 +25,7 @@ export const columnLateChargeHistories = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
   },
   {

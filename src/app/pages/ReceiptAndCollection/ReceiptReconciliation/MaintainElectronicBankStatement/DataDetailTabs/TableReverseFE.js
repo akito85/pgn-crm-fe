@@ -106,7 +106,7 @@ const TableReverseFE = ({
               searchInput,
               searchedColumn,
               searchText,
-              paging === "BE" ? handleSearchBE : handleSearch
+              paging === "BE" ? handleSearchBE : handleSearch,
             )
           : columnsReverse(
               page,
@@ -114,7 +114,7 @@ const TableReverseFE = ({
               searchInput,
               searchedColumn,
               searchText,
-              paging === "BE" ? handleSearchBE : handleSearch
+              paging === "BE" ? handleSearchBE : handleSearch,
             )
       }
       onSort={paging !== "BE" ? onSort : onSortBE}

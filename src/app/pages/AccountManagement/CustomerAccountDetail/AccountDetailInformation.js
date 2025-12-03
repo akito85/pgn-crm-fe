@@ -1,5 +1,5 @@
 import { LeftCircleFilled, RightCircleFilled } from "@ant-design/icons";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import AccountInformation from "./DetailPages/AccountInformation/AccountInformation";
 import LastActivity from "./DetailPages/LastActivity";
 import ServiceRequest from "./DetailPages/ServiceRequest/ServiceRequest";
@@ -20,6 +20,8 @@ import EquipmentPage from "./DetailPages/Equipment/Equipment";
 import ProductDistribution from "./DetailPages/ProductDistribution/ProductDistribution";
 import RawMaterialSource from "./DetailPages/RawMaterialSource/RawMaterialSource";
 import GasUtilization from "./DetailPages/GasUtilization/GasUtilization";
+import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
+import { Switch } from "antd";
 
 const dataTabs = {
   // ci: "Customer Information",
@@ -74,107 +76,107 @@ const AccountDetailInformation = ({
     if (
       path &&
       (path.pathname.includes(
-        "/account-management/account-standard/service-agreement"
+        "/account-management/account-standard/service-agreement",
       ) ||
         path.pathname.includes(
-          "/account-management/account-standard/service-agreement-main/create"
+          "/account-management/account-standard/service-agreement-main/create",
         ) ||
         path.pathname.includes(
-          "/account-management/account-standard/service-agreement-addon/create"
+          "/account-management/account-standard/service-agreement-addon/create",
         ) ||
         path.pathname.includes(
-          "/account-management/account-standard/service-agreement-amandemen/create"
+          "/account-management/account-standard/service-agreement-amandemen/create",
         ) ||
         path.pathname.includes(
-          "/account-management/account-standard/service-agreement/update"
+          "/account-management/account-standard/service-agreement/update",
         ))
     ) {
       setTypeAccountInfoDetailSection(dataTabs.serviceAgreement);
     } else if (
       path &&
       (path.pathname.includes(
-        "/account-management/account-standard/address/create"
+        "/account-management/account-standard/address/create",
       ) ||
         path.pathname.includes(
-          "/account-management/account-standard/address/update"
+          "/account-management/account-standard/address/update",
         ) ||
         path.pathname.includes(
-          "/account-management/account-onetime/address/create"
+          "/account-management/account-onetime/address/create",
         ) ||
         path.pathname.includes(
-          "/account-management/account-onetime/address/update"
+          "/account-management/account-onetime/address/update",
         ))
     ) {
       setTypeAccountInfoDetailSection(dataTabs.accountAddress);
     } else if (
       path &&
       (path.pathname.includes(
-        "/account-management/account-standard/contact/create"
+        "/account-management/account-standard/contact/create",
       ) ||
         path.pathname.includes(
-          "/account-management/account-standard/contact/update"
+          "/account-management/account-standard/contact/update",
         ) ||
         path.pathname.includes(
-          "/account-management/account-onetime/contact/create"
+          "/account-management/account-onetime/contact/create",
         ) ||
         path.pathname.includes(
-          "/account-management/account-onetime/contact/update"
+          "/account-management/account-onetime/contact/update",
         ))
     ) {
       setTypeAccountInfoDetailSection(dataTabs.accountContact);
     } else if (
       path &&
       (path.pathname.includes(
-        "/account-management/account-standard/service-point/view"
+        "/account-management/account-standard/service-point/view",
       ) ||
         path.pathname.includes(
-          "/account-management/account-standard/premise/view"
+          "/account-management/account-standard/premise/view",
         ) ||
         path.pathname.includes(
-          "/account-management/account-onetime/service-point/view"
+          "/account-management/account-onetime/service-point/view",
         ) ||
         path.pathname.includes(
-          "/account-management/account-onetime/premise/view"
+          "/account-management/account-onetime/premise/view",
         ))
     ) {
       setTypeAccountInfoDetailSection(dataTabs.premise);
     } else if (
       path &&
       (path.pathname.includes(
-        "/account-management/account-standard/account-information/update"
+        "/account-management/account-standard/account-information/update",
       ) ||
         path.pathname.includes(
-          "/account-management/account-onetime/account-information/update"
+          "/account-management/account-onetime/account-information/update",
         ))
     ) {
       setTypeAccountInfoDetailSection(dataTabs.ai);
     } else if (
       path &&
       (path.pathname.includes(
-        "/account-management/account-standard/gas-utilization/create"
+        "/account-management/account-standard/gas-utilization/create",
       ) ||
         path.pathname.includes(
-          "/account-management/account-standard/gas-utilization/update"
+          "/account-management/account-standard/gas-utilization/update",
         ))
     ) {
       setTypeAccountInfoDetailSection(dataTabs.gu);
     } else if (
       path &&
       (path.pathname.includes(
-        "/account-management/account-standard/product-distribution/create"
+        "/account-management/account-standard/product-distribution/create",
       ) ||
         path.pathname.includes(
-          "/account-management/account-standard/product-distribution/update"
+          "/account-management/account-standard/product-distribution/update",
         ))
     ) {
       setTypeAccountInfoDetailSection(dataTabs.pd);
     } else if (
       path &&
       (path.pathname.includes(
-        "/account-management/account-standard/raw-material-source/create"
+        "/account-management/account-standard/raw-material-source/create",
       ) ||
         path.pathname.includes(
-          "/account-management/account-standard/raw-material-source/update"
+          "/account-management/account-standard/raw-material-source/update",
         ))
     ) {
       setTypeAccountInfoDetailSection(dataTabs.ras);

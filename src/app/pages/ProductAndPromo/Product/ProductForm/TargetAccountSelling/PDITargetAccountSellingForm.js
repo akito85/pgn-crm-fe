@@ -1,8 +1,4 @@
-import {
-  Form,
-  Input,
-  Select,
-} from "antd";
+import { Form, Input, Select } from "antd";
 import React, { useEffect } from "react";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
@@ -236,7 +232,7 @@ const PDITargetAccountSellingForm = ({
   //     dispatch(getBudgetList());
   //     dispatch(getProvinceList());
   //     dispatch(getIndustrialSectorList());
-      // dispatch(getAccountCategoryList());
+  // dispatch(getAccountCategoryList());
   //     dispatch(getServiceTypeList());
   //     // dispatch(getAccountGroupList());
   //     dispatch(getCustomerList());

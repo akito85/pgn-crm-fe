@@ -19,7 +19,7 @@ const FinancialInformationForm = ({
   dataFinancialInfo = [],
   dataAddress,
   form,
-  setTiObj
+  setTiObj,
 }) => {
   // State
   const [current, setCurrent] = useState(0);
@@ -34,7 +34,7 @@ const FinancialInformationForm = ({
           handleFIObj={handleFIObj}
         />
       ),
-      isError: Object.keys(fiObj).length > 0 ? !fiObj.paymentChannelType : true
+      isError: Object.keys(fiObj).length > 0 ? !fiObj.paymentChannelType : true,
     },
     {
       header: "Tax Identifier",
@@ -47,7 +47,15 @@ const FinancialInformationForm = ({
           form={form}
         />
       ),
-      isError: Object.keys(fiObj).length > 0 && (hasValue(tiObj.taxIdentifierType) && hasValue(tiObj.taxIdentifierNumber) && (tiObj.taxIdentifierNumber.length === 16) && hasValue(tiObj.taxIdentifierName) && hasValue(tiObj.taxAddress)) ? false : true
+      isError:
+        Object.keys(fiObj).length > 0 &&
+        hasValue(tiObj.taxIdentifierType) &&
+        hasValue(tiObj.taxIdentifierNumber) &&
+        tiObj.taxIdentifierNumber.length === 16 &&
+        hasValue(tiObj.taxIdentifierName) &&
+        hasValue(tiObj.taxAddress)
+          ? false
+          : true,
     },
     {
       header: "Withholding tax",
@@ -58,7 +66,7 @@ const FinancialInformationForm = ({
           handleWTObj={handleWTObj}
         />
       ),
-      isError: false
+      isError: false,
     },
     {
       header: "Accounting Rule",
@@ -72,7 +80,7 @@ const FinancialInformationForm = ({
           type={"create"}
         />
       ),
-      isError: false
+      isError: false,
     },
     {
       header: "Tax Implication",
@@ -82,7 +90,7 @@ const FinancialInformationForm = ({
           type={"create"}
         />
       ),
-      isError: false
+      isError: false,
     },
   ];
 
@@ -108,7 +116,12 @@ const FinancialInformationForm = ({
               onChange={(e) => handleCollapse(e, index)}
               style={{ borderRadius: "8px", backgroundColor: "#E6F1F9" }}
             >
-              <Collapse.Panel header={item.header} extra={item.isError ? <Badge count={'!'} overflowCount={10} /> : null}>
+              <Collapse.Panel
+                header={item.header}
+                extra={
+                  item.isError ? <Badge count={"!"} overflowCount={10} /> : null
+                }
+              >
                 {item.children}
               </Collapse.Panel>
             </Collapse>

@@ -43,7 +43,7 @@ const Relationship = ({ id = 0, handleChangeInteraction = () => {} }) => {
 
         <div className={"w-full mt-5"}>
           <RelationshipTable
-            // handleChangeInteraction={handleChangeInteraction}
+          // handleChangeInteraction={handleChangeInteraction}
           />
         </div>
       </BaseContainer>

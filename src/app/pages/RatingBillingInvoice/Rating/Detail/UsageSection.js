@@ -33,7 +33,7 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, ratingCodeId, search, page, pageSize, sort]);
 
@@ -74,7 +74,7 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ).filter((item) => item?.title !== "APPROVED BY");
   }, [search, page, pageSize, searchedColumn, searchText]);
 
@@ -97,7 +97,7 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
   }, [allColumns]);
 
   return (
-    <CardContainer 
+    <CardContainer
       header={
         <div className="flex -my-4 justify-between items-center">
           <p className="mt-[15px] font-bold">USAGE INFORMATION</p>
@@ -114,9 +114,7 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
         <p className="text-[15px] font-semibold text-text-color-semibold">
           Rating Code:
         </p>
-        <p className="text-[15px] font-semibold text-primary">
-          {ratingCodeId}
-        </p>
+        <p className="text-[15px] font-semibold text-primary">{ratingCodeId}</p>
       </div>
       <div className="w-full">
         <TableRBI

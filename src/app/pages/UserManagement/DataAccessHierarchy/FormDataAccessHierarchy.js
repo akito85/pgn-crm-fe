@@ -51,7 +51,7 @@ const { Option } = Select;
 const FormDataAccessHierarchy = (props) => {
   const { type } = props;
   const { cost_center_data, data_detail, loading } = useSelector(
-    (state) => state.data_access
+    (state) => state.data_access,
   );
   const { bodyError } = useSelector((state) => state?.general);
   const navigate = useNavigate();
@@ -94,10 +94,10 @@ const FormDataAccessHierarchy = (props) => {
     (data_detail, cost_center_data) => {
       if (data_detail && cost_center_data) {
         const mappedParent = data_detail?.rDataAccessHierarchy?.map(
-          (item) => item.costCenter
+          (item) => item.costCenter,
         );
         const filteredParent = cost_center_data?.filter((item) =>
-          mappedParent?.includes(item?.name)
+          mappedParent?.includes(item?.name),
         );
 
         setParents(filteredParent);
@@ -119,8 +119,8 @@ const FormDataAccessHierarchy = (props) => {
           (costCenter) =>
             !data_detail?.rDataAccessHierarchy?.some(
               (dataCostCenter) =>
-                dataCostCenter?.costCenter === costCenter?.name
-            )
+                dataCostCenter?.costCenter === costCenter?.name,
+            ),
         );
         setCostCenters(filteredCostCenters);
 
@@ -147,11 +147,11 @@ const FormDataAccessHierarchy = (props) => {
               createdBy: item?.createdBy,
               updatedBy: item?.updatedBy,
             };
-          }) || []
+          }) || [],
         );
       }
     },
-    [formHeader]
+    [formHeader],
   );
 
   // use effect get data
@@ -201,7 +201,7 @@ const FormDataAccessHierarchy = (props) => {
   const handleChangeCostCenter = (e) => {
     const selectedParentData = Object.assign(
       {},
-      ...costCenters?.filter((item) => item?.name === e)
+      ...costCenters?.filter((item) => item?.name === e),
     );
     // if (hasValue(e)) {
     //   setDisabledButtonAdd(false);
@@ -230,7 +230,7 @@ const FormDataAccessHierarchy = (props) => {
       const costCenter = data.filter((item) => item.key === key)[0]?.costCenter;
       const hasChildren = data.filter((item) => item.parent === costCenter);
       const filteredBySelectedCostCenter = parents.filter(
-        (item) => item?.name !== costCenter
+        (item) => item?.name !== costCenter,
       );
       if (
         key === "1" ||
@@ -246,14 +246,14 @@ const FormDataAccessHierarchy = (props) => {
       setSibling(
         data
           ?.filter((item) => item?.parent === rowSelected?.parent)
-          ?.filter((item) => item?.costCenter !== rowSelected?.costCenter)
+          ?.filter((item) => item?.costCenter !== rowSelected?.costCenter),
       );
       setUpdateTree(true);
       setDisabledButtonAdd(false);
       setParents(filteredBySelectedCostCenter);
       form.getFieldValue("costCenter");
     },
-    [data, form, parents]
+    [data, form, parents],
   );
 
   // add & update hierarchy
@@ -283,7 +283,7 @@ const FormDataAccessHierarchy = (props) => {
     } else {
       const maxId = data.reduce(
         (max, item) => (item.key > max ? item.key : max),
-        0
+        0,
       );
       const values =
         type === "create"
@@ -355,7 +355,7 @@ const FormDataAccessHierarchy = (props) => {
       if (findIndex === 0 || key === 1) {
         setParents([]);
         const filteredCostCenter = parentsData.filter(
-          (item) => item?.value || item?.name !== null
+          (item) => item?.value || item?.name !== null,
         );
         setCostCenters([...costCenters, ...filteredCostCenter]);
         setData([]);
@@ -363,7 +363,7 @@ const FormDataAccessHierarchy = (props) => {
         const item = data[findIndex];
         const setCostCenter = item.costCenter;
         const filteredCostCenter = parentsData.filter(
-          (item) => item.name === setCostCenter
+          (item) => item.name === setCostCenter,
         );
         const setParent = item.parent;
         const newData = [...data];
@@ -382,7 +382,7 @@ const FormDataAccessHierarchy = (props) => {
       setDisabledParent(false);
       form.resetFields();
     },
-    [costCenters, data, form, parents]
+    [costCenters, data, form, parents],
   );
 
   // func detail cost centers
@@ -494,7 +494,7 @@ const FormDataAccessHierarchy = (props) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         ellipsis: {
           showTitle: false,
@@ -508,7 +508,7 @@ const FormDataAccessHierarchy = (props) => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -520,7 +520,7 @@ const FormDataAccessHierarchy = (props) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         ellipsis: {
           showTitle: false,
@@ -534,7 +534,7 @@ const FormDataAccessHierarchy = (props) => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -554,7 +554,7 @@ const FormDataAccessHierarchy = (props) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) => {
           const texts = text?.join(", ");
@@ -565,7 +565,7 @@ const FormDataAccessHierarchy = (props) => {
             texts,
             true,
             "input",
-            search
+            search,
           );
         },
       },
@@ -581,7 +581,7 @@ const FormDataAccessHierarchy = (props) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         sorter: (a, b) => a.description?.localeCompare(b.description),
         render: (text) =>
@@ -592,7 +592,7 @@ const FormDataAccessHierarchy = (props) => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -653,7 +653,7 @@ const FormDataAccessHierarchy = (props) => {
       search,
       searchText,
       searchedColumn,
-    ]
+    ],
   );
 
   // filtering column
@@ -662,7 +662,7 @@ const FormDataAccessHierarchy = (props) => {
       column(transformDataToTree(data)).filter(function (item) {
         return item?.dataIndex !== "status";
       }),
-    [column, data]
+    [column, data],
   );
 
   // routes breadcrumb
@@ -730,8 +730,8 @@ const FormDataAccessHierarchy = (props) => {
     // setDisabledButtonAdd(true)
     setParents(
       cost_center_data?.filter((itemCostCenter) =>
-        data?.some((item) => item?.costCenter === itemCostCenter?.name)
-      )
+        data?.some((item) => item?.costCenter === itemCostCenter?.name),
+      ),
     );
     setPayload({});
   };

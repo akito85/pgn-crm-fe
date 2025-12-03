@@ -25,7 +25,7 @@ const ModalApprovalBilling = ({
 }) => {
   // Selector
   const { data_list_billing_approval, loading } = useSelector(
-    (state) => state.billing
+    (state) => state.billing,
   );
 
   // Declaration
@@ -188,7 +188,7 @@ const ModalApprovalBilling = ({
       approvedBilling({
         body: body,
         action: action === "APPROVE" ? "approved" : "rejected",
-      })
+      }),
     )
       .unwrap()
       .then(() => {
@@ -242,9 +242,9 @@ const ModalApprovalBilling = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-    [page, pageSize, searchedColumn, searchText]
+    [page, pageSize, searchedColumn, searchText],
   );
 
   const allColumns = useMemo(() => {
@@ -258,7 +258,6 @@ const ModalApprovalBilling = ({
   const processedColumns = useMemo(() => {
     return applyFixedColumns(allColumns, fixedColumns);
   }, [allColumns, fixedColumns]);
-
 
   const columnDefinitions = useMemo(() => {
     return allColumns.map((col) => ({

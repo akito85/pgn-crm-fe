@@ -5,7 +5,7 @@ import FileSaver from "file-saver";
 import { errorCode, hasValue } from "../../utils";
 
 const isNgrokUrl = (baseUrl) => {
-  return baseUrl && baseUrl.includes('ngrok');
+  return baseUrl && baseUrl.includes("ngrok");
 };
 
 const buildHeaders = (baseUrl, additionalHeaders = {}) => {
@@ -13,18 +13,18 @@ const buildHeaders = (baseUrl, additionalHeaders = {}) => {
     ...tokenHeader(),
     ...additionalHeaders,
   };
-  
+
   if (isNgrokUrl(baseUrl)) {
-    headers['ngrok-skip-browser-warning'] = 'true';
+    headers["ngrok-skip-browser-warning"] = "true";
   }
-  
+
   return headers;
 };
 
 const getAll = async (url, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
+
     const response = await axios.get(baseUrl + url, {
       headers: buildHeaders(baseUrl),
     });
@@ -37,7 +37,7 @@ const getAll = async (url, customBaseUrl = null) => {
 const getPagination = async (url, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
+
     const response = await axios.get(baseUrl + url, {
       headers: buildHeaders(baseUrl),
     });
@@ -50,7 +50,7 @@ const getPagination = async (url, customBaseUrl = null) => {
 const getDetail = async (url, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
+
     const response = await axios.get(baseUrl + url, {
       headers: buildHeaders(baseUrl),
     });
@@ -63,11 +63,11 @@ const getDetail = async (url, customBaseUrl = null) => {
 const getDetailByIdBody = async (url, id, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
+
     const response = await axios.get(
       baseUrl + url,
       { id: id },
-      { headers: buildHeaders(baseUrl) }
+      { headers: buildHeaders(baseUrl) },
     );
     return response?.data;
   } catch (error) {
@@ -78,7 +78,7 @@ const getDetailByIdBody = async (url, id, customBaseUrl = null) => {
 const downloadData = async (url, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
+
     const response = await axios.get(baseUrl + url, {
       headers: buildHeaders(baseUrl),
       responseType: "blob",
@@ -94,7 +94,7 @@ const downloadData = async (url, customBaseUrl = null) => {
       const blob = await response?.data;
       FileSaver.saveAs(blob, filename);
     } else if (errorCode(response) === 204) {
-      throw response
+      throw response;
     }
     return response;
   } catch (error) {
@@ -105,14 +105,10 @@ const downloadData = async (url, customBaseUrl = null) => {
 const createData = async (url, body, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
-    const response = await axios.post(
-      baseUrl + url,
-      body,
-      {
-        headers: buildHeaders(baseUrl),
-      }
-    );
+
+    const response = await axios.post(baseUrl + url, body, {
+      headers: buildHeaders(baseUrl),
+    });
     return response?.data;
   } catch (error) {
     throw error;
@@ -122,14 +118,10 @@ const createData = async (url, body, customBaseUrl = null) => {
 const updateData = async (url, data, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
-    const response = await axios.put(
-      baseUrl + url,
-      data,
-      {
-        headers: buildHeaders(baseUrl),
-      }
-    );
+
+    const response = await axios.put(baseUrl + url, data, {
+      headers: buildHeaders(baseUrl),
+    });
     return response?.data;
   } catch (error) {
     throw error;
@@ -139,13 +131,10 @@ const updateData = async (url, data, customBaseUrl = null) => {
 const deleteData = async (url, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
-    const response = await axios.delete(
-      baseUrl + url,
-      {
-        headers: buildHeaders(baseUrl),
-      }
-    );
+
+    const response = await axios.delete(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
+    });
     return response?.data;
   } catch (error) {
     throw error;
@@ -155,14 +144,10 @@ const deleteData = async (url, customBaseUrl = null) => {
 const activationWithRemark = async (url, body, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
-    const response = await axios.post(
-      baseUrl + url,
-      body,
-      {
-        headers: buildHeaders(baseUrl),
-      }
-    );
+
+    const response = await axios.post(baseUrl + url, body, {
+      headers: buildHeaders(baseUrl),
+    });
     return response?.data;
   } catch (error) {
     throw error;
@@ -172,7 +157,7 @@ const activationWithRemark = async (url, body, customBaseUrl = null) => {
 const removePicture = async (url, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
+
     const response = await axios.get(baseUrl + url, {
       headers: buildHeaders(baseUrl),
     });
@@ -185,7 +170,7 @@ const removePicture = async (url, customBaseUrl = null) => {
 const activationWithOutRemark = async (url, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
+
     const response = await axios.post(baseUrl + url, {
       headers: buildHeaders(baseUrl),
     });
@@ -198,7 +183,7 @@ const activationWithOutRemark = async (url, customBaseUrl = null) => {
 const activationWithMethodGet = async (url, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
+
     const response = await axios.get(baseUrl + url, {
       headers: buildHeaders(baseUrl),
     });
@@ -211,13 +196,10 @@ const activationWithMethodGet = async (url, customBaseUrl = null) => {
 const activationWithDelete = async (url, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
-    const response = await axios.delete(
-      baseUrl + url,
-      {
-        headers: buildHeaders(baseUrl),
-      }
-    );
+
+    const response = await axios.delete(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
+    });
     return response?.data;
   } catch (error) {
     throw error;
@@ -227,18 +209,16 @@ const activationWithDelete = async (url, customBaseUrl = null) => {
 const uploadImage = async (url, data, onProgress, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
-    const response = await axios.post(
-      baseUrl + url,
-      data,
-      {
-        headers: buildHeaders(baseUrl, { "Content-Type": "multipart/form-data" }),
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percentCompleted);
-        },
-      }
-    );
+
+    const response = await axios.post(baseUrl + url, data, {
+      headers: buildHeaders(baseUrl, { "Content-Type": "multipart/form-data" }),
+      onUploadProgress: (progressEvent) => {
+        const percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total,
+        );
+        onProgress(percentCompleted);
+      },
+    });
     return response?.data;
   } catch (error) {
     throw error;
@@ -248,14 +228,10 @@ const uploadImage = async (url, data, onProgress, customBaseUrl = null) => {
 const terminateData = async (url, body, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
-    const response = await axios.put(
-      baseUrl + url,
-      body,
-      {
-        headers: buildHeaders(baseUrl),
-      }
-    );
+
+    const response = await axios.put(baseUrl + url, body, {
+      headers: buildHeaders(baseUrl),
+    });
     return response?.data;
   } catch (error) {
     throw error;
@@ -265,14 +241,10 @@ const terminateData = async (url, body, customBaseUrl = null) => {
 const takeOver = async (url, body, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
-    const response = await axios.post(
-      baseUrl + url,
-      body,
-      {
-        headers: buildHeaders(baseUrl),
-      }
-    );
+
+    const response = await axios.post(baseUrl + url, body, {
+      headers: buildHeaders(baseUrl),
+    });
     return response?.data;
   } catch (error) {
     throw error;
@@ -295,7 +267,7 @@ const userHttpService = {
   removePicture,
   uploadImage,
   terminateData,
-  takeOver
+  takeOver,
 };
 
 export default userHttpService;

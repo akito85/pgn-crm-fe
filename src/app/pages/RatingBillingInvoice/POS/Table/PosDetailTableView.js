@@ -68,7 +68,9 @@ const sorter = (fieldSort, a, b) => {
         //     ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
         //       descimal
         //     : "";
-        return obj[fieldSort] ? (obj[fieldSort] || 0)?.toString()?.toLowerCase() : "0" ;
+        return obj[fieldSort]
+          ? (obj[fieldSort] || 0)?.toString()?.toLowerCase()
+          : "0";
 
       default:
         return obj[fieldSort]?.toLowerCase();
@@ -89,11 +91,13 @@ const sorter = (fieldSort, a, b) => {
       case "total":
       case "totalEqvIdr":
       case "totalEqvUsd":
-        return Math.sign(parseInt(a.replace(/,/g, '')) - parseInt(b.replace(/,/g, '')))
+        return Math.sign(
+          parseInt(a.replace(/,/g, "")) - parseInt(b.replace(/,/g, "")),
+        );
       default:
         return a.localeCompare(b);
     }
-  }
+  };
 
   return handleCompare(fa, fb);
 };
@@ -111,7 +115,7 @@ const columnDetail = (
   handleUpdate = () => {},
   onFilter,
   sorter,
-  data = []
+  data = [],
 ) => {
   const column = [
     {
@@ -141,7 +145,7 @@ const columnDetail = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -151,7 +155,7 @@ const columnDetail = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -174,7 +178,7 @@ const columnDetail = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -184,7 +188,7 @@ const columnDetail = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -208,7 +212,7 @@ const columnDetail = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -218,7 +222,7 @@ const columnDetail = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -233,7 +237,7 @@ const columnDetail = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -243,7 +247,7 @@ const columnDetail = (
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) => onFilter("quantity", value, record),
       // sorter: (a, b) => sorter("quantity", a, b),
@@ -277,7 +281,7 @@ const columnDetail = (
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) => onFilter("price", value, record),
       // sorter: (a, b) => sorter("price", a, b),
@@ -353,7 +357,7 @@ const columnDetail = (
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) => onFilter("amount", value, record),
       // sorter: (a, b) => sorter("amount", a, b),
@@ -445,7 +449,7 @@ const columnDetail = (
           // ) !== -1
           //   ? (page - 1) * pageSize +
           data.findIndex(
-            (item) => parseInt(item.itemId) === parseInt(r.reference)
+            (item) => parseInt(item.itemId) === parseInt(r.reference),
           ) + 1;
         // : r.referenceName;
         if (text) {
@@ -467,7 +471,7 @@ const columnDetail = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -477,7 +481,7 @@ const columnDetail = (
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) => onFilter("uom", value, record),
       // sorter: (a, b) => sorter("uom", a, b),
@@ -501,7 +505,7 @@ const columnDetail = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -511,7 +515,7 @@ const columnDetail = (
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) => onFilter("posNumber", value, record),
       // sorter: (a, b) => sorter("posNumber", a, b),
@@ -545,7 +549,7 @@ const columnDetail = (
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) => onFilter("amountEqvIdr", value, record),
       // sorter: (a, b) => sorter("amountEqvIdr", a, b),
@@ -621,7 +625,7 @@ const columnDetail = (
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) => onFilter("amountEqvUsd", value, record),
       // sorter: (a, b) => sorter("amountEqvUsd", a, b),
@@ -698,7 +702,7 @@ const columnDetail = (
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) => onFilter("eqvIdr", value, record),
       // sorter: (a, b) => sorter("eqvIdr", a, b),
@@ -775,7 +779,7 @@ const columnDetail = (
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) => onFilter("discount", value, record),
       // sorter: (a, b) => sorter("discount", a, b),
@@ -851,7 +855,7 @@ const columnDetail = (
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) => onFilter("total", value, record),
       // sorter: (a, b) => sorter("total", a, b),
@@ -928,7 +932,7 @@ const columnDetail = (
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) => onFilter("totalEqvIdr", value, record),
       // sorter: (a, b) => sorter("totalEqvIdr", a, b),
@@ -1005,7 +1009,7 @@ const columnDetail = (
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) => onFilter("totalEqvUsd", value, record),
       // sorter: (a, b) => sorter("totalEqvUsd", a, b),
@@ -1073,7 +1077,7 @@ const columnDetail = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1083,7 +1087,7 @@ const columnDetail = (
           text,
           true,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) => onFilter("remark", value, record),
       // sorter: (a, b) => sorter("remark", a, b),
@@ -1199,12 +1203,12 @@ const columnDetail = (
         column.title !== "AMOUNT EQV IDR" &&
         column.title !== "AMOUNT EQV USD" &&
         column.title !== "EQV IDR ( TAX PURPOSE )" &&
-        column.title !== "POS NUMBER"
+        column.title !== "POS NUMBER",
     );
   } else if (type === "confirm") {
     //confirm
     return column.filter(
-      (column) => column.title !== "ACTION" && column.title !== "POS NUMBER"
+      (column) => column.title !== "ACTION" && column.title !== "POS NUMBER",
     );
   } else if (type === "calculate") {
     return column.filter((column) => column.title !== "POS NUMBER");
@@ -1262,7 +1266,7 @@ const PosDetailTableView = ({
           handleUpdate,
           onFilter,
           sorter,
-          dataTemp
+          dataTemp,
         )}
       />
     </Fragment>

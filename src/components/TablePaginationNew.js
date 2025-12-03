@@ -64,7 +64,7 @@ const TablePaginationNew = ({
   const filteredColumns = useMemo(() => {
     if (!searchText) return columns;
     return columns.filter((col) =>
-      col.title.toLowerCase().includes(searchText.toLowerCase())
+      col.title.toLowerCase().includes(searchText.toLowerCase()),
     );
   }, [columns, searchText]);
 

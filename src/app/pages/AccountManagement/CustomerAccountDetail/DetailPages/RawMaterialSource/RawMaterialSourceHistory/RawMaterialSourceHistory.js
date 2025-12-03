@@ -5,7 +5,12 @@ import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import ToolbarAccount from "../../../../ComponentAccount/ToolbarAccount";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../../utils";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
@@ -30,7 +35,7 @@ const columns = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { }
+  handleSearch = () => {},
 ) => {
   return [
     {
@@ -52,9 +57,17 @@ const columns = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
-      render: (text) => renderDateColumn('effectiveDate', hasValue(search['effectiveDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "effectiveDate",
+          hasValue(search["effectiveDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "LOCAL (%)",
@@ -67,9 +80,18 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('value1', hasValue(search['value1']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "value1",
+          hasValue(search["value1"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "IMPORT (%)",
@@ -82,9 +104,18 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      render: (text) => renderColumn('value2', hasValue(search['value2']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "value2",
+          hasValue(search["value2"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -96,13 +127,22 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ellipsis: {
         showTitle: false,
       },
       sorter: true,
-      render: (text) => renderColumn('description', hasValue(search['description']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          hasValue(search["description"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
   ];
 };
@@ -111,7 +151,7 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
   // Selector
   const { access_account } = useSelector((state) => state.accountManagement);
   const { data, data_detail_history } = useSelector(
-    (state) => state.rawMaterialSource
+    (state) => state.rawMaterialSource,
   );
 
   // Declaration
@@ -137,12 +177,20 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
 
   // Use Effect
   useEffect(() => {
-    if(location?.pathname.includes('account-standard')) {
-      dispatch(getGrantedAccessAccount('/account-management/account-standard/raw-material-source'))
-    }else{
-      dispatch(getGrantedAccessAccount('/account-management/account-onetime/raw-material-source'))
+    if (location?.pathname.includes("account-standard")) {
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-standard/raw-material-source",
+        ),
+      );
+    } else {
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-onetime/raw-material-source",
+        ),
+      );
     }
-  }, [dispatch])
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(
@@ -152,7 +200,7 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, id, search, page, pageSize, sort]);
 
@@ -292,7 +340,7 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -312,14 +360,14 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
   const handleCloseModalError = () => {
     setModalError(false);
     setIdData();
-    setEffectiveData()
+    setEffectiveData();
   };
 
   const handleRetry = () => {
     handleDeleteOk();
     setModalError(false);
     setIdData();
-    setEffectiveData()
+    setEffectiveData();
   };
 
   return (
@@ -353,12 +401,12 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
             searchText,
             handleSearch,
             handleDetail,
-            handleDelete
+            handleDelete,
           ),
           ...useColumnActionPermissionAccount(
             ["View", "Update", "Delete"],
             itemGrantAccess,
-            access_account
+            access_account,
           ),
         ]}
       />
@@ -382,7 +430,7 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
           <SVGIcon name="IconAlertTriangle" width={48} />
           <p className={"text-[18px] font-bold"}>
             {`Are you sure you want to delete Raw Material Source with effective date ${moment(
-              effectiveData
+              effectiveData,
             ).format(dateFormatting.date)}?`}
           </p>
         </div>

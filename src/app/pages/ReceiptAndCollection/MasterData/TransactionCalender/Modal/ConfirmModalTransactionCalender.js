@@ -28,7 +28,7 @@ const ConfirmModalTransactionCalender = ({
   const [valuePage, setValuePage] = useState(tabData[0].value);
   // find data criteria
   const matchedObjectsCriteria = apiCriteria?.filter((obj) =>
-    data?.criteria?.includes(obj?.Id)
+    data?.criteria?.includes(obj?.Id),
   );
 
   const matchedNamesCriteria = matchedObjectsCriteria
@@ -74,7 +74,7 @@ const ConfirmModalTransactionCalender = ({
             disableSelect={true}
             approvalName={
               (dataOption || []).filter(
-                (data) => data.value === selectedHierarchy
+                (data) => data.value === selectedHierarchy,
               )?.[0].name || ""
             }
             dataTable={listDataAppHierDetail}

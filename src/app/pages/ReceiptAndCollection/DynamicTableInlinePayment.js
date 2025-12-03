@@ -235,7 +235,7 @@ const DynamicTableInlinePayment = ({
   useEffect(() => {
     if (mode === "update") {
       setData(
-        tableData?.map((row, index) => ({ ...row, key: index.toString() }))
+        tableData?.map((row, index) => ({ ...row, key: index.toString() })),
       );
     } else {
       setData(tableData);
@@ -637,7 +637,7 @@ const DynamicTableInlinePayment = ({
                   disabled: col.disabled || false,
                 }),
               };
-            })
+            }),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

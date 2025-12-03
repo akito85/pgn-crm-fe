@@ -1,11 +1,10 @@
 import { FilterOutlined } from "@ant-design/icons";
-import { DatePicker, Input, TimePicker, Select  } from "antd";
+import { DatePicker, Input, TimePicker, Select } from "antd";
 import Highlighter from "react-highlight-words";
 import { dateFormatting, hasValue } from ".";
 import moment from "moment";
 // import InputComponent from "../components/InputComponent";
 // import { format } from "react-number-format/types/numeric_format";
-
 
 // BE
 export const getColumnSearchPropsPaging = (
@@ -16,7 +15,7 @@ export const getColumnSearchPropsPaging = (
   handleSearch,
   excludeRender = false,
   typeFilter = "input",
-  search
+  search,
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
@@ -33,22 +32,55 @@ export const getColumnSearchPropsPaging = (
           onKeyDown={(e) => e.stopPropagation()}
         >
           {typeFilter === "date" ? (
-            <DatePicker onChange={onDataChange} format={dateFormatting.date} ref={searchInput} value={hasValue(searchText) && moment(searchText).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              format={dateFormatting.date}
+              ref={searchInput}
+              value={hasValue(searchText) && moment(searchText).clone()}
+            />
           ) : null}
           {typeFilter === "dateCapital" ? (
-            <DatePicker onChange={onDataChange} format={dateFormatting.dateCapital} ref={searchInput} value={hasValue(searchText) && moment(searchText).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              format={dateFormatting.dateCapital}
+              ref={searchInput}
+              value={hasValue(searchText) && moment(searchText).clone()}
+            />
           ) : null}
           {typeFilter === "datetime" ? (
-            <DatePicker onChange={onDataChange} showTime={true} format={dateFormatting.dateTime} ref={searchInput} value={hasValue(searchText) && moment(searchText).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              showTime={true}
+              format={dateFormatting.dateTime}
+              ref={searchInput}
+              value={hasValue(searchText) && moment(searchText).clone()}
+            />
           ) : null}
           {typeFilter === "datePeriod" ? (
-            <DatePicker onChange={onDataChange} picker="month" format={dateFormatting.datePeriod} ref={searchInput} value={hasValue(searchText) && moment(searchText).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              picker="month"
+              format={dateFormatting.datePeriod}
+              ref={searchInput}
+              value={hasValue(searchText) && moment(searchText).clone()}
+            />
           ) : null}
           {typeFilter === "year_only" ? (
-            <DatePicker onChange={onDataChange} picker="year" format={dateFormatting.year_only} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              picker="year"
+              format={dateFormatting.year_only}
+              ref={searchInput}
+              value={
+                hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()
+              }
+            />
           ) : null}
           {typeFilter === "hour" ? (
-            <TimePicker format={dateFormatting?.hour_format} onChange={onDataChange} />
+            <TimePicker
+              format={dateFormatting?.hour_format}
+              onChange={onDataChange}
+            />
           ) : null}
           {typeFilter === "input" ? (
             <Input
@@ -67,7 +99,7 @@ export const getColumnSearchPropsPaging = (
               }}
             />
           ) : null}
-          {typeFilter === 'boolean' ? (
+          {typeFilter === "boolean" ? (
             <Input
               ref={searchInput}
               placeholder={`Search (Y/N/y/n)`}
@@ -76,9 +108,10 @@ export const getColumnSearchPropsPaging = (
                 setSelectedKeys(e.target.value ? [e.target.value] : [])
               }
               onInput={(e) => {
-                e.target.value = e.target.value.replace(/[^YyNn]/g, "")?.charAt(0)
-              }
-              }
+                e.target.value = e.target.value
+                  .replace(/[^YyNn]/g, "")
+                  ?.charAt(0);
+              }}
               onPressEnter={() =>
                 handleSearch(selectedKeys, confirm, dataIndex)
               }
@@ -89,7 +122,7 @@ export const getColumnSearchPropsPaging = (
               maxLength={1}
             />
           ) : null}
-          {typeFilter === 'yes_or_no' ? (
+          {typeFilter === "yes_or_no" ? (
             <Input
               ref={searchInput}
               placeholder={`Search (Yes/No)`}
@@ -99,8 +132,7 @@ export const getColumnSearchPropsPaging = (
               }
               onInput={(e) => {
                 e.target.value = e.target.value.replace(/[^yesnoYESNO]/g, "");
-              }
-              }
+              }}
               onPressEnter={() =>
                 handleSearch(selectedKeys, confirm, dataIndex)
               }
@@ -147,7 +179,6 @@ export const getColumnSearchPropsPaging = (
   return obj;
 };
 
-
 // FE
 export const getColumnSearchProps = (
   dataIndex,
@@ -157,7 +188,7 @@ export const getColumnSearchProps = (
   handleSearch,
   excludeRender = false,
   typeFilter = "input",
-  search
+  search,
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
@@ -176,21 +207,46 @@ export const getColumnSearchProps = (
             <DatePicker onChange={onDataChange} format={dateFormatting.date} />
           ) : null}
           {typeFilter === "dateCapital" ? (
-            <DatePicker onChange={onDataChange} format={dateFormatting.dateCapital} />
+            <DatePicker
+              onChange={onDataChange}
+              format={dateFormatting.dateCapital}
+            />
           ) : null}
           {typeFilter === "datetime" ? (
-            <DatePicker onChange={onDataChange} showTime={true} format={dateFormatting.dateTime} />
+            <DatePicker
+              onChange={onDataChange}
+              showTime={true}
+              format={dateFormatting.dateTime}
+            />
           ) : null}
           {typeFilter === "datePeriod" ? (
-            <DatePicker onChange={onDataChange} picker="month" format={dateFormatting.datePeriod} />
+            <DatePicker
+              onChange={onDataChange}
+              picker="month"
+              format={dateFormatting.datePeriod}
+            />
           ) : null}
-           {typeFilter === "year_only" ? (
-            <DatePicker onChange={onDataChange} picker="year" format={dateFormatting.year_only} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+          {typeFilter === "year_only" ? (
+            <DatePicker
+              onChange={onDataChange}
+              picker="year"
+              format={dateFormatting.year_only}
+              ref={searchInput}
+              value={
+                hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()
+              }
+            />
           ) : null}
           {typeFilter === "hour" ? (
-            <TimePicker format={dateFormatting?.hour_format} onChange={onDataChange} />
+            <TimePicker
+              format={dateFormatting?.hour_format}
+              onChange={onDataChange}
+            />
           ) : null}
-          {typeFilter === "input" || typeFilter === "status" || typeFilter === 'contact' || typeFilter === 'select' ? (
+          {typeFilter === "input" ||
+          typeFilter === "status" ||
+          typeFilter === "contact" ||
+          typeFilter === "select" ? (
             <Input
               ref={searchInput}
               placeholder={`Search`}
@@ -208,7 +264,7 @@ export const getColumnSearchProps = (
             />
           ) : null}
 
-          {typeFilter === 'boolean' ? (
+          {typeFilter === "boolean" ? (
             <Input
               ref={searchInput}
               placeholder={`Search (Y/N/y/n)`}
@@ -217,9 +273,10 @@ export const getColumnSearchProps = (
                 setSelectedKeys(e.target.value ? [e.target.value] : [])
               }
               onInput={(e) => {
-                e.target.value = e.target.value.replace(/[^YyNn]/g, "")?.charAt(0)
-              }
-              }
+                e.target.value = e.target.value
+                  .replace(/[^YyNn]/g, "")
+                  ?.charAt(0);
+              }}
               onPressEnter={() =>
                 handleSearch(selectedKeys, confirm, dataIndex)
               }
@@ -230,7 +287,7 @@ export const getColumnSearchProps = (
               maxLength={1}
             />
           ) : null}
-          {typeFilter === 'yes_or_no' ? (
+          {typeFilter === "yes_or_no" ? (
             <Input
               ref={searchInput}
               placeholder={`Search (Yes/No)`}
@@ -240,8 +297,7 @@ export const getColumnSearchProps = (
               }
               onInput={(e) => {
                 e.target.value = e.target.value.replace(/[^yesnoYESNO]/g, "");
-              }
-              }
+              }}
               onPressEnter={() =>
                 handleSearch(selectedKeys, confirm, dataIndex)
               }
@@ -268,30 +324,70 @@ export const getColumnSearchProps = (
       }
     },
     onFilter: (value, record) => {
-      if (typeFilter === 'status') {
-        return record[dataIndex].toString().toLowerCase() === value?.toLowerCase()
-      } else if (typeFilter === 'dateCapital') {
-        return moment(record[dataIndex])?.format(dateFormatting?.dateCapital)?.toLowerCase() === moment(value)?.format(dateFormatting.dateCapital)?.toLowerCase()
-      } else if (typeFilter === 'datetime') {
-        return moment(record[dataIndex]).format(dateFormatting?.dateTime)?.toLowerCase() === moment(value)?.format(dateFormatting.dateTime)?.toLowerCase()
-      } else if (typeFilter === 'datePeriod') {
-        return moment(record[dataIndex]).format(dateFormatting.datePeriod).toLowerCase() === moment(value)?.format(dateFormatting.datePeriod)?.toLowerCase()
-      } else if (typeFilter === 'date') {
-        return moment(record[dataIndex])?.format(dateFormatting?.date)?.toLowerCase() === moment(value)?.format(dateFormatting.date)?.toLowerCase()
-      } else if (typeFilter === 'boolean') {
+      if (typeFilter === "status") {
+        return (
+          record[dataIndex].toString().toLowerCase() === value?.toLowerCase()
+        );
+      } else if (typeFilter === "dateCapital") {
+        return (
+          moment(record[dataIndex])
+            ?.format(dateFormatting?.dateCapital)
+            ?.toLowerCase() ===
+          moment(value)?.format(dateFormatting.dateCapital)?.toLowerCase()
+        );
+      } else if (typeFilter === "datetime") {
+        return (
+          moment(record[dataIndex])
+            .format(dateFormatting?.dateTime)
+            ?.toLowerCase() ===
+          moment(value)?.format(dateFormatting.dateTime)?.toLowerCase()
+        );
+      } else if (typeFilter === "datePeriod") {
+        return (
+          moment(record[dataIndex])
+            .format(dateFormatting.datePeriod)
+            .toLowerCase() ===
+          moment(value)?.format(dateFormatting.datePeriod)?.toLowerCase()
+        );
+      } else if (typeFilter === "date") {
+        return (
+          moment(record[dataIndex])
+            ?.format(dateFormatting?.date)
+            ?.toLowerCase() ===
+          moment(value)?.format(dateFormatting.date)?.toLowerCase()
+        );
+      } else if (typeFilter === "boolean") {
         let result;
-        if (value?.toLowerCase() === 'y') {
-          result = record[dataIndex] === true
+        if (value?.toLowerCase() === "y") {
+          result = record[dataIndex] === true;
         } else {
-          result = record[dataIndex] === false
+          result = record[dataIndex] === false;
         }
         return result;
       } else {
-        if (typeFilter === 'contact' && dataIndex === 'value') {
-          let changeDataIndex = dataIndex === 'value' ? 'fullValue' : dataIndex;
-          return record[changeDataIndex]?.toString()?.toLowerCase()?.includes(value?.toLowerCase()) || record[changeDataIndex]?.label?.toString()?.toLowerCase()?.includes(value?.toLowerCase());
+        if (typeFilter === "contact" && dataIndex === "value") {
+          let changeDataIndex = dataIndex === "value" ? "fullValue" : dataIndex;
+          return (
+            record[changeDataIndex]
+              ?.toString()
+              ?.toLowerCase()
+              ?.includes(value?.toLowerCase()) ||
+            record[changeDataIndex]?.label
+              ?.toString()
+              ?.toLowerCase()
+              ?.includes(value?.toLowerCase())
+          );
         } else {
-          return record[dataIndex]?.toString()?.toLowerCase()?.includes(value?.toLowerCase()) || record[dataIndex]?.label?.toString()?.toLowerCase()?.includes(value?.toLowerCase());
+          return (
+            record[dataIndex]
+              ?.toString()
+              ?.toLowerCase()
+              ?.includes(value?.toLowerCase()) ||
+            record[dataIndex]?.label
+              ?.toString()
+              ?.toLowerCase()
+              ?.includes(value?.toLowerCase())
+          );
         }
       }
     },
@@ -316,7 +412,6 @@ export const getColumnSearchProps = (
   return obj;
 };
 
-
 export const getColumnSearchPropsUseFilteredValue = (
   search,
   dataIndex,
@@ -326,7 +421,7 @@ export const getColumnSearchPropsUseFilteredValue = (
   handleSearch,
   excludeRender = false,
   typeFilter = "input",
-  selectOptions = [] // tambahkan parameter baru untuk options
+  selectOptions = [], // tambahkan parameter baru untuk options
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
@@ -343,22 +438,63 @@ export const getColumnSearchPropsUseFilteredValue = (
           onKeyDown={(e) => e.stopPropagation()}
         >
           {typeFilter === "date" ? (
-            <DatePicker onChange={onDataChange} format={dateFormatting.date} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              format={dateFormatting.date}
+              ref={searchInput}
+              value={
+                hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()
+              }
+            />
           ) : null}
           {typeFilter === "dateCapital" ? (
-            <DatePicker onChange={onDataChange} format={dateFormatting.dateCapital} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              format={dateFormatting.dateCapital}
+              ref={searchInput}
+              value={
+                hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()
+              }
+            />
           ) : null}
           {typeFilter === "datetime" ? (
-            <DatePicker onChange={onDataChange} showTime={true} format={dateFormatting.dateTime} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              showTime={true}
+              format={dateFormatting.dateTime}
+              ref={searchInput}
+              value={
+                hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()
+              }
+            />
           ) : null}
           {typeFilter === "datePeriod" ? (
-            <DatePicker onChange={onDataChange} picker="month" format={dateFormatting.datePeriod} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              picker="month"
+              format={dateFormatting.datePeriod}
+              ref={searchInput}
+              value={
+                hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()
+              }
+            />
           ) : null}
           {typeFilter === "year_only" ? (
-            <DatePicker onChange={onDataChange} picker="year" format={dateFormatting.year_only} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              picker="year"
+              format={dateFormatting.year_only}
+              ref={searchInput}
+              value={
+                hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()
+              }
+            />
           ) : null}
           {typeFilter === "hour" ? (
-            <TimePicker format={dateFormatting?.hour_format} onChange={onDataChange} />
+            <TimePicker
+              format={dateFormatting?.hour_format}
+              onChange={onDataChange}
+            />
           ) : null}
           {/* TAMBAHKAN CASE SELECT INI */}
           {typeFilter === "select" ? (
@@ -397,7 +533,7 @@ export const getColumnSearchPropsUseFilteredValue = (
               }}
             />
           ) : null}
-          {typeFilter === 'boolean' ? (
+          {typeFilter === "boolean" ? (
             <Input
               ref={searchInput}
               placeholder={`Search (Y/N/y/n)`}
@@ -406,7 +542,9 @@ export const getColumnSearchPropsUseFilteredValue = (
                 setSelectedKeys(e.target.value ? [e.target.value] : [])
               }
               onInput={(e) => {
-                e.target.value = e.target.value.replace(/[^YyNn]/g, "")?.charAt(0)
+                e.target.value = e.target.value
+                  .replace(/[^YyNn]/g, "")
+                  ?.charAt(0);
               }}
               onPressEnter={() =>
                 handleSearch(selectedKeys, confirm, dataIndex)
@@ -418,7 +556,7 @@ export const getColumnSearchPropsUseFilteredValue = (
               maxLength={1}
             />
           ) : null}
-          {typeFilter === 'yes_or_no' ? (
+          {typeFilter === "yes_or_no" ? (
             <Input
               ref={searchInput}
               placeholder={`Search (Yes/No)`}
@@ -445,7 +583,10 @@ export const getColumnSearchPropsUseFilteredValue = (
     filterIcon: (filtered) => (
       <FilterOutlined
         style={{
-          color: filtered && hasValue(search[dataIndex]) === true ? "#1890ff" : undefined,
+          color:
+            filtered && hasValue(search[dataIndex]) === true
+              ? "#1890ff"
+              : undefined,
         }}
       />
     ),
@@ -469,16 +610,16 @@ export const getColumnSearchPropsUseFilteredValue = (
         text || ""
       ),
   };
-  
+
   if (excludeRender) {
     delete obj.render;
   }
-  
+
   // Tambahkan filteredValue untuk select
   if (typeFilter === "select") {
     obj.filteredValue = search[dataIndex] ? [search[dataIndex]] : null;
   }
-  
+
   return obj;
 };
 
@@ -508,21 +649,57 @@ export const getColumnSearchPropsUseFilteredValueFE = (
           onKeyDown={(e) => e.stopPropagation()}
         >
           {typeFilter === "date" ? (
-            <DatePicker onChange={onDataChange} format={dateFormatting.date} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              format={dateFormatting.date}
+              ref={searchInput}
+              value={
+                hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()
+              }
+            />
           ) : null}
           {typeFilter === "dateCapital" ? (
-            <DatePicker onChange={onDataChange} format={dateFormatting.dateCapital} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              format={dateFormatting.dateCapital}
+              ref={searchInput}
+              value={
+                hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()
+              }
+            />
           ) : null}
           {typeFilter === "datetime" ? (
-            <DatePicker onChange={onDataChange} showTime={true} format={dateFormatting.dateTime} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              showTime={true}
+              format={dateFormatting.dateTime}
+              ref={searchInput}
+              value={
+                hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()
+              }
+            />
           ) : null}
           {typeFilter === "datePeriod" ? (
-            <DatePicker onChange={onDataChange} picker="month" format={dateFormatting.datePeriod} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+            <DatePicker
+              onChange={onDataChange}
+              picker="month"
+              format={dateFormatting.datePeriod}
+              ref={searchInput}
+              value={
+                hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()
+              }
+            />
           ) : null}
           {typeFilter === "hour" ? (
-            <TimePicker format={dateFormatting?.hour_format} onChange={onDataChange} />
+            <TimePicker
+              format={dateFormatting?.hour_format}
+              onChange={onDataChange}
+            />
           ) : null}
-          {typeFilter === "input" || typeFilter === 'status' || typeFilter === 'select' || typeFilter === 'currency' ? (
+          {typeFilter === "input" ||
+          typeFilter === "status" ||
+          typeFilter === "select" ||
+          typeFilter === "currency" ? (
             <Input
               ref={searchInput}
               placeholder={`Search`}
@@ -539,7 +716,7 @@ export const getColumnSearchPropsUseFilteredValueFE = (
               }}
             />
           ) : null}
-          {typeFilter === 'boolean' ? (
+          {typeFilter === "boolean" ? (
             <Input
               ref={searchInput}
               placeholder={`Search (Y/N/y/n)`}
@@ -548,9 +725,10 @@ export const getColumnSearchPropsUseFilteredValueFE = (
                 setSelectedKeys(e.target.value ? [e.target.value] : [])
               }
               onInput={(e) => {
-                e.target.value = e.target.value.replace(/[^YyNn]/g, "")?.charAt(0)
-              }
-              }
+                e.target.value = e.target.value
+                  .replace(/[^YyNn]/g, "")
+                  ?.charAt(0);
+              }}
               onPressEnter={() =>
                 handleSearch(selectedKeys, confirm, dataIndex)
               }
@@ -561,7 +739,7 @@ export const getColumnSearchPropsUseFilteredValueFE = (
               maxLength={1}
             />
           ) : null}
-           {typeFilter === 'yes_or_no' ? (
+          {typeFilter === "yes_or_no" ? (
             <Input
               ref={searchInput}
               placeholder={`Search (Yes/No)`}
@@ -571,8 +749,7 @@ export const getColumnSearchPropsUseFilteredValueFE = (
               }
               onInput={(e) => {
                 e.target.value = e.target.value.replace(/[^yesnoYESNO]/g, "");
-              }
-              }
+              }}
               onPressEnter={() =>
                 handleSearch(selectedKeys, confirm, dataIndex)
               }
@@ -606,7 +783,10 @@ export const getColumnSearchPropsUseFilteredValueFE = (
     filterIcon: (filtered) => (
       <FilterOutlined
         style={{
-          color: filtered && hasValue(search[dataIndex]) === true ? "#1890ff" : undefined,
+          color:
+            filtered && hasValue(search[dataIndex]) === true
+              ? "#1890ff"
+              : undefined,
         }}
       />
     ),
@@ -616,28 +796,59 @@ export const getColumnSearchPropsUseFilteredValueFE = (
       }
     },
     onFilter: (value, record) => {
-      if (typeFilter === 'status') {
-        return record[dataIndex].toString().toLowerCase() === value?.toLowerCase()
-      } else if (typeFilter === 'dateCapital') {
-        return moment(record[dataIndex])?.format(dateFormatting?.dateCapital)?.toLowerCase() === moment(value)?.format(dateFormatting.dateCapital)?.toLowerCase()
-      } else if (typeFilter === 'datetime') {
-        return moment(record[dataIndex]).format(dateFormatting?.dateTime)?.toLowerCase() === moment(value)?.format(dateFormatting.dateTime)?.toLowerCase()
-      } else if (typeFilter === 'datePeriod') {
-        return moment(record[dataIndex]).format(dateFormatting.datePeriod).toLowerCase() === moment(value)?.format(dateFormatting.datePeriod)?.toLowerCase()
-      } else if (typeFilter === 'date') {
-        return moment(record[dataIndex])?.format(dateFormatting?.date)?.toLowerCase() === moment(value)?.format(dateFormatting.date)?.toLowerCase()
-      } else if (typeFilter === 'boolean') {
+      if (typeFilter === "status") {
+        return (
+          record[dataIndex].toString().toLowerCase() === value?.toLowerCase()
+        );
+      } else if (typeFilter === "dateCapital") {
+        return (
+          moment(record[dataIndex])
+            ?.format(dateFormatting?.dateCapital)
+            ?.toLowerCase() ===
+          moment(value)?.format(dateFormatting.dateCapital)?.toLowerCase()
+        );
+      } else if (typeFilter === "datetime") {
+        return (
+          moment(record[dataIndex])
+            .format(dateFormatting?.dateTime)
+            ?.toLowerCase() ===
+          moment(value)?.format(dateFormatting.dateTime)?.toLowerCase()
+        );
+      } else if (typeFilter === "datePeriod") {
+        return (
+          moment(record[dataIndex])
+            .format(dateFormatting.datePeriod)
+            .toLowerCase() ===
+          moment(value)?.format(dateFormatting.datePeriod)?.toLowerCase()
+        );
+      } else if (typeFilter === "date") {
+        return (
+          moment(record[dataIndex])
+            ?.format(dateFormatting?.date)
+            ?.toLowerCase() ===
+          moment(value)?.format(dateFormatting.date)?.toLowerCase()
+        );
+      } else if (typeFilter === "boolean") {
         let result;
-        if (value?.toLowerCase() === 'y') {
-          result = record[dataIndex] === true
+        if (value?.toLowerCase() === "y") {
+          result = record[dataIndex] === true;
         } else {
-          result = record[dataIndex] === false
+          result = record[dataIndex] === false;
         }
         return result;
       } else {
-        if (typeFilter === 'contact' && dataIndex === 'value') {
-          let changeDataIndex = dataIndex === 'value' ? 'fullValue' : dataIndex;
-          return record[changeDataIndex]?.toString()?.toLowerCase()?.includes(value?.toLowerCase()) || record[changeDataIndex]?.label?.toString()?.toLowerCase()?.includes(value?.toLowerCase());
+        if (typeFilter === "contact" && dataIndex === "value") {
+          let changeDataIndex = dataIndex === "value" ? "fullValue" : dataIndex;
+          return (
+            record[changeDataIndex]
+              ?.toString()
+              ?.toLowerCase()
+              ?.includes(value?.toLowerCase()) ||
+            record[changeDataIndex]?.label
+              ?.toString()
+              ?.toLowerCase()
+              ?.includes(value?.toLowerCase())
+          );
         } else if (typeFilter === "currency") {
           const tempValue = record[dataIndex]
             ? (record[dataIndex] + "").split(".")
@@ -650,12 +861,15 @@ export const getColumnSearchPropsUseFilteredValueFE = (
           const format =
             tempValue.length > 0
               ? tempValue[0].replace(
-                /\B(?=(\d{3})+(?!\d))/g,
-                thousandSeparator
-              ) + descimal
+                  /\B(?=(\d{3})+(?!\d))/g,
+                  thousandSeparator,
+                ) + descimal
               : "";
-          return format?.toString()?.toLowerCase()?.includes(value?.toLowerCase())
-        } else if(typeFilter?.includes("decimal")){
+          return format
+            ?.toString()
+            ?.toLowerCase()
+            ?.includes(value?.toLowerCase());
+        } else if (typeFilter?.includes("decimal")) {
           const decimal = parseInt(typeFilter?.split(",")[1]);
           const tempValue = record[dataIndex]
             ? (record[dataIndex] + "").split(".")
@@ -666,7 +880,7 @@ export const getColumnSearchPropsUseFilteredValueFE = (
             ? `${decimalSeparator}${tempValue[1]}${"0"?.repeat(
                 decimal - tempValue[1].length > 0
                   ? decimal - tempValue[1].length
-                  : 0
+                  : 0,
               )}`
             : `${decimalSeparator}${"0"?.repeat(decimal)}`;
 
@@ -674,13 +888,25 @@ export const getColumnSearchPropsUseFilteredValueFE = (
             tempValue.length > 0
               ? tempValue[0].replace(
                   /\B(?=(\d{3})+(?!\d))/g,
-                  thousandSeparator
+                  thousandSeparator,
                 ) + descimal
               : "";
 
-      return format?.toString()?.toLowerCase()?.includes(value?.toLowerCase())
+          return format
+            ?.toString()
+            ?.toLowerCase()
+            ?.includes(value?.toLowerCase());
         } else {
-          return record[dataIndex]?.toString()?.toLowerCase()?.includes(value?.toLowerCase()) || record[dataIndex]?.label?.toString()?.toLowerCase()?.includes(value?.toLowerCase());
+          return (
+            record[dataIndex]
+              ?.toString()
+              ?.toLowerCase()
+              ?.includes(value?.toLowerCase()) ||
+            record[dataIndex]?.label
+              ?.toString()
+              ?.toLowerCase()
+              ?.includes(value?.toLowerCase())
+          );
         }
       }
     },

@@ -28,7 +28,7 @@ import CardContainer from "../../../../../components/CardContainer";
 const BillingBucketView = () => {
   // Selector
   const { data, loading, data_approval_history } = useSelector(
-    (state) => state.billing_bucket
+    (state) => state.billing_bucket,
   );
 
   // Declaration
@@ -66,7 +66,7 @@ const BillingBucketView = () => {
   useEffect(() => {
     localStorage.setItem(
       "billingBucketFixedColumns",
-      JSON.stringify(fixedColumns)
+      JSON.stringify(fixedColumns),
     );
   }, [fixedColumns]);
 
@@ -78,7 +78,7 @@ const BillingBucketView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [search, sort, page, pageSize, dispatch]);
 
@@ -196,7 +196,7 @@ const BillingBucketView = () => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -249,7 +249,7 @@ const BillingBucketView = () => {
         pageSize,
         sort,
         search: tempSearch,
-      })
+      }),
     );
   };
 
@@ -443,7 +443,7 @@ const BillingBucketView = () => {
   // ✅ Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   // ✅ Get base columns with key property
@@ -456,7 +456,7 @@ const BillingBucketView = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ...actionColumns,
     ];

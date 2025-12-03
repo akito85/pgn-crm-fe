@@ -1,19 +1,18 @@
-import React,{ useState, useRef } from 'react'
-import { DatePicker, Form, Input, Select } from 'antd'
+import React, { useState, useRef } from "react";
+import { DatePicker, Form, Input, Select } from "antd";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 import { useDispatch } from "react-redux";
 
 import { dateFormatting } from "../../../../../../../utils";
-import InputComponent from '../../../../../../../components/InputComponent'
-import SelectComponent from '../../../../../../../components/SelectComponent'
-import ButtonComponent from '../../../../../../../components/ButtonComponent'
-import ModalCustom from '../../../../../../../components/Modal/ModalCustom'
-import { FilterOutlined } from '@ant-design/icons';
-import TableInlineAccount from './TableInlineContact';
-import { getCountryZone } from '../../../../../../../redux/slices/account_management/detailAccount/accountContactSlice';
-import { onInputUpperCase } from '../../../../Utils';
-
+import InputComponent from "../../../../../../../components/InputComponent";
+import SelectComponent from "../../../../../../../components/SelectComponent";
+import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
+import { FilterOutlined } from "@ant-design/icons";
+import TableInlineAccount from "./TableInlineContact";
+import { getCountryZone } from "../../../../../../../redux/slices/account_management/detailAccount/accountContactSlice";
+import { onInputUpperCase } from "../../../../Utils";
 
 const ModalCreateNewContact = ({
   isOpen,
@@ -60,7 +59,6 @@ const ModalCreateNewContact = ({
   // const [suffix, setSuffix] = useState({});
   // const [value, setValue] = useState({});
 
-
   const [dataTableDetail, setDataTableDetail] = useState([]);
   const searchInput = useRef(null);
   const [selectDataRecord, setSelectDataRecord] = useState({});
@@ -90,8 +88,8 @@ const ModalCreateNewContact = ({
       label: item.text,
     };
   });
-   // Search Column Table
-   const getColumnSearchProps = (dataIndex, type) => ({
+  // Search Column Table
+  const getColumnSearchProps = (dataIndex, type) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
       const onDataChange = (value, dateString) => {
         setSelectedKeys(dateString ? [dateString] : []);
@@ -192,9 +190,8 @@ const ModalCreateNewContact = ({
       render: (type) => (
         <span>
           {dataContactType &&
-            dataContactType
-              .filter((a) => a.id === type)
-              .find((b) => b.text)?.text}
+            dataContactType.filter((a) => a.id === type).find((b) => b.text)
+              ?.text}
         </span>
       ),
     },
@@ -209,9 +206,8 @@ const ModalCreateNewContact = ({
       render: (inpuType) => (
         <span>
           {dataInputType &&
-            dataInputType
-              .filter((a) => a.id === inpuType)
-              .find((b) => b.text)?.text}
+            dataInputType.filter((a) => a.id === inpuType).find((b) => b.text)
+              ?.text}
         </span>
       ),
     },
@@ -227,12 +223,16 @@ const ModalCreateNewContact = ({
       ...getColumnSearchProps("value"),
       render: (_, record, id) => {
         const prefixName1 =
-        dataCountryCode &&
-        dataCountryCode.filter((a) => a.id === prefix1[`${record.key}`]).find((b) => b.text)?.text
+          dataCountryCode &&
+          dataCountryCode
+            .filter((a) => a.id === prefix1[`${record.key}`])
+            .find((b) => b.text)?.text;
 
         const prefixName2 =
           dataCountryZone &&
-          dataCountryZone.filter((a) => a.id === prefix2[`${record.key}`]).find((b) => b.text)?.text;
+          dataCountryZone
+            .filter((a) => a.id === prefix2[`${record.key}`])
+            .find((b) => b.text)?.text;
 
         const tempValue = value[`${record.key}`];
         if (record.type === 741) {
@@ -251,7 +251,11 @@ const ModalCreateNewContact = ({
           return <span>{`(${prefixName1}) - ${tempValue}`}</span>;
         }
         if (record.type === 745) {
-          return <span>{`(${prefixName1}) (${prefixName2}) - ${tempValue} Ext ${suffix[`${record.key}`]}`} </span>;
+          return (
+            <span>
+              {`(${prefixName1}) (${prefixName2}) - ${tempValue} Ext ${suffix[`${record.key}`]}`}{" "}
+            </span>
+          );
         } else {
           return <span>{tempValue}</span>;
         }
@@ -264,7 +268,7 @@ const ModalCreateNewContact = ({
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -322,7 +326,7 @@ const ModalCreateNewContact = ({
 
   const handlePushToMainForm = (e) => {
     // handleResetDataDetail()
-    if(dataTableDetail.length > 0 && !isEditing){
+    if (dataTableDetail.length > 0 && !isEditing) {
       const modifiedArray = dataTableDetail.map((obj, index) => {
         const tempSuffix = suffix[`${obj.key}`];
         const tempValue = value[`${obj.key}`];
@@ -343,49 +347,49 @@ const ModalCreateNewContact = ({
         job: e.job,
         position: e.position,
         contactDetail: modifiedArray,
-      }
-      setDataCreateNew(dataValue)
-      setModalCreateNewContact(false)
-      setModalChooseContact(false)
-      resetDataCreateNew()
+      };
+      setDataCreateNew(dataValue);
+      setModalCreateNewContact(false);
+      setModalChooseContact(false);
+      resetDataCreateNew();
     } else {
-      setModalValidate(true)
+      setModalValidate(true);
     }
-  }
+  };
 
   const resetDataCreateNew = () => {
     setTimeout(() => {
-      form.resetFields()
-      setDataTableDetail([])
-      setPrefix1({})
-      setPrefix2({})
-      setSuffix({})
-      setValue({})
-      setSelectDataRecord({})
+      form.resetFields();
+      setDataTableDetail([]);
+      setPrefix1({});
+      setPrefix2({});
+      setSuffix({});
+      setValue({});
+      setSelectDataRecord({});
     }, 1000);
-  }
+  };
   const getCountryZoneByIdCountryCode = (e) => {
-    if(e !== undefined){
-      dispatch(getCountryZone(e))
+    if (e !== undefined) {
+      dispatch(getCountryZone(e));
     }
-  }
+  };
 
   return (
     <div>
       <ModalCustom
         header={"CREATE NEW CONTACT"}
-        isOpen={isOpen} 
-        type={"confirmation"} 
-        handleCancel={()=>{
-          resetDataCreateNew()
-          setModalCreateNewContact(false)
+        isOpen={isOpen}
+        type={"confirmation"}
+        handleCancel={() => {
+          resetDataCreateNew();
+          setModalCreateNewContact(false);
         }}
         width={1000}
         footer={
           <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
             <ButtonComponent
-              onClick={()=>{
-                resetDataCreateNew()
+              onClick={() => {
+                resetDataCreateNew();
                 setModalCreateNewContact(false);
               }}
               type="default"
@@ -393,9 +397,9 @@ const ModalCreateNewContact = ({
             >
               Cancel
             </ButtonComponent>
-            <ButtonComponent 
-              type="submit" 
-              htmlType={"submit"} 
+            <ButtonComponent
+              type="submit"
+              htmlType={"submit"}
               form={"formContactNew"}
               // disabled={dataTableDetail.length > 0 ? false : true}
               // onClick={handlePushToMainForm}
@@ -405,16 +409,18 @@ const ModalCreateNewContact = ({
           </div>
         }
       >
-        <Form 
-        layout='vertical' 
-        onFinish={
-          // dataTableDetail.length > 0 ? 
-          handlePushToMainForm 
-          // : ""
-          } 
-        form={form} id="formContactNew">
+        <Form
+          layout="vertical"
+          onFinish={
+            // dataTableDetail.length > 0 ?
+            handlePushToMainForm
+            // : ""
+          }
+          form={form}
+          id="formContactNew"
+        >
           <div>
-            <div className='text-primary text-xs font-bold uppercase'> 
+            <div className="text-primary text-xs font-bold uppercase">
               <p>CONTACT INFORMATION</p>
             </div>
 
@@ -430,54 +436,41 @@ const ModalCreateNewContact = ({
                   },
                 ]}
               >
-                <InputComponent 
-                  onInput={onInputUpperCase}/>
+                <InputComponent onInput={onInputUpperCase} />
               </Form.Item>
-              <Form.Item
-                name="middleName"
-                label={"Middle Name"}
-              >
-                <InputComponent 
-                  onInput={onInputUpperCase}/>
+              <Form.Item name="middleName" label={"Middle Name"}>
+                <InputComponent onInput={onInputUpperCase} />
               </Form.Item>
-              <Form.Item
-                name="lastName"
-                label={"Last Name"}
-              >
-                <InputComponent 
-                  onInput={onInputUpperCase}/>
+              <Form.Item name="lastName" label={"Last Name"}>
+                <InputComponent onInput={onInputUpperCase} />
               </Form.Item>
-              <Form.Item
-                name="job"
-                label={"Job"}
-              >
+              <Form.Item name="job" label={"Job"}>
                 <SelectComponent>
                   {dataJob &&
                     dataJob?.map((data) => (
                       <Select.Option key={data.id} value={data.id}>
                         {data.text}
                       </Select.Option>
-                  ))}
+                    ))}
                 </SelectComponent>
               </Form.Item>
-              <Form.Item
-                name="position"
-                label={"Position"}
-              >
+              <Form.Item name="position" label={"Position"}>
                 <SelectComponent>
                   {dataPosition &&
                     dataPosition?.map((data) => (
                       <Select.Option key={data.id} value={data.id}>
                         {data.text}
                       </Select.Option>
-                  ))}
+                    ))}
                 </SelectComponent>
               </Form.Item>
             </div>
 
             {/* CONTACT DETAIL */}
-            <div className='pb-8'>
-              <p className='text-primary text-xs font-bold uppercase'>CONTACT DETAIL</p>
+            <div className="pb-8">
+              <p className="text-primary text-xs font-bold uppercase">
+                CONTACT DETAIL
+              </p>
               <TableInlineAccount
                 tableData={filterDataByPage()}
                 onDataChange={setDataTableDetail}
@@ -510,12 +503,11 @@ const ModalCreateNewContact = ({
                 setModalValidate={setModalValidate}
               />
             </div>
-
           </div>
         </Form>
       </ModalCustom>
     </div>
-  )
-}
+  );
+};
 
-export default ModalCreateNewContact
+export default ModalCreateNewContact;

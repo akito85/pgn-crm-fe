@@ -6,7 +6,7 @@ export const columnsApproval = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -24,7 +24,7 @@ export const columnsApproval = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["approvalLevel"]
@@ -41,7 +41,7 @@ export const columnsApproval = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["position"]
@@ -57,7 +57,7 @@ export const columnsExpandApproval = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -75,7 +75,7 @@ export const columnsExpandApproval = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     onFilter: (value, record) =>
       record["employeeName"]

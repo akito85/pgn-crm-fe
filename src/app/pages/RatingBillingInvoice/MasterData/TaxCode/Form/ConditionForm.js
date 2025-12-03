@@ -223,7 +223,7 @@ const ConditionForm = ({
       } else {
         updateData((prevState) => {
           const index = prevState.findIndex(
-            (detail) => detail.key === dataUpdate.key
+            (detail) => detail.key === dataUpdate.key,
           );
 
           let temp = [...prevState];
@@ -254,7 +254,7 @@ const ConditionForm = ({
       handleCancelModalForm,
       typeModal,
       updateData,
-    ]
+    ],
   );
 
   const setRow = useCallback(
@@ -274,7 +274,7 @@ const ConditionForm = ({
 
       return newRow;
     },
-    [dataUpdate, typeModal]
+    [dataUpdate, typeModal],
   );
 
   // check has overlapping data
@@ -305,7 +305,7 @@ const ConditionForm = ({
         (item) =>
           item.name === setDataRow.name &&
           item.operator === setDataRow.operator &&
-          item?.key !== setDataRow?.key
+          item?.key !== setDataRow?.key,
       );
 
       if (isNameChosen) {
@@ -322,7 +322,7 @@ const ConditionForm = ({
         } else {
           const tempData = [...data];
           const index = tempData.findIndex(
-            (item) => item?.key === setDataRow?.key
+            (item) => item?.key === setDataRow?.key,
           );
           if (index > -1) {
             const item = tempData[index];
@@ -337,14 +337,14 @@ const ConditionForm = ({
         setModalForm(false);
       }
     },
-    [setRow, data, dispatch, typeModal, form, updateData]
+    [setRow, data, dispatch, typeModal, form, updateData],
   );
 
   const handleDelete = useCallback(
     (r) => {
       updateData((prevState) => prevState.filter((e) => e.key !== r.key));
     },
-    [updateData]
+    [updateData],
   );
 
   const handleUpdate = (r) => {
@@ -448,8 +448,8 @@ const ConditionForm = ({
             showAction,
             data_condition_name,
             data_condition_operator,
-            data_condition_type
-          )
+            data_condition_type,
+          ),
         )}
         tableScrolled={{
           x: 1500,

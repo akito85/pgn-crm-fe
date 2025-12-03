@@ -4,7 +4,11 @@ import TablePagination from "../../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { Fragment } from "react";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../../utils";
 
 const AssignChooseAssetTable = ({
   data = [],
@@ -17,10 +21,10 @@ const AssignChooseAssetTable = ({
   searchText,
   searchedColumn,
   // getColumnSearchProps = () => {},
-  handleChooseAsset = () => { },
-  handleSearch = () => { },
+  handleChooseAsset = () => {},
+  handleSearch = () => {},
   search,
-  searchInput
+  searchInput,
 }) => {
   // const dispatch = useDispatch();
   // const { data_detail, loading } = useSelector(
@@ -48,9 +52,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("productNameValue", hasValue(search['productNameValue']), searchText, text, true, 'input', search),
+      render: (text) =>
+        renderColumn(
+          "productNameValue",
+          hasValue(search["productNameValue"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
       ellipsis: {
         showTitle: false,
       },
@@ -69,9 +82,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("serviceTypeValue", hasValue(search['serviceTypeValue']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "serviceTypeValue",
+          hasValue(search["serviceTypeValue"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ASSET NAME",
@@ -87,9 +109,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("assetNameValue", hasValue(search['assetNameValue']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "assetNameValue",
+          hasValue(search["assetNameValue"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ASSET TYPE",
@@ -105,9 +136,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("typeValue", hasValue(search['typeValue']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "typeValue",
+          hasValue(search["typeValue"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "SERIAL NUMBER",
@@ -122,9 +162,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("serialNumber", hasValue(search['serialNumber']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "serialNumber",
+          hasValue(search["serialNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "BRAND",
@@ -140,9 +189,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("brandValue", hasValue(search['brandValue']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "brandValue",
+          hasValue(search["brandValue"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "YEAR",
@@ -158,9 +216,17 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'year_only'
+        "year_only",
       ),
-      render: (text) => renderDateColumn("year", hasValue(search['year']), searchText, text?.toString(), 'year', search)
+      render: (text) =>
+        renderDateColumn(
+          "year",
+          hasValue(search["year"]),
+          searchText,
+          text?.toString(),
+          "year",
+          search,
+        ),
     },
     {
       title: "CUSTODY TRANSFER",
@@ -176,9 +242,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("custodyTransfer", hasValue(search['custodyTransfers']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "custodyTransfer",
+          hasValue(search["custodyTransfers"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
       // render: (text) => {
       //   const tempText = text === "Y" ? "YES" : "NO";
       //   if (searchedColumn === "custodyTransfer") {
@@ -213,9 +288,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("inletDiameter", hasValue(search['inletDiameter']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "inletDiameter",
+          hasValue(search["inletDiameter"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "OUTLET DIAMETER",
@@ -231,9 +315,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("outletDiameter", hasValue(search['outletDiameter']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "outletDiameter",
+          hasValue(search["outletDiameter"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "MINIMUM INLET PRESSURE",
@@ -249,9 +342,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("minimumInletPressure", hasValue(search['minimumInletPressure']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "minimumInletPressure",
+          hasValue(search["minimumInletPressure"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "MAXIMUM INLET PRESSURE",
@@ -267,9 +369,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("maximumInletPressure", hasValue(search['maximumInletPressure']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "maximumInletPressure",
+          hasValue(search["maximumInletPressure"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "MINIMUM OUTLET PRESSURE",
@@ -285,9 +396,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("minimumOutletPressure", hasValue(search['minimumOutletPressure']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "minimumOutletPressure",
+          hasValue(search["minimumOutletPressure"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "MAXIMUM OUTLET PRESSURE",
@@ -303,9 +423,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("maximumOutletPressure", hasValue(search['maximumOutletPressure']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "maximumOutletPressure",
+          hasValue(search["maximumOutletPressure"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "MAX FLOW CAPACITY PER STREAM",
@@ -321,9 +450,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("maxFlowCapacityPerStream", hasValue(search['maxFlowCapacityPerStream']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "maxFlowCapacityPerStream",
+          hasValue(search["maxFlowCapacityPerStream"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "STREAM AMOUNT",
@@ -339,9 +477,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("streamAmount", hasValue(search['streamAmount']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "streamAmount",
+          hasValue(search["streamAmount"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "G SIZE",
@@ -357,9 +504,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("gsize", hasValue(search['gsize']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "gsize",
+          hasValue(search["gsize"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "SETTING PRESSURE",
@@ -375,9 +531,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("settingPressure", hasValue(search['settingPressure']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "settingPressure",
+          hasValue(search["settingPressure"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "LENGTH",
@@ -393,9 +558,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("length", hasValue(search['length']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "length",
+          hasValue(search["length"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "BOLT HOLE AMOUNT",
@@ -411,9 +585,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("boltHoleAmount", hasValue(search['boltHoleAmount']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "boltHoleAmount",
+          hasValue(search["boltHoleAmount"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "MINIMUM CAPACITY",
@@ -429,9 +612,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("minimumCapacity", hasValue(search['minimumCapacity']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "minimumCapacity",
+          hasValue(search["minimumCapacity"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "MAXIMUM CAPACITY",
@@ -447,9 +639,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("maximumCapacity", hasValue(search['maximumCapacity']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "maximumCapacity",
+          hasValue(search["maximumCapacity"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "CLASS/ANSI",
@@ -465,9 +666,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("ansi", hasValue(search['ansi']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "ansi",
+          hasValue(search["ansi"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -482,9 +692,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("description", hasValue(search['description']), searchText, text, true, 'input', search),
+      render: (text) =>
+        renderColumn(
+          "description",
+          hasValue(search["description"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
       ellipsis: {
         showTitle: false,
       },
@@ -502,9 +721,18 @@ const AssignChooseAssetTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn("status", hasValue(search['status']), searchText, text, false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          hasValue(search["status"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
     {
       title: "ACTIONS",

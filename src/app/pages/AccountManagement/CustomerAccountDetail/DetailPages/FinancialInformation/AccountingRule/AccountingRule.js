@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 
-
 import { Form, Spin } from "antd";
 import { Fragment } from "react";
 import { requiredMessage } from "../../../../../../../utils";
@@ -12,7 +11,7 @@ import { getAccountingRule } from "../../../../../../../redux/slices/account_man
 const AccountingRule = ({ id = 0 }) => {
   const dispatch = useDispatch();
   const { data_accountingRule, loading } = useSelector(
-    (state) => state.financialInformation
+    (state) => state.financialInformation,
   );
 
   //declare

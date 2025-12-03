@@ -44,11 +44,11 @@ export const getAllGasSourcePaginate = createAsyncThunk(
           error: error,
           action: "GET_ALL_GAS_SOURCE_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAllGasSourceQualityPaginate = createAsyncThunk(
@@ -78,11 +78,11 @@ export const getAllGasSourceQualityPaginate = createAsyncThunk(
           error: error,
           action: "GET_ALL_GAS_SOURCE_QUALITY_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getUOM = createAsyncThunk("GET_UOM", async (_, thunkAPI) => {
@@ -103,7 +103,7 @@ export const getUOM = createAsyncThunk("GET_UOM", async (_, thunkAPI) => {
     //   thunkAPI.dispatch(showModalError(errorBody))
     // }
     thunkAPI.dispatch(
-      validateError({ error: error, action: "GET_UOM", back: false })
+      validateError({ error: error, action: "GET_UOM", back: false }),
     );
     return thunkAPI.rejectWithValue(error?.response);
   }
@@ -129,11 +129,11 @@ export const getCostCenter = createAsyncThunk(
       //   thunkAPI.dispatch(showModalError(errorBody))
       // }
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_COST_CENTER", back: false })
+        validateError({ error: error, action: "GET_COST_CENTER", back: false }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadGasSource = createAsyncThunk(
@@ -152,11 +152,11 @@ export const downloadGasSource = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_GAS_SOURCE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const createGasSource = createAsyncThunk(
@@ -192,11 +192,11 @@ export const createGasSource = createAsyncThunk(
           error: error,
           action: "CREATE_GAS_SOURCE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const createGasSourceQuality = createAsyncThunk(
@@ -234,11 +234,11 @@ export const createGasSourceQuality = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_GAS_SOURCE_QUALITY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const updateEnDateGasSourceQuality = createAsyncThunk(
   "UPDATE_END_DATE_GAS_SOURCE_QUALITY",
@@ -260,11 +260,11 @@ export const updateEnDateGasSourceQuality = createAsyncThunk(
           error: error,
           action: "UPDATE_END_DATE_GAS_SOURCE_QUALITY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const updateGasSource = createAsyncThunk(
@@ -300,11 +300,11 @@ export const updateGasSource = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_GAS_SOURCE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const activeOrInactiveGasSource = createAsyncThunk(
@@ -342,11 +342,11 @@ export const activeOrInactiveGasSource = createAsyncThunk(
           error: error,
           action: "ACTIVE_OR_INACTIVE_GAS_SOURCE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const activeOrInactiveGasSourceQuality = createAsyncThunk(
@@ -384,11 +384,11 @@ export const activeOrInactiveGasSourceQuality = createAsyncThunk(
           error: error,
           action: "ACTIVE_OR_INACTIVE_GAS_SOURCE_QUALITY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getDetailGasSource = createAsyncThunk(
@@ -415,11 +415,11 @@ export const getDetailGasSource = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_GAS_SOURCE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getDetailGasSourceQuality = createAsyncThunk(
@@ -446,11 +446,11 @@ export const getDetailGasSourceQuality = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_GAS_SOURCE_QUALITY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 const gasSourceSlice = createSlice({

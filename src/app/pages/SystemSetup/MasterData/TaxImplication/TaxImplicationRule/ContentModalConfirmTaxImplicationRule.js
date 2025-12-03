@@ -19,25 +19,33 @@ const ContentModalConfirmTaxImplicationRule = ({
   listDataAppHierDetail = [],
   dataOption = [],
   selectedHierarchy,
-  listDataDetailOverride =[],
-  dataTaxImplicationRule = {}
+  listDataDetailOverride = [],
+  dataTaxImplicationRule = {},
 }) => {
-  const {dataImplicationType = []} = useSelector((state) => state.tax_implication);
+  const { dataImplicationType = [] } = useSelector(
+    (state) => state.tax_implication,
+  );
   const [typeTaxImplicationRuleInfo, setTypeTaxImplicationRuleInfo] = useState(
-    listSectionInfo[0].value
+    listSectionInfo[0].value,
   );
   const getImplicationType = (val) => {
-    const implicationName = dataImplicationType && dataImplicationType?.filter((item) =>  item?.value === val)
-    if(implicationName === undefined){
-      return ''
+    const implicationName =
+      dataImplicationType &&
+      dataImplicationType?.filter((item) => item?.value === val);
+    if (implicationName === undefined) {
+      return "";
     }
-    if(implicationName.length !== 0){
-      return implicationName[0].label 
-    } 
-  }
+    if (implicationName.length !== 0) {
+      return implicationName[0].label;
+    }
+  };
 
-  const transactionCodeName = useMemo(() => { return data?.find(item => item?.id === dataTaxImplicationRule?.transactionCode)?.code}, [data, dataTaxImplicationRule?.transactionCode])
-  
+  const transactionCodeName = useMemo(() => {
+    return data?.find(
+      (item) => item?.id === dataTaxImplicationRule?.transactionCode,
+    )?.code;
+  }, [data, dataTaxImplicationRule?.transactionCode]);
+
   const showSection = () => {
     switch (typeTaxImplicationRuleInfo) {
       case listSectionInfo[0].value:
@@ -76,10 +84,12 @@ const ContentModalConfirmTaxImplicationRule = ({
                 {dataTaxImplicationRule?.documentNumber}
               </DetailText>
               <DetailText label={"VAT INvoice Issuance"}>
-                {dataTaxImplicationRule?.vatInvoiceIssuance=== true ? "Yes" : "No"}
+                {dataTaxImplicationRule?.vatInvoiceIssuance === true
+                  ? "Yes"
+                  : "No"}
               </DetailText>
               <DetailText label={"Gunggung"}>
-                {dataTaxImplicationRule?.gunggung === true ? "Yes" : "No" }
+                {dataTaxImplicationRule?.gunggung === true ? "Yes" : "No"}
               </DetailText>
               <DetailText label={"Implication Type"}>
                 {getImplicationType(dataTaxImplicationRule?.implicationType)}
@@ -88,7 +98,11 @@ const ContentModalConfirmTaxImplicationRule = ({
                 {transactionCodeName}
               </DetailText>
               <DetailText label={"Start Date"}>
-                {dataTaxImplicationRule?.startDate ? moment(dataTaxImplicationRule?.startDate).format(dateFormatting.date) : ''}
+                {dataTaxImplicationRule?.startDate
+                  ? moment(dataTaxImplicationRule?.startDate).format(
+                      dateFormatting.date,
+                    )
+                  : ""}
               </DetailText>
               <div className="col-span-3">
                 <DetailText label={"Description"}>
@@ -118,7 +132,7 @@ const ContentModalConfirmTaxImplicationRule = ({
               disableSelect={true}
               approvalName={
                 (dataOption || []).filter(
-                  (data) => data.value === selectedHierarchy
+                  (data) => data.value === selectedHierarchy,
                 )?.[0].name || ""
               }
               dataTable={listDataAppHierDetail}
@@ -152,7 +166,7 @@ const ContentModalConfirmTaxImplicationRule = ({
       />
       <div className="flex flex-col gap-4">{showSection()}</div>
     </div>
-  )
-}
+  );
+};
 
-export default ContentModalConfirmTaxImplicationRule
+export default ContentModalConfirmTaxImplicationRule;

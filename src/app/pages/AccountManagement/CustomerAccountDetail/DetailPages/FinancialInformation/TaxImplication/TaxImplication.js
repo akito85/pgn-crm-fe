@@ -1,13 +1,14 @@
 import React, { useEffect, useRef } from "react";
-import {
-  FilterOutlined,
-} from "@ant-design/icons";
+import { FilterOutlined } from "@ant-design/icons";
 import { DatePicker, Input, Spin } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
 import TaxImplicationTable from "./TaxImplicationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { getTaxImplication, getDetailTaxImplication } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import {
+  getTaxImplication,
+  getDetailTaxImplication,
+} from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
@@ -19,7 +20,7 @@ import DetailTaxImplication from "./DetailTaxImplication";
 const TaxImplication = ({ id = 0 }) => {
   const dispatch = useDispatch();
   const { data_taxImplication, detail_taxImplication, loading } = useSelector(
-    (state) => state.financialInformation
+    (state) => state.financialInformation,
   );
 
   //declare
@@ -48,13 +49,15 @@ const TaxImplication = ({ id = 0 }) => {
       }
       tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
       const reqSearch = encodeURIComponent(JSON.stringify(search));
-      dispatch(getTaxImplication({ id, page, pageSize, sort, search: reqSearch }));
+      dispatch(
+        getTaxImplication({ id, page, pageSize, sort, search: reqSearch }),
+      );
     }
   }, [dispatch, id, page, pageSize, sort, search]);
 
   useEffect(() => {
     if (
-      data_taxImplication && 
+      data_taxImplication &&
       data_taxImplication.result &&
       data_taxImplication.result.length > 0
     ) {
@@ -63,18 +66,13 @@ const TaxImplication = ({ id = 0 }) => {
   }, [data_taxImplication]);
 
   const handleDetail = (record) => {
-  const id = record.id
-  setModalDetail(true);
-  dispatch(
-    getDetailTaxImplication(id)
-  )
-  .unwrap()
-  .then((data) => {
-  })
-  .catch((err) => {
-  })
-
-  }
+    const id = record.id;
+    setModalDetail(true);
+    dispatch(getDetailTaxImplication(id))
+      .unwrap()
+      .then((data) => {})
+      .catch((err) => {});
+  };
 
   //handle on-changes listener
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -203,13 +201,13 @@ const TaxImplication = ({ id = 0 }) => {
       </Fragment>
 
       {/* Modal detail tax implication */}
-      {modalDetail ? 
+      {modalDetail ? (
         <DetailTaxImplication
           setModalDetail={setModalDetail}
           modalDetail={modalDetail}
           detail_taxImplication={detail_taxImplication}
-        /> : null
-      }
+        />
+      ) : null}
     </Spin>
   );
 };

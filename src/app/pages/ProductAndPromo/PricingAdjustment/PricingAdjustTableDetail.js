@@ -1,11 +1,4 @@
-import {
-  DatePicker,
-  Form,
-  Input,
-  Select,
-  Table,
-  Tooltip,
-} from "antd";
+import { DatePicker, Form, Input, Select, Table, Tooltip } from "antd";
 import React, { useEffect, useState } from "react";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -437,7 +430,7 @@ const PricingAdjustTableDetail = ({
 
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -449,7 +442,7 @@ const PricingAdjustTableDetail = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     ];
 
@@ -483,7 +476,7 @@ const PricingAdjustTableDetail = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -500,7 +493,7 @@ const PricingAdjustTableDetail = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -518,7 +511,7 @@ const PricingAdjustTableDetail = ({
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (index) => {
           const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -553,7 +546,7 @@ const PricingAdjustTableDetail = ({
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (index) => {
           const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -587,7 +580,7 @@ const PricingAdjustTableDetail = ({
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         ellipsis: {
           showTitle: false,
@@ -718,7 +711,7 @@ const PricingAdjustTableDetail = ({
             return {
               ...dataFix,
               children: dataFix.children?.filter((crit) =>
-                dataCriteria.includes(crit.indexValue)
+                dataCriteria.includes(crit.indexValue),
               ),
             };
           } else {
@@ -747,7 +740,7 @@ const PricingAdjustTableDetail = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ).map((item) => item.dataIndex);
     if (searchedColumn) {
       const tempSearchText = searchText.toLowerCase();
@@ -880,7 +873,7 @@ const PricingAdjustTableDetail = ({
                   handleEditDataRecord: handleEditDataRecord,
                   form: formTableCriteria,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],

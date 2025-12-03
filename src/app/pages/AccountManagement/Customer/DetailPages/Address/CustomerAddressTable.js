@@ -13,7 +13,6 @@ import Highlighter from "react-highlight-words";
 import { toTitleCase } from "../../../../../../utils";
 // import { getColumnSearchProps } from "../../../../../../utils/getColumnSearchProps";
 
-
 const CustomerAddressTable = ({
   data = [],
   handleChange = {},
@@ -26,7 +25,7 @@ const CustomerAddressTable = ({
   onSort = {},
   getColumnSearchProps = () => {},
   searchInput,
-  handleSearch
+  handleSearch,
 }) => {
   //state
   const [modalDetail, setModalDetail] = useState(false);
@@ -493,7 +492,10 @@ const CustomerAddressTable = ({
   return (
     <Fragment>
       <TablePagination
-        dataSource={data?.map((item, index) => ({ ...item, primaryFlag: item?.primaryFlag === true ? "Primary" : "Non Primary" }))}
+        dataSource={data?.map((item, index) => ({
+          ...item,
+          primaryFlag: item?.primaryFlag === true ? "Primary" : "Non Primary",
+        }))}
         totalData={totalElement}
         current={page}
         pageSize={pageSize}

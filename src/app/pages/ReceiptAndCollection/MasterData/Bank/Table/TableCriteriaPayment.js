@@ -1,5 +1,10 @@
 import { FilterOutlined } from "@ant-design/icons";
 import { Input } from "antd";
+<<<<<<< HEAD
+||||||| (empty tree)
+=======
+import moment from "moment";
+>>>>>>> 20b7779 (Init)
 import Highlighter from "react-highlight-words";
 
 const getColumnSearchProps = (

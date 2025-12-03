@@ -1,11 +1,5 @@
 import { MoreOutlined } from "@ant-design/icons";
-import {
-  Checkbox,
-  Popover,
-  Space,
-  Spin,
-  Tooltip,
-} from "antd";
+import { Checkbox, Popover, Space, Spin, Tooltip } from "antd";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
@@ -18,9 +12,7 @@ import StatusComponent from "../../../../../components/StatusComponent";
 import TablePagination from "../../../../../components/TablePagination";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
-import {
-  dateFormatting,
-} from "../../../../../utils";
+import { dateFormatting } from "../../../../../utils";
 import {
   approveOrRejectBankAccount,
   approveOrRejectInactiveBankAccount,
@@ -109,7 +101,7 @@ const DetailBank = ({
             id: item?.criteria,
             accountInformationId: item?.accountInformationId,
           };
-        }
+        },
       );
 
       const mappingCriteria = criteriaSelect?.map((a) => a.id);
@@ -154,7 +146,7 @@ const DetailBank = ({
     }
     setSearchedColumn(tempSearchColumn);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -282,7 +274,7 @@ const DetailBank = ({
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => {}
+    handleSearch = () => {},
   ) => [
     {
       title: "NO",
@@ -299,7 +291,7 @@ const DetailBank = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -312,7 +304,7 @@ const DetailBank = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       // render: (text) =>
       //   searchedColumn === "jobId" ? (
@@ -350,7 +342,7 @@ const DetailBank = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       // render: (text) =>
       //   searchedColumn === "positionId" ? (
@@ -488,7 +480,7 @@ const DetailBank = ({
         pageSize: pageSizeBank,
         sort: sortBank,
         search: tempSearch,
-      })
+      }),
     );
   }, [id, pageBank, pageSizeBank, sortBank, searchBank, dispatch]);
 
@@ -544,7 +536,7 @@ const DetailBank = ({
             pageSize: pageSizeBank,
             sort: sortBank,
             search: tempSearch,
-          })
+          }),
         );
       });
   };
@@ -558,7 +550,7 @@ const DetailBank = ({
     handleSearchBank = () => {},
     handleDetailAccount = () => {},
     handleInactive = () => {},
-    handleApprovalHistory = () => {}
+    handleApprovalHistory = () => {},
   ) => [
     {
       title: "NO",
@@ -578,7 +570,7 @@ const DetailBank = ({
         searchedColumn,
         searchText,
         handleSearchBank,
-        true
+        true,
       ),
       render: (text) =>
         searchedColumn === "accountNumber" ? (
@@ -610,7 +602,7 @@ const DetailBank = ({
         searchedColumn,
         searchText,
         handleSearchBank,
-        true
+        true,
       ),
       render: (text) =>
         searchedColumn === "accountName" ? (
@@ -642,7 +634,7 @@ const DetailBank = ({
         searchedColumn,
         searchText,
         handleSearchBank,
-        true
+        true,
       ),
       render: (text) =>
         searchedColumn === "currency" ? (
@@ -674,7 +666,7 @@ const DetailBank = ({
         searchedColumn,
         searchText,
         handleSearchBank,
-        true
+        true,
       ),
       render: (text) =>
         searchedColumn === "entityName" ? (
@@ -706,7 +698,7 @@ const DetailBank = ({
         searchedColumn,
         searchText,
         handleSearchBank,
-        true
+        true,
       ),
       render: (text) =>
         searchedColumn === "type" ? (
@@ -738,7 +730,7 @@ const DetailBank = ({
         searchedColumn,
         searchText,
         handleSearchBank,
-        true
+        true,
       ),
       render: (text) =>
         searchedColumn === "totalDigit" ? (
@@ -771,7 +763,7 @@ const DetailBank = ({
         searchText,
         handleSearchBank,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         searchedColumn === "startDate" ? (
@@ -806,7 +798,7 @@ const DetailBank = ({
         searchText,
         handleSearchBank,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         searchedColumn === "endDate" ? (
@@ -840,7 +832,7 @@ const DetailBank = ({
         searchedColumn,
         searchText,
         handleSearchBank,
-        true
+        true,
       ),
       render: (text) =>
         searchedColumn === "staticCode" ? (
@@ -873,7 +865,7 @@ const DetailBank = ({
         searchedColumn,
         searchText,
         handleSearchBank,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -902,14 +894,14 @@ const DetailBank = ({
       dataIndex: "status",
       key: "status",
       sorter: true,
-      fixed:'right',
+      fixed: "right",
       ...getColumnSearchPropsPaging(
         "status",
         searchInput,
         searchedColumn,
         searchText,
         handleSearchBank,
-        true
+        true,
       ),
       render: (text) =>
         text ? (
@@ -925,14 +917,14 @@ const DetailBank = ({
       dataIndex: "statusApproval",
       key: "statusApproval",
       sorter: true,
-      fixed: 'right',
+      fixed: "right",
       ...getColumnSearchPropsPaging(
         "statusApproval",
         searchInput,
         searchedColumn,
         searchText,
         handleSearchBank,
-        true
+        true,
       ),
       render: (text) =>
         text ? (
@@ -1032,8 +1024,8 @@ const DetailBank = ({
                             r?.status === "Active"
                               ? true
                               : false || r?.status === "Draft"
-                              ? true
-                              : null
+                                ? true
+                                : null
                           }
                           className="gap-7"
                         />
@@ -1134,7 +1126,7 @@ const DetailBank = ({
   const mappingCriteria = criteriaSelect.map((a) => a.criteriaName || ""); // Adding a default value for criteriaName
   const criteria = mappingCriteria.reduce(
     (current, next) => current + (next ? `, ${next}` : ""),
-    ""
+    "",
   );
 
   const showButtonApproval = data_modal?.tApprovalDto?.isApprover;
@@ -1166,7 +1158,7 @@ const DetailBank = ({
             pageSize: pageSizeBank,
             sort: sortBank,
             search: tempSearch,
-          })
+          }),
         );
         handleClear();
         setModalConfirm(false);
@@ -1197,7 +1189,7 @@ const DetailBank = ({
             pageSize: pageSizeBank,
             sort: sortBank,
             search: tempSearch,
-          })
+          }),
         );
         handleClear();
         setModalConfirm(false);
@@ -1222,7 +1214,7 @@ const DetailBank = ({
               <DetailText label={"Requested Date"}>
                 {data_req?.requestedDate
                   ? moment(data_req?.requestedDate).format(
-                      "DD MMM YYYY HH:mm:ss"
+                      "DD MMM YYYY HH:mm:ss",
                     )
                   : ""}
               </DetailText>
@@ -1296,7 +1288,7 @@ const DetailBank = ({
                   handleSearchBank,
                   handleDetailAccount,
                   handleInactive,
-                  handleApprovalHistory
+                  handleApprovalHistory,
                 )}
                 current={pageBank}
                 onChange={handleChangeSizeBank}
@@ -1324,7 +1316,7 @@ const DetailBank = ({
               searchInput,
               searchedColumn,
               searchText,
-              handleSearch
+              handleSearch,
             )}
             onSort={onSortDetail}
             tableScrolled={{ y: 525, x: 2000 }}
@@ -1409,13 +1401,13 @@ const DetailBank = ({
               </DetailText>
               <DetailText label={"Start Date"}>
                 {moment(data_modal?.accountBankDto?.startDate).format(
-                  dateFormatting.dateCapital
+                  dateFormatting.dateCapital,
                 )}
               </DetailText>
               <DetailText label={"End Date"}>
                 {data_modal.accountBankDto?.endDate
                   ? moment(data_modal?.accountBankDto?.endDate).format(
-                      dateFormatting.dateCapital
+                      dateFormatting.dateCapital,
                     )
                   : ""}
               </DetailText>
@@ -1448,7 +1440,7 @@ const DetailBank = ({
               </DetailText>
               <DetailText label={"Created Date"}>
                 {moment(data_modal?.accountBankDto?.createdDate).format(
-                  "DD MMM YYYY HH:mm:ss"
+                  "DD MMM YYYY HH:mm:ss",
                 )}
               </DetailText>
               <DetailText label={"Created By"}>
@@ -1458,7 +1450,7 @@ const DetailBank = ({
                 {data_modal?.accountBankDto?.updatedDate === null
                   ? ""
                   : moment(data_modal?.accountBankDto?.updatedDate).format(
-                      "DD MMM YYYY HH:mm:ss"
+                      "DD MMM YYYY HH:mm:ss",
                     )}
               </DetailText>
               <DetailText label={"Updated By"}>
@@ -1486,7 +1478,7 @@ const DetailBank = ({
               {data_detail?.updatedDate === null
                 ? ""
                 : moment(data_detail?.updatedDate).format(
-                    "DD MMM YYYY HH:mm:ss"
+                    "DD MMM YYYY HH:mm:ss",
                   )}
             </DetailText>
             <DetailText label={"Updated By"}>

@@ -7,7 +7,7 @@ const Criteria = ({ apiHeader, data = [] }) => {
   const { loading } = useSelector((state) => state.pricingRule);
 
   const criteria = apiHeader?.rpricingRuleCriterias?.map(
-    (item) => item.criteria
+    (item) => item.criteria,
   );
 
   return (

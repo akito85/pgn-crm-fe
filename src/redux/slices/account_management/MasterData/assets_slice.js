@@ -50,11 +50,11 @@ export const getAssetsPaginate = createAsyncThunk(
           error: error,
           action: "GET_ASSETS_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadAssets = createAsyncThunk(
@@ -73,11 +73,11 @@ export const downloadAssets = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_ASSETS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getDetailAssets = createAsyncThunk(
@@ -93,11 +93,11 @@ export const getDetailAssets = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_ASSETS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const createAssets = createAsyncThunk(
   "CREATE_ASSETS",
@@ -118,11 +118,11 @@ export const createAssets = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_ASSETS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const updateAsstes = createAsyncThunk(
   "UPDATE_ASSETS",
@@ -142,11 +142,11 @@ export const updateAsstes = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_ASSETS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const activationAssets = createAsyncThunk(
   "ACTIVATION_ASSETS",
@@ -183,11 +183,11 @@ export const activationAssets = createAsyncThunk(
           error: error,
           action: "ACTIVATION_ASSETS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListAssetName = createAsyncThunk(
@@ -214,7 +214,7 @@ export const getListAssetName = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getListAssetType = createAsyncThunk(
   "LIST_ASSET_TYPE",
@@ -240,7 +240,7 @@ export const getListAssetType = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getListAssetBrand = createAsyncThunk(
   "LIST_ASSET_BRAND",
@@ -266,7 +266,7 @@ export const getListAssetBrand = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getListAssetServiceType = createAsyncThunk(
   "LIST_ASSET_SERVICE_TYPE",
@@ -292,7 +292,7 @@ export const getListAssetServiceType = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getListProductName = createAsyncThunk(
   "LIST_PRODUCT_NAME",
@@ -318,7 +318,7 @@ export const getListProductName = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getListServicePointName = createAsyncThunk(
   "LIST_SERVICE_POINT_NAME",
@@ -344,7 +344,7 @@ export const getListServicePointName = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getListGsize = createAsyncThunk(
   "LIST_G_SIZE",
@@ -370,7 +370,7 @@ export const getListGsize = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getListAnsi = createAsyncThunk("LIST_ANSI", async (thunkAPI) => {
   try {

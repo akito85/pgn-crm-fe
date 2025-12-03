@@ -38,7 +38,7 @@ const BankCreate = ({
 
     if (!domain || domain.indexOf(".") === -1) {
       return Promise.reject(
-        "Please enter a valid email address with a domain."
+        "Please enter a valid email address with a domain.",
       );
     }
 
@@ -170,7 +170,7 @@ const BankCreate = ({
                   const value = input.value.replace(/[^\d]/g, "");
                   const formattedValue = value.replace(
                     /(\d{2})(\d{3})(\d{3})(\d{1})(\d{3})(\d{4})/,
-                    "$1.$2.$3.$4-$5.$6"
+                    "$1.$2.$3.$4-$5.$6",
                   );
                   input.value = formattedValue;
                 }

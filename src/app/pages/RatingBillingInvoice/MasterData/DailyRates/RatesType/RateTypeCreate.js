@@ -111,7 +111,7 @@ const RateTypeCreate = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -169,7 +169,7 @@ const RateTypeCreate = ({ type }) => {
                 name={"code"}
                 rules={formMessageRequired("Code")}
               >
-                <InputComponent maxLength={100}/>
+                <InputComponent maxLength={100} />
               </Form.Item>
             </div>
             <Form.Item

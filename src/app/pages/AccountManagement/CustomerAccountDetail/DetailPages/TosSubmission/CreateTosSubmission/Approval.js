@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import BaseContainer from "../../../../../../../components/BaseContainer";
 import TablePagination from "../../../../../../../components/TablePagination";
@@ -84,7 +84,7 @@ const Approval = ({ type }) => {
   //  Handle Select Approval Hierarchy
   const handleSelect = (e) => {
     // dispatch(getListApprovalById(e));
-
+    console.log(e);
     setBoolean(true);
   };
   return (

@@ -82,7 +82,7 @@ const EditableCell = ({
 
   const filterOption = (input, option) =>
     option.props.children.toLowerCase().includes(input.toLowerCase());
-  
+
   const getInputNode = (inputType) => {
     switch (inputType) {
       case "select":
@@ -106,14 +106,12 @@ const EditableCell = ({
       case "endDate":
         return (
           <DateComponent
-          disabled={formTableCriteria.getFieldValue().startDate === null}
-          dateDisable={handleDisableEndDate}
+            disabled={formTableCriteria.getFieldValue().startDate === null}
+            dateDisable={handleDisableEndDate}
           />
-        ) 
-      default:
-        return (
-          <InputComponent />
         );
+      default:
+        return <InputComponent />;
     }
   };
   const inputNode = getInputNode(inputType);
@@ -151,7 +149,7 @@ const EditableCell = ({
                   {
                     validator: (_, value) =>
                       endDateValidator(
-                        formTableCriteria.getFieldValue().startDate
+                        formTableCriteria.getFieldValue().startDate,
                       )(_, value),
                   },
                 ]
@@ -423,14 +421,14 @@ const LateChargeTableCriteria = ({
 
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
 
   const handleDetailHistory = (record) => {
-    setModalHistory(true)
-    setDataHistory(record)
+    setModalHistory(true);
+    setDataHistory(record);
   };
 
   const columns = () => {
@@ -447,7 +445,7 @@ const LateChargeTableCriteria = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       {
         title: "ACTION",
@@ -475,7 +473,7 @@ const LateChargeTableCriteria = ({
                 </>
               ) : (
                 <div className="flex w-full justify-center gap-4">
-                {type === "detail" ? (
+                  {type === "detail" ? (
                     <Tooltip title="Detail">
                       <div className="pt-1">
                         <SVGIcon
@@ -486,7 +484,7 @@ const LateChargeTableCriteria = ({
                       </div>
                     </Tooltip>
                   ) : (
-                    <> 
+                    <>
                       <Tooltip title="Update">
                         <div
                           className={`flex justify-center${
@@ -497,24 +495,32 @@ const LateChargeTableCriteria = ({
                             name="IconEdit"
                             color={editingKey ? "#8D91A0" : "#ACC424"}
                             width={24}
-                            onClick={!editingKey ? () => edit(record) : undefined}
+                            onClick={
+                              !editingKey ? () => edit(record) : undefined
+                            }
                           />
                         </div>
                       </Tooltip>
                       <Tooltip title="Delete">
                         <div
                           className={`flex justify-center${
-                            record.typeData === "exist" ? " cursor-not-allowed" : ""
+                            record.typeData === "exist"
+                              ? " cursor-not-allowed"
+                              : ""
                           }`}
                         >
                           <SVGIcon
                             name="IconDelete"
                             color={
-                              record.typeData !== "exist" ? "#D90000" : "#8D91A0"
+                              record.typeData !== "exist"
+                                ? "#D90000"
+                                : "#8D91A0"
                             }
                             width={24}
                             className={
-                              record.typeData === "exist" ? "disabled" : undefined
+                              record.typeData === "exist"
+                                ? "disabled"
+                                : undefined
                             }
                             onClick={
                               record.typeData !== "exist"
@@ -534,19 +540,17 @@ const LateChargeTableCriteria = ({
       },
     ];
     const filterCol =
-      type !== "preview"
-        ? temp
-        : temp.filter((col) => col.title !== "ACTION");
-      return filterCol.filter((col) =>
-        col.title !== "NO" &&
-        col.title !== "ACTION" &&
-        col.title !== "START DATE" &&
-        col.title !== "END DATE" &&
-        col.title !== "DESCRIPTION"
-          ? dataCriteria.includes(col.indexValue)
-          : true
-      );
-    };
+      type !== "preview" ? temp : temp.filter((col) => col.title !== "ACTION");
+    return filterCol.filter((col) =>
+      col.title !== "NO" &&
+      col.title !== "ACTION" &&
+      col.title !== "START DATE" &&
+      col.title !== "END DATE" &&
+      col.title !== "DESCRIPTION"
+        ? dataCriteria.includes(col.indexValue)
+        : true,
+    );
+  };
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
 
   const handleDisplayColumn = (value) => {
@@ -627,9 +631,9 @@ const LateChargeTableCriteria = ({
                   required: col.required,
                   dataEditRecord: editDataRecord,
                   handleEditDataRecord: handleEditDataRecord,
-                  formTableCriteria:formTableCriteria
+                  formTableCriteria: formTableCriteria,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],
@@ -694,9 +698,7 @@ const LateChargeTableCriteria = ({
         </CardComponent>
       </ModalCustom>
       {/* End Modal History Log */}
-    
     </div>
-
   ) : null;
 };
 

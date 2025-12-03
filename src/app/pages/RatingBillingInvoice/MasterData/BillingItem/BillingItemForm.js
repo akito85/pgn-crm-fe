@@ -94,7 +94,7 @@ const BillingItemForm = (props) => {
   const [modalBack, setModalBack] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
-  const [modalValidationTable, setModalValidationTable] = useState(false)
+  const [modalValidationTable, setModalValidationTable] = useState(false);
 
   const [detailMapping, setDetailMapping] = useState(false); //map detail shown
   const [startDate, setStartDate] = useState();
@@ -138,11 +138,12 @@ const BillingItemForm = (props) => {
   useEffect(() => {
     if (type === "update" && id) {
       dispatch(getBillingItemDetail({ id }));
-      dispatch(getDetailDraft({id}))
+      dispatch(getDetailDraft({ id }));
     }
   }, [dispatch, type, id]);
 
-  const handleDataTypeExist = ( //for billing item
+  const handleDataTypeExist = (
+    //for billing item
     status,
     statusApproval,
     dataDetail,
@@ -153,14 +154,18 @@ const BillingItemForm = (props) => {
       case "ACTIVE":
         if (statusApproval === "DRAFT" && table === "mapping") {
           return dataCompare?.some(
-            (item) => item?.categoryId === dataDetail?.categoryId
-          ) ? { dataType: "exist" } : null;
-        } else if (statusApproval === "DRAFT"){
+            (item) => item?.categoryId === dataDetail?.categoryId,
+          )
+            ? { dataType: "exist" }
+            : null;
+        } else if (statusApproval === "DRAFT") {
           return dataCompare?.some((item) =>
             item?.detailMappingInfo?.some(
-              (detail) => detail?.item === dataDetail?.item
-            )
-          ) ? { dataType: "exist" } : null;
+              (detail) => detail?.item === dataDetail?.item,
+            ),
+          )
+            ? { dataType: "exist" }
+            : null;
         } else {
           return { dataType: "exist" }; // for active & approve
         }
@@ -192,14 +197,14 @@ const BillingItemForm = (props) => {
               return {
                 ...item,
                 createdDate: moment(item.createdDate).format(
-                  dateFormatting.date
+                  dateFormatting.date,
                 ),
                 // fileSize: bytesConverter(item.fileSize || 0),
                 // urlFile1: `${urlLink(item?.id)}`,
                 dataType: "exist",
               };
             })
-          : []
+          : [],
       );
       setdataTable(
         dataDetail?.mappingInformation?.map((item, index) => {
@@ -215,9 +220,14 @@ const BillingItemForm = (props) => {
               ? moment(item?.endDate).format(dateFormatting.date)
               : null,
             description: item?.description,
-            ...(handleDataTypeExist(dataDetail?.status, dataDetail?.statusApproval, item, dataCompare)),
+            ...handleDataTypeExist(
+              dataDetail?.status,
+              dataDetail?.statusApproval,
+              item,
+              dataCompare,
+            ),
           };
-        }) || []
+        }) || [],
       );
       (dataDetail?.mappingInformation || [])?.map((item) => {
         setAllDataDetailTable((prev) => {
@@ -237,14 +247,20 @@ const BillingItemForm = (props) => {
                     ? moment(detail?.endDate).format(dateFormatting.date)
                     : null,
                   description: detail?.description,
-                  ...(handleDataTypeExist(dataDetail?.status, dataDetail?.statusApproval, detail, dataCompare, "detailMap")),
+                  ...handleDataTypeExist(
+                    dataDetail?.status,
+                    dataDetail?.statusApproval,
+                    detail,
+                    dataCompare,
+                    "detailMap",
+                  ),
                 };
               }) || [],
           };
         });
       });
     },
-    [form]
+    [form],
   );
 
   useEffect(() => {
@@ -258,11 +274,10 @@ const BillingItemForm = (props) => {
         data_BillingItemDetail?.status === "ACTIVE" &&
         data_BillingItemDetail?.statusApproval === "DRAFT" &&
         data_BillingItemDetail.billingItemCode === id
-      ){
-        
+      ) {
         const body = {
           ...data_detailDraft,
-          startDate : data_detailDraft.startDate,
+          startDate: data_detailDraft.startDate,
           endDate: data_detailDraft?.endDate,
           approvalHierarchy: data_detailDraft?.approvalHierarchy,
           billingItemCategory: data_detailDraft?.billingItemCategoryId,
@@ -274,7 +289,7 @@ const BillingItemForm = (props) => {
           paymentWarranty: data_detailDraft?.paymentWarranty,
           status: data_BillingItemDetail?.status,
           statusApproval: data_BillingItemDetail?.statusApproval,
-        }
+        };
 
         handleSetDataUpdate(body, data_BillingItemDetail?.mappingInformation);
       } else {
@@ -337,7 +352,7 @@ const BillingItemForm = (props) => {
     } else {
       setEndDate(moment(e));
     }
-  }
+  };
 
   const handleChangesPayment = (e) => {
     setCheckedPaymentWarranty(e.target.checked);
@@ -347,38 +362,39 @@ const BillingItemForm = (props) => {
     setCheckedLateCharge(e.target.checked);
   };
 
-  const handleCheckDetailDateConflict = (data) =>{
+  const handleCheckDetailDateConflict = (data) => {
     const index = data_billingItemCategory
-    ?.filter((category) => category?.name === data.categoryName)
-    .find((data) => data?.id)?.id
+      ?.filter((category) => category?.name === data.categoryName)
+      .find((data) => data?.id)?.id;
     let result = false;
-    if(allDataDetailTable[index]?.length || 0 > 0){
+    if (allDataDetailTable[index]?.length || 0 > 0) {
       result = allDataDetailTable[index].some((dataDetail) => {
-        if(moment(data.startDate) > moment(dataDetail.startDate)){
+        if (moment(data.startDate) > moment(dataDetail.startDate)) {
           const body = {
             title: "Failed",
             description: `Detail Mapping has conflicted Date. Please try again.`,
             return: false,
-          }
+          };
           dispatch(showModalError(body));
           return true;
-          }
-        })
-        return result;
-      }
-      return false
+        }
+      });
+      return result;
     }
+    return false;
+  };
 
   const handleChangesMapInformation = (e, newData = {}) => {
-    if(!handleCheckDetailDateConflict(newData)){
+    if (!handleCheckDetailDateConflict(newData)) {
       const temp = e.map((item) => {
         return {
           ...item,
           ...(hasValue(item.categoryName) //looking for name for filtering table to get ID
             ? {
-                category: data_billingItemCategory
-                  ?.filter((category) => category?.name === item.categoryName)
-                  .find((item) => item?.id)?.id  || item?.category,
+                category:
+                  data_billingItemCategory
+                    ?.filter((category) => category?.name === item.categoryName)
+                    .find((item) => item?.id)?.id || item?.category,
                 // startDate: moment(item.startDate).format(dateFormatting.date),
                 // endDate: item?.endDate
                 //   ? moment(item.endDate).format(dateFormatting.date)
@@ -387,7 +403,7 @@ const BillingItemForm = (props) => {
             : {}),
         };
       });
-  
+
       setdataTable(
         // e.map((item) => {
         //   return {
@@ -405,19 +421,15 @@ const BillingItemForm = (props) => {
         //       : {}),
         //   };
         // })
-        temp
+        temp,
       );
-  
+
       setStartDateMap(
-        moment(
-          temp?.find((item) => item.category === category)?.startDate
-        )
+        moment(temp?.find((item) => item.category === category)?.startDate),
       );
       setEndDateMap(
-        moment(
-          temp?.find((item) => item.category === category)?.endDate
-        )
-      )
+        moment(temp?.find((item) => item.category === category)?.endDate),
+      );
     }
   };
 
@@ -427,9 +439,10 @@ const BillingItemForm = (props) => {
         ...item,
         ...(hasValue(item.itemName) //looking for name for filtering table to get ID
           ? {
-              item: detail_mapping_category
-                ?.filter((category) => category?.name === item.itemName)
-                .find((item) => item?.id)?.id || item?.item,
+              item:
+                detail_mapping_category
+                  ?.filter((category) => category?.name === item.itemName)
+                  .find((item) => item?.id)?.id || item?.item,
               // startDate: moment(item.startDate).format(dateFormatting.date),
               // endDate: item?.endDate
               //   ? moment(item.endDate).format(dateFormatting.date)
@@ -446,7 +459,7 @@ const BillingItemForm = (props) => {
   const handleCheckMissingDetailMap = (data, dataDetail) => {
     return (
       dataDetail.some(
-        (detail) => !data.hasOwnProperty(detail.category.toString())
+        (detail) => !data.hasOwnProperty(detail.category.toString()),
       ) || Object.keys(data).some((key) => data[key].length === 0)
     );
   };
@@ -467,7 +480,7 @@ const BillingItemForm = (props) => {
       return {
         item: parseInt(item),
         name: (data_billingItemCategory || []).find(
-          (data) => data.id === parseInt(item)
+          (data) => data.id === parseInt(item),
         )?.name,
       };
     });
@@ -508,7 +521,7 @@ const BillingItemForm = (props) => {
   const handleChangesCreateButtonDetail = (
     oldCategory,
     newCategory,
-    dataDetailTable
+    dataDetailTable,
   ) => {
     // setLoadingDetail(true);
     setAllDataDetailTable((prev) => ({
@@ -531,21 +544,23 @@ const BillingItemForm = (props) => {
       const temp =
         allDataDetailTable[
           data_billingItemCategory?.find(
-            (item) => bodyData?.categoryName === item?.name
+            (item) => bodyData?.categoryName === item?.name,
           )?.id
         ] || [];
 
       temp?.forEach((item) => {
-        if(moment(item?.startDate) < moment(bodyData?.startDate) || moment(item?.endDate) > moment(bodyData?.endDate)){
+        if (
+          moment(item?.startDate) < moment(bodyData?.startDate) ||
+          moment(item?.endDate) > moment(bodyData?.endDate)
+        ) {
           dataConflict.push(item);
         }
-      })
-      if(dataConflict?.length > 0){
-        setModalValidationTable(true)
+      });
+      if (dataConflict?.length > 0) {
+        setModalValidationTable(true);
       }
-      return dataConflict?.length > 0 ? false : true 
+      return dataConflict?.length > 0 ? false : true;
     }
-
   };
 
   const handleCreate = (e) => {
@@ -558,14 +573,14 @@ const BillingItemForm = (props) => {
       dispatch(getDetailMappingCategory(e.category));
       setStartDateMap(
         moment(
-          dataTable?.find((item) => item.category === e.category)?.startDate
-        )
+          dataTable?.find((item) => item.category === e.category)?.startDate,
+        ),
       );
       setEndDateMap(
         moment(
-          dataTable?.find((item) => item.category === e.category)?.endDate
-        )
-      )
+          dataTable?.find((item) => item.category === e.category)?.endDate,
+        ),
+      );
       setCategory(e.category);
       setDetailMapping(true);
     }
@@ -585,13 +600,13 @@ const BillingItemForm = (props) => {
     filteringAllDataDetailTable();
     if (category !== "") {
       setDetailMapping(
-        (dataTable || [])?.find((item) => item.category === category)
+        (dataTable || [])?.find((item) => item.category === category),
       );
     }
   }, [dataTable, category, filteringAllDataDetailTable]);
 
-   // Validate Data before Modal
-   const checkDataValidity = async (data) => {
+  // Validate Data before Modal
+  const checkDataValidity = async (data) => {
     const url =
       type === "create"
         ? "/v1/dbs/api/billingitem/validate-create"
@@ -604,7 +619,7 @@ const BillingItemForm = (props) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -628,7 +643,7 @@ const BillingItemForm = (props) => {
           title: "Failed",
           description: `${handleAllMissingDetailMap(
             allDataDetailTable,
-            dataTable
+            dataTable,
           )}. Please insert data.`,
         };
         dispatch(showModalError(errorBody));
@@ -657,11 +672,9 @@ const BillingItemForm = (props) => {
         if (isDataValid) {
           setDataSend(body);
           setOpenModal(true);
-          
         } else {
-          setOpenModal(false)
+          setOpenModal(false);
         }
-
       }
     }
   };
@@ -689,7 +702,7 @@ const BillingItemForm = (props) => {
       };
       dispatch(showModalSuccess(successMessage));
     },
-    [dispatch]
+    [dispatch],
   );
 
   const handleSave = (e) => {
@@ -700,7 +713,7 @@ const BillingItemForm = (props) => {
         const id = type === "create" ? data?.id : data_BillingItemDetail?.id;
         setLoadingForm(true);
         const filterDataAttach = listDataAttachment.filter(
-          (item) => item.dataType !== "exist"
+          (item) => item.dataType !== "exist",
         );
         for (let icon = 0; icon < filterDataAttach.length; icon++) {
           const element = filterDataAttach[icon];
@@ -711,7 +724,7 @@ const BillingItemForm = (props) => {
           };
           await ratingBillingHttpService.uploadAttachment(
             `/v1/dbs/api/billingitem/attachment-upload`,
-            body
+            body,
           );
         }
         setLoadingForm(false);
@@ -758,37 +771,37 @@ const BillingItemForm = (props) => {
       setCheckedLateCharge(false);
       setCheckedPaymentWarranty(false);
       setTypeSubmit(false);
-      setStartDate(null)
-      setStartDateMap(null)
-      setEndDate(null)
-      setEndDateMap(null)
+      setStartDate(null);
+      setStartDateMap(null);
+      setEndDate(null);
+      setEndDateMap(null);
     } else {
-      setDetailMapping(false)
+      setDetailMapping(false);
       setCategory("");
-        if (
-          data_BillingItemDetail?.status === "ACTIVE" &&
-          data_BillingItemDetail?.statusApproval === "DRAFT" &&
-          data_BillingItemDetail.billingItemCode === id
-        ){
-          const body = {
-            ...data_detailDraft,
-            startDate : data_detailDraft.startDate,
-            endDate: data_detailDraft?.endDate,
-            approvalHierarchy: data_detailDraft?.approvalHierarchy,
-            billingItemCategory: data_detailDraft?.billingItemCategoryId,
-            name: data_detailDraft?.billingItemName,
-            billType: data_detailDraft?.billingTypeId,
-            apphierId: data_detailDraft?.approvalHierarchy,
-            attachmentDtoList: data_BillingItemDetail?.attachmentDtoList,
-            lateCharge: data_detailDraft?.lateCharge,
-            paymentWarranty: data_detailDraft?.paymentWarranty,
-            status: data_BillingItemDetail?.status,
-            statusApproval: data_BillingItemDetail?.statusApproval,
-          }
+      if (
+        data_BillingItemDetail?.status === "ACTIVE" &&
+        data_BillingItemDetail?.statusApproval === "DRAFT" &&
+        data_BillingItemDetail.billingItemCode === id
+      ) {
+        const body = {
+          ...data_detailDraft,
+          startDate: data_detailDraft.startDate,
+          endDate: data_detailDraft?.endDate,
+          approvalHierarchy: data_detailDraft?.approvalHierarchy,
+          billingItemCategory: data_detailDraft?.billingItemCategoryId,
+          name: data_detailDraft?.billingItemName,
+          billType: data_detailDraft?.billingTypeId,
+          apphierId: data_detailDraft?.approvalHierarchy,
+          attachmentDtoList: data_BillingItemDetail?.attachmentDtoList,
+          lateCharge: data_detailDraft?.lateCharge,
+          paymentWarranty: data_detailDraft?.paymentWarranty,
+          status: data_BillingItemDetail?.status,
+          statusApproval: data_BillingItemDetail?.statusApproval,
+        };
 
-          handleSetDataUpdate(body, data_BillingItemDetail?.mappingInformation);
-        } else {
-          handleSetDataUpdate(data_BillingItemDetail);
+        handleSetDataUpdate(body, data_BillingItemDetail?.mappingInformation);
+      } else {
+        handleSetDataUpdate(data_BillingItemDetail);
       }
     }
     setOpenModal(false);
@@ -882,7 +895,7 @@ const BillingItemForm = (props) => {
                 dataMapDetailItemList={detail_mapping_category}
                 subHeader={`${
                   (data_billingItemCategory || []).find(
-                    (item) => item.id === category
+                    (item) => item.id === category,
                   )?.name
                 }`}
                 dataTable={dataDetailTable || []}

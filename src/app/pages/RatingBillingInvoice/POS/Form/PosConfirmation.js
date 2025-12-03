@@ -19,10 +19,10 @@ const PosConfirmation = ({
   dataApproval = {},
   dataApprovalTable = [],
   dataAttachment = [],
-  listApproval = []
+  listApproval = [],
 }) => {
   const [pointOfSalesPage, setPointOfSalesPage] = useState(
-    listPointOfSalesPage[0].value
+    listPointOfSalesPage[0].value,
   );
 
   const handlePointOfSalesPage = (e) => {

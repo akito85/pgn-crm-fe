@@ -12,7 +12,7 @@ export const columnsBillingBucket = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => {
   return [
     {
@@ -31,7 +31,7 @@ export const columnsBillingBucket = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -41,7 +41,7 @@ export const columnsBillingBucket = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -54,7 +54,7 @@ export const columnsBillingBucket = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -64,7 +64,7 @@ export const columnsBillingBucket = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -78,7 +78,7 @@ export const columnsBillingBucket = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -88,7 +88,7 @@ export const columnsBillingBucket = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -104,7 +104,7 @@ export const columnsBillingBucket = (
         searchText,
         handleSearch,
         true,
-        "dateCapital"
+        "dateCapital",
       ),
       render: (text) =>
         renderDateColumn(
@@ -113,7 +113,7 @@ export const columnsBillingBucket = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -129,7 +129,7 @@ export const columnsBillingBucket = (
         searchText,
         handleSearch,
         true,
-        "dateCapital"
+        "dateCapital",
       ),
       render: (text) =>
         renderDateColumn(
@@ -138,7 +138,7 @@ export const columnsBillingBucket = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -151,7 +151,7 @@ export const columnsBillingBucket = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ellipsis: {
         showTitle: false,
@@ -165,7 +165,7 @@ export const columnsBillingBucket = (
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -180,7 +180,7 @@ export const columnsBillingBucket = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (index) => {
         let text;
@@ -201,7 +201,7 @@ export const columnsBillingBucket = (
           text,
           false,
           "status",
-          search
+          search,
         );
       },
     },
@@ -217,7 +217,7 @@ export const columnsBillingBucket = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (index) => {
         let text;
@@ -238,7 +238,7 @@ export const columnsBillingBucket = (
           text,
           false,
           "status",
-          search
+          search,
         );
       },
     },

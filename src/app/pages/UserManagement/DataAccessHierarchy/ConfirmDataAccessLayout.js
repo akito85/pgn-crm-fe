@@ -35,7 +35,7 @@ const ConfirmDataAccessLayout = ({
       return rest;
     });
     const startDate = moment(formValue?.startDate).format(
-      dateFormatting.dateCapital
+      dateFormatting.dateCapital,
     );
     const endDate =
       hasValue(formValue?.endDate) === false

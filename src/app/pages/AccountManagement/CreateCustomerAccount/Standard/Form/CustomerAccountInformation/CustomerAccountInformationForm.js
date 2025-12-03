@@ -30,7 +30,7 @@ const CustomerAccountInformation = ({
   CAIObj = {},
   CIObj = {},
   handleCAIObj,
-  form
+  form,
 }) => {
   // Selector
   const {
@@ -93,15 +93,15 @@ const CustomerAccountInformation = ({
     });
   };
   useEffect(() => {
-    if(CAIObj.accountRegistrationNumber){
-      if(CAIObj.accountRegistrationNumber.length > 0 && CAIObj.accountRegistrationNumber.length < 11){
-        form.validateFields([
-          "accountRegistrationNumber"
-        ])
+    if (CAIObj.accountRegistrationNumber) {
+      if (
+        CAIObj.accountRegistrationNumber.length > 0 &&
+        CAIObj.accountRegistrationNumber.length < 11
+      ) {
+        form.validateFields(["accountRegistrationNumber"]);
       }
     }
-  }, [CAIObj, form])
-  
+  }, [CAIObj, form]);
 
   const validateInputNumber = (rule, value, callback) => {
     if (value && value.toString().length < 11) {
@@ -620,7 +620,10 @@ const CustomerAccountInformation = ({
                 </Select.Option>
               ))}
           </SelectComponent> */}
-          <UtilsTreeSelect treeData={filterData(data_industrialSector)} filterTreeNode={filterTreeNode}/>
+          <UtilsTreeSelect
+            treeData={filterData(data_industrialSector)}
+            filterTreeNode={filterTreeNode}
+          />
         </Form.Item>
       </div>
 

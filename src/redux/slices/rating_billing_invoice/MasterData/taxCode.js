@@ -49,7 +49,7 @@ export const getCategory = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListCategory = createAsyncThunk(
@@ -78,7 +78,7 @@ export const getListCategory = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getCriteria = createAsyncThunk(
@@ -104,7 +104,7 @@ export const getCriteria = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getCustomerSegment = createAsyncThunk(
@@ -130,7 +130,7 @@ export const getCustomerSegment = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAccountGroup = createAsyncThunk(
@@ -156,7 +156,7 @@ export const getAccountGroup = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getConditionName = createAsyncThunk(
@@ -182,7 +182,7 @@ export const getConditionName = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getConditionOperator = createAsyncThunk(
@@ -208,7 +208,7 @@ export const getConditionOperator = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getConditionType = createAsyncThunk(
@@ -234,7 +234,7 @@ export const getConditionType = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getTaxCodePaginate = createAsyncThunk(
@@ -263,7 +263,7 @@ export const getTaxCodePaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const downloadTaxCode = createAsyncThunk(
@@ -282,11 +282,11 @@ export const downloadTaxCode = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_ACCOUNT_STANDARD",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getDetailTaxCode = createAsyncThunk(
@@ -312,7 +312,7 @@ export const getDetailTaxCode = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getDetailDraftTaxCode = createAsyncThunk(
@@ -338,7 +338,7 @@ export const getDetailDraftTaxCode = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -364,7 +364,7 @@ export const getApprovalHistory = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListApprovalHierarchy = createAsyncThunk(
@@ -390,7 +390,7 @@ export const getListApprovalHierarchy = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListApprovalHierarchyDetail = createAsyncThunk(
@@ -416,7 +416,7 @@ export const getListApprovalHierarchyDetail = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const inactiveTaxCode = createAsyncThunk(
@@ -426,7 +426,7 @@ export const inactiveTaxCode = createAsyncThunk(
       const url = `/v1/dbs/api/tax-code/inactive`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -456,7 +456,7 @@ export const inactiveTaxCode = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 export const createTaxCode = createAsyncThunk(
@@ -495,7 +495,7 @@ export const createTaxCode = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 export const updateTaxCode = createAsyncThunk(
@@ -534,7 +534,7 @@ export const updateTaxCode = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 export const approvalInactiveTaxCode = createAsyncThunk(
@@ -544,7 +544,7 @@ export const approvalInactiveTaxCode = createAsyncThunk(
       const url = `/v1/dbs/api/tax-code/approve-inactive`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -564,7 +564,7 @@ export const approvalInactiveTaxCode = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         if (error.response.data.code === 419) {
           thunkAPI.dispatch(
-            validateError({ error, action: "APPROVAL_INACTIVE_TAX_CODE" })
+            validateError({ error, action: "APPROVAL_INACTIVE_TAX_CODE" }),
           );
         } else {
           const errorBody = {
@@ -579,7 +579,7 @@ export const approvalInactiveTaxCode = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approvalRejectTaxCode = createAsyncThunk(
@@ -589,7 +589,7 @@ export const approvalRejectTaxCode = createAsyncThunk(
       const url = `/v1/dbs/api/tax-code/approve`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -622,7 +622,7 @@ export const approvalRejectTaxCode = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 const taxCodeSlice = createSlice({

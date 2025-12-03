@@ -85,7 +85,7 @@ export const createAccountInformation = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAccountInformationPaging = createAsyncThunk(
@@ -115,7 +115,7 @@ export const getAccountInformationPaging = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getPaginateBank = createAsyncThunk(
@@ -134,11 +134,11 @@ export const getPaginateBank = createAsyncThunk(
           error: response,
           action: "GET_ALL_BANK",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getAccountVApagging = createAsyncThunk(
@@ -168,7 +168,7 @@ export const getAccountVApagging = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getDetailAccountInformation = createAsyncThunk(
@@ -195,7 +195,7 @@ export const getDetailAccountInformation = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getBankDetail = createAsyncThunk(
@@ -211,11 +211,11 @@ export const getBankDetail = createAsyncThunk(
           error: response,
           action: "DETAIL_MASTER_BANK",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getBankDetailDraft = createAsyncThunk(
@@ -242,7 +242,7 @@ export const getBankDetailDraft = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getDownloadBank = createAsyncThunk(
@@ -261,11 +261,11 @@ export const getDownloadBank = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_ACTION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getDownloadBankStatement = createAsyncThunk(
@@ -284,11 +284,11 @@ export const getDownloadBankStatement = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_ACTION_STATMENT_BAN",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response);
     }
-  }
+  },
 );
 
 export const inactiveBank = createAsyncThunk(
@@ -298,7 +298,7 @@ export const inactiveBank = createAsyncThunk(
       const url = `/v1/dbs/api/bank/update-status`;
       const response = await receiptCollectionHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successMessage = {
         title: "Successfull",
@@ -324,7 +324,7 @@ export const inactiveBank = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const inactiveBankAccount = createAsyncThunk(
@@ -358,7 +358,7 @@ export const inactiveBankAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAllApprovalList = createAsyncThunk(
@@ -385,7 +385,7 @@ export const getAllApprovalList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAllBankNotBranch = createAsyncThunk(
@@ -412,7 +412,7 @@ export const getAllBankNotBranch = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getJobContact = createAsyncThunk(
@@ -439,7 +439,7 @@ export const getJobContact = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getPositionContact = createAsyncThunk(
@@ -466,7 +466,7 @@ export const getPositionContact = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getZoneContact = createAsyncThunk(
@@ -495,7 +495,7 @@ export const getZoneContact = createAsyncThunk(
         return thunkAPI.rejectWithValue(error.response);
       }
     }
-  }
+  },
 );
 
 export const getContryContact = createAsyncThunk(
@@ -522,7 +522,7 @@ export const getContryContact = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAllContactPaginate = createAsyncThunk(
@@ -555,7 +555,7 @@ export const getAllContactPaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListApprovalById = createAsyncThunk(
@@ -582,7 +582,7 @@ export const getListApprovalById = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const approveOrRejectInactiveBank = createAsyncThunk(
@@ -624,7 +624,7 @@ export const approveOrRejectInactiveBank = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approveOrRejectInactiveBankAccount = createAsyncThunk(
@@ -656,7 +656,7 @@ export const approveOrRejectInactiveBankAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approveOrRejectBankAccount = createAsyncThunk(
@@ -698,7 +698,7 @@ export const approveOrRejectBankAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListCategory = createAsyncThunk(
@@ -729,7 +729,7 @@ export const getListCategory = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getInputType = createAsyncThunk(
@@ -756,7 +756,7 @@ export const getInputType = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getInputTypeContact = createAsyncThunk(
@@ -783,7 +783,7 @@ export const getInputTypeContact = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const createMasterBank = createAsyncThunk(
@@ -809,7 +809,7 @@ export const createMasterBank = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const createValidasiBank = createAsyncThunk(
@@ -835,7 +835,7 @@ export const createValidasiBank = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const createValidasiBankAccount = createAsyncThunk(
@@ -861,7 +861,7 @@ export const createValidasiBankAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const UpdateValidasiBankAccount = createAsyncThunk(
@@ -887,7 +887,7 @@ export const UpdateValidasiBankAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getTypeList = createAsyncThunk(
@@ -914,7 +914,7 @@ export const getTypeList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 //criteriaaaa
@@ -943,7 +943,7 @@ export const getListCriteria = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getProvinceList = createAsyncThunk(
@@ -970,7 +970,7 @@ export const getProvinceList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getCityList = createAsyncThunk(
@@ -997,7 +997,7 @@ export const getCityList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getDistrictList = createAsyncThunk(
@@ -1024,7 +1024,7 @@ export const getDistrictList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getSubDistrictList = createAsyncThunk(
@@ -1051,7 +1051,7 @@ export const getSubDistrictList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getProductList = createAsyncThunk(
@@ -1078,7 +1078,7 @@ export const getProductList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getCostCenterList = createAsyncThunk(
@@ -1105,7 +1105,7 @@ export const getCostCenterList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getSorList = createAsyncThunk(
@@ -1132,7 +1132,7 @@ export const getSorList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getGsizesList = createAsyncThunk(
@@ -1159,7 +1159,7 @@ export const getGsizesList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getCustomerSegment = createAsyncThunk(
@@ -1186,7 +1186,7 @@ export const getCustomerSegment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getIndustrialSectorList = createAsyncThunk(
@@ -1213,7 +1213,7 @@ export const getIndustrialSectorList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getServiceTypeList = createAsyncThunk(
@@ -1240,7 +1240,7 @@ export const getServiceTypeList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAccountCategoryList = createAsyncThunk(
@@ -1267,7 +1267,7 @@ export const getAccountCategoryList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAccountGroupList = createAsyncThunk(
@@ -1294,7 +1294,7 @@ export const getAccountGroupList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListCurrency = createAsyncThunk(
@@ -1321,7 +1321,7 @@ export const getListCurrency = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getListEntity = createAsyncThunk(
@@ -1348,7 +1348,7 @@ export const getListEntity = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getCustomer = createAsyncThunk(
@@ -1375,7 +1375,7 @@ export const getCustomer = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getBudgetList = createAsyncThunk(
@@ -1402,7 +1402,7 @@ export const getBudgetList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -1418,11 +1418,11 @@ export const getApprovalHistory = createAsyncThunk(
           error: error,
           action: "GET_APPROVAL_HISTORY_BANK_MASTER",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getApprovalHistoryBankAccount = createAsyncThunk(
@@ -1449,7 +1449,7 @@ export const getApprovalHistoryBankAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // get gl account
@@ -1462,11 +1462,11 @@ export const getGLAccount = createAsyncThunk(
       return response?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, actions: "GET_GL_ACCOUNT", back: false })
+        validateError({ error: error, actions: "GET_GL_ACCOUNT", back: false }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const bankSlice = createSlice({

@@ -39,7 +39,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         bgColor = "bg-gray-600";
         tColor = "text-white";
         break;
-        
+
       case "inactive":
       case "rejected":
       case "failed":

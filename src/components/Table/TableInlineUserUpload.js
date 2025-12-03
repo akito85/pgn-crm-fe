@@ -615,7 +615,7 @@ const TableInlineUserUpload = ({
                     maxLength: col.maxLength,
                   }),
                 };
-              })
+              }),
             )}
             rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
             components={{
@@ -720,7 +720,7 @@ const TableInlineUserUpload = ({
                   maxLength: col.maxLength,
                 }),
               };
-            })
+            }),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

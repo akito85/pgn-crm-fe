@@ -62,7 +62,7 @@ const ModalChooseContact = ({
           searchedColumn,
           searchText,
           handleSearch,
-          handleChooseContact
+          handleChooseContact,
         ),
       },
       {
@@ -76,7 +76,7 @@ const ModalChooseContact = ({
           searchedColumn,
           searchText,
           handleSearch,
-          handleChooseContact
+          handleChooseContact,
         ),
         render: (type) => <span>{type}</span>,
       },
@@ -91,7 +91,7 @@ const ModalChooseContact = ({
           searchedColumn,
           searchText,
           handleSearch,
-          handleChooseContact
+          handleChooseContact,
         ),
         render: (type) => <span>{type}</span>,
       },
@@ -106,7 +106,7 @@ const ModalChooseContact = ({
           searchedColumn,
           searchText,
           handleSearch,
-          handleChooseContact
+          handleChooseContact,
         ),
         render: (type) => <span>{type}</span>,
       },
@@ -190,7 +190,7 @@ const ModalChooseContact = ({
       setPageChoose(tempPage);
       setPageChooseSize(pageSizeChange);
     },
-    [pageChooseSize]
+    [pageChooseSize],
   );
 
   const onSort = (_, __, sort) => {

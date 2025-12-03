@@ -12,7 +12,7 @@ export const columnsBillingItem = (
   searchedColumnBI,
   searchTextBI,
   handleSearchBI = () => {},
-  searchBI
+  searchBI,
 ) => [
   {
     key: "no",
@@ -34,7 +34,7 @@ export const columnsBillingItem = (
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -44,7 +44,7 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
       ),
   },
   {
@@ -60,7 +60,7 @@ export const columnsBillingItem = (
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -70,7 +70,7 @@ export const columnsBillingItem = (
         separatorNumber(text),
         false,
         "input",
-        searchBI
+        searchBI,
       ),
   },
   {
@@ -86,7 +86,7 @@ export const columnsBillingItem = (
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -96,7 +96,7 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
       ),
   },
   {
@@ -112,7 +112,7 @@ export const columnsBillingItem = (
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -122,7 +122,7 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
       ),
   },
   {
@@ -137,7 +137,7 @@ export const columnsBillingItem = (
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -147,7 +147,7 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
       ),
   },
   {
@@ -163,7 +163,7 @@ export const columnsBillingItem = (
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -173,7 +173,7 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
       ),
   },
   {
@@ -189,7 +189,7 @@ export const columnsBillingItem = (
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -199,7 +199,7 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
       ),
   },
   {
@@ -215,7 +215,7 @@ export const columnsBillingItem = (
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -225,7 +225,7 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
       ),
   },
   {
@@ -241,7 +241,7 @@ export const columnsBillingItem = (
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -251,7 +251,7 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
       ),
   },
   {
@@ -267,7 +267,7 @@ export const columnsBillingItem = (
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -277,7 +277,7 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
       ),
   },
   {
@@ -293,7 +293,7 @@ export const columnsBillingItem = (
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -303,7 +303,7 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
       ),
   },
   {
@@ -318,7 +318,7 @@ export const columnsBillingItem = (
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -328,7 +328,7 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
       ),
   },
   {
@@ -344,7 +344,7 @@ export const columnsBillingItem = (
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -354,7 +354,7 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
       ),
   },
   {
@@ -372,7 +372,7 @@ export const columnsBillingItem = (
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -382,7 +382,7 @@ export const columnsBillingItem = (
         text,
         true,
         "input",
-        searchBI
+        searchBI,
       ),
   },
 ];

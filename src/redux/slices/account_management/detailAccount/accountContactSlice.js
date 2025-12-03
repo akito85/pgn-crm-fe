@@ -35,7 +35,7 @@ export const getListDetailAccountContact = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get detail account contact
@@ -50,7 +50,7 @@ export const getDetailAccountContact = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get List Choose Contact
@@ -66,7 +66,7 @@ export const getListChooseContact = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get detail after choose
@@ -80,7 +80,7 @@ export const getDetailContactAfterChoose = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Activation contact
@@ -113,7 +113,7 @@ export const activationAccountContact = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // Create Account Contact
@@ -148,7 +148,7 @@ export const createAccountContact = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 // Get Job
@@ -173,7 +173,7 @@ export const getPosition = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get Contact Address
@@ -187,7 +187,7 @@ export const getContactAddress = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const updateAccountContact = createAsyncThunk(
@@ -221,7 +221,7 @@ export const updateAccountContact = createAsyncThunk(
       // thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getContactType = createAsyncThunk(
@@ -234,7 +234,7 @@ export const getContactType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getInputType = createAsyncThunk(
@@ -247,7 +247,7 @@ export const getInputType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCountryCode = createAsyncThunk(
@@ -260,7 +260,7 @@ export const getCountryCode = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCountryZone = createAsyncThunk(
@@ -273,7 +273,7 @@ export const getCountryZone = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const accountContactSlice = createSlice({
@@ -324,10 +324,10 @@ const accountContactSlice = createSlice({
     },
 
     // Acivation Account Contact
-    [activationAccountContact.pending]: (state) => {
+    [activationAccountContact.pending]: (state, action) => {
       state.loading = true;
     },
-    [activationAccountContact.fulfilled]: (state) => {
+    [activationAccountContact.fulfilled]: (state, action) => {
       state.isSuccess = true;
       state.loading = false;
     },
@@ -416,27 +416,27 @@ const accountContactSlice = createSlice({
     },
 
     // Create Account Contact
-    [createAccountContact.pending]: (state) => {
+    [createAccountContact.pending]: (state, action) => {
       state.loading = true;
     },
-    [createAccountContact.fulfilled]: (state) => {
+    [createAccountContact.fulfilled]: (state, action) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [createAccountContact.rejected]: (state) => {
+    [createAccountContact.rejected]: (state, action) => {
       state.loading = false;
       state.isFailed = true;
     },
 
     // Update Account Contact
-    [updateAccountContact.pending]: (state) => {
+    [updateAccountContact.pending]: (state, action) => {
       state.loading = true;
     },
-    [updateAccountContact.fulfilled]: (state) => {
+    [updateAccountContact.fulfilled]: (state, action) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [updateAccountContact.rejected]: (state) => {
+    [updateAccountContact.rejected]: (state, action) => {
       state.loading = false;
       state.isFailed = true;
     },
@@ -489,6 +489,7 @@ const accountContactSlice = createSlice({
       state.data_country_zone = action.payload;
     },
     [getCountryZone.fulfilled]: (state, action) => {
+      console.log("🚀 ~ action:", action);
       state.loading = false;
       state.data_country_zone = action.payload;
       state.data_temp_zone = [...state?.data_temp_zone, ...action?.payload];

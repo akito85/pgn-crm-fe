@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   Form,
   Select,
@@ -41,10 +47,10 @@ const AddressForm = ({
   handleAddressObj = () => {},
   form,
   customerId,
-  handleContactChangesByAddress =()=>{},
+  handleContactChangesByAddress = () => {},
   setAddressObj,
   setTiObj,
-  tiObj
+  tiObj,
 }) => {
   // Selector
   const {
@@ -85,14 +91,14 @@ const AddressForm = ({
     districtId: null,
     subDistrictId: null,
     postalCodeId: null,
-  })
+  });
   // const [btnUpdate, setBtnUpdate] = useState(false);
 
   const [selectedLocationCreateNew, setSelectedLocationCreateNew] = useState({
     lat: -6.184395,
     lng: 106.844298,
   });
-  const [selectedMaps, setSelectedMaps] = useState('');
+  const [selectedMaps, setSelectedMaps] = useState("");
 
   const formAddressValues = formAddress.getFieldsValue();
 
@@ -115,24 +121,25 @@ const AddressForm = ({
   } = formAddressValues;
 
   const formValue = formAddress.getFieldsValue();
-  
+
   const replaceStreetName = useCallback(
     (val) => {
       if (val) {
         const result = val.replace(
           // /JALAN|JALAN\.|jLN|JL\.|JLN\.|JL/gi, ''
-          /JL\.|JLN\.|JLN|JALAN\.|JALAN|JL|/ig, ""
+          /JL\.|JLN\.|JLN|JALAN\.|JALAN|JL|/gi,
+          "",
         );
         return result;
       }
       return "";
     },
-    [formValue]
+    [formValue],
   );
 
   const fullAddress = `
-  ${building ?  `GEDUNG ${building}, ` : ""}
-  ${floor ?   `LANTAI ${floor}, ` : ""}
+  ${building ? `GEDUNG ${building}, ` : ""}
+  ${floor ? `LANTAI ${floor}, ` : ""}
   ${houseName ? houseName + ", " : ""}
   ${streetName ? `JL. ${replaceStreetName(streetName)}` + "," : ""}
   ${block ? `BLOCK ${block}, ` : ""}
@@ -196,7 +203,7 @@ const AddressForm = ({
 
   useEffect(() => {
     setDataBusinessPurpose(
-      data_businessPurpose?.filter((item) => item.id !== 162)
+      data_businessPurpose?.filter((item) => item.id !== 162),
     );
   }, [data_businessPurpose]);
 
@@ -218,13 +225,13 @@ const AddressForm = ({
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [customerId, search, page, pageSize, sort]);
 
   const validateBusinessPurpose = (index) => {
     if (
-      addressTable[index] 
+      addressTable[index]
       // &&
       // addressObj[`businessPurpose${index + 1}`]?.length > 0
     ) {
@@ -236,8 +243,7 @@ const AddressForm = ({
 
   // Validation Address Information
   const validateAddress = (index) => {
-
-    if ( index === 1 && addressTable.length >= 1) {
+    if (index === 1 && addressTable.length >= 1) {
       return validateBusinessPurpose(0);
     }
     if (index === 2 && addressTable.length >= 2) {
@@ -597,10 +603,12 @@ const AddressForm = ({
             <Tooltip title="Choose">
               <PlusCircleOutlined
                 onClick={
-                  !disabledPlus(r) ? () => {
-                    handleChooseAddress(r)
-                    businessPurposeReset()
-                  } : undefined
+                  !disabledPlus(r)
+                    ? () => {
+                        handleChooseAddress(r);
+                        businessPurposeReset();
+                      }
+                    : undefined
                 }
                 style={{
                   color: !disabledPlus(r) ? "#0075BF" : "#8D91A0",
@@ -640,7 +648,7 @@ const AddressForm = ({
         districtId: null,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
       dispatch(getProvince(e));
       return e;
     } else {
@@ -651,7 +659,7 @@ const AddressForm = ({
         districtId: null,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
     }
   };
 
@@ -670,7 +678,7 @@ const AddressForm = ({
         districtId: null,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
       dispatch(getCity(e));
       return e;
     } else {
@@ -681,7 +689,7 @@ const AddressForm = ({
         districtId: null,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
     }
   };
 
@@ -694,7 +702,7 @@ const AddressForm = ({
         districtId: null,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
       dispatch(getDistrict(e));
       return e;
     } else {
@@ -704,7 +712,7 @@ const AddressForm = ({
         districtId: null,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
     }
   };
 
@@ -716,7 +724,7 @@ const AddressForm = ({
         districtId: e,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
       dispatch(getSubDistrict(e));
       return e;
     } else {
@@ -725,7 +733,7 @@ const AddressForm = ({
         districtId: null,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
     }
   };
 
@@ -736,15 +744,15 @@ const AddressForm = ({
         ...inputAddress,
         subDistrictId: e,
         postalCodeId: null,
-      })
+      });
       dispatch(getPostalCode(e));
       return e;
-    }else {
+    } else {
       setInputAddress({
         ...inputAddress,
         subDistrictId: null,
         postalCodeId: null,
-      })
+      });
     }
   };
 
@@ -757,7 +765,7 @@ const AddressForm = ({
       districtId: null,
       subDistrictId: null,
       postalCodeId: null,
-    })
+    });
   };
 
   const handleChooseAddress = (record) => {
@@ -791,7 +799,7 @@ const AddressForm = ({
     }
 
     newData[keyModal - 1] = outputObject;
-    handleContactChangesByAddress(keyModal, newData)
+    handleContactChangesByAddress(keyModal, newData);
     setAddressTable(newData);
     setModalChooseAddress(false);
   };
@@ -799,34 +807,34 @@ const AddressForm = ({
   const businessPurposeReset = () => {
     setTiObj({
       ...tiObj,
-      taxAddress: null
-    })
+      taxAddress: null,
+    });
     if (keyModal === 1) {
       setAddressObj({
         ...addressObj,
         businessPurpose1: null,
-        premiseAddress1: false
-      })
+        premiseAddress1: false,
+      });
     } else if (keyModal === 2) {
       setAddressObj({
         ...addressObj,
         businessPurpose2: null,
-        premiseAddress2: false
-      })
+        premiseAddress2: false,
+      });
     } else if (keyModal === 3) {
       setAddressObj({
         ...addressObj,
         businessPurpose3: null,
-        premiseAddress3: false
-      })
-    } else{
+        premiseAddress3: false,
+      });
+    } else {
       setAddressObj({
         ...addressObj,
         businessPurpose4: null,
-        premiseAddress4: false
-      })
+        premiseAddress4: false,
+      });
     }
-  } 
+  };
 
   // Handle Add Value to Array
   const handleAdd = (formValue) => {
@@ -855,7 +863,7 @@ const AddressForm = ({
     }
 
     newData[keyModal - 1] = outputObject;
-    handleContactChangesByAddress(keyModal, newData)
+    handleContactChangesByAddress(keyModal, newData);
     setAddressTable(newData);
     setModalCreateAddress(false);
     setInputAddress({
@@ -865,11 +873,11 @@ const AddressForm = ({
       districtId: null,
       subDistrictId: null,
       postalCodeId: null,
-    })
+    });
     formAddress.resetFields();
     setTiObj({
-      taxAddress: null
-    })
+      taxAddress: null,
+    });
   };
 
   // Handle Function Maps
@@ -880,7 +888,7 @@ const AddressForm = ({
         lng: event.latLng.lng(),
       });
     },
-    [selectedLocationCreateNew]
+    [selectedLocationCreateNew],
   );
 
   const handleInputChange = (value, name) => {
@@ -892,14 +900,18 @@ const AddressForm = ({
 
   const RenderMaps = useMemo(() => {
     if (hasValue(selectedMaps)) {
-      if (selectedMaps?.toLowerCase() === 'google maps') {
-        return <Maps keyword={fullAddress} setSelectedLocationFront={setSelectedLocationCreateNew} />
+      if (selectedMaps?.toLowerCase() === "google maps") {
+        return (
+          <Maps
+            keyword={fullAddress}
+            setSelectedLocationFront={setSelectedLocationCreateNew}
+          />
+        );
       }
     } else {
-      return <></>
+      return <></>;
     }
   }, [fullAddress, selectedMaps]);
-
 
   return (
     <div>
@@ -1200,30 +1212,30 @@ const AddressForm = ({
       </div>
 
       {/* Modal Choose Address */}
-      {modalChooseAddress ?
-      <ModalCustom
-        isOpen={modalChooseAddress}
-        type="confirmation"
-        header={"Choose Address"}
-        width={1200}
-        handleCancel={handleCancelModalChooseAddress}
-        footer={
-          <div className={"w-full flex justify-end gap-5"}>
-            <ButtonComponent
-              type={"default"}
-              onClick={handleCancelModalChooseAddress}
-            >
-              Cancel
-            </ButtonComponent>
-          </div>
-        }
-      >
-        <span className="text-primary uppercase font-bold">
-          ADDRESS INFORMATION
-        </span>
+      {modalChooseAddress ? (
+        <ModalCustom
+          isOpen={modalChooseAddress}
+          type="confirmation"
+          header={"Choose Address"}
+          width={1200}
+          handleCancel={handleCancelModalChooseAddress}
+          footer={
+            <div className={"w-full flex justify-end gap-5"}>
+              <ButtonComponent
+                type={"default"}
+                onClick={handleCancelModalChooseAddress}
+              >
+                Cancel
+              </ButtonComponent>
+            </div>
+          }
+        >
+          <span className="text-primary uppercase font-bold">
+            ADDRESS INFORMATION
+          </span>
 
-        <div className="w-full flex justify-end my-[30px] gap-3">
-          {/* {addressTable?.length <= keyModal ? (
+          <div className="w-full flex justify-end my-[30px] gap-3">
+            {/* {addressTable?.length <= keyModal ? (
             <>
               <ButtonComponent
                 type={"submit"}
@@ -1236,36 +1248,37 @@ const AddressForm = ({
               </ButtonComponent>
             </>
           ) : null} */}
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => {
-              setModalChooseAddress(false);
-              setModalCreateAddress(true);
-            }}
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
-          >
-            Create
-          </ButtonComponent>
-        </div>
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => {
+                setModalChooseAddress(false);
+                setModalCreateAddress(true);
+              }}
+              icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            >
+              Create
+            </ButtonComponent>
+          </div>
 
-        <div className="w-full">
-          <TablePagination
-            loading={loading}
-            dataSource={dataSource}
-            columns={columns}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChange}
-            onSizeChanger={handleChange}
-            onSort={onSort}
-            totalData={data_address?.page?.totalElements}
-            tableScrolled={{
-              x: 4000,
-              y: 300,
-            }}
-          />
-        </div>
-      </ModalCustom> : null}
+          <div className="w-full">
+            <TablePagination
+              loading={loading}
+              dataSource={dataSource}
+              columns={columns}
+              current={page}
+              pageSize={pageSize}
+              onChange={handleChange}
+              onSizeChanger={handleChange}
+              onSort={onSort}
+              totalData={data_address?.page?.totalElements}
+              tableScrolled={{
+                x: 4000,
+                y: 300,
+              }}
+            />
+          </div>
+        </ModalCustom>
+      ) : null}
 
       {/* Modal Create Address */}
       <ModalCustom
@@ -1285,7 +1298,7 @@ const AddressForm = ({
             districtId: null,
             subDistrictId: null,
             postalCodeId: null,
-          })
+          });
         }}
         footer={
           <div className={"w-full flex justify-end gap-5"}>
@@ -1303,7 +1316,7 @@ const AddressForm = ({
                     districtId: null,
                     subDistrictId: null,
                     postalCodeId: null,
-                  })
+                  });
                 }}
               >
                 Cancel
@@ -1389,9 +1402,7 @@ const AddressForm = ({
               getValueFromEvent={handleOnChangeCity}
             >
               <SelectComponent
-                disabled={
-                  !inputAddress?.provinceId ? true : false
-                }
+                disabled={!inputAddress?.provinceId ? true : false}
               >
                 {data_city?.data &&
                   data_city?.data?.map((data) => (
@@ -1412,9 +1423,7 @@ const AddressForm = ({
               ]}
               getValueFromEvent={handleOnChangeDistrict}
             >
-              <SelectComponent
-                disabled={!inputAddress?.cityId ? true : false}
-              >
+              <SelectComponent disabled={!inputAddress?.cityId ? true : false}>
                 {data_district?.data &&
                   data_district?.data?.map((data) => (
                     <Select.Option key={data.id} value={data.id}>
@@ -1435,9 +1444,7 @@ const AddressForm = ({
               getValueFromEvent={handleOnChangeSubDistrict}
             >
               <SelectComponent
-                disabled={
-                  !inputAddress?.districtId ? true : false
-                }
+                disabled={!inputAddress?.districtId ? true : false}
               >
                 {data_subDistrict?.data &&
                   data_subDistrict?.data?.map((data) => (
@@ -1458,9 +1465,7 @@ const AddressForm = ({
               ]}
             >
               <SelectComponent
-                disabled={
-                  !inputAddress?.subDistrictId ? true : false
-                }
+                disabled={!inputAddress?.subDistrictId ? true : false}
               >
                 {data_postalCode?.data &&
                   data_postalCode?.data?.map((data) => (
@@ -1605,7 +1610,7 @@ const AddressForm = ({
                 },
               ]}
             >
-              <SelectComponent onChange={e => setSelectedMaps(e)}>
+              <SelectComponent onChange={(e) => setSelectedMaps(e)}>
                 {/* {data_productName &&
                   data_productName?.map((data) => (
                     <Select.Option key={data.id} value={data.id}>
@@ -1648,11 +1653,8 @@ const AddressForm = ({
 
           <div className={"w-full grid grid-cols-1 gap-2"}>
             <span className="text-primary">Pinpoint address coordinate</span>
-            <div className="w-full">
-              {RenderMaps}
-            </div>
+            <div className="w-full">{RenderMaps}</div>
           </div>
-
         </Form>
       </ModalCustom>
     </div>

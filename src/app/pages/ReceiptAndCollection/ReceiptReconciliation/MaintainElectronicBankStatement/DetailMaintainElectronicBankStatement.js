@@ -273,7 +273,7 @@ const DetailMaintainElectronicBankStatement = (props) => {
             <DetailText label={"Updated Date"}>
               {data_detail?.updatedDate
                 ? moment(data_detail?.updatedDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : null}
             </DetailText>

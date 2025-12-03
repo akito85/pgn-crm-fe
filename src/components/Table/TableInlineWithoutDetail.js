@@ -185,7 +185,7 @@ const TableInlineWithoutDetail = (props) => {
   useEffect(() => {
     if (mode === "update") {
       setData(
-        tableData?.map((row, index) => ({ ...row, key: index.toString() }))
+        tableData?.map((row, index) => ({ ...row, key: index.toString() })),
       );
     }
   }, [mode, tableData]);
@@ -419,7 +419,7 @@ const TableInlineWithoutDetail = (props) => {
                   regex: regex,
                   required: required,
                 }),
-              }))
+              })),
             )}
             rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
             components={{

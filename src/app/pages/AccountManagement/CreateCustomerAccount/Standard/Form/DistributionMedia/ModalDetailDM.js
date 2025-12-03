@@ -14,7 +14,7 @@ const ModalDetailDM = ({
   pageSize,
   handleChange,
   columns,
-  onSort
+  onSort,
 }) => {
   return (
     <ModalCustom

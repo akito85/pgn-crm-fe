@@ -174,7 +174,7 @@ const sorter = (fieldSort, a, b) => {
       case "totalAmountEqvIdr":
       case "totalAmountEqvUsd":
         return Math.sign(
-          parseInt(a.replace(/,/g, "")) - parseInt(b.replace(/,/g, ""))
+          parseInt(a.replace(/,/g, "")) - parseInt(b.replace(/,/g, "")),
         );
       default:
         return a.localeCompare(b);
@@ -220,7 +220,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -230,7 +230,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["posNumber"]
@@ -261,7 +261,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -271,7 +271,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["proformaInvoice"]
@@ -302,7 +302,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -312,7 +312,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["invoiceNumber"]
@@ -343,7 +343,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -353,7 +353,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["billingCycle"]
@@ -386,7 +386,7 @@ const PosApprovalTable = ({
         searchText,
         handleSearch,
         true,
-        "datePeriod"
+        "datePeriod",
       ),
       render: (text) =>
         renderDateColumn(
@@ -395,7 +395,7 @@ const PosApprovalTable = ({
           searchText,
           text,
           "datePeriod",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["billingPeriod"]
@@ -426,7 +426,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -436,7 +436,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["customerNumber"]
@@ -467,7 +467,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -477,7 +477,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["customerName"]
@@ -508,7 +508,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -518,7 +518,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["accountNumber"]
@@ -547,7 +547,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -557,7 +557,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["accountName"]
@@ -595,7 +595,7 @@ const PosApprovalTable = ({
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -604,7 +604,7 @@ const PosApprovalTable = ({
           searchText,
           text,
           "date",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["proformaInvoiceDate"]
@@ -657,7 +657,7 @@ const PosApprovalTable = ({
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -666,7 +666,7 @@ const PosApprovalTable = ({
           searchText,
           text,
           "date",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["invoiceDate"]
@@ -719,7 +719,7 @@ const PosApprovalTable = ({
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -728,7 +728,7 @@ const PosApprovalTable = ({
           searchText,
           text,
           "date",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["transactionDate"]
@@ -776,7 +776,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -786,7 +786,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["currency"]
@@ -818,7 +818,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -828,7 +828,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["accountGroupType"]
@@ -858,7 +858,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -868,7 +868,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["sor"]?.toString().toLowerCase().includes(value.toLowerCase()),
@@ -894,7 +894,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -904,7 +904,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["costCenter"]
@@ -935,7 +935,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -945,7 +945,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["accountSegment"]
@@ -976,7 +976,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -986,7 +986,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["meterReadingCode"]
@@ -1111,7 +1111,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1121,7 +1121,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["amountIdr"]
@@ -1151,7 +1151,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1161,7 +1161,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["amountUsd"]
@@ -1191,7 +1191,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1201,7 +1201,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["taxBasisIdr"]
@@ -1231,7 +1231,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1241,7 +1241,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["taxBasisUsd"]
@@ -1273,7 +1273,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1283,7 +1283,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["taxBasisEqvIdr"]
@@ -1313,7 +1313,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1323,7 +1323,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["vatIdr"]
@@ -1353,7 +1353,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1363,7 +1363,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["vatUsd"]
@@ -1393,7 +1393,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1403,7 +1403,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["vatEqvIdr"]
@@ -1435,7 +1435,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1445,7 +1445,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["withholdingTax"]
@@ -1475,7 +1475,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1485,7 +1485,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["taxRateType"]
@@ -1515,7 +1515,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1525,7 +1525,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["taxRate"]
@@ -1558,7 +1558,7 @@ const PosApprovalTable = ({
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -1567,7 +1567,7 @@ const PosApprovalTable = ({
           searchText,
           text,
           "date",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["taxRateDate"]
@@ -1617,7 +1617,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1627,7 +1627,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["discountAmount"]
@@ -1660,7 +1660,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1670,7 +1670,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["discountAmountIdr"]
@@ -1703,7 +1703,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1713,7 +1713,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["discountAmountUsd"]
@@ -1745,7 +1745,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1755,7 +1755,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["totalAmountIdr"]
@@ -1787,7 +1787,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1797,7 +1797,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["totalAmountUsd"]
@@ -1829,7 +1829,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -1839,7 +1839,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["termsOfPayment"]
@@ -1874,7 +1874,7 @@ const PosApprovalTable = ({
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -1883,7 +1883,7 @@ const PosApprovalTable = ({
           searchText,
           text,
           "date",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["accountingDate"]
@@ -1934,7 +1934,7 @@ const PosApprovalTable = ({
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -1943,7 +1943,7 @@ const PosApprovalTable = ({
           searchText,
           text,
           "date",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["dueDate"]
@@ -1991,7 +1991,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -2001,7 +2001,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["rateType"]
@@ -2031,7 +2031,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -2041,7 +2041,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["rate"]?.toString().toLowerCase().includes(value.toLowerCase()),
@@ -2071,7 +2071,7 @@ const PosApprovalTable = ({
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
 
       render: (text) =>
@@ -2081,7 +2081,7 @@ const PosApprovalTable = ({
           searchText,
           text,
           "date",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["rateDate"]
@@ -2132,7 +2132,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -2142,7 +2142,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["totalAmountEqvIdr"]
@@ -2168,7 +2168,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -2178,7 +2178,7 @@ const PosApprovalTable = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "totalAmountEqvUsd",
@@ -2298,7 +2298,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -2310,7 +2310,7 @@ const PosApprovalTable = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -2320,7 +2320,7 @@ const PosApprovalTable = ({
           text,
           true,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) =>
       //   record["remark"]

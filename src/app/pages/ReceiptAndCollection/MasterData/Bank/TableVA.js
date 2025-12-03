@@ -10,7 +10,7 @@ export const columnVA = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -30,7 +30,7 @@ export const columnVA = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
   },
   {
@@ -44,7 +44,7 @@ export const columnVA = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
   },
   {
@@ -58,7 +58,7 @@ export const columnVA = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
   },
 ];
@@ -97,7 +97,7 @@ const TableVA = ({
         pageSize,
         sort,
         search: tempSearch,
-      })
+      }),
     );
   }, [id, page, pageSize, sort, search]);
 
@@ -126,7 +126,7 @@ const TableVA = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         )}
         current={page}
         onChange={handleChange}

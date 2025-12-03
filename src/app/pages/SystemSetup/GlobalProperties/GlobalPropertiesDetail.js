@@ -5,10 +5,7 @@ import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
-import {
-  getGlobalPropertiesDetail,
-
-} from "../../../../redux/slices/system_setup/globalProperties";
+import { getGlobalPropertiesDetail } from "../../../../redux/slices/system_setup/globalProperties";
 import BaseContainer from "../../../../components/BaseContainer";
 import DetailText from "../../../../components/DetailText";
 import { dateFormat, renderColumn, toTitleCase } from "../../../../utils";
@@ -21,11 +18,10 @@ import { getColumnSearchProps } from "../../../../utils/getColumnSearchProps.js"
 import TablePaginationNew from "../../../../components/TablePaginationNew.js";
 import { sorterFunction } from "../../../../utils/sorterFunction.js";
 
-
 const GlobalPropertiesDetail = () => {
   // Selector
   const { data_detail, loading } = useSelector(
-    (state) => state.globalProperties
+    (state) => state.globalProperties,
   );
   const { bodyError } = useSelector((state) => state?.general);
 
@@ -48,7 +44,6 @@ const GlobalPropertiesDetail = () => {
     dispatch(getGlobalPropertiesDetail(id));
   }, [id, dispatch]);
 
-
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -64,7 +59,6 @@ const GlobalPropertiesDetail = () => {
       };
     });
   };
-
 
   // Breadcrumbs
   const routes = [
@@ -92,35 +86,60 @@ const GlobalPropertiesDetail = () => {
     {
       title: "KEY",
       dataIndex: "gpdKey",
-      sorter: (a, b) => sorterFunction('gpdKey', a, b),
+      sorter: (a, b) => sorterFunction("gpdKey", a, b),
       ...getColumnSearchProps(
         "gpdKey",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('gpdKey', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "gpdKey",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "VALUE",
       dataIndex: "gpdVal",
       align: "left",
-      sorter: (a, b) => sorterFunction('gpdVal', a,b),
+      sorter: (a, b) => sorterFunction("gpdVal", a, b),
       ...getColumnSearchProps(
         "gpdVal",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text, record) => {
         if (record?.isEncrypt === true) {
-          return renderColumn('gpdVal', searchedColumn, searchText, "*"?.repeat(text?.length), false, 'input', search)
+          return renderColumn(
+            "gpdVal",
+            searchedColumn,
+            searchText,
+            "*"?.repeat(text?.length),
+            false,
+            "input",
+            search,
+          );
         } else {
-          return renderColumn('gpdVal', searchedColumn, searchText, text, false, 'input', search)
+          return renderColumn(
+            "gpdVal",
+            searchedColumn,
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          );
         }
       },
     },
@@ -129,23 +148,32 @@ const GlobalPropertiesDetail = () => {
       dataIndex: "dataTypeName",
       align: "left",
       width: 220,
-      sorter: (a, b) => sorterFunction('dataTypeName', a, b),
+      sorter: (a, b) => sorterFunction("dataTypeName", a, b),
       ...getColumnSearchProps(
         "dataTypeName",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
-      render: (text) => renderColumn('dataTypeName', searchedColumn, searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "dataTypeName",
+          searchedColumn,
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "STATUS",
       dataIndex: "status",
       width: 120,
       fixed: "right",
-      sorter: (a, b) => sorterFunction('status', a, b),
+      sorter: (a, b) => sorterFunction("status", a, b),
       ...getColumnSearchProps(
         "status",
         searchInput,
@@ -153,9 +181,18 @@ const GlobalPropertiesDetail = () => {
         searchText,
         handleSearch,
         true,
-        'status'
+        "status",
       ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, toTitleCase(text), false, 'status', search)
+      render: (text) =>
+        renderColumn(
+          "status",
+          searchedColumn,
+          searchText,
+          toTitleCase(text),
+          false,
+          "status",
+          search,
+        ),
     },
   ];
 
@@ -166,14 +203,13 @@ const GlobalPropertiesDetail = () => {
     setPageSize(pageSizeChange);
   };
 
-
   // handle Retry
   const handleRetry = () => {
-    handleCancelTryAgain()
+    handleCancelTryAgain();
     dispatch(getGlobalPropertiesDetail(id));
   };
 
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
     <LayoutMenu>
@@ -185,16 +221,16 @@ const GlobalPropertiesDetail = () => {
               {data_detail?.name}
             </DetailText>
             <DetailText label={"Type"}>{data_detail?.gpType}</DetailText>
-            <DetailText label={"Status"}>{toTitleCase(data_detail?.status)}</DetailText>
+            <DetailText label={"Status"}>
+              {toTitleCase(data_detail?.status)}
+            </DetailText>
           </div>
           <DetailText label={"Description"}>{data_detail?.desc}</DetailText>
         </BaseContainer>
 
         <BaseContainer header={"HISTORY LOG INFORMATION"}>
           <div className="grid grid-cols-5 w-full">
-            <DetailText label={"Record Id"}>
-              {data_detail?.gpId}
-            </DetailText>
+            <DetailText label={"Record Id"}>{data_detail?.gpId}</DetailText>
             <DetailText label={"Created Date"}>
               {data_detail?.createdDate
                 ? moment(data_detail.createdDate).format(dateFormat)

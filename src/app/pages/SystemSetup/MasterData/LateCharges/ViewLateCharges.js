@@ -61,7 +61,7 @@ const ViewLateCharges = () => {
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      getLateChargePaginate({ search: reqSearch, sort, page, pageSize })
+      getLateChargePaginate({ search: reqSearch, sort, page, pageSize }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
@@ -110,12 +110,12 @@ const ViewLateCharges = () => {
     const activeOrInactive =
       typeStatus === "ACTIVE" ? "inactivate" : "activate";
     await dispatch(
-      activeInactiveLateCharge({ body, activeOrInactive })
+      activeInactiveLateCharge({ body, activeOrInactive }),
     ).unwrap();
     setOpenModalActivation(false);
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     await dispatch(
-      getLateChargePaginate({ page, pageSize, sort, search: reqSearch })
+      getLateChargePaginate({ page, pageSize, sort, search: reqSearch }),
     ).unwrap();
     form.resetFields();
   };
@@ -147,7 +147,7 @@ const ViewLateCharges = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -157,7 +157,7 @@ const ViewLateCharges = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -175,7 +175,7 @@ const ViewLateCharges = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -185,7 +185,7 @@ const ViewLateCharges = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -206,7 +206,7 @@ const ViewLateCharges = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -216,7 +216,7 @@ const ViewLateCharges = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -234,7 +234,7 @@ const ViewLateCharges = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -244,7 +244,7 @@ const ViewLateCharges = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -264,7 +264,7 @@ const ViewLateCharges = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -274,7 +274,7 @@ const ViewLateCharges = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -294,7 +294,7 @@ const ViewLateCharges = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -304,7 +304,7 @@ const ViewLateCharges = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -321,7 +321,7 @@ const ViewLateCharges = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -331,11 +331,11 @@ const ViewLateCharges = () => {
             text,
             false,
             "status",
-            search
+            search,
           ),
       },
     ],
-    [page, pageSize, search, searchText, searchedColumn]
+    [page, pageSize, search, searchText, searchedColumn],
   );
 
   // Breadcrumbs
@@ -382,7 +382,7 @@ const ViewLateCharges = () => {
     if (bodyError?.action === "GET_LATE_CHARGE_PAGINATE") {
       const reqSearch = encodeURIComponent(JSON.stringify(search));
       dispatch(
-        getLateChargePaginate({ search: reqSearch, sort, page, pageSize })
+        getLateChargePaginate({ search: reqSearch, sort, page, pageSize }),
       );
     } else if (bodyError?.action === "DOWNLOAD_LATE_CHARGE") {
       handleDownload();
@@ -506,7 +506,7 @@ const ViewLateCharges = () => {
 
   const actionCols = useColumnActionPermission(
     ["Activate", "View", "Update"],
-    itemActions
+    itemActions,
   );
 
   const allColumns = useMemo(() => {

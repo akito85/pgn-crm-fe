@@ -17,7 +17,7 @@ const columns = (
   type,
   typeUpdate,
   dataTaxImplicationRule,
-  dataTransCode
+  dataTransCode,
 ) => {
   const temp = [
     {
@@ -37,7 +37,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -51,7 +51,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) => {
         return (
@@ -70,7 +70,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -145,7 +145,7 @@ const expandedRowRender = (record) => {
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => {}
+    handleSearch = () => {},
   ) => {
     return [
       {
@@ -164,7 +164,7 @@ const expandedRowRender = (record) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -177,7 +177,7 @@ const expandedRowRender = (record) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -190,7 +190,7 @@ const expandedRowRender = (record) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         render: (value, r) => {
           return (
@@ -303,7 +303,7 @@ const TableTaxImplicationRuleOverride = ({
           type,
           typeUpdate,
           dataTaxImplicationRule,
-          dataTransCode
+          dataTransCode,
         )}
         current={page}
         pageSize={pageSize}

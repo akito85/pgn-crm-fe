@@ -1,12 +1,6 @@
 import moment from "moment";
-import {
-  hasValue,
-  renderColumn,
-  renderDateColumn,
-} from "../../../../utils";
-import {
-  getColumnSearchPropsUseFilteredValueFE,
-} from "../../../../utils/getColumnSearchProps";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
 
 const sorter = (fieldSort, a, b) => {
   const handleDataSort = (obj) => {
@@ -60,7 +54,7 @@ const sorter = (fieldSort, a, b) => {
       case "maxContract":
       case "minContract":
         return Math.sign(
-          parseFloat(a.replace(/,/g, "")) - parseFloat(b.replace(/,/g, ""))
+          parseFloat(a.replace(/,/g, "")) - parseFloat(b.replace(/,/g, "")),
         );
       default:
         return a.localeCompare(b);
@@ -77,7 +71,7 @@ export const columnsGenerateInvoice = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -99,7 +93,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -109,7 +103,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -124,7 +118,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -134,7 +128,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -153,7 +147,7 @@ export const columnsGenerateInvoice = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -162,7 +156,7 @@ export const columnsGenerateInvoice = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -177,7 +171,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -187,7 +181,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -204,7 +198,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -214,7 +208,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -229,7 +223,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -239,7 +233,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -256,7 +250,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -266,7 +260,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -284,7 +278,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -294,7 +288,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -310,7 +304,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -320,7 +314,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -336,7 +330,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -346,7 +340,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -363,7 +357,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -373,7 +367,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -389,7 +383,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -399,7 +393,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -415,7 +409,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -425,7 +419,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -441,7 +435,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -451,7 +445,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -469,7 +463,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -479,7 +473,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -495,7 +489,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -505,7 +499,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -523,7 +517,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -533,7 +527,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -551,7 +545,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -561,7 +555,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -577,7 +571,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -587,7 +581,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -603,7 +597,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -613,7 +607,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -631,7 +625,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -641,7 +635,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -659,7 +653,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -669,7 +663,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -687,7 +681,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -697,7 +691,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -713,7 +707,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -723,7 +717,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -738,7 +732,7 @@ export const columnsGenerateInvoice = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -748,7 +742,7 @@ export const columnsGenerateInvoice = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
 ];

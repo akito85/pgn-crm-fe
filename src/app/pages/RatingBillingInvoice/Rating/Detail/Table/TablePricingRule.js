@@ -9,7 +9,7 @@ export const columnsPricingRule = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -29,7 +29,7 @@ export const columnsPricingRule = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text, row, index) => {
       return searchedColumn === "min" ? (
@@ -57,7 +57,7 @@ export const columnsPricingRule = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text, row, index) => {
       return searchedColumn === "max" ? (
@@ -85,7 +85,7 @@ export const columnsPricingRule = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text, row, index) => {
       return searchedColumn === "priceCode" ? (
@@ -112,10 +112,11 @@ export const columnsPricingRule = (
         align: "right",
         render: (value, record) => {
           // Remove comma and convert to number for NumericFormat
-          const numericValue = typeof value === 'string' 
-            ? parseFloat(value.replace(/,/g, '')) 
-            : value;
-          
+          const numericValue =
+            typeof value === "string"
+              ? parseFloat(value.replace(/,/g, ""))
+              : value;
+
           return (
             <NumericFormat
               displayType="text"

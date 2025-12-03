@@ -74,7 +74,7 @@ const ModalContact = ({
       };
       return dataOptions?.filter((a) => obj[selectedType]?.includes(a.value));
     },
-    [selectedType]
+    [selectedType],
   );
 
   // handle search
@@ -111,7 +111,7 @@ const ModalContact = ({
       setOpen(true);
       dispatcherChooseContact?.dispatchChooseDetail(r?.id);
     },
-    [dispatcherChooseContact, setOpen, setTypeContact]
+    [dispatcherChooseContact, setOpen, setTypeContact],
   );
 
   // handle change type
@@ -122,31 +122,31 @@ const ModalContact = ({
       if (e?.value === 744) {
         formContact?.setFieldsValue({
           inputType: datas_option?.data_input_type?.find(
-            (item) => item?.value === 752
+            (item) => item?.value === 752,
           ),
         });
       } else if (e?.value === 743 || e?.value === 742) {
         formContact?.setFieldsValue({
           inputType: datas_option?.data_input_type?.find(
-            (item) => item?.value === 750
+            (item) => item?.value === 750,
           ),
         });
       } else if (e?.value === 747 || e?.value === 746) {
         formContact?.setFieldsValue({
           inputType: datas_option?.data_input_type?.find(
-            (item) => item?.value === 749
+            (item) => item?.value === 749,
           ),
         });
       } else if (e?.value === 745) {
         formContact?.setFieldsValue({
           inputType: datas_option?.data_input_type?.find(
-            (item) => item?.value === 751
+            (item) => item?.value === 751,
           ),
         });
       } else if (e?.value === 741) {
         formContact?.setFieldsValue({
           inputType: datas_option?.data_input_type?.find(
-            (item) => item?.value === 748
+            (item) => item?.value === 748,
           ),
         });
       } else {
@@ -159,7 +159,7 @@ const ModalContact = ({
         ["values", 0, "value"],
       ]);
     },
-    [datas_option?.data_input_type, formContact]
+    [datas_option?.data_input_type, formContact],
   );
 
   // handle change input type
@@ -177,7 +177,7 @@ const ModalContact = ({
       });
       // setInputTypeRow(e?.value);
     },
-    [formContact]
+    [formContact],
   );
 
   const columns = useMemo(() => {
@@ -209,7 +209,7 @@ const ModalContact = ({
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -219,7 +219,7 @@ const ModalContact = ({
             text?.label,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -231,7 +231,7 @@ const ModalContact = ({
             "inputType",
             a?.inputType?.label,
             b?.inputType?.label,
-            "select"
+            "select",
           ),
         inputType: "select",
         align: "left",
@@ -246,7 +246,7 @@ const ModalContact = ({
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -256,7 +256,7 @@ const ModalContact = ({
             text?.label,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -280,7 +280,7 @@ const ModalContact = ({
           searchText,
           handleSearch,
           true,
-          "contact"
+          "contact",
         ),
         render: (text, record, id) => {
           return renderColumn(
@@ -290,7 +290,7 @@ const ModalContact = ({
             record?.fullValue,
             true,
             "input",
-            search
+            search,
           );
         },
       },
@@ -329,7 +329,7 @@ const ModalContact = ({
         ]);
       }
     },
-    [dispatch, dispatcher, formContact]
+    [dispatch, dispatcher, formContact],
   );
 
   // handle change

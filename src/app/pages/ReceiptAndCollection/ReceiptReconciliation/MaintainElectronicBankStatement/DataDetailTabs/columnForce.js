@@ -6,9 +6,7 @@ import { Link } from "react-router-dom";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import StatusComponent from "../../../../../../components/StatusComponent";
 import { dateFormatting } from "../../../../../../utils";
-import {
-  getColumnSearchPropsPaging,
-} from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../../assets/Icon/index";
 
 export const columnForce = (
@@ -17,7 +15,7 @@ export const columnForce = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -36,7 +34,7 @@ export const columnForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     onFilter: (value, record) =>
       record["sor"]?.toString().toLowerCase().includes(value.toLowerCase()),
@@ -70,7 +68,7 @@ export const columnForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     onFilter: (value, record) =>
       record["costCenter"]
@@ -110,7 +108,7 @@ export const columnForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     onFilter: (value, record) =>
       record["customerName"]
@@ -150,7 +148,7 @@ export const columnForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     onFilter: (value, record) =>
       record["accountNumber"]
@@ -190,7 +188,7 @@ export const columnForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     onFilter: (value, record) =>
       record["receiptNumber"]
@@ -231,7 +229,7 @@ export const columnForce = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     onFilter: (value, record) =>
       record["receiptDate"]
@@ -270,7 +268,7 @@ export const columnForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     onFilter: (value, record) =>
       record["currency"]
@@ -310,7 +308,7 @@ export const columnForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     onFilter: (value, record) =>
       record["amount"]?.toString().toLowerCase().includes(value.toLowerCase()),
@@ -348,7 +346,7 @@ export const columnForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     onFilter: (value, record) =>
       record["statusApproval"]
@@ -402,7 +400,7 @@ export const columnsReverse = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -420,7 +418,7 @@ export const columnsReverse = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     onFilter: (value, record) =>
       record["receiptCode"]
@@ -457,7 +455,7 @@ export const columnsReverse = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     onFilter: (value, record) =>
       record["sor"]?.toString().toLowerCase().includes(value.toLowerCase()),
@@ -491,7 +489,7 @@ export const columnsReverse = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -531,7 +529,7 @@ export const columnsReverse = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -571,7 +569,7 @@ export const columnsReverse = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -611,7 +609,7 @@ export const columnsReverse = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -652,7 +650,7 @@ export const columnsReverse = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     onFilter: (value, record) =>
       record["receiptDate"]
@@ -691,7 +689,7 @@ export const columnsReverse = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -731,7 +729,7 @@ export const columnsReverse = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -769,7 +767,7 @@ export const columnsReverse = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     onFilter: (value, record) =>
       record["statusApproval"]
@@ -823,7 +821,7 @@ export const columnsAwalForce = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -841,7 +839,7 @@ export const columnsAwalForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "receiptCode" ? (
@@ -875,7 +873,7 @@ export const columnsAwalForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       searchedColumn === "sor" ? (
@@ -907,7 +905,7 @@ export const columnsAwalForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -942,7 +940,7 @@ export const columnsAwalForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -977,7 +975,7 @@ export const columnsAwalForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -1012,7 +1010,7 @@ export const columnsAwalForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -1048,7 +1046,7 @@ export const columnsAwalForce = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       searchedColumn === "receiptDate" ? (
@@ -1082,7 +1080,7 @@ export const columnsAwalForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     ellipsis: {
       showTitle: false,
@@ -1119,7 +1117,7 @@ export const columnsAwalForce = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (approvalStatus) => {
       let text;
@@ -1241,8 +1239,8 @@ export const columnsAwalForce = (
                             r?.status === "Active"
                               ? true
                               : false || r?.status === "Draft"
-                              ? true
-                              : null
+                                ? true
+                                : null
                           }
                           disabled={true}
                           className="gap-7"

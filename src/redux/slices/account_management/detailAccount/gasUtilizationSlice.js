@@ -30,11 +30,11 @@ export const getListGasUtilizationHistory = createAsyncThunk(
           error: error,
           action: "GET_LIST_GAS_UTILIZATION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get list pagination address
@@ -51,11 +51,11 @@ export const getCurrentGasUtilization = createAsyncThunk(
           error: error,
           action: "GET_CURRENT_GAS_UTILIZATION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Get list pagination address
@@ -72,11 +72,11 @@ export const getDetailGasUtilization = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_GAS_UTILIZATION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Create Gas Utilization
@@ -99,11 +99,11 @@ export const createUpdateGasUtilization = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_UPDATE_EQUIPMENT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 // Get Ddl Fuel Type Equipment
@@ -124,11 +124,11 @@ export const getDdlUtilizationName = createAsyncThunk(
           error: error,
           action: "GET_DDL_UTILIZATION_NAME",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Delete
@@ -151,11 +151,11 @@ export const deleteGasUtilization = createAsyncThunk(
           error: error,
           action: "DELETE_GAS_UTILIZATION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const accountGasUtilizationSlice = createSlice({

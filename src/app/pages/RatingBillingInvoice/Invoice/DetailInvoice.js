@@ -22,7 +22,7 @@ export const columns = (
   searchedColumn,
   searchText,
   handleSearch,
-  handlePreview
+  handlePreview,
 ) => [
   {
     title: "NO",
@@ -43,7 +43,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -53,7 +53,7 @@ export const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -68,7 +68,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -78,7 +78,7 @@ export const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -93,7 +93,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -103,7 +103,7 @@ export const columns = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -119,7 +119,7 @@ export const columns = (
       searchedColumn,
       searchText,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -128,7 +128,7 @@ export const columns = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -143,7 +143,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -153,7 +153,7 @@ export const columns = (
         text,
         false,
         "status",
-        search
+        search,
       ),
   },
   {
@@ -169,7 +169,7 @@ export const columns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (text) =>
       renderColumn(
@@ -179,7 +179,7 @@ export const columns = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -236,7 +236,7 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
         filtered = filtered.filter((item) =>
           String(item[key] ?? "")
             .toLowerCase()
-            .includes(search[key].toLowerCase())
+            .includes(search[key].toLowerCase()),
         );
       }
     });
@@ -258,7 +258,7 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
         {
           headers: tokenHeader(),
           responseType: "arraybuffer",
-        }
+        },
       );
 
       const contentType = res.headers["content-type"];
@@ -281,7 +281,7 @@ const DetailInvoice = ({ detail, invoiceNumber }) => {
       searchedColumn,
       searchText,
       handleSearch,
-      handlePreview
+      handlePreview,
     );
 
     // Pastikan semua ada key

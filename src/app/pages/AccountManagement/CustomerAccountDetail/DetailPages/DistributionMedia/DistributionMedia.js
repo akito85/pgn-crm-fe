@@ -32,11 +32,9 @@ import { validateCreateUpdate } from "../../../../../../redux/slices/general_sli
 const DistributionMedia = ({ id = 0 }) => {
   const dispatch = useDispatch();
   const { data_distribution, data_product, loading } = useSelector(
-    (state) => state.distributionMedia
-    );
-    const { access_account } = useSelector(
-      (state) => state.accountManagement
-      );
+    (state) => state.distributionMedia,
+  );
+  const { access_account } = useSelector((state) => state.accountManagement);
 
   //declare
   const searchInput = useRef(null);
@@ -63,25 +61,33 @@ const DistributionMedia = ({ id = 0 }) => {
   const [data, setData] = useState();
   const [modalInactive, setModalInactive] = useState(false);
   const [typeRetry, setTypeRetry] = useState(false);
-  const [distributionName, setDistributionName] = useState('');
+  const [distributionName, setDistributionName] = useState("");
 
   const [dataProduct, setDataProduct] = useState([]);
   const location = useLocation();
 
   useEffect(() => {
-    if(location?.pathname.includes('account-standard')) {
-      dispatch(getGrantedAccessAccount('/account-management/account-standard/distribution-media'))
-    }else{
-      dispatch(getGrantedAccessAccount('/account-management/account-onetime/distribution-media'))
+    if (location?.pathname.includes("account-standard")) {
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-standard/distribution-media",
+        ),
+      );
+    } else {
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-onetime/distribution-media",
+        ),
+      );
     }
-  }, [dispatch])
+  }, [dispatch]);
 
   //useEffect
   useEffect(() => {
     if (id) {
       const reqSearch = encodeURIComponent(JSON.stringify(search));
       dispatch(
-        getDistributionMedia({ id, page, pageSize, sort, search: reqSearch })
+        getDistributionMedia({ id, page, pageSize, sort, search: reqSearch }),
       );
     }
   }, [dispatch, id, page, pageSize, sort, search]);
@@ -99,28 +105,28 @@ const DistributionMedia = ({ id = 0 }) => {
     ) {
       setTotalElement(data_distribution?.page?.totalElements);
       const temp = data_distribution?.result
-        ?.filter(
-          (item) =>
-            item.status === "ACTIVE"
-        )
+        ?.filter((item) => item.status === "ACTIVE")
         .map((item) => item.productId);
-      setDataProduct(data_product
-        ? data_product?.filter((item) => !temp.includes(item.productId)) 
-        : []
+      setDataProduct(
+        data_product
+          ? data_product?.filter((item) => !temp.includes(item.productId))
+          : [],
       );
     }
   }, [data_distribution, data_product, id]);
 
   //handle
   const handleProduct = (value) => {
-    const temp = data_product.filter((item) => item.productId === value).map((item) => ({
-      ...item,
-      productDetail: item.productDetail.map((item) => ({
+    const temp = data_product
+      .filter((item) => item.productId === value)
+      .map((item) => ({
         ...item,
-        unitName: item.unit,
-        description: item.detailDescription,
-      })),
-    }));
+        productDetail: item.productDetail.map((item) => ({
+          ...item,
+          unitName: item.unit,
+          description: item.detailDescription,
+        })),
+      }));
     formCreate.setFieldsValue({
       productDescription: temp[0]?.description,
       priceCode: temp[0]?.pricing,
@@ -144,7 +150,7 @@ const DistributionMedia = ({ id = 0 }) => {
 
         const reqSearch = encodeURIComponent(JSON.stringify(search));
         dispatch(
-          getDistributionMedia({ id, page, pageSize, sort, search: reqSearch })
+          getDistributionMedia({ id, page, pageSize, sort, search: reqSearch }),
         );
         // dispatch(getDistributionMedia({ id, page, pageSize }));
       })
@@ -275,7 +281,7 @@ const DistributionMedia = ({ id = 0 }) => {
     if (typeRetry) {
       handleCreate(bodyError?.value);
     } else {
-      onFinishInactive(bodyError?.value, ()=>{});
+      onFinishInactive(bodyError?.value, () => {});
     }
     setTypeRetry(false);
     setModalError(false);
@@ -286,7 +292,7 @@ const DistributionMedia = ({ id = 0 }) => {
     let url;
     let bodyRequest;
     const temp = data_product.filter(
-      (item) => item.productId === e?.productName
+      (item) => item.productId === e?.productName,
     );
     setDataConfirm({
       ...temp[0],
@@ -296,10 +302,17 @@ const DistributionMedia = ({ id = 0 }) => {
     bodyRequest = {
       ...temp[0],
       startDate: moment(e?.startDate).format("DD MMM YYYY"),
-      remark: e?.remark
-    }
+      remark: e?.remark,
+    };
     url = "/v1/dbs/api/distribution-media/validate-create";
-    await dispatch(validateCreateUpdate({ body: bodyRequest, services: accountManagementService, endPoint: url, type }))?.unwrap();
+    await dispatch(
+      validateCreateUpdate({
+        body: bodyRequest,
+        services: accountManagementService,
+        endPoint: url,
+        type,
+      }),
+    )?.unwrap();
     setType(true);
   };
 
@@ -315,14 +328,14 @@ const DistributionMedia = ({ id = 0 }) => {
       .unwrap()
       .then(() => {
         // formInactive.resetFields();
-        handleClear()
+        handleClear();
         setData([]);
         setModalInactive(false);
         // dispatch(getDistributionMedia({ id, page, pageSize }));
 
         const reqSearch = encodeURIComponent(JSON.stringify(search));
         dispatch(
-          getDistributionMedia({ id, page, pageSize, sort, search: reqSearch })
+          getDistributionMedia({ id, page, pageSize, sort, search: reqSearch }),
         );
       })
       .catch((error) => {
@@ -347,12 +360,12 @@ const DistributionMedia = ({ id = 0 }) => {
 
   const handleCancel = () => {
     setModalInactive(false);
-  }
+  };
 
   const itemActions = [
     //action toolbar
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <ButtonComponent
           onClick={() => {
@@ -364,10 +377,9 @@ const DistributionMedia = ({ id = 0 }) => {
         >
           Create
         </ButtonComponent>
-
-      )
-    }
-  ]
+      ),
+    },
+  ];
 
   return (
     <Spin spinning={loading} className={"w-full top-20"}>
@@ -375,9 +387,12 @@ const DistributionMedia = ({ id = 0 }) => {
         <BaseContainer header={"DISTRIBUTION MEDIA LIST"}>
           {/* <Toolbar items={itemActions} /> */}
           <div className={"w-full flex justify-end mb-5"}>
-            <ToolbarAccount items={itemActions} advancedAccess={access_account}/>
+            <ToolbarAccount
+              items={itemActions}
+              advancedAccess={access_account}
+            />
           </div>
-          
+
           {/* <div className={"w-full flex justify-end mb-5"}>
             <ButtonComponent
               onClick={() => {
@@ -497,27 +512,27 @@ const DistributionMedia = ({ id = 0 }) => {
           isOpen={modalInactive}
           handleCloseModal={handleCancel}
           onFinish={onFinishInactive}
-          header={'Inactive'}
-          approveOrReject={'Inactive'}
+          header={"Inactive"}
+          approveOrReject={"Inactive"}
           menu={"Media Distribution"}
           named={distributionName}
           children={
             <Form.Item
-            name={"endDate"}
-            label={"End Date"}
-            rules={[
-              {
-                message: requiredMessage("End Date"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <DateComponent mandatory />
-          </Form.Item>
+              name={"endDate"}
+              label={"End Date"}
+              rules={[
+                {
+                  message: requiredMessage("End Date"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <DateComponent mandatory />
+            </Form.Item>
           }
         />
-        
+
         {/* <ModalApproveOrReject
           isOpen={modalInactive}
           header="Inactive Information"
@@ -568,9 +583,9 @@ const DistributionMedia = ({ id = 0 }) => {
               >
                 <DateComponent mandatory />
               </Form.Item>
-              <Form.Item 
-                name={"remark"} 
-                label={"Remark"} 
+              <Form.Item
+                name={"remark"}
+                label={"Remark"}
                 rules={[
                   {
                     message: requiredMessage("Remark"),

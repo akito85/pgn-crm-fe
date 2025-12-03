@@ -10,7 +10,11 @@ import moment from "moment";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import { useColumnActionPermissionAccount } from "../../../../../ComponentAccount/ColumnActionPermissionAccount";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../../utils/getColumnSearchProps";
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../../../../utils";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../../../utils";
 
 const TaxIdentifierTable = ({
   data = [],
@@ -22,11 +26,11 @@ const TaxIdentifierTable = ({
   onSort = {},
   searchText,
   searchedColumn,
-  getColumnSearchProps = () => { },
+  getColumnSearchProps = () => {},
   access,
   search,
   searchInput,
-  handleSearch = () => { }
+  handleSearch = () => {},
 }) => {
   // state
   const [modalDetail, setModalDetail] = useState();
@@ -64,8 +68,18 @@ const TaxIdentifierTable = ({
         searchText,
         handleSearch,
         true,
-        'input'),
-      render: (text) => renderColumn('taxIdentifierTypeValue', hasValue(search['taxIdentifierTypeValue']), searchText, text, false, 'input', search)
+        "input",
+      ),
+      render: (text) =>
+        renderColumn(
+          "taxIdentifierTypeValue",
+          hasValue(search["taxIdentifierTypeValue"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "TAX IDENTIFIER NUMBER",
@@ -79,11 +93,20 @@ const TaxIdentifierTable = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch, 
-        true, 
-        'input'
+        handleSearch,
+        true,
+        "input",
       ),
-      render: (text) => renderColumn('taxIdentifierNumber', hasValue(search['taxIdentifierNumber']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "taxIdentifierNumber",
+          hasValue(search["taxIdentifierNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "TAX IDENTIFIER NAME",
@@ -98,9 +121,18 @@ const TaxIdentifierTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn('taxIdentifierName', hasValue(search['taxIdentifierName']), searchText, text, false, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "taxIdentifierName",
+          hasValue(search["taxIdentifierName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "TAX IDENTIFIER ADDRESS",
@@ -118,9 +150,18 @@ const TaxIdentifierTable = ({
         searchText,
         handleSearch,
         true,
-        'input'
+        "input",
       ),
-      render: (text) => renderColumn('taxIdentifierAddressValue', hasValue(search['taxIdentifierAddressValue']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "taxIdentifierAddressValue",
+          hasValue(search["taxIdentifierAddressValue"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
     {
       title: "START DATE",
@@ -136,9 +177,17 @@ const TaxIdentifierTable = ({
         searchText,
         handleSearch,
         true,
-        'date'
+        "date",
       ),
-      render: (text) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "startDate",
+          hasValue(search["startDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "END DATE",
@@ -154,9 +203,17 @@ const TaxIdentifierTable = ({
         searchText,
         handleSearch,
         true,
-        'date'
+        "date",
       ),
-      render: (text) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "endDate",
+          hasValue(search["endDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "STATUS",
@@ -172,8 +229,18 @@ const TaxIdentifierTable = ({
         searchText,
         handleSearch,
         true,
-        'input'),
-      render: (text) => renderColumn('status', hasValue(search['status']), searchText, text, false, 'status', search)
+        "input",
+      ),
+      render: (text) =>
+        renderColumn(
+          "status",
+          hasValue(search["status"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        ),
     },
   ];
 
@@ -197,11 +264,10 @@ const TaxIdentifierTable = ({
               />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
-
-  ]
+  ];
 
   return (
     <Fragment>
@@ -216,11 +282,7 @@ const TaxIdentifierTable = ({
         onSort={onSort}
         columns={[
           ...columns,
-          ...useColumnActionPermissionAccount(
-            ["View"],
-            itemActions,
-            access
-          )
+          ...useColumnActionPermissionAccount(["View"], itemActions, access),
         ]}
       />
 

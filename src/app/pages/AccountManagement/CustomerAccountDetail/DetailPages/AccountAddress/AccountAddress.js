@@ -27,7 +27,7 @@ import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_
 const AccountAddress = ({ id, idCustomer, type }) => {
   const dispatch = useDispatch();
   const { data, data_detail, loading } = useSelector(
-    (state) => state.accountAddress
+    (state) => state.accountAddress,
   );
   const { access_account } = useSelector((state) => state.accountManagement);
   const dataDetail = data_detail?.data;
@@ -55,11 +55,11 @@ const AccountAddress = ({ id, idCustomer, type }) => {
   useEffect(() => {
     if (location?.pathname.includes("account-standard")) {
       dispatch(
-        getGrantedAccessAccount("/account-management/account-standard/address")
+        getGrantedAccessAccount("/account-management/account-standard/address"),
       );
     } else {
       dispatch(
-        getGrantedAccessAccount("/account-management/account-onetime/address")
+        getGrantedAccessAccount("/account-management/account-onetime/address"),
       );
     }
   }, [dispatch]);
@@ -73,7 +73,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
         sort,
         page,
         pageSize,
-      })
+      }),
     );
   }, [dispatch, id, page, pageSize, search, sort]);
 
@@ -116,8 +116,8 @@ const AccountAddress = ({ id, idCustomer, type }) => {
         selectedKeys[0] === "primary"
           ? "Y"
           : selectedKeys[0] === "non primary"
-          ? "N"
-          : ""; // Handle cases where selectedKeys[0] is not valid
+            ? "N"
+            : ""; // Handle cases where selectedKeys[0] is not valid
 
       setSearchText(selectedKeys[0]);
       setSearchedColumn(dataIndex);
@@ -137,7 +137,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
   const handleActiveOrInactive = (record) => {
     setModalActivate(true);
     setTitleActiveOrInactive(
-      record?.status === "ACTIVE" ? "Inactivate" : "Activate"
+      record?.status === "ACTIVE" ? "Inactivate" : "Activate",
     );
     setChooseId(record?.accountAddressId);
   };
@@ -150,7 +150,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
       activationAccountAddress({
         body: data,
         title: titleActiveOrInactive,
-      })
+      }),
     )
       .unwrap()
       .then(() => {
@@ -165,7 +165,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
             sort,
             page,
             pageSize,
-          })
+          }),
         );
       })
       .catch(() => {
@@ -185,7 +185,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch = () => {}
+    handleSearch = () => {},
   ) => {
     return [
       {
@@ -204,7 +204,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         render: (index) => {
           let text;
@@ -240,7 +240,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         ellipsis: {
           showTitle: false,
@@ -281,7 +281,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         // render: (type) => <>{type?.name}</>,
         render: (type) =>
@@ -311,7 +311,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         ellipsis: {
           showTitle: false,
@@ -353,7 +353,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -366,7 +366,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -379,7 +379,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -392,7 +392,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -406,7 +406,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -420,7 +420,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -434,7 +434,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -447,7 +447,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -461,7 +461,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         // render: (postalCode) => <>{postalCode?.name}</>,
         render: (postalCode) =>
@@ -491,7 +491,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         // render: (subDistrict) => <>{subDistrict?.name}</>,
         render: (subDistrict) =>
@@ -521,7 +521,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         // render: (district) => <>{district?.name}</>,
         render: (district) =>
@@ -551,7 +551,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         // render: (city) => <>{city?.name}</>,
         render: (city) =>
@@ -581,7 +581,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         // render: (province) => <>{province?.name}</>,
         render: (province) =>
@@ -611,7 +611,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         // render: (country) => <>{country?.name}</>,\
         render: (country) =>
@@ -641,7 +641,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         // render: (desc) => (
         //   <Tooltip placement="topLeft" title={desc}>
@@ -679,7 +679,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         render: (businessPurpose) => (
           <div className={" flex justify-center"}>
@@ -704,7 +704,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         // render: (premise) => <>{premise.value}</>,
         render: (premise) =>
@@ -734,7 +734,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         ellipsis: {
           showTitle: false,
@@ -776,7 +776,7 @@ const AccountAddress = ({ id, idCustomer, type }) => {
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         render: (index) => {
           const text = index
@@ -1046,12 +1046,12 @@ const AccountAddress = ({ id, idCustomer, type }) => {
                   searchInput,
                   searchedColumn,
                   searchText,
-                  handleSearch
+                  handleSearch,
                 ),
                 ...useColumnActionPermissionAccount(
                   ["Activate", "View", "Update"],
                   itemActions,
-                  access_account
+                  access_account,
                 ),
               ]}
             />

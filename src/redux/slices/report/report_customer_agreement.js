@@ -50,7 +50,7 @@ export const reportCustomerAgreementSlice = createApi({
               action: "getCustomerAccountAdvancedFilter",
               back: false,
               load: false,
-            })
+            }),
           );
 
           return {

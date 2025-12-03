@@ -50,8 +50,6 @@ const BillingBucketForm = ({ type }) => {
     loading,
   } = useSelector((state) => state.billing_bucket);
 
-
-
   // Declaration
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -98,16 +96,20 @@ const BillingBucketForm = ({ type }) => {
   const [priority, setPriority] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [bodyData, setBodyData] = useState({});
-  
+
   const isDisabledDate = useMemo(() => {
-    if (hasValue(form?.getFieldsValue()?.endDate) === true && listDataCriteria?.map(item => ({ startDate: item?.startDate, endDate: item?.endDate }))?.length > 0) {
+    if (
+      hasValue(form?.getFieldsValue()?.endDate) === true &&
+      listDataCriteria?.map((item) => ({
+        startDate: item?.startDate,
+        endDate: item?.endDate,
+      }))?.length > 0
+    ) {
       return true;
     } else {
-      return false
+      return false;
     }
   }, [form, listDataCriteria]);
-
-  
 
   const isLoading = loading || loadingForm;
 
@@ -194,7 +196,7 @@ const BillingBucketForm = ({ type }) => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Information
@@ -266,7 +268,7 @@ const BillingBucketForm = ({ type }) => {
             description: item.description,
             type: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Select
@@ -300,7 +302,7 @@ const BillingBucketForm = ({ type }) => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Information
@@ -468,7 +470,7 @@ const BillingBucketForm = ({ type }) => {
       bodyData,
       id,
       data_detail,
-      data_detail_draft
+      data_detail_draft,
     ) => {
       return bodyData?.criteria.map((item) => {
         const tempData =
@@ -486,12 +488,12 @@ const BillingBucketForm = ({ type }) => {
     // Helper function to filter criteria
     const getFilteredCriteria = (
       bodyData,
-      columnsTableCriteriaBillingBucket
+      columnsTableCriteriaBillingBucket,
     ) => {
       return columnsTableCriteriaBillingBucket().filter(
         (item) =>
           !bodyData.criteria.includes(item.indexValue) &&
-          bodyData.criteria.includes(item.indexValue) === 1
+          bodyData.criteria.includes(item.indexValue) === 1,
       );
     };
 
@@ -508,7 +510,7 @@ const BillingBucketForm = ({ type }) => {
 
     const dataCriteriaObject = mapListDataCriteria(
       listDataCriteria,
-      dateFormatting
+      dateFormatting,
     );
 
     const dataListBI = mapListDataBI(listDataBI, dateFormatting);
@@ -517,17 +519,17 @@ const BillingBucketForm = ({ type }) => {
       bodyData,
       id,
       data_detail,
-      data_detail_draft
+      data_detail_draft,
     );
 
     const filteredCriteria = getFilteredCriteria(
       bodyData,
-      columnsTableCriteriaBillingBucket
+      columnsTableCriteriaBillingBucket,
     );
 
     const updatedDataCriteriaObject = updateDataCriteriaObject(
       dataCriteriaObject,
-      filteredCriteria
+      filteredCriteria,
     );
 
     const includesAll = bodyData.criteria.includes(24);
@@ -590,7 +592,7 @@ const BillingBucketForm = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -656,12 +658,12 @@ const BillingBucketForm = ({ type }) => {
     criteriaValues,
     dataCriteria,
     listDataCriteria = [],
-    setMissingColumn = () => { },
-    minimumData = 0
+    setMissingColumn = () => {},
+    minimumData = 0,
   ) => {
     let missingColumn = [];
     const tempArray = criteriaValues.filter((item) =>
-      dataCriteria?.includes(item.value)
+      dataCriteria?.includes(item.value),
     );
     const tempNameCriteria = tempArray.map((data) => data.name);
     listDataCriteria?.map((item) => {
@@ -692,26 +694,30 @@ const BillingBucketForm = ({ type }) => {
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
     // if (hasValue(formHeader?.endDate)) {
-    dataTable?.forEach(item => {
-      if (moment(item?.startDate) < moment(formHeader?.startDate) || moment(item?.endDate) > moment(formHeader?.endDate)) {
-        dataOverlap?.push(item)
+    dataTable?.forEach((item) => {
+      if (
+        moment(item?.startDate) < moment(formHeader?.startDate) ||
+        moment(item?.endDate) > moment(formHeader?.endDate)
+      ) {
+        dataOverlap?.push(item);
       }
     });
 
     if (dataOverlap?.length > 0) {
-      return true
+      return true;
     } else {
-      return false
+      return false;
     }
     // }
-
   }, []);
-
 
   // Handle Save Form
   const handleSave = async (formValue) => {
     let errorBody = {};
-    const hasOverlapping = checkOverlappingData({startDate: formValue?.startDate, endDate: formValue?.endDate}, listDataCriteria)
+    const hasOverlapping = checkOverlappingData(
+      { startDate: formValue?.startDate, endDate: formValue?.endDate },
+      listDataCriteria,
+    );
     if (listDataAttachment.length === 0) {
       handleMandatory(setListSectionInfo, listDataAttachment);
     } else {
@@ -733,8 +739,8 @@ const BillingBucketForm = ({ type }) => {
           criteriaOptions,
           formValue?.criteria,
           listDataCriteria,
-          () => { },
-          0
+          () => {},
+          0,
         )
       ) {
         const errorBody = {
@@ -748,7 +754,7 @@ const BillingBucketForm = ({ type }) => {
           description: `You can't add Criteria. Start date and end date can't be overlap`,
         };
         dispatch(showModalError(errorBody));
-       } else {
+      } else {
         const isDataValid = await checkDataValidity(formValue);
 
         if (isDataValid) {
@@ -903,7 +909,7 @@ const BillingBucketForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/rbi/billing-bucket/create-attachment`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -929,7 +935,7 @@ const BillingBucketForm = ({ type }) => {
         .then(async (dataForm) => {
           const billingBucketCode = dataForm.billingBucketCode;
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           setLoadingForm(true);
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
@@ -941,7 +947,7 @@ const BillingBucketForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/rbi/billing-bucket/create-attachment`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -964,21 +970,21 @@ const BillingBucketForm = ({ type }) => {
   };
 
   const handleMandatory = (
-    setListSectionInfo = () => { },
+    setListSectionInfo = () => {},
     listDataAttachment,
-    errorFields
+    errorFields,
   ) => {
     setListSectionInfo((prevState) => {
       const res = prevState.map((item) => {
         const errorBadge =
           item.value !== "Attachment"
             ? (errorFields || []).reduce(
-              (current, next) =>
-                item.paramValue.includes(next.name[0])
-                  ? current + 1
-                  : current,
-              0
-            )
+                (current, next) =>
+                  item.paramValue.includes(next.name[0])
+                    ? current + 1
+                    : current,
+                0,
+              )
             : listDataAttachment.length < 1
               ? 1
               : 0;
@@ -1051,7 +1057,6 @@ const BillingBucketForm = ({ type }) => {
     setEndDate(value);
     return value;
   };
-
 
   return (
     <LayoutMenu>
@@ -1216,8 +1221,9 @@ const BillingBucketForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${flag === 1 ? "created" : "submitted"
-              }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              flag === 1 ? "created" : "submitted"
+            }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

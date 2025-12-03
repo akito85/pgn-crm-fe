@@ -45,7 +45,7 @@ import CardContainer from "../../../../../components/CardContainer";
 
 const ViewMeterReadingCode = () => {
   const { data, loading, data_detail } = useSelector(
-    (state) => state?.meter_reading_code
+    (state) => state?.meter_reading_code,
   );
   const { bodyError } = useSelector((state) => state?.general);
   const dispatch = useDispatch();
@@ -76,7 +76,7 @@ const ViewMeterReadingCode = () => {
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      getMeterReadingCodePaginate({ search: reqSearch, sort, page, pageSize })
+      getMeterReadingCodePaginate({ search: reqSearch, sort, page, pageSize }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
@@ -134,7 +134,7 @@ const ViewMeterReadingCode = () => {
     handleCancel();
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     await dispatch(
-      getMeterReadingCodePaginate({ page, pageSize, sort, search: reqSearch })
+      getMeterReadingCodePaginate({ page, pageSize, sort, search: reqSearch }),
     ).unwrap();
     setRecordId("");
     form.resetFields();
@@ -144,7 +144,7 @@ const ViewMeterReadingCode = () => {
   const handleDownload = () => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      downloadMeterReadingCode({ search: reqSearch, sort, page, pageSize })
+      downloadMeterReadingCode({ search: reqSearch, sort, page, pageSize }),
     );
   };
 
@@ -194,7 +194,7 @@ const ViewMeterReadingCode = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -204,7 +204,7 @@ const ViewMeterReadingCode = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -220,7 +220,7 @@ const ViewMeterReadingCode = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -230,7 +230,7 @@ const ViewMeterReadingCode = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -249,7 +249,7 @@ const ViewMeterReadingCode = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -259,7 +259,7 @@ const ViewMeterReadingCode = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -276,7 +276,7 @@ const ViewMeterReadingCode = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -286,11 +286,11 @@ const ViewMeterReadingCode = () => {
             text,
             false,
             "status",
-            search
+            search,
           ),
       },
     ],
-    [page, pageSize, search, searchText, searchedColumn]
+    [page, pageSize, search, searchText, searchedColumn],
   );
 
   // on sort
@@ -307,7 +307,12 @@ const ViewMeterReadingCode = () => {
     if (bodyError?.action === "GET_METER_READING_CODE_PAGINATE") {
       const reqSearch = encodeURIComponent(JSON.stringify(search));
       dispatch(
-        getMeterReadingCodePaginate({ search: reqSearch, sort, page, pageSize })
+        getMeterReadingCodePaginate({
+          search: reqSearch,
+          sort,
+          page,
+          pageSize,
+        }),
       );
     } else if (bodyError?.action === "DOWNLOAD_METER_READING_CODE") {
       handleDownload();
@@ -443,7 +448,7 @@ const ViewMeterReadingCode = () => {
 
   const actionCols = useColumnActionPermission(
     ["Activate", "View", "Update"],
-    itemActions
+    itemActions,
   );
 
   const allColumns = useMemo(() => {
@@ -532,7 +537,7 @@ const ViewMeterReadingCode = () => {
               <DetailText label={"Created Date"}>
                 {data_detail?.createdDate
                   ? moment(data_detail?.createdDate).format(
-                      dateFormatting.dateTime
+                      dateFormatting.dateTime,
                     )
                   : ""}
               </DetailText>
@@ -542,7 +547,7 @@ const ViewMeterReadingCode = () => {
               <DetailText label={"Updated Date"}>
                 {data_detail?.updatedDate
                   ? moment(data_detail?.updatedDate).format(
-                      dateFormatting.dateTime
+                      dateFormatting.dateTime,
                     )
                   : ""}
               </DetailText>

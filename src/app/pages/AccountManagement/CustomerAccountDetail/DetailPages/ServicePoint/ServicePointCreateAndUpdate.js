@@ -6,8 +6,8 @@ import InputComponent from "../../../../../../components/InputComponent";
 
 const ServicePointCreateAndUpdate = ({
   type = {},
-  optionAddress= [],
-  optionServicePoint= [],
+  optionAddress = [],
+  optionServicePoint = [],
   handleOptionServicePoint = () => {},
 }) => {
   return (
@@ -54,10 +54,7 @@ const ServicePointCreateAndUpdate = ({
       </div>
 
       <div className="w-full mt-2">
-        <Form.Item
-          name={"description"}
-          label={"Description"}
-        >
+        <Form.Item name={"description"} label={"Description"}>
           <InputComponent
             type="textarea"
             // onChange={(e) => setDescription(e.target.value)}

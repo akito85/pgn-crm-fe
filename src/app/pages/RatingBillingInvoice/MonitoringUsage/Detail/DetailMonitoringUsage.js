@@ -30,12 +30,8 @@ import TablePaginationNew from "../../../../../components/TablePaginationNew";
 
 const DetailMonitoringUsage = () => {
   // Selector
-  const {
-    detail_batch,
-    loading,
-    list_approval_by_id,
-    list_approval,
-  } = useSelector((state) => state.monitoring_usage);
+  const { detail_batch, loading, list_approval_by_id, list_approval } =
+    useSelector((state) => state.monitoring_usage);
 
   // Declaration
   const navigate = useNavigate();
@@ -51,7 +47,7 @@ const DetailMonitoringUsage = () => {
       item?.dataIndex !== "serviceType" &&
       item?.dataIndex !== "ratingCode" &&
       item?.dataIndex !== "fileSource" &&
-      item?.dataIndex !== "creationDate"
+      item?.dataIndex !== "creationDate",
   );
 
   // use state
@@ -91,14 +87,14 @@ const DetailMonitoringUsage = () => {
         }
       }
     },
-    [form]
+    [form],
   );
 
   // use effect
   useEffect(() => {
     if (location?.state?.id) {
       dispatch(
-        getDetailBatch({ batchId: location?.state?.id, page, pageSize })
+        getDetailBatch({ batchId: location?.state?.id, page, pageSize }),
       );
       dispatch(getApprovalHierarchy({ page, pageSize }));
     }
@@ -165,12 +161,12 @@ const DetailMonitoringUsage = () => {
         const errorBadge =
           item.value !== "Attachment"
             ? (errorFields || []).reduce(
-              (current, next) =>
-                item.paramValue.includes(next.name[0])
-                  ? current + 1
-                  : current,
-              0
-            )
+                (current, next) =>
+                  item.paramValue.includes(next.name[0])
+                    ? current + 1
+                    : current,
+                0,
+              )
             : listDataAttachment.length < 1
               ? 1
               : 0;
@@ -185,7 +181,11 @@ const DetailMonitoringUsage = () => {
   };
   // handle save
   const handleSave = (formValue) => {
-    setBody({ ...detail_batch, usageList: dataTable, isSubmit: flag === 1 ? false : true });
+    setBody({
+      ...detail_batch,
+      usageList: dataTable,
+      isSubmit: flag === 1 ? false : true,
+    });
     setOpenConfirmation(true);
   };
 
@@ -234,7 +234,7 @@ const DetailMonitoringUsage = () => {
   const handleCancel = () => setOpenUpdateUsage(false);
 
   // handle clear
-  const handleClear = () => { };
+  const handleClear = () => {};
 
   // handle delete usage list
   const handleDeleteOk = () => {
@@ -415,7 +415,7 @@ const DetailMonitoringUsage = () => {
                   pageSize={pageSize}
                   onChange={handleChangePage}
                   tableScrolled={{ x: 8000, y: 600 }}
-                // onSort={onSort}
+                  // onSort={onSort}
                 />
               </div>
             </BaseContainer>
@@ -494,7 +494,7 @@ const DetailMonitoringUsage = () => {
           record={selectedRecord}
           uploadType={detail_batch?.batchInformation?.uploadType}
           handleSave={handleSaveUpdateUsage}
-        // form={form}
+          // form={form}
         />
         <ModalConfirm
           isOpen={modalDelete}

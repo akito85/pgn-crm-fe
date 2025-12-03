@@ -12,7 +12,7 @@ import { columnsPricingRule } from "../Table/TablePricingRule";
 const PricingSection = ({ SAId }) => {
   // Selector
   const { data_pricing, data_pricingRule } = useSelector(
-    (state) => state.rating
+    (state) => state.rating,
   );
 
   // Declaration
@@ -49,7 +49,7 @@ const PricingSection = ({ SAId }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, SAId, search, page, pageSize, sort]);
 
@@ -64,7 +64,7 @@ const PricingSection = ({ SAId }) => {
       number: index,
       key: item.ratingSaPricingRuleId || index, // Add unique key
     }));
-    
+
     setDataTable(mappedData);
   }, [dataSource]);
 
@@ -142,7 +142,7 @@ const PricingSection = ({ SAId }) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           )}
           current={page}
           pageSize={pageSize}

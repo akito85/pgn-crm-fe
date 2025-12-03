@@ -12,10 +12,9 @@ const DistributionMediaCreate = ({
   optionsProduct = [],
   handleProduct = () => {},
 }) => {
-
   const handleBackDate = (current) => {
     return false;
-  }
+  };
 
   return (
     <Fragment>
@@ -29,15 +28,9 @@ const DistributionMediaCreate = ({
           label={"Product Name"}
           rules={[{ message: requiredMessage("Product Name"), required: true }]}
         >
-          <SelectComponent
-            mandatory
-            onChange={(e) => handleProduct(e)}
-          >
+          <SelectComponent mandatory onChange={(e) => handleProduct(e)}>
             {optionsProduct?.map((data) => (
-              <Select.Option
-                key={data.productId}
-                value={data.productId}
-              >
+              <Select.Option key={data.productId} value={data.productId}>
                 {data.productName}
               </Select.Option>
             ))}
@@ -94,10 +87,7 @@ const DistributionMediaCreate = ({
           />
         </Form.Item>
 
-        <Form.Item
-          name={"remark"}
-          label={"Remark"}
-        >
+        <Form.Item name={"remark"} label={"Remark"}>
           <InputComponent
             type="textarea"
             // onChange={(e) => setDescription(e.target.value)}

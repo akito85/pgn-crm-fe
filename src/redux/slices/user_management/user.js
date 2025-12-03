@@ -27,11 +27,11 @@ export const getListUser = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_LIST_USER", back: false })
+        validateError({ error: error, action: "GET_LIST_USER", back: false }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailUser = createAsyncThunk(
@@ -47,11 +47,11 @@ export const getDetailUser = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_USER",
           back: true,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getDetailUpdateUser = createAsyncThunk(
   "GET_DETAIL_USER",
@@ -66,11 +66,11 @@ export const getDetailUpdateUser = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_USER",
           back: true,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const createUser = createAsyncThunk(
   "CREATE_USER",
@@ -90,11 +90,11 @@ export const createUser = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_USER",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const updateUser = createAsyncThunk(
   "UPDATE_USER",
@@ -114,12 +114,12 @@ export const updateUser = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_USER",
           back: false,
-        })
+        }),
       );
 
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const inactiveUser = createAsyncThunk(
@@ -142,11 +142,11 @@ export const inactiveUser = createAsyncThunk(
           error: errorBody(errorCode(error), status, errorMessage(error)),
           action: "INACTIVE_USER",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response.data);
     }
-  }
+  },
 );
 
 export const donwloadedExcel = createAsyncThunk(
@@ -165,11 +165,11 @@ export const donwloadedExcel = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_USER_EXCEL",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadTemplate = createAsyncThunk(
@@ -181,12 +181,12 @@ export const downloadTemplate = createAsyncThunk(
       return data?.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "DOWNLOAD_TEMPLATE", back: false })
+        validateError({ error, action: "DOWNLOAD_TEMPLATE", back: false }),
       );
 
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getAllUserPaginate = createAsyncThunk(
   "GET_ALL_USER_PAGINATE",
@@ -204,11 +204,11 @@ export const getAllUserPaginate = createAsyncThunk(
           error: error,
           action: "GET_ALL_USER_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 
 export const uploadUser = createAsyncThunk(
@@ -223,7 +223,7 @@ export const uploadUser = createAsyncThunk(
       const data = await userHttpService.uploadImage(
         url,
         dataRequest,
-        onProgress
+        onProgress,
       );
       return data;
     } catch (e) {
@@ -232,11 +232,11 @@ export const uploadUser = createAsyncThunk(
           error: errorBody(errorCode(e), "updated", errorMessage(e)),
           action: "UPLOAD_USER",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(e?.response);
     }
-  }
+  },
 );
 export const getDetailGroupAccess = createAsyncThunk(
   "GET_DETAIL_GROUP_ACCESS",
@@ -251,11 +251,11 @@ export const getDetailGroupAccess = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_GROUP_ACCESS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 
 export const getAllEmployees = createAsyncThunk(
@@ -271,11 +271,11 @@ export const getAllEmployees = createAsyncThunk(
           error: error,
           action: "GET_ALL_EMPLOYEE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getAllGroupAccess = createAsyncThunk(
   "GET_ALL_GROUP_ACCES",
@@ -290,11 +290,11 @@ export const getAllGroupAccess = createAsyncThunk(
           error: error,
           action: "GET_ALL_GROUP_ACCESS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getAllUserLevel = createAsyncThunk(
   "GET_ALL_USER_LEVEL",
@@ -309,11 +309,11 @@ export const getAllUserLevel = createAsyncThunk(
           error: error,
           action: "GET_ALL_USER_LEVEL",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getAllAuthType = createAsyncThunk(
   "GET_ALL_AUTH_TYPE",
@@ -328,11 +328,11 @@ export const getAllAuthType = createAsyncThunk(
           error: error,
           action: "GET_ALL_AUTH_TYPE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 export const getAllUserType = createAsyncThunk(
   "GET_ALL_USER_TYPE",
@@ -347,11 +347,11 @@ export const getAllUserType = createAsyncThunk(
           error: error,
           action: "GET_ALL_USER_TYPE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 
 export const finalUploadUser = createAsyncThunk(
@@ -372,11 +372,11 @@ export const finalUploadUser = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "UPLOAD_USER",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const generatePasswordLink = createAsyncThunk(
   "GENERATE_PASSWORD_LINK",
@@ -391,11 +391,11 @@ export const generatePasswordLink = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "GENERATE_PASSWORD_LINK",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getEmployeeById = createAsyncThunk(
   "GET_EMPLOYEE_BY_ID",
@@ -410,11 +410,11 @@ export const getEmployeeById = createAsyncThunk(
           error: error,
           action: "GET_EMPLOYEE_BY_ID",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue([]);
     }
-  }
+  },
 );
 
 export const changeAuthType = createAsyncThunk(
@@ -435,11 +435,11 @@ export const changeAuthType = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CHANGE_AUTH_TYPE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getUserPositionTo = createAsyncThunk(
@@ -460,13 +460,13 @@ export const getUserPositionTo = createAsyncThunk(
         validateError({
           error: errorBody(errorCode(error), "forwaded", errorMessage(error)),
           action: "GET_USER_POSITION_TO",
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const forwardTaskUser = createAsyncThunk(
@@ -487,11 +487,11 @@ export const forwardTaskUser = createAsyncThunk(
           error: errorBody(errorCode(error), "forwarded", errorMessage(error)),
           action: "FORWARD_TASK_USER",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 const userSlice = createSlice({

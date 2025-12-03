@@ -36,11 +36,11 @@ export const createPD = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_PD",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const updatePD = createAsyncThunk(
@@ -61,11 +61,11 @@ export const updatePD = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "UPDATE_PD",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getAllPDHistoryPaginate = createAsyncThunk(
@@ -84,11 +84,11 @@ export const getAllPDHistoryPaginate = createAsyncThunk(
           error: error,
           action: "GET_ALL_PBHistory_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCurrentPB = createAsyncThunk(
@@ -106,11 +106,11 @@ export const getCurrentPB = createAsyncThunk(
           error: error,
           action: "GET_CURRENT_PRODUCT_DISTRIBUTION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getDetailPDHistory = createAsyncThunk(
@@ -124,13 +124,13 @@ export const getDetailPDHistory = createAsyncThunk(
       }
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_DETAIL_PDHistory" })
+        validateError({ error, action: "GET_DETAIL_PDHistory" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const deletePD = createAsyncThunk("DELETE_PD", async (id, thunkAPI) => {
@@ -143,7 +143,7 @@ export const deletePD = createAsyncThunk("DELETE_PD", async (id, thunkAPI) => {
   } catch (error) {
     thunkAPI.dispatch(validateError({ error, action: "DELETE_PD" }));
     return thunkAPI.rejectWithValue(
-      error.response.data.code === 419 ? null : error.response.data
+      error.response.data.code === 419 ? null : error.response.data,
     );
   }
 });
@@ -161,11 +161,11 @@ export const getCountryPD = createAsyncThunk(
           error: error,
           action: "GET_COUNTRY_PD",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 const productDistributionSlice = createSlice({

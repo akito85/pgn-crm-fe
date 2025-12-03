@@ -36,7 +36,7 @@ const ModalHistory = (props) => {
       const useTabs = tabOptions && (tabOptions?.length > 0 || false);
       let historyData = [];
       let approverData = [];
-      
+
       if (useTabs) {
         const tempTab = tabOptions[0].value.toLowerCase();
         setTabActive(tabOptions[0].value);
@@ -46,15 +46,15 @@ const ModalHistory = (props) => {
         approverData = dataApprover || [];
         historyData = dataHistory || [];
       }
-      
-      const submitData = historyData.find(h => h.status === "SUBMIT");
+
+      const submitData = historyData.find((h) => h.status === "SUBMIT");
       setSubmitterData(submitData);
-      
+
       setDataApproverFinal(approverData);
-      
-      const hasWaiting = approverData.some(a => a.status === null);
-      const hasReject = approverData.some(a => a.status === "REJECT");
-      
+
+      const hasWaiting = approverData.some((a) => a.status === null);
+      const hasReject = approverData.some((a) => a.status === "REJECT");
+
       if (hasReject) {
         setApproverStatus("REJECTED");
       } else if (hasWaiting) {
@@ -62,8 +62,8 @@ const ModalHistory = (props) => {
       } else {
         setApproverStatus("APPROVED");
       }
-      
-      setActiveKeys(['0']);
+
+      setActiveKeys(["0"]);
     } else {
       setDataApproverFinal([]);
       setSubmitterData(null);
@@ -76,18 +76,18 @@ const ModalHistory = (props) => {
     const value = e.target.value;
     const tempTab = value.toLowerCase();
     setTabActive(value);
-    
+
     const approverData = dataApprover[tempTab] || [];
     const historyData = dataHistory[tempTab] || [];
-    
-    const submitData = historyData.find(h => h.status === "SUBMIT");
+
+    const submitData = historyData.find((h) => h.status === "SUBMIT");
     setSubmitterData(submitData);
-    
+
     setDataApproverFinal(approverData);
-    
-    const hasWaiting = approverData.some(a => a.status === null);
-    const hasReject = approverData.some(a => a.status === "REJECT");
-    
+
+    const hasWaiting = approverData.some((a) => a.status === null);
+    const hasReject = approverData.some((a) => a.status === "REJECT");
+
     if (hasReject) {
       setApproverStatus("REJECTED");
     } else if (hasWaiting) {
@@ -95,8 +95,8 @@ const ModalHistory = (props) => {
     } else {
       setApproverStatus("APPROVED");
     }
-    
-    setActiveKeys(['0']);
+
+    setActiveKeys(["0"]);
   };
 
   const formatDate = (date) => {
@@ -142,19 +142,19 @@ const ModalHistory = (props) => {
 
     const enrichedApprovers = dataApproverFinal.map((approver) => {
       let historyMatch = null;
-      
+
       if (tabActive) {
         const tempTab = tabActive.toLowerCase();
         const historyData = dataHistory[tempTab] || [];
         historyMatch = historyData.find(
-          h => h.name === approver.name && h.status === approver.status
+          (h) => h.name === approver.name && h.status === approver.status,
         );
       } else {
         historyMatch = dataHistory?.find(
-          h => h.name === approver.name && h.status === approver.status
+          (h) => h.name === approver.name && h.status === approver.status,
         );
       }
-      
+
       return {
         ...approver,
         taskDate: historyMatch?.taskDate || submitterData?.taskDate || null,
@@ -169,22 +169,36 @@ const ModalHistory = (props) => {
           <table className="w-full text-xs border border-gray-200">
             <thead>
               <tr className="bg-blue-600 text-white">
-                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">NO</th>
-                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">TASK SUBMITTED DATE</th>
-                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">ACTION DATE</th>
-                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">HIERARCHY</th>
-                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">ACTION BY</th>
-                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">POSITION</th>
+                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">
+                  NO
+                </th>
+                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">
+                  TASK SUBMITTED DATE
+                </th>
+                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">
+                  ACTION DATE
+                </th>
+                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">
+                  HIERARCHY
+                </th>
+                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">
+                  ACTION BY
+                </th>
+                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">
+                  POSITION
+                </th>
                 <th className="py-2 px-3 text-center font-semibold">STATUS</th>
               </tr>
             </thead>
             <tbody>
               {enrichedApprovers.map((approver, index) => (
-                <tr 
+                <tr
                   key={index}
                   className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
                 >
-                  <td className="py-2 px-3 border-b border-r border-gray-200">{index + 1}</td>
+                  <td className="py-2 px-3 border-b border-r border-gray-200">
+                    {index + 1}
+                  </td>
                   <td className="py-2 px-3 border-b border-r border-gray-200">
                     {formatDate(approver.taskDate)}
                   </td>
@@ -216,12 +230,15 @@ const ModalHistory = (props) => {
     if (!submitterData) return null;
 
     return (
-      <Panel 
+      <Panel
         header={
           <div className="flex items-center justify-between w-full pr-4">
             <div className="flex items-center gap-3">
               <SVGIcon name="IconSubmitApprover" width={20} />
-              <span className="font-semibold text-sm" style={{ color: "#0063A2" }}>
+              <span
+                className="font-semibold text-sm"
+                style={{ color: "#0063A2" }}
+              >
                 SUBMITTER DATA
               </span>
             </div>
@@ -233,10 +250,10 @@ const ModalHistory = (props) => {
         key="0"
         style={{
           marginBottom: 12,
-          border: '1px solid #d9d9d9',
+          border: "1px solid #d9d9d9",
           borderRadius: 6,
-          overflow: 'hidden',
-          backgroundColor: '#ffffff'
+          overflow: "hidden",
+          backgroundColor: "#ffffff",
         }}
         className="approval-history-panel"
       >
@@ -244,30 +261,40 @@ const ModalHistory = (props) => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-gray-500 mb-1">Task Submitted Date</p>
-              <p className="text-sm font-medium">{formatDate(submitterData.taskDate)}</p>
+              <p className="text-sm font-medium">
+                {formatDate(submitterData.taskDate)}
+              </p>
             </div>
             <div>
               <p className="text-xs text-gray-500 mb-1">Action Date</p>
-              <p className="text-sm font-medium">{formatDate(submitterData.actionDate)}</p>
+              <p className="text-sm font-medium">
+                {formatDate(submitterData.actionDate)}
+              </p>
             </div>
-            
+
             <div className="col-span-2">
               <p className="text-xs font-semibold text-gray-700 mb-2">DETAIL</p>
-              
+
               <div className="space-y-2">
                 <div className="flex">
                   <span className="text-xs text-gray-600 w-32">Hierarchy</span>
-                  <span className="text-xs font-medium">{submitterData.hierarchy || "-"}</span>
+                  <span className="text-xs font-medium">
+                    {submitterData.hierarchy || "-"}
+                  </span>
                 </div>
-                
+
                 <div className="flex">
                   <span className="text-xs text-gray-600 w-32">Action By</span>
-                  <span className="text-xs font-medium">{submitterData.name || "-"}</span>
+                  <span className="text-xs font-medium">
+                    {submitterData.name || "-"}
+                  </span>
                 </div>
-                
+
                 <div className="flex">
                   <span className="text-xs text-gray-600 w-32">Position</span>
-                  <span className="text-xs font-medium">{submitterData.role || "-"}</span>
+                  <span className="text-xs font-medium">
+                    {submitterData.role || "-"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -301,16 +328,22 @@ const ModalHistory = (props) => {
     };
 
     return (
-      <Panel 
+      <Panel
         header={
           <div className="flex items-center justify-between w-full pr-4">
             <div className="flex items-center gap-3">
               {getApproverIcon()}
-              <span className="font-semibold text-sm" style={{ color: getApproverColor() }}>
+              <span
+                className="font-semibold text-sm"
+                style={{ color: getApproverColor() }}
+              >
                 APPROVER
               </span>
             </div>
-            <span className="text-xs font-medium" style={{ color: getApproverColor() }}>
+            <span
+              className="text-xs font-medium"
+              style={{ color: getApproverColor() }}
+            >
               {getApproverText()}
             </span>
           </div>
@@ -318,10 +351,10 @@ const ModalHistory = (props) => {
         key="1"
         style={{
           marginBottom: 12,
-          border: '1px solid #d9d9d9',
+          border: "1px solid #d9d9d9",
           borderRadius: 6,
-          overflow: 'hidden',
-          backgroundColor: '#ffffff'
+          overflow: "hidden",
+          backgroundColor: "#ffffff",
         }}
         className="approval-history-panel"
       >
@@ -364,7 +397,7 @@ const ModalHistory = (props) => {
           {tabOptions && tabOptions.length > 0 ? (
             <RadioTabs data={tabOptions} onChange={handleTabs} />
           ) : null}
-          
+
           {/* Collapse Accordion - SELALU 2 ACCORDION */}
           <div className="space-y-3">
             <Collapse
@@ -372,19 +405,19 @@ const ModalHistory = (props) => {
               onChange={setActiveKeys}
               expandIconPosition="end"
               expandIcon={({ isActive }) => (
-                <DownOutlined 
-                  rotate={isActive ? 180 : 0} 
+                <DownOutlined
+                  rotate={isActive ? 180 : 0}
                   style={{ fontSize: 12 }}
                 />
               )}
               style={{
-                backgroundColor: 'transparent',
-                border: 'none'
+                backgroundColor: "transparent",
+                border: "none",
               }}
             >
               {/* ACCORDION 1: SUBMITTER DATA */}
               {renderSubmitterPanel()}
-              
+
               {/* ACCORDION 2: APPROVER */}
               {renderApproverPanel()}
             </Collapse>
@@ -402,7 +435,7 @@ const ModalHistory = (props) => {
             padding: 14px 16px !important;
             background-color: #ffffff !important;
           }
-          
+
           .approval-history-panel .ant-collapse-content-box {
             padding: 0 !important;
           }
@@ -411,7 +444,7 @@ const ModalHistory = (props) => {
             border-top: 1px solid #d9d9d9;
             background-color: #ffffff !important;
           }
-          
+
           .approval-history-panel.ant-collapse-item {
             background-color: #ffffff !important;
           }

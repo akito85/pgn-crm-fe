@@ -12,8 +12,8 @@ const ModalReGenerateInvoice = ({
   handleConfirm = () => {},
   remark,
   onChange = () => {},
-  onChangeSelect = () => { },
-  data_format
+  onChangeSelect = () => {},
+  data_format,
 }) => {
   // Declaration
   const [form] = Form.useForm();
@@ -21,10 +21,9 @@ const ModalReGenerateInvoice = ({
 
   useEffect(() => {
     if (isOpen === false) {
-      form.resetFields()
+      form.resetFields();
     }
-  }, [form, isOpen])
-
+  }, [form, isOpen]);
 
   return (
     <ModalApproveOrReject
@@ -42,15 +41,15 @@ const ModalReGenerateInvoice = ({
             type={"submit"}
             border={false}
             onClick={handleConfirm}
-            htmlType={'submit'}
-            form={'formRegenarate'}
+            htmlType={"submit"}
+            form={"formRegenarate"}
           >
             Confirm
           </ButtonComponent>
         </div>
       }
     >
-      <Form layout="vertical" form={form} id={'formRegenarate'}>
+      <Form layout="vertical" form={form} id={"formRegenarate"}>
         <div className="w-full grid grid-cols-1 gap-2">
           <Form.Item
             label={"Format Option"}

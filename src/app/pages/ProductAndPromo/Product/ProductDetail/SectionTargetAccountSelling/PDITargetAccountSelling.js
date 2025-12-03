@@ -7,7 +7,7 @@ import moment from "moment";
 import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 import { columnsTableCriteria } from "../../columnTableCriteria";
 import { columnsTableCriteriaAll } from "../../../UtilsProduct/TableCriteriaAllProduct";
-import FunctionalCriteriaProduct from"../../../UtilsProduct/FunctionalCriteriaProduct";
+import FunctionalCriteriaProduct from "../../../UtilsProduct/FunctionalCriteriaProduct";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -30,7 +30,7 @@ const columns = (
   searchedColumn,
   searchText,
   handleSearch,
-  dataCriteria = []
+  dataCriteria = [],
 ) => {
   const result = [
     {
@@ -44,7 +44,7 @@ const columns = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     {
       title: "START DATE",
@@ -60,7 +60,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -76,7 +76,7 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
@@ -92,7 +92,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       ellipsis: {
         showTitle: false,
@@ -137,7 +137,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (index) => {
         if (index) {
@@ -163,7 +163,7 @@ const columns = (
   return result.filter((col) =>
     !listExclude.includes(col.title)
       ? dataCriteria.includes(col.indexValue)
-      : true
+      : true,
   );
 };
 const PDITargetAccountSelling = ({
@@ -228,7 +228,7 @@ const PDITargetAccountSelling = ({
     return (dataObject.mProductTargetAccountSellingCriteria || []).reduce(
       (prev, current, index) =>
         prev + (index !== 0 ? ", " : "") + current.criteriaName,
-      ""
+      "",
     );
   };
   return (
@@ -248,31 +248,31 @@ const PDITargetAccountSelling = ({
       dataCriteria &&
       dataCriteria.length > 0 ? (
         <FunctionalCriteriaProduct
-            data={dataTable} //data
-            dataCriteria={dataCriteria} //ddl
-            type={"detail"}
-            selector="product"
-            columnsTable={columnsTableCriteriaAll}
-          />
-        // <TablePaginationNew
-        //   type="FE"
-        //   dataSource={dataTable}
-        //   totalData={totalElements}
-        //   current={page}
-        //   pageSize={pageSize}
-        //   tableScrolled={{ y: 525, x: 2300 }}
-        //   onChange={handleChangeSize}
-        //   columns={columns(
-        //     page,
-        //     pageSize,
-        //     searchInput,
-        //     searchedColumn,
-        //     searchText,
-        //     handleSearch,
-        //     dataCriteria
-        //   )}
-        // />
-      ) : null}
+          data={dataTable} //data
+          dataCriteria={dataCriteria} //ddl
+          type={"detail"}
+          selector="product"
+          columnsTable={columnsTableCriteriaAll}
+        />
+      ) : // <TablePaginationNew
+      //   type="FE"
+      //   dataSource={dataTable}
+      //   totalData={totalElements}
+      //   current={page}
+      //   pageSize={pageSize}
+      //   tableScrolled={{ y: 525, x: 2300 }}
+      //   onChange={handleChangeSize}
+      //   columns={columns(
+      //     page,
+      //     pageSize,
+      //     searchInput,
+      //     searchedColumn,
+      //     searchText,
+      //     handleSearch,
+      //     dataCriteria
+      //   )}
+      // />
+      null}
     </div>
   );
 };

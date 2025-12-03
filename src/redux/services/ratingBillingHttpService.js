@@ -81,7 +81,7 @@ const getDetailByIdBody = async (url, id) => {
     const response = await axios.get(
       baseUrl + url,
       { id: id },
-      { headers: buildHeaders(baseUrl) }
+      { headers: buildHeaders(baseUrl) },
     );
     return response?.data;
   } catch (error) {
@@ -259,7 +259,7 @@ const uploadAttachment = async (url, body, onProgress, customBaseUrl) => {
       headers: buildHeaders(baseUrl, { "Content-Type": "multipart/form-data" }),
       onUploadProgress: (progressEvent) => {
         const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
+          (progressEvent.loaded * 100) / progressEvent.total,
         );
         onProgress(percentCompleted);
       },
@@ -355,7 +355,7 @@ const previewOrDownloadData = async (url, params, customBaseUrl) => {
 const downloadXlsx = async (
   url,
   fallbackFilename = "download",
-  customBaseUrl
+  customBaseUrl,
 ) => {
   try {
     const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;

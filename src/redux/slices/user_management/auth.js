@@ -48,17 +48,21 @@ export const login = createAsyncThunk(
       remember_me = remember;
       if (remember_me) {
         thunkAPI.dispatch(
-          setData({ key: "token", data: data.data.token, storageType: "local" })
+          setData({
+            key: "token",
+            data: data.data.token,
+            storageType: "local",
+          }),
         );
         thunkAPI.dispatch(
-          setData({ key: "remember", data: remember, storageType: "local" })
+          setData({ key: "remember", data: remember, storageType: "local" }),
         );
         thunkAPI.dispatch(
           setData({
             key: "config",
             data: data.data.config,
             storageType: "local",
-          })
+          }),
         );
         if (
           data.data.token.userType === "Non Employee" &&
@@ -69,7 +73,7 @@ export const login = createAsyncThunk(
               key: "side_bar",
               data: data.data.side_bar,
               storageType: "local",
-            })
+            }),
           );
         } else {
           level === "superuser" &&
@@ -80,14 +84,14 @@ export const login = createAsyncThunk(
                   key: "entities",
                   data: data.data.entityList,
                   storageType: "local",
-                })
+                }),
               )
             : thunkAPI.dispatch(
                 setData({
                   key: "positions",
                   data: data.data.positionList,
                   storageType: "local",
-                })
+                }),
               );
         }
       } else {
@@ -96,17 +100,17 @@ export const login = createAsyncThunk(
             key: "token",
             data: data.data.token,
             storageType: "session",
-          })
+          }),
         );
         thunkAPI.dispatch(
-          setData({ key: "remember", data: remember, storageType: "session" })
+          setData({ key: "remember", data: remember, storageType: "session" }),
         );
         thunkAPI.dispatch(
           setData({
             key: "config",
             data: data.data.config,
             storageType: "session",
-          })
+          }),
         );
         if (
           data.data.token.userType === "Non Employee" &&
@@ -117,7 +121,7 @@ export const login = createAsyncThunk(
               key: "side_bar",
               data: data.data.side_bar,
               storageType: "session",
-            })
+            }),
           );
         } else {
           level === "superuser" &&
@@ -128,14 +132,14 @@ export const login = createAsyncThunk(
                   key: "entities",
                   data: data.data.entityList,
                   storageType: "session",
-                })
+                }),
               )
             : thunkAPI.dispatch(
                 setData({
                   key: "positions",
                   data: data.data.positionList,
                   storageType: "session",
-                })
+                }),
               );
         }
       }
@@ -154,7 +158,7 @@ export const login = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 export const logout = createAsyncThunk("LOGOUT", async (_, thunkAPI) => {
   try {
@@ -191,7 +195,7 @@ export const logoutTokenExpired = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const choosePosition = createAsyncThunk(
@@ -201,24 +205,28 @@ export const choosePosition = createAsyncThunk(
       const data = await authService.choosePosition(id);
       if (remember === "true") {
         thunkAPI.dispatch(
-          setData({ key: "token", data: data.data.token, storageType: "local" })
+          setData({
+            key: "token",
+            data: data.data.token,
+            storageType: "local",
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "side_bar",
             data: data.data.side_bar,
             storageType: "local",
-          })
+          }),
         );
         thunkAPI.dispatch(
-          setData({ key: "remember", data: remember, storageType: "local" })
+          setData({ key: "remember", data: remember, storageType: "local" }),
         );
         thunkAPI.dispatch(
           setData({
             key: "config",
             data: data.data.config,
             storageType: "local",
-          })
+          }),
         );
       } else {
         thunkAPI.dispatch(
@@ -226,34 +234,34 @@ export const choosePosition = createAsyncThunk(
             key: "token",
             data: data.data.token,
             storageType: "session",
-          })
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "side_bar",
             data: data.data.side_bar,
             storageType: "session",
-          })
+          }),
         );
         thunkAPI.dispatch(
-          setData({ key: "remember", data: remember, storageType: "session" })
+          setData({ key: "remember", data: remember, storageType: "session" }),
         );
         thunkAPI.dispatch(
           setData({
             key: "config",
             data: data.data.config,
             storageType: "session",
-          })
+          }),
         );
       }
       return data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "CHOOSE_POSITION", back: false })
+        validateError({ error: error, action: "CHOOSE_POSITION", back: false }),
       );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const chooseEntity = createAsyncThunk(
@@ -263,24 +271,28 @@ export const chooseEntity = createAsyncThunk(
       const data = await authService.chooseEntity(id);
       if (remember === "true") {
         thunkAPI.dispatch(
-          setData({ key: "token", data: data.data.token, storageType: "local" })
+          setData({
+            key: "token",
+            data: data.data.token,
+            storageType: "local",
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "side_bar",
             data: data.data.side_bar,
             storageType: "local",
-          })
+          }),
         );
         thunkAPI.dispatch(
-          setData({ key: "remember", data: remember, storageType: "local" })
+          setData({ key: "remember", data: remember, storageType: "local" }),
         );
         thunkAPI.dispatch(
           setData({
             key: "config",
             data: data.data.config,
             storageType: "local",
-          })
+          }),
         );
       } else {
         thunkAPI.dispatch(
@@ -288,34 +300,34 @@ export const chooseEntity = createAsyncThunk(
             key: "token",
             data: data.data.token,
             storageType: "session",
-          })
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "side_bar",
             data: data.data.side_bar,
             storageType: "session",
-          })
+          }),
         );
         thunkAPI.dispatch(
-          setData({ key: "remember", data: remember, storageType: "session" })
+          setData({ key: "remember", data: remember, storageType: "session" }),
         );
         thunkAPI.dispatch(
           setData({
             key: "config",
             data: data.data.config,
             storageType: "session",
-          })
+          }),
         );
       }
       return data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "CHOOSE_ENTITY", back: false })
+        validateError({ error: error, action: "CHOOSE_ENTITY", back: false }),
       );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 export const getEntities = createAsyncThunk(
   "GET_ENTITIES",
@@ -326,7 +338,7 @@ export const getEntities = createAsyncThunk(
       return data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_ENTITY", back: false })
+        validateError({ error, action: "GET_ENTITY", back: false }),
       );
       // const message =
       // 	error?.response?.data?.message || error?.message || error?.toString();
@@ -341,7 +353,7 @@ export const getEntities = createAsyncThunk(
       // }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const forgotPassword = createAsyncThunk(
   "FORGOT_PASSWORD_SUPER_USER",
@@ -369,7 +381,7 @@ export const forgotPassword = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const confirmNewPassword = createAsyncThunk(
   "CONFIRM_PASSWORD",
@@ -398,7 +410,7 @@ export const confirmNewPassword = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const checkGrantedAccess = createAsyncThunk(
@@ -410,11 +422,11 @@ export const checkGrantedAccess = createAsyncThunk(
       return data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "CHECK_GRANTED_ACCESS" })
+        validateError({ error: error, action: "CHECK_GRANTED_ACCESS" }),
       );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // get list entity
@@ -443,7 +455,7 @@ export const getListSwitchEntity = createAsyncThunk(
       thunkAPI.dispatch(grantedAccess(error?.response?.data?.data));
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // change entity
@@ -458,14 +470,18 @@ export const changeEntity = createAsyncThunk(
         localStorage.removeItem("token");
         localStorage.removeItem("side_bar");
         thunkAPI.dispatch(
-          setData({ key: "token", data: data.data.token, storageType: "local" })
+          setData({
+            key: "token",
+            data: data.data.token,
+            storageType: "local",
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "side_bar",
             data: data.data.side_bar,
             storageType: "local",
-          })
+          }),
         );
       } else {
         window.sessionStorage.removeItem("token");
@@ -475,14 +491,14 @@ export const changeEntity = createAsyncThunk(
             key: "token",
             data: data.data.token,
             storageType: "session",
-          })
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "side_bar",
             data: data.data.side_bar,
             storageType: "session",
-          })
+          }),
         );
       }
       return data?.data;
@@ -503,7 +519,7 @@ export const changeEntity = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 // get list entity
 export const getListSwitchPosition = createAsyncThunk(
@@ -531,7 +547,7 @@ export const getListSwitchPosition = createAsyncThunk(
       thunkAPI.dispatch(grantedAccess(error?.response?.data?.data));
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // change position
@@ -547,7 +563,11 @@ export const changePosition = createAsyncThunk(
       // localStorage.removeItem('side_bar') && window.sessionStorage.removeItem('side_bar');
       if (remember) {
         thunkAPI.dispatch(
-          setData({ key: "token", data: data.data.token, storageType: "local" })
+          setData({
+            key: "token",
+            data: data.data.token,
+            storageType: "local",
+          }),
         );
         // thunkAPI.dispatch(setData({ key: 'side_bar', data: data.data.side_bar, storageType: "local" }))
       } else {
@@ -556,7 +576,7 @@ export const changePosition = createAsyncThunk(
             key: "token",
             data: data.data.token,
             storageType: "session",
-          })
+          }),
         );
         // thunkAPI.dispatch(setData({ key: 'side_bar', data: data.data.side_bar, storageType: "session" }))
       }
@@ -578,7 +598,7 @@ export const changePosition = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // change verify email
@@ -592,7 +612,7 @@ export const verifyChangeEmail = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const verifyChangePhone = createAsyncThunk(
   "VERIFY_CHANGE_PHONE",
@@ -604,7 +624,7 @@ export const verifyChangePhone = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const verifyChangeEmailPhone = createAsyncThunk(
   "VERIFY_CHANGE_EMAIL_PHONE",
@@ -616,7 +636,7 @@ export const verifyChangeEmailPhone = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const verifyChangePassword = createAsyncThunk(
   "VERIFY_CHANGE_EMAIL_PHONE",
@@ -628,7 +648,7 @@ export const verifyChangePassword = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // check validate link
@@ -655,7 +675,7 @@ export const checkValidateLink = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // check creds
@@ -683,7 +703,7 @@ export const checkCredential = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // relogin
@@ -705,21 +725,21 @@ export const reLogin = createAsyncThunk(
             key: "token",
             data: response.data.token,
             storageType: "local",
-          })
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "side_bar",
             data: response.data.side_bar,
             storageType: "local",
-          })
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "config",
             data: response.data.config,
             storageType: "local",
-          })
+          }),
         );
       } else {
         thunkAPI.dispatch(
@@ -727,21 +747,21 @@ export const reLogin = createAsyncThunk(
             key: "token",
             data: response.data.token,
             storageType: "session",
-          })
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "side_bar",
             data: response.data.side_bar,
             storageType: "session",
-          })
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "config",
             data: response.data.config,
             storageType: "session",
-          })
+          }),
         );
       }
       window.location.reload();
@@ -757,7 +777,7 @@ export const reLogin = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // take over
@@ -774,28 +794,28 @@ export const takeOverDelegation = createAsyncThunk(
             key: "token",
             data: response.data.token,
             storageType: "local",
-          })
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "side_bar",
             data: response.data.side_bar,
             storageType: "local",
-          })
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "remember",
             data: body?.remember,
             storageType: "local",
-          })
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "config",
             data: response.data.config,
             storageType: "local",
-          })
+          }),
         );
       } else {
         thunkAPI.dispatch(
@@ -803,28 +823,28 @@ export const takeOverDelegation = createAsyncThunk(
             key: "token",
             data: response.data.token,
             storageType: "session",
-          })
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "side_bar",
             data: response.data.side_bar,
             storageType: "session",
-          })
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "remember",
             data: body?.remember,
             storageType: "session",
-          })
+          }),
         );
         thunkAPI.dispatch(
           setData({
             key: "config",
             data: response.data.config,
             storageType: "session",
-          })
+          }),
         );
       }
       // return response.data;
@@ -834,12 +854,12 @@ export const takeOverDelegation = createAsyncThunk(
           error: errorBody(errorCode(error), "take over", errorMessage(error)),
           action: "TAKE_OVER_DELEGATION",
           back: false,
-        })
+        }),
       );
 
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 const authSlice = createSlice({

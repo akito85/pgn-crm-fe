@@ -68,7 +68,7 @@ const ModalGenerateInvoice = ({
               key: index + 1,
               ...item,
             };
-          })
+          }),
         );
       }
     }
@@ -77,7 +77,7 @@ const ModalGenerateInvoice = ({
   useEffect(() => {
     if (selectedRowKeys?.length !== 0) {
       setFilterRowSelected(
-        dataTable?.filter((item) => selectedRowKeys?.includes(item?.key))
+        dataTable?.filter((item) => selectedRowKeys?.includes(item?.key)),
       );
     }
   }, [dataTable, selectedRowKeys]);
@@ -314,7 +314,7 @@ const ModalGenerateInvoice = ({
                 searchInput,
                 searchedColumn,
                 searchText,
-                handleSearch
+                handleSearch,
               )}
               onSort={onSort}
               tableScrolled={{ y: 525, x: 11000 }}
@@ -360,7 +360,7 @@ const ModalGenerateInvoice = ({
                 searchInput,
                 searchedColumn,
                 searchText,
-                handleSearch
+                handleSearch,
               )}
               onSort={onSort}
               tableScrolled={{ y: 525, x: 11000 }}

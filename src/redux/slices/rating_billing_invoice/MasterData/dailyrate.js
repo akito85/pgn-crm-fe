@@ -36,7 +36,7 @@ export const getDailyRatePaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 //get currency
@@ -50,7 +50,7 @@ export const getCurrencyDDL = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 //get ratype create
@@ -64,7 +64,7 @@ export const getRateTypeDDL = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListCategory = createAsyncThunk(
@@ -80,7 +80,7 @@ export const getListCategory = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 //list approval hierarchy
@@ -94,7 +94,7 @@ export const getAllApprovalList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListApprovalById = createAsyncThunk(
@@ -107,7 +107,7 @@ export const getListApprovalById = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const createMasterDailyRates = createAsyncThunk(
@@ -147,7 +147,7 @@ export const createMasterDailyRates = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const updateMasterDailyRates = createAsyncThunk(
@@ -187,7 +187,7 @@ export const updateMasterDailyRates = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getDetailDR = createAsyncThunk(
@@ -200,7 +200,7 @@ export const getDetailDR = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getDetailDraftDR = createAsyncThunk(
@@ -213,7 +213,7 @@ export const getDetailDraftDR = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const inactiveDailyRates = createAsyncThunk(
@@ -223,7 +223,7 @@ export const inactiveDailyRates = createAsyncThunk(
       const url = `/v1/dbs/api/daily-rate/inactive`;
       const response = await ratingBillingHttpService.activationRemarkWithPut(
         url,
-        body
+        body,
       );
       const messageBody = {
         title: `Successful`,
@@ -246,7 +246,7 @@ export const inactiveDailyRates = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getDowloadDailyRate = createAsyncThunk(
@@ -265,11 +265,11 @@ export const getDowloadDailyRate = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_DAILY_RATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -296,7 +296,7 @@ export const getApprovalHistory = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 //approve or reject create
@@ -307,7 +307,7 @@ export const approveCreate = createAsyncThunk(
       const url = "/v1/dbs/api/daily-rate/approve-reject";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const messageBody = {
         title: `Successful`,
@@ -337,7 +337,7 @@ export const approveCreate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 //approve or reject INACTIVE
@@ -348,7 +348,7 @@ export const approveRejectInactive = createAsyncThunk(
       const url = "/v1/dbs/api/daily-rate/approve-inactive";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const messageBody = {
         title: `Successful`,
@@ -378,7 +378,7 @@ export const approveRejectInactive = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 const dailyrateSlice = createSlice({

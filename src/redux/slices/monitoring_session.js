@@ -21,11 +21,11 @@ export const getMonitoringSession = createAsyncThunk(
           error: error,
           action: "GET_MONITORING_SESSION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 const monitoringSessionSlice = createSlice({
   name: "monitoring_session",

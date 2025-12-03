@@ -649,7 +649,7 @@ const DynamicTableInline = ({
                     maxLength: col.maxLength,
                   }),
                 };
-              })
+              }),
             )}
             rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
             components={{
@@ -754,7 +754,7 @@ const DynamicTableInline = ({
                   maxLength: col.maxLength,
                 }),
               };
-            })
+            }),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

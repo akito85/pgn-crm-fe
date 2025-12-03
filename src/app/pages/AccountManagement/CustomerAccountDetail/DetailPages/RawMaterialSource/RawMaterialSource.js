@@ -21,29 +21,29 @@ const RawMaterialSource = ({ id, idCustomer }) => {
   const layout = (valuePage) => {
     switch (valuePage) {
       case "Current Raw Material Source":
-        return <CurrentRawMaterialSource id={id} idCustomer={idCustomer}/>;
+        return <CurrentRawMaterialSource id={id} idCustomer={idCustomer} />;
       case "Raw Material Source History":
         return <RawMaterialSourceHistory id={id} idCustomer={idCustomer} />;
       default:
-        return <CurrentRawMaterialSource id={id} idCustomer={idCustomer}/>;
+        return <CurrentRawMaterialSource id={id} idCustomer={idCustomer} />;
     }
   };
 
   return (
     <Fragment>
-        <BaseContainer
-          type={"tab"}
-          element={
-            <>
-              <RadioTabs
-                data={listSectionInfo}
-                onChange={(e) => setValuePage(e.target.value)}
-              />
-            </>
-          }
-        >
-          {layout(valuePage)}
-        </BaseContainer>
+      <BaseContainer
+        type={"tab"}
+        element={
+          <>
+            <RadioTabs
+              data={listSectionInfo}
+              onChange={(e) => setValuePage(e.target.value)}
+            />
+          </>
+        }
+      >
+        {layout(valuePage)}
+      </BaseContainer>
     </Fragment>
   );
 };

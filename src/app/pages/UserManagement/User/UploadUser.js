@@ -86,7 +86,7 @@ const UploadUser = () => {
                 : moment(item?.endDateGa).clone(),
             message: item?.message,
           };
-        })
+        }),
       );
     } else {
       setFirstStep(true);
@@ -163,7 +163,7 @@ const UploadUser = () => {
             return { ...file, status: "error" };
           }
           return file;
-        })
+        }),
       );
     }
   };
@@ -175,7 +175,7 @@ const UploadUser = () => {
         ...file,
         percent: 0,
         status: "uploading",
-      }))
+      })),
     );
     handleUpload();
   };
@@ -228,7 +228,7 @@ const UploadUser = () => {
             return { ...file, status: "error" };
           }
           return file;
-        })
+        }),
       );
     }
   };

@@ -42,9 +42,7 @@ import {
   checkValidateCreateSa,
   getDetailServiceAgreement,
 } from "../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
-import {
-  ModalError,
-} from "../../../../../../../components/Modal/ModalPopUp";
+import { ModalError } from "../../../../../../../components/Modal/ModalPopUp";
 import ConfirmationSa from "./Modal/ConfirmationSa";
 import { hasValue } from "../../../../../../../utils";
 
@@ -66,7 +64,7 @@ const CreateServiceAgreement = ({ saType }) => {
   ]);
 
   const [valuePageSaDetail, setValuePageSaDetail] = useState(
-    tabPagesSaDetail[0].value
+    tabPagesSaDetail[0].value,
   );
   const [modalSaDetail, setModalSaDetail] = useState(false);
   const [modalChooseProduct, setModalChooseProduct] = useState(false);
@@ -145,7 +143,7 @@ const CreateServiceAgreement = ({ saType }) => {
   } = useSelector((state) => state.accountServiceAgreement);
 
   const { data_accountDetail } = useSelector(
-    (state) => state.accountManagement
+    (state) => state.accountManagement,
   );
 
   const [modalError, setModalError] = useState(false);
@@ -245,10 +243,10 @@ const CreateServiceAgreement = ({ saType }) => {
           const paymentTypeId = 210;
           const chargingMethodId = 214;
           const hasIdpaymentTypeId = tempProductDetail.filter(
-            (item) => item.nameId === paymentTypeId
+            (item) => item.nameId === paymentTypeId,
           );
           const haschargingMethodId = tempProductDetail.filter(
-            (item) => item.nameId === chargingMethodId
+            (item) => item.nameId === chargingMethodId,
           );
           // End DDL Product Selected
 
@@ -256,7 +254,7 @@ const CreateServiceAgreement = ({ saType }) => {
           const tempCalcRuleDetail = data?.saCalcRule;
           const calculationTypeId = 687;
           const hasIdCalcTypeId = tempCalcRuleDetail.filter(
-            (item) => item.nameId === calculationTypeId
+            (item) => item.nameId === calculationTypeId,
           );
           // End Ddl Calc Rule - Calc Type
 
@@ -349,7 +347,7 @@ const CreateServiceAgreement = ({ saType }) => {
                 adjustment: item?.adjustment?.adjustmentText,
                 adjustmentId: item?.adjustment?.priceAdjustmentDetailId,
               };
-            }
+            },
           );
 
           const calculationRule = (data?.saCalcRule || []).map((item) => {
@@ -372,7 +370,7 @@ const CreateServiceAgreement = ({ saType }) => {
           });
           const excludedIds = [paymentTypeId, chargingMethodId];
           const tempProductWithoutTwoNameProduct = tempProductDetail.filter(
-            (item) => !excludedIds.includes(item.nameId)
+            (item) => !excludedIds.includes(item.nameId),
           );
           const productDetail = (tempProductWithoutTwoNameProduct || []).map(
             (item) => {
@@ -391,15 +389,15 @@ const CreateServiceAgreement = ({ saType }) => {
                 },
                 description: item?.description,
               };
-            }
+            },
           );
 
           if (data?.saLateCharge || data?.saLateCharge !== null) {
             const dataArrayLateCharge = Object.keys(data?.saLateCharge).map(
-              (key) => data?.saLateCharge[key]
+              (key) => data?.saLateCharge[key],
             );
             const filteredDataLateCharge = dataArrayLateCharge.filter(
-              (item) => item !== null
+              (item) => item !== null,
             );
             setDataTableLateCharge(filteredDataLateCharge);
           } else {
@@ -408,10 +406,10 @@ const CreateServiceAgreement = ({ saType }) => {
 
           if (data?.saTaxImplication || data?.saTaxImplication !== null) {
             const dataArrayTaxImplication = Object.keys(
-              data?.saTaxImplication
+              data?.saTaxImplication,
             ).map((key) => data?.saTaxImplication[key]);
             const filteredDataTaxImplication = dataArrayTaxImplication.filter(
-              (item) => item !== null
+              (item) => item !== null,
             );
             setDataTaxImplication(filteredDataTaxImplication);
           } else {
@@ -731,10 +729,10 @@ const CreateServiceAgreement = ({ saType }) => {
           const paymentTypeId = 210;
           const chargingMethodId = 214;
           const hasIdpaymentTypeId = tempProductDetail.filter(
-            (item) => item.nameId === paymentTypeId
+            (item) => item.nameId === paymentTypeId,
           );
           const haschargingMethodId = tempProductDetail.filter(
-            (item) => item.nameId === chargingMethodId
+            (item) => item.nameId === chargingMethodId,
           );
           // End DDL Product Selected
 
@@ -742,7 +740,7 @@ const CreateServiceAgreement = ({ saType }) => {
           const tempCalcRuleDetail = data?.product?.productCalcRule;
           const calculationTypeId = 687;
           const hasIdCalcTypeId = tempCalcRuleDetail.filter(
-            (item) => item.nameId === calculationTypeId
+            (item) => item.nameId === calculationTypeId,
           );
           // End Ddl Calc Rule - Calc Type
 
@@ -765,7 +763,7 @@ const CreateServiceAgreement = ({ saType }) => {
             cleanedString = mergedAdjustmentText.replace(/-+$/, "");
             setPriceAdjustmentSelect(cleanedString);
             setPriceAdjustmentSelectId(
-              mergePriceAdjustmentId.length > 0 ? mergePriceAdjustmentId : null
+              mergePriceAdjustmentId.length > 0 ? mergePriceAdjustmentId : null,
             );
           }
 
@@ -857,7 +855,7 @@ const CreateServiceAgreement = ({ saType }) => {
 
           const excludedIds = [paymentTypeId, chargingMethodId];
           const tempProductWithoutTwoNameProduct = tempProductDetail.filter(
-            (item) => !excludedIds.includes(item.nameId)
+            (item) => !excludedIds.includes(item.nameId),
           );
           const productDetail = (tempProductWithoutTwoNameProduct || []).map(
             (item) => {
@@ -876,11 +874,11 @@ const CreateServiceAgreement = ({ saType }) => {
                 },
                 description: item?.description,
               };
-            }
+            },
           );
 
           const tempCalcRuleWithoutCalcType = tempCalcRuleDetail.filter(
-            (item) => ![687].includes(item.nameId)
+            (item) => ![687].includes(item.nameId),
           );
           const calculationRule = (tempCalcRuleWithoutCalcType || []).map(
             (item) => {
@@ -900,7 +898,7 @@ const CreateServiceAgreement = ({ saType }) => {
                 },
                 description: item?.description,
               };
-            }
+            },
           );
           const dataDetailPricing = (
             data?.product?.productPricing?.priceRuleTiering || []
@@ -931,10 +929,10 @@ const CreateServiceAgreement = ({ saType }) => {
 
           if (data?.product?.lateCharge !== null) {
             const dataArrayLateCharge = Object.keys(
-              data?.product?.lateCharge
+              data?.product?.lateCharge,
             ).map((key) => data?.product?.lateCharge[key]);
             const filteredDataLateCharge = dataArrayLateCharge.filter(
-              (item) => item !== null
+              (item) => item !== null,
             );
             setDataTableLateCharge(filteredDataLateCharge);
           } else {
@@ -955,10 +953,10 @@ const CreateServiceAgreement = ({ saType }) => {
                   key: index + 1,
                 })),
               };
-            }
+            },
           );
           setDataTermOfService(
-            data?.product?.productTos !== null ? tempTos : []
+            data?.product?.productTos !== null ? tempTos : [],
           );
         }
       })
@@ -982,10 +980,10 @@ const CreateServiceAgreement = ({ saType }) => {
           const paymentTypeId = 210;
           const chargingMethodId = 214;
           const hasIdpaymentTypeId = tempProductDetail.filter(
-            (item) => item.nameId === paymentTypeId
+            (item) => item.nameId === paymentTypeId,
           );
           const haschargingMethodId = tempProductDetail.filter(
-            (item) => item.nameId === chargingMethodId
+            (item) => item.nameId === chargingMethodId,
           );
           // End DDL Product Selected
 
@@ -993,7 +991,7 @@ const CreateServiceAgreement = ({ saType }) => {
           const tempCalcRuleDetail = data?.productCalcRule;
           const calculationTypeId = 687;
           const hasIdCalcTypeId = tempCalcRuleDetail.filter(
-            (item) => item.nameId === calculationTypeId
+            (item) => item.nameId === calculationTypeId,
           );
           // End Ddl Calc Rule - Calc Type
 
@@ -1016,7 +1014,7 @@ const CreateServiceAgreement = ({ saType }) => {
             cleanedString = mergedAdjustmentText.replace(/-+$/, "");
             setPriceAdjustmentSelect(cleanedString);
             setPriceAdjustmentSelectId(
-              mergePriceAdjustmentId.length > 0 ? mergePriceAdjustmentId : null
+              mergePriceAdjustmentId.length > 0 ? mergePriceAdjustmentId : null,
             );
           }
 
@@ -1097,7 +1095,7 @@ const CreateServiceAgreement = ({ saType }) => {
 
           const excludedIds = [paymentTypeId, chargingMethodId];
           const tempProductWithoutTwoNameProduct = tempProductDetail.filter(
-            (item) => !excludedIds.includes(item.nameId)
+            (item) => !excludedIds.includes(item.nameId),
           );
           const productDetail = (tempProductWithoutTwoNameProduct || []).map(
             (item) => {
@@ -1116,11 +1114,11 @@ const CreateServiceAgreement = ({ saType }) => {
                 },
                 description: item?.description,
               };
-            }
+            },
           );
 
           const tempCalcRuleWithoutCalcType = tempCalcRuleDetail.filter(
-            (item) => ![687].includes(item.nameId)
+            (item) => ![687].includes(item.nameId),
           );
           const calculationRule = (tempCalcRuleWithoutCalcType || []).map(
             (item) => {
@@ -1140,7 +1138,7 @@ const CreateServiceAgreement = ({ saType }) => {
                 },
                 description: item?.description,
               };
-            }
+            },
           );
           const dataDetailPricing = (
             data?.productPricing?.priceRuleTiering || []
@@ -1171,10 +1169,10 @@ const CreateServiceAgreement = ({ saType }) => {
 
           if (data?.lateCharge !== null) {
             const dataArrayLateCharge = Object.keys(data?.lateCharge).map(
-              (key) => data?.lateCharge[key]
+              (key) => data?.lateCharge[key],
             );
             const filteredDataLateCharge = dataArrayLateCharge.filter(
-              (item) => item !== null
+              (item) => item !== null,
             );
             setDataTableLateCharge(filteredDataLateCharge);
           } else {
@@ -1464,7 +1462,7 @@ const CreateServiceAgreement = ({ saType }) => {
   const handleMandatory = (
     setTabPagesSaDetail = () => {},
     listDataAttachment,
-    errorFields
+    errorFields,
   ) => {
     setTabPagesSaDetail((prevState) => {
       const res = prevState.map((item) => {
@@ -1475,7 +1473,7 @@ const CreateServiceAgreement = ({ saType }) => {
                   item?.paramValue?.includes(next.name[0])
                     ? current + 1
                     : current,
-                0
+                0,
               )
             : 0;
         return {
@@ -1533,7 +1531,7 @@ const CreateServiceAgreement = ({ saType }) => {
         handleMandatory(
           setTabPagesSaDetail,
           listDataAttachment,
-          error.errorFields
+          error.errorFields,
         );
         // Handle the rejected result here
       });
@@ -1784,7 +1782,7 @@ const CreateServiceAgreement = ({ saType }) => {
         productPricing: {
           ...dataFinal.saDetail.productPricing,
           priceRuleTiering: transformArray(
-            dataFinal.saDetail.productPricing.priceRuleTiering
+            dataFinal.saDetail.productPricing.priceRuleTiering,
           ),
         },
       },
@@ -1804,7 +1802,7 @@ const CreateServiceAgreement = ({ saType }) => {
           };
           await accountManagementPromoHttpService.uploadAttachment(
             `/v1/dbs/api/sa/uploadAttachment/${idServiceagreement}`,
-            body
+            body,
           );
         }
         setLoadingForm(false);

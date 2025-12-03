@@ -38,11 +38,11 @@ export const inactiveAppHierarchy = createAsyncThunk(
           error: errorBody(errorCode(response), status, errorMessage(response)),
           action: "CREATE_APPROVAL_HIEARARCHY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getApprovHierarchyPaginate = createAsyncThunk(
@@ -61,11 +61,11 @@ export const getApprovHierarchyPaginate = createAsyncThunk(
           error: error,
           action: "GET_ALL_APPROVAL_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const detailPositionHierarchy = createAsyncThunk(
@@ -81,11 +81,11 @@ export const detailPositionHierarchy = createAsyncThunk(
           error: error,
           action: "GET_APPROVAL_HIERARCHY_DETAIL",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getAppCode = createAsyncThunk(
@@ -101,11 +101,11 @@ export const getAppCode = createAsyncThunk(
           error: error,
           action: "GET_APPROVAL_HIERARCHY_CODE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const createHierarchy = createAsyncThunk(
@@ -126,11 +126,11 @@ export const createHierarchy = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_APPROVAL_HIEARARCHY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const downloadHierarchy = createAsyncThunk(
@@ -149,11 +149,11 @@ export const downloadHierarchy = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_APPROVAL",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getPositionDDL = createAsyncThunk(
@@ -165,11 +165,11 @@ export const getPositionDDL = createAsyncThunk(
       return data;
     } catch (error) {
       thunkAPI?.dispatch(
-        validateError({ error: error, action: "GET_POSITION", back: false })
+        validateError({ error: error, action: "GET_POSITION", back: false }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getEmployeeByIdPosition = createAsyncThunk(
@@ -185,11 +185,11 @@ export const getEmployeeByIdPosition = createAsyncThunk(
           error: error,
           action: "GET_EMPLOYEE_BY_ID",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAppType = createAsyncThunk(
@@ -205,11 +205,11 @@ export const getAppType = createAsyncThunk(
           error: error,
           action: "GET_APPROVAL_HIERARCHY_TYPE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const updateAppHier = createAsyncThunk(
   "UPDATE_APPHIER",
@@ -229,11 +229,11 @@ export const updateAppHier = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_APPHIER",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 const approvHierarchy = createSlice({

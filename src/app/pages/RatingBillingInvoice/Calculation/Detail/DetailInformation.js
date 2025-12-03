@@ -89,7 +89,7 @@ const DetailInformation = ({ data, tabHeader }) => {
           pageSize,
           sort,
           search: reqSearch,
-        })
+        }),
       );
     }
   }, [segmentedPage, dispatch, data, page, pageSize, search, sort, tabHeader]);
@@ -104,7 +104,7 @@ const DetailInformation = ({ data, tabHeader }) => {
         getDetailCalculationResultNoPaging({
           calCode: data?.calCode,
           calType: segmentedPage === "Rating Result" ? 621 : 623,
-        })
+        }),
       );
     }
   }, [dispatch, segmentedPage, data]);
@@ -138,7 +138,7 @@ const DetailInformation = ({ data, tabHeader }) => {
 
   const tempTabs = useMemo(
     () => <RadioTabs data={tabData} onChange={handleSegmentedPage} />,
-    [segmentedPage, handleSegmentedPage, tabData]
+    [segmentedPage, handleSegmentedPage, tabData],
   );
 
   const renderSection = (segmentedPage) => {
@@ -173,7 +173,7 @@ const DetailInformation = ({ data, tabHeader }) => {
                   searchedColumn,
                   searchText,
                   handleSearch,
-                  search
+                  search,
                 )}
                 dataSource={list_calculation_result?.result}
                 totalData={list_calculation_result?.page?.totalElements || 0}
@@ -216,7 +216,7 @@ const DetailInformation = ({ data, tabHeader }) => {
                   searchedColumn,
                   searchText,
                   handleSearch,
-                  search
+                  search,
                 )}
                 dataSource={list_calculation_result?.result}
                 totalData={list_calculation_result?.page?.totalElements || 0}
@@ -414,10 +414,10 @@ const DetailInformation = ({ data, tabHeader }) => {
                           Object.entries(item).map(([key, value]) => [
                             key,
                             value === null ? "" : value,
-                          ])
+                          ]),
                         );
                       }),
-                    "data"
+                    "data",
                   )}
                   columns={columnsRecalculate(
                     pageCal,
@@ -426,15 +426,15 @@ const DetailInformation = ({ data, tabHeader }) => {
                     searchedColumnCal,
                     searchTextCal,
                     handleSearchRecalculate,
-                    searchRecalculate
+                    searchRecalculate,
                   )}
                   current={pageCal}
                   pageSize={pageSizeCal}
                   totalData={filterDataByPage(
                     (list_calculation_no_paging || []).filter(
-                      (item) => item.calType !== 624 && !item.isTry
+                      (item) => item.calType !== 624 && !item.isTry,
                     ),
-                    "length"
+                    "length",
                   )}
                   tableScrolled={{
                     x: 2500,
@@ -466,7 +466,7 @@ const DetailInformation = ({ data, tabHeader }) => {
                   searchedColumnCal,
                   searchTextCal,
                   handleSearchRecalculate,
-                  searchRecalculate
+                  searchRecalculate,
                 )}
                 current={pageCal}
                 pageSize={pageSizeCal}
@@ -532,13 +532,13 @@ const DetailInformation = ({ data, tabHeader }) => {
             pageSize,
             sort,
             search: reqSearch,
-          })
+          }),
         );
         dispatch(
           getDetailCalculationResultNoPaging({
             calCode: data?.calCode,
             calType: segmentedPage === "Rating Result" ? 621 : 623,
-          })
+          }),
         );
         handleClear();
       });
@@ -573,7 +573,7 @@ const DetailInformation = ({ data, tabHeader }) => {
             pageSize,
             sort,
             search: reqSearch,
-          })
+          }),
         );
         clearRetry();
         handleClear();

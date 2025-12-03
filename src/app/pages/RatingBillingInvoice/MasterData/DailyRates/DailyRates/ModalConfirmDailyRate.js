@@ -30,17 +30,19 @@ const ModalConfirmDailyRate = ({
     ?.filter((a) => a?.code === data?.rateType)
     ?.find((b) => b?.text)?.text;
 
-    const tempValue = data?.convertedRate ? (data?.convertedRate + "").split(".") : [];
-    const thousandSeparator = ",";
-    const decimalSeparator = ".";
-    const descimal = tempValue[1]
-      ? `${decimalSeparator}${tempValue[1]?.length < 2 ? `${tempValue[1]}0` : tempValue[1]}`
-      : `${decimalSeparator}00`;
-    const convertedRate =
-      tempValue.length > 0
-        ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
-          descimal
-        : "";
+  const tempValue = data?.convertedRate
+    ? (data?.convertedRate + "").split(".")
+    : [];
+  const thousandSeparator = ",";
+  const decimalSeparator = ".";
+  const descimal = tempValue[1]
+    ? `${decimalSeparator}${tempValue[1]?.length < 2 ? `${tempValue[1]}0` : tempValue[1]}`
+    : `${decimalSeparator}00`;
+  const convertedRate =
+    tempValue.length > 0
+      ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
+        descimal
+      : "";
   const showSection = () => {
     switch (valuePage) {
       case tabData[0].value:
@@ -56,9 +58,7 @@ const ModalConfirmDailyRate = ({
               <DetailText label={"Rate Date"}>
                 {moment(data?.rateDate).format(dateFormatting.dateCapital)}
               </DetailText>
-              <DetailText label={"Converted Rate"}>
-                {convertedRate} 
-              </DetailText>
+              <DetailText label={"Converted Rate"}>{convertedRate}</DetailText>
             </div>
             <div>
               <DetailText label={"Description"}>{data?.description}</DetailText>
@@ -72,7 +72,7 @@ const ModalConfirmDailyRate = ({
             disableSelect={true}
             approvalName={
               (dataOption || []).filter(
-                (data) => data.value === selectedHierarchy
+                (data) => data.value === selectedHierarchy,
               )?.[0].name || ""
             }
             dataTable={listDataAppHierDetail}

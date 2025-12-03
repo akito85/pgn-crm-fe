@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Checkbox, Col, Form, Radio, Select, Space } from "antd";
 const CronSecond = (props) => {
   const { onChangeSecond, valChecked, handleResetSecond } = props;
-
   const valueChecked = valChecked ? valChecked.split(",") : [];
   const intValCheck = valueChecked.map((item) => {
     return parseInt(item, 10);

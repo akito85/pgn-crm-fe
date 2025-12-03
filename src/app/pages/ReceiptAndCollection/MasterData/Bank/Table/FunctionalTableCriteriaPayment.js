@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  DatePicker,
-  Form,
-  Select,
-  Space,
-  Table,
-  Tooltip,
-} from "antd";
+import { DatePicker, Form, Select, Space, Table, Tooltip } from "antd";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { useRef } from "react";
@@ -186,7 +179,7 @@ const EditableCell = ({
                   {
                     validator: (_, value) =>
                       endDateValidator(
-                        formTableCriteria.getFieldValue().startDate
+                        formTableCriteria.getFieldValue().startDate,
                       )(_, value),
                   },
                 ]
@@ -447,7 +440,7 @@ const FunctionalTableCriteriaPayment = ({
     }
     setSearchedColumn(tempSearchColumn);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -473,7 +466,7 @@ const FunctionalTableCriteriaPayment = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ).map((item) => item.dataIndex);
     if (searchedColumn) {
       const tempSearchText = searchText.toLowerCase();
@@ -625,7 +618,7 @@ const FunctionalTableCriteriaPayment = ({
 
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -683,7 +676,7 @@ const FunctionalTableCriteriaPayment = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       {
         title: "START DATE",
@@ -700,7 +693,7 @@ const FunctionalTableCriteriaPayment = ({
           searchText,
           handleSearch,
           true,
-          "date"
+          "date",
         ),
         render: (index) => {
           const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -736,7 +729,7 @@ const FunctionalTableCriteriaPayment = ({
           searchText,
           handleSearch,
           true,
-          "date"
+          "date",
         ),
         render: (index) => {
           const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -853,7 +846,7 @@ const FunctionalTableCriteriaPayment = ({
       col.title !== "START DATE" &&
       col.title !== "END DATE"
         ? dataCriteria.includes(col.indexValue)
-        : true
+        : true,
     );
   };
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
@@ -1030,7 +1023,7 @@ const FunctionalTableCriteriaPayment = ({
                   endDateHeader: endDateHeader,
                   required: col.required,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],

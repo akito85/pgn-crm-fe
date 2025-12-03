@@ -33,11 +33,11 @@ export const getAllGlobalTypesPaginate = createAsyncThunk(
           error: error,
           action: "GET_ALL_GLOBAL_TYPES_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // create global type slice
@@ -59,15 +59,15 @@ export const createGlobalType = createAsyncThunk(
           error: errorBody(
             errorCode(response),
             "created",
-            errorMessage(response)
+            errorMessage(response),
           ),
           action: "CREATE_GLOBAL_TYPE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response);
     }
-  }
+  },
 );
 
 // update global type slice
@@ -89,15 +89,15 @@ export const updateGlobalType = createAsyncThunk(
           error: errorBody(
             errorCode(response),
             "updated",
-            errorMessage(response)
+            errorMessage(response),
           ),
           action: "UPDATE_GLOBAL_TYPE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response);
     }
-  }
+  },
 );
 
 // View Detail Global Type
@@ -114,11 +114,11 @@ export const getViewDetailGlobalType = createAsyncThunk(
           error: error,
           action: "GET_VIEW_DETAIL_GLOBAL_TYPE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailGlobalType = createAsyncThunk(
@@ -134,11 +134,11 @@ export const getDetailGlobalType = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_GLOBAL_TYPE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Detail Global Type Value
@@ -155,11 +155,11 @@ export const getDetailGlobalTypeValue = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_GLOBAL_TYPE_VALUE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Sort By
@@ -176,11 +176,11 @@ export const getSortBy = createAsyncThunk(
           error: error,
           action: "GET_GLOBAL_TYPE_SORT_BY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Parent and Group
@@ -197,11 +197,11 @@ export const getParentAndGroup = createAsyncThunk(
           error: error,
           action: "GET_GLOBAL_TYPE_PARENT_AND_GROUP",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // Inactive
@@ -227,11 +227,11 @@ export const inactiveGlobalType = createAsyncThunk(
           error: errorBody(errorCode(error), status, errorMessage(error)),
           action: "INACTIVE_GLOBAL_TYPE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // Download
@@ -251,11 +251,11 @@ export const downloadExcelGlobalType = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_GLOBAL_TYPE_EXCEL",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const globalTypesSlice = createSlice({

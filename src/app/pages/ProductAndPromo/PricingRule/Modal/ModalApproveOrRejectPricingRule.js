@@ -49,7 +49,7 @@ const ModalApproveOrRejectPricingRule = ({
       //   </div>
       // }
     />
-      /*{ <Form form={form} name="formApproveRejcet" onFinish={handleConfirmFooter}>
+    /*{ <Form form={form} name="formApproveRejcet" onFinish={handleConfirmFooter}>
         <Form.Item
           name={"remark"}
           rules={[{ message: requiredMessage("Remark"), required: true }]}

@@ -1,7 +1,5 @@
 import React from "react";
-import {
-  Tooltip,
-} from "antd";
+import { Tooltip } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import TablePagination from "../../../../../../components/TablePagination";
@@ -63,7 +61,7 @@ const AttachmentTable = ({
       sorter: true,
       ...getColumnSearchProps("uploadBy"),
     },
-		{
+    {
       title: "UPLOADED DATE",
       dataIndex: "uploadDate",
       width: 150,
@@ -71,7 +69,7 @@ const AttachmentTable = ({
       ...getColumnSearchProps("uploadDate"),
       render: (endDate) => renderDate(endDate),
     },
-		{
+    {
       title: "FILE SIZE",
       dataIndex: "fileSize",
       width: 150,

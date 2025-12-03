@@ -12,7 +12,9 @@ import { hasValue, renderDateConverter } from "../../../../../utils";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
-  const { data_calculationUsage, loading } = useSelector((state) => state.rating);
+  const { data_calculationUsage, loading } = useSelector(
+    (state) => state.rating,
+  );
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -50,7 +52,7 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [ratingCodeId, search, page, pageSize, sort, dispatch]);
 
@@ -101,9 +103,9 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
         searchedColumn,
         searchText,
         handleSearch,
-        handleDetail
+        handleDetail,
       ),
-    [page, pageSize, searchedColumn, searchText]
+    [page, pageSize, searchedColumn, searchText],
   );
 
   const allColumns = useMemo(() => {
@@ -181,9 +183,13 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
       >
         <CardComponent header={"CALCULATION USAGE INFORMATION"} cols={1}>
           <div className="w-full grid grid-cols-4">
-            <DetailText label={"Type"}>{detailCalculationItem?.type}</DetailText>
+            <DetailText label={"Type"}>
+              {detailCalculationItem?.type}
+            </DetailText>
             <DetailText label={"UOM"}>{detailCalculationItem?.uom}</DetailText>
-            <DetailText label={"Usage"}>{detailCalculationItem?.usage}</DetailText>
+            <DetailText label={"Usage"}>
+              {detailCalculationItem?.usage}
+            </DetailText>
             <DetailText label={"Converted Usage M3"}>
               {detailCalculationItem?.convUsageM3}
             </DetailText>
@@ -220,8 +226,12 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
             <DetailText label={"Currency"}>
               {detailCalculationItem?.currency}
             </DetailText>
-            <DetailText label={"Price"}>{detailCalculationItem?.price}</DetailText>
-            <DetailText label={"Amount"}>{detailCalculationItem?.amount}</DetailText>
+            <DetailText label={"Price"}>
+              {detailCalculationItem?.price}
+            </DetailText>
+            <DetailText label={"Amount"}>
+              {detailCalculationItem?.amount}
+            </DetailText>
             <DetailText label={"Amount EQV IDR"}>
               {detailCalculationItem?.amountEqvIdr}
             </DetailText>
@@ -241,7 +251,9 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
             </DetailText>
           </div>
           <div className="w-full">
-            <DetailText label={"Remark"}>{detailCalculationItem?.remark}</DetailText>
+            <DetailText label={"Remark"}>
+              {detailCalculationItem?.remark}
+            </DetailText>
           </div>
         </CardComponent>
         <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
@@ -250,14 +262,20 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
           </DetailText>
           <DetailText label="Created Date">
             {hasValue(detailCalculationItem?.createdDate) &&
-              renderDateConverter(detailCalculationItem?.createdDate, "datetime")}
+              renderDateConverter(
+                detailCalculationItem?.createdDate,
+                "datetime",
+              )}
           </DetailText>
           <DetailText label="Created By">
             {detailCalculationItem?.createdBy}
           </DetailText>
           <DetailText label="Updated Date">
             {hasValue(detailCalculationItem?.updatedDate) &&
-              renderDateConverter(detailCalculationItem?.updatedDate, "datetime")}
+              renderDateConverter(
+                detailCalculationItem?.updatedDate,
+                "datetime",
+              )}
           </DetailText>
           <DetailText label="Updated By">
             {detailCalculationItem?.updatedBy}

@@ -25,7 +25,7 @@ import { hasValue, renderDateConverter, toTitleCase } from "../../../../utils";
 
 const DelegationDetail = () => {
   const { loading, detail_Delegation } = useSelector(
-    (state) => state.delegation
+    (state) => state.delegation,
   );
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -66,7 +66,7 @@ const DelegationDetail = () => {
             ? moment(item.createdDate).format("DD MMM YYYY")
             : "",
           dataType: "exist",
-        }))
+        })),
       );
     }
   }, [record, detail_Delegation]);

@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import {
-  Button,
-  Form,
-  Input,
-  Select,
-} from "antd";
+import { Button, Form, Input, Select } from "antd";
 import SelectComponent from "../../../../../../../../components/SelectComponent";
 import InputComponent from "../../../../../../../../components/InputComponent";
 import { hasValue } from "../../../../../../../../utils";
@@ -85,7 +80,7 @@ const SaDetail = ({
   valuePage,
   setValuePage,
   tabPagesSaDetail,
-  setTabPagesSaDetail
+  setTabPagesSaDetail,
 }) => {
   const dispatch = useDispatch();
   const { data_product, data_price_code, data_price_rule, loading } =
@@ -137,10 +132,10 @@ const SaDetail = ({
   useEffect(() => {
     // if (saDetailObj.createFrom === 2) {
     const selectedPriceCode = data_price_code?.filter(
-      (item) => item.id === saDetailObj?.priceCode
+      (item) => item.id === saDetailObj?.priceCode,
     )[0];
     const selectedPriceRule = data_price_rule?.filter(
-      (item) => item.pricingRuleId === saDetailObj?.pricingRule
+      (item) => item.pricingRuleId === saDetailObj?.pricingRule,
     )[0];
 
     setSaDetailObj((prevState) => ({
@@ -198,7 +193,7 @@ const SaDetail = ({
       "priceCode",
       "pricingRule",
       "priceAdjustment",
-      "chooseProduct"
+      "chooseProduct",
     ]);
     setDataListVersion([]);
     setDataTableDetailProduct({});
@@ -270,10 +265,10 @@ const SaDetail = ({
         .then((data) => {
           if (data) {
             const dataArrayLateCharge = Object.keys(data).map(
-              (key) => data[key]
+              (key) => data[key],
             );
             const filteredDataLateCharge = dataArrayLateCharge.filter(
-              (item) => item !== null
+              (item) => item !== null,
             );
             setDataTableLateCharge(filteredDataLateCharge);
             setSendLateCharge(data);
@@ -576,7 +571,11 @@ const SaDetail = ({
           <div className="pt-8 pb-4">
             {/* ==== Tabs ==== */}
             <div>
-              <RadioTabs data={tabPagesSaDetail} onChange={onChange} currentPosition={valuePage}/>
+              <RadioTabs
+                data={tabPagesSaDetail}
+                onChange={onChange}
+                currentPosition={valuePage}
+              />
 
               <div className="py-8">
                 {/* Tab Pricing */}

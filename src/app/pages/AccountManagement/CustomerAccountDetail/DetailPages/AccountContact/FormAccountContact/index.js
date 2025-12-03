@@ -148,7 +148,7 @@ const FormAccountAddress = ({ type }) => {
         primaryFlag: dataDetail?.primaryFlagValue,
       });
       setPrimary(
-        dataDetail?.primaryFlagValue ? dataDetail?.primaryFlagValue : primary
+        dataDetail?.primaryFlagValue ? dataDetail?.primaryFlagValue : primary,
       );
       setDataDetailFinal(
         dataDetail?.contactDetail?.map((item) => {
@@ -160,7 +160,7 @@ const FormAccountAddress = ({ type }) => {
             value: item.value,
             sufix: item.sufix,
           };
-        })
+        }),
       );
     }
   }, [dataDetail]);
@@ -209,7 +209,9 @@ const FormAccountAddress = ({ type }) => {
             ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
             : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME,
         breadcrumbName:
-          typeAccount == "standard" ? "Account - Standard" : "Account - One Time",
+          typeAccount == "standard"
+            ? "Account - Standard"
+            : "Account - One Time",
       },
       {
         path:
@@ -218,8 +220,8 @@ const FormAccountAddress = ({ type }) => {
             : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
         breadcrumbName: "Detail Account",
         state: {
-					idAccount: id,
-				}
+          idAccount: id,
+        },
       },
       {
         path:
@@ -229,7 +231,7 @@ const FormAccountAddress = ({ type }) => {
         breadcrumbName: type === "create" ? "Create Contact" : "Update Contact",
       },
     ];
-  }
+  };
 
   const getCountryCodeName = (val) => {
     const countryCodeName =
@@ -317,17 +319,17 @@ const FormAccountAddress = ({ type }) => {
         //     </div>
         //   </div>
         // );
-        if(record.fullValue){
-          return <span>{record.fullValue}</span>
+        if (record.fullValue) {
+          return <span>{record.fullValue}</span>;
         }
         if (record.typeId === 741) {
           if (record.inputTypeId === 748) {
             return (
               <span>{`${getCountryCodeName(
-                record?.prefix1
-              )} ${getCountryZoneName(record?.prefix2)} - ${record.value}  
+                record?.prefix1,
+              )} ${getCountryZoneName(record?.prefix2)} - ${record.value}
                 ${
-                  record.sufix ? 'Ext ' + record.sufix : ""
+                  record.sufix ? "Ext " + record.sufix : ""
                   // sufix[`${record.row}~${record.key}`] ? sufix[`${record.row}~${record.key}`] : ""
                 }
                 `}</span>
@@ -357,7 +359,7 @@ const FormAccountAddress = ({ type }) => {
         if (record.typeId === 745) {
           return (
             <span>
-              {`${getCountryCodeName(record?.prefix1)} ${getCountryZoneName(record?.prefix2)} - ${record.value} ${record.sufix ? 'Ext ' + record.sufix : ""}`}
+              {`${getCountryCodeName(record?.prefix1)} ${getCountryZoneName(record?.prefix2)} - ${record.value} ${record.sufix ? "Ext " + record.sufix : ""}`}
             </span>
           );
         } else {
@@ -431,17 +433,17 @@ const FormAccountAddress = ({ type }) => {
       sorter: true,
       // ...getColumnSearchProps("srId"),
       render: (_, record) => {
-        if(record.fullValue){
-          return <span>{record.fullValue}</span>
+        if (record.fullValue) {
+          return <span>{record.fullValue}</span>;
         }
         if (record.typeId === 741) {
           if (record.inputTypeId === 748) {
             return (
               <span>{`${getCountryCodeName(
-                record?.prefix1
-              )} ${getCountryZoneName(record?.prefix2)} - ${record.value} 
+                record?.prefix1,
+              )} ${getCountryZoneName(record?.prefix2)} - ${record.value}
               ${
-                record.sufix ? 'Ext ' + record.sufix : ""
+                record.sufix ? "Ext " + record.sufix : ""
                 // sufix[`${record.row}~${record.key}`] ? sufix[`${record.row}~${record.key}`] : ""
               }
               `}</span>
@@ -471,8 +473,8 @@ const FormAccountAddress = ({ type }) => {
         if (record.typeId === 745) {
           return (
             <span>{`${getCountryCodeName(record?.prefix1)} ${getCountryZoneName(
-              record?.prefix2
-            )} - ${record.value} ${record.sufix ? 'Ext ' + record.sufix : ""}`}</span>
+              record?.prefix2,
+            )} - ${record.value} ${record.sufix ? "Ext " + record.sufix : ""}`}</span>
           );
         } else {
           return <span>{record.value}</span>;
@@ -537,8 +539,12 @@ const FormAccountAddress = ({ type }) => {
           }
         }
       }
-      url = "/v1/dbs/api/account/contact/validate-create"
-      bodyRequest= {...outputObject, needValidation: formValue?.primaryFlag, primaryFlag: formValue?.primaryFlag};
+      url = "/v1/dbs/api/account/contact/validate-create";
+      bodyRequest = {
+        ...outputObject,
+        needValidation: formValue?.primaryFlag,
+        primaryFlag: formValue?.primaryFlag,
+      };
       setDataPush(outputObject);
     } else {
       const bodyUpdate = {
@@ -558,32 +564,40 @@ const FormAccountAddress = ({ type }) => {
           : dataCreateNew?.contactDetail,
         primaryFlag: primary !== undefined ? primary : false,
       };
-      url = "/v1/dbs/api/account/contact/validate-update"
-      bodyRequest= {
+      url = "/v1/dbs/api/account/contact/validate-update";
+      bodyRequest = {
         accountId: id,
         contactId: contactIdUpdate,
         description:
-          formValue?.description === null || formValue?.description === undefined
+          formValue?.description === null ||
+          formValue?.description === undefined
             ? ""
             : formValue?.description,
-        needValidation: formValue?.primaryFlag, 
+        needValidation: formValue?.primaryFlag,
         primaryFlag: formValue?.primaryFlag,
-        accountContactId: accountContactId
+        accountContactId: accountContactId,
       };
       setDataPush(bodyUpdate);
     }
     try {
-      const res = await dispatch(validateCreateUpdate({ body: bodyRequest, services: accountManagementService, endPoint: url, type }))?.unwrap();
-      if(res.success === false){
+      const res = await dispatch(
+        validateCreateUpdate({
+          body: bodyRequest,
+          services: accountManagementService,
+          endPoint: url,
+          type,
+        }),
+      )?.unwrap();
+      if (res.success === false) {
         setModalCheckPrimaryExist(true);
         setTypeValidation(false);
-      }else{
+      } else {
         setTypeValidation(false);
         setModalCheckPrimaryExist(false);
         setModalConfirm(true);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
 
@@ -616,7 +630,7 @@ const FormAccountAddress = ({ type }) => {
             : dataPush?.description,
         primaryFlag: dataPush?.primaryFlag,
         needValidation: typeValidation,
-        accountContactId: accountContactId
+        accountContactId: accountContactId,
       };
       await dispatch(updateAccountContact({ body: bodyDataUpdate }))
         .unwrap()
@@ -689,7 +703,7 @@ const FormAccountAddress = ({ type }) => {
     <div>
       <LayoutMenu>
         <Spin spinning={loading}>
-          <BreadCrumbAdvanced routes={routes(id)}/>
+          <BreadCrumbAdvanced routes={routes(id)} />
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}
@@ -916,16 +930,16 @@ const FormAccountAddress = ({ type }) => {
             header={"confirmation"}
             width={1000}
             handleCancel={() => {
-              setModalConfirm(false)
-              setTypeValidation(false)
+              setModalConfirm(false);
+              setTypeValidation(false);
             }}
             footer={
               <div className={"w-full flex justify-end gap-5"}>
                 <ButtonComponent
                   type={"default"}
                   onClick={() => {
-                    setModalConfirm(false)
-                    setTypeValidation(false)
+                    setModalConfirm(false);
+                    setTypeValidation(false);
                   }}
                 >
                   Cancel
@@ -1071,7 +1085,7 @@ const FormAccountAddress = ({ type }) => {
             handleOk={() => {
               setModalCheckPrimaryExist(false);
               setTypeValidation(false);
-              setModalConfirm(true)
+              setModalConfirm(true);
             }}
             width={700}
           >
@@ -1109,7 +1123,7 @@ const FormAccountAddress = ({ type }) => {
                 <SVGIcon name="IconSuccess" width={48} />
                 <p className="text-[18px] font-bold">{"Successfull"}</p>
               </div>
-              <p className="pl-[70px]">{`Your data has been ${type === "create" ? "created": "updated"}`}</p>
+              <p className="pl-[70px]">{`Your data has been ${type === "create" ? "created" : "updated"}`}</p>
             </div>
           </ModalSuccess>
         ) : null}

@@ -7,9 +7,7 @@ import SelectComponent from "../../../../../../components/SelectComponent";
 import StatusComponent from "../../../../../../components/StatusComponent";
 import { getCustomerInfo } from "../../../../../../redux/slices/receipt_collection/electrionicBank";
 import { dateFormatting } from "../../../../../../utils";
-import {
-  getColumnSearchPropsPaging,
-} from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 const { Option } = Select;
 
@@ -24,7 +22,7 @@ const columnSundry = (
   handleSelectCustomer = () => {},
   type,
   dataCustomer,
-  typeModal
+  typeModal,
 ) => {
   const column = [
     {
@@ -43,7 +41,7 @@ const columnSundry = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       onFilter: (value, record) =>
         record["receiptCode"]
@@ -80,7 +78,7 @@ const columnSundry = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       onFilter: (value, record) =>
         record["sor"]?.toString().toLowerCase().includes(value.toLowerCase()),
@@ -115,7 +113,7 @@ const columnSundry = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       onFilter: (value, record) =>
         record["costCenter"]
@@ -155,7 +153,7 @@ const columnSundry = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       onFilter: (value, record) =>
         record["customerName"]
@@ -195,7 +193,7 @@ const columnSundry = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       onFilter: (value, record) =>
         record["accountNumber"]
@@ -235,7 +233,7 @@ const columnSundry = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       onFilter: (value, record) =>
         record["receiptNumber"]
@@ -275,7 +273,7 @@ const columnSundry = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
         // "date"
       ),
       onFilter: (value, record) =>
@@ -316,7 +314,7 @@ const columnSundry = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
         // dataCustomer,
         // selectCustomer,
         // handleSelectCustomer
@@ -331,7 +329,7 @@ const columnSundry = (
           return dataCustomer
             ?.filter(
               (item) =>
-                item?.value === selectCustomer[record.receiptReconcileId]
+                item?.value === selectCustomer[record.receiptReconcileId],
             )
             .find((b) => b.label)?.label;
         } else {
@@ -366,7 +364,7 @@ const columnSundry = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       onFilter: (value, record) =>
         record["currency"]
@@ -406,7 +404,7 @@ const columnSundry = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       onFilter: (value, record) =>
         record["amount"]
@@ -448,7 +446,7 @@ const columnSundry = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       onFilter: (value, record) =>
         record["statusApproval"]
@@ -641,7 +639,7 @@ const TableSundryFE = ({
         handleSelectCustomer,
         type,
         dataCustomer,
-        typeModal
+        typeModal,
       )}
       onSort={onSort}
       rowSelection={type === 1 ? rowSelection : undefined}

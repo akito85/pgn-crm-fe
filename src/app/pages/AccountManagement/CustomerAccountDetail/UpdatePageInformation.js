@@ -1,6 +1,9 @@
-import React from "react";
+import { LeftCircleFilled, RightCircleFilled } from "@ant-design/icons";
+import React, { useState } from "react";
+import CustomerInformation from "./DetailPages/CustomerInformation";
 import UpdateAccountInformation from "./DetailPages/AccountInformation/UpdateAccountInformation";
 import RelationshipCreateAndUpdate from "./DetailPages/Relationship/RelationshipCreateAndUpdate";
+import ServicePointAssetAssign from "./DetailPages/ServicePoint/ServicePointAssetAssign";
 import ServicePoint from "./DetailPages/ServicePoint/ServicePoint";
 import PremiseDetail from "./DetailPages/Premise/PremiseDetail";
 
@@ -8,7 +11,6 @@ const UpdatePageInformation = ({
   type = {},
   handleChangeInteraction = () => {},
 }) => {
-
   const renderSection = () => {
     switch (type.section) {
       case "account":

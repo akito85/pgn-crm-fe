@@ -53,7 +53,7 @@ export const TablePeriodInformation = (
   searchText,
   handleSearch = () => {},
   handleApprovalHistory = () => {},
-  handleOpenModalInactivate = () => {}
+  handleOpenModalInactivate = () => {},
 ) => [
   {
     title: "NO",
@@ -78,7 +78,7 @@ export const TablePeriodInformation = (
       searchText,
       handleSearch,
       true,
-      "datePeriod"
+      "datePeriod",
     ),
     render: (text) =>
       renderDateColumn(
@@ -87,7 +87,7 @@ export const TablePeriodInformation = (
         searchText,
         text,
         "datePeriod",
-        search
+        search,
       ),
   },
   {
@@ -106,7 +106,7 @@ export const TablePeriodInformation = (
       searchText,
       handleSearch,
       true,
-      "datetime"
+      "datetime",
     ),
     render: (text) =>
       renderDateColumn(
@@ -115,7 +115,7 @@ export const TablePeriodInformation = (
         searchText,
         text,
         "datetime",
-        search
+        search,
       ),
   },
   {
@@ -134,7 +134,7 @@ export const TablePeriodInformation = (
       searchText,
       handleSearch,
       true,
-      "datetime"
+      "datetime",
     ),
     render: (text) =>
       renderDateColumn(
@@ -143,7 +143,7 @@ export const TablePeriodInformation = (
         searchText,
         text,
         "datetime",
-        search
+        search,
       ),
   },
   {
@@ -161,7 +161,7 @@ export const TablePeriodInformation = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -170,7 +170,7 @@ export const TablePeriodInformation = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -189,7 +189,7 @@ export const TablePeriodInformation = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (index) =>
       renderColumn(
@@ -199,7 +199,7 @@ export const TablePeriodInformation = (
         index,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -214,7 +214,7 @@ export const TablePeriodInformation = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (index) =>
       renderColumn(
@@ -224,7 +224,7 @@ export const TablePeriodInformation = (
         index,
         false,
         "status",
-        search
+        search,
       ),
   },
 ];

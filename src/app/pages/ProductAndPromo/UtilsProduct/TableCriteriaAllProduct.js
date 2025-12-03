@@ -1,12 +1,7 @@
 import moment from "moment";
-import {
-  hasValue,
-  renderColumn,
-  renderDateColumn,
-} from "../../../../utils";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
 import { separatorCurrency } from "./UtilsAllProduct";
-
 
 const onFilter = (dataIndex, value, record) => {
   const fixSearchText = value?.toLowerCase();
@@ -66,8 +61,8 @@ const sorter = (fieldSort, a, b) => {
       default:
         return a.localeCompare(b);
     }
-  }
-    return handleCompare(fa, fb);
+  };
+  return handleCompare(fa, fb);
 };
 
 export const columnsTableCriteriaAll = (
@@ -77,7 +72,7 @@ export const columnsTableCriteriaAll = (
   searchText,
   handleSearch,
   search,
-  storedData
+  storedData,
 ) => [
   {
     required: true,
@@ -103,7 +98,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -113,7 +108,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -138,7 +133,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -148,7 +143,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -175,7 +170,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -185,7 +180,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -211,7 +206,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -221,7 +216,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -248,7 +243,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -258,7 +253,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -283,7 +278,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -293,7 +288,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -318,7 +313,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -328,7 +323,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -353,7 +348,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -363,7 +358,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -388,7 +383,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -398,7 +393,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -424,7 +419,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -434,7 +429,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -460,7 +455,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -470,7 +465,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -496,7 +491,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -506,7 +501,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -534,7 +529,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -544,7 +539,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -569,7 +564,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -579,7 +574,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -606,7 +601,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -616,7 +611,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -641,7 +636,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "currency",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -651,7 +646,7 @@ export const columnsTableCriteriaAll = (
         separatorCurrency(text),
         true,
         "input",
-        search
+        search,
       ),
     // ellipsis: {
     //   showTitle: false,
@@ -705,7 +700,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -715,7 +710,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -740,7 +735,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "currency",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -750,7 +745,7 @@ export const columnsTableCriteriaAll = (
         separatorCurrency(text),
         false,
         "input",
-        search
+        search,
       ),
     // ellipsis: {
     //   showTitle: false,
@@ -804,7 +799,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -814,7 +809,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -839,7 +834,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -849,7 +844,7 @@ export const columnsTableCriteriaAll = (
         text?.label,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -873,7 +868,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "date",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderDateColumn(
@@ -882,7 +877,7 @@ export const columnsTableCriteriaAll = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (index) => {
     //   const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -923,7 +918,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "date",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderDateColumn(
@@ -932,7 +927,7 @@ export const columnsTableCriteriaAll = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
     // render: (index) => {
     //   const text = index ? moment(index).format("DD MMM YYYY") : "";
@@ -975,7 +970,7 @@ export const columnsTableCriteriaAll = (
       handleSearch,
       true,
       "input",
-      storedData
+      storedData,
     ),
     render: (text) =>
       renderColumn(
@@ -985,7 +980,7 @@ export const columnsTableCriteriaAll = (
         text,
         true,
         "input",
-        search
+        search,
       ),
     // ellipsis: {
     //   showTitle: false,

@@ -19,12 +19,12 @@ export const getListEntity = createAsyncThunk(
       return response;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_LIST_ENTITY", back: false })
+        validateError({ error: error, action: "GET_LIST_ENTITY", back: false }),
       );
 
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const getAllEntityPaginate = createAsyncThunk(
   "GET_ALL_ENTITY_PAGINATE",
@@ -42,11 +42,11 @@ export const getAllEntityPaginate = createAsyncThunk(
           error: error,
           action: "GET_ALL_ENTITY_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const createEntity = createAsyncThunk(
   "CREATE_ENTITY",
@@ -66,11 +66,11 @@ export const createEntity = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_ENTITY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const inactiveEntity = createAsyncThunk(
   "INACTIVE_ENTITY",
@@ -92,7 +92,7 @@ export const inactiveEntity = createAsyncThunk(
           error: errorBody(errorCode(error), status, errorMessage(error)),
           action: "INACTIVE_ENTITY",
           back: false,
-        })
+        }),
       );
 
       // const message =
@@ -112,7 +112,7 @@ export const inactiveEntity = createAsyncThunk(
       // }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getDetailEntity = createAsyncThunk(
   "GET_DETAIL_ENTITY",
@@ -127,11 +127,11 @@ export const getDetailEntity = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_ENTITY",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const deleteEntity = createAsyncThunk(
   "DELETE_ENTITY",
@@ -142,7 +142,7 @@ export const deleteEntity = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "DELETE_ENTITY", back: false })
+        validateError({ error: error, action: "DELETE_ENTITY", back: false }),
       );
 
       // const message =
@@ -160,7 +160,7 @@ export const deleteEntity = createAsyncThunk(
       // }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const updateEntity = createAsyncThunk(
   "UPDATE_ENTITY",
@@ -180,7 +180,7 @@ export const updateEntity = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_ENTITY",
           back: false,
-        })
+        }),
       );
 
       // const message =
@@ -200,7 +200,7 @@ export const updateEntity = createAsyncThunk(
       // }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const downloadExcel = createAsyncThunk(
   "DOWNLOAD_ENTITY_EXCEL",
@@ -218,11 +218,11 @@ export const downloadExcel = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_ENTITY_EXCEL",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const getDetailTaxEntity = createAsyncThunk(
   "DETAIL_TAX_ENTITY",
@@ -237,7 +237,7 @@ export const getDetailTaxEntity = createAsyncThunk(
           error: error,
           action: "DETAIL_TAX_ENTITY",
           back: false,
-        })
+        }),
       );
 
       // const message =
@@ -255,7 +255,7 @@ export const getDetailTaxEntity = createAsyncThunk(
       // }
       thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const inactiveTax = createAsyncThunk(
@@ -271,7 +271,7 @@ export const inactiveTax = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "INACTIVE_TAX",
           back: false,
-        })
+        }),
       );
 
       // const message =
@@ -289,7 +289,7 @@ export const inactiveTax = createAsyncThunk(
       // }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const checkAllowingFile = createAsyncThunk(
@@ -305,7 +305,7 @@ export const checkAllowingFile = createAsyncThunk(
           error: error,
           action: "CHECK_ALLOWING_FILE",
           back: false,
-        })
+        }),
       );
 
       // const message =
@@ -323,7 +323,7 @@ export const checkAllowingFile = createAsyncThunk(
       // }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 const entitySlice = createSlice({
   name: "entity",

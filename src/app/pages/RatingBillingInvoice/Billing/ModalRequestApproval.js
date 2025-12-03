@@ -268,9 +268,9 @@ const ModalRequestApproval = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-    [page, pageSize, searchedColumn, searchText]
+    [page, pageSize, searchedColumn, searchText],
   );
 
   const allColumns = useMemo(() => {
@@ -457,7 +457,7 @@ const ModalRequestApproval = ({
                   searchInput,
                   searchedColumn,
                   searchText,
-                  handleSearch
+                  handleSearch,
                 )}
                 expandable={{
                   expandedRowRender: (record) => (
@@ -473,7 +473,7 @@ const ModalRequestApproval = ({
                           searchInput,
                           searchedColumn,
                           searchText,
-                          handleSearch
+                          handleSearch,
                         )}
                         className={"mb-4"}
                         useSelect={false}
@@ -595,7 +595,7 @@ const ModalRequestApproval = ({
                     {
                       data_approval
                         ?.filter(
-                          (a) => a.appHierId === form.getFieldValue().apphierId
+                          (a) => a.appHierId === form.getFieldValue().apphierId,
                         )
                         ?.find((b) => b.approvalName)?.approvalName
                     }
@@ -618,7 +618,7 @@ const ModalRequestApproval = ({
                       searchInput,
                       searchedColumn,
                       searchText,
-                      handleSearch
+                      handleSearch,
                     )}
                     expandable={{
                       expandedRowRender: (record) => (
@@ -637,7 +637,7 @@ const ModalRequestApproval = ({
                               searchInput,
                               searchedColumn,
                               searchText,
-                              handleSearch
+                              handleSearch,
                             )}
                             className={"mb-4"}
                           />

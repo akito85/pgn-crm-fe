@@ -64,7 +64,7 @@ export const updatePassword = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateProfile = createAsyncThunk(
@@ -107,7 +107,7 @@ export const updateProfile = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const uploadProfile = createAsyncThunk(
@@ -122,7 +122,7 @@ export const uploadProfile = createAsyncThunk(
       const data = await userHttpService.uploadImage(
         url,
         dataRequest,
-        onProgress
+        onProgress,
       );
       return data;
     } catch (error) {
@@ -146,7 +146,7 @@ export const uploadProfile = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const removePicture = createAsyncThunk(
@@ -177,7 +177,7 @@ export const removePicture = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const profileSlice = createSlice({

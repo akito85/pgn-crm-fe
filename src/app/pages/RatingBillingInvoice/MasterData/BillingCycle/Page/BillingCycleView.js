@@ -41,7 +41,7 @@ const BillingCycleView = ({ type }) => {
   const [bodyError, setBodyError] = useState({});
   const [chooseId, setChooseId] = useState();
   const { data_list_billing_cycle, loading, dataApprovalHistory } = useSelector(
-    (state) => state.billingCycle
+    (state) => state.billingCycle,
   );
 
   // ✅ State untuk fix column dengan format baru { left: [], right: [] }
@@ -59,7 +59,7 @@ const BillingCycleView = ({ type }) => {
   useEffect(() => {
     localStorage.setItem(
       "billingCycleFixedColumns",
-      JSON.stringify(fixedColumns)
+      JSON.stringify(fixedColumns),
     );
   }, [fixedColumns]);
 
@@ -90,7 +90,7 @@ const BillingCycleView = ({ type }) => {
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
-      downloadBillingCycle({ search: tempSearch, page, pageSize, sort })
+      downloadBillingCycle({ search: tempSearch, page, pageSize, sort }),
     );
   };
 
@@ -135,7 +135,7 @@ const BillingCycleView = ({ type }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, search, page, pageSize, sort]);
 
@@ -215,7 +215,7 @@ const BillingCycleView = ({ type }) => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -430,7 +430,7 @@ const BillingCycleView = ({ type }) => {
   // ✅ Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["activate", "view", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   // ✅ Get base columns with key property
@@ -445,7 +445,7 @@ const BillingCycleView = ({ type }) => {
         searchText,
         handleSearch,
         handleApprovalHistory,
-        handleInactive
+        handleInactive,
       ),
       ...actionColumns,
     ];

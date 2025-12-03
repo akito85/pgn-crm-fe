@@ -1,20 +1,28 @@
-import React,{ useEffect, useState, useRef } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Link, NavLink } from 'react-router-dom'
-import { PlusOutlined, WarningOutlined } from '@ant-design/icons'
-import { Tooltip } from 'antd'
+import React, { useEffect, useState, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, NavLink } from "react-router-dom";
+import { PlusOutlined, WarningOutlined } from "@ant-design/icons";
+import { Tooltip } from "antd";
 
-import DetailGasUtilHistory from './DetailGasUtilHistory'
-import { getColumnSearchPropsUseFilteredValue } from '../../../../../../utils/getColumnSearchProps'
+import DetailGasUtilHistory from "./DetailGasUtilHistory";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../../assets/Icon/index";
-import ButtonComponent from '../../../../../../components/ButtonComponent'
-import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../../routes/account_management/customer_account_routes'
-import { deleteGasUtilization, getDetailGasUtilization, getListGasUtilizationHistory } from '../../../../../../redux/slices/account_management/detailAccount/gasUtilizationSlice'
-import { hasValue, renderColumn, renderDateColumn } from '../../../../../../utils'
-import TablePagination from '../../../../../../components/TablePagination'
-import { ModalConfirm } from '../../../../../../components/Modal/ModalPopUp'
-import { useColumnActionPermissionAccount } from '../../../ComponentAccount/ColumnActionPermissionAccount'
-import ToolbarAccount from '../../../ComponentAccount/ToolbarAccount'
+import ButtonComponent from "../../../../../../components/ButtonComponent";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
+import {
+  deleteGasUtilization,
+  getDetailGasUtilization,
+  getListGasUtilizationHistory,
+} from "../../../../../../redux/slices/account_management/detailAccount/gasUtilizationSlice";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../utils";
+import TablePagination from "../../../../../../components/TablePagination";
+import { ModalConfirm } from "../../../../../../components/Modal/ModalPopUp";
+import { useColumnActionPermissionAccount } from "../../../ComponentAccount/ColumnActionPermissionAccount";
+import ToolbarAccount from "../../../ComponentAccount/ToolbarAccount";
 
 const columns = (
   search,
@@ -27,8 +35,8 @@ const columns = (
   handleDetail,
   handleOpenDelete,
   idCustomer,
-  idAccount
-) => { 
+  idAccount,
+) => {
   return [
     {
       title: "NO",
@@ -49,9 +57,17 @@ const columns = (
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
-      render: (text) => renderDateColumn('effectiveDate', hasValue(search['effectiveDate']), searchText, text, 'date', search)
+      render: (text) =>
+        renderDateColumn(
+          "effectiveDate",
+          hasValue(search["effectiveDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
     {
       title: "DESCRIPTION",
@@ -64,21 +80,29 @@ const columns = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ellipsis: {
         showTitle: false,
       },
-      render: (text) => renderColumn('description', hasValue(search['description']), searchText, text, true, 'input', search)
+      render: (text) =>
+        renderColumn(
+          "description",
+          hasValue(search["description"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
-  ]
-}
+  ];
+};
 
-
-const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
+const TableGasUtilHistory = ({ idAccount, idCustomer, access }) => {
   const dispatch = useDispatch();
   const { data, loading, data_detail } = useSelector(
-    (state) =>  state.accountGasUtilization
+    (state) => state.accountGasUtilization,
   );
 
   const [page, setPage] = useState(1);
@@ -91,14 +115,18 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
   const [modalDetail, setModalDetail] = useState(false);
   const [dataDetail, setDataDetail] = useState({});
   const [openModalDelete, setOpenModalDelete] = useState(false);
-  const [idSelected, setIdSelected] = useState('');
+  const [idSelected, setIdSelected] = useState("");
 
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
       getListGasUtilizationHistory({
-        id:idAccount, search: reqSearch, sort, page, pageSize
-      })
+        id: idAccount,
+        search: reqSearch,
+        sort,
+        page,
+        pageSize,
+      }),
     );
   }, [search, page, pageSize, sort, dispatch]);
 
@@ -130,41 +158,44 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
     setPageSize(pageSizeChange);
   };
 
-
-  const handleDetail = async (r) => { 
-    dispatch(getDetailGasUtilization({id:r?.id}));
-    setModalDetail(true)
-    setDataDetail(r)
+  const handleDetail = async (r) => {
+    dispatch(getDetailGasUtilization({ id: r?.id }));
+    setModalDetail(true);
+    setDataDetail(r);
     // dispatch()
-  }
+  };
 
   const handleOpenDelete = (r) => {
-    setOpenModalDelete(true)
-    setIdSelected(r)
-  }
+    setOpenModalDelete(true);
+    setIdSelected(r);
+  };
 
   const handleConfirmModalDelete = () => {
     setOpenModalDelete(false);
     dispatch(deleteGasUtilization({ id: idSelected }))
-    .unwrap()
-    .then((data) => {
-      const reqSearch = encodeURIComponent(JSON.stringify(search));
-      dispatch(
-        getListGasUtilizationHistory({
-          id:idAccount, search: reqSearch, sort, page, pageSize
-        })
-      );
-    })  
-    .catch((err) => {
-      console.log(err)
-      return;
-    });
+      .unwrap()
+      .then((data) => {
+        const reqSearch = encodeURIComponent(JSON.stringify(search));
+        dispatch(
+          getListGasUtilizationHistory({
+            id: idAccount,
+            search: reqSearch,
+            sort,
+            page,
+            pageSize,
+          }),
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+        return;
+      });
   };
 
   const itemActions = [
     //action toolbar
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink
           to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_GAS_UTILIZATION}
@@ -180,7 +211,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
             Create
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
     // Column Action Table
@@ -201,8 +232,8 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
               />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
       action: "Update",
@@ -215,21 +246,16 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
               state={{
                 id: record?.id,
                 accountId: idAccount,
-                customerId: idCustomer
+                customerId: idCustomer,
               }}
-              >
-              <div
-                className={`flex justify-center pt-1`}
-              > 
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                />
+            >
+              <div className={`flex justify-center pt-1`}>
+                <SVGIcon name="IconEdit" width={24} />
               </div>
             </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
       action: "Hapus",
@@ -245,15 +271,17 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
               />
             </div>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
   ];
   return (
     <>
-      <div className="text-primary text-xs font-bold uppercase py-4">GAS UTILIZATION HISTORY LIST</div>
+      <div className="text-primary text-xs font-bold uppercase py-4">
+        GAS UTILIZATION HISTORY LIST
+      </div>
       <div className="flex w-full justify-end gap-3 mb-5">
-        <ToolbarAccount items={itemActions} advancedAccess={access}/>
+        <ToolbarAccount items={itemActions} advancedAccess={access} />
       </div>
       <TablePagination
         dataSource={data?.result}
@@ -276,25 +304,29 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
             handleDetail,
             handleOpenDelete,
             idCustomer,
-            idAccount
-          ), 
+            idAccount,
+          ),
           ...useColumnActionPermissionAccount(
             ["View", "Update", "Hapus"],
             itemActions,
-            access
-          )
+            access,
+          ),
         ]}
       />
 
       {/* Modal Detail */}
-      <DetailGasUtilHistory isOpen={modalDetail} setIsOpen={setModalDetail} dataDetail={data_detail} />
+      <DetailGasUtilHistory
+        isOpen={modalDetail}
+        setIsOpen={setModalDetail}
+        dataDetail={data_detail}
+      />
 
       {/* Modal Delete */}
       <ModalConfirm
         isOpen={openModalDelete}
-        handleCancel={()=>{
-          setIdSelected('')
-          setOpenModalDelete(false)
+        handleCancel={() => {
+          setIdSelected("");
+          setOpenModalDelete(false);
         }}
         handleOk={handleConfirmModalDelete}
         width={500}
@@ -311,7 +343,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
         /> */}
       </ModalConfirm>
     </>
-  )
-}
+  );
+};
 
-export default TableGasUtilHistory
+export default TableGasUtilHistory;

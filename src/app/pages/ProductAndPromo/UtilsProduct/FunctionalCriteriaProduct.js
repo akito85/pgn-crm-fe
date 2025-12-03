@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useRef, useCallback, Fragment } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  Fragment,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import { Form, Input, Select, Space, Table, Tooltip } from "antd";
@@ -8,7 +14,11 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import { NumericFormat } from "react-number-format";
 import { columnsTableCriteriaPromo } from "../PromoDiscount/Table/TableCriteriaPromo";
 import { dateFormatting, hasValue } from "../../../../utils";
-import { dataDependAdvanced, dataDepended, handleMappingBodyTiering } from "./UtilsAllProduct";
+import {
+  dataDependAdvanced,
+  dataDepended,
+  handleMappingBodyTiering,
+} from "./UtilsAllProduct";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../components/Card/CardComponent";
 import DetailText from "../../../../components/DetailText";
@@ -86,7 +96,9 @@ const EditableCell = ({
         //checked start date inline and end date header
         return !(
           currentDate.isSameOrAfter(
-            moment(formTableCriteria.getFieldValue("startDate"))?.startOf("day")
+            moment(formTableCriteria.getFieldValue("startDate"))?.startOf(
+              "day",
+            ),
           ) && currentDate.isSameOrBefore(moment(endDate).startOf("day"))
         );
         // return (
@@ -94,9 +106,9 @@ const EditableCell = ({
         //   current > moment(endDate)
         // );
       } else if (hasValue(formTableCriteria.getFieldValue("startDate"))) {
-        return !(currentDate?.isSameOrAfter(
-          moment(formTableCriteria.getFieldValue().startDate)?.startOf("day")
-        ));
+        return !currentDate?.isSameOrAfter(
+          moment(formTableCriteria.getFieldValue().startDate)?.startOf("day"),
+        );
         // return moment(formTableCriteria.getFieldValue().startDate) > current; // no end date header
       } else {
         return false; //no start date value
@@ -112,7 +124,7 @@ const EditableCell = ({
         // return moment(current)?.isSameOrAfter(moment(startDate)) &&
         // moment(current).isSameOrBefore(moment(endDate));
       } else {
-        return hasValue(startDate) ? !(currentDate?.isSameOrAfter(start)) : false;
+        return hasValue(startDate) ? !currentDate?.isSameOrAfter(start) : false;
       }
     } else {
       return moment().add(-1, "days") >= current;
@@ -128,7 +140,12 @@ const EditableCell = ({
             allowClear
             optionFilterProp="children"
             labelInValue
-            disabled={dataDepended(dependDataIndex, dataIndex, record, dataEditRecord)}
+            disabled={dataDepended(
+              dependDataIndex,
+              dataIndex,
+              record,
+              dataEditRecord,
+            )}
             filterOption={(input, option) =>
               (option?.children ?? "")
                 .toLowerCase()
@@ -223,7 +240,7 @@ const EditableCell = ({
                   {
                     validator: (_, value) =>
                       endDateValidator(
-                        formTableCriteria.getFieldValue().startDate
+                        formTableCriteria.getFieldValue().startDate,
                       )(_, value),
                   },
                 ]
@@ -334,7 +351,7 @@ const FunctionalCriteriaProduct = ({
 
   useEffect(() => {
     setSearch({});
-    if(editingKey && hasValue(editingKey)){
+    if (editingKey && hasValue(editingKey)) {
       formTableCriteria.resetFields(["tiering", "fromItem"]);
       setEditDataRecord((prevState) => {
         return {
@@ -347,17 +364,18 @@ const FunctionalCriteriaProduct = ({
   }, [dataCriteria, formTableCriteria]);
 
   useEffect(() => {
-    if (type !== "detail" && type !== "preview" && dataCriteria?.length > 0){
+    if (type !== "detail" && type !== "preview" && dataCriteria?.length > 0) {
       [...columnsTable()]
         ?.filter(
           (item) =>
             ([...dataCriteria]?.includes(item?.indexValue) &&
               !hasValue(item?.dependDataIndex)) ||
-            fixedColumn?.includes(item?.title)
+            fixedColumn?.includes(item?.title),
         )
         ?.forEach((element) => {
           if (
-            hasValue(element?.url) && !hasValue(element?.dependDataIndex) &&
+            hasValue(element?.url) &&
+            !hasValue(element?.dependDataIndex) &&
             (!hasValue(listOption[element?.dataIndexForm]) ||
               listOption[element?.dataIndexForm].length < 1)
           ) {
@@ -365,111 +383,114 @@ const FunctionalCriteriaProduct = ({
           }
         });
     }
-  },[dispatch, type, dataCriteria])
+  }, [dispatch, type, dataCriteria]);
 
   // Handle Edit Data Record
-  const handleEditDataRecord = useCallback((data, key, index) => {
-    const keyName = key + index;
-    const value =
-      index === "description" ||
-      index === "adjustmentValue" ||
-      index === "maxValueUom"
-        ? data.target.value
-        : data;
-    setEditDataRecord((prevState) => {
-      return {
-        ...prevState,
-        [keyName]: value,
-      };
-    });
-    if (index === `province`) {
-      if (dataCriteria.includes(39) || (dataCriteria.includes(28))) {
-        dispatch(getApi?.getCityList(data?.value));
-      }
-      formTableCriteria.resetFields(["city", "district", "subDistrict"]);
+  const handleEditDataRecord = useCallback(
+    (data, key, index) => {
+      const keyName = key + index;
+      const value =
+        index === "description" ||
+        index === "adjustmentValue" ||
+        index === "maxValueUom"
+          ? data.target.value
+          : data;
       setEditDataRecord((prevState) => {
         return {
           ...prevState,
-          [key + "city"]: undefined,
-          [key + "district"]: undefined,
-          [key + "subDistrict"]: undefined,
+          [keyName]: value,
         };
       });
-    }
-    if (index === `city`) {
-      if (dataCriteria.includes(14) || (dataCriteria.includes(139))) {
-        dispatch(getApi?.getDistrictList(data?.value));
+      if (index === `province`) {
+        if (dataCriteria.includes(39) || dataCriteria.includes(28)) {
+          dispatch(getApi?.getCityList(data?.value));
+        }
+        formTableCriteria.resetFields(["city", "district", "subDistrict"]);
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [key + "city"]: undefined,
+            [key + "district"]: undefined,
+            [key + "subDistrict"]: undefined,
+          };
+        });
       }
-      formTableCriteria.resetFields(["district", "subDistrict"]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "district"]: undefined,
-          [key + "subDistrict"]: undefined,
-        };
-      });
-    }
-    if (index === `district`) {
-      if (dataCriteria.includes(13) || (dataCriteria.includes(27))) {
-        dispatch(getApi?.getSubDistrictList(data?.value));
+      if (index === `city`) {
+        if (dataCriteria.includes(14) || dataCriteria.includes(139)) {
+          dispatch(getApi?.getDistrictList(data?.value));
+        }
+        formTableCriteria.resetFields(["district", "subDistrict"]);
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [key + "district"]: undefined,
+            [key + "subDistrict"]: undefined,
+          };
+        });
       }
-      formTableCriteria.resetFields(["subDistrict"]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "subDistrict"]: undefined,
-        };
-      });
-    }
-    if (index === `customerSegment`) {
-      if (dataCriteria.includes(20) || (dataCriteria.includes(33))) {
-        dispatch(getApi?.getAccountGroupList(data?.value));
+      if (index === `district`) {
+        if (dataCriteria.includes(13) || dataCriteria.includes(27)) {
+          dispatch(getApi?.getSubDistrictList(data?.value));
+        }
+        formTableCriteria.resetFields(["subDistrict"]);
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [key + "subDistrict"]: undefined,
+          };
+        });
       }
-      formTableCriteria.resetFields(["accountGroup"]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "accountGroup"]: undefined,
-        };
-      });
-    }
-    if (index === `fromItem`) {
-      formTableCriteria.resetFields(["tiering"]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "tiering"]: undefined,
-        };
-      });
-      if (data?.value === 2302 || data?.value === 2301) {
-        const body = handleMappingBodyTiering({
-          dataCriteria: dataCriteria,
-          editDataRecord: editDataRecord,
-          key: key,
-        })
-        
-        dispatch(getApi?.getTieringList(body));
+      if (index === `customerSegment`) {
+        if (dataCriteria.includes(20) || dataCriteria.includes(33)) {
+          dispatch(getApi?.getAccountGroupList(data?.value));
+        }
+        formTableCriteria.resetFields(["accountGroup"]);
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [key + "accountGroup"]: undefined,
+          };
+        });
       }
-    }   
-    // if (
-    //   ([...dataCriteria]?.includes(
-    //     columnsTable()?.find((item) => item?.dataIndex === index)?.indexValue
-    //   ) ||
-    //     dataCriteria?.includes(37))
-    // ) {
-      
-    //   formTableCriteria.resetFields(["tiering", "fromItem"]);
-    //     setEditDataRecord((prevState) => {
-    //       return {
-    //         ...prevState,
-    //         [key + "fromItem"]: undefined,
-    //         [key + "tiering"]: undefined,
-    //       };
-    //     });
-    // }
-    
-    return value;
-  },[dataCriteria, dispatch, editDataRecord, formTableCriteria]);
+      if (index === `fromItem`) {
+        formTableCriteria.resetFields(["tiering"]);
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [key + "tiering"]: undefined,
+          };
+        });
+        if (data?.value === 2302 || data?.value === 2301) {
+          const body = handleMappingBodyTiering({
+            dataCriteria: dataCriteria,
+            editDataRecord: editDataRecord,
+            key: key,
+          });
+
+          dispatch(getApi?.getTieringList(body));
+        }
+      }
+      // if (
+      //   ([...dataCriteria]?.includes(
+      //     columnsTable()?.find((item) => item?.dataIndex === index)?.indexValue
+      //   ) ||
+      //     dataCriteria?.includes(37))
+      // ) {
+
+      //   formTableCriteria.resetFields(["tiering", "fromItem"]);
+      //     setEditDataRecord((prevState) => {
+      //       return {
+      //         ...prevState,
+      //         [key + "fromItem"]: undefined,
+      //         [key + "tiering"]: undefined,
+      //       };
+      //     });
+      // }
+
+      return value;
+    },
+    [dataCriteria, dispatch, editDataRecord, formTableCriteria],
+  );
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -505,36 +526,47 @@ const FunctionalCriteriaProduct = ({
     setPageSize(pageSizeChange);
   };
 
-    // check has overlapping data
-    const checkOverlappingData = useCallback((formHeader, dataTable) => {
-      const dataOverlap = [];
-      // if (hasValue(formHeader?.endDate)) {
-      dataTable?.forEach(item => {
-        if (moment(item?.startDate).startOf('day') < moment(formHeader?.startDate).startOf('day') || moment(item?.endDate).startOf('day') > moment(formHeader?.endDate).startOf('day')) {
-          dataOverlap?.push(item)
-        }
-      });
-  
-      if (dataOverlap?.length > 0) {
-        return true
-      } else {
-        return false
+  // check has overlapping data
+  const checkOverlappingData = useCallback((formHeader, dataTable) => {
+    const dataOverlap = [];
+    // if (hasValue(formHeader?.endDate)) {
+    dataTable?.forEach((item) => {
+      if (
+        moment(item?.startDate).startOf("day") <
+          moment(formHeader?.startDate).startOf("day") ||
+        moment(item?.endDate).startOf("day") >
+          moment(formHeader?.endDate).startOf("day")
+      ) {
+        dataOverlap?.push(item);
       }
-      // }
-  
-    }, []);
+    });
 
-    const checkOverlappingDate = useCallback((formHeaderValue, rowValue) => {
-      // if (hasValue(formHeaderValue?.endDate)) {
-      if (moment(rowValue?.startDate).startOf('day') < moment(formHeaderValue?.startDate).startOf('day')) {
-        return true
-      } else if (hasValue(formHeaderValue?.endDate) && moment(rowValue?.endDate).startOf('day') > moment(formHeaderValue?.endDate).startOf('day')) {
-        return true
-      } else {
-        return false
-      }
-      // }
-    }, []);
+    if (dataOverlap?.length > 0) {
+      return true;
+    } else {
+      return false;
+    }
+    // }
+  }, []);
+
+  const checkOverlappingDate = useCallback((formHeaderValue, rowValue) => {
+    // if (hasValue(formHeaderValue?.endDate)) {
+    if (
+      moment(rowValue?.startDate).startOf("day") <
+      moment(formHeaderValue?.startDate).startOf("day")
+    ) {
+      return true;
+    } else if (
+      hasValue(formHeaderValue?.endDate) &&
+      moment(rowValue?.endDate).startOf("day") >
+        moment(formHeaderValue?.endDate).startOf("day")
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+    // }
+  }, []);
 
   // Function Edit Data
   const edit = (record, field) => {
@@ -575,7 +607,10 @@ const FunctionalCriteriaProduct = ({
 
   // Function Cancel Data
   const cancel = (record) => {
-    if(parseInt(editingKey) > 10 && editingKey?.[editingKey?.length - 1] === "1"){
+    if (
+      parseInt(editingKey) > 10 &&
+      editingKey?.[editingKey?.length - 1] === "1"
+    ) {
       setPage(parseInt(editingKey?.[0]));
     }
     setEditingKey("");
@@ -593,7 +628,10 @@ const FunctionalCriteriaProduct = ({
       const newData = [...data];
       const index = newData.findIndex((item) => key === item.key);
 
-      if (checkStartDate && checkOverlappingDate({ startDate: startDate, endDate: endDate }, row)) {
+      if (
+        checkStartDate &&
+        checkOverlappingDate({ startDate: startDate, endDate: endDate }, row)
+      ) {
         formTableCriteria.setFields([
           {
             name: "startDate",
@@ -623,8 +661,11 @@ const FunctionalCriteriaProduct = ({
 
   // Function Add Row Data
   const addRow = () => {
-    if (checkStartDate && checkOverlappingData({ startDate: startDate, endDate: endDate }, data)) {
-      setModalValidationTable(true)
+    if (
+      checkStartDate &&
+      checkOverlappingData({ startDate: startDate, endDate: endDate }, data)
+    ) {
+      setModalValidationTable(true);
     } else {
       setSearch({});
       formTableCriteria.resetFields();
@@ -654,7 +695,7 @@ const FunctionalCriteriaProduct = ({
   // Function Delete Row
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -681,7 +722,7 @@ const FunctionalCriteriaProduct = ({
         searchText,
         handleSearch,
         search,
-        storedData
+        storedData,
       ),
       {
         title: "ACTION",
@@ -782,7 +823,7 @@ const FunctionalCriteriaProduct = ({
         ...(fixedColumn || []),
       ].includes(col.title)
         ? dataCriteria.includes(col.indexValue)
-        : true
+        : true,
     );
   };
 
@@ -915,11 +956,11 @@ const FunctionalCriteriaProduct = ({
                       handleEditDataRecord: handleEditDataRecord,
                       required: col.required,
                       endDate: endDate,
-                      requiredDate:checkStartDate,
+                      requiredDate: checkStartDate,
                       // disableDate,
                       formTableCriteria: formTableCriteria,
                     }),
-                  }))
+                  })),
                 )}
                 pagination={{
                   position: ["topRight"],
@@ -970,7 +1011,7 @@ const FunctionalCriteriaProduct = ({
               <DetailText label="Created Date">
                 {dataHistory?.createdDate
                   ? moment(dataHistory.createdDate).format(
-                      dateFormatting.dateTime
+                      dateFormatting.dateTime,
                     )
                   : ""}
               </DetailText>
@@ -980,7 +1021,7 @@ const FunctionalCriteriaProduct = ({
               <DetailText label="Updated Date">
                 {dataHistory?.updatedDate
                   ? moment(dataHistory.updatedDate).format(
-                      dateFormatting.dateTime
+                      dateFormatting.dateTime,
                     )
                   : ""}
               </DetailText>

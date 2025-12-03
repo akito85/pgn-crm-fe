@@ -55,7 +55,7 @@ export const validateError = createAsyncThunk(
       };
       thunkAPI.dispatch(showModalError(errorBody));
     }
-  }
+  },
 );
 
 export const validateCreateUpdate = createAsyncThunk(
@@ -70,15 +70,15 @@ export const validateCreateUpdate = createAsyncThunk(
           error: errorBody(
             errorCode(error),
             type === "update" ? "updated" : "created",
-            errorMessage(error)
+            errorMessage(error),
           ),
           action: "VALIDATE_CREATE_UPDATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 const generalSlice = createSlice({

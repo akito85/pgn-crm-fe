@@ -29,9 +29,9 @@ const CostCenterForm = (props) => {
   const { type } = props;
 
   const { typeData, loading, data_detail } = useSelector(
-    (state) => state.master_cost_center
+    (state) => state.master_cost_center,
   );
-  const { bodyError, isLoading } = useSelector(state => state?.general);
+  const { bodyError, isLoading } = useSelector((state) => state?.general);
 
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -46,7 +46,6 @@ const CostCenterForm = (props) => {
   const [description, setDescription] = useState("");
   const [mandatoryFieldType, setMandatoryFieldType] = useState(false);
   const [payload, setPayload] = useState({});
-
 
   useEffect(() => {
     if (id) {
@@ -76,23 +75,34 @@ const CostCenterForm = (props) => {
     form.resetFields();
   };
 
-
   const onFinish = async (formValue) => {
     try {
       let body;
       let url;
-      if (type === 'update') {
+      if (type === "update") {
         body = { ...formValue, id: location?.state?.id };
-        url = '/v1/dbs/api/costcenter/validate-update'
+        url = "/v1/dbs/api/costcenter/validate-update";
       } else {
-        body = formValue
-        url = '/v1/dbs/api/costcenter/validate-create'
+        body = formValue;
+        url = "/v1/dbs/api/costcenter/validate-create";
       }
       setPayload({
         requestBody: body,
-        validateCreateUpdate: { body: body, services: userHttpService, endPoint: url, type}
-      })
-      await dispatch(validateCreateUpdate({ body: body, services: userHttpService, endPoint: url, type }))?.unwrap();
+        validateCreateUpdate: {
+          body: body,
+          services: userHttpService,
+          endPoint: url,
+          type,
+        },
+      });
+      await dispatch(
+        validateCreateUpdate({
+          body: body,
+          services: userHttpService,
+          endPoint: url,
+          type,
+        }),
+      )?.unwrap();
       setModalConfirmation(true);
     } catch (error) {
       setModalConfirmation(false);
@@ -102,7 +112,7 @@ const CostCenterForm = (props) => {
   // handle Confirm
   const submitForm = () => {
     setModalConfirmation(false);
-    const { typeAction, ...keys } = payload?.requestBody
+    const { typeAction, ...keys } = payload?.requestBody;
     if (type === "update") {
       dispatch(updateCostCenter(keys))
         .unwrap()
@@ -139,8 +149,9 @@ const CostCenterForm = (props) => {
     },
     {
       path: SYSTEM_SETUP_ROUTES.CREATE_HIERARCHY,
-      breadcrumbName: `${type === "create" ? "Create Cost Center" : "Update Cost Center"
-        }`,
+      breadcrumbName: `${
+        type === "create" ? "Create Cost Center" : "Update Cost Center"
+      }`,
     },
   ];
 
@@ -149,43 +160,42 @@ const CostCenterForm = (props) => {
       dispatch(getCostCenterDetail(id));
     } else {
       form.resetFields();
-      setMandatoryFieldType(false)
+      setMandatoryFieldType(false);
     }
   };
 
   const handleSelectType = (e) => {
     setMandatoryFieldType(!!e);
     if (!e) {
-      form.resetFields(['valName', 'valCode'])
+      form.resetFields(["valName", "valCode"]);
     }
   };
-
 
   const handleRetry = () => {
     handleCancelTryAgain();
-    if (bodyError?.action === 'CREATE_COST_CENTER') {
-      dispatch(createCostCenter(payload?.requestBody))
-    } else if (bodyError?.action === 'UPDATE_COST_CENTER') {
-      dispatch(updateCostCenter(payload?.requestBody))
-    } else if (bodyError?.action === 'GET_COST_CENTER_DETAIL') {
-      dispatch(getCostCenterDetail(id))
-    } else if (bodyError?.action === 'VALIDATE_CREATE_UPDATE') {
-      dispatch(validateCreateUpdate(payload?.validateCreateUpdate))
+    if (bodyError?.action === "CREATE_COST_CENTER") {
+      dispatch(createCostCenter(payload?.requestBody));
+    } else if (bodyError?.action === "UPDATE_COST_CENTER") {
+      dispatch(updateCostCenter(payload?.requestBody));
+    } else if (bodyError?.action === "GET_COST_CENTER_DETAIL") {
+      dispatch(getCostCenterDetail(id));
+    } else if (bodyError?.action === "VALIDATE_CREATE_UPDATE") {
+      dispatch(validateCreateUpdate(payload?.validateCreateUpdate));
     } else {
-      dispatch(getType())
+      dispatch(getType());
     }
   };
 
-
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
     <LayoutMenu>
       <Spin spinning={loading || isLoading}>
         <BreadCrumb routes={routes} />
         <Form form={form} layout="vertical" onFinish={onFinish}>
           <BaseContainer
-            header={`${type === "create" ? "CREATE COST CENTER" : "UPDATE COST CENTER"
-              }`}
+            header={`${
+              type === "create" ? "CREATE COST CENTER" : "UPDATE COST CENTER"
+            }`}
           >
             <div className={"w-full flex flex-col"}>
               <div className={"flex w-full flex-row gap-4"}>
@@ -307,7 +317,10 @@ const CostCenterForm = (props) => {
         width={600}
         footer={
           <div className="w-full flex justify-end gap-5">
-            <ButtonComponent onClick={() => setModalConfirmation(false)} type="default">
+            <ButtonComponent
+              onClick={() => setModalConfirmation(false)}
+              type="default"
+            >
               Cancel
             </ButtonComponent>
             <ButtonComponent onClick={submitForm} type="submit">

@@ -137,12 +137,12 @@ const AccountInformation = ({
         item.children.find((child) => child.value === dataAI?.industrialSector)
       ) {
         result = item.children.find(
-          (child) => child.value === dataAI?.industrialSector
+          (child) => child.value === dataAI?.industrialSector,
         ).title;
       }
       return result;
     },
-    ""
+    "",
   );
 
   const labelBudgetYear = data_budgetYear
@@ -231,21 +231,39 @@ const AccountInformation = ({
             )}
 
             <DetailText label={"Birth/Founded Date"}>
-              {!dataCheck ? handleDate(dataCI?.foundedBirthDate2) : handleDate(dataCustomer?.customerInformation?.dateOfBirth)}
+              {!dataCheck
+                ? handleDate(dataCI?.foundedBirthDate2)
+                : handleDate(dataCustomer?.customerInformation?.dateOfBirth)}
             </DetailText>
             <DetailText label={"Birth/Founded Place"}>
-              {!dataCheck ? dataCI?.foundedBirthPlace : dataCustomer?.customerInformation?.placeOfBirth}
+              {!dataCheck
+                ? dataCI?.foundedBirthPlace
+                : dataCustomer?.customerInformation?.placeOfBirth}
             </DetailText>
             {dataCI?.customerType === 58 ? null : (
               <>
-                <DetailText label={"Sex"}>{!dataCheck ? labelSex : dataCustomer?.customerInformation?.sex}</DetailText>
+                <DetailText label={"Sex"}>
+                  {!dataCheck
+                    ? labelSex
+                    : dataCustomer?.customerInformation?.sex}
+                </DetailText>
                 <DetailText label={"Marital Status"}>
-                  {!dataCheck ? labelMaritalStatus : dataCustomer?.customerInformation?.maritalStatus}
+                  {!dataCheck
+                    ? labelMaritalStatus
+                    : dataCustomer?.customerInformation?.maritalStatus}
                 </DetailText>
               </>
             )}
-            <DetailText label={"Search Key"}>{!dataCheck ? dataCI?.searchKey : dataCustomer?.customerInformation?.searchKey}</DetailText>
-            <DetailText label={"Description"}>{!dataCheck ? dataCI?.description : dataCustomer?.customerInformation?.description}</DetailText>
+            <DetailText label={"Search Key"}>
+              {!dataCheck
+                ? dataCI?.searchKey
+                : dataCustomer?.customerInformation?.searchKey}
+            </DetailText>
+            <DetailText label={"Description"}>
+              {!dataCheck
+                ? dataCI?.description
+                : dataCustomer?.customerInformation?.description}
+            </DetailText>
           </div>
 
           <p className="text-primary uppercase font-bold pt-[30px]">
@@ -352,7 +370,11 @@ const AccountInformation = ({
     <Spin spinning={loading}>
       {/* {dataCheck !== true ? ( */}
       <RadioTabs
-        data={dataCustomer?.registered ? tabPages.filter(tabPage => tabPage.value !== "Attachment") : tabPages}
+        data={
+          dataCustomer?.registered
+            ? tabPages.filter((tabPage) => tabPage.value !== "Attachment")
+            : tabPages
+        }
         onChange={(e) => setValuePage(e.target.value)}
       />
       {/* ) : null} */}

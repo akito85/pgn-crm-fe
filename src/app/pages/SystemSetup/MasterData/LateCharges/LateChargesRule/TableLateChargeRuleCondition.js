@@ -1,7 +1,12 @@
 import { Form, Input, Select, Table, Tooltip } from "antd";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSelector } from "react-redux";
-
 
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
@@ -16,7 +21,7 @@ export const getColumnSearchPropsCriteria = (
   searchedColumn,
   searchText,
   handleSearch,
-  excludeRender = false
+  excludeRender = false,
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
@@ -121,7 +126,7 @@ const EditableCell = ({
   urlIndex,
   dataRules,
   onInput,
-  handleEditDataRecord = () => { },
+  handleEditDataRecord = () => {},
   isDoubleValues,
   dataTable,
   ...restProps
@@ -133,23 +138,23 @@ const EditableCell = ({
 
   const checkDuplicate = (isDuplicate) => (_, value) => {
     if (isDuplicate) {
-      return Promise?.reject(new Error(`Name and Operator can't be same`))
+      return Promise?.reject(new Error(`Name and Operator can't be same`));
     } else {
-      return Promise?.resolve()
+      return Promise?.resolve();
     }
-  }
+  };
 
   const rules = () => {
     let rule = [];
     if (required) {
       // Check if dataIndex is either 'name' or 'operator'
-      if (dataIndex === 'name' || dataIndex === 'operator') {
+      if (dataIndex === "name" || dataIndex === "operator") {
         rule.push({
           ...required,
           message: `${required.message} ${title}!`,
           validator: (field, value) => {
-            checkDuplicate(isDoubleValues)(field, value)
-          }
+            checkDuplicate(isDoubleValues)(field, value);
+          },
         });
       } else {
         rule.push({
@@ -160,7 +165,6 @@ const EditableCell = ({
     }
     return rule;
   };
-
 
   const filterOption = (input, option) =>
     option.props.children.toLowerCase().includes(input.toLowerCase());
@@ -178,7 +182,6 @@ const EditableCell = ({
   //   return !dataDepend;
   // };
 
-
   let maxLength =
     dataIndex === "value" && dataEditRecord[key + "dataType"]?.value === 4
       ? 1
@@ -193,7 +196,7 @@ const EditableCell = ({
             optionFilterProp="children"
             filterOption={filterOption}
             labelInValue
-          // disabled={dependDataIndex ? dependentData() : false}
+            // disabled={dependDataIndex ? dependentData() : false}
           >
             {options.map((option) => (
               <Select.Option key={option.value} value={option.value}>
@@ -214,10 +217,11 @@ const EditableCell = ({
       case "description":
         return <Input.TextArea rows={1} maxLength={255} />;
       case "input_value":
-        if (dataEditRecord[key + "name"]?.value == 1169 || dataEditRecord[key + "name"]?.value == 200) {
-          return (
-            <InputComponent type="number" />
-          );
+        if (
+          dataEditRecord[key + "name"]?.value == 1169 ||
+          dataEditRecord[key + "name"]?.value == 200
+        ) {
+          return <InputComponent type="number" />;
         } else {
           return (
             <InputComponent
@@ -321,10 +325,10 @@ const renderOnInput = (type, e) => {
 
 const TableLateChargeRuleCondition = ({
   dataTable = [],
-  updateTable = () => { },
+  updateTable = () => {},
   dataLateChargeRule = {},
   storedData = false,
-  setStoredData = () => { },
+  setStoredData = () => {},
   type = "detail",
 }) => {
   const searchInput = useRef(null);
@@ -349,9 +353,8 @@ const TableLateChargeRuleCondition = ({
       (type === "update" && dataLateChargeRule.status === "ACTIVE") ||
       type === "detail" ||
       type === "preview",
-    [type, dataLateChargeRule]
+    [type, dataLateChargeRule],
   );
-
 
   useEffect(() => {
     setTotalData(dataTable.length);
@@ -373,24 +376,18 @@ const TableLateChargeRuleCondition = ({
   };
 
   const handleEditDataRecord = (data, key, index) => {
-    const tempNameSelect = editDataRecord[key + "name"]?.value || '';
+    const tempNameSelect = editDataRecord[key + "name"]?.value || "";
     const keyName = key + index;
     let value = index === "value" ? data.floatValue : data;
-    if (
-      index == "value" && (
-        tempNameSelect == 1169 ||
-        tempNameSelect == 200
-      )
-    ) {
+    if (index == "value" && (tempNameSelect == 1169 || tempNameSelect == 200)) {
       value = data.target.value;
     } else if (
-      index == "value" && (
-        tempNameSelect === 215 ||
+      index == "value" &&
+      (tempNameSelect === 215 ||
         tempNameSelect === 216 ||
         tempNameSelect === 217 ||
         tempNameSelect === 218 ||
-        tempNameSelect === 219
-      )
+        tempNameSelect === 219)
     ) {
       value = data.floatValue;
     }
@@ -434,13 +431,13 @@ const TableLateChargeRuleCondition = ({
 
   const deleteRow = (record) => {
     updateTable((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
 
   const cancel = (record) => {
-    setisDoubleValues(false)
+    setisDoubleValues(false);
     setStoredData(false);
     setEditingKey("");
     if (statusAction === "add") {
@@ -450,21 +447,26 @@ const TableLateChargeRuleCondition = ({
   };
 
   const checkDuplicateData = useCallback((dataTable, row) => {
-    if (dataTable?.filter(item => item?.name?.value === row?.name?.value && item?.operator?.value === row?.operator?.value)?.length > 0) {
-      setisDoubleValues(true)
-      return true
+    if (
+      dataTable?.filter(
+        (item) =>
+          item?.name?.value === row?.name?.value &&
+          item?.operator?.value === row?.operator?.value,
+      )?.length > 0
+    ) {
+      setisDoubleValues(true);
+      return true;
     } else {
-      setisDoubleValues(false)
-      return false
+      setisDoubleValues(false);
+      return false;
     }
-  }, [])
-
+  }, []);
 
   const save = async (key) => {
     try {
       const row = await formTable.validateFields();
       const newData = [...dataTable];
-      const duplicated = checkDuplicateData(newData, row)
+      const duplicated = checkDuplicateData(newData, row);
       const index = newData.findIndex((item) => key === item.key);
       if (duplicated === false) {
         if (index > -1) {
@@ -483,11 +485,11 @@ const TableLateChargeRuleCondition = ({
       } else {
         formTable.setFields([
           {
-            name: 'name',
+            name: "name",
             errors: [`Duplicate data found. Name and Operator can't be same`],
           },
           {
-            name: 'operator',
+            name: "operator",
             errors: [`Duplicate data found. Name and Operator can't be same`],
           },
         ]);
@@ -498,7 +500,7 @@ const TableLateChargeRuleCondition = ({
   };
 
   const addRow = () => {
-    setisDoubleValues(false)
+    setisDoubleValues(false);
     formTable.resetFields();
     setStoredData(true);
     setStatusAction("add");
@@ -536,7 +538,9 @@ const TableLateChargeRuleCondition = ({
         // required: { required: true, message: "Please input your" },
         rules: [
           {
-            message: isDoubleValues ? `Name and Operator can't be same` : `Please input your Name!`,
+            message: isDoubleValues
+              ? `Name and Operator can't be same`
+              : `Please input your Name!`,
             required: true,
           },
         ],
@@ -545,7 +549,7 @@ const TableLateChargeRuleCondition = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       // {
@@ -587,7 +591,7 @@ const TableLateChargeRuleCondition = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
@@ -612,20 +616,19 @@ const TableLateChargeRuleCondition = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
         render: (value, record) => {
-          const valueCheck = typeof value === "string" ? value : parseFloat(value)
+          const valueCheck =
+            typeof value === "string" ? value : parseFloat(value);
           const formating = (val) => {
-            return val.toLocaleString('en-US', {
+            return val.toLocaleString("en-US", {
               minimumFractionDigits: 2,
-              maximumFractionDigits: 4
+              maximumFractionDigits: 4,
             });
-          }
-          return (
-            <span>{value ? formating(valueCheck) : ''}</span>
-          )
-        }
+          };
+          return <span>{value ? formating(valueCheck) : ""}</span>;
+        },
       },
       {
         title: "ACTION",
@@ -655,8 +658,9 @@ const TableLateChargeRuleCondition = ({
                 <>
                   <Tooltip title="Edit">
                     <div
-                      className={`flex justify-center${editingKey ? " cursor-not-allowed" : ""
-                        }`}
+                      className={`flex justify-center${
+                        editingKey ? " cursor-not-allowed" : ""
+                      }`}
                     >
                       <SVGIcon
                         name="IconEdit"
@@ -669,8 +673,11 @@ const TableLateChargeRuleCondition = ({
                   </Tooltip>
                   <Tooltip title="Delete">
                     <div
-                      className={`flex justify-center${record.typeData === "exist" || editingKey ? " cursor-not-allowed" : ""
-                        }`}
+                      className={`flex justify-center${
+                        record.typeData === "exist" || editingKey
+                          ? " cursor-not-allowed"
+                          : ""
+                      }`}
                     >
                       <SVGIcon
                         name="IconDelete"
@@ -679,7 +686,9 @@ const TableLateChargeRuleCondition = ({
                         }
                         width={24}
                         className={
-                          record.typeData === "exist" || editingKey ? " disabled " : undefined
+                          record.typeData === "exist" || editingKey
+                            ? " disabled "
+                            : undefined
                         }
                         onClick={
                           record.typeData !== "exist" || !editingKey
@@ -732,8 +741,9 @@ const TableLateChargeRuleCondition = ({
       </div>
       <div className={"relative flex flex-col w-full"}>
         <div
-          className={`${totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
-            } w-1/4 flex`}
+          className={`${
+            totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
+          } w-1/4 flex`}
         >
           <Select
             mode="multiple"
@@ -782,9 +792,9 @@ const TableLateChargeRuleCondition = ({
                   onInput: col.onInput,
                   handleEditDataRecord: handleEditDataRecord,
                   isDoubleValues: isDoubleValues,
-                  dataTable: dataTable
+                  dataTable: dataTable,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],

@@ -28,7 +28,7 @@ export const getAllAccountGasSourcePaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCalorieType = createAsyncThunk(
@@ -41,7 +41,7 @@ export const getCalorieType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAccountGasSource = createAsyncThunk(
@@ -54,7 +54,7 @@ export const getAccountGasSource = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const assignGasSource = createAsyncThunk(
@@ -77,7 +77,7 @@ export const assignGasSource = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const InactiveAccountGasSource = createAsyncThunk(
@@ -108,7 +108,7 @@ export const InactiveAccountGasSource = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getDetailAccountGasSource = createAsyncThunk(
@@ -121,7 +121,7 @@ export const getDetailAccountGasSource = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 const accountGasSourceSlice = createSlice({

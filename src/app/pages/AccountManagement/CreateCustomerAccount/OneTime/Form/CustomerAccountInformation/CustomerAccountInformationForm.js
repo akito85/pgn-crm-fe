@@ -29,7 +29,7 @@ const CustomerAccountInformation = ({
   dispatch = () => {},
   CAIObj = {},
   handleCAIObj,
-  form
+  form,
 }) => {
   // Selector
   const {
@@ -75,7 +75,7 @@ const CustomerAccountInformation = ({
   }, [CAIObj?.accountSegment]);
 
   const filterData = (data) => {
-    return (data || []).map(item => {
+    return (data || []).map((item) => {
       if (item.children && item.children.length > 0) {
         return {
           ...item,
@@ -86,18 +86,18 @@ const CustomerAccountInformation = ({
         return item;
       }
     });
-  }
+  };
 
   useEffect(() => {
-    if(CAIObj.accountRegistrationNumber){
-      if(CAIObj.accountRegistrationNumber.length > 0 && CAIObj.accountRegistrationNumber.length < 11){
-        form.validateFields([
-          "accountRegistrationNumber"
-        ])
+    if (CAIObj.accountRegistrationNumber) {
+      if (
+        CAIObj.accountRegistrationNumber.length > 0 &&
+        CAIObj.accountRegistrationNumber.length < 11
+      ) {
+        form.validateFields(["accountRegistrationNumber"]);
       }
     }
-  }, [CAIObj, form])
-  
+  }, [CAIObj, form]);
 
   const validateInputNumber = (rule, value, callback) => {
     if (value && value.toString().length < 11) {
@@ -114,7 +114,7 @@ const CustomerAccountInformation = ({
   const filterTreeNode = (input, treeNode) => {
     return treeNode.props.title.toLowerCase().indexOf(input.toLowerCase()) >= 0;
   };
-  
+
   return (
     <div>
       {dataCheck !== "choose" ? (
@@ -134,21 +134,21 @@ const CustomerAccountInformation = ({
                 },
               ]}
             >
-              <InputComponent onInput={onInputUpperCase}/>
+              <InputComponent onInput={onInputUpperCase} />
             </Form.Item>
             <Form.Item
               label={"Middle Name"}
               name={"middleName"}
               getValueFromEvent={(e) => handleCAIObj(e, "middleName")}
             >
-              <InputComponent onInput={onInputUpperCase}/>
+              <InputComponent onInput={onInputUpperCase} />
             </Form.Item>
             <Form.Item
               label={"Last Name"}
               name={"lastName"}
               getValueFromEvent={(e) => handleCAIObj(e, "lastName")}
             >
-              <InputComponent onInput={onInputUpperCase}/>
+              <InputComponent onInput={onInputUpperCase} />
             </Form.Item>
             <Form.Item
               label={"Customer Name"}
@@ -156,8 +156,12 @@ const CustomerAccountInformation = ({
               valuePropName={
                 CAIObj?.firstName || CAIObj?.middleName || CAIObj?.lastName
                   ? `${CAIObj.firstName}${
-                    CAIObj.middleName === undefined || CAIObj.middleName === null || CAIObj.middleName === "" ? "" : ` ${CAIObj.middleName}`
-                  }${CAIObj.lastName === undefined ? "" : ` ${CAIObj.lastName}`}`
+                      CAIObj.middleName === undefined ||
+                      CAIObj.middleName === null ||
+                      CAIObj.middleName === ""
+                        ? ""
+                        : ` ${CAIObj.middleName}`
+                    }${CAIObj.lastName === undefined ? "" : ` ${CAIObj.lastName}`}`
                   : ""
               }
             >
@@ -167,8 +171,12 @@ const CustomerAccountInformation = ({
                 value={
                   CAIObj?.firstName || CAIObj?.middleName || CAIObj?.lastName
                     ? `${CAIObj.firstName}${
-                      CAIObj.middleName === undefined || CAIObj.middleName === null || CAIObj.middleName === "" ? "" : ` ${CAIObj.middleName}`
-                    }${CAIObj.lastName === undefined ? "" : ` ${CAIObj.lastName}`}`
+                        CAIObj.middleName === undefined ||
+                        CAIObj.middleName === null ||
+                        CAIObj.middleName === ""
+                          ? ""
+                          : ` ${CAIObj.middleName}`
+                      }${CAIObj.lastName === undefined ? "" : ` ${CAIObj.lastName}`}`
                     : ""
                 }
               />
@@ -330,7 +338,7 @@ const CustomerAccountInformation = ({
           ]}
           getValueFromEvent={(e) => handleCAIObj(e, "accountName")}
         >
-          <InputComponent onInput={onInputUpperCase}/>
+          <InputComponent onInput={onInputUpperCase} />
         </Form.Item>
         <Form.Item
           label={"Account Registration Number"}

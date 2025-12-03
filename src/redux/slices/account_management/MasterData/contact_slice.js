@@ -46,11 +46,11 @@ export const getContactPaginate = createAsyncThunk(
       //     thunkAPI.dispatch(showModalError(errorBody))
       // }
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_CONTACT_PAGINATE" })
+        validateError({ error: error, action: "GET_CONTACT_PAGINATE" }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadContact = createAsyncThunk(
@@ -65,11 +65,11 @@ export const downloadContact = createAsyncThunk(
       return response.data;
     } catch (response) {
       thunkAPI.dispatch(
-        validateError({ error: response, action: "DOWNLOAD_CONTACT" })
+        validateError({ error: response, action: "DOWNLOAD_CONTACT" }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getDetailContact = createAsyncThunk(
@@ -92,11 +92,11 @@ export const getDetailContact = createAsyncThunk(
       //     thunkAPI.dispatch(showModalError(errorBody))
       // }
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_DETAIL_CONTACT" })
+        validateError({ error: error, action: "GET_DETAIL_CONTACT" }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const createContact = createAsyncThunk(
   "CREATE_CONTACT",
@@ -115,11 +115,11 @@ export const createContact = createAsyncThunk(
         validateError({
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_CONTACT",
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const updateContact = createAsyncThunk(
   "UPDATE_CONTACT",
@@ -138,11 +138,11 @@ export const updateContact = createAsyncThunk(
         validateError({
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_CONTACT",
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const activationContact = createAsyncThunk(
   "ACTIVATION_CONTACT",
@@ -175,11 +175,11 @@ export const activationContact = createAsyncThunk(
       //     thunkAPI.dispatch(showModalError(errorBody));
       // }
       thunkAPI.dispatch(
-        validateError({ error: error, action: "ACTIVATION_CONTACT" })
+        validateError({ error: error, action: "ACTIVATION_CONTACT" }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListJob = createAsyncThunk(
@@ -206,11 +206,11 @@ export const getListJob = createAsyncThunk(
       //     thunkAPI.dispatch(showModalError(errorBody))
       // }
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_LIST_JOB" })
+        validateError({ error: error, action: "GET_LIST_JOB" }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getListPosition = createAsyncThunk(
   "GET_LIST_POSITION",
@@ -236,11 +236,11 @@ export const getListPosition = createAsyncThunk(
       //     thunkAPI.dispatch(showModalError(errorBody))
       // }
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_LIST_POSITION" })
+        validateError({ error: error, action: "GET_LIST_POSITION" }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getInputType = createAsyncThunk(
@@ -252,11 +252,11 @@ export const getInputType = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_INPUT_TYPE" })
+        validateError({ error: error, action: "GET_INPUT_TYPE" }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getContactType = createAsyncThunk(
@@ -268,11 +268,11 @@ export const getContactType = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_CONTACT_TYPE" })
+        validateError({ error: error, action: "GET_CONTACT_TYPE" }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCountryCode = createAsyncThunk(
@@ -284,11 +284,11 @@ export const getCountryCode = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_COUNTRY_CODE" })
+        validateError({ error: error, action: "GET_COUNTRY_CODE" }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getCountryZone = createAsyncThunk(
@@ -302,11 +302,11 @@ export const getCountryZone = createAsyncThunk(
       }
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_COUNTRY_ZONE" })
+        validateError({ error: error, action: "GET_COUNTRY_ZONE" }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const contactSlice = createSlice({
@@ -451,10 +451,10 @@ const contactSlice = createSlice({
       state.loading = false;
       state.data_country_zone = action.payload;
       const uniqueItems = new Set(
-        state.temp_country_zone?.map((item) => item.id)
+        state.temp_country_zone?.map((item) => item.id),
       );
       const filteredItems = action.payload.filter(
-        (item) => !uniqueItems.has(item.id)
+        (item) => !uniqueItems.has(item.id),
       );
       state.temp_country_zone = [...state?.temp_country_zone, ...filteredItems];
     },

@@ -23,13 +23,13 @@ export const getDelegationList = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_DELEGATION_LIST" })
+        validateError({ error: error, action: "GET_DELEGATION_LIST" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getDelegationDetail = createAsyncThunk(
@@ -41,13 +41,13 @@ export const getDelegationDetail = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_DELEGATION_DETAIL" })
+        validateError({ error: error, action: "GET_DELEGATION_DETAIL" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const approveRejectDelegation = createAsyncThunk(
@@ -70,12 +70,12 @@ export const approveRejectDelegation = createAsyncThunk(
           error: errorBody(errorCode(error), "submitted", errorMessage(error)),
           action: "APPROVE_REJECT_DELEGATION",
           back: false,
-        })
+        }),
       );
 
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getPositionDelegation = createAsyncThunk(
@@ -87,13 +87,13 @@ export const getPositionDelegation = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_POSITION_DELEGATION" })
+        validateError({ error: error, action: "GET_POSITION_DELEGATION" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getDelegateTo = createAsyncThunk(
@@ -107,13 +107,13 @@ export const getDelegateTo = createAsyncThunk(
       }
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_DELEGATE_TO" })
+        validateError({ error: error, action: "GET_DELEGATE_TO" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const createDelegation = createAsyncThunk(
@@ -134,12 +134,12 @@ export const createDelegation = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_DELEGATION",
           back: false,
-        })
+        }),
       );
 
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 const delegationSlice = createSlice({

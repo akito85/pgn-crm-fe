@@ -4,7 +4,15 @@ import { Form, Spin, Modal } from "antd";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import { convertToSnakeCase, dateFormatting, formMessageRequired, hasValue, renderDateConverter, requiredMessage, toTitleCase } from "../../../../../utils";
+import {
+  convertToSnakeCase,
+  dateFormatting,
+  formMessageRequired,
+  hasValue,
+  renderDateConverter,
+  requiredMessage,
+  toTitleCase,
+} from "../../../../../utils";
 import InputComponent from "../../../../../components/InputComponent";
 import SelectComponent from "../../../../../components/SelectComponent";
 import { useDispatch, useSelector } from "react-redux";
@@ -28,14 +36,17 @@ import {
   getSubDistrictList,
   updateLateCharge,
   getSorList,
-  getAccountCategoryList
+  getAccountCategoryList,
 } from "../../../../../redux/slices/account_management/MasterData/late_charges";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { LeftOutlined } from "@ant-design/icons";
 import ModalBack from "../../../../../components/Modal/ModalBack";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import { showModalError, validateCreateUpdate } from "../../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  validateCreateUpdate,
+} from "../../../../../redux/slices/general_slice";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import ContentModalConfirmLateCharge from "./ContentModalConfirmLateCharge";
 import moment from "moment";
@@ -60,14 +71,15 @@ const routes = (type) => [
   },
   {
     path: "",
-    breadcrumbName: `${type === "update" ? "Update Late Charge" : "Create Late Charge"
-      }`,
+    breadcrumbName: `${
+      type === "update" ? "Update Late Charge" : "Create Late Charge"
+    }`,
   },
 ];
 
 const FormLateCharges = ({ type }) => {
   const [form] = Form.useForm();
-  const [formCriteria] = Form.useForm()
+  const [formCriteria] = Form.useForm();
   const formValue = form.getFieldsValue();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -94,8 +106,8 @@ const FormLateCharges = ({ type }) => {
     premiseSubdistrictList = [],
   } = useSelector((state) => state.late_charge);
 
-  const { stored } = useSelector(state => state?.criteria_slice)
-  const { isLoading } = useSelector(state => state?.general)
+  const { stored } = useSelector((state) => state?.criteria_slice);
+  const { isLoading } = useSelector((state) => state?.general);
   const [criteriaValues, setCriteriaValues] = useState([]);
   const [description, setDescription] = useState("");
   const [dataListCriteria, setDataListCriteria] = useState([]);
@@ -107,8 +119,8 @@ const FormLateCharges = ({ type }) => {
   const [modalSuccessCreate, setModalSuccessCreate] = useState(false);
   const [payload, setPayload] = useState(true);
   const [idCreateRule, setIdCreateRule] = useState(null);
-  const [columnCriteria, setColumnCriteria] = useState([])
-  const { setDataIndex } = useCriteriaHooks()
+  const [columnCriteria, setColumnCriteria] = useState([]);
+  const { setDataIndex } = useCriteriaHooks();
   const [dataTable, setDataTable] = useState([]);
   const [editDataRecord, setEditDataRecord] = useState({});
   const sorterColumnOption = useMemo(() => {
@@ -131,15 +143,20 @@ const FormLateCharges = ({ type }) => {
       "accountNumber",
     ];
     if (hasValue(dataListCriteriaOpt) && Array?.isArray(dataListCriteriaOpt)) {
-      const mappingOption = dataListCriteriaOpt?.map(item => ({ ...item, code: setDataIndex(item?.code) }))
-      return [...mappingOption].sort((a, b) => orderedCodes.indexOf(a.code) - orderedCodes.indexOf(b.code));
+      const mappingOption = dataListCriteriaOpt?.map((item) => ({
+        ...item,
+        code: setDataIndex(item?.code),
+      }));
+      return [...mappingOption].sort(
+        (a, b) => orderedCodes.indexOf(a.code) - orderedCodes.indexOf(b.code),
+      );
     } else {
-      return []
+      return [];
     }
-  }, [dataListCriteriaOpt, setDataIndex])
+  }, [dataListCriteriaOpt, setDataIndex]);
 
-// console.log(sorList, ' sor lis');
-// console.log(costCenterList, ' sor lis');
+  // console.log(sorList, ' sor lis');
+  // console.log(costCenterList, ' sor lis');
 
   useEffect(() => {
     if (type === "update" && id) {
@@ -149,8 +166,8 @@ const FormLateCharges = ({ type }) => {
 
   useEffect(() => {
     if (type === "update" && data_detail?.lateChargeId === id) {
-      const dataIndexList = dataListCriteriaOpt?.map(
-        (item) => setDataIndex(item?.code)
+      const dataIndexList = dataListCriteriaOpt?.map((item) =>
+        setDataIndex(item?.code),
       );
       const criteriaData = (data_detail?.lateChargeCriterias || [])
         .filter((data) => data?.allCriteria !== true)
@@ -158,9 +175,11 @@ const FormLateCharges = ({ type }) => {
           let obj = { typeData: "exist", key: index + 1 };
           for (const attr in item) {
             if (dataIndexList.includes(attr)) {
-              if (attr === 'startDate' || attr === 'endDate') {
-                obj[attr] = hasValue(item[attr]) ? moment(item[attr]).format(dateFormatting.date) : null;
-              } else if (attr === 'description') {
+              if (attr === "startDate" || attr === "endDate") {
+                obj[attr] = hasValue(item[attr])
+                  ? moment(item[attr]).format(dateFormatting.date)
+                  : null;
+              } else if (attr === "description") {
                 obj[attr] = hasValue(item[attr]) ? item[attr] : null;
               } else {
                 obj[attr] = {
@@ -180,7 +199,7 @@ const FormLateCharges = ({ type }) => {
         description: data_detail.description,
         criteria: (data_detail.criteria || []).map((item) => item.value),
       };
-      setDataTable(criteriaData)
+      setDataTable(criteriaData);
       setDataListCriteria(criteriaData);
       setDescription(obj.description);
       setCriteriaValues(obj.criteria);
@@ -189,40 +208,50 @@ const FormLateCharges = ({ type }) => {
   }, [type, id, data_detail, form, dataListCriteriaOpt, setDataIndex]);
 
   useEffect(() => {
-    dispatch(setStored(false))
+    dispatch(setStored(false));
     dispatch(getSelectCriteria());
     dispatch(getSelectCurrency());
   }, []);
 
-
-  const reorderedDTO = useCallback((dataTable) => {
-    if (hasValue(dataTable) && Array?.isArray(dataTable)) {
-      const filteredSelectCriteria = dataListCriteriaOpt?.filter(item => criteriaValues?.includes(item?.value))?.map(item => ({ code: item?.code }))
-      const reorderedDataDTO = dataTable.map(dto => {
-        let orderedDTO = {
-          id: hasValue(dto?.id) ? dto?.id : null,
-          startDate: hasValue(dto.startDate) ? renderDateConverter(dto?.startDate, 'date') : null,
-          endDate: hasValue(dto.endDate) ? renderDateConverter(dto?.endDate, 'date') : null,
-          description: hasValue(dto.description) ? dto?.description : null
-        };
-        dataListCriteriaOpt.forEach(({ code }) => {
-          const prop = constantKeys[code];
-          const isCriteriaSelected = filteredSelectCriteria.some(item => constantKeys[item.code] === prop);
-          if (!isCriteriaSelected || hasValue(dto[prop]) === false) {
-            orderedDTO[prop] = null;
-          } else if (typeof dto[prop] === 'object' && hasValue(dto[prop])) {
-            orderedDTO[prop] = dto[prop]?.value;
-          } else {
-            orderedDTO[prop] = dto[prop];
-          }
+  const reorderedDTO = useCallback(
+    (dataTable) => {
+      if (hasValue(dataTable) && Array?.isArray(dataTable)) {
+        const filteredSelectCriteria = dataListCriteriaOpt
+          ?.filter((item) => criteriaValues?.includes(item?.value))
+          ?.map((item) => ({ code: item?.code }));
+        const reorderedDataDTO = dataTable.map((dto) => {
+          let orderedDTO = {
+            id: hasValue(dto?.id) ? dto?.id : null,
+            startDate: hasValue(dto.startDate)
+              ? renderDateConverter(dto?.startDate, "date")
+              : null,
+            endDate: hasValue(dto.endDate)
+              ? renderDateConverter(dto?.endDate, "date")
+              : null,
+            description: hasValue(dto.description) ? dto?.description : null,
+          };
+          dataListCriteriaOpt.forEach(({ code }) => {
+            const prop = constantKeys[code];
+            const isCriteriaSelected = filteredSelectCriteria.some(
+              (item) => constantKeys[item.code] === prop,
+            );
+            if (!isCriteriaSelected || hasValue(dto[prop]) === false) {
+              orderedDTO[prop] = null;
+            } else if (typeof dto[prop] === "object" && hasValue(dto[prop])) {
+              orderedDTO[prop] = dto[prop]?.value;
+            } else {
+              orderedDTO[prop] = dto[prop];
+            }
+          });
+          return orderedDTO;
         });
-        return orderedDTO;
-      });
-      return reorderedDataDTO
-    } else {
-      return [];
-    }
-  }, [criteriaValues, dataListCriteriaOpt]);
+        return reorderedDataDTO;
+      } else {
+        return [];
+      }
+    },
+    [criteriaValues, dataListCriteriaOpt],
+  );
 
   const handleSelectCriteria = (value) => {
     let res = [...criteriaValues, value];
@@ -281,21 +310,18 @@ const FormLateCharges = ({ type }) => {
   const handleSubmitForm = async (valueForm) => {
     try {
       if (storedDataInline) {
-        
         const errorBody = {
           title: "Failed",
           description: `Please save data table inline before submit. Please try again.`,
         };
         dispatch(showModalError(errorBody));
       } else if (dataTable.length === 0 && !criteriaValues.includes(255)) {
-        
         const errorBody = {
           title: "Failed",
           description: `List Data Late Charge Criteria at least 1 data . Please try again.`,
         };
         dispatch(showModalError(errorBody));
       } else {
-
         let validateValueObj;
         const includesAll = formValue.criteria.includes(24);
         const lateChargeCriterias = formValue.criteria.map((item) => {
@@ -305,7 +331,7 @@ const FormLateCharges = ({ type }) => {
             dataDefault = tempData.filter((data) => data.value === item);
           }
           const itemName = dataListCriteriaOpt.filter(
-            (criteria) => criteria.value === item
+            (criteria) => criteria.value === item,
           );
           return {
             id: dataDefault.length > 0 ? dataDefault[0].id : null,
@@ -326,26 +352,26 @@ const FormLateCharges = ({ type }) => {
             : reorderedDTO(dataTable),
         };
         setPayload(body);
-        if (type === 'update') {
+        if (type === "update") {
           validateValueObj = {
             body: body,
             services: accountManagementService,
-            endPoint: '/v1/dbs/api/master/late-charge/validate-update-header',
-            type
-          }
+            endPoint: "/v1/dbs/api/master/late-charge/validate-update-header",
+            type,
+          };
         } else {
           validateValueObj = {
             body: body,
             services: accountManagementService,
-            endPoint: '/v1/dbs/api/master/late-charge/validate-create-master',
-            type
-          }
+            endPoint: "/v1/dbs/api/master/late-charge/validate-create-master",
+            type,
+          };
         }
         await dispatch(validateCreateUpdate(validateValueObj))?.unwrap();
         setModalConfirm(true);
       }
     } catch (error) {
-      setModalConfirm(false)
+      setModalConfirm(false);
     }
   };
 
@@ -376,8 +402,8 @@ const FormLateCharges = ({ type }) => {
           handleCancelModalConfirm();
           handleClear();
           if (data) {
-            setIdCreateRule(data?.masterLateCharge?.id)
-            setModalSuccessCreate(true)
+            setIdCreateRule(data?.masterLateCharge?.id);
+            setModalSuccessCreate(true);
           }
         })
         ?.catch((error) => {
@@ -411,13 +437,12 @@ const FormLateCharges = ({ type }) => {
           }
         });
     }
-    setDataTable([])
+    setDataTable([]);
   };
-
 
   const formatCriteria = (data) => {
     const tempArray = dataListCriteriaOpt.filter((item) =>
-      data.includes(item.value)
+      data.includes(item.value),
     );
     return tempArray.map((data) => data.label);
   };
@@ -436,17 +461,17 @@ const FormLateCharges = ({ type }) => {
   const conditionalDispatcher = useCallback((dataIndex) => {
     switch (dataIndex) {
       case "premiseCountry":
-        return getCountryList()
+        return getCountryList();
       case "costCenter":
-        return getCostCenterList()
+        return getCostCenterList();
       case "accountNumber":
-        return getAccountNumberList()
+        return getAccountNumberList();
       case "classificationType":
-        return getClassificationTypeList()
+        return getClassificationTypeList();
       case "accountSegment":
-        return getAccountSegment()
+        return getAccountSegment();
       case "saType":
-        return getSATypeList()
+        return getSATypeList();
       case "accountType":
         return getAccountTypeList();
       case "sor":
@@ -454,201 +479,232 @@ const FormLateCharges = ({ type }) => {
       case "accountCategory":
         return getAccountCategoryList();
       default:
-        return null
+        return null;
     }
-  }, [])
+  }, []);
 
   // conditional depend column
   const conditionalDependendData = useCallback((dataIndex) => {
     switch (dataIndex) {
       case "premiseProvince":
-        return "premiseCountry"
+        return "premiseCountry";
       case "premiseCity":
-        return "premiseProvince"
+        return "premiseProvince";
       case "accountGroupType":
-        return "accountSegment"
+        return "accountSegment";
       case "premiseDistrict":
         return "premiseCity";
       case "premiseSubdistrict":
         return "premiseDistrict";
       default:
-        return null
+        return null;
     }
   }, []);
 
-
   // conditional option
-  const conditionalOption = useCallback((dataIndex) => {
-    switch (dataIndex) {
-      case "saType":
-        return saTypeList
-      case "wapuFlag":
-        return [
-          { label: "Yes", value: true },
-          { label: "No", value: false },
-        ];
-      case "accountNumber":
-        return accountNumberList;
-      case "costCenter":
-        return costCenterList?.map(item => ({ value: item?.id, label: item?.text, key: item?.code }));
-      case "premiseProvince":
-        return premiseProvinceList;
-      case "accountSegment":
-        return accountSegmentList;
-      case "premiseCity":
-        return premiseCityList;
-      case "premiseCountry":
-        return premiseCountryList;
-      case "corporateFlag":
-        return [
-          { label: "Yes", value: true },
-          { label: "No", value: false },
-        ];
-      case "accountType":
-        return accountTypeList;
-      case "accountGroupType":
-        return accountGroupTypeList;
-      case "premiseSubdistrict":
-        return premiseSubdistrictList;
-      case "premiseDistrict":
-        return premiseDistrictList;
-      case "sor":
-        return sorList?.map(item => ({value:item?.id, label:item?.text, key:item?.code}));
-      case "accountCategory":
-        return accountCategoryList?.map(item => ({ value: item?.id, label: item?.text, key: item?.code }));
-      case "classificationType":
-        return classificationTypeList;
+  const conditionalOption = useCallback(
+    (dataIndex) => {
+      switch (dataIndex) {
+        case "saType":
+          return saTypeList;
+        case "wapuFlag":
+          return [
+            { label: "Yes", value: true },
+            { label: "No", value: false },
+          ];
+        case "accountNumber":
+          return accountNumberList;
+        case "costCenter":
+          return costCenterList?.map((item) => ({
+            value: item?.id,
+            label: item?.text,
+            key: item?.code,
+          }));
+        case "premiseProvince":
+          return premiseProvinceList;
+        case "accountSegment":
+          return accountSegmentList;
+        case "premiseCity":
+          return premiseCityList;
+        case "premiseCountry":
+          return premiseCountryList;
+        case "corporateFlag":
+          return [
+            { label: "Yes", value: true },
+            { label: "No", value: false },
+          ];
+        case "accountType":
+          return accountTypeList;
+        case "accountGroupType":
+          return accountGroupTypeList;
+        case "premiseSubdistrict":
+          return premiseSubdistrictList;
+        case "premiseDistrict":
+          return premiseDistrictList;
+        case "sor":
+          return sorList?.map((item) => ({
+            value: item?.id,
+            label: item?.text,
+            key: item?.code,
+          }));
+        case "accountCategory":
+          return accountCategoryList?.map((item) => ({
+            value: item?.id,
+            label: item?.text,
+            key: item?.code,
+          }));
+        case "classificationType":
+          return classificationTypeList;
 
-      default:
-        return null
-    }
-  }, [accountCategoryList, accountGroupTypeList, accountNumberList, accountSegmentList, accountTypeList, classificationTypeList, costCenterList, premiseCityList, premiseCountryList, premiseDistrictList, premiseProvinceList, premiseSubdistrictList, saTypeList, sorList]);
+        default:
+          return null;
+      }
+    },
+    [
+      accountCategoryList,
+      accountGroupTypeList,
+      accountNumberList,
+      accountSegmentList,
+      accountTypeList,
+      classificationTypeList,
+      costCenterList,
+      premiseCityList,
+      premiseCountryList,
+      premiseDistrictList,
+      premiseProvinceList,
+      premiseSubdistrictList,
+      saTypeList,
+      sorList,
+    ],
+  );
   // console.log(accountCategoryList);
 
-  const conditionalDispatch = useCallback((record) => {
-    if (record?.premiseCountry && record?.premiseCountry?.value) {
-      dispatch(getProvinceList(record?.premiseCountry?.value));
-    }
-    if (record?.premiseProvince && record?.premiseProvince?.value) {
-      dispatch(getCityList(record?.premiseProvince?.value));
-    }
-    if (record?.premiseCity && record?.premiseCity?.value) {
-      dispatch(getDistrictList(record?.premiseCity?.value));
-    }
-    if (record?.premiseDistrict && record?.premiseDistrict?.value) {
-      dispatch(getSubDistrictList(record?.premiseDistrict?.value));
-    }
-    if (record?.accountSegment && record?.accountSegment?.value) {
-      dispatch(getAccountGroupList(record?.accountSegment?.value));
-    }
-  }, [dispatch]);
+  const conditionalDispatch = useCallback(
+    (record) => {
+      if (record?.premiseCountry && record?.premiseCountry?.value) {
+        dispatch(getProvinceList(record?.premiseCountry?.value));
+      }
+      if (record?.premiseProvince && record?.premiseProvince?.value) {
+        dispatch(getCityList(record?.premiseProvince?.value));
+      }
+      if (record?.premiseCity && record?.premiseCity?.value) {
+        dispatch(getDistrictList(record?.premiseCity?.value));
+      }
+      if (record?.premiseDistrict && record?.premiseDistrict?.value) {
+        dispatch(getSubDistrictList(record?.premiseDistrict?.value));
+      }
+      if (record?.accountSegment && record?.accountSegment?.value) {
+        dispatch(getAccountGroupList(record?.accountSegment?.value));
+      }
+    },
+    [dispatch],
+  );
 
-  const handleEditDataRecord = useCallback((data, key, index) => {
-    const keyName = key + index;
-    setEditDataRecord((prevState) => {
-      return {
-        ...prevState,
-        [keyName]: data,
-      };
-    });
-    if (index === "premiseCountry") {
-      dispatch(getProvinceList(data));
-      formCriteria.resetFields([
-        "premiseProvince",
-        "premiseCity",
-        "premiseDistrict",
-        "premiseSubdistrict",
-      ]);
+  const handleEditDataRecord = useCallback(
+    (data, key, index) => {
+      const keyName = key + index;
       setEditDataRecord((prevState) => {
         return {
           ...prevState,
-          [key + "premiseProvince"]: undefined,
-          [key + "premiseCity"]: undefined,
-          [key + "premiseDistrict"]: undefined,
-          [key + "premiseSubdistrict"]: undefined,
+          [keyName]: data,
         };
       });
-    }
-    if (index === `premiseProvince`) {
-      dispatch(getCityList(data));
-      formCriteria.resetFields([
-        "premiseCity",
-        "premiseDistrict",
-        "premiseSubdistrict",
-      ]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "premiseCity"]: undefined,
-          [key + "premiseDistrict"]: undefined,
-          [key + "premiseSubdistrict"]: undefined,
-        };
-      });
-    }
-    if (index === `premiseCity`) {
-      dispatch(getDistrictList(data));
-      formCriteria.resetFields([
-        "premiseDistrict",
-        "premiseSubdistrict",]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "premiseDistrict"]: undefined,
-          [key + "premiseSubdistrict"]: undefined,
-        };
-      });
-    }
-    if (index === `premiseDistrict`) {
-      dispatch(getSubDistrictList(data));
-      formCriteria.resetFields(["premiseSubdistrict"]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "premiseSubdistrict"]: undefined,
-        };
-      });
-    }
-    if (index === `accountSegment`) {
-      dispatch(getAccountGroupList(data));
-      formCriteria.resetFields(["accountGroupType"]);
-      setEditDataRecord((prevState) => {
-        return {
-          ...prevState,
-          [key + "accountGroupType"]: undefined,
-        };
-      });
-    }
-  }, [dispatch, formCriteria, setEditDataRecord]);
+      if (index === "premiseCountry") {
+        dispatch(getProvinceList(data));
+        formCriteria.resetFields([
+          "premiseProvince",
+          "premiseCity",
+          "premiseDistrict",
+          "premiseSubdistrict",
+        ]);
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [key + "premiseProvince"]: undefined,
+            [key + "premiseCity"]: undefined,
+            [key + "premiseDistrict"]: undefined,
+            [key + "premiseSubdistrict"]: undefined,
+          };
+        });
+      }
+      if (index === `premiseProvince`) {
+        dispatch(getCityList(data));
+        formCriteria.resetFields([
+          "premiseCity",
+          "premiseDistrict",
+          "premiseSubdistrict",
+        ]);
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [key + "premiseCity"]: undefined,
+            [key + "premiseDistrict"]: undefined,
+            [key + "premiseSubdistrict"]: undefined,
+          };
+        });
+      }
+      if (index === `premiseCity`) {
+        dispatch(getDistrictList(data));
+        formCriteria.resetFields(["premiseDistrict", "premiseSubdistrict"]);
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [key + "premiseDistrict"]: undefined,
+            [key + "premiseSubdistrict"]: undefined,
+          };
+        });
+      }
+      if (index === `premiseDistrict`) {
+        dispatch(getSubDistrictList(data));
+        formCriteria.resetFields(["premiseSubdistrict"]);
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [key + "premiseSubdistrict"]: undefined,
+          };
+        });
+      }
+      if (index === `accountSegment`) {
+        dispatch(getAccountGroupList(data));
+        formCriteria.resetFields(["accountGroupType"]);
+        setEditDataRecord((prevState) => {
+          return {
+            ...prevState,
+            [key + "accountGroupType"]: undefined,
+          };
+        });
+      }
+    },
+    [dispatch, formCriteria, setEditDataRecord],
+  );
 
-
-  const handleSetCriteria = useCallback((dataCriteria) => {
-    if (hasValue(dataCriteria) && Array?.isArray(dataCriteria)) {
-      setColumnCriteria(dataCriteria?.map((item, index) => (
-        {
-          required: true,
-          title: item?.label?.toUpperCase(),
-          dataIndex: item?.code,
-          indexValue: item?.value,
-          inputType: 'select',
-          url: conditionalDispatcher(item?.code),
-          dataIndexFrom: 'data_' + convertToSnakeCase(item?.code),
-          option: conditionalOption(item?.code),
-          dependDataIndex: conditionalDependendData(item?.code),
-          rules: formMessageRequired(toTitleCase(item?.label), true),
-        }
-      )))
-    }
-  }, [conditionalDependendData, conditionalDispatcher, conditionalOption]);
-
+  const handleSetCriteria = useCallback(
+    (dataCriteria) => {
+      if (hasValue(dataCriteria) && Array?.isArray(dataCriteria)) {
+        setColumnCriteria(
+          dataCriteria?.map((item, index) => ({
+            required: true,
+            title: item?.label?.toUpperCase(),
+            dataIndex: item?.code,
+            indexValue: item?.value,
+            inputType: "select",
+            url: conditionalDispatcher(item?.code),
+            dataIndexFrom: "data_" + convertToSnakeCase(item?.code),
+            option: conditionalOption(item?.code),
+            dependDataIndex: conditionalDependendData(item?.code),
+            rules: formMessageRequired(toTitleCase(item?.label), true),
+          })),
+        );
+      }
+    },
+    [conditionalDependendData, conditionalDispatcher, conditionalOption],
+  );
 
   useEffect(() => {
     if (sorterColumnOption) {
-      handleSetCriteria(sorterColumnOption)
+      handleSetCriteria(sorterColumnOption);
     }
-
   }, [sorterColumnOption, handleSetCriteria]);
-
-
 
   return (
     <LayoutMenu>
@@ -681,7 +737,10 @@ const FormLateCharges = ({ type }) => {
                 label={"Currency"}
                 required
               >
-                <SelectComponent disabled={type === "update"} options={dataListCurrency} />
+                <SelectComponent
+                  disabled={type === "update"}
+                  options={dataListCurrency}
+                />
               </Form.Item>
 
               <div className="col-span-3">
@@ -727,13 +786,18 @@ const FormLateCharges = ({ type }) => {
               setUpdateDataTable={setDataTable}
               type={type}
               startDateHeader={moment()}
-              defaultColumn={['no', 'startDate', 'endDate', 'description', 'action']}
+              defaultColumn={[
+                "no",
+                "startDate",
+                "endDate",
+                "description",
+                "action",
+              ]}
               handleEditDataRecord={handleEditDataRecord}
               setEditDataRecord={setEditDataRecord}
               editDataRecord={editDataRecord}
               conditionalDispatcher={conditionalDispatch}
               checkStartDate={false}
-
             />
           </BaseContainer>
           <div className="flex w-full justify-between align-middle my-3">
@@ -766,7 +830,6 @@ const FormLateCharges = ({ type }) => {
                 type="submit"
                 disabled={stored}
                 onClick={storedDataInline ? undefined : handleClear}
-
               >
                 {type === "update" ? "Reset" : "Clear"}
               </ButtonComponent>
@@ -831,19 +894,20 @@ const FormLateCharges = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${type === "update" ? "updated" : "created"
-              }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              type === "update" ? "updated" : "created"
+            }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
 
         {/* Modal Success create late charge */}
-        {modalSuccessCreate ?
+        {modalSuccessCreate ? (
           <Modal
             open={modalSuccessCreate}
             onCancel={() => {
-              setModalSuccessCreate(false)
-              navigate(-1)
+              setModalSuccessCreate(false);
+              navigate(-1);
             }}
             className={"modal-custom"}
             centered={true}
@@ -853,8 +917,8 @@ const FormLateCharges = ({ type }) => {
               <div className="w-full flex justify-end gap-5 p-4">
                 <ButtonComponent
                   onClick={() => {
-                    setModalSuccessCreate(false)
-                    navigate(-1)
+                    setModalSuccessCreate(false);
+                    navigate(-1);
                   }}
                   type="default"
                 >
@@ -865,11 +929,8 @@ const FormLateCharges = ({ type }) => {
                   state={{
                     lateChargeId: idCreateRule,
                   }}
-
                 >
-                  <ButtonComponent type="submit">
-                    YES
-                  </ButtonComponent>
+                  <ButtonComponent type="submit">YES</ButtonComponent>
                 </Link>
               </div>
             }
@@ -884,8 +945,7 @@ const FormLateCharges = ({ type }) => {
               </div>
             </div>
           </Modal>
-          : null}
-
+        ) : null}
       </Spin>
     </LayoutMenu>
   );

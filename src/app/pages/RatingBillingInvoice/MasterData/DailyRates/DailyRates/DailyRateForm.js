@@ -167,7 +167,7 @@ const DailyRateForm = ({ type }) => {
         apphierId: appHier,
       });
     },
-    [form]
+    [form],
   );
 
   const asserDataDetailDraft = useCallback(
@@ -208,7 +208,7 @@ const DailyRateForm = ({ type }) => {
         description: data_detail_draft?.description,
       });
     },
-    [form]
+    [form],
   );
 
   useEffect(() => {
@@ -303,7 +303,7 @@ const DailyRateForm = ({ type }) => {
   const handleMandatory = (
     setListSectionInfo = () => {},
     listDataAttachment,
-    errorFields
+    errorFields,
   ) => {
     setListSectionInfo((prevState) => {
       const res = prevState.map((item) => {
@@ -314,11 +314,11 @@ const DailyRateForm = ({ type }) => {
                   item.paramValue.includes(next.name[0])
                     ? current + 1
                     : current,
-                0
+                0,
               )
             : listDataAttachment.length < 1
-            ? 1
-            : 0;
+              ? 1
+              : 0;
         return {
           value: item.value,
           paramValue: item.paramValue,
@@ -368,7 +368,7 @@ const DailyRateForm = ({ type }) => {
       fCurrencyName,
       rTypeName,
       tCurrencyName,
-      type
+      type,
     });
 
     try {
@@ -378,7 +378,7 @@ const DailyRateForm = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -438,7 +438,7 @@ const DailyRateForm = ({ type }) => {
           fromCurrency: formValue?.fCurrency,
           toCurrency: formValue?.tCurrency,
           rateDate: moment(formValue?.rateDate).format(
-            dateFormatting.dateCapital
+            dateFormatting.dateCapital,
           ),
           convertedRate: formValue?.convertedRate,
           description: formValue?.description,
@@ -484,7 +484,7 @@ const DailyRateForm = ({ type }) => {
       fCurrencyName,
       rTypeName,
       tCurrencyName,
-      type
+      type,
     });
     // const body = {
     //   ...kirimBody,
@@ -498,7 +498,6 @@ const DailyRateForm = ({ type }) => {
     //   rateTypeName: rTypeName,
     //   convertedRateName: kirimBody?.convertedRate,
     // };
-
 
     if (type !== "update") {
       dispatch(createMasterDailyRates(body))
@@ -515,7 +514,7 @@ const DailyRateForm = ({ type }) => {
             };
             const response = await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/daily-rate/upload-attachment`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -545,7 +544,7 @@ const DailyRateForm = ({ type }) => {
         .then(async () => {
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
@@ -556,7 +555,7 @@ const DailyRateForm = ({ type }) => {
             };
             const response = await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/daily-rate/upload-attachment`,
-              body
+              body,
             );
           }
           setLoadingForm(false);

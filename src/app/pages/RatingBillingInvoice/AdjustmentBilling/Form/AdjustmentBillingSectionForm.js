@@ -29,17 +29,17 @@ const AdjustmentBillingSectionForm = ({
   idInvoice,
   setIdInvoice,
   dataInvoice = {},
-  setDataInvoice = () => { },
+  setDataInvoice = () => {},
   form,
   listDataABI = [],
-  setListDataABI = () => { },
+  setListDataABI = () => {},
   adjustmentId,
   cycleId,
   setCycleId,
   billingPeriodId,
   setBillingPeriodId,
-  setRangeDisableDate = () => { },
-  rangeDisableDate
+  setRangeDisableDate = () => {},
+  rangeDisableDate,
 }) => {
   // Selector
   const {
@@ -85,7 +85,14 @@ const AdjustmentBillingSectionForm = ({
   }, [dispatch, cycleId, form]);
 
   useEffect(() => {
-    if (idAccount && cycleId && billingPeriodId && dataListAccount && dataListBillingCycle && dataListBillingPeriod) {
+    if (
+      idAccount &&
+      cycleId &&
+      billingPeriodId &&
+      dataListAccount &&
+      dataListBillingCycle &&
+      dataListBillingPeriod
+    ) {
       const getFilteredData = (dataList, id) => {
         return dataList?.find((v) => v.id === id);
       };
@@ -98,7 +105,7 @@ const AdjustmentBillingSectionForm = ({
       const dataCycle = getFilteredData(dataListBillingCycle, cycleId);
       const dataBillingPeriod = getFilteredData(
         dataListBillingPeriod,
-        billingPeriodId
+        billingPeriodId,
       );
       const params = {
         accountNumber: dataAccount?.accountNumber,
@@ -108,12 +115,20 @@ const AdjustmentBillingSectionForm = ({
 
       dispatch(getListInvoice({ body: params }));
     }
-  }, [dispatch, idAccount, cycleId, billingPeriodId, dataListAccount, dataListBillingCycle, dataListBillingPeriod]);
+  }, [
+    dispatch,
+    idAccount,
+    cycleId,
+    billingPeriodId,
+    dataListAccount,
+    dataListBillingCycle,
+    dataListBillingPeriod,
+  ]);
 
   useEffect(() => {
     if (idAccount && idAccount !== 0) {
       const dataAccount = dataListAccount?.filter(
-        (v) => v.accountId === idAccount
+        (v) => v.accountId === idAccount,
       )[0];
 
       form.setFieldsValue({
@@ -174,7 +189,7 @@ const AdjustmentBillingSectionForm = ({
   //     setBillingPeriodId();
   //     setIdInvoice();
   //     form.resetFields(["billingPeriod", "referenceInvoiceNumber"]);
-  //   } 
+  //   }
   // }, [form, billingPeriodId, cycleId]);
 
   useEffect(() => {
@@ -182,7 +197,7 @@ const AdjustmentBillingSectionForm = ({
       setDataInvoice(dataListInvoiceInformation);
 
       const dataTOP = dataListInvoice?.find(
-        (item) => item.invoiceNumber === idInvoice
+        (item) => item.invoiceNumber === idInvoice,
       );
 
       form.setFieldsValue({
@@ -196,21 +211,22 @@ const AdjustmentBillingSectionForm = ({
 
   useEffect(() => {
     if (hasValue(billingPeriodId)) {
-      const findPeriod = dataListBillingPeriod?.find(item => item?.id === billingPeriodId);
+      const findPeriod = dataListBillingPeriod?.find(
+        (item) => item?.id === billingPeriodId,
+      );
       setRangeDisableDate({
         startDate: findPeriod?.startDate,
-        endDate: findPeriod?.endDate
-      })
+        endDate: findPeriod?.endDate,
+      });
     }
-  }, [billingPeriodId, dataListBillingPeriod, setRangeDisableDate])
+  }, [billingPeriodId, dataListBillingPeriod, setRangeDisableDate]);
 
   useEffect(() => {
     if (hasValue(rangeDisableDate?.startDate)) {
-      setDefaultPicker(moment(rangeDisableDate?.startDate)?.clone())
-      setKeyPicker(prev => prev + 1)
+      setDefaultPicker(moment(rangeDisableDate?.startDate)?.clone());
+      setKeyPicker((prev) => prev + 1);
     }
   }, [rangeDisableDate?.startDate]);
-
 
   const onChangeAccountNumber = (e) => {
     setIdAccount(e || undefined);
@@ -230,8 +246,6 @@ const AdjustmentBillingSectionForm = ({
     return e;
   };
 
-
-
   const onChangeBillingPeriod = (e) => {
     setBillingPeriodId(e || undefined);
     setIdInvoice();
@@ -245,7 +259,7 @@ const AdjustmentBillingSectionForm = ({
     .map((a) => a.adjustmentAmount);
   const sumIDR = dataIDR.reduce(
     (accumulator, currentValue) => accumulator + currentValue,
-    0
+    0,
   );
 
   // Sum Total Adjustment USD
@@ -254,20 +268,24 @@ const AdjustmentBillingSectionForm = ({
     .map((a) => a.adjustmentAmount);
   const sumUSD = dataUSD.reduce(
     (accumulator, currentValue) => accumulator + currentValue,
-    0
+    0,
   );
 
   // Sum Total Adjustment EQV IDR
-  let dataEqvIdr = sumIDR + sumUSD * dataInvoice?.rate
+  let dataEqvIdr = sumIDR + sumUSD * dataInvoice?.rate;
 
   // Sum Total Adjustment EQV USD
   let dataEqvUSD = sumUSD + sumIDR / dataInvoice?.rate;
 
-  const disabledRangeDate = useCallback((current) => {
-    return current < moment(rangeDisableDate?.startDate) || current > moment(rangeDisableDate?.endDate).add(1, 'days')
-  }, [rangeDisableDate]);
-
-  
+  const disabledRangeDate = useCallback(
+    (current) => {
+      return (
+        current < moment(rangeDisableDate?.startDate) ||
+        current > moment(rangeDisableDate?.endDate).add(1, "days")
+      );
+    },
+    [rangeDisableDate],
+  );
 
   return (
     <div>
@@ -398,7 +416,7 @@ const AdjustmentBillingSectionForm = ({
               onChange={onChangeBillingPeriod}
               disabled={
                 !form.getFieldValue().billingCycle ||
-                  !form.getFieldValue().accountNumberWithName
+                !form.getFieldValue().accountNumberWithName
                   ? true
                   : false
               }
@@ -423,8 +441,8 @@ const AdjustmentBillingSectionForm = ({
               onChange={handleChangeInvoice}
               disabled={
                 !form.getFieldValue().accountNumberWithName ||
-                  !form.getFieldValue().billingCycle ||
-                  !form.getFieldValue().billingPeriod
+                !form.getFieldValue().billingCycle ||
+                !form.getFieldValue().billingPeriod
                   ? true
                   : false
               }
@@ -460,12 +478,15 @@ const AdjustmentBillingSectionForm = ({
               { required: true, message: "Please input your Document Date!" },
             ]}
           >
-            <DatePicker format={dateFormatting?.date} style={{
-              borderRadius: "6px",
-              boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-              padding: "4px 12px",
-            }}
-              className="w-full" />
+            <DatePicker
+              format={dateFormatting?.date}
+              style={{
+                borderRadius: "6px",
+                boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+                padding: "4px 12px",
+              }}
+              className="w-full"
+            />
           </Form.Item>
 
           <Form.Item
@@ -478,7 +499,11 @@ const AdjustmentBillingSectionForm = ({
               },
             ]}
           >
-            <DateComponent dateDisable={disabledRangeDate} defaultPickerValue={defaultPicker} key={keyPicker} />
+            <DateComponent
+              dateDisable={disabledRangeDate}
+              defaultPickerValue={defaultPicker}
+              key={keyPicker}
+            />
           </Form.Item>
 
           <Form.Item
@@ -488,7 +513,11 @@ const AdjustmentBillingSectionForm = ({
               { required: true, message: "Please input your Accounting Date!" },
             ]}
           >
-            <DateComponent dateDisable={disabledRangeDate} defaultPickerValue={defaultPicker} key={keyPicker} />
+            <DateComponent
+              dateDisable={disabledRangeDate}
+              defaultPickerValue={defaultPicker}
+              key={keyPicker}
+            />
           </Form.Item>
 
           <div className="col-span-2">

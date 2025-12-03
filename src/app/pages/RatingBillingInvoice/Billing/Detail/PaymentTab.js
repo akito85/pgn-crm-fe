@@ -72,7 +72,7 @@ const PaymentTab = ({ billingCodeId, calculationCodeId }) => {
       searchedColumn,
       searchText,
       handleSearch,
-      search
+      search,
     );
   }, [page, pageSize, searchedColumn, searchText, search]);
 
@@ -101,7 +101,7 @@ const PaymentTab = ({ billingCodeId, calculationCodeId }) => {
         <h3 className="text-sm font-bold text-primary uppercase mb-4">
           Payment Information
         </h3>
-        
+
         <div className="grid grid-cols-2 gap-x-8 gap-y-4">
           {/* Left Column */}
           <div className="space-y-4">
@@ -111,21 +111,27 @@ const PaymentTab = ({ billingCodeId, calculationCodeId }) => {
                 {calculationCodeId || "-"}
               </p>
             </div>
-            
+
             <div>
-              <p className="text-[13px] text-gray-600 mb-1">Total Payment IDR</p>
+              <p className="text-[13px] text-gray-600 mb-1">
+                Total Payment IDR
+              </p>
               <p className="text-[15px] font-normal text-gray-900">
-                {currencyFormatting(data_Payment?.totalIdr, "idr") || "0.00 IDR"}
+                {currencyFormatting(data_Payment?.totalIdr, "idr") ||
+                  "0.00 IDR"}
               </p>
             </div>
-            
+
             <div>
-              <p className="text-[13px] text-gray-600 mb-1">Total Payment EQV IDR</p>
+              <p className="text-[13px] text-gray-600 mb-1">
+                Total Payment EQV IDR
+              </p>
               <p className="text-[15px] font-normal text-gray-900">
-                {currencyFormatting(data_Payment?.totalEqvIdr, "idr") || "0.00 IDR"}
+                {currencyFormatting(data_Payment?.totalEqvIdr, "idr") ||
+                  "0.00 IDR"}
               </p>
             </div>
-            
+
             <div>
               <p className="text-[13px] text-gray-600 mb-1">Equivalent USD</p>
               <p className="text-[15px] font-normal text-gray-900">
@@ -142,21 +148,27 @@ const PaymentTab = ({ billingCodeId, calculationCodeId }) => {
                 {billingCodeId || "-"}
               </p>
             </div>
-            
+
             <div>
-              <p className="text-[13px] text-gray-600 mb-1">Total Payment USD</p>
+              <p className="text-[13px] text-gray-600 mb-1">
+                Total Payment USD
+              </p>
               <p className="text-[15px] font-normal text-gray-900">
-                {currencyFormatting(data_Payment?.totalUsd, "usd") || "0.00 USD"}
+                {currencyFormatting(data_Payment?.totalUsd, "usd") ||
+                  "0.00 USD"}
               </p>
             </div>
-            
+
             <div>
-              <p className="text-[13px] text-gray-600 mb-1">Total Payment EQV USD</p>
+              <p className="text-[13px] text-gray-600 mb-1">
+                Total Payment EQV USD
+              </p>
               <p className="text-[15px] font-normal text-gray-900">
-                {currencyFormatting(data_Payment?.totalEqvUsd, "usd") || "0.00 USD"}
+                {currencyFormatting(data_Payment?.totalEqvUsd, "usd") ||
+                  "0.00 USD"}
               </p>
             </div>
-            
+
             <div>
               <p className="text-[13px] text-gray-600 mb-1">Equivalent USD</p>
               <p className="text-[15px] font-normal text-gray-900">
@@ -172,7 +184,7 @@ const PaymentTab = ({ billingCodeId, calculationCodeId }) => {
         <h3 className="text-sm font-bold text-primary uppercase mb-3">
           Payment Detail Information
         </h3>
-        
+
         <TableRBI
           size="small"
           dataSource={dataSource}

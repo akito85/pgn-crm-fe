@@ -1,11 +1,11 @@
-import React, {useState, useEffect} from 'react'
+import React, { useState, useEffect } from "react";
 import { bytesConverter } from "../../../../../../../.././../utils/bytesConverter";
-import TablePagination from '../../../../../../../../../components/TablePagination';
+import TablePagination from "../../../../../../../../../components/TablePagination";
 
-const TableAttachment = ({data, saRecordData}) => {
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  const [columnFilter, setColumnFilter] = useState([])
+const TableAttachment = ({ data, saRecordData }) => {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [columnFilter, setColumnFilter] = useState([]);
 
   const columns = [
     {
@@ -26,7 +26,7 @@ const TableAttachment = ({data, saRecordData}) => {
       dataIndex: "fileName",
       width: 150,
       sorter: true,
-      align: 'right'
+      align: "right",
       // ...getColumnSearchProps("value"),
     },
     {
@@ -50,31 +50,35 @@ const TableAttachment = ({data, saRecordData}) => {
       sorter: true,
       // ...getColumnSearchProps("unit"),
       render: (fileSize, r, i) => (
-        <span>{typeof fileSize == 'string' ? fileSize : bytesConverter(fileSize)}</span>
+        <span>
+          {typeof fileSize == "string" ? fileSize : bytesConverter(fileSize)}
+        </span>
       ),
     },
   ];
-  
+
   useEffect(() => {
-    if(saRecordData.status == "DRAFT"){
-      const columnFilter = columns.filter(item => item.title !== "UPLOAD BY" && item.title !== "UPLOADED DATE")
-      setColumnFilter(columnFilter)
-    }else{
-      setColumnFilter(columns)
+    if (saRecordData.status == "DRAFT") {
+      const columnFilter = columns.filter(
+        (item) => item.title !== "UPLOAD BY" && item.title !== "UPLOADED DATE",
+      );
+      setColumnFilter(columnFilter);
+    } else {
+      setColumnFilter(columns);
     }
-  }, [])
-  
+  }, []);
+
   return (
     <div className={"w-full"}>
       <TablePagination
         pageSize={pageSize}
         current={page}
         dataSource={data}
-        tableScrolled={{y: 525, x: 1300 }}
+        tableScrolled={{ y: 525, x: 1300 }}
         columns={columnFilter}
         totalData={data?.length}
       />
     </div>
-  )
-}
-export default TableAttachment
+  );
+};
+export default TableAttachment;

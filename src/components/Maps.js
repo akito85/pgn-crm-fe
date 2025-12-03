@@ -43,7 +43,7 @@ const Maps = ({ keyword, type = "select", setSelectedLocationFront }) => {
         lng: event.latLng.lng(),
       });
     },
-    [setSelectedLocationFront]
+    [setSelectedLocationFront],
   );
 
   const onMapLoad = useCallback((map) => {

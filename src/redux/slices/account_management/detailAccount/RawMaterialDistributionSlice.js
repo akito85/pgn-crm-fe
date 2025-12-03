@@ -36,11 +36,11 @@ export const createRMS = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_RMS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const updateRMS = createAsyncThunk(
@@ -61,11 +61,11 @@ export const updateRMS = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "UPDATE_RMS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getCurrentRaw = createAsyncThunk(
@@ -83,11 +83,11 @@ export const getCurrentRaw = createAsyncThunk(
           error: error,
           action: "GET_CURRENT_RAW",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getAllRMSHistoryPaginate = createAsyncThunk(
@@ -106,11 +106,11 @@ export const getAllRMSHistoryPaginate = createAsyncThunk(
           error: error,
           action: "GET_ALL_RMSHistory_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailRMSHistory = createAsyncThunk(
@@ -124,13 +124,13 @@ export const getDetailRMSHistory = createAsyncThunk(
       }
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error, action: "GET_DETAIL_RMSHistory" })
+        validateError({ error, action: "GET_DETAIL_RMSHistory" }),
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const deleteRMS = createAsyncThunk(
@@ -145,10 +145,10 @@ export const deleteRMS = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(validateError({ error, action: "DELETE_RMS" }));
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response.data.code === 419 ? null : error.response.data,
       );
     }
-  }
+  },
 );
 
 export const getCountryRMS = createAsyncThunk(
@@ -164,11 +164,11 @@ export const getCountryRMS = createAsyncThunk(
           error: error,
           action: "GET_COUNTRY_RMS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 const rawMaterialSourceSlice = createSlice({

@@ -9,15 +9,8 @@ import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Col
 import SVGIcon from "../../../../../assets/Icon/index";
 
 import Highlighter from "react-highlight-words";
-import {
-  DownloadOutlined,
-} from "@ant-design/icons";
-import {
-  Checkbox,
-  Form,
-  Spin,
-  Tooltip,
-} from "antd";
+import { DownloadOutlined } from "@ant-design/icons";
+import { Checkbox, Form, Spin, Tooltip } from "antd";
 import TablePagination from "../../../../../components/TablePagination";
 import StatusComponent from "../../../../../components/StatusComponent";
 import {
@@ -43,88 +36,134 @@ export const columnsBank = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { },
-  handleInactive = () => { },
-  handleApprovalHistory = () => { }
+  handleSearch = () => {},
+  handleInactive = () => {},
+  handleApprovalHistory = () => {},
 ) => [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "BANK CODE",
-      dataIndex: "bankCode",
-      key: "bankCode",
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsPaging(
-        "bankCode",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
+  {
+    title: "NO",
+    width: 60,
+    align: "center",
+    render: (text, object, index) => (page - 1) * pageSize + index + 1,
+  },
+  {
+    title: "BANK CODE",
+    dataIndex: "bankCode",
+    key: "bankCode",
+    sorter: true,
+    align: "center",
+    ...getColumnSearchPropsPaging(
+      "bankCode",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+  },
+  {
+    title: "BANK NAME",
+    dataIndex: "bankName",
+    key: "bankName",
+    sorter: true,
+    align: "left",
+    ...getColumnSearchPropsPaging(
+      "bankName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+  },
+  {
+    title: "BANK SHORT NAME",
+    dataIndex: "bankShortName",
+    key: "bankShortName",
+    sorter: true,
+    align: "left",
+    ...getColumnSearchPropsPaging(
+      "bankShortName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+  },
+  {
+    title: "BRANCH NAME",
+    dataIndex: "branchName",
+    key: "branchName",
+    sorter: true,
+    align: "left",
+    ...getColumnSearchPropsPaging(
+      "branchName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+  },
+  {
+    title: "TAX IDENTIFICATION NUMBER (NPWP)",
+    dataIndex: "npwp",
+    key: "npwp",
+    sorter: (a, b) => a.npwp.length - b.npwp.length,
+    align: "left",
+    ...getColumnSearchPropsPaging(
+      "npwp",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      searchedColumn === "npwp" ? (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: "#ffc069",
+            padding: 0,
+          }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? intToNPWP(text) : ""}
+        />
+      ) : text ? (
+        intToNPWP(text)
+      ) : (
+        "-"
       ),
-    },
-    {
-      title: "BANK NAME",
-      dataIndex: "bankName",
-      key: "bankName",
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsPaging(
-        "bankName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      title: "BANK SHORT NAME",
-      dataIndex: "bankShortName",
-      key: "bankShortName",
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsPaging(
-        "bankShortName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      title: "BRANCH NAME",
-      dataIndex: "branchName",
-      key: "branchName",
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsPaging(
-        "branchName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      title: "TAX IDENTIFICATION NUMBER (NPWP)",
-      dataIndex: "npwp",
-      key: "npwp",
-      sorter: (a, b) => a.npwp.length - b.npwp.length,
-      align: "left",
-      ...getColumnSearchPropsPaging(
-        "npwp",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        searchedColumn === "npwp" ? (
+  },
+  {
+    title: "PHONE NUMBER",
+    dataIndex: "phoneNumber",
+    key: "phoneNumber",
+    sorter: true,
+    align: "left",
+    ...getColumnSearchPropsPaging(
+      "phoneNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+  },
+  {
+    title: "IS BRANCH",
+    dataIndex: "isBranch",
+    key: "isBranch",
+    sorter: true,
+    align: "left",
+    ...getColumnSearchPropsPaging(
+      "isBranch",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) => {
+      if (searchedColumn === "isBranch") {
+        return (
           <Highlighter
             highlightStyle={{
               backgroundColor: "#ffc069",
@@ -132,136 +171,90 @@ export const columnsBank = (
             }}
             searchWords={[searchText]}
             autoEscape
-            textToHighlight={text ? intToNPWP(text) : ""}
+            textToHighlight={text ? text.toString() : ""}
           />
-        ) : text ? (
-          intToNPWP(text)
-        ) : (
-          "-"
-        ),
+        );
+      } else {
+        return <div>{text}</div>;
+      }
     },
-    {
-      title: "PHONE NUMBER",
-      dataIndex: "phoneNumber",
-      key: "phoneNumber",
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsPaging(
-        "phoneNumber",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      title: "IS BRANCH",
-      dataIndex: "isBranch",
-      key: "isBranch",
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsPaging(
-        "isBranch",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => {
-        if (searchedColumn === "isBranch") {
-          return (
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          );
-        } else {
-          return <div>{text}</div>;
-        }
-      },
-    },
+  },
 
-    {
-      title: "EMAIL",
-      dataIndex: "email",
-      key: "email",
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsPaging(
-        "email",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      title: "ADDRESS",
-      dataIndex: "address",
-      key: "address",
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsPaging(
-        "address",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      sorter: true,
-      align: "left",
-      fixed: "right",
-      width: 150,
-      ...getColumnSearchPropsPaging(
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (a) => (
-        <div className="flex justify-center">
-          <StatusComponent colour={a}>{a}</StatusComponent>
-        </div>
-      ),
-    },
-    {
-      title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
-      sorter: true,
-      align: "left",
-      fixed: "right",
-      width: 250,
-      ...getColumnSearchPropsPaging(
-        "statusApproval",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (a) => (
-        <div className="flex justify-center">
-          <StatusComponent colour={a}>{a}</StatusComponent>
-        </div>
-      ),
-    },
-  ];
+  {
+    title: "EMAIL",
+    dataIndex: "email",
+    key: "email",
+    sorter: true,
+    align: "left",
+    ...getColumnSearchPropsPaging(
+      "email",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+  },
+  {
+    title: "ADDRESS",
+    dataIndex: "address",
+    key: "address",
+    sorter: true,
+    align: "left",
+    ...getColumnSearchPropsPaging(
+      "address",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+  },
+  {
+    title: "STATUS",
+    dataIndex: "status",
+    sorter: true,
+    align: "left",
+    fixed: "right",
+    width: 150,
+    ...getColumnSearchPropsPaging(
+      "status",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (a) => (
+      <div className="flex justify-center">
+        <StatusComponent colour={a}>{a}</StatusComponent>
+      </div>
+    ),
+  },
+  {
+    title: "STATUS APPROVAL",
+    dataIndex: "statusApproval",
+    sorter: true,
+    align: "left",
+    fixed: "right",
+    width: 250,
+    ...getColumnSearchPropsPaging(
+      "statusApproval",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (a) => (
+      <div className="flex justify-center">
+        <StatusComponent colour={a}>{a}</StatusComponent>
+      </div>
+    ),
+  },
+];
 const ViewBank = () => {
   // selector
   const { data, dataApprovalHistory, loading } = useSelector(
-    (state) => state.bank
+    (state) => state.bank,
   );
   const { bodyError } = useSelector((state) => state?.general);
   const dispatch = useDispatch();
@@ -290,7 +283,7 @@ const ViewBank = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, page, pageSize, search, sort]);
 
@@ -448,11 +441,10 @@ const ViewBank = () => {
   const handleApprovalHistory = async (data) => {
     try {
       setBody(data);
-      await dispatch(getApprovalHistory(data.id))?.unwrap(); 
+      await dispatch(getApprovalHistory(data.id))?.unwrap();
       setOpenModalHistory(true);
     } catch (error) {
       setOpenModalHistory(false);
-      
     }
   };
 
@@ -463,7 +455,7 @@ const ViewBank = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -526,52 +518,88 @@ const ViewBank = () => {
       type: "table",
 
       render: (record, data_length) => {
-        return (
-          data_length > 3 ? (
+        return data_length > 3 ? (
+          <Link
+            to={
+              disabledActionByStatus(
+                "update",
+                record?.status,
+                record?.statusApproval,
+              ) === false && RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK
+            }
+            state={
+              disabledActionByStatus(
+                "update",
+                record?.status,
+                record?.statusApproval,
+              ) === false && { id: record?.id }
+            }
+          >
+            <ButtonComponent
+              className="gap-5 w-full"
+              icon={<SVGIcon name="IconEdit" width={24} color={"#0075BF"} />}
+              border={false}
+            >
+              <span className={"text-black gap-2 text-xl text-center w-full"}>
+                Update
+              </span>
+            </ButtonComponent>
+          </Link>
+        ) : (
+          <Tooltip
+            title="Update"
+            className={
+              disabledActionByStatus(
+                "update",
+                record?.status,
+                record?.statusApproval,
+              )
+                ? "cursor-not-allowed"
+                : "cursor-pointer"
+            }
+          >
             <Link
               to={
-                disabledActionByStatus('update', record?.status, record?.statusApproval) === false &&
-                RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK}
-              state={disabledActionByStatus('update', record?.status, record?.statusApproval) === false &&
-                { id: record?.id }}
+                disabledActionByStatus(
+                  "update",
+                  record?.status,
+                  record?.statusApproval,
+                ) === false && RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK
+              }
+              state={
+                disabledActionByStatus(
+                  "update",
+                  record?.status,
+                  record?.statusApproval,
+                ) === false && { id: record?.id }
+              }
             >
-              <ButtonComponent
-                className="gap-5 w-full"
-                icon={
-                  <SVGIcon name="IconEdit" width={24} color={"#0075BF"} />
-                }
-                border={false}
-              >
-                <span
-                  className={"text-black gap-2 text-xl text-center w-full"}
-                >
-                  Update
-                </span>
-              </ButtonComponent>
+              <div border={false}>
+                <SVGIcon
+                  name="IconEdit"
+                  color={
+                    disabledActionByStatus(
+                      "update",
+                      record?.status,
+                      record?.statusApproval,
+                    )
+                      ? "#d3d3d3"
+                      : "#ACC424"
+                  }
+                  width={24}
+                  className={
+                    disabledActionByStatus(
+                      "update",
+                      record?.status,
+                      record?.statusApproval,
+                    )
+                      ? "cursor-not-allowed"
+                      : "cursor-pointer"
+                  }
+                />
+              </div>
             </Link>
-          ) : (
-            <Tooltip title="Update" className={
-              disabledActionByStatus('update', record?.status, record?.statusApproval) ? "cursor-not-allowed" : "cursor-pointer"
-            }>
-              <Link
-                to={
-                  disabledActionByStatus('update', record?.status, record?.statusApproval) === false &&
-                  RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK}
-                state={
-                  disabledActionByStatus('update', record?.status, record?.statusApproval) === false &&
-                  { id: record?.id }
-                }
-              >
-                <div border={false}>
-                  <SVGIcon name="IconEdit"
-                    color={disabledActionByStatus('update', record?.status, record?.statusApproval) ? "#d3d3d3" : "#ACC424"} width={24}
-                    className={
-                      disabledActionByStatus('update', record?.status, record?.statusApproval) ? "cursor-not-allowed" : "cursor-pointer"
-                    } />
-                </div>
-              </Link>
-            </Tooltip>
-          )
+          </Tooltip>
         );
       },
     },
@@ -580,41 +608,56 @@ const ViewBank = () => {
       type: "table",
 
       render: (record, data_length) => {
-        const statusLowerCase = record?.status?.toLowerCase()
-        return (
-          data_length > 3 ?
-            <div className="w-full">
-              <ButtonComponent
-                border={false}
-                className={'gap-5 w-full'}
+        const statusLowerCase = record?.status?.toLowerCase();
+        return data_length > 3 ? (
+          <div className="w-full">
+            <ButtonComponent
+              border={false}
+              className={"gap-5 w-full"}
+              onClick={() => handleInactive(record)}
+              disabled={disabledActionByStatus(
+                "activate",
+                record?.status,
+                record?.statusApproval,
+              )}
+            >
+              <Checkbox
                 onClick={() => handleInactive(record)}
-                disabled={
-                  disabledActionByStatus('activate', record?.status, record?.statusApproval)
-                }
+                checked={record?.status !== "Active"}
+                disabled={disabledActionByStatus(
+                  "activate",
+                  record?.status,
+                  record?.statusApproval,
+                )}
+              />
+              <span
+                className={"text-black ml-6 gap-2 text-xl text-center w-full"}
               >
-                <Checkbox
-                  onClick={() => handleInactive(record)}
-                  checked={record?.status !== "Active"}
-                  disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
-                />
-                <span
-                  className={"text-black ml-6 gap-2 text-xl text-center w-full"}
-                >
-                  {record?.status === "Active" ? "Inactivate" : "Activate"}
-                </span>
-              </ButtonComponent>
+                {record?.status === "Active" ? "Inactivate" : "Activate"}
+              </span>
+            </ButtonComponent>
+          </div>
+        ) : (
+          <Tooltip
+            title={
+              statusLowerCase === "active" || statusLowerCase === "draft"
+                ? "Inactivate"
+                : "Activate"
+            }
+          >
+            <div>
+              <Checkbox
+                border={false}
+                onClick={() => handleInactive(record)}
+                checked={record?.status !== "Active"}
+                disabled={disabledActionByStatus(
+                  "activate",
+                  record?.status,
+                  record?.statusApproval,
+                )}
+              />
             </div>
-            :
-            <Tooltip title={statusLowerCase === "active" || statusLowerCase === 'draft' ? "Inactivate" : "Activate"}>
-              <div >
-                <Checkbox
-                  border={false}
-                  onClick={() => handleInactive(record)}
-                  checked={record?.status !== "Active"}
-                  disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
-                />
-              </div>
-            </Tooltip>
+          </Tooltip>
         );
       },
     },
@@ -622,29 +665,25 @@ const ViewBank = () => {
       action: "history",
       type: "table",
       render: (record, data_length) => {
-        return (
-          data_length > 3 ?
-            <ButtonComponent
-              className="gap-5"
-              icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              }
-              border={false}
-              onClick={() => handleApprovalHistory(record)}
-            >
-              <span className={"text-black gap-2 text-xl text-center"}>
-                Approval History
-              </span>
-            </ButtonComponent>
-
-            :
-            <Tooltip title={'Approval History'}>
-              <div border={false}
-                onClick={() => handleApprovalHistory(record)}
-              >
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              </div>
-            </Tooltip>
+        return data_length > 3 ? (
+          <ButtonComponent
+            className="gap-5"
+            icon={
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+            }
+            border={false}
+            onClick={() => handleApprovalHistory(record)}
+          >
+            <span className={"text-black gap-2 text-xl text-center"}>
+              Approval History
+            </span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip title={"Approval History"}>
+            <div border={false} onClick={() => handleApprovalHistory(record)}>
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+            </div>
+          </Tooltip>
         );
       },
     },
@@ -687,11 +726,11 @@ const ViewBank = () => {
                 searchText,
                 handleSearch,
                 handleInactive,
-                handleApprovalHistory
+                handleApprovalHistory,
               ),
               ...useColumnActionPermission(
-                ["view", "history", "update", 'activate'],
-                itemActions
+                ["view", "history", "update", "activate"],
+                itemActions,
               ),
             ]}
             // columns={[...columns]}
@@ -712,8 +751,9 @@ const ViewBank = () => {
           getAPIOption={getAllApprovalList}
           getAPIDetail={getListApprovalById}
           selector={"bank"}
-          alertMessage={`Are you sure you want to inactivate this Bank with the name ${bankNames || ""
-            }?`}
+          alertMessage={`Are you sure you want to inactivate this Bank with the name ${
+            bankNames || ""
+          }?`}
           openModalInactivate={openModalInactivate}
           handleCloseModalInactivate={handleCancelModalInactivate}
           onFinish={handleSubmitModalInactivate}

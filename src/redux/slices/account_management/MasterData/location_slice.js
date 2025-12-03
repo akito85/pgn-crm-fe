@@ -46,11 +46,11 @@ export const getLocationPaginate = createAsyncThunk(
           error: error,
           action: "GET_LOCATION_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const downloadLocation = createAsyncThunk(
@@ -69,11 +69,11 @@ export const downloadLocation = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_LOCATION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getDetailLocation = createAsyncThunk(
@@ -105,7 +105,7 @@ export const getDetailLocation = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const createLocation = createAsyncThunk(
   "CREATE_LOCATION",
@@ -126,7 +126,7 @@ export const createLocation = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_LOCATION",
           back: false,
-        })
+        }),
       );
       // const message =
       //     (error.response &&
@@ -146,7 +146,7 @@ export const createLocation = createAsyncThunk(
       // }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const updateLocation = createAsyncThunk(
@@ -167,7 +167,7 @@ export const updateLocation = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "UPDATE_LOCATION",
           back: false,
-        })
+        }),
       );
       // const message =
       //     (error.response &&
@@ -186,7 +186,7 @@ export const updateLocation = createAsyncThunk(
       // }
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const activationLocation = createAsyncThunk(
   "ACTIVATION_LOCATION",
@@ -224,11 +224,11 @@ export const activationLocation = createAsyncThunk(
           error: error,
           action: "ACTIVATION_LOCATION",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getLocationReference = createAsyncThunk(
@@ -260,7 +260,7 @@ export const getLocationReference = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const getLocationType = createAsyncThunk(
   "GET_LOCATION_TYPE",
@@ -286,7 +286,7 @@ export const getLocationType = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const getLocationParent = createAsyncThunk(
   "GET_LOCATION_PARENT",
@@ -317,7 +317,7 @@ export const getLocationParent = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const getLocationParentType = createAsyncThunk(
@@ -344,7 +344,7 @@ export const getLocationParentType = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 const locationSlice = createSlice({
   name: "location_slice",

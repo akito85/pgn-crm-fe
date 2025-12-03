@@ -56,7 +56,7 @@ const LayoutMenu = ({ children }) => {
 
   const publicPaths = ["/invoice/generate-invoice"];
   const isPublicPath = publicPaths.some((path) =>
-    location.pathname.includes(path)
+    location.pathname.includes(path),
   );
 
   const { user, remember, data_switch } = useSelector((state) => state.auth);
@@ -72,7 +72,7 @@ const LayoutMenu = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [modalConfirmation, setModalConfirmation] = useState(false);
   const tokenJSON = JSON.parse(
-    localStorage.getItem("token") || window.sessionStorage.getItem("token")
+    localStorage.getItem("token") || window.sessionStorage.getItem("token"),
   );
   // const config =
   //   localStorage.getItem("config") || window.sessionStorage.getItem("config");
@@ -272,7 +272,7 @@ const LayoutMenu = ({ children }) => {
                 navigate(
                   tokenJSON?.userLevel === "Super User"
                     ? "/switch-entity"
-                    : "/switch-position"
+                    : "/switch-position",
                 )
               }
             >
@@ -390,7 +390,7 @@ const LayoutMenu = ({ children }) => {
                       color: "#4B465C",
                       width: "24px",
                     },
-                  }
+                  },
                 )}
             </div>
           </div>
@@ -416,7 +416,7 @@ const LayoutMenu = ({ children }) => {
                         color: "#FFFFFF",
                         width: "24px",
                       },
-                    }
+                    },
                   )}
               </div>
               <div className="flex justify-end items-center align-middle gap-x-5 mr-5">

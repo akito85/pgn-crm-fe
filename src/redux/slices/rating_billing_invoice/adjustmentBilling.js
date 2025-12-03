@@ -68,7 +68,7 @@ export const createAdjustmentBilling = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 export const updateAdjustmentBilling = createAsyncThunk(
@@ -107,7 +107,7 @@ export const updateAdjustmentBilling = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 export const getAdjustmentBillingPaginate = createAsyncThunk(
@@ -136,7 +136,7 @@ export const getAdjustmentBillingPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListApprovalHierarchy = createAsyncThunk(
@@ -162,7 +162,7 @@ export const getListApprovalHierarchy = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListApprovalHierarchyDetail = createAsyncThunk(
@@ -188,7 +188,7 @@ export const getListApprovalHierarchyDetail = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -214,7 +214,7 @@ export const getApprovalHistory = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const deleteAdjustmentBilling = createAsyncThunk(
@@ -253,7 +253,7 @@ export const deleteAdjustmentBilling = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 export const getListCategory = createAsyncThunk(
@@ -279,7 +279,7 @@ export const getListCategory = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const downloadAdjustmentBilling = createAsyncThunk(
@@ -298,11 +298,11 @@ export const downloadAdjustmentBilling = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_ADJUSTMENT_BILLING",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListAccount = createAsyncThunk(
@@ -328,7 +328,7 @@ export const getListAccount = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListAccountDetail = createAsyncThunk(
@@ -354,7 +354,7 @@ export const getListAccountDetail = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListType = createAsyncThunk(
@@ -380,7 +380,7 @@ export const getListType = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListDetailType = createAsyncThunk(
@@ -406,7 +406,7 @@ export const getListDetailType = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListBillingCycle = createAsyncThunk(
@@ -432,7 +432,7 @@ export const getListBillingCycle = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListBillingPeriod = createAsyncThunk(
@@ -458,7 +458,7 @@ export const getListBillingPeriod = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListInvoice = createAsyncThunk(
@@ -484,7 +484,7 @@ export const getListInvoice = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListInvoiceInformation = createAsyncThunk(
@@ -510,7 +510,7 @@ export const getListInvoiceInformation = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListAdjustmentReason = createAsyncThunk(
@@ -536,7 +536,7 @@ export const getListAdjustmentReason = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListCurrency = createAsyncThunk(
@@ -562,7 +562,7 @@ export const getListCurrency = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListTermsOfPayment = createAsyncThunk(
@@ -588,7 +588,7 @@ export const getListTermsOfPayment = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getSelectTOP = createAsyncThunk(
@@ -614,7 +614,7 @@ export const getSelectTOP = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListItem = createAsyncThunk(
@@ -640,7 +640,7 @@ export const getListItem = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getDetailAdjustmentBilling = createAsyncThunk(
@@ -666,7 +666,7 @@ export const getDetailAdjustmentBilling = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const approveOrRejectAdjustmentBilling = createAsyncThunk(
@@ -676,7 +676,7 @@ export const approveOrRejectAdjustmentBilling = createAsyncThunk(
       const url = "/v1/dbs/api/rbi/adjustment/approval-adjustment";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successApprove = {
         title: `Successful`,
@@ -708,7 +708,7 @@ export const approveOrRejectAdjustmentBilling = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 const adjustmentBillingSlice = createSlice({

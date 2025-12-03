@@ -32,7 +32,7 @@ export const columnTOP = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -55,7 +55,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -65,7 +65,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -81,7 +81,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -91,7 +91,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -107,7 +107,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -117,7 +117,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -133,7 +133,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -143,7 +143,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -159,7 +159,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -169,7 +169,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -185,7 +185,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -195,7 +195,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -214,7 +214,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -224,7 +224,7 @@ export const columnTOP = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -242,7 +242,7 @@ export const columnTOP = (
       searchText,
       handleSearch,
       true,
-      "dateCapital"
+      "dateCapital",
     ),
     render: (text) =>
       renderDateColumn(
@@ -251,7 +251,7 @@ export const columnTOP = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -269,7 +269,7 @@ export const columnTOP = (
       searchText,
       handleSearch,
       true,
-      "dateCapital"
+      "dateCapital",
     ),
     render: (text) =>
       renderDateColumn(
@@ -278,7 +278,7 @@ export const columnTOP = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -293,7 +293,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -303,7 +303,7 @@ export const columnTOP = (
         text,
         true,
         "input",
-        search
+        search,
       ),
     ellipsis: {
       showTitle: false,
@@ -322,7 +322,7 @@ export const columnTOP = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (index) => {
       let text;
@@ -343,7 +343,7 @@ export const columnTOP = (
         text,
         false,
         "status",
-        search
+        search,
       );
     },
   },
@@ -360,7 +360,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (index) => {
       let text;
@@ -381,7 +381,7 @@ export const columnTOP = (
         text,
         false,
         "status",
-        search
+        search,
       );
     },
   },
@@ -390,7 +390,7 @@ export const columnTOP = (
 const TopView = () => {
   const dispatch = useDispatch();
   const { data_list, dataApprovalHistory, loading } = useSelector(
-    (state) => state.top
+    (state) => state.top,
   );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -446,7 +446,7 @@ const TopView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [search, page, pageSize, sort, dispatch]);
 
@@ -557,7 +557,7 @@ const TopView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -754,7 +754,7 @@ const TopView = () => {
   // ✅ Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   // ✅ Get base columns with key property
@@ -769,7 +769,7 @@ const TopView = () => {
         searchText,
         handleSearch,
         handleInactive,
-        handleApprovalHistory
+        handleApprovalHistory,
       ),
       ...actionColumns,
     ];

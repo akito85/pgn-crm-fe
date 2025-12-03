@@ -16,26 +16,26 @@ const LayoutDetailTaxImplicationRule = ({
   dispatch = () => {},
   dataLogInformation = {},
   dataOverrideRule,
-  transactionCodeData
+  transactionCodeData,
 }) => {
-  const dataOverrideTemp = dataOverrideRule?.listRuleOverride?.map(item =>{
+  const dataOverrideTemp = dataOverrideRule?.listRuleOverride?.map((item) => {
     return {
       implicationType: item?.implicationType?.name,
       transactionCode: item?.transCode,
       description: item?.description,
-      dataDetail: item?.listRuleOverrideCondition?.map(itemSecond =>{
+      dataDetail: item?.listRuleOverrideCondition?.map((itemSecond) => {
         return {
           conditionName: {
-            label: itemSecond?.name?.name
+            label: itemSecond?.name?.name,
           },
           operator: {
-            label: itemSecond?.operator?.name
+            label: itemSecond?.operator?.name,
           },
-          value: itemSecond?.value
-        }
-      })
-    }
-  })
+          value: itemSecond?.value,
+        };
+      }),
+    };
+  });
   console.log(dataTaxImplicationRule);
 
   return (
@@ -73,7 +73,7 @@ const LayoutDetailTaxImplicationRule = ({
               </DetailText>
               <DetailText label={"Status Approval"}>
                 {dataTaxImplicationRule.approvalStatus}
-                </DetailText>
+              </DetailText>
               <div className="col-span-3">
                 <DetailText label={"Description"}>{description}</DetailText>
               </div>
@@ -84,7 +84,11 @@ const LayoutDetailTaxImplicationRule = ({
               {"tax implication rule override"}
             </div>
             <div className="font-bold">
-              <TableTaxImplicationRuleOverride data={dataOverrideTemp} type="view" dataTransCode={transactionCodeData}/>
+              <TableTaxImplicationRuleOverride
+                data={dataOverrideTemp}
+                type="view"
+                dataTransCode={transactionCodeData}
+              />
             </div>
           </div>
         </div>
@@ -104,7 +108,7 @@ const LayoutDetailTaxImplicationRule = ({
 
       <BaseContainer header={"HISTORY LOG INFORMATION"}>
         <div className="grid grid-cols-5 w-full">
-          <DetailText label={'Record ID'}>
+          <DetailText label={"Record ID"}>
             {dataLogInformation?.taxImplicationRuleId}
           </DetailText>
           <DetailText label={"Created Date"}>
@@ -122,7 +126,7 @@ const LayoutDetailTaxImplicationRule = ({
         </div>
       </BaseContainer>
     </>
-  )
-}
+  );
+};
 
-export default LayoutDetailTaxImplicationRule
+export default LayoutDetailTaxImplicationRule;

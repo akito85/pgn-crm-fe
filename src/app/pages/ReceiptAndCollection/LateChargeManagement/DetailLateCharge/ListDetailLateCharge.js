@@ -96,7 +96,7 @@ const ListDetailLateCharge = () => {
           </DetailText>
           <DetailText label={"Billing Period"}>
             {moment(data_detail?.billingPeriod).format(
-              dateFormatting.datePeriod
+              dateFormatting.datePeriod,
             )}
           </DetailText>
           <DetailText label={"Payment Amount"}>
@@ -151,7 +151,7 @@ const ListDetailLateCharge = () => {
               searchInput,
               searchedColumn,
               searchText,
-              handleSearch
+              handleSearch,
             )}
             current={page}
             pageSize={pageSize}
@@ -175,7 +175,7 @@ const ListDetailLateCharge = () => {
               searchInput,
               searchedColumn,
               searchText,
-              handleSearch
+              handleSearch,
             )}
             current={page}
             pageSize={pageSize}

@@ -35,7 +35,7 @@ const ContentModalConfirmBank = ({
   //     )}.${npwp.charAt(8)}-${npwp.substring(9, 12)}.${npwp.substring(13)}`
   //   : "";
   const bankCode = (dataBank || []).filter(
-    (item) => item.bankCode === data?.bankCode
+    (item) => item.bankCode === data?.bankCode,
   );
   const showSection = () => {
     switch (valuePage) {
@@ -89,7 +89,7 @@ const ContentModalConfirmBank = ({
             disableSelect={true}
             approvalName={
               (dataOption || []).filter(
-                (data) => data.value === selectedHierarchy
+                (data) => data.value === selectedHierarchy,
               )?.[0].name || ""
             }
             dataTable={listDataAppHierDetail}

@@ -28,7 +28,7 @@ import CardContainer from "../../../../../components/CardContainer";
 const InvoiceTemplateView = () => {
   // Selector
   const { data, loading, data_approval_history } = useSelector(
-    (state) => state.invoice_template
+    (state) => state.invoice_template,
   );
 
   // Declaration
@@ -58,7 +58,7 @@ const InvoiceTemplateView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [dispatch, search, page, pageSize, sort]);
 
@@ -165,7 +165,7 @@ const InvoiceTemplateView = () => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -195,7 +195,7 @@ const InvoiceTemplateView = () => {
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
-      downloadInvoiceTemplate({ search: tempSearch, page, pageSize, sort })
+      downloadInvoiceTemplate({ search: tempSearch, page, pageSize, sort }),
     );
   };
 
@@ -436,11 +436,11 @@ const InvoiceTemplateView = () => {
                   searchInput,
                   searchedColumn,
                   searchText,
-                  handleSearch
+                  handleSearch,
                 ),
                 ...useColumnActionPermission(
                   ["view", "activate", "update", "history"],
-                  itemGrantAccess
+                  itemGrantAccess,
                 ),
               ]}
               current={page}

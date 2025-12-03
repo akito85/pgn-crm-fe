@@ -51,7 +51,7 @@ const ChangeProfileLayout = (props) => {
         setDisabled(true);
       }
     },
-    [data?.data?.email, data?.data?.phoneNumber]
+    [data?.data?.email, data?.data?.phoneNumber],
   );
 
   return (

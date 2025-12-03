@@ -1,6 +1,10 @@
 import { Fragment } from "react";
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import DetailText from "../../../../../components/DetailText";
 import BaseContainer from "../../../../../components/BaseContainer";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import StatusComponent from "../../../../../components/StatusComponent";
+import SVGIcon from "../../../../../assets/Icon/index";
 import MiniBaseContainer from "../../../../../components/MiniBaseContainer";
 
 const data_detail = {

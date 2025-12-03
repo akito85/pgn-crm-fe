@@ -1,5 +1,10 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
-import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../utils";
 import { Tooltip } from "antd";
 import BaseContainer from "../../../../../components/BaseContainer";
 import moment from "moment";
@@ -107,7 +112,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -143,7 +148,7 @@ const columns = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -178,7 +183,7 @@ const columns = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -186,7 +191,9 @@ const columns = (
       width: 160,
       align: "center",
       dataIndex: "endDateBefore",
-      filteredValue: search?.["endDateBefore"] ? [search?.["endDateBefore"]] : null,
+      filteredValue: search?.["endDateBefore"]
+        ? [search?.["endDateBefore"]]
+        : null,
       // onFilter: (value, record) => onFilter("endDateBefore", value, record),
       sorter: (a, b) => sorter("endDateBefore", a, b),
       // ...getColumnSearchPropsPaging(
@@ -213,7 +220,7 @@ const columns = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -221,7 +228,9 @@ const columns = (
       width: 160,
       align: "center",
       dataIndex: "endDateAfter",
-      filteredValue: search?.["endDateAfter"] ? [search?.["endDateAfter"]] : null,
+      filteredValue: search?.["endDateAfter"]
+        ? [search?.["endDateAfter"]]
+        : null,
       // onFilter: (value, record) => onFilter("endDateAfter", value, record),
       sorter: (a, b) => sorter("endDateAfter", a, b),
       // ...getColumnSearchPropsPaging(
@@ -248,7 +257,7 @@ const columns = (
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -279,7 +288,7 @@ const columns = (
           text,
           true,
           "input",
-          search
+          search,
         ),
       // ...getColumnSearchPropsPaging(
       //   "description",
@@ -332,7 +341,7 @@ const columns = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       // ...getColumnSearchPropsPaging(
       //   "status",
@@ -430,7 +439,7 @@ const ProductExtendTerminate = ({ data = [] }) => {
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
-    })
+    });
   };
 
   const handleChangeSize = (pageChange, pageSizeChange) => {
@@ -462,7 +471,7 @@ const ProductExtendTerminate = ({ data = [] }) => {
             searchText,
             search,
             handleSearch,
-            handleSelectedDetail
+            handleSelectedDetail,
           )}
         />
       </BaseContainer>
@@ -493,7 +502,7 @@ const ProductExtendTerminate = ({ data = [] }) => {
             <DetailText label="Created Date">
               {selectedData?.createdDate
                 ? moment(selectedData.createdDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : ""}
             </DetailText>
@@ -503,7 +512,7 @@ const ProductExtendTerminate = ({ data = [] }) => {
             <DetailText label="Updated Date">
               {selectedData?.updatedDate
                 ? moment(selectedData.updatedDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : ""}
             </DetailText>

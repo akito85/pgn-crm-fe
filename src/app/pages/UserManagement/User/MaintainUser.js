@@ -26,7 +26,7 @@ import { getColumnSearchPropsPaging } from "../../../../utils/getColumnSearchPro
 
 const MaintainUser = ({ dataTable }) => {
   const { data, data_user, data_auth_type, loading } = useSelector(
-    (state) => state.user
+    (state) => state.user,
   );
   const [openModal, setOpenModal] = useState(false);
   const navigate = useNavigate();
@@ -103,7 +103,7 @@ const MaintainUser = ({ dataTable }) => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [search, sort, page, pageSize, dispatch]);
 
@@ -204,7 +204,7 @@ const MaintainUser = ({ dataTable }) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -214,7 +214,7 @@ const MaintainUser = ({ dataTable }) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -229,7 +229,7 @@ const MaintainUser = ({ dataTable }) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -239,7 +239,7 @@ const MaintainUser = ({ dataTable }) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -255,7 +255,7 @@ const MaintainUser = ({ dataTable }) => {
         searchText,
         handleSearch,
         false,
-        "status"
+        "status",
       ),
       render: (text) =>
         renderColumn(
@@ -265,7 +265,7 @@ const MaintainUser = ({ dataTable }) => {
           text,
           false,
           "status",
-          search
+          search,
         ),
     },
     {
@@ -280,7 +280,7 @@ const MaintainUser = ({ dataTable }) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         renderColumn(
@@ -290,7 +290,7 @@ const MaintainUser = ({ dataTable }) => {
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
   ];

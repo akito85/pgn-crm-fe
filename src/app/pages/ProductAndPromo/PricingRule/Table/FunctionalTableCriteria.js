@@ -423,7 +423,7 @@ const FunctionalTableCriteria = ({
 
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -442,7 +442,7 @@ const FunctionalTableCriteria = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       {
         title: "ACTION",
@@ -526,7 +526,7 @@ const FunctionalTableCriteria = ({
     return filterCol.filter((col) =>
       col.title !== "NO" && col.title !== "ACTION"
         ? dataCriteria.includes(col.indexValue)
-        : true
+        : true,
     );
   };
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
@@ -609,7 +609,7 @@ const FunctionalTableCriteria = ({
                   dataEditRecord: editDataRecord,
                   handleEditDataRecord: handleEditDataRecord,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],

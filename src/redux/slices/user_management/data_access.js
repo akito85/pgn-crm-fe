@@ -28,11 +28,11 @@ export const getDataAccessPaginate = createAsyncThunk(
           error: error,
           action: "GET_DATA_ACCESS_PAGINATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getDetailDataAccess = createAsyncThunk(
   "GET_DETAIL_DATA_ACCESS",
@@ -47,11 +47,11 @@ export const getDetailDataAccess = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_DATA_ACCESS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const downloadDataAccess = createAsyncThunk(
   "DOWNLOAD_DATA_ACCESS_VIEW",
@@ -69,11 +69,11 @@ export const downloadDataAccess = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_DATA_ACCESS_VIEW",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const downloadDetail = createAsyncThunk(
   "DOWNLOAD_DATA_ACCESS",
@@ -93,11 +93,11 @@ export const downloadDetail = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_DATA_ACCESS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const createDataAccess = createAsyncThunk(
@@ -118,11 +118,11 @@ export const createDataAccess = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_DATA_ACCESS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const dupliacateDataAccess = createAsyncThunk(
@@ -144,11 +144,11 @@ export const dupliacateDataAccess = createAsyncThunk(
           error: errorBody(errorCode(error), "duplicated", errorMessage(error)),
           action: "DUPLICATION_DATA_ACCESS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const activationDataAccess = createAsyncThunk(
   "ACTIVATION_DATA_ACCESS",
@@ -169,11 +169,11 @@ export const activationDataAccess = createAsyncThunk(
           error: errorBody(errorCode(error), "activated", errorMessage(error)),
           action: "ACTIVATION_DATA_ACCESS",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const updateDataAccess = createAsyncThunk(
   "UPDATE_DATA_ACCES",
@@ -193,11 +193,11 @@ export const updateDataAccess = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_DATA_ACCES",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getDetailCostCenter = createAsyncThunk(
   "GET_DETAIL_COST_CENTER",
@@ -212,11 +212,11 @@ export const getDetailCostCenter = createAsyncThunk(
           error: error,
           action: "GET_DETAIL_COST_CENTER",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const activationCostCenter = createAsyncThunk(
   "ACTIVATION_COST_CENTER",
@@ -231,11 +231,11 @@ export const activationCostCenter = createAsyncThunk(
           error: errorBody(errorCode(error), "activated", errorMessage(error)),
           action: "ACTIVATION_COST_CENTER",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const getAllCostCenter = createAsyncThunk(
   "GET_ALL_COST_CENTER",
@@ -250,11 +250,11 @@ export const getAllCostCenter = createAsyncThunk(
           error: error,
           action: "GET_ALL_COST_CENTER",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 const dataAccessSlice = createSlice({
   name: "data_access",

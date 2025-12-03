@@ -16,7 +16,7 @@ const data = [
     receiptDate: "21 Agustus 2023 11:03:55",
     currency: "IDR",
     amount: "15000",
-    priceUsd:"1.00",
+    priceUsd: "1.00",
     status: "Active",
     createdBy: "Annisa",
     createdDate: "21 Agustus 2023 11:03:55",
@@ -29,7 +29,7 @@ const data = [
     receiptDate: "21 Agustus 2023 11:03:55",
     currency: "IDR",
     amount: "15000",
-    priceUsd:"1.00",
+    priceUsd: "1.00",
     status: "Active",
     createdBy: "Annisa",
     createdDate: "21 Agustus 2023 11:03:55",
@@ -42,7 +42,7 @@ const data = [
     receiptDate: "21 Agustus 2023 11:03:55",
     currency: "USD",
     amount: "15",
-    priceUsd:"1.00",
+    priceUsd: "1.00",
     status: "Inactive",
     createdBy: "Annisa",
     createdDate: "21 Agustus 2023 11:03:55",
@@ -51,9 +51,7 @@ const data = [
   },
 ];
 
-const AccountReceiptTable = ({
-    handleChangeInteraction = () => {},
-}) => {
+const AccountReceiptTable = ({ handleChangeInteraction = () => {} }) => {
   // const dispatch = useDispatch();
   // const { data_detail, loading } = useSelector(
   //   (state) => state.accountManagement

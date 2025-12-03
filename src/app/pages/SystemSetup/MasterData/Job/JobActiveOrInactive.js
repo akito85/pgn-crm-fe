@@ -13,11 +13,11 @@ const JobActiveOrInactive = (props) => {
     isOpen,
     header,
     ActiveOrInactive,
-    handleCancel = () => { },
-    handleCancelFooter = () => { },
-    handleConfirmFooter = () => { },
+    handleCancel = () => {},
+    handleCancelFooter = () => {},
+    handleConfirmFooter = () => {},
     remark,
-    onChange = () => { },
+    onChange = () => {},
     form,
   } = props;
   return (
@@ -27,7 +27,7 @@ const JobActiveOrInactive = (props) => {
       message={`Are you sure want to ${ActiveOrInactive} Job?`}
       width={500}
       handleCancel={handleCancel}
-      type={'confirmation'}
+      type={"confirmation"}
       footer={
         <div className={"w-full flex justify-end gap-5"}>
           <ButtonComponent type={"default"} onClick={handleCancelFooter}>
@@ -51,8 +51,7 @@ const JobActiveOrInactive = (props) => {
               style={{ fontSize: "24px", color: "#65481C" }}
             />
           }
-          message={`Are you sure you want to ${ActiveOrInactive
-            } job?`}
+          message={`Are you sure you want to ${ActiveOrInactive} job?`}
           type={"warning"}
           showIcon
           className={"alert-icon"}
@@ -75,8 +74,8 @@ const JobActiveOrInactive = (props) => {
 const JobErrorActiveOrInactive = (props) => {
   const {
     isOpen,
-    handleOk = () => { },
-    handleCancel = () => { },
+    handleOk = () => {},
+    handleCancel = () => {},
     ActiveOrInactive,
     message,
   } = props;
@@ -88,8 +87,9 @@ const JobErrorActiveOrInactive = (props) => {
           <p className="text-[18px] font-bold">Failed</p>
         </div>
         <p className="pl-[70px]">
-          {`Your data was not ${ActiveOrInactive === "Activate" ? "Inactivate" : "Activate"
-            } ${message}. Please try again.`}
+          {`Your data was not ${
+            ActiveOrInactive === "Activate" ? "Inactivate" : "Activate"
+          } ${message}. Please try again.`}
         </p>
       </div>
     </ModalError>

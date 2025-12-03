@@ -20,7 +20,7 @@ const Detail = ({ id = 0, getAPI, selector = "pricingRule" }) => {
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState("");
   const { data_pricing_rule_detail = {} } = useSelector(
-    (state) => state[selector]
+    (state) => state[selector],
   );
 
   useEffect(() => {
@@ -45,7 +45,7 @@ const Detail = ({ id = 0, getAPI, selector = "pricingRule" }) => {
         uom: item.uom,
         currency: item.currency,
       };
-    }
+    },
   );
 
   // Search Column
@@ -109,7 +109,7 @@ const Detail = ({ id = 0, getAPI, selector = "pricingRule" }) => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -144,7 +144,7 @@ const Detail = ({ id = 0, getAPI, selector = "pricingRule" }) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (value, row, index) => {
         let obj = {
@@ -167,7 +167,7 @@ const Detail = ({ id = 0, getAPI, selector = "pricingRule" }) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (value, row, index) => {
         let obj = {
@@ -190,7 +190,7 @@ const Detail = ({ id = 0, getAPI, selector = "pricingRule" }) => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (value, row, index) => {
         let obj = {
@@ -216,7 +216,7 @@ const Detail = ({ id = 0, getAPI, selector = "pricingRule" }) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
           render: (value) => (
             <NumericFormat
@@ -239,7 +239,7 @@ const Detail = ({ id = 0, getAPI, selector = "pricingRule" }) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -252,7 +252,7 @@ const Detail = ({ id = 0, getAPI, selector = "pricingRule" }) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
       ],

@@ -2,7 +2,6 @@ import React, { useRef } from "react";
 import { Input, Checkbox, Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
 
-
 import { useNavigate } from "react-router-dom";
 import StatusComponent from "../../../../../../components/StatusComponent";
 import { useState } from "react";
@@ -222,15 +221,16 @@ const ServicePointActivityTable = () => {
                 }}
               />
             </Tooltip>
-						{r.status === "CLOSED" ? (
-            <Tooltip>
-              <Checkbox
-                // onClick={() => {
-                //   handleActiveOrInactive(record);
-                // }}
-                checked={r.status === "CLOSED" ? true : false}
-              ></Checkbox>
-            </Tooltip>) : null}
+            {r.status === "CLOSED" ? (
+              <Tooltip>
+                <Checkbox
+                  // onClick={() => {
+                  //   handleActiveOrInactive(record);
+                  // }}
+                  checked={r.status === "CLOSED" ? true : false}
+                ></Checkbox>
+              </Tooltip>
+            ) : null}
           </div>
         );
       },

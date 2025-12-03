@@ -15,7 +15,7 @@ const PrivateRoute = () => {
   const type_token = JSON.parse(token);
   const dateExpired = moment(
     type_token?.dateExpired.toString(),
-    "YYYY-MM-DD HH:mm:ss"
+    "YYYY-MM-DD HH:mm:ss",
   );
   const currentTime = moment();
   const navigate = useNavigate();

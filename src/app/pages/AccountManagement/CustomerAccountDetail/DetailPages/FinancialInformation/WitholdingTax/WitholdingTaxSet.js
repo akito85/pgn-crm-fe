@@ -29,10 +29,7 @@ const WitholdingTaxSet = () => {
       </div>
 
       <div className="w-full mt-5">
-        <Form.Item
-          name={"description"}
-          label={"Description"}
-        >
+        <Form.Item name={"description"} label={"Description"}>
           <InputComponent
             type="textarea"
             // onChange={(e) => setDescription(e.target.value)}

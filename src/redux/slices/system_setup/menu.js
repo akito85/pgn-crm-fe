@@ -22,11 +22,11 @@ export const getAllMenuPaginate = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_ALL_MENU", back: false })
+        validateError({ error: error, action: "GET_ALL_MENU", back: false }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getMenuDetail = createAsyncThunk(
@@ -38,11 +38,11 @@ export const getMenuDetail = createAsyncThunk(
       return data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_MENU_DETAIL", back: false })
+        validateError({ error: error, action: "GET_MENU_DETAIL", back: false }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const downloadMenu = createAsyncThunk(
@@ -57,11 +57,11 @@ export const downloadMenu = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "DOWNLOAD_MENU", back: false })
+        validateError({ error: error, action: "DOWNLOAD_MENU", back: false }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const inactiveMenu = createAsyncThunk(
@@ -85,11 +85,11 @@ export const inactiveMenu = createAsyncThunk(
           error: errorBody(errorCode(error), statusData, errorMessage(error)),
           action: "INACTIVE_MENU",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const updateMenu = createAsyncThunk(
@@ -110,11 +110,11 @@ export const updateMenu = createAsyncThunk(
           error: errorBody(errorCode(error), "updated", errorMessage(error)),
           action: "UPDATE_MENU",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getCreateMenu = createAsyncThunk(
@@ -135,11 +135,11 @@ export const getCreateMenu = createAsyncThunk(
           error: errorBody(errorCode(error), "created", errorMessage(error)),
           action: "CREATE_MENU",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getParent = createAsyncThunk(
@@ -151,11 +151,11 @@ export const getParent = createAsyncThunk(
       return data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_PARENT_MENU", back: false })
+        validateError({ error: error, action: "GET_PARENT_MENU", back: false }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 export const getActions = createAsyncThunk(
   "GET_ACTIONS",
@@ -166,11 +166,11 @@ export const getActions = createAsyncThunk(
       return data;
     } catch (error) {
       thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_ACTIONS", back: false })
+        validateError({ error: error, action: "GET_ACTIONS", back: false }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 const mainMenuSlice = createSlice({

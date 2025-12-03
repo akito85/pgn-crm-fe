@@ -23,7 +23,7 @@ import { IconModal } from "../../../../../../../../utils/Icon";
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 import { validateCreateUpdate } from "../../../../../../../../redux/slices/general_slice";
 
-const TaxIdentifier = ({access, id = 0 }) => {
+const TaxIdentifier = ({ access, id = 0 }) => {
   const dispatch = useDispatch();
   const {
     data_taxIdentifier,
@@ -74,7 +74,7 @@ const TaxIdentifier = ({access, id = 0 }) => {
       tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
 
       dispatch(
-        getTaxIdentifier({ id, page, pageSize, sort, search: tempSearch })
+        getTaxIdentifier({ id, page, pageSize, sort, search: tempSearch }),
       );
     }
   }, [dispatch, id, page, pageSize, sort, search]);
@@ -210,7 +210,7 @@ const TaxIdentifier = ({access, id = 0 }) => {
     setDataConfirm({
       ...value,
       taxIdentifierAddress: data_address_taxIdentifier?.find(
-        (item) => item.addressId === value.taxIdentifierAddress
+        (item) => item.addressId === value.taxIdentifierAddress,
       )?.fullAddress,
     });
     url = "/v1/dbs/api/tax-identifier/validate-create";
@@ -218,8 +218,15 @@ const TaxIdentifier = ({access, id = 0 }) => {
       ...value,
       startDate: moment(value?.startDate).format(dateFormatting.date),
       accountId: id,
-    }
-    await dispatch(validateCreateUpdate({ body: bodyRequest, services: accountManagementService, endPoint: url, type: "create" }))?.unwrap();
+    };
+    await dispatch(
+      validateCreateUpdate({
+        body: bodyRequest,
+        services: accountManagementService,
+        endPoint: url,
+        type: "create",
+      }),
+    )?.unwrap();
     setModalType(true);
   };
 
@@ -284,7 +291,7 @@ const TaxIdentifier = ({access, id = 0 }) => {
         tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
 
         dispatch(
-          getTaxIdentifier({ id, page, pageSize, sort, search: tempSearch })
+          getTaxIdentifier({ id, page, pageSize, sort, search: tempSearch }),
         );
         // dispatch(getTaxIdentifier({ id, page, pageSize, sort, search }));
       })
@@ -316,7 +323,7 @@ const TaxIdentifier = ({access, id = 0 }) => {
 
       <div>
         <div className={"w-full flex justify-end mb-5"}>
-          {access?.actionList?.some(action => action.name === 'Create' ) && 
+          {access?.actionList?.some((action) => action.name === "Create") && (
             <ButtonComponent
               onClick={() => {
                 if (
@@ -334,7 +341,7 @@ const TaxIdentifier = ({access, id = 0 }) => {
             >
               Create
             </ButtonComponent>
-          }
+          )}
         </div>
         <TaxIdentifierTable
           data={data_taxIdentifier?.result}

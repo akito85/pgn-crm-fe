@@ -1,9 +1,7 @@
 import React, { useRef } from "react";
 import { Input, Checkbox, Tooltip } from "antd";
 import Highlighter from "react-highlight-words";
-import {
-  LeftOutlined,
-} from "@ant-design/icons";
+import { LeftOutlined } from "@ant-design/icons";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import TablePagination from "../../../../../../components/TablePagination";

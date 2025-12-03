@@ -142,7 +142,7 @@ const DetailPaymentItem = ({ data_detail, data_GL, totalData, data_req }) => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
+      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`,
     );
   };
 
@@ -191,7 +191,7 @@ const DetailPaymentItem = ({ data_detail, data_GL, totalData, data_req }) => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         searchedColumn === "startDate" ? (
@@ -228,7 +228,7 @@ const DetailPaymentItem = ({ data_detail, data_GL, totalData, data_req }) => {
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         searchedColumn === "endDate" ? (

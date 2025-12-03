@@ -23,11 +23,11 @@ export const getPagingLateCharge = createAsyncThunk(
           error: error,
           action: "GET_ALL_LATE_CHARGE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailLateChargePayment = createAsyncThunk(
@@ -54,7 +54,7 @@ export const getDetailLateChargePayment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 export const downloadLateCharge = createAsyncThunk(
@@ -73,11 +73,11 @@ export const downloadLateCharge = createAsyncThunk(
           error: error,
           action: "LATE_CHARGE_DOWNLOAD",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response);
     }
-  }
+  },
 );
 
 const lateCharge = createSlice({

@@ -85,7 +85,7 @@ const columns = ({
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -95,7 +95,7 @@ const columns = ({
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
@@ -130,7 +130,7 @@ const columns = ({
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -165,14 +165,14 @@ const columns = ({
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
       title: "RELEASE DATE",
       width: 240,
       align: "center",
-      dataIndex: "releaseDate",    
+      dataIndex: "releaseDate",
       filteredValue: search?.["releaseDate"] ? [search?.["releaseDate"]] : null,
       // onFilter: (value, record) => onFilter("releaseDate", value, record),
       sorter: (a, b) => sorter("releaseDate", a, b),
@@ -191,7 +191,7 @@ const columns = ({
         searchText,
         handleSearch,
         true,
-        "date"
+        "date",
       ),
       render: (text) =>
         renderDateColumn(
@@ -200,7 +200,7 @@ const columns = ({
           searchText,
           text,
           "date",
-          search
+          search,
         ),
     },
     {
@@ -229,7 +229,7 @@ const columns = ({
         searchText,
         handleSearch,
         true,
-        "input"
+        "input",
       ),
       render: (text) =>
         renderColumn(
@@ -239,7 +239,7 @@ const columns = ({
           text,
           true,
           "input",
-          search
+          search,
         ),
       // render: (text) => {
       //   if (searchedColumn === "description") {
@@ -293,7 +293,7 @@ const columns = ({
         searchText,
         handleSearch,
         true,
-        "input"
+        "input",
       ),
       render: (index) => {
         let text;
@@ -326,7 +326,9 @@ const columns = ({
       width: 240,
       dataIndex: "approvalStatus",
       fixed: "right",
-      filteredValue: search?.["approvalStatus"] ? [search?.["approvalStatus"]] : null,
+      filteredValue: search?.["approvalStatus"]
+        ? [search?.["approvalStatus"]]
+        : null,
       // onFilter: (value, record) => onFilter("approvalStatus", value, record),
       sorter: (a, b) => sorter("approvalStatus", a, b),
       key: "approvalStatus",
@@ -346,7 +348,7 @@ const columns = ({
         searchText,
         handleSearch,
         true,
-        "input"
+        "input",
       ),
       render: (index) => {
         let text;
@@ -562,25 +564,25 @@ const itemsActionView = (
     action: "Create",
     render: (
       <NavLink
-      to={PRODUCT_PROMO_ROUTES.CREATE_PRODUCT}
-      state={{ prevPage: "detail-product", idParent: idProduct }}
-    >
-      <ButtonComponent
-        icon={<SVGIcon name="IconButtonCreate" width={24} />}
-        type="submit"
-        disabled={
-          !editableProduct ||
-          dataTable.some(
-            (item) =>
-              item.status === "DRAFT" ||
-              item.status === "WAITING FOR RELEASE"
-          )
-        }
-        onClick={handleCreate}
+        to={PRODUCT_PROMO_ROUTES.CREATE_PRODUCT}
+        state={{ prevPage: "detail-product", idParent: idProduct }}
       >
-        Create
-      </ButtonComponent>
-    </NavLink>
+        <ButtonComponent
+          icon={<SVGIcon name="IconButtonCreate" width={24} />}
+          type="submit"
+          disabled={
+            !editableProduct ||
+            dataTable.some(
+              (item) =>
+                item.status === "DRAFT" ||
+                item.status === "WAITING FOR RELEASE",
+            )
+          }
+          onClick={handleCreate}
+        >
+          Create
+        </ButtonComponent>
+      </NavLink>
     ),
   },
   //table
@@ -651,7 +653,6 @@ const itemsActionView = (
     action: "Extend",
     type: "table",
     render: (record, data_length) => {
-      
       return data_length > 3 ? (
         <ButtonComponent
           icon={
@@ -686,9 +687,7 @@ const itemsActionView = (
           <span className={"text-black ml-3"}>Extend</span>
         </ButtonComponent>
       ) : (
-        <Tooltip
-          title={"Extend"}
-        >
+        <Tooltip title={"Extend"}>
           <div className="pt-1">
             <SVGIcon
               name="IconExtend"
@@ -701,9 +700,11 @@ const itemsActionView = (
                   : undefined
               }
               className={
-                !(record.status === "ACTIVE" &&
-                record.approvalStatus !== "WAITING FOR APPROVAL" &&
-                editableProduct)
+                !(
+                  record.status === "ACTIVE" &&
+                  record.approvalStatus !== "WAITING FOR APPROVAL" &&
+                  editableProduct
+                )
                   ? "cursor-not-allowed"
                   : undefined
               }
@@ -724,7 +725,6 @@ const itemsActionView = (
     action: "Terminate",
     type: "table",
     render: (record, data_length) => {
-      
       return data_length > 3 ? (
         <ButtonComponent
           icon={
@@ -802,7 +802,6 @@ const itemsActionView = (
     action: "Release",
     type: "table",
     render: (record, data_length) => {
-      
       return data_length > 3 ? (
         <ButtonComponent
           icon={
@@ -835,7 +834,7 @@ const itemsActionView = (
               name="IconReleaseApprover"
               width={24}
               onClick={() =>
-                (record.status === "WAITING FOR RELEASE" && editableProduct)
+                record.status === "WAITING FOR RELEASE" && editableProduct
                   ? () => handleExtendTerminate(record, "terminate")
                   : undefined
               }
@@ -861,9 +860,7 @@ const itemsActionView = (
     render: (record, data_length) => {
       return data_length > 3 ? (
         <ButtonComponent
-          icon={
-            <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-          }
+          icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
           border={false}
           onClick={() => handleApprovalHistory(record)}
         >
@@ -911,7 +908,7 @@ const ProductVersionInformation = ({
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const { dataApprovalHistoryProductVersion } = useSelector(
-    (state) => state.product
+    (state) => state.product,
   );
   const [search, setSearch] = useState({});
 
@@ -958,7 +955,7 @@ const ProductVersionInformation = ({
         releaseDate: item.releaseDate
           ? moment(item.releaseDate).format("DD MMM YYYY")
           : "",
-      }))
+      })),
     );
     setTotalElement(dataProductVersion.length);
   }, [dataProductVersion]);
@@ -979,7 +976,7 @@ const ProductVersionInformation = ({
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
-    })
+    });
   };
   const handleChangeSize = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
@@ -1162,7 +1159,7 @@ const ProductVersionInformation = ({
             updateActiveProduct,
             handleExtendTerminate,
             handleRelease,
-            handleApprovalHistory
+            handleApprovalHistory,
           )}
           selector={"product"}
           url={"/product-promo/detail-product"}
@@ -1203,9 +1200,9 @@ const ProductVersionInformation = ({
                 updateActiveProduct,
                 handleExtendTerminate,
                 handleRelease,
-                handleApprovalHistory
+                handleApprovalHistory,
               ),
-              "view"
+              "view",
             ),
           ]}
         />

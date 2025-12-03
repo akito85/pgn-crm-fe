@@ -27,11 +27,11 @@ export const getListMasterJob = createAsyncThunk(
           error: response,
           action: "GET_LIST_MASTER_JOB",
           back: false,
-        })
+        }),
       );
       return thunkApi.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getAllMasterJob = createAsyncThunk(
@@ -47,11 +47,11 @@ export const getAllMasterJob = createAsyncThunk(
           error: response,
           action: "GET_ALL_LIST_MASTER_JOB",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getDetailMasterJob = createAsyncThunk(
@@ -67,11 +67,11 @@ export const getDetailMasterJob = createAsyncThunk(
           error: response,
           action: "GET_DETAIL_MASTER_JOB",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const createMasterJob = createAsyncThunk(
@@ -92,15 +92,15 @@ export const createMasterJob = createAsyncThunk(
           error: errorBody(
             errorCode(response),
             "created",
-            errorMessage(response)
+            errorMessage(response),
           ),
           action: "CREATE_MASTER_JOB",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const inactiveMasterJob = createAsyncThunk(
@@ -124,15 +124,15 @@ export const inactiveMasterJob = createAsyncThunk(
           error: errorBody(
             errorCode(response),
             statusData,
-            errorMessage(response)
+            errorMessage(response),
           ),
           action: "INACTIVE_MASTER_JOB",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const updateMasterJob = createAsyncThunk(
@@ -153,15 +153,15 @@ export const updateMasterJob = createAsyncThunk(
           error: errorBody(
             errorCode(response),
             "updated",
-            errorMessage(response)
+            errorMessage(response),
           ),
           action: "UPDATE_MASTER_JOB",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const downloadMasterJob = createAsyncThunk(
@@ -180,11 +180,11 @@ export const downloadMasterJob = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_MASTER_JOB",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
-  }
+  },
 );
 
 const masterJobSlice = createSlice({
