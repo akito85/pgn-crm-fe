@@ -14,6 +14,7 @@ const ButtonComponent = ({
   fontSizeClassname = "text-[18px]",
   className,
   fullButton = false,
+  style = {}, // Add this parameter
 }) => {
   return (
     <div>
@@ -21,7 +22,7 @@ const ButtonComponent = ({
         form={form || undefined}
         onClick={onClick}
         icon={icon ? icon : null}
-        className={`flex w-full justify-center ${className}`}
+        className={`flex justify-center ${className}`}
         type={type}
         disabled={disabled}
         htmlType={htmlType}
@@ -29,6 +30,7 @@ const ButtonComponent = ({
         style={{
           borderColor: `${border === false ? "#0075bf00" : "var(--primary)"}`,
           ...(fullButton ? { width: "100%" } : {}),
+          ...style, // Merge custom styles (new code won't break old usage)
         }}
       >
         <div className={children ? `p-1 ${fontSizeClassname} text-center` : ``}>
