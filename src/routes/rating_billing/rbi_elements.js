@@ -1,7 +1,8 @@
 import BillingPage from "../../app/pages/RatingBillingInvoice/Billing/BillingPage";
-import PrabillingPage from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingPage";
-import PrabillingForm from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingForm";
-import PrabillingDetailLog from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingDetailLog";
+// import PrabillingPage from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingPage";
+// import PrabillingForm from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingForm";
+// import PrabillingDetailLog from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingDetailLog";
+// import PrabillingDetail from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingDetail";
 import CalculationDetail from "../../app/pages/RatingBillingInvoice/Calculation/Detail/CalculationDetail";
 import CalculationForm from "../../app/pages/RatingBillingInvoice/Calculation/CalculationForm";
 import CalculationPage from "../../app/pages/RatingBillingInvoice/Calculation/CalculationPage";
@@ -72,7 +73,7 @@ export const RBI_ELEMENTS = {
   BILLING_VIEW_PAGE: <BillingPage />,
 
   // monitoring usage
-  MONITORING_CUSTOMER_VIEW_ELEMENTS: <MonitoringCustomerPage />,
+  // MONITORING_CUSTOMER_VIEW_ELEMENTS: <MonitoringCustomerPage />,
 
   // monitoring usage
   MONITORING_USAGE_VIEW_ELEMENTS: <MonitoringUsagePage />,
