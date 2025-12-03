@@ -39,6 +39,7 @@ const PromoDiscountDetailPages = ({ dataPromo }) => {
           <DetailText label="Name">{dataPromo?.name || ""}</DetailText>
           <DetailText label="Category">{dataPromo?.categoryName}</DetailText>
           <DetailText label="Promo Type">{dataPromo?.typeName}</DetailText>
+          <DetailText label="Promotion Type">{dataPromo?.promotionTypeName}</DetailText>
           <DetailText label="Start Date">
             {dataPromo?.startDate
               ? moment(dataPromo?.startDate).format(dateFormatting.date)
