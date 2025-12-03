@@ -21,6 +21,7 @@ const initialState = {
   data_prApprovalHierarchy: [],
   detail_prApprovalHierarchy: [],
   data_prAttachmentCategory: [],
+  data_prAccountStandard: [],
   detail_taxImplication: {},
   detail_paymentRelation: {},
   isPrSuccess: false,
@@ -576,6 +577,22 @@ export const getPrAttachmentCategory = createAsyncThunk(
   }
 )
 
+export const getPrAccountStandard = createAsyncThunk(
+  "GET_PR_ACCOUNT_STANDARD",
+  async ({ page, pageSize, sort, search }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/account-info/paging-account-standart?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await accountManagementService.getPagination(url);
+      return response?.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+)
+
 const financialInformationSlice = createSlice({
   name: "financialInformation",
   initialState,
@@ -825,7 +842,7 @@ const financialInformationSlice = createSlice({
       state.loading = false;
     },
 
-    /** Get Approval Hierarchy */
+    /** Get PR Approval Hierarchy */
     [getPrApprovalHierarchy.pending]: (state) => {
       state.loading = true;
     },
@@ -838,7 +855,7 @@ const financialInformationSlice = createSlice({
       state.loading = false;
     },
 
-    /** Get Detail Approval Hierarchy */
+    /** Get PR Detail Approval Hierarchy */
     [getDetailPrApprovalHierarchy.pending]: (state) => {
       state.loading = true;
     },
@@ -851,7 +868,7 @@ const financialInformationSlice = createSlice({
       state.loading = false;
     },
 
-    /** Get Attachment Category */
+    /** Get PR Attachment Category */
     [getPrAttachmentCategory.pending]: (state) => {
       state.loading = true;
     },
@@ -861,6 +878,19 @@ const financialInformationSlice = createSlice({
     },
     [getPrAttachmentCategory.rejected]: (state) => {
       state.detail_prApprovalHierarchy = [];
+      state.loading = false;
+    },
+
+    /** Get PR Account Standard */
+    [getPrAccountStandard.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPrAccountStandard.fulfilled]: (state, action) => {
+      state.data_prAccountStandard = action.payload;
+      state.loading = false;
+    },
+    [getPrAccountStandard.rejected]: (state) => {
+      state.data_prAccountStandard = [];
       state.loading = false;
     },
   },

@@ -1,40 +1,49 @@
-import { useState } from "react";
-import { Fragment } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 
-import { Form, Select, Button, Tooltip } from "antd";
+import { Form, Button, Tooltip, Input, DatePicker } from "antd";
 import SVGIcon from "../../../../../../../../../../assets/Icon/index";
 
 import InputComponent from "../../../../../../../../../../components/InputComponent";
 import ModalCustom from "../../../../../../../../../../components/Modal/ModalCustom";
 import NxPanel from "../../../../../../../../../../components/Nx/NxPanel";
-import NxTable from "../../../../../../../../../../components/Nx/NxTable";
-import StatusComponent from "../../../../../../../../../../components/StatusComponent";
-import { requiredMessage, toTitleCase } from "../../../../../../../../../../utils";
+import { dateFormatting, requiredMessage } from "../../../../../../../../../../utils";
 
 import moment from "moment";
 import DateComponent from "../../../../../../../../../../components/DateComponent";
-import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
 import TablePagination from "../../../../../../../../../../components/TablePagination";
+import { FilterOutlined } from "@ant-design/icons";
+import Highlighter from "react-highlight-words";
+import { getPrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function InfoPaymentRelation({
-  totalElement = 0,
-  page = 1,
-  pageSize = 10,
-  searchText = "",
-  searchedColumn = "",
-  onSort = () => {},
-  getColumnSearchProps = () => {},
-  searchInput,
-  handleSearch,
   setAccount,
   className,
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [paymentRelation, setPaymentRelation] = useState([])
-  
-  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState({});
+  const [sort, setSort] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [totalElement, setTotalElement] = useState(0);
+  const searchInput = useRef(null);
+                                                                                                                                                                                                                                                                                                                                      
+  const onSort = (_, __, sort) => {
+    const dataSort = sort.order
+      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
+  };
+
+  const [isOpen, setIsOpen] = useState(false);
+  
+  const { data_prAccountStandard, } = useSelector(
+    (state) => state.financialInformation
+  );
+  
   const handleOk = () => {
     console.log("ok")
   }
@@ -54,17 +63,114 @@ export default function InfoPaymentRelation({
     return "";
   };
 
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(1);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
+  };
+
+  const handleChangeSize = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
+    setPageSize(pageSizeChange);
+  };
+
+  const getColumnSearchProps = (dataIndex, type) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
+      const onDataChange = (value, dateString) => {
+        setSelectedKeys(dateString ? [dateString] : []);
+        handleSearch(dateString ? [dateString] : [], confirm, dataIndex);
+      };
+      return (
+        <div
+          style={{
+            padding: 8,
+          }}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          {type === "date" ? (
+            <DatePicker onChange={onDataChange} />
+          ) : (
+            <Input
+              ref={searchInput}
+              placeholder={`Search`}
+              value={selectedKeys[0]}
+              onChange={(e) =>
+                setSelectedKeys(e.target.value ? [e.target.value] : [])
+              }
+              onPressEnter={() => {
+                handleSearch(selectedKeys, confirm, dataIndex);
+              }}
+              style={{
+                marginBottom: 8,
+                display: "block",
+              }}
+            />
+          )}
+        </div>
+      );
+    },
+    filterIcon: (filtered) => (
+      <FilterOutlined
+        style={{
+          color: filtered ? "#1890ff" : undefined,
+        }}
+      />
+    ),
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 5000);
+      }
+    },
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: "#ffc069",
+            padding: 0,
+          }}
+          searchWords={
+            type === "date"
+              ? moment([searchText]).format(dateFormatting.dateFormal)
+              : [searchText]
+          }
+          autoEscape
+          textToHighlight={text ? text.toString() : ""}
+        />
+      ) : (
+        text || ""
+      ),
+  });
+
+  useEffect(() => {
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
+    dispatch(getPrAccountStandard({ page, pageSize, sort, search: reqSearch }));
+  }, [page, pageSize, sort, search]);
+
+  useEffect(() => {
+    if (
+      data_prAccountStandard && 
+      data_prAccountStandard.result &&
+      data_prAccountStandard.result.length > 0
+    ) {
+      setTotalElement(data_prAccountStandard?.page?.totalElements);
+    }
+  }, [data_prAccountStandard]);
+
   // Sanitize pagination values to prevent NaN
   // Modify
   const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
   const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
-  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : paymentRelation.length;
-  const renderSimpleDate = (date) => {
-    if (date) {
-      return moment(date).format("DD MMM YYYY");
-    }
-    return "";
-  };
+  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : (data_prAccountStandard?.result?.length || 0);
 
   const columnMain = [
     {
@@ -319,7 +425,7 @@ export default function InfoPaymentRelation({
         ]}
       >
         <TablePagination
-          dataSource={paymentRelationDummy.map((item, idx) => ({
+          dataSource={data_prAccountStandard?.result?.map((item, idx) => ({
             ...item,
             key: item.id || idx,
           }))}
@@ -329,6 +435,7 @@ export default function InfoPaymentRelation({
           onSort={onSort}
           tableScrolled={{ y: 525, x: 3000 }}
           columns={columnMain}
+          onSizeChanger={handleChangeSize}
         />
       </ModalCustom>
     </div>
