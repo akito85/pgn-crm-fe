@@ -585,12 +585,26 @@ export const getPrAttachmentCategory = createAsyncThunk(
 
 export const getPrAccountStandard = createAsyncThunk(
   "GET_PR_ACCOUNT_STANDARD",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/account/list`;
+      const response = await accountManagementService.getAll(url);
+      return response?.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+)
+
+export const getPaginationPrAccountStandard = createAsyncThunk(
+  "GET_PAGINATION_PR_ACCOUNT_STANDARD",
   async ({ page, pageSize, sort, search }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
+
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/account/list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/account/list?searchs=${JSON.stringify(searchParams)}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await accountManagementService.getPagination(url);
       return response?.data;
     } catch (error) {
@@ -780,15 +794,15 @@ const financialInformationSlice = createSlice({
 
     /** Get Detail Payment Relation */
     [getDetailPaymentRelation.pending]: (state, action) => {
-      state.data_paymentRelation = action.payload;
+      state.detail_paymentRelation = action.payload;
       state.loading = true;
     },
     [getDetailPaymentRelation.fulfilled]: (state, action) => {
-      state.data_paymentRelation = action.payload;
+      state.detail_paymentRelation = action.payload;
       state.loading = false;
     },
     [getDetailPaymentRelation.rejected]: (state, action) => {
-      state.data_paymentRelation = action.payload;
+      state.detail_paymentRelation = action.payload;
       state.loading = false;
     },
 
@@ -893,6 +907,19 @@ const financialInformationSlice = createSlice({
       state.loading = false;
     },
     [getPrAccountStandard.rejected]: (state) => {
+      state.data_prAccountStandard = [];
+      state.loading = false;
+    },
+
+    /** Get Pagination PR Account Standard */
+    [getPaginationPrAccountStandard.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPaginationPrAccountStandard.fulfilled]: (state, action) => {
+      state.data_prAccountStandard = action.payload;
+      state.loading = false;
+    },
+    [getPaginationPrAccountStandard.rejected]: (state) => {
       state.data_prAccountStandard = [];
       state.loading = false;
     },
