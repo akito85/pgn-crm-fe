@@ -37,6 +37,8 @@ import {
   getPrAttachmentCategory,
   updatePaymentRelation,
 } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { validateCreateUpdate } from "../../../../../../../../redux/slices/general_slice";
+import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 
 const CreatePaymentRelation = ({ type }) => {
   const containerRef = useRef(null);
@@ -197,14 +199,46 @@ const CreatePaymentRelation = ({ type }) => {
 
   /**
    * @param {boolean} show 
-   * @param {"draft" | "submit"} type
+   * @param {"draft" | "submit"} submitType
    */
-  const handleSetShowConfirmationModal = (show, type) => {
-    setShowConfirmationModal(show);
-    if (show)
-      setConfirmationType(type);
-    else
+  const handleSetShowConfirmationModal = async (show, submitType) => {
+    if (show) {
+      const {
+        objectId,
+        priority,
+        description, 
+        startDate,
+        endDate,
+        appHierId,
+      } = formCreate.getFieldsValue();
+
+      const body = {
+        subjectId: data_accountDetail?.accountInformation?.accountId, 
+        objectId,
+        priority,
+        description, 
+        startDate,
+        endDate,
+        appHierId,
+        action: submitType
+      };
+
+      dispatch(validateCreateUpdate({
+        body,
+        services: accountManagementService,
+        endPoint: `/v1/dbs/api/payment-relation/validate-${type}`,
+        type,
+      }))
+      .unwrap()
+      .then((data) => {
+        setShowConfirmationModal(show);
+        setConfirmationType(submitType);
+      }).catch(() => {});
+    }
+    else {
+      setShowConfirmationModal(show);
       setConfirmationType("");
+    }
   }
 
   // Fetch Account Standard/OneTime Detail
