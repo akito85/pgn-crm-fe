@@ -474,13 +474,26 @@ export const createPaymentRelation = createAsyncThunk(
 
 export const updatePaymentRelation = createAsyncThunk(
   "UPDATE_PAYMENT_RELATION",
-  async ({ id, body }, thunkAPI) => {
+  async ({ id, body: updateBody, attachments = [] }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/payment-relation/${id}`;
-      const response = await accountManagementService.updateData(url, body);
+      const updateUrl = `/v1/dbs/api/payment-relation/${id}`;
+      const response = await accountManagementService.updateData(updateUrl, updateBody);
+
+      const uploadUrl = `v1/dbs/api/payment-relation/upload-attachment/${id}`;
+
+      const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
+        uploadUrl,
+        {
+          file:  attachment.file,
+          category: attachment.fileCategoryId,
+        }
+      ));
+
+      await Promise.all(uploadPromises);
+
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${body?.action === "DRAFT" ? 'drafted' : 'updated'}.`,
+        description: `Your data has been ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
       return response.data;
@@ -494,8 +507,14 @@ export const updatePaymentRelation = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body?.action === "DRAFT" ? 'drafted' : 'updated'}. ${message}.`,
+          description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}. ${message}.`,
         };
+        thunkAPI.dispatch(showModalError(errorBody));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. An unknown error occured.`
+        }
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error?.response);

@@ -364,7 +364,22 @@ const CreatePaymentRelation = ({ type }) => {
       })
       .catch((error) => {});
     else if (type === "update")
-      dispatch(updatePaymentRelation({ id: idPr, body }));
+      dispatch(updatePaymentRelation({ id: idPr, body }))
+      .unwrap()
+        .then((data) => {
+          setTimeout(() => {
+            navigate(
+              ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+              {
+                state: {
+                  idAccount,
+                  idCustomer,
+                }
+              }
+            );
+          }, 2000)
+        })
+        .catch((error) => {});;
   };
 
   return (
