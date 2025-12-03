@@ -13,13 +13,37 @@ import ButtonComponent from "../../../../../../../../../components/ButtonCompone
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
 
+import ModalPreRequisiteDetail from "./ModalPreRequisiteDetail";
+
 export default function PreRequisiteForm() {
   const [form] = Form.useForm(); // Form instance for contact information
   const [isOpen, setIsOpen] = useState(false); // ModalInformationContactDetail
 
   const navigate = useNavigate();
 
-  const PREREQUISITE = [];
+  const PREREQUISITE = [
+    {
+      no: 1,
+      type: "Administrative",
+      name: "Menerbitkan BBG",
+      description: "Desc",
+      status: "status",
+    },
+    {
+      no: 2,
+      type: "Administrative",
+      name: "Menerbitkan BBG",
+      description: "Desc",
+      status: "status",
+    },
+    {
+      no: 3,
+      type: "Administrative",
+      name: "Menerbitkan BBG",
+      description: "Desc",
+      status: "status",
+    },
+  ];
   const columnMain = [
     {
       title: "NO",
@@ -53,6 +77,9 @@ export default function PreRequisiteForm() {
       width: 150,
       render: (_, record) => (
         <Space size="small">
+          <Button type="link" onClick={() => setIsOpen(true)}>
+            Detail
+          </Button>
           <Button
             type="link"
             icon={<EditOutlined />}
@@ -116,8 +143,31 @@ export default function PreRequisiteForm() {
           useSelect={true}
           dataMain={PREREQUISITE}
           columnMain={columnMain}
+          fontSize={"medium"}
+          dataExpand={null}
+          columnExpand={null}
+          useCheckbox={true}
+          rowKey={(PREREQUISITE) => PREREQUISITE.no}
+          onSelectionChange={(keys, rows) => {
+            console.log("Selected keys:", keys);
+            console.log("Full row data:", rows); // All props of selected rows
+          }}
+          getCheckboxProps={(record) => ({
+            disabled: record.status === "Inactive",
+          })}
         />
       </NxPanel>
+
+      <ModalPreRequisiteDetail
+        isOpen={isOpen}
+        footer={null}
+        handleCancel={() => {
+          setIsOpen(false);
+        }}
+        handleOk={() => {
+          setIsOpen(false);
+        }}
+      />
     </Fragment>
   );
 }
