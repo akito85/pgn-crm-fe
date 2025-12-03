@@ -272,7 +272,7 @@ export default function InfoPaymentRelation({
                   color={"#0075bf"}
                   width={20}
                   onClick={() => {
-                    setAccount(r?.customerNumber, r?.customerName)
+                    setAccount(r?.accountId, r?.customerNumber, r?.customerName)
                     setIsOpen(false);
                   }}
                 />
@@ -305,6 +305,10 @@ export default function InfoPaymentRelation({
       <NxPanel title={"PAYMENT RELATION INFORMATION"} removeBottomMargin>
         <div className="w-full grid grid-cols-3 gap-4">
           <div className="flex gap-2 items-end">
+            <Form.Item name={"objectId"} hidden>
+              <Input />
+            </Form.Item>
+
             <Form.Item
               key="accountNumber"
               name={"accountNumber"}
