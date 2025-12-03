@@ -180,8 +180,8 @@ const AttachmentForm = ({
   }, [data]);
 
   useEffect(() => {
-    dispatch(getCategoryAttachment())
-  }, []);
+    dispatch(getCategoryAttachment());
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(getGlobalPropertiesAttachment());

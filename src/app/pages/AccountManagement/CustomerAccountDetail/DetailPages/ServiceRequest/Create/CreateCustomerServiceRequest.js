@@ -369,7 +369,6 @@ const CreateCustomerServiceRequest = (props) => {
           form={formCreate}
           account={data_accountDetail}
           customer={data_customerDetail}
-          serviceRequestData={formCreate.getFieldsValue(true)}
           dropdowns={dropdowns}
           currentStep={current}
         />
@@ -380,7 +379,7 @@ const CreateCustomerServiceRequest = (props) => {
       title: "Approval",
       content: (
         <ApprovalForm
-          formData={formCreate.getFieldsValue(true)}
+          form={formCreate}
           account={data_accountDetail}
           customer={data_customerDetail}
           dropdowns={dropdowns}

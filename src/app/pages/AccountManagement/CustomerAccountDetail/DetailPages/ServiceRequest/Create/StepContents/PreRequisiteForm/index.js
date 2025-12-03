@@ -19,7 +19,6 @@ export default function PreRequisiteForm({
   form,
   account,
   customer,
-  serviceRequestData,
   currentStep,
 }) {
   const [isOpen, setIsOpen] = useState(false);

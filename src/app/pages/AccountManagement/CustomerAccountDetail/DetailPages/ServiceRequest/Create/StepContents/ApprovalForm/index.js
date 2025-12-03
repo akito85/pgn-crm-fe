@@ -8,7 +8,7 @@ import moment from "moment";
  * Approval/Review step for Service Request
  */
 export default function ApprovalForm({
-  formData = {},
+  form,
   account = {},
   customer = {},
   dropdowns = {},
@@ -17,6 +17,9 @@ export default function ApprovalForm({
   attachmentsData = [],
 }) {
   const [valuePage, setValuePage] = useState("Service Request");
+
+  // Get form data only when rendering (not on every parent render)
+  const formData = form?.getFieldsValue(true) || {};
 
   const tabPages = [
     { value: "Service Request" },
