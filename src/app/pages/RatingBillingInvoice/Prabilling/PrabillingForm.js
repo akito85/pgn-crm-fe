@@ -819,13 +819,12 @@ const PrabillingForm = ({ type }) => {
                 </Form.Item>
               )}
 
-            <Form.Item label={"Remark"} name={"remark"}>
+            <Form.Item label={"Remark"} name={"remark"} rules={formMessageRequired("Remark")}>
               <InputComponent
                 type="textarea"
                 value={remark}
                 style={{ marginBottom: 4 }}
                 onChange={(e) => setRemark(e.target.value)}
-                rules={formMessageRequired("Remark")}
               />
             </Form.Item>
           </CardContainer>
