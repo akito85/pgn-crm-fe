@@ -2,8 +2,8 @@ import { useEffect,  useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Steps, Button, message, Form } from "antd";
-import { LeftCircleOutlined, RightCircleOutlined, RightOutlined, WarningOutlined } from "@ant-design/icons";
+import { Steps, Button, Form } from "antd";
+import { RightOutlined } from "@ant-design/icons";
 
 import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../../../components/BreadCrumb";
@@ -14,12 +14,6 @@ import ButtonComponent from "../../../../../../../../components/ButtonComponent"
 // you fucking nasty using bulky moment lazy as fuck
 import moment from "moment";
 
-import {
-  ModalConfirm,
-  ModalError,
-  ModalSuccess,
-} from "../../../../../../../../components/Modal/ModalPopUp";
-import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 
 import {
@@ -28,7 +22,6 @@ import {
 import {
   getAccountStandardDetail,
   getAccountOneTimeDetail,
-  getAccountDetail,
 } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
@@ -51,12 +44,10 @@ const CreatePaymentRelation = ({ type }) => {
   const dispatch = useDispatch();
   const {
     data_customerDetail,
-    loading,
   } = useSelector((state) => state.customerAccount);
 
   const {
     data_accountDetail,
-    loading: loadingAccount,
   } = useSelector((state) => state.accountManagement);
 
   const {
@@ -76,19 +67,10 @@ const CreatePaymentRelation = ({ type }) => {
 
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
-  const [data, setData] = useState({});
-  const [dataSend, setDataSend] = useState({});
-  const [modalSuccess, setModalSuccess] = useState(false);
-  const [loadingForm, setLoadingForm] = useState(false);
-  const [dataConfirm, setDataConfirm] = useState({});
-  const [btnConfirm, setBtnConfirm] = useState(false);
-  const [modalBack, setModalBack] = useState(false);
 
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
-
-  const isLoading = loading || loadingForm || loadingAccount;
 
   const formFields = [
     [
@@ -202,8 +184,6 @@ const CreatePaymentRelation = ({ type }) => {
     }
   }, [dispatch, idAccount, idCustomer, accountType]);
 
-  const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}` 
-  
   const setAccount = (objectId, accountNumber, accountName) => {
     formCreate.setFieldValue("objectId", objectId)
     formCreate.setFieldValue("accountNumber", accountNumber);
