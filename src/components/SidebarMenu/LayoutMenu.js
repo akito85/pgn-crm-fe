@@ -71,6 +71,8 @@ const LayoutMenu = ({ children }) => {
   const [form] = Form.useForm();
   const [collapsed, setCollapsed] = useState(false);
   const [modalConfirmation, setModalConfirmation] = useState(false);
+  const isIdleTimerEnabled =
+    process.env.REACT_APP_IDLE_TIMER_ENABLED === "true";
   const tokenJSON = JSON.parse(
     localStorage.getItem("token") || window.sessionStorage.getItem("token"),
   );
@@ -335,12 +337,14 @@ const LayoutMenu = ({ children }) => {
     </>
   ) : (
     <>
-      <IdleTimerContainer
-        handleLogout={handleLogout}
-        timeout={isTimedout}
-        timeoutModal={() => setShowIdleModal(true)}
-        timedoutHandler={setIsTimedout}
-      />
+      {isIdleTimerEnabled && (
+        <IdleTimerContainer
+          handleLogout={handleLogout}
+          timeout={isTimedout}
+          timeoutModal={() => setShowIdleModal(true)}
+          timedoutHandler={setIsTimedout}
+        />
+      )}
       <Layout
         hasSider
         style={{
