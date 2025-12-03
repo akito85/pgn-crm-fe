@@ -22,6 +22,7 @@ const initialState = {
   detail_prApprovalHierarchy: [],
   data_prAttachmentCategory: [],
   data_prAccountStandard: [],
+  data_paginationPrAccountStandard: [],
   detail_taxImplication: {},
   detail_paymentRelation: {},
   data_paymentRelationAttachment: [],
@@ -619,7 +620,7 @@ export const getPrAccountStandard = createAsyncThunk(
   "GET_PR_ACCOUNT_STANDARD",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/list`;
+      const url = `/v1/dbs/api/account/list?size=1000000000`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -948,11 +949,11 @@ const financialInformationSlice = createSlice({
       state.loading = true;
     },
     [getPaginationPrAccountStandard.fulfilled]: (state, action) => {
-      state.data_prAccountStandard = action.payload;
+      state.data_paginationPrAccountStandard = action.payload;
       state.loading = false;
     },
     [getPaginationPrAccountStandard.rejected]: (state) => {
-      state.data_prAccountStandard = [];
+      state.data_paginationPrAccountStandard = [];
       state.loading = false;
     },
 

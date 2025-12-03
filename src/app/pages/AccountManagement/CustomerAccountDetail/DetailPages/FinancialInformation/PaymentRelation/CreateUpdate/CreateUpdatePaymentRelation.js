@@ -35,7 +35,7 @@ import {
   getPrAccountStandard,
   getPrApprovalHierarchy,
   getPrAttachmentCategory,
-  updatePaymentRelation
+  updatePaymentRelation,
 } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 
 const CreatePaymentRelation = ({ type }) => {
@@ -110,7 +110,7 @@ const CreatePaymentRelation = ({ type }) => {
   }, [type, idPr]);
 
   useEffect(() => {
-    if (detail_paymentRelation?.data) {
+    if (type === "update" && detail_paymentRelation?.data && data_prAccountStandard?.result?.length) {
       const {
         subjectId,
         objectId,
@@ -120,42 +120,38 @@ const CreatePaymentRelation = ({ type }) => {
         description,
         appHierId,
       } = detail_paymentRelation.data;
-
-      const accountName = formCreate.getFieldValue("accountName");
-      const accountNumber =formCreate.getFieldValue("accountNumber");
-
-      if (!data_prAccountStandard?.result?.length) {
-        dispatch(getPrAccountStandard());
-      }
       
-      else if (!accountName && !accountNumber) {
-        const result = data_prAccountStandard.result;
+      const result = data_prAccountStandard.result;
 
-        const accountStandard = result.find((item) => item.accountId === objectId);        
+      const accountStandard = result.find((item) => item.accountId === objectId);        
 
-        if (accountStandard) {
-          const { accountNumber, accountName } = accountStandard;
+      if (accountStandard) {
+        const { accountNumber, accountName } = accountStandard;
 
-          formCreate.setFieldsValue({
-            subjectId,
-            objectId,
-            accountName,
-            accountNumber,
-            priority,
-            startDate,
-            endDate,
-            description,
-            appHierId,
-          });
+        formCreate.setFieldsValue({
+          subjectId,
+          objectId,
+          accountName,
+          accountNumber,
+          priority,
+          startDate,
+          endDate,
+          description,
+          appHierId,
+        });
 
-          handleSelectHiararchy(appHierId);
-        }
+        handleSelectHiararchy(appHierId);
       }
     }
   }, [detail_paymentRelation, data_prAccountStandard]);
 
   useEffect(() => {
-    if (data_paymentRelationAttachment?.result) {
+    if (type === "update")
+      dispatch(getPrAccountStandard());
+  }, []);
+
+  useEffect(() => {
+    if (type === "update" && data_paymentRelationAttachment?.result) {
       const result = data_paymentRelationAttachment?.result;
       setDataAttachment(prev => ({
         ...prev,
