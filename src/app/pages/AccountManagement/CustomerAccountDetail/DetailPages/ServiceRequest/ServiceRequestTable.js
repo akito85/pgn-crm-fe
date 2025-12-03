@@ -12,6 +12,7 @@ import ButtonComponent from "../../../../../../components/ButtonComponent";
 import { toTitleCase } from "../../../../../../utils";
 
 const CustomerServiceRequestList = ({
+  id, 
   data = [],
   handleChange = () => {},
   handleChangeSize = () => {},

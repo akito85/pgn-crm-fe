@@ -60,6 +60,7 @@ const AccountDetailInformation = ({
 }) => {
   const { path } = usePrevLocContext();
   console.log(path);
+  console.log("account-detail-info: ", id, idCustomer, type);
 
   // useEffect(() => {
   //   switch (section) {
@@ -235,7 +236,13 @@ const AccountDetailInformation = ({
           />
         );
       case dataTabs.sr:
-        return <ServiceRequest />;
+        return(
+          <ServiceRequest 
+            idAccount={id}
+            idCustomer={idCustomer}
+            type={type}
+          />
+        );
       case dataTabs.dm:
         return (
           <DistributionMedia

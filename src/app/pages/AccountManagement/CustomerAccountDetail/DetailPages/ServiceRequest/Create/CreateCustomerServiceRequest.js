@@ -1,9 +1,14 @@
-import { useEffect,  useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { Steps, Button, message, Form, Spin } from "antd";
-import { LeftCircleOutlined, RightCircleOutlined, RightOutlined, WarningOutlined } from "@ant-design/icons";
+import {
+  LeftCircleOutlined,
+  RightCircleOutlined,
+  RightOutlined,
+  WarningOutlined,
+} from "@ant-design/icons";
 
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../../components/BreadCrumb";
@@ -30,12 +35,10 @@ import {
   getGlobalMartialStatus,
   getGlobalSex,
   getListCategoryFile,
-  updateCustomer
+  updateCustomer,
 } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
 
-import {
-  getDetailContact
-} from "../../../../../../../redux/slices/account_management/MasterData/contact_slice";
+import { getDetailContact } from "../../../../../../../redux/slices/account_management/MasterData/contact_slice";
 
 import {
   getListDetailAccountContact,
@@ -61,12 +64,15 @@ import {
   getServiceRequestPriorities,
   getServiceRequestSources,
   getServiceRequestDataRequirements,
-  getServiceRequestPrerequisites
+  getServiceRequestPrerequisites,
 } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequest";
 
 const CreateCustomerServiceRequest = (props) => {
   const containerRef = useRef(null);
-  const [current, setCurrent] = useState(0);
+  const location = useLocation();
+
+  // Restore step from location state if returning from prerequisite create
+  const [current, setCurrent] = useState(location?.state?.returnToStep || 0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const { type } = props;
 
@@ -82,19 +88,15 @@ const CreateCustomerServiceRequest = (props) => {
     loading,
   } = useSelector((state) => state.customerAccount);
 
-  const {
-    data_accountDetail,
-    loading: loadingAccount,
-  } = useSelector((state) => state.accountManagement);
+  const { data_accountDetail, loading: loadingAccount } = useSelector(
+    (state) => state.accountManagement,
+  );
 
-  const {
-    dropdowns,
-    serviceRequestDetail
-  } = useSelector((state) => state.serviceRequest);
+  const { dropdowns, serviceRequestDetail } = useSelector(
+    (state) => state.serviceRequest,
+  );
 
-  const {
-    data_detail
-  } = useSelector((state) => state.accountContact); // Add this selector
+  const { data_detail } = useSelector((state) => state.accountContact); // Add this selector
 
   const {
     data_country,
@@ -104,21 +106,15 @@ const CreateCustomerServiceRequest = (props) => {
     data_subdistrict,
     data_postalcode,
     data_type,
-    data_business_purpose
+    data_business_purpose,
   } = useSelector((state) => state.accountAddress);
 
   //declare
-  const location = useLocation();
   const [formCreate] = Form.useForm();
   const id = location?.state?.id;
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const accountType = location?.state?.type; // "standard" or "onetime"
-  // const id = 7;
-  
-  console.log("create ", idAccount, idCustomer, accountType)
-  console.log(data_detail)
-  console.log(dropdowns)
 
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
@@ -140,10 +136,21 @@ const CreateCustomerServiceRequest = (props) => {
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
 
+  // Service Request step state objects (following StandardForm pattern)
+  const [srObj, setSrObj] = useState({}); // Service Request information
+  const [contactsData, setContactsData] = useState([]); // Contacts table
+  const [prerequisitesData, setPrerequisitesData] = useState([]); // Prerequisites table
+  const [attachmentsData, setAttachmentsData] = useState([]); // Attachments
+
   const isLoading = loading || loadingForm || loadingAccount;
 
- 
-  const { InformationForm, AttachmentForm, ApprovalForm, ContactForm, PreRequisiteForm } = StepContents;
+  const {
+    InformationForm,
+    AttachmentForm,
+    ApprovalForm,
+    ContactForm,
+    PreRequisiteForm,
+  } = StepContents;
   const [dropdownsLoaded, setDropdownsLoaded] = useState(false);
 
   const routes = [
@@ -160,7 +167,7 @@ const CreateCustomerServiceRequest = (props) => {
       breadcrumbName: "Detail Account",
     },
     {
-      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST,
+      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST,
       breadcrumbName: "Service Requests",
     },
     {
@@ -187,12 +194,14 @@ const CreateCustomerServiceRequest = (props) => {
   }, [dispatch, id]);
 
   useEffect(() => {
-    dispatch(getListDetailAccountContact({ 
-      id: idAccount, 
-      page: 1,
-      pageSize: 111,
-      sort: "createdDate~desc"
-    }));
+    dispatch(
+      getListDetailAccountContact({
+        id: idAccount,
+        page: 1,
+        pageSize: 111,
+        sort: "createdDate~desc",
+      }),
+    );
 
     dispatch(getDetailAccountContact(idCustomer));
     // dispatch(getServiceRequestById(idAccount));
@@ -214,15 +223,16 @@ const CreateCustomerServiceRequest = (props) => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (dropdowns && 
-        dropdowns.serviceRequestTypes?.data && 
-        dropdowns.serviceRequestCategories?.data &&
-        dropdowns.serviceRequestSubcategories?.data &&
-        dropdowns.serviceRequestChannels?.data &&
-        dropdowns.serviceRequestPriorities?.data &&
-        dropdowns.serviceRequestSources?.data &&
-        dropdowns.serviceRequestPrerequisites?.data &&
-        dropdowns.serviceRequestDataRequirements?.data
+    if (
+      dropdowns &&
+      dropdowns.serviceRequestTypes?.data &&
+      dropdowns.serviceRequestCategories?.data &&
+      dropdowns.serviceRequestSubcategories?.data &&
+      dropdowns.serviceRequestChannels?.data &&
+      dropdowns.serviceRequestPriorities?.data &&
+      dropdowns.serviceRequestSources?.data &&
+      dropdowns.serviceRequestPrerequisites?.data &&
+      dropdowns.serviceRequestDataRequirements?.data
     ) {
       setDropdownsLoaded(true);
     }
@@ -258,19 +268,20 @@ const CreateCustomerServiceRequest = (props) => {
   }, [data_customerDetail]);
 
   useEffect(() => {
-    if(customerType === 58){
-
-      setIdentificationDdlValue(data_globalIdentificationType?.filter(item => item?.id !== 1123))
+    if (customerType === 58) {
+      setIdentificationDdlValue(
+        data_globalIdentificationType?.filter((item) => item?.id !== 1123),
+      );
     } else {
-      setIdentificationDdlValue(data_globalIdentificationType)
+      setIdentificationDdlValue(data_globalIdentificationType);
     }
-  },[customerType, data_globalIdentificationType])
+  }, [customerType, data_globalIdentificationType]);
 
   useEffect(() => {
     formCreate.setFieldsValue({
       customerName: `${firstName}${middleName ? ` ${middleName}` : ""}${lastName ? ` ${lastName}` : ""}`,
     });
-  },[firstName, middleName, lastName])
+  }, [firstName, middleName, lastName]);
 
   useEffect(() => {
     formCreate.setFieldsValue({
@@ -302,7 +313,7 @@ const CreateCustomerServiceRequest = (props) => {
     }
   }, [data_accountDetail, formCreate]);
 
-  console.log(data_detail)
+  console.log(data_detail);
 
   const handleChangeName = (e, type) => {
     switch (type) {
@@ -318,10 +329,10 @@ const CreateCustomerServiceRequest = (props) => {
       default:
         break;
     }
-  }
+  };
 
-  // const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}` 
-  
+  // const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}`
+
   const steps = [
     {
       title: "Service Request",
@@ -337,30 +348,45 @@ const CreateCustomerServiceRequest = (props) => {
           <Spin size="large" tip="Loading dropdown data..." />
         </div>
       ),
-      disabled: !dropdownsLoaded
+      disabled: !dropdownsLoaded,
     },
     {
       title: "Contact",
-      content: <ContactForm form={formCreate} />,
-      disabled: false
-    },    
+      content: (
+        <ContactForm
+          form={formCreate}
+          idAccount={idAccount}
+          idCustomer={idCustomer}
+          accountType={accountType}
+        />
+      ),
+      disabled: false,
+    },
     {
       title: "Pre-Requisite",
-      content: <PreRequisiteForm />,
-      disabled: false
+      content: (
+        <PreRequisiteForm
+          form={formCreate}
+          account={data_accountDetail}
+          customer={data_customerDetail}
+          serviceRequestData={formCreate.getFieldsValue(true)}
+          dropdowns={dropdowns}
+          currentStep={current}
+        />
+      ),
+      disabled: false,
     },
     {
       title: "Attachment",
       content: <AttachmentForm />,
-      disabled: false
+      disabled: false,
     },
     {
       title: "Approval",
       content: <ApprovalForm />,
-      disabled: false
-    }
+      disabled: false,
+    },
   ];
-  
 
   const navigate = useNavigate();
   const next = () => {
@@ -376,9 +402,9 @@ const CreateCustomerServiceRequest = (props) => {
   };
   const handleButtonNext = () => {
     next();
-    scrollRightHandler()
-  }
-  
+    scrollRightHandler();
+  };
+
   const items = steps.map((item) => ({
     key: item.title,
     title: item.title,
@@ -388,7 +414,7 @@ const CreateCustomerServiceRequest = (props) => {
     if (containerRef.current) {
       setScrollLeft(containerRef.current.scrollLeft);
     }
-  }
+  };
 
   const scrollLeftHandler = () => {
     if (containerRef.current) {
@@ -414,16 +440,26 @@ const CreateCustomerServiceRequest = (props) => {
         {/* Step Contents */}
         <div className="flex flex-row gap-x-6 justify-center">
           <span className="mt-[10px]">
-            <LeftCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollLeftHandler}/>
+            <LeftCircleOutlined
+              style={{ fontSize: "24px", color: "#0075bf" }}
+              onClick={scrollLeftHandler}
+            />
           </span>
-          <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
+          <div
+            onScroll={handleScroll}
+            ref={containerRef}
+            className="overflow-x-scroll scrollStepsCstm"
+          >
             <Steps current={current} items={items} labelPlacement="vertical" />
           </div>
           <span className="mt-[10px]">
-            <RightCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollRightHandler}/>
+            <RightCircleOutlined
+              style={{ fontSize: "24px", color: "#0075bf" }}
+              onClick={scrollRightHandler}
+            />
           </span>
         </div>
-        
+
         <div className="steps-content my-6">{steps[current].content}</div>
 
         {/* Section Action Steps */}
@@ -431,7 +467,9 @@ const CreateCustomerServiceRequest = (props) => {
           <ButtonComponent
             type={"submit"}
             icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-            onClick={()=>{setModalBack(true)}}
+            onClick={() => {
+              setModalBack(true);
+            }}
           >
             Back
           </ButtonComponent>
@@ -478,7 +516,6 @@ const CreateCustomerServiceRequest = (props) => {
           </div>
         </div>
       </Form>
-
 
       {/* Modal Back */}
       <ModalConfirm

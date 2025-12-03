@@ -1,16 +1,21 @@
+import { useState } from "react";
+
 import { Form, Select } from "antd";
 import InputComponent from "../../../../../../../../../components/InputComponent";
 import { requiredMessage } from "../../../../../../../../../utils";
 import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
 
-export default function InfoAccount() {
+export default function InfoAccount(props) {
+  const account = props.account
+  const customer = props.customer
+
   return(
     <NxPanel title={"ACCOUNT INFORMATION"}>
       <div className="w-full grid grid-cols-3 gap-3">
         {/* Column 1 */}
         <Form.Item
-          key="account"
-          name={"account"}
+          key="srFormAccountId"
+          name={"srFormAccountId"}
           label={"Account"}
           rules={[
             {
@@ -18,14 +23,15 @@ export default function InfoAccount() {
               required: true,
             },
           ]}
+          value="TEST"
           className="no-margin-form"
         >
           <InputComponent disabled={true} />
         </Form.Item>
 
         <Form.Item
-          key="accountSOR"
-          name={"accountSOR"}
+          key="srFormAccountSor"
+          name={"srFormAccountSor"}
           label={"Account SOR"}
           rules={[
             {
@@ -39,8 +45,8 @@ export default function InfoAccount() {
         </Form.Item>
 
         <Form.Item
-          key="accountCostCenter"
-          name={"accountCostCenter"}
+          key="srFormAccountCostCenter"
+          name={"srFormAccountCostCenter"}
           label={"Account Cost Center"}
           rules={[
             {
@@ -54,8 +60,8 @@ export default function InfoAccount() {
         </Form.Item>
 
         <Form.Item
-          key="meterReadingCode"
-          name={"meterReadingCode"}
+          key="srFormMeterReadingCode"
+          name={"srFormMeterReadingCode"}
           label={"Meter Reading Code"}
           rules={[
             {
@@ -69,8 +75,8 @@ export default function InfoAccount() {
         </Form.Item>
 
         <Form.Item
-          key="accountSegment"
-          name={"accountSegment"}
+          key="srFormAccountSegment"
+          name={"srFormAccountSegment"}
           label={"Account Segment"}
           rules={[
             {
@@ -84,8 +90,8 @@ export default function InfoAccount() {
         </Form.Item>
 
         <Form.Item
-          key="accountGroupType"
-          name={"accountGroupType"}
+          key="srFormAccountGroupType"
+          name={"srFormAccountGroupType"}
           label={"Account Group Type"}
           rules={[
             {
@@ -99,8 +105,8 @@ export default function InfoAccount() {
         </Form.Item>
 
         <Form.Item
-          key="accountType"
-          name={"accountType"}
+          key="srFormAccountType"
+          name={"srFormAccountType"}
           label={"Account Type"}
           rules={[
             {
@@ -114,8 +120,8 @@ export default function InfoAccount() {
         </Form.Item>
 
         <Form.Item
-          key="premiseAddress"
-          name={"premiseAddress"}
+          key="srFormPremiseAddress"
+          name={"srFormPremiseAddress"}
           label={"Premise Address"}
           rules={[
             {
@@ -129,8 +135,8 @@ export default function InfoAccount() {
         </Form.Item>
 
         <Form.Item
-          key="subdistrict"
-          name={"subdistrict"}
+          key="srFormSubdistrict"
+          name={"srFormSubdistrict"}
           label={"Subdistrict"}
           rules={[
             {
@@ -145,8 +151,8 @@ export default function InfoAccount() {
 
         {/* Column 2 */}
         <Form.Item
-          key="district"
-          name={"district"}
+          key="srFormDistrict"
+          name={"srFormDistrict"}
           label={"District"}
           rules={[
             {
@@ -160,8 +166,8 @@ export default function InfoAccount() {
         </Form.Item>
 
         <Form.Item
-          key="city"
-          name={"city"}
+          key="srFormCity"
+          name={"srFormCity"}
           label={"City"}
           rules={[
             {
@@ -175,8 +181,8 @@ export default function InfoAccount() {
         </Form.Item>
 
         <Form.Item
-          key="country"
-          name={"country"}
+          key="srFormCountry"
+          name={"srFormCountry"}
           label={"Country"}
           rules={[
             {
@@ -190,8 +196,8 @@ export default function InfoAccount() {
         </Form.Item>
 
         <Form.Item
-          key="latitude"
-          name={"latitude"}
+          key="srFormLatitude"
+          name={"srFormLatitude"}
           label={"Latitude"}
           rules={[
             {
@@ -205,8 +211,8 @@ export default function InfoAccount() {
         </Form.Item>
 
         <Form.Item
-          key="longitude"
-          name={"longitude"}
+          key="srFormLongitude"
+          name={"srFormLongitude"}
           label={"Longitude"}
           rules={[
             {

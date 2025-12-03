@@ -1,20 +1,26 @@
-import { useState } from "react";
-import { Fragment } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Form, Select, Button, Tooltip } from "antd";
+import { Form, Select, Button, Tooltip, Spin, Tag, Input } from "antd"; // Added Input import
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
 
 import InputComponent from "../../../../../../../../../components/InputComponent";
 import StatusComponent from "../../../../../../../../../components/StatusComponent";
+import DateComponent from "../../../../../../../../../components/DateComponent";
+
 import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
+
 import { requiredMessage, toTitleCase } from "../../../../../../../../../utils";
 
 import moment from "moment";
 
 export default function InfoServiceRequest({
+  account,
+  customer,
+  dropdowns,
+  form,
   totalElement = 0,
   page = 1,
   pageSize = 10,
@@ -26,22 +32,66 @@ export default function InfoServiceRequest({
   handleSearch
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [ServiceRequest, setServiceRequest] = useState([])
-  
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [selectedRowKey, setSelectedRowKey] = useState(null);
+  const [serviceRequestRef, setServiceRequestRef] = useState("");
   const navigate = useNavigate();
 
+  // Debug: Log form values when they change
+  useEffect(() => {
+    const values = form?.getFieldsValue();
+    console.log("InfoServiceRequest - Current form values:", values);
+  }, [form]);
+
+  // Create safe accessor functions
+  const getDropdownOptions = (dropdownKey) => {
+    if (!dropdowns || !dropdowns[dropdownKey] || !dropdowns[dropdownKey].data) {
+      return [];
+    }
+    return dropdowns[dropdownKey].data.map(item => ({
+      value: item.glbTypeValId?.toString() || item.id?.toString(),
+      label: item.name || item.glbTypeValName
+    }));
+  };
+
+  // Or use destructuring with defaults
+  const {
+    serviceRequestTypes = { data: [] },
+    serviceRequestCategories = { data: [] },
+    serviceRequestSubcategories = { data: [] },
+    serviceRequestChannels = { data: [] },
+    serviceRequestPriorities = { data: [] },
+    serviceRequestSources = { data: [] }
+  } = dropdowns || {};
+
+  // Update handleOk to use the selected row
   const handleOk = () => {
-    // TODO: Add logic to select service request and populate the form
-    console.log("ok")
-    setIsOpen(false)
-  }
+    form.setFieldsValue({
+      srr: selectedRow.serviceRequestReference,
+    });
+
+    setIsOpen(false);
+    // Reset selection when modal closes
+    setSelectedRow(null);
+    setSelectedRowKey(null);
+  };
 
   const handleCancel = () => {
-    setIsOpen(false)
+    setIsOpen(false);
+    // Reset selection when modal closes
+    setSelectedRow(null);
+    setSelectedRowKey(null);
   }
 
   const handleClose = () => {
-    setIsOpen(false)
+    setIsOpen(false);
+    // Reset selection when modal closes
+    setSelectedRow(null);
+    setSelectedRowKey(null);
+  }
+
+  const handleDateChange = () => {
+
   }
 
   const renderDate = (date) => {
@@ -51,24 +101,12 @@ export default function InfoServiceRequest({
     return "";
   };
 
-  // Sanitize pagination values to prevent NaN
-  // Modify
-  const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
-  const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
-  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : ServiceRequest.length;
-  const renderSimpleDate = (date) => {
-    if (date) {
-      return moment(date).format("DD MMM YYYY");
-    }
-    return "";
-  };
-
   const columnMain = [
     {
       title: "NO",
       width: 80,
       align: "center",
-      render: (text, object, index) => (sanitizedPage - 1) * sanitizedPageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       title: "SERVICE REQUEST NUMBER",
@@ -76,6 +114,26 @@ export default function InfoServiceRequest({
       width: 200,
       sorter: true,
       ...getColumnSearchProps("serviceRequestNumber"),
+      render: (reference, record) => (
+        <div 
+          className="flex items-center gap-2"
+        >
+          <span 
+            className="underline cursor-pointer text-blue-600"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRowClick(record);
+            }}
+          >
+            {reference || "-"}
+          </span>
+          {/*
+          {selectedRowKey === record.key && (
+            <Tag color="blue">Selected</Tag>
+          )}
+          */}
+        </div>
+      ),
     },
     {
       title: "SERVICE REQUEST REFERENCE",
@@ -83,8 +141,14 @@ export default function InfoServiceRequest({
       width: 220,
       sorter: true,
       ...getColumnSearchProps("serviceRequestReference"),
-      render: (reference) => (
-        <span className="underline cursor-pointer text-blue-600">
+      render: (reference, record) => (
+        <span 
+          className="underline cursor-pointer text-blue-600"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRowClick(record);
+          }}
+        >
           {reference || "-"}
         </span>
       ),
@@ -277,8 +341,6 @@ export default function InfoServiceRequest({
                   width={20}
                   onClick={() => {
                     navigate("/account-management/account-standard/service-requests/details");
-                    // handleDetail(r);
-                    // setModalDetail(true);
                   }}
                 />
               </div>
@@ -299,23 +361,92 @@ export default function InfoServiceRequest({
         );
       },
     },
+  ];
 
-  ]
+  const ServiceRequestData = [
+    {
+      "key": 1,
+      "serviceRequestNumber": "SR-2023-001",
+      "serviceRequestReference": "REF-2023-001",
+      "type": "Installation",
+      "category": "Hardware",
+      "subCategory": "Server",
+      "channel": "Email",
+      "requestSource": "Customer",
+      "requestDate": "2023-10-15T10:30:00",
+      "openDate": "2023-10-15T11:00:00",
+      "resolvedDate": "2023-10-16T15:45:00",
+      "closedDate": "2023-10-17T09:20:00",
+      "age": 48,
+      "description": "Install new server rack in data center",
+      "statusApproval": "approved",
+      "statusPrerequisite": "completed",
+      "status": "closed"
+    },
+    {
+      "key": 2,
+      "serviceRequestNumber": "SR-2023-002",
+      "serviceRequestReference": "REF-2023-002",
+      "type": "Maintenance",
+      "category": "Software",
+      "subCategory": "Application",
+      "channel": "Phone",
+      "requestSource": "Internal",
+      "requestDate": "2023-10-16T09:15:00",
+      "openDate": "2023-10-16T09:30:00",
+      "resolvedDate": "2023-10-16T14:20:00",
+      "closedDate": "2023-10-16T16:00:00",
+      "age": 24,
+      "description": "Update application to latest version",
+      "statusApproval": "approved",
+      "statusPrerequisite": "completed",
+      "status": "closed"
+    }
+  ];
+
+  // Handle row click
+  const handleRowClick = (record) => {
+    console.log('Row clicked:', record);
+    setSelectedRow(record);
+    setSelectedRowKey(record.key);
+  };
+
+  const handleTableRowClick = (record, rowIndex, event) => {
+    // Prevent click on action buttons
+    const target = event.target;
+    const shouldPrevent = ['button', 'a', 'svg', 'path', '.ant-btn', '.ant-btn-link', '.ant-btn-icon-only', '.action-button', '.ant-dropdown-trigger', '.anticon', '.ant-popconfirm', '.ant-popover', 'input', 'select', '.ant-select', '.ant-input', '.ant-checkbox', '.ant-radio', '.ant-switch']
+      .some((selector) => {
+        if (selector.startsWith('.')) {
+          return target.closest(selector) !== null;
+        } else {
+          return target.tagName.toLowerCase() === selector.toLowerCase() ||
+                 target.closest(selector) !== null;
+        }
+      });
+
+    if (!shouldPrevent) {
+      handleRowClick(record);
+    }
+  };
 
   return(
-  <Fragment>
-    <NxPanel title={"SERVICE INFORMATION"}>
-      <div className="w-full grid grid-cols-2 gap-4">
-        {/* Left Column */}
-        <div className="space-y-4">
-          <Form.Item
-            key="serviceRequestReference"
-            name={"serviceRequestReference"}
-            label={"Service Request Reference"}
-            className="no-margin-form"
-          >
-            <div className="flex gap-2 items-center">
-              <InputComponent disabled className="flex-1" />
+    <Fragment>
+      <NxPanel title={"SERVICE INFORMATION"}>
+        {/* Remove the wrapper Form component since form is passed as prop */}
+        <div className="w-full grid grid-cols-2 gap-4">
+          {/* Left Column */}
+          <div className="space-y-4">
+            <div class="w-full gap-4 flex flex-row items-end">
+              <Form.Item
+                key="serviceRequestReference"
+                name="srr"
+                label="Service Request Reference"
+                className="no-margin-form w-full"
+              >
+                  <InputComponent 
+                    className="flex-1"
+                  />
+              </Form.Item>
               <Button
                 type="primary"
                 className="h-9 px-4 justify-center items-center"
@@ -326,248 +457,245 @@ export default function InfoServiceRequest({
                   minWidth: "112px",
                 }}
                 onClick={() => {
-                  // Add your select logic here
-                  setIsOpen(true)
-                  console.log("Select button clicked");
+                  setIsOpen(true);
                 }}
               >
                 Select
               </Button>
             </div>
-          </Form.Item>
-
-          <Form.Item
-            key="category"
-            name={"category"}
-            label={"Category"}
-            rules={[
-              {
-                message: requiredMessage("Category"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <Select
-              placeholder="Select Category"
-              options={[
-                { value: 'technical', label: 'Technical' },
-                { value: 'billing', label: 'Billing' },
-                { value: 'customer_service', label: 'Customer Service' },
-                { value: 'maintenance', label: 'Maintenance' },
-                // Add more options as needed
+            <Form.Item
+              key="category"
+              name="category"
+              label="Category"
+              rules={[
+                {
+                  message: requiredMessage("Category"),
+                  required: true,
+                },
               ]}
-            />
-          </Form.Item>
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Category"
+                loading={!dropdowns?.serviceRequestCategories?.data}
+                options={getDropdownOptions('serviceRequestCategories')}
+              />
+            </Form.Item>
 
-          <Form.Item
-            key="priority"
-            name={"priority"}
-            label={"Priority"}
-            rules={[
-              {
-                message: requiredMessage("Priority"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <Select
-              placeholder="Select Priority"
-              options={[
-                { value: 'low', label: 'Low' },
-                { value: 'medium', label: 'Medium' },
-                { value: 'high', label: 'High' },
-                { value: 'urgent', label: 'Urgent' },
+            <Form.Item
+              key="priority"
+              name="priority"
+              label="Priority"
+              rules={[
+                {
+                  message: requiredMessage("Priority"),
+                  required: true,
+                },
               ]}
-            />
-          </Form.Item>
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Priorities"
+                loading={!dropdowns?.serviceRequestPriorities?.data}
+                options={getDropdownOptions('serviceRequestPriorities')}
+              />
+            </Form.Item>
 
-          <Form.Item
-            key="costCenter"
-            name={"costCenter"}
-            label={"Cost Center"}
-            rules={[
-              {
-                message: requiredMessage("Cost Center"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <InputComponent />
-          </Form.Item>
-
-          <Form.Item
-            key="subCategory"
-            name={"subCategory"}
-            label={"Sub Category"}
-            rules={[
-              {
-                message: requiredMessage("Sub Category"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <Select
-              placeholder="Select Sub Category"
-              options={[
-                { value: 'installation', label: 'Installation' },
-                { value: 'repair', label: 'Repair' },
-                { value: 'inspection', label: 'Inspection' },
-                { value: 'replacement', label: 'Replacement' },
-                // Add more options as needed
+            <Form.Item
+              key="srFormAccountCostCenter"
+              name="srFormAccountCostCenter"
+              label="Cost Center"
+              rules={[
+                {
+                  message: requiredMessage("Cost Center"),
+                  required: true,
+                },
               ]}
+              className="no-margin-form"
+            >
+              <InputComponent disabled={true} />
+            </Form.Item>
+
+            <Form.Item
+              key="subCategory"
+              name="subCategory"
+              label="Sub Category"
+              rules={[
+                {
+                  message: requiredMessage("Sub Category"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Sub Category"
+                loading={!dropdowns?.serviceRequestSubcategories?.data}
+                options={getDropdownOptions('serviceRequestSubcategories')}
+              />
+            </Form.Item>
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-4">
+            <Form.Item
+              key="requestSource"
+              name="requestSource"
+              label="Request Source"
+              rules={[
+                {
+                  message: requiredMessage("Request Source"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Sources"
+                loading={!dropdowns?.serviceRequestSources?.data}
+                options={getDropdownOptions('serviceRequestSources')}
+              />
+            </Form.Item>
+
+            <Form.Item
+              key="type"
+              name="type"
+              label="Type"
+              rules={[
+                {
+                  message: requiredMessage("Type"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Types"
+                loading={!dropdowns?.serviceRequestTypes?.data}
+                options={getDropdownOptions('serviceRequestTypes')}
+              />
+            </Form.Item>
+
+            <Form.Item
+              key="channel"
+              name="channel"
+              label="Channel"
+              rules={[
+                {
+                  message: requiredMessage("Channel"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Channels"
+                loading={!dropdowns?.serviceRequestChannels?.data}
+                options={getDropdownOptions('serviceRequestChannels')}
+              />
+            </Form.Item>
+
+            <Form.Item
+              key="requestDate"
+              name="requestDate"
+              label="Request Date"
+              rules={[
+                {
+                  message: requiredMessage("Request Date"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <DateComponent />
+            </Form.Item>
+          </div>
+        </div>
+
+        {/* Description - Full Width */}
+        <div className="w-full my-5">
+          <Form.Item
+            key="description"
+            name="description"
+            label="Description"
+            className="no-margin-form"
+          >
+            <InputComponent
+              type="textarea"
+              rows={4}
+              placeholder="Asset meter baru PGN"
+              maxLength={255}
             />
           </Form.Item>
         </div>
+      </NxPanel>
 
-        {/* Right Column */}
-        <div className="space-y-4">
-          <Form.Item
-            key="requestSource"
-            name={"requestSource"}
-            label={"Request Source"}
-            rules={[
-              {
-                message: requiredMessage("Request Source"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <Select
-              placeholder="Select Request Source"
-              options={[
-                { value: 'phone', label: 'Phone' },
-                { value: 'email', label: 'Email' },
-                { value: 'web_portal', label: 'Web Portal' },
-                { value: 'mobile_app', label: 'Mobile App' },
-                { value: 'walk_in', label: 'Walk-in' },
-              ]}
-            />
-          </Form.Item>
-
-          <Form.Item
-            key="type"
-            name={"type"}
-            label={"Type"}
-            rules={[
-              {
-                message: requiredMessage("Type"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <Select
-              placeholder="Select Type"
-              options={[
-                { value: 'service_request', label: 'Service Request' },
-                { value: 'complaint', label: 'Complaint' },
-                { value: 'inquiry', label: 'Inquiry' },
-                { value: 'emergency', label: 'Emergency' },
-              ]}
-            />
-          </Form.Item>
-
-          <Form.Item
-            key="channel"
-            name={"channel"}
-            label={"Channel"}
-            rules={[
-              {
-                message: requiredMessage("Channel"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <Select
-              placeholder="Select Channel"
-              options={[
-                { value: 'direct', label: 'Direct' },
-                { value: 'partner', label: 'Partner' },
-                { value: 'agent', label: 'Agent' },
-                { value: 'online', label: 'Online' },
-              ]}
-            />
-          </Form.Item>
-
-          <Form.Item
-            key="requestDate"
-            name={"requestDate"}
-            label={"Request Date"}
-            rules={[
-              {
-                message: requiredMessage("Request Date"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-          >
-            <InputComponent />
-          </Form.Item>
+      <NxModal
+        isOpen={isOpen}
+        handleCancel={handleCancel}
+        handleOk={handleOk}
+        title="CHOOSE SERVICE REQUEST REFERENCE"
+        width={1100}
+        type="custom"
+        footer={[
+          <div className="flex justify-end items-end w-full">
+            <div className="flex flex-row gap-2">
+              <Button onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                className="h-9 px-5 justify-center items-center"
+                style={{
+                  backgroundColor: "#0075bf",
+                  borderColor: "#0075bf",
+                  borderRadius: "5px",
+                  minWidth: "112px",
+                  color: "#ffffff"
+                }}
+                onClick={handleOk}
+                disabled={!selectedRow}
+              >
+                Select
+              </Button>
+            </div>
+          </div>
+        ]}
+      >
+        <div className="mb-4">
+          {selectedRow ? (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded">
+              <span className="font-medium">Selected Service Request:</span> 
+              <span className="ml-2 font-bold">{selectedRow.serviceRequestNumber}</span>
+              <span className="ml-2">({selectedRow.serviceRequestReference})</span>
+            </div>
+          ) : (
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded text-gray-500">
+              Click on a Service Request Number or Reference to select
+            </div>
+          )}
         </div>
-      </div>
-
-      {/* Description - Full Width */}
-      <div className="w-full my-5">
-        <Form.Item
-          key="description"
-          name={"description"}
-          label={"Description"}
-          className="no-margin-form"
-        >
-          <InputComponent
-            type={"textarea"}
-            rows={4}
-            placeholder="Asset meter baru PGN"
-            maxLength={255}
-          />
-        </Form.Item>
-      </div>
-    </NxPanel>
-
-    <NxModal
-      isOpen={isOpen}
-      handleCancel={handleCancel}
-      handleOk={handleOk}
-      title={"CHOOSE SERVICE REQUEST REFERENCE"}
-      width={1100}
-      type={"custom"}
-      footer={[
-        <Button
-          type="primary"
-          className="h-9 px-5 justify-center items-center"
-          style={{
-            backgroundColor: "#0075bf",
-            borderColor: "#0075bf",
-            borderRadius: "5px",
-            minWidth: "112px",
+        
+        <NxTable
+          className="border-[0.5px] border-[#c8cdd4] border-solid"
+          usePagination={true}
+          useSelect={true}
+          dataMain={ServiceRequestData}
+          columnMain={columnMain}
+          tablePadding="small"
+          fontSize="small"
+          onRowClicked={handleTableRowClick}
+          rowSelection={{
+            type: 'radio',
+            selectedRowKeys: selectedRowKey ? [selectedRowKey] : [],
+            onChange: (selectedRowKeys, selectedRows) => {
+              if (selectedRows.length > 0) {
+                handleRowClick(selectedRows[0]);
+              }
+            },
           }}
-          onClick={() => {
-            // Add your select logic here
-            console.log("Select button clicked");
-            handleOk(); // Use handleOk to properly close the modal
-          }}
-        >
-          Select
-        </Button>
-      ]}
-    >
-      <NxTable
-        className="border-[0.5px] border-[#c8cdd4] border-solid "
-        usePagination={true}
-        useSelect={true}
-        dataMain={ServiceRequest}
-        columnMain={columnMain}
-        tablePadding={"small"}
-        fontSize={"small"}
-      />
-
-    </NxModal>
-  </Fragment>
+        />
+      </NxModal>
+    </Fragment>
   )
 }

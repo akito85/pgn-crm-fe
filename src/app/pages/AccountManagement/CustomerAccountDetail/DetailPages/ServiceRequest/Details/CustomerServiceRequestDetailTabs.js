@@ -22,6 +22,7 @@ const CustomerServiceRequestDetailTabs = ({
   idAccount,
   idCustomer,
   accountType,
+  idServiceRequest,
   data_accountDetail,
   data_customerDetail,
 }) => {

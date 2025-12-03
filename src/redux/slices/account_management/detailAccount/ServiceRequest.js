@@ -6,14 +6,15 @@ import accountManagementService from "../../../services/account_management/accou
 // 1. Get Filtered Service Requests with Dynamic Search
 export const getFilteredServiceRequests = createAsyncThunk(
   "serviceRequest/getFilteredServiceRequests",
-  async ({ page = 0, size = 10, sort, search, filters = {} }, thunkAPI) => {
+  async ({ page = 1, size = 10, sort, search, filters = {} }, thunkAPI) => {
     try {
+      // Use 1-based pagination as per documentation
       let url = `/v1/dbs/api/servicerequests/lists?page=${page}&size=${size}`;
-      
+
       if (sort) url += `&sort=${sort}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
-      
-      // Add filter parameters
+
+      // Add filter parameters (using DTO field names per documentation)
       Object.keys(filters).forEach(key => {
         if (filters[key] !== undefined && filters[key] !== null) {
           url += `&${key}=${encodeURIComponent(filters[key])}`;
@@ -31,9 +32,9 @@ export const getFilteredServiceRequests = createAsyncThunk(
 // 2. Get Service Requests by Account
 export const getServiceRequestsByAccount = createAsyncThunk(
   "serviceRequest/getServiceRequestsByAccount",
-  async ({ accountId, page = 0, size = 10 }, thunkAPI) => {
+  async ({ accountId, page = 1, size = 10 }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/list?page=${page}&size=${size}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/list?page=${page}&size=${size}`;
       const response = await accountManagementService.getAll(url);
       return response;
     } catch (error) {
@@ -47,7 +48,7 @@ export const getServiceRequestDetailByAccount = createAsyncThunk(
   "serviceRequest/getServiceRequestDetailByAccount",
   async ({ accountId, id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response;
     } catch (error) {
@@ -61,7 +62,7 @@ export const createServiceRequestForAccount = createAsyncThunk(
   "serviceRequest/createServiceRequestForAccount",
   async ({ accountId, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests`;
       const response = await accountManagementService.createData(url, requestBody);
       return response;
     } catch (error) {
@@ -75,7 +76,7 @@ export const createCompleteServiceRequest = createAsyncThunk(
   "serviceRequest/createCompleteServiceRequest",
   async ({ accountId, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/composite`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/composite`;
       const response = await accountManagementService.createData(url, requestBody);
       return response;
     } catch (error) {
@@ -89,7 +90,7 @@ export const updateServiceRequestForAccount = createAsyncThunk(
   "serviceRequest/updateServiceRequestForAccount",
   async ({ accountId, id, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${id}`;
       const response = await accountManagementService.updateData(url, requestBody);
       return response;
     } catch (error) {
@@ -103,7 +104,7 @@ export const partialUpdateServiceRequestForAccount = createAsyncThunk(
   "serviceRequest/partialUpdateServiceRequestForAccount",
   async ({ accountId, id, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${id}`;
       const response = await accountManagementService.updateData(url, requestBody); // PATCH would typically be handled by service
       return response;
     } catch (error) {
@@ -117,7 +118,7 @@ export const deleteServiceRequestForAccount = createAsyncThunk(
   "serviceRequest/deleteServiceRequestForAccount",
   async ({ accountId, id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${id}`;
       const response = await accountManagementService.deleteData(url);
       return response;
     } catch (error) {
@@ -129,12 +130,12 @@ export const deleteServiceRequestForAccount = createAsyncThunk(
 // 9. Get All Service Requests
 export const getAllServiceRequests = createAsyncThunk(
   "serviceRequest/getAllServiceRequests",
-  async ({ page = 0, size = 10, search, sort }, thunkAPI) => {
+  async ({ page = 1, size = 10, search, sort }, thunkAPI) => {
     try {
       let url = `/v1/dbs/api/servicerequests/list?page=${page}&size=${size}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
       if (sort) url += `&sort=${sort}`;
-      
+
       const response = await accountManagementService.getAll(url);
       return response;
     } catch (error) {
@@ -328,11 +329,24 @@ export const getWorkOrderStatuses = createAsyncThunk(
 );
 
 // 23. Get Prerequisite Types
-export const getPrerequisiteTypes = createAsyncThunk(
-  "serviceRequest/getPrerequisiteTypes",
+export const getServiceRequestPrerequisites = createAsyncThunk(
+  "serviceRequest/getServiceRequestPrerequisites",
   async (_, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/dropdowns/prerequisites/types`;
+      const url = `/v1/dbs/api/dropdowns/servicerequests/prerequisites`;
+      const response = await accountManagementService.getAll(url);
+      return response;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response?.data || error.message);
+    }
+  }
+);
+
+export const getServiceRequestDataRequirements = createAsyncThunk(
+  "serviceRequest/getServiceRequestDataRequirements",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/dropdowns/servicerequests/datarequirements`;
       const response = await accountManagementService.getAll(url);
       return response;
     } catch (error) {
@@ -360,13 +374,13 @@ export const getActivityStatuses = createAsyncThunk(
 // 25. Get Filtered Prerequisites with Dynamic Search
 export const getFilteredPrerequisites = createAsyncThunk(
   "serviceRequest/getFilteredPrerequisites",
-  async ({ page = 0, size = 10, sort, search, filters = {} }, thunkAPI) => {
+  async ({ page = 1, size = 10, sort, search, filters = {} }, thunkAPI) => {
     try {
       let url = `/v1/dbs/api/prerequisites/lists?page=${page}&size=${size}`;
-      
+
       if (sort) url += `&sort=${sort}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
-      
+
       // Add filter parameters
       Object.keys(filters).forEach(key => {
         if (filters[key] !== undefined && filters[key] !== null) {
@@ -385,9 +399,9 @@ export const getFilteredPrerequisites = createAsyncThunk(
 // 26. Get Prerequisites by Service Request
 export const getPrerequisitesByServiceRequest = createAsyncThunk(
   "serviceRequest/getPrerequisitesByServiceRequest",
-  async ({ accountId, srId, page = 0, size = 10 }, thunkAPI) => {
+  async ({ accountId, srId, page = 1, size = 10 }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/prerequisites/list?page=${page}&size=${size}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/prerequisites/list?page=${page}&size=${size}`;
       const response = await accountManagementService.getAll(url);
       return response;
     } catch (error) {
@@ -401,7 +415,7 @@ export const getPrerequisiteDetailByServiceRequest = createAsyncThunk(
   "serviceRequest/getPrerequisiteDetailByServiceRequest",
   async ({ accountId, srId, id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/prerequisites/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/prerequisites/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response;
     } catch (error) {
@@ -415,7 +429,7 @@ export const createPrerequisiteForServiceRequest = createAsyncThunk(
   "serviceRequest/createPrerequisiteForServiceRequest",
   async ({ accountId, srId, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/prerequisites`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/prerequisites`;
       const response = await accountManagementService.createData(url, requestBody);
       return response;
     } catch (error) {
@@ -429,7 +443,7 @@ export const updatePrerequisiteForServiceRequest = createAsyncThunk(
   "serviceRequest/updatePrerequisiteForServiceRequest",
   async ({ accountId, srId, id, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/prerequisites/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/prerequisites/${id}`;
       const response = await accountManagementService.updateData(url, requestBody);
       return response;
     } catch (error) {
@@ -443,7 +457,7 @@ export const partialUpdatePrerequisiteForServiceRequest = createAsyncThunk(
   "serviceRequest/partialUpdatePrerequisiteForServiceRequest",
   async ({ accountId, srId, id, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/prerequisites/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/prerequisites/${id}`;
       const response = await accountManagementService.updateData(url, requestBody);
       return response;
     } catch (error) {
@@ -457,7 +471,7 @@ export const deletePrerequisiteForServiceRequest = createAsyncThunk(
   "serviceRequest/deletePrerequisiteForServiceRequest",
   async ({ accountId, srId, id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/prerequisites/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/prerequisites/${id}`;
       const response = await accountManagementService.deleteData(url);
       return response;
     } catch (error) {
@@ -471,13 +485,13 @@ export const deletePrerequisiteForServiceRequest = createAsyncThunk(
 // 32. Get Filtered Work Orders with Dynamic Search
 export const getFilteredWorkOrders = createAsyncThunk(
   "serviceRequest/getFilteredWorkOrders",
-  async ({ page = 0, size = 10, sort, search, filters = {} }, thunkAPI) => {
+  async ({ page = 1, size = 10, sort, search, filters = {} }, thunkAPI) => {
     try {
       let url = `/v1/dbs/api/workorders/lists?page=${page}&size=${size}`;
-      
+
       if (sort) url += `&sort=${sort}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
-      
+
       // Add filter parameters
       Object.keys(filters).forEach(key => {
         if (filters[key] !== undefined && filters[key] !== null) {
@@ -496,9 +510,9 @@ export const getFilteredWorkOrders = createAsyncThunk(
 // 33. Get Work Orders by Service Request
 export const getWorkOrdersByServiceRequest = createAsyncThunk(
   "serviceRequest/getWorkOrdersByServiceRequest",
-  async ({ accountId, srId, page = 0, size = 10 }, thunkAPI) => {
+  async ({ accountId, srId, page = 1, size = 10 }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/workorders/list?page=${page}&size=${size}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/workorders/list?page=${page}&size=${size}`;
       const response = await accountManagementService.getAll(url);
       return response;
     } catch (error) {
@@ -512,7 +526,7 @@ export const getWorkOrderDetailByServiceRequest = createAsyncThunk(
   "serviceRequest/getWorkOrderDetailByServiceRequest",
   async ({ accountId, srId, id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/workorders/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/workorders/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response;
     } catch (error) {
@@ -526,7 +540,7 @@ export const createWorkOrderForServiceRequest = createAsyncThunk(
   "serviceRequest/createWorkOrderForServiceRequest",
   async ({ accountId, srId, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/workorders`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/workorders`;
       const response = await accountManagementService.createData(url, requestBody);
       return response;
     } catch (error) {
@@ -540,7 +554,7 @@ export const updateWorkOrderForServiceRequest = createAsyncThunk(
   "serviceRequest/updateWorkOrderForServiceRequest",
   async ({ accountId, srId, id, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/workorders/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/workorders/${id}`;
       const response = await accountManagementService.updateData(url, requestBody);
       return response;
     } catch (error) {
@@ -554,7 +568,7 @@ export const partialUpdateWorkOrderForServiceRequest = createAsyncThunk(
   "serviceRequest/partialUpdateWorkOrderForServiceRequest",
   async ({ accountId, srId, id, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/workorders/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/workorders/${id}`;
       const response = await accountManagementService.updateData(url, requestBody);
       return response;
     } catch (error) {
@@ -568,7 +582,7 @@ export const deleteWorkOrderForServiceRequest = createAsyncThunk(
   "serviceRequest/deleteWorkOrderForServiceRequest",
   async ({ accountId, srId, id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/workorders/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/workorders/${id}`;
       const response = await accountManagementService.deleteData(url);
       return response;
     } catch (error) {
@@ -582,13 +596,13 @@ export const deleteWorkOrderForServiceRequest = createAsyncThunk(
 // 39. Get Filtered Activities with Dynamic Search
 export const getFilteredActivities = createAsyncThunk(
   "serviceRequest/getFilteredActivities",
-  async ({ page = 0, size = 10, sort, search, filters = {} }, thunkAPI) => {
+  async ({ page = 1, size = 10, sort, search, filters = {} }, thunkAPI) => {
     try {
       let url = `/v1/dbs/api/activities/lists?page=${page}&size=${size}`;
-      
+
       if (sort) url += `&sort=${sort}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
-      
+
       // Add filter parameters
       Object.keys(filters).forEach(key => {
         if (filters[key] !== undefined && filters[key] !== null) {
@@ -607,9 +621,9 @@ export const getFilteredActivities = createAsyncThunk(
 // 40. Get Activities by Work Order
 export const getActivitiesByWorkOrder = createAsyncThunk(
   "serviceRequest/getActivitiesByWorkOrder",
-  async ({ accountId, srId, woId, page = 0, size = 10 }, thunkAPI) => {
+  async ({ accountId, srId, woId, page = 1, size = 10 }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/workorders/${woId}/activities/list?page=${page}&size=${size}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/workorders/${woId}/activities/list?page=${page}&size=${size}`;
       const response = await accountManagementService.getAll(url);
       return response;
     } catch (error) {
@@ -623,7 +637,7 @@ export const getActivityDetailByWorkOrder = createAsyncThunk(
   "serviceRequest/getActivityDetailByWorkOrder",
   async ({ accountId, srId, woId, id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/workorders/${woId}/activities/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/workorders/${woId}/activities/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response;
     } catch (error) {
@@ -637,7 +651,7 @@ export const createActivityForWorkOrder = createAsyncThunk(
   "serviceRequest/createActivityForWorkOrder",
   async ({ accountId, srId, woId, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/workorders/${woId}/activities`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/workorders/${woId}/activities`;
       const response = await accountManagementService.createData(url, requestBody);
       return response;
     } catch (error) {
@@ -651,7 +665,7 @@ export const updateActivityForWorkOrder = createAsyncThunk(
   "serviceRequest/updateActivityForWorkOrder",
   async ({ accountId, srId, woId, id, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/workorders/${woId}/activities/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/workorders/${woId}/activities/${id}`;
       const response = await accountManagementService.updateData(url, requestBody);
       return response;
     } catch (error) {
@@ -665,7 +679,7 @@ export const partialUpdateActivityForWorkOrder = createAsyncThunk(
   "serviceRequest/partialUpdateActivityForWorkOrder",
   async ({ accountId, srId, woId, id, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/workorders/${woId}/activities/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/workorders/${woId}/activities/${id}`;
       const response = await accountManagementService.updateData(url, requestBody);
       return response;
     } catch (error) {
@@ -679,7 +693,7 @@ export const deleteActivityForWorkOrder = createAsyncThunk(
   "serviceRequest/deleteActivityForWorkOrder",
   async ({ accountId, srId, woId, id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/workorders/${woId}/activities/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/workorders/${woId}/activities/${id}`;
       const response = await accountManagementService.deleteData(url);
       return response;
     } catch (error) {
@@ -693,13 +707,13 @@ export const deleteActivityForWorkOrder = createAsyncThunk(
 // 46. Get Filtered Data Requirements with Dynamic Search
 export const getFilteredDataRequirements = createAsyncThunk(
   "serviceRequest/getFilteredDataRequirements",
-  async ({ page = 0, size = 10, sort, search, filters = {} }, thunkAPI) => {
+  async ({ page = 1, size = 10, sort, search, filters = {} }, thunkAPI) => {
     try {
       let url = `/v1/dbs/api/datarequirements/lists?page=${page}&size=${size}`;
-      
+
       if (sort) url += `&sort=${sort}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
-      
+
       // Add filter parameters
       Object.keys(filters).forEach(key => {
         if (filters[key] !== undefined && filters[key] !== null) {
@@ -718,9 +732,9 @@ export const getFilteredDataRequirements = createAsyncThunk(
 // 47. Get Data Requirements by Service Request
 export const getDataRequirementsByServiceRequest = createAsyncThunk(
   "serviceRequest/GetDataRequirementsByServiceRequest",
-  async ({ accountId, srId, page = 0, size = 10 }, thunkAPI) => {
+  async ({ accountId, srId, page = 1, size = 10 }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/datarequirements/list?page=${page}&size=${size}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/datarequirements/list?page=${page}&size=${size}`;
       const response = await accountManagementService.getAll(url);
       return response;
     } catch (error) {
@@ -734,7 +748,7 @@ export const getDataRequirementDetailByServiceRequest = createAsyncThunk(
   "serviceRequest/GetDataRequirementDetailByServiceRequest",
   async ({ accountId, srId, id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/datarequirements/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/datarequirements/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response;
     } catch (error) {
@@ -748,7 +762,7 @@ export const createDataRequirementForServiceRequest = createAsyncThunk(
   "serviceRequest/createDataRequirementForServiceRequest",
   async ({ accountId, srId, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/datarequirements`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/datarequirements`;
       const response = await accountManagementService.createData(url, requestBody);
       return response;
     } catch (error) {
@@ -762,7 +776,7 @@ export const updateDataRequirementForServiceRequest = createAsyncThunk(
   "serviceRequest/updateDataRequirementForServiceRequest",
   async ({ accountId, srId, id, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/datarequirements/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/datarequirements/${id}`;
       const response = await accountManagementService.updateData(url, requestBody);
       return response;
     } catch (error) {
@@ -776,7 +790,7 @@ export const partialUpdateDataRequirementForServiceRequest = createAsyncThunk(
   "serviceRequest/partialUpdateDataRequirementForServiceRequest",
   async ({ accountId, srId, id, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/datarequirements/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/datarequirements/${id}`;
       const response = await accountManagementService.updateData(url, requestBody);
       return response;
     } catch (error) {
@@ -790,7 +804,7 @@ export const deleteDataRequirementForServiceRequest = createAsyncThunk(
   "serviceRequest/deleteDataRequirementForServiceRequest",
   async ({ accountId, srId, id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/datarequirements/${id}`;
+      const url = `/v1/dbs/apiounts/${accountId}/servicerequests/${srId}/datarequirements/${id}`;
       const response = await accountManagementService.deleteData(url);
       return response;
     } catch (error) {
@@ -806,7 +820,7 @@ export const createPaymentPlan = createAsyncThunk(
   "serviceRequest/createPaymentPlan",
   async (requestBody, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/paymentplan/create`;
+      const url = `/v1/dbs/apiount/servicerequest/paymentplan/create`;
       const response = await accountManagementService.createData(url, requestBody);
       return response;
     } catch (error) {
@@ -820,7 +834,7 @@ export const updatePaymentPlan = createAsyncThunk(
   "serviceRequest/updatePaymentPlan",
   async (requestBody, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/paymentplan/update`;
+      const url = `/v1/dbs/apiount/servicerequest/paymentplan/update`;
       const response = await accountManagementService.updateData(url, requestBody);
       return response;
     } catch (error) {
@@ -834,7 +848,7 @@ export const getPaymentPlanDetail = createAsyncThunk(
   "serviceRequest/getPaymentPlanDetail",
   async (paymentPlanId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/paymentplan/detail/${paymentPlanId}`;
+      const url = `/v1/dbs/apiount/servicerequest/paymentplan/detail/${paymentPlanId}`;
       const response = await accountManagementService.getDetail(url);
       return response;
     } catch (error) {
@@ -848,7 +862,7 @@ export const getPaymentPlansByInstallment = createAsyncThunk(
   "serviceRequest/getPaymentPlansByInstallment",
   async (installmentId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/paymentplan/installment/${installmentId}`;
+      const url = `/v1/dbs/apiount/servicerequest/paymentplan/installment/${installmentId}`;
       const response = await accountManagementService.getAll(url);
       return response;
     } catch (error) {
@@ -862,7 +876,7 @@ export const getPaymentPlansByPlanType = createAsyncThunk(
   "serviceRequest/getPaymentPlansByPlanType",
   async (planType, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/paymentplan/type/${planType}`;
+      const url = `/v1/dbs/apiount/servicerequest/paymentplan/type/${planType}`;
       const response = await accountManagementService.getAll(url);
       return response;
     } catch (error) {
@@ -876,7 +890,7 @@ export const togglePaymentPlanStatus = createAsyncThunk(
   "serviceRequest/togglePaymentPlanStatus",
   async (paymentPlanId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/paymentplan/toggle/${paymentPlanId}`;
+      const url = `/v1/dbs/apiount/servicerequest/paymentplan/toggle/${paymentPlanId}`;
       const response = await accountManagementService.updateData(url, {});
       return response;
     } catch (error) {
@@ -892,7 +906,7 @@ export const createInstallment = createAsyncThunk(
   "serviceRequest/createInstallment",
   async (requestBody, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/installment/create`;
+      const url = `/v1/dbs/apiount/servicerequest/installment/create`;
       const response = await accountManagementService.createData(url, requestBody);
       return response;
     } catch (error) {
@@ -906,7 +920,7 @@ export const updateInstallment = createAsyncThunk(
   "serviceRequest/updateInstallment",
   async (requestBody, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/installment/update`;
+      const url = `/v1/dbs/apiount/servicerequest/installment/update`;
       const response = await accountManagementService.updateData(url, requestBody);
       return response;
     } catch (error) {
@@ -920,7 +934,7 @@ export const getInstallmentDetail = createAsyncThunk(
   "serviceRequest/getInstallmentDetail",
   async (installmentId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/installment/detail/${installmentId}`;
+      const url = `/v1/dbs/apiount/servicerequest/installment/detail/${installmentId}`;
       const response = await accountManagementService.getDetail(url);
       return response;
     } catch (error) {
@@ -934,7 +948,7 @@ export const getInstallmentPaymentSchedule = createAsyncThunk(
   "serviceRequest/getInstallmentPaymentSchedule",
   async (installmentId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/installment/schedule/${installmentId}`;
+      const url = `/v1/dbs/apiount/servicerequest/installment/schedule/${installmentId}`;
       const response = await accountManagementService.getAll(url);
       return response;
     } catch (error) {
@@ -948,7 +962,7 @@ export const linkInstallmentToServiceRequest = createAsyncThunk(
   "serviceRequest/linkInstallmentToServiceRequest",
   async ({ serviceRequestId, accountId, installmentId }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/installment/link`;
+      const url = `/v1/dbs/apiount/servicerequest/installment/link`;
       const requestBody = { serviceRequestId, accountId, installmentId };
       const response = await accountManagementService.createData(url, requestBody);
       return response;
@@ -965,7 +979,7 @@ export const createInstallmentSchedule = createAsyncThunk(
   "serviceRequest/createInstallmentSchedule",
   async (requestBody, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/schedule/create`;
+      const url = `/v1/dbs/apiount/servicerequest/schedule/create`;
       const response = await accountManagementService.createData(url, requestBody);
       return response;
     } catch (error) {
@@ -979,7 +993,7 @@ export const updateInstallmentSchedule = createAsyncThunk(
   "serviceRequest/updateInstallmentSchedule",
   async (requestBody, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/schedule/update`;
+      const url = `/v1/dbs/apiount/servicerequest/schedule/update`;
       const response = await accountManagementService.updateData(url, requestBody);
       return response;
     } catch (error) {
@@ -993,7 +1007,7 @@ export const getScheduleDetail = createAsyncThunk(
   "serviceRequest/getScheduleDetail",
   async (scheduleId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/schedule/detail/${scheduleId}`;
+      const url = `/v1/dbs/apiount/servicerequest/schedule/detail/${scheduleId}`;
       const response = await accountManagementService.getDetail(url);
       return response;
     } catch (error) {
@@ -1007,7 +1021,7 @@ export const getSchedulesByInstallment = createAsyncThunk(
   "serviceRequest/getSchedulesByInstallment",
   async (installmentId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/schedule/installment/${installmentId}`;
+      const url = `/v1/dbs/apiount/servicerequest/schedule/installment/${installmentId}`;
       const response = await accountManagementService.getAll(url);
       return response;
     } catch (error) {
@@ -1021,7 +1035,7 @@ export const getSchedulesByPaymentStatus = createAsyncThunk(
   "serviceRequest/getSchedulesByPaymentStatus",
   async (paymentStatus, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/schedule/status/${paymentStatus}`;
+      const url = `/v1/dbs/apiount/servicerequest/schedule/status/${paymentStatus}`;
       const response = await accountManagementService.getAll(url);
       return response;
     } catch (error) {
@@ -1035,7 +1049,7 @@ export const recordPaymentForSchedule = createAsyncThunk(
   "serviceRequest/recordPaymentForSchedule",
   async ({ scheduleId, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/schedule/payment/${scheduleId}`;
+      const url = `/v1/dbs/apiount/servicerequest/schedule/payment/${scheduleId}`;
       const response = await accountManagementService.updateData(url, requestBody);
       return response;
     } catch (error) {
@@ -1049,7 +1063,7 @@ export const toggleScheduleStatus = createAsyncThunk(
   "serviceRequest/toggleScheduleStatus",
   async (scheduleId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/schedule/toggle/${scheduleId}`;
+      const url = `/v1/dbs/apiount/servicerequest/schedule/toggle/${scheduleId}`;
       const response = await accountManagementService.updateData(url, {});
       return response;
     } catch (error) {
@@ -1065,7 +1079,7 @@ export const createBillingItem = createAsyncThunk(
   "serviceRequest/createBillingItem",
   async (requestBody, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/billingitem/create`;
+      const url = `/v1/dbs/apiount/servicerequest/billingitem/create`;
       const response = await accountManagementService.createData(url, requestBody);
       return response;
     } catch (error) {
@@ -1079,7 +1093,7 @@ export const updateBillingItem = createAsyncThunk(
   "serviceRequest/updateBillingItem",
   async (requestBody, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/billingitem/update`;
+      const url = `/v1/dbs/apiount/servicerequest/billingitem/update`;
       const response = await accountManagementService.updateData(url, requestBody);
       return response;
     } catch (error) {
@@ -1093,7 +1107,7 @@ export const getBillingItemDetail = createAsyncThunk(
   "serviceRequest/getBillingItemDetail",
   async (billingItemId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/billingitem/detail/${billingItemId}`;
+      const url = `/v1/dbs/apiount/servicerequest/billingitem/detail/${billingItemId}`;
       const response = await accountManagementService.getDetail(url);
       return response;
     } catch (error) {
@@ -1107,7 +1121,7 @@ export const getBillingItemsByInstallment = createAsyncThunk(
   "serviceRequest/getBillingItemsByInstallment",
   async (installmentId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/billingitem/installment/${installmentId}`;
+      const url = `/v1/dbs/apiount/servicerequest/billingitem/installment/${installmentId}`;
       const response = await accountManagementService.getAll(url);
       return response;
     } catch (error) {
@@ -1121,7 +1135,7 @@ export const getBillingItemsByItemType = createAsyncThunk(
   "serviceRequest/getBillingItemsByItemType",
   async (itemType, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/billingitem/type/${itemType}`;
+      const url = `/v1/dbs/apiount/servicerequest/billingitem/type/${itemType}`;
       const response = await accountManagementService.getAll(url);
       return response;
     } catch (error) {
@@ -1135,7 +1149,7 @@ export const toggleBillingItemStatus = createAsyncThunk(
   "serviceRequest/toggleBillingItemStatus",
   async (billingItemId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/account/servicerequest/billingitem/toggle/${billingItemId}`;
+      const url = `/v1/dbs/apiount/servicerequest/billingitem/toggle/${billingItemId}`;
       const response = await accountManagementService.updateData(url, {});
       return response;
     } catch (error) {
@@ -1366,10 +1380,12 @@ const serviceRequestSlice = createSlice({
       .addCase(getWorkOrderStatuses.fulfilled, (state, action) => {
         state.dropdowns.workOrderStatuses = action.payload;
       })
-      .addCase(getPrerequisiteTypes.fulfilled, (state, action) => {
-        state.dropdowns.prerequisiteTypes = action.payload;
+      .addCase(getServiceRequestPrerequisites.fulfilled, (state, action) => {
+        state.dropdowns.serviceRequestPrerequisites = action.payload;
       })
-      .addCase(getActivityStatuses.fulfilled, (state, action) => {
+      .addCase(getServiceRequestDataRequirements.fulfilled, (state, action) => {
+        state.dropdowns.serviceRequestDataRequirements = action.payload;
+      })      .addCase(getActivityStatuses.fulfilled, (state, action) => {
         state.dropdowns.activityStatuses = action.payload;
       });
 

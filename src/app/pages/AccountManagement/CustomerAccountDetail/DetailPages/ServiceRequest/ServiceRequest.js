@@ -1,31 +1,33 @@
-import React, { Fragment, useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import { Spin, Input, Form, Alert, Popover, Checkbox, Tooltip } from "antd";
-import { Link, NavLink, Route, Routes, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ServiceRequestTable from "./ServiceRequestTable";
 import { FilterOutlined, DownloadOutlined, CheckOutlined, PlusOutlined } from "@ant-design/icons"
+import { getFilteredServiceRequests } from "../../../../../../redux/slices/account_management/detailAccount/ServiceRequest"
 
 const ServiceRequest = ({ idAccount, idCustomer, type }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { serviceRequests, loading, errors } = useSelector(state => state.serviceRequest);
 
-  // const dispatch = useDispatch();
+  console.log(idAccount, idCustomer, type)
 
-  // useEffect(() => {
-  //   dispatch(getAllTosPaginate({ page, pageSize }));
-  // }, [dispatch, page, pageSize]);
-  // const handleDetail = (id) => {
-  //   setModalDetail(true);
-  //   dispatch(getTosDetail(id));
-  // };
+  useEffect(() => {
+    // Fetch service requests when component mounts
+    dispatch(getFilteredServiceRequests({
+      page: 1,
+      pageSize: 10,
+      // sort: "createdDate~desc",
+      search: '',
+      filters: { accountId: idCustomer, isDeleted: "N" }
+    }));
+  }, [dispatch]);
 
-  //   const handleOk = () => {
-  //     dispatch(inactiveMenu(id))
-  //     dispatch(getAllTosNewsPaginate({page, pageSize}))
-  //     setModalInactive(false);
-  // };
+  if (loading.serviceRequests) {
+    return <div>Loading service requests...</div>;
+  }
 
   return (
     <Fragment>

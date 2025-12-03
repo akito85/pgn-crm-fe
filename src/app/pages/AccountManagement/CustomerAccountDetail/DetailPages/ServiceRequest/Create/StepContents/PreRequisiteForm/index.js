@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
 import { Fragment, useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { Space, Button, Popconfirm, Form } from "antd";
 import {
@@ -15,11 +15,16 @@ import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
 
 import ModalPreRequisiteDetail from "./ModalPreRequisiteDetail";
 
-export default function PreRequisiteForm() {
-  const [form] = Form.useForm(); // Form instance for contact information
-  const [isOpen, setIsOpen] = useState(false); // ModalInformationContactDetail
-
+export default function PreRequisiteForm({
+  form,
+  account,
+  customer,
+  serviceRequestData,
+  currentStep,
+}) {
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const PREREQUISITE = [
     {
@@ -103,18 +108,61 @@ export default function PreRequisiteForm() {
     },
   ];
 
+  const handleCreateClick = () => {
+    // Use getFieldsValue(true) to get ALL fields, not just touched ones
+    const currentFormData = form?.getFieldsValue(true);
+    // Check if required service request fields are filled
+    const requiredFields = [
+      "type",
+      "category",
+      "subCategory",
+      "channel",
+      "priority",
+      "requestSource",
+      "requestDate",
+    ];
+    const missingFields = requiredFields.filter(
+      (field) => !currentFormData?.[field],
+    );
+
+    const serializedData = {
+      ...currentFormData,
+      // Moment objects have toISOString() method, use it to convert to string
+      requestDate:
+        currentFormData?.requestDate &&
+        currentFormData.requestDate._isAMomentObject
+          ? currentFormData.requestDate.toISOString()
+          : currentFormData?.requestDate,
+    };
+
+    navigate(
+      "/account-management/account-standard/service-requests/prerequisite/create",
+      {
+        state: {
+          account,
+          customer,
+          serviceRequestData: serializedData,
+          fromWizard: true,
+          returnPath: window.location.pathname,
+          returnToStep: currentStep || 2, // Pass the current step index (PreRequisite is step 2)
+          // Pass original wizard state so it can be restored
+          id: location?.state?.id,
+          idAccount: location?.state?.idAccount,
+          idCustomer: location?.state?.idCustomer,
+          type: location?.state?.type,
+        },
+      },
+    );
+  };
+
   return (
     <Fragment>
       <NxPanel title={"PREREQUSITE LIST"}>
-        {/* Create Contact Button */}
+        {/* Create Button */}
         <div className="w-full flex justify-end items-center gap-2.5 mb-5">
           <ButtonComponent
             type={"submit"}
-            onClick={() =>
-              navigate(
-                "/account-management/account-standard/service-requests/prerequisite/create",
-              )
-            }
+            onClick={handleCreateClick}
             icon={
               <PlusOutlined
                 style={{
