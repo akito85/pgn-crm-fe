@@ -378,12 +378,28 @@ const CreateCustomerServiceRequest = (props) => {
     },
     {
       title: "Attachment",
-      content: <AttachmentForm />,
+      content: (
+        <AttachmentForm
+          attachmentsData={attachmentsData}
+          setAttachmentsData={setAttachmentsData}
+          dispatch={dispatch}
+        />
+      ),
       disabled: false,
     },
     {
       title: "Approval",
-      content: <ApprovalForm />,
+      content: (
+        <ApprovalForm
+          formData={formCreate.getFieldsValue(true)}
+          account={data_accountDetail}
+          customer={data_customerDetail}
+          dropdowns={dropdowns}
+          contactsData={contactsData}
+          prerequisitesData={prerequisitesData}
+          attachmentsData={attachmentsData}
+        />
+      ),
       disabled: false,
     },
   ];
