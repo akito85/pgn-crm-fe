@@ -115,7 +115,7 @@ const PaymentRelationTable = ({
       render: (v, r, i) => {
         return (
           <div className="flex w-full justify-center gap-6">
-            {!isApproval && (
+            {/* {!isApproval && (
               <Tooltip>
                 <div className="pt-1">
                   <SVGIcon
@@ -126,7 +126,7 @@ const PaymentRelationTable = ({
                   />
                 </div>
               </Tooltip>
-            )}
+            )} */}
             <Link to={ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION} state={{
               idPr: r.id,
               idAccount,
@@ -154,6 +154,25 @@ const PaymentRelationTable = ({
                     />
                   </div>
                 </Tooltip>
+              )
+            }
+            {
+              !isApproval && (
+                <Link to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION} state={{
+                  idPr: r.id,
+                  idAccount,
+                  idCustomer,
+                }}>
+                  <Tooltip title="Update">
+                    <div className="pt-1">
+                      <SVGIcon
+                        name="IconUpdateAction"
+                        color={"#0075bf"}
+                        width={24}
+                      />
+                    </div>
+                  </Tooltip>
+                </Link>
               )
             }
           </div>
