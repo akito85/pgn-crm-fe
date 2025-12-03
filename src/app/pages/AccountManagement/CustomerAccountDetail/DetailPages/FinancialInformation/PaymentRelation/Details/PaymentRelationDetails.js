@@ -12,7 +12,7 @@ import { getCustomerDetail } from "../../../../../../../../redux/slices/account_
 import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { dateFormatting } from "../../../../../../../../utils";
-import { getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
+import { getAccountStandardDetail, getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import DetailText from "../../../../../../../../components/DetailText";
 import { getDetailPaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
@@ -57,13 +57,18 @@ const PaymentRelationDetails = ({
   }, [dispatch]);
 
   useEffect(() => {
-    if (idCustomer) {
+    if (idCustomer)
       dispatch(getCustomerDetail(idCustomer));
-    }
-  }, [dispatch, idCustomer]);
+  }, [idCustomer]);
 
   useEffect(() => {
-    console.log("idPr", idPr);
+    console.log({idAccount, idCustomer})
+    if (idAccount && idCustomer) {
+      dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
+    }
+  }, [idAccount, idCustomer]);
+
+  useEffect(() => {
     if (idPr) {
       dispatch(getDetailPaymentRelation(idPr));
     }
@@ -154,7 +159,7 @@ const PaymentRelationDetails = ({
               <DetailText label="Category">{data_accountDetail?.accountSummary?.category}</DetailText>
               <DetailText label="SOR">{data_accountDetail?.accountSummary?.sor}</DetailText>
               <DetailText label="Cost Center">{data_accountDetail?.accountSummary?.costCenter}</DetailText>
-              <DetailText label="Meter Reading Codes">{renderDate(data_accountDetail.meterReadingCodes || "")}</DetailText>
+              <DetailText label="Meter Reading Codes">{renderDate(data_accountDetail?.meterReadingCodes || "")}</DetailText>
               <DetailText label="Customer Management">{data_accountDetail?.accountSummary?.customerManagement}</DetailText>
               <DetailText label="Classification Type">{data_accountDetail?.accountSummary?.classificationType}</DetailText>
               <DetailText label="Segment">{data_accountDetail?.accountSummary?.segment}</DetailText>
