@@ -8,8 +8,10 @@ import DetailText from "../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../components/BaseContainer";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxPanel from "../../../../../../../components/Nx/NxPanel";
+import NxModal from "../../../../../../../components/Nx/NxModal";
 
-import { Tooltip } from "antd";
+import { Tooltip, Form } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 
 import { USER_ROUTES } from "../../../../../../../routes/user_management/user_routes";
@@ -31,6 +33,8 @@ const CustomerServiceRequestContact = ({
 }) => {
   const [dataDetail, setDataDetail] = useState({});
   const [expanded, setExpanded] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [form] = Form.useForm();
   
   // Dummy data for main table (2 rows)
   const dataMain = [
@@ -230,6 +234,27 @@ const CustomerServiceRequestContact = ({
     // Add your file viewing logic here
   };
 
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    form.resetFields();
+  };
+
+  const handleSaveContact = () => {
+    form.validateFields()
+      .then((values) => {
+        console.log("Contact saved:", values);
+        // Add logic to save contact
+        handleCloseModal();
+      })
+      .catch((error) => {
+        console.log("Validation failed:", error);
+      });
+  };
+
   const itemActions = [
   {
     action: "View",
@@ -302,6 +327,43 @@ const CustomerServiceRequestContact = ({
   return(
     <Fragment>
       <NxPanel title={"CONTACT LIST"}>
+        {/* Create Contact Button */}
+        <div className="w-full flex justify-end items-center gap-2.5 mb-5">
+          <ButtonComponent
+            type={"button"}
+            onClick={handleOpenModal}
+            icon={
+              <PlusOutlined
+                style={{
+                  color: "#fff",
+                  fontSize: 20,
+                }}
+              />
+            }
+            style={{
+              backgroundColor: "#0075bf",
+              color: "#fff",
+              borderColor: "#0075bf",
+              border: "1px solid #0075bf",
+              borderRadius: "5px",
+              height: "48px",
+              paddingLeft: "16px",
+              paddingRight: "16px",
+              paddingTop: "9px",
+              paddingBottom: "9px",
+              display: "inline-flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "8px",
+              fontSize: "20px",
+              fontWeight: "400",
+              lineHeight: "30px"
+            }}
+          >
+            Create Contact
+          </ButtonComponent>
+        </div>
+
         <NxTable
           className="border-[0.5px] border-[#c8cdd4] border-solid "
 
@@ -335,8 +397,86 @@ const CustomerServiceRequestContact = ({
           }}
           onSort={onSort}
         />
-          
+
       </NxPanel>
+
+      {/* Modal for Creating Contact */}
+      <NxModal
+        id="ModalCreateContact"
+        isOpen={isModalOpen}
+        handleCancel={handleCloseModal}
+        handleOk={handleSaveContact}
+        header={"CREATE CONTACT"}
+        width={800}
+        title={"CREATE CONTACT"}
+        footer={[
+          <div key="footer" className="self-stretch flex flex-row justify-end">
+            <div className="flex flex-row items-center gap-3">
+              <ButtonComponent
+                type={"button"}
+                onClick={handleCloseModal}
+                style={{
+                  backgroundColor: "#ffffff",
+                  color: "#0075bf",
+                  borderColor: "#0075bf",
+                  border: "1px solid #0075bf",
+                  borderRadius: "5px",
+                  height: "48px",
+                  width: "135px",
+                  paddingLeft: "16px",
+                  paddingRight: "16px",
+                  paddingTop: "9px",
+                  paddingBottom: "9px",
+                  display: "inline-flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontSize: "20px",
+                  fontWeight: "400",
+                  lineHeight: "30px"
+                }}
+              >
+                Cancel
+              </ButtonComponent>
+              <ButtonComponent
+                type={"submit"}
+                onClick={handleSaveContact}
+                style={{
+                  backgroundColor: "#0075bf",
+                  color: "#fff",
+                  borderColor: "#0075bf",
+                  border: "1px solid #0075bf",
+                  borderRadius: "5px",
+                  height: "48px",
+                  width: "135px",
+                  paddingLeft: "16px",
+                  paddingRight: "16px",
+                  paddingTop: "9px",
+                  paddingBottom: "9px",
+                  display: "inline-flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontSize: "20px",
+                  fontWeight: "400",
+                  lineHeight: "30px"
+                }}
+              >
+                Save
+              </ButtonComponent>
+            </div>
+          </div>
+        ]}
+      >
+        <Form form={form} layout="vertical">
+          <div className="mb-5 text-sky-600 text-sm font-bold">
+            CONTACT INFORMATION
+          </div>
+          <p className="text-neutral-400 text-sm mb-4">
+            Fill in the contact information below
+          </p>
+        </Form>
+      </NxModal>
 
     </Fragment>
   )

@@ -50,8 +50,7 @@ import ProductDistributionForm from "../../app/pages/AccountManagement/CustomerA
 
 import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/CreateCustomerServiceRequest";
 import CustomerServiceRequestDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
-
-
+import PreRequisiteCreateForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/StepContents/PreRequisiteForm/Create";
 
 export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Customer/Account List
@@ -100,6 +99,7 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Service Request Detail
   VIEW_DETAIL_SERVICE_REQUEST_PAGE: <CustomerServiceRequestDetails />,
   CREATE_SERVICE_REQUEST_PAGE: <CreateCustomerServiceRequest />,
+  CREATE_SERVICE_REQUEST_PREREQUISITE_PAGE: <PreRequisiteCreateForm />,
   // UPDATE_SERVICE_REQUEST_PAGE: <UpdateCustomerServiceRequest />,
 
   // Gas Source
