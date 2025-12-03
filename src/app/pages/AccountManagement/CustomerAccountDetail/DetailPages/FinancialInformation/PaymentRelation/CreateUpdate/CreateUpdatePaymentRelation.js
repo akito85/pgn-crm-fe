@@ -31,6 +31,7 @@ import {
   createPaymentRelation,
   getDetailPaymentRelation,
   getDetailPrApprovalHierarchy,
+  getPaymentRelationAttachment,
   getPrAccountStandard,
   getPrApprovalHierarchy,
   getPrAttachmentCategory,
@@ -56,6 +57,7 @@ const CreatePaymentRelation = ({ type }) => {
     detail_prApprovalHierarchy,
     detail_paymentRelation,
     data_prAccountStandard,
+    data_paymentRelationAttachment,
   } = useSelector((state) => state.financialInformation);
 
   //declare
@@ -103,6 +105,7 @@ const CreatePaymentRelation = ({ type }) => {
   useEffect(() => {
     if (type === "update" && idPr) {
       dispatch(getDetailPaymentRelation(idPr));
+      dispatch(getPaymentRelationAttachment({ id: idPr }))
     }
   }, [type, idPr]);
 
@@ -150,7 +153,17 @@ const CreatePaymentRelation = ({ type }) => {
       }
     }
   }, [detail_paymentRelation, data_prAccountStandard]);
-  
+
+  useEffect(() => {
+    if (data_paymentRelationAttachment?.result) {
+      const result = data_paymentRelationAttachment?.result;
+      setDataAttachment(prev => ({
+        ...prev,
+        ...result,
+      }))
+    }
+  }, [data_paymentRelationAttachment])
+
   useEffect(() => {
     dispatch(getPrApprovalHierarchy());
   }, []);
