@@ -34,6 +34,9 @@ node_modules
 *.md
 *.txt
 *.sh
-
 .cla*
 
+# ignored logs and build.zip
+build/
+build.zip
+logs/
