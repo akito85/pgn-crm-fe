@@ -788,7 +788,7 @@ export const getCustomerSegmentList = createAsyncThunk(
       const response = await productPromoHttpService.getAll(url);
       return response.data.map((item) => {
         return {
-          value: item.id,
+          value: item.Id,
           label: item.text,
         };
     });
