@@ -11,7 +11,7 @@ import { getBase64 } from "../../../../../../../../../utils/getBase64";
 import { tokenHeader } from "../../../../../../../../../utils/tokenHeader";
 import { getColumnSearchProps } from "../../../../../../../../../utils/getColumnSearchProps";
 import { previewFileAttachment } from "../../../../../../../../../utils/previewFileAttachment";
-import ModalAttachment from "../../../../../../../ProductAndPromo/Pricing/Form/ModalAttachment";
+import ModalAttachment from "./ModalAttachment";
 import axios from "axios";
 import { getCategoryAttachment } from "../../../../../../../../../redux/slices/account_management/Account/accountSlice";
 import { getGlobalPropertiesAttachment } from "../../../../../../../../../redux/slices/product_promo/product";
