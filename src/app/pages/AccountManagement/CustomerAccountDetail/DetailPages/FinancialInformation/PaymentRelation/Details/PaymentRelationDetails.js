@@ -63,6 +63,7 @@ const PaymentRelationDetails = ({
   }, [dispatch, idCustomer]);
 
   useEffect(() => {
+    console.log("idPr", idPr);
     if (idPr) {
       dispatch(getDetailPaymentRelation(idPr));
     }
@@ -175,7 +176,7 @@ const PaymentRelationDetails = ({
             section={typeDetailSection}
             options={tabs}
             handleChangeOption={handleDetailSection}
-            dataDetail={detail_paymentRelation}
+            dataDetail={detail_paymentRelation?.data}
           />
         </div>
 

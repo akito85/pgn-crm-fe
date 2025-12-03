@@ -40,10 +40,10 @@ const CustomerServiceRequestDetailInfo = ({
           {/* Payment Relation Information */}
           <DetailText label="Account Number">{dataDetail?.accountNumber}</DetailText>
           <DetailText label="Account Name">{dataDetail?.accountName}</DetailText>
-          <DetailText label="Cost Center">{dataDetail?.priority}</DetailText>
-          <DetailText label="Type">{dataDetail?.startDate}</DetailText>
-          <DetailText label="Category">{dataDetail?.endDate}</DetailText>
-          <DetailText label="Sub Category">{dataDetail?.status}</DetailText>
+          <DetailText label="Priority">{dataDetail?.priority}</DetailText>
+          <DetailText label="Start Date">{dataDetail?.startDate}</DetailText>
+          <DetailText label="End Date">{dataDetail?.endDate}</DetailText>
+          <DetailText label="Status">{dataDetail?.status}</DetailText>
         </div>
         <div className="w-full">
           <DetailText label="Description">{dataDetail?.description}</DetailText>
