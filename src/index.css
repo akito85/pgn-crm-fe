@@ -989,21 +989,39 @@ span.ant-tree-title {
     line-height: 24px;
 }
 
+.head-no-bg-modal .ant-modal-header {
+    background-color: #ffffff;
+    color: #52525b;
+    border-radius: 16px 16px 0 0;
+    padding: 20px;
+    border-bottom: none;
+    font-family: "Public Sans", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    text-transform: uppercase;
+    line-height: 24px;
+}
+
 .custom-modal .ant-modal-footer,
-.custom-modal .ant-modal-body {
+.custom-modal .ant-modal-body,
+.head-no-bg-modal .ant-modal-footer,
+.heed-no-bg-modal .ant-modal-body {
     padding: 20px;
 }
 
-.custom-modal .ant-modal-content {
+.custom-modal .ant-modal-content,
+.head-no-bg-modal .ant-modal-content {
     border-radius: 16px;
 }
 
-.custom-modal .ant-modal-close {
+.custom-modal .ant-modal-close,
+.head-no-bg-modal .ant-modal-close {
     top: 15px;
     right: 20px;
 }
 
-.custom-modal .ant-modal-close-x {
+.custom-modal .ant-modal-close-x,
+.head-no-bg-modal .ant-modal-close-x {
     width: 32px;
     height: 32px;
     line-height: 32px;
@@ -1014,7 +1032,8 @@ span.ant-tree-title {
     transition: all 0.3s ease;
 }
 
-.custom-modal .ant-modal-close-x:hover {
+.custom-modal .ant-modal-close-x:hover,
+.head-no-bg-modal .ant-modal-close-x:hover {
     background-color: rgba(239, 68, 68, 0.2);
     transform: scale(1.1);
 }
