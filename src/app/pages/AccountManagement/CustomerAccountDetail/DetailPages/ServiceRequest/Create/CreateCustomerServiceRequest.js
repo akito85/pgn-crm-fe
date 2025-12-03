@@ -377,17 +377,6 @@ const CreateCustomerServiceRequest = (props) => {
       disabled: false,
     },
     {
-      title: "Attachment",
-      content: (
-        <AttachmentForm
-          attachmentsData={attachmentsData}
-          setAttachmentsData={setAttachmentsData}
-          dispatch={dispatch}
-        />
-      ),
-      disabled: false,
-    },
-    {
       title: "Approval",
       content: (
         <ApprovalForm
@@ -398,6 +387,17 @@ const CreateCustomerServiceRequest = (props) => {
           contactsData={contactsData}
           prerequisitesData={prerequisitesData}
           attachmentsData={attachmentsData}
+        />
+      ),
+      disabled: false,
+    },
+    {
+      title: "Attachment",
+      content: (
+        <AttachmentForm
+          attachmentsData={attachmentsData}
+          setAttachmentsData={setAttachmentsData}
+          dispatch={dispatch}
         />
       ),
       disabled: false,

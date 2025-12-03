@@ -22,7 +22,6 @@ export default function ApprovalForm({
     { value: "Service Request" },
     { value: "Contact" },
     { value: "Pre-Requisite" },
-    { value: "Attachment" },
   ];
 
   // Helper to get dropdown label from ID
@@ -173,32 +172,6 @@ export default function ApprovalForm({
     </NxPanel>
   );
 
-  const renderAttachmentSummary = () => (
-    <NxPanel title="ATTACHMENTS">
-      {attachmentsData.length > 0 ? (
-        <div className="w-full">
-          {attachmentsData.map((attachment, index) => (
-            <div key={index} className="border-b pb-3 mb-3">
-              <div className="grid grid-cols-3 gap-3">
-                <DetailText label="Category">
-                  {attachment.fileCategoryName || "-"}
-                </DetailText>
-                <DetailText label="File Name">
-                  {attachment.fileName || "-"}
-                </DetailText>
-                <DetailText label="File Size">
-                  {attachment.fileSize || "-"}
-                </DetailText>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-500">No attachments added</p>
-      )}
-    </NxPanel>
-  );
-
   const renderContent = () => {
     switch (valuePage) {
       case "Service Request":
@@ -207,8 +180,6 @@ export default function ApprovalForm({
         return renderContactSummary();
       case "Pre-Requisite":
         return renderPrerequisiteSummary();
-      case "Attachment":
-        return renderAttachmentSummary();
       default:
         return renderServiceRequestSummary();
     }
@@ -221,7 +192,8 @@ export default function ApprovalForm({
           REVIEW & APPROVAL
         </span>
         <p className="text-gray-600 mt-2">
-          Please review all information before submitting the service request.
+          Please review the Service Request information, Contacts, and
+          Pre-Requisites before proceeding to attachments.
         </p>
       </div>
 
