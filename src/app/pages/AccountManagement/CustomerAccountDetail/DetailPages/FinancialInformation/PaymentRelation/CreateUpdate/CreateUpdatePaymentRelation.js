@@ -109,17 +109,17 @@ const CreatePaymentRelation = ({ type }) => {
 
   useEffect(() => {
     if (idCustomer)
-      getCustomerDetail(idCustomer);
+      dispatch(getCustomerDetail(idCustomer));
   }, [idCustomer]);
 
   useEffect(() => {
     if (idAccount)
-      getAccountDetail(idAccount);
+      dispatch(getAccountStandardDetail({idAccount, idCustomer}));
   }, [idAccount]);
 
   useEffect(() => {
     if (type === "update" && idPr) {
-      getDetailPaymentRelation(idPr);
+      dispatch(getDetailPaymentRelation(idPr));
     }
   }, [idPr]);
 
@@ -204,7 +204,8 @@ const CreatePaymentRelation = ({ type }) => {
 
   const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}` 
   
-  const setAccount = (accountNumber, accountName) => {
+  const setAccount = (objectId, accountNumber, accountName) => {
+    formCreate.setFieldValue("objectId", objectId)
     formCreate.setFieldValue("accountNumber", accountNumber);
     formCreate.setFieldValue("accountName", accountName);
   }
@@ -320,10 +321,43 @@ const CreatePaymentRelation = ({ type }) => {
   };
 
   const handleSubmitForm = () => {
-    const body = formCreate.getFieldsValue();
+    const {
+      objectId,
+      priority,
+      description, 
+      startDate,
+      endDate,
+      appHierId,
+    } = formCreate.getFieldsValue();
+
+    const body = {
+      subjectId: data_accountDetail?.accountInformation?.accountId, 
+      objectId,
+      priority,
+      description, 
+      startDate,
+      endDate,
+      appHierId,
+      action: confirmationType
+    };
 
     if (type === "create")
-      dispatch(createPaymentRelation({ body }));
+      dispatch(createPaymentRelation({ body, attachments: dataAttachment }))
+      .unwrap()
+      .then((data) => {
+        setTimeout(() => {
+          navigate(
+            ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+            {
+              state: {
+                idAccount,
+                idCustomer,
+              }
+            }
+          );
+        }, 2000)
+      })
+      .catch((error) => {});
     else if (type === "update")
       dispatch(updatePaymentRelation({ id: idPr, body }));
   };

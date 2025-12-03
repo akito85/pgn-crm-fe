@@ -429,7 +429,7 @@ export const createPaymentRelation = createAsyncThunk(
 
       const { id } = response.data;
 
-      const uploadUrl = `/v1/dbs/api/payment-relation/${id}`;
+      const uploadUrl = `v1/dbs/api/payment-relation/upload-attachment/${id}`;
 
       const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
         uploadUrl,
@@ -459,6 +459,12 @@ export const createPaymentRelation = createAsyncThunk(
           title: "Failed",
           description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
         };
+        thunkAPI.dispatch(showModalError(errorBody));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. An unknown error occured.`
+        }
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error?.response);
@@ -584,7 +590,7 @@ export const getPrAccountStandard = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/account-info/paging-account-standart?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/account/list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await accountManagementService.getPagination(url);
       return response?.data;
     } catch (error) {
@@ -788,15 +794,12 @@ const financialInformationSlice = createSlice({
 
     /** Create Payment Relation */
     [createPaymentRelation.pending]: (state) => {
-      state.isPrSuccess = false;
       state.loading = true;
     },
     [createPaymentRelation.fulfilled]: (state) => {
-      state.isPrSuccess = true;
       state.loading = false;
     },
     [createPaymentRelation.pending]: (state) => {
-      state.isPrSuccess = false;
       state.loading = false;
     },
 
@@ -877,7 +880,7 @@ const financialInformationSlice = createSlice({
       state.loading = false;
     },
     [getPrAttachmentCategory.rejected]: (state) => {
-      state.detail_prApprovalHierarchy = [];
+      state.data_prAttachmentCategory = [];
       state.loading = false;
     },
 
