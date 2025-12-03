@@ -44,8 +44,8 @@ const CustomerDetail = () => {
   const [typeDetailSection, setTypeDetailSection] = useState(tabs[0].value);
 
   useEffect(() => {
-    dispatch(getGrantedAccessAccount("/account-management/customers"));
-  }, [dispatch]);
+    dispatch(getGrantedAccessAccount('/account-management/customers'))
+  }, [dispatch])
 
   useEffect(() => {
     if (id) {
