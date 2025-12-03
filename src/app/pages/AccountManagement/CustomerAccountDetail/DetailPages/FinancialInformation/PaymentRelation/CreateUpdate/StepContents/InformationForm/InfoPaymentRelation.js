@@ -13,7 +13,7 @@ import DateComponent from "../../../../../../../../../../components/DateComponen
 import TablePagination from "../../../../../../../../../../components/TablePagination";
 import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
-import { getPrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { getPaginationPrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function InfoPaymentRelation({
@@ -153,7 +153,7 @@ export default function InfoPaymentRelation({
 
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(getPrAccountStandard({ page, pageSize, sort, search: reqSearch }));
+    dispatch(getPaginationPrAccountStandard({ page, pageSize, sort, search: reqSearch }));
   }, [page, pageSize, sort, search]);
 
   useEffect(() => {

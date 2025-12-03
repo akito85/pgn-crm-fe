@@ -31,6 +31,7 @@ import {
   createPaymentRelation,
   getDetailPaymentRelation,
   getDetailPrApprovalHierarchy,
+  getPrAccountStandard,
   getPrApprovalHierarchy,
   getPrAttachmentCategory,
   updatePaymentRelation
@@ -54,7 +55,7 @@ const CreatePaymentRelation = ({ type }) => {
     data_prApprovalHierarchy,
     detail_prApprovalHierarchy,
     detail_paymentRelation,
-    isPrSuccess,
+    data_prAccountStandard,
   } = useSelector((state) => state.financialInformation);
 
   //declare
@@ -103,28 +104,52 @@ const CreatePaymentRelation = ({ type }) => {
     if (type === "update" && idPr) {
       dispatch(getDetailPaymentRelation(idPr));
     }
-  }, [idPr]);
+  }, [type, idPr]);
 
   useEffect(() => {
-    if (detail_paymentRelation) {
+    if (detail_paymentRelation?.data) {
       const {
-        accountNumber,
-        accountName,
+        subjectId,
+        objectId,
         priority,
         startDate,
         endDate,
         description,
-      } = detail_paymentRelation;
-      formCreate.setFieldsValue({
-        accountNumber,
-        accountName,
-        priority,
-        startDate,
-        endDate,
-        description,
-      })
+        appHierId,
+      } = detail_paymentRelation.data;
+
+      const accountName = formCreate.getFieldValue("accountName");
+      const accountNumber =formCreate.getFieldValue("accountNumber");
+
+      if (!data_prAccountStandard?.result?.length) {
+        dispatch(getPrAccountStandard());
+      }
+      
+      else if (!accountName && !accountNumber) {
+        const result = data_prAccountStandard.result;
+
+        const accountStandard = result.find((item) => item.accountId === objectId);        
+
+        if (accountStandard) {
+          const { accountNumber, accountName } = accountStandard;
+
+          formCreate.setFieldsValue({
+            subjectId,
+            objectId,
+            accountName,
+            accountNumber,
+            priority,
+            startDate,
+            endDate,
+            description,
+            appHierId,
+          });
+
+          handleSelectHiararchy(appHierId);
+        }
+      }
     }
-  }, [detail_paymentRelation]);
+  }, [detail_paymentRelation, data_prAccountStandard]);
   
   useEffect(() => {
     dispatch(getPrApprovalHierarchy());
@@ -341,22 +366,6 @@ const CreatePaymentRelation = ({ type }) => {
     else if (type === "update")
       dispatch(updatePaymentRelation({ id: idPr, body }));
   };
-
-  useEffect(() => {
-    if (isPrSuccess) {
-      setTimeout(() => {
-        navigate(
-          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
-          {
-            state: {
-              idAccount,
-              idCustomer,
-            }
-          }
-        );
-      }, 2000)
-    }
-  }, [isPrSuccess])
 
   return (
     <LayoutMenu>
