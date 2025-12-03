@@ -136,8 +136,8 @@ const EditableCell = ({
                 .includes(input.toLowerCase())
             }
           >
-            {options?.map((option, index) => (
-              <Select.Option key={option.value ?? `option-${index}`} value={option.value}>
+            {options?.map((option) => (
+              <Select.Option key={option.value} value={option.value}>
                 {option.label}
               </Select.Option>
             ))}
