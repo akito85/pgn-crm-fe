@@ -24,7 +24,7 @@ const initialState = {
   data_prAccountStandard: [],
   detail_taxImplication: {},
   detail_paymentRelation: {},
-  isPrSuccess: false,
+  data_paymentRelationAttachment: [],
 };
 
 export const getGlobalTypeTaxIdentifier= createAsyncThunk(
@@ -419,6 +419,19 @@ export const getPaymentRelation = createAsyncThunk(
     }
   }
 );
+
+export const getPaymentRelationAttachment = createAsyncThunk(
+  "GET_PAYMENT_RELATION_ATTACHMENT",
+  async ({ id }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/list-attachment/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+)
 
 export const createPaymentRelation = createAsyncThunk(
   "CREATE_PAYMENT_RELATION",
@@ -940,6 +953,19 @@ const financialInformationSlice = createSlice({
     },
     [getPaginationPrAccountStandard.rejected]: (state) => {
       state.data_prAccountStandard = [];
+      state.loading = false;
+    },
+
+    /** Get Payment Relation Attachment */
+    [getPaymentRelationAttachment.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPaymentRelationAttachment.fulfilled]: (state, action) => {
+      state.data_paymentRelationAttachment = action.payload;
+      state.loading = false;
+    },
+    [getPaymentRelationAttachment.rejected]: (state) => {
+      state.data_paymentRelationAttachment = [];
       state.loading = false;
     },
   },
