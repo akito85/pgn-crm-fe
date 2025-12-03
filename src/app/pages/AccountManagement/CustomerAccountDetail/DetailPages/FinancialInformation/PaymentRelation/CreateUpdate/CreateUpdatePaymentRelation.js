@@ -521,6 +521,7 @@ const CreatePaymentRelation = ({ type }) => {
           }))}
           hieararchyOptionData={data_prApprovalHierarchy}
           type={confirmationType}
+          dataAttachment={dataAttachment}
         />
       </div>
     </LayoutMenu>
