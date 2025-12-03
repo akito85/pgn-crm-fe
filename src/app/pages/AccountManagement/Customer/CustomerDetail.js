@@ -44,8 +44,8 @@ const CustomerDetail = () => {
   const [typeDetailSection, setTypeDetailSection] = useState(tabs[0].value);
 
   useEffect(() => {
-    dispatch(getGrantedAccessAccount('/account-management/customers'))
-  }, [dispatch])
+    dispatch(getGrantedAccessAccount("/account-management/customers"));
+  }, [dispatch]);
 
   useEffect(() => {
     if (id) {
@@ -94,50 +94,6 @@ const CustomerDetail = () => {
           />
         </div>
 
-<<<<<<< HEAD
-        <BaseContainer header={"HISTORY LOG INFORMATION"}>
-          <div className="w-full grid grid-cols-5 gap-5">
-            <DetailText label="Record ID">
-              {data_customerDetail?.customerId}
-            </DetailText>
-            <DetailText label="Created Date">
-              {moment(data_customerDetail?.createdDate).format(
-                dateFormatting.dateTime,
-              )}
-            </DetailText>
-            <DetailText label="Created By">
-              {data_customerDetail?.createdBy}
-            </DetailText>
-            <DetailText label="Update Date">
-              {renderDate(data_customerDetail?.updatedDate)}
-            </DetailText>
-            <DetailText label="Updated By">
-              {data_customerDetail?.updatedBy}
-            </DetailText>
-          </div>
-        </BaseContainer>
-||||||| parent of d1d544e (Add Service Request feature to Customer Detail page)
-        <BaseContainer header={"HISTORY LOG INFORMATION"}>
-          <div className="w-full grid grid-cols-5 gap-5">
-            <DetailText label="Record ID">
-              {data_customerDetail?.customerId}
-            </DetailText>
-            <DetailText label="Created Date">
-              {moment(data_customerDetail?.createdDate).format(dateFormatting.dateTime)}
-            </DetailText>
-            <DetailText label="Created By">
-              {data_customerDetail?.createdBy}
-            </DetailText>
-            <DetailText label="Update Date">
-              {renderDate(data_customerDetail?.updatedDate)}
-            </DetailText>
-            <DetailText label="Updated By">
-              {data_customerDetail?.updatedBy}
-            </DetailText>
-          </div>
-        </BaseContainer>
-=======
->>>>>>> d1d544e (Add Service Request feature to Customer Detail page)
         <div className="my-5">
           <CustomerDetailInformation
             dispatch={dispatch}
