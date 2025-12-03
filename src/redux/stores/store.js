@@ -85,6 +85,7 @@ import productDistributionReducer from "../slices/account_management/detailAccou
 import accountGasUtilizationReducer from "../slices/account_management/detailAccount/gasUtilizationSlice";
 import additionalInfoReducer from "../slices/account_management/detailAccount/additionalInformation";
 import equpmentReducer from "../slices/account_management/detailAccount/equpmentSlice";
+import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequest";
 import criteriaReducer from "../slices/criteria_slice";
 import { reportCustomerSlice } from "../slices/report/report_customer_slice";
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
@@ -165,6 +166,7 @@ const reducer = combineReducers({
 
   //Account Management ( Customer )
   customerAccount: customerAccountReducer,
+  serviceRequest: serviceRequestReducer,
 
   // Account Management (Master Data)
   gasSource: gasSourceReducer,
