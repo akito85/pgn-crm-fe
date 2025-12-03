@@ -15,6 +15,7 @@ import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { getPaginationPrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import { useDispatch, useSelector } from "react-redux";
+import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
 
 export default function InfoPaymentRelation({
   setAccount,
@@ -79,6 +80,7 @@ export default function InfoPaymentRelation({
   };
 
   const handleChangeSize = (pageChange, pageSizeChange) => {
+    console.log({pageChange, pageSizeChange})
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
     setPage(tempPage);
     setPageSize(pageSizeChange);
@@ -152,6 +154,8 @@ export default function InfoPaymentRelation({
   });
 
   useEffect(() => {
+    console.log({page, pageSize, sort, search});
+
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(getPaginationPrAccountStandard({ page, pageSize, sort, search: reqSearch }));
   }, [page, pageSize, sort, search]);
@@ -284,22 +288,6 @@ export default function InfoPaymentRelation({
     },
   ]
 
-  const paymentRelationDummy = [
-    {
-      customerNumber: "CST009425",
-      identificationType: "NPWP",
-      customerIdentificationNumber: "9809149088941",
-      customerName: "KERAMIK INTI",
-      customerType: "Organization",
-      description: "-",
-      birthFoundedDate: "22-08-2022",
-      birthFoundedPlace: "Jakarta",
-      sex: "Male",
-      maritalStatus: "Married",
-      searchKey: "Keramik Inti Pusat",
-    }
-  ]
-
   return(
     <div className={className}>
       <NxPanel title={"PAYMENT RELATION INFORMATION"} removeBottomMargin>
@@ -428,7 +416,7 @@ export default function InfoPaymentRelation({
           </Button>,
         ]}
       >
-        <TablePagination
+        <TablePaginationNew
           dataSource={data_prAccountStandard?.result?.map((item, idx) => ({
             ...item,
             key: item.id || idx,
@@ -439,7 +427,7 @@ export default function InfoPaymentRelation({
           onSort={onSort}
           tableScrolled={{ y: 525, x: 3000 }}
           columns={columnMain}
-          onSizeChanger={handleChangeSize}
+          onChange={handleChangeSize}
         />
       </ModalCustom>
     </div>
