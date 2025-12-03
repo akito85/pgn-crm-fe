@@ -636,7 +636,7 @@ export const getPaginationPrAccountStandard = createAsyncThunk(
 
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/account/list?searchs=${JSON.stringify(searchParams)}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/account/list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await accountManagementService.getPagination(url);
       return response?.data;
     } catch (error) {
