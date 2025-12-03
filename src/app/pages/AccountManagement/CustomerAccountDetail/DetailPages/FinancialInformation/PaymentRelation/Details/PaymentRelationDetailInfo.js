@@ -1,28 +1,10 @@
-import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { useLocation } from 'react-router-dom';
 import { Fragment } from "react";
 import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
-import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
 
 const CustomerServiceRequestDetailInfo = ({
   dataDetail = {},
 }) => {
-  // State
-  const dispatch = useDispatch();
-
-  //declare
-  const location = useLocation();
-  const id = location?.state?.id;
-
-  useEffect(() => {
-    if (id) {
-      dispatch(getCustomerDetail(id));
-    }
-  }, [dispatch, id]);
-
-
   const log = []
 
   const HistoryLogDummy = {
