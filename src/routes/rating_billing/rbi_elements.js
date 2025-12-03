@@ -46,7 +46,7 @@ import TaxCodeForm from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode
 import ManagementBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/ManagementBillingInstallmentPage";
 import CreateBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/CreateBillingInstallmentPage";
 import PrabillingDetail from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingDetail";
-import MonitoringCustomerPage from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/MonitoringCustomerPage";
+// import MonitoringCustomerPage from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/MonitoringCustomerPage";
 import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/prabillCustomer/AccountDetailPage";
 import EFakturCodeView from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeView";
 import DigitalSignatureView from "../../app/pages/RatingBillingInvoice/MasterData/DigitalSignature/DigitalSignatureView";
@@ -54,9 +54,10 @@ import ContentManagementView from "../../app/pages/RatingBillingInvoice/MasterDa
 
 export const RBI_ELEMENTS = {
   // prabilling elements render
-  PRABILLING_VIEW_ELEMENTS: <PrabillingPage />,
-  PRABILLING_CREATE_ELEMENTS: <PrabillingForm type={"create"} />,
-  PRABILLOG_VIEW_ELEMENTS: <PrabillingDetailLog />,
+  // this is already there?
+  // PRABILLING_VIEW_ELEMENTS: <PrabillingPage />,
+  // PRABILLING_CREATE_ELEMENTS: <PrabillingForm type={"create"} />,
+  //PRABILLOG_VIEW_ELEMENTS: <PrabillingDetailLog />,
   PRABILLING_DETAIL_ELEMENTS: <PrabillingDetail />,
   PRABILLCUS_DETAIL_ELEMENTS: <AccountDetailPage />,
 
