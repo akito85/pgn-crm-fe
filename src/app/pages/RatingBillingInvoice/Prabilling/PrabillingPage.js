@@ -486,7 +486,7 @@ const PrabillingPage = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold text-primary">
+              <p className="w-full mt-[15px] font-bold text-primary">
                 PRABILLING LIST
               </p>
 
