@@ -147,25 +147,25 @@ const PaymentRelationDetails = ({
               ACCOUNT INFORMATION
             </div>
             <div className="w-full grid grid-cols-4 gap-x-4">
-              <DetailText label="Account Number">{data_accountDetail?.accountNumber}</DetailText>
-              <DetailText label="Registration Number">{data_accountDetail?.registrationNumber}</DetailText>
-              <DetailText label="Account Name">{data_accountDetail?.accountName}</DetailText>
-              <DetailText label="Category">{data_accountDetail?.category}</DetailText>
-              <DetailText label="SOR">{data_accountDetail?.sor}</DetailText>
-              <DetailText label="Cost Center">{data_accountDetail?.costCenter}</DetailText>
+              <DetailText label="Account Number">{data_accountDetail?.accountSummary?.accountNumber}</DetailText>
+              <DetailText label="Registration Number">{data_accountDetail?.accountSummary?.registrationNumber}</DetailText>
+              <DetailText label="Account Name">{data_accountDetail?.accountSummary?.accountName}</DetailText>
+              <DetailText label="Category">{data_accountDetail?.accountSummary?.category}</DetailText>
+              <DetailText label="SOR">{data_accountDetail?.accountSummary?.sor}</DetailText>
+              <DetailText label="Cost Center">{data_accountDetail?.accountSummary?.costCenter}</DetailText>
               <DetailText label="Meter Reading Codes">{renderDate(data_accountDetail.meterReadingCodes || "")}</DetailText>
-              <DetailText label="Customer Management">{data_accountDetail?.customerManagement}</DetailText>
-              <DetailText label="Classification Type">{data_accountDetail?.classificationType}</DetailText>
-              <DetailText label="Segment">{data_accountDetail?.segment}</DetailText>
-              <DetailText label="Account Group Type">{data_accountDetail?.accountGroupType}</DetailText>
-              <DetailText label="Premise Address">{data_accountDetail?.premiseAddress}</DetailText>
-              <DetailText label="Subdistrict">{data_accountDetail?.subdistrict}</DetailText>
-              <DetailText label="District">{data_accountDetail?.district}</DetailText>
-              <DetailText label="City">{data_accountDetail?.city}</DetailText>
-              <DetailText label="Country">{data_accountDetail?.country}</DetailText>
-              <DetailText label="Longitude">{data_accountDetail?.longitude}</DetailText>
-              <DetailText label="Latitude">{data_accountDetail?.latitude}</DetailText>
-              <DetailText label="Status">{data_accountDetail?.status}</DetailText>    
+              <DetailText label="Customer Management">{data_accountDetail?.accountSummary?.customerManagement}</DetailText>
+              <DetailText label="Classification Type">{data_accountDetail?.accountSummary?.classificationType}</DetailText>
+              <DetailText label="Segment">{data_accountDetail?.accountSummary?.segment}</DetailText>
+              <DetailText label="Account Group Type">{data_accountDetail?.accountSummary?.accountGroupType}</DetailText>
+              <DetailText label="Premise Address">{data_accountDetail?.accountSummary?.premiseAddress}</DetailText>
+              <DetailText label="Subdistrict">{data_accountDetail?.accountSummary?.subdistrict}</DetailText>
+              <DetailText label="District">{data_accountDetail?.accountSummary?.district}</DetailText>
+              <DetailText label="City">{data_accountDetail?.accountSummary?.city}</DetailText>
+              <DetailText label="Country">{data_accountDetail?.accountSummary?.country}</DetailText>
+              <DetailText label="Longitude">{data_accountDetail?.accountSummary?.longitude}</DetailText>
+              <DetailText label="Latitude">{data_accountDetail?.accountSummary?.latitude}</DetailText>
+              <DetailText label="Status">{data_accountDetail?.accountSummary?.status}</DetailText>    
             </div>
           </div>
         </BaseContainer>
