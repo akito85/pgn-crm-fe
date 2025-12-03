@@ -32,7 +32,13 @@ const ModalHistory = (props) => {
   const [activeKeys, setActiveKeys] = useState([]);
 
   useEffect(() => {
-    if (isOpen && dataApprover && dataHistory) {
+    // ✅ Check if modal is open and data exists (not empty object)
+    const hasValidData = dataApprover && 
+                        dataHistory && 
+                        Object.keys(dataApprover).length > 0 && 
+                        Object.keys(dataHistory).length > 0;
+    
+    if (isOpen && hasValidData) {
       const useTabs = tabOptions && (tabOptions?.length > 0 || false);
       let historyData = [];
       let approverData = [];
@@ -40,20 +46,39 @@ const ModalHistory = (props) => {
       if (useTabs) {
         const tempTab = tabOptions[0].value.toLowerCase();
         setTabActive(tabOptions[0].value);
-        approverData = dataApprover[tempTab] || [];
-        historyData = dataHistory[tempTab] || [];
+        
+        // ✅ Enhanced validation
+        if (Array.isArray(dataApprover)) {
+          approverData = dataApprover;
+        } else if (dataApprover && typeof dataApprover === 'object') {
+          const tabData = dataApprover[tempTab];
+          approverData = Array.isArray(tabData) ? tabData : [];
+        } else {
+          approverData = [];
+        }
+        
+        if (Array.isArray(dataHistory)) {
+          historyData = dataHistory;
+        } else if (dataHistory && typeof dataHistory === 'object') {
+          const tabData = dataHistory[tempTab];
+          historyData = Array.isArray(tabData) ? tabData : [];
+        } else {
+          historyData = [];
+        }
       } else {
-        approverData = dataApprover || [];
-        historyData = dataHistory || [];
+        approverData = Array.isArray(dataApprover) ? dataApprover : [];
+        historyData = Array.isArray(dataHistory) ? dataHistory : [];
       }
       
-      const submitData = historyData.find(h => h.status === "SUBMIT");
+      const submitData = Array.isArray(historyData) 
+        ? historyData.find(h => h && h.status === "SUBMIT")
+        : null;
       setSubmitterData(submitData);
       
       setDataApproverFinal(approverData);
       
-      const hasWaiting = approverData.some(a => a.status === null);
-      const hasReject = approverData.some(a => a.status === "REJECT");
+      const hasWaiting = Array.isArray(approverData) && approverData.some(a => a && (a.status === null || a.status === undefined));
+      const hasReject = Array.isArray(approverData) && approverData.some(a => a && a.status === "REJECT");
       
       if (hasReject) {
         setApproverStatus("REJECTED");
@@ -65,10 +90,12 @@ const ModalHistory = (props) => {
       
       setActiveKeys(['0']);
     } else {
+      // ✅ Reset all states when no data
       setDataApproverFinal([]);
       setSubmitterData(null);
       setApproverStatus("WAITING");
       setActiveKeys([]);
+      setTabActive("");
     }
   }, [isOpen, tabOptions, dataApprover, dataHistory]);
 
@@ -77,16 +104,33 @@ const ModalHistory = (props) => {
     const tempTab = value.toLowerCase();
     setTabActive(value);
     
-    const approverData = dataApprover[tempTab] || [];
-    const historyData = dataHistory[tempTab] || [];
+    // ✅ Enhanced validation
+    let approverData = [];
+    let historyData = [];
     
-    const submitData = historyData.find(h => h.status === "SUBMIT");
+    if (Array.isArray(dataApprover)) {
+      approverData = dataApprover;
+    } else if (dataApprover && typeof dataApprover === 'object') {
+      const tabData = dataApprover[tempTab];
+      approverData = Array.isArray(tabData) ? tabData : [];
+    }
+    
+    if (Array.isArray(dataHistory)) {
+      historyData = dataHistory;
+    } else if (dataHistory && typeof dataHistory === 'object') {
+      const tabData = dataHistory[tempTab];
+      historyData = Array.isArray(tabData) ? tabData : [];
+    }
+    
+    const submitData = Array.isArray(historyData)
+      ? historyData.find(h => h && h.status === "SUBMIT")
+      : null;
     setSubmitterData(submitData);
     
     setDataApproverFinal(approverData);
     
-    const hasWaiting = approverData.some(a => a.status === null);
-    const hasReject = approverData.some(a => a.status === "REJECT");
+    const hasWaiting = Array.isArray(approverData) && approverData.some(a => a && (a.status === null || a.status === undefined));
+    const hasReject = Array.isArray(approverData) && approverData.some(a => a && a.status === "REJECT");
     
     if (hasReject) {
       setApproverStatus("REJECTED");
@@ -105,7 +149,28 @@ const ModalHistory = (props) => {
   };
 
   const renderApproverTable = () => {
-    if (!dataApproverFinal || dataApproverFinal.length === 0) return null;
+    // ✅ Stricter validation
+    if (!dataApproverFinal || !Array.isArray(dataApproverFinal) || dataApproverFinal.length === 0) {
+      return (
+        <div className="p-4 text-center text-gray-500">
+          No approver data available
+        </div>
+      );
+    }
+
+    // ✅ Filter out SUBMIT status (already shown in submitter card)
+    const approversWithoutSubmit = dataApproverFinal.filter(
+      approver => approver.status !== "SUBMIT"
+    );
+
+    // ✅ Check if there are any approvers after filtering
+    if (approversWithoutSubmit.length === 0) {
+      return (
+        <div className="p-4 text-center text-gray-500">
+          No approver data available
+        </div>
+      );
+    }
 
     const getStatusBadge = (status) => {
       if (status === "APPROVE") {
@@ -140,18 +205,26 @@ const ModalHistory = (props) => {
       );
     };
 
-    const enrichedApprovers = dataApproverFinal.map((approver) => {
+    // ✅ Add safety check and ensure we're working with arrays
+    // Filter out SUBMIT status from enrichment
+    const enrichedApprovers = approversWithoutSubmit.map((approver, idx) => {
       let historyMatch = null;
       
-      if (tabActive) {
+      // ✅ Fix: Get correct history data based on tab with strict validation
+      let historyData = [];
+      
+      if (tabActive && dataHistory && typeof dataHistory === 'object') {
         const tempTab = tabActive.toLowerCase();
-        const historyData = dataHistory[tempTab] || [];
+        const tabData = dataHistory[tempTab];
+        historyData = Array.isArray(tabData) ? tabData : [];
+      } else if (Array.isArray(dataHistory)) {
+        historyData = dataHistory;
+      }
+      
+      // Find matching history only if we have valid history data
+      if (Array.isArray(historyData) && historyData.length > 0) {
         historyMatch = historyData.find(
-          h => h.name === approver.name && h.status === approver.status
-        );
-      } else {
-        historyMatch = dataHistory?.find(
-          h => h.name === approver.name && h.status === approver.status
+          h => h && h.name === approver.name && h.status === approver.status
         );
       }
       
@@ -278,6 +351,16 @@ const ModalHistory = (props) => {
   };
 
   const renderApproverPanel = () => {
+    // ✅ Check if there are approvers excluding SUBMIT status
+    const approversWithoutSubmit = Array.isArray(dataApproverFinal) 
+      ? dataApproverFinal.filter(a => a.status !== "SUBMIT")
+      : [];
+
+    // ✅ Don't render panel if no valid approvers
+    if (approversWithoutSubmit.length === 0) {
+      return null;
+    }
+
     const getApproverIcon = () => {
       if (approverStatus === "APPROVED") {
         return <CheckCircleFilled style={{ color: "#52C41A", fontSize: 20 }} />;
@@ -365,36 +448,36 @@ const ModalHistory = (props) => {
             <RadioTabs data={tabOptions} onChange={handleTabs} />
           ) : null}
           
-          {/* Collapse Accordion - SELALU 2 ACCORDION */}
-          <div className="space-y-3">
-            <Collapse
-              activeKey={activeKeys}
-              onChange={setActiveKeys}
-              expandIconPosition="end"
-              expandIcon={({ isActive }) => (
-                <DownOutlined 
-                  rotate={isActive ? 180 : 0} 
-                  style={{ fontSize: 12 }}
-                />
-              )}
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none'
-              }}
-            >
-              {/* ACCORDION 1: SUBMITTER DATA */}
-              {renderSubmitterPanel()}
-              
-              {/* ACCORDION 2: APPROVER */}
-              {renderApproverPanel()}
-            </Collapse>
-
-            {!submitterData && (
-              <div className="text-center py-8 text-gray-400">
-                <p>No approval history available</p>
-              </div>
-            )}
-          </div>
+          {/* Collapse Accordion - HANYA TAMPIL JIKA ADA DATA */}
+          {submitterData || (dataApproverFinal && dataApproverFinal.filter(a => a.status !== "SUBMIT").length > 0) ? (
+            <div className="space-y-3">
+              <Collapse
+                activeKey={activeKeys}
+                onChange={setActiveKeys}
+                expandIconPosition="end"
+                expandIcon={({ isActive }) => (
+                  <DownOutlined 
+                    rotate={isActive ? 180 : 0} 
+                    style={{ fontSize: 12 }}
+                  />
+                )}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none'
+                }}
+              >
+                {/* ACCORDION 1: SUBMITTER DATA - Only if exists */}
+                {submitterData && renderSubmitterPanel()}
+                
+                {/* ACCORDION 2: APPROVER - Only if exists and has non-SUBMIT data */}
+                {renderApproverPanel()}
+              </Collapse>
+            </div>
+          ) : (
+            <div className="text-center py-16 text-gray-400">
+              <p className="text-base">No approval history available</p>
+            </div>
+          )}
         </div>
 
         <style jsx global>{`

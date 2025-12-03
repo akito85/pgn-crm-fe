@@ -66,7 +66,7 @@ const PrabillingForm = ({ type }) => {
   const [form] = Form.useForm();
   const formValue = form.getFieldsValue();
 
-  const DEFAULT_SEARCH_LIMIT = 50;
+  const DEFAULT_SEARCH_LIMIT = 99999;
   const MAX_SEARCH_LENGTH = 50;
 
   const [dataSpecificCustomer, setDataSpecificCustomer] = useState({
@@ -825,6 +825,7 @@ const PrabillingForm = ({ type }) => {
                 value={remark}
                 style={{ marginBottom: 4 }}
                 onChange={(e) => setRemark(e.target.value)}
+                rules={formMessageRequired("Remark")}
               />
             </Form.Item>
           </CardContainer>
