@@ -34,7 +34,7 @@ const PaymentRelationTable = ({
     {
       title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
-      width: 150,
+      width: 120,
       sorter: true,
       ...getColumnSearchProps("accountNumber"),
     },
@@ -48,7 +48,7 @@ const PaymentRelationTable = ({
     {
       title: "START DATE",
       dataIndex: "startDate",
-      width: 150,
+      width: 90,
       align: "center",
       ...getColumnSearchProps("startDate", "date"),
       render: (startDate) => moment(startDate).format(dateFormatting.date),
@@ -56,7 +56,7 @@ const PaymentRelationTable = ({
     {
       title: "END DATE",
       dataIndex: "endDate",
-      width: 150,
+      width: 90,
       align: "center",
       ...getColumnSearchProps("endDate", "date"),
       render: (endDate) => moment(endDate).format(dateFormatting.date),
@@ -74,7 +74,8 @@ const PaymentRelationTable = ({
           "approved": "Approved",
           "waitingApproval": "Waiting Approval",
           "pending": "Pending",
-          "rejected": "Rejected"
+          "rejected": "Rejected",
+          "WAITING_APPROVAL": "Waiting Approval"
         };
         return (
           <div className="flex justify-center">
@@ -90,12 +91,12 @@ const PaymentRelationTable = ({
       dataIndex: "status",
       sorter: true,
       fixed: "right",
-      width: 100,
+      width: 75,
       ...getColumnSearchProps("status"),
       render: (status) => {
         const displayText = {
           "active": "Active",
-          "inactive": "inactive",
+          "inactive": "Inactive",
         };
 
         return (
@@ -144,7 +145,7 @@ const PaymentRelationTable = ({
             </Link>
             {
               isApproval && (
-                <Tooltip title="Detail">
+                <Tooltip title="History">
                   <div className="pt-1">
                     <SVGIcon
                       name="IconLogHistory"
@@ -190,7 +191,7 @@ const PaymentRelationTable = ({
         pageSize={pageSize}
         onChange={handleChange}
         onSizeChanger={handleChangeSize}
-        tableScrolled={{ y: 525, x: 2200 }}
+        tableScrolled={{ y: 400, x: 2000 }}
         onSort={onSort}
         columns={columns}
         rowSelection={rowSelection}
