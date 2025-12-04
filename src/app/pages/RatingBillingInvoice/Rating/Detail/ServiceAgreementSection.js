@@ -199,6 +199,7 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
             onSort={onSortApi}
             columnDefinitions={columnDefinitions}
             fixedColumns={fixedColumns}
+            showExport={false}
             setFixedColumns={setFixedColumns}
             loading={loading}
           />

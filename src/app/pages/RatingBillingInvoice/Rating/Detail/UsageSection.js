@@ -131,6 +131,7 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
           onSort={onSort}
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
+          showExport={false}
           setFixedColumns={setFixedColumns}
           loading={false}
         />

@@ -253,6 +253,7 @@ const PrevBillingTab = ({ billingCodeId, accountNumberId, saNumberId }) => {
           totalData={data_billingItem?.page?.totalElements || 0}
           tableScrolled={{ x: 4500, y: 525 }}
           onSort={onSort}
+          showExport={false}
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
