@@ -162,7 +162,6 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
             showExport={false}
             columnDefinitions={columnDefinitions}
             fixedColumns={fixedColumns}
-            showExport={false}
             setFixedColumns={setFixedColumns}
             loading={loading}
           />
