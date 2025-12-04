@@ -740,6 +740,8 @@ const promoHistoryRepository = {
       title: "Action",
       dataIndex: "action",
       key: "action",
+      disableFilter: true,
+      disableSorter: true,
       render: (_, record) => (
         <Col span={24} className="text-center">
           <UnorderedListOutlined

@@ -1,9 +1,6 @@
 import { Fragment, useState } from "react";
-import BaseContainer from "../../../../../../components/BaseContainer";
-import ButtonComponent from "../../../../../../components/ButtonComponent";
 import { Col, Collapse, Divider, Modal, Row, Space } from "antd";
 import { TablePaginationNew } from "poc-table-dragandrop";
-import { LeftOutlined } from "@ant-design/icons";
 import HeaderText from "./components/HeaderText";
 import FilterButton from "./components/FilterButton";
 import promoRepository from "./repository/promoRepository";
@@ -45,22 +42,21 @@ const PromoViewData = ({
           <FilterButton />
         </Col>
       </Row>
-      <Space direction="vertical" size={"large"}>
-        <div style={{ width: "100%", overflowX: "auto" }}>
-          <TablePaginationNew
-            enableDragColumn={true}
-            enableColumnSorter={true}
-            enableColumnFilter={true}
-            freezeColumns={[{ key: "action", position: "left" }]}
-            tableScrolled={{ x: 800 }}
-            columns={promoRepository.getColumns(
-              setIsModalPromoVisible,
-              setDetailPromoData,
-            )}
-            dataSource={promoRepository.getPromoList()}
-          />
-        </div>
-      </Space>
+
+      <div style={{ width: "100%", overflowX: "auto" }}>
+        <TablePaginationNew
+          enableDragColumn={true}
+          enableColumnSorter={true}
+          enableColumnFilter={true}
+          freezeColumns={[{ key: "action", position: "right" }]}
+          tableScrolled={{ x: 800 }}
+          columns={promoRepository.getColumns(
+            setIsModalPromoVisible,
+            setDetailPromoData,
+          )}
+          dataSource={promoRepository.getPromoList()}
+        />
+      </div>
     </Fragment>
   );
 };
@@ -80,22 +76,21 @@ const PromoHistoryViewData = ({
           <FilterButton />
         </Col>
       </Row>
-      <Space direction="vertical" size={"large"}>
-        <div style={{ width: "100%", overflowX: "auto" }}>
-          <TablePaginationNew
-            enableDragColumn={true}
-            enableColumnSorter={true}
-            enableColumnFilter={true}
-            freezeColumns={[{ key: "action", position: "left" }]}
-            tableScrolled={{ x: 800 }}
-            columns={promoHistoryRepository.getColumns(
-              setIsModalHistoryVisible,
-              setDetailHistoryData,
-            )}
-            dataSource={promoHistoryRepository.getPromoHistoryList()}
-          />
-        </div>
-      </Space>
+
+      <div style={{ width: "100%", overflowX: "auto" }}>
+        <TablePaginationNew
+          enableDragColumn={true}
+          enableColumnSorter={true}
+          enableColumnFilter={true}
+          freezeColumns={[{ key: "action", position: "right" }]}
+          tableScrolled={{ x: 800 }}
+          columns={promoHistoryRepository.getColumns(
+            setIsModalHistoryVisible,
+            setDetailHistoryData,
+          )}
+          dataSource={promoHistoryRepository.getPromoHistoryList()}
+        />
+      </div>
     </Fragment>
   );
 };
@@ -373,13 +368,13 @@ const AccountPromo = () => {
 
   return (
     <Fragment>
+      <HeaderAccountPromo
+        onChangeTab={onChangeTab}
+        isPromoHistory={isPromoHistory}
+      />
       <ContainerWithTab
         children={
           <Fragment>
-            <HeaderAccountPromo
-              onChangeTab={onChangeTab}
-              isPromoHistory={isPromoHistory}
-            />
             <Divider style={{ margin: "2rem 0" }} />
             {selectedRender({
               tab: selectedTab,

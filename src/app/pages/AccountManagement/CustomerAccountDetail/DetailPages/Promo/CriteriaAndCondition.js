@@ -44,7 +44,7 @@ const selectedRender = (selectedTab, handleClickDetail, setDetailData) => {
               enableDragColumn={true}
               enableColumnSorter={true}
               enableColumnFilter={true}
-              freezeColumns={[{ key: "action", position: "left" }]}
+              freezeColumns={[{ key: "action", position: "right" }]}
               tableScrolled={{ x: 800 }}
               columns={promoCriteriaRepository.getColumns(
                 handleClickDetail,
@@ -74,7 +74,7 @@ const selectedRender = (selectedTab, handleClickDetail, setDetailData) => {
               enableDragColumn={true}
               enableColumnSorter={true}
               enableColumnFilter={true}
-              freezeColumns={[{ key: "action", position: "left" }]}
+              freezeColumns={[{ key: "action", position: "right" }]}
               tableScrolled={{ x: 800 }}
               columns={promoConditionRepository.getColumns(
                 handleClickDetail,
