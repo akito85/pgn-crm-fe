@@ -15,7 +15,7 @@ const ConfirmationModal = ({
   isOpen,
   handleCancel,
   handleOk,
-  selectedHierarchy,
+  selectedAppHierId,
   hieararchyOptionData,
   hierarchyTableData,
   dataAttachment,
@@ -85,7 +85,7 @@ const ConfirmationModal = ({
         options={tabs}
         handleChangeOption={handleDetailSection}
         section={typeDetailSection}
-        selectedHierarchy={selectedHierarchy}
+        selectedAppHierId={selectedAppHierId}
         hierarchyTableData={hierarchyTableData}
         hieararchyOptionData={hieararchyOptionData}
         dataAttachment={dataAttachment}

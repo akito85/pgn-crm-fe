@@ -61,7 +61,7 @@ export const validateCreateUpdate = createAsyncThunk('VALIDATE_CREATE_UPDATE', a
     } catch (error) {
       thunkAPI.dispatch(validateError({ error: errorBody(errorCode(error), type === 'update' ? 'updated' : 'created', errorMessage(error)), action: "VALIDATE_CREATE_UPDATE", back: false }))
       return thunkAPI.rejectWithValue(error.response.data);
-    }    
+    }
 });
 
 export const checkGrantedAccessDetail = createAsyncThunk('CHECK_GRANTED_ACCESS_DETAIL', async (_, thunkAPI) => {

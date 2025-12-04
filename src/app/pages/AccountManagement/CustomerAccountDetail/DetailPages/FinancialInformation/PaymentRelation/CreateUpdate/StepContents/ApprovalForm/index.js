@@ -3,7 +3,7 @@ import ApprovalPaymentRelation from "./ApprovalPaymentRelation";
 export default function ApprovalForm({
   dataTable,
   dataOption,
-  selectedHierarchy,
+  selectedAppHierId,
   handleSelectHiararchy,
   className,
 }){
@@ -11,7 +11,7 @@ export default function ApprovalForm({
     <ApprovalPaymentRelation
       dataTable={dataTable}
       dataOption={dataOption}
-      selectedHierarchy={selectedHierarchy}
+      selectedAppHierId={selectedAppHierId}
       handleSelectHiararchy={handleSelectHiararchy}
       className={className}
     />

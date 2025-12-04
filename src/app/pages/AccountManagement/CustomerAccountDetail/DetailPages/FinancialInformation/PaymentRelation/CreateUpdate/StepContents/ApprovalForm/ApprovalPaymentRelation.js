@@ -1,11 +1,10 @@
 import React, { useRef, useState } from "react";
 import ApprovalHierarchy from "./ApprovalHierarchy";
-import BaseContainer from "../../../../../../../../../../components/BaseContainer";
 
 const ApprovalSectionForm = ({
   dataTable,
   dataOption,
-  selectedHierarchy = "",
+  selectedAppHierId = 0,
   handleSelectHiararchy = () => {},
   showSelect = true,
   disableSelect = false,
@@ -29,7 +28,7 @@ const ApprovalSectionForm = ({
         dataTable={dataTable}
         dataOption={dataOption}
         handleSelectHiararchy={handleSelectHiararchy}
-        selectedHierarchy={selectedHierarchy}
+        selectedAppHierId={selectedAppHierId}
         searchInput={searchInput}
         searchedColumn={searchedColumn}
         searchText={searchText}

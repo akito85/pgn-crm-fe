@@ -226,7 +226,7 @@ const ApprovalHierarchy = ({
   dataTable = [],
   dataOption = [],
   handleSelectHiararchy = () => {},
-  selectedHierarchy,
+  selectedAppHierId,
   searchInput,
   searchedColumn,
   searchText,
@@ -247,7 +247,10 @@ const ApprovalHierarchy = ({
           label={"Approval Hierarchy"}
           required
         >
-          <SelectComponent onChange={handleSelectHiararchy} value={selectedHierarchy}>
+          <SelectComponent
+            onChange={(appHierId, option) => handleSelectHiararchy(appHierId, option.children)}
+            value={selectedAppHierId}
+          >
             {dataOption.map((data, index) => (
               <Select.Option key={index} value={data.appHierId}>
                 {data.approvalName}
@@ -259,7 +262,7 @@ const ApprovalHierarchy = ({
       {!showSelect && disableSelect ? (
         <DetailText label={"Approval Hierarchy:"}>{approvalName}</DetailText>
       ) : null}
-      {selectedHierarchy && dataTable.length > 0 ? (
+      {selectedAppHierId && dataTable.length > 0 ? (
         <TablePagination
           useSelect={false}
           usePagination={false}
