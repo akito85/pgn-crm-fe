@@ -656,6 +656,7 @@ export const approveOrRejectPaymentRelation = createAsyncThunk(
       const successBody = {
         title: `Successful`,
         description: `Your data has been ${body?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
       return response.data;
