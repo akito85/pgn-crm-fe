@@ -48,11 +48,10 @@ import PrabillingDetail from "../../app/pages/RatingBillingInvoice/Prabilling/Pr
 import MonitoringCustomerPage from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/MonitoringCustomerPage";
 import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/prabillCustomer/AccountDetailPage";
 import EFakturCodeView from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeView";
-import DigitalSignatureView from "../../app/pages/RatingBillingInvoice/MasterData/DigitalSignature/DigitalSignatureView";
 import ContentManagementView from "../../app/pages/RatingBillingInvoice/MasterData/ContentManagement/ContentManagementView";
 import EFakturCodeForm from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeForm";
 import EFakturCodeDetail from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeDetail";
-import DigitalSignatureCreate from "../../app/pages/RatingBillingInvoice/MasterData/DigitalSignature/DigitalSignatureCreate";
+import DigitalSignatureView from "../../app/pages/RatingBillingInvoice/MasterData/DigitalSignature/DigitalSignatureView";
 import DigitalSignatureForm from "../../app/pages/RatingBillingInvoice/MasterData/DigitalSignature/DigitalSignatureForm";
 import DigitalSignatureDetail from "../../app/pages/RatingBillingInvoice/MasterData/DigitalSignature/DigitalSignatureDetail";
 

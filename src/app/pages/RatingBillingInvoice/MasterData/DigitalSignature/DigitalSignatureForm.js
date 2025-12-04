@@ -1,6 +1,6 @@
 import React from "react";
 
-const DigitalSignatureForm = () => {
+const DigitalSignatureForm = ({ type }) => {
   return <div>DigitalSignatureForm</div>;
 };
 
