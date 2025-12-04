@@ -119,11 +119,12 @@ const ModalConfirmationApprovalPaymentRelation = ({
     >
       <TablePaginationNew
         dataSource={dataSource}
-        pageSize={pageSize}
         totalData={dataSource.length}
         columns={columns}
         onChange={handleChangeDetail}
         current={page}
+        tableScrolled={{ y: 200, x: 1500 }}
+        type="FE"
       />
     </ModalApproveOrReject>
   )
