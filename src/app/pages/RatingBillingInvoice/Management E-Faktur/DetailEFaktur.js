@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Spin, Tabs, Empty, message } from "antd";
-import { LeftOutlined, DownloadOutlined } from "@ant-design/icons";
+import { Spin, Empty, message, Modal, Tabs } from "antd";
+import { LeftOutlined, DownloadOutlined, EyeOutlined, FileTextOutlined } from "@ant-design/icons";
 import moment from "moment";
+import axios from "axios";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
+import StatusComponent from "../../../../components/StatusComponent";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import ModalBuatFakturPengganti from "./ModalEfaktur/ModalBuatFakturPengganti";
 import ModalGenerateXML from "./ModalEfaktur/ModalGenerateXML";
@@ -20,6 +22,8 @@ import {
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
+import { configApp } from "../../../../constants/configApp";
+import { tokenHeader } from "../../../../utils/tokenHeader";
 
 const { TabPane } = Tabs;
 
@@ -29,8 +33,7 @@ const DetailEFaktur = () => {
   const navigate = useNavigate();
   const searchInput = useRef(null);
 
-  const searchParams = new URLSearchParams(location.search);
-  const efakturId = searchParams.get("efakturId");
+  const efakturId = location?.state?.id;
 
   // Redux state
   const {
@@ -47,12 +50,14 @@ const DetailEFaktur = () => {
   const [modalGenerateXML, setModalGenerateXML] = useState(false);
   const [pageLog, setPageLog] = useState(1);
   const [pageSizeLog, setPageSizeLog] = useState(10);
-  const [hasLoadedLog, setHasLoadedLog] = useState(false);
   const [pageAttachment, setPageAttachment] = useState(1);
   const [pageSizeAttachment, setPageSizeAttachment] = useState(10);
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [previewFile, setPreviewFile] = useState(null);
+  const [previewVisible, setPreviewVisible] = useState(false);
+  
   const [fixedColumnsAttachment, setFixedColumnsAttachment] = useState(() => ({
     left: ["no"],
     right: ["action"],
@@ -73,7 +78,7 @@ const DetailEFaktur = () => {
     },
     {
       path: INVOICE_ROUTES.EFAKTUR_VIEW_DETAIL,
-      breadcrumbName: "Detail E-Faktur",
+      breadcrumbName: "E-Faktur Detail",
     },
   ];
 
@@ -92,7 +97,6 @@ const DetailEFaktur = () => {
 
     return () => {
       dispatch(resetEFakturState());
-      setHasLoadedLog(false);
     };
   }, [efakturId, dispatch]);
 
@@ -105,15 +109,11 @@ const DetailEFaktur = () => {
           size: pageSizeLog,
         })
       );
-      setHasLoadedLog(true);
     }
   }, [efakturId, activeTab, pageLog, pageSizeLog, dispatch]);
 
   const handleTabChange = (key) => {
     setActiveTab(key);
-    if (key === "3" && !hasLoadedLog) {
-      setPageLog(1);
-    }
   };
 
   const handleLogPaginationChange = (page, pageSize) => {
@@ -126,45 +126,109 @@ const DetailEFaktur = () => {
     setPageSizeAttachment(pageSize);
   };
 
-  const handleKirimKePelanggan = () => {
-    message.info("Fitur kirim ke pelanggan akan segera tersedia");
-  };
+  // ✅ Download Handler - menggunakan downloadUrl dari backend
+  const handleDownloadAttachment = async (attachment) => {
+    try {
+      const response = await axios.get(
+        configApp.RATING_BILLING_SERVICE + attachment.downloadUrl,
+        {
+          headers: tokenHeader(),
+          responseType: "arraybuffer",
+        }
+      );
 
-  const handleUnduhPDF = () => {
-    if (detail_efaktur?.finalUploadDoc) {
-      window.open(detail_efaktur.finalUploadDoc, "_blank");
-    } else if (detail_efaktur?.manualUploadDoc) {
-      window.open(detail_efaktur.manualUploadDoc, "_blank");
-    } else {
-      message.warning("Dokumen PDF tidak tersedia");
+      const contentType = response.headers["content-type"];
+      const blob = new Blob([response.data], { type: contentType });
+      const url = URL.createObjectURL(blob);
+
+      // Create temporary link to trigger download
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = attachment.fileName || "download";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      message.success("File berhasil diunduh");
+    } catch (error) {
+      console.error("Download error:", error);
+      message.error("Gagal mengunduh file");
     }
   };
 
-  const handleGenerateXML = () => {
-    if (!efakturId) {
-      message.error("E-Faktur ID tidak ditemukan");
-      return;
+  // ✅ Preview Handler - menggunakan downloadUrl dari backend (sama dengan download, tapi buka di tab baru)
+  const handlePreviewAttachment = async (attachment) => {
+    try {
+      const response = await axios.get(
+        configApp.RATING_BILLING_SERVICE + attachment.downloadUrl,
+        {
+          headers: tokenHeader(),
+          responseType: "arraybuffer",
+        }
+      );
+
+      const contentType = response.headers["content-type"];
+      const blob = new Blob([response.data], { type: contentType });
+      const url = URL.createObjectURL(blob);
+
+      // Open in new tab
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Preview error:", error);
+      message.error("Gagal preview file");
     }
-    setModalGenerateXML(true);
   };
 
-  const handleBuatFakturPengganti = () => {
-    setModalFakturPengganti(true);
+  // ✅ Manual Upload Download Handler - menggunakan manualUploadDoc dari backend
+  const handleDownloadManualUpload = async () => {
+    try {
+      const response = await axios.get(
+        configApp.RATING_BILLING_SERVICE + detail_efaktur.manualUploadDoc,
+        {
+          headers: tokenHeader(),
+          responseType: "arraybuffer",
+        }
+      );
+
+      const contentType = response.headers["content-type"];
+      const blob = new Blob([response.data], { type: contentType });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "Manual_Upload_Document.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      message.success("File berhasil diunduh");
+    } catch (error) {
+      console.error("Download error:", error);
+      message.error("Gagal mengunduh dokumen manual upload");
+    }
   };
 
-  const handleSuccessFakturPengganti = () => {
-    message.success("Faktur pengganti berhasil dibuat!");
-    navigate(INVOICE_ROUTES.EFAKTUR_VIEW);
-  };
+  // ✅ Manual Upload Preview Handler - menggunakan manualUploadDoc dari backend
+  const handlePreviewManualUpload = async () => {
+    try {
+      const response = await axios.get(
+        configApp.RATING_BILLING_SERVICE + detail_efaktur.manualUploadDoc,
+        {
+          headers: tokenHeader(),
+          responseType: "arraybuffer",
+        }
+      );
 
-  const handleDownloadAttachment = (attachment) => {
-    if (attachment.downloadUrl) {
-      const fullUrl = `${process.env.REACT_APP_BASE_URL || ""}${
-        attachment.downloadUrl
-      }`;
-      window.open(fullUrl, "_blank");
-    } else {
-      message.error("URL download tidak tersedia");
+      const contentType = response.headers["content-type"];
+      const blob = new Blob([response.data], { type: contentType });
+      const url = URL.createObjectURL(blob);
+
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Preview error:", error);
+      message.error("Gagal preview dokumen manual upload");
     }
   };
 
@@ -342,19 +406,9 @@ const DetailEFaktur = () => {
           true
         ),
         render: (text, record) => {
-          const fileName = renderColumn(
-            "fileName",
-            hasValue(search["fileName"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          );
-
           return (
             <div>
-              <div className="font-medium text-blue-600">{fileName}</div>
+              <div className="font-medium text-gray-900">{text || "-"}</div>
               {record.fileCategoryName && (
                 <div className="text-xs text-gray-500 mt-1">
                   <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700">
@@ -362,59 +416,36 @@ const DetailEFaktur = () => {
                   </span>
                 </div>
               )}
-              {record.description && (
-                <div className="text-xs text-gray-400 mt-1">
-                  {record.description}
-                </div>
-              )}
             </div>
           );
         },
       },
       {
-        key: "type",
+        key: "category",
         title: "CATEGORY",
         dataIndex: "fileCategoryName",
         width: 150,
+        align: "center",
         sorter: true,
-        filteredValue: [search?.fileCategoryName] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "fileCategoryName",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
         render: (text) => {
           if (!text) return "-";
-
           const getCategoryColor = (category) => {
             if (category.toLowerCase().includes("berita acara"))
-              return "bg-green-100 text-green-800 border-green-300";
+              return "bg-green-100 text-green-800";
             if (category.toLowerCase().includes("surat"))
-              return "bg-blue-100 text-blue-800 border-blue-300";
-            if (category.toLowerCase().includes("sk1"))
-              return "bg-orange-100 text-orange-800 border-orange-300";
-            return "bg-gray-100 text-gray-800 border-gray-300";
+              return "bg-blue-100 text-blue-800";
+            if (category.toLowerCase().includes("sk"))
+              return "bg-orange-100 text-orange-800";
+            return "bg-gray-100 text-gray-800";
           };
 
           return (
             <span
-              className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border ${getCategoryColor(
+              className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getCategoryColor(
                 text
               )}`}
             >
-              {renderColumn(
-                "fileCategoryName",
-                hasValue(search["fileCategoryName"]),
-                searchText,
-                text,
-                false,
-                "input",
-                search
-              )}
+              {text}
             </span>
           );
         },
@@ -423,50 +454,13 @@ const DetailEFaktur = () => {
         key: "fileType",
         title: "FILE TYPE",
         dataIndex: "type",
-        width: 150,
+        width: 120,
+        align: "center",
         sorter: true,
-        filteredValue: [search?.type] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "type",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
         render: (text) => {
           if (!text) return "-";
-
-          const getTypeColor = (type) => {
-            if (type.includes("pdf")) return "text-red-600 bg-red-50";
-            if (type.includes("image")) return "text-green-600 bg-green-50";
-            if (type.includes("excel") || type.includes("spreadsheet"))
-              return "text-green-600 bg-green-50";
-            if (type.includes("word") || type.includes("document"))
-              return "text-blue-600 bg-blue-50";
-            return "text-gray-600 bg-gray-50";
-          };
-
           const displayType = text.split("/").pop().toUpperCase();
-
-          return (
-            <span
-              className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getTypeColor(
-                text
-              )}`}
-            >
-              {renderColumn(
-                "type",
-                hasValue(search["type"]),
-                searchText,
-                displayType,
-                false,
-                "input",
-                search
-              )}
-            </span>
-          );
+          return <span className="text-xs font-medium">{displayType}</span>;
         },
       },
       {
@@ -476,30 +470,10 @@ const DetailEFaktur = () => {
         width: 120,
         align: "right",
         sorter: true,
-        filteredValue: [search?.fileSize] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "fileSize",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
         render: (size) => {
           if (!size) return "-";
           const kb = size / 1024;
-          const formatted =
-            kb < 1024 ? `${kb.toFixed(2)} KB` : `${(kb / 1024).toFixed(2)} MB`;
-          return renderColumn(
-            "fileSize",
-            hasValue(search["fileSize"]),
-            searchText,
-            formatted,
-            false,
-            "input",
-            search
-          );
+          return kb < 1024 ? `${kb.toFixed(2)} KB` : `${(kb / 1024).toFixed(2)} MB`;
         },
       },
       {
@@ -508,71 +482,18 @@ const DetailEFaktur = () => {
         dataIndex: "createdBy",
         width: 150,
         sorter: true,
-        filteredValue: [search?.createdBy] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "createdBy",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) => {
-          const displayText = text || "System";
-          return (
-            <div className="text-sm">
-              <div className="font-medium text-gray-900">
-                {renderColumn(
-                  "createdBy",
-                  hasValue(search["createdBy"]),
-                  searchText,
-                  displayText,
-                  false,
-                  "input",
-                  search
-                )}
-              </div>
-            </div>
-          );
-        },
+        render: (text) => text || "System",
       },
       {
         key: "createdDate",
         title: "UPLOAD DATE",
         dataIndex: "createdDate",
-        width: 180,
+        width: 150,
+        align: "center",
         sorter: true,
-        filteredValue: [search?.createdDate] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "createdDate",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true,
-          "date"
-        ),
         render: (text) => {
           if (!text) return "-";
-          return (
-            <div className="text-sm">
-              <div className="font-medium text-gray-900">
-                {renderDateColumn(
-                  "createdDate",
-                  hasValue(search["createdDate"]),
-                  searchText,
-                  moment(text).format("DD MMM YYYY"),
-                  "date",
-                  search
-                )}
-              </div>
-              <div className="text-xs text-gray-500">
-                {moment(text).format("HH:mm:ss")}
-              </div>
-            </div>
-          );
+          return moment(text).format("DD MMM YYYY");
         },
       },
       {
@@ -581,15 +502,20 @@ const DetailEFaktur = () => {
         width: 120,
         align: "center",
         render: (_, record) => (
-          <ButtonComponent
-            type="primary"
-            size="small"
-            icon={<DownloadOutlined />}
-            onClick={() => handleDownloadAttachment(record)}
-            className="w-full"
-          >
-            Download
-          </ButtonComponent>
+          <div className="flex gap-2 justify-center">
+            <ButtonComponent
+              type="default"
+              size="small"
+              icon={<EyeOutlined />}
+              onClick={() => handlePreviewAttachment(record)}
+            />
+            <ButtonComponent
+              type="primary"
+              size="small"
+              icon={<DownloadOutlined />}
+              onClick={() => handleDownloadAttachment(record)}
+            />
+          </div>
         ),
       },
     ],
@@ -615,7 +541,6 @@ const DetailEFaktur = () => {
           <p className="mt-4 text-gray-600 text-base">
             Memuat detail E-Faktur...
           </p>
-          <p className="mt-2 text-gray-400 text-sm">Mohon tunggu sebentar</p>
         </div>
       </LayoutMenu>
     );
@@ -642,393 +567,541 @@ const DetailEFaktur = () => {
     );
   }
 
-  const displayStatus = detail_efaktur?.efakturStatus || "NOT_GENERATED";
+  const dataTabs = [
+    { 
+      value: "Invoice Detail",
+      badge: 10
+    },
+    { 
+      value: "Document Attachment",
+      badge: detail_efaktur?.attachments?.length || 0
+    },
+    { 
+      value: "Log Activity",
+      badge: pagination_log?.totalElements || 0
+    },
+  ];
 
-  const billingDataForModal = detail_efaktur
-    ? {
-        billingCode: detail_efaktur.billingCode,
-        invoiceNumber: detail_efaktur.invoiceNumber,
-        customerName: detail_efaktur.customerName,
-        accountNumber: detail_efaktur.accountNumber,
-        invoiceDate: moment(detail_efaktur.invoiceDate).format("DD-MM-YYYY"),
-        billingPeriod: detail_efaktur.billingPeriod,
-        totalAmountEqvIdr: detail_efaktur.totalAmountEqvIdr,
-        efakturNo: detail_efaktur.efakturNo,
-        efakturId: detail_efaktur.efakturId,
-        efakturStatus: detail_efaktur.efakturStatus,
-      }
-    : null;
-
+  const displayStatus = detail_efaktur?.status || "DRAFT";
   const attachmentCount = detail_efaktur?.attachments?.length || 0;
-  const logCount = pagination_log?.totalElements || 0;
 
   return (
     <LayoutMenu>
-      <BreadCrumb routes={routes} />
+      <Spin spinning={loading_detail}>
+        <BreadCrumb routes={routes} />
 
-      <CardContainer header="E-FAKTUR INFORMATION">
-        {/* Header Info Section */}
-        <div className="grid grid-cols-4 gap-6 mb-6">
-          <div>
-            <div className="text-xs font-medium text-gray-500 mb-2">
-              E-Faktur Status
+        {/* E-FAKTUR INFORMATION Card */}
+        <CardContainer 
+          header={
+            <div className="flex justify-between items-center">
+              <span>E-FAKTUR INFORMATION</span>
+              <ButtonComponent
+                type="primary"
+                onClick={() => message.info("Send to Customer feature coming soon")}
+              >
+                Send to Customer
+              </ButtonComponent>
             </div>
-            <div>
-              <span className="inline-block px-3 py-1.5 rounded text-xs font-semibold bg-blue-100 text-blue-800">
-                {displayStatus.replace(/_/g, " ")}
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <div className="text-xs font-medium text-gray-500 mb-2">
-              Customer
-            </div>
-            <div className="font-semibold text-gray-900 text-sm">
-              {detail_efaktur?.customerName || "-"}
-            </div>
-          </div>
-
-          <div>
-            <div className="text-xs font-medium text-gray-500 mb-2">
-              Account Number
-            </div>
-            <div className="font-semibold text-gray-900 text-sm">
-              {detail_efaktur?.accountNumber || "-"}
-            </div>
-          </div>
-
-          <div>
-            <div className="text-xs font-medium text-gray-500 mb-2">
-              Total Billing
-            </div>
-            <div className="font-bold text-xl text-blue-600">
-              {detail_efaktur?.totalAmountEqvIdr?.toLocaleString("id-ID", {
-                style: "currency",
-                currency: "IDR",
-              }) || "Rp 0"}
-            </div>
-          </div>
-        </div>
-      </CardContainer>
-
-      <CardContainer header="E-FAKTUR DETAIL">
-        <Tabs
-          activeKey={activeTab}
-          onChange={handleTabChange}
-          tabBarExtraContent={
-            <ButtonComponent
-              type="default"
-              border={false}
-              icon={<LeftOutlined style={{ fontSize: "12px" }} />}
-              onClick={() => navigate(INVOICE_ROUTES.EFAKTUR_VIEW)}
-              size="small"
-            >
-              Back
-            </ButtonComponent>
           }
         >
-          {/* Tab 1: Invoice Detail */}
-          <TabPane
-            tab={
-              <span>
-                Invoice Detail
-                <span className="ml-2 px-2 py-0.5 text-xs font-semibold text-gray-700 bg-gray-100 rounded-full">
-                  10
+          <div className="grid grid-cols-4 gap-6">
+            <div>
+              <div className="text-xs font-medium text-gray-500 mb-2">
+                E-Faktur Status
+              </div>
+              <StatusComponent colour={displayStatus.toLowerCase()}>
+                {displayStatus.replace(/_/g, " ")}
+              </StatusComponent>
+            </div>
+
+            <div>
+              <div className="text-xs font-medium text-gray-500 mb-2">
+                Customer
+              </div>
+              <div className="font-semibold text-gray-900">
+                {detail_efaktur?.name || "-"}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-xs font-medium text-gray-500 mb-2">
+                Customer Number
+              </div>
+              <div className="font-semibold text-gray-900">
+                {detail_efaktur?.accountNumber || "-"}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-xs font-medium text-gray-500 mb-2">
+                Total Billing
+              </div>
+              <div className="font-bold text-xl text-blue-600">
+                {(detail_efaktur?.totalAmount || 0).toLocaleString("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                })}
+              </div>
+            </div>
+          </div>
+        </CardContainer>
+
+        {/* E-FAKTUR DETAIL Card */}
+        <CardContainer 
+          header={
+            <div className="flex justify-between items-center">
+              <span>E-FAKTUR DETAIL</span>
+              <ButtonComponent
+                type="default"
+                icon={<FileTextOutlined />}
+                onClick={() => message.info("Export List feature coming soon")}
+              >
+                Export List
+              </ButtonComponent>
+            </div>
+          }
+        >
+          {/* Tabs */}
+          <Tabs activeKey={activeTab} onChange={handleTabChange}>
+            {/* Tab 1: Invoice Detail */}
+            <TabPane
+              tab={
+                <span>
+                  Invoice Detail
+                  <span className="ml-2 px-2 py-0.5 text-xs font-semibold text-gray-700 bg-gray-100 rounded-full">
+                    10
+                  </span>
                 </span>
-              </span>
-            }
-            key="1"
-          >
-            <div className="space-y-6">
-              {/* General Info Section */}
-              <div>
-                <h3 className="text-sm font-bold text-gray-700 mb-4 pb-2 border-b">
-                  GENERAL INFORMATION
-                </h3>
-                <div className="grid grid-cols-4 gap-x-8 gap-y-4">
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      Invoice Number
+              }
+              key="1"
+            >
+              <div className="space-y-6 mt-4">
+                {/* GENERAL INFORMATION */}
+                <div>
+                  <h3 className="text-sm font-bold text-gray-700 mb-4">
+                    GENERAL INFORMATION
+                  </h3>
+                  <div className="grid grid-cols-3 gap-x-8 gap-y-4">
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Billing Code</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.billingCode || "-"}</div>
                     </div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {detail_efaktur?.invoiceNumber || "-"}
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Invoice Date</div>
+                      <div className="text-sm font-medium">
+                        {detail_efaktur?.invoiceDate ? moment(detail_efaktur.invoiceDate).format("DD MMMM YYYY") : "-"}
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      E-Faktur Number
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Billing Period</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.billPeriode || "-"}</div>
                     </div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {detail_efaktur?.efakturNo || "-"}
+                    
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Invoice Number</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.invoiceNumber || "-"}</div>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      Billing Code
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Faktur Code</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.efakturNo || "-"}</div>
                     </div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {detail_efaktur?.billingCode || "-"}
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">E-Faktur Date</div>
+                      <div className="text-sm font-medium">
+                        {detail_efaktur?.efakturDate ? moment(detail_efaktur.efakturDate).format("DD MMMM YYYY") : "-"}
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      Type PPN
+                    
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Account Number</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.accountNumber || "-"}</div>
                     </div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {detail_efaktur?.typePpn || "-"}
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Account Name</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.accountName || "-"}</div>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      Invoice Date
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Account Segment</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.accountSegment || "-"}</div>
                     </div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {detail_efaktur?.invoiceDate
-                        ? moment(detail_efaktur.invoiceDate).format(
-                            "DD MMMM YYYY"
-                          )
-                        : "-"}
+
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">SOR</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.sor || "-"}</div>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      E-Faktur Date
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Cost Center</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.costCenter || "-"}</div>
                     </div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {detail_efaktur?.efakturDate
-                        ? moment(detail_efaktur.efakturDate).format(
-                            "DD MMMM YYYY, HH:mm"
-                          )
-                        : "-"}
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Meter Reading Code</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.meterReadingCode || "-"}</div>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      Billing Period
+
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Type PPN</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.typePpn || "-"}</div>
                     </div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {detail_efaktur?.billingPeriod || "-"}
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Transaction Code</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.transactionCode || "-"}</div>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      E-Faktur Type
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">TKU Code</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.tkuCode || "-"}</div>
                     </div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {detail_efaktur?.efakturType || "-"}
+
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Due Date</div>
+                      <div className="text-sm font-medium">
+                        {detail_efaktur?.dueDate ? moment(detail_efaktur.dueDate).format("DD MMMM YYYY") : "-"}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Type</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.type || "-"}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Status Approval</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.statusApproval || "-"}</div>
+                    </div>
+
+                    <div className="col-span-3">
+                      <div className="text-xs text-gray-500 mb-1">Note</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.remark || "-"}</div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Customer Info Section */}
-              <div>
-                <h3 className="text-sm font-bold text-gray-700 mb-4 pb-2 border-b">
-                  CUSTOMER INFORMATION
-                </h3>
-                <div className="grid grid-cols-4 gap-x-8 gap-y-4">
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      Customer Name
+                {/* CUSTOMER INFORMATION */}
+                <div>
+                  <h3 className="text-sm font-bold text-gray-700 mb-4">
+                    CUSTOMER INFORMATION
+                  </h3>
+                  <div className="grid grid-cols-3 gap-x-8 gap-y-4">
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Customer Name</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.name || "-"}</div>
                     </div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {detail_efaktur?.customerName || "-"}
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Email</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.email || "-"}</div>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      Account Number
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Country Code</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.countryCode || "-"}</div>
                     </div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {detail_efaktur?.accountNumber || "-"}
+
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">NPWP Customer</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.npwpCust || "-"}</div>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      Account Name
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">NIK/Passport</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.nikPasport || "-"}</div>
                     </div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {detail_efaktur?.accountName || "-"}
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">DJP Info User ID</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.djpInfoUserId || "-"}</div>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      NPWP
-                    </div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {detail_efaktur?.npwp || "-"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      NIK/Passport
-                    </div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {detail_efaktur?.nikPasp || "-"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      Email
-                    </div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {detail_efaktur?.email || "-"}
-                    </div>
-                  </div>
-                  <div className="col-span-2">
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      Address
-                    </div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {detail_efaktur?.alamat || "-"}
+
+                    <div className="col-span-3">
+                      <div className="text-xs text-gray-500 mb-1">Full Address</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.fullAddress || "-"}</div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Summary Section */}
-              <div>
-                <h3 className="text-sm font-bold text-gray-700 mb-4 pb-2 border-b">
-                  SUMMARY
-                </h3>
-                <div className="grid grid-cols-4 gap-x-8 gap-y-4">
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      DPP
-                    </div>
-                    <div className="font-bold text-gray-900 text-sm">
-                      {detail_efaktur?.dpp?.toLocaleString("id-ID", {
-                        style: "currency",
-                        currency: "IDR",
-                      }) || "Rp 0"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      PPN
-                    </div>
-                    <div className="font-bold text-gray-900 text-sm">
-                      {detail_efaktur?.ppn?.toLocaleString("id-ID", {
-                        style: "currency",
-                        currency: "IDR",
-                      }) || "Rp 0"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      Total
-                    </div>
-                    <div className="font-bold text-gray-900 text-sm">
-                      {detail_efaktur?.totalAmountEqvIdr?.toLocaleString(
-                        "id-ID",
-                        {
+                {/* TAX INFORMATION */}
+                <div>
+                  <h3 className="text-sm font-bold text-gray-700 mb-4">
+                    TAX INFORMATION
+                  </h3>
+                  <div className="grid grid-cols-3 gap-x-8 gap-y-4">
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">DPP</div>
+                      <div className="text-sm font-medium">
+                        {(detail_efaktur?.dpp || 0).toLocaleString("id-ID", {
                           style: "currency",
                           currency: "IDR",
-                        }
-                      ) || "Rp 0"}
+                        })}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">PPN</div>
+                      <div className="text-sm font-medium">
+                        {(detail_efaktur?.ppn || 0).toLocaleString("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                        })}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">PPNBM</div>
+                      <div className="text-sm font-medium">
+                        {(detail_efaktur?.ppnbm || 0).toLocaleString("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                        })}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Other DPP</div>
+                      <div className="text-sm font-medium">
+                        {(detail_efaktur?.otherDpp || 0).toLocaleString("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                        })}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Discount</div>
+                      <div className="text-sm font-medium">
+                        {(detail_efaktur?.discount || 0).toLocaleString("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                        })}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Total Amount</div>
+                      <div className="text-sm font-bold text-blue-600">
+                        {(detail_efaktur?.totalAmount || 0).toLocaleString("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                        })}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Masa Pajak</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.masaPajak || "-"}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Tahun Pajak</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.tahunPajak || "-"}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Referensi</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.referensi || "-"}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* APPROVAL INFORMATION */}
+                <div>
+                  <h3 className="text-sm font-bold text-gray-700 mb-4">
+                    APPROVAL INFORMATION
+                  </h3>
+                  <div className="grid grid-cols-3 gap-x-8 gap-y-4">
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Created By</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.createdBy || "-"}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Created Date</div>
+                      <div className="text-sm font-medium">
+                        {detail_efaktur?.createdDtm ? moment(detail_efaktur.createdDtm).format("DD MMMM YYYY HH:mm:ss") : "-"}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Updated By</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.updatedBy || "-"}</div>
+                    </div>
+
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Updated Date</div>
+                      <div className="text-sm font-medium">
+                        {detail_efaktur?.updatedDtm ? moment(detail_efaktur.updatedDtm).format("DD MMMM YYYY HH:mm:ss") : "-"}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Approved By</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.approvedBy || "-"}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Approved Date</div>
+                      <div className="text-sm font-medium">
+                        {detail_efaktur?.approvedDtm ? moment(detail_efaktur.approvedDtm).format("DD MMMM YYYY HH:mm:ss") : "-"}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Approval Hierarchy</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.approvalHierarchy || "-"}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Status PJAP</div>
+                      <div className="text-sm font-medium">{detail_efaktur?.statusPjap || "-"}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">PJAP ID</div>
+                      <div className="text-sm font-medium text-xs break-all">{detail_efaktur?.pjapId || "-"}</div>
                     </div>
                   </div>
                 </div>
               </div>
+            </TabPane>
 
-              {detail_efaktur?.remark && (
-                <div>
-                  <h3 className="text-sm font-bold text-gray-700 mb-4 pb-2 border-b">
-                    NOTES
-                  </h3>
-                  <div className="bg-gray-50 p-4 rounded">
-                    <div className="text-sm text-gray-900">
-                      {detail_efaktur.remark}
+            {/* Tab 2: Document Attachment */}
+            <TabPane
+              tab={
+                <span>
+                  Document Attachment
+                  {attachmentCount > 0 && (
+                    <span className="ml-2 px-2 py-0.5 text-xs font-semibold text-white bg-blue-500 rounded-full">
+                      {attachmentCount}
+                    </span>
+                  )}
+                </span>
+              }
+              key="2"
+            >
+              <div className="space-y-4 mt-4">
+                {/* Manual Upload Document Section */}
+                {detail_efaktur?.manualUploadDoc && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <FileTextOutlined className="text-2xl text-blue-600" />
+                        <div>
+                          <div className="font-semibold text-gray-900">Manual Upload Document</div>
+                          <div className="text-xs text-gray-500">E-Faktur PDF Document</div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <ButtonComponent
+                          type="default"
+                          size="small"
+                          icon={<EyeOutlined />}
+                          onClick={handlePreviewManualUpload}
+                        >
+                          Preview
+                        </ButtonComponent>
+                        <ButtonComponent
+                          type="primary"
+                          size="small"
+                          icon={<DownloadOutlined />}
+                          onClick={handleDownloadManualUpload}
+                        >
+                          Download
+                        </ButtonComponent>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          </TabPane>
-
-          {/* Tab 2: Document Attachment */}
-          <TabPane
-            tab={
-              <span>
-                Document Attachment
-                {attachmentCount > 0 && (
-                  <span className="ml-2 px-2 py-0.5 text-xs font-semibold text-white bg-blue-500 rounded-full">
-                    {attachmentCount}
-                  </span>
                 )}
-              </span>
-            }
-            key="2"
-          >
-            <TableRBI
-              dataSource={
-                detail_efaktur?.attachments
-                  ? detail_efaktur.attachments.map((item) => ({
+
+                {/* Attachments Table */}
+                <TableRBI
+                  dataSource={
+                    detail_efaktur?.attachments?.map((item, index) => ({
                       ...item,
-                      key: item.id,
-                    }))
-                  : []
+                      key: item.id || index,
+                    })) || []
+                  }
+                  columns={processedColumnsAttachment}
+                  current={pageAttachment}
+                  pageSize={pageSizeAttachment}
+                  onChange={handleAttachmentPaginationChange}
+                  onSizeChanger={handleAttachmentPaginationChange}
+                  totalData={attachmentCount}
+                  tableScrolled={{ x: 1200, y: 400 }}
+                  loading={loading_detail}
+                  columnDefinitions={columnDefinitionsAttachment}
+                  fixedColumns={fixedColumnsAttachment}
+                  setFixedColumns={setFixedColumnsAttachment}
+                />
+              </div>
+            </TabPane>
+
+            {/* Tab 3: Log Activity */}
+            <TabPane
+              tab={
+                <span>
+                  Log Activity
+                  {(pagination_log?.totalElements || 0) > 0 && (
+                    <span className="ml-2 px-2 py-0.5 text-xs font-semibold text-white bg-blue-500 rounded-full">
+                      {pagination_log?.totalElements || 0}
+                    </span>
+                  )}
+                </span>
               }
-              columns={processedColumnsAttachment}
-              current={pageAttachment}
-              pageSize={pageSizeAttachment}
-              onChange={handleAttachmentPaginationChange}
-              onSizeChanger={handleAttachmentPaginationChange}
-              totalData={attachmentCount}
-              tableScrolled={{ x: 1200, y: 400 }}
-              loading={loading_detail}
-              columnDefinitions={columnDefinitionsAttachment}
-              fixedColumns={fixedColumnsAttachment}
-              setFixedColumns={setFixedColumnsAttachment}
-            />
-          </TabPane>
+              key="3"
+            >
+              <div className="mt-4">
+                <TableRBI
+                  dataSource={log_activity || []}
+                  columns={processedColumnsLog}
+                  current={pageLog}
+                  pageSize={pageSizeLog}
+                  onChange={handleLogPaginationChange}
+                  onSizeChanger={handleLogPaginationChange}
+                  totalData={pagination_log?.totalElements || 0}
+                  tableScrolled={{ x: 1000, y: 400 }}
+                  loading={loading_log}
+                  columnDefinitions={columnDefinitionsLog}
+                  fixedColumns={fixedColumnsLog}
+                  setFixedColumns={setFixedColumnsLog}
+                />
+              </div>
+            </TabPane>
+          </Tabs>
+        </CardContainer>
 
-          {/* Tab 3: Log Activity */}
-          <TabPane
-            tab={
-              <span>
-                Log Activity
-                {logCount > 0 && (
-                  <span className="ml-2 px-2 py-0.5 text-xs font-semibold text-white bg-blue-500 rounded-full">
-                    {logCount}
-                  </span>
-                )}
-              </span>
-            }
-            key="3"
+        {/* Back Button */}
+        <div className="flex justify-start my-5">
+          <ButtonComponent
+            type="submit"
+            border={false}
+            icon={<LeftOutlined style={{ color: "#fff", fontSize: 16 }} />}
+            onClick={() => navigate(-1)}
           >
-            <TableRBI
-              dataSource={log_activity || []}
-              columns={processedColumnsLog}
-              current={pageLog}
-              pageSize={pageSizeLog}
-              onChange={handleLogPaginationChange}
-              onSizeChanger={handleLogPaginationChange}
-              totalData={pagination_log?.totalElements || 0}
-              tableScrolled={{ x: 1000, y: 400 }}
-              loading={loading_log}
-              columnDefinitions={columnDefinitionsLog}
-              fixedColumns={fixedColumnsLog}
-              setFixedColumns={setFixedColumnsLog}
+            Back
+          </ButtonComponent>
+        </div>
+
+        {/* Preview Modal */}
+        <Modal
+          visible={previewVisible}
+          title={previewFile?.name}
+          footer={null}
+          onCancel={() => setPreviewVisible(false)}
+          width={800}
+          centered
+        >
+          {previewFile?.type?.includes("pdf") ? (
+            <iframe
+              src={previewFile.url}
+              style={{ width: "100%", height: "600px" }}
+              title="PDF Preview"
             />
-          </TabPane>
-        </Tabs>
-      </CardContainer>
+          ) : previewFile?.type?.includes("image") ? (
+            <img
+              src={previewFile.url}
+              alt="Preview"
+              style={{ width: "100%", maxHeight: "600px", objectFit: "contain" }}
+            />
+          ) : null}
+        </Modal>
 
-      {/* Modals */}
-      <ModalBuatFakturPengganti
-        visible={modalFakturPengganti}
-        onCancel={() => setModalFakturPengganti(false)}
-        onSuccess={handleSuccessFakturPengganti}
-        billingData={billingDataForModal}
-      />
+        {/* Modals */}
+        <ModalBuatFakturPengganti
+          visible={modalFakturPengganti}
+          onCancel={() => setModalFakturPengganti(false)}
+          onSuccess={() => {
+            setModalFakturPengganti(false);
+            navigate(INVOICE_ROUTES.EFAKTUR_VIEW);
+          }}
+          billingData={detail_efaktur}
+        />
 
-      <ModalGenerateXML
-        visible={modalGenerateXML}
-        onCancel={() => setModalGenerateXML(false)}
-        efakturId={efakturId}
-      />
+        <ModalGenerateXML
+          visible={modalGenerateXML}
+          onCancel={() => setModalGenerateXML(false)}
+          efakturId={efakturId}
+        />
+      </Spin>
     </LayoutMenu>
   );
 };

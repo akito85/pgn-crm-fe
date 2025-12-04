@@ -50,6 +50,7 @@ import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/p
 import EFakturCodeView from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeView";
 import DigitalSignatureView from "../../app/pages/RatingBillingInvoice/MasterData/DigitalSignature/DigitalSignatureView";
 import ContentManagementView from "../../app/pages/RatingBillingInvoice/MasterData/ContentManagement/ContentManagementView";
+import ContentManagementForm from "../../app/pages/RatingBillingInvoice/MasterData/ContentManagement/ContentManagementForm";
 import EFakturCodeForm from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeForm";
 import EFakturCodeDetail from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeDetail";
 
@@ -170,4 +171,6 @@ export const RBI_ELEMENTS = {
 
   // content management
   CONTENT_MANAGEMENT_VIEW_ELEMENT: <ContentManagementView />,
+  CONTENT_MANAGEMENT_CREATE_ELEMENT: <ContentManagementForm  />,
+
 };
