@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Spin, Steps, Select, Progress } from "antd";
-import {
-  RightOutlined,
-  CheckCircleOutlined,
-} from "@ant-design/icons";
+import { Form, Spin, Steps, Select } from "antd";
+import { RightOutlined } from "@ant-design/icons";
+import moment from "moment";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import DetailText from "../../../../../components/DetailText";
@@ -16,28 +14,19 @@ import {
 } from "../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../utils/Icon";
 import TableRBI from "../../../../../components/TableRBI";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
-import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn } from "../../../../../utils";
 import {
-  getEligibleEFakturForRequest,
+  getAvailableRequestedList,
+  createRequestApprovalEFaktur,
+  createRequestReplacementEFaktur,
+  createRequestCancellationEFaktur,
   getAllApprovalList,
   getListApprovalById,
-  bulkRequestApprovalEFaktur,
-  getListCategory,
 } from "../../../../../redux/slices/rating_billing_invoice/efakturSlice";
-import {
-  columnsApproval,
-  columnsExpandApproval,
-} from "../../Billing/Detail/Table/TableApproval";
-import { configApp } from "../../../../../constants/configApp";
-import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
-import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
-import moment from "moment";
 
-const ModalBulkRequestApproval = ({
+const ModalRequestApprovalEFaktur = ({
   isOpen = false,
   handleClose = () => {},
   onSuccess = () => {},
@@ -47,13 +36,12 @@ const ModalBulkRequestApproval = ({
   const searchInput = useRef(null);
 
   const {
-    loading,
+    loading_available_requested,
     loading_modal,
-    data_eligible_efaktur,
+    data_available_requested,
     data_approval,
     data_approval_list,
-    dataListCategory,
-    upload_progress,
+    pagination_available_requested,
   } = useSelector((state) => state.efaktur);
 
   const [current, setCurrent] = useState(0);
@@ -62,39 +50,47 @@ const ModalBulkRequestApproval = ({
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState("");
+  const [sort, setSort] = useState("invoiceDate~desc");
+  const [filterType, setFilterType] = useState("normal");
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
   const [boolean, setBoolean] = useState(false);
   const [dataTable, setDataTable] = useState([]);
   const [remark, setRemark] = useState("");
-  const [listDataAttachment, setListDataAttachment] = useState([]);
-  
+
   const [modalSuccess, setModalSuccess] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [successData, setSuccessData] = useState(null);
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
     right: [],
   }));
 
-  const dataSource = data_eligible_efaktur || [];
+  const dataSource = data_available_requested || [];
+
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSource.map((item, index) => ({
+      ...item,
+      key: item.efakturId || index,
+    }));
+  }, [dataSource]);
 
   useEffect(() => {
     if (isOpen) {
-      dispatch(getEligibleEFakturForRequest({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      }));
+      dispatch(
+        getAvailableRequestedList({
+          page,
+          pageSize,
+          sort,
+          type: filterType,
+          search: encodeURIComponent(JSON.stringify(search)),
+        })
+      );
       dispatch(getAllApprovalList());
-      dispatch(getListCategory());
     }
-  }, [isOpen, dispatch, search, page, pageSize, sort]);
+  }, [isOpen, dispatch, search, page, pageSize, sort, filterType]);
 
   useEffect(() => {
     if (boolean && data_approval_list && data_approval_list.length > 0) {
@@ -112,19 +108,15 @@ const ModalBulkRequestApproval = ({
 
   const steps = [
     {
-      title: "E-FAKTUR SELECTION",
+      title: "E-FAKTUR",
       disabled: selectedRowKeys.length === 0 || !remark,
     },
     {
-      title: "APPROVAL INFORMATION",
+      title: "APPROVAL",
       disabled: !form.getFieldValue()?.apphierId,
     },
     {
-      title: "ATTACHMENT",
-      disabled: false,
-    },
-    {
-      title: "CONFIRMATION & SUBMIT",
+      title: "CONFIRMATION",
       disabled: false,
     },
   ];
@@ -175,47 +167,15 @@ const ModalBulkRequestApproval = ({
     fixed: true,
     selectedRowKeys,
     onChange: onSelectChange,
+    getCheckboxProps: (record) => ({
+      name: record.efakturId,
+    }),
   };
 
   const handleSelect = (e) => {
     dispatch(getListApprovalById(e));
     setBoolean(true);
   };
-
-  const calculateSummary = () => {
-    if (selectedRows.length === 0) {
-      return {
-        totalItems: 0,
-        totalAmount: 0,
-        customers: [],
-        uniqueCustomers: 0,
-      };
-    }
-
-    const totalAmount = selectedRows.reduce(
-      (sum, item) => sum + (item.totalAmountEqvIdr || 0),
-      0
-    );
-
-    const customerMap = new Map();
-    selectedRows.forEach((item) => {
-      const customer = item.customerName;
-      customerMap.set(customer, (customerMap.get(customer) || 0) + 1);
-    });
-
-    const customers = Array.from(customerMap.entries()).map(
-      ([name, count]) => ({ name, count })
-    );
-
-    return {
-      totalItems: selectedRows.length,
-      totalAmount,
-      customers,
-      uniqueCustomers: customerMap.size,
-    };
-  };
-
-  const summary = calculateSummary();
 
   const handleSubmit = async () => {
     const formValues = form.getFieldsValue();
@@ -233,36 +193,63 @@ const ModalBulkRequestApproval = ({
     }
 
     if (!remark) {
-      setErrorMessage("Please input remark");
+      setErrorMessage("Please input remark/reason");
       setModalError(true);
       return;
     }
 
-    const payload = {
-      efakturIds: selectedRows.map((row) => row.efakturId),
-      apphierId: formValues.apphierId,
-      remark: remark,
-    };
-
     try {
-      const result = await dispatch(
-        bulkRequestApprovalEFaktur({
-          requestData: payload,
-          attachments: listDataAttachment,
-        })
-      ).unwrap();
+      const efakturIds = selectedRows.map((row) => String(row.efakturId));
+      const apphierId = String(formValues.apphierId);
+      const reasonText = remark.trim();
 
-      setSuccessData({
-        totalRequested: result.totalRequested || selectedRows.length,
-        successCount: result.successCount || selectedRows.length,
-        failedCount: result.failedCount || 0,
-        summary: result.summary,
-      });
+      switch (filterType) {
+        case "normal":
+          await dispatch(
+            createRequestApprovalEFaktur({
+              apphierId: apphierId,
+              efakturIds: efakturIds,
+              remark: reasonText,
+            })
+          ).unwrap();
+          break;
+
+        case "replacement":
+          await dispatch(
+            createRequestReplacementEFaktur({
+              apphierId: apphierId,
+              efakturIds: efakturIds,
+              reason: reasonText,
+            })
+          ).unwrap();
+          break;
+
+        case "cancellation":
+          await dispatch(
+            createRequestCancellationEFaktur({
+              apphierId: apphierId,
+              efakturIds: efakturIds,
+              reason: reasonText,
+            })
+          ).unwrap();
+          break;
+
+        case "manual_upload":
+          setErrorMessage(
+            "Manual upload tidak support request approval. Silakan gunakan Generate XML."
+          );
+          setModalError(true);
+          return;
+
+        default:
+          setErrorMessage(`Type "${filterType}" tidak dikenali`);
+          setModalError(true);
+          return;
+      }
 
       setModalSuccess(true);
     } catch (error) {
-      const errorMsg =
-        error?.message || "Failed to submit bulk request approval";
+      const errorMsg = error?.message || "Failed to create request approval";
       setErrorMessage(errorMsg);
       setModalError(true);
     }
@@ -275,10 +262,9 @@ const ModalBulkRequestApproval = ({
     setBoolean(false);
     setDataTable([]);
     setRemark("");
-    setListDataAttachment([]);
     setCurrent(0);
     setSearch({});
-    setSuccessData(null);
+    setFilterType("normal"); 
     handleClose();
   };
 
@@ -286,6 +272,37 @@ const ModalBulkRequestApproval = ({
     setModalSuccess(false);
     onSuccess();
     handleCancel();
+  };
+
+  // ✅ Dynamic Label untuk Remark berdasarkan Type
+  const getRemarkLabel = () => {
+    switch (filterType) {
+      case "normal":
+        return "Request";
+      case "replacement":
+        return "Replacement Reason";
+      case "cancellation":
+        return "Cancellation Reason";
+      case "manual_upload":
+        return "Note";
+      default:
+        return "Request/Reason";
+    }
+  };
+
+  const getRemarkPlaceholder = () => {
+    switch (filterType) {
+      case "normal":
+        return "Type your request";
+      case "replacement":
+        return "Type your reason for replacement";
+      case "cancellation":
+        return "Type your reason for cancellation";
+      case "manual_upload":
+        return "Type your note";
+      default:
+        return "Type your request or reason";
+    }
   };
 
   // Columns untuk Step 1
@@ -296,11 +313,11 @@ const ModalBulkRequestApproval = ({
         title: "NO",
         width: 60,
         align: "center",
-        render: (_, __, index) => (page - 1) * pageSize + index + 1,
+        render: (_, record, index) => (page - 1) * pageSize + index + 1,
       },
       {
         key: "efakturNo",
-        title: "KODE FAKTUR",
+        title: "FAKTUR CODE",
         dataIndex: "efakturNo",
         width: 180,
         align: "left",
@@ -321,6 +338,64 @@ const ModalBulkRequestApproval = ({
             hasValue(search["efakturNo"]),
             searchText,
             text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "type",
+        title: "FAKTUR TYPE",
+        dataIndex: "type",
+        width: 150,
+        align: "center",
+        sorter: true,
+        render: (type) => {
+          const typeColors = {
+            STANDARD: "bg-blue-100 text-blue-800 border-blue-300",
+            REPLACEMENT: "bg-orange-100 text-orange-800 border-orange-300",
+            CANCELLATION: "bg-red-100 text-red-800 border-red-300",
+          };
+
+          const displayType = type || "STANDARD";
+
+          return (
+            <div className="flex justify-center">
+              <span
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                  typeColors[displayType] ||
+                  "bg-gray-100 text-gray-800 border-gray-300"
+                }`}
+              >
+                {displayType}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        key: "billingCode",
+        title: "BILLING CODE",
+        dataIndex: "billingCode",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.billingCode] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "billingCode",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "billingCode",
+            hasValue(search["billingCode"]),
+            searchText,
+            text,
             false,
             "input",
             search
@@ -355,16 +430,16 @@ const ModalBulkRequestApproval = ({
           ),
       },
       {
-        key: "billingCode",
-        title: "BILLING CODE",
-        dataIndex: "billingCode",
+        key: "accountNumber",
+        title: "ACCOUNT NUMBER",
+        dataIndex: "accountNumber",
         width: 180,
         align: "left",
         sorter: true,
-        filteredValue: [search?.billingCode] || null,
+        filteredValue: [search?.accountNumber] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "billingCode",
+          "accountNumber",
           searchInput,
           searchedColumn,
           searchText,
@@ -373,27 +448,27 @@ const ModalBulkRequestApproval = ({
         ),
         render: (text) =>
           renderColumn(
-            "billingCode",
-            hasValue(search["billingCode"]),
+            "accountNumber",
+            hasValue(search["accountNumber"]),
             searchText,
-            text,
+            text || "-",
             false,
             "input",
             search
           ),
       },
       {
-        key: "customerName",
-        title: "CUSTOMER",
-        dataIndex: "customerName",
+        key: "accountName",
+        title: "ACCOUNT NAME",
+        dataIndex: "accountName",
         width: 250,
         align: "left",
         sorter: true,
-        filteredValue: [search?.customerName] || null,
+        filteredValue: [search?.accountName] || null,
         ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "customerName",
+          "accountName",
           searchInput,
           searchedColumn,
           searchText,
@@ -402,10 +477,10 @@ const ModalBulkRequestApproval = ({
         ),
         render: (text) =>
           renderColumn(
-            "customerName",
-            hasValue(search["customerName"]),
+            "accountName",
+            hasValue(search["accountName"]),
             searchText,
-            text,
+            text || "-",
             true,
             "input",
             search
@@ -421,30 +496,29 @@ const ModalBulkRequestApproval = ({
         render: (text) => (text ? moment(text).format("DD-MM-YYYY") : "-"),
       },
       {
-        key: "totalAmountEqvIdr",
-        title: "TOTAL AMOUNT (IDR)",
-        dataIndex: "totalAmountEqvIdr",
-        width: 180,
-        align: "right",
+        key: "efakturDate",
+        title: "EFAKTUR DATE",
+        dataIndex: "efakturDate",
+        width: 120,
+        align: "center",
         sorter: true,
-        render: (value) => `Rp ${value?.toLocaleString("id-ID") || 0}`,
+        render: (text) => (text ? moment(text).format("DD-MM-YYYY") : "-"),
       },
       {
-        key: "efakturStatus",
+        key: "status",
         title: "STATUS",
-        dataIndex: "efakturStatus",
+        dataIndex: "status",
         width: 150,
         align: "center",
         sorter: true,
         render: (status) => {
           const statusColors = {
-            NOT_GENERATED: "bg-gray-100 text-gray-800 border-gray-300",
             FAILED: "bg-red-100 text-red-800 border-red-300",
-            REJECTED: "bg-red-100 text-red-800 border-red-300",
+            CANCELLED: "bg-gray-100 text-gray-800 border-gray-300",
+            APPROVED: "bg-green-100 text-green-800 border-green-300",
           };
 
-          const displayStatus = status || "NOT_GENERATED";
-          const statusLabel = displayStatus.replace(/_/g, " ");
+          const displayStatus = status || "FAILED";
 
           return (
             <div className="flex justify-center">
@@ -454,7 +528,7 @@ const ModalBulkRequestApproval = ({
                   "bg-gray-100 text-gray-800 border-gray-300"
                 }`}
               >
-                {statusLabel}
+                {displayStatus}
               </span>
             </div>
           );
@@ -483,14 +557,59 @@ const ModalBulkRequestApproval = ({
     }));
   }, [allColumns]);
 
+  // Columns untuk Approval Table (Step 2)
+  const columnsApproval = [
+    {
+      title: "NO",
+      key: "no",
+      width: 60,
+      align: "center",
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: "HIERARCHY",
+      dataIndex: "hierarchy",
+      key: "hierarchy",
+      width: 150,
+    },
+    {
+      title: "POSITION",
+      dataIndex: "position",
+      key: "position",
+      width: 200,
+    },
+  ];
+
+  const columnsExpandApproval = [
+    {
+      title: "NO",
+      key: "no",
+      width: 60,
+      align: "center",
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: "EMPLOYEE",
+      dataIndex: "employeeName",
+      key: "employeeName",
+      width: 250,
+    },
+    {
+      title: "EMAIL",
+      dataIndex: "email",
+      key: "email",
+      width: 250,
+    },
+  ];
+
   return (
     <div>
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Bulk Request Approval E-Faktur"
+        header={`REQUEST APPROVAL - ${filterType.toUpperCase()}`}
         handleCancel={handleCancel}
-        width={1200}
+        width={1000}
         footer={
           <div className="flex w-full justify-end gap-5">
             {current < steps.length - 1 && (
@@ -529,13 +648,13 @@ const ModalBulkRequestApproval = ({
                 loading={loading_modal}
                 disabled={loading_modal}
               >
-                {loading_modal ? "Submitting..." : "Submit"}
+                {loading_modal ? "Submitting..." : "Submit Request"}
               </ButtonComponent>
             )}
           </div>
         }
       >
-        <Spin spinning={loading || loading_modal}>
+        <Spin spinning={loading_available_requested || loading_modal}>
           <div className="my-6">
             {/* STEPS */}
             <div className="mb-8">
@@ -549,67 +668,98 @@ const ModalBulkRequestApproval = ({
             </div>
 
             <Form layout="vertical" form={form}>
-              {/* STEP 1: E-FAKTUR SELECTION */}
+              {/* STEP 1: E-FAKTUR LIST */}
               <div className={`${current !== 0 ? "hidden" : ""}`}>
                 <div className="mb-6">
                   <p className="text-primary uppercase font-bold mb-4">
-                    Select E-Faktur for Request Approval
+                    E-FAKTUR LIST
                   </p>
 
+                  {/* Filter Type Dropdown */}
+                  <div className="mb-4">
+                    <style>{`
+                      .filter-type-select .ant-select-selector {
+                        display: flex !important;
+                        align-items: center !important;
+                        gap: 8px !important;
+                        border: 1px solid #BDBDBD !important;
+                        height: 40px !important;
+                        color: black !important;
+                        border-radius: 6px !important;
+                        font-size: 14px !important;
+                        font-weight: 500 !important;
+                        padding: 0 11px !important;
+                        background: white !important;
+                      }
+                      .filter-type-select .ant-select-selection-placeholder {
+                        color: rgba(0, 0, 0, 0.25) !important;
+                        line-height: 40px !important;
+                        font-size: 14px !important;
+                        font-weight: 500 !important;
+                      }
+                      .filter-type-select .ant-select-selection-item {
+                        line-height: 40px !important;
+                        font-size: 14px !important;
+                        font-weight: 500 !important;
+                        color: black !important;
+                      }
+                    `}</style>
+                    <Select
+                      value={filterType}
+                      onChange={(value) => {
+                        setFilterType(value);
+                        setPage(1);
+                        setSelectedRowKeys([]);
+                        setSelectedRows([]);
+                      }}
+                      style={{ width: 200 }}
+                      className="filter-type-select"
+                    >
+                      <Select.Option value="normal">Normal</Select.Option>
+                      <Select.Option value="replacement">
+                        Replacement
+                      </Select.Option>
+                      <Select.Option value="cancellation">
+                        Cancellation
+                      </Select.Option>
+                      <Select.Option value="manual_upload" disabled>
+                        Manual Upload (Use Generate XML)
+                      </Select.Option>
+                    </Select>
+                  </div>
+
                   <TableRBI
-                    dataSource={dataSource}
+                    dataSource={dataSourceWithKeys}
                     columns={processedColumns}
                     current={page}
                     pageSize={pageSize}
                     onChange={handleChangePage}
                     onSizeChanger={handleChangePage}
-                    totalData={dataSource?.length || 0}
-                    tableScrolled={{ x: 1800, y: 400 }}
+                    totalData={
+                      pagination_available_requested?.totalElements || 0
+                    }
+                    tableScrolled={{ x: 2000, y: 400 }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
                     fixedColumns={fixedColumns}
                     setFixedColumns={setFixedColumns}
-                    loading={loading}
+                    loading={loading_available_requested}
                     rowSelection={rowSelection}
                   />
                 </div>
 
-                {/* Summary Box */}
-                {selectedRows.length > 0 && (
-                  <div className="mb-6 p-5 bg-blue-50 border-2 border-blue-300 rounded-lg">
-                    <h3 className="text-base font-bold text-blue-800 mb-4">
-                      Selection Summary
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <DetailText label="Total Selected">
-                        {summary.totalItems} item(s)
-                      </DetailText>
-                      <DetailText label="Total Amount">
-                        Rp {summary.totalAmount.toLocaleString("id-ID")}
-                      </DetailText>
-                      <DetailText label="Unique Customers">
-                        {summary.uniqueCustomers} customer(s)
-                      </DetailText>
-                      <div className="col-span-2">
-                        <DetailText label="Customer Details">
-                          {summary.customers
-                            .map((c) => `${c.name} (${c.count})`)
-                            .join(", ")}
-                        </DetailText>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Remark */}
+                {/* Remark - Dynamic Label */}
                 <div className="mb-6">
+                  <p className="text-sm text-gray-600 mb-2">
+                    {getRemarkLabel()}
+                    <span className="text-red-500">*</span>
+                  </p>
                   <Form.Item
-                    label="Remark"
                     name="remark"
                     rules={[
                       {
                         required: true,
-                        message: "Please input your remark!",
+                        message: `Please input your ${getRemarkLabel().toLowerCase()}!`,
                       },
                     ]}
                   >
@@ -618,7 +768,7 @@ const ModalBulkRequestApproval = ({
                       type="textarea"
                       value={remark}
                       onChange={(e) => setRemark(e.target.value)}
-                      placeholder="Type your remark for bulk request approval..."
+                      placeholder={getRemarkPlaceholder()}
                     />
                   </Form.Item>
                 </div>
@@ -628,7 +778,7 @@ const ModalBulkRequestApproval = ({
               <div className={`${current !== 1 ? "hidden" : ""}`}>
                 <div className="w-full grid grid-cols-1 gap-x-4">
                   <p className="text-primary uppercase font-bold mb-4">
-                    Approval Information
+                    APPROVAL INFORMATION
                   </p>
 
                   <div className="w-1/3 mb-6">
@@ -645,7 +795,7 @@ const ModalBulkRequestApproval = ({
                       <Select
                         onChange={handleSelect}
                         placeholder="Select approval hierarchy"
-                        loading={loading}
+                        loading={loading_available_requested}
                         showSearch
                         filterOption={(input, option) =>
                           (option?.children ?? "")
@@ -667,37 +817,21 @@ const ModalBulkRequestApproval = ({
                   </div>
 
                   {boolean && dataTable.length > 0 && (
-                    <TablePaginationNew
-                      type="FE"
+                    <TableRBI
                       dataSource={dataTable}
-                      columns={columnsApproval(
-                        page,
-                        pageSize,
-                        searchInput,
-                        searchedColumn,
-                        searchText,
-                        handleSearch
-                      )}
+                      columns={columnsApproval}
                       expandable={{
                         expandedRowRender: (record) => (
                           <div>
                             <p className="text-primary text-xs font-bold uppercase pt-4">
                               EMPLOYEE INFORMATION
                             </p>
-                            <TablePaginationNew
-                              type="FE"
+                            <TableRBI
+                              dataSource={record?.employeeDetail || []}
+                              columns={columnsExpandApproval}
+                              className={"mb-4"}
                               useSelect={false}
                               usePagination={false}
-                              dataSource={record?.employeeDetail}
-                              columns={columnsExpandApproval(
-                                page,
-                                pageSize,
-                                searchInput,
-                                searchedColumn,
-                                searchText,
-                                handleSearch
-                              )}
-                              className={"mb-4"}
                             />
                           </div>
                         ),
@@ -709,140 +843,84 @@ const ModalBulkRequestApproval = ({
                 </div>
               </div>
 
-              {/* STEP 3: ATTACHMENT */}
+              {/* STEP 3: CONFIRMATION */}
               <div className={`${current !== 2 ? "hidden" : ""}`}>
+                {/* Review Type */}
+                <div className="mb-6 p-5 bg-purple-50 border-2 border-purple-300 rounded-lg">
+                  <h3 className="text-base font-bold text-purple-800 mb-4 pb-2 border-b-2 border-purple-200">
+                    Request Type
+                  </h3>
+                  <DetailText label="Type">
+                    <span className="font-bold text-lg uppercase">
+                      {filterType}
+                    </span>
+                  </DetailText>
+                </div>
+
+                {/* Review Remark */}
                 <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
                   <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
-                    Attachment Information (Optional)
+                    {getRemarkLabel()}
                   </h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Upload attachments for this bulk request. This is optional
-                    and can be skipped.
-                  </p>
-                  <AttachmentComponent
-                    type="create"
-                    data={listDataAttachment}
-                    updateData={setListDataAttachment}
-                    dispatch={dispatch}
-                    getAPICategory={getListCategory}
-                    typeSelector="efaktur"
-                    service={ratingBillingHttpService}
-                    configApplication={configApp.RATING_BILLING_SERVICE}
-                    getAPIGuard={getConfigFileRBIData}
-                    typeRBI={"efaktur"}
-                    mandatory={false}
-                  />
+                  <DetailText label={getRemarkLabel()}>{remark}</DetailText>
                 </div>
-              </div>
 
-              {/* STEP 4: CONFIRMATION */}
-              <div className={`${current !== 3 ? "hidden" : ""}`}>
-                {!loading_modal && (
-                  <>
-                    {/* Review Selected E-Faktur */}
-                    <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
-                      <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
-                        Review - Selected E-Faktur
-                      </h3>
-                      <TableRBI
-                        dataSource={selectedRows}
-                        columns={processedColumns}
-                        current={1}
-                        pageSize={selectedRows.length}
-                        totalData={selectedRows.length}
-                        tableScrolled={{ x: 1800, y: 300 }}
-                        columnDefinitions={columnDefinitions}
-                        fixedColumns={fixedColumns}
-                        setFixedColumns={setFixedColumns}
-                        loading={false}
-                        usePagination={false}
-                      />
-                      <div className="mt-4 p-4 bg-blue-50 rounded">
-                        <div className="grid grid-cols-2 gap-4">
-                          <DetailText label="Total Items">
-                            {summary.totalItems}
-                          </DetailText>
-                          <DetailText label="Total Amount">
-                            Rp {summary.totalAmount.toLocaleString("id-ID")}
-                          </DetailText>
+                {/* Review Approver */}
+                <div className="mb-6 p-5 bg-blue-50 border-2 border-blue-300 rounded-lg">
+                  <h3 className="text-base font-bold text-blue-800 mb-4 pb-2 border-b-2 border-blue-200">
+                    APPROVER
+                  </h3>
+                  {dataTable.length > 0 && (
+                    <div className="mb-4">
+                      {dataTable.map((approval, idx) => (
+                        <div key={idx} className="mb-3">
+                          <p className="text-sm font-medium text-gray-700">
+                            {idx + 1}. {approval.position} -{" "}
+                            {approval.hierarchy}
+                          </p>
+                          {approval.employeeDetail &&
+                            approval.employeeDetail.length > 0 && (
+                              <ul className="ml-6 mt-1">
+                                {approval.employeeDetail.map((emp, empIdx) => (
+                                  <li
+                                    key={empIdx}
+                                    className="text-xs text-gray-600"
+                                  >
+                                    • {emp.employeeName} ({emp.email})
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
                         </div>
-                      </div>
-                      <div className="mt-4">
-                        <DetailText label="Remark">{remark}</DetailText>
-                      </div>
+                      ))}
                     </div>
+                  )}
+                </div>
 
-                    {/* Review Approval */}
-                    <div className="mb-6 p-5 bg-blue-50 border-2 border-blue-300 rounded-lg">
-                      <h3 className="text-base font-bold text-blue-800 mb-4 pb-2 border-b-2 border-blue-200">
-                        Review - Approval Information
-                      </h3>
-                      <DetailText label="Approval Hierarchy">
-                        {data_approval
-                          ?.filter(
-                            (a) =>
-                              a.appHierId === form.getFieldValue()?.apphierId
-                          )
-                          ?.find((b) => b.approvalName)?.approvalName || "-"}
-                      </DetailText>
-                    </div>
-
-                    {/* Review Attachment */}
-                    <div className="mb-6 p-5 bg-green-50 border-2 border-green-300 rounded-lg">
-                      <h3 className="text-base font-bold text-green-800 mb-4 pb-2 border-b-2 border-green-200">
-                        Review - Attachment Information
-                      </h3>
-                      <DetailText label="Total Attachments">
-                        {listDataAttachment.length} file(s)
-                      </DetailText>
-                      {listDataAttachment.length > 0 && (
-                        <div className="mt-3">
-                          <ul className="list-disc pl-5">
-                            {listDataAttachment.map((att, idx) => (
-                              <li key={idx} className="text-sm text-gray-600">
-                                {att.fileName || att.file.name}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {listDataAttachment.length === 0 && (
-                        <p className="text-sm text-gray-500 mt-2">
-                          No attachments uploaded
-                        </p>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                {loading_modal && (
-                  <div className="mb-6">
-                    <p className="text-sm font-medium text-gray-700 mb-2">
-                      Processing Bulk Request Approval:
-                    </p>
-                    <Progress
-                      percent={Math.floor(upload_progress)}
-                      status={upload_progress === 100 ? "success" : "active"}
-                      strokeColor={{
-                        "0%": "#108ee9",
-                        "100%": "#87d068",
-                      }}
-                    />
-                    <p className="text-xs text-gray-500 mt-2">
-                      {upload_progress < 30 && "Processing request..."}
-                      {upload_progress >= 30 &&
-                        upload_progress < 60 &&
-                        "Submitting to approval system..."}
-                      {upload_progress >= 60 &&
-                        upload_progress < 90 &&
-                        "Uploading attachments..."}
-                      {upload_progress >= 90 &&
-                        upload_progress < 100 &&
-                        "Finalizing..."}
-                      {upload_progress === 100 && "Done!"}
-                    </p>
+                {/* Review E-Faktur List */}
+                <div className="mb-6 p-5 bg-green-50 border-2 border-green-300 rounded-lg">
+                  <h3 className="text-base font-bold text-green-800 mb-4 pb-2 border-b-2 border-green-200">
+                    E-FAKTUR LIST
+                  </h3>
+                  <TableRBI
+                    dataSource={selectedRows}
+                    columns={processedColumns}
+                    current={1}
+                    pageSize={selectedRows.length}
+                    totalData={selectedRows.length}
+                    tableScrolled={{ x: 2000, y: 300 }}
+                    columnDefinitions={columnDefinitions}
+                    fixedColumns={fixedColumns}
+                    setFixedColumns={setFixedColumns}
+                    loading={false}
+                    usePagination={false}
+                  />
+                  <div className="mt-4 p-4 bg-white rounded">
+                    <DetailText label="Total Selected">
+                      {selectedRows.length} item(s)
+                    </DetailText>
                   </div>
-                )}
+                </div>
               </div>
             </Form>
           </div>
@@ -861,24 +939,11 @@ const ModalBulkRequestApproval = ({
             <p className="text-[18px] font-bold">Success</p>
           </div>
           <p className="pl-[70px]">
-            Bulk request approval has been submitted successfully.
+            Request {filterType} has been submitted successfully.
           </p>
-          {successData && (
-            <>
-              <p className="pl-[70px]">
-                Total Requested: <strong>{successData.totalRequested}</strong>
-              </p>
-              {successData.summary && (
-                <div className="pl-[70px] mt-3">
-                  <p className="text-sm">
-                    Success: {successData.successCount}
-                    {successData.failedCount > 0 &&
-                      `, Failed: ${successData.failedCount}`}
-                  </p>
-                </div>
-              )}
-            </>
-          )}
+          <p className="pl-[70px]">
+            Total Requested: <strong>{selectedRows.length}</strong> E-Faktur
+          </p>
         </div>
       </ModalSuccess>
 
@@ -901,4 +966,4 @@ const ModalBulkRequestApproval = ({
   );
 };
 
-export default ModalBulkRequestApproval;
+export default ModalRequestApprovalEFaktur;

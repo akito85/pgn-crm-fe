@@ -73,6 +73,15 @@ const initialState = {
   loading_approval_history: false,
   loading_log: false,
 
+  data_available_requested: [],
+  loading_available_requested: false,
+  error_available_requested: null,
+  pagination_available_requested: {
+    totalElements: 0,
+    totalPages: 0,
+    size: 10,
+    number: 0,
+  },
   dataListCategory: [],
   data_approval: [],
   data_approval_list: [],
@@ -244,6 +253,192 @@ export const getApprovalHistory = createAsyncThunk(
   }
 );
 
+// ========================================
+// GET AVAILABLE REQUESTED LIST
+// ========================================
+export const getAvailableRequestedList = createAsyncThunk(
+  "EFAKTUR/GET_AVAILABLE_REQUESTED_LIST",
+  async (
+    {
+      page = 1,
+      pageSize = 10,
+      sort = "invoiceDate~desc",
+      type = "",
+      efakturDateFrom = "",
+      efakturDateTo = "",
+      search = "",
+    },
+    thunkAPI
+  ) => {
+    try {
+      let url = `/v1/dbs/api/rbi/e-invoice/available-requested-list?page=${page}&size=${pageSize}`;
+
+      if (sort) url += `&sort=${sort}`;
+      if (type) url += `&type=${type}`;
+      if (efakturDateFrom) url += `&efakturDateFrom=${efakturDateFrom}`;
+      if (efakturDateTo) url += `&efakturDateTo=${efakturDateTo}`;
+      if (search) url += `&search=${search}`;
+
+      const response = await ratingBillingHttpService.getPagination(url);
+      return response.data || { result: [], page: {} };
+    } catch (error) {
+      return handleApiError(
+        error,
+        thunkAPI,
+        "Gagal mengambil list E-Faktur available for request"
+      );
+    }
+  }
+);
+
+// ========================================
+// CREATE REQUEST APPROVAL E-FAKTUR
+// ========================================
+export const createRequestApprovalEFaktur = createAsyncThunk(
+  "EFAKTUR/CREATE_REQUEST_APPROVAL",
+  async ({ apphierId, efakturIds, remark }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/create";
+      const requestBody = {
+        apphierId: String(apphierId),
+        efakturIds: efakturIds.map((id) => String(id)),
+        remark: remark || "",
+      };
+
+      const response = await ratingBillingHttpService.createData(
+        url,
+        requestBody
+      );
+
+      if (response.success) {
+        thunkAPI.dispatch(
+          showModalSuccess({
+            title: "Success",
+            description: response.message || "Request approval berhasil dibuat",
+            return: false,
+          })
+        );
+
+        return {
+          efakturIds,
+          apphierId,
+          remark,
+          type: "normal",
+        };
+      } else {
+        throw new Error(response.message || "Gagal membuat request approval");
+      }
+    } catch (error) {
+      return handleApiError(
+        error,
+        thunkAPI,
+        "Gagal membuat request approval E-Faktur"
+      );
+    }
+  }
+);
+
+// ========================================
+// CREATE REQUEST REPLACEMENT E-FAKTUR
+// ========================================
+export const createRequestReplacementEFaktur = createAsyncThunk(
+  "EFAKTUR/CREATE_REQUEST_REPLACEMENT",
+  async ({ apphierId, efakturIds, reason }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/replacement";
+      const requestBody = {
+        apphierId: String(apphierId),
+        efakturIds: efakturIds.map((id) => String(id)),
+        reason: reason || "",
+      };
+
+      const response = await ratingBillingHttpService.createData(
+        url,
+        requestBody
+      );
+
+      if (response.success) {
+        thunkAPI.dispatch(
+          showModalSuccess({
+            title: "Success",
+            description:
+              response.message ||
+              "Success request replacement faktur, please wait for approval",
+            return: false,
+          })
+        );
+
+        return {
+          efakturIds,
+          apphierId,
+          reason,
+          type: "replacement",
+        };
+      } else {
+        throw new Error(
+          response.message || "Gagal membuat request replacement"
+        );
+      }
+    } catch (error) {
+      return handleApiError(
+        error,
+        thunkAPI,
+        "Gagal membuat request replacement E-Faktur"
+      );
+    }
+  }
+);
+
+// ========================================
+// CREATE REQUEST CANCELLATION E-FAKTUR
+// ========================================
+export const createRequestCancellationEFaktur = createAsyncThunk(
+  "EFAKTUR/CREATE_REQUEST_CANCELLATION",
+  async ({ apphierId, efakturIds, reason }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/cancellation";
+      const requestBody = {
+        apphierId: String(apphierId),
+        efakturIds: efakturIds.map((id) => String(id)),
+        reason: reason || "",
+      };
+
+      const response = await ratingBillingHttpService.createData(
+        url,
+        requestBody
+      );
+
+      if (response.success) {
+        thunkAPI.dispatch(
+          showModalSuccess({
+            title: "Success",
+            description:
+              response.message || "Success submit request cancellation efaktur",
+            return: false,
+          })
+        );
+
+        return {
+          efakturIds,
+          apphierId,
+          reason,
+          type: "cancellation",
+        };
+      } else {
+        throw new Error(
+          response.message || "Gagal membuat request cancellation"
+        );
+      }
+    } catch (error) {
+      return handleApiError(
+        error,
+        thunkAPI,
+        "Gagal membuat request cancellation E-Faktur"
+      );
+    }
+  }
+);
+
 // POST - Create/Update Operations
 export const generateEFakturWithAttachments = createAsyncThunk(
   "EFAKTUR/GENERATE_WITH_ATTACHMENTS",
@@ -405,14 +600,15 @@ export const uploadAttachment = createAsyncThunk(
 
 export const getAllEFakturApprovePaginate = createAsyncThunk(
   "EFAKTUR/GET_ALL_EFAKTUR_APPROVE_PAGINATE",
-  async (_, thunkAPI) => {
+  async ({ type = "normal" } = {}, thunkAPI) => {
+    // ✅ Add type parameter
     try {
-      const url = "/v1/dbs/api/rbi/e-invoice/approval-efaktur-list";
+      // ✅ Add type query parameter
+      const url = `/v1/dbs/api/rbi/e-invoice/approval-efaktur-list?type=${type}`;
       const response = await ratingBillingHttpService.getAll(url);
 
-      return Array.isArray(response.data)
-        ? response.data
-        : response.data?.result || [];
+      // ✅ Fix: Backend returns array in data directly, not in data.result
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       return handleApiError(
         error,
@@ -429,9 +625,14 @@ export const approvedEfaktur = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/rbi/e-invoice/approval`;
 
+      // ✅ Fix: Match exact API request structure
       const requestBody = {
-        detailApproves: body.detailApproves,
-        action: body.action,
+        detailApproves: body.detailApproves.map((item) => ({
+          approvalId: String(item.approvalId), // ✅ Ensure string
+          efakturId: String(item.efakturId), // ✅ Ensure string
+        })),
+        action: body.action, // APPROVE or REJECT
+        type: body.type.toLowerCase(), // ✅ Add type: normal, replacement, cancellation, manual_upload
         description: body.description || "",
       };
 
@@ -452,6 +653,7 @@ export const approvedEfaktur = createAsyncThunk(
 
         return {
           action: body.action,
+          type: body.type, // ✅ Return type for state update
           detailApproves: body.detailApproves,
         };
       } else {
@@ -571,26 +773,29 @@ export const replaceEFaktur = createAsyncThunk(
 );
 
 export const generateXMLEFaktur = createAsyncThunk(
-  "EFAKTUR/GENERATE_XML",
-  async ({ efakturId, invoiceNumber }, thunkAPI) => {
+  "EFAKTUR/GENERATE_BULK_XML",
+  async ({ efakturIds }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/rbi/e-invoice/generate-xml";
-      const requestBody = { efakturId };
+      const requestBody = {
+        efakturIds: efakturIds.map((id) => String(id)),
+      };
 
       const response = await ratingBillingHttpService.createData(
         url,
         requestBody
       );
 
-      // Extract XML content
+      // Extract XML content from response
       let xmlContent = "";
+
       if (typeof response === "string") {
         xmlContent = response;
       } else if (response?.data) {
         xmlContent =
           typeof response.data === "string"
             ? response.data
-            : response.data?.xml || "";
+            : response.data?.xml || response.data || "";
       }
 
       // Validate XML
@@ -599,36 +804,13 @@ export const generateXMLEFaktur = createAsyncThunk(
         throw new Error("Invalid XML format received from backend");
       }
 
-      // Download XML file
-      const blob = new Blob([xmlContent], {
-        type: "application/xml;charset=utf-8",
-      });
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-
-      link.href = downloadUrl;
-      link.download = `E-Faktur_${
-        invoiceNumber || efakturId
-      }_${new Date().getTime()}.xml`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
-
-      thunkAPI.dispatch(
-        showModalSuccess({
-          title: "Success",
-          description: "XML E-Faktur berhasil di-generate dan di-download",
-          return: false,
-        })
-      );
-
       return {
         xmlContent,
-        fileName: `E-Faktur_${invoiceNumber || efakturId}.xml`,
+        efakturIds,
+        count: efakturIds.length,
       };
     } catch (error) {
-      return handleApiError(error, thunkAPI, "Gagal generate XML");
+      return handleApiError(error, thunkAPI, "Gagal generate bulk XML");
     }
   }
 );
@@ -682,6 +864,55 @@ export const downloadEFakturList = createAsyncThunk(
       return response.data;
     } catch (error) {
       return handleApiError(error, thunkAPI, "Download gagal");
+    }
+  }
+);
+
+export const batchManualUploadEFaktur = createAsyncThunk(
+  "EFAKTUR/BATCH_MANUAL_UPLOAD",
+  async ({ apphierId, remark, dataItems }, thunkAPI) => {
+    try {
+      const formData = new FormData();
+      formData.append("apphierId", String(apphierId));
+      formData.append("remark", remark);
+
+      // Append data array
+      dataItems.forEach((item, index) => {
+        formData.append(`data[${index}].efakturId`, String(item.efakturId));
+        formData.append(`data[${index}].efakturNumber`, item.efakturNumber);
+        formData.append(`data[${index}].efakturFile`, item.efakturFile);
+      });
+
+      const url = "/v1/dbs/api/rbi/e-invoice/batch-manual-upload";
+      const response = await ratingBillingHttpService.uploadAttachment(
+        url,
+        formData,
+        () => {}
+      );
+
+      if (response.success) {
+        thunkAPI.dispatch(
+          showModalSuccess({
+            title: "Success",
+            description: response.message || "All items uploaded successfully",
+            return: false,
+          })
+        );
+
+        return {
+          success: response.data?.success || [],
+          errors: response.data?.errors || [],
+          totalUploaded: dataItems.length,
+        };
+      } else {
+        throw new Error(response.message || "Upload failed");
+      }
+    } catch (error) {
+      return handleApiError(
+        error,
+        thunkAPI,
+        "Gagal upload manual E-Faktur bulk"
+      );
     }
   }
 );
@@ -901,6 +1132,33 @@ const efakturSlice = createSlice({
       state.list_efaktur = [];
     },
 
+    // BATCH MANUAL UPLOAD E-FAKTUR
+    [batchManualUploadEFaktur.pending]: (state) => {
+      state.loading_modal = true;
+    },
+    [batchManualUploadEFaktur.fulfilled]: (state, action) => {
+      state.loading_modal = false;
+
+      // Update status E-Faktur yang berhasil di-upload
+      const successIds = action.payload.success.map((item) => item.efakturId);
+
+      state.list_efaktur = state.list_efaktur.map((item) =>
+        successIds.includes(String(item.efakturId))
+          ? { ...item, efakturStatus: "AWAITING_APPROVAL" }
+          : item
+      );
+
+      state.data_available_requested = state.data_available_requested.map(
+        (item) =>
+          successIds.includes(String(item.efakturId))
+            ? { ...item, status: "AWAITING_APPROVAL" }
+            : item
+      );
+    },
+    [batchManualUploadEFaktur.rejected]: (state) => {
+      state.loading_modal = false;
+    },
+
     // GET BILLING ITEMS
     [getAllBillingItemPaginate.pending]: (state) => {
       state.loading_detail = true;
@@ -917,21 +1175,19 @@ const efakturSlice = createSlice({
 
     // GET ALL EFAKTUR APPROVE LIST
     [getAllEFakturApprovePaginate.pending]: (state) => {
-      state.loading = true;
+      state.loading_modal = true; // ✅ Use loading_modal for modal
     },
     [getAllEFakturApprovePaginate.fulfilled]: (state, action) => {
-      state.loading = false;
-      const data = Array.isArray(action.payload)
+      state.loading_modal = false;
+      // ✅ Fix: Response is array directly
+      state.list_efaktur_approval = Array.isArray(action.payload)
         ? action.payload
-        : action.payload?.result || [];
-
-      state.list_efaktur_approval = data;
+        : [];
     },
     [getAllEFakturApprovePaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loading_modal = false;
       state.list_efaktur_approval = [];
     },
-
     // GET DETAIL E-FAKTUR
     [getDetailEFaktur.pending]: (state) => {
       state.loading_detail = true;
@@ -943,6 +1199,46 @@ const efakturSlice = createSlice({
     [getDetailEFaktur.rejected]: (state) => {
       state.loading_detail = false;
       state.detail_efaktur = null;
+    },
+
+    // CREATE REQUEST REPLACEMENT E-FAKTUR
+    [createRequestReplacementEFaktur.pending]: (state) => {
+      state.loading_modal = true;
+    },
+    [createRequestReplacementEFaktur.fulfilled]: (state, action) => {
+      state.loading_modal = false;
+
+      // Update status e-faktur yang berhasil di-request
+      const requestedIds = action.payload.efakturIds;
+      state.data_available_requested = state.data_available_requested.map(
+        (item) =>
+          requestedIds.includes(item.efakturId)
+            ? { ...item, statusApproval: "AWAITING_APPROVAL" }
+            : item
+      );
+    },
+    [createRequestReplacementEFaktur.rejected]: (state) => {
+      state.loading_modal = false;
+    },
+
+    // CREATE REQUEST CANCELLATION E-FAKTUR
+    [createRequestCancellationEFaktur.pending]: (state) => {
+      state.loading_modal = true;
+    },
+    [createRequestCancellationEFaktur.fulfilled]: (state, action) => {
+      state.loading_modal = false;
+
+      // Update status e-faktur yang berhasil di-request
+      const requestedIds = action.payload.efakturIds;
+      state.data_available_requested = state.data_available_requested.map(
+        (item) =>
+          requestedIds.includes(item.efakturId)
+            ? { ...item, statusApproval: "AWAITING_APPROVAL" }
+            : item
+      );
+    },
+    [createRequestCancellationEFaktur.rejected]: (state) => {
+      state.loading_modal = false;
     },
 
     // GET LOG ACTIVITY
@@ -1046,13 +1342,15 @@ const efakturSlice = createSlice({
     },
     [approvedEfaktur.fulfilled]: (state, action) => {
       state.loading_modal = false;
-      state.list_efaktur = state.list_efaktur.map((item) =>
-        item.efakturId === action.payload.efakturId
-          ? {
-              ...item,
-              efakturStatus:
-                action.payload.action === "APPROVE" ? "APPROVED" : "REJECTED",
-            }
+
+      // ✅ Update list after approval/rejection
+      const approvedIds = action.payload.detailApproves.map((d) => d.efakturId);
+      const newStatus =
+        action.payload.action === "APPROVE" ? "APPROVED" : "REJECTED";
+
+      state.list_efaktur_approval = state.list_efaktur_approval.map((item) =>
+        approvedIds.includes(String(item.efakturId))
+          ? { ...item, statusApproval: newStatus }
           : item
       );
     },
@@ -1091,8 +1389,16 @@ const efakturSlice = createSlice({
     [generateXMLEFaktur.pending]: (state) => {
       state.loading_modal = true;
     },
-    [generateXMLEFaktur.fulfilled]: (state) => {
+    [generateXMLEFaktur.fulfilled]: (state, action) => {
       state.loading_modal = false;
+
+      // Optional: Update status di list jika perlu
+      const processedIds = action.payload.efakturIds;
+      state.list_efaktur = state.list_efaktur.map((item) =>
+        processedIds.includes(String(item.efakturId))
+          ? { ...item, lastXmlGenerated: new Date().toISOString() }
+          : item
+      );
     },
     [generateXMLEFaktur.rejected]: (state) => {
       state.loading_modal = false;
@@ -1147,6 +1453,43 @@ const efakturSlice = createSlice({
       state.loading_eligible = false;
       state.error_eligible = action.payload;
       state.data_eligible_efaktur = [];
+    },
+
+    // GET AVAILABLE REQUESTED LIST
+    [getAvailableRequestedList.pending]: (state) => {
+      state.loading_available_requested = true;
+      state.error_available_requested = null;
+    },
+    [getAvailableRequestedList.fulfilled]: (state, action) => {
+      state.loading_available_requested = false;
+      state.data_available_requested = action.payload.result || [];
+      state.pagination_available_requested =
+        action.payload.page || initialState.pagination_available_requested;
+    },
+    [getAvailableRequestedList.rejected]: (state, action) => {
+      state.loading_available_requested = false;
+      state.error_available_requested = action.payload;
+      state.data_available_requested = [];
+    },
+
+    // CREATE REQUEST APPROVAL E-FAKTUR
+    [createRequestApprovalEFaktur.pending]: (state) => {
+      state.loading_modal = true;
+    },
+    [createRequestApprovalEFaktur.fulfilled]: (state, action) => {
+      state.loading_modal = false;
+
+      // Update status e-faktur yang berhasil di-request
+      const requestedIds = action.payload.efakturIds;
+      state.data_available_requested = state.data_available_requested.map(
+        (item) =>
+          requestedIds.includes(item.efakturId)
+            ? { ...item, statusApproval: "AWAITING_APPROVAL" }
+            : item
+      );
+    },
+    [createRequestApprovalEFaktur.rejected]: (state) => {
+      state.loading_modal = false;
     },
 
     // BULK REQUEST APPROVAL E-FAKTUR

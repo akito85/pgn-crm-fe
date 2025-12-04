@@ -1,9 +1,15 @@
+// ==========================================
+// FIXED: ModalApprovalEFaktur Component
+// Key Changes Highlighted with ✅
+// ==========================================
+
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form } from "antd";
+import { Form, Select } from "antd";
 import SVGIcon from "../../../../../assets/Icon/index";
 import InputComponent from "../../../../../components/InputComponent";
 import ButtonComponent from "../../../../../components/ButtonComponent";
+import StatusComponent from "../../../../../components/StatusComponent";
 import {
   approvedEfaktur,
   getAllEFakturApprovePaginate,
@@ -20,25 +26,22 @@ const ModalApprovalEFaktur = ({
   onSuccess,
   billingData,
 }) => {
-  // Selector
   const { list_efaktur_approval, loading_modal } = useSelector(
     (state) => state.efaktur
   );
 
-  // Declaration
   const containerRef = useRef(null);
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSource = list_efaktur_approval;
 
-  // State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [remark, setRemark] = useState("");
   const [action, setAction] = useState("");
+  const [filterType, setFilterType] = useState("normal"); // ✅ Default: normal
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [dataTableSelect, setDataTableSelect] = useState([]);
@@ -50,14 +53,28 @@ const ModalApprovalEFaktur = ({
     efakturStatus: "right",
   });
 
-  // Use Effect
+  // ✅ FIX: dataSource now uses list_efaktur_approval directly (already filtered by backend)
+  const dataSource = useMemo(() => {
+    if (!list_efaktur_approval || list_efaktur_approval.length === 0) {
+      return [];
+    }
+    return list_efaktur_approval;
+  }, [list_efaktur_approval]);
+
+  // ✅ FIX: Fetch data with type parameter when modal opens or filterType changes
   useEffect(() => {
     if (isOpen) {
-      dispatch(getAllEFakturApprovePaginate());
+      dispatch(getAllEFakturApprovePaginate({ type: filterType }));
     }
-  }, [dispatch, isOpen]);
+  }, [dispatch, isOpen, filterType]);
 
-  // Function Search
+  // ✅ Reset selection when filter type changes
+  useEffect(() => {
+    setSelectedRowKeys([]);
+    setDataTableSelect([]);
+    setPage(1);
+  }, [filterType]);
+
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -68,13 +85,11 @@ const ModalApprovalEFaktur = ({
     setSearchedColumn(tempSearchColumn);
   };
 
-  // Handle Change Page
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
   };
 
-  // Sort Table
   const onSort = (_, __, sort) => {
     // Implement if needed
   };
@@ -90,24 +105,25 @@ const ModalApprovalEFaktur = ({
     onChange: onSelectChange,
   };
 
-  // Handle Cancel Form
   const handleCancelForm = () => {
     handleClose();
     setSelectedRowKeys([]);
     setDataTableSelect([]);
     setRemark("");
     setAction("");
+    setFilterType("normal");
     form.resetFields();
   };
 
-  // Handle Save
-  const handleSave = (formValue) => {
+  // ✅ FIX: Updated handleSave with action parameter
+  const handleSave = (actionType) => {
     if (!dataTableSelect || dataTableSelect.length === 0) {
       setBodyError({ message: "Tidak ada E-Faktur yang dipilih" });
       setModalError(true);
       return;
     }
 
+    // ✅ Validate tappId and efakturId exist
     const invalidItems = dataTableSelect.filter(
       (item) => !item.tappId || !item.efakturId
     );
@@ -120,21 +136,30 @@ const ModalApprovalEFaktur = ({
       return;
     }
 
+    if (!remark.trim()) {
+      setBodyError({ message: "Remark harus diisi" });
+      setModalError(true);
+      return;
+    }
+
+    // ✅ FIX: Map tappId as approvalId
     const detailApproves = dataTableSelect.map((item) => ({
-      approvalId: Number(item.tappId),
-      efakturId: Number(item.efakturId),
+      approvalId: String(item.tappId),   // ✅ tappId from response
+      efakturId: String(item.efakturId), // ✅ efakturId from response
     }));
 
+    // ✅ FIX: Use actionType parameter directly
     const body = {
       detailApproves: detailApproves,
-      action: action,
+      action: actionType, // ✅ APPROVE or REJECT from parameter
+      type: filterType, // ✅ Add type: normal, replacement, cancellation, manual_upload
       description: remark,
     };
 
     dispatch(
       approvedEfaktur({
-        body: { ...body, billingCode: "" },
-        action: action === "APPROVE" ? "approved" : "rejected",
+        body: body,
+        action: actionType === "APPROVE" ? "approved" : "rejected",
       })
     )
       .unwrap()
@@ -146,6 +171,9 @@ const ModalApprovalEFaktur = ({
         handleClose();
         setSelectedRowKeys([]);
         setDataTableSelect([]);
+        
+        // ✅ Refresh data after approval
+        dispatch(getAllEFakturApprovePaginate({ type: filterType }));
       })
       .catch((error) => {
         const message =
@@ -159,12 +187,11 @@ const ModalApprovalEFaktur = ({
 
   const handleCloseModalError = () => {
     setModalError(false);
-    handleClose();
     setBodyError({});
   };
 
   const handleRetry = () => {
-    handleSave();
+    handleSave(action); // ✅ Pass the stored action
     setModalError(false);
     setBodyError({});
   };
@@ -177,6 +204,7 @@ const ModalApprovalEFaktur = ({
     return type === "data" ? result : result.length;
   };
 
+  // ✅ FIX: Updated columns to match API response
   const baseColumns = useMemo(
     () => [
       {
@@ -189,7 +217,7 @@ const ModalApprovalEFaktur = ({
       {
         key: "efakturCode",
         title: "FAKTUR CODE",
-        dataIndex: "efakturNo",
+        dataIndex: "efakturNo", // ✅ efakturNo from response
         width: 150,
         render: (text) => text || "-",
       },
@@ -199,7 +227,20 @@ const ModalApprovalEFaktur = ({
         dataIndex: "efakturType",
         width: 140,
         align: "center",
-        render: (text) => text || "-",
+        render: (type) => {
+          if (!type) return "-";
+          
+          const displayType = (type || "NORMAL").toUpperCase();
+          const statusLabel = displayType.replace(/_/g, " ");
+
+          return (
+            <div className="flex justify-center">
+              <StatusComponent colour={displayType.toLowerCase()}>
+                {statusLabel}
+              </StatusComponent>
+            </div>
+          );
+        },
       },
       {
         key: "billingCode",
@@ -322,26 +363,16 @@ const ModalApprovalEFaktur = ({
         width: 180,
         align: "center",
         render: (status) => {
-          const statusColors = {
-            APPROVED: "bg-green-100 text-green-800 border-green-300",
-            SUCCESS: "bg-green-100 text-green-800 border-green-300",
-            PROCESSING: "bg-blue-100 text-blue-800 border-blue-300",
-            AWAITING_APPROVAL:
-              "bg-orange-100 text-orange-800 border-orange-300",
-            FAILED: "bg-red-100 text-red-800 border-red-300",
-            REJECTED: "bg-red-100 text-red-800 border-red-300",
-          };
+          if (!status) return "-";
+          
+          const displayStatus = status.toUpperCase();
+          const statusLabel = displayStatus.replace(/_/g, " ");
 
           return (
             <div className="flex justify-center">
-              <span
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
-                  statusColors[status] ||
-                  "bg-gray-100 text-gray-800 border-gray-300"
-                }`}
-              >
-                {status?.replace(/_/g, " ")}
-              </span>
+              <StatusComponent colour={status.toLowerCase()}>
+                {statusLabel}
+              </StatusComponent>
             </div>
           );
         },
@@ -353,24 +384,16 @@ const ModalApprovalEFaktur = ({
         width: 200,
         align: "center",
         render: (status) => {
-          const statusColors = {
-            APPROVED: "bg-green-100 text-green-800 border-green-300",
-            WAITING_CANCELLATION_APPROVAL:
-              "bg-yellow-100 text-yellow-800 border-yellow-300",
-            REJECTED: "bg-red-100 text-red-800 border-red-300",
-            PENDING: "bg-blue-100 text-blue-800 border-blue-300",
-          };
+          if (!status) return "-";
+          
+          const displayStatus = status.toUpperCase();
+          const statusLabel = displayStatus.replace(/_/g, " ");
 
           return (
             <div className="flex justify-center">
-              <span
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
-                  statusColors[status] ||
-                  "bg-gray-100 text-gray-800 border-gray-300"
-                }`}
-              >
-                {status?.replace(/_/g, " ")}
-              </span>
+              <StatusComponent colour={status.toLowerCase()}>
+                {statusLabel}
+              </StatusComponent>
             </div>
           );
         },
@@ -382,6 +405,7 @@ const ModalApprovalEFaktur = ({
         width: 200,
         render: (text) => text || "-",
       },
+      // ✅ Add reasonCanceled and reasonReplacement columns
       {
         key: "reasonCanceled",
         title: "REASON CANCELED",
@@ -394,6 +418,39 @@ const ModalApprovalEFaktur = ({
         title: "REASON REPLACEMENT",
         dataIndex: "reasonReplacement",
         width: 250,
+        render: (text) => text || "-",
+      },
+      // ✅ Add approval detail columns
+      {
+        key: "requestedBy",
+        title: "REQUESTED BY",
+        dataIndex: ["approvalDetail", "requestedBy"],
+        width: 180,
+        render: (text) => text || "-",
+      },
+      {
+        key: "requestedDate",
+        title: "REQUESTED DATE",
+        dataIndex: ["approvalDetail", "requestedDate"],
+        width: 180,
+        align: "center",
+        render: (text) => {
+          if (!text) return "-";
+          const date = new Date(text);
+          return date.toLocaleDateString("id-ID", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        },
+      },
+      {
+        key: "approvalRemarks",
+        title: "APPROVAL REMARKS",
+        dataIndex: ["approvalDetail", "remarks"],
+        width: 200,
         render: (text) => text || "-",
       },
     ],
@@ -419,7 +476,6 @@ const ModalApprovalEFaktur = ({
     }));
   }, [allColumns]);
 
-  // Check if form is valid for submission
   const isFormValid = useMemo(() => {
     return dataTableSelect.length > 0 && remark.trim() !== "";
   }, [dataTableSelect, remark]);
@@ -439,9 +495,10 @@ const ModalApprovalEFaktur = ({
             </ButtonComponent>
             <ButtonComponent
               type={"reject"}
-              htmlType={"submit"}
-              form={"formApproveEFaktur"}
-              onClick={() => setAction("REJECT")}
+              onClick={() => {
+                setAction("REJECT");
+                handleSave("REJECT");
+              }}
               loading={loading_modal}
               disabled={!isFormValid}
             >
@@ -449,9 +506,10 @@ const ModalApprovalEFaktur = ({
             </ButtonComponent>
             <ButtonComponent
               type={"approve"}
-              htmlType={"submit"}
-              form={"formApproveEFaktur"}
-              onClick={() => setAction("APPROVE")}
+              onClick={() => {
+                setAction("APPROVE");
+                handleSave("APPROVE");
+              }}
               loading={loading_modal}
               disabled={!isFormValid}
             >
@@ -460,54 +518,85 @@ const ModalApprovalEFaktur = ({
           </div>
         }
       >
-        <Form
-          layout="vertical"
-          form={form}
-          id={"formApproveEFaktur"}
-          onFinish={handleSave}
-        >
-          <div className="w-full grid grid-cols-1 gap-4">
-            {/* Table Section */}
-            <div>
-              <TableRBI
-                dataSource={filterDataByPage("data")}
-                columns={processedColumns}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
-                totalData={filterDataByPage("length")}
-                tableScrolled={{ y: 400, x: 2000 }}
-                onSort={onSort}
-                columnDefinitions={columnDefinitions}
-                fixedColumns={fixedColumns}
-                setFixedColumns={setFixedColumns}
-                loading={loading_modal}
-                rowSelection={rowSelection}
-                showExport={false}
-              />
-            </div>
-
-            {/* Remark Section */}
-            <div className="pt-4">
-              <Form.Item
-                label={<span className="font-medium">Remark*</span>}
-                name={"remark"}
-                rules={[
-                  { required: true, message: "Please input your Remark!" },
-                ]}
-              >
-                <InputComponent
-                  rows={3}
-                  type="textarea"
-                  value={remark}
-                  onChange={(e) => setRemark(e.target.value)}
-                  placeholder={"Remark"}
-                />
-              </Form.Item>
-            </div>
+        <div className="w-full grid grid-cols-1 gap-4">
+          <div className="mb-4">
+            <style>{`
+              .filter-type-select .ant-select-selector {
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                border: 1px solid #BDBDBD !important;
+                height: 40px !important;
+                color: black !important;
+                border-radius: 6px !important;
+                font-size: 14px !important;
+                font-weight: 500 !important;
+                padding: 0 11px !important;
+                background: white !important;
+              }
+              .filter-type-select .ant-select-selection-placeholder {
+                color: rgba(0, 0, 0, 0.25) !important;
+                line-height: 40px !important;
+                font-size: 14px !important;
+                font-weight: 500 !important;
+              }
+              .filter-type-select .ant-select-selection-item {
+                line-height: 40px !important;
+                font-size: 14px !important;
+                font-weight: 500 !important;
+                color: black !important;
+              }
+            `}</style>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Filter by Type
+            </label>
+            <Select
+              value={filterType}
+              onChange={(value) => setFilterType(value)}
+              style={{ width: 250 }}
+              className="filter-type-select"
+            >
+              <Select.Option value="normal">Normal</Select.Option>
+              <Select.Option value="replacement">Replacement</Select.Option>
+              <Select.Option value="cancellation">Cancellation</Select.Option>
+              <Select.Option value="manual_upload">Manual Upload</Select.Option>
+            </Select>
           </div>
-        </Form>
+
+          {/* Table Section */}
+          <div>
+            <TableRBI
+              dataSource={filterDataByPage("data")}
+              columns={processedColumns}
+              current={page}
+              pageSize={pageSize}
+              onChange={handleChange}
+              onSizeChanger={handleChange}
+              totalData={filterDataByPage("length")}
+              tableScrolled={{ y: 400, x: 2000 }}
+              onSort={onSort}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading_modal}
+              rowSelection={rowSelection}
+              showExport={false}
+            />
+          </div>
+          {/* Remark Section */}
+          <div className="pt-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Remark<span className="text-red-500">*</span>
+            </label>
+            <InputComponent
+              rows={3}
+              type="textarea"
+              value={remark}
+              onChange={(e) => setRemark(e.target.value)}
+              placeholder={"Enter your remark here..."}
+            />
+          </div>
+        </div>
       </ModalCustom>
 
       {/* Modal Error */}
