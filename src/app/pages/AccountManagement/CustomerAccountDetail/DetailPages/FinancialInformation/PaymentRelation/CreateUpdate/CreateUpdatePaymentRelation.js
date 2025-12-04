@@ -563,8 +563,8 @@ const CreatePaymentRelation = ({ type }) => {
           form={"paymentRelationForm"}
           isOpen={showConfirmationModal}
           handleCancel={() => handleSetShowConfirmationModal(false)}
-          handleOk={() => handleSetShowConfirmationModal(false)}
           selectedAppHierId={selectedAppHierId}
+          selectedApprovalName={selectedApprovalName}
           hierarchyTableData={detail_prApprovalHierarchy.map((detail, index) => ({
             ...detail,
             employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({

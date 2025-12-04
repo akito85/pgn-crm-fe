@@ -4,7 +4,7 @@ import ConfirmationModalHierarchy from "./ConfirmationModalHierarchy";
 const ConfirmationModalApproval = ({
   dataTable = [],
   selectedAppHierId = "",
-  dataOption = [],
+  selectedApprovalName = "",
 }) => {
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -23,11 +23,11 @@ const ConfirmationModalApproval = ({
       <ConfirmationModalHierarchy
         dataTable={dataTable}
         selectedAppHierId={selectedAppHierId}
+        selectedApprovalName={selectedApprovalName}
         searchInput={searchInput}
         searchedColumn={searchedColumn}
         searchText={searchText}
         handleSearch={handleSearch}
-        dataOption={dataOption}
       />
     </Fragment>
   );

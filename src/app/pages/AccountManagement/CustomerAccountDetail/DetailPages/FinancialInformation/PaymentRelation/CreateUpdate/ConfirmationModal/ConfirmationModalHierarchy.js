@@ -216,10 +216,10 @@ const expandedRowRender = (record) => {
   return <DataExpand list={dataExpand} />;
 };
 
-const ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy = ({
+const ConfirmationModalHierarchy = ({
   dataTable = [],
-  dataOption = [],
   selectedAppHierId,
+  selectedApprovalName,
   searchInput,
   searchedColumn,
   searchText,
@@ -229,7 +229,7 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy = ({
     <Fragment>
       <div className="flex flex-col gap-y-1">
         <span className="font-bold">Approval Hieararchy</span>
-        <span>{dataOption[selectedAppHierId]?.name}</span>
+        <span>{selectedApprovalName}</span>
       </div>
       {selectedAppHierId && dataTable.length > 0 ? (
         <TablePagination
@@ -251,4 +251,4 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy = ({
   );
 };
 
-export default ModalConfirmationCreateUpdateApprovalPaymentRelationHierarchy;
+export default ConfirmationModalHierarchy;
