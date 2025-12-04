@@ -53,6 +53,7 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
   //state
   const [tabs, setTabs] = useState([]);
   const [isApproval, setIsApproval] = useState(false);
+  const [showApprovalButton, setShowApprovalButton] = useState(false);
   const [submitApprovalCondition, setSubmitApprovalCondition] = useState("");
 
   useEffect(() => {
@@ -134,6 +135,7 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
               dispatch = {dispatch}
               isApproval={isApproval}
               setIsApproval={setIsApproval}
+              setShowApprovalButton={setShowApprovalButton}
               submitApprovalCondition={submitApprovalCondition}
               setSubmitApprovalCondition={setSubmitApprovalCondition}
               // handleChangeInteraction={handleSetType}
@@ -183,7 +185,7 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
                 </Link>
               )}
 
-              {isApproval && (
+              {showApprovalButton && (
               <div className={"w-full flex justify-end gap-5"}>
                 <ButtonComponent
                   type="reject"

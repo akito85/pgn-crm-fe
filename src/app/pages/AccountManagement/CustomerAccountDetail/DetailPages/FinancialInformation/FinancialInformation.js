@@ -21,6 +21,7 @@ const FinancialInformation = ({
   idCustomer = 0,
   isApproval = false,
   setIsApproval = () => {},
+  setShowApprovalButton = () => {},
   submitApprovalCondition = "",
   setSubmitApprovalCondition = () => {},
 }) => {
@@ -85,6 +86,7 @@ const FinancialInformation = ({
           isActive={current === 6}
           isApproval={isApproval}
           setIsApproval={setIsApproval}
+          setShowApprovalButton={setShowApprovalButton}
           submitApprovalCondition={submitApprovalCondition}
           setSubmitApprovalCondition={setSubmitApprovalCondition}
         />
