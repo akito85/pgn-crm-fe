@@ -15,7 +15,7 @@ import { dateFormatting } from "../../../../../../../../utils";
 import { getAccountStandardDetail, getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import DetailText from "../../../../../../../../components/DetailText";
-import { getDetailPaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { getDetailPaymentRelation, getPaymentRelationAttachment, getPrAttachmentCategory } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 
 const tabs = [
   { value: "Service Request" },
@@ -27,7 +27,7 @@ const PaymentRelationDetails = ({
 }) => {
   const dispatch = useDispatch();
 
-  const { detail_paymentRelation } = useSelector(
+  const { detail_paymentRelation, data_paymentRelationAttachment } = useSelector(
     (state) => state.financialInformation
   )
 
@@ -71,6 +71,7 @@ const PaymentRelationDetails = ({
   useEffect(() => {
     if (idPr) {
       dispatch(getDetailPaymentRelation(idPr));
+      dispatch(getPaymentRelationAttachment({ id: idPr }));
     }
   }, [idPr])
 
@@ -182,6 +183,7 @@ const PaymentRelationDetails = ({
             options={tabs}
             handleChangeOption={handleDetailSection}
             dataDetail={detail_paymentRelation?.data}
+            dataAttachment={data_paymentRelationAttachment}
           />
         </div>
 
