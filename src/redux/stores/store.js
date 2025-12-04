@@ -102,6 +102,7 @@ import activitiesReducer from "../slices/debt_and_collection/activities";
 import transactionReportReducer from "../slices/debt_and_collection/transactionReport";
 import managementDeliveryInvoiceReducer from "../slices/rating_billing_invoice/managementDeliveryInvoice";
 import masterEfakturCodeReducer from "../slices/rating_billing_invoice/MasterData/efakturCode";
+import masterDigitalSignatureReducer from "../slices/rating_billing_invoice/MasterData/digitalSignature";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -202,6 +203,7 @@ const reducer = combineReducers({
   emeterai: emeteraiReducer,
   managementDeliveryInvoice: managementDeliveryInvoiceReducer,
   masterEfakturCode: masterEfakturCodeReducer,
+  masterDigitalSignature: masterDigitalSignatureReducer,
 
   //receipt and collection
   receipt: receiptReducer,
