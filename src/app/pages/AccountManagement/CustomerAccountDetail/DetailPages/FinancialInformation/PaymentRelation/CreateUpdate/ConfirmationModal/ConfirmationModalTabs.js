@@ -14,7 +14,7 @@ const ConfirmationModalTabs = ({
   section = "",
   options = [],
   handleChangeOption = () => {},
-  selectedHierarchy,
+  selectedAppHierId,
   hierarchyTableData,
   hieararchyOptionData,
   dispatch,
@@ -35,7 +35,7 @@ const ConfirmationModalTabs = ({
         return (
         <ConfirmationModalApproval
           dataTable={hierarchyTableData}
-          selectedHierarchy={selectedHierarchy}
+          selectedAppHierId={selectedAppHierId}
           dataOption={hieararchyOptionData}
         />
         )

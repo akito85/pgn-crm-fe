@@ -32,7 +32,6 @@ import {
   getDetailPaymentRelation,
   getDetailPrApprovalHierarchy,
   getPaymentRelationAttachment,
-  getPrAccountStandard,
   getPrApprovalHierarchy,
   getPrAttachmentCategory,
   updatePaymentRelation,
@@ -58,7 +57,6 @@ const CreatePaymentRelation = ({ type }) => {
     data_prApprovalHierarchy,
     detail_prApprovalHierarchy,
     detail_paymentRelation,
-    data_prAccountStandard,
     data_paymentRelationAttachment,
   } = useSelector((state) => state.financialInformation);
 
@@ -73,7 +71,8 @@ const CreatePaymentRelation = ({ type }) => {
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
 
-  const [selectedHierarchy, setSelectedHierarchy] = useState();
+  const [selectedAppHierId, setSelectedAppHierId] = useState();
+  const [selectedApprovalName, setSelectedApprovalName] = useState();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
 
@@ -112,7 +111,11 @@ const CreatePaymentRelation = ({ type }) => {
   }, [type, idPr]);
 
   useEffect(() => {
-    if (type === "update" && detail_paymentRelation?.data && data_prAccountStandard?.result?.length) {
+    if (
+      type === "update" &&
+      detail_paymentRelation?.result &&
+      data_prApprovalHierarchy?.length
+    ) {
       const {
         subjectId,
         objectId,
@@ -121,36 +124,28 @@ const CreatePaymentRelation = ({ type }) => {
         endDate,
         description,
         appHierId,
-      } = detail_paymentRelation.data;
-      
-      const result = data_prAccountStandard.result;
+      } = detail_paymentRelation.result;
 
-      const accountStandard = result.find((item) => item.accountId === objectId);        
+      const { accountNumber, accountName } = detail_paymentRelation.result;
 
-      if (accountStandard) {
-        const { accountNumber, accountName } = accountStandard;
+      formCreate.setFieldsValue({
+        subjectId,
+        objectId,
+        accountName,
+        accountNumber,
+        priority,
+        startDate,
+        endDate,
+        description,
+        appHierId,
+      });
 
-        formCreate.setFieldsValue({
-          subjectId,
-          objectId,
-          accountName,
-          accountNumber,
-          priority,
-          startDate,
-          endDate,
-          description,
-          appHierId,
-        });
+      const appHierOption = data_prApprovalHierarchy.find((option) => option.appHierId === appHierId)
 
-        handleSelectHiararchy(appHierId);
-      }
+      if (appHierOption)
+        handleSelectHiararchy(appHierId, appHierOption.approvalName);
     }
-  }, [detail_paymentRelation, data_prAccountStandard]);
-
-  useEffect(() => {
-    if (type === "update")
-      dispatch(getPrAccountStandard());
-  }, []);
+  }, [detail_paymentRelation, data_prApprovalHierarchy]);
 
   useEffect(() => {
     if (type === "update" && data_paymentRelationAttachment?.result) {
@@ -258,9 +253,10 @@ const CreatePaymentRelation = ({ type }) => {
     formCreate.setFieldValue("accountName", accountName);
   }
 
-  const handleSelectHiararchy = (appHierId) => {
+  const handleSelectHiararchy = (appHierId, approvalName) => {
     dispatch(getDetailPrApprovalHierarchy({id: appHierId}));
-    setSelectedHierarchy(appHierId);
+    setSelectedAppHierId(appHierId);
+    setSelectedApprovalName(approvalName);
   }
 
   const steps = [
@@ -288,7 +284,7 @@ const CreatePaymentRelation = ({ type }) => {
             key: `detail-detail-${index}`,
           }))}
           dataOption={data_prApprovalHierarchy}
-          selectedHierarchy={selectedHierarchy}
+          selectedAppHierId={selectedAppHierId}
           handleSelectHiararchy={handleSelectHiararchy}
           className={`${current !== 1 ? "hidden" : ""}`}
           key={`payment-relation-tab-1`}
@@ -568,7 +564,7 @@ const CreatePaymentRelation = ({ type }) => {
           isOpen={showConfirmationModal}
           handleCancel={() => handleSetShowConfirmationModal(false)}
           handleOk={() => handleSetShowConfirmationModal(false)}
-          selectedHierarchy={selectedHierarchy}
+          selectedAppHierId={selectedAppHierId}
           hierarchyTableData={detail_prApprovalHierarchy.map((detail, index) => ({
             ...detail,
             employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({

@@ -22,7 +22,6 @@ const initialState = {
   detail_prApprovalHierarchy: [],
   data_prAttachmentCategory: [],
   data_prAccountStandard: [],
-  data_paginationPrAccountStandard: [],
   detail_taxImplication: {},
   detail_paymentRelation: {},
   data_paymentRelationAttachment: [],
@@ -542,7 +541,7 @@ export const getDetailPaymentRelation = createAsyncThunk(
   "GET_DETAIL_PAYMENT_RELATION",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/payment-relation/${id}`;
+      const url = `/v1/dbs/api/payment-relation/detail/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -620,19 +619,6 @@ export const getPrAttachmentCategory = createAsyncThunk(
 
 export const getPrAccountStandard = createAsyncThunk(
   "GET_PR_ACCOUNT_STANDARD",
-  async (thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/account/list?size=1000000000`;
-      const response = await accountManagementService.getAll(url);
-      return response?.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.response);
-    }
-  }
-)
-
-export const getPaginationPrAccountStandard = createAsyncThunk(
-  "GET_PAGINATION_PR_ACCOUNT_STANDARD",
   async ({ page, pageSize, sort, search }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
@@ -982,19 +968,6 @@ const financialInformationSlice = createSlice({
     },
     [getPrAccountStandard.rejected]: (state) => {
       state.data_prAccountStandard = [];
-      state.loading = false;
-    },
-
-    /** Get Pagination PR Account Standard */
-    [getPaginationPrAccountStandard.pending]: (state) => {
-      state.loading = true;
-    },
-    [getPaginationPrAccountStandard.fulfilled]: (state, action) => {
-      state.data_paginationPrAccountStandard = action.payload;
-      state.loading = false;
-    },
-    [getPaginationPrAccountStandard.rejected]: (state) => {
-      state.data_paginationPrAccountStandard = [];
       state.loading = false;
     },
 
