@@ -10,6 +10,7 @@ const dataTabs = {
 
 const PaymentRelationDetailTabs = ({
   dataDetail = {},
+  dataAttachment = [],
   section = "",
   options = [],
   handleChangeOption = () => {},
@@ -43,7 +44,7 @@ const PaymentRelationDetailTabs = ({
       case dataTabs.sreqi:
         return <PaymentRelationDetailInfo dataDetail={dataDetail} type={AccountType}/>;
       case dataTabs.attch:
-        return <PaymentRelationDetailAttch dataDetail={dataDetail} />;
+        return <PaymentRelationDetailAttch dataAttachment={dataAttachment} />;
       default:
         return <PaymentRelationDetailInfo />;
     }

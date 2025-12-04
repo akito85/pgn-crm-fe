@@ -9,10 +9,11 @@ import {
   FilterOutlined,
   DownloadOutlined,
 } from "@ant-design/icons";
+import TablePaginationNew from "../../../../../../../../components/TablePaginationNew";
 
 
 const PaymentRelationDetailAttch = ({
-  dataDetail = {},
+  dataAttachment = [],
   handleChange = () => {},
   handleChangeSize = () => {},
   totalElement = 0,
@@ -55,11 +56,71 @@ const PaymentRelationDetailAttch = ({
       type: "PDF",
       fileName: "Contract_Agreement.pdf",
       fileSize: "1.2 MB"
-    }
+    },
+    {
+      id: "6",
+      type: "PDF",
+      fileName: "Document_Report_2025.pdf",
+      fileSize: "2.5 MB"
+    },
+    {
+      id: "7",
+      type: "Excel",
+      fileName: "Sales_Data_Q4.xlsx",
+      fileSize: "1.8 MB"
+    },
+    {
+      id: "8",
+      type: "Word",
+      fileName: "Project_Proposal.docx",
+      fileSize: "850 KB"
+    },
+    {
+      id: "9",
+      type: "Image",
+      fileName: "Brand_Guidelines.png",
+      fileSize: "3.2 MB"
+    },
+    {
+      id: "10",
+      type: "PDF",
+      fileName: "Contract_Agreement.pdf",
+      fileSize: "1.2 MB"
+    },
+    {
+      id: "11",
+      type: "PDF",
+      fileName: "Document_Report_2025.pdf",
+      fileSize: "2.5 MB"
+    },
+    {
+      id: "12",
+      type: "Excel",
+      fileName: "Sales_Data_Q4.xlsx",
+      fileSize: "1.8 MB"
+    },
+    {
+      id: "13",
+      type: "Word",
+      fileName: "Project_Proposal.docx",
+      fileSize: "850 KB"
+    },
+    {
+      id: "14",
+      type: "Image",
+      fileName: "Brand_Guidelines.png",
+      fileSize: "3.2 MB"
+    },
+    {
+      id: "15",
+      type: "PDF",
+      fileName: "Contract_Agreement.pdf",
+      fileSize: "1.2 MB"
+    },
   ];
 
   // Use dummy data if no data provided
-  const tableData = (Array.isArray(dataDetail) && dataDetail.length > 0) ? dataDetail : dummyData;
+  const tableData = (Array.isArray(dataAttachment) && dataAttachment.length > 0) ? dataAttachment : [];
 
   // Sanitize pagination values to prevent NaN
   const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
@@ -154,19 +215,14 @@ const PaymentRelationDetailAttch = ({
           </div>
         </div>
 
-        <TablePagination
-          dataSource={tableData.map((item, idx) => ({
+        <TablePaginationNew
+          dataSource={dataAttachment.map((item, idx) => ({
             ...item,
             key: item.id || idx,
           }))}
-          totalData={sanitizedTotalElement}
-          current={sanitizedPage}
-          pageSize={sanitizedPageSize}
-          onChange={handleChange}
-          onSizeChanger={handleChangeSize}
           tableScrolled={{ y: 525, x: 1500 }}
-          onSort={onSort}
           columns={columns}
+          type="FE"
         />
 
       </BaseContainer>
