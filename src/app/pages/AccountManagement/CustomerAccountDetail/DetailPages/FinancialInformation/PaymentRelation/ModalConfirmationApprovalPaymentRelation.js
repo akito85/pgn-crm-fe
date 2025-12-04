@@ -1,15 +1,17 @@
 import { useState } from "react";
-import ModalConfirmationApproval from "../../../../../../../components/Modal/ModalConfirmationApproval";
 import moment from "moment";
 import { dateFormatting, toTitleCase } from "../../../../../../../utils";
 import StatusComponent from "../../../../../../../components/StatusComponent";
+import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
+import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
 
 const ModalConfirmationApprovalPaymentRelation = ({
   dataSource,
   isOpen,
-  handleCancel,
-  handleOk,
+  handleCloseModal,
+  onFinish,
   getColumnSearchProps,
+  approveOrReject,
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -106,16 +108,24 @@ const ModalConfirmationApprovalPaymentRelation = ({
   ];
 
   return (
-    <ModalConfirmationApproval
-      columns={columns}
-      dataSource={dataSource}
+    <ModalApproveOrReject
       isOpen={isOpen}
-      page={page}
-      pageSize={pageSize}
-      handleChangeDetail={handleChangeDetail}
-      handleCancel={handleCancel}
-      handleOk={handleOk}
-    />
+      handleCloseModal={handleCloseModal}
+      onFinish={onFinish}
+      width={1000}
+      approveOrReject={approveOrReject}
+      customMessage={"Are you sure you want to approve selected data?"}
+      header={"CONFIRMATION"}
+    >
+      <TablePaginationNew
+        dataSource={dataSource}
+        pageSize={pageSize}
+        totalData={dataSource.length}
+        columns={columns}
+        onChange={handleChangeDetail}
+        current={page}
+      />
+    </ModalApproveOrReject>
   )
 }
 

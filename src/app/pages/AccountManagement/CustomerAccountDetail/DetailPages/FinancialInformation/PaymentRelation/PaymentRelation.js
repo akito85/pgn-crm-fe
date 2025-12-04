@@ -10,7 +10,7 @@ import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { getPaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { approveOrRejectPaymentRelation, getPaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
@@ -28,6 +28,7 @@ const PaymentRelation = ({
   isActive = false,
   isApproval = false,
   setIsApproval = () => {},
+  setShowApprovalButton = () => {},
   submitApprovalCondition = "",
   setSubmitApprovalCondition = () => {},
 }) => {
@@ -53,9 +54,25 @@ const PaymentRelation = ({
 
   const handleCancelApprovalModal = () => {
     setShowApprovalModal(false);
+    setSubmitApprovalCondition("");
   }
-  const handleConfirmApprovalModal = (submitApprovalCondition) => {
-    setShowApprovalModal(false);
+
+  const handleConfirmApprovalModal = (description, submitApprovalCondition, handleClear) => {
+    const body = selectedRows.map((row) => ({
+      id: row.id,
+      approvalId: row.tappId,
+      action: submitApprovalCondition.toUpperCase(),
+      description,
+    }))
+
+    dispatch(approveOrRejectPaymentRelation({ body }))
+    .unwrap()
+    .then(() => {
+      handleClear();
+      setShowApprovalModal(false);
+      setSubmitApprovalCondition("");
+    })
+    .catch(() => {})
   }
 
   useEffect(() => {
@@ -191,8 +208,11 @@ const PaymentRelation = ({
     selectedRowKeys,
     onChange: (newSelectedRowKeys, newSelectedRows) => {
       setSelectedRowKeys([...newSelectedRowKeys]);
-      console.log("newSelectedRows", newSelectedRows);
       setSelectedRows(newSelectedRows.map(newSelectedRow => ({...newSelectedRow})));
+      if (!newSelectedRowKeys.length)
+        setShowApprovalButton(false);
+      else
+        setShowApprovalButton(true);
     },
     type: "checkbox",
   }
@@ -206,7 +226,7 @@ const PaymentRelation = ({
     setSubmitApprovalCondition("");
   }
 
-  // Listen to submit approval
+  // Listen to approve or reject button on the parent component
   useEffect(() => {
     if (isActive) {
       if (submitApprovalCondition === "approve") {
@@ -216,6 +236,17 @@ const PaymentRelation = ({
       }
     }
   }, [submitApprovalCondition]);
+
+  // Reset accordian when it's not the current one that's opened
+  useEffect(() => {
+    if (!isActive) {
+      setSelectedRowKeys([]);
+      setSelectedRows([]);
+      setIsApproval(false);
+      setSubmitApprovalCondition("");
+      setShowApprovalButton("");
+    }
+  }, [isActive])
 
   return (
     <Spin spinning={loading}>
@@ -333,7 +364,10 @@ const PaymentRelation = ({
             </div>
           )}
           <PaymentRelationTable
-            data={data_paymentRelation?.result}
+            data={data_paymentRelation?.result?.map((paymentRelation, index) => ({
+              ...paymentRelation,
+              key: `payment-relation-${index}`
+            }))}
             idAccount={id}
             idCustomer={idCustomer}
             handleChange={handleChange}
@@ -352,8 +386,8 @@ const PaymentRelation = ({
           isOpen={showApprovalModal}
           setIsOpen={setShowApprovalModal}
           getColumnSearchProps={getColumnSearchProps}
-          handleCancel={handleCancelApprovalModal}
-          handleOk={() => handleConfirmApprovalModal(submitApprovalCondition)}
+          handleCloseModal={handleCancelApprovalModal}
+          onFinish={({ remark }, handleClear) => handleConfirmApprovalModal(remark, submitApprovalCondition, handleClear)}
         />
       </Fragment>  
     </Spin>
