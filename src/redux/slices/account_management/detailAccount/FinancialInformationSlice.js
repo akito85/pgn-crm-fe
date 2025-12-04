@@ -646,6 +646,44 @@ export const getPaginationPrAccountStandard = createAsyncThunk(
   }
 )
 
+export const approveOrRejectPaymentRelation = createAsyncThunk(
+  "APPROVE_OR_REJECT_PAYMENT_RELATION",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-relation/approve";
+      const response = await accountManagementService.activationWithRemark(url, body);
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${body?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody))
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body?.action === "DRAFT" ? 'drafted' : 'submitted'}. An unknown error occured.`
+        }
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 const financialInformationSlice = createSlice({
   name: "financialInformation",
   initialState,
