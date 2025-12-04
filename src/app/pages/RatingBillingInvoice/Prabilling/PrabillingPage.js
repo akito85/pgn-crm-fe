@@ -505,6 +505,7 @@ const PrabillingPage = () => {
               totalData={prabilling_pagination?.totalElements || 0}
               tableScrolled={{ x: 2500, y: 525 }}
               onSort={onSort}
+              showExport={false}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}

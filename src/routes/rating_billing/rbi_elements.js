@@ -50,6 +50,7 @@ import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/p
 import EFakturCodeView from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeView";
 import DigitalSignatureView from "../../app/pages/RatingBillingInvoice/MasterData/DigitalSignature/DigitalSignatureView";
 import ContentManagementView from "../../app/pages/RatingBillingInvoice/MasterData/ContentManagement/ContentManagementView";
+import ContentManagementForm from "../../app/pages/RatingBillingInvoice/MasterData/ContentManagement/ContentManagementForm";
 
 export const RBI_ELEMENTS = {
   // prabilling elements render
@@ -165,4 +166,6 @@ export const RBI_ELEMENTS = {
 
   // content management
   CONTENT_MANAGEMENT_VIEW_ELEMENT: <ContentManagementView />,
+  CONTENT_MANAGEMENT_CREATE_ELEMENT: <ContentManagementForm  />,
+
 };

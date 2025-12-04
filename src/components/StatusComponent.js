@@ -6,6 +6,10 @@ import {
   Loading3QuartersOutlined,
   ExclamationCircleFilled,
   MinusCircleFilled,
+  SyncOutlined,
+  FileTextOutlined,
+  StopOutlined,
+  HourglassOutlined,
 } from "@ant-design/icons";
 import React, { useMemo } from "react";
 
@@ -20,6 +24,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
     let tColor = "text-white";
 
     switch (lowerColour) {
+      // ===== SUCCESS STATUSES =====
       case "active":
       case "success":
       case "completed":
@@ -29,8 +34,9 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "paid":
       case "complete billing":
       case "sent":
-      case "approved": // E-Faktur status
-      case "success_upload": // E-Faktur status
+      case "approved":
+      case "success_upload":
+      case "standard": // ✅ E-Faktur: Generated successfully
         bgColor = "status-active";
         tColor = "text-white";
         break;
@@ -40,6 +46,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         tColor = "text-white";
         break;
         
+      // ===== FAILED/REJECTED STATUSES =====
       case "inactive":
       case "rejected":
       case "failed":
@@ -56,27 +63,36 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         tColor = "text-white";
         break;
 
+      // ===== WAITING/PENDING STATUSES =====
       case "waiting":
       case "waiting approval":
       case "waiting_approval":
       case "partial payment":
       case "waiting to release":
-      case "awaiting_approval": // E-Faktur status
-      case "awaiting approval": // E-Faktur status
+      case "awaiting_approval":
+      case "awaiting approval":
+      case "need review": // ✅ Billing status
+      case "waiting_cancellation_approval": // ✅ E-Faktur: Waiting for cancellation approval
+      case "waiting cancellation approval":
+      case "waiting_upload_approval": // ✅ E-Faktur: Waiting for upload approval
+      case "waiting upload approval":
         bgColor = "status-waiting";
         tColor = "text-yellow-700";
         break;
 
+      // ===== PROCESSING STATUSES =====
       case "in progress":
-      case "INPROGRESS":
-      case "processing": // E-Faktur status
+      case "inprogress":
+      case "processing": // ✅ E-Faktur: Being processed
+      case "submitted": // ✅ E-Faktur: Submitted to DJP
         bgColor = "bg-yellow-500";
         tColor = "text-white";
         break;
 
+      // ===== DRAFT STATUSES =====
       case "draft":
-      case "not_generated": // E-Faktur status
-      case "not generated": // E-Faktur status
+      case "not_generated": // ✅ E-Faktur: Not generated yet
+      case "not generated":
         bgColor = "bg-gray-600";
         tColor = "text-white";
         break;
@@ -86,14 +102,13 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         tColor = "text-white";
         break;
 
+      // ===== CANCELLED/EXPIRED STATUSES =====
       case "expire":
-      case "cancelled": // E-Faktur status
         bgColor = "status-expire";
         tColor = "text-red-700";
         break;
 
       case "expire10":
-      case "need review":
         bgColor = "status-expire10";
         break;
 
@@ -101,6 +116,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         bgColor = "status-expire30";
         break;
 
+      // ===== PENDING/ASSIGNED STATUSES =====
       case "pending":
       case "assigned":
         bgColor = "status-pending";
@@ -185,13 +201,32 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         tColor = "text-white";
         break;
 
-      // E-Faktur specific statuses
-      case "replaced": // Replacement status
+      // ===== E-FAKTUR TYPE STATUSES =====
+      case "normal": // ✅ E-Faktur Type: Normal
+        bgColor = "bg-blue-100";
+        tColor = "text-blue-800";
+        break;
+
+      case "replacement": // ✅ E-Faktur Type: Replacement
         bgColor = "bg-orange-100";
         tColor = "text-orange-800";
         break;
 
-      case "latest": // Replacement status
+      case "cancellation":
+      case "replaced":
+        case "cancelled": 
+        case "CANCELLED":// ✅ E-Faktur Type: Cancellation
+        bgColor = "bg-red-100";
+        tColor = "text-red-800";
+        break;
+
+      case "manual_upload": // ✅ E-Faktur Type: Manual Upload
+      case "manual upload":
+        bgColor = "bg-purple-100";
+        tColor = "text-purple-800";
+        break;
+
+      case "latest": // ✅ Replacement status: Latest replacement faktur
         bgColor = "bg-green-100";
         tColor = "text-green-800";
         break;
@@ -206,6 +241,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
     const lowerColour = colour.toLowerCase();
 
     switch (lowerColour) {
+      // ===== SUCCESS ICONS =====
       case "completed":
       case "success":
       case "sent":
@@ -213,28 +249,56 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "paid":
       case "success_upload":
       case "latest":
+      case "standard": // ✅ E-Faktur success
         return <CheckCircleFilled style={{ fontSize: "15px" }} />;
+
+      // ===== PROCESSING ICONS =====
       case "generating":
       case "in progress":
       case "inprogress":
-      case "INPROGRESS":
-      case "processing":
+      case "processing": // ✅ E-Faktur processing
+      case "submitted": // ✅ E-Faktur submitted
+        return <Loading3QuartersOutlined style={{ fontSize: "15px" }} />;
+
+      // ===== WAITING ICONS =====
       case "waiting approval":
       case "waiting_approval":
       case "awaiting_approval":
       case "awaiting approval":
-        return <Loading3QuartersOutlined style={{ fontSize: "15px" }} />;
+      case "waiting_cancellation_approval": // ✅ E-Faktur
+      case "waiting cancellation approval":
+      case "waiting_upload_approval": // ✅ E-Faktur
+      case "waiting upload approval":
+        return <HourglassOutlined style={{ fontSize: "15px" }} />;
+
+      // ===== FAILED ICONS =====
       case "failed":
       case "not paid":
       case "not_paid":
       case "rejected":
         return <CloseCircleFilled style={{ fontSize: "15px" }} />;
+
+      // ===== PENDING/SCHEDULED ICONS =====
       case "scheduled":
+      case "not_generated":
+      case "not generated":
         return <ClockCircleFilled style={{ fontSize: "15px" }} />;
+
       case "cancelled":
-        return <MinusCircleFilled style={{ fontSize: "15px" }} />;
+      case "cancellation":
+        return <StopOutlined style={{ fontSize: "15px" }} />;
+
       case "replaced":
         return <ExclamationCircleFilled style={{ fontSize: "15px" }} />;
+
+      case "replacement": 
+        return <SyncOutlined style={{ fontSize: "15px" }} />;
+
+      case "normal":
+      case "manual_upload":
+      case "manual upload":
+        return <FileTextOutlined style={{ fontSize: "15px" }} />;
+
       default:
         return null;
     }
