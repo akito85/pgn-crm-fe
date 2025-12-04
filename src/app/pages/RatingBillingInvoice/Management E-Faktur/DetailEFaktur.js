@@ -937,7 +937,7 @@ const DetailEFaktur = () => {
                     </div>
                     <div>
                       <div className="text-xs text-gray-500 mb-1">PJAP ID</div>
-                      <div className="text-sm font-medium text-xs break-all">{detail_efaktur?.pjapId || "-"}</div>
+                      <div className="text-sm font-medium break-all">{detail_efaktur?.pjapId || "-"}</div>
                     </div>
                   </div>
                 </div>
