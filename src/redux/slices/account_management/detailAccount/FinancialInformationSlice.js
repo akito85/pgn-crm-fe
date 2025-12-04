@@ -458,6 +458,7 @@ export const createPaymentRelation = createAsyncThunk(
       const successBody = {
         title: `Successful`,
         description: `Your data has been ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
       return response.data;
@@ -508,6 +509,7 @@ export const updatePaymentRelation = createAsyncThunk(
       const successBody = {
         title: `Successful`,
         description: `Your data has been ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}.`,
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
       return response.data;
