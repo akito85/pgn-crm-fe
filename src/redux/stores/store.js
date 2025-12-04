@@ -101,6 +101,7 @@ import activityActionReducer from "../slices/debt_and_collection/activityAction"
 import activitiesReducer from "../slices/debt_and_collection/activities";
 import transactionReportReducer from "../slices/debt_and_collection/transactionReport";
 import managementDeliveryInvoiceReducer from "../slices/rating_billing_invoice/managementDeliveryInvoice";
+import masterEfakturCodeReducer from "../slices/rating_billing_invoice/MasterData/efakturCode";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -200,6 +201,7 @@ const reducer = combineReducers({
   tax_code: taxCodeReducer,
   emeterai: emeteraiReducer,
   managementDeliveryInvoice: managementDeliveryInvoiceReducer,
+  masterEfakturCode: masterEfakturCodeReducer,
 
   //receipt and collection
   receipt: receiptReducer,
@@ -221,7 +223,6 @@ const reducer = combineReducers({
   [reportCustomerAgreementSlice.reducerPath]:
     reportCustomerAgreementSlice.reducer,
 
-
   // debt and collection
   gracePeriod: gracePeriodReducer,
   activityName: activityNameReducer,
@@ -230,7 +231,6 @@ const reducer = combineReducers({
   activityAction: activityActionReducer,
   activities: activitiesReducer,
   transactionReport: transactionReportReducer,
-
 });
 
 // add throttle middlewares

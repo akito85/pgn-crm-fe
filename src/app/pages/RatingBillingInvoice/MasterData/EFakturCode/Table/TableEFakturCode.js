@@ -23,11 +23,11 @@ export const columnsEFakturCode = (
     },
     {
       title: "CODE",
-      dataIndex: "efakturCode",
+      dataIndex: "einvoiceCode",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "efakturCode",
+        "einvoiceCode",
         searchInput,
         searchedColumn,
         searchText,
@@ -35,8 +35,8 @@ export const columnsEFakturCode = (
       ),
       render: (text) =>
         renderColumn(
-          "efakturCode",
-          hasValue(search["efakturCode"]),
+          "einvoiceCode",
+          hasValue(search["einvoiceCode"]),
           searchText,
           text,
           false,
@@ -46,11 +46,11 @@ export const columnsEFakturCode = (
     },
     {
       title: "DESCRIPTION",
-      dataIndex: "efakturName",
+      dataIndex: "description",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "efakturName",
+        "description",
         searchInput,
         searchedColumn,
         searchText,
@@ -58,8 +58,8 @@ export const columnsEFakturCode = (
       ),
       render: (text) =>
         renderColumn(
-          "efakturName",
-          hasValue(search["efakturName"]),
+          "description",
+          hasValue(search["description"]),
           searchText,
           text,
           false,

@@ -50,6 +50,8 @@ import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/p
 import EFakturCodeView from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeView";
 import DigitalSignatureView from "../../app/pages/RatingBillingInvoice/MasterData/DigitalSignature/DigitalSignatureView";
 import ContentManagementView from "../../app/pages/RatingBillingInvoice/MasterData/ContentManagement/ContentManagementView";
+import EFakturCodeForm from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeForm";
+import EFakturCodeDetail from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeDetail";
 
 export const RBI_ELEMENTS = {
   // prabilling elements render
@@ -159,6 +161,9 @@ export const RBI_ELEMENTS = {
 
   // efaktur-code
   EFAKTUR_CODE_VIEW_ELEMENT: <EFakturCodeView />,
+  EFAKTUR_CODE_CREATE_ELEMENT: <EFakturCodeForm type={"create"} />,
+  EFAKTUR_CODE_UPDATE_ELEMENT: <EFakturCodeForm type={"update"} />,
+  EFAKTUR_CODE_DETAIL_ELEMENT: <EFakturCodeDetail />,
 
   // digital signature
   DIGITAL_SIGNATURE_VIEW_ELEMENT: <DigitalSignatureView />,
