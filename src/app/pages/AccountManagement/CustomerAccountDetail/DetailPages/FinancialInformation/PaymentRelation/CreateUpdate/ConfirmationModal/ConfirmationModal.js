@@ -11,12 +11,10 @@ const tabs = [
 
 const ConfirmationModal = ({
   form,
-  dataSource,
   isOpen,
   handleCancel,
-  handleOk,
   selectedAppHierId,
-  hieararchyOptionData,
+  selectedApprovalName,
   hierarchyTableData,
   dataAttachment,
   type = "",
@@ -86,8 +84,8 @@ const ConfirmationModal = ({
         handleChangeOption={handleDetailSection}
         section={typeDetailSection}
         selectedAppHierId={selectedAppHierId}
+        selectedApprovalName={selectedApprovalName}
         hierarchyTableData={hierarchyTableData}
-        hieararchyOptionData={hieararchyOptionData}
         dataAttachment={dataAttachment}
       />
     </ModalCustom>
