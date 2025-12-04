@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import { Checkbox, Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -9,7 +9,14 @@ import { useDispatch, useSelector } from "react-redux";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { columnsEFakturCode } from "./Table/TableEFakturCode";
-// import { getAllEFakturCodePaginate, downloadEFakturCode, getApprovalHistory, getListApprovalHierarchy, getListApprovalHierarchyDetail, inactiveEFakturCode } from "../../../../../redux/slices/rating_billing_invoice/MasterData/efakturCode"; // Placeholder for future slice
+import {
+  getAllEfakturCodePaginate,
+  downloadEfakturCode,
+  getApprovalHistory,
+  getApprovalHierarchyList,
+  getApprovalHierarchyDetail,
+  inactiveEfakturCode,
+} from "../../../../../redux/slices/rating_billing_invoice/MasterData/efakturCode";
 import TableRBI from "../../../../../components/TableRBI";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
@@ -19,16 +26,15 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 import CardContainer from "../../../../../components/CardContainer";
 
 const EFakturCodeView = () => {
-  // Placeholder for selector - replace with actual slice when available
-  // const { data, loading, data_approval_history } = useSelector((state) => state.efaktur_code);
-  const data = { result: [], page: { totalElements: 0 } }; // Dummy data
-  const loading = false;
-  const data_approval_history = null;
+  // Selector - Fully integrated with Redux
+  const { data, loading, data_approval_history } = useSelector(
+    (state) => state.masterEfakturCode
+  );
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data?.result;
+  const dataSource = data?.result || [];
 
   // State
   const [page, setPage] = useState(1);
@@ -45,7 +51,7 @@ const EFakturCodeView = () => {
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [chooseId, setChooseId] = useState();
 
-  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
+  // Fixed columns state with new format { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
     const saved = localStorage.getItem("efakturCodeFixedColumns");
     return saved
@@ -56,7 +62,7 @@ const EFakturCodeView = () => {
         };
   });
 
-  // ✅ Save to localStorage when fixedColumns change
+  // Save to localStorage when fixedColumns change
   useEffect(() => {
     localStorage.setItem(
       "efakturCodeFixedColumns",
@@ -64,23 +70,30 @@ const EFakturCodeView = () => {
     );
   }, [fixedColumns]);
 
-  // Use Effect - Placeholder for data fetching
   useEffect(() => {
-    // dispatch(getAllEFakturCodePaginate({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }));
-  }, [search, sort, page, pageSize, dispatch]);
+    dispatch(
+      getAllEfakturCodePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      })
+    );
+  }, [page, pageSize, sort, dispatch, search]);
 
+  // Format approval history data
   useEffect(() => {
     if (data_approval_history) {
       const temp = {
         dataApprover: {
-          create: data_approval_history?.dataApprover?.EFAKTUR_CODE || [],
+          create: data_approval_history?.dataApprover?.FAKTUR_CODE || [],
           inactive:
-            data_approval_history?.dataApprover?.INACTIVE_EFAKTUR_CODE || [],
+            data_approval_history?.dataApprover?.INACTIVE_FAKTUR_CODE || [],
         },
         dataHistory: {
-          create: data_approval_history?.dataHistory?.EFAKTUR_CODE || [],
+          create: data_approval_history?.dataHistory?.FAKTUR_CODE || [],
           inactive:
-            data_approval_history?.dataHistory?.INACTIVE_EFAKTUR_CODE || [],
+            data_approval_history?.dataHistory?.INACTIVE_FAKTUR_CODE || [],
         },
       };
       setDataApprovalHistory(temp);
@@ -157,14 +170,52 @@ const EFakturCodeView = () => {
   };
 
   const handleOk = (res, handleClear) => {
-    // Placeholder for inactive action
-    // const dataValue = { efakturCode: chooseId.efakturCode, apphierId: res.approvalHierarchy, remark: res.remark };
-    // dispatch(inactiveEFakturCode(dataValue)).unwrap().then(() => { handleClear(); handleCancel(); ... });
+    const dataValue = {
+      fakturCodeId: chooseId.einvoiceCodeId,
+      apphierId: chooseId.apphierId,
+      remark: res.remark,
+    };
+    dispatch(inactiveEfakturCode(dataValue))
+      .unwrap()
+      .then(() => {
+        handleClear();
+        handleCancel();
+        let tempSearch = "";
+        for (const dataIndex in search) {
+          if (Object.hasOwnProperty.call(search, dataIndex)) {
+            const tempSearchText = search[dataIndex];
+            if (tempSearchText) {
+              tempSearch += `${dataIndex}~${tempSearchText},`;
+            }
+          }
+        }
+        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+        dispatch(
+          getAllEfakturCodePaginate({
+            search: tempSearch,
+            page,
+            pageSize,
+            sort,
+          })
+        );
+      })
+      .catch((error) => {
+        if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+          const message =
+            (error.response &&
+              error.response.data &&
+              error.response.data.message) ||
+            error.message ||
+            error.toString();
+          setBodyError({ body: { ...res }, handleClear, message });
+          setModalError(true);
+        }
+      });
   };
 
   // Handle Approval History
   const handleApprovalHistory = (id) => {
-    // dispatch(getApprovalHistory(id));
+    dispatch(getApprovalHistory(id));
     setModalApprovalHistory(true);
   };
 
@@ -182,24 +233,28 @@ const EFakturCodeView = () => {
 
   // Handle Download
   const handleDownload = () => {
-    // Placeholder for download
-    // let tempSearch = ""; ... dispatch(downloadEFakturCode({ page, pageSize, sort, search: tempSearch }));
+    let tempSearch = "";
+    for (const dataIndex in search) {
+      if (Object.hasOwnProperty.call(search, dataIndex)) {
+        const tempSearchText = search[dataIndex];
+        if (tempSearchText) {
+          tempSearch += `${dataIndex}~${tempSearchText},`;
+        }
+      }
+    }
+    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+    dispatch(
+      downloadEfakturCode({
+        page,
+        pageSize,
+        sort,
+        search: tempSearch,
+      })
+    );
   };
 
-  // Grant Access Item - moved outside useMemo
+  // Grant Access Items
   const itemGrantAccess = [
-    // {
-    //   action: "Download",
-    //   render: (
-    //     <ButtonComponent
-    //       type={"submit"}
-    //       icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-    //       onClick={() => handleDownload()}
-    //     >
-    //       Download List
-    //     </ButtonComponent>
-    //   ),
-    // },
     {
       action: "Create",
       render: (
@@ -220,7 +275,10 @@ const EFakturCodeView = () => {
       type: "table",
       render: (record) => {
         return (
-          <Link to={RBI_ROUTES.EFAKTUR_CODE_DETAIL} state={{ id: record.id }}>
+          <Link
+            to={RBI_ROUTES.EFAKTUR_CODE_DETAIL}
+            state={{ id: record.einvoiceCodeId }}
+          >
             <Tooltip title="Detail">
               <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
@@ -276,9 +334,7 @@ const EFakturCodeView = () => {
           <Link
             to={RBI_ROUTES.EFAKTUR_CODE_UPDATE}
             state={{
-              id: record.id,
-              status: record.status,
-              statusApproval: record.statusApproval,
+              id: record.einvoiceCodeId,
             }}
           >
             {linkContent}
@@ -328,7 +384,7 @@ const EFakturCodeView = () => {
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
+                  disabled={record.status !== "ACTIVE" ? false : true}
                   checked={record.status === "ACTIVE" ? false : true}
                 />
               </div>
@@ -349,7 +405,7 @@ const EFakturCodeView = () => {
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
               border={false}
-              onClick={() => handleApprovalHistory(record.efakturCode)}
+              onClick={() => handleApprovalHistory(record.einvoiceCodeId)}
             >
               <span className={"text-black ml-3"}>Approval History</span>
             </ButtonComponent>
@@ -360,7 +416,7 @@ const EFakturCodeView = () => {
                   name="IconLogHistory"
                   color={"#0075bf"}
                   width={24}
-                  onClick={() => handleApprovalHistory(record.efakturCode)}
+                  onClick={() => handleApprovalHistory(record.einvoiceCodeId)}
                 />
               </div>
             </Tooltip>
@@ -371,13 +427,13 @@ const EFakturCodeView = () => {
     },
   ];
 
-  // ✅ Call useColumnActionPermission hook at component level
+  // Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
     itemGrantAccess
   );
 
-  // ✅ Get base columns with key property
+  // Get base columns with key property
   const baseColumns = useMemo(() => {
     const efakturCodeCols = [
       ...columnsEFakturCode(
@@ -434,7 +490,7 @@ const EFakturCodeView = () => {
       if (fixedColumns.left.includes(colKey)) {
         newCol.fixed = "left";
       } else if (fixedColumns.right.includes(colKey)) {
-        delete newCol.fixed;
+        newCol.fixed = "right";
       } else {
         delete newCol.fixed;
       }
@@ -452,7 +508,7 @@ const EFakturCodeView = () => {
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="w-full mt-[15px] font-bold text-primary">
-                E-FAKTUR CODE LIST
+                LIST E-FAKTUR CODE
               </p>
 
               <Toolbar items={itemGrantAccess} />
@@ -479,7 +535,7 @@ const EFakturCodeView = () => {
         </CardContainer>
 
         {/* Modal Approval History */}
-        {/* <ModalHistory
+        <ModalHistory
           isOpen={modalApprovalHistory && dataApprovalHistory}
           handleClose={() => setModalApprovalHistory(false)}
           header={"Approval History"}
@@ -487,23 +543,23 @@ const EFakturCodeView = () => {
           tabOptions={handleOptions()}
           dataApprover={dataApprovalHistory?.dataApprover}
           dataHistory={dataApprovalHistory?.dataHistory}
-        /> */}
+        />
 
         {/* Modal Inactive */}
-        {/* <ModalInactivateWithHierarchy
-          selector={"efaktur_code"} // Placeholder
+        <ModalInactivateWithHierarchy
+          selector={"masterEfakturCode"}
           dispatch={dispatch}
-          getAPIOption={() => {}} // Placeholder
-          getAPIDetail={() => {}} // Placeholder
+          getAPIOption={getApprovalHierarchyList}
+          getAPIDetail={getApprovalHierarchyDetail}
           alertMessage={`Are you sure you want to inactivate this E-Faktur Code with name ${
-            chooseId?.efakturCode || ""
+            chooseId?.einvoiceCodeId || ""
           }?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
-        /> */}
+        />
 
-        {/* Modal Modal Error Inactive */}
+        {/* Modal Error Inactive */}
         <ModalError
           isOpen={modalError}
           handleOk={handleRetry}
