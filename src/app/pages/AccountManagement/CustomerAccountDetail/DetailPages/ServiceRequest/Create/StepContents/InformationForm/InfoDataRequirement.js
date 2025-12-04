@@ -29,7 +29,12 @@ export default function InfoDataRequirement({
   useEffect(() => {
     const formData = form.getFieldValue('srFormDataRequirements');
     if (formData && formData.length > 0) {
-      setDataRequirement(formData);
+      // Ensure all records have proper no values
+      const dataWithNumbers = formData.map((item, index) => ({
+        ...item,
+        no: index + 1
+      }));
+      setDataRequirement(dataWithNumbers);
     }
   }, [form]);
 
@@ -43,7 +48,32 @@ export default function InfoDataRequirement({
       label: item.name || item.glbTypeValName
     }));
   };
+
+  // A limiter for sercurity purpose
+  const MAX_DATA_REQUIREMENTS = 111;
+
+  const getNextNumber = () => {
+    // Business rule: Check if we've reached maximum allowed records
+    if (dataRequirement.length >= MAX_DATA_REQUIREMENTS) {
+      throw new Error(`Maximum of ${MAX_DATA_REQUIREMENTS} data requirements allowed`);
+    }
+    
+    if (dataRequirement.length === 0) {
+      return 1;
+    }
+    
+    const maxNo = Math.max(...dataRequirement.map(item => item.no || 0));
+    return maxNo + 1;
+  }
+
   const columnMain = [
+    {
+      title: 'No',
+      dataIndex: 'no',
+      key: 'no',
+      align: 'center',
+      width: 80
+    },
     {
       title: 'Type',
       dataIndex: 'type',
@@ -98,10 +128,18 @@ export default function InfoDataRequirement({
   }
 
   const handleDelete = (record) => {
+    // Remove the record
     const updatedData = dataRequirement.filter(item => item.key !== record.key);
-    setDataRequirement(updatedData);
+    
+    // Reassign numbers to all remaining records
+    const renumberedData = updatedData.map((item, index) => ({
+      ...item,
+      no: index + 1
+    }));
+    
+    setDataRequirement(renumberedData);
     form.setFieldsValue({
-      srFormDataRequirements: updatedData
+      srFormDataRequirements: renumberedData
     });
   }
 
@@ -121,8 +159,8 @@ export default function InfoDataRequirement({
         let updatedData;
 
         if (editingRecord) {
-          // Update existing record
-          updatedData = dataRequirement.map(item =>
+          // Update existing record - keep the same no
+          updatedData = dataRequirement.map((item) =>
             item.key === editingRecord.key
               ? {
                   ...item,
@@ -133,14 +171,21 @@ export default function InfoDataRequirement({
               : item
           );
         } else {
-          // Create new record
-          const newRecord = {
-            key: Date.now(), // unique key
-            type: typeLabel,
-            typeId: values.srFormDataRequirementType,
-            value: values.srFormDataRequirementValue
-          };
-          updatedData = [...dataRequirement, newRecord];
+          // Create new record with next sequential number
+          try {
+            // Get next number (might throw if max reached)
+            const newRecord = {
+              key: Date.now(), // unique key
+              no: getNextNumber(),
+              type: typeLabel,
+              typeId: values.srFormDataRequirementType,
+              value: values.srFormDataRequirementValue
+            };
+            updatedData = [...dataRequirement, newRecord];
+          } catch (error) {
+            // Show error message to user
+            console.log(error.message);
+          }
         }
 
         // Update table data

@@ -281,13 +281,15 @@ const CreateCustomerServiceRequest = (props) => {
     formCreate.setFieldsValue({
       customerName: `${firstName}${middleName ? ` ${middleName}` : ""}${lastName ? ` ${lastName}` : ""}`,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firstName, middleName, lastName]);
 
   useEffect(() => {
     formCreate.setFieldsValue({
       ...data,
     });
-  }, [data, formCreate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   // Populate form with Account Standard/OneTime information
   useEffect(() => {
@@ -311,9 +313,8 @@ const CreateCustomerServiceRequest = (props) => {
         srFormCountry: data_country || "",
       });
     }
-  }, [data_accountDetail, formCreate]);
-
-  console.log(data_detail);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data_accountDetail, data_detail, data_district, data_subdistrict, data_city, data_country]);
 
   const handleChangeName = (e, type) => {
     switch (type) {

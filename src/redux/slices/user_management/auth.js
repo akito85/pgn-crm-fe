@@ -143,6 +143,7 @@ export const login = createAsyncThunk(
               );
         }
       }
+      console.log(data)
       return data;
     } catch (error) {
       const message =
