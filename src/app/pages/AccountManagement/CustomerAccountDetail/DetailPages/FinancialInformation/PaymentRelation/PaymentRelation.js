@@ -35,7 +35,7 @@ const PaymentRelation = ({
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { data_paymentRelation, detail_paymentRelation, loading } = useSelector(
+  const { data_paymentRelation, loading } = useSelector(
     (state) => state.financialInformation
   );
 
