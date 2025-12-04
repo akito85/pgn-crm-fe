@@ -8,14 +8,15 @@ import { LeftOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PaymentRelationDetailTabs from "./PaymentRelationDetailTabs";
-import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
+import { getCustomerAccount, getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { dateFormatting } from "../../../../../../../../utils";
 import { getAccountStandardDetail, getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import DetailText from "../../../../../../../../components/DetailText";
-import { getDetailPaymentRelation, getPaymentRelationAttachment, getPrAttachmentCategory } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { getDetailPaymentRelation, getPaymentRelationAttachment, approveOrRejectPaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import ModalApproveOrReject from "../../../../../../../../components/Modal/ModalApproveOrReject";
 
 const tabs = [
   { value: "Service Request" },
@@ -51,48 +52,8 @@ const PaymentRelationDetails = ({
   //state
   const [typeDetailSection, setTypeDetailSection] = useState(tabs[0].value);
   const [isApproval, setIsApproval] = useState(false);
-
-  useEffect(() => {
-    dispatch(getGrantedAccessAccount('/account-management/customers/view/service-requests/details'))
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (idCustomer)
-      dispatch(getCustomerDetail(idCustomer));
-  }, [idCustomer]);
-
-  useEffect(() => {
-    console.log({idAccount, idCustomer})
-    if (idAccount && idCustomer) {
-      dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
-    }
-  }, [idAccount, idCustomer]);
-
-  useEffect(() => {
-    if (idPr) {
-      dispatch(getDetailPaymentRelation(idPr));
-      dispatch(getPaymentRelationAttachment({ id: idPr }));
-    }
-  }, [idPr])
-
-  useEffect(() => {
-    if (detail_paymentRelation) {
-      
-    }
-  }, [detail_paymentRelation])
-
-  //handle
-  const handleDetailSection = (e) => {
-    setTypeDetailSection(e.target.value);
-  };
-
-  const renderDate = (date) => {
-    if (date) {
-      return moment(date).format(dateFormatting.dateTime);
-    } else {
-      return "";
-    }
-  };
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [approveOrReject, setApproveOrReject] = useState("");
 
   const routes = [
     {
@@ -123,6 +84,92 @@ const PaymentRelationDetails = ({
       breadcrumbName: "Detail",
     },
   ];
+
+  //handle
+  const handleDetailSection = (e) => {
+    setTypeDetailSection(e.target.value);
+  };
+
+  const renderDate = (date) => {
+    if (date) {
+      return moment(date).format(dateFormatting.dateTime);
+    } else {
+      return "";
+    }
+  };
+
+  /**
+   * @param {boolean} show
+   * @param {"approve"|"reject"} action 
+   */
+  const handleApprovalModal = (show, action) => {
+    if (show) {
+      setShowApprovalModal(true);
+      setApproveOrReject(action);
+    } else {
+      setShowApprovalModal(false);
+      setApproveOrReject("");
+    }
+  }
+
+  /**
+   * @param {"approve"|"reject"} action 
+   */
+  const handleApproveOrReject = (description, action, handleClear) => {
+    if (detail_paymentRelation?.data) {
+      const { data } = detail_paymentRelation;
+
+      const body = [{
+        id: data.id,
+        approvalId: data.id,
+        action: action.toUpperCase(),
+        description,
+      }];
+
+      dispatch(approveOrRejectPaymentRelation({
+        body,
+      }))
+      .unwrap()
+      .then(() => {
+        dispatch(getDetailPaymentRelation(idPr));
+        handleClear();
+        handleApprovalModal(false);
+      })
+      .catch(() => {});
+    }
+  }
+
+  useEffect(() => {
+    dispatch(getGrantedAccessAccount('/account-management/customers/view/service-requests/details'))
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (idCustomer)
+      dispatch(getCustomerDetail(idCustomer));
+  }, [idCustomer]);
+
+  useEffect(() => {
+    console.log({idAccount, idCustomer})
+    if (idAccount && idCustomer) {
+      dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
+    }
+  }, [idAccount, idCustomer]);
+
+  useEffect(() => {
+    if (idPr) {
+      dispatch(getDetailPaymentRelation(idPr));
+      dispatch(getPaymentRelationAttachment({ id: idPr }));
+    }
+  }, [idPr])
+
+  useEffect(() => {
+    if (detail_paymentRelation?.data) {
+      const { statusApproval } = detail_paymentRelation.data;
+
+      if (statusApproval === "WAITING_APPROVAL")
+        setIsApproval(true);
+    }
+  }, [detail_paymentRelation]);
 
   return (
     <LayoutMenu>
@@ -208,13 +255,13 @@ const PaymentRelationDetails = ({
               <div className={"w-full flex justify-end gap-5"}>
                 <ButtonComponent
                   type="reject"
-                  onClick={() => {}}
+                  onClick={() => handleApprovalModal(true, "reject")}
                 >
                   Reject
                 </ButtonComponent>
                 <ButtonComponent
                   type="approve"
-                  onClick={() => {}}
+                  onClick={() => handleApprovalModal(true, "approve")}
                 >
                   Approve
                 </ButtonComponent>
@@ -223,6 +270,13 @@ const PaymentRelationDetails = ({
           </div>
         </div>
       </Spin>
+      <ModalApproveOrReject
+        isOpen={showApprovalModal}
+        header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
+        handleCloseModal={() => handleApprovalModal(false)}
+        customMessage={`Are you sure you want to ${approveOrReject} payment relation - ${detail_paymentRelation?.data?.id}?`}
+        onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
+      />
     </LayoutMenu>
   );
 };
