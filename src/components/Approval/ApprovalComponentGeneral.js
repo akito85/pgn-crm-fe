@@ -26,6 +26,7 @@ const ApprovalComponentGeneral = ({
   const handleUpdateSelectHierarchy = (val) => {
     updateSelectedHierarchy(val);
   };
+
   return (
     <div className="flex flex-col gap-3">
       <FunctionalApproval
