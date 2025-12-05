@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import accountManagementService from "../../../services/account_management/accountManagementService";
-import { showModalError, showModalSuccess } from "../../general_slice";
+import { setBodyError, showModalError, showModalSuccess } from "../../general_slice";
 
 const initialState = {
   loading: false,
@@ -25,6 +25,7 @@ const initialState = {
   detail_taxImplication: {},
   detail_paymentRelation: {},
   data_paymentRelationAttachment: [],
+  data_prApprovalHistory: {},
 };
 
 export const getGlobalTypeTaxIdentifier= createAsyncThunk(
@@ -712,6 +713,22 @@ export const inactivatePaymentRelation = createAsyncThunk(
   }
 );
 
+export const getPrApprovalHistory = createAsyncThunk(
+  "GET_APPROVAL_HISTORY_PAYMENT_RELATION",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/approval-history/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return Array.isArray(response.data) ? null : response.data;
+    } catch (error) {
+      if (error.response.data.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 const financialInformationSlice = createSlice({
   name: "financialInformation",
   initialState,
@@ -1042,6 +1059,18 @@ const financialInformationSlice = createSlice({
       state.loading = false;
     },
     [inactivatePaymentRelation.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    /** Get Payment Relation Approval History */
+    [getPrApprovalHistory.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPrApprovalHistory.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_prApprovalHistory = action.payload;
+    },
+    [getPrApprovalHistory.rejected]: (state) => {
       state.loading = false;
     },
   },
