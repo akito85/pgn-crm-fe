@@ -116,12 +116,12 @@ const PaymentRelationDetails = ({
    * @param {"approve"|"reject"} action 
    */
   const handleApproveOrReject = (description, action, handleClear) => {
-    if (detail_paymentRelation?.data) {
-      const { data } = detail_paymentRelation;
+    if (detail_paymentRelation?.result) {
+      const { result } = detail_paymentRelation;
 
       const body = [{
-        id: data.id,
-        approvalId: data.id,
+        id: result.id,
+        approvalId: result.tappId,
         action: action.toUpperCase(),
         description,
       }];
@@ -163,8 +163,8 @@ const PaymentRelationDetails = ({
   }, [idPr])
 
   useEffect(() => {
-    if (detail_paymentRelation?.data) {
-      const { statusApproval } = detail_paymentRelation.data;
+    if (detail_paymentRelation?.result) {
+      const { statusApproval } = detail_paymentRelation.result;
 
       if (statusApproval === "WAITING_APPROVAL")
         setIsApproval(true);
