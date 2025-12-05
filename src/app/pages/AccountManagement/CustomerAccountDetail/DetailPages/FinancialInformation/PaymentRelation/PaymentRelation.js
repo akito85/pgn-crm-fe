@@ -10,7 +10,7 @@ import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { approveOrRejectPaymentRelation, getPaymentRelation, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { approveOrRejectPaymentRelation, getPaymentRelation, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
@@ -19,6 +19,7 @@ import { Link, useNavigate } from "react-router-dom"
 import ModalConfirmationApprovalPaymentRelation from "./ModalConfirmationApprovalPaymentRelation";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
+import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
 
 // getDetailTaxImplication
 // detail_taxImplication
@@ -36,7 +37,7 @@ const PaymentRelation = ({
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { data_paymentRelation, loading } = useSelector(
+  const { data_paymentRelation, loading, data_prApprovalHistory } = useSelector(
     (state) => state.financialInformation
   );
 
@@ -52,9 +53,13 @@ const PaymentRelation = ({
   const [sort, setSort] = useState("");
   const [search, updateSearch] = useState({});
   const [showApprovalModal, setShowApprovalModal] = useState(false);
+
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivatePrId, setInactivatePrId] = useState(0);
   const [inactivatePrAppHierId, setInactivatePrAppHierId] = useState(0);
+
+  const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
+  const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
 
   const handleCancelApprovalModal = () => {
     setShowApprovalModal(false);
@@ -251,6 +256,23 @@ const PaymentRelation = ({
     type: "checkbox",
   }
 
+  const handleApprovalHistoryOptions = () => {
+    const data = dataApprovalHistoryFix?.dataApprover || {};
+    const keyData = Object.keys(data);
+    return keyData.map((item) => ({
+      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+    }));
+  };
+
+  const handleApprovalHistoryModal = (show, prId = 0) => {
+    if (show) {
+      dispatch(getPrApprovalHistory(prId));
+      setShowApprovalHistoryModal(true);
+    } else {
+      setShowApprovalHistoryModal(false);
+    }
+  }
+
   // Listen to approve or reject button on the parent component
   useEffect(() => {
     if (isActive) {
@@ -272,6 +294,28 @@ const PaymentRelation = ({
       setShowApprovalButton("");
     }
   }, [isActive])
+
+  useEffect(() => {
+    console.log("data_prApprovalHistory", data_prApprovalHistory);
+
+    if (data_prApprovalHistory && data_prApprovalHistory?.dataApprover) {
+      const temp = {
+        dataApprover: {
+          create: data_prApprovalHistory?.dataApprover?.PRICING || [],
+          inactive: data_prApprovalHistory?.dataApprover?.INACTIVE_PRICING || [],
+        },
+        dataHistory: {
+          create: data_prApprovalHistory?.dataHistory?.PRICING || [],
+          inactive: data_prApprovalHistory?.dataHistory?.INACTIVE_PRICING || [],
+        },
+      };
+
+      console.log("temp", temp);
+      setDataApprovalHistoryFix(temp);
+    } else {
+      setDataApprovalHistoryFix({});
+    }
+  }, [data_prApprovalHistory]);
 
   return (
     <Spin spinning={loading}>
@@ -405,6 +449,7 @@ const PaymentRelation = ({
             rowSelection={isApproval ? rowSelection : undefined}
             isApproval={isApproval}
             handleInactivePrModal={handleInactivePrModal}
+            handleApprovalHistoryModal={handleApprovalHistoryModal}
           />
         </div>
         <ModalConfirmationApprovalPaymentRelation
@@ -423,6 +468,17 @@ const PaymentRelation = ({
           handleCloseModal={() => handleInactivePrModal(false)}
           customMessage={`Are you sure you want to inactivate payment relation - ${inactivatePrId}?`}
           onFinish={({ remark }, handleClear) => handleInactivatePr(remark, handleClear)}
+        />
+
+        {/* Approval History Modal */}
+        <ModalHistory
+          isOpen={showApprovalHistoryModal}
+          handleClose={() => handleApprovalHistoryModal(false)}
+          header={"Approval History"}
+          width={850}
+          tabOptions={handleApprovalHistoryOptions()}
+          dataApprover={dataApprovalHistoryFix?.dataApprover}
+          dataHistory={dataApprovalHistoryFix?.dataHistory}
         />
       </Fragment>  
     </Spin>

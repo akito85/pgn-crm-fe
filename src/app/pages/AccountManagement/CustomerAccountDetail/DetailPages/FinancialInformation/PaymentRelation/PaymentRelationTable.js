@@ -24,6 +24,7 @@ const PaymentRelationTable = ({
   rowSelection,
   isApproval = false,
   handleInactivePrModal = () => {},
+  handleApprovalHistoryModal = () => {},
 }) => {
   const columns = [
     {
@@ -153,7 +154,7 @@ const PaymentRelationTable = ({
                       name="IconLogHistory"
                       color={"#0075bf"}
                       width={24}
-                      onClick={() => {}}
+                      onClick={() => handleApprovalHistoryModal(true, r?.id)}
                     />
                   </div>
                 </Tooltip>
