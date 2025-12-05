@@ -13,14 +13,12 @@ import ratingBillingHttpService from "../../../../../redux/services/ratingBillin
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import RadioTabs from "../../../../../components/RadioTabs";
-import EFakturCodeSectionForm from "./EFakturCodeSectionForm";
 import BaseContainer from "../../../../../components/BaseContainer";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { configApp } from "../../../../../constants/configApp";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { LeftOutlined } from "@ant-design/icons";
-import ConfirmationEFakturCode from "./ConfirmationEfakturCode";
 import ModalBack from "../../../../../components/Modal/ModalBack";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -35,14 +33,15 @@ import {
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/efakturCode";
 import { getAttachmentCategory } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
+import ConfirmationEFakturCode from "../EFakturCode/ConfirmationEfakturCode";
+import DigitalSignatureSectionForm from "./_components/DigitalSignatureSectionForm";
 
-const EFakturCodeForm = ({ type }) => {
+const DigitalSignatureForm = ({ type }) => {
   // Selector
   const {
     data_detail,
     data_approval_hierarchy,
     data_approval_hierarchy_detail,
-    data_category_list,
     loading,
   } = useSelector((state) => state.masterEfakturCode);
 
@@ -63,11 +62,11 @@ const EFakturCodeForm = ({ type }) => {
   const [selectedHierarchy, setSelectedHierarchy] = useState();
 
   const [flag, setFlag] = useState(false);
-  const [valuePage, setValuePage] = useState("Efaktur Code");
+  const [valuePage, setValuePage] = useState("Digital Signature");
   const [listSectionInfo, setListSectionInfo] = useState([
     {
-      value: "Efaktur Code",
-      paramValue: ["efakturCode", "description"],
+      value: "Digital Signature",
+      paramValue: ["digitalSignature", "description"],
     },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
@@ -203,16 +202,18 @@ const EFakturCodeForm = ({ type }) => {
       breadcrumbName: "Master Data",
     },
     {
-      path: RBI_ROUTES.EFAKTUR_CODE,
-      breadcrumbName: "E-Faktur Code",
+      path: RBI_ROUTES.DIGITAL_SIGNATURE,
+      breadcrumbName: "Digital Signature",
     },
     {
       path:
         type === "create"
-          ? RBI_ROUTES.EFAKTUR_CODE_CREATE
-          : RBI_ROUTES.EFAKTUR_CODE_UPDATE,
+          ? RBI_ROUTES.DIGITAL_SIGNATURE_CREATE
+          : RBI_ROUTES.DIGITAL_SIGNATURE_UPDATE,
       breadcrumbName:
-        type === "create" ? "Create E-Faktur Code" : "Update E-Faktur Code",
+        type === "create"
+          ? "Create Digital Signature"
+          : "Update Digital Signature",
     },
   ];
 
@@ -347,8 +348,8 @@ const EFakturCodeForm = ({ type }) => {
           setModalConfirm(true);
           setListSectionInfo([
             {
-              value: "Efaktur Code",
-              paramValue: ["efakturCode", "description"],
+              value: "Digital Signature",
+              paramValue: ["digitalSignature", "description"],
             },
             { value: "Approval", paramValue: ["apphierId"] },
             { value: "Attachment" },
@@ -485,8 +486,8 @@ const EFakturCodeForm = ({ type }) => {
       setStoredDataInline(false);
       setListSectionInfo([
         {
-          value: "Efaktur Code",
-          paramValue: ["efakturCode", "description"],
+          value: "Digital Signature",
+          paramValue: ["digitalSignature", "description"],
         },
         { value: "Approval", paramValue: ["apphierId"] },
         { value: "Attachment" },
@@ -524,17 +525,10 @@ const EFakturCodeForm = ({ type }) => {
           onFinishFailed={handleError}
         >
           {/* E-Faktur Code Section */}
-          <div className={`${valuePage !== "Efaktur Code" ? "hidden" : ""}`}>
-            <EFakturCodeSectionForm
-              type={type}
-              form={form}
-              listAdditionalCode={listAdditionalCode}
-              setListAdditionalCode={setListAdditionalCode}
-              storedDataInline={storedDataInline}
-              setStoredDataInline={setStoredDataInline}
-              status={status}
-              statusApproval={statusApproval}
-            />
+          <div
+            className={`${valuePage !== "Digital Signature" ? "hidden" : ""}`}
+          >
+            <DigitalSignatureSectionForm type={type} />
           </div>
 
           <div className={valuePage !== "Approval" ? "hidden" : ""}>
@@ -552,7 +546,7 @@ const EFakturCodeForm = ({ type }) => {
           <div className={valuePage !== "Attachment" ? "hidden" : ""}>
             <BaseContainer header={"Attachment Information"}>
               <AttachmentComponent
-                type={"create"}
+                type={"detail"}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
                 dispatch={dispatch}
@@ -666,4 +660,4 @@ const EFakturCodeForm = ({ type }) => {
   );
 };
 
-export default EFakturCodeForm;
+export default DigitalSignatureForm;
