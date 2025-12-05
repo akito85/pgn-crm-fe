@@ -673,6 +673,45 @@ export const approveOrRejectPaymentRelation = createAsyncThunk(
   }
 );
 
+export const inactivatePaymentRelation = createAsyncThunk(
+  "INACTIVATE_PAYMENT_RELATION",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-relation/inactive";
+      const response = await accountManagementService.activationWithRemark(url, body);
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been submitted`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody))
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not submitted. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not submitted. An unknown error occured.`
+        }
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 const financialInformationSlice = createSlice({
   name: "financialInformation",
   initialState,
@@ -981,6 +1020,28 @@ const financialInformationSlice = createSlice({
     },
     [getPaymentRelationAttachment.rejected]: (state) => {
       state.data_paymentRelationAttachment = [];
+      state.loading = false;
+    },
+
+    /** Approve or Reject Payment Relation Attachment */
+    [approveOrRejectPaymentRelation.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectPaymentRelation.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [approveOrRejectPaymentRelation.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    /** Inactivate Payment Relation Attachment */
+    [inactivatePaymentRelation.pending]: (state) => {
+      state.loading = true;
+    },
+    [inactivatePaymentRelation.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [inactivatePaymentRelation.rejected]: (state) => {
       state.loading = false;
     },
   },

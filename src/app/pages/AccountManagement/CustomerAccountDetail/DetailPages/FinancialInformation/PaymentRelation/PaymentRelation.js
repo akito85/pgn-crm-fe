@@ -10,7 +10,7 @@ import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { approveOrRejectPaymentRelation, getPaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { approveOrRejectPaymentRelation, getPaymentRelation, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
@@ -18,6 +18,7 @@ import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import { Link, useNavigate } from "react-router-dom"
 import ModalConfirmationApprovalPaymentRelation from "./ModalConfirmationApprovalPaymentRelation";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
+import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 
 // getDetailTaxImplication
 // detail_taxImplication
@@ -51,6 +52,9 @@ const PaymentRelation = ({
   const [sort, setSort] = useState("");
   const [search, updateSearch] = useState({});
   const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showInactiveModal, setShowInactiveModal] = useState(false);
+  const [inactivatePrId, setInactivatePrId] = useState(0);
+  const [inactivatePrAppHierId, setInactivatePrAppHierId] = useState(0);
 
   const handleCancelApprovalModal = () => {
     setShowApprovalModal(false);
@@ -71,6 +75,36 @@ const PaymentRelation = ({
       handleClear();
       setShowApprovalModal(false);
       setSubmitApprovalCondition("");
+    })
+    .catch(() => {})
+  }
+
+  const handleInactivePrModal = (show, prId = 0, prAppHierId = 0) => {
+    if (show) {
+      setInactivatePrId(prId);
+      setInactivatePrAppHierId(prAppHierId);
+      setShowInactiveModal(true);
+    } else {
+      setInactivatePrId(0);
+      setInactivatePrAppHierId(0);
+      setShowInactiveModal(false);
+    }
+  }
+
+  const handleInactivatePr = (remark, handleClear) => {
+    const body = {
+      id: inactivatePrId,
+      appHierId: inactivatePrAppHierId,
+      remark,
+    }
+
+    dispatch(inactivatePaymentRelation({
+      body,
+    }))
+    .unwrap()
+    .then(() => {
+      setShowInactiveModal(false);
+      handleClear()
     })
     .catch(() => {})
   }
@@ -370,6 +404,7 @@ const PaymentRelation = ({
             getColumnSearchProps={getColumnSearchProps}
             rowSelection={isApproval ? rowSelection : undefined}
             isApproval={isApproval}
+            handleInactivePrModal={handleInactivePrModal}
           />
         </div>
         <ModalConfirmationApprovalPaymentRelation
@@ -379,6 +414,15 @@ const PaymentRelation = ({
           getColumnSearchProps={getColumnSearchProps}
           handleCloseModal={handleCancelApprovalModal}
           onFinish={({ remark }, handleClear) => handleConfirmApprovalModal(remark, submitApprovalCondition, handleClear)}
+        />
+
+        {/* Inactivate Modal */}
+        <ModalApproveOrReject
+          isOpen={showInactiveModal}
+          header={"INACTIVATE"}
+          handleCloseModal={() => handleInactivePrModal(false)}
+          customMessage={`Are you sure you want to inactivate payment relation - ${inactivatePrId}?`}
+          onFinish={({ remark }, handleClear) => handleInactivatePr(remark, handleClear)}
         />
       </Fragment>  
     </Spin>

@@ -23,6 +23,7 @@ const PaymentRelationTable = ({
   getColumnSearchProps = () => {},
   rowSelection,
   isApproval = false,
+  handleInactivePrModal = () => {},
 }) => {
   const columns = [
     {
@@ -115,7 +116,7 @@ const PaymentRelationTable = ({
       fixed: "right",
       render: (v, r, i) => {
         return (
-          <div className="flex w-full justify-center gap-6">
+          <div className="flex w-full justify-center gap-x-4">
             {/* {!isApproval && (
               <Tooltip>
                 <div className="pt-1">
@@ -144,7 +145,8 @@ const PaymentRelationTable = ({
               </Tooltip>
             </Link>
             {
-              isApproval && (
+              // isApproval &&
+              (
                 <Tooltip title="History">
                   <div className="pt-1">
                     <SVGIcon
@@ -159,21 +161,33 @@ const PaymentRelationTable = ({
             }
             {
               !isApproval && (
-                <Link to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION} state={{
-                  idPr: r.id,
-                  idAccount,
-                  idCustomer,
-                }}>
-                  <Tooltip title="Update">
-                    <div className="pt-1">
-                      <SVGIcon
-                        name="IconUpdateAction"
-                        color={"#0075bf"}
-                        width={24}
-                      />
-                    </div>
+                <>
+                  <Tooltip
+                    title="Inactive"
+                  >
+                    <Checkbox
+                      className="inactive-check"
+                      disabled={r?.status === "ACTIVE" ? false : true}
+                      checked={r?.status === "ACTIVE" ? false : true}
+                      onClick={() => handleInactivePrModal(true, r?.id, r?.appHierId)}
+                    />
                   </Tooltip>
-                </Link>
+                  <Link to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION} state={{
+                    idPr: r.id,
+                    idAccount,
+                    idCustomer,
+                  }}>
+                    <Tooltip title="Update">
+                      <div className="pt-1">
+                        <SVGIcon
+                          name="IconUpdateAction"
+                          color={"#0075bf"}
+                          width={24}
+                        />
+                      </div>
+                    </Tooltip>
+                  </Link>
+                </>
               )
             }
           </div>
