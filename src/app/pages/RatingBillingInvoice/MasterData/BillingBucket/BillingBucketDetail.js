@@ -290,8 +290,6 @@ const BillingBucketDetail = () => {
     }
   }, [id, data_detail, data_detail_draft]);
 
-  console.log(criteriaValuesDraft);
-
   // Breadcrumbs
   const routes = [
     {
