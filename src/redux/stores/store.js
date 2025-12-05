@@ -103,6 +103,7 @@ import transactionReportReducer from "../slices/debt_and_collection/transactionR
 import managementDeliveryInvoiceReducer from "../slices/rating_billing_invoice/managementDeliveryInvoice";
 import masterEfakturCodeReducer from "../slices/rating_billing_invoice/MasterData/efakturCode";
 // import masterDigitalSignatureReducer from "../slices/rating_billing_invoice/MasterData/digitalSignature";
+import bridgeReducer from "../slices/receipt_collection/bridge";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -213,6 +214,7 @@ const reducer = combineReducers({
   item: itemReducer,
   cycle: cycleReducer,
   late: lateReducer,
+  bridge: bridgeReducer,
 
   // Attachment
   attachment: attachmentReducer,

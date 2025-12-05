@@ -20,6 +20,7 @@ import AccountInformation from "../../app/pages/ReceiptAndCollection/MasterData/
 import ViewLateCharge from "../../app/pages/ReceiptAndCollection/LateChargeManagement/ViewLateCharge";
 import ListRececiptForm from "../../app/pages/ReceiptAndCollection/Receipt/CreateReceipt/ListRececiptForm";
 import ListDetailLateCharge from "../../app/pages/ReceiptAndCollection/LateChargeManagement/DetailLateCharge/ListDetailLateCharge";
+import ViewBridge from "../../app/pages/ReceiptAndCollection/MasterData/Bridge/ViewBridge";
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
   VIEW_RECEIPT_PAGE: <ViewReceipt />,
@@ -73,4 +74,7 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   //late Charge
   VIEW_LATE_CHARGE: <ViewLateCharge />,
   DETAIL_LATE_CHARGE: <ListDetailLateCharge />,
+
+  // bridge
+  VIEW_BRIDGE: <ViewBridge />,
 };
