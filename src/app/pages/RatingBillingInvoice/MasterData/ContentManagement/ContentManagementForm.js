@@ -400,8 +400,8 @@ const ContentManagementForm = ({ type }) => {
       breadcrumbName: "Master Data",
     },
     {
-      path: RBI_ROUTES.BILLING_BUCKET_VIEW,
-      breadcrumbName: "Billing Bucket",
+      path: RBI_ROUTES.CONTENT_MANAGEMENT,
+      breadcrumbName: "Content Management",
     },
     {
       path:
