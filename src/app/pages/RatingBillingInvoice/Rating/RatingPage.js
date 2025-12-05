@@ -227,19 +227,19 @@ const RatingPage = () => {
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">RATING LIST</p>
-              <div className="mt-[15px]">
-                <Radio.Group
-                  options={tabRating}
-                  onChange={onChangeTab}
-                  value={valueTab}
-                  optionType="button"
-                  buttonStyle="solid"
-                  style={{ gap: 12, display: "flex" }}
-                />
-              </div>
             </div>
           }
         >
+          <div className="mt-[0px]">
+            <Radio.Group
+              options={tabRating}
+              onChange={onChangeTab}
+              value={valueTab}
+              optionType="button"
+              buttonStyle="solid"
+              style={{ gap: 12, display: "flex" }}
+            />
+          </div>
           <div className="my-5">
             <TableRBI
               size="small"

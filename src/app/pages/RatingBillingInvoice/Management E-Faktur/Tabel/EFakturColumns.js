@@ -8,6 +8,7 @@ import { INVOICE_ROUTES } from "../../../../../routes/invoice/invoice_routes";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import { currencyFormatting } from "../../../../../utils/formatCurrency";
+import { Link } from "react-router-dom";
 
 export const getEFakturColumns = ({
   page,
@@ -174,16 +175,16 @@ export const getEFakturColumns = ({
         ),
     },
     {
-      key: "meterReading",
+      key: "meterReadingCode",
       title: "METER READING",
-      dataIndex: "meterReading",
+      dataIndex: "meterReadingCode",
       width: 150,
       align: "left",
       sorter: true,
-      filteredValue: [search?.meterReading] || null,
+      filteredValue: [search?.meterReadingCode] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "meterReading",
+        "meterReadingCode",
         searchInput,
         searchedColumn,
         searchText,
@@ -192,8 +193,8 @@ export const getEFakturColumns = ({
       ),
       render: (text) =>
         renderColumn(
-          "meterReading",
-          hasValue(search["meterReading"]),
+          "meterReadingCode",
+          hasValue(search["meterReadingCode"]),
           searchText,
           text || "-",
           false,
@@ -259,17 +260,17 @@ export const getEFakturColumns = ({
         ),
     },
     {
-      key: "customerName",
+      key: "name",
       title: "CUSTOMER NAME",
-      dataIndex: "customerName",
+      dataIndex: "name",
       width: 250,
       align: "left",
       sorter: true,
-      filteredValue: [search?.customerName] || null,
+      filteredValue: [search?.name] || null,
       ellipsis: { showTitle: false },
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "customerName",
+        "name",
         searchInput,
         searchedColumn,
         searchText,
@@ -278,8 +279,8 @@ export const getEFakturColumns = ({
       ),
       render: (text) =>
         renderColumn(
-          "customerName",
-          hasValue(search["customerName"]),
+          "name",
+          hasValue(search["name"]),
           searchText,
           text,
           true,
@@ -288,16 +289,16 @@ export const getEFakturColumns = ({
         ),
     },
     {
-      key: "segment",
+      key: "accountSegment",
       title: "SEGMENT",
-      dataIndex: "segment",
+      dataIndex: "accountSegment",
       width: 150,
       align: "left",
       sorter: true,
-      filteredValue: [search?.segment] || null,
+      filteredValue: [search?.accountSegment] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "segment",
+        "accountSegment",
         searchInput,
         searchedColumn,
         searchText,
@@ -306,36 +307,8 @@ export const getEFakturColumns = ({
       ),
       render: (text) =>
         renderColumn(
-          "segment",
-          hasValue(search["segment"]),
-          searchText,
-          text || "-",
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      key: "accountGroupType",
-      title: "ACCOUNT GROUP TYPE",
-      dataIndex: "accountGroupType",
-      width: 180,
-      align: "left",
-      sorter: true,
-      filteredValue: [search?.accountGroupType] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accountGroupType",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "accountGroupType",
-          hasValue(search["accountGroupType"]),
+          "accountSegment",
+          hasValue(search["accountSegment"]),
           searchText,
           text || "-",
           false,
@@ -372,16 +345,16 @@ export const getEFakturColumns = ({
         ),
     },
     {
-      key: "customerIdentificationNumber",
-      title: "CUSTOMER IDENTIFICATION NUMBER",
-      dataIndex: "customerIdentificationNumber",
-      width: 220,
+      key: "npwpCust",
+      title: "NPWP CUSTOMER",
+      dataIndex: "npwpCust",
+      width: 180,
       align: "left",
       sorter: true,
-      filteredValue: [search?.customerIdentificationNumber] || null,
+      filteredValue: [search?.npwpCust] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "customerIdentificationNumber",
+        "npwpCust",
         searchInput,
         searchedColumn,
         searchText,
@@ -390,8 +363,8 @@ export const getEFakturColumns = ({
       ),
       render: (text) =>
         renderColumn(
-          "customerIdentificationNumber",
-          hasValue(search["customerIdentificationNumber"]),
+          "npwpCust",
+          hasValue(search["npwpCust"]),
           searchText,
           text || "-",
           false,
@@ -400,17 +373,17 @@ export const getEFakturColumns = ({
         ),
     },
     {
-      key: "taxAddress",
+      key: "fullAddress",
       title: "TAX ADDRESS",
-      dataIndex: "taxAddress",
+      dataIndex: "fullAddress",
       width: 300,
       align: "left",
       sorter: true,
-      filteredValue: [search?.taxAddress] || null,
+      filteredValue: [search?.fullAddress] || null,
       ellipsis: { showTitle: false },
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "taxAddress",
+        "fullAddress",
         searchInput,
         searchedColumn,
         searchText,
@@ -419,8 +392,8 @@ export const getEFakturColumns = ({
       ),
       render: (text) =>
         renderColumn(
-          "taxAddress",
-          hasValue(search["taxAddress"]),
+          "fullAddress",
+          hasValue(search["fullAddress"]),
           searchText,
           text || "-",
           true,
@@ -429,16 +402,44 @@ export const getEFakturColumns = ({
         ),
     },
     {
-      key: "jenisIdentitas",
-      title: "JENIS IDENTITAS",
-      dataIndex: "jenisIdentitas",
+      key: "nikPasport",
+      title: "NIK/PASSPORT",
+      dataIndex: "nikPasport",
+      width: 180,
+      align: "left",
+      sorter: true,
+      filteredValue: [search?.nikPasport] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "nikPasport",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "nikPasport",
+          hasValue(search["nikPasport"]),
+          searchText,
+          text || "-",
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      key: "tkuCode",
+      title: "TKU CODE",
+      dataIndex: "tkuCode",
       width: 150,
       align: "left",
       sorter: true,
-      filteredValue: [search?.jenisIdentitas] || null,
+      filteredValue: [search?.tkuCode] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "jenisIdentitas",
+        "tkuCode",
         searchInput,
         searchedColumn,
         searchText,
@@ -447,8 +448,8 @@ export const getEFakturColumns = ({
       ),
       render: (text) =>
         renderColumn(
-          "jenisIdentitas",
-          hasValue(search["jenisIdentitas"]),
+          "tkuCode",
+          hasValue(search["tkuCode"]),
           searchText,
           text || "-",
           false,
@@ -457,100 +458,16 @@ export const getEFakturColumns = ({
         ),
     },
     {
-      key: "nomorIdentitas",
-      title: "NOMOR IDENTITAS",
-      dataIndex: "nomorIdentitas",
-      width: 180,
-      align: "left",
-      sorter: true,
-      filteredValue: [search?.nomorIdentitas] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "nomorIdentitas",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "nomorIdentitas",
-          hasValue(search["nomorIdentitas"]),
-          searchText,
-          text || "-",
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      key: "jenisWajibPajak",
-      title: "JENIS WAJIB PAJAK",
-      dataIndex: "jenisWajibPajak",
-      width: 180,
-      align: "left",
-      sorter: true,
-      filteredValue: [search?.jenisWajibPajak] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "jenisWajibPajak",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "jenisWajibPajak",
-          hasValue(search["jenisWajibPajak"]),
-          searchText,
-          text || "-",
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      key: "nitku",
-      title: "NITKU",
-      dataIndex: "nitku",
-      width: 180,
-      align: "left",
-      sorter: true,
-      filteredValue: [search?.nitku] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "nitku",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "nitku",
-          hasValue(search["nitku"]),
-          searchText,
-          text || "-",
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      key: "billingPeriod",
+      key: "billPeriode",
       title: "BILLING PERIOD",
-      dataIndex: "billingPeriod",
+      dataIndex: "billPeriode",
       width: 120,
       align: "center",
       sorter: true,
-      filteredValue: [search?.billingPeriod] || null,
+      filteredValue: [search?.billPeriode] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "billingPeriod",
+        "billPeriode",
         searchInput,
         searchedColumn,
         searchText,
@@ -560,8 +477,8 @@ export const getEFakturColumns = ({
       ),
       render: (text) =>
         renderDateColumn(
-          "billingPeriod",
-          hasValue(search["billingPeriod"]),
+          "billPeriode",
+          hasValue(search["billPeriode"]),
           searchText,
           text,
           "datePeriod",
@@ -599,16 +516,16 @@ export const getEFakturColumns = ({
       },
     },
     {
-      key: "totalAmountEqvIdr",
+      key: "totalAmount",
       title: "TOTAL AMOUNT (IDR)",
-      dataIndex: "totalAmountEqvIdr",
+      dataIndex: "totalAmount",
       width: 180,
       align: "right",
       sorter: true,
-      filteredValue: [search?.totalAmountEqvIdr] || null,
+      filteredValue: [search?.totalAmount] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "totalAmountEqvIdr",
+        "totalAmount",
         searchInput,
         searchedColumn,
         searchText,
@@ -621,8 +538,8 @@ export const getEFakturColumns = ({
         );
 
         return renderColumn(
-          "totalAmountEqvIdr",
-          hasValue(search["totalAmountEqvIdr"]),
+          "totalAmount",
+          hasValue(search["totalAmount"]),
           searchText,
           formattedValue,
           false,
@@ -632,16 +549,16 @@ export const getEFakturColumns = ({
       },
     },
     {
-      key: "efakturStatus",
+      key: "status",
       title: "STATUS E-FAKTUR",
-      dataIndex: "efakturStatus",
+      dataIndex: "status",
       width: 180,
       align: "center",
       sorter: true,
-      filteredValue: [search?.efakturStatus] || null,
+      filteredValue: [search?.status] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "efakturStatus",
+        "status",
         searchInput,
         searchedColumn,
         searchText,
@@ -649,89 +566,46 @@ export const getEFakturColumns = ({
         true
       ),
       render: (status) => {
-        const displayStatus = status || "NOT_GENERATED";
+        const displayStatus = status || "DRAFT";
         const statusLabel = displayStatus.replace(/_/g, " ");
 
         return (
           <div className="flex justify-center">
             <StatusComponent colour={displayStatus.toLowerCase()}>
-              {renderColumn(
-                "efakturStatus",
-                hasValue(search["efakturStatus"]),
-                searchText,
-                statusLabel,
-                false,
-                "status",
-                search
-              )}
+              {statusLabel}
             </StatusComponent>
           </div>
         );
       },
     },
     {
-      key: "replacement",
-      title: "REPLACEMENT",
-      dataIndex: "replacement",
-      width: 120,
+      key: "statusApproval",
+      title: "STATUS APPROVAL",
+      dataIndex: "statusApproval",
+      width: 220,
       align: "center",
       sorter: true,
-      filteredValue: [search?.replacement] || null,
+      filteredValue: [search?.statusApproval] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "replacement",
+        "statusApproval",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         true
       ),
-      render: (replacement) => {
-        if (!replacement) {
-          return <span className="text-gray-400">-</span>;
-        }
+      render: (status) => {
+        const displayStatus = status || "DRAFT";
+        const statusLabel = displayStatus.replace(/_/g, " ");
 
-        if (replacement === "Y") {
-          return (
-            <Tooltip title="Faktur ini sudah diganti dengan faktur baru">
-              <div className="flex justify-center">
-                <StatusComponent colour="replaced">
-                  {renderColumn(
-                    "replacement",
-                    hasValue(search["replacement"]),
-                    searchText,
-                    "REPLACED",
-                    false,
-                    "input",
-                    search
-                  )}
-                </StatusComponent>
-              </div>
-            </Tooltip>
-          );
-        }
-
-        if (replacement === "N") {
-          return (
-            <Tooltip title="Faktur pengganti terbaru">
-              <div className="flex justify-center">
-                <StatusComponent colour="latest">
-                  {renderColumn(
-                    "replacement",
-                    hasValue(search["replacement"]),
-                    searchText,
-                    "LATEST",
-                    false,
-                    "input",
-                    search
-                  )}
-                </StatusComponent>
-              </div>
-            </Tooltip>
-          );
-        }
-
-        return <span className="text-gray-400">-</span>;
+        return (
+          <div className="flex justify-center">
+            <StatusComponent colour={displayStatus.toLowerCase()}>
+              {statusLabel}
+            </StatusComponent>
+          </div>
+        );
       },
     },
   ];
@@ -739,10 +613,9 @@ export const getEFakturColumns = ({
 
 // Action Column untuk Approval History
 export const getActionColumn = ({
+  navigate,
   handleApprovalHistory,
   handleGenerateEFaktur,
-  handleReplaceFaktur,
-  handleCancelFaktur,
   handleLogAktivitas,
 }) => {
   return [
@@ -772,11 +645,16 @@ export const getActionColumn = ({
         const menuItems = [
           {
             key: "detail",
-            label: "Detail",
+            label: (
+              <Link
+                to={INVOICE_ROUTES.EFAKTUR_VIEW_DETAIL}
+                state={{ id: record.efakturId }}
+                style={{ color: "inherit", textDecoration: "none" }}
+              >
+                Detail
+              </Link>
+            ),
             icon: <SVGIcon name="IconDetail" width={16} />,
-            onClick: () => {
-              window.location.href = `${INVOICE_ROUTES.EFAKTUR_VIEW_DETAIL}?efakturId=${record.efakturId}`;
-            },
           },
           {
             key: "log",
@@ -801,104 +679,6 @@ export const getActionColumn = ({
             onClick: () => handleLogAktivitas(record),
           },
         ];
-
-        if (record.replacement === "Y") {
-          return (
-            <Tooltip title="Faktur ini sudah diganti, tidak dapat dimodifikasi">
-              <Dropdown
-                menu={{ items: menuItems }}
-                trigger={["click"]}
-                placement="bottomRight"
-                disabled
-              >
-                <div className="pt-1 cursor-not-allowed opacity-50">
-                  <MoreOutlined style={{ fontSize: 20, color: "#595959" }} />
-                </div>
-              </Dropdown>
-            </Tooltip>
-          );
-        }
-
-        // Generate E-Faktur - hanya untuk NOT_GENERATED
-        if (!record.efakturStatus || record.efakturStatus === "NOT_GENERATED") {
-          menuItems.push(
-            { type: "divider" },
-            {
-              key: "generate",
-              label: "Generate E-Faktur",
-              icon: <PlusOutlined style={{ color: "#52c41a" }} />,
-              onClick: () => handleGenerateEFaktur(record),
-            }
-          );
-        }
-
-        // REMOVED: Upload & Generate XML dari FAILED status
-        // Sekarang hanya ada di dropdown "Approval Action"
-
-        // Replace & Cancel Faktur - untuk status SUCCESS/APPROVED
-        if (
-          record.efakturStatus === "SUCCESS" ||
-          record.efakturStatus === "SUCCESS_UPLOAD" ||
-          record.efakturStatus === "APPROVED"
-        ) {
-          if (record.replacement !== "Y") {
-            menuItems.push(
-              { type: "divider" },
-              {
-                key: "replace-faktur",
-                label: "Buat Faktur Pengganti",
-                icon: (
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                      stroke="#1890ff"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                ),
-                onClick: () => handleReplaceFaktur(record),
-              }
-            );
-          }
-
-          if (
-            record.efakturStatus !== "CANCELLED" &&
-            record.replacement !== "Y"
-          ) {
-            menuItems.push({
-              key: "cancel-faktur",
-              label: "Batalkan E-Faktur",
-              icon: (
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    stroke="#ff4d4f"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              ),
-              onClick: () => handleCancelFaktur(record),
-              danger: true,
-            });
-          }
-        }
-
         return (
           <Tooltip title="Aksi Lainnya">
             <Dropdown
