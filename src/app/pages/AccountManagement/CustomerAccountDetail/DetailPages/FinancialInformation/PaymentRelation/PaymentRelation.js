@@ -217,15 +217,6 @@ const PaymentRelation = ({
     type: "checkbox",
   }
 
-  const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-  const handleSubmitApproval = async (condition) => {
-
-    await wait(2000);
-    
-    setSubmitApprovalCondition("");
-  }
-
   // Listen to approve or reject button on the parent component
   useEffect(() => {
     if (isActive) {
