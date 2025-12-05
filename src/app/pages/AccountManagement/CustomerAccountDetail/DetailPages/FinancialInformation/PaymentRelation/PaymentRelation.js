@@ -296,8 +296,6 @@ const PaymentRelation = ({
   }, [isActive])
 
   useEffect(() => {
-    console.log("data_prApprovalHistory", data_prApprovalHistory);
-
     if (data_prApprovalHistory && data_prApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
@@ -310,7 +308,6 @@ const PaymentRelation = ({
         },
       };
 
-      console.log("temp", temp);
       setDataApprovalHistoryFix(temp);
     } else {
       setDataApprovalHistoryFix({});
