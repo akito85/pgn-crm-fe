@@ -183,12 +183,10 @@ const EFakturCodeDetail = () => {
             <AttachmentComponent
               type={"detail"}
               data={listDataAttachment}
-              // updateData={setListDataAttachment}
               dispatch={dispatch}
               typeSelector="masterEfakturCode"
               service={ratingBillingHttpService}
               configApplication={configApp.RATING_BILLING_SERVICE}
-              // typeRBI={"masterEfakturCode"}
             />
           </BaseContainer>
         );

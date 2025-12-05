@@ -552,7 +552,7 @@ const EFakturCodeForm = ({ type }) => {
           <div className={valuePage !== "Attachment" ? "hidden" : ""}>
             <BaseContainer header={"Attachment Information"}>
               <AttachmentComponent
-                type={"detail"}
+                type={"create"}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
                 dispatch={dispatch}
