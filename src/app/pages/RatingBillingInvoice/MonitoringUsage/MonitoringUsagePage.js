@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
@@ -6,17 +6,18 @@ import { useMonitoringList } from "./useMonirotingList";
 import { useDispatch, useSelector } from "react-redux";
 import { getApprovalHistory, getListUsagePaginate } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { usePrevLocContext } from "../../../../utils/usePrevLoc";
-import BaseContainer from "../../../../components/BaseContainer";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import RadioTabs from "../../../../components/RadioTabs";
-import TablePagination from "../../../../components/TablePagination";
+import TableRBI from "../../../../components/TableRBI";
 import ModalApprovalUsage from "./ModalApprovalUsage";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import CardContainer from "../../../../components/CardContainer";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const dataTabs = [
   {
@@ -38,6 +39,7 @@ const MonitoringUsagePage = () => {
   // Declaration
   const dispatch = useDispatch();
   const { path } = usePrevLocContext();
+  const searchInput = useRef(null);
   const [tabHeader, setTabHeader] = useState("Usage List");
   const {
     dataBatch,
@@ -68,18 +70,10 @@ const MonitoringUsagePage = () => {
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataTableSelect, setDataTableSelect] = useState([]);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
-
-
-  // const [dataTabs] = useState([
-  //   {
-  //     key: "usageList",
-  //     value: "Usage List",
-  //   },
-  //   {
-  //     key: "batchList",
-  //     value: "Batch List",
-  //   },
-  // ]);
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["action", "status"],
+  }));
 
   useEffect(() => {
     if (
@@ -104,11 +98,6 @@ const MonitoringUsagePage = () => {
     }
   }, [data_approval_history]);
 
-  // onChangeColumns
-  const onSelectChange = (newSelectedRowKeys) => {
-    setSelectedRowKeys(newSelectedRowKeys);
-  };
-
   const handleApprovalHistory = async (record) => {
     try {
       setModalApprovalHistory(true);
@@ -118,12 +107,13 @@ const MonitoringUsagePage = () => {
     }
   };
 
-
   // onChange page
   const onChangePage = (page, sizeChange) => {
-    setPage(page);
+    const tempPage = pageSize !== sizeChange ? 1 : page;
+    setPage(tempPage);
     setPageSize(sizeChange);
   };
+
   // onchang tabs
   const changeTabHeader = useCallback((e) => {
     setTabHeader(e.target.value);
@@ -136,8 +126,6 @@ const MonitoringUsagePage = () => {
     setSearch({});
     onSort("", "", "")
   }, [onSort, setPage, setPageSize, setSearch, setSearchText, setSearchedColumn, setSort]);
-
-
 
   const routes = [
     {
@@ -152,9 +140,9 @@ const MonitoringUsagePage = () => {
 
   const tableScroll = (tabHeader) => {
     if (tabHeader === "Usage List") {
-      return { x: 10000, y: 500 };
+      return { x: 5000, y: 525 };
     } else {
-      return { x: 10000, y: 500 };
+      return { x: 1500, y: 525 };
     }
   };
 
@@ -216,7 +204,7 @@ const MonitoringUsagePage = () => {
       render: (record) => {
         return (
           <Tooltip title="Approval History">
-            <div className="pt-1">
+            <div className="pt-0">
               <SVGIcon
                 name="IconLogHistory"
                 color={"#0075bf"}
@@ -241,7 +229,7 @@ const MonitoringUsagePage = () => {
             state={{ id: record?.batchId }}
           >
             <Tooltip title="Detail">
-              <div className="pt-1">
+              <div className="pt-0">
                 <SVGIcon name="IconDetail" width={24} />
               </div>
             </Tooltip>
@@ -254,25 +242,46 @@ const MonitoringUsagePage = () => {
   const columnActionUsage = useColumnActionPermission(
     ["history"],
     grantAccessUsage
-  );
+  ).map((col) => ({
+    ...col,
+    width: 80,
+    align: "center",
+  }));
 
   const columnActionBatch = useColumnActionPermission(
     ["view"],
     grantAccessBatch
-  );
+  ).map((col) => ({
+    ...col,
+    width: 80,
+    align: "center",
+  }));
 
+  const allColumns = useMemo(() => {
+    let baseColumns = tabHeader === "Usage List" ? columnUsage : batchColumns;
+    let actionColumns = tabHeader === "Usage List" ? columnActionUsage : columnActionBatch;
+    
+    const columnsWithKeys = [...baseColumns, ...actionColumns].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+      // Ensure width is set for all columns, use default if not specified
+      width: col.width || 150,
+    }));
+    
+    return columnsWithKeys;
+  }, [batchColumns, columnActionBatch, columnActionUsage, columnUsage, tabHeader]);
 
-  const columns = useMemo(() => {
-    if (tabHeader === "Usage List") {
-      return [
-        ...columnUsage,
-        ...columnActionUsage,
-      ]
-    } else {
-      return [...batchColumns, ...columnActionBatch];
-    }
-  }, [batchColumns, columnActionBatch, columnActionUsage, columnUsage, tabHeader])
-  
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
   const handleList = (tabHeader) => {
     if (tabHeader === "Usage List") {
       return dataUsage;
@@ -281,38 +290,54 @@ const MonitoringUsagePage = () => {
     }
   }
   
-  const handleListRefresh = () =>{
-    dispatch(getListUsagePaginate({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }))
+  const handleListRefresh = () => {
+    dispatch(getListUsagePaginate({ 
+      search: encodeURIComponent(JSON.stringify(search)), 
+      page, 
+      pageSize, 
+      sort 
+    }))
   }
 
   return (
     <Spin spinning={loading}>
       <LayoutMenu>
         <BreadCrumb routes={routes} />
-        <div className={"w-full flex justify-end gap-2"}>
-          <Toolbar items={grantAccessButton} />
-        </div>
 
-        <BaseContainer header={"MONITORING USAGE"}>
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="w-full mt-[15px] font-bold text-primary">
+                MONITORING USAGE
+              </p>
+              <Toolbar items={grantAccessButton} />
+            </div>
+          }
+        >
           <RadioTabs
             data={dataTabs}
             onChange={changeTabHeader}
             currentPosition={tabHeader}
           />
           <div className="my-5">
-            <TablePagination
+            <TableRBI
               totalData={handleList(tabHeader)?.page?.totalElements}
               dataSource={handleList(tabHeader)?.result}
-              columns={columns}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
               tableScrolled={tableScroll(tabHeader)}
               onChange={onChangePage}
               onSizeChanger={onChangePage}
               onSort={onSort}
+              showExport={false}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
       </LayoutMenu>
 
       {modalApproval ? (
