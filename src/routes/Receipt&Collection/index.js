@@ -142,4 +142,10 @@ export const receipt_and_collection = [
     path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_BRIDGE,
     element: RECEIPT_AND_COLLECTION_ELEMENTS.VIEW_BRIDGE,
   },
+
+  // invoice
+  {
+    path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_INVOICE,
+    element: RECEIPT_AND_COLLECTION_ELEMENTS.VIEW_INVOICE,
+  },
 ];

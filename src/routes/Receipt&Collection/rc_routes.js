@@ -56,6 +56,9 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   VIEW_LATE_CHARGE: "/receipt-and-collection/late-charge-management",
   DETAIL_LATE_CHARGE: "/receipt-and-collection/late-charge-management/view",
 
-  VIEW_BRIDGE:
-    "/receipt-and-collection/bridge",
+  //bridge
+  VIEW_BRIDGE: "/receipt-and-collection/bridge",
+  
+  //invoice
+  VIEW_INVOICE: "/receipt-and-collection/invoice",
 };
