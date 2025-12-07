@@ -23,18 +23,19 @@ import ModalBack from "../../../../../components/Modal/ModalBack";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../assets/Icon/index";
 import {
-  getDetailEfakturCode,
+  getDetailDigitalSignature,
   getApprovalHierarchyList,
   getApprovalHierarchyDetail,
   getCategoryList,
-  createEfakturCode,
-  updateEfakturCode,
+  createDigitalSignature,
+  updateDigitalSignature,
   uploadAttachment,
-} from "../../../../../redux/slices/rating_billing_invoice/MasterData/efakturCode";
+} from "../../../../../redux/slices/rating_billing_invoice/MasterData/digitalSignature";
 import { getAttachmentCategory } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
-import ConfirmationEFakturCode from "../EFakturCode/ConfirmationEfakturCode";
+import ConfirmationDigitalSignature from "./_components/ConfirmationDigitalSignature";
 import DigitalSignatureSectionForm from "./_components/DigitalSignatureSectionForm";
+import { getProfile } from "../../../../../redux/slices/user_management/profile";
 
 const DigitalSignatureForm = ({ type }) => {
   // Selector
@@ -43,7 +44,9 @@ const DigitalSignatureForm = ({ type }) => {
     data_approval_hierarchy,
     data_approval_hierarchy_detail,
     loading,
-  } = useSelector((state) => state.masterEfakturCode);
+  } = useSelector((state) => state.digitalSignature);
+
+  const { data: profileData } = useSelector((state) => state.profile);
 
   // Declaration
   const [form] = Form.useForm();
@@ -58,7 +61,6 @@ const DigitalSignatureForm = ({ type }) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
-  const [listAdditionalCode, setListAdditionalCode] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
 
   const [flag, setFlag] = useState(false);
@@ -86,11 +88,12 @@ const DigitalSignatureForm = ({ type }) => {
   useEffect(() => {
     dispatch(getApprovalHierarchyList());
     dispatch(getCategoryList());
+    dispatch(getProfile());
   }, [dispatch]);
 
   useEffect(() => {
     if (id && type === "update") {
-      dispatch(getDetailEfakturCode(id));
+      dispatch(getDetailDigitalSignature(id));
     }
   }, [dispatch, id, type]);
 
@@ -101,28 +104,9 @@ const DigitalSignatureForm = ({ type }) => {
       Object.keys(data_detail).length > 0 &&
       type === "update"
     ) {
-      const fakturCode = data_detail?.fakturCode || {};
-      const additionalCodes = data_detail?.additionalCodes || [];
+      const signature = data_detail?.["Digital signature"] || {};
+      const approvalInformation = data_detail?.["approval information"] || {};
       const attachments = data_detail?.attachments || [];
-
-      // Data Additional Code Detail - mapping dari additionalCodes
-      const mappedAdditionalCode = additionalCodes.map((item, index) => ({
-        id: item.additionalId,
-        key: index + 1,
-        code: item.code || "-",
-        description: item.description || "-",
-        startDate: item.startDate
-          ? moment(item.startDate).format(dateFormatting.dateFormal)
-          : null,
-        endDate: item.endDate
-          ? moment(item.endDate).format(dateFormatting.dateFormal)
-          : null,
-        type: "exist",
-        createdBy: item.createdBy || "-",
-        createdDate: item.createdDate || null,
-        updatedBy: item.updatedBy || "-",
-        updatedDate: item.updatedDate || null,
-      }));
 
       // Data Attachment Information - mapping dari attachments
       const mappedAttachment = attachments.map((item, index) => ({
@@ -143,16 +127,18 @@ const DigitalSignatureForm = ({ type }) => {
         dataType: "exist",
       }));
 
-      // Set form values dari fakturCode
+      // Set form values dari digital signature
       form.setFieldsValue({
-        efakturCode: fakturCode?.einvoiceCode || "",
-        description: fakturCode?.description || "",
-        apphierId: fakturCode?.apphierId || null,
+        name: signature?.name || "",
+        employee: signature?.employee || "",
+        primaryPosition: signature?.primaryPosition || "",
+        description: signature?.description || "",
+        signatureBase64: signature?.signatureBase64 || "",
+        apphierId: approvalInformation?.approvalHierarchy || null,
       });
 
-      setSelectedHierarchy(fakturCode?.apphierId);
+      setSelectedHierarchy(approvalInformation?.approvalHierarchy);
       setListDataAttachment(mappedAttachment);
-      setListAdditionalCode(mappedAdditionalCode);
     }
   }, [id, type, form, data_detail]);
 
@@ -217,32 +203,12 @@ const DigitalSignatureForm = ({ type }) => {
     },
   ];
 
-  const processData = ({
-    listAdditionalCode,
-    bodyData,
-    id,
-    type,
-    dateFormatting,
-    flag,
-  }) => {
-    // Map additionalCodes sesuai format backend
-    const additionalCodes = listAdditionalCode?.map((item) => ({
-      code: item.code,
-      description: item.description,
-      startDate: item.startDate
-        ? moment(item.startDate).format(dateFormatting.dateFormal)
-        : null,
-      endDate: item.endDate
-        ? moment(item.endDate).format(dateFormatting.dateFormal)
-        : null,
-    }));
-
+  const processData = ({ bodyData, id, type, dateFormatting, flag }) => {
     // Struktur payload sesuai backend
     const body = {
-      id: type === "create" ? null : id,
-      code: bodyData.efakturCode,
+      name: bodyData.name,
+      employeeCode: bodyData.employeeCode,
       description: bodyData.description || null,
-      additionalCodes: additionalCodes,
       apphierId: bodyData.apphierId,
       isSubmit: flag,
     };
@@ -258,7 +224,6 @@ const DigitalSignatureForm = ({ type }) => {
         : "/v1/dbs/api/faktur-code/validate-update";
 
     const body = processData({
-      listAdditionalCode,
       bodyData: formValue,
       id,
       type,
@@ -314,50 +279,11 @@ const DigitalSignatureForm = ({ type }) => {
   // Handle Save Form
   const handleSave = async (formValue) => {
     let errorBody = {};
-    const hasOverlapping = checkOverlappingData(listAdditionalCode);
 
     if (listDataAttachment.length === 0) {
       handleMandatory(setListSectionInfo, listDataAttachment);
     } else {
       handleMandatory(setListSectionInfo, setListSectionInfo);
-      if (listAdditionalCode.length === 0) {
-        errorBody = {
-          title: "Failed",
-          description: "Additional Code is mandatory. Please insert data.",
-        };
-        dispatch(showModalError(errorBody));
-      } else if (storedDataInline) {
-        errorBody = {
-          title: "Failed",
-          description: `Please save data table inline before submit. Please try again.`,
-        };
-        dispatch(showModalError(errorBody));
-      } else if (hasOverlapping) {
-        const errorBody = {
-          title: "Failed",
-          description: `You can't add Additional Code. Start date and end date can't overlap.`,
-        };
-        dispatch(showModalError(errorBody));
-      } else {
-        const isDataValid = await checkDataValidity(formValue);
-
-        if (isDataValid) {
-          setBodyData({
-            ...formValue,
-          });
-          setModalConfirm(true);
-          setListSectionInfo([
-            {
-              value: "Digital Signature",
-              paramValue: ["digitalSignature", "description"],
-            },
-            { value: "Approval", paramValue: ["apphierId"] },
-            { value: "Attachment" },
-          ]);
-        } else {
-          setModalConfirm(false);
-        }
-      }
     }
   };
 
@@ -365,7 +291,6 @@ const DigitalSignatureForm = ({ type }) => {
     setModalConfirm(false);
 
     const body = processData({
-      listAdditionalCode,
       bodyData,
       id,
       type,
@@ -482,7 +407,6 @@ const DigitalSignatureForm = ({ type }) => {
       setSelectedHierarchy("");
       setListDataAttachment([]);
       setBodyData({});
-      setListAdditionalCode([]);
       setStoredDataInline(false);
       setListSectionInfo([
         {
@@ -534,7 +458,6 @@ const DigitalSignatureForm = ({ type }) => {
           <div className={valuePage !== "Approval" ? "hidden" : ""}>
             <BaseContainer header={"Approval Information"}>
               <ApprovalComponentGeneral
-                type={type}
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
@@ -546,7 +469,7 @@ const DigitalSignatureForm = ({ type }) => {
           <div className={valuePage !== "Attachment" ? "hidden" : ""}>
             <BaseContainer header={"Attachment Information"}>
               <AttachmentComponent
-                type={"detail"}
+                type={"create"}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
                 dispatch={dispatch}
@@ -618,13 +541,12 @@ const DigitalSignatureForm = ({ type }) => {
         </Form>
 
         {/* Modal Confirmation */}
-        <ConfirmationEFakturCode
+        <ConfirmationDigitalSignature
           isOpen={modalConfirm}
           data={bodyData}
           selectedHierarchy={selectedHierarchy}
           listDataAppHierDetail={appHierDataDetail}
           listDataAttachment={listDataAttachment}
-          listAdditionalCode={listAdditionalCode}
           dataOption={appHierOptions}
           handleCancel={() => setModalConfirm(false)}
           handleConfirm={() => handleConfirm()}

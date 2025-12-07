@@ -9,7 +9,14 @@ import { useDispatch, useSelector } from "react-redux";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { columnsDigitalSignature } from "./Table/TableDigitalSignature";
-// import { getAllDigitalSignaturePaginate, downloadDigitalSignature, getApprovalHistory, getListApprovalHierarchy, getListApprovalHierarchyDetail, inactiveDigitalSignature } from "../../../../../redux/slices/rating_billing_invoice/MasterData/digitalSignature"; // Placeholder for future slice
+import {
+  getAllDigitalSignaturePaginate,
+  downloadDigitalSignature,
+  getApprovalHistory,
+  getApprovalHierarchyList,
+  getApprovalHierarchyDetail,
+  inactiveDigitalSignature,
+} from "../../../../../redux/slices/rating_billing_invoice/MasterData/digitalSignature"; // Placeholder for future slice
 import TableRBI from "../../../../../components/TableRBI";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
@@ -19,11 +26,9 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 import CardContainer from "../../../../../components/CardContainer";
 
 const DigitalSignatureView = () => {
-  // Placeholder for selector - replace with actual slice when available
-  // const { data, loading, data_approval_history } = useSelector((state) => state.digital_signature);
-  const data = { result: [], page: { totalElements: 0 } }; // Dummy data
-  const loading = false;
-  const data_approval_history = null;
+  const { data, loading, data_approval_history } = useSelector(
+    (state) => state.digitalSignature
+  );
 
   // Declaration
   const dispatch = useDispatch();
@@ -66,7 +71,14 @@ const DigitalSignatureView = () => {
 
   // Use Effect - Placeholder for data fetching
   useEffect(() => {
-    // dispatch(getAllDigitalSignaturePaginate({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }));
+    dispatch(
+      getAllDigitalSignaturePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      })
+    );
   }, [search, sort, page, pageSize, dispatch]);
 
   useEffect(() => {
@@ -159,14 +171,52 @@ const DigitalSignatureView = () => {
   };
 
   const handleOk = (res, handleClear) => {
-    // Placeholder for inactive action
-    // const dataValue = { digitalSignatureId: chooseId.digitalSignatureId, apphierId: res.approvalHierarchy, remark: res.remark };
-    // dispatch(inactiveDigitalSignature(dataValue)).unwrap().then(() => { handleClear(); handleCancel(); ... });
+    const dataValue = {
+      fakturCodeId: chooseId.einvoiceCodeId,
+      apphierId: chooseId.apphierId,
+      remark: res.remark,
+    };
+    dispatch(inactiveDigitalSignature(dataValue))
+      .unwrap()
+      .then(() => {
+        handleClear();
+        handleCancel();
+        let tempSearch = "";
+        for (const dataIndex in search) {
+          if (Object.hasOwnProperty.call(search, dataIndex)) {
+            const tempSearchText = search[dataIndex];
+            if (tempSearchText) {
+              tempSearch += `${dataIndex}~${tempSearchText},`;
+            }
+          }
+        }
+        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+        dispatch(
+          getAllDigitalSignaturePaginate({
+            search: tempSearch,
+            page,
+            pageSize,
+            sort,
+          })
+        );
+      })
+      .catch((error) => {
+        if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+          const message =
+            (error.response &&
+              error.response.data &&
+              error.response.data.message) ||
+            error.message ||
+            error.toString();
+          setBodyError({ body: { ...res }, handleClear, message });
+          setModalError(true);
+        }
+      });
   };
 
   // Handle Approval History
   const handleApprovalHistory = (id) => {
-    // dispatch(getApprovalHistory(id));
+    dispatch(getApprovalHistory(id));
     setModalApprovalHistory(true);
   };
 
@@ -184,8 +234,24 @@ const DigitalSignatureView = () => {
 
   // Handle Download
   const handleDownload = () => {
-    // Placeholder for download
-    // let tempSearch = ""; ... dispatch(downloadDigitalSignature({ page, pageSize, sort, search: tempSearch }));
+    let tempSearch = "";
+    for (const dataIndex in search) {
+      if (Object.hasOwnProperty.call(search, dataIndex)) {
+        const tempSearchText = search[dataIndex];
+        if (tempSearchText) {
+          tempSearch += `${dataIndex}~${tempSearchText},`;
+        }
+      }
+    }
+    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+    dispatch(
+      downloadDigitalSignature({
+        page,
+        pageSize,
+        sort,
+        search: tempSearch,
+      })
+    );
   };
 
   // Grant Access Item
@@ -221,10 +287,11 @@ const DigitalSignatureView = () => {
       action: "View",
       type: "table",
       render: (record) => {
+        console.log(record);
         return (
           <Link
             to={RBI_ROUTES.DIGITAL_SIGNATURE_DETAIL}
-            state={{ id: record.id }}
+            state={{ id: record.signatureId }}
           >
             <Tooltip title="Detail">
               <div className="pt-1">
@@ -283,7 +350,7 @@ const DigitalSignatureView = () => {
           <Link
             to={RBI_ROUTES.DIGITAL_SIGNATURE_UPDATE}
             state={{
-              id: record.id,
+              id: record.signatureId,
               status: record.status,
               statusApproval: record.statusApproval,
             }}
@@ -488,7 +555,7 @@ const DigitalSignatureView = () => {
         </CardContainer>
 
         {/* Modal Approval History */}
-        {/* <ModalHistory
+        <ModalHistory
           isOpen={modalApprovalHistory && dataApprovalHistory}
           handleClose={() => setModalApprovalHistory(false)}
           header={"Approval History"}
@@ -496,21 +563,21 @@ const DigitalSignatureView = () => {
           tabOptions={handleOptions()}
           dataApprover={dataApprovalHistory?.dataApprover}
           dataHistory={dataApprovalHistory?.dataHistory}
-        /> */}
+        />
 
         {/* Modal Inactive */}
-        {/* <ModalInactivateWithHierarchy
-          selector={"digital_signature"} // Placeholder
+        <ModalInactivateWithHierarchy
+          selector={"masterEfakturCode"}
           dispatch={dispatch}
-          getAPIOption={() => {}} // Placeholder
-          getAPIDetail={() => {}} // Placeholder
+          getAPIOption={getApprovalHierarchyList}
+          getAPIDetail={getApprovalHierarchyDetail}
           alertMessage={`Are you sure you want to inactivate this Digital Signature with name ${
-            chooseId?.digitalSignatureName || ""
+            chooseId?.einvoiceCodeId || ""
           }?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
-        /> */}
+        />
 
         {/* Modal Error Inactive */}
         <ModalError

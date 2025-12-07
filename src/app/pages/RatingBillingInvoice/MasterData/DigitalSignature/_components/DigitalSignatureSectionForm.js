@@ -51,7 +51,7 @@ const DigitalSignatureSectionForm = ({ type }) => {
           {/* Signature Section */}
           <Form.Item
             label="Signature"
-            name="signature"
+            name="signatureBase64"
             rules={[
               {
                 required: true,
