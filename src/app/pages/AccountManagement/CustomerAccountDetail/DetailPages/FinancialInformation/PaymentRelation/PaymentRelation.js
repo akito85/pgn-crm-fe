@@ -10,7 +10,7 @@ import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { approveOrRejectPaymentRelation, getPaymentRelation, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { approveOrRejectAllPaymentRelation, approveOrRejectInactivePaymentRelation, approveOrRejectPaymentRelation, getPaymentRelation, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
@@ -67,21 +67,28 @@ const PaymentRelation = ({
   }
 
   const handleConfirmApprovalModal = (description, submitApprovalCondition, handleClear) => {
-    const body = selectedRows.map((row) => ({
+    const body = selectedRows.filter(row => row.approvalType === "PAYMENT_RELATION").map((row) => ({
+      id: row.id,
+      approvalId: row.tappId,
+      action: submitApprovalCondition.toUpperCase(),
+      description,
+    }));
+
+    const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_PAYMENT_RELATION").map((row) => ({
       id: row.id,
       approvalId: row.tappId,
       action: submitApprovalCondition.toUpperCase(),
       description,
     }))
 
-    dispatch(approveOrRejectPaymentRelation({ body }))
+    dispatch(approveOrRejectAllPaymentRelation({ body, inactiveBody }))
     .unwrap()
     .then(() => {
       handleClear();
       setShowApprovalModal(false);
       setSubmitApprovalCondition("");
     })
-    .catch(() => {})
+    .catch(() => {});
   }
 
   const handleInactivePrModal = (show, prId = 0, prAppHierId = 0) => {
