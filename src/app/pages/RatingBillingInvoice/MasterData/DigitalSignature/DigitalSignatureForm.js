@@ -1,14 +1,10 @@
 import { Form, Spin } from "antd";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment";
-import { dateFormatting } from "../../../../../utils";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
-import {
-  showModalError,
-  validateCreateUpdate,
-} from "../../../../../redux/slices/general_slice";
+import { showModalError } from "../../../../../redux/slices/general_slice";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -23,18 +19,18 @@ import ModalBack from "../../../../../components/Modal/ModalBack";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../assets/Icon/index";
 import {
-  getDetailEfakturCode,
+  getDetailDigitalSignature,
   getApprovalHierarchyList,
   getApprovalHierarchyDetail,
-  getCategoryList,
-  createEfakturCode,
-  updateEfakturCode,
+  createDigitalSignature,
+  updateDigitalSignature,
   uploadAttachment,
-} from "../../../../../redux/slices/rating_billing_invoice/MasterData/efakturCode";
-import { getAttachmentCategory } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
+} from "../../../../../redux/slices/rating_billing_invoice/MasterData/digitalSignature";
+import { getAttachmentCategory } from "../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
-import ConfirmationEFakturCode from "../EFakturCode/ConfirmationEfakturCode";
+import ConfirmationDigitalSignature from "./_components/ConfirmationDigitalSignature";
 import DigitalSignatureSectionForm from "./_components/DigitalSignatureSectionForm";
+import { getProfile } from "../../../../../redux/slices/user_management/profile";
 
 const DigitalSignatureForm = ({ type }) => {
   // Selector
@@ -42,8 +38,9 @@ const DigitalSignatureForm = ({ type }) => {
     data_detail,
     data_approval_hierarchy,
     data_approval_hierarchy_detail,
+    data_position_employee,
     loading,
-  } = useSelector((state) => state.masterEfakturCode);
+  } = useSelector((state) => state.digitalSignature);
 
   // Declaration
   const [form] = Form.useForm();
@@ -51,14 +48,11 @@ const DigitalSignatureForm = ({ type }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const id = location?.state?.id;
-  const status = location?.state?.status;
-  const statusApproval = location?.state?.statusApproval;
 
   // State
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
-  const [listAdditionalCode, setListAdditionalCode] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
 
   const [flag, setFlag] = useState(false);
@@ -66,7 +60,7 @@ const DigitalSignatureForm = ({ type }) => {
   const [listSectionInfo, setListSectionInfo] = useState([
     {
       value: "Digital Signature",
-      paramValue: ["digitalSignature", "description"],
+      paramValue: ["name", "employeeCode", "signatureBase64"],
     },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
@@ -85,12 +79,12 @@ const DigitalSignatureForm = ({ type }) => {
   // Use Effect
   useEffect(() => {
     dispatch(getApprovalHierarchyList());
-    dispatch(getCategoryList());
+    dispatch(getProfile());
   }, [dispatch]);
 
   useEffect(() => {
     if (id && type === "update") {
-      dispatch(getDetailEfakturCode(id));
+      dispatch(getDetailDigitalSignature(id));
     }
   }, [dispatch, id, type]);
 
@@ -101,28 +95,9 @@ const DigitalSignatureForm = ({ type }) => {
       Object.keys(data_detail).length > 0 &&
       type === "update"
     ) {
-      const fakturCode = data_detail?.fakturCode || {};
-      const additionalCodes = data_detail?.additionalCodes || [];
+      const signature = data_detail?.digitalSignature || {};
+      const approvalInformation = data_detail?.approvalInformation || {};
       const attachments = data_detail?.attachments || [];
-
-      // Data Additional Code Detail - mapping dari additionalCodes
-      const mappedAdditionalCode = additionalCodes.map((item, index) => ({
-        id: item.additionalId,
-        key: index + 1,
-        code: item.code || "-",
-        description: item.description || "-",
-        startDate: item.startDate
-          ? moment(item.startDate).format(dateFormatting.dateFormal)
-          : null,
-        endDate: item.endDate
-          ? moment(item.endDate).format(dateFormatting.dateFormal)
-          : null,
-        type: "exist",
-        createdBy: item.createdBy || "-",
-        createdDate: item.createdDate || null,
-        updatedBy: item.updatedBy || "-",
-        updatedDate: item.updatedDate || null,
-      }));
 
       // Data Attachment Information - mapping dari attachments
       const mappedAttachment = attachments.map((item, index) => ({
@@ -130,7 +105,7 @@ const DigitalSignatureForm = ({ type }) => {
         size: item.size || 0,
         fileName: item.fileName || "-",
         fileSize: item.fileSize || "-",
-        fileType: item.fileType || "-",
+        fileType: item.type || "-",
         fileCategoryId: item.fileCategoryId || null,
         fileCategoryName: item.fileCategoryName || "-",
         pathFile: item.pathFile || "",
@@ -143,16 +118,24 @@ const DigitalSignatureForm = ({ type }) => {
         dataType: "exist",
       }));
 
-      // Set form values dari fakturCode
+      // Set form values dari digital signature
       form.setFieldsValue({
-        efakturCode: fakturCode?.einvoiceCode || "",
-        description: fakturCode?.description || "",
-        apphierId: fakturCode?.apphierId || null,
+        name: signature?.name || "",
+        employeeCode: signature?.employeeCode || "",
+        primaryPosition: signature?.positionName || "",
+        description: signature?.description || "",
+        signatureBase64: signature?.signatureBase64 || "",
+        signatureMethod: signature?.signatureMethod || "DRAW",
+        apphierId:
+          approvalInformation?.approvalHierarchy ||
+          signature?.approvalHierarchy ||
+          null,
       });
 
-      setSelectedHierarchy(fakturCode?.apphierId);
+      setSelectedHierarchy(
+        approvalInformation?.approvalHierarchy || signature?.approvalHierarchy
+      );
       setListDataAttachment(mappedAttachment);
-      setListAdditionalCode(mappedAdditionalCode);
     }
   }, [id, type, form, data_detail]);
 
@@ -217,125 +200,206 @@ const DigitalSignatureForm = ({ type }) => {
     },
   ];
 
-  const processData = ({
-    listAdditionalCode,
-    bodyData,
-    id,
-    type,
-    dateFormatting,
-    flag,
-  }) => {
-    // Map additionalCodes sesuai format backend
-    const additionalCodes = listAdditionalCode?.map((item) => ({
-      code: item.code,
-      description: item.description,
-      startDate: item.startDate
-        ? moment(item.startDate).format(dateFormatting.dateFormal)
-        : null,
-      endDate: item.endDate
-        ? moment(item.endDate).format(dateFormatting.dateFormal)
-        : null,
-    }));
+  // Helper function to convert base64 to File
+  const convertBase64ToFile = (base64Data, fileName = "signature.png") => {
+    try {
+      // Extract base64 string (remove prefix if exists)
+      const base64String = base64Data.includes(",")
+        ? base64Data.split(",")[1]
+        : base64Data;
 
-    // Struktur payload sesuai backend
-    const body = {
-      id: type === "create" ? null : id,
-      code: bodyData.efakturCode,
+      // Extract MIME type
+      const mimeMatch = base64Data.match(/data:([^;]+);/);
+      const mimeString = mimeMatch ? mimeMatch[1] : "image/png";
+
+      // Convert to binary
+      const byteString = atob(base64String);
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+
+      // Create blob and file
+      const blob = new Blob([ab], { type: mimeString });
+      const fileExtension = mimeString.split("/")[1] || "png";
+      const file = new File([blob], `${fileName}.${fileExtension}`, {
+        type: mimeString,
+      });
+
+      return file;
+    } catch (error) {
+      console.error("Error converting base64 to file:", error);
+      throw error;
+    }
+  };
+
+  // Helper function to clean base64 string
+  const cleanBase64String = (base64Data) => {
+    if (!base64Data) return "";
+    return base64Data.includes(",") ? base64Data.split(",")[1] : base64Data;
+  };
+
+  // Process Data untuk Update
+  const processDataUpdate = ({ bodyData, flag, id }) => {
+    const positionId = data_position_employee?.positionId || null;
+    const signatureMethod = bodyData.signatureMethod || "DRAW";
+
+    // Clean base64 string
+    const signatureBase64Clean = cleanBase64String(bodyData.signatureBase64);
+
+    // Prepare JSON data
+    const jsonData = {
+      id: id,
+      name: bodyData.name,
+      employeeCode: bodyData.employeeCode,
+      positionId: positionId,
       description: bodyData.description || null,
-      additionalCodes: additionalCodes,
+      signatureMethod: signatureMethod,
+      signatureBase64: signatureBase64Clean,
       apphierId: bodyData.apphierId,
       isSubmit: flag,
     };
 
-    return body;
+    // Create FormData
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(jsonData));
+
+    // Add file only if method is UPLOAD
+    if (signatureMethod === "UPLOAD" && bodyData.signatureBase64) {
+      try {
+        const file = convertBase64ToFile(bodyData.signatureBase64, "signature");
+        formData.append("file", file);
+      } catch (error) {
+        console.error("Error processing file for update:", error);
+      }
+    }
+
+    return formData;
+  };
+
+  // Process Data untuk Create
+  const processDataCreate = ({ bodyData, flag }) => {
+    const positionId = data_position_employee?.positionId || null;
+    const signatureMethod = bodyData.signatureMethod || "DRAW";
+
+    // Clean base64 string
+    const signatureBase64Clean = cleanBase64String(bodyData.signatureBase64);
+
+    // Prepare JSON data
+    const jsonData = {
+      name: bodyData.name,
+      employeeCode: bodyData.employeeCode,
+      positionId: positionId,
+      description: bodyData.description || null,
+      signatureMethod: signatureMethod,
+      signatureBase64: signatureBase64Clean,
+      apphierId: bodyData.apphierId,
+      isSubmit: flag,
+    };
+
+    // Create FormData
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(jsonData));
+
+    // Add file only if method is UPLOAD
+    if (signatureMethod === "UPLOAD" && bodyData.signatureBase64) {
+      try {
+        const file = convertBase64ToFile(bodyData.signatureBase64, "signature");
+        formData.append("file", file);
+      } catch (error) {
+        console.error("Error processing file for create:", error);
+      }
+    }
+
+    return formData;
   };
 
   // Validate Data before Modal
   const checkDataValidity = async (formValue) => {
     const url =
       type === "create"
-        ? "/v1/dbs/api/faktur-code/validate-create"
-        : "/v1/dbs/api/faktur-code/validate-update";
+        ? "/v1/dbs/api/signature/validate-create"
+        : "/v1/dbs/api/signature/validate-update";
 
-    const body = processData({
-      listAdditionalCode,
-      bodyData: formValue,
-      id,
-      type,
-      dateFormatting,
-      flag,
-    });
+    // Prepare JSON data payload
+    const positionId = data_position_employee?.positionId || null;
+    const signatureMethod = formValue.signatureMethod || "DRAW";
+
+    // Clean base64 string
+    const signatureBase64Clean = cleanBase64String(formValue.signatureBase64);
+
+    const jsonData = {
+      ...(type === "update" && { id: id }),
+      name: formValue.name,
+      employeeCode: formValue.employeeCode,
+      positionId: positionId,
+      description: formValue.description || null,
+      signatureMethod: signatureMethod,
+      signatureBase64: signatureBase64Clean,
+      apphierId: formValue.apphierId,
+      isSubmit: flag,
+    };
+
+    // Create FormData for multipart/form-data
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(jsonData));
+
+    // Add 'file' only if method is UPLOAD
+    if (signatureMethod === "UPLOAD" && formValue.signatureBase64) {
+      try {
+        const file = convertBase64ToFile(
+          formValue.signatureBase64,
+          "signature"
+        );
+        formData.append("file", file);
+      } catch (error) {
+        console.error("Error converting base64 to file:", error);
+        const errorBody = {
+          title: "Failed",
+          description: "Failed to process signature file. Please try again.",
+        };
+        dispatch(showModalError(errorBody));
+        return false;
+      }
+    }
 
     try {
-      await dispatch(
-        validateCreateUpdate({
-          body: body,
-          services: ratingBillingHttpService,
-          endPoint: url,
-          type: type,
-        })
-      )?.unwrap();
+      const response = await ratingBillingHttpService.createData(url, formData);
       return true;
     } catch (error) {
+      // Handle validation error
+      if (error?.response?.data) {
+        const message = error.response.data.message || "Validation failed";
+        const errorBody = {
+          title: "Failed",
+          description: message,
+        };
+        dispatch(showModalError(errorBody));
+      }
       return false;
     }
   };
 
-  // check has overlapping data
-  const checkOverlappingData = useCallback((dataTable) => {
-    const dataOverlap = [];
-
-    for (let i = 0; i < dataTable.length; i++) {
-      for (let j = i + 1; j < dataTable.length; j++) {
-        const item1 = dataTable[i];
-        const item2 = dataTable[j];
-
-        const start1 = moment(item1.startDate);
-        const end1 = item1.endDate ? moment(item1.endDate) : null;
-        const start2 = moment(item2.startDate);
-        const end2 = item2.endDate ? moment(item2.endDate) : null;
-
-        // Check for overlap
-        const hasOverlap =
-          (start1.isSameOrBefore(start2) &&
-            (!end1 || end1.isSameOrAfter(start2))) ||
-          (start2.isSameOrBefore(start1) &&
-            (!end2 || end2.isSameOrAfter(start1)));
-
-        if (hasOverlap) {
-          dataOverlap.push({ item1, item2 });
-        }
-      }
-    }
-
-    return dataOverlap.length > 0;
-  }, []);
-
   // Handle Save Form
   const handleSave = async (formValue) => {
     let errorBody = {};
-    const hasOverlapping = checkOverlappingData(listAdditionalCode);
 
     if (listDataAttachment.length === 0) {
       handleMandatory(setListSectionInfo, listDataAttachment);
+      errorBody = {
+        title: "Failed",
+        description:
+          "Attachment is mandatory. Please upload at least one file.",
+      };
+      dispatch(showModalError(errorBody));
     } else {
       handleMandatory(setListSectionInfo, setListSectionInfo);
-      if (listAdditionalCode.length === 0) {
-        errorBody = {
-          title: "Failed",
-          description: "Additional Code is mandatory. Please insert data.",
-        };
-        dispatch(showModalError(errorBody));
-      } else if (storedDataInline) {
+
+      if (storedDataInline) {
         errorBody = {
           title: "Failed",
           description: `Please save data table inline before submit. Please try again.`,
-        };
-        dispatch(showModalError(errorBody));
-      } else if (hasOverlapping) {
-        const errorBody = {
-          title: "Failed",
-          description: `You can't add Additional Code. Start date and end date can't overlap.`,
         };
         dispatch(showModalError(errorBody));
       } else {
@@ -349,7 +413,7 @@ const DigitalSignatureForm = ({ type }) => {
           setListSectionInfo([
             {
               value: "Digital Signature",
-              paramValue: ["digitalSignature", "description"],
+              paramValue: ["name", "employeeCode", "signatureBase64"],
             },
             { value: "Approval", paramValue: ["apphierId"] },
             { value: "Attachment" },
@@ -364,27 +428,24 @@ const DigitalSignatureForm = ({ type }) => {
   const handleConfirm = () => {
     setModalConfirm(false);
 
-    const body = processData({
-      listAdditionalCode,
-      bodyData,
-      id,
-      type,
-      dateFormatting,
-      flag,
-    });
-
     if (type === "create") {
-      dispatch(createEfakturCode({ body: body }))
+      // Create menggunakan FormData (multipart)
+      const body = processDataCreate({
+        bodyData,
+        flag,
+      });
+
+      dispatch(createDigitalSignature({ body: body }))
         .unwrap()
         .then(async (dataForm) => {
-          const efakturCode = dataForm?.einvoiceCodeId;
+          const signatureId = dataForm?.signatureId;
           setLoadingForm(true);
           for (let i = 0; i < listDataAttachment.length; i++) {
             const element = listDataAttachment[i];
             const body = {
               files: element.file,
               categoryId: element.fileCategoryId,
-              referenceId: efakturCode,
+              referenceId: signatureId,
             };
             await dispatch(uploadAttachment({ body }));
           }
@@ -405,10 +466,16 @@ const DigitalSignatureForm = ({ type }) => {
           }
         });
     } else {
-      dispatch(updateEfakturCode({ body: body, id }))
+      const body = processDataUpdate({
+        bodyData,
+        flag,
+        id,
+      });
+
+      dispatch(updateDigitalSignature({ body: body, id }))
         .unwrap()
         .then(async (dataForm) => {
-          const efakturCode = dataForm?.einvoiceCodeId;
+          const signatureId = dataForm?.signatureId;
           const filterDataAttach = listDataAttachment.filter(
             (item) => item.dataType !== "exist"
           );
@@ -418,7 +485,7 @@ const DigitalSignatureForm = ({ type }) => {
             const body = {
               files: element.file,
               categoryId: element.fileCategoryId,
-              referenceId: efakturCode,
+              referenceId: signatureId,
             };
             await dispatch(uploadAttachment({ body }));
           }
@@ -482,18 +549,17 @@ const DigitalSignatureForm = ({ type }) => {
       setSelectedHierarchy("");
       setListDataAttachment([]);
       setBodyData({});
-      setListAdditionalCode([]);
       setStoredDataInline(false);
       setListSectionInfo([
         {
           value: "Digital Signature",
-          paramValue: ["digitalSignature", "description"],
+          paramValue: ["name", "employeeCode", "signatureBase64"],
         },
         { value: "Approval", paramValue: ["apphierId"] },
         { value: "Attachment" },
       ]);
     } else {
-      dispatch(getDetailEfakturCode(id));
+      dispatch(getDetailDigitalSignature(id));
     }
   };
 
@@ -524,17 +590,16 @@ const DigitalSignatureForm = ({ type }) => {
           onFinish={handleSave}
           onFinishFailed={handleError}
         >
-          {/* E-Faktur Code Section */}
+          {/* Digital Signature Section */}
           <div
             className={`${valuePage !== "Digital Signature" ? "hidden" : ""}`}
           >
-            <DigitalSignatureSectionForm type={type} />
+            <DigitalSignatureSectionForm type={type} form={form} />
           </div>
 
           <div className={valuePage !== "Approval" ? "hidden" : ""}>
             <BaseContainer header={"Approval Information"}>
               <ApprovalComponentGeneral
-                type={type}
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
@@ -546,16 +611,16 @@ const DigitalSignatureForm = ({ type }) => {
           <div className={valuePage !== "Attachment" ? "hidden" : ""}>
             <BaseContainer header={"Attachment Information"}>
               <AttachmentComponent
-                type={"detail"}
+                type={type}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
                 dispatch={dispatch}
                 getAPICategory={getAttachmentCategory}
-                typeSelector="masterEfakturCode"
+                typeSelector="billing_bucket"
                 service={ratingBillingHttpService}
                 configApplication={configApp.RATING_BILLING_SERVICE}
                 getAPIGuard={getConfigFileRBIData}
-                typeRBI={"masterEfakturCode"}
+                typeRBI={"data"}
                 mandatory={true}
               />
             </BaseContainer>
@@ -618,13 +683,12 @@ const DigitalSignatureForm = ({ type }) => {
         </Form>
 
         {/* Modal Confirmation */}
-        <ConfirmationEFakturCode
+        <ConfirmationDigitalSignature
           isOpen={modalConfirm}
           data={bodyData}
           selectedHierarchy={selectedHierarchy}
           listDataAppHierDetail={appHierDataDetail}
           listDataAttachment={listDataAttachment}
-          listAdditionalCode={listAdditionalCode}
           dataOption={appHierOptions}
           handleCancel={() => setModalConfirm(false)}
           handleConfirm={() => handleConfirm()}

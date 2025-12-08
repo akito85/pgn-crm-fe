@@ -45,7 +45,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         bgColor = "bg-gray-600";
         tColor = "text-white";
         break;
-        
+
       // ===== FAILED/REJECTED STATUSES =====
       case "inactive":
       case "rejected":
@@ -214,8 +214,8 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
 
       case "cancellation":
       case "replaced":
-        case "cancelled": 
-        case "CANCELLED":// ✅ E-Faktur Type: Cancellation
+      case "cancelled":
+      case "CANCELLED": // ✅ E-Faktur Type: Cancellation
         bgColor = "bg-red-100";
         tColor = "text-red-800";
         break;
@@ -258,18 +258,15 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "inprogress":
       case "processing": // ✅ E-Faktur processing
       case "submitted": // ✅ E-Faktur submitted
-        return <Loading3QuartersOutlined style={{ fontSize: "15px" }} />;
-
-      // ===== WAITING ICONS =====
-      case "waiting approval":
       case "waiting_approval":
+      case "waiting approval":
       case "awaiting_approval":
       case "awaiting approval":
       case "waiting_cancellation_approval": // ✅ E-Faktur
       case "waiting cancellation approval":
       case "waiting_upload_approval": // ✅ E-Faktur
       case "waiting upload approval":
-        return <HourglassOutlined style={{ fontSize: "15px" }} />;
+        return <Loading3QuartersOutlined style={{ fontSize: "15px" }} />;
 
       // ===== FAILED ICONS =====
       case "failed":
@@ -291,7 +288,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "replaced":
         return <ExclamationCircleFilled style={{ fontSize: "15px" }} />;
 
-      case "replacement": 
+      case "replacement":
         return <SyncOutlined style={{ fontSize: "15px" }} />;
 
       case "normal":
