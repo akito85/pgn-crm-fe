@@ -30,7 +30,7 @@ const routes = [
 ];
 
 
-const ViewActivityName = () => {
+const ViewBridge = () => {
   const dispatch = useDispatch();
   const {
     dataBridge,
@@ -182,4 +182,4 @@ const ViewActivityName = () => {
   );
 };
 
-export default ViewActivityName;
+export default ViewBridge;

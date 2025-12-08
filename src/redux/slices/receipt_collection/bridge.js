@@ -4,7 +4,7 @@ import { validateError } from "../general_slice";
 
 const initialState = {
   loading: false,
-  data: null,
+  dataBridge: null,
   dataDownload: null,
 };
 
