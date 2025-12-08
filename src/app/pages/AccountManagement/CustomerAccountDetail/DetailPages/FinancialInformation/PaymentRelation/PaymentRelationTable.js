@@ -66,7 +66,7 @@ const PaymentRelationTable = ({
     {
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
-      width: 100,
+      width: 70,
       sorter: true,
       align: "center",
       fixed: "right",
@@ -87,13 +87,14 @@ const PaymentRelationTable = ({
           </div>
         );
       },
+      hidden: isApproval,
     },
     {
       title: "STATUS",
       dataIndex: "status",
       sorter: true,
       fixed: "right",
-      width: 75,
+      width: 50,
       ...getColumnSearchProps("status"),
       render: (status) => {
         const displayText = {
@@ -197,6 +198,8 @@ const PaymentRelationTable = ({
     },
   ];
 
+  const visibleColumns = columns.filter(column => !column.hidden)
+
   return (
     <Fragment>
       <TablePagination
@@ -208,7 +211,7 @@ const PaymentRelationTable = ({
         onSizeChanger={handleChangeSize}
         tableScrolled={{ y: 400, x: 2000 }}
         onSort={onSort}
-        columns={columns}
+        columns={visibleColumns}
         rowSelection={rowSelection}
       />
     </Fragment>
