@@ -1,7 +1,5 @@
-import React, { useEffect, useRef } from "react";
 import TablePagination from "../../../../../../../components/TablePagination";
 import { Fragment } from "react";
-import Highlighter from "react-highlight-words";
 import { Checkbox, Tooltip } from "antd";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import moment from "moment";
