@@ -208,6 +208,7 @@ const CreatePaymentRelation = ({ type }) => {
       } = formCreate.getFieldsValue();
 
       const body = {
+        id: idPr,
         subjectId: data_accountDetail?.accountInformation?.accountId, 
         objectId,
         priority,
@@ -215,7 +216,6 @@ const CreatePaymentRelation = ({ type }) => {
         startDate,
         endDate,
         appHierId,
-        action: submitType
       };
 
       dispatch(validateCreateUpdate({
