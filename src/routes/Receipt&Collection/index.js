@@ -134,7 +134,7 @@ export const receipt_and_collection = [
   },
   {
     path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_LATE_CHARGE,
-    element:RECEIPT_AND_COLLECTION_ELEMENTS.DETAIL_LATE_CHARGE,
+    element: RECEIPT_AND_COLLECTION_ELEMENTS.DETAIL_LATE_CHARGE,
   },
 
   // bridge
@@ -147,6 +147,12 @@ export const receipt_and_collection = [
   {
     path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_INVOICE,
     element: RECEIPT_AND_COLLECTION_ELEMENTS.VIEW_INVOICE,
+  },
+
+  // transaction log
+  {
+    path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSACTION_LOG,
+    element: RECEIPT_AND_COLLECTION_ELEMENTS.VIEW_TRANSACTION_LOG,
   },
 
   //partner

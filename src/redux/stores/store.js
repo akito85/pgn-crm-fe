@@ -104,6 +104,7 @@ import managementDeliveryInvoiceReducer from "../slices/rating_billing_invoice/m
 import masterEfakturCodeReducer from "../slices/rating_billing_invoice/MasterData/efakturCode";
 // import masterDigitalSignatureReducer from "../slices/rating_billing_invoice/MasterData/digitalSignature";
 import bridgeReducer from "../slices/receipt_collection/bridge";
+import transactionLogReducer from "../slices/receipt_collection/transactionLog";
 import invoiceMasterDataReducer from "../slices/receipt_collection/invoice";
 import partnerReducer from "../slices/receipt_collection/partner";
 
@@ -217,6 +218,7 @@ const reducer = combineReducers({
   cycle: cycleReducer,
   late: lateReducer,
   bridge: bridgeReducer,
+  transactionLog: transactionLogReducer,
   invoiceMasterData: invoiceMasterDataReducer,
   partner: partnerReducer,
 
