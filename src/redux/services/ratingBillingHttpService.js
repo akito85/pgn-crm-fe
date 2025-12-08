@@ -110,12 +110,18 @@ const downloadData = async (url, customBaseUrl) => {
       responseType: "blob",
     });
     if (hasValue(response.headers?.get("content-disposition"))) {
-      const filename = response.headers
+      const rawFilename = response.headers
         .get("content-disposition")
         .split(";")
         .find((n) => n.includes("filename="))
         .replace("filename=", "")
         .trim();
+
+      // Remove quotes and trailing underscore
+      const filename = rawFilename.replace(/['"]/g, "").replace(/_+$/, "");
+
+      console.log("📥 [downloadData] Raw filename:", rawFilename);
+      console.log("📥 [downloadData] Cleaned filename:", filename);
 
       const blob = await response?.data;
       FileSaver.saveAs(blob, filename);

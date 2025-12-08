@@ -55,4 +55,23 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   //late charge
   VIEW_LATE_CHARGE: "/receipt-and-collection/late-charge-management",
   DETAIL_LATE_CHARGE: "/receipt-and-collection/late-charge-management/view",
+
+  //bridge
+  VIEW_BRIDGE: "/receipt-and-collection/bridge",
+
+  //transaction log
+  VIEW_TRANSACTION_LOG: "/receipt-and-collection/transaction-log",
+
+  //invoice
+  VIEW_INVOICE: "/receipt-and-collection/invoice",
+
+  VIEW_PARTNER: "/receipt-and-collection/partner",
+  DETAIL_PARTNER: "/receipt-and-collection/partner/view",
+  CREATE_PARTNER: "/receipt-and-collection/partner/create",
+  UPDATE_PARTNER: "/receipt-and-collection/partner/update",
+
+  VIEW_PARTNER_CA: "/receipt-and-collection/partner-ca",
+  DETAIL_PARTNER_CA: "/receipt-and-collection/partner-ca/view",
+  CREATE_PARTNER_CA: "/receipt-and-collection/partner-ca/create",
+  UPDATE_PARTNER_CA: "/receipt-and-collection/partner-ca/update",
 };

@@ -9,7 +9,12 @@ import {
   getPositionEmployee,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/digitalSignature";
 
-const DigitalSignatureSectionForm = ({ type, form }) => {
+const DigitalSignatureSectionForm = ({
+  type,
+  form,
+  onSignatureFileChange,
+  fileId,
+}) => {
   const dispatch = useDispatch();
   const { data_list_employee, data_position_employee, loading } = useSelector(
     (state) => state.digitalSignature
@@ -56,7 +61,7 @@ const DigitalSignatureSectionForm = ({ type, form }) => {
       try {
         await dispatch(getPositionEmployee({ employeeCode: value })).unwrap();
       } catch (error) {
-        console.error("Failed to fetch employee position:", error);
+        // Error fetching employee position
       } finally {
         setLoadingEmployee(false);
       }
@@ -77,6 +82,23 @@ const DigitalSignatureSectionForm = ({ type, form }) => {
     form.setFieldsValue({
       signatureMethod: method,
     });
+  };
+
+  // Handle signature base64 value change (for DRAW method only)
+  const handleSignatureBase64Change = (value) => {
+    // Update signatureBase64 field untuk DRAW method
+    if (typeof value === "string" && value.includes("data:image")) {
+      form.setFieldsValue({
+        signatureBase64: value,
+      });
+    }
+  };
+
+  // Handle signature file change (for UPLOAD method)
+  const handleSignatureFileChange = (file) => {
+    if (onSignatureFileChange) {
+      onSignatureFileChange(file);
+    }
   };
 
   return (
@@ -142,25 +164,33 @@ const DigitalSignatureSectionForm = ({ type, form }) => {
             </Form.Item>
 
             {/* Hidden field for signature method */}
-            <Form.Item name="signatureMethod" hidden>
+            <Form.Item name="signatureMethod" hidden initialValue="DRAW">
               <input type="hidden" />
             </Form.Item>
 
-            {/* Signature Section */}
-            <Form.Item
-              label="Signature"
-              name="signatureBase64"
-              rules={[
-                {
-                  required: true,
-                  message: "Please provide your signature!",
-                },
-              ]}
-            >
-              <SignatureComponent
-                onMethodChange={handleSignatureMethodChange}
-              />
+            {/* Hidden field for base64 signature (used by DRAW method) */}
+            <Form.Item name="signatureBase64" hidden>
+              <input type="hidden" />
             </Form.Item>
+
+            {/* Signature field - Manual control without Form.Item wrapper */}
+            <div className="ant-row ant-form-item">
+              <div className="ant-col ant-form-item-label">
+                <label>Signature</label>
+              </div>
+              <div className="ant-col ant-form-item-control">
+                <SignatureComponent
+                  value={form.getFieldValue("signature")}
+                  onChange={(value) => {
+                    form.setFieldsValue({ signature: value });
+                  }}
+                  onMethodChange={handleSignatureMethodChange}
+                  onFileChange={handleSignatureFileChange}
+                  onBase64Change={handleSignatureBase64Change}
+                  fileId={fileId}
+                />
+              </div>
+            </div>
           </div>
         </Spin>
       </BaseContainer>

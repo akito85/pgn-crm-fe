@@ -9,6 +9,8 @@ import RadioTabs from "../../../../../../components/RadioTabs";
 const ConfirmationDigitalSignature = ({
   isOpen,
   data,
+  uploadedSignatureFile,
+  signatureFileId,
   selectedHierarchy,
   listDataAppHierDetail = [],
   listDataAttachment = [],
@@ -18,10 +20,10 @@ const ConfirmationDigitalSignature = ({
   dataOption = [],
 }) => {
   // State
-  const [valuePage, setValuePage] = useState("Efaktur Code");
+  const [valuePage, setValuePage] = useState("Digital Signature");
 
   const [tabPages, setTabPages] = useState([
-    { value: "Efaktur Code" },
+    { value: "Digital Signature" },
     { value: "Approval" },
     { value: "Attachment" },
   ]);
@@ -29,13 +31,17 @@ const ConfirmationDigitalSignature = ({
   // Rendering Section
   const renderSection = (valuePage) => {
     switch (valuePage) {
-      case "Efaktur Code":
+      case "Digital Signature":
         return (
           <div>
             <p className="text-primary text-xs font-bold uppercase pt-[30px]">
-              {"EFAKTUR CODE INFORMATION"}
+              {"Digital Signature INFORMATION"}
             </p>
-            <DigitalSignatureInfo data={data} />
+            <DigitalSignatureInfo
+              data={data}
+              uploadedSignatureFile={uploadedSignatureFile}
+              signatureFileId={signatureFileId}
+            />
           </div>
         );
       case "Approval":
@@ -74,9 +80,13 @@ const ConfirmationDigitalSignature = ({
         return (
           <div>
             <p className="text-primary text-xs font-bold uppercase pt-[30px]">
-              {"EFAKTUR CODE INFORMATION"}
+              {"Digital Signature INFORMATION"}
             </p>
-            <DigitalSignatureInfo data={data} />
+            <DigitalSignatureInfo
+              data={data}
+              uploadedSignatureFile={uploadedSignatureFile}
+              signatureFileId={signatureFileId}
+            />
           </div>
         );
     }
