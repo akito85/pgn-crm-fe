@@ -278,7 +278,7 @@ export const updateDigitalSignature = createAsyncThunk(
   async ({ body }, thunkApi) => {
     try {
       const url = `/v1/dbs/api/signature/update`;
-      const response = await ratingBillingHttpService.updateData(url, body);
+      const response = await ratingBillingHttpService.createData(url, body);
       const successMessage = {
         title: "Successful",
         description: `Your data has been ${
@@ -473,7 +473,7 @@ export const getListEmployee = createAsyncThunk(
   async ({ search }, { rejectWithValue }) => {
     try {
       const searchParams = search === undefined ? "" : search;
-      const url = `/v1/dbs/api/signature/list-employee?searchs=${searchParams}`;
+      const url = `/v1/dbs/api/signature/list-employee?search=${searchParams}`;
       const response = await ratingBillingHttpService.getAll(url);
       return response.data;
     } catch (err) {

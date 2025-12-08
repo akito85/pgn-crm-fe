@@ -11,34 +11,6 @@ const DigitalSignatureSection = ({
   dataDetailSignature = {},
   dataHistory = {},
 }) => {
-  const dispatch = useDispatch();
-  const { data_position_employee, loading } = useSelector(
-    (state) => state.digitalSignature
-  );
-
-  useEffect(() => {
-    if (dataDetailSignature.employeeCode) {
-      dispatch(
-        getPositionEmployee({ employeeCode: dataDetailSignature.employeeCode })
-      );
-    }
-  }, [dataDetailSignature.employeeCode, dispatch]);
-
-  const renderPosition = () => {
-    if (loading) return "Loading...";
-    if (!data_position_employee || data_position_employee.length === 0)
-      return "-";
-
-    // Jika data_position_employee adalah array
-    if (Array.isArray(data_position_employee)) {
-      return data_position_employee.join(", ");
-    }
-
-    return (
-      data_position_employee.position || data_position_employee.name || "-"
-    );
-  };
-
   return (
     <>
       {/* Efaktur Code Information */}
@@ -50,11 +22,11 @@ const DigitalSignatureSection = ({
             </DetailText>
 
             <DetailText label={"Employee"}>
-              {dataDetailSignature?.employeeCode || "-"}
+              {dataDetailSignature?.employee || "-"}
             </DetailText>
 
             <DetailText label={"Primary Position"}>
-              {renderPosition()}
+              {dataDetailSignature?.primaryPosition || "-"}
             </DetailText>
           </div>
 
@@ -78,8 +50,8 @@ const DigitalSignatureSection = ({
               {dataDetailSignature.signatureBase64 &&
               dataDetailSignature.signatureMethod === "DRAW" ? (
                 <Image
-                  src={dataDetailSignature.signatureBase64}
-                  width={50}
+                  src={`data:image/png;base64,${dataDetailSignature.signatureBase64}`}
+                  width={250}
                   alt="Signature"
                 />
               ) : (

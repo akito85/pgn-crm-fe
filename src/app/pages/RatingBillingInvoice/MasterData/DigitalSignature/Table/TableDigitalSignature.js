@@ -46,11 +46,11 @@ export const columnsDigitalSignature = (
     },
     {
       title: "POSITION",
-      dataIndex: "position",
+      dataIndex: "positionName",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "position",
+        "positionName",
         searchInput,
         searchedColumn,
         searchText,
@@ -58,8 +58,8 @@ export const columnsDigitalSignature = (
       ),
       render: (text) =>
         renderColumn(
-          "position",
-          hasValue(search["position"]),
+          "positionName",
+          hasValue(search["positionName"]),
           searchText,
           text,
           false,
@@ -69,11 +69,11 @@ export const columnsDigitalSignature = (
     },
     {
       title: "EMPLOYEE",
-      dataIndex: "employee",
+      dataIndex: "employeeName",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "employee",
+        "employeeName",
         searchInput,
         searchedColumn,
         searchText,
@@ -81,8 +81,8 @@ export const columnsDigitalSignature = (
       ),
       render: (text) =>
         renderColumn(
-          "employee",
-          hasValue(search["employee"]),
+          "employeeName",
+          hasValue(search["employeeName"]),
           searchText,
           text,
           false,

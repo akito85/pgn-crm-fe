@@ -72,9 +72,9 @@ const DigitalSignatureDetail = () => {
 
   useEffect(() => {
     if (data_detail && Object.keys(data_detail).length > 0) {
-      const signature = data_detail?.["Digital signature"] || {};
+      const signature = data_detail?.digitalSignature || {};
       const attachments = data_detail?.attachments || [];
-      const approvalInfo = data_detail?.["approval information"] || {};
+      const approvalInfo = data_detail?.approvalInformation || {};
 
       // Data Attachment Information
       const mappedAttachment = attachments.map((item, index) => ({
@@ -106,13 +106,14 @@ const DigitalSignatureDetail = () => {
 
       // Set Efaktur Code Data
       setDataDetail({
-        name: signature?.einvoiceCode || "-",
-        employee: signature?.employee || "-",
-        primaryPosition: signature?.primaryPosition || "-",
+        name: signature?.name || "-",
+        employee: signature?.fullName || "-",
+        primaryPosition: signature?.positionName || "-",
         status: signature?.status || "-",
         statusApproval: signature?.statusApproval || "-",
         description: signature?.description || "-",
-        signatureImg: signature?.signatureBase64 || "-",
+        signatureBase64: signature?.signatureBase64 || "-",
+        signatureMethod: signature?.signatureMethod || "-",
       });
 
       setListDataAttachment(mappedAttachment);

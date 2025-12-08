@@ -1,7 +1,7 @@
 import React from "react";
-import CardComponent from "../../../../../components/Card/CardComponent";
-import DetailText from "../../../../../components/DetailText";
 import { Image } from "antd";
+import CardComponent from "../../../../../../components/Card/CardComponent";
+import DetailText from "../../../../../../components/DetailText";
 
 const DigitalSignatureInfo = ({ data }) => {
   return (

@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import EFakturCodeInfo from "./EFakturCodeInfo";
-import FunctionalAdditionalCode from "./FunctionalConditionalCode";
-import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
-import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
-import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import ButtonComponent from "../../../../../components/ButtonComponent";
-import RadioTabs from "../../../../../components/RadioTabs";
+import DigitalSignatureInfo from "./DigitalSignatureInfo";
+import ApprovalComponentGeneral from "../../../../../../components/Approval/ApprovalComponentGeneral";
+import AttachmentComponent from "../../../../../../components/Attachment/AttachmentComponent";
+import ModalCustom from "../../../../../../components/Modal/ModalCustom";
+import ButtonComponent from "../../../../../../components/ButtonComponent";
+import RadioTabs from "../../../../../../components/RadioTabs";
 
 const ConfirmationDigitalSignature = ({
   isOpen,
@@ -36,17 +35,7 @@ const ConfirmationDigitalSignature = ({
             <p className="text-primary text-xs font-bold uppercase pt-[30px]">
               {"EFAKTUR CODE INFORMATION"}
             </p>
-            <EFakturCodeInfo data={data} />
-
-            <p className="text-primary text-xs font-bold uppercase pt-[30px]">
-              {"ADDITIONAL CODE INFORMATION"}
-            </p>
-            <div className="pt-[30px]">
-              <FunctionalAdditionalCode
-                type={"preview"}
-                data={listAdditionalCode}
-              />
-            </div>
+            <DigitalSignatureInfo data={data} />
           </div>
         );
       case "Approval":
@@ -87,17 +76,7 @@ const ConfirmationDigitalSignature = ({
             <p className="text-primary text-xs font-bold uppercase pt-[30px]">
               {"EFAKTUR CODE INFORMATION"}
             </p>
-            <EFakturCodeInfo data={data} />
-
-            <p className="text-primary text-xs font-bold uppercase pt-[30px]">
-              {"ADDITIONAL CODE INFORMATION"}
-            </p>
-            <div className="pt-[30px]">
-              <FunctionalAdditionalCode
-                type={"preview"}
-                data={listAdditionalCode}
-              />
-            </div>
+            <DigitalSignatureInfo data={data} />
           </div>
         );
     }

@@ -172,8 +172,8 @@ const DigitalSignatureView = () => {
 
   const handleOk = (res, handleClear) => {
     const dataValue = {
-      fakturCodeId: chooseId.einvoiceCodeId,
-      apphierId: chooseId.apphierId,
+      signatureId: chooseId.signatureId,
+      apphierId: res.approvalHierarchy,
       remark: res.remark,
     };
     dispatch(inactiveDigitalSignature(dataValue))
@@ -287,7 +287,6 @@ const DigitalSignatureView = () => {
       action: "View",
       type: "table",
       render: (record) => {
-        console.log(record);
         return (
           <Link
             to={RBI_ROUTES.DIGITAL_SIGNATURE_DETAIL}
@@ -310,7 +309,7 @@ const DigitalSignatureView = () => {
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED" ||
           (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
-
+        console.log("sigID: ", record.signatureId);
         const linkContent =
           data > 3 ? (
             <ButtonComponent
@@ -423,7 +422,7 @@ const DigitalSignatureView = () => {
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
               border={false}
-              onClick={() => handleApprovalHistory(record.digitalSignatureId)}
+              onClick={() => handleApprovalHistory(record.signatureId)}
             >
               <span className={"text-black ml-3"}>Approval History</span>
             </ButtonComponent>
@@ -434,9 +433,7 @@ const DigitalSignatureView = () => {
                   name="IconLogHistory"
                   color={"#0075bf"}
                   width={24}
-                  onClick={() =>
-                    handleApprovalHistory(record.digitalSignatureId)
-                  }
+                  onClick={() => handleApprovalHistory(record.signatureId)}
                 />
               </div>
             </Tooltip>
