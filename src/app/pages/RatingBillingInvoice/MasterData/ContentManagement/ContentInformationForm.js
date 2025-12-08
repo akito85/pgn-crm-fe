@@ -93,7 +93,7 @@ const ContentInformationForm = ({ form, type, status, statusApproval }) => {
             <Form.Item
               label={
                 <span className="font-medium">
-                  Subject <span className="text-red-500">*</span>
+                  Subject
                 </span>
               }
               name="subject"
@@ -105,7 +105,7 @@ const ContentInformationForm = ({ form, type, status, statusApproval }) => {
               ]}
             >
               <Input
-                placeholder="Billing Suvidha {billingPeriod}: {customerName}: {customerNumber}"
+                placeholder="Billing {billingPeriod}: {customerName}: {customerNumber}"
                 disabled={status === "view" || statusApproval === "view"}
                 className="rounded-md"
                 size="large"
@@ -170,18 +170,6 @@ const ContentInformationForm = ({ form, type, status, statusApproval }) => {
                     </Editor>
                   </EditorProvider>
                 </Form.Item>
-
-                {/* Helper text */}
-                <div className="text-xs text-gray-500 mt-2 space-y-1">
-                  <p>
-                    1. Informasi tagihan PGN dapat diakses di aplikasi PGN Mobile
-                    atau dapat diunduh melalui tagihan PGN.
-                  </p>
-                  <p>
-                    2. Apabila status tagihan pada saat jatuh tempo belum terbayar,
-                    maka Anda dapat melakukan pembayaran tagihan melalui channel pembayaran yang tersedia.
-                  </p>
-                </div>
               </div>
 
               {/* Variable Sidebar - FIXED STYLING */}
