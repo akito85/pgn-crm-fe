@@ -73,6 +73,8 @@ const DigitalSignatureForm = ({ type }) => {
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [bodyData, setBodyData] = useState({});
+  const [uploadedSignatureFile, setUploadedSignatureFile] = useState(null);
+  const [signatureFileId, setSignatureFileId] = useState(null);
 
   const isLoading = loading || loadingForm;
 
@@ -99,7 +101,7 @@ const DigitalSignatureForm = ({ type }) => {
       const approvalInformation = data_detail?.approvalInformation || {};
       const attachments = data_detail?.attachments || [];
 
-      // Data Attachment Information - mapping dari attachments
+      // Data Attachment Information
       const mappedAttachment = attachments.map((item, index) => ({
         id: item.id || index,
         size: item.size || 0,
@@ -118,7 +120,24 @@ const DigitalSignatureForm = ({ type }) => {
         dataType: "exist",
       }));
 
-      // Set form values dari digital signature
+      // Set fileId jika ada
+      if (signature?.fileId) {
+        setSignatureFileId(signature.fileId);
+      }
+
+      // Determine signature value based on method
+      // PENTING: Harus ada value agar validasi pass
+      let signatureValue = null;
+      if (signature?.signatureMethod === "UPLOAD" && signature?.fileId) {
+        signatureValue = `EXISTING_FILE_${signature.fileId}`; // Use placeholder for uploaded signatures
+      } else if (
+        signature?.signatureMethod === "DRAW" &&
+        signature?.signatureBase64
+      ) {
+        signatureValue = signature.signatureBase64; // Use base64 for drawn signatures
+      }
+
+      // Set form values
       form.setFieldsValue({
         name: signature?.name || "",
         employeeCode: signature?.employeeCode || "",
@@ -126,11 +145,17 @@ const DigitalSignatureForm = ({ type }) => {
         description: signature?.description || "",
         signatureBase64: signature?.signatureBase64 || "",
         signatureMethod: signature?.signatureMethod || "DRAW",
+        signature: signatureValue, // This is the main field for validation
         apphierId:
           approvalInformation?.approvalHierarchy ||
           signature?.approvalHierarchy ||
           null,
       });
+
+      // Validate signature field to clear any errors
+      setTimeout(() => {
+        form.validateFields(["signature"]).catch(() => {});
+      }, 100);
 
       setSelectedHierarchy(
         approvalInformation?.approvalHierarchy || signature?.approvalHierarchy
@@ -200,40 +225,6 @@ const DigitalSignatureForm = ({ type }) => {
     },
   ];
 
-  // Helper function to convert base64 to File
-  const convertBase64ToFile = (base64Data, fileName = "signature.png") => {
-    try {
-      // Extract base64 string (remove prefix if exists)
-      const base64String = base64Data.includes(",")
-        ? base64Data.split(",")[1]
-        : base64Data;
-
-      // Extract MIME type
-      const mimeMatch = base64Data.match(/data:([^;]+);/);
-      const mimeString = mimeMatch ? mimeMatch[1] : "image/png";
-
-      // Convert to binary
-      const byteString = atob(base64String);
-      const ab = new ArrayBuffer(byteString.length);
-      const ia = new Uint8Array(ab);
-      for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-      }
-
-      // Create blob and file
-      const blob = new Blob([ab], { type: mimeString });
-      const fileExtension = mimeString.split("/")[1] || "png";
-      const file = new File([blob], `${fileName}.${fileExtension}`, {
-        type: mimeString,
-      });
-
-      return file;
-    } catch (error) {
-      console.error("Error converting base64 to file:", error);
-      throw error;
-    }
-  };
-
   // Helper function to clean base64 string
   const cleanBase64String = (base64Data) => {
     if (!base64Data) return "";
@@ -244,11 +235,8 @@ const DigitalSignatureForm = ({ type }) => {
   const processDataUpdate = ({ bodyData, flag, id }) => {
     const positionId = data_position_employee?.positionId || null;
     const signatureMethod = bodyData.signatureMethod || "DRAW";
-
-    // Clean base64 string
     const signatureBase64Clean = cleanBase64String(bodyData.signatureBase64);
 
-    // Prepare JSON data
     const jsonData = {
       id: id,
       name: bodyData.name,
@@ -261,18 +249,17 @@ const DigitalSignatureForm = ({ type }) => {
       isSubmit: flag,
     };
 
-    // Create FormData
+    // Tambahkan fileId jika ada (untuk update tanpa upload file baru)
+    if (signatureFileId && !uploadedSignatureFile) {
+      jsonData.fileId = signatureFileId;
+    }
+
     const formData = new FormData();
     formData.append("data", JSON.stringify(jsonData));
 
-    // Add file only if method is UPLOAD
-    if (signatureMethod === "UPLOAD" && bodyData.signatureBase64) {
-      try {
-        const file = convertBase64ToFile(bodyData.signatureBase64, "signature");
-        formData.append("file", file);
-      } catch (error) {
-        console.error("Error processing file for update:", error);
-      }
+    // Add file only for UPLOAD method with new file
+    if (signatureMethod === "UPLOAD" && uploadedSignatureFile) {
+      formData.append("file", uploadedSignatureFile);
     }
 
     return formData;
@@ -282,11 +269,8 @@ const DigitalSignatureForm = ({ type }) => {
   const processDataCreate = ({ bodyData, flag }) => {
     const positionId = data_position_employee?.positionId || null;
     const signatureMethod = bodyData.signatureMethod || "DRAW";
-
-    // Clean base64 string
     const signatureBase64Clean = cleanBase64String(bodyData.signatureBase64);
 
-    // Prepare JSON data
     const jsonData = {
       name: bodyData.name,
       employeeCode: bodyData.employeeCode,
@@ -298,18 +282,16 @@ const DigitalSignatureForm = ({ type }) => {
       isSubmit: flag,
     };
 
-    // Create FormData
     const formData = new FormData();
     formData.append("data", JSON.stringify(jsonData));
 
-    // Add file only if method is UPLOAD
-    if (signatureMethod === "UPLOAD" && bodyData.signatureBase64) {
-      try {
-        const file = convertBase64ToFile(bodyData.signatureBase64, "signature");
-        formData.append("file", file);
-      } catch (error) {
-        console.error("Error processing file for create:", error);
-      }
+    // Add file only for UPLOAD method
+    if (signatureMethod === "UPLOAD" && uploadedSignatureFile) {
+      formData.append("file", uploadedSignatureFile);
+    } else if (signatureMethod === "UPLOAD" && !uploadedSignatureFile) {
+      console.warn(
+        "⚠️ [DigitalSignatureForm] UPLOAD method selected but no file attached!"
+      );
     }
 
     return formData;
@@ -322,11 +304,8 @@ const DigitalSignatureForm = ({ type }) => {
         ? "/v1/dbs/api/signature/validate-create"
         : "/v1/dbs/api/signature/validate-update";
 
-    // Prepare JSON data payload
     const positionId = data_position_employee?.positionId || null;
     const signatureMethod = formValue.signatureMethod || "DRAW";
-
-    // Clean base64 string
     const signatureBase64Clean = cleanBase64String(formValue.signatureBase64);
 
     const jsonData = {
@@ -341,34 +320,30 @@ const DigitalSignatureForm = ({ type }) => {
       isSubmit: flag,
     };
 
-    // Create FormData for multipart/form-data
+    // Tambahkan fileId untuk update dengan file existing
+    if (type === "update" && signatureFileId && !uploadedSignatureFile) {
+      jsonData.fileId = signatureFileId;
+    }
+
     const formData = new FormData();
     formData.append("data", JSON.stringify(jsonData));
 
-    // Add 'file' only if method is UPLOAD
-    if (signatureMethod === "UPLOAD" && formValue.signatureBase64) {
-      try {
-        const file = convertBase64ToFile(
-          formValue.signatureBase64,
-          "signature"
-        );
-        formData.append("file", file);
-      } catch (error) {
-        console.error("Error converting base64 to file:", error);
-        const errorBody = {
-          title: "Failed",
-          description: "Failed to process signature file. Please try again.",
-        };
-        dispatch(showModalError(errorBody));
-        return false;
-      }
+    // Add file only for UPLOAD method with new file
+    if (signatureMethod === "UPLOAD" && uploadedSignatureFile) {
+      formData.append("file", uploadedSignatureFile);
+    } else if (signatureMethod === "UPLOAD" && !uploadedSignatureFile) {
+      console.error(
+        "❌ [DigitalSignatureForm] Validation: UPLOAD method but NO FILE!"
+      );
+      console.error("❌ uploadedSignatureFile state:", uploadedSignatureFile);
     }
 
     try {
-      const response = await ratingBillingHttpService.createData(url, formData);
+      await ratingBillingHttpService.createData(url, formData);
+
       return true;
     } catch (error) {
-      // Handle validation error
+      console.error("❌ [DigitalSignatureForm] Validation failed:", error);
       if (error?.response?.data) {
         const message = error.response.data.message || "Validation failed";
         const errorBody = {
@@ -379,6 +354,11 @@ const DigitalSignatureForm = ({ type }) => {
       }
       return false;
     }
+  };
+
+  // Handle signature file change
+  const handleSignatureFileChange = (file) => {
+    setUploadedSignatureFile(file);
   };
 
   // Handle Save Form
@@ -394,7 +374,7 @@ const DigitalSignatureForm = ({ type }) => {
       };
       dispatch(showModalError(errorBody));
     } else {
-      handleMandatory(setListSectionInfo, setListSectionInfo);
+      handleMandatory(setListSectionInfo, listDataAttachment);
 
       if (storedDataInline) {
         errorBody = {
@@ -406,9 +386,7 @@ const DigitalSignatureForm = ({ type }) => {
         const isDataValid = await checkDataValidity(formValue);
 
         if (isDataValid) {
-          setBodyData({
-            ...formValue,
-          });
+          setBodyData({ ...formValue });
           setModalConfirm(true);
           setListSectionInfo([
             {
@@ -429,11 +407,7 @@ const DigitalSignatureForm = ({ type }) => {
     setModalConfirm(false);
 
     if (type === "create") {
-      // Create menggunakan FormData (multipart)
-      const body = processDataCreate({
-        bodyData,
-        flag,
-      });
+      const body = processDataCreate({ bodyData, flag });
 
       dispatch(createDigitalSignature({ body: body }))
         .unwrap()
@@ -466,11 +440,7 @@ const DigitalSignatureForm = ({ type }) => {
           }
         });
     } else {
-      const body = processDataUpdate({
-        bodyData,
-        flag,
-        id,
-      });
+      const body = processDataUpdate({ bodyData, flag, id });
 
       dispatch(updateDigitalSignature({ body: body, id }))
         .unwrap()
@@ -537,7 +507,6 @@ const DigitalSignatureForm = ({ type }) => {
     });
   };
 
-  // Handle Error Tab Form
   const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setListSectionInfo, listDataAttachment, errorFields);
   };
@@ -550,6 +519,8 @@ const DigitalSignatureForm = ({ type }) => {
       setListDataAttachment([]);
       setBodyData({});
       setStoredDataInline(false);
+      setUploadedSignatureFile(null);
+      setSignatureFileId(null);
       setListSectionInfo([
         {
           value: "Digital Signature",
@@ -560,6 +531,8 @@ const DigitalSignatureForm = ({ type }) => {
       ]);
     } else {
       dispatch(getDetailDigitalSignature(id));
+      setUploadedSignatureFile(null);
+      // FileId akan di-reset dari data detail yang di-fetch ulang
     }
   };
 
@@ -594,7 +567,12 @@ const DigitalSignatureForm = ({ type }) => {
           <div
             className={`${valuePage !== "Digital Signature" ? "hidden" : ""}`}
           >
-            <DigitalSignatureSectionForm type={type} form={form} />
+            <DigitalSignatureSectionForm
+              type={type}
+              form={form}
+              fileId={signatureFileId}
+              onSignatureFileChange={handleSignatureFileChange}
+            />
           </div>
 
           <div className={valuePage !== "Approval" ? "hidden" : ""}>
@@ -682,10 +660,11 @@ const DigitalSignatureForm = ({ type }) => {
           </div>
         </Form>
 
-        {/* Modal Confirmation */}
         <ConfirmationDigitalSignature
           isOpen={modalConfirm}
           data={bodyData}
+          uploadedSignatureFile={uploadedSignatureFile}
+          signatureFileId={signatureFileId}
           selectedHierarchy={selectedHierarchy}
           listDataAppHierDetail={appHierDataDetail}
           listDataAttachment={listDataAttachment}
@@ -694,14 +673,12 @@ const DigitalSignatureForm = ({ type }) => {
           handleConfirm={() => handleConfirm()}
         />
 
-        {/* Modal Back */}
         <ModalBack
           isOpen={modalBack}
           handleCancel={() => setModalBack(false)}
           handleOk={() => navigate(-1)}
         />
 
-        {/* Modal Retry */}
         <ModalError
           isOpen={modalError}
           handleOk={handleRetry}
