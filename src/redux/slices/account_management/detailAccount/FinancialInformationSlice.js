@@ -644,7 +644,7 @@ export const approveOrRejectPaymentRelation = createAsyncThunk(
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${body?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
+        description: `Your data has been ${body?.action === "APPROVE" ? 'approved' : 'rejected'}.`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
@@ -659,13 +659,13 @@ export const approveOrRejectPaymentRelation = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
+          description: `Your data was not ${body?.action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       } else {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body?.action === "DRAFT" ? 'drafted' : 'submitted'}. An unknown error occured.`
+          description: `Your data was not ${body?.action === "APPROVED" ? 'approved' : 'rejected'}. An unknown error occured.`
         }
         thunkAPI.dispatch(showModalError(errorBody));
       }
