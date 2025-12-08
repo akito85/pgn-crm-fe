@@ -15,8 +15,9 @@ import { dateFormatting } from "../../../../../../../../utils";
 import { getAccountStandardDetail, getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import DetailText from "../../../../../../../../components/DetailText";
-import { getDetailPaymentRelation, getPaymentRelationAttachment, approveOrRejectPaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { getDetailPaymentRelation, getPaymentRelationAttachment, approveOrRejectPaymentRelation, approveOrRejectInactivePaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import ModalApproveOrReject from "../../../../../../../../components/Modal/ModalApproveOrReject";
+import { showModalError } from "../../../../../../../../redux/slices/general_slice";
 
 const tabs = [
   { value: "Service Request" },
@@ -126,16 +127,36 @@ const PaymentRelationDetails = ({
         description,
       }];
 
-      dispatch(approveOrRejectPaymentRelation({
-        body,
-      }))
-      .unwrap()
-      .then(() => {
-        dispatch(getDetailPaymentRelation(idPr));
-        handleClear();
-        handleApprovalModal(false);
-      })
-      .catch(() => {});
+      if (result.approvalType === "PAYMENT_RELATION") {
+        dispatch(approveOrRejectPaymentRelation({
+          body,
+        }))
+        .unwrap()
+        .then(() => {
+          dispatch(getDetailPaymentRelation(idPr));
+          handleClear();
+          handleApprovalModal(false);
+        })
+        .catch(() => {});
+      } else if (result.approvalType === "INACTIVE_PAYMENT_RELATION") {
+        dispatch(approveOrRejectInactivePaymentRelation({
+          body,
+        }))
+        .unwrap()
+        .then(() => {
+          dispatch(getDetailPaymentRelation(idPr));
+          handleClear();
+          handleApprovalModal(false);
+        })
+        .catch(() => {});
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `The approval type is invalid.`,
+        };
+
+        dispatch(showModalError(errorBody));
+      }
     }
   }
 
