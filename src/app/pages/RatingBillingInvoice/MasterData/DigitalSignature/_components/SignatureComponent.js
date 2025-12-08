@@ -1,18 +1,33 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Modal, Button, Upload, Progress, Radio, message } from "antd";
 import SignatureCanvas from "react-signature-canvas";
 import { EyeOutlined } from "@ant-design/icons";
 
-const SignatureComponent = ({ value, onChange }) => {
+const SignatureComponent = ({ value, onChange, onMethodChange }) => {
   const [signatureType, setSignatureType] = useState("draw");
+  const [signatureMethod, setSignatureMethod] = useState("DRAW");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [signatureData, setSignatureData] = useState(value || null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const sigCanvas = useRef(null);
 
+  // Update signatureData when value prop changes (for update mode)
+  useEffect(() => {
+    if (value) {
+      setSignatureData(value);
+    }
+  }, [value]);
+
   const handleRadioChange = (e) => {
-    setSignatureType(e.target.value);
+    const type = e.target.value;
+    setSignatureType(type);
+    const method = type === "draw" ? "DRAW" : "UPLOAD";
+    setSignatureMethod(method);
+    // Notify parent about method change
+    if (onMethodChange) {
+      onMethodChange(method);
+    }
   };
 
   const handleDrawClick = () => {
@@ -29,21 +44,20 @@ const SignatureComponent = ({ value, onChange }) => {
 
   const handleSave = () => {
     if (sigCanvas.current) {
-      // Check if canvas is empty
       if (sigCanvas.current.isEmpty()) {
         message.warning("Please draw your signature first!");
         return;
       }
 
-      // Get canvas data directly without trimming first
       const canvas = sigCanvas.current.getCanvas();
       const base64Data = canvas.toDataURL("image/png");
 
-      // Log to console
-      console.log("Signature Base64:", base64Data);
-
       setSignatureData(base64Data);
+      setSignatureMethod("DRAW");
       onChange && onChange(base64Data);
+      if (onMethodChange) {
+        onMethodChange("DRAW");
+      }
       setIsModalVisible(false);
       message.success("Signature saved successfully!");
     }
@@ -54,11 +68,20 @@ const SignatureComponent = ({ value, onChange }) => {
   };
 
   const beforeUpload = (file) => {
-    const isPNG = file.type === "image/png";
-    if (!isPNG) {
-      message.error("You can only upload PNG files!");
+    // Check file type - hanya accept gambar
+    const isImage = file.type.startsWith("image/");
+    if (!isImage) {
+      message.error("You can only upload image files!");
       return false;
     }
+
+    // Check file size - maksimal 5MB
+    const isLt5M = file.size / 1024 / 1024 < 5;
+    if (!isLt5M) {
+      message.error("Image must be smaller than 5MB!");
+      return false;
+    }
+
     return true;
   };
 
@@ -91,11 +114,12 @@ const SignatureComponent = ({ value, onChange }) => {
         setUploadProgress(100);
         const base64Data = e.target.result;
 
-        // Log to console
-        console.log("Uploaded File Base64:", base64Data);
-
         setSignatureData(base64Data);
+        setSignatureMethod("UPLOAD");
         onChange && onChange(base64Data);
+        if (onMethodChange) {
+          onMethodChange("UPLOAD");
+        }
 
         setTimeout(() => {
           setIsUploading(false);
@@ -118,7 +142,11 @@ const SignatureComponent = ({ value, onChange }) => {
         content: (
           <div className="flex justify-center items-center p-4">
             <img
-              src={signatureData}
+              src={
+                signatureData.includes("data:image")
+                  ? signatureData
+                  : `data:image/png;base64,${signatureData}`
+              }
               alt="Signature"
               style={{ maxWidth: "100%", border: "1px solid #d9d9d9" }}
             />
@@ -137,7 +165,7 @@ const SignatureComponent = ({ value, onChange }) => {
           </Radio.Button>
           <Radio.Button value="upload">
             <Upload
-              accept=".png"
+              accept="image/*"
               beforeUpload={beforeUpload}
               customRequest={handleUpload}
               showUploadList={false}
@@ -155,7 +183,7 @@ const SignatureComponent = ({ value, onChange }) => {
             onClick={handleViewSignature}
             className="text-gray-500"
           >
-            uploaded
+            {signatureType === "draw" ? "drawn" : "uploaded"}
           </Button>
         )}
       </div>
