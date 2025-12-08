@@ -64,18 +64,10 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         break;
 
       // ===== WAITING/PENDING STATUSES =====
-      case "waiting":
-      case "waiting approval":
-      case "waiting_approval":
       case "partial payment":
       case "waiting to release":
-      case "awaiting_approval":
-      case "awaiting approval":
       case "need review": // ✅ Billing status
-      case "waiting_cancellation_approval": // ✅ E-Faktur: Waiting for cancellation approval
-      case "waiting cancellation approval":
-      case "waiting_upload_approval": // ✅ E-Faktur: Waiting for upload approval
-      case "waiting upload approval":
+
         bgColor = "status-waiting";
         tColor = "text-yellow-700";
         break;
@@ -83,15 +75,24 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       // ===== PROCESSING STATUSES =====
       case "in progress":
       case "inprogress":
-      case "processing": // ✅ E-Faktur: Being processed
-      case "submitted": // ✅ E-Faktur: Submitted to DJP
-        bgColor = "bg-yellow-500";
+      case "awaiting_approval":
+      case "awaiting approval":
+      case "processing":
+      case "submitted": 
+      case "waiting":
+      case "waiting approval":
+      case "waiting_approval":
+      case "waiting_cancellation_approval":
+      case "waiting cancellation approval":
+      case "waiting_upload_approval":
+      case "waiting upload approval":
+        bgColor = "bg-[#f57c00]";
         tColor = "text-white";
         break;
 
       // ===== DRAFT STATUSES =====
       case "draft":
-      case "not_generated": // ✅ E-Faktur: Not generated yet
+      case "not_generated":
       case "not generated":
         bgColor = "bg-gray-600";
         tColor = "text-white";
@@ -102,7 +103,6 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         tColor = "text-white";
         break;
 
-      // ===== CANCELLED/EXPIRED STATUSES =====
       case "expire":
         bgColor = "status-expire";
         tColor = "text-red-700";
@@ -202,12 +202,12 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         break;
 
       // ===== E-FAKTUR TYPE STATUSES =====
-      case "normal": // ✅ E-Faktur Type: Normal
+      case "normal":
         bgColor = "bg-blue-100";
         tColor = "text-blue-800";
         break;
 
-      case "replacement": // ✅ E-Faktur Type: Replacement
+      case "replacement":
         bgColor = "bg-orange-100";
         tColor = "text-orange-800";
         break;
@@ -215,18 +215,18 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "cancellation":
       case "replaced":
         case "cancelled": 
-        case "CANCELLED":// ✅ E-Faktur Type: Cancellation
+        case "CANCELLED":
         bgColor = "bg-red-100";
         tColor = "text-red-800";
         break;
 
-      case "manual_upload": // ✅ E-Faktur Type: Manual Upload
+      case "manual_upload": 
       case "manual upload":
         bgColor = "bg-purple-100";
         tColor = "text-purple-800";
         break;
 
-      case "latest": // ✅ Replacement status: Latest replacement faktur
+      case "latest":
         bgColor = "bg-green-100";
         tColor = "text-green-800";
         break;
@@ -247,9 +247,10 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "sent":
       case "approved":
       case "paid":
+      case "complete":
       case "success_upload":
       case "latest":
-      case "standard": // ✅ E-Faktur success
+      case "standard":
         return <CheckCircleFilled style={{ fontSize: "15px" }} />;
 
       // ===== PROCESSING ICONS =====
@@ -258,9 +259,6 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "inprogress":
       case "processing": // ✅ E-Faktur processing
       case "submitted": // ✅ E-Faktur submitted
-        return <Loading3QuartersOutlined style={{ fontSize: "15px" }} />;
-
-      // ===== WAITING ICONS =====
       case "waiting approval":
       case "waiting_approval":
       case "awaiting_approval":
@@ -269,7 +267,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "waiting cancellation approval":
       case "waiting_upload_approval": // ✅ E-Faktur
       case "waiting upload approval":
-        return <HourglassOutlined style={{ fontSize: "15px" }} />;
+        return <Loading3QuartersOutlined style={{ fontSize: "15px" }} />;
 
       // ===== FAILED ICONS =====
       case "failed":

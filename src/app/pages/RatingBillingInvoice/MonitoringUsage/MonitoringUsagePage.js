@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import { Spin, Tooltip } from "antd";
+import { Spin, Tooltip, Tabs } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import { useMonitoringList } from "./useMonirotingList";
@@ -10,7 +10,6 @@ import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
-import RadioTabs from "../../../../components/RadioTabs";
 import TableRBI from "../../../../components/TableRBI";
 import ModalApprovalUsage from "./ModalApprovalUsage";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
@@ -18,17 +17,6 @@ import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import CardContainer from "../../../../components/CardContainer";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
-
-const dataTabs = [
-  {
-    key: "usageList",
-    value: "Usage List",
-  },
-  {
-    key: "batchList",
-    value: "Batch List",
-  },
-];
 
 const MonitoringUsagePage = () => {
   // Selector
@@ -80,9 +68,9 @@ const MonitoringUsagePage = () => {
       path &&
       path?.pathname?.includes("/rating-billing/monitoring-usage/view")
     ) {
-      setTabHeader(dataTabs[1].value);
+      setTabHeader("Batch List");
     } else {
-      setTabHeader(dataTabs[0].value);
+      setTabHeader("Usage List");
     }
   }, [path]);
 
@@ -114,18 +102,20 @@ const MonitoringUsagePage = () => {
     setPageSize(sizeChange);
   };
 
-  // onchang tabs
-  const changeTabHeader = useCallback((e) => {
-    setTabHeader(e.target.value);
-    setPage(1);
-    setPageSize(10);
-    setSearch({})
-    setSort('')
-    setSearchText("")
-    setSearchedColumn('')
-    setSearch({});
-    onSort("", "", "")
-  }, [onSort, setPage, setPageSize, setSearch, setSearchText, setSearchedColumn, setSort]);
+  // onchange tabs
+  const changeTab = (key) => {
+    setTabHeader((prevState) => {
+      if (prevState !== key) {
+        setPage(1);
+        setPageSize(10);
+        setSearch({});
+        setSort('');
+        setSearchText("");
+        setSearchedColumn('');
+      }
+      return key;
+    });
+  };
 
   const routes = [
     {
@@ -140,34 +130,19 @@ const MonitoringUsagePage = () => {
 
   const tableScroll = (tabHeader) => {
     if (tabHeader === "Usage List") {
-      return { x: 5000, y: 525 };
+      return { x: 8000, y: 525 };
     } else {
-      return { x: 1500, y: 525 };
+      return { x: 1000, y: 525 };
     }
   };
 
   const grantAccessButton = [
     {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          type={"submit"}
-          border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          onClick={() => {
-            handleDownload();
-          }}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
-    {
       action: "Approval",
       render: (
         <ButtonComponent
           icon={
-            <SVGIcon name="IconRequestApproval" color={"#FFFFFF"} width={24} />
+            <SVGIcon name="IconRequestApproval" color={"#FFFFFF"} width={20} />
           }
           type={"submit"}
           border={false}
@@ -204,14 +179,12 @@ const MonitoringUsagePage = () => {
       render: (record) => {
         return (
           <Tooltip title="Approval History">
-            <div className="pt-0">
               <SVGIcon
                 name="IconLogHistory"
                 color={"#0075bf"}
-                width={24}
+                width={20}
                 onClick={() => handleApprovalHistory(record)}
               />
-            </div>
           </Tooltip>
         );
       },
@@ -229,9 +202,7 @@ const MonitoringUsagePage = () => {
             state={{ id: record?.batchId }}
           >
             <Tooltip title="Detail">
-              <div className="pt-0">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
+                <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         );
@@ -264,7 +235,6 @@ const MonitoringUsagePage = () => {
     const columnsWithKeys = [...baseColumns, ...actionColumns].map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
-      // Ensure width is set for all columns, use default if not specified
       width: col.width || 150,
     }));
     
@@ -314,29 +284,53 @@ const MonitoringUsagePage = () => {
             </div>
           }
         >
-          <RadioTabs
-            data={dataTabs}
-            onChange={changeTabHeader}
-            currentPosition={tabHeader}
-          />
-          <div className="my-5">
-            <TableRBI
-              totalData={handleList(tabHeader)?.page?.totalElements}
-              dataSource={handleList(tabHeader)?.result}
-              columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              tableScrolled={tableScroll(tabHeader)}
-              onChange={onChangePage}
-              onSizeChanger={onChangePage}
-              onSort={onSort}
-              showExport={false}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
-            />
-          </div>
+          <Tabs
+            activeKey={tabHeader}
+            onChange={changeTab}
+            type="line"
+            size="small"
+          >
+            <Tabs.TabPane tab="Usage List" key="Usage List">
+              <div className="my-5">
+                <TableRBI
+                  totalData={handleList(tabHeader)?.page?.totalElements}
+                  dataSource={handleList(tabHeader)?.result}
+                  columns={processedColumns}
+                  current={page}
+                  pageSize={pageSize}
+                  tableScrolled={tableScroll(tabHeader)}
+                  onChange={onChangePage}
+                  onSizeChanger={onChangePage}
+                  onSort={onSort}
+                  columnDefinitions={columnDefinitions}
+                  fixedColumns={fixedColumns}
+                  setFixedColumns={setFixedColumns}
+                  loading={loading}
+                  handleDownload={handleDownload}
+                />
+              </div>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab="Batch List" key="Batch List">
+              <div className="my-5">
+                <TableRBI
+                  totalData={handleList(tabHeader)?.page?.totalElements}
+                  dataSource={handleList(tabHeader)?.result}
+                  columns={processedColumns}
+                  current={page}
+                  pageSize={pageSize}
+                  tableScrolled={tableScroll(tabHeader)}
+                  onChange={onChangePage}
+                  onSizeChanger={onChangePage}
+                  onSort={onSort}
+                  columnDefinitions={columnDefinitions}
+                  fixedColumns={fixedColumns}
+                  setFixedColumns={setFixedColumns}
+                  loading={loading}
+                  handleDownload={handleDownload}
+                />
+              </div>
+            </Tabs.TabPane>
+          </Tabs>
         </CardContainer>
       </LayoutMenu>
 
