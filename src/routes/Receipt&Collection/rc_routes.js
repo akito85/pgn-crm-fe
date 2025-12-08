@@ -58,7 +58,10 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
 
   //bridge
   VIEW_BRIDGE: "/receipt-and-collection/bridge",
-  
+
+  //transaction log
+  VIEW_TRANSACTION_LOG: "/receipt-and-collection/transaction-log",
+
   //invoice
   VIEW_INVOICE: "/receipt-and-collection/invoice",
 
