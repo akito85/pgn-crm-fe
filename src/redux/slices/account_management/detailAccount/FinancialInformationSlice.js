@@ -674,6 +674,45 @@ export const approveOrRejectPaymentRelation = createAsyncThunk(
   }
 );
 
+export const approveOrRejectInactivePaymentRelation = createAsyncThunk(
+  "APPROVE_OR_REJECT_INACTIVE_PAYMENT_RELATION",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-relation/approve-inactive";
+      const response = await accountManagementService.activationWithRemark(url, body);
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${body?.action === "APPROVE" ? 'approved' : 'rejected'}.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody))
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body?.action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body?.action === "APPROVED" ? 'approved' : 'rejected'}. An unknown error occured.`
+        }
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 export const inactivatePaymentRelation = createAsyncThunk(
   "INACTIVATE_PAYMENT_RELATION",
   async ({ body }, thunkAPI) => {
@@ -1040,7 +1079,7 @@ const financialInformationSlice = createSlice({
       state.loading = false;
     },
 
-    /** Approve or Reject Payment Relation Attachment */
+    /** Approve or Reject Payment Relation */
     [approveOrRejectPaymentRelation.pending]: (state) => {
       state.loading = true;
     },
@@ -1048,6 +1087,17 @@ const financialInformationSlice = createSlice({
       state.loading = false;
     },
     [approveOrRejectPaymentRelation.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    /** Approve or Reject Inactive Payment Relation */
+    [approveOrRejectInactivePaymentRelation.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectInactivePaymentRelation.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [approveOrRejectInactivePaymentRelation.rejected]: (state) => {
       state.loading = false;
     },
 
