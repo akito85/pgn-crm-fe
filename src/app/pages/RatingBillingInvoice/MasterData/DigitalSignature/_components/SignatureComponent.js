@@ -207,11 +207,18 @@ const SignatureComponent = ({ value, onChange, onMethodChange }) => {
             <SignatureCanvas
               ref={sigCanvas}
               canvasProps={{
-                className: "w-full h-64 bg-white",
+                width: 600,
+                height: 250,
+                style: {
+                  width: "100%",
+                  height: "250px",
+                  backgroundColor: "white",
+                },
               }}
               backgroundColor="white"
             />
           </div>
+
           <div className="flex justify-end gap-2">
             <Button onClick={handleClear}>Clear</Button>
             <Button type="primary" onClick={handleSave}>
