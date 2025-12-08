@@ -20,6 +20,19 @@ import AccountInformation from "../../app/pages/ReceiptAndCollection/MasterData/
 import ViewLateCharge from "../../app/pages/ReceiptAndCollection/LateChargeManagement/ViewLateCharge";
 import ListRececiptForm from "../../app/pages/ReceiptAndCollection/Receipt/CreateReceipt/ListRececiptForm";
 import ListDetailLateCharge from "../../app/pages/ReceiptAndCollection/LateChargeManagement/DetailLateCharge/ListDetailLateCharge";
+import ViewBridge from "../../app/pages/ReceiptAndCollection/MasterData/Bridge/ViewBridge";
+import ViewInvoice from "../../app/pages/ReceiptAndCollection/MasterData/Invoice/ViewInvoice";
+import ViewTransactionLog from "../../app/pages/ReceiptAndCollection/MasterData/TransactionLog/ViewTransactionLog";
+
+
+import ViewPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ViewPartner";
+import ListDetailPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ListDetailPartner";
+import ListFormPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ListFormPartner";
+
+import ViewPartnerCa from "../../app/pages/ReceiptAndCollection/MasterData/PartnerCa/ViewPartnerCa";
+import ListDetailPartnerCa from "../../app/pages/ReceiptAndCollection/MasterData/PartnerCa/ListDetailPartnerCa";
+import ListFormPartnerCa from "../../app/pages/ReceiptAndCollection/MasterData/PartnerCa/ListFormPartnerCa";
+
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
   VIEW_RECEIPT_PAGE: <ViewReceipt />,
@@ -73,4 +86,25 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   //late Charge
   VIEW_LATE_CHARGE: <ViewLateCharge />,
   DETAIL_LATE_CHARGE: <ListDetailLateCharge />,
+
+  // bridge
+  VIEW_BRIDGE: <ViewBridge />,
+
+  // invoice
+  VIEW_INVOICE: <ViewInvoice />,
+
+  // transaction log
+  VIEW_TRANSACTION_LOG: <ViewTransactionLog />,
+
+  // partner
+  VIEW_PARTNER: <ViewPartner />,
+  DETAIL_PARTNER: <ListDetailPartner />,
+  CREATE_PARTNER: <ListFormPartner type={"create"} />,
+  UPDATE_PARTNER: <ListFormPartner type={"update"} />,  
+
+  // partner ca
+  VIEW_PARTNER_CA: <ViewPartnerCa />,
+  DETAIL_PARTNER_CA: <ListDetailPartnerCa />,
+  CREATE_PARTNER_CA: <ListFormPartnerCa type={"create"} />,
+  UPDATE_PARTNER_CA: <ListFormPartnerCa type={"update"} />,
 };
