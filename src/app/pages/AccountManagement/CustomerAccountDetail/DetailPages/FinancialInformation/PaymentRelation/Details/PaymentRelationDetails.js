@@ -168,6 +168,8 @@ const PaymentRelationDetails = ({
 
       if (statusApproval === "WAITING_APPROVAL")
         setIsApproval(true);
+      else
+        setIsApproval(false);
     }
   }, [detail_paymentRelation]);
 
