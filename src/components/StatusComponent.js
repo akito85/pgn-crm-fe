@@ -45,7 +45,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         bgColor = "bg-gray-600";
         tColor = "text-white";
         break;
-        
+
       // ===== FAILED/REJECTED STATUSES =====
       case "inactive":
       case "rejected":
@@ -261,6 +261,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "submitted": // ✅ E-Faktur submitted
       case "waiting approval":
       case "waiting_approval":
+      case "waiting approval":
       case "awaiting_approval":
       case "awaiting approval":
       case "waiting_cancellation_approval": // ✅ E-Faktur
@@ -289,7 +290,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "replaced":
         return <ExclamationCircleFilled style={{ fontSize: "15px" }} />;
 
-      case "replacement": 
+      case "replacement":
         return <SyncOutlined style={{ fontSize: "15px" }} />;
 
       case "normal":
