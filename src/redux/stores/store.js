@@ -107,6 +107,7 @@ import bridgeReducer from "../slices/receipt_collection/bridge";
 import transactionLogReducer from "../slices/receipt_collection/transactionLog";
 import invoiceMasterDataReducer from "../slices/receipt_collection/invoice";
 import partnerReducer from "../slices/receipt_collection/partner";
+import partnerCaReducer from "../slices/receipt_collection/partnerCa";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -221,6 +222,7 @@ const reducer = combineReducers({
   transactionLog: transactionLogReducer,
   invoiceMasterData: invoiceMasterDataReducer,
   partner: partnerReducer,
+  partnerCa: partnerCaReducer,
 
   // Attachment
   attachment: attachmentReducer,

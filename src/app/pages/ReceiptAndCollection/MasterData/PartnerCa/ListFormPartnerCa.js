@@ -20,10 +20,10 @@ import {
   getListApprovalById,
   getListCategory,
   updatePartner,
-} from "../../../../../redux/slices/receipt_collection/partner";
+} from "../../../../../redux/slices/receipt_collection/partnerCa";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
-import PartnerForm from "./PartnerForm";
+import PartnerCaForm from "./PartnerCaForm";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -39,7 +39,7 @@ import ApprovalComponentGeneral from "../../../../../components/Approval/Approva
 import { configApp } from "../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 
-const ListFormPartner = (props) => {
+const ListFormPartnerCa = (props) => {
   const { type } = props;
   const {
     data_detail,
@@ -47,7 +47,7 @@ const ListFormPartner = (props) => {
     dataListAppHierDetail,
     loading,
     dataType,
-  } = useSelector((state) => state.partner);
+  } = useSelector((state) => state.partnerCa);
 
   // Declaration
   const navigate = useNavigate();
@@ -93,7 +93,7 @@ const ListFormPartner = (props) => {
       setAppHierOptions(tempAppHier);
     }
   }, [dataListAppHierId]);
-  
+
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
       dispatch(getListApprovalById({ id: selectedHierarchy }));
@@ -146,10 +146,10 @@ const ListFormPartner = (props) => {
         tokenExpirationTime: data_detail?.partner?.tokenExpirationTime,
         seckeySignature: data_detail?.partner?.secKeySignature,
         type: data_detail?.partner?.type,
-        apphierId: data_detail?.partner?.appHierId,
+        apphierId: data_detail?.partner?.apphierId,
       });
 
-      setSelectedHierarchy(data_detail?.partner?.appHierId);
+      setSelectedHierarchy(data_detail?.partner?.apphierId);
 
       setListDataAttachment(
         (data_detail?.attachmentDtoList || []).map((attachData) => ({
@@ -164,13 +164,11 @@ const ListFormPartner = (props) => {
   // Define tabData before using it in useState
 
   const [tabData, setTabData] = useState([
-    { value: "Partner", paramValue: ["partnerCode", 
-                                      "partnerName",
+    { value: "Partner Ca", paramValue: ["partnerCode", 
+                                      "caCode",
                                       "effStartDate",
                                       "effEndDate",
-                                      "tokenExpirationTime",
-                                      "secKeySignature",
-                                      "type"
+                                      "settlementBank",
                                      ] },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
@@ -198,16 +196,16 @@ const ListFormPartner = (props) => {
       const dataValue = {
         // partnerId: id,
         partnerCode: formValue.partnerCode,
-        partnerName: formValue.partnerName,
-        type: formValue.type,
-        tokenExpirationTime: formValue.tokenExpirationTime,
-        seckeySignature: formValue.secKeySignature,
+        caCode: formValue.caCode,
+        settlementBank: formValue.settlementBank,
         effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
         effEndDate: formValue.effEndDate
           ? moment(formValue.endDate).format(dateFormatting.date)
           : null,
-        apphierId: formValue.apphierId,
+        appHierId: formValue.apphierId,
       };
+
+      console.log("data value partner ca: ", dataValue);    
 
       setSendBody(dataValue);
       const bodyValidasiUpdate = {
@@ -298,11 +296,11 @@ const ListFormPartner = (props) => {
       breadcrumbName: "Receipt & Collection",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER,
-      breadcrumbName: "Partner",
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER_CA,
+      breadcrumbName: "Partner Ca",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_PARTNER,
+      path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_PARTNER_CA,
       breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
     },
   ];
@@ -337,7 +335,7 @@ const ListFormPartner = (props) => {
             const body = {
               referensiId: data_detail?.partner?.id,
               files: element.file,
-              category: "PARTNER",
+              category: "PARTNER_CA",
               fileCategoryId: element.fileCategoryId,
             };
             const response = await receiptCollectionHttpService.uploadImage(
@@ -377,7 +375,7 @@ const ListFormPartner = (props) => {
               files: element.file,
               fileCategoryId: element.fileCategoryId,
               referensiId: id,
-              category: "PARTNER",
+              category: "PARTNER_CA",
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
@@ -423,7 +421,7 @@ const ListFormPartner = (props) => {
               display: valuePage !== tabData[0].value ? "none" : undefined,
             }}
           >
-            <PartnerForm
+            <PartnerCaForm
               dataType={dataType}
               form={form}
             />
@@ -549,4 +547,4 @@ const ListFormPartner = (props) => {
   );
 };
 
-export default ListFormPartner;
+export default ListFormPartnerCa;

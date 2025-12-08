@@ -11,15 +11,15 @@ import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   approveOrRejectPartner,
   getDetailPartner,
-} from "../../../../../redux/slices/receipt_collection/partner";
+} from "../../../../../redux/slices/receipt_collection/partnerCa";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
-import DetailPartner from "./DetailPartner";
+import DetailPartnerCa from "./DetailPartnerCa";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import BaseContainer from "../../../../../components/BaseContainer";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
 
-const ListDetailPartner = () => {
+const ListDetailPartnerCa = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
@@ -31,12 +31,12 @@ const ListDetailPartner = () => {
 
   // Define tabData before using it in useState
   const [tabData, setTabData] = useState([
-    { value: "Partner" },
+    { value: "Partner Ca" },
     { value: "Attachment" },
   ]);
 
   const { loading, data_detail } = useSelector(
-    (state) => state.partner
+    (state) => state.partnerCa
   );
   const [segmentedPage, setSegmentedPage] = useState(tabData[0].value);
 
@@ -53,9 +53,9 @@ const ListDetailPartner = () => {
   useEffect(() => {
     if (
       id &&
-      data_detail?.partner?.id &&
+      data_detail?.partnerCa?.id &&
       data_detail &&
-      data_detail?.partner?.id === id
+      data_detail?.partnerCa?.id === id
     ) {
       const dataAttachment = (data_detail?.attachmentDtoList || []).map(
         (item) => {
@@ -79,7 +79,7 @@ const ListDetailPartner = () => {
         }
       );
       setListDataAttachment(dataAttachment);
-      setDataHeader(data_detail?.partner);
+      setDataHeader(data_detail?.partnerCa);
     }
 
     
@@ -89,9 +89,9 @@ const ListDetailPartner = () => {
   
   const renderSection = (segmentedPage) => {
     switch (segmentedPage) {
-      case "Partner":
+      case "Partner Ca":
         return (
-          <DetailPartner
+          <DetailPartnerCa
             key={"active"}
             data_detail={dataHeader}
             data_req={data_detail?.tApprovalDto}
@@ -99,7 +99,7 @@ const ListDetailPartner = () => {
         );
       case "Draft":
         return (
-          <DetailPartner
+          <DetailPartnerCa
             key={"draft"}
             data_detail={dataHeader}
             data_req={data_detail?.tApprovalDto}
@@ -133,11 +133,11 @@ const ListDetailPartner = () => {
       breadcrumbName: "Receipt & Collection",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER,
-      breadcrumbName: "Partner",
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER_CA,
+      breadcrumbName: "Partner Ca",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_PARTNER,
+      path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_PARTNER_CA,
       breadcrumbName: `Detail ${segmentedPage}`,
     },
   ];
@@ -145,7 +145,7 @@ const ListDetailPartner = () => {
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
     const data = {
-      partnerId: id,
+      partnerCaId: id,
       remark: res.remark,
       approvalId: data_detail?.tApprovalDto?.tAppId,
       action: approveOrReject.toUpperCase(),
@@ -176,7 +176,7 @@ const ListDetailPartner = () => {
         header={approveOrReject}
         approveOrReject={approveOrReject}
         menu={"Partner"}
-        named={ data_detail?.partner?.partnerName
+        named={ data_detail?.partnerCa?.caCode
         }
       />
 
@@ -224,4 +224,4 @@ const ListDetailPartner = () => {
   );
 };
 
-export default ListDetailPartner;
+export default ListDetailPartnerCa;

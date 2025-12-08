@@ -25,7 +25,7 @@ import {
   getApprovalHistory,
   getDownloadPartner,
   getPaginatePartner,
-} from "../../../../../redux/slices/receipt_collection/partner";
+} from "../../../../../redux/slices/receipt_collection/partnerCa";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
@@ -33,10 +33,10 @@ import Toolbar from "../../../../../components/Toolbar";
 import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 
-const ViewPartner = () => {
+const ViewPartnerCa = () => {
   // Selector
   const { loading, data, dataApprovalHistory } = useSelector(
-    (state) => state.partner
+    (state) => state.partnerCa
   );
   const { bodyError } = useSelector((state) => state?.general);
 
@@ -79,8 +79,8 @@ const ViewPartner = () => {
       breadcrumbName: "Receipt & Collection",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER,
-      breadcrumbName: "Partner",
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER_CA,
+      breadcrumbName: "Partner Ca",
     },
   ];
 
@@ -114,12 +114,12 @@ const ViewPartner = () => {
     if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: dataApprovalHistory?.dataApprover?.PARTNER || [],
+          create: dataApprovalHistory?.dataApprover?.PARTNER_CA || [],
           // inactive:
           //   dataApprovalHistory?.dataApprover?.INACTIVE_PAYMENT_METHOD || [],
         },
         dataHistory: {
-          create: dataApprovalHistory?.dataHistory?.PARTNER || [],
+          create: dataApprovalHistory?.dataHistory?.PARTNER_CA || [],
           // inactive:
           //   dataApprovalHistory?.dataHistory?.INACTIVE_PAYMENT_METHOD || [],
         },
@@ -173,13 +173,13 @@ const ViewPartner = () => {
         ),
     },
     {
-      title: "PARTNER NAME",
-      dataIndex: "partnerName",
-      key: "partnerName",
+      title: "Ca Code",
+      dataIndex: "caCode",
+      key: "caCode",
       align: "",
       sorter: true,
       ...getColumnSearchPropsPaging(
-        "partnerName",
+        "caCode",
         searchInput,
         searchedColumn,
         searchText,
@@ -188,7 +188,7 @@ const ViewPartner = () => {
       ),
       render: (text) =>
         renderColumn(
-          "partnerName",
+          "caCode",
           searchedColumn,
           searchText,
           text,
@@ -246,15 +246,15 @@ const ViewPartner = () => {
         ),
     },
     {
-      title: "SEC KEY SIGNATURE",
-      dataIndex: "secKeySignature",
-      key: "secKeySignature",
+      title: "SETTLEMENT BANK",
+      dataIndex: "settlementBank",
+      key: "settlementBank",
       sorter: true,
       ellipsis: {
         showTitle: false,
       },
       ...getColumnSearchPropsPaging(
-        "secKeySignature",
+        "settlementBank",
         searchInput,
         searchedColumn,
         searchText,
@@ -263,61 +263,7 @@ const ViewPartner = () => {
       ),
       render: (text) =>
         renderColumn(
-          "secKeySignature",
-          searchedColumn,
-          searchText,
-          text,
-          true,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "TOKEN EXPIRATION TIME",
-      dataIndex: "tokenExpirationTime",
-      key: "tokenExpirationTime",
-      sorter: true,
-      ellipsis: {
-        showTitle: false,
-      },
-      ...getColumnSearchPropsPaging(
-        "tokenExpirationTime",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false
-      ),
-      render: (text) =>
-        renderColumn(
-          "tokenExpirationTime",
-          searchedColumn,
-          searchText,
-          text,
-          true,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "TYPE",
-      dataIndex: "type",
-      key: "type",
-      sorter: true,
-      ellipsis: {
-        showTitle: false,
-      },
-      ...getColumnSearchPropsPaging(
-        "type",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false
-      ),
-      render: (text) =>
-        renderColumn(
-          "type",
+          "settlementBank",
           searchedColumn,
           searchText,
           text,
@@ -396,7 +342,7 @@ const ViewPartner = () => {
     {
       action: "Create",
       render: (
-        <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_PARTNER}>
+        <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_PARTNER_CA}>
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
@@ -415,7 +361,7 @@ const ViewPartner = () => {
         return (
           <Tooltip title={"Detail"}>
             <Link
-              to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_PARTNER}
+              to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_PARTNER_CA}
               state={{ id: record?.id }}
             >
               {/* <ButtonComponent
@@ -440,7 +386,7 @@ const ViewPartner = () => {
         return (
           data_length > 3 ? (
             <Link
-              to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PARTNER}
+              to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PARTNER_CA}
               state={{ id: record?.id }}
             >
               <ButtonComponent
@@ -469,7 +415,7 @@ const ViewPartner = () => {
               >
                 {isEditable ? (
                   <Link
-                    to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PARTNER}
+                    to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PARTNER_CA}
                     state={{ id: record?.id }}
                   >
                     <SVGIcon name="IconEdit" color="#ACC424" width={24} />
@@ -518,9 +464,9 @@ const ViewPartner = () => {
   const handleRetry = () => {
     try {
       handleCancelTryAgain();
-      if (bodyError?.action === "GET_APPROVAL_PARTNER") {
+      if (bodyError?.action === "GET_APPROVAL_PARTNER_CA") {
         dispatch(getApprovalHistory(body));
-      } else if (bodyError?.action === "DOWNLOAD_PARTNER") {
+      } else if (bodyError?.action === "DOWNLOAD_PARTNER_CA") {
         handleDownload();
       }
       handleFetch();
@@ -578,4 +524,4 @@ const ViewPartner = () => {
   );
 };
 
-export default ViewPartner;
+export default ViewPartnerCa;

@@ -29,6 +29,10 @@ import ViewPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner
 import ListDetailPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ListDetailPartner";
 import ListFormPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ListFormPartner";
 
+import ViewPartnerCa from "../../app/pages/ReceiptAndCollection/MasterData/PartnerCa/ViewPartnerCa";
+import ListDetailPartnerCa from "../../app/pages/ReceiptAndCollection/MasterData/PartnerCa/ListDetailPartnerCa";
+import ListFormPartnerCa from "../../app/pages/ReceiptAndCollection/MasterData/PartnerCa/ListFormPartnerCa";
+
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
   VIEW_RECEIPT_PAGE: <ViewReceipt />,
@@ -92,9 +96,15 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // transaction log
   VIEW_TRANSACTION_LOG: <ViewTransactionLog />,
 
-  //payment item
+  // partner
   VIEW_PARTNER: <ViewPartner />,
   DETAIL_PARTNER: <ListDetailPartner />,
   CREATE_PARTNER: <ListFormPartner type={"create"} />,
-  UPDATE_PARTNER: <ListFormPartner type={"update"} />,
+  UPDATE_PARTNER: <ListFormPartner type={"update"} />,  
+
+  // partner ca
+  VIEW_PARTNER_CA: <ViewPartnerCa />,
+  DETAIL_PARTNER_CA: <ListDetailPartnerCa />,
+  CREATE_PARTNER_CA: <ListFormPartnerCa type={"create"} />,
+  UPDATE_PARTNER_CA: <ListFormPartnerCa type={"update"} />,
 };

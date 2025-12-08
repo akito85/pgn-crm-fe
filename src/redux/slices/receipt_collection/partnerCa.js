@@ -22,20 +22,20 @@ const initialState = {
 };
 
 export  const getPaginatePartner = createAsyncThunk(
-  "GET_ALL_PARTNER",
+  "GET_ALL_PARTNER_CA",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/partner/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/partner-ca/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
         validateError({
           error: error,
-          action: "GET_ALL_PARTNER_PAGING",
+          action: "GET_ALL_PARTNER_CA_PAGING",
           back: false,
         })
       );
@@ -48,7 +48,7 @@ export const getTypeDDL = createAsyncThunk(
   "GET_LIST_TYPE",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner/list-type`;
+      const url = `/v1/dbs/api/partner-ca/list-type`;
       const data = await receiptCollectionHttpService.getAll(url);
       return data;
     } catch (error) {
@@ -72,10 +72,10 @@ export const getTypeDDL = createAsyncThunk(
 );
 
 export const createValidasiPartner = createAsyncThunk(
-  "CREATE_MASTER_PARTNER_VALIDASI",
+  "CREATE_MASTER_PARTNER_CA_VALIDASI",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner/validate-create-update`;
+      const url = `/v1/dbs/api/partner-ca/validate-create-update`;
       const data = await receiptCollectionHttpService.createData(url, body);
       return data.data;
     } catch (error) {
@@ -98,20 +98,20 @@ export const createValidasiPartner = createAsyncThunk(
 );
 
 export const getDownloadPartner = createAsyncThunk(
-  "DOWNLOAD_PARTNER",
+  "DOWNLOAD_PARTNER_CA",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/partner/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/partner-ca/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.downloadData(url);
       return response.data;
     } catch (response) {
       thunkAPI.dispatch(
         validateError({
           error: response,
-          action: "DOWNLOAD_PARTNER",
+          action: "DOWNLOAD_PARTNER_CA",
           back: false,
         })
       );
@@ -122,10 +122,10 @@ export const getDownloadPartner = createAsyncThunk(
 
 
 export const createPartner = createAsyncThunk(
-  "CREATE_PARTNER",
+  "CREATE_PARTNER_CA",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner/create-update`;
+      const url = `/v1/dbs/api/partner-ca/create-update`;
       const data = await receiptCollectionHttpService.createData(url, body);
       // const successBody = {
       //   title: "Successfull",
@@ -152,10 +152,10 @@ export const createPartner = createAsyncThunk(
 );
 
 export const updatePartner = createAsyncThunk(
-  "UPDATE_PARTNER",
+  "UPDATE_PARTNER_CA",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner/create-update`;
+      const url = `/v1/dbs/api/partner-ca/create-update`;
       const data = await receiptCollectionHttpService.updateDataPost(url, body);
       // const successBody = {
       //   title: "Successfull",
@@ -183,10 +183,10 @@ export const updatePartner = createAsyncThunk(
 );
 
 export const getDetailPartner = createAsyncThunk(
-  "GET_DETAIL_PARTNER",
+  "GET_DETAIL_PARTNER_CA",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner/detail-get/${id}`;
+      const url = `/v1/dbs/api/partner-ca/detail-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -208,7 +208,6 @@ export const getDetailPartner = createAsyncThunk(
     }
   }
 );
-
 
 
 export const getAllApprovalList = createAsyncThunk(
@@ -238,24 +237,13 @@ export const getAllApprovalList = createAsyncThunk(
   }
 );
 
-// export const getApprovalHistory = createAsyncThunk(
-//   "GET_APPROVAL_HISTORY_METHOD",
-//   async (id, thunkAPI) => {
-//     try {
-//       const url = `/v1/dbs/api/payment/item/approval-history-get/${id}`;
-//       const response = await receiptCollectionHttpService.getDetail(url);
-//       return response.data;
-//     } catch (error) {
-//       return thunkAPI.rejectWithValue(error?.response);
-//     }
-//   }
-// );
+
 
 export const getApprovalHistory = createAsyncThunk(
   "GET_APPROVAL_HISTORY_METHOD",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner/approval-history-get/${id}`;
+      const url = `/v1/dbs/api/partner-ca/approval-history-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
@@ -274,10 +262,10 @@ export const getApprovalHistory = createAsyncThunk(
 
 
 export const approveOrRejectPartner = createAsyncThunk(
-  "APPROVE_OR_REJECT_PARTNER",
+  "APPROVE_OR_REJECT_PARTNER_CA",
   async ({ body }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/partner/approve-reject";
+      const url = "/v1/dbs/api/partner-ca/approve-reject";
       const response =
         await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const message = response?.message;
@@ -368,8 +356,8 @@ export const getListCategory = createAsyncThunk(
   }
 );
 
-const partnerSlice = createSlice({
-  name: "partner",
+const partnerCaSlice = createSlice({
+  name: "partnerCa",
   initialState,
   extraReducers: {
     //get all employee paginate reducer
@@ -428,7 +416,6 @@ const partnerSlice = createSlice({
     [getDetailPartner.rejected]: (state) => {
       state.loading = true;
     },
-
     // Get Approve Hierarchy List
     [getAllApprovalList.pending]: (state, action) => {
       state.loading = true;
@@ -546,11 +533,11 @@ const partnerSlice = createSlice({
       state.loading = false;
     },
     [createValidasiPartner.rejected]: (state, action) => {
-      state.data = action.payload;
+      state.error = action.payload;
       state.loading = false;
     },
   },
 });
 
-const { reducer } = partnerSlice;
+const { reducer } = partnerCaSlice;
 export default reducer;
