@@ -119,24 +119,24 @@ const ListFormCaPaymentChannel = (props) => {
     useEffect(() => {
         if (id && data_detail) {
             form.setFieldsValue({
-                id: data_detail?.id,
-                caCode: data_detail?.caCode,
-                ciCode: data_detail?.ciCode,
-                name: data_detail?.name,
-                partnerCode: data_detail?.partnerCode,
-                type: data_detail?.type,
+                id: data_detail?.peOpCaCi?.id,
+                caCode: data_detail?.peOpCaCi?.caCode,
+                ciCode: data_detail?.peOpCaCi?.ciCode,
+                name: data_detail?.peOpCaCi?.name,
+                partnerCode: data_detail?.peOpCaCi?.partnerCode,
+                type: data_detail?.peOpCaCi?.type,
                 effStartDate:
-                    data_detail?.effStartDate === null
+                    data_detail?.peOpCaCi?.effStartDate === null
                         ? moment()
-                        : moment(data_detail?.effStartDate).clone(),
+                        : moment(data_detail?.peOpCaCi?.effStartDate).clone(),
                 effEndDate:
-                    data_detail?.effEndDate === null
+                    data_detail?.peOpCaCi?.effEndDate === null
                         ? ""
-                        : moment(data_detail?.effEndDate).clone(),
-                apphierId: data_detail?.apphierId,
+                        : moment(data_detail?.peOpCaCi?.effEndDate).clone(),
+                apphierId: data_detail?.peOpCaCi?.apphierId,
             });
 
-            setSelectedHierarchy(data_detail?.apphierId);
+            setSelectedHierarchy(data_detail?.peOpCaCi?.apphierId);
 
             setListDataAttachment(
                 (data_detail?.attachmentDtoList || []).map((attachData) => ({
@@ -432,7 +432,7 @@ const ListFormCaPaymentChannel = (props) => {
                                 type={type}
                                 data={listDataAttachment}
                                 updateData={setListDataAttachment}
-                                typeSelector="item"
+                                typeSelector="caPaymentChannel"
                                 dispatch={dispatch}
                                 getAPICategory={getListCategoryCaPaymentChannel}
                                 service={receiptCollectionHttpService}

@@ -25,10 +25,10 @@ const DetailCaPaymentChannel = ({ data_detail, data_req }) => {
             ) : null}
             <BaseContainer header={"CA PAYMENT CHANNEL INFORMATION"}>
                 <div className="w-full grid grid-cols-3 gap-3">
-                    <DetailText label="CA Code">
+                    <DetailText label="Collection Agent Code">
                         {data_detail?.caCode}
                     </DetailText>
-                    <DetailText label="CI Code">
+                    <DetailText label="Payment Channel Code">
                         {data_detail?.ciCode}
                     </DetailText>
                     <DetailText label="Name">

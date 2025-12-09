@@ -1,83 +1,80 @@
 import moment from "moment";
-import BaseContainer from "../../../../../components/BaseContainer";
+import { Fragment, useState } from "react";
+import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import DetailText from "../../../../../components/DetailText";
+import RadioTabs from "../../../../../components/RadioTabs";
 import { dateFormatting } from "../../../../../utils";
+import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 
-const ContentModalConfirm = (props) => {
-    const {
-        data,
-        tabData,
-        listDataAttachment,
-        listDataAppHierDetail,
-        dataOption,
-        selectedHierarchy,
-    } = props;
+const ContentModalConfirm = ({
+  data,
+  listDataAttachment = [],
+  listDataAppHierDetail = [],
+  tabData = [],
+  dataOption,
+  selectedHierarchy,
+}) => {
+  const [valuePage, setValuePage] = useState(tabData[0].value);
 
-    const getApprovalName = () => {
-        const found = dataOption?.find((item) => item.value === selectedHierarchy);
-        return found?.name || "-";
-    };
+  console.log("data in content modal confirm: ", data);
 
-    return (
-        <div>
-            <BaseContainer header={"CA PAYMENT CHANNEL INFORMATION"}>
-                <div className="w-full grid grid-cols-3 gap-3">
-                    <DetailText label="CA Code">{data?.caCode}</DetailText>
-                    <DetailText label="CI Code">{data?.ciCode}</DetailText>
-                    <DetailText label="Name">{data?.name}</DetailText>
-                    <DetailText label="Partner Code">{data?.partnerCode}</DetailText>
-                    <DetailText label="Type">{data?.type}</DetailText>
-                    <DetailText label="Eff Start Date">
-                        {data?.effStartDate
-                            ? moment(data?.effStartDate, dateFormatting.date).format(
-                                dateFormatting.date
-                            )
-                            : ""}
-                    </DetailText>
-                    <DetailText label="Eff End Date">
-                        {data?.effEndDate
-                            ? moment(data?.effEndDate, dateFormatting.date).format(
-                                dateFormatting.date
-                            )
-                            : ""}
-                    </DetailText>
-                </div>
-            </BaseContainer>
+  const showSection = () => {
+    switch (valuePage) {
+      case tabData[0].value:
+        return (
+          <div className="grid grid-cols-2 w-full">
+            <DetailText label="Collection Agent Code">{data?.caCode}</DetailText>
+            <DetailText label="Payment Channel Code">{data?.ciCode}</DetailText>
+            <DetailText label="Name">{data?.name}</DetailText>
+            <DetailText label="Partner Code">{data?.partnerCode}</DetailText>
+            <DetailText label="Type">{data?.type}</DetailText>
+            <DetailText label={"Eff Start Date"}>
+              {moment(data?.effStartDate).format(dateFormatting.date)}
+            </DetailText>
+            <DetailText label={"End Date"}>
+              {data?.effEndDate
+                ? moment(data?.effEndDate).format(dateFormatting.date)
+                : ""}
+            </DetailText>
+          </div>
+        );
+      case tabData[1].value:
+        return (
+          <ApprovalComponentGeneral
+            showSelect={false}
+            disableSelect={true}
+            approvalName={
+              (dataOption || []).filter(
+                (data) => data.value === selectedHierarchy
+              )?.[0].name || ""
+            }
+            dataTable={listDataAppHierDetail}
+            selectedHierarchy
+          />
+        );
+      case tabData[2].value:
+        return (
+          <AttachmentSectionForm type={"preview"} data={listDataAttachment} />
+        );
+      default:
+        return <Fragment></Fragment>;
+    }
+  };
+  const handleMethod = (e) => {
+    setValuePage(e.target.value);
+  };
 
-            <BaseContainer header={"APPROVAL INFORMATION"}>
-                <div className="w-full grid grid-cols-3 gap-3">
-                    <DetailText label="Approval Hierarchy">
-                        {getApprovalName()}
-                    </DetailText>
-                </div>
-            </BaseContainer>
-
-            {listDataAttachment && listDataAttachment.length > 0 && (
-                <BaseContainer header={"ATTACHMENT INFORMATION"}>
-                    <div className="w-full">
-                        <table className="w-full border-collapse">
-                            <thead>
-                                <tr className="bg-gray-100">
-                                    <th className="border p-2 text-left">No</th>
-                                    <th className="border p-2 text-left">File Name</th>
-                                    <th className="border p-2 text-left">Category</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {listDataAttachment.map((item, index) => (
-                                    <tr key={index}>
-                                        <td className="border p-2">{index + 1}</td>
-                                        <td className="border p-2">{item.fileName}</td>
-                                        <td className="border p-2">{item.fileCategoryName}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </BaseContainer>
-            )}
+  return (
+    <div className="flex flex-col gap-4">
+      <RadioTabs data={tabData} onChange={handleMethod} />
+      <div className="flex flex-col gap-4">
+        <div className="text-primary text-xs font-bold uppercase">
+          {`${valuePage} INFORMATION`}
         </div>
-    );
+        {showSection()}
+      </div>
+    </div>
+  );
 };
 
 export default ContentModalConfirm;

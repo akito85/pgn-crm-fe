@@ -450,7 +450,7 @@ const ListFormPartnerCa = (props) => {
                 type={type}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
-                typeSelector="item"
+                typeSelector="patnerCa"
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
                 service={receiptCollectionHttpService}

@@ -18,7 +18,6 @@ const CaPaymentChannelForm = (props) => {
     const id = location?.state?.id;
 
     const typeOptions = [
-        { name: "ONLINE", value: "ONLINE" },
         { name: "PREPAID", value: "PREPAID" },
         { name: "POSTPAID", value: "POSTPAID" },
     ];
@@ -51,18 +50,18 @@ const CaPaymentChannelForm = (props) => {
             <BaseContainer header={"CA PAYMENT CHANNEL"}>
                 <div className="w-full grid grid-cols-2 gap-5">
                     <Form.Item
-                        label={"CA Code"}
+                        label={"Collection Agent Code"}
                         name={"caCode"}
                         rules={formMessageRequired("CA Code")}
                     >
                         <InputComponent maxLength={15} />
                     </Form.Item>
                     <Form.Item
-                        label={"CI Code"}
+                        label={"Payment Channel Code"}
                         name={"ciCode"}
                         rules={formMessageRequired("CI Code")}
                     >
-                        <InputComponent maxLength={15} />
+                        <InputComponent allowClear maxLength={4}  />
                     </Form.Item>
                     <Form.Item
                         label={"Name"}
@@ -84,7 +83,7 @@ const CaPaymentChannelForm = (props) => {
                         rules={formMessageRequired("Type")}
                     >
                         <SelectComponent
-                            dataOption={typeOptions}
+                            options={typeOptions}
                             placeholder="Select Type"
                         />
                     </Form.Item>

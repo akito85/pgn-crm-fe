@@ -28,6 +28,7 @@ const ListDetailCaPaymentChannel = () => {
     const id = location?.state?.id;
     const [dataHeader, setDataHeader] = useState({});
     const [listDataAttachment, setListDataAttachment] = useState([]);
+    // const [isShowButton, setIsShowButton] = useState(false);
 
     // Define tabData before using it in useState
     const [tabData, setTabData] = useState([
@@ -49,7 +50,7 @@ const ListDetailCaPaymentChannel = () => {
     }, [dispatch, id]);
 
     useEffect(() => {
-        if (id && data_detail?.id && data_detail && data_detail?.id === id) {
+        if (id && data_detail?.peOpCaCi?.id && data_detail && data_detail?.peOpCaCi?.id === id) {
             const dataAttachment = (data_detail?.attachmentDtoList || []).map(
                 (item) => {
                     return {
@@ -72,7 +73,8 @@ const ListDetailCaPaymentChannel = () => {
                 }
             );
             setListDataAttachment(dataAttachment);
-            setDataHeader(data_detail);
+            setDataHeader(data_detail?.peOpCaCi);
+            // setIsShowButton(data_detail?.tapprovalDto?.isApprover)
         }
     }, [id, data_detail]);
 
@@ -83,7 +85,7 @@ const ListDetailCaPaymentChannel = () => {
                     <DetailCaPaymentChannel
                         key={"active"}
                         data_detail={dataHeader}
-                        data_req={data_detail?.tApprovalDto}
+                        data_req={data_detail?.tapprovalDto}
                     />
                 );
             case "Attachment":
@@ -93,7 +95,7 @@ const ListDetailCaPaymentChannel = () => {
                             type={"detail"}
                             data={listDataAttachment}
                             updateData={setListDataAttachment}
-                            typeSelector="item"
+                            typeSelector="caPaymentChannel"
                             service={receiptCollectionHttpService}
                             configApplication={configApp.PAYMENT_SERVICE}
                         />
@@ -104,7 +106,9 @@ const ListDetailCaPaymentChannel = () => {
         }
     };
 
-    const isShowButton = data_detail?.tApprovalDto?.isApprover;
+    const isShowButton = data_detail?.tapprovalDto?.isApprover;
+
+    // console.log("isShowButton",isShowButton)
 
     // Breadcrumbs
     const routes = [
@@ -126,8 +130,9 @@ const ListDetailCaPaymentChannel = () => {
     const handleConfirm = (res, handleClear) => {
         const data = {
             id: id,
-            statusApproval: approveOrReject.toUpperCase(),
-            remarks: res.remark,
+            remark: res.remark,
+            approvalId: data_detail?.tapprovalDto?.tAppId,
+            action: approveOrReject.toUpperCase(),
         };
         dispatch(approveOrRejectCaPaymentChannel({ body: data }));
         handleClear();

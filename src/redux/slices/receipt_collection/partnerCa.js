@@ -512,16 +512,6 @@ const partnerCaSlice = createSlice({
       state.data_download = action.payload;
       state.loading = false;
     },
-    [getDownloadPartner.fulfilled]: (state, action) => {
-      state.data_download_statement = action.payload;
-      // state.isSuccess = true;
-      state.loading = false;
-    },
-    [getDownloadPartner.rejected]: (state, action) => {
-      state.isFailed = true;
-      state.data_download_statement = action.payload;
-      state.loading = false;
-    },
 
     //validasi create payment method
     [createValidasiPartner.pending]: (state, action) => {

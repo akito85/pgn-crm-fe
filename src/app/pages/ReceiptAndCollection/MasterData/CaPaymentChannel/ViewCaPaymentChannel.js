@@ -139,7 +139,7 @@ const ViewCaPaymentChannel = () => {
             render: (text, object, index) => (page - 1) * pageSize + index + 1,
         },
         {
-            title: "CA CODE",
+            title: "COLLECTION AGENT CODE",
             dataIndex: "caCode",
             key: "caCode",
             sorter: true,
@@ -163,7 +163,7 @@ const ViewCaPaymentChannel = () => {
                 ),
         },
         {
-            title: "CI CODE",
+            title: "PAYMENT CHANNEL CODE",
             dataIndex: "ciCode",
             key: "ciCode",
             sorter: true,
