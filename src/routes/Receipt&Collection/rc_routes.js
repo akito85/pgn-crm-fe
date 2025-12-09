@@ -74,4 +74,10 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_PARTNER_CA: "/receipt-and-collection/partner-ca/view",
   CREATE_PARTNER_CA: "/receipt-and-collection/partner-ca/create",
   UPDATE_PARTNER_CA: "/receipt-and-collection/partner-ca/update",
+
+  // Ca Payment Channel
+  VIEW_CA_PAYMENT_CHANNEL: "/receipt-and-collection/ca-payment-channel",
+  DETAIL_CA_PAYMENT_CHANNEL: "/receipt-and-collection/ca-payment-channel/view",
+  CREATE_CA_PAYMENT_CHANNEL: "/receipt-and-collection/ca-payment-channel/create",
+  UPDATE_CA_PAYMENT_CHANNEL: "/receipt-and-collection/ca-payment-channel/update",
 };
