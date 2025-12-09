@@ -5,6 +5,7 @@ import { showModalError, showModalSuccess } from "../general_slice";
 import DocViewer from "react-doc-viewer";
 import { tokenHeader } from "../../../utils/tokenHeader";
 import axios from "axios";
+import ReactDOM from "react-dom";
 
 const initialState = {
   data: [],
@@ -32,22 +33,6 @@ const initialState = {
     totalPages: 0,
     number: 0,
   },
-};
-
-const getFilenameFromHeader = (contentDisposition) => {
-  if (!contentDisposition) return null;
-
-  const utf8Match = contentDisposition.match(/filename\*=UTF-8''(.+)/i);
-  if (utf8Match) {
-    return decodeURIComponent(utf8Match[1]);
-  }
-
-  const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/i);
-  if (filenameMatch) {
-    return filenameMatch[1];
-  }
-
-  return null;
 };
 
 export const getAllEMeteraiInvoices = createAsyncThunk(
@@ -142,7 +127,7 @@ export const previewOriginalInvoice = createAsyncThunk(
   async ({ invoiceNumber }, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        +`/v1/dbs/api/rbi/invoice/stampsign/download/original/${invoiceNumber}`,
+        `/v1/dbs/api/rbi/invoice/stampsign/download/original/${invoiceNumber}`,
         {
           headers: {
             ...tokenHeader(),
@@ -183,7 +168,7 @@ export const previewStampedInvoice = createAsyncThunk(
   async ({ invoiceNumber }, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        +`/v1/dbs/api/rbi/invoice/stampsign/download/stamped/${invoiceNumber}`,
+        `/v1/dbs/api/rbi/invoice/stampsign/download/stamped/${invoiceNumber}`,
         {
           headers: {
             ...tokenHeader(),
@@ -223,29 +208,9 @@ export const downloadOriginalInvoice = createAsyncThunk(
   "DOWNLOAD_ORIGINAL_INVOICE",
   async ({ invoiceNumber }, thunkAPI) => {
     try {
-      const response = await axios.get(
-        +`/v1/dbs/api/rbi/invoice/stampsign/download/original/${invoiceNumber}`,
-        {
-          headers: {
-            ...tokenHeader(),
-            "ngrok-skip-browser-warning": "true",
-          },
-          responseType: "blob",
-        }
-      );
+      const url = `/v1/dbs/api/rbi/invoice/stampsign/download/original/${invoiceNumber}`;
 
-      const contentDisposition = response.headers["content-disposition"];
-      let filename = getFilenameFromHeader(contentDisposition);
-
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
+      const response = await ratingBillingHttpService.downloadFile(url);
 
       return response.data;
     } catch (error) {
@@ -275,29 +240,9 @@ export const downloadStampedInvoice = createAsyncThunk(
   "DOWNLOAD_STAMPED_INVOICE",
   async ({ invoiceNumber }, thunkAPI) => {
     try {
-      const response = await axios.get(
-        +`/v1/dbs/api/rbi/invoice/stampsign/download/stamped/${invoiceNumber}`,
-        {
-          headers: {
-            ...tokenHeader(),
-            "ngrok-skip-browser-warning": "true",
-          },
-          responseType: "blob",
-        }
-      );
+      const url = `/v1/dbs/api/rbi/invoice/stampsign/download/stamped/${invoiceNumber}`;
 
-      const contentDisposition = response.headers["content-disposition"];
-      let filename = getFilenameFromHeader(contentDisposition);
-
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
+      const response = await ratingBillingHttpService.downloadFile(url);
 
       return response.data;
     } catch (error) {
@@ -327,29 +272,9 @@ export const downloadSignedInvoice = createAsyncThunk(
   "DOWNLOAD_SIGNED_INVOICE",
   async ({ invoiceNumber }, thunkAPI) => {
     try {
-      const response = await axios.get(
-        +`/v1/dbs/api/rbi/invoice/stampsign/download/signed/${invoiceNumber}`,
-        {
-          headers: {
-            ...tokenHeader(),
-            "ngrok-skip-browser-warning": "true",
-          },
-          responseType: "blob",
-        }
-      );
+      const url = `/v1/dbs/api/rbi/invoice/stampsign/download/signed/${invoiceNumber}`;
 
-      const contentDisposition = response.headers["content-disposition"];
-      let filename = getFilenameFromHeader(contentDisposition);
-
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
+      const response = await ratingBillingHttpService.downloadFile(url);
 
       return response.data;
     } catch (error) {

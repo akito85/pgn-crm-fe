@@ -59,6 +59,8 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "failed billing":
       case "fail":
       case "not_paid":
+      case "cancelled": 
+      case "CANCELLED":
         bgColor = "status-inactive";
         tColor = "text-white";
         break;
@@ -214,8 +216,6 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
 
       case "cancellation":
       case "replaced":
-        case "cancelled": 
-        case "CANCELLED":
         bgColor = "bg-red-100";
         tColor = "text-red-800";
         break;
@@ -275,6 +275,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "not paid":
       case "not_paid":
       case "rejected":
+        case "cancelled":
         return <CloseCircleFilled style={{ fontSize: "15px" }} />;
 
       // ===== PENDING/SCHEDULED ICONS =====
@@ -283,7 +284,6 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "not generated":
         return <ClockCircleFilled style={{ fontSize: "15px" }} />;
 
-      case "cancelled":
       case "cancellation":
         return <StopOutlined style={{ fontSize: "15px" }} />;
 
