@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Spin, Steps, Select } from "antd";
+import { Form, Spin, Select } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 import moment from "moment";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import DetailText from "../../../../../components/DetailText";
 import SVGIcon from "../../../../../assets/Icon/index";
 import InputComponent from "../../../../../components/InputComponent";
 import {
@@ -25,6 +24,181 @@ import {
   getAllApprovalList,
   getListApprovalById,
 } from "../../../../../redux/slices/rating_billing_invoice/efakturSlice";
+import StatusComponent from "../../../../../components/StatusComponent";
+
+const ApproverListByLevel = ({
+  dataTable,
+  approvalLevel,
+  maxInitialShow = 2,
+}) => {
+  const [showAll, setShowAll] = useState(false);
+
+  // Filter berdasarkan approvalLevel (Submitter atau Final Approver)
+  const levelData = dataTable.filter(
+    (approval) => approval.approvalLevel === approvalLevel
+  );
+
+  // Ambil semua employee dari level tersebut
+  const allApprovers = levelData.flatMap((approval) =>
+    (approval.employeeDetail || [])
+      .filter((emp) => emp && emp.employeeName)
+      .map((emp) => ({
+        name: emp.employeeName,
+        position: approval.position,
+      }))
+  );
+
+  const displayedApprovers = showAll
+    ? allApprovers
+    : allApprovers.slice(0, maxInitialShow);
+
+  const hasMore = allApprovers.length > maxInitialShow;
+
+  if (allApprovers.length === 0) {
+    return (
+      <p className="text-sm text-gray-500 italic">
+        No {approvalLevel.toLowerCase()} selected
+      </p>
+    );
+  }
+
+  return (
+    <div>
+      <div className="space-y-1.5">
+        {displayedApprovers.map((approver, idx) => (
+          <div
+            key={idx}
+            className="text-[15px] leading-[22px] text-[#000000] flex items-start gap-1.5"
+          >
+            <span className="font-normal">{idx + 1}.</span>
+            <span className="flex-1 font-normal">
+              {approver.name} | {approver.position}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {hasMore && (
+        <div className="mt-3">
+          <button
+            onClick={() => setShowAll(!showAll)}
+            type="button"
+            className="inline-flex items-center gap-1.5 text-[15px] leading-[22px] text-[#000000] font-normal bg-transparent border-none p-0 cursor-pointer hover:opacity-70 transition-opacity"
+            style={{
+              background: "none",
+              border: "none",
+              padding: 0,
+              font: "inherit",
+              cursor: "pointer",
+              outline: "inherit",
+            }}
+          >
+            <span>{showAll ? "Hide" : "See More"}</span>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+              className={`transition-transform duration-200 ${
+                showAll ? "rotate-180" : ""
+              }`}
+              style={{
+                transform: showAll ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "transform 0.2s ease",
+              }}
+            >
+              <path
+                d="M3 4.5L6 7.5L9 4.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const CustomSteps = ({ current, steps }) => {
+  return (
+    <div className="flex items-center justify-center mb-8">
+      {steps.map((step, index) => (
+        <React.Fragment key={index}>
+          <div className="flex flex-col items-center">
+            <div
+              className={`
+                w-12 h-12 rounded-full flex items-center justify-center
+                ${
+                  index < current
+                    ? "bg-blue-500"
+                    : index === current
+                    ? "bg-blue-500"
+                    : "bg-gray-300"
+                }
+                transition-all duration-300
+              `}
+            >
+              {index < current ? (
+                <svg
+                  className="w-6 h-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={3}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              ) : index === current ? (
+                <svg
+                  className="w-5 h-5 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                  />
+                </svg>
+              ) : (
+                <span className="text-white font-semibold text-lg">
+                  {index + 1}
+                </span>
+              )}
+            </div>
+            <p
+              className={`
+                mt-2 text-sm font-medium
+                ${index <= current ? "text-blue-500" : "text-gray-400"}
+              `}
+            >
+              {step.title}
+            </p>
+          </div>
+
+          {index < steps.length - 1 && (
+            <div
+              className={`
+                h-0.5 w-32 mx-4 mb-6
+                ${index < current ? "bg-blue-500" : "bg-gray-300"}
+                transition-all duration-300
+              `}
+            ></div>
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+};
 
 const ModalRequestApprovalEFaktur = ({
   isOpen = false,
@@ -42,6 +216,7 @@ const ModalRequestApprovalEFaktur = ({
     data_approval,
     data_approval_list,
     pagination_available_requested,
+    user_info,
   } = useSelector((state) => state.efaktur);
 
   const [current, setCurrent] = useState(0);
@@ -120,11 +295,6 @@ const ModalRequestApprovalEFaktur = ({
       disabled: false,
     },
   ];
-
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
 
   const next = () => setCurrent(current + 1);
   const prev = () => setCurrent(current - 1);
@@ -264,7 +434,7 @@ const ModalRequestApprovalEFaktur = ({
     setRemark("");
     setCurrent(0);
     setSearch({});
-    setFilterType("normal"); 
+    setFilterType("normal");
     handleClose();
   };
 
@@ -274,11 +444,10 @@ const ModalRequestApprovalEFaktur = ({
     handleCancel();
   };
 
-  // ✅ Dynamic Label untuk Remark berdasarkan Type
   const getRemarkLabel = () => {
     switch (filterType) {
       case "normal":
-        return "Request";
+        return "Remark";
       case "replacement":
         return "Replacement Reason";
       case "cancellation":
@@ -286,14 +455,14 @@ const ModalRequestApprovalEFaktur = ({
       case "manual_upload":
         return "Note";
       default:
-        return "Request/Reason";
+        return "Remark";
     }
   };
 
   const getRemarkPlaceholder = () => {
     switch (filterType) {
       case "normal":
-        return "Type your request";
+        return "Type your remark";
       case "replacement":
         return "Type your reason for replacement";
       case "cancellation":
@@ -301,242 +470,217 @@ const ModalRequestApprovalEFaktur = ({
       case "manual_upload":
         return "Type your note";
       default:
-        return "Type your request or reason";
+        return "Type your remark";
     }
   };
 
-  // Columns untuk Step 1
-  const baseColumns = useMemo(
-    () => [
-      {
-        key: "no",
-        title: "NO",
-        width: 60,
-        align: "center",
-        render: (_, record, index) => (page - 1) * pageSize + index + 1,
-      },
-      {
-        key: "efakturNo",
-        title: "FAKTUR CODE",
-        dataIndex: "efakturNo",
-        width: 180,
-        align: "left",
-        sorter: true,
-        filteredValue: [search?.efakturNo] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+const baseColumns = useMemo(
+  () => [
+    {
+      key: "no",
+      title: "NO",
+      width: 60,
+      align: "center",
+      render: (_, record, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
+      key: "efakturNo",
+      title: "FAKTUR CODE",
+      dataIndex: "efakturNo",
+      width: 180,
+      align: "left",
+      sorter: true,
+      filteredValue: [search?.efakturNo] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "efakturNo",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "efakturNo",
-          searchInput,
-          searchedColumn,
+          hasValue(search["efakturNo"]),
           searchText,
-          handleSearch,
-          true
+          text || "-",
+          false,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "efakturNo",
-            hasValue(search["efakturNo"]),
-            searchText,
-            text || "-",
-            false,
-            "input",
-            search
-          ),
+    },
+    {
+      key: "type",
+      title: "FAKTUR TYPE",
+      dataIndex: "type",
+      width: 150,
+      align: "center",
+      sorter: true,
+      render: (type) => {
+        const displayType = type || "STANDARD";
+        return (
+          <div className="flex justify-center">
+            <StatusComponent colour={displayType.toLowerCase()}>
+              {displayType}
+            </StatusComponent>
+          </div>
+        );
       },
-      {
-        key: "type",
-        title: "FAKTUR TYPE",
-        dataIndex: "type",
-        width: 150,
-        align: "center",
-        sorter: true,
-        render: (type) => {
-          const typeColors = {
-            STANDARD: "bg-blue-100 text-blue-800 border-blue-300",
-            REPLACEMENT: "bg-orange-100 text-orange-800 border-orange-300",
-            CANCELLATION: "bg-red-100 text-red-800 border-red-300",
-          };
-
-          const displayType = type || "STANDARD";
-
-          return (
-            <div className="flex justify-center">
-              <span
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
-                  typeColors[displayType] ||
-                  "bg-gray-100 text-gray-800 border-gray-300"
-                }`}
-              >
-                {displayType}
-              </span>
-            </div>
-          );
-        },
-      },
-      {
-        key: "billingCode",
-        title: "BILLING CODE",
-        dataIndex: "billingCode",
-        width: 180,
-        align: "left",
-        sorter: true,
-        filteredValue: [search?.billingCode] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+    },
+    {
+      key: "billingCode",
+      title: "BILLING CODE",
+      dataIndex: "billingCode",
+      width: 180,
+      align: "left",
+      sorter: true,
+      filteredValue: [search?.billingCode] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "billingCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "billingCode",
-          searchInput,
-          searchedColumn,
+          hasValue(search["billingCode"]),
           searchText,
-          handleSearch,
-          true
+          text,
+          false,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "billingCode",
-            hasValue(search["billingCode"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "invoiceNumber",
-        title: "INVOICE NUMBER",
-        dataIndex: "invoiceNumber",
-        width: 180,
-        align: "left",
-        sorter: true,
-        filteredValue: [search?.invoiceNumber] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+    },
+    {
+      key: "invoiceNumber",
+      title: "INVOICE NUMBER",
+      dataIndex: "invoiceNumber",
+      width: 180,
+      align: "left",
+      sorter: true,
+      filteredValue: [search?.invoiceNumber] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "invoiceNumber",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "invoiceNumber",
-          searchInput,
-          searchedColumn,
+          hasValue(search["invoiceNumber"]),
           searchText,
-          handleSearch,
-          true
+          text || "-",
+          false,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "invoiceNumber",
-            hasValue(search["invoiceNumber"]),
-            searchText,
-            text || "-",
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "accountNumber",
-        title: "ACCOUNT NUMBER",
-        dataIndex: "accountNumber",
-        width: 180,
-        align: "left",
-        sorter: true,
-        filteredValue: [search?.accountNumber] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+    },
+    {
+      key: "accountNumber",
+      title: "ACCOUNT NUMBER",
+      dataIndex: "accountNumber",
+      width: 180,
+      align: "left",
+      sorter: true,
+      filteredValue: [search?.accountNumber] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accountNumber",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "accountNumber",
-          searchInput,
-          searchedColumn,
+          hasValue(search["accountNumber"]),
           searchText,
-          handleSearch,
-          true
+          text || "-",
+          false,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "accountNumber",
-            hasValue(search["accountNumber"]),
-            searchText,
-            text || "-",
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "accountName",
-        title: "ACCOUNT NAME",
-        dataIndex: "accountName",
-        width: 250,
-        align: "left",
-        sorter: true,
-        filteredValue: [search?.accountName] || null,
-        ellipsis: { showTitle: false },
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
+    },
+    {
+      key: "accountName",
+      title: "ACCOUNT NAME",
+      dataIndex: "accountName",
+      width: 250,
+      align: "left",
+      sorter: true,
+      filteredValue: [search?.accountName] || null,
+      ellipsis: { showTitle: false },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accountName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
           "accountName",
-          searchInput,
-          searchedColumn,
+          hasValue(search["accountName"]),
           searchText,
-          handleSearch,
-          true
+          text || "-",
+          true,
+          "input",
+          search
         ),
-        render: (text) =>
-          renderColumn(
-            "accountName",
-            hasValue(search["accountName"]),
-            searchText,
-            text || "-",
-            true,
-            "input",
-            search
-          ),
+    },
+    {
+      key: "invoiceDate",
+      title: "INVOICE DATE",
+      dataIndex: "invoiceDate",
+      width: 120,
+      align: "center",
+      sorter: true,
+      render: (text) => (text ? moment(text).format("DD-MM-YYYY") : "-"),
+    },
+    {
+      key: "efakturDate",
+      title: "EFAKTUR DATE",
+      dataIndex: "efakturDate",
+      width: 120,
+      align: "center",
+      sorter: true,
+      render: (text) => (text ? moment(text).format("DD-MM-YYYY") : "-"),
+    },
+    {
+      key: "status",
+      title: "STATUS",
+      dataIndex: "status",
+      width: 150,
+      align: "center",
+      sorter: true,
+      render: (status) => {
+        const displayStatus = status || "FAILED";
+        return (
+          <div className="flex justify-center">
+            <StatusComponent colour={displayStatus.toLowerCase()}>
+              {displayStatus}
+            </StatusComponent>
+          </div>
+        );
       },
-      {
-        key: "invoiceDate",
-        title: "INVOICE DATE",
-        dataIndex: "invoiceDate",
-        width: 120,
-        align: "center",
-        sorter: true,
-        render: (text) => (text ? moment(text).format("DD-MM-YYYY") : "-"),
-      },
-      {
-        key: "efakturDate",
-        title: "EFAKTUR DATE",
-        dataIndex: "efakturDate",
-        width: 120,
-        align: "center",
-        sorter: true,
-        render: (text) => (text ? moment(text).format("DD-MM-YYYY") : "-"),
-      },
-      {
-        key: "status",
-        title: "STATUS",
-        dataIndex: "status",
-        width: 150,
-        align: "center",
-        sorter: true,
-        render: (status) => {
-          const statusColors = {
-            FAILED: "bg-red-100 text-red-800 border-red-300",
-            CANCELLED: "bg-gray-100 text-gray-800 border-gray-300",
-            APPROVED: "bg-green-100 text-green-800 border-green-300",
-          };
-
-          const displayStatus = status || "FAILED";
-
-          return (
-            <div className="flex justify-center">
-              <span
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
-                  statusColors[displayStatus] ||
-                  "bg-gray-100 text-gray-800 border-gray-300"
-                }`}
-              >
-                {displayStatus}
-              </span>
-            </div>
-          );
-        },
-      },
-    ],
-    [page, pageSize, search, searchText, searchedColumn]
-  );
+    },
+  ],
+  [page, pageSize, search, searchText, searchedColumn]
+);
 
   const allColumns = useMemo(() => {
     const columnsWithKeys = baseColumns.map((col) => ({
@@ -557,7 +701,6 @@ const ModalRequestApprovalEFaktur = ({
     }));
   }, [allColumns]);
 
-  // Columns untuk Approval Table (Step 2)
   const columnsApproval = [
     {
       title: "NO",
@@ -607,7 +750,7 @@ const ModalRequestApprovalEFaktur = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header={`REQUEST APPROVAL - ${filterType.toUpperCase()}`}
+        header={`REQUEST APPROVAL`}
         handleCancel={handleCancel}
         width={1000}
         footer={
@@ -621,14 +764,27 @@ const ModalRequestApprovalEFaktur = ({
                 Cancel
               </ButtonComponent>
             )}
-            {current > 0 && current < steps.length - 1 && (
+            {current > 0 && (
               <ButtonComponent
                 onClick={prev}
-                type="submit"
-                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
+                type="default"
                 disabled={loading_modal}
               >
-                Previous
+                <div className="flex items-center gap-2">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                  </svg>
+                  <span>Previous</span>
+                </div>
               </ButtonComponent>
             )}
             {current < steps.length - 1 && (
@@ -637,8 +793,8 @@ const ModalRequestApprovalEFaktur = ({
                 type="submit"
                 disabled={steps[current].disabled || loading_modal}
               >
-                <span className="p-1 text-[18px]">Next</span>
-                <RightOutlined style={{ fontSize: "18px", color: "#fff" }} />
+                <span className="text-base">Next</span>
+                <RightOutlined style={{ fontSize: "16px", color: "#fff" }} />
               </ButtonComponent>
             )}
             {current === steps.length - 1 && (
@@ -656,26 +812,12 @@ const ModalRequestApprovalEFaktur = ({
       >
         <Spin spinning={loading_available_requested || loading_modal}>
           <div className="my-6">
-            {/* STEPS */}
-            <div className="mb-8">
-              <Steps
-                current={current}
-                items={items}
-                labelPlacement="vertical"
-                size="small"
-                className="custom-steps"
-              />
-            </div>
+            <CustomSteps current={current} steps={steps} />
 
             <Form layout="vertical" form={form}>
               {/* STEP 1: E-FAKTUR LIST */}
               <div className={`${current !== 0 ? "hidden" : ""}`}>
                 <div className="mb-6">
-                  <p className="text-primary uppercase font-bold mb-4">
-                    E-FAKTUR LIST
-                  </p>
-
-                  {/* Filter Type Dropdown */}
                   <div className="mb-4">
                     <style>{`
                       .filter-type-select .ant-select-selector {
@@ -722,11 +864,12 @@ const ModalRequestApprovalEFaktur = ({
                       <Select.Option value="cancellation">
                         Cancellation
                       </Select.Option>
-                      <Select.Option value="manual_upload" disabled>
-                        Manual Upload (Use Generate XML)
-                      </Select.Option>
                     </Select>
                   </div>
+
+                  <p className="text-primary uppercase font-bold mb-4 text-sm">
+                    E-FAKTUR LIST
+                  </p>
 
                   <TableRBI
                     dataSource={dataSourceWithKeys}
@@ -748,11 +891,10 @@ const ModalRequestApprovalEFaktur = ({
                   />
                 </div>
 
-                {/* Remark - Dynamic Label */}
                 <div className="mb-6">
-                  <p className="text-sm text-gray-600 mb-2">
+                  <p className="text-sm text-gray-700 font-medium mb-2">
                     {getRemarkLabel()}
-                    <span className="text-red-500">*</span>
+                    <span className="text-red-500 ml-1">*</span>
                   </p>
                   <Form.Item
                     name="remark"
@@ -777,7 +919,7 @@ const ModalRequestApprovalEFaktur = ({
               {/* STEP 2: APPROVAL INFORMATION */}
               <div className={`${current !== 1 ? "hidden" : ""}`}>
                 <div className="w-full grid grid-cols-1 gap-x-4">
-                  <p className="text-primary uppercase font-bold mb-4">
+                  <p className="text-primary uppercase font-bold mb-4 text-sm">
                     APPROVAL INFORMATION
                   </p>
 
@@ -845,65 +987,44 @@ const ModalRequestApprovalEFaktur = ({
 
               {/* STEP 3: CONFIRMATION */}
               <div className={`${current !== 2 ? "hidden" : ""}`}>
-                {/* Review Type */}
-                <div className="mb-6 p-5 bg-purple-50 border-2 border-purple-300 rounded-lg">
-                  <h3 className="text-base font-bold text-purple-800 mb-4 pb-2 border-b-2 border-purple-200">
-                    Request Type
-                  </h3>
-                  <DetailText label="Type">
-                    <span className="font-bold text-lg uppercase">
-                      {filterType}
-                    </span>
-                  </DetailText>
+                <div className="mb-6">
+                  <p className="text-sm text-gray-600 mb-1">Remark</p>
+                  <p className="text-base text-gray-800">{remark}</p>
                 </div>
 
-                {/* Review Remark */}
-                <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
-                  <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
-                    {getRemarkLabel()}
-                  </h3>
-                  <DetailText label={getRemarkLabel()}>{remark}</DetailText>
+                {/* APPROVER SECTION - HANYA INI YANG DITAMPILKAN */}
+                <div className="mb-6">
+                  <p className="text-sm text-gray-600 mb-3">Approver</p>
+
+                  <div className="bg-gray-50 p-4 rounded border border-gray-200">
+                    <p className="text-sm font-semibold text-gray-800 mb-3">
+                      APPROVER
+                    </p>
+                    {dataTable.length > 0 ? (
+                      <ApproverListByLevel
+                        dataTable={dataTable}
+                        approvalLevel="Final Approver"
+                        maxInitialShow={2}
+                      />
+                    ) : (
+                      <p className="text-sm text-gray-500 italic">
+                        No approver selected
+                      </p>
+                    )}
+                  </div>
                 </div>
 
-                {/* Review Approver */}
-                <div className="mb-6 p-5 bg-blue-50 border-2 border-blue-300 rounded-lg">
-                  <h3 className="text-base font-bold text-blue-800 mb-4 pb-2 border-b-2 border-blue-200">
-                    APPROVER
-                  </h3>
-                  {dataTable.length > 0 && (
-                    <div className="mb-4">
-                      {dataTable.map((approval, idx) => (
-                        <div key={idx} className="mb-3">
-                          <p className="text-sm font-medium text-gray-700">
-                            {idx + 1}. {approval.position} -{" "}
-                            {approval.hierarchy}
-                          </p>
-                          {approval.employeeDetail &&
-                            approval.employeeDetail.length > 0 && (
-                              <ul className="ml-6 mt-1">
-                                {approval.employeeDetail.map((emp, empIdx) => (
-                                  <li
-                                    key={empIdx}
-                                    className="text-xs text-gray-600"
-                                  >
-                                    • {emp.employeeName} ({emp.email})
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Review E-Faktur List */}
-                <div className="mb-6 p-5 bg-green-50 border-2 border-green-300 rounded-lg">
-                  <h3 className="text-base font-bold text-green-800 mb-4 pb-2 border-b-2 border-green-200">
+                {/* E-FAKTUR LIST */}
+                <div className="mb-6">
+                  <p className="text-primary uppercase font-bold mb-3 text-sm">
                     E-FAKTUR LIST
-                  </h3>
+                  </p>
+
                   <TableRBI
-                    dataSource={selectedRows}
+                    dataSource={selectedRows.map((item, idx) => ({
+                      ...item,
+                      key: item.efakturId || idx,
+                    }))}
                     columns={processedColumns}
                     current={1}
                     pageSize={selectedRows.length}
@@ -913,12 +1034,12 @@ const ModalRequestApprovalEFaktur = ({
                     fixedColumns={fixedColumns}
                     setFixedColumns={setFixedColumns}
                     loading={false}
-                    usePagination={false}
+                    usePagination={true}
+                    showPagination={false}
                   />
-                  <div className="mt-4 p-4 bg-white rounded">
-                    <DetailText label="Total Selected">
-                      {selectedRows.length} item(s)
-                    </DetailText>
+                  <div className="mt-3 text-right text-sm text-gray-600">
+                    Showing 1 to {selectedRows.length} of {selectedRows.length}{" "}
+                    entries
                   </div>
                 </div>
               </div>
@@ -927,27 +1048,6 @@ const ModalRequestApprovalEFaktur = ({
         </Spin>
       </ModalCustom>
 
-      {/* Success Modal */}
-      <ModalSuccess
-        isOpen={modalSuccess}
-        handleOk={handleSuccessClose}
-        handleCancel={() => setModalSuccess(false)}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            {IconModal["icon_success"]}
-            <p className="text-[18px] font-bold">Success</p>
-          </div>
-          <p className="pl-[70px]">
-            Request {filterType} has been submitted successfully.
-          </p>
-          <p className="pl-[70px]">
-            Total Requested: <strong>{selectedRows.length}</strong> E-Faktur
-          </p>
-        </div>
-      </ModalSuccess>
-
-      {/* Error Modal */}
       <ModalError
         isOpen={modalError}
         handleOk={() => setModalError(false)}
