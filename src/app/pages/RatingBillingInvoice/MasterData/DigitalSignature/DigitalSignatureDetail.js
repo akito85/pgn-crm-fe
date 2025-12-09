@@ -104,8 +104,9 @@ const DigitalSignatureDetail = () => {
         updatedBy: signature?.updatedBy || "-",
       });
 
-      // Set Efaktur Code Data
+      // Set Digital Signature Data
       setDataDetail({
+        signatureId: signature?.signatureId,
         name: signature?.name || "-",
         employee: signature?.fullName || "-",
         primaryPosition: signature?.positionName || "-",
@@ -114,6 +115,7 @@ const DigitalSignatureDetail = () => {
         description: signature?.description || "-",
         signatureBase64: signature?.signatureBase64 || "-",
         signatureMethod: signature?.signatureMethod || "-",
+        fileDetail: data_detail?.fileDetail || null,
       });
 
       setListDataAttachment(mappedAttachment);
@@ -313,8 +315,8 @@ const DigitalSignatureDetail = () => {
           onFinish={handleConfirm}
           header={approveOrReject}
           approveOrReject={approveOrReject}
-          menu={"Efaktur Code"}
-          named={dataDetail?.code}
+          menu={"Digital Signature"}
+          named={dataDetail?.name}
         />
 
         {/* Modal Retry */}

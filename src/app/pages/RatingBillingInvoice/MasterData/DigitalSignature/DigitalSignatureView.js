@@ -309,7 +309,6 @@ const DigitalSignatureView = () => {
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED" ||
           (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
-        console.log("sigID: ", record.signatureId);
         const linkContent =
           data > 3 ? (
             <ButtonComponent

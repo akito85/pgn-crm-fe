@@ -2,6 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+nameOverride: "pgn-frontend"
+fullnameOverride: "pgn-frontend"
+
 replicaCount: 1
 deployment:
   enabled: true
@@ -30,7 +33,7 @@ serviceAccount:
 podAnnotations:
   releaseNamespace: "default"
   vault:
-    enabled: true
+    enabled: false
     authPath: ""
     role: "default"
     access_path: ""
@@ -38,12 +41,20 @@ podAnnotations:
     inject: "update"
     access_properties_un: spring.crm-datasource.userName={{ .Data.data.username }}
     access_properties_pw: spring.crm-datasource.password={{ .Data.data.password }}
-podLabels:
-  helm.sh/chart: dbs-module-account
-  app.kubernetes.io/name: dbs-module-account
-  app.kubernetes.io/instance: dbs-module-account
-  app.kubernetes.io/version: "1.0.0"
-  app.kubernetes.io/managed-by: Helm
+# podLabels:
+#   helm.sh/chart: dbs-module-account
+#   app.kubernetes.io/name: dbs-module-account
+#   app.kubernetes.io/instance: dbs-module-account
+#   app.kubernetes.io/version: "1.0.0"
+#   app.kubernetes.io/managed-by: Helm
+
+
+# podLabels:
+#   app.kubernetes.io/name: pgn-frontend
+#   app.kubernetes.io/instance: pgn-frontend
+#   app.kubernetes.io/managed-by: Helm
+#   app.kubernetes.io/version: "1.0.0"        
+#   helm.sh/chart: pgn-frontend-0.1.0 
 
 #
 #podSecurityContext: {}
@@ -63,22 +74,63 @@ service:
   port: 80
 
 ingress:
-  enabled: false
+  enabled: true
   className: "nginx"
+  annotations: 
+    nginx.ingress.kubernetes.io/proxy-body-size: 50m
+    nginx.ingress.kubernetes.io/client-body-buffer-size: 1024K
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    # nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # nginx.ingress.kubernetes.io/use-regex: "true"
   hosts:
     - host: dev-energy.pgn.co.id
       paths:
         - path: /
           pathType: Prefix
-          backend:
-            service:
-              name: dbs-module-account
-              port:
-                number: 80
+          serviceName: pgn-frontend
+          servicePort: 80
+
+        # - path: /rbi(/|$)(.*)
+        #   pathType: ImplementationSpecific
+        #   serviceName: rbi-management
+        #   servicePort: 8903
+        #   annotations:
+        #     nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+        # - path: /payment(/|$)(.*)
+        #   pathType: ImplementationSpecific
+        #   serviceName: dbs-module-payment
+        #   servicePort: 8905
+        #   annotations:
+        #     nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+        # - path: /acc(/|$)(.*)
+        #   pathType: ImplementationSpecific
+        #   serviceName: dbs-module-account
+        #   servicePort: 8902
+        #   annotations:
+        #     nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+        # - path: /rabbitmq(/|$)(.*)
+        #   pathType: ImplementationSpecific
+        #   serviceName: rabbitmq
+        #   servicePort: 15672 # port management nginx biasanya ini
+        #   annotations:
+        #     nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+        # - path: /ig(/|$)(.*)
+        #   pathType: ImplementationSpecific
+        #   serviceName: integration-service
+        #   servicePort: 8903
+        #   annotations:
+        #     nginx.ingress.kubernetes.io/rewrite-target: /$2
   tls:
-    - secretName: crm-developemnt-tls
+    - secretName: tls-secret
       hosts:
         - dev-energy.pgn.co.id
+
 
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -92,18 +144,70 @@ resources:
     cpu: 1
     memory: 128Mi
 #
-livenessProbe:
-  tcpSocket: 80
-  initialDelaySeconds: 180
-  timeoutSeconds: 20
-  successThreshold: 1
-  failureThreshold: 5
-readinessProbe:
-  tcpSocket: 80
-  initialDelaySeconds: 180
-  timeoutSeconds: 20
-  successThreshold: 1
-  failureThreshold: 5
+
+
+
+# readinessProbe:
+#   tcpSocket:
+#     port: 80
+#   initialDelaySeconds: 15
+#   periodSeconds: 10
+#   failureThreshold: 3
+#   successThreshold: 1
+#   timeoutSeconds: 2
+
+# livenessProbe:
+#   tcpSocket:
+#     port: 80
+#   initialDelaySeconds: 30
+#   periodSeconds: 20
+#   failureThreshold: 3
+#   timeoutSeconds: 2
+
+# livenessProbe:
+#   initialDelaySeconds: 180
+#   timeoutSeconds: 20
+#   successThreshold: 1
+#   failureThreshold: 5
+
+# readinessProbe:
+#   initialDelaySeconds: 30
+#   timeoutSeconds: 10
+#   successThreshold: 1
+#   failureThreshold: 5
+
+
+# livenessProbe:
+#   tcpSocket: 80
+#   initialDelaySeconds: 180
+#   timeoutSeconds: 20
+#   successThreshold: 1
+#   failureThreshold: 5
+# readinessProbe:
+#   tcpSocket: 80
+#   initialDelaySeconds: 180
+#   timeoutSeconds: 20
+#   successThreshold: 1
+#   failureThreshold: 5
+
+# livenessProbe:
+#   httpGet:
+#     path: /
+#     port: 80
+#   initialDelaySeconds: 30
+#   periodSeconds: 10
+#   timeoutSeconds: 2
+#   failureThreshold: 3
+
+# readinessProbe:
+#   httpGet:
+#     path: /
+#     port: 80
+#   initialDelaySeconds: 5
+#   periodSeconds: 5
+#   timeoutSeconds: 2
+#   failureThreshold: 3
+
 
 autoscaling:
   enabled: false
