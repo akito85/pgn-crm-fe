@@ -108,6 +108,7 @@ import transactionLogReducer from "../slices/receipt_collection/transactionLog";
 import invoiceMasterDataReducer from "../slices/receipt_collection/invoice";
 import partnerReducer from "../slices/receipt_collection/partner";
 import partnerCaReducer from "../slices/receipt_collection/partnerCa";
+import caPaymentChannelReducer from "../slices/receipt_collection/caPaymentChannel";
 import digitalSignatureReducer from "../slices/rating_billing_invoice/MasterData/digitalSignature";
 
 const reducer = combineReducers({
@@ -224,6 +225,7 @@ const reducer = combineReducers({
   invoiceMasterData: invoiceMasterDataReducer,
   partner: partnerReducer,
   partnerCa: partnerCaReducer,
+  caPaymentChannel: caPaymentChannelReducer,
 
   // Attachment
   attachment: attachmentReducer,
