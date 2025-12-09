@@ -454,17 +454,28 @@ const ModalGenerateXML = ({
   const getFooter = () => {
     if (currentStep === 0) {
       return (
-        <div className="flex justify-end gap-3">
-          <ButtonComponent type="default" onClick={handleCancel}>
+        <div
+          className="flex justify-end gap-3"
+          style={{ alignItems: "stretch" }}
+        >
+          <ButtonComponent
+            type="default"
+            size="large"
+            onClick={handleCancel}
+            style={{ width: 140, height: 40 }}
+          >
             Cancel
           </ButtonComponent>
+
           <ButtonComponent
             type="default"
             className={"bg-red-500"}
             onClick={handleGenerateXML}
             loading={loading_modal}
-            icon={<FileTextOutlined />}
             disabled={selectedRowKeys.length === 0}
+            icon={<FileTextOutlined />}
+            fontSizeClassname="text-[18px] py-1 px-1"
+            style={{ width: 140 }}
           >
             Next
           </ButtonComponent>
@@ -507,7 +518,7 @@ const ModalGenerateXML = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="GENERATE XML FOR E-FAKTUR (MANUAL UPLOAD)"
+        header="GENERATE XML"
         handleCancel={handleCancel}
         width={1000}
         footer={getFooter()}
@@ -525,15 +536,6 @@ const ModalGenerateXML = ({
             {/* Step 1: E-Faktur List */}
             {currentStep === 0 && (
               <>
-                {/* Info Box */}
-                <Alert
-                  message="Info: Generate XML untuk Manual Upload"
-                  description="Pilih E-Faktur dengan type manual_upload yang sudah tersedia untuk di-generate XML-nya."
-                  type="info"
-                  showIcon
-                  className="mb-4"
-                />
-
                 {/* Table */}
                 <TableRBI
                   dataSource={dataSource}
@@ -550,34 +552,14 @@ const ModalGenerateXML = ({
                   setFixedColumns={setFixedColumns}
                   loading={loading_available_requested}
                   rowSelection={rowSelection}
+                  showExport={false}
                 />
-
-                {/* Info Badge */}
-                <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-sm text-blue-800">
-                    <strong>Type:</strong> Manual Upload •
-                    <strong> Total:</strong>{" "}
-                    {pagination_available_requested.totalElements} entries •
-                    <strong> Page:</strong> {page} of{" "}
-                    {pagination_available_requested.totalPages} •
-                    <strong> Selected:</strong> {selectedRowKeys.length}{" "}
-                    E-Faktur
-                  </p>
-                </div>
               </>
             )}
 
             {/* Step 2: Confirmation */}
             {currentStep === 1 && (
               <div>
-                <Alert
-                  message="XML berhasil di-generate"
-                  description={`File XML untuk ${selectedRecords.length} E-Faktur sudah siap untuk diunduh dan digunakan di aplikasi e-Faktur DJP.`}
-                  type="success"
-                  showIcon
-                  className="mb-6"
-                />
-
                 {/* Selected E-Faktur Summary */}
                 <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
                   <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">

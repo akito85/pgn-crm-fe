@@ -12,7 +12,6 @@ import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import StatusComponent from "../../../../components/StatusComponent";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
-import ModalBuatFakturPengganti from "./ModalEfaktur/ModalBuatFakturPengganti";
 import ModalGenerateXML from "./ModalEfaktur/ModalGenerateXML";
 import {
   getDetailEFaktur,
@@ -46,7 +45,6 @@ const DetailEFaktur = () => {
 
   // Local state
   const [activeTab, setActiveTab] = useState("1");
-  const [modalFakturPengganti, setModalFakturPengganti] = useState(false);
   const [modalGenerateXML, setModalGenerateXML] = useState(false);
   const [pageLog, setPageLog] = useState(1);
   const [pageSizeLog, setPageSizeLog] = useState(10);
@@ -1084,17 +1082,6 @@ const DetailEFaktur = () => {
             />
           ) : null}
         </Modal>
-
-        {/* Modals */}
-        <ModalBuatFakturPengganti
-          visible={modalFakturPengganti}
-          onCancel={() => setModalFakturPengganti(false)}
-          onSuccess={() => {
-            setModalFakturPengganti(false);
-            navigate(INVOICE_ROUTES.EFAKTUR_VIEW);
-          }}
-          billingData={detail_efaktur}
-        />
 
         <ModalGenerateXML
           visible={modalGenerateXML}

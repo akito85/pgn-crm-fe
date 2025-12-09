@@ -582,7 +582,7 @@ export const getEFakturColumns = ({
       key: "statusApproval",
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
-      width: 220,
+      width: 300,
       align: "center",
       sorter: true,
       filteredValue: [search?.statusApproval] || null,

@@ -379,7 +379,7 @@ const ViewFaktur = () => {
               onChange={handleChangePage}
               onSizeChanger={handleChangePage}
               totalData={pagination?.totalElements || 0}
-              tableScrolled={{ x: 2500, y: 525 }}
+              tableScrolled={{ x: 3000, y: 525 }}
               onSort={onSort}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}

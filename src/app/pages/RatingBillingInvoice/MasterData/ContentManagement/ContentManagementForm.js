@@ -12,8 +12,7 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import RadioTabs from "../../../../../components/RadioTabs";
-import ContentSetupForm from "./ContentSetupForm";
-import ContentInformationForm from "./ContentInformationForm";
+import BillingBucketSectionForm from "./Form/BillingBucketSectionForm";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
 import { dateFormatting, hasValue } from "../../../../../utils";
 import {
@@ -50,6 +49,8 @@ const ContentManagementForm = ({ type }) => {
     dataListAppHierDetail,
     loading,
   } = useSelector((state) => state.billing_bucket);
+
+
 
   // Declaration
   const [form] = Form.useForm();
@@ -97,20 +98,16 @@ const ContentManagementForm = ({ type }) => {
   const [priority, setPriority] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [bodyData, setBodyData] = useState({});
-
+  
   const isDisabledDate = useMemo(() => {
-    if (
-      hasValue(form?.getFieldsValue()?.endDate) === true &&
-      listDataCriteria?.map((item) => ({
-        startDate: item?.startDate,
-        endDate: item?.endDate,
-      }))?.length > 0
-    ) {
+    if (hasValue(form?.getFieldsValue()?.endDate) === true && listDataCriteria?.map(item => ({ startDate: item?.startDate, endDate: item?.endDate }))?.length > 0) {
       return true;
     } else {
-      return false;
+      return false
     }
   }, [form, listDataCriteria]);
+
+  
 
   const isLoading = loading || loadingForm;
 
@@ -400,8 +397,8 @@ const ContentManagementForm = ({ type }) => {
       breadcrumbName: "Master Data",
     },
     {
-      path: RBI_ROUTES.CONTENT_MANAGEMENT,
-      breadcrumbName: "Content Management",
+      path: RBI_ROUTES.BILLING_BUCKET_VIEW,
+      breadcrumbName: "Billing Bucket",
     },
     {
       path:
@@ -659,7 +656,7 @@ const ContentManagementForm = ({ type }) => {
     criteriaValues,
     dataCriteria,
     listDataCriteria = [],
-    setMissingColumn = () => {},
+    setMissingColumn = () => { },
     minimumData = 0
   ) => {
     let missingColumn = [];
@@ -695,30 +692,26 @@ const ContentManagementForm = ({ type }) => {
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
     // if (hasValue(formHeader?.endDate)) {
-    dataTable?.forEach((item) => {
-      if (
-        moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)
-      ) {
-        dataOverlap?.push(item);
+    dataTable?.forEach(item => {
+      if (moment(item?.startDate) < moment(formHeader?.startDate) || moment(item?.endDate) > moment(formHeader?.endDate)) {
+        dataOverlap?.push(item)
       }
     });
 
     if (dataOverlap?.length > 0) {
-      return true;
+      return true
     } else {
-      return false;
+      return false
     }
     // }
+
   }, []);
+
 
   // Handle Save Form
   const handleSave = async (formValue) => {
     let errorBody = {};
-    const hasOverlapping = checkOverlappingData(
-      { startDate: formValue?.startDate, endDate: formValue?.endDate },
-      listDataCriteria
-    );
+    const hasOverlapping = checkOverlappingData({startDate: formValue?.startDate, endDate: formValue?.endDate}, listDataCriteria)
     if (listDataAttachment.length === 0) {
       handleMandatory(setListSectionInfo, listDataAttachment);
     } else {
@@ -740,7 +733,7 @@ const ContentManagementForm = ({ type }) => {
           criteriaOptions,
           formValue?.criteria,
           listDataCriteria,
-          () => {},
+          () => { },
           0
         )
       ) {
@@ -755,7 +748,7 @@ const ContentManagementForm = ({ type }) => {
           description: `You can't add Criteria. Start date and end date can't be overlap`,
         };
         dispatch(showModalError(errorBody));
-      } else {
+       } else {
         const isDataValid = await checkDataValidity(formValue);
 
         if (isDataValid) {
@@ -971,7 +964,7 @@ const ContentManagementForm = ({ type }) => {
   };
 
   const handleMandatory = (
-    setListSectionInfo = () => {},
+    setListSectionInfo = () => { },
     listDataAttachment,
     errorFields
   ) => {
@@ -980,15 +973,15 @@ const ContentManagementForm = ({ type }) => {
         const errorBadge =
           item.value !== "Attachment"
             ? (errorFields || []).reduce(
-                (current, next) =>
-                  item.paramValue.includes(next.name[0])
-                    ? current + 1
-                    : current,
-                0
-              )
+              (current, next) =>
+                item.paramValue.includes(next.name[0])
+                  ? current + 1
+                  : current,
+              0
+            )
             : listDataAttachment.length < 1
-            ? 1
-            : 0;
+              ? 1
+              : 0;
         return {
           value: item.value,
           paramValue: item.paramValue,
@@ -1059,6 +1052,7 @@ const ContentManagementForm = ({ type }) => {
     return value;
   };
 
+
   return (
     <LayoutMenu>
       <Spin spinning={isLoading}>
@@ -1077,18 +1071,26 @@ const ContentManagementForm = ({ type }) => {
         >
           {/* Billing Bucket Section */}
           <div className={`${valuePage !== "Billing Bucket" ? "hidden" : ""}`}>
-            <ContentSetupForm
-              form={form}
+            <BillingBucketSectionForm
               type={type}
+              form={form}
+              listDataCriteria={listDataCriteria}
+              setListDataCriteria={setListDataCriteria}
+              criteriaValues={criteriaValues}
+              setCriteriaValues={setCriteriaValues}
+              storedDataInline={storedDataInline}
+              setStoredDataInline={setStoredDataInline}
+              listDataBI={listDataBI}
+              setListDataBI={setListDataBI}
+              priority={priority}
+              setPriority={setPriority}
               status={status}
               statusApproval={statusApproval}
-            />
-
-            <ContentInformationForm
-              form={form}
-              type={type}
-              status={status}
-              statusApproval={statusApproval}
+              startDate={startDate}
+              endDate={endDate}
+              handleStartDate={handleStartDate}
+              handleEndDate={handleEndDate}
+              disabledDate={isDisabledDate}
             />
           </div>
 
@@ -1214,9 +1216,8 @@ const ContentManagementForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              flag === 1 ? "created" : "submitted"
-            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${flag === 1 ? "created" : "submitted"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
