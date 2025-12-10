@@ -19,6 +19,7 @@ const ConfirmationModalTabs = ({
   hierarchyTableData,
   dispatch,
   dataAttachment,
+  data = {}
 }) => {
   // Use provided options or fall back to default tabs
   const tabOptions = options.length > 0 ? options : [
@@ -30,7 +31,7 @@ const ConfirmationModalTabs = ({
   const renderSection = () => {
     switch (section) {
       case dataTabs.info:
-        return <ConfirmationModalInfo />;
+        return <ConfirmationModalInfo data={data} />;
       case dataTabs.apprv:
         return (
         <ConfirmationModalApproval
