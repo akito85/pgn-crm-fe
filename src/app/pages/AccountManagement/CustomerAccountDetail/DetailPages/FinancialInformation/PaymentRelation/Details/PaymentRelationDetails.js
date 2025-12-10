@@ -20,7 +20,7 @@ import ModalApproveOrReject from "../../../../../../../../components/Modal/Modal
 import { showModalError } from "../../../../../../../../redux/slices/general_slice";
 
 const tabs = [
-  { value: "Service Request" },
+  { value: "Payment Relation Information" },
   { value: "Attachment" },
 ];
 
