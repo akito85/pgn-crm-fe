@@ -719,8 +719,8 @@ export const approveOrRejectAllPaymentRelation = createAsyncThunk(
       const inactiveUrl = "/v1/dbs/api/payment-relation/approve-inactive";
       
       await Promise.all([
-        accountManagementService.activationWithRemark(url, body),
-        accountManagementService.activationWithRemark(inactiveUrl, inactiveBody),
+        body.length ? accountManagementService.activationWithRemark(url, body) : null,
+        inactiveBody.length ? accountManagementService.activationWithRemark(inactiveUrl, inactiveBody) : null,
       ])
 
       const successBody = {
