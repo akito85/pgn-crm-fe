@@ -166,4 +166,10 @@ export const receipt_and_collection = [
     path: RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PARTNER,
     element: RECEIPT_AND_COLLECTION_ELEMENTS.UPDATE_PARTNER,
   },
+
+  // payment
+  {
+    path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT,
+    element: RECEIPT_AND_COLLECTION_ELEMENTS.VIEW_PAYMENT,
+  },
 ];

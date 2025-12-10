@@ -105,6 +105,7 @@ import masterEfakturCodeReducer from "../slices/rating_billing_invoice/MasterDat
 // import masterDigitalSignatureReducer from "../slices/rating_billing_invoice/MasterData/digitalSignature";
 import bridgeReducer from "../slices/receipt_collection/bridge";
 import invoiceMasterDataReducer from "../slices/receipt_collection/invoice";
+import paymentMasterDataReducer from "../slices/receipt_collection/payment";
 import partnerReducer from "../slices/receipt_collection/partner";
 
 const reducer = combineReducers({
@@ -218,6 +219,7 @@ const reducer = combineReducers({
   late: lateReducer,
   bridge: bridgeReducer,
   invoiceMasterData: invoiceMasterDataReducer,
+  paymentMasterData: paymentMasterDataReducer,
   partner: partnerReducer,
 
   // Attachment

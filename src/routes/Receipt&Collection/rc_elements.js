@@ -22,6 +22,7 @@ import ListRececiptForm from "../../app/pages/ReceiptAndCollection/Receipt/Creat
 import ListDetailLateCharge from "../../app/pages/ReceiptAndCollection/LateChargeManagement/DetailLateCharge/ListDetailLateCharge";
 import ViewBridge from "../../app/pages/ReceiptAndCollection/MasterData/Bridge/ViewBridge";
 import ViewInvoice from "../../app/pages/ReceiptAndCollection/MasterData/Invoice/ViewInvoice";
+import ViewPayment from "../../app/pages/ReceiptAndCollection/MasterData/Payment/ViewPayment";
 
 
 import ViewPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ViewPartner";
@@ -93,4 +94,7 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_PARTNER: <ListDetailPartner />,
   CREATE_PARTNER: <ListFormPartner type={"create"} />,
   UPDATE_PARTNER: <ListFormPartner type={"update"} />,
+  
+  // payment
+  VIEW_PAYMENT: <ViewPayment />,
 };

@@ -66,4 +66,8 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_PARTNER: "/receipt-and-collection/partner/view",
   CREATE_PARTNER: "/receipt-and-collection/partner/create",
   UPDATE_PARTNER: "/receipt-and-collection/partner/update",
+
+  
+  //Payment
+  VIEW_PAYMENT: "/receipt-and-collection/payment",
 };
