@@ -53,6 +53,7 @@ import CreateUpdatePaymentRelation from "../../app/pages/AccountManagement/Custo
 import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/CreateCustomerServiceRequest";
 import CustomerServiceRequestDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
 import InvoiceRelationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/Details/InvoiceRelationDetails";
+import CreateUpdateInvoiceRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/CreateUpdate/CreateUpdateInvoiceRelation";
 
 export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Customer/Account List
@@ -110,6 +111,8 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
 
   // Payment Relation Detail
   VIEW_DETAIL_INVOICE_RELATION_PAGE: <InvoiceRelationDetails />,
+  CREATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation type={"create"} />,
+  UPDATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation type={"update"} />,
 
   // Gas Source
   DETAIL_GAS_SOURCE: <DetailGasSource />,

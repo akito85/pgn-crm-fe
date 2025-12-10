@@ -32,7 +32,7 @@ import {
   getDetailInvoiceRelation,
   getDetailIrApprovalHierarchy,
   getInvoiceRelationAttachment,
-  getInvoiceApprovalHierarchy,
+  getIrApprovalHierarchy,
   getIrAttachmentCategory,
   updateInvoiceRelation,
 } from "../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
@@ -158,7 +158,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   }, [data_invoiceRelationAttachment])
 
   useEffect(() => {
-    dispatch(getInvoiceApprovalHierarchy());
+    dispatch(getIrApprovalHierarchy());
   }, []);
 
   const routes = [
