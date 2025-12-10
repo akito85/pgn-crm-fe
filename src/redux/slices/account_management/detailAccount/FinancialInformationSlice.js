@@ -408,12 +408,10 @@ export const getDetailTaxImplication = createAsyncThunk(
 
 export const getPaymentRelation = createAsyncThunk(
   "GET_PAYMENT_RELATION",
-  async ({page, pageSize, sort, search }, thunkAPI) => {
+  async ({ id, body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/payment-relation/list?page=${page}&size=${pageSize}${
-        sort ? `&sort=${sort}` : ""
-      }${search ? `&searchs=${search}` : ""}`;
-      const response = await accountManagementService.getPagination(url);
+      const url = `/v1/dbs/api/payment-relation/list/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);

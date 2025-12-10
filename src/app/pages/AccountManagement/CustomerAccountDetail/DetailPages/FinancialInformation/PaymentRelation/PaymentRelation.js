@@ -122,19 +122,15 @@ const PaymentRelation = ({
   }
 
   useEffect(() => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
+    const body = {
+      page,
+      size: pageSize,
+      sort,
+      searches: search,
     }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(getPaymentRelation({ page, pageSize, sort, search: reqSearch }));
-  }, [dispatch, page, pageSize, sort, search]);
+
+    dispatch(getPaymentRelation({ id, body }));
+  }, [page, pageSize, sort, search]);
 
   useEffect(() => {
     if (
