@@ -1,4 +1,4 @@
-import ApprovalPaymentRelation from "./ApprovalPaymentRelation";
+import ApprovalInvoiceRelation from "./ApprovalInvoiceRelation";
 
 export default function ApprovalForm({
   dataTable,
@@ -8,7 +8,7 @@ export default function ApprovalForm({
   className,
 }){
   return (
-    <ApprovalPaymentRelation
+    <ApprovalInvoiceRelation
       dataTable={dataTable}
       dataOption={dataOption}
       selectedAppHierId={selectedAppHierId}
