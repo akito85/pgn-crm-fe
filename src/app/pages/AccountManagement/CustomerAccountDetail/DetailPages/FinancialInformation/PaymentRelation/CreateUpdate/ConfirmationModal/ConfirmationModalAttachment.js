@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import ConfirmationModalAttachmentTable from "./ConfirmationModalAttachmentTable";
 
-const ModalConfirmationCreateUpdateApprovalPaymentRelationAttachment = ({
+const ConfirmationModalAttachment = ({
   data = [],
   type,
   dispatch,
@@ -20,4 +20,4 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationAttachment = ({
   );
 };
 
-export default ModalConfirmationCreateUpdateApprovalPaymentRelationAttachment;
+export default ConfirmationModalAttachment;

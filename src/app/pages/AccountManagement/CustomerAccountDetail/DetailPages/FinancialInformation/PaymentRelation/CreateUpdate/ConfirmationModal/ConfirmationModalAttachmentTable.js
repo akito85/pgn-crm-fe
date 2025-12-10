@@ -1,9 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
-import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
+import { useState, useEffect, useRef } from "react";
 import { Spin, Tooltip } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
-import SVGIcon from "../../../../../../../../../assets/Icon/index";
-import { useSelector } from "react-redux";
 import { previewFileAttachment } from "../../../../../../../../../utils/previewFileAttachment";
 import { getColumnSearchPropsPaging } from "../../../../../../../../../utils/getColumnSearchProps";
 import moment from "moment";

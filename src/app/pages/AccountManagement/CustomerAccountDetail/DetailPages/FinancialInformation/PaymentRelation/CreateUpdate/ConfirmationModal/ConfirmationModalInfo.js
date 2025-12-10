@@ -1,20 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Tooltip } from "antd";
-import TablePagination from "../../../../../../../../../components/TablePagination";
-import SVGIcon from "../../../../../../../../../assets/Icon/index";
 import { Fragment } from "react";
-import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import DetailText from "../../../../../../../../../components/DetailText";
-import BaseContainer from "../../../../../../../../../components/BaseContainer";
-import { CloseOutlined, PauseCircleOutlined, PlayCircleOutlined, LockOutlined, PlusOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import { getCustomerDetail } from "../../../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../../../utils";
 
-const ModalConfirmationCreateUpdateApprovalPaymentRelationInfo = ({
+const ConfirmationModalInfo = ({
   data = {},
   handleChange = () => {},
   handleChangeSize = () => {},
@@ -90,4 +83,4 @@ const ModalConfirmationCreateUpdateApprovalPaymentRelationInfo = ({
   );
 };
 
-export default ModalConfirmationCreateUpdateApprovalPaymentRelationInfo;
+export default ConfirmationModalInfo;
