@@ -23,6 +23,11 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   CREATE_PAYMENT_RELATION: "/account-management/account-standard/financial-information/payment-relation/create",
   UPDATE_PAYMENT_RELATION: "/account-management/account-standard/financial-information/payment-relation/update",
 
+  // Invoice Relation Detail
+  VIEW_DETAIL_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/details",
+  CREATE_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/create",
+  UPDATE_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/update",
+
   //Detail Service Agreement
   VIEW_DETAIL_SERVICE_AGREEMENT:
     "/account-management/account-standard/service-agreement/view",
