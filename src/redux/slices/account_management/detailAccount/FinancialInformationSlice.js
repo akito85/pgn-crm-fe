@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import accountManagementService from "../../../services/account_management/accountManagementService";
-import { showModalError, showModalSuccess } from "../../general_slice";
+import { setBodyError, showModalError, showModalSuccess } from "../../general_slice";
 
 const initialState = {
+  loading: false,
   data_withHoldingTax: [],
   data_taxIdentifier: [],
   data_taxRelation: [],
@@ -14,9 +15,17 @@ const initialState = {
   data_billingBucket: [],
   data_accountingRule: {},
   data_globalTypeTaxIdentifier: [],
+  data_paymentRelation: [],
   data_firstIndexIdentifier: [],
   data_taxRelationFirstIndex: [],
-  detail_taxImplication: {}
+  data_prApprovalHierarchy: [],
+  detail_prApprovalHierarchy: [],
+  data_prAttachmentCategory: [],
+  data_prAccountStandard: [],
+  detail_taxImplication: {},
+  detail_paymentRelation: {},
+  data_paymentRelationAttachment: [],
+  data_prApprovalHistory: {},
 };
 
 export const getGlobalTypeTaxIdentifier= createAsyncThunk(
@@ -397,6 +406,149 @@ export const getDetailTaxImplication = createAsyncThunk(
   }
 );
 
+export const getPaymentRelation = createAsyncThunk(
+  "GET_PAYMENT_RELATION",
+  async ({ id, body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/list/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getPaymentRelationAttachment = createAsyncThunk(
+  "GET_PAYMENT_RELATION_ATTACHMENT",
+  async ({ id }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/list-attachment/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+)
+
+export const createPaymentRelation = createAsyncThunk(
+  "CREATE_PAYMENT_RELATION",
+  async ({ body: createBody, attachments = [] }, thunkAPI) => {
+    try {
+      const createUrl = "/v1/dbs/api/payment-relation/create";
+      const response = await accountManagementService.createData(createUrl, createBody);
+
+      const { id } = response.data;
+
+      const uploadUrl = `v1/dbs/api/payment-relation/upload-attachment/${id}`;
+
+      const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
+        uploadUrl,
+        {
+          file:  attachment.file,
+          category: attachment.fileCategoryId,
+        }
+      ));
+
+      await Promise.all(uploadPromises);
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody))
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. An unknown error occured.`
+        }
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const updatePaymentRelation = createAsyncThunk(
+  "UPDATE_PAYMENT_RELATION",
+  async ({ id, body: updateBody, attachments = [] }, thunkAPI) => {
+    try {
+      const updateUrl = `/v1/dbs/api/payment-relation/${id}`;
+      const response = await accountManagementService.updateData(updateUrl, updateBody);
+
+      const uploadUrl = `v1/dbs/api/payment-relation/upload-attachment/${id}`;
+
+      const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
+        uploadUrl,
+        {
+          file:  attachment.file,
+          category: attachment.fileCategoryId,
+        }
+      ));
+
+      await Promise.all(uploadPromises);
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody))
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. An unknown error occured.`
+        }
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getDetailPaymentRelation = createAsyncThunk(
+  "GET_DETAIL_PAYMENT_RELATION",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/detail/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 export const getBillingBucket = createAsyncThunk(
   "GET_BILLING_BUCKET",
   async ({ id, page, pageSize, sort, search }, thunkAPI) => {
@@ -420,6 +572,240 @@ export const getAccountingRule = createAsyncThunk(
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getPrApprovalHierarchy = createAsyncThunk(
+  "GET_PR_APPROVAL_HIERARCHY",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/approval-hierarchies`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+)
+
+export const getDetailPrApprovalHierarchy = createAsyncThunk(
+  "GET_DETAIL_PR_APPROVAL_HIERARCHY",
+  async ({ id }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/approval-hierarchy/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+)
+
+export const getPrAttachmentCategory = createAsyncThunk(
+  "GET_PR_ATTACHMENT_CATEGORY",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/attachment-category`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+)
+
+export const getPrAccountStandard = createAsyncThunk(
+  "GET_PR_ACCOUNT_STANDARD",
+  async ({ page, pageSize, sort, search }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/account/list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await accountManagementService.getPagination(url);
+      return response?.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+)
+
+export const approveOrRejectPaymentRelation = createAsyncThunk(
+  "APPROVE_OR_REJECT_PAYMENT_RELATION",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-relation/approve";
+      const response = await accountManagementService.activationWithRemark(url, body);
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${body?.action === "APPROVE" ? 'approved' : 'rejected'}.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody))
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body?.action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body?.action === "APPROVED" ? 'approved' : 'rejected'}. An unknown error occured.`
+        }
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const approveOrRejectInactivePaymentRelation = createAsyncThunk(
+  "APPROVE_OR_REJECT_INACTIVE_PAYMENT_RELATION",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-relation/approve-inactive";
+      const response = await accountManagementService.activationWithRemark(url, body);
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${body?.action === "APPROVE" ? 'approved' : 'rejected'}.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody))
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body?.action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body?.action === "APPROVED" ? 'approved' : 'rejected'}. An unknown error occured.`
+        }
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const approveOrRejectAllPaymentRelation = createAsyncThunk(
+  "APPROVE_OR_REJECT_ALL_PAYMENT_RELATION",
+  async ({ body, inactiveBody }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-relation/approve";
+      const inactiveUrl = "/v1/dbs/api/payment-relation/approve-inactive";
+      
+      await Promise.all([
+        body.length ? accountManagementService.activationWithRemark(url, body) : null,
+        inactiveBody.length ? accountManagementService.activationWithRemark(inactiveUrl, inactiveBody) : null,
+      ])
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${body?.action === "APPROVE" ? 'approved' : 'rejected'}.`,
+        return: false,
+      };
+
+      thunkAPI.dispatch(showModalSuccess(successBody))
+      return null;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body?.action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body?.action === "APPROVED" ? 'approved' : 'rejected'}. An unknown error occured.`
+        }
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const inactivatePaymentRelation = createAsyncThunk(
+  "INACTIVATE_PAYMENT_RELATION",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-relation/inactive";
+      const response = await accountManagementService.activationWithRemark(url, body);
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been submitted`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody))
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not submitted. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not submitted. An unknown error occured.`
+        }
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getPrApprovalHistory = createAsyncThunk(
+  "GET_APPROVAL_HISTORY_PAYMENT_RELATION",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/approval-history/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return Array.isArray(response.data) ? null : response.data;
+    } catch (error) {
+      if (error.response.data.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      }
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -591,6 +977,58 @@ const financialInformationSlice = createSlice({
       state.loading = false;
     },
 
+    /** Get Payment Relation */
+    [getPaymentRelation.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPaymentRelation.fulfilled]: (state, action) => {
+      state.data_paymentRelation = action.payload;
+      state.loading = false;
+    },
+    [getPaymentRelation.rejected]: (state) => {
+      state.data_paymentRelation = [];
+      state.loading = false;
+    },
+
+    /** Get Detail Payment Relation */
+    [getDetailPaymentRelation.pending]: (state, action) => {
+      state.detail_paymentRelation = action.payload;
+      state.loading = true;
+    },
+    [getDetailPaymentRelation.fulfilled]: (state, action) => {
+      state.detail_paymentRelation = action.payload;
+      state.loading = false;
+    },
+    [getDetailPaymentRelation.rejected]: (state, action) => {
+      state.detail_paymentRelation = action.payload;
+      state.loading = false;
+    },
+
+    /** Create Payment Relation */
+    [createPaymentRelation.pending]: (state) => {
+      state.loading = true;
+    },
+    [createPaymentRelation.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [createPaymentRelation.pending]: (state) => {
+      state.loading = false;
+    },
+
+    /** Update Payment Relation */
+    [updatePaymentRelation.pending]: (state) => {
+      state.isPrSuccess = false;
+      state.loading = true;
+    },
+    [updatePaymentRelation.fulfilled]: (state) => {
+      state.isPrSuccess = true;
+      state.loading = false;
+    },
+    [updatePaymentRelation.pending]: (state) => {
+      state.isPrSuccess = false;
+      state.loading = false;
+    },
+
     //billing bucket
     [getBillingBucket.pending]: (state, action) => {
       state.data_billingBucket = action.payload;
@@ -616,6 +1054,127 @@ const financialInformationSlice = createSlice({
     },
     [getAccountingRule.rejected]: (state, action) => {
       state.data_accountingRule = action.payload;
+      state.loading = false;
+    },
+
+    /** Get PR Approval Hierarchy */
+    [getPrApprovalHierarchy.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPrApprovalHierarchy.fulfilled]: (state, action) => {
+      state.data_prApprovalHierarchy = action.payload;
+      state.loading = false;
+    },
+    [getPrApprovalHierarchy.rejected]: (state) => {
+      state.data_prApprovalHierarchy = [];
+      state.loading = false;
+    },
+
+    /** Get PR Detail Approval Hierarchy */
+    [getDetailPrApprovalHierarchy.pending]: (state) => {
+      state.loading = true;
+    },
+    [getDetailPrApprovalHierarchy.fulfilled]: (state, action) => {
+      state.detail_prApprovalHierarchy = action.payload;
+      state.loading = false;
+    },
+    [getDetailPrApprovalHierarchy.rejected]: (state) => {
+      state.detail_prApprovalHierarchy = [];
+      state.loading = false;
+    },
+
+    /** Get PR Attachment Category */
+    [getPrAttachmentCategory.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPrAttachmentCategory.fulfilled]: (state, action) => {
+      state.data_prAttachmentCategory = action.payload;
+      state.loading = false;
+    },
+    [getPrAttachmentCategory.rejected]: (state) => {
+      state.data_prAttachmentCategory = [];
+      state.loading = false;
+    },
+
+    /** Get PR Account Standard */
+    [getPrAccountStandard.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPrAccountStandard.fulfilled]: (state, action) => {
+      state.data_prAccountStandard = action.payload;
+      state.loading = false;
+    },
+    [getPrAccountStandard.rejected]: (state) => {
+      state.data_prAccountStandard = [];
+      state.loading = false;
+    },
+
+    /** Get Payment Relation Attachment */
+    [getPaymentRelationAttachment.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPaymentRelationAttachment.fulfilled]: (state, action) => {
+      state.data_paymentRelationAttachment = action.payload;
+      state.loading = false;
+    },
+    [getPaymentRelationAttachment.rejected]: (state) => {
+      state.data_paymentRelationAttachment = [];
+      state.loading = false;
+    },
+
+    /** Approve or Reject Payment Relation */
+    [approveOrRejectPaymentRelation.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectPaymentRelation.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [approveOrRejectPaymentRelation.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    /** Approve or Reject Inactive Payment Relation */
+    [approveOrRejectInactivePaymentRelation.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectInactivePaymentRelation.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [approveOrRejectInactivePaymentRelation.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    /** Approve or Reject All Inactive Payment Relation */
+    [approveOrRejectAllPaymentRelation.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectAllPaymentRelation.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [approveOrRejectAllPaymentRelation.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    /** Inactivate Payment Relation Attachment */
+    [inactivatePaymentRelation.pending]: (state) => {
+      state.loading = true;
+    },
+    [inactivatePaymentRelation.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [inactivatePaymentRelation.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    /** Get Payment Relation Approval History */
+    [getPrApprovalHistory.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPrApprovalHistory.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_prApprovalHistory = action.payload;
+    },
+    [getPrApprovalHistory.rejected]: (state) => {
       state.loading = false;
     },
   },

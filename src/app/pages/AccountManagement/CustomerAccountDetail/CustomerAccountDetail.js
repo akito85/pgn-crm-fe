@@ -52,6 +52,9 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
 
   //state
   const [tabs, setTabs] = useState([]);
+  const [isApproval, setIsApproval] = useState(false);
+  const [showApprovalButton, setShowApprovalButton] = useState(false);
+  const [submitApprovalCondition, setSubmitApprovalCondition] = useState("");
 
   useEffect(() => {
     if (type != "standard") {
@@ -130,21 +133,18 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
               type={type}
               setTypeAccountInfoDetailSection={setTypeAccountInfoDetailSection}
               dispatch = {dispatch}
+              isApproval={isApproval}
+              setIsApproval={setIsApproval}
+              setShowApprovalButton={setShowApprovalButton}
+              submitApprovalCondition={submitApprovalCondition}
+              setSubmitApprovalCondition={setSubmitApprovalCondition}
               // handleChangeInteraction={handleSetType}
             />
-            <div className="my-5 flex">
-              <Link
-                to={
-                  type === "standard"
-                    ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
-                    : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME
-                }
-              >
+            <div className="my-5 flex justify-between">
+              {isApproval ? (
                 <ButtonComponent
                   type={"submit"}
-                  // onClick={() => {
-                  //   navigate(-1)
-                  // }}
+                  onClick={() => setIsApproval(false)}
                   icon={
                     <LeftOutlined
                       style={{
@@ -157,7 +157,52 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
                 >
                   Back
                 </ButtonComponent>
-              </Link>
+              ) : (
+                <Link
+                  to={
+                    type === "standard"
+                      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
+                      : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME
+                  }
+                >
+                  <ButtonComponent
+                    type={"submit"}
+                    // onClick={() => {
+                    //   navigate(-1)
+                    // }}
+                    icon={
+                      <LeftOutlined
+                        style={{
+                          color: "#fff",
+                          fontSize: 24,
+                          justifyItems: "center",
+                        }}
+                      />
+                    }
+                  >
+                    Back
+                  </ButtonComponent>
+                </Link>
+              )}
+
+              {showApprovalButton && (
+              <div className={"w-full flex justify-end gap-5"}>
+                <ButtonComponent
+                  type="reject"
+                  onClick={() => setSubmitApprovalCondition("reject")}
+                  disabled={!!submitApprovalCondition}
+                >
+                  Reject
+                </ButtonComponent>
+                <ButtonComponent
+                  type="approve"
+                  onClick={() => setSubmitApprovalCondition("approve")}
+                  disabled={!!submitApprovalCondition}
+                >
+                  Approve
+                </ButtonComponent>
+              </div>
+            )}
             </div>
           </div>
           {/* ) : (

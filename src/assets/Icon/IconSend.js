@@ -21,7 +21,7 @@ const SVG = ({
       fill={color}
       // stroke="#0075BF"
       stroke={color}
-      stroke-width="0.5"
+      strokeWidth="0.5"
     />
   </svg>
 );

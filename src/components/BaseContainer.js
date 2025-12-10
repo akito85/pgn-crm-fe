@@ -1,14 +1,14 @@
 import React from "react";
 
-const BaseContainer = ({ header,subHeader, children, type, element }) => {
+const BaseContainer = ({ header,subHeader, children, type, element, removeTopMargin = false }) => {
   return (
-    <div className="drop-shadow-lg bg-white rounded-lg w-full mt-[30px] p-[20px]">
+    <div className={`drop-shadow-lg bg-white rounded-lg w-full ${!removeTopMargin ? "mt-[30px]" : ""} p-[20px]`}>
       {type === "profile" || type === 'tab' ? (
         <>
           <div className="p-4">{element}</div>
         </>
       ) : (
-        <>
+        (header || subHeader) && <>
           <div className="p-4">
             <div className="text-primary text-xs font-bold uppercase">
               {header}

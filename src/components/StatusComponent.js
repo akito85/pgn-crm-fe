@@ -37,7 +37,7 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         case "waiting":
         case "waiting approval":
         case "WAITING_APPROVAL":
-        case "in progress":
+        case "in pross":
         case "inprogress":
         case "partial payment":
         case "waiting to release":
