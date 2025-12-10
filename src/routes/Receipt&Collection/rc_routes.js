@@ -58,7 +58,10 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
 
   //bridge
   VIEW_BRIDGE: "/receipt-and-collection/bridge",
-  
+
+  //transaction log
+  VIEW_TRANSACTION_LOG: "/receipt-and-collection/transaction-log",
+
   //invoice
   VIEW_INVOICE: "/receipt-and-collection/invoice",
 
@@ -66,8 +69,23 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_PARTNER: "/receipt-and-collection/partner/view",
   CREATE_PARTNER: "/receipt-and-collection/partner/create",
   UPDATE_PARTNER: "/receipt-and-collection/partner/update",
-
   
   //Payment
   VIEW_PAYMENT: "/receipt-and-collection/payment",
+  VIEW_PARTNER_CA: "/receipt-and-collection/partner-ca",
+  DETAIL_PARTNER_CA: "/receipt-and-collection/partner-ca/view",
+  CREATE_PARTNER_CA: "/receipt-and-collection/partner-ca/create",
+  UPDATE_PARTNER_CA: "/receipt-and-collection/partner-ca/update",
+
+  // Ca Payment Channel
+  VIEW_CA_PAYMENT_CHANNEL: "/receipt-and-collection/ca-payment-channel",
+  DETAIL_CA_PAYMENT_CHANNEL: "/receipt-and-collection/ca-payment-channel/view",
+  CREATE_CA_PAYMENT_CHANNEL: "/receipt-and-collection/ca-payment-channel/create",
+  UPDATE_CA_PAYMENT_CHANNEL: "/receipt-and-collection/ca-payment-channel/update",
+
+  // Collection Agent
+  VIEW_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent",
+  DETAIL_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/view",
+  CREATE_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/create",
+  UPDATE_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/update",
 };

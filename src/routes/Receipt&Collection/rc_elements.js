@@ -23,11 +23,28 @@ import ListDetailLateCharge from "../../app/pages/ReceiptAndCollection/LateCharg
 import ViewBridge from "../../app/pages/ReceiptAndCollection/MasterData/Bridge/ViewBridge";
 import ViewInvoice from "../../app/pages/ReceiptAndCollection/MasterData/Invoice/ViewInvoice";
 import ViewPayment from "../../app/pages/ReceiptAndCollection/MasterData/Payment/ViewPayment";
+import ViewTransactionLog from "../../app/pages/ReceiptAndCollection/MasterData/TransactionLog/ViewTransactionLog";
 
 
 import ViewPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ViewPartner";
 import ListDetailPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ListDetailPartner";
 import ListFormPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ListFormPartner";
+
+import ViewPartnerCa from "../../app/pages/ReceiptAndCollection/MasterData/PartnerCa/ViewPartnerCa";
+import ListDetailPartnerCa from "../../app/pages/ReceiptAndCollection/MasterData/PartnerCa/ListDetailPartnerCa";
+import ListFormPartnerCa from "../../app/pages/ReceiptAndCollection/MasterData/PartnerCa/ListFormPartnerCa";
+
+import ViewCaPaymentChannel from "../../app/pages/ReceiptAndCollection/MasterData/CaPaymentChannel/ViewCaPaymentChannel";
+import ListDetailCaPaymentChannel from "../../app/pages/ReceiptAndCollection/MasterData/CaPaymentChannel/ListDetailCaPaymentChannel";
+import ListFormCaPaymentChannel from "../../app/pages/ReceiptAndCollection/MasterData/CaPaymentChannel/ListFormCaPaymentChannel";
+
+// import ViewCollectingAgent from "../../app/pages/ReceiptAndCollection/MasterData/CaPaymentChannel/ViewCaPaymentChannel";
+// import ListDetailCollectingAgent from "../../app/pages/ReceiptAndCollection/MasterData/CaPaymentChannel/ListDetailCaPaymentChannel";
+// import ListFormCollectingAgent from "../../app/pages/ReceiptAndCollection/MasterData/CaPaymentChannel/ListFormCaPaymentChannel";
+
+import ViewCollectingAgent from "../../app/pages/ReceiptAndCollection/MasterData/CollectingAgent/ViewCollectingAgent";
+import ListDetailCollectingAgent from "../../app/pages/ReceiptAndCollection/MasterData/CollectingAgent/ListDetailCollectingAgent";
+import ListFormCollectingAgent from "../../app/pages/ReceiptAndCollection/MasterData/CollectingAgent/ListFormCollectingAgent";
 
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
@@ -85,11 +102,14 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
 
   // bridge
   VIEW_BRIDGE: <ViewBridge />,
-  
+
   // invoice
   VIEW_INVOICE: <ViewInvoice />,
 
-  //payment item
+  // transaction log
+  VIEW_TRANSACTION_LOG: <ViewTransactionLog />,
+
+  // partner
   VIEW_PARTNER: <ViewPartner />,
   DETAIL_PARTNER: <ListDetailPartner />,
   CREATE_PARTNER: <ListFormPartner type={"create"} />,
@@ -97,4 +117,22 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   
   // payment
   VIEW_PAYMENT: <ViewPayment />,
+
+  // partner ca
+  VIEW_PARTNER_CA: <ViewPartnerCa />,
+  DETAIL_PARTNER_CA: <ListDetailPartnerCa />,
+  CREATE_PARTNER_CA: <ListFormPartnerCa type={"create"} />,
+  UPDATE_PARTNER_CA: <ListFormPartnerCa type={"update"} />,
+
+  // ca payment channel
+  VIEW_CA_PAYMENT_CHANNEL: <ViewCaPaymentChannel />,
+  DETAIL_CA_PAYMENT_CHANNEL: <ListDetailCaPaymentChannel />,
+  CREATE_CA_PAYMENT_CHANNEL: <ListFormCaPaymentChannel type={"create"} />,
+  UPDATE_CA_PAYMENT_CHANNEL: <ListFormCaPaymentChannel type={"update"} />,
+
+  // Collection Agent
+  VIEW_COLLECTING_AGENT: <ViewCollectingAgent />,
+  DETAIL_COLLECTING_AGENT: <ListDetailCollectingAgent />,
+  CREATE_COLLECTING_AGENT: <ListFormCollectingAgent type={"create"} />,
+  UPDATE_COLLECTING_AGENT: <ListFormCollectingAgent type={"update"} />,
 };

@@ -507,6 +507,8 @@ const EFakturCodeForm = ({ type }) => {
     setBodyError({});
   };
 
+  console.log("data: ", listDataAttachment);
+
   return (
     <LayoutMenu>
       <Spin spinning={isLoading}>
@@ -552,16 +554,16 @@ const EFakturCodeForm = ({ type }) => {
           <div className={valuePage !== "Attachment" ? "hidden" : ""}>
             <BaseContainer header={"Attachment Information"}>
               <AttachmentComponent
-                type={"create"}
+                type={type}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
                 dispatch={dispatch}
+                typeSelector="billing_bucket"
                 getAPICategory={getAttachmentCategory}
-                typeSelector="masterEfakturCode"
                 service={ratingBillingHttpService}
                 configApplication={configApp.RATING_BILLING_SERVICE}
                 getAPIGuard={getConfigFileRBIData}
-                typeRBI={"masterEfakturCode"}
+                typeRBI={"data"}
                 mandatory={true}
               />
             </BaseContainer>

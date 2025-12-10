@@ -1,5 +1,5 @@
-import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
-import { hasValue, renderColumn } from "../../../../../utils";
+import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 
 export const columns = (
   search,
@@ -26,7 +26,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "custNumber",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "custNumber",
         searchInput,
@@ -52,7 +52,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "custName",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "custName",
         searchInput,
@@ -78,7 +78,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "billAmount",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "billAmount",
         searchInput,
@@ -104,7 +104,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "currency",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "currency",
         searchInput,
@@ -130,7 +130,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "usage",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "usage",
         searchInput,
@@ -156,7 +156,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "custType",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "custType",
         searchInput,
@@ -182,7 +182,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "totalBillPeriod",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "totalBillPeriod",
         searchInput,
@@ -208,7 +208,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "billPeriod",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "billPeriod",
         searchInput,
@@ -234,7 +234,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "billCycle",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "billCycle",
         searchInput,
@@ -260,7 +260,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "billReference",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "billReference",
         searchInput,
@@ -286,7 +286,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "processStatus",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "processStatus",
         searchInput,
@@ -310,25 +310,25 @@ export const columns = (
       key: "processDate",
       title: "Process Date",
       sorter: true,
-      align: "left",
+      align: "center",
       dataIndex: "processDate",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "processDate",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        false,
+        "date"
       ),
       render: (text) =>
-        renderColumn(
+        renderDateColumn(
           "processDate",
           hasValue(search["processDate"]),
           searchText,
           text,
-          false,
-          "input",
+          "date",
           search
         ),
     },
@@ -338,7 +338,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "paidAmount",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "paidAmount",
         searchInput,
@@ -364,7 +364,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "receiptNumber",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "receiptNumber",
         searchInput,
@@ -390,7 +390,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "stan",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "stan",
         searchInput,
@@ -416,23 +416,23 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "transDate",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "transDate",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        false,
+        "date"
       ),
       render: (text) =>
-        renderColumn(
+        renderDateColumn(
           "transDate",
           hasValue(search["transDate"]),
           searchText,
           text,
-          false,
-          "input",
+          "date",
           search
         ),
     },
@@ -442,7 +442,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "caCode",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "caCode",
         searchInput,
@@ -468,7 +468,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "ciCode",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "ciCode",
         searchInput,
@@ -494,7 +494,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "terminalId",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "terminalId",
         searchInput,
@@ -520,7 +520,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "standBegin",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "standBegin",
         searchInput,
@@ -546,7 +546,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "standEnd",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "standEnd",
         searchInput,
@@ -572,7 +572,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "gopMasterId",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "gopMasterId",
         searchInput,
@@ -598,7 +598,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "sessionId",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "sessionId",
         searchInput,
@@ -624,7 +624,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "partnerCode",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "partnerCode",
         searchInput,
@@ -650,7 +650,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "custSegment",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "custSegment",
         searchInput,
@@ -676,7 +676,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "paymentCode",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "paymentCode",
         searchInput,
@@ -702,7 +702,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "readingMethod",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "readingMethod",
         searchInput,
@@ -728,7 +728,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "gasInvAmount",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "gasInvAmount",
         searchInput,
@@ -754,7 +754,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "guaranteeInvAmount",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "guaranteeInvAmount",
         searchInput,
@@ -780,7 +780,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "othersInvAmount",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "othersInvAmount",
         searchInput,
@@ -806,7 +806,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "totalAmount",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "totalAmount",
         searchInput,
@@ -832,23 +832,24 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "updatedDate",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "updatedDate",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        false,
+        "date"
       ),
       render: (text) =>
-        renderColumn(
+        renderDateColumn(
           "updatedDate",
           hasValue(search["updatedDate"]),
           searchText,
           text,
           false,
-          "input",
+          "date",
           search
         ),
     },
@@ -858,7 +859,7 @@ export const columns = (
       sorter: true,
       align: "left",
       dataIndex: "transactionId",
-      ...getColumnSearchPropsUseFilteredValue(
+      ...getColumnSearchPropsPaging(
         search,
         "transactionId",
         searchInput,

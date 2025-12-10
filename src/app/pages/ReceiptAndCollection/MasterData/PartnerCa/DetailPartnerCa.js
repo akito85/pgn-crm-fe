@@ -3,7 +3,7 @@ import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../utils";
 
-const DetailPartner = ({ data_detail,  data_req }) => {
+const DetailPartnerCa = ({ data_detail,  data_req }) => {
 
   
   return (
@@ -25,19 +25,16 @@ const DetailPartner = ({ data_detail,  data_req }) => {
           </div>
         </BaseContainer>
       ) : null}
-      <BaseContainer header={"PARTNER INFORMATION"}>
+      <BaseContainer header={"PARTNER CA INFORMATION"}>
         <div className="w-full grid grid-cols-3 gap-3">
           <DetailText label="Partner Code">
             {data_detail?.partnerCode}
           </DetailText>
-          <DetailText label="Partner Name">
-            {data_detail?.partnerName}
+          <DetailText label="Collaction Agent Code">
+            {data_detail?.caCode}
           </DetailText>
-          <DetailText label="Sec Key Signature">
-            {data_detail?.secKeySignature }
-          </DetailText>
-          <DetailText label="Token Expiration Time">
-            {data_detail?.tokenExpirationTime }
+          <DetailText label="Settlement Bank">
+            {data_detail?.settlementBank }
           </DetailText>
           <DetailText label="Eff Start Date">
             {moment(data_detail?.effStartDate).format(dateFormatting.date)}
@@ -51,11 +48,6 @@ const DetailPartner = ({ data_detail,  data_req }) => {
           <DetailText label="Status Approval">
             {data_detail?.statusApproval}
           </DetailText>
-          <div className="col-span-3">
-            <DetailText label="Type">
-              {data_detail?.type}
-            </DetailText>
-          </div>
         </div>
       </BaseContainer>
 
@@ -78,4 +70,4 @@ const DetailPartner = ({ data_detail,  data_req }) => {
   );
 };
 
-export default DetailPartner;
+export default DetailPartnerCa;

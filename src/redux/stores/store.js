@@ -104,9 +104,14 @@ import managementDeliveryInvoiceReducer from "../slices/rating_billing_invoice/m
 import masterEfakturCodeReducer from "../slices/rating_billing_invoice/MasterData/efakturCode";
 // import masterDigitalSignatureReducer from "../slices/rating_billing_invoice/MasterData/digitalSignature";
 import bridgeReducer from "../slices/receipt_collection/bridge";
+import transactionLogReducer from "../slices/receipt_collection/transactionLog";
 import invoiceMasterDataReducer from "../slices/receipt_collection/invoice";
 import paymentMasterDataReducer from "../slices/receipt_collection/payment";
 import partnerReducer from "../slices/receipt_collection/partner";
+import partnerCaReducer from "../slices/receipt_collection/partnerCa";
+import caPaymentChannelReducer from "../slices/receipt_collection/caPaymentChannel";
+import collectingAgentReducer from "../slices/receipt_collection/collectingAgent";
+import digitalSignatureReducer from "../slices/rating_billing_invoice/MasterData/digitalSignature";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -207,7 +212,7 @@ const reducer = combineReducers({
   emeterai: emeteraiReducer,
   managementDeliveryInvoice: managementDeliveryInvoiceReducer,
   masterEfakturCode: masterEfakturCodeReducer,
-  // masterDigitalSignature: masterDigitalSignatureReducer,
+  digitalSignature: digitalSignatureReducer,
 
   //receipt and collection
   receipt: receiptReducer,
@@ -218,9 +223,13 @@ const reducer = combineReducers({
   cycle: cycleReducer,
   late: lateReducer,
   bridge: bridgeReducer,
+  transactionLog: transactionLogReducer,
   invoiceMasterData: invoiceMasterDataReducer,
   paymentMasterData: paymentMasterDataReducer,
   partner: partnerReducer,
+  partnerCa: partnerCaReducer,
+  caPaymentChannel: caPaymentChannelReducer,
+  collectingAgent: collectingAgentReducer,
 
   // Attachment
   attachment: attachmentReducer,

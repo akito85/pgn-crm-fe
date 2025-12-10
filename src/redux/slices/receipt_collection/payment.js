@@ -14,7 +14,7 @@ export const getPaymentPagging = createAsyncThunk(
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
-        sort === undefined || sort === "" ? "custNum~desc" : sort;
+        sort === undefined || sort === "" ? "custNumber~desc" : sort;
       const url = `/v1/dbs/api/payment/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
@@ -39,7 +39,7 @@ export const downloadPayment = createAsyncThunk(
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
-        sort === undefined || sort === "" ? "custNum~desc" : sort;
+        sort === undefined || sort === "" ? "custNumber~desc" : sort;
       const url = `/v1/dbs/api/payment/download?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.downloadData(url);
       return response.data;
