@@ -4,7 +4,7 @@ import PaymentRelationDetailAttch from "./PaymentRelationDetailAttch";
 import PaymentRelationDetailInfo from "./PaymentRelationDetailInfo";
 
 const dataTabs = {
-  sreqi: "Service Request",
+  pri: "Payment Relation Information",
   attch: "Attachment",
 };
 
@@ -17,7 +17,7 @@ const PaymentRelationDetailTabs = ({
 }) => {
   // Use provided options or fall back to default tabs
   const tabOptions = options.length > 0 ? options : [
-    { value: "sreqi", label: "Service Request" },
+    { value: "pri", label: "Payment Relation Information" },
     { value: "attch", label: "Attachment" },
   ];
 
@@ -41,7 +41,7 @@ const PaymentRelationDetailTabs = ({
 
   const renderSection = () => {
     switch (section) {
-      case dataTabs.sreqi:
+      case dataTabs.pri:
         return <PaymentRelationDetailInfo dataDetail={dataDetail} type={AccountType}/>;
       case dataTabs.attch:
         return <PaymentRelationDetailAttch dataAttachment={dataAttachment} />;
