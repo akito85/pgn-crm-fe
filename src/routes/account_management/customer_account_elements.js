@@ -50,6 +50,10 @@ import ProductDistributionForm from "../../app/pages/AccountManagement/CustomerA
 import PaymentRelationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/Details/PaymentRelationDetails"; 
 import CreateUpdatePaymentRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/CreateUpdate/CreateUpdatePaymentRelation"
 
+import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/CreateCustomerServiceRequest";
+import CustomerServiceRequestDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
+import InvoiceRelationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/Details/InvoiceRelationDetails";
+
 export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Customer/Account List
   VIEW_CUSTOMER_PAGE: <CustomerAccountList />,
@@ -103,6 +107,9 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   VIEW_DETAIL_PAYMENT_RELATION_PAGE: <PaymentRelationDetails />,
   CREATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation type={"create"} />,
   UPDATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation type={"update"} />,
+
+  // Payment Relation Detail
+  VIEW_DETAIL_INVOICE_RELATION_PAGE: <InvoiceRelationDetails />,
 
   // Gas Source
   DETAIL_GAS_SOURCE: <DetailGasSource />,
