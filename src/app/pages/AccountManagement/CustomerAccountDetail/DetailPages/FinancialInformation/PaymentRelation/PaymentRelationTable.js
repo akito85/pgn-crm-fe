@@ -40,10 +40,10 @@ const PaymentRelationTable = ({
     },
     {
       title: "PRIORITY",
-      dataIndex: "priorty",
-      width: 100,
+      dataIndex: "priority",
+      width: 50,
       sorter: true,
-      ...getColumnSearchProps("priorty"),
+      ...getColumnSearchProps("priority"),
     },
     {
       title: "START DATE",
