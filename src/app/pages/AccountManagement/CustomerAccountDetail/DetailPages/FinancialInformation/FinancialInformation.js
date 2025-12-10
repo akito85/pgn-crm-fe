@@ -13,8 +13,7 @@ import BillingBucket from "./BillingBucket/BillingBucket";
 import PaymentRelation from "./PaymentRelation/PaymentRelation";
 import { useDispatch, useSelector } from "react-redux";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
-
-const { Panel } = Collapse;
+import InvoiceRelation from "./InvoiceRelation/InvoiceRelation";
 
 const FinancialInformation = ({
   id = 0,
@@ -84,6 +83,21 @@ const FinancialInformation = ({
           id={id}
           idCustomer={idCustomer}
           isActive={current === 6}
+          isApproval={isApproval}
+          setIsApproval={setIsApproval}
+          setShowApprovalButton={setShowApprovalButton}
+          submitApprovalCondition={submitApprovalCondition}
+          setSubmitApprovalCondition={setSubmitApprovalCondition}
+        />
+      ),
+    },
+    {
+      header: "Invoice Relation",
+      children: (
+        <InvoiceRelation
+          id={id}
+          idCustomer={idCustomer}
+          isActive={current === 7}
           isApproval={isApproval}
           setIsApproval={setIsApproval}
           setShowApprovalButton={setShowApprovalButton}
