@@ -1,6 +1,4 @@
-import { useNavigate } from 'react-router-dom';
 import { Tooltip } from "antd";
-import TablePagination from "../../../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import { Fragment } from "react";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";

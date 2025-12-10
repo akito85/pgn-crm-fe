@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 
-const CustomerServiceRequestDetailInfo = ({
+const PaymentRelationDetailInfo = ({
   dataDetail = {},
 }) => {
   const log = []
@@ -46,4 +46,4 @@ const CustomerServiceRequestDetailInfo = ({
   );
 };
 
-export default CustomerServiceRequestDetailInfo;
+export default PaymentRelationDetailInfo;

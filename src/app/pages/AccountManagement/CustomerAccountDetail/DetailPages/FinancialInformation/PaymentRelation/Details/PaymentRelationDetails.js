@@ -8,7 +8,7 @@ import { LeftOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PaymentRelationDetailTabs from "./PaymentRelationDetailTabs";
-import { getCustomerAccount, getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
+import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { dateFormatting } from "../../../../../../../../utils";

@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import { Fragment } from "react";
 import RadioTabs from "../../../../../../../../components/RadioTabs";
 import PaymentRelationDetailAttch from "./PaymentRelationDetailAttch";
 import PaymentRelationDetailInfo from "./PaymentRelationDetailInfo";
