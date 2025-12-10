@@ -46,6 +46,10 @@ import ViewCollectingAgent from "../../app/pages/ReceiptAndCollection/MasterData
 import ListDetailCollectingAgent from "../../app/pages/ReceiptAndCollection/MasterData/CollectingAgent/ListDetailCollectingAgent";
 import ListFormCollectingAgent from "../../app/pages/ReceiptAndCollection/MasterData/CollectingAgent/ListFormCollectingAgent";
 
+import ViewPaymentChannel from "../../app/pages/ReceiptAndCollection/MasterData/PaymentChannel/ViewPaymentChannel";
+import ListDetailPaymentChannel from "../../app/pages/ReceiptAndCollection/MasterData/PaymentChannel/ListDetailPaymentChannel";
+import ListFormPaymentChannel from "../../app/pages/ReceiptAndCollection/MasterData/PaymentChannel/ListFormPaymentChannel";
+
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
   VIEW_RECEIPT_PAGE: <ViewReceipt />,
@@ -135,4 +139,10 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_COLLECTING_AGENT: <ListDetailCollectingAgent />,
   CREATE_COLLECTING_AGENT: <ListFormCollectingAgent type={"create"} />,
   UPDATE_COLLECTING_AGENT: <ListFormCollectingAgent type={"update"} />,
+
+  // Payment Channel
+  VIEW_PAYMENT_CHANNEL: <ViewPaymentChannel />,
+  DETAIL_PAYMENT_CHANNEL: <ListDetailPaymentChannel />,
+  CREATE_PAYMENT_CHANNEL: <ListFormPaymentChannel type={"create"} />,
+  UPDATE_PAYMENT_CHANNEL: <ListFormPaymentChannel type={"update"} />,
 };

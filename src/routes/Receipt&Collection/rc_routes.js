@@ -88,4 +88,10 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/view",
   CREATE_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/create",
   UPDATE_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/update",
+  
+  // Payment Channel
+  VIEW_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel",
+  DETAIL_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel/view",
+  CREATE_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel/create",
+  UPDATE_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel/update",
 };
