@@ -441,15 +441,24 @@ export const createPaymentRelation = createAsyncThunk(
 
       const { id } = response.data;
 
-      const uploadUrl = `v1/dbs/api/payment-relation/upload-attachment/${id}`;
+      const uploadUrl = `/v1/dbs/api/payment-relation/upload-attachment`;
 
-      const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
-        uploadUrl,
-        {
-          file:  attachment.file,
+      const uploadPromises = attachments.map((attachment) => {
+        console.log({
+          files:  attachment.file,
           category: attachment.fileCategoryId,
-        }
-      ));
+          refId: id,
+        })
+
+        return accountManagementService.uploadAttachment(
+          uploadUrl,
+          {
+            files:  attachment.file,
+            category: attachment.fileCategoryId,
+            refId: id,
+          }
+        )
+      });
 
       await Promise.all(uploadPromises);
 
@@ -492,13 +501,14 @@ export const updatePaymentRelation = createAsyncThunk(
       const updateUrl = `/v1/dbs/api/payment-relation/${id}`;
       const response = await accountManagementService.updateData(updateUrl, updateBody);
 
-      const uploadUrl = `v1/dbs/api/payment-relation/upload-attachment/${id}`;
+      const uploadUrl = `/v1/dbs/api/payment-relation/upload-attachment`;
 
       const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
         uploadUrl,
         {
-          file:  attachment.file,
+          files:  attachment.file,
           category: attachment.fileCategoryId,
+          refId: id,
         }
       ));
 
@@ -745,7 +755,7 @@ export const approveOrRejectAllPaymentRelation = createAsyncThunk(
         title: "Failed",
         description: `Your data was not ${action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
       };
-      
+
       thunkAPI.dispatch(showModalError(errorBody));
 
       return thunkAPI.rejectWithValue(error?.response);

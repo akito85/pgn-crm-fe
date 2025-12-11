@@ -245,7 +245,7 @@ const AttachmentSectionForm = ({
   useEffect(() => {
     if (data_prAttachmentCategory && data_prAttachmentCategory.length > 0) {
       const tempCategory = data_prAttachmentCategory.map((category) => ({
-        id: category.code,
+        id: category.id,
         text: category.text,
       }));
       setCategoryOptions(tempCategory);
