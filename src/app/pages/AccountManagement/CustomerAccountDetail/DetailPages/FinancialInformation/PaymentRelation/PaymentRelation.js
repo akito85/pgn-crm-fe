@@ -306,6 +306,7 @@ const PaymentRelation = ({
       setSelectedRows([]);
       setSubmitApprovalCondition("");
       setShowApprovalButton(false);
+      setShowApprovalModal(false);
     }
   }
 
