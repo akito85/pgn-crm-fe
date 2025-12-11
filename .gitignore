@@ -64,3 +64,6 @@ logs/
 
 # Local config files
 .eslintrc.json
+
+# examples files
+*.example.*

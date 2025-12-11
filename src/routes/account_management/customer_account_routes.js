@@ -18,7 +18,7 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   UPDATE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/update",
   DELETE_SERVICE_REQUEST: "/account-management/account-standard/service-requests/delete",
 
-  CREATE_SERVICE_REQUEST_PREREQUISITE: "/account-management/account-standard/service-requests/prerequisite/create",
+  CREATE_SERVICE_REQUEST_PREREQUISITE: "/account-management/account-standard/service-requests/pre-requisites/create",
 
   //Detail Service Agreement
   VIEW_DETAIL_SERVICE_AGREEMENT:
