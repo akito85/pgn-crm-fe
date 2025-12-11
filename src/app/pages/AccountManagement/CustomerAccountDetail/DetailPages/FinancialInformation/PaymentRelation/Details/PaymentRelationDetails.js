@@ -170,7 +170,6 @@ const PaymentRelationDetails = ({
   }, [idCustomer]);
 
   useEffect(() => {
-    console.log({idAccount, idCustomer})
     if (idAccount && idCustomer) {
       dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
     }
