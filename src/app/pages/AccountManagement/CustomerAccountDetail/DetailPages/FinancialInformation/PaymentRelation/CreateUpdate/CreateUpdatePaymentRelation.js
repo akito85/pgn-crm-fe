@@ -149,11 +149,14 @@ const CreatePaymentRelation = ({ type }) => {
 
   useEffect(() => {
     if (type === "update" && data_paymentRelationAttachment?.result) {
-      const result = data_paymentRelationAttachment?.result;
-      setDataAttachment(prev => ({
-        ...prev,
+      const result = data_paymentRelationAttachment.result?.map((item, index) => ({
+        ...item,
+        key: `payment-relation-attachment-${item.id}`,
+        dataType: "exist"
+      }));
+      setDataAttachment([
         ...result,
-      }))
+      ])
     }
   }, [data_paymentRelationAttachment])
 
@@ -304,6 +307,7 @@ const CreatePaymentRelation = ({ type }) => {
           className={`${current !== 2 ? "hidden" : ""}`}
           key={`payment-relation-tab-2`}
           getAPICategory={getPrAttachmentCategory}
+          service={accountManagementService}
         />
       ),
       disabled: false

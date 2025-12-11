@@ -229,8 +229,6 @@ const AttachmentSectionForm = ({
   mandatory = false,
   className,
 }) => {
-
-
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
