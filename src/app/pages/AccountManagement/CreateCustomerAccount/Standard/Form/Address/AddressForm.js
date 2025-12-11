@@ -1459,7 +1459,7 @@ const AddressForm = ({
               name="postalCodeId"
               rules={[
                 {
-                  required: true,
+                  required: false,
                   message: "Please input your Postal Code!",
                 },
               ]}
