@@ -169,6 +169,7 @@ const PrevPaymentTab = ({ billingCodeId }) => {
           onSort={onSort}
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
+          showExport={false}
           setFixedColumns={setFixedColumns}
           loading={false}
         />

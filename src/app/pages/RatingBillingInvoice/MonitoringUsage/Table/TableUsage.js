@@ -1016,7 +1016,7 @@ export const tableUsage = (
       title: "STATUS",
       dataIndex: "status",
       fixed: "right",
-      width: 150,
+      width: 200,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,

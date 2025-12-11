@@ -263,6 +263,7 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
           onSort={onSortBI}
           columnDefinitions={columnDefinitionsBI}
           fixedColumns={fixedColumnsBI}
+          showExport={false}
           setFixedColumns={setFixedColumnsBI}
           loading={false}
         />

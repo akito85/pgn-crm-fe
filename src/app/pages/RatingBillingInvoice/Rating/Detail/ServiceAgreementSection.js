@@ -195,6 +195,7 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
             current={page}
             pageSize={pageSize}
             onChange={handleChange}
+            showExport={false}
             onSizeChanger={handleChange}
             totalData={data_serviceAgreement?.page?.totalElements || 0}
             tableScrolled={{ y: 525, x: 3000 }}

@@ -1,14 +1,13 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { useLocation, useNavigate } from "react-router-dom";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import { Alert, Form, Spin, Tooltip } from "antd";
+import { Alert, Form, Spin, Tooltip, Tabs } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
-import RadioTabs from "../../../../../components/RadioTabs";
 import {
   addDeletedData,
   addUpdatedData,
@@ -17,6 +16,7 @@ import {
   getDownloadFailed,
   getListApprovalById,
 } from "../../../../../redux/slices/rating_billing_invoice/monitoring_usage";
+import CardContainer from "../../../../../components/CardContainer";
 import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting, hasValue, toTitleCase } from "../../../../../utils";
@@ -26,7 +26,9 @@ import ModalUpdateUsage from "../ModalUpdateUsage";
 import moment from "moment";
 import ConfirmationUsage from "../ConfirmationUsage";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../components/TableRBI";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import StatusComponent from "../../../../../components/StatusComponent";
 
 const DetailMonitoringUsage = () => {
   // Selector
@@ -51,14 +53,7 @@ const DetailMonitoringUsage = () => {
   );
 
   // use state
-  const [valuePage, setValuePage] = useState("Upload");
-  const [tabPages, setTabPages] = useState([
-    {
-      value: "Upload",
-      paramValue: [],
-    },
-    { value: "Approval", paramValue: ["apphierId"] },
-  ]);
+  const [tabHeader, setTabHeader] = useState("Upload");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [appHierOptions, setAppHierOptions] = useState([]);
@@ -74,6 +69,10 @@ const DetailMonitoringUsage = () => {
   const [flag, setFlag] = useState(1);
   const [openConfirmation, setOpenConfirmation] = useState(false);
   const [body, setBody] = useState({});
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["action"],
+  }));
 
   // assert function
   const assert = useCallback(
@@ -109,11 +108,13 @@ const DetailMonitoringUsage = () => {
       setDataTable(detail_batch?.usageList?.result);
     }
   }, [detail_batch, assert, location]);
+
   useEffect(() => {
     if (hasValue(selectedHierarchy) === true) {
       dispatch(getListApprovalById(selectedHierarchy));
     }
   }, [selectedHierarchy, dispatch]);
+
   useEffect(() => {
     if (
       list_approval_by_id?.length > 0 &&
@@ -139,7 +140,7 @@ const DetailMonitoringUsage = () => {
     list_approval_by_id,
     page,
     pageSize,
-    valuePage,
+    tabHeader,
     dispatch,
     list_approval,
     selectedHierarchy,
@@ -152,39 +153,12 @@ const DetailMonitoringUsage = () => {
     setOpenUpdateUsage(true);
   };
 
-  // handle error
-  // Handle Error Tab Form
-  const handleError = ({ values, errorFields, outOfDate }) => {
-    // console.log(errorFields, " error");
-    setTabPages((prevState) => {
-      const res = prevState.map((item) => {
-        const errorBadge =
-          item.value !== "Attachment"
-            ? (errorFields || []).reduce(
-                (current, next) =>
-                  item.paramValue.includes(next.name[0])
-                    ? current + 1
-                    : current,
-                0,
-              )
-            : listDataAttachment.length < 1
-              ? 1
-              : 0;
-        return {
-          value: item.value,
-          paramValue: item.paramValue,
-          errorBadge,
-        };
-      });
-      return res;
-    });
-  };
   // handle save
   const handleSave = (formValue) => {
-    setBody({
-      ...detail_batch,
-      usageList: dataTable,
-      isSubmit: flag === 1 ? false : true,
+    setBody({ 
+      ...detail_batch, 
+      usageList: dataTable, 
+      isSubmit: flag === 1 ? false : true 
     });
     setOpenConfirmation(true);
   };
@@ -214,20 +188,20 @@ const DetailMonitoringUsage = () => {
       status: "SUCCESS",
       recordId: recordId,
     };
-    // console.log(updatedRow, " updated row");
     newDataTable.splice(index, 1, updatedRow);
     setDataTable(newDataTable);
     setOpenUpdateUsage(false);
     dispatch(addUpdatedData(updatedRow));
   };
+
   // change tabs
-  const changeTabHeader = (e) => {
-    setValuePage(e.target.value);
+  const changeTab = (key) => {
+    setTabHeader(key);
   };
+
   // handle back page
   const handleBack = () => {
     navigate(-1);
-    // dispatch(clearUpdatedDeleted())
   };
 
   // handle cancel update usage
@@ -250,6 +224,7 @@ const DetailMonitoringUsage = () => {
     setPage(tempPage);
     setPageSize(pageSizeChange);
   };
+
   // breadcrumbs routes
   const routes = [
     {
@@ -262,71 +237,63 @@ const DetailMonitoringUsage = () => {
     },
     {
       path: "",
-      breadcrumbName: "Detail Batch Usage",
+      breadcrumbName: "Batch List Detail",
     },
   ];
 
-  // column
-  const action = [
+  // column action
+  const actionColumns = [
     {
+      key: "action",
       title: "ACTION",
       dataIndex: "accountId",
       align: "center",
-      fixed: "right",
       width: 100,
       render: (id, record, index) => {
+        const isComplete = detail_batch?.batchInformation?.status === "COMPLETE";
         return (
           <div className="flex w-full justify-center gap-3">
             <Tooltip title="Update">
-              <div className="pt-1">
-                {detail_batch?.batchInformation?.status !== "COMPLETE" ? (
-                  <SVGIcon
-                    name="IconEdit"
-                    width={24}
-                    onClick={() => handleUpdate(record)}
-                  />
-                ) : (
-                  <SVGIcon
-                    name="IconEdit"
-                    width={24}
-                    color={"#C0BEC6"}
-                    className={"cursor-not-allowed"}
-                  />
-                )}
-              </div>
+              {!isComplete ? (
+                <SVGIcon
+                  name="IconEdit"
+                  width={20}
+                  onClick={() => handleUpdate(record)}
+                />
+              ) : (
+                <SVGIcon
+                  name="IconEdit"
+                  width={20}
+                  color={"#C0BEC6"}
+                  className={"cursor-not-allowed"}
+                />
+              )}
             </Tooltip>
             <Tooltip title="Delete">
-              <div className="pt-1">
-                {detail_batch?.batchInformation?.status !== "COMPLETE" ? (
-                  <SVGIcon
-                    name="IconDelete"
-                    width={24}
-                    onClick={() => {
-                      setModalDelete(true);
-                      setDeletedRecord(record);
-                      setRecordId(record?.recordId);
-                    }}
-                  />
-                ) : (
-                  <SVGIcon
-                    name="IconDelete"
-                    width={24}
-                    color={"#C0BEC6"}
-                    className={"cursor-not-allowed"}
-                  />
-                )}
-              </div>
+              {!isComplete ? (
+                <SVGIcon
+                  name="IconDelete"
+                  width={20}
+                  onClick={() => {
+                    setModalDelete(true);
+                    setDeletedRecord(record);
+                    setRecordId(record?.recordId);
+                  }}
+                />
+              ) : (
+                <SVGIcon
+                  name="IconDelete"
+                  width={20}
+                  color={"#C0BEC6"}
+                  className={"cursor-not-allowed"}
+                />
+              )}
             </Tooltip>
           </div>
         );
       },
     },
   ];
-
-  // pagination table
-  const paginationTable = (page, pageSize) => {
-    return dataTable?.slice((page - 1) * pageSize, page * pageSize);
-  };
 
   const handleDownloadFailed = () => {
     dispatch(getDownloadFailed(location?.state?.id))
@@ -339,102 +306,135 @@ const DetailMonitoringUsage = () => {
       });
   };
 
+  // All columns with keys
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...filteredColumns, ...actionColumns].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+      width: col.width || 150,
+    }));
+    return columnsWithKeys;
+  }, [filteredColumns, actionColumns]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
   return (
     <LayoutMenu>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
-        <div className={"w-full flex justify-start"}>
-          <RadioTabs
-            data={tabPages}
-            onChange={changeTabHeader}
-            currentPosition={valuePage}
-          />
-        </div>
-        <div className={"w-full flex justify-end"}>
-          {valuePage === "Upload" && (
-            <ButtonComponent
-              type={"submit"}
-              icon={<SVGIcon name="IconButtonDownload" width={24} />}
-              onClick={handleDownloadFailed}
-            >
-              Download Failed Data
-            </ButtonComponent>
-          )}
-        </div>
         <Form
           layout="vertical"
           form={form}
           onFinish={handleSave}
-          onFinishFailed={handleError}
         >
-          <div className={`${valuePage !== "Upload" ? "hidden" : ""}`}>
-            {/* <Form.Item> */}
-            <BaseContainer header={"batch information"}>
-              <div className={"w-full grid grid-cols-4"}>
-                <DetailText label={"Batch ID"}>
-                  {detail_batch?.batchInformation?.batchId}
-                </DetailText>
-                <DetailText label={"Upload Type"}>
-                  {detail_batch?.batchInformation?.uploadType}
-                </DetailText>
-                <DetailText label={"Upload Date"}>
-                  {detail_batch?.batchInformation?.uploadDate}
-                </DetailText>
-                <DetailText label={"Upload By"}>
-                  {detail_batch?.batchInformation?.uploadBy}
-                </DetailText>
+          <CardContainer
+            header={
+              <div className="flex justify-between items-center -my-4">
+                <p className="mt-[15px] font-bold text-primary">
+                  BATCH LIST DETAIL
+                </p>
               </div>
-              <div className={"w-full grid grid-cols-4"}>
-                <DetailText label={"Total Data"}>
-                  {detail_batch?.batchInformation?.totalUsage}
-                </DetailText>
-                <DetailText label={"Total Succeed"}>
-                  {detail_batch?.batchInformation?.totalSucceed}
-                </DetailText>
-                <DetailText label={"Total Progress"}>
-                  {detail_batch?.batchInformation?.totalProgress}
-                </DetailText>
-                <DetailText label={"Total Failed"}>
-                  {detail_batch?.batchInformation?.totalFailed}
-                </DetailText>
-              </div>
-              <div className={"w-full grid grid-cols-4"}>
-                <DetailText label={"Status"}>
-                  {toTitleCase(detail_batch?.batchInformation?.status)}
-                </DetailText>
-              </div>
-            </BaseContainer>
-            <BaseContainer header={"USAGE LIST"}>
-              <div className="my-10">
-                <TablePaginationNew
-                  type="FE"
-                  columns={[...filteredColumns, ...action]}
-                  dataSource={dataTable}
-                  totalData={dataTable?.length}
-                  current={page}
-                  pageSize={pageSize}
-                  onChange={handleChangePage}
-                  tableScrolled={{ x: 8000, y: 600 }}
-                  // onSort={onSort}
-                />
-              </div>
-            </BaseContainer>
-            {/* </Form.Item> */}
-          </div>
-          <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
-            <BaseContainer header={"Approval Information"}>
-              <ApprovalComponentGeneral
-                // type={type}
-                dataTable={appHierDataDetail}
-                dataOption={appHierOptions}
-                selectedHierarchy={selectedHierarchy}
-                updateSelectedHierarchy={setSelectedHierarchy}
-              />
-            </BaseContainer>
-          </div>
+            }
+          >
+            <Tabs
+              activeKey={tabHeader}
+              onChange={changeTab}
+              type="line"
+              size="small"
+              className="tabs-compact"
+              style={{ marginBottom: 0 }}
+            >
+              <Tabs.TabPane tab="Upload" key="Upload">
+                <BaseContainer header={"Batch List"} className="-mt-4">
+                  {/* Two Column Layout */}
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                    <DetailText label="Batch ID">
+                      {detail_batch?.batchInformation?.batchId}
+                    </DetailText>
+                    <DetailText label="Upload Type">
+                      {detail_batch?.batchInformation?.uploadType}
+                    </DetailText>
+                    
+                    <DetailText label="Upload Date">
+                      {detail_batch?.batchInformation?.uploadDate}
+                    </DetailText>
+                    <DetailText label="Status">
+                      <StatusComponent colour={detail_batch?.batchInformation?.status}>
+                        {detail_batch?.batchInformation?.status}
+                      </StatusComponent>
+                    </DetailText>
+                    
+                    <DetailText label="Total Invoice">
+                      {detail_batch?.batchInformation?.totalUsage}
+                    </DetailText>
+                    <DetailText label="Total Succeed">
+                      {detail_batch?.batchInformation?.totalSucceed}
+                    </DetailText>
+                    
+                    <DetailText label="Total Progress">
+                      {detail_batch?.batchInformation?.totalProgress}
+                    </DetailText>
+                    <DetailText label="Total Failed">
+                      {detail_batch?.batchInformation?.totalFailed}
+                    </DetailText>
+                    
+                    <DetailText label="General Date">
+                      {detail_batch?.batchInformation?.generalDate}
+                    </DetailText>
+                    <DetailText label="Status">
+                      <StatusComponent colour={detail_batch?.batchInformation?.status}>
+                        {detail_batch?.batchInformation?.status}
+                      </StatusComponent>
+                    </DetailText>
+                  </div>
+                </BaseContainer>
 
-          <div className={"w-full flex mt-5"}>
-            <div className={"w-full justify-start"}>
+                <BaseContainer header={"Usage List"} className="mt-1">
+                  <div className="my-5">
+                    <TableRBI
+                      dataSource={dataTable}
+                      columns={processedColumns}
+                      current={page}
+                      pageSize={pageSize}
+                      onChange={handleChangePage}
+                      onSizeChanger={handleChangePage}
+                      totalData={dataTable?.length || 0}
+                      tableScrolled={{ x: 4000, y: 525 }}
+                      columnDefinitions={columnDefinitions}
+                      fixedColumns={fixedColumns}
+                      setFixedColumns={setFixedColumns}
+                      loading={loading}
+                    />
+                  </div>
+                </BaseContainer>
+              </Tabs.TabPane>
+
+              <Tabs.TabPane tab="Approval" key="Approval">
+                {/* Approval Tab - Sesuai Desain Figma */}
+                <div className="bg-white mt-1">
+                  <ApprovalComponentGeneral
+                    dataTable={appHierDataDetail}
+                    dataOption={appHierOptions}
+                    selectedHierarchy={selectedHierarchy}
+                    updateSelectedHierarchy={setSelectedHierarchy}
+                  />
+                </div>
+              </Tabs.TabPane>
+            </Tabs>
+          </CardContainer>
+
+          {/* Action Buttons */}
+          <div className="w-full flex mt-5">
+            <div className="w-full justify-start">
               <Form.Item>
                 <ButtonComponent
                   type={"submit"}
@@ -454,16 +454,14 @@ const DetailMonitoringUsage = () => {
               </Form.Item>
             </div>
             {detail_batch?.batchInformation?.status !== "COMPLETE" && (
-              <div className={"w-full flex justify-end gap-5"}>
+              <div className="w-full flex justify-end gap-5">
                 <Form.Item>
                   <ButtonComponent
                     icon={<SVGIcon name={`IconButtonClear`} width={24} />}
                     type="submit"
-                    onClick={() => {
-                      handleClear();
-                    }}
+                    onClick={handleClear}
                   >
-                    {"Clear"}
+                    Clear
                   </ButtonComponent>
                 </Form.Item>
                 <Form.Item>
@@ -488,14 +486,15 @@ const DetailMonitoringUsage = () => {
             )}
           </div>
         </Form>
+
         <ModalUpdateUsage
           isOpen={openUpdateUsage}
           handleCancel={handleCancel}
           record={selectedRecord}
           uploadType={detail_batch?.batchInformation?.uploadType}
           handleSave={handleSaveUpdateUsage}
-          // form={form}
         />
+
         <ModalConfirm
           isOpen={modalDelete}
           handleCancel={() => setModalDelete(false)}
@@ -505,8 +504,8 @@ const DetailMonitoringUsage = () => {
         >
           <div className="flex justify-center gap-[20px] mt-6">
             <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className={"text-[18px] font-bold"}>
-              {`Are you sure want to delete it?`}
+            <p className="text-[18px] font-bold">
+              Are you sure want to delete it?
             </p>
           </div>
           <Alert
@@ -514,17 +513,18 @@ const DetailMonitoringUsage = () => {
             type={"error"}
           />
         </ModalConfirm>
+
+        <ConfirmationUsage
+          isOpen={openConfirmation}
+          setIsOpen={setOpenConfirmation}
+          dispatcher={dispatch}
+          dataOption={appHierOptions}
+          selectedHierarchy={selectedHierarchy}
+          listDataAppHierDetail={appHierDataDetail}
+          data_detail={body}
+          columns={filteredColumns}
+        />
       </Spin>
-      <ConfirmationUsage
-        isOpen={openConfirmation}
-        setIsOpen={setOpenConfirmation}
-        dispatcher={dispatch}
-        dataOption={appHierOptions}
-        selectedHierarchy={selectedHierarchy}
-        listDataAppHierDetail={appHierDataDetail}
-        data_detail={body}
-        columns={filteredColumns}
-      />
     </LayoutMenu>
   );
 };

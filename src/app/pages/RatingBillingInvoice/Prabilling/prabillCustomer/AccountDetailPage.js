@@ -3,13 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Tabs, Spin, Tag, Button } from "antd";
 import {
-  FileTextOutlined,
-  ThunderboltOutlined,
-  PercentageOutlined,
-  DollarOutlined,
   LeftOutlined,
-  InfoCircleOutlined,
-  SettingOutlined,
   RightOutlined,
 } from "@ant-design/icons";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
@@ -1003,13 +997,13 @@ const AccountDetailPage = () => {
                 alignItems: "center",
               }}
             >
-              <Button
+              {/* <Button
                 type="primary"
                 icon={<LeftOutlined />}
                 onClick={() => scrollTabs("left")}
                 size="small"
                 style={{ boxShadow: "2px 0 8px rgba(0,0,0,0.15)" }}
-              />
+              /> */}
             </div>
             <div
               style={{
@@ -1024,20 +1018,20 @@ const AccountDetailPage = () => {
                 alignItems: "center",
               }}
             >
-              <Button
+              {/* <Button
                 type="primary"
                 icon={<RightOutlined />}
                 onClick={() => scrollTabs("right")}
                 size="small"
                 style={{ boxShadow: "-2px 0 8px rgba(0,0,0,0.15)" }}
-              />
+              /> */}
             </div>
             <div style={{ paddingLeft: "45px", paddingRight: "45px" }}>
               <Tabs activeKey={activeTab} onChange={setActiveTab} type="card">
                 <TabPane
                   tab={
                     <span>
-                      <ThunderboltOutlined /> Usage ({usageData.length})
+                      Usage ({usageData.length})
                     </span>
                   }
                   key="1"
@@ -1054,6 +1048,7 @@ const AccountDetailPage = () => {
                     rowKey={(record, index) => `usage-${index}`}
                     columnDefinitions={usageColumnDefs}
                     fixedColumns={fixedColumnsUsage}
+                    showExport={false}
                     setFixedColumns={setFixedColumnsUsage}
                     loading={false}
                   />
@@ -1062,7 +1057,7 @@ const AccountDetailPage = () => {
                 <TabPane
                   tab={
                     <span>
-                      <PercentageOutlined /> Tax Implication ({taxData.length})
+                      Tax Implication ({taxData.length})
                     </span>
                   }
                   key="2"
@@ -1079,6 +1074,7 @@ const AccountDetailPage = () => {
                     rowKey={(record, index) => `tax-${index}`}
                     columnDefinitions={taxColumnDefs}
                     fixedColumns={fixedColumnsTax}
+                    showExport={false}
                     setFixedColumns={setFixedColumnsTax}
                     loading={false}
                   />
@@ -1087,7 +1083,7 @@ const AccountDetailPage = () => {
                 <TabPane
                   tab={
                     <span>
-                      <DollarOutlined /> SA Price Rule ({saPriceRuleData.length}
+                      SA Price Rule ({saPriceRuleData.length}
                       )
                     </span>
                   }
@@ -1105,6 +1101,7 @@ const AccountDetailPage = () => {
                     rowKey={(record, index) => `saprice-${index}`}
                     columnDefinitions={priceColumnDefs}
                     fixedColumns={fixedColumnsPrice}
+                    showExport={false}
                     setFixedColumns={setFixedColumnsPrice}
                     loading={false}
                   />
@@ -1113,7 +1110,7 @@ const AccountDetailPage = () => {
                 <TabPane
                   tab={
                     <span>
-                      <InfoCircleOutlined /> SA TOS Detail ({saTosDet.length})
+                       SA TOS Detail ({saTosDet.length})
                     </span>
                   }
                   key="4"
@@ -1130,6 +1127,7 @@ const AccountDetailPage = () => {
                     rowKey={(record, index) => `satos-${index}`}
                     columnDefinitions={saTosColumnDefs}
                     fixedColumns={fixedColumnsSaTos}
+                    showExport={false}
                     setFixedColumns={setFixedColumnsSaTos}
                     loading={false}
                   />
@@ -1138,7 +1136,7 @@ const AccountDetailPage = () => {
                 <TabPane
                   tab={
                     <span>
-                      <FileTextOutlined /> SA Data ({saData.length})
+                      SA Data ({saData.length})
                     </span>
                   }
                   key="5"
@@ -1155,6 +1153,7 @@ const AccountDetailPage = () => {
                     rowKey={(record, index) => `sadata-${index}`}
                     columnDefinitions={tosSubmissionColumnDefs}
                     fixedColumns={fixedColumnsTosSubmission}
+                    showExport={false}
                     setFixedColumns={setFixedColumnsTosSubmission}
                     loading={false}
                   />
@@ -1163,7 +1162,7 @@ const AccountDetailPage = () => {
                 <TabPane
                   tab={
                     <span>
-                      <SettingOutlined /> TOS Sub Detail ({tosSubDet.length})
+                      TOS Sub Detail ({tosSubDet.length})
                     </span>
                   }
                   key="6"
@@ -1180,6 +1179,7 @@ const AccountDetailPage = () => {
                     rowKey={(record, index) => `tossubdet-${index}`}
                     columnDefinitions={tosSubColumnDefs}
                     fixedColumns={fixedColumnsTosSub}
+                    showExport={false}
                     setFixedColumns={setFixedColumnsTosSub}
                     loading={false}
                   />

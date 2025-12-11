@@ -124,6 +124,7 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
           pageSize={pageSize}
           onChange={handleChangePage}
           onSizeChanger={handleChangePage}
+          showExport={false}
           totalData={data_usageSA?.page?.totalElements || 0}
           tableScrolled={{ x: 6000, y: 525 }}
           onSort={onSort}

@@ -161,6 +161,7 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
             totalData={data_calculationUsage?.page?.totalElements || 0}
             tableScrolled={{ y: 525, x: 8000 }}
             onSort={onSortApi}
+            showExport={false}
             columnDefinitions={columnDefinitions}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
