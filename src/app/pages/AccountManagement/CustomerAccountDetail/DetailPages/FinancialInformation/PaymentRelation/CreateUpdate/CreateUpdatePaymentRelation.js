@@ -380,6 +380,7 @@ const CreatePaymentRelation = ({ type }) => {
     } = formCreate.getFieldsValue();
 
     const body = {
+      id: idPr,
       subjectId: data_accountDetail?.accountInformation?.accountId, 
       objectId,
       priority,
@@ -408,7 +409,7 @@ const CreatePaymentRelation = ({ type }) => {
       })
       .catch((error) => {});
     else if (type === "update")
-      dispatch(updatePaymentRelation({ id: idPr, body }))
+      dispatch(updatePaymentRelation({ id: idPr, body, attachments: dataAttachment.filter((attachment => attachment.dataType !== "exist")) }))
       .unwrap()
         .then((data) => {
           setTimeout(() => {
