@@ -48,7 +48,7 @@ const PaymentRelation = ({
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
-  const [search, updateSearch] = useState({});
+  const [search, setSearch] = useState({});
   const [showApprovalModal, setShowApprovalModal] = useState(false);
 
   const [showInactiveModal, setShowInactiveModal] = useState(false);
@@ -84,12 +84,7 @@ const PaymentRelation = ({
     .unwrap()
     .then(() => {
       handleClear();
-      setSelectedRowKeys([]);
-      setSelectedRows([]);
-      setIsApproval(false);
-      setSubmitApprovalCondition("");
-      setShowApprovalButton(false);
-      setShowApprovalModal(false);
+      handleIsApproval(false)
 
       const body = {
         page,
@@ -159,7 +154,7 @@ const PaymentRelation = ({
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    updateSearch((prevState) => {
+    setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
       }
@@ -288,6 +283,32 @@ const PaymentRelation = ({
     }
   }
 
+  const handleIsApproval = (newIsApproval) => {
+    if (newIsApproval) {
+      setSearchText("WAITING APPROVAL");
+      setSearchedColumn("approvalStatus");
+      setPage(1);
+      setSearch((prevState) => ({
+        ...prevState,
+        approvalStatus: "WAITING_APPROVAL",
+      }));
+      setIsApproval(true);
+    } else {
+      setSearchText("");
+      setSearchedColumn("");
+      setPage(1)
+      setSearch((prevState) => ({
+        ...prevState,
+        approvalStatus: undefined,
+      }));
+      setIsApproval(false);
+      setSelectedRowKeys([]);
+      setSelectedRows([]);
+      setSubmitApprovalCondition("");
+      setShowApprovalButton(false);
+    }
+  }
+
   // Listen to approve or reject button on the parent component
   useEffect(() => {
     if (isActive) {
@@ -301,14 +322,9 @@ const PaymentRelation = ({
 
   // Reset accordian when it's not the current one that's opened
   useEffect(() => {
-    if (!isActive) {
-      setSelectedRowKeys([]);
-      setSelectedRows([]);
-      setIsApproval(false);
-      setSubmitApprovalCondition("");
-      setShowApprovalButton(false);
-    }
-  }, [isActive])
+    if (!isActive || !isApproval)
+      handleIsApproval(false);
+  }, [isActive, isApproval]);
 
   useEffect(() => {
     if (data_prApprovalHistory && data_prApprovalHistory?.dataApprover) {
@@ -393,7 +409,7 @@ const PaymentRelation = ({
                 {/* Approval Button */}
                 <ButtonComponent
                   type={"submit"}
-                  onClick={() => setIsApproval(!isApproval)}
+                  onClick={() => handleIsApproval(true)}
                   icon={
                     <CheckOutlined
                       style={{
