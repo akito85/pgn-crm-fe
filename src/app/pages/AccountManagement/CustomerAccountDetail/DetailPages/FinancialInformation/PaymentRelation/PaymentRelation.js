@@ -264,6 +264,7 @@ const PaymentRelation = ({
         setShowApprovalButton(true);
     },
     type: "checkbox",
+    preserveSelectedRowKeys: true,
   }
 
   const handleApprovalHistoryOptions = () => {
@@ -462,9 +463,9 @@ const PaymentRelation = ({
             </div>
           )}
           <PaymentRelationTable
-            data={data_paymentRelation?.result?.map((paymentRelation, index) => ({
+            data={data_paymentRelation?.result?.map((paymentRelation) => ({
               ...paymentRelation,
-              key: `payment-relation-${index}`
+              key: `payment-relation-${paymentRelation.id}`
             }))}
             idAccount={id}
             idCustomer={idCustomer}
