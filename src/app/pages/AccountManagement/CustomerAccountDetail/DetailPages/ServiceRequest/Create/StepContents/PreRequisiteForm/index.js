@@ -135,7 +135,7 @@ export default function PreRequisiteForm({
     };
 
     navigate(
-      "/account-management/account-standard/service-requests/prerequisite/create",
+      "/account-management/account-standard/service-requests/pre-requisites/create",
       {
         state: {
           account,
