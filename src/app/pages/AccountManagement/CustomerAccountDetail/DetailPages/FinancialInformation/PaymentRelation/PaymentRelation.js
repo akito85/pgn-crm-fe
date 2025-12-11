@@ -21,9 +21,6 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_m
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
 
-// getDetailTaxImplication
-// detail_taxImplication
-
 const PaymentRelation = ({
   id = 0,
   idCustomer = 0,
@@ -67,21 +64,23 @@ const PaymentRelation = ({
   }
 
   const handleConfirmApprovalModal = (description, submitApprovalCondition, handleClear) => {
+    const action = submitApprovalCondition.toUpperCase();
+
     const body = selectedRows.filter(row => row.statusApproval === "WAITING_APPROVAL" && row.status === "DRAFT").map((row) => ({
       id: row.id,
       approvalId: row.tappId,
-      action: submitApprovalCondition.toUpperCase(),
+      action,
       description,
     }));
 
     const inactiveBody = selectedRows.filter(row => row.statusApproval === "WAITING_APPROVAL" && row.status === "ACTIVE").map((row) => ({
       id: row.id,
       approvalId: row.tappId,
-      action: submitApprovalCondition.toUpperCase(),
+      action,
       description,
     }))
 
-    dispatch(approveOrRejectAllPaymentRelation({ body, inactiveBody }))
+    dispatch(approveOrRejectAllPaymentRelation({ body, inactiveBody, action }))
     .unwrap()
     .then(() => {
       handleClear();

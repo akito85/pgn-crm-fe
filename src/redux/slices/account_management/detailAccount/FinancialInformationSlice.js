@@ -713,7 +713,7 @@ export const approveOrRejectInactivePaymentRelation = createAsyncThunk(
 
 export const approveOrRejectAllPaymentRelation = createAsyncThunk(
   "APPROVE_OR_REJECT_ALL_PAYMENT_RELATION",
-  async ({ body, inactiveBody }, thunkAPI) => {
+  async ({ body, inactiveBody, action }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/payment-relation/approve";
       const inactiveUrl = "/v1/dbs/api/payment-relation/approve-inactive";
@@ -725,32 +725,29 @@ export const approveOrRejectAllPaymentRelation = createAsyncThunk(
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${body?.action === "APPROVE" ? 'approved' : 'rejected'}.`,
+        description: `Your data has been ${action === "APPROVE" ? 'approved' : 'rejected'}.`,
         return: false,
       };
 
       thunkAPI.dispatch(showModalSuccess(successBody))
       return null;
     } catch (error) {
-      const message =
+      let message =
         (error.response &&
           error.response.data &&
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${body?.action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${body?.action === "APPROVED" ? 'approved' : 'rejected'}. An unknown error occured.`
-        }
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
+      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
+        message = "An unknown error occured"
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
+      };
+      
+      thunkAPI.dispatch(showModalError(errorBody));
+
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
