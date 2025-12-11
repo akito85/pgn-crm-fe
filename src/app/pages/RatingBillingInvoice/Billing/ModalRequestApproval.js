@@ -65,8 +65,9 @@ const ModalRequestApproval = ({
   const [bodyError, setBodyError] = useState({});
 
   const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
-  });
+  left: ["no"],
+  right: [] 
+});
 
   // Use Effect
   useEffect(() => {
@@ -391,6 +392,7 @@ const ModalRequestApproval = ({
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
                 loading={loading}
+                showExport={false}
                 rowSelection={rowSelection}
               />
               <div className="pt-[30px]">

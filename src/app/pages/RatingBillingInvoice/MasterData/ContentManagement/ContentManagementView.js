@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
-import { Checkbox, Spin, Tooltip } from "antd";
+import { PlusOutlined, MoreOutlined } from "@ant-design/icons";
+import { Checkbox, Spin, Tooltip, Dropdown, Menu } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -9,7 +9,13 @@ import { useDispatch, useSelector } from "react-redux";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { columnsContentManagement } from "./Table/TableContentManagement";
-// import { getAllContentManagementPaginate, downloadContentManagement, getApprovalHistory, getListApprovalHierarchy, getListApprovalHierarchyDetail, inactiveContentManagement } from "../../../../../redux/slices/rating_billing_invoice/MasterData/contentManagement"; // Placeholder for future slice
+import {
+  getAllContentManagementPaginate,
+  getApprovalHistory,
+  getListApprovalHierarchy,
+  getListApprovalHierarchyDetail,
+  inactiveContentManagement,
+} from "../../../../../redux/slices/rating_billing_invoice/MasterData/contentManagement";
 import TableRBI from "../../../../../components/TableRBI";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
@@ -19,11 +25,10 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 import CardContainer from "../../../../../components/CardContainer";
 
 const ContentManagementView = () => {
-  // Placeholder for selector - replace with actual slice when available
-  // const { data, loading, data_approval_history } = useSelector((state) => state.content_management);
-  const data = { result: [], page: { totalElements: 0 } }; // Dummy data
-  const loading = false;
-  const data_approval_history = null;
+  // Selector
+  const { data, loading, data_approval_history } = useSelector(
+    (state) => state.contentManagement
+  );
 
   // Declaration
   const dispatch = useDispatch();
@@ -51,7 +56,7 @@ const ContentManagementView = () => {
     return saved
       ? JSON.parse(saved)
       : {
-          left: ["no"],
+          left: ["NO"],
           right: ["action"],
         };
   });
@@ -64,24 +69,31 @@ const ContentManagementView = () => {
     );
   }, [fixedColumns]);
 
-  // Use Effect - Placeholder for data fetching
+  // Use Effect
   useEffect(() => {
-    // dispatch(getAllContentManagementPaginate({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }));
+    dispatch(
+      getAllContentManagementPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      })
+    );
   }, [search, sort, page, pageSize, dispatch]);
 
   useEffect(() => {
     if (data_approval_history) {
       const temp = {
         dataApprover: {
-          create: data_approval_history?.dataApprover?.CONTENT_MANAGEMENT || [],
+          create: data_approval_history?.dataApprover?.CONTENT_TEMPLATE || [],
           inactive:
-            data_approval_history?.dataApprover?.INACTIVE_CONTENT_MANAGEMENT ||
+            data_approval_history?.dataApprover?.INACTIVE_CONTENT_TEMPLATE ||
             [],
         },
         dataHistory: {
-          create: data_approval_history?.dataHistory?.CONTENT_MANAGEMENT || [],
+          create: data_approval_history?.dataHistory?.CONTENT_TEMPLATE || [],
           inactive:
-            data_approval_history?.dataHistory?.INACTIVE_CONTENT_MANAGEMENT ||
+            data_approval_history?.dataHistory?.INACTIVE_CONTENT_TEMPLATE ||
             [],
         },
       };
@@ -159,14 +171,52 @@ const ContentManagementView = () => {
   };
 
   const handleOk = (res, handleClear) => {
-    // Placeholder for inactive action
-    // const dataValue = { contentCode: chooseId.contentCode, apphierId: res.approvalHierarchy, remark: res.remark };
-    // dispatch(inactiveContentManagement(dataValue)).unwrap().then(() => { handleClear(); handleCancel(); ... });
+    const dataValue = {
+      id: chooseId.id,
+      apphierId: res.approvalHierarchy,
+      remark: res.remark,
+    };
+    dispatch(inactiveContentManagement(dataValue))
+      .unwrap()
+      .then(() => {
+        handleClear();
+        handleCancel();
+        let tempSearch = "";
+        for (const dataIndex in search) {
+          if (Object.hasOwnProperty.call(search, dataIndex)) {
+            const tempSearchText = search[dataIndex];
+            if (tempSearchText) {
+              tempSearch += `${dataIndex}~${tempSearchText},`;
+            }
+          }
+        }
+        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+        dispatch(
+          getAllContentManagementPaginate({
+            search: tempSearch,
+            page,
+            pageSize,
+            sort,
+          })
+        );
+      })
+      .catch((error) => {
+        if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
+          const message =
+            (error.response &&
+              error.response.data &&
+              error.response.data.message) ||
+            error.message ||
+            error.toString();
+          setBodyError({ body: { ...res }, handleClear, message });
+          setModalError(true);
+        }
+      });
   };
 
   // Handle Approval History
   const handleApprovalHistory = (id) => {
-    // dispatch(getApprovalHistory(id));
+    dispatch(getApprovalHistory(id));
     setModalApprovalHistory(true);
   };
 
@@ -184,24 +234,12 @@ const ContentManagementView = () => {
 
   // Handle Download
   const handleDownload = () => {
-    // Placeholder for download
-    // let tempSearch = ""; ... dispatch(downloadContentManagement({ page, pageSize, sort, search: tempSearch }));
+    // Backend belum menyediakan endpoint download
+    console.log("Download feature not yet available");
   };
 
   // Grant Access Item - moved outside useMemo
   const itemGrantAccess = [
-    // {
-    //   action: "Download",
-    //   render: (
-    //     <ButtonComponent
-    //       type={"submit"}
-    //       icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-    //       onClick={() => handleDownload()}
-    //     >
-    //       Download List
-    //     </ButtonComponent>
-    //   ),
-    // },
     {
       action: "Create",
       render: (
@@ -240,42 +278,20 @@ const ContentManagementView = () => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          (record.status === "ACTIVE" && record.statusApproval === "APPROVE");
 
-        const linkContent =
-          data > 3 ? (
-            <ButtonComponent
-              icon={
-                <SVGIcon
-                  name="IconEdit"
-                  color={isEditable ? "#0075bf" : "#8D91A0"}
-                  width={24}
-                />
-              }
-              border={false}
-              disabled={!isEditable}
-            >
-              <span
-                className={`ml-3 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
-                }`}
-              >
-                {" "}
-                Update
-              </span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Update">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  color={!isEditable ? "#8D91A0" : "#ACC424"}
-                  className={!isEditable ? "cursor-not-allowed" : undefined}
-                />
-              </div>
-            </Tooltip>
-          );
+        const linkContent = (
+          <div className="flex items-center gap-2">
+            <SVGIcon
+              name="IconEdit"
+              color={isEditable ? "#0075bf" : "#8D91A0"}
+              width={20}
+            />
+            <span className={isEditable ? "text-black" : "text-[#8D91A0]"}>
+              Update
+            </span>
+          </div>
+        );
 
         return isEditable ? (
           <Link
@@ -289,7 +305,9 @@ const ContentManagementView = () => {
             {linkContent}
           </Link>
         ) : (
-          <div>{linkContent}</div>
+          <div className={!isEditable ? "cursor-not-allowed" : ""}>
+            {linkContent}
+          </div>
         );
       },
     },
@@ -306,83 +324,41 @@ const ContentManagementView = () => {
           (record.statusApproval === "WAITING APPROVAL" &&
             record.status === "ACTIVE");
 
-        const Content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={
-                <Checkbox
-                  className="inactive-check"
-                  onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
-                />
-              }
-              border={false}
+        return (
+          <div 
+            className={`flex items-center gap-2 ${!isActivateOrInactivate ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+            onClick={isActivateOrInactivate ? () => handleInactive(record) : undefined}
+          >
+            <Checkbox
+              className="inactive-check"
               disabled={!isActivateOrInactivate}
-              onClick={() => handleInactive(record)}
-            >
-              <span className="text-black ml-5">
-                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
-              </span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-            >
-              <div className="pt-1">
-                <Checkbox
-                  className="inactive-check"
-                  onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
-                />
-              </div>
-            </Tooltip>
-          );
-
-        return Content;
+              checked={record.status !== "ACTIVE"}
+            />
+            <span className={isActivateOrInactivate ? "text-black" : "text-[#8D91A0]"}>
+              {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
+            </span>
+          </div>
+        );
       },
     },
     {
       action: "History",
       type: "table",
       render: (record, data) => {
-        const Content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              }
-              border={false}
-              onClick={() => handleApprovalHistory(record.contentCode)}
-            >
-              <span className={"text-black ml-3"}>Approval History</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Approval History">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconLogHistory"
-                  color={"#0075bf"}
-                  width={24}
-                  onClick={() => handleApprovalHistory(record.contentCode)}
-                />
-              </div>
-            </Tooltip>
-          );
-
-        return Content;
+        return (
+          <div 
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => handleApprovalHistory(record.id)}
+          >
+            <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
+            <span className="text-black">Approval History</span>
+          </div>
+        );
       },
     },
   ];
 
-  // ✅ Call useColumnActionPermission hook at component level
-  const actionColumns = useColumnActionPermission(
-    ["view", "activate", "update", "history"],
-    itemGrantAccess
-  );
-
-  // ✅ Get base columns with key property
+  // ✅ PERUBAHAN UTAMA DI SINI - Manual render action columns dengan Dropdown Menu
   const baseColumns = useMemo(() => {
     const contentManagementCols = [
       ...columnsContentManagement(
@@ -394,7 +370,39 @@ const ContentManagementView = () => {
         searchText,
         handleSearch
       ),
-      ...actionColumns,
+      // ✅ Definisikan manual action column dengan Dropdown Menu
+      {
+        title: "ACTION",
+        key: "action",
+        dataIndex: "action",
+        fixed: "right",
+        width: 80,
+        align: "center",
+        render: (_, record) => {
+          // Filter hanya action dengan type "table"
+          const tableActions = itemGrantAccess.filter(item => item.type === "table");
+          
+          // Buat menu items untuk dropdown
+          const menuItems = tableActions.map((item, idx) => ({
+            key: idx,
+            label: item.render(record, 5),
+          }));
+
+          const menu = <Menu items={menuItems} />;
+          
+          return (
+            <Dropdown overlay={menu} trigger={["click"]} placement="bottomRight">
+              <MoreOutlined 
+                style={{ 
+                  fontSize: "20px", 
+                  cursor: "pointer",
+                  color: "#0075bf"
+                }} 
+              />
+            </Dropdown>
+          );
+        }
+      }
     ];
 
     // Add 'key' property to columns that don't have it
@@ -404,7 +412,7 @@ const ContentManagementView = () => {
     }));
 
     return columnsWithKeys;
-  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+  }, [search, page, pageSize, searchedColumn, searchText]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -439,7 +447,7 @@ const ContentManagementView = () => {
       if (fixedColumns.left.includes(colKey)) {
         newCol.fixed = "left";
       } else if (fixedColumns.right.includes(colKey)) {
-        delete newCol.fixed;
+        newCol.fixed = "right";
       } else {
         delete newCol.fixed;
       }
@@ -484,7 +492,7 @@ const ContentManagementView = () => {
         </CardContainer>
 
         {/* Modal Approval History */}
-        {/* <ModalHistory
+        <ModalHistory
           isOpen={modalApprovalHistory && dataApprovalHistory}
           handleClose={() => setModalApprovalHistory(false)}
           header={"Approval History"}
@@ -492,21 +500,21 @@ const ContentManagementView = () => {
           tabOptions={handleOptions()}
           dataApprover={dataApprovalHistory?.dataApprover}
           dataHistory={dataApprovalHistory?.dataHistory}
-        /> */}
+        />
 
         {/* Modal Inactive */}
-        {/* <ModalInactivateWithHierarchy
-          selector={"content_management"} // Placeholder
+        <ModalInactivateWithHierarchy
+          selector={"contentManagement"}
           dispatch={dispatch}
-          getAPIOption={() => {}} // Placeholder
-          getAPIDetail={() => {}} // Placeholder
+          getAPIOption={getListApprovalHierarchy}
+          getAPIDetail={getListApprovalHierarchyDetail}
           alertMessage={`Are you sure you want to inactivate this Content Management with name ${
-            chooseId?.contentCode || ""
+            chooseId?.templateName || ""
           }?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
-        /> */}
+        />
 
         {/* Modal Modal Error Inactive */}
         <ModalError
@@ -520,7 +528,7 @@ const ContentManagementView = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not inactivated. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

@@ -1,6 +1,5 @@
-// path: src/components/ContentInformationForm.jsx
 import React, { useState, useRef, useEffect } from "react";
-import { Form, Input } from "antd";
+import { Input } from "antd";
 import Editor, {
   BtnBold,
   BtnItalic,
@@ -18,51 +17,50 @@ import Editor, {
 } from "react-simple-wysiwyg";
 import SVGIcon from "../../../../../assets/Icon/index";
 
-const ContentInformationForm = ({ form, type, status, statusApproval }) => {
-  // state
-  const [bodyContent, setBodyContent] = useState("");
-  const [lastFocus, setLastFocus] = useState(null); // track last focused area
+const ContentInformationForm = ({ 
+  form, 
+  type, 
+  status, 
+  statusApproval,
+  // ✅ Terima props untuk subject & body
+  subjectValue,
+  setSubjectValue,
+  bodyValue,
+  setBodyValue
+}) => {
+  const [lastFocus, setLastFocus] = useState(null);
   const editorRef = useRef(null);
   const subjectInputRef = useRef(null);
 
   const variables = [
-    { label: "invoiceNumber", value: "{invoiceNumber}" },
-    { label: "customerName", value: "{customerName}" },
-    { label: "customerAddress", value: "{customerAddress}" },
-    { label: "linkPetunjuk", value: "{linkPetunjuk}" },
-    { label: "pwBalance", value: "{pwBalance}" },
-    { label: "totalAmountEqvUsd", value: "{totalAmountEqvUsd}" },
-    { label: "dueDate", value: "{dueDate}" },
-    { label: "pwRule", value: "{pwRule}" },
-    { label: "billingPeriod", value: "{billingPeriod}" },
+    { label: "invoiceNumber", value: "[invoiceNumber]" },
+    { label: "customerName", value: "[customerName]" },
+    { label: "customerAddress", value: "[customerAddress]" },
+    { label: "linkPetunjuk", value: "[linkPetunjuk]" },
+    { label: "pwBalance", value: "[pwBalance]" },
+    { label: "totalAmountEqvUsd", value: "[totalAmountEqvUsd]" },
+    { label: "dueDate", value: "[dueDate]" },
+    { label: "pwRule", value: "[pwRule]" },
+    { label: "billingPeriod", value: "[billingPeriod]" },
   ];
 
-  useEffect(() => {
-    const formBody = form.getFieldValue("body");
-    if (formBody && formBody !== bodyContent) {
-      setBodyContent(formBody);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
-
-  const handleBodyChange = (e) => {
-    const content = e.target.value;
-    setBodyContent(content);
-    form.setFieldsValue({ body: content });
+  const handleSubjectChange = (e) => {
+    setSubjectValue(e.target.value);
   };
 
-  // Insert variable ke posisi cursor di Body Editor (plain text, no background)
+  const handleBodyChange = (e) => {
+    setBodyValue(e.target.value);
+  };
+
   const handleInsertVariableToBody = (variable) => {
     const editorEl = editorRef.current;
     if (!editorEl) return;
 
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) {
-      // fallback: append at end
       editorEl.focus();
       const textNode = document.createTextNode(variable.value);
       editorEl.appendChild(textNode);
-      // move caret after appended node
       const range = document.createRange();
       range.setStartAfter(textNode);
       range.collapse(true);
@@ -70,9 +68,7 @@ const ContentInformationForm = ({ form, type, status, statusApproval }) => {
       selection.addRange(range);
     } else {
       const range = selection.getRangeAt(0);
-      // Ensure range is inside our editor, otherwise fallback to end
       if (!editorEl.contains(range.commonAncestorContainer)) {
-        // place at end
         editorEl.focus();
         const textNode = document.createTextNode(variable.value);
         editorEl.appendChild(textNode);
@@ -82,12 +78,9 @@ const ContentInformationForm = ({ form, type, status, statusApproval }) => {
         selection.removeAllRanges();
         selection.addRange(r);
       } else {
-        // Insert as plain text node
         const textNode = document.createTextNode(variable.value);
         range.deleteContents();
         range.insertNode(textNode);
-
-        // Move caret after inserted text node
         const newRange = document.createRange();
         newRange.setStartAfter(textNode);
         newRange.collapse(true);
@@ -96,49 +89,41 @@ const ContentInformationForm = ({ form, type, status, statusApproval }) => {
       }
     }
 
-    // Normalize to merge adjacent text nodes (keamanan)
     try {
       editorEl.normalize && editorEl.normalize();
     } catch (err) {
-      // ignore normalization errors
+      // ignore
     }
 
-    // Update content to form
     const newContent = editorEl.innerHTML;
-    setBodyContent(newContent);
-    form.setFieldsValue({ body: newContent });
-
-    // Keep focus on editor
+    setBodyValue(newContent);
     editorEl.focus();
     setLastFocus("body");
   };
 
-  // Insert variable ke posisi cursor di Subject Input (PLAIN TEXT)
   const handleInsertVariableToSubject = (variable) => {
     const input = subjectInputRef.current?.input;
     if (!input) return;
 
     const start = typeof input.selectionStart === "number" ? input.selectionStart : 0;
     const end = typeof input.selectionEnd === "number" ? input.selectionEnd : 0;
-    const currentValue = input.value || "";
 
     const newValue =
-      currentValue.substring(0, start) +
+      subjectValue.substring(0, start) +
       variable.value +
-      currentValue.substring(end);
+      subjectValue.substring(end);
 
-    // Set value and update form
-    input.value = newValue;
-    form.setFieldsValue({ subject: newValue });
+    setSubjectValue(newValue);
 
-    // Move caret after inserted variable
-    const newPosition = start + variable.value.length;
-    input.setSelectionRange(newPosition, newPosition);
-    input.focus();
+    setTimeout(() => {
+      const newPosition = start + variable.value.length;
+      input.setSelectionRange(newPosition, newPosition);
+      input.focus();
+    }, 0);
+    
     setLastFocus("subject");
   };
 
-  // Deteksi apakah fokus terakhir di Subject atau Body (gunakan lastFocus)
   const handleInsertVariable = (variable) => {
     if (lastFocus === "subject") {
       handleInsertVariableToSubject(variable);
@@ -149,76 +134,60 @@ const ContentInformationForm = ({ form, type, status, statusApproval }) => {
 
   return (
     <div className="grid grid-cols-1 gap-4">
-      {/* Subject Field */}
-      <Form.Item
-        label={<span className="font-medium">Subject</span>}
-        name="subject"
-        rules={[{ required: true, message: "Please input subject!" }]}
-      >
+      {/* Subject Field - TANPA Form.Item */}
+      <div>
+        <label className="block mb-2">
+          <span className="font-medium">Subject</span>
+          <span className="text-red-500 ml-1">*</span>
+        </label>
         <Input
           ref={subjectInputRef}
+          value={subjectValue}
+          onChange={handleSubjectChange}
           placeholder="Billing {billingPeriod}: {customerName}: {customerNumber}"
           disabled={status === "view" || statusApproval === "view"}
           className="rounded-md"
           size="large"
           onFocus={() => setLastFocus("subject")}
         />
-      </Form.Item>
+        {!subjectValue && (
+          <div className="text-red-500 text-sm mt-1">Please input subject!</div>
+        )}
+      </div>
 
-      {/* Body Field with Rich Text Editor and Variable Sidebar */}
+      {/* Body Field - TANPA Form.Item */}
       <div className="flex gap-4">
-        {/* Rich Text Editor with Custom Toolbar */}
         <div className="flex-1">
-          <Form.Item
-            label={
-              <span className="font-medium">
-                Body <span className="text-red-500">*</span>
-              </span>
-            }
-            name="body"
-            rules={[{ required: true, message: "Please input body content!" }]}
-          >
-            <EditorProvider>
-              <Editor
-                value={bodyContent}
-                onChange={handleBodyChange}
-                disabled={status === "view" || statusApproval === "view"}
-                containerProps={{
-                  style: {
-                    minHeight: "400px",
-                    border: "1px solid #d9d9d9",
-                    borderRadius: "6px",
-                    overflow: "hidden",
-                  },
-                }}
-                style={{
-                  minHeight: "350px",
-                  maxHeight: "500px",
-                  overflowY: "auto",
-                }}
-                placeholder="Start typing your content here..."
-                ref={editorRef}
-                onFocus={() => setLastFocus("body")}
-              >
-                <Toolbar>
-                  <BtnUndo />
-                  <BtnRedo />
-                  <Separator />
-                  <BtnBold />
-                  <BtnItalic />
-                  <BtnUnderline />
-                  <BtnStrikeThrough />
-                  <Separator />
-                  <BtnNumberedList />
-                  <BtnBulletList />
-                  <Separator />
-                  <BtnLink />
-                  <Separator />
-                  <BtnStyles />
-                </Toolbar>
-              </Editor>
-            </EditorProvider>
-          </Form.Item>
+          <label className="block mb-2">
+            <span className="font-medium">Body</span>
+            <span className="text-red-500 ml-1">*</span>
+          </label>
+          <EditorProvider>
+            <Editor
+              value={bodyValue}
+              onChange={handleBodyChange}
+              disabled={status === "view" || statusApproval === "view"}
+              containerProps={{
+                style: {
+                  minHeight: "400px",
+                  border: "1px solid #d9d9d9",
+                  borderRadius: "6px",
+                  overflow: "hidden",
+                },
+              }}
+              style={{
+                minHeight: "350px",
+                maxHeight: "500px",
+                overflowY: "auto",
+              }}
+              placeholder="Start typing your content here..."
+              ref={editorRef}
+              onFocus={() => setLastFocus("body")}
+            />
+          </EditorProvider>
+          {!bodyValue && (
+            <div className="text-red-500 text-sm mt-1">Please input body content!</div>
+          )}
         </div>
 
         {/* Variable Sidebar */}
@@ -226,7 +195,6 @@ const ContentInformationForm = ({ form, type, status, statusApproval }) => {
           className="w-64 bg-blue-600 rounded-lg shadow-lg overflow-hidden flex flex-col"
           style={{ height: "fit-content" }}
         >
-          {/* Header */}
           <div className="bg-blue-600 px-4 py-3 flex items-center justify-between border-b border-blue-500">
             <h3 className="font-bold text-sm text-white uppercase tracking-wide">
               VARIABLE
@@ -239,13 +207,12 @@ const ContentInformationForm = ({ form, type, status, statusApproval }) => {
             </button>
           </div>
 
-          {/* Variable List */}
           <div className="bg-white p-3 space-y-1.5 max-h-96 overflow-y-auto variable-scrollbar">
             {variables.map((variable, index) => (
               <button
                 key={variable.value}
                 type="button"
-                onMouseDown={(e) => e.preventDefault()} // prevent button stealing focus
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleInsertVariable(variable)}
                 disabled={status === "view" || statusApproval === "view"}
                 className={`
@@ -262,7 +229,6 @@ const ContentInformationForm = ({ form, type, status, statusApproval }) => {
             ))}
           </div>
 
-          {/* Footer Info */}
           <div className="bg-blue-600 px-4 py-3 border-t border-blue-500">
             <p className="text-xs text-white leading-relaxed opacity-90">
               Click on a variable to insert it at cursor position
@@ -272,7 +238,6 @@ const ContentInformationForm = ({ form, type, status, statusApproval }) => {
       </div>
 
       <style jsx>{`
-        /* Variable Sidebar Scrollbar */
         .variable-scrollbar::-webkit-scrollbar {
           width: 6px;
         }
@@ -288,7 +253,6 @@ const ContentInformationForm = ({ form, type, status, statusApproval }) => {
           background: #94a3b8;
         }
 
-        /* Custom Editor Styling */
         :global(.rsw-toolbar) {
           background: #fafafa;
           border-bottom: 1px solid #d9d9d9;

@@ -22,12 +22,13 @@ export const columnsContentManagement = (
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "CODE",
-      dataIndex: "contentCode",
+      title: "TEMPLATE CODE",
+      dataIndex: "templateCode",
       sorter: true,
+      width: 180,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "contentCode",
+        "templateCode",
         searchInput,
         searchedColumn,
         searchText,
@@ -35,8 +36,8 @@ export const columnsContentManagement = (
       ),
       render: (text) =>
         renderColumn(
-          "contentCode",
-          hasValue(search["contentCode"]),
+          "templateCode",
+          hasValue(search["templateCode"]),
           searchText,
           text,
           false,
@@ -45,12 +46,13 @@ export const columnsContentManagement = (
         ),
     },
     {
-      title: "DESCRIPTION",
-      dataIndex: "contentName",
+      title: "TEMPLATE NAME",
+      dataIndex: "templateName",
       sorter: true,
+      width: 250,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "contentName",
+        "templateName",
         searchInput,
         searchedColumn,
         searchText,
@@ -58,8 +60,142 @@ export const columnsContentManagement = (
       ),
       render: (text) =>
         renderColumn(
-          "contentName",
-          hasValue(search["contentName"]),
+          "templateName",
+          hasValue(search["templateName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "FORMAT TYPE",
+      dataIndex: "formatType",
+      sorter: true,
+      width: 150,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "formatType",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "formatType",
+          hasValue(search["formatType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "CATEGORY",
+      dataIndex: "category",
+      sorter: true,
+      width: 150,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "category",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "category",
+          hasValue(search["category"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "MEDIA CHANNEL",
+      dataIndex: "mediaChannel",
+      sorter: true,
+      width: 150,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "mediaChannel",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "mediaChannel",
+          hasValue(search["mediaChannel"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "START DATE",
+      dataIndex: "startDate",
+      sorter: true,
+      width: 150,
+      render: (text, record) => {
+        // ✅ Triple check untuk memastikan tidak ada undefined/null
+        if (!text || text === null || text === undefined || text === "") {
+          return <span>-</span>;
+        }
+        try {
+          const formatted = renderDateColumn(text, "DD/MM/YYYY");
+          return <span>{formatted}</span>;
+        } catch (error) {
+          console.error("Error rendering startDate:", error, record);
+          return <span>-</span>;
+        }
+      },
+    },
+    {
+      title: "END DATE",
+      dataIndex: "endDate",
+      sorter: true,
+      width: 150,
+      render: (text, record) => {
+        // ✅ Triple check untuk memastikan tidak ada undefined/null
+        if (!text || text === null || text === undefined || text === "") {
+          return <span>-</span>;
+        }
+        try {
+          const formatted = renderDateColumn(text, "DD/MM/YYYY");
+          return <span>{formatted}</span>;
+        } catch (error) {
+          console.error("Error rendering endDate:", error, record);
+          return <span>-</span>;
+        }
+      },
+    },
+    {
+      title: "DESCRIPTION",
+      dataIndex: "description",
+      sorter: true,
+      width: 200,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "description",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "description",
+          hasValue(search["description"]),
           searchText,
           text,
           false,
@@ -70,7 +206,6 @@ export const columnsContentManagement = (
     {
       title: "STATUS",
       dataIndex: "status",
-      fixed: "right",
       width: 100,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -107,7 +242,6 @@ export const columnsContentManagement = (
     {
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
-      fixed: "right",
       width: 150,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(

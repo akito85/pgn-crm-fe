@@ -109,6 +109,7 @@ import invoiceMasterDataReducer from "../slices/receipt_collection/invoice";
 import partnerReducer from "../slices/receipt_collection/partner";
 import partnerCaReducer from "../slices/receipt_collection/partnerCa";
 import digitalSignatureReducer from "../slices/rating_billing_invoice/MasterData/digitalSignature";
+import contentManagementReducer from "../slices/rating_billing_invoice/MasterData/contentManagement";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -210,6 +211,7 @@ const reducer = combineReducers({
   managementDeliveryInvoice: managementDeliveryInvoiceReducer,
   masterEfakturCode: masterEfakturCodeReducer,
   digitalSignature: digitalSignatureReducer,
+  contentManagement: contentManagementReducer,
 
   //receipt and collection
   receipt: receiptReducer,
