@@ -125,10 +125,10 @@ const PaymentRelationDetailAttch = ({
     },
     {
       title: "TYPE",
-      dataIndex: "type",
-      width: 150,
+      dataIndex: "fileCategoryName",
+      width: 75,
       sorter: true,
-      ...getColumnSearchProps("type"),
+      ...getColumnSearchProps("fileCategoryName"),
     },
     {
       title: "FILE NAME",
@@ -140,7 +140,7 @@ const PaymentRelationDetailAttch = ({
     {
       title: "FILE SIZE",
       dataIndex: "fileSize",
-      width: 150,
+      width: 100,
       sorter: true,
       align: "center",
       ...getColumnSearchProps("fileSize"),

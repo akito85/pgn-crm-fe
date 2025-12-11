@@ -252,7 +252,7 @@ const PaymentRelationDetails = ({
             options={tabs}
             handleChangeOption={handleDetailSection}
             dataDetail={detail_paymentRelation?.result}
-            dataAttachment={data_paymentRelationAttachment}
+            dataAttachment={data_paymentRelationAttachment?.result}
           />
         </div>
 
