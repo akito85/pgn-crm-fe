@@ -86,13 +86,13 @@ const columnAttachmentData = (
   const res = [
     {
       title: "NO",
-      width: 60,
+      width: 30,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "CATEGORY",
-      width: 240,
+      width: 75,
       dataIndex: "fileCategoryName",
       onFilter: (value, record) => onFilter("fileCategoryName", value, record),
       sorter: (a, b) => sorter("fileCategoryName", a, b),
@@ -106,7 +106,7 @@ const columnAttachmentData = (
     },
     {
       title: "FILE NAME",
-      width: 240,
+      width: 200,
       dataIndex: "fileName",
       onFilter: (value, record) => onFilter("fileName", value, record),
       sorter: (a, b) => sorter("fileName", a, b),
@@ -120,7 +120,7 @@ const columnAttachmentData = (
     },
     {
       title: "UPLOADED BY",
-      width: 240,
+      width: 100,
       dataIndex: "createdBy",
       onFilter: (value, record) => onFilter("createdBy", value, record),
       sorter: (a, b) => sorter("createdBy", a, b),
@@ -135,7 +135,7 @@ const columnAttachmentData = (
     {
       title: "UPLOADED DATE",
       align: "center",
-      width: 240,
+      width: 100,
       dataIndex: "createdDate",
       onFilter: (value, record) => onFilter("createdDate", value, record),
       sorter: (a, b) => sorter("createdDate", a, b),
@@ -150,7 +150,7 @@ const columnAttachmentData = (
     {
       title: "FILE SIZE",
       align: "center",
-      width: 240,
+      width: 100,
       dataIndex: "fileSize",
       onFilter: (value, record) => onFilter("fileSize", value, record),
       sorter: (a, b) => sorter("fileSize", a, b),
@@ -165,7 +165,7 @@ const columnAttachmentData = (
     {
       title: "ACTION",
       align: "center",
-      width: 180,
+      width: 75,
       fixed: "right",
       render: (v, r, i) => {
         return (
