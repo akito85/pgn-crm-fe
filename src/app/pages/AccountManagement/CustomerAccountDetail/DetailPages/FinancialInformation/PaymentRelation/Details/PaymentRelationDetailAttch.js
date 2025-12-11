@@ -1,28 +1,18 @@
 import { Tooltip } from "antd";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
-import { 
-  FilterOutlined,
-  DownloadOutlined,
-} from "@ant-design/icons";
 import TablePaginationNew from "../../../../../../../../components/TablePaginationNew";
 
 
 const PaymentRelationDetailAttch = ({
   dataAttachment = [],
-  handleChange = () => {},
-  handleChangeSize = () => {},
-  totalElement = 0,
-  page = 1,
-  pageSize = 10,
-  searchText = "",
-  searchedColumn = "",
-  onSort = () => {},
   getColumnSearchProps = () => {},
-  handleSearch
 }) => {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   // Dummy data
   const dummyData = [
     {
@@ -117,13 +107,8 @@ const PaymentRelationDetailAttch = ({
     },
   ];
 
-  // Use dummy data if no data provided
-  const tableData = (Array.isArray(dataAttachment) && dataAttachment.length > 0) ? dataAttachment : [];
-
   // Sanitize pagination values to prevent NaN
   const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
-  const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
-  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : tableData.length;
 
   const handleViewFile = (fileData) => {
     // Placeholder for view file action
@@ -136,7 +121,7 @@ const PaymentRelationDetailAttch = ({
       title: "NO",
       width: 80,
       align: "center",
-      render: (text, object, index) => (sanitizedPage - 1) * sanitizedPageSize + index + 1,
+      render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "TYPE",
@@ -189,30 +174,6 @@ const PaymentRelationDetailAttch = ({
   return (
     <Fragment>
       <BaseContainer header={"ATTACHMENTS"}>
-        <div className="mb-5 flex items-center justify-between">
-          {/* Left Side Buttons Group */}
-          <div className="flex items-center gap-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {/* trigger filter */}}
-              icon={<FilterOutlined className="text-2xl" />}
-            >
-              Filter
-            </ButtonComponent>
-          </div>
-
-          {/* Right Side Buttons Group */}
-          <div className="flex items-center gap-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {/* trigger download list */}}
-              icon={<DownloadOutlined className="text-2xl" />}
-            >
-              Download List
-            </ButtonComponent>
-          </div>
-        </div>
-
         <TablePaginationNew
           dataSource={dataAttachment.map((item, idx) => ({
             ...item,
@@ -220,6 +181,9 @@ const PaymentRelationDetailAttch = ({
           }))}
           tableScrolled={{ y: 525, x: 1500 }}
           columns={columns}
+          current={page}
+          onChange={setPage}
+          onSizeChanger={setPageSize}
           type="FE"
         />
 
