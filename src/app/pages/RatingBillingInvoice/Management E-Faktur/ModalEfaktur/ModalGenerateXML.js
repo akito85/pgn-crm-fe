@@ -1,104 +1,133 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Alert, Table, message } from "antd";
+import { Spin, Alert, Steps, message } from "antd";
 import {
   DownloadOutlined,
   FileTextOutlined,
   CopyOutlined,
   CheckOutlined,
+  ArrowLeftOutlined,
 } from "@ant-design/icons";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import DetailText from "../../../../../components/DetailText";
-import {
-  ModalError,
-} from "../../../../../components/Modal/ModalPopUp";
+import StatusComponent from "../../../../../components/StatusComponent";
+import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../utils/Icon";
+import TableRBI from "../../../../../components/TableRBI";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 import {
-  getAllBillingItemPaginate,
   generateXMLEFaktur,
-  getDetailEFaktur,
+  getAvailableRequestedList,
 } from "../../../../../redux/slices/rating_billing_invoice/efakturSlice";
+
+const { Step } = Steps;
 
 const ModalGenerateXML = ({
   isOpen = false,
   handleClose = () => {},
-  billingData = null,
   onSuccess = () => {},
 }) => {
   const dispatch = useDispatch();
-  
-  const { 
-    data_billingItem, 
-    loading_modal, 
-    loading_detail,
-    detail_efaktur 
+  const searchInput = useRef(null);
+
+  // Redux state
+  const {
+    data_available_requested,
+    loading_available_requested,
+    loading_modal,
+    pagination_available_requested,
   } = useSelector((state) => state.efaktur);
 
+  // State
+  const [currentStep, setCurrentStep] = useState(0);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedRecords, setSelectedRecords] = useState([]);
   const [xmlContent, setXmlContent] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
-  const [efakturDetail, setEfakturDetail] = useState(null);
 
+  // Table state
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [fieldSort, setFieldSort] = useState("invoiceDate");
+  const [orderSort, setOrderSort] = useState("desc");
+  const [fixedColumns, setFixedColumns] = useState({
+    no: "left",
+  });
+
+  // Fetch data when modal opens or pagination/sort changes
   useEffect(() => {
-    if (isOpen && billingData?.efakturId) {
-      dispatch(getAllBillingItemPaginate(billingData.efakturId));
-      
-      dispatch(getDetailEFaktur(billingData.efakturId))
-        .unwrap()
-        .then((result) => {
-          if (result) {
-            setEfakturDetail(result);
-          }
+    if (isOpen) {
+      const sortParam =
+        fieldSort && orderSort
+          ? `${fieldSort}~${orderSort}`
+          : "invoiceDate~desc";
+
+      dispatch(
+        getAvailableRequestedList({
+          page: page,
+          pageSize: pageSize,
+          type: "manual_upload",
+          sort: sortParam,
+          search: searchText,
         })
-        .catch((error) => {
-          setErrorMessage("E-Faktur belum dibuat untuk billing ini");
-          setModalError(true);
-        });
+      );
     }
-  }, [isOpen, billingData, dispatch]);
+  }, [isOpen, page, pageSize, fieldSort, orderSort, searchText, dispatch]);
 
+  // Reset state when modal closes
   useEffect(() => {
-    if (detail_efaktur) {
-      setEfakturDetail(detail_efaktur);
+    if (!isOpen) {
+      setCurrentStep(0);
+      setSelectedRowKeys([]);
+      setSelectedRecords([]);
+      setXmlContent("");
+      setCopied(false);
+      setPage(1);
+      setPageSize(10);
+      setSearchText("");
+      setSearchedColumn("");
+      setFieldSort("invoiceDate");
+      setOrderSort("desc");
     }
-  }, [detail_efaktur]);
+  }, [isOpen]);
 
   const formatXML = (xmlString) => {
     try {
       let formatted = xmlString.trim();
-      
-      // Format XML dengan indentasi yang benar
-      formatted = formatted.replace(/></g, '>\n<');
-      
+      formatted = formatted.replace(/></g, ">\n<");
+
       let indent = 0;
-      const lines = formatted.split('\n');
-      
-      formatted = lines.map(line => {
-        const trimmed = line.trim();
-        
-        if (!trimmed) return '';
-        
-        // Kurangi indent untuk closing tag
-        if (trimmed.startsWith('</')) {
-          indent = Math.max(0, indent - 1);
-        }
-        
-        const indentation = '  '.repeat(indent);
-        
-        // Tambah indent untuk opening tag (kecuali self-closing)
-        if (trimmed.startsWith('<') && 
-            !trimmed.startsWith('</') && 
-            !trimmed.endsWith('/>') &&
-            !trimmed.match(/<[^>]+>[^<]*<\/[^>]+>/)) {
-          indent++;
-        }
-        
-        return indentation + trimmed;
-      }).filter(line => line !== '').join('\n');
-      
+      const lines = formatted.split("\n");
+
+      formatted = lines
+        .map((line) => {
+          const trimmed = line.trim();
+          if (!trimmed) return "";
+
+          if (trimmed.startsWith("</")) {
+            indent = Math.max(0, indent - 1);
+          }
+
+          const indentation = "  ".repeat(indent);
+
+          if (
+            trimmed.startsWith("<") &&
+            !trimmed.startsWith("</") &&
+            !trimmed.endsWith("/>") &&
+            !trimmed.match(/<[^>]+>[^<]*<\/[^>]+>/)
+          ) {
+            indent++;
+          }
+
+          return indentation + trimmed;
+        })
+        .filter((line) => line !== "")
+        .join("\n");
+
       return formatted;
     } catch (error) {
       return xmlString;
@@ -106,71 +135,52 @@ const ModalGenerateXML = ({
   };
 
   const handleGenerateXML = async () => {
-    if (!billingData) {
-      setErrorMessage("Data billing tidak ditemukan");
+    if (selectedRecords.length === 0) {
+      setErrorMessage("Tidak ada E-Faktur yang dipilih");
       setModalError(true);
       return;
     }
-
-    if (!efakturDetail?.efakturId) {
-      setErrorMessage("E-Faktur ID tidak ditemukan. Pastikan E-Faktur sudah dibuat.");
-      setModalError(true);
-      return;
-    }
-
-    setIsGenerating(true);
 
     try {
+      const efakturIds = selectedRecords.map((record) =>
+        String(record.efakturId)
+      );
+
       const result = await dispatch(
-        generateXMLEFaktur({
-          efakturId: efakturDetail.efakturId,
-          invoiceNumber: efakturDetail.invoiceNumber || billingData.invoiceNumber
-        })
+        generateXMLEFaktur({ efakturIds })
       ).unwrap();
 
-      // Extract XML content dari result
-      let xmlString = '';
-      
-      if (typeof result === 'string') {
-        xmlString = result;
-      } else if (result?.xmlContent) {
-        xmlString = result.xmlContent;
-      } else if (result?.data) {
-        xmlString = typeof result.data === 'string' ? result.data : result.data.xmlContent || '';
-      }
+      const xmlString = result.xmlContent || "";
 
-      // Validasi XML content
       if (!xmlString || xmlString.trim().length === 0) {
         throw new Error("XML content kosong dari backend");
       }
 
       const trimmedXml = xmlString.trim();
-      if (!trimmedXml.startsWith('<')) {
+      if (!trimmedXml.startsWith("<")) {
         throw new Error("Format XML tidak valid dari backend");
       }
 
-      // Format XML untuk display
       const formattedXml = formatXML(xmlString);
       setXmlContent(formattedXml);
-      
-      message.success("XML berhasil di-generate dan didownload!");
-      
-      setIsGenerating(false);
+
+      message.success(
+        `Berhasil generate XML untuk ${selectedRecords.length} E-Faktur!`
+      );
+      setCurrentStep(1);
     } catch (error) {
-      
       let errorMsg = "Gagal generate XML E-Faktur";
-      
+
       if (error?.message) {
         errorMsg = error.message;
       } else if (error?.response?.data?.message) {
         errorMsg = error.response.data.message;
-      } else if (typeof error === 'string') {
+      } else if (typeof error === "string") {
         errorMsg = error;
       }
-      
+
       setErrorMessage(errorMsg);
       setModalError(true);
-      setIsGenerating(false);
     }
   };
 
@@ -189,7 +199,6 @@ const ModalGenerateXML = ({
         setCopied(false);
       }, 2000);
     } catch (error) {
-      // Fallback untuk browser yang tidak support clipboard API
       try {
         const textArea = document.createElement("textarea");
         textArea.value = xmlContent;
@@ -199,14 +208,14 @@ const ModalGenerateXML = ({
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-        
-        const successful = document.execCommand('copy');
+
+        const successful = document.execCommand("copy");
         document.body.removeChild(textArea);
-        
+
         if (successful) {
           setCopied(true);
           message.success("XML berhasil di-copy ke clipboard");
-          
+
           setTimeout(() => {
             setCopied(false);
           }, 2000);
@@ -227,295 +236,365 @@ const ModalGenerateXML = ({
     }
 
     try {
-      const blob = new Blob([xmlContent], { 
-        type: "application/xml;charset=utf-8" 
+      const blob = new Blob([xmlContent], {
+        type: "application/xml;charset=utf-8",
       });
-      
+
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-      const invoiceNum = efakturDetail?.invoiceNumber || billingData?.invoiceNumber || 'unknown';
-      const fileName = `E-Faktur_${invoiceNum}_${timestamp}.xml`;
-      
+
+      const timestamp = new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")
+        .slice(0, -5);
+      const fileName = `E-Faktur_Manual_Upload_${selectedRecords.length}_${timestamp}.xml`;
+
       link.download = fileName;
-      
+
       document.body.appendChild(link);
       link.click();
-      
+
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
       message.success(`File ${fileName} berhasil diunduh`);
+
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       message.error("Gagal mengunduh file XML");
     }
   };
 
   const handleCancel = () => {
+    setCurrentStep(0);
+    setSelectedRowKeys([]);
+    setSelectedRecords([]);
     setXmlContent("");
-    setIsGenerating(false);
     setCopied(false);
-    setEfakturDetail(null);
     handleClose();
   };
 
-  const columnsItems = [
-    {
-      title: "#",
-      dataIndex: "lineNumber",
-      key: "lineNumber",
-      width: 50,
-      align: "center",
-    },
-    {
-      title: "Nama Barang/Jasa",
-      dataIndex: "productName",
-      key: "productName",
-      width: 300,
-      render: (text, record) => (
-        <div>
-          <div className="font-medium">{text}</div>
-          {record.description && (
-            <div className="text-xs text-gray-500">{record.description}</div>
-          )}
-        </div>
-      ),
-    },
-    {
-      title: "Qty",
-      dataIndex: "quantity",
-      key: "quantity",
-      width: 80,
-      align: "right",
-      render: (value) => {
-        const numValue = parseFloat(value);
-        return numValue.toLocaleString("id-ID");
-      },
-    },
-    {
-      title: "Harga Satuan",
-      dataIndex: "unitPrice",
-      key: "unitPrice",
-      width: 120,
-      align: "right",
-      render: (value, record) => {
-        const symbol = record.currency === "USD" ? "$" : "Rp";
-        return `${symbol} ${value?.toLocaleString("id-ID")}`;
-      },
-    },
-    {
-      title: "Total",
-      dataIndex: "total",
-      key: "total",
-      width: 150,
-      align: "right",
-      render: (value, record) => {
-        const symbol = record.currency === "USD" ? "$" : "Rp";
-        return (
-          <span className="font-semibold">
-            {symbol} {value?.toLocaleString("id-ID")}
-          </span>
-        );
-      },
-    },
-  ];
-
-  const calculateTotals = () => {
-    if (!data_billingItem || data_billingItem.length === 0) {
-      return { totalDpp: 0, totalPpn: 0, total: 0 };
-    }
-
-    const totalDpp = data_billingItem
-      .filter((item) => {
-        const itemName = (item.productName || "").toLowerCase();
-        return !itemName.includes("ppn");
-      })
-      .reduce((sum, item) => sum + (item.total || 0), 0);
-
-    const totalPpn = data_billingItem
-      .filter((item) => {
-        const itemName = (item.productName || "").toLowerCase();
-        return itemName.includes("ppn");
-      })
-      .reduce((sum, item) => sum + (item.total || 0), 0);
-
-    const total = totalDpp + totalPpn;
-
-    return { totalDpp, totalPpn, total };
+  const handlePrevious = () => {
+    setCurrentStep(0);
+    setXmlContent("");
   };
 
-  const totals = calculateTotals();
-  const currency = data_billingItem?.[0]?.currency || "IDR";
+  // Table handlers
+  const handleChange = (pageChange, pageSizeChange) => {
+    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+    setPageSize(pageSizeChange);
+    // Reset selection when page changes
+    setSelectedRowKeys([]);
+    setSelectedRecords([]);
+  };
+
+  const onSort = (_, __, sort) => {
+    if (sort.order) {
+      setFieldSort(sort.field);
+      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
+    } else {
+      setFieldSort("invoiceDate");
+      setOrderSort("desc");
+    }
+  };
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
+    if (searchedColumn !== tempSearchColumn) {
+      setPage(1);
+    }
+    setSearchedColumn(tempSearchColumn);
+  };
+
+  const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
+    setSelectedRowKeys(newSelectedRowKeys);
+    setSelectedRecords(newSelectedRows);
+  };
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+    fixed: true,
+  };
+
+  // Columns definition
+  const baseColumns = useMemo(
+    () => [
+      {
+        title: "NO",
+        dataIndex: "no",
+        key: "no",
+        width: 60,
+        align: "center",
+        render: (_, __, index) => (page - 1) * pageSize + index + 1,
+      },
+      {
+        title: "FAKTUR CODE",
+        dataIndex: "efakturNo",
+        key: "efakturNo",
+        width: 150,
+        sorter: true,
+        render: (text) => text || "-",
+      },
+      {
+        title: "FAKTUR TYPE",
+        dataIndex: "type",
+        key: "type",
+        width: 140,
+        align: "center",
+        sorter: true,
+        render: (type) => {
+          if (!type) return "-";
+
+          const displayType = (type || "STANDARD").toUpperCase();
+          const statusLabel = displayType.replace(/_/g, " ");
+
+          return (
+            <div className="flex justify-center">
+              <StatusComponent colour={displayType.toLowerCase()}>
+                {statusLabel}
+              </StatusComponent>
+            </div>
+          );
+        },
+      },
+      {
+        title: "BILLING CODE",
+        dataIndex: "billingCode",
+        key: "billingCode",
+        width: 150,
+        sorter: true,
+      },
+      {
+        title: "INVOICE NUMBER",
+        dataIndex: "invoiceNumber",
+        key: "invoiceNumber",
+        width: 150,
+        sorter: true,
+      },
+      {
+        title: "INVOICE DATE",
+        dataIndex: "invoiceDate",
+        key: "invoiceDate",
+        width: 150,
+        sorter: true,
+      },
+      {
+        title: "ACCOUNT NUMBER",
+        dataIndex: "accountNumber",
+        key: "accountNumber",
+        width: 150,
+        sorter: true,
+      },
+      {
+        title: "ACCOUNT NAME",
+        dataIndex: "accountName",
+        key: "accountName",
+        width: 200,
+      },
+      {
+        title: "STATUS PJAP",
+        dataIndex: "statusPjap",
+        key: "statusPjap",
+        width: 130,
+        align: "center",
+        sorter: true,
+        render: (statusPjap, record) => {
+          const displayStatus = statusPjap || record.status;
+          if (!displayStatus) return "-";
+
+          const upperStatus = displayStatus.toUpperCase();
+          const statusLabel = upperStatus.replace(/_/g, " ");
+
+          return (
+            <div className="flex justify-center">
+              <StatusComponent colour={displayStatus.toLowerCase()}>
+                {statusLabel}
+              </StatusComponent>
+            </div>
+          );
+        },
+      },
+    ],
+    [page, pageSize]
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
+  // Data source with keys
+  const dataSource = useMemo(() => {
+    return data_available_requested.map((item, idx) => ({
+      ...item,
+      key: item.efakturId || idx,
+    }));
+  }, [data_available_requested]);
+
+  const getFooter = () => {
+    if (currentStep === 0) {
+      return (
+        <div
+          className="flex justify-end gap-3"
+          style={{ alignItems: "stretch" }}
+        >
+          <ButtonComponent
+            type="default"
+            size="large"
+            onClick={handleCancel}
+            style={{ width: 140, height: 40 }}
+          >
+            Cancel
+          </ButtonComponent>
+
+          <ButtonComponent
+            type="primary"
+            size="large"
+            onClick={handleGenerateXML}
+            loading={loading_modal}
+            disabled={selectedRowKeys.length === 0}
+            icon={<FileTextOutlined />}
+            fontSizeClassname="text-[18px] py-1 px-1" 
+            style={{ width: 140 }}
+          >
+            Next
+          </ButtonComponent>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex justify-between">
+        <ButtonComponent
+          type="default"
+          onClick={handlePrevious}
+          icon={<ArrowLeftOutlined />}
+        >
+          Previous
+        </ButtonComponent>
+        <div className="flex gap-3">
+          <ButtonComponent
+            type="default"
+            onClick={handleCopyXML}
+            icon={copied ? <CheckOutlined /> : <CopyOutlined />}
+            style={copied ? { borderColor: "#52c41a", color: "#52c41a" } : {}}
+          >
+            {copied ? "Copied!" : "Copy XML"}
+          </ButtonComponent>
+          <ButtonComponent
+            type="primary"
+            onClick={handleDownloadXML}
+            icon={<DownloadOutlined />}
+          >
+            Download XML
+          </ButtonComponent>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div>
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Generate XML for E-Faktur"
+        header="GENERATE XML"
         handleCancel={handleCancel}
-        width={900}
-        footer={
-          <div className="flex justify-end gap-3">
-            <ButtonComponent type="default" onClick={handleCancel}>
-              Tutup
-            </ButtonComponent>
-            {!xmlContent && (
-              <ButtonComponent
-                type="primary"
-                onClick={handleGenerateXML}
-                loading={isGenerating}
-                icon={<FileTextOutlined />}
-                disabled={!efakturDetail?.efakturId}
-              >
-                Generate XML
-              </ButtonComponent>
-            )}
-            {xmlContent && (
+        width={1000}
+        footer={getFooter()}
+      >
+        <Spin spinning={loading_available_requested || loading_modal}>
+          <div className="my-6">
+            {/* Steps */}
+            <div className="mb-6">
+              <Steps current={currentStep} className="px-12">
+                <Step title="E-FAKTUR" icon={<FileTextOutlined />} />
+                <Step title="CONFIRMATION" icon={<CheckOutlined />} />
+              </Steps>
+            </div>
+
+            {/* Step 1: E-Faktur List */}
+            {currentStep === 0 && (
               <>
-                <ButtonComponent
-                  type="default"
-                  onClick={handleCopyXML}
-                  icon={copied ? <CheckOutlined /> : <CopyOutlined />}
-                  style={
-                    copied ? { borderColor: "#52c41a", color: "#52c41a" } : {}
-                  }
-                >
-                  {copied ? "Copied!" : "Copy XML"}
-                </ButtonComponent>
-                <ButtonComponent
-                  type="primary"
-                  onClick={handleDownloadXML}
-                  icon={<DownloadOutlined />}
-                >
-                  Download XML
-                </ButtonComponent>
+                {/* Table */}
+                <TableRBI
+                  dataSource={dataSource}
+                  columns={processedColumns}
+                  current={page}
+                  pageSize={pageSize}
+                  onChange={handleChange}
+                  onSizeChanger={handleChange}
+                  totalData={pagination_available_requested.totalElements}
+                  tableScrolled={{ y: 400, x: 1200 }}
+                  onSort={onSort}
+                  columnDefinitions={columnDefinitions}
+                  fixedColumns={fixedColumns}
+                  setFixedColumns={setFixedColumns}
+                  loading={loading_available_requested}
+                  rowSelection={rowSelection}
+                  showExport={false}
+                />
               </>
             )}
-          </div>
-        }
-      >
-        <Spin spinning={loading_modal || loading_detail || isGenerating}>
-          <div className="my-6">
-            {!loading_detail && !efakturDetail && (
-              <Alert
-                message="E-Faktur Belum Dibuat"
-                description="E-Faktur untuk billing ini belum dibuat. Silakan buat E-Faktur terlebih dahulu sebelum generate XML."
-                type="warning"
-                showIcon
-                className="mb-6"
-              />
-            )}
 
-            {billingData && efakturDetail && (
-              <>
+            {/* Step 2: Confirmation */}
+            {currentStep === 1 && (
+              <div>
+                {/* Selected E-Faktur Summary */}
                 <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
                   <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
-                    Informasi Billing
+                    E-Faktur yang Diproses ({selectedRecords.length})
                   </h3>
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                    <DetailText label="Billing Code">
-                      {billingData.billingCode}
-                    </DetailText>
-                    <DetailText label="Invoice Number">
-                      {efakturDetail.invoiceNumber || billingData.invoiceNumber || "-"}
-                    </DetailText>
-                    <DetailText label="Customer">
-                      {billingData.customerName}
-                    </DetailText>
-                    <DetailText label="Account Number">
-                      {billingData.accountNumber}
-                    </DetailText>
-                    <DetailText label="Invoice Date">
-                      {billingData.invoiceDate}
-                    </DetailText>
-                    <DetailText label="Billing Period">
-                      {billingData.billingPeriod || "-"}
-                    </DetailText>
-                    <DetailText label="E-Faktur Status">
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold border bg-orange-100 text-orange-800 border-orange-300">
-                        {efakturDetail.efakturStatus?.replace(/_/g, " ")}
-                      </span>
-                    </DetailText>
-                    {efakturDetail.efakturNo && (
-                      <DetailText label="No. E-Faktur">
-                        {efakturDetail.efakturNo}
-                      </DetailText>
+                  <div className="grid grid-cols-2 gap-4">
+                    {selectedRecords.slice(0, 10).map((record, idx) => (
+                      <div key={idx} className="flex justify-between text-sm">
+                        <span className="text-gray-600">
+                          {idx + 1}. {record.billingCode}
+                        </span>
+                        <span className="font-medium">
+                          {record.invoiceNumber || "-"}
+                        </span>
+                      </div>
+                    ))}
+                    {selectedRecords.length > 10 && (
+                      <div className="col-span-2 text-center text-sm text-gray-500">
+                        ... dan {selectedRecords.length - 10} lainnya
+                      </div>
                     )}
                   </div>
                 </div>
 
-                {data_billingItem && data_billingItem.length > 0 && (
-                  <div className="mb-6 p-5 bg-white border-2 border-gray-300 rounded-lg">
-                    <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
-                      Rincian Barang/Jasa
-                    </h3>
-                    <Table
-                      dataSource={data_billingItem}
-                      columns={columnsItems}
-                      pagination={false}
-                      size="small"
-                      bordered
-                      scroll={{ x: 700 }}
-                    />
-                  </div>
-                )}
-
-                {data_billingItem.length > 0 && (
-                  <div className="mb-6 p-5 bg-blue-50 border-2 border-blue-300 rounded-lg">
-                    <h3 className="text-base font-bold text-blue-800 mb-4 pb-2 border-b-2 border-blue-200">
-                      Ringkasan ({currency})
-                    </h3>
-                    <div className="space-y-2">
-                      <div className="flex justify-between px-3 py-2">
-                        <span className="font-medium">Total DPP (Tanpa PPN):</span>
-                        <span className="font-semibold">
-                          {currency === "USD" ? "$" : "Rp"}{" "}
-                          {totals.totalDpp.toLocaleString("id-ID")}
-                        </span>
-                      </div>
-                      <div className="flex justify-between px-3 py-2">
-                        <span className="font-medium">Total PPN:</span>
-                        <span className="font-semibold">
-                          {currency === "USD" ? "$" : "Rp"}{" "}
-                          {totals.totalPpn.toLocaleString("id-ID")}
-                        </span>
-                      </div>
-                      <div className="flex justify-between px-3 py-2">
-                        <span className="font-medium">Total PPnBM:</span>
-                        <span className="font-semibold">Rp 0</span>
-                      </div>
-                      <div className="flex justify-between items-center pt-3 pb-2 px-3 border-t-2 border-blue-300 bg-blue-100 rounded">
-                        <span className="text-base font-bold text-blue-900">
-                          Total Nilai:
-                        </span>
-                        <span className="text-xl font-bold text-blue-700">
-                          {currency === "USD" ? "$" : "Rp"}{" "}
-                          {totals.total.toLocaleString("id-ID")}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
+                {/* XML Preview */}
                 {xmlContent && (
-                  <div className="mt-6">
+                  <div>
                     <h3 className="text-base font-bold text-green-800 mb-3 flex items-center gap-2">
                       <FileTextOutlined /> XML Generated Successfully
                     </h3>
-                    <Alert
-                      message="XML berhasil di-generate"
-                      description="File XML sudah siap untuk diunduh dan digunakan di aplikasi e-Faktur DJP."
-                      type="success"
-                      showIcon
-                      className="mb-4"
-                    />
                     <div className="rounded-lg border-2 border-green-300 bg-white shadow-md overflow-hidden">
                       <div className="flex justify-between items-center px-4 py-3 border-b-2 border-green-200 bg-green-50">
                         <p className="text-sm font-bold text-green-800">
-                          XML Preview ({xmlContent.length.toLocaleString()} characters)
+                          XML Preview ({xmlContent.length.toLocaleString()}{" "}
+                          characters)
                         </p>
                         <ButtonComponent
                           type="default"
@@ -540,7 +619,7 @@ const ModalGenerateXML = ({
                     </div>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
         </Spin>

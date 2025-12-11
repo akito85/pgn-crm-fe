@@ -21,9 +21,7 @@ import ModalGenerateEFaktur from "./ModalEfaktur/ModalGenerateEFaktur";
 import ModalGenerateXML from "./ModalEfaktur/ModalGenerateXML";
 import ModalUploadEFaktur from "./ModalEfaktur/ModalUploadEFaktur";
 import ModalApprovalEFaktur from "./ModalEfaktur/ModalApprovalEFaktur ";
-import ModalReplaceEFaktur from "./ModalEfaktur/ModalReplaceEFaktur";
-import ModalCancelEFaktur from "./ModalEfaktur/ModalCancelEFaktur ";
-import ModalBulkRequestApproval from "./ModalEfaktur/ModalBulkRequestApproval";
+import ModalRequestApprovalEFaktur from "./ModalEfaktur/ModalRequestApprovalEFaktur";
 import LogAktivitasEFaktur from "./LogAktivitasEFaktur";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
@@ -64,9 +62,7 @@ const ViewFaktur = () => {
   const [modalApproval, setModalApproval] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [logAktivitasOpen, setLogAktivitasOpen] = useState(false);
-  const [modalReplaceFaktur, setModalReplaceFaktur] = useState(false);
-  const [modalCancelFaktur, setModalCancelFaktur] = useState(false);
-  const [modalBulkRequest, setModalBulkRequest] = useState(false);
+  const [modalRequest, setModalRequest] = useState(false);
 
   const [selectedBilling, setSelectedBilling] = useState(null);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
@@ -162,16 +158,6 @@ const ViewFaktur = () => {
     setModalGenerateEFaktur(true);
   };
 
-  const handleCancelFaktur = (record) => {
-    setSelectedBilling(record);
-    setModalCancelFaktur(true);
-  };
-
-  const handleReplaceFaktur = (record) => {
-    setSelectedBilling(record);
-    setModalReplaceFaktur(true);
-  };
-
   const handleApprovalHistory = async (record) => {
     if (!record.efakturId) {
       message.warning("E-Faktur belum dibuat untuk billing ini");
@@ -205,8 +191,8 @@ const ViewFaktur = () => {
     setLogAktivitasOpen(true);
   };
 
-  const handleBulkRequest = () => {
-    setModalBulkRequest(true);
+  const handleRequest = () => {
+    setModalRequest(true);
   };
 
   // Bulk Action Handlers
@@ -244,11 +230,6 @@ const ViewFaktur = () => {
     setSelectedBilling(null);
   };
 
-  const closeModalCancelFaktur = () => {
-    setModalCancelFaktur(false);
-    setSelectedBilling(null);
-  };
-
   const closeModalUploadEFaktur = () => {
     setModalUploadEFaktur(false);
     setSelectedBilling(null);
@@ -259,10 +240,6 @@ const ViewFaktur = () => {
     setSelectedBilling(null);
   };
 
-  const closeModalReplaceFaktur = () => {
-    setModalReplaceFaktur(false);
-    setSelectedBilling(null);
-  };
 
   const closeModalApprovalHistory = () => {
     setModalApprovalHistory(false);
@@ -273,8 +250,8 @@ const ViewFaktur = () => {
     setSelectedBilling(null);
   };
 
-  const closeModalBulkRequest = () => {
-    setModalBulkRequest(false);
+  const closeModalRequest = () => {
+    setModalRequest(false);
   };
 
   // Columns Definition
@@ -290,8 +267,6 @@ const ViewFaktur = () => {
         handleSearch,
         handleApprovalHistory,
         handleGenerateEFaktur,
-        handleReplaceFaktur,
-        handleCancelFaktur,
         handleLogAktivitas,
       }),
     [page, pageSize, search, searchText, searchedColumn]
@@ -326,7 +301,7 @@ const ViewFaktur = () => {
           key: "request",
           label: "Request Approval",
           icon: <PlusOutlined style={{ color: "#52c41a" }} />,
-          onClick: handleBulkRequest,
+          onClick: handleRequest,
         },
       ]}
     />
@@ -337,8 +312,6 @@ const ViewFaktur = () => {
     ...getActionColumn({
       handleApprovalHistory,
       handleGenerateEFaktur,
-      handleReplaceFaktur,
-      handleCancelFaktur,
       handleLogAktivitas,
     }),
   ];
@@ -406,7 +379,7 @@ const ViewFaktur = () => {
               onChange={handleChangePage}
               onSizeChanger={handleChangePage}
               totalData={pagination?.totalElements || 0}
-              tableScrolled={{ x: 2500, y: 525 }}
+              tableScrolled={{ x: 3000, y: 525 }}
               onSort={onSort}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
@@ -450,16 +423,6 @@ const ViewFaktur = () => {
           }}
         />
 
-        <ModalReplaceEFaktur
-          isOpen={modalReplaceFaktur}
-          handleClose={closeModalReplaceFaktur}
-          billingData={selectedBilling}
-          onSuccess={() => {
-            closeModalReplaceFaktur();
-            handleRefresh();
-          }}
-        />
-
         {/* Modal Approval */}
         <ModalApprovalEFaktur
           isOpen={modalApproval}
@@ -470,23 +433,12 @@ const ViewFaktur = () => {
             handleRefresh();
           }}
         />
-
-        <ModalCancelEFaktur
-          isOpen={modalCancelFaktur}
-          handleClose={closeModalCancelFaktur}
-          billingData={selectedBilling}
-          onSuccess={() => {
-            closeModalCancelFaktur();
-            handleRefresh();
-          }}
-        />
-
         {/* Modal Bulk Request Approval */}
-        <ModalBulkRequestApproval
-          isOpen={modalBulkRequest}
-          handleClose={closeModalBulkRequest}
+        <ModalRequestApprovalEFaktur
+          isOpen={modalRequest}
+          handleClose={closeModalRequest}
           onSuccess={() => {
-            closeModalBulkRequest();
+            closeModalRequest();
             handleRefresh();
           }}
         />

@@ -48,8 +48,13 @@ import PrabillingDetail from "../../app/pages/RatingBillingInvoice/Prabilling/Pr
 import MonitoringCustomerPage from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/MonitoringCustomerPage";
 import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/prabillCustomer/AccountDetailPage";
 import EFakturCodeView from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeView";
-import DigitalSignatureView from "../../app/pages/RatingBillingInvoice/MasterData/DigitalSignature/DigitalSignatureView";
 import ContentManagementView from "../../app/pages/RatingBillingInvoice/MasterData/ContentManagement/ContentManagementView";
+import ContentManagementForm from "../../app/pages/RatingBillingInvoice/MasterData/ContentManagement/ContentManagementForm";
+import EFakturCodeForm from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeForm";
+import EFakturCodeDetail from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeDetail";
+import DigitalSignatureView from "../../app/pages/RatingBillingInvoice/MasterData/DigitalSignature/DigitalSignatureView";
+import DigitalSignatureForm from "../../app/pages/RatingBillingInvoice/MasterData/DigitalSignature/DigitalSignatureForm";
+import DigitalSignatureDetail from "../../app/pages/RatingBillingInvoice/MasterData/DigitalSignature/DigitalSignatureDetail";
 
 export const RBI_ELEMENTS = {
   // prabilling elements render
@@ -159,10 +164,18 @@ export const RBI_ELEMENTS = {
 
   // efaktur-code
   EFAKTUR_CODE_VIEW_ELEMENT: <EFakturCodeView />,
+  EFAKTUR_CODE_CREATE_ELEMENT: <EFakturCodeForm type={"create"} />,
+  EFAKTUR_CODE_UPDATE_ELEMENT: <EFakturCodeForm type={"update"} />,
+  EFAKTUR_CODE_DETAIL_ELEMENT: <EFakturCodeDetail />,
 
   // digital signature
   DIGITAL_SIGNATURE_VIEW_ELEMENT: <DigitalSignatureView />,
+  DIGITAL_SIGNATURE_CREATE_ELEMENT: <DigitalSignatureForm type={"create"} />,
+  DIGITAL_SIGNATURE_UPDATE_ELEMENT: <DigitalSignatureForm type={"update"} />,
+  DIGITAL_SIGNATURE_DETAIL_ELEMENT: <DigitalSignatureDetail />,
 
   // content management
   CONTENT_MANAGEMENT_VIEW_ELEMENT: <ContentManagementView />,
+  CONTENT_MANAGEMENT_CREATE_ELEMENT: <ContentManagementForm  />,
+
 };

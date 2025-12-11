@@ -61,10 +61,11 @@ const ModalInactivateWithHierarchy = ({
   }, [dataListAppHierId]);
 
   useEffect(() => {
-    if (selectedHierarchy && selectedHierarchy !== 0) {
-      dispatch(getAPIDetail({ id: selectedHierarchy }));
+    if (openModalInactivate && selectedHierarchy && selectedHierarchy !== 0) {
+      console.log("Fetching detail for hierarchy ID:", selectedHierarchy);
+      dispatch(getAPIDetail(selectedHierarchy));
     }
-  }, [dispatch, getAPIDetail, selectedHierarchy]);
+  }, [dispatch, selectedHierarchy, openModalInactivate, getAPIDetail]);
 
   useEffect(() => {
     if (dataListAppHierDetail && dataListAppHierDetail.length > 0) {

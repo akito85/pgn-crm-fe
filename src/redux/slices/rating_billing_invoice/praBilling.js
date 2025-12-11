@@ -733,10 +733,10 @@ export const getDetailPrabillingResult = createAsyncThunk(
   "GET_DETAIL_PRABILLING_RESULT",
   async ({ initCode, search, page, pageSize, sort }, thunkAPI) => {
     try {
-      const backendPage = page - 1;
+      // const backendPage = page - 1;
       let url = `/v1/dbs/api/prabill/detail?search=${encodeURIComponent(
         initCode
-      )}&page=${backendPage}&size=${pageSize}`;
+      )}&page=${page}&size=${pageSize}`;
 
       if (sort) {
         url += `&sort=${sort}`;

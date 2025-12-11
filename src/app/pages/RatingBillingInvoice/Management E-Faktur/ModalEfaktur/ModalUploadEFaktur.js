@@ -1,336 +1,929 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Upload, Alert, DatePicker, Spin } from "antd";
-import {
-  InboxOutlined,
-  FileOutlined,
-} from "@ant-design/icons";
+import { Form, Spin, Steps, Select, Upload, Button } from "antd";
+import { RightOutlined, UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 import moment from "moment";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import InputComponent from "../../../../../components/InputComponent";
 import DetailText from "../../../../../components/DetailText";
-import { 
-  ModalError, 
-  ModalSuccess 
+import SVGIcon from "../../../../../assets/Icon/index";
+import InputComponent from "../../../../../components/InputComponent";
+import {
+  ModalError,
+  ModalSuccess,
 } from "../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../utils/Icon";
+import TableRBI from "../../../../../components/TableRBI";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import { hasValue, renderColumn } from "../../../../../utils";
 import {
-  uploadManualEFaktur,
-  getDetailEFaktur,
+  getAvailableRequestedList,
+  getAllApprovalList,
+  getListApprovalById,
 } from "../../../../../redux/slices/rating_billing_invoice/efakturSlice";
-
-const { Dragger } = Upload;
+import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 
 const ModalUploadEFaktur = ({
   isOpen = false,
   handleClose = () => {},
-  billingData = null,
   onSuccess = () => {},
 }) => {
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  
-  const { 
-    loading_modal, 
-    loading_detail,
-    detail_efaktur 
+  const searchInput = useRef(null);
+
+  const {
+    loading_available_requested,
+    data_available_requested,
+    data_approval,
+    data_approval_list,
+    pagination_available_requested,
   } = useSelector((state) => state.efaktur);
 
-  // State
-  const [fileList, setFileList] = useState([]);
+  const [current, setCurrent] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState({});
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [sort, setSort] = useState("invoiceDate~desc");
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [efakturNumbers, setEfakturNumbers] = useState({}); // { efakturId: "nomor" }
+  const [uploadedFiles, setUploadedFiles] = useState({}); // { efakturId: File }
+  
+  const [boolean, setBoolean] = useState(false);
+  const [dataTable, setDataTable] = useState([]);
+  const [remark, setRemark] = useState("");
+
+  const [loading_modal, setLoadingModal] = useState(false);
   const [modalSuccess, setModalSuccess] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [errorDetails, setErrorDetails] = useState([]);
-  const [efakturDetail, setEfakturDetail] = useState(null);
 
-  // Load E-Faktur detail ketika modal dibuka
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: [],
+  }));
+
+  const dataSource = data_available_requested || [];
+
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSource.map((item, index) => ({
+      ...item,
+      key: item.efakturId || index,
+    }));
+  }, [dataSource]);
+
+  // Load data ketika modal dibuka
   useEffect(() => {
-    if (isOpen && billingData?.billingCode) {
-      
-      dispatch(getDetailEFaktur(billingData.billingCode))
-        .unwrap()
-        .then((result) => {
-          if (result) {
-            setEfakturDetail(result);
-          }
+    if (isOpen) {
+      dispatch(
+        getAvailableRequestedList({
+          page,
+          pageSize,
+          sort,
+          type: "manual_upload", // ✅ Default type untuk manual upload
+          search: encodeURIComponent(JSON.stringify(search)),
         })
-        .catch((error) => {
-          setErrorMessage("E-Faktur belum dibuat untuk billing ini");
-          setModalError(true);
-        });
+      );
+      dispatch(getAllApprovalList());
     }
-  }, [isOpen, billingData, dispatch]);
+  }, [isOpen, dispatch, search, page, pageSize, sort]);
 
   useEffect(() => {
-    if (detail_efaktur) {
-      setEfakturDetail(detail_efaktur);
+    if (boolean && data_approval_list && data_approval_list.length > 0) {
+      const data = data_approval_list?.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: a.employeeDetail.map((b, idx) => ({
+          ...b,
+          key: idx + 1,
+        })),
+      }));
+      setDataTable(data);
     }
-  }, [detail_efaktur]);
+  }, [data_approval_list, boolean]);
 
-  // Props untuk Upload
-  const uploadProps = {
-    name: "file",
-    multiple: false, 
-    accept: ".pdf",
-    fileList: fileList,
-    maxCount: 1,
-    beforeUpload: (file) => {
-  
-      const isPDF = file.type === "application/pdf" || file.name.endsWith(".pdf");
-      if (!isPDF) {
-        setErrorMessage("Hanya file PDF yang diperbolehkan!");
-        setErrorDetails([{ efakturFile: "Efaktur file must be pdf" }]);
-        setModalError(true);
-        return false;
-      }
-
-      // Validasi ukuran file (max 10MB)
-      const isLt10M = file.size / 1024 / 1024 < 10;
-      if (!isLt10M) {
-        setErrorMessage("File tidak boleh lebih dari 10MB!");
-        setModalError(true);
-        return false;
-      }
-
-      setFileList([file]);
-      return false; 
+  const steps = [
+    {
+      title: "E-FAKTUR",
+      disabled: selectedRowKeys.length === 0 || !remark || !allSelectedHaveNumbers(),
     },
-    onRemove: () => {
-      setFileList([]);
+    {
+      title: "ATTACHMENT",
+      disabled: !allSelectedHaveFiles(),
     },
+    {
+      title: "APPROVAL",
+      disabled: !form.getFieldValue()?.apphierId,
+    },
+  ];
+
+  const items = steps.map((item) => ({
+    key: item.title,
+    title: item.title,
+  }));
+
+  const next = () => setCurrent(current + 1);
+  const prev = () => setCurrent(current - 1);
+
+  // ✅ Check apakah semua E-Faktur yang dipilih sudah punya nomor
+  function allSelectedHaveNumbers() {
+    return selectedRowKeys.every((key) => {
+      const number = efakturNumbers[key];
+      return number && number.trim().length > 0;
+    });
+  }
+
+  // ✅ Check apakah semua E-Faktur yang dipilih sudah punya file
+  function allSelectedHaveFiles() {
+    return selectedRowKeys.every((key) => uploadedFiles[key]);
+  }
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(1);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
   };
 
-  // Handle Upload
-  const handleUpload = async (formValues) => {
-    if (fileList.length === 0) {
-      setErrorMessage("Silakan pilih file terlebih dahulu!");
+  const handleChangePage = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
+    setPageSize(pageSizeChange);
+  };
+
+  const onSort = (_, __, sorter) => {
+    const dataSort =
+      sorter && sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
+  };
+
+  const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
+    setSelectedRowKeys(newSelectedRowKeys);
+    setSelectedRows(newSelectedRows);
+    
+    // ✅ Clean up data untuk row yang di-uncheck
+    const removedKeys = selectedRowKeys.filter(k => !newSelectedRowKeys.includes(k));
+    removedKeys.forEach(key => {
+      delete efakturNumbers[key];
+      delete uploadedFiles[key];
+    });
+  };
+
+  const rowSelection = {
+    fixed: true,
+    selectedRowKeys,
+    onChange: onSelectChange,
+    getCheckboxProps: (record) => ({
+      name: record.efakturId,
+    }),
+  };
+
+  const handleSelect = (e) => {
+    dispatch(getListApprovalById(e));
+    setBoolean(true);
+  };
+
+  // ✅ Handle change nomor faktur
+  const handleNumberChange = (efakturId, value) => {
+    setEfakturNumbers(prev => ({
+      ...prev,
+      [efakturId]: value
+    }));
+  };
+
+  // ✅ Handle file upload
+  const handleFileUpload = (efakturId, file) => {
+    const isPDF = file.type === "application/pdf" || file.name.endsWith(".pdf");
+    if (!isPDF) {
+      setErrorMessage("Hanya file PDF yang diperbolehkan!");
+      setModalError(true);
+      return false;
+    }
+
+    const isLt10M = file.size / 1024 / 1024 < 10;
+    if (!isLt10M) {
+      setErrorMessage("File tidak boleh lebih dari 10MB!");
+      setModalError(true);
+      return false;
+    }
+
+    setUploadedFiles(prev => ({
+      ...prev,
+      [efakturId]: file
+    }));
+    
+    return false; // Prevent auto upload
+  };
+
+  // ✅ Handle remove file
+  const handleRemoveFile = (efakturId) => {
+    setUploadedFiles(prev => {
+      const newFiles = { ...prev };
+      delete newFiles[efakturId];
+      return newFiles;
+    });
+  };
+
+  // ✅ HANDLE SUBMIT
+  const handleSubmit = async () => {
+    const formValues = form.getFieldsValue();
+
+    if (selectedRowKeys.length === 0) {
+      setErrorMessage("Please select at least one E-Faktur");
       setModalError(true);
       return;
     }
 
-    if (!efakturDetail?.efakturId) {
-      setErrorMessage("E-Faktur ID tidak ditemukan. Pastikan E-Faktur sudah dibuat.");
+    if (!allSelectedHaveNumbers()) {
+      setErrorMessage("Please input Nomor Faktur for all selected E-Faktur");
       setModalError(true);
       return;
     }
 
-
-    if (!formValues.efakturDate) {
-      setErrorMessage("Tanggal E-Faktur wajib diisi!");
+    if (!allSelectedHaveFiles()) {
+      setErrorMessage("Please upload PDF file for all selected E-Faktur");
       setModalError(true);
       return;
     }
 
-    if (!formValues.efakturNo) {
-      setErrorMessage("Nomor E-Faktur wajib diisi!");
+    if (!formValues.apphierId) {
+      setErrorMessage("Please select approval hierarchy");
+      setModalError(true);
+      return;
+    }
+
+    if (!remark) {
+      setErrorMessage("Please input remark");
       setModalError(true);
       return;
     }
 
     try {
-      const payload = {
-        efakturId: efakturDetail.efakturId,
-        efakturFile: fileList[0], 
-        efakturDate: moment(formValues.efakturDate).format("YYYY-MM-DD"),
-        efakturNo: formValues.efakturNo,
-      };
+      setLoadingModal(true);
 
+      const formData = new FormData();
+      formData.append("apphierId", String(formValues.apphierId));
+      formData.append("remark", remark.trim());
 
-      await dispatch(uploadManualEFaktur(payload)).unwrap();
+      // ✅ Append data array
+      selectedRowKeys.forEach((efakturId, index) => {
+        formData.append(`data[${index}].efakturId`, String(efakturId));
+        formData.append(`data[${index}].efakturNumber`, efakturNumbers[efakturId]);
+        formData.append(`data[${index}].efakturFile`, uploadedFiles[efakturId]);
+      });
 
-      setModalSuccess(true);
-    } catch (error) {
+      const url = "/v1/dbs/api/rbi/e-invoice/batch-manual-upload";
+      const response = await ratingBillingHttpService.uploadAttachment(url, formData, () => {});
 
-      if (error?.data && Array.isArray(error.data)) {
-        setErrorDetails(error.data);
-        setErrorMessage(error.message || "Validation error");
+      if (response.success) {
+        setModalSuccess(true);
       } else {
-        setErrorMessage(error?.message || "Gagal upload E-Faktur");
+        throw new Error(response.message || "Upload failed");
       }
-      
+    } catch (error) {
+      const errorMsg = error?.response?.data?.message || error?.message || "Failed to upload manual E-Faktur";
+      setErrorMessage(errorMsg);
       setModalError(true);
+    } finally {
+      setLoadingModal(false);
     }
   };
 
   const handleCancel = () => {
-    if (loading_modal) return; // Prevent closing while uploading
-
     form.resetFields();
-    setFileList([]);
-    setErrorDetails([]);
-    setEfakturDetail(null);
+    setSelectedRowKeys([]);
+    setSelectedRows([]);
+    setEfakturNumbers({});
+    setUploadedFiles({});
+    setBoolean(false);
+    setDataTable([]);
+    setRemark("");
+    setCurrent(0);
+    setSearch({});
     handleClose();
   };
 
-  // Handle Success Modal Close
   const handleSuccessClose = () => {
     setModalSuccess(false);
     onSuccess();
     handleCancel();
   };
 
+  // ========================================
+  // COLUMNS STEP 1
+  // ========================================
+  const baseColumns = useMemo(
+    () => [
+      {
+        key: "no",
+        title: "NO",
+        width: 60,
+        align: "center",
+        render: (_, record, index) => (page - 1) * pageSize + index + 1,
+      },
+      {
+        key: "efakturNo",
+        title: "FAKTUR CODE",
+        dataIndex: "efakturNo",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.efakturNo] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "efakturNo",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "efakturNo",
+            hasValue(search["efakturNo"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "billingCode",
+        title: "BILLING CODE",
+        dataIndex: "billingCode",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.billingCode] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "billingCode",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "billingCode",
+            hasValue(search["billingCode"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "invoiceNumber",
+        title: "INVOICE NUMBER",
+        dataIndex: "invoiceNumber",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.invoiceNumber] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "invoiceNumber",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "invoiceNumber",
+            hasValue(search["invoiceNumber"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "accountNumber",
+        title: "ACCOUNT NUMBER",
+        dataIndex: "accountNumber",
+        width: 180,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.accountNumber] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "accountNumber",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "accountNumber",
+            hasValue(search["accountNumber"]),
+            searchText,
+            text || "-",
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "accountName",
+        title: "ACCOUNT NAME",
+        dataIndex: "accountName",
+        width: 250,
+        align: "left",
+        sorter: true,
+        filteredValue: [search?.accountName] || null,
+        ellipsis: { showTitle: false },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "accountName",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "accountName",
+            hasValue(search["accountName"]),
+            searchText,
+            text || "-",
+            true,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "invoiceDate",
+        title: "INVOICE DATE",
+        dataIndex: "invoiceDate",
+        width: 120,
+        align: "center",
+        sorter: true,
+        render: (text) => (text ? moment(text).format("DD-MM-YYYY") : "-"),
+      },
+      {
+        key: "inputNumber",
+        title: "INPUT NO FAKTUR",
+        width: 250,
+        align: "left",
+        render: (_, record) => {
+          const isSelected = selectedRowKeys.includes(record.efakturId);
+          if (!isSelected) return "-";
+          
+          return (
+            <InputComponent
+              placeholder="Contoh: 00004092893220241216000270"
+              value={efakturNumbers[record.efakturId] || ""}
+              onChange={(e) => handleNumberChange(record.efakturId, e.target.value)}
+            />
+          );
+        },
+      },
+    ],
+    [page, pageSize, search, searchText, searchedColumn, selectedRowKeys, efakturNumbers]
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
+  // ========================================
+  // COLUMNS STEP 2 (ATTACHMENT)
+  // ========================================
+  const attachmentColumns = useMemo(
+    () => [
+      {
+        key: "no",
+        title: "NO",
+        width: 60,
+        align: "center",
+        render: (_, __, index) => index + 1,
+      },
+      {
+        key: "efakturNo",
+        title: "FAKTUR CODE",
+        dataIndex: "efakturNo",
+        width: 150,
+        align: "left",
+        render: (text) => text || "-",
+      },
+      {
+        key: "billingCode",
+        title: "BILLING CODE",
+        dataIndex: "billingCode",
+        width: 150,
+        align: "left",
+      },
+      {
+        key: "invoiceNumber",
+        title: "INVOICE NUMBER",
+        dataIndex: "invoiceNumber",
+        width: 150,
+        align: "left",
+        render: (text) => text || "-",
+      },
+      {
+        key: "accountNumber",
+        title: "ACCOUNT NUMBER",
+        dataIndex: "accountNumber",
+        width: 150,
+        align: "left",
+      },
+      {
+        key: "inputtedNumber",
+        title: "NOMOR FAKTUR",
+        width: 200,
+        align: "left",
+        render: (_, record) => (
+          <span className="font-semibold text-blue-600">
+            {efakturNumbers[record.efakturId] || "-"}
+          </span>
+        ),
+      },
+      {
+        key: "attachment",
+        title: "ATTACHMENT",
+        width: 250,
+        align: "left",
+        render: (_, record) => {
+          const file = uploadedFiles[record.efakturId];
+          if (file) {
+            return (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-600 truncate max-w-[150px]">
+                  {file.name}
+                </span>
+                <span className="text-xs text-gray-500">
+                  ({(file.size / 1024).toFixed(2)} KB)
+                </span>
+              </div>
+            );
+          }
+          return <span className="text-gray-400">No file</span>;
+        },
+      },
+      {
+        key: "action",
+        title: "ACTION",
+        width: 150,
+        align: "center",
+        render: (_, record) => {
+          const file = uploadedFiles[record.efakturId];
+          
+          return (
+            <div className="flex gap-2 justify-center">
+              <Upload
+                accept=".pdf"
+                beforeUpload={(file) => handleFileUpload(record.efakturId, file)}
+                showUploadList={false}
+                maxCount={1}
+              >
+                <Button 
+                  icon={<UploadOutlined />} 
+                  size="small"
+                  type={file ? "default" : "primary"}
+                >
+                  {file ? "Change" : "Upload"}
+                </Button>
+              </Upload>
+              
+              {file && (
+                <Button
+                  icon={<DeleteOutlined />}
+                  size="small"
+                  danger
+                  onClick={() => handleRemoveFile(record.efakturId)}
+                >
+                  Remove
+                </Button>
+              )}
+            </div>
+          );
+        },
+      },
+    ],
+    [selectedRows, efakturNumbers, uploadedFiles]
+  );
+
+  // ========================================
+  // APPROVAL TABLE COLUMNS
+  // ========================================
+  const columnsApproval = [
+    {
+      title: "NO",
+      key: "no",
+      width: 60,
+      align: "center",
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: "HIERARCHY",
+      dataIndex: "hierarchy",
+      key: "hierarchy",
+      width: 150,
+    },
+    {
+      title: "POSITION",
+      dataIndex: "position",
+      key: "position",
+      width: 200,
+    },
+  ];
+
+  const columnsExpandApproval = [
+    {
+      title: "NO",
+      key: "no",
+      width: 60,
+      align: "center",
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: "EMPLOYEE",
+      dataIndex: "employeeName",
+      key: "employeeName",
+      width: 250,
+    },
+    {
+      title: "EMAIL",
+      dataIndex: "email",
+      key: "email",
+      width: 250,
+    },
+  ];
+
   return (
     <div>
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Upload E-Faktur Manual dari DJP"
+        header="UPLOAD E-FAKTUR MANUAL"
         handleCancel={handleCancel}
-        width={700}
+        width={1000}
         footer={
-          <div className="flex justify-end gap-3">
-            <ButtonComponent
-              type="default"
-              onClick={handleCancel}
-              disabled={loading_modal}
-            >
-              Batal
-            </ButtonComponent>
-            <ButtonComponent
-              type="submit"
-              htmlType="submit"
-              form="formUploadEfaktur"
-              loading={loading_modal}
-              disabled={fileList.length === 0 || loading_modal || !efakturDetail?.efakturId}
-            >
-              {loading_modal ? "Uploading..." : "Upload"}
-            </ButtonComponent>
+          <div className="flex w-full justify-end gap-5">
+            {current < steps.length - 1 && (
+              <ButtonComponent
+                type="default"
+                onClick={handleCancel}
+                disabled={loading_modal}
+              >
+                Cancel
+              </ButtonComponent>
+            )}
+            {current > 0 && (
+              <ButtonComponent
+                onClick={prev}
+                type="submit"
+                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
+                disabled={loading_modal}
+              >
+                Previous
+              </ButtonComponent>
+            )}
+            {current < steps.length - 1 && (
+              <ButtonComponent
+                onClick={next}
+                type="submit"
+                disabled={steps[current].disabled || loading_modal}
+              >
+                <span className="p-1 text-[18px]">Next</span>
+                <RightOutlined style={{ fontSize: "18px", color: "#fff" }} />
+              </ButtonComponent>
+            )}
+            {current === steps.length - 1 && (
+              <ButtonComponent
+                type="submit"
+                onClick={handleSubmit}
+                loading={loading_modal}
+                disabled={loading_modal}
+              >
+                {loading_modal ? "Uploading..." : "Submit"}
+              </ButtonComponent>
+            )}
           </div>
         }
       >
-        <Spin spinning={loading_detail || loading_modal}>
+        <Spin spinning={loading_available_requested || loading_modal}>
           <div className="my-6">
-            {/* Alert jika E-Faktur belum ada */}
-            {!loading_detail && !efakturDetail && (
-              <Alert
-                message="E-Faktur Belum Dibuat"
-                description="E-Faktur untuk billing ini belum dibuat. Silakan buat E-Faktur terlebih dahulu."
-                type="warning"
-                showIcon
-                className="mb-6"
+            {/* STEPS */}
+            <div className="mb-8">
+              <Steps
+                current={current}
+                items={items}
+                labelPlacement="vertical"
+                size="small"
+                className="custom-steps"
               />
-            )}
+            </div>
 
-            {/* Informasi Billing */}
-            {billingData && efakturDetail && (
-              <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
-                <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
-                  Informasi Billing
-                </h3>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                  <DetailText label="Billing Code">
-                    {billingData.billingCode}
-                  </DetailText>
-                  <DetailText label="Invoice Number">
-                    {efakturDetail.invoiceNumber || billingData.invoiceNumber || "-"}
-                  </DetailText>
-                  <DetailText label="Customer">
-                    {billingData.customerName}
-                  </DetailText>
-                  <DetailText label="Account Number">
-                    {billingData.accountNumber}
-                  </DetailText>
-                  <DetailText label="Status E-Faktur">
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold border bg-red-100 text-red-800 border-red-300">
-                      {billingData.efakturStatus || "FAILED"}
-                    </span>
-                  </DetailText>
-                  <DetailText label="Total Amount">
-                    Rp{" "}
-                    {billingData.totalAmountEqvIdr?.toLocaleString("id-ID") || "0"}
-                  </DetailText>
+            <Form layout="vertical" form={form}>
+              {/* STEP 1: E-FAKTUR LIST */}
+              <div className={`${current !== 0 ? "hidden" : ""}`}>
+                <div className="mb-6">
+                  <p className="text-primary uppercase font-bold mb-4">
+                    E-FAKTUR LIST
+                  </p>
+
+                  <TableRBI
+                    dataSource={dataSourceWithKeys}
+                    columns={processedColumns}
+                    current={page}
+                    pageSize={pageSize}
+                    onChange={handleChangePage}
+                    onSizeChanger={handleChangePage}
+                    totalData={pagination_available_requested?.totalElements || 0}
+                    tableScrolled={{ x: 2000, y: 400 }}
+                    onSort={onSort}
+                    columnDefinitions={columnDefinitions}
+                    fixedColumns={fixedColumns}
+                    setFixedColumns={setFixedColumns}
+                    loading={loading_available_requested}
+                    rowSelection={rowSelection}
+                  />
+                </div>
+
+                {/* Remark */}
+                <div className="mb-6">
+                  <p className="text-sm text-gray-600 mb-2">
+                    Remark <span className="text-red-500">*</span>
+                  </p>
+                  <Form.Item
+                    name="remark"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your remark!",
+                      },
+                    ]}
+                  >
+                    <InputComponent
+                      rows={3}
+                      type="textarea"
+                      value={remark}
+                      onChange={(e) => setRemark(e.target.value)}
+                      placeholder="Type your remark"
+                    />
+                  </Form.Item>
                 </div>
               </div>
-            )}
 
-            {efakturDetail?.efakturId && (
-              <Form 
-                form={form} 
-                layout="vertical" 
-                id="formUploadEfaktur"
-                onFinish={handleUpload}
-              >
-                {/* Nomor E-Faktur */}
-                <Form.Item
-                  label="Nomor E-Faktur"
-                  name="efakturNo"
-                  rules={[
-                    { required: true, message: "Nomor E-Faktur wajib diisi!" },
-                    { 
-                      pattern: /^[0-9]+$/, 
-                      message: "Nomor E-Faktur hanya boleh berisi angka!" 
-                    },
-                  ]}
-                >
-                  <InputComponent
-                    placeholder="Contoh: 00004092893220241216000270"
-                    disabled={loading_modal}
+              {/* STEP 2: ATTACHMENT */}
+              <div className={`${current !== 1 ? "hidden" : ""}`}>
+                <div className="mb-6">
+                  <p className="text-primary uppercase font-bold mb-4">
+                    UPLOAD ATTACHMENT
+                  </p>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Upload PDF file untuk setiap E-Faktur yang dipilih. Maksimal ukuran file 10MB per file.
+                  </p>
+
+                  <TableRBI
+                    dataSource={selectedRows}
+                    columns={attachmentColumns}
+                    current={1}
+                    pageSize={selectedRows.length}
+                    totalData={selectedRows.length}
+                    tableScrolled={{ x: 1500, y: 400 }}
+                    loading={false}
+                    usePagination={false}
+                    useSelect={false}
                   />
-                </Form.Item>
+                </div>
+              </div>
 
-                {/* Tanggal E-Faktur */}
-                <Form.Item
-                  label="Tanggal E-Faktur"
-                  name="efakturDate"
-                  rules={[
-                    { required: true, message: "Tanggal E-Faktur wajib diisi!" },
-                  ]}
-                >
-                  <DatePicker
-                    style={{ width: "100%" }}
-                    format="DD-MM-YYYY"
-                    placeholder="Pilih tanggal E-Faktur"
-                    disabled={loading_modal}
-                  />
-                </Form.Item>
+              {/* STEP 3: APPROVAL */}
+              <div className={`${current !== 2 ? "hidden" : ""}`}>
+                <div className="w-full grid grid-cols-1 gap-x-4">
+                  <p className="text-primary uppercase font-bold mb-4">
+                    APPROVAL INFORMATION
+                  </p>
 
-                {/* Upload File */}
-                <Form.Item 
-                  label="Upload File E-Faktur (PDF)"
-                  required
-                >
-                  <Dragger {...uploadProps} disabled={loading_modal}>
-                    <p className="ant-upload-drag-icon">
-                      <InboxOutlined style={{ color: "#1890ff" }} />
-                    </p>
-                    <p className="ant-upload-text">
-                      Klik atau drag file ke area ini untuk upload
-                    </p>
-                    <p className="ant-upload-hint">
-                      Hanya file PDF yang diperbolehkan. Maksimal ukuran 10MB.
-                    </p>
-                  </Dragger>
-                </Form.Item>
+                  <div className="w-1/3 mb-6">
+                    <Form.Item
+                      label="Approval Hierarchy"
+                      name="apphierId"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select Approval Hierarchy!",
+                        },
+                      ]}
+                    >
+                      <Select
+                        onChange={handleSelect}
+                        placeholder="Select approval hierarchy"
+                        loading={loading_available_requested}
+                        showSearch
+                        filterOption={(input, option) =>
+                          (option?.children ?? "")
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
+                      >
+                        {data_approval &&
+                          data_approval.map((data) => (
+                            <Select.Option
+                              value={data.appHierId}
+                              key={data.appHierId}
+                            >
+                              {data.approvalName}
+                            </Select.Option>
+                          ))}
+                      </Select>
+                    </Form.Item>
+                  </div>
 
-                {/* File Preview */}
-                {fileList.length > 0 && (
-                  <div className="mb-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
-                    <p className="text-sm font-bold text-blue-800 mb-2">
-                      File yang akan diupload:
-                    </p>
-                    <div className="flex items-center gap-3 p-3 bg-white border border-blue-200 rounded">
-                      <FileOutlined style={{ fontSize: 24, color: "#1890ff" }} />
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{fileList[0].name}</p>
-                        <p className="text-xs text-gray-500">
-                          {(fileList[0].size / 1024).toFixed(2)} KB
-                        </p>
-                      </div>
-                      <span className="px-3 py-1 rounded text-xs font-semibold bg-red-100 text-red-700">
-                        PDF
-                      </span>
+                  {boolean && dataTable.length > 0 && (
+                    <TableRBI
+                      dataSource={dataTable}
+                      columns={columnsApproval}
+                      expandable={{
+                        expandedRowRender: (record) => (
+                          <div>
+                            <p className="text-primary text-xs font-bold uppercase pt-4">
+                              EMPLOYEE INFORMATION
+                            </p>
+                            <TableRBI
+                              dataSource={record?.employeeDetail || []}
+                              columns={columnsExpandApproval}
+                              className={"mb-4"}
+                              useSelect={false}
+                              usePagination={false}
+                            />
+                          </div>
+                        ),
+                      }}
+                      useSelect={false}
+                      usePagination={false}
+                    />
+                  )}
+
+                  {/* Review Section */}
+                  <div className="mt-6 p-5 bg-blue-50 border-2 border-blue-300 rounded-lg">
+                    <h3 className="text-base font-bold text-blue-800 mb-4 pb-2 border-b-2 border-blue-200">
+                      REVIEW DATA
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <DetailText label="Total E-Faktur">
+                        <span className="font-bold">{selectedRows.length} item(s)</span>
+                      </DetailText>
+                      <DetailText label="Total Files Uploaded">
+                        <span className="font-bold">{Object.keys(uploadedFiles).length} file(s)</span>
+                      </DetailText>
+                      <DetailText label="Remark" className="col-span-2">
+                        {remark}
+                      </DetailText>
                     </div>
                   </div>
-                )}
-              </Form>
-            )}
+                </div>
+              </div>
+            </Form>
           </div>
         </Spin>
       </ModalCustom>
 
-      {/* Modal Success */}
+      {/* Success Modal */}
       <ModalSuccess
         isOpen={modalSuccess}
         handleOk={handleSuccessClose}
@@ -342,28 +935,19 @@ const ModalUploadEFaktur = ({
             <p className="text-[18px] font-bold">Upload Berhasil</p>
           </div>
           <p className="pl-[70px]">
-            E-Faktur manual berhasil diupload.
+            Manual E-Faktur berhasil diupload untuk approval.
           </p>
-          <p className="pl-[70px] font-semibold text-green-700 mt-2">
-            Status E-Faktur telah diperbarui.
-          </p>
-          <p className="pl-[70px] text-sm text-gray-600 mt-1">
-            File dapat diakses melalui detail E-Faktur.
+          <p className="pl-[70px]">
+            Total: <strong>{selectedRows.length}</strong> E-Faktur
           </p>
         </div>
       </ModalSuccess>
 
-      {/* Modal Error */}
+      {/* Error Modal */}
       <ModalError
         isOpen={modalError}
-        handleOk={() => {
-          setModalError(false);
-          setErrorDetails([]);
-        }}
-        handleCancel={() => {
-          setModalError(false);
-          setErrorDetails([]);
-        }}
+        handleOk={() => setModalError(false)}
+        handleCancel={() => setModalError(false)}
       >
         <div className="px-5 pt-5 pb-[10px] justify-center">
           <div className="w-full flex gap-[20px]">
@@ -371,27 +955,7 @@ const ModalUploadEFaktur = ({
             <p className="text-[18px] font-bold">Upload Gagal</p>
           </div>
           <p className="pl-[70px]">{errorMessage}</p>
-          
-          {errorDetails.length > 0 && (
-            <div className="pl-[70px] mt-3">
-              <p className="text-sm font-semibold text-red-600 mb-2">
-                Detail Error:
-              </p>
-              <ul className="list-disc list-inside text-sm text-gray-700">
-                {errorDetails.map((error, index) => (
-                  <li key={index}>
-                    {Object.entries(error).map(([field, message]) => (
-                      <span key={field}>
-                        <strong>{field}:</strong> {message}
-                      </span>
-                    ))}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          
-          <p className="pl-[70px] mt-2">Silakan coba lagi.</p>
+          <p className="pl-[70px]">Silakan coba lagi.</p>
         </div>
       </ModalError>
     </div>
