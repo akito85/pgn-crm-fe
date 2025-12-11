@@ -11,7 +11,7 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import RadioTabs from "../../../../../components/RadioTabs";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import BaseContainer from "../../../../../components/BaseContainer";
-import DetailSection from "./Utils/DetailSection";
+import ContentDetailSection from "./ContentDetailSection";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../assets/Icon/index";
 import DetailText from "../../../../../components/DetailText";
@@ -19,17 +19,17 @@ import { dateFormatting } from "../../../../../utils";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import { configApp } from "../../../../../constants/configApp";
 import {
-  getDetailBillingBucket,
-  getDetailDraftBillingBucket,
-  approveRejectBillingBucket,
-  approveRejectInactiveBillingBucket,
-} from "../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
+  getDetailContentManagement,
+  getDetailDraftContentManagement,
+  approveRejectContentManagement,
+  approveRejectInactiveContentManagement,
+} from "../../../../../redux/slices/rating_billing_invoice/MasterData/contentManagement";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 
-const BillingBucketDetail = () => {
+const ContentManagementDetail = () => {
   // Selector
   const { loading, data_detail, data_detail_draft } = useSelector(
-    (state) => state.billing_bucket
+    (state) => state.contentManagement
   );
 
   // Declaration
@@ -39,27 +39,22 @@ const BillingBucketDetail = () => {
 
   //State
   const [modalConfirm, setModalConfirm] = useState(false);
-  const [modalError, setModalError] = useState(false);
   const [modalErrorServer, setModalErrorServer] = useState(false);
 
-  const [valuePage, setValuePage] = useState("Billing Bucket");
+  const [valuePage, setValuePage] = useState("Content Management");
   const [approveOrReject, setApproveOrReject] = useState("");
 
   const [dataDetail, setDataDetail] = useState({});
-  const [listDataBI, setListDataBI] = useState([]);
-  const [criteriaValues, setCriteriaValues] = useState([]);
-  const [listDataCriteria, setListDataCriteria] = useState([]);
+  const [dataCriteria, setDataCriteria] = useState([]);
 
-  const [criteriaValuesDraft, setCriteriaValuesDraft] = useState([]);
-  const [listDataCriteriaDraft, setListDataCriteriaDraft] = useState([]);
   const [dataDraft, setDataDraft] = useState({});
-  const [listDataBIDraft, setListDataBIDraft] = useState([]);
+  const [dataCriteriaDraft, setDataCriteriaDraft] = useState([]);
 
   const [bodyError, setBodyError] = useState({});
   const [dataLogInformation, setDataLogInformation] = useState({});
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [listSectionInfo, setListSectionInfo] = useState([
-    { value: "Billing Bucket" },
+    { value: "Content Management" },
     { value: "Attachment" },
   ]);
   const [bodyApproval, setBodyApproval] = useState({
@@ -71,73 +66,59 @@ const BillingBucketDetail = () => {
   const showButtonApproval =
     bodyApproval.isApprover !== null && bodyApproval.isApprover;
 
-  // Use Effect
+  // Use Effect - Fetch Data
   useEffect(() => {
     if (id) {
-      dispatch(getDetailDraftBillingBucket(id));
-      dispatch(getDetailBillingBucket(id));
+      dispatch(getDetailContentManagement(id));
+      dispatch(getDetailDraftContentManagement(id));
+      fetchAttachments(id);
     }
   }, [dispatch, id]);
 
-  useEffect(() => {
-    if (id && data_detail?.information?.id === id) {
-      // Criteria Data Select
-      const criteriaSelect = data_detail?.criteria?.map((item) => {
+  // Fetch Attachments
+  const fetchAttachments = async (refId) => {
+    try {
+      const url = `/v1/dbs/api/content/list-attachment/${refId}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      
+      // Get base URL from config or construct it
+      const baseURL = configApp.RATING_BILLING_SERVICE || "";
+      
+      const dataAttachment = (response.data?.result || []).map((item) => {
+        // Generate full URL from pathFile if urlFile1/urlFile2 is null
+        const fullURL = item.urlFile1 || item.urlFile2 || (item.pathFile ? `${baseURL}${item.pathFile}` : null);
+        
         return {
           id: item.id,
-          criteria: item.criteria,
+          size: item.fileSize,
+          fileName: item.fileName,
+          fileSize: item.fileSize,
+          fileType: item.fileType,
+          fileCategoryId: item.fileCategoryId,
+          fileCategoryName: item.fileCategoryName,
+          pathFile: item.pathFile || "",
+          urlFile1: fullURL,
+          urlFile2: fullURL,
+          createdBy: item.createdBy,
+          createdDate: item.createdDate
+            ? moment(item.createdDate).format("DD MMM YYYY")
+            : "",
+          dataType: "exist",
         };
       });
+      
+      setListDataAttachment(dataAttachment);
+    } catch (error) {
+      console.error("Error fetching attachments:", error);
+    }
+  };
 
-      const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
-
-      // Data Detail Billing Bucket (Billing Item)
-      const dataDetailBillingBucket = data_detail?.billingBucketDetail?.map(
-        (item) => {
-          return {
-            billingItem: item.billingItem.value,
-            currency: item.currency.value,
-            sequence: item.sequence,
-            startDate: item.startDate,
-            endDate: item.endDate,
-            description: item.description,
-            priority: item.priority,
-            id: item.id,
-            createdDate: item.createdDate,
-            createdBy: item.createdBy,
-            updatedDate: item.updatedDate,
-            updatedBy: item.updatedBy,
-          };
-        }
-      );
-
-      // Data Attachment Information
-      const dataAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
-          return {
-            id: item.id,
-            size: item.size,
-            fileName: item.fileName,
-            fileSize: item.fileSize,
-            fileType: item.fileType,
-            fileCategoryId: item.fileCategoryId,
-            fileCategoryName: item.fileCategoryName,
-            pathFile: item.pathFile,
-            urlFile1: item.urlFile1,
-            urlFile2: item.urlFile2,
-            createdBy: item.createdBy,
-            createdDate: item.createdDate
-              ? moment(item.createdDate).format("DD MMM YYYY")
-              : "",
-            dataType: "exist",
-          };
-        }
-      );
-
+  // Process Detail Data
+  useEffect(() => {
+    if (id && data_detail?.contentTemplate?.id === id) {
       // Data Criteria Information
-      const dataCriteriaList = (data_detail?.criteriaData || [])
-        .filter((data) => data?.allCriteria !== true)
-        .map((item, index) => {
+      const dataCriteriaList = (data_detail?.contentCriteria || []).map(
+        (item, index) => {
           return {
             id: item.id,
             budget: item.budget,
@@ -145,41 +126,39 @@ const BillingBucketDetail = () => {
             district: item.district,
             city: item.city,
             province: item.province,
-            area: item.costCenter,
+            area: item.area,
             sor: item.sor,
             industrialSector: item.industrialSector,
+            product: item.product,
             gsizes: item.gsizes,
             customerSegment: item.customerSegment,
-            accountGroup: item.accountGroup,
+            accountGroupType: item.accountGroupType,
             accountClass: item.accountClass,
             accountCategory: item.accountCategory,
             serviceType: item.serviceType,
             customer: item.customer,
             startDate: item.startDate,
             endDate: item.endDate,
+            allCriteria: item.allCriteria,
             key: index + 1,
             type: "exist",
             createdDate: item.createdDate,
             createdBy: item.createdBy,
-            updatedDate: item.updatedDate,
-            updatedBy: item.updatedBy,
           };
-        });
+        }
+      );
 
       // Data History Log Information
       setDataLogInformation({
-        recordId: data_detail?.information?.id,
-        createdDate: data_detail?.historyLog?.createdDate,
-        createdBy: data_detail?.historyLog?.createdBy,
-        updatedDate: data_detail?.historyLog?.updatedDate,
-        updatedBy: data_detail?.historyLog?.updatedBy,
+        recordId: data_detail?.contentTemplate?.id,
+        createdDate: data_detail?.contentTemplate?.createdDate,
+        createdBy: data_detail?.contentTemplate?.createdBy,
+        updatedDate: data_detail?.contentTemplate?.updateDate,
+        updatedBy: data_detail?.contentTemplate?.updatedBy,
       });
 
       setDataDetail(data_detail);
-      setListDataCriteria(dataCriteriaList);
-      setCriteriaValues(mappingCriteria);
-      setListDataAttachment(dataAttachment);
-      setListDataBI(dataDetailBillingBucket);
+      setDataCriteria(dataCriteriaList);
       setBodyApproval({
         isApprover: data_detail?.approvalInformation?.isApprover,
         tAppId: data_detail?.approvalInformation?.tAppId,
@@ -187,54 +166,19 @@ const BillingBucketDetail = () => {
         approvalType: data_detail?.approvalInformation?.approvalType,
       });
     }
+
+    // Process Draft Data
     if (
       id &&
-      data_detail_draft?.information?.id === id &&
-      data_detail_draft?.information?.id === data_detail?.information?.id &&
+      data_detail_draft?.contentTemplate?.id === id &&
+      data_detail_draft?.contentTemplate?.id === data_detail?.contentTemplate?.id &&
       data_detail &&
       (!data_detail?.approvalInformation?.approvalType ||
-        data_detail?.approvalInformation?.approvalType !==
-          "INACTIVE_BILLING_BUCKET")
+        data_detail?.approvalInformation?.approvalType !== "INACTIVE_CONTENT_TEMPLATE")
     ) {
-      // Criteria Data Select
-      const criteriaSelect = (data_detail_draft?.criteria || []).map((item) => {
-        return {
-          id: item.id,
-          criteria: item.criteria,
-        };
-      });
-
-      // console.log(criteriaSelect, "criteriaSelect");
-
-      const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
-
-      // Data Attachment Information
-      // const dataDraftAttachment = (
-      //   data_detail_draft?.mattachmentLists || []
-      // ).map((item) => {
-      //   return {
-      //     id: item.id,
-      //     size: item.size,
-      //     fileName: item.fileName,
-      //     fileSize: item.fileSize,
-      //     fileType: item.fileType,
-      //     fileCategoryId: item.fileCategoryId,
-      //     fileCategoryName: item.fileCategoryName,
-      //     pathFile: item.pathFile,
-      //     urlFile1: item.urlFile1,
-      //     urlFile2: item.urlFile2,
-      //     createdBy: item.createdBy,
-      //     createdDate: item.createdDate
-      //       ? moment(item.createdDate).format("DD MMM YYYY")
-      //       : "",
-      //     dataType: "exist",
-      //   };
-      // });
-
-      // Data Criteria Information
-      const dataDraftCriteriaList = (data_detail_draft?.criteriaData || [])
-        .filter((data) => data?.allCriteria !== true)
-        .map((item, index) => {
+      // Data Criteria Information Draft
+      const dataDraftCriteriaList = (data_detail_draft?.contentCriteria || []).map(
+        (item, index) => {
           return {
             id: item.id,
             budget: item.budget,
@@ -242,48 +186,31 @@ const BillingBucketDetail = () => {
             district: item.district,
             city: item.city,
             province: item.province,
-            area: item.costCenter,
+            area: item.area,
             sor: item.sor,
             industrialSector: item.industrialSector,
+            product: item.product,
             gsizes: item.gsizes,
             customerSegment: item.customerSegment,
-            accountGroup: item.accountGroup,
+            accountGroupType: item.accountGroupType,
             accountClass: item.accountClass,
             accountCategory: item.accountCategory,
             serviceType: item.serviceType,
             customer: item.customer,
             startDate: item.startDate,
             endDate: item.endDate,
+            allCriteria: item.allCriteria,
             key: index + 1,
             type: "exist",
           };
-        });
-
-      // Data Detail Billing Bucket (Billing Item)
-      const dataDraftDetailBillingBucket =
-        data_detail_draft?.billingBucketDetail?.map((item) => {
-          return {
-            billingItem: item.billingItem.value,
-            currency: item.currency.value,
-            sequence: item.sequence,
-            startDate: item.startDate,
-            endDate: item.endDate,
-            description: item.description,
-            priority: item.priority,
-          };
-        });
+        }
+      );
 
       setDataDraft(data_detail_draft);
-      setListDataCriteriaDraft(dataDraftCriteriaList);
-      setCriteriaValuesDraft(mappingCriteria);
-      // setListDataAttachment((prevState) => [
-      //   ...prevState,
-      //   ...dataDraftAttachment,
-      // ]);
-      setListDataBIDraft(dataDraftDetailBillingBucket);
+      setDataCriteriaDraft(dataDraftCriteriaList);
 
       setListSectionInfo([
-        { value: "Billing Bucket" },
+        { value: "Content Management" },
         { value: "Draft" },
         { value: "Attachment" },
       ]);
@@ -301,50 +228,52 @@ const BillingBucketDetail = () => {
       breadcrumbName: "Master Data",
     },
     {
-      path: RBI_ROUTES.BILLING_BUCKET_VIEW,
-      breadcrumbName: "Billing Bucket",
+      path: RBI_ROUTES.CONTENT_MANAGEMENT,
+      breadcrumbName: "Content Management",
     },
     {
-      path: RBI_ROUTES.BILLING_BUCKET_DETAIL,
-      breadcrumbName: "Detail Billing Bucket",
+      path: RBI_ROUTES.CONTENT_MANAGEMENT_DETAIL,
+      breadcrumbName: "Detail Content Management",
     },
   ];
 
   const layout = (valuePage) => {
     switch (valuePage) {
-      case "Billing Bucket":
+      case "Content Management":
         return (
-          <DetailSection
+          <ContentDetailSection
             key={"detail"}
-            dataBillingBucket={dataDetail}
+            dataContentManagement={dataDetail}
             dataHistory={dataLogInformation}
-            criteriaValues={criteriaValues}
-            dataCriteria={listDataCriteria}
-            listDataBI={listDataBI}
+            dataCriteria={dataCriteria}
           />
         );
       case "Draft":
         return (
-          <DetailSection
+          <ContentDetailSection
             key={"draft"}
-            dataBillingBucket={dataDraft}
+            dataContentManagement={dataDraft}
             dataHistory={dataLogInformation}
-            criteriaValues={criteriaValuesDraft}
-            dataCriteria={listDataCriteriaDraft}
-            listDataBI={listDataBIDraft}
+            dataCriteria={dataCriteriaDraft}
           />
         );
       case "Attachment":
         return (
           <BaseContainer header={"Attachment Information"}>
-            <AttachmentComponent
-              type={"detail"}
-              data={listDataAttachment}
-              updateData={setListDataAttachment}
-              typeSelector="billing_bucket"
-              service={ratingBillingHttpService}
-              configApplication={configApp.RATING_BILLING_SERVICE}
-            />
+            {listDataAttachment && listDataAttachment.length > 0 ? (
+              <AttachmentComponent
+                type={"detail"}
+                data={listDataAttachment}
+                updateData={setListDataAttachment}
+                typeSelector="contentManagement"
+                service={ratingBillingHttpService}
+                configApplication={configApp.RATING_BILLING_SERVICE}
+              />
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                No attachment available
+              </div>
+            )}
           </BaseContainer>
         );
       default:
@@ -376,23 +305,21 @@ const BillingBucketDetail = () => {
       approvalId: bodyApproval.tAppId,
       action: approveOrReject.toUpperCase(),
     };
+    
     dispatch(
-      bodyApproval.approvalType === "INACTIVE_BILLING_BUCKET"
-        ? approveRejectInactiveBillingBucket({
-            body: data,
-          })
-        : approveRejectBillingBucket({
-            body: data,
-          })
+      bodyApproval.approvalType === "INACTIVE_CONTENT_TEMPLATE"
+        ? approveRejectInactiveContentManagement({ body: data })
+        : approveRejectContentManagement({ body: data })
     )
       .unwrap()
       .then(() => {
         handleClear();
-        dispatch(getDetailDraftBillingBucket(id));
-        dispatch(getDetailBillingBucket(id));
+        dispatch(getDetailContentManagement(id));
+        dispatch(getDetailDraftContentManagement(id));
+        fetchAttachments(id);
       })
       .catch((error) => {
-        if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+        if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
           const message =
             (error.response &&
               error.response.data &&
@@ -413,7 +340,7 @@ const BillingBucketDetail = () => {
         <div className="flex flex-col w-full gap-4">
           {bodyApproval.isApprover &&
             bodyApproval.approvalType &&
-            bodyApproval.approvalType === "INACTIVE_BILLING_BUCKET" && (
+            bodyApproval.approvalType === "INACTIVE_CONTENT_TEMPLATE" && (
               <BaseContainer header={"inactive request information"}>
                 <div className="w-full grid grid-cols-4 gap-3">
                   <DetailText label={"Requested Date"}>
@@ -488,8 +415,8 @@ const BillingBucketDetail = () => {
           onFinish={handleConfirm}
           header={approveOrReject}
           approveOrReject={approveOrReject}
-          menu={"Billing Bucket"}
-          named={dataDetail?.information?.name}
+          menu={"Content Management"}
+          named={dataDetail?.contentTemplate?.templateName}
         />
 
         {/* Modal Retry */}
@@ -515,4 +442,4 @@ const BillingBucketDetail = () => {
   );
 };
 
-export default BillingBucketDetail;
+export default ContentManagementDetail;

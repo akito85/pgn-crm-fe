@@ -53,8 +53,9 @@ const ModalApprovalBilling = ({
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
 
-  const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
+   const [fixedColumns, setFixedColumns] = useState({
+    left: ["no"],
+    right: [] 
   });
 
   // Use State
@@ -378,6 +379,7 @@ const ModalApprovalBilling = ({
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
                 loading={loading}
+                showExport={false}
                 rowSelection={rowSelection}
               />
               <div className="pt-[30px]">
