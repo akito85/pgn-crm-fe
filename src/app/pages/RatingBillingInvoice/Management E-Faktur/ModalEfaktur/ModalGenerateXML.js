@@ -15,9 +15,9 @@ import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../utils/Icon";
 import TableRBI from "../../../../../components/TableRBI";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
-import { 
+import {
   generateXMLEFaktur,
-  getAvailableRequestedList 
+  getAvailableRequestedList,
 } from "../../../../../redux/slices/rating_billing_invoice/efakturSlice";
 
 const { Step } = Steps;
@@ -29,15 +29,15 @@ const ModalGenerateXML = ({
 }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  
+
   // Redux state
-  const { 
-    data_available_requested, 
-    loading_available_requested, 
+  const {
+    data_available_requested,
+    loading_available_requested,
     loading_modal,
-    pagination_available_requested 
+    pagination_available_requested,
   } = useSelector((state) => state.efaktur);
-  
+
   // State
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -46,7 +46,7 @@ const ModalGenerateXML = ({
   const [modalError, setModalError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
-  
+
   // Table state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -61,9 +61,10 @@ const ModalGenerateXML = ({
   // Fetch data when modal opens or pagination/sort changes
   useEffect(() => {
     if (isOpen) {
-      const sortParam = fieldSort && orderSort 
-        ? `${fieldSort}~${orderSort}` 
-        : "invoiceDate~desc";
+      const sortParam =
+        fieldSort && orderSort
+          ? `${fieldSort}~${orderSort}`
+          : "invoiceDate~desc";
 
       dispatch(
         getAvailableRequestedList({
@@ -97,31 +98,36 @@ const ModalGenerateXML = ({
   const formatXML = (xmlString) => {
     try {
       let formatted = xmlString.trim();
-      formatted = formatted.replace(/></g, '>\n<');
-      
+      formatted = formatted.replace(/></g, ">\n<");
+
       let indent = 0;
-      const lines = formatted.split('\n');
-      
-      formatted = lines.map(line => {
-        const trimmed = line.trim();
-        if (!trimmed) return '';
-        
-        if (trimmed.startsWith('</')) {
-          indent = Math.max(0, indent - 1);
-        }
-        
-        const indentation = '  '.repeat(indent);
-        
-        if (trimmed.startsWith('<') && 
-            !trimmed.startsWith('</') && 
-            !trimmed.endsWith('/>') &&
-            !trimmed.match(/<[^>]+>[^<]*<\/[^>]+>/)) {
-          indent++;
-        }
-        
-        return indentation + trimmed;
-      }).filter(line => line !== '').join('\n');
-      
+      const lines = formatted.split("\n");
+
+      formatted = lines
+        .map((line) => {
+          const trimmed = line.trim();
+          if (!trimmed) return "";
+
+          if (trimmed.startsWith("</")) {
+            indent = Math.max(0, indent - 1);
+          }
+
+          const indentation = "  ".repeat(indent);
+
+          if (
+            trimmed.startsWith("<") &&
+            !trimmed.startsWith("</") &&
+            !trimmed.endsWith("/>") &&
+            !trimmed.match(/<[^>]+>[^<]*<\/[^>]+>/)
+          ) {
+            indent++;
+          }
+
+          return indentation + trimmed;
+        })
+        .filter((line) => line !== "")
+        .join("\n");
+
       return formatted;
     } catch (error) {
       return xmlString;
@@ -136,39 +142,43 @@ const ModalGenerateXML = ({
     }
 
     try {
-      const efakturIds = selectedRecords.map(record => String(record.efakturId));
-      
+      const efakturIds = selectedRecords.map((record) =>
+        String(record.efakturId)
+      );
+
       const result = await dispatch(
         generateXMLEFaktur({ efakturIds })
       ).unwrap();
 
       const xmlString = result.xmlContent || "";
-      
+
       if (!xmlString || xmlString.trim().length === 0) {
         throw new Error("XML content kosong dari backend");
       }
 
       const trimmedXml = xmlString.trim();
-      if (!trimmedXml.startsWith('<')) {
+      if (!trimmedXml.startsWith("<")) {
         throw new Error("Format XML tidak valid dari backend");
       }
 
       const formattedXml = formatXML(xmlString);
       setXmlContent(formattedXml);
-      
-      message.success(`Berhasil generate XML untuk ${selectedRecords.length} E-Faktur!`);
+
+      message.success(
+        `Berhasil generate XML untuk ${selectedRecords.length} E-Faktur!`
+      );
       setCurrentStep(1);
     } catch (error) {
       let errorMsg = "Gagal generate XML E-Faktur";
-      
+
       if (error?.message) {
         errorMsg = error.message;
       } else if (error?.response?.data?.message) {
         errorMsg = error.response.data.message;
-      } else if (typeof error === 'string') {
+      } else if (typeof error === "string") {
         errorMsg = error;
       }
-      
+
       setErrorMessage(errorMsg);
       setModalError(true);
     }
@@ -198,14 +208,14 @@ const ModalGenerateXML = ({
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-        
-        const successful = document.execCommand('copy');
+
+        const successful = document.execCommand("copy");
         document.body.removeChild(textArea);
-        
+
         if (successful) {
           setCopied(true);
           message.success("XML berhasil di-copy ke clipboard");
-          
+
           setTimeout(() => {
             setCopied(false);
           }, 2000);
@@ -226,27 +236,30 @@ const ModalGenerateXML = ({
     }
 
     try {
-      const blob = new Blob([xmlContent], { 
-        type: "application/xml;charset=utf-8" 
+      const blob = new Blob([xmlContent], {
+        type: "application/xml;charset=utf-8",
       });
-      
+
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+
+      const timestamp = new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")
+        .slice(0, -5);
       const fileName = `E-Faktur_Manual_Upload_${selectedRecords.length}_${timestamp}.xml`;
-      
+
       link.download = fileName;
-      
+
       document.body.appendChild(link);
       link.click();
-      
+
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
       message.success(`File ${fileName} berhasil diunduh`);
-      
+
       if (onSuccess) {
         onSuccess();
       }
@@ -337,7 +350,7 @@ const ModalGenerateXML = ({
         sorter: true,
         render: (type) => {
           if (!type) return "-";
-          
+
           const displayType = (type || "STANDARD").toUpperCase();
           const statusLabel = displayType.replace(/_/g, " ");
 
@@ -394,7 +407,7 @@ const ModalGenerateXML = ({
         render: (statusPjap, record) => {
           const displayStatus = statusPjap || record.status;
           if (!displayStatus) return "-";
-          
+
           const upperStatus = displayStatus.toUpperCase();
           const statusLabel = upperStatus.replace(/_/g, " ");
 
@@ -441,16 +454,28 @@ const ModalGenerateXML = ({
   const getFooter = () => {
     if (currentStep === 0) {
       return (
-        <div className="flex justify-end gap-3">
-          <ButtonComponent type="default" onClick={handleCancel}>
+        <div
+          className="flex justify-end gap-3"
+          style={{ alignItems: "stretch" }}
+        >
+          <ButtonComponent
+            type="default"
+            size="large"
+            onClick={handleCancel}
+            style={{ width: 140, height: 40 }}
+          >
             Cancel
           </ButtonComponent>
+
           <ButtonComponent
-            type="primary"
+            type="default"
+            className={"bg-red-500"}
             onClick={handleGenerateXML}
             loading={loading_modal}
-            icon={<FileTextOutlined />}
             disabled={selectedRowKeys.length === 0}
+            icon={<FileTextOutlined />}
+            fontSizeClassname="text-[18px] py-1 px-1"
+            style={{ width: 140 }}
           >
             Next
           </ButtonComponent>
@@ -472,9 +497,7 @@ const ModalGenerateXML = ({
             type="default"
             onClick={handleCopyXML}
             icon={copied ? <CheckOutlined /> : <CopyOutlined />}
-            style={
-              copied ? { borderColor: "#52c41a", color: "#52c41a" } : {}
-            }
+            style={copied ? { borderColor: "#52c41a", color: "#52c41a" } : {}}
           >
             {copied ? "Copied!" : "Copy XML"}
           </ButtonComponent>
@@ -495,7 +518,7 @@ const ModalGenerateXML = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="GENERATE XML FOR E-FAKTUR (MANUAL UPLOAD)"
+        header="GENERATE XML"
         handleCancel={handleCancel}
         width={1000}
         footer={getFooter()}
@@ -513,15 +536,6 @@ const ModalGenerateXML = ({
             {/* Step 1: E-Faktur List */}
             {currentStep === 0 && (
               <>
-                {/* Info Box */}
-                <Alert
-                  message="Info: Generate XML untuk Manual Upload"
-                  description="Pilih E-Faktur dengan type manual_upload yang sudah tersedia untuk di-generate XML-nya."
-                  type="info"
-                  showIcon
-                  className="mb-4"
-                />
-
                 {/* Table */}
                 <TableRBI
                   dataSource={dataSource}
@@ -538,31 +552,14 @@ const ModalGenerateXML = ({
                   setFixedColumns={setFixedColumns}
                   loading={loading_available_requested}
                   rowSelection={rowSelection}
+                  showExport={false}
                 />
-
-                {/* Info Badge */}
-                <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-sm text-blue-800">
-                    <strong>Type:</strong> Manual Upload • 
-                    <strong> Total:</strong> {pagination_available_requested.totalElements} entries • 
-                    <strong> Page:</strong> {page} of {pagination_available_requested.totalPages} • 
-                    <strong> Selected:</strong> {selectedRowKeys.length} E-Faktur
-                  </p>
-                </div>
               </>
             )}
 
             {/* Step 2: Confirmation */}
             {currentStep === 1 && (
               <div>
-                <Alert
-                  message="XML berhasil di-generate"
-                  description={`File XML untuk ${selectedRecords.length} E-Faktur sudah siap untuk diunduh dan digunakan di aplikasi e-Faktur DJP.`}
-                  type="success"
-                  showIcon
-                  className="mb-6"
-                />
-
                 {/* Selected E-Faktur Summary */}
                 <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
                   <h3 className="text-base font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">
@@ -571,8 +568,12 @@ const ModalGenerateXML = ({
                   <div className="grid grid-cols-2 gap-4">
                     {selectedRecords.slice(0, 10).map((record, idx) => (
                       <div key={idx} className="flex justify-between text-sm">
-                        <span className="text-gray-600">{idx + 1}. {record.billingCode}</span>
-                        <span className="font-medium">{record.invoiceNumber || '-'}</span>
+                        <span className="text-gray-600">
+                          {idx + 1}. {record.billingCode}
+                        </span>
+                        <span className="font-medium">
+                          {record.invoiceNumber || "-"}
+                        </span>
                       </div>
                     ))}
                     {selectedRecords.length > 10 && (
@@ -592,7 +593,8 @@ const ModalGenerateXML = ({
                     <div className="rounded-lg border-2 border-green-300 bg-white shadow-md overflow-hidden">
                       <div className="flex justify-between items-center px-4 py-3 border-b-2 border-green-200 bg-green-50">
                         <p className="text-sm font-bold text-green-800">
-                          XML Preview ({xmlContent.length.toLocaleString()} characters)
+                          XML Preview ({xmlContent.length.toLocaleString()}{" "}
+                          characters)
                         </p>
                         <ButtonComponent
                           type="default"

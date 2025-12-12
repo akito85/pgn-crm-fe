@@ -5,7 +5,7 @@ import {
 } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
-export const columnsContentManagement = (
+export const columnsGLAccount = (
   search,
   page,
   pageSize,
@@ -17,18 +17,18 @@ export const columnsContentManagement = (
   return [
     {
       title: "NO",
+      dataIndex: "no",
       align: "center",
       width: 60,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "TEMPLATE CODE",
-      dataIndex: "templateCode",
+      title: "GL ACCOUNT NUMBER",
+      dataIndex: "glAccount",
       sorter: true,
-      width: 180,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "templateCode",
+        "glAccount",
         searchInput,
         searchedColumn,
         searchText,
@@ -36,8 +36,8 @@ export const columnsContentManagement = (
       ),
       render: (text) =>
         renderColumn(
-          "templateCode",
-          hasValue(search["templateCode"]),
+          "glAccount",
+          hasValue(search["glAccount"]),
           searchText,
           text,
           false,
@@ -46,13 +46,12 @@ export const columnsContentManagement = (
         ),
     },
     {
-      title: "TEMPLATE NAME",
-      dataIndex: "templateName",
+      title: "GL ACCOUNT DESCRIPTION",
+      dataIndex: "glAccountDesc",
       sorter: true,
-      width: 250,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "templateName",
+        "glAccountDesc",
         searchInput,
         searchedColumn,
         searchText,
@@ -60,8 +59,8 @@ export const columnsContentManagement = (
       ),
       render: (text) =>
         renderColumn(
-          "templateName",
-          hasValue(search["templateName"]),
+          "glAccountDesc",
+          hasValue(search["glAccountDesc"]),
           searchText,
           text,
           false,
@@ -70,123 +69,37 @@ export const columnsContentManagement = (
         ),
     },
     {
-      title: "FORMAT TYPE",
-      dataIndex: "formatType",
+      title: "SPECIAL GL",
+      dataIndex: "specialGlName",
       sorter: true,
-      width: 150,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "formatType",
+        "specialGlName",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
       ),
-      render: (text) =>
-        renderColumn(
-          "formatType",
-          hasValue(search["formatType"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "CATEGORY",
-      dataIndex: "category",
-      sorter: true,
-      width: 150,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "category",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text) =>
-        renderColumn(
-          "category",
-          hasValue(search["category"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "MEDIA CHANNEL",
-      dataIndex: "mediaChannel",
-      sorter: true,
-      width: 150,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "mediaChannel",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text) =>
-        renderColumn(
-          "mediaChannel",
-          hasValue(search["mediaChannel"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "START DATE",
-      dataIndex: "startDate",
-      sorter: true,
-      width: 150,
       render: (text, record) => {
-        // ✅ Triple check untuk memastikan tidak ada undefined/null
-        if (!text || text === null || text === undefined || text === "") {
-          return <span>-</span>;
-        }
-        try {
-          const formatted = renderDateColumn(text, "DD/MM/YYYY");
-          return <span>{formatted}</span>;
-        } catch (error) {
-          console.error("Error rendering startDate:", error, record);
-          return <span>-</span>;
-        }
+        const specialGlName = record?.specialGlRef?.name || text;
+        return renderColumn(
+          "specialGlName",
+          hasValue(search["specialGlName"]),
+          searchText,
+          specialGlName,
+          false,
+          "input",
+          search
+        );
       },
     },
     {
-      title: "END DATE",
-      dataIndex: "endDate",
+      title: "REFERENCE",
+      dataIndex: "reference",
       sorter: true,
-      width: 150,
-      render: (text, record) => {
-        // ✅ Triple check untuk memastikan tidak ada undefined/null
-        if (!text || text === null || text === undefined || text === "") {
-          return <span>-</span>;
-        }
-        try {
-          const formatted = renderDateColumn(text, "DD/MM/YYYY");
-          return <span>{formatted}</span>;
-        } catch (error) {
-          console.error("Error rendering endDate:", error, record);
-          return <span>-</span>;
-        }
-      },
-    },
-    {
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      sorter: true,
-      width: 200,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "description",
+        "reference",
         searchInput,
         searchedColumn,
         searchText,
@@ -194,8 +107,8 @@ export const columnsContentManagement = (
       ),
       render: (text) =>
         renderColumn(
-          "description",
-          hasValue(search["description"]),
+          "reference",
+          hasValue(search["reference"]),
           searchText,
           text,
           false,
@@ -206,6 +119,7 @@ export const columnsContentManagement = (
     {
       title: "STATUS",
       dataIndex: "status",
+      fixed: "right",
       width: 100,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -241,12 +155,13 @@ export const columnsContentManagement = (
     },
     {
       title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
+      dataIndex: "approvalStatus",
+      fixed: "right",
       width: 150,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "statusApproval",
+        "approvalStatus",
         searchInput,
         searchedColumn,
         searchText,
@@ -265,8 +180,8 @@ export const columnsContentManagement = (
             break;
         }
         return renderColumn(
-          "statusApproval",
-          hasValue(search["statusApproval"]),
+          "approvalStatus",
+          hasValue(search["approvalStatus"]),
           searchText,
           text,
           false,

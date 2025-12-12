@@ -12,44 +12,44 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import RadioTabs from "../../../../../components/RadioTabs";
-import ContentSetupForm from "./ContentSetupForm";
-import ContentInformationForm from "./ContentInformationForm";
-import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
+import ContentSectionForm from "./ContentSectionForm";
 import { dateFormatting, hasValue } from "../../../../../utils";
-import {
-  showModalError,
-  validateCreateUpdate,
-} from "../../../../../redux/slices/general_slice";
+import { showModalError } from "../../../../../redux/slices/general_slice";
 import {
   getCriteria,
-  getListPriorityPeriod,
-  createBillingBucket,
-  updateBillingBucket,
+  getListFormat,
+  getListCategory,
+  getListMedia,
+  createContentManagement,
+  updateContentManagement,
   getAvailableApproval,
   getSelectedApproval,
   getAttachmentCategory,
-  getDetailBillingBucket,
-  getDetailDraftBillingBucket,
-} from "../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
-import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+  getDetailContentManagement,
+  getDetailDraftContentManagement,
+} from "../../../../../redux/slices/rating_billing_invoice/MasterData/contentManagement";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
+import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
+import { configApp } from "../../../../../constants/configApp";
 import { columnsTableCriteriaBillingBucket } from "./Table/TableCriteriaBillingBucket";
 import ModalBack from "../../../../../components/Modal/ModalBack";
-import { configApp } from "../../../../../constants/configApp";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
-import ConfirmationBillingBucket from "./Modal/ConfirmationBillingBucket";
+import ConfirmationContentManagement from "./Modal/ConfirmationContentManagement";
 
 const ContentManagementForm = ({ type }) => {
   // Selector
   const {
-    data_priority_period,
+    data_format,
+    data_category,
+    data_media,
     data_criteria,
     data_detail_draft,
     data_detail,
     dataListAppHierId,
     dataListAppHierDetail,
     loading,
-  } = useSelector((state) => state.billing_bucket);
+  } = useSelector((state) => state.contentManagement);
 
   // Declaration
   const [form] = Form.useForm();
@@ -65,24 +65,25 @@ const ContentManagementForm = ({ type }) => {
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [listDataCriteria, setListDataCriteria] = useState([]);
-  const [listDataBI, setListDataBI] = useState([]);
   const [criteriaOptions, setCriteriaOptions] = useState([]);
   const [criteriaValues, setCriteriaValues] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
-
   const [flag, setFlag] = useState(false);
-  const [valuePage, setValuePage] = useState("Billing Bucket");
+  const [valuePage, setValuePage] = useState("Content Information");
   const [listSectionInfo, setListSectionInfo] = useState([
     {
-      value: "Billing Bucket",
+      value: "Content Information",
       paramValue: [
-        "billingBucketCode",
         "name",
-        "priorityPeriod",
+        "format",
+        "category",
+        "media",
         "criteria",
         "startDate",
+        "subject",
+        "body",
       ],
     },
     { value: "Approval", paramValue: ["apphierId"] },
@@ -94,9 +95,10 @@ const ContentManagementForm = ({ type }) => {
   const [modalBack, setModalBack] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalError, setModalError] = useState(false);
-  const [priority, setPriority] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [bodyData, setBodyData] = useState({});
+  const [subjectValue, setSubjectValue] = useState("");
+  const [bodyValue, setBodyValue] = useState("");
 
   const isDisabledDate = useMemo(() => {
     if (
@@ -116,17 +118,19 @@ const ContentManagementForm = ({ type }) => {
 
   // Use Effect
   useEffect(() => {
-    dispatch(getListPriorityPeriod());
+    dispatch(getListFormat());
+    dispatch(getListCategory());
+    dispatch(getListMedia());
     dispatch(getCriteria());
     dispatch(getAvailableApproval());
     dispatch(getSelectedApproval());
-    dispatch(getListPriorityPeriod());
+    dispatch(getAttachmentCategory());
   }, [dispatch]);
 
   useEffect(() => {
     if (id && type === "update") {
-      dispatch(getDetailBillingBucket(id));
-      dispatch(getDetailDraftBillingBucket(id));
+      dispatch(getDetailContentManagement(id));
+      dispatch(getDetailDraftContentManagement(id));
     }
   }, [dispatch, id, type]);
 
@@ -146,35 +150,14 @@ const ContentManagementForm = ({ type }) => {
       data_detail_draft?.information?.id === id &&
       data_detail?.information?.id === id
     ) {
-      // Data Draft Billing Item Detail
-      const dataDetailDraft = (
-        data_detail_draft?.billingBucketDetail || []
-      ).map((item, index) => {
-        return {
-          id: item.id,
-          key: index + 1,
-          billingItem: item.billingItem?.value,
-          currency: item.currency?.value,
-          sequence: item.sequence,
-          startDate: moment(item.startDate).format(dateFormatting.dateFormal),
-          endDate: item.endDate
-            ? moment(item.endDate).format(dateFormatting.dateFormal)
-            : null,
-          priority: item.priority,
-          description: item.description,
-          type: "exist",
-        };
-      });
-
-      // Data Criteria Select
+      // Data Draft Content Management
       const criteriaSelect = data_detail_draft?.criteria?.map((item) => {
         return {
-          billingBucketCriteriaId: item.billingBucketCriteriaId,
+          contentCriteriaId: item.contentCriteriaId,
           criteria: item.criteria,
         };
       });
 
-      // mapping for get data Criteria
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
 
       // Data Draft Attachment Information
@@ -200,7 +183,6 @@ const ContentManagementForm = ({ type }) => {
         }
       );
 
-      // Data Criteria Information
       const dataDraftCriteriaList = (data_detail_draft?.criteriaData || [])
         .filter((data) => data?.allCriteria !== true)
         .map((item, index) => {
@@ -221,6 +203,8 @@ const ContentManagementForm = ({ type }) => {
             accountCategory: item.accountCategory,
             serviceType: item.serviceType,
             customer: item.customer,
+            product: item.product,
+            accountNumber: item.accountNumber,
             startDate: item.startDate,
             endDate: item.endDate,
             key: index + 1,
@@ -229,15 +213,18 @@ const ContentManagementForm = ({ type }) => {
         });
 
       form.setFieldsValue({
-        billingBucketCode: data_detail_draft?.information?.billingBucketCode,
         name: data_detail_draft?.information?.name,
-        priorityPeriod: data_detail_draft?.information?.priorityPeriod?.value,
+        format: data_detail_draft?.information?.format,
+        category: data_detail_draft?.information?.category,
+        media: data_detail_draft?.information?.media,
         startDate: moment(data_detail_draft?.information?.startDate),
         endDate: data_detail_draft?.information?.endDate
           ? moment(data_detail_draft?.information?.endDate)
           : undefined,
         criteria: mappingCriteria,
         description: data_detail_draft?.information?.description,
+        subject: data_detail_draft?.content?.subject,
+        body: data_detail_draft?.content?.body,
         apphierId: data_detail_draft?.information?.apphierId,
       });
 
@@ -246,41 +233,21 @@ const ContentManagementForm = ({ type }) => {
       setListDataAttachment(dataDraftAttachment);
       setCriteriaValues(mappingCriteria);
       setListDataCriteria(dataDraftCriteriaList);
-      setListDataBI(dataDetailDraft);
+      setSubjectValue(data_detail_draft?.content?.subject || "");
+      setBodyValue(data_detail_draft?.content?.body || "");
     } else if (
       id &&
       !data_detail_draft?.information?.id &&
       data_detail?.information?.id === id
     ) {
-      // Data Billing Item Detail
-      const dataDetail = (data_detail?.billingBucketDetail || []).map(
-        (item, index) => {
-          return {
-            id: item.id,
-            key: index + 1,
-            billingItem: item.billingItem?.value,
-            currency: item.currency?.value,
-            sequence: item.sequence,
-            startDate: moment(item.startDate).format(dateFormatting.dateFormal),
-            endDate: item.endDate
-              ? moment(item.endDate).format(dateFormatting.dateFormal)
-              : null,
-            priority: item.priority,
-            description: item.description,
-            type: "exist",
-          };
-        }
-      );
-
-      // Data Criteria Select
+      // Data Content Management
       const criteriaSelect = data_detail?.criteria?.map((item) => {
         return {
-          billingBucketCriteriaId: item.billingBucketCriteriaId,
+          contentCriteriaId: item.contentCriteriaId,
           criteria: item.criteria,
         };
       });
 
-      // mapping for get data Criteria
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
 
       // Data Attachment Information
@@ -306,7 +273,6 @@ const ContentManagementForm = ({ type }) => {
         }
       );
 
-      // Data Criteria Information
       const dataCriteriaList = (data_detail?.criteriaData || [])
         .filter((data) => data?.allCriteria !== true)
         .map((item, index) => {
@@ -328,6 +294,7 @@ const ContentManagementForm = ({ type }) => {
             accountCategory: item.accountCategory,
             serviceType: item.serviceType,
             customer: item.customer,
+            accountNumber: item.accountNumber,
             startDate: item.startDate,
             endDate: item.endDate,
             key: index + 1,
@@ -336,15 +303,18 @@ const ContentManagementForm = ({ type }) => {
         });
 
       form.setFieldsValue({
-        billingBucketCode: data_detail?.information?.billingBucketCode,
         name: data_detail?.information?.name,
-        priorityPeriod: data_detail?.information?.priorityPeriod?.value,
+        format: data_detail?.information?.format,
+        category: data_detail?.information?.category,
+        media: data_detail?.information?.media,
         startDate: moment(data_detail?.information?.startDate),
         endDate: data_detail?.information?.endDate
           ? moment(data_detail?.information?.endDate)
           : undefined,
         criteria: mappingCriteria,
         description: data_detail?.information?.description,
+        subject: data_detail?.content?.subject,
+        body: data_detail?.content?.body,
         apphierId: data_detail?.information?.apphierId,
       });
 
@@ -353,7 +323,8 @@ const ContentManagementForm = ({ type }) => {
       setListDataAttachment(dataAttachment);
       setCriteriaValues(mappingCriteria);
       setListDataCriteria(dataCriteriaList);
-      setListDataBI(dataDetail);
+      setSubjectValue(data_detail?.content?.subject || "");
+      setBodyValue(data_detail?.content?.body || "");
     }
   }, [id, type, form, data_detail, data_detail_draft]);
 
@@ -400,22 +371,23 @@ const ContentManagementForm = ({ type }) => {
       breadcrumbName: "Master Data",
     },
     {
-      path: RBI_ROUTES.CONTENT_MANAGEMENT,
+      path: RBI_ROUTES.CONTENT_MANAGEMENT_VIEW,
       breadcrumbName: "Content Management",
     },
     {
       path:
         type === "create"
-          ? RBI_ROUTES.BILLING_BUCKET_CREATE
-          : RBI_ROUTES.BILLING_BUCKET_UPDATE,
+          ? RBI_ROUTES.CONTENT_MANAGEMENT_CREATE
+          : RBI_ROUTES.CONTENT_MANAGEMENT_UPDATE,
       breadcrumbName:
-        type === "create" ? "Create Billing Bucket" : "Update Billing Bucket",
+        type === "create"
+          ? "Create Content Management"
+          : "Update Content Management",
     },
   ];
 
   const processData = ({
     listDataCriteria,
-    listDataBI,
     bodyData,
     id,
     type,
@@ -425,7 +397,6 @@ const ContentManagementForm = ({ type }) => {
     data_detail_draft,
     columnsTableCriteriaBillingBucket,
   }) => {
-    // Helper function to map listDataCriteria
     const mapListDataCriteria = (listDataCriteria, dateFormatting) => {
       return listDataCriteria?.map((item) => ({
         id: item?.id || null,
@@ -442,71 +413,19 @@ const ContentManagementForm = ({ type }) => {
         city: item.city?.value || null,
         province: item.province?.value || null,
         area: item.area?.value || null,
+        costCenter: item.area?.value || null,
         sor: item.sor?.value || null,
         industrialSector: item.industrialSector?.value || null,
         gsizes: item.gsizes?.value || null,
         customerSegment: item.customerSegment?.value || null,
         accountGroup: item.accountGroup?.value || null,
+        accountClass: item.accountClass?.value || null,
         serviceType: item.serviceType?.value || null,
         accountCategory: item.accountCategory?.value || null,
+        product: item.product?.value || null,
+        accountNumber: item.accountNumber?.value || null,
+        allCriteria: false,
       }));
-    };
-
-    // Helper function to map listDataBI
-    const mapListDataBI = (listDataBI, dateFormatting) => {
-      return listDataBI?.map((item) => ({
-        ...item,
-        priority: item.priority === undefined ? false : item.priority,
-        startDate: item.startDate
-          ? moment(item.startDate).format(dateFormatting.dateFormal)
-          : null,
-        endDate: item.endDate
-          ? moment(item.endDate).format(dateFormatting.dateFormal)
-          : null,
-      }));
-    };
-
-    // Helper function to map bodyData.criteria
-    const mapCriteriaArrayObject = (
-      bodyData,
-      id,
-      data_detail,
-      data_detail_draft
-    ) => {
-      return bodyData?.criteria.map((item) => {
-        const tempData =
-          id && data_detail_draft?.information?.id === id
-            ? data_detail_draft?.listCriteria || []
-            : data_detail?.listCriteria || [];
-        const temp = tempData.filter((a) => item === a.criteria);
-        return {
-          billingBucketCriteriaId: temp[0]?.billingBucketCriteriaId || null,
-          criteria: item,
-        };
-      });
-    };
-
-    // Helper function to filter criteria
-    const getFilteredCriteria = (
-      bodyData,
-      columnsTableCriteriaBillingBucket
-    ) => {
-      return columnsTableCriteriaBillingBucket().filter(
-        (item) =>
-          !bodyData.criteria.includes(item.indexValue) &&
-          bodyData.criteria.includes(item.indexValue) === 1
-      );
-    };
-
-    // Helper function to update dataCriteriaObject with filtered criteria
-    const updateDataCriteriaObject = (dataCriteriaObject, filteredCriteria) => {
-      return dataCriteriaObject.map((item) => {
-        let obj = { ...item };
-        filteredCriteria.forEach((criteria) => {
-          obj[criteria.dataIndexForm] = null;
-        });
-        return obj;
-      });
     };
 
     const dataCriteriaObject = mapListDataCriteria(
@@ -514,39 +433,29 @@ const ContentManagementForm = ({ type }) => {
       dateFormatting
     );
 
-    const dataListBI = mapListDataBI(listDataBI, dateFormatting);
-
-    const criteriaArrayObject = mapCriteriaArrayObject(
-      bodyData,
-      id,
-      data_detail,
-      data_detail_draft
+    const filteredCriteria = columnsTableCriteriaBillingBucket().filter(
+      (item) =>
+        !bodyData.criteria.includes(item.indexValue) &&
+        bodyData.criteria.includes(item.indexValue) === 1
     );
 
-    const filteredCriteria = getFilteredCriteria(
-      bodyData,
-      columnsTableCriteriaBillingBucket
-    );
-
-    const updatedDataCriteriaObject = updateDataCriteriaObject(
-      dataCriteriaObject,
-      filteredCriteria
-    );
+    const updatedDataCriteriaObject = dataCriteriaObject.map((item) => {
+      let obj = { ...item };
+      filteredCriteria.forEach((criteria) => {
+        obj[criteria.dataIndexForm] = null;
+      });
+      return obj;
+    });
 
     const includesAll = bodyData.criteria.includes(24);
 
-    dataListBI.map((a) => {
-      return {
-        type: delete a.type,
-        key: delete a.key,
-      };
-    });
-
     const body = {
       id: type === "create" ? undefined : id,
-      billingBucketCode: bodyData.billingBucketCode,
+      type: flag ? "SUBMIT" : "DRAFT",
       name: bodyData.name,
-      priorityPeriod: bodyData.priorityPeriod,
+      format: bodyData.format,
+      category: bodyData.category,
+      media: bodyData.media,
       startDate: bodyData.startDate
         ? moment(bodyData?.startDate).format(dateFormatting.dateFormal)
         : null,
@@ -554,51 +463,17 @@ const ContentManagementForm = ({ type }) => {
         ? moment(bodyData?.endDate).format(dateFormatting.dateFormal)
         : null,
       description: bodyData.description ? bodyData.description : null,
-      apphierId: bodyData.apphierId,
-      listDetail: dataListBI,
-      listCriteria: criteriaArrayObject,
-      listCriteriaData: includesAll
+      content: {
+        subject: bodyData.subject || "",
+        body: bodyData.body || "",
+      },
+      criteriaData: includesAll
         ? [{ allCriteria: true }]
         : updatedDataCriteriaObject,
-      isSubmit: flag,
+      apphierId: bodyData.apphierId,
     };
 
     return body;
-  };
-
-  // Validate Data before Modal
-  const checkDataValidity = async (formValue) => {
-    const url =
-      type === "create"
-        ? "/v1/dbs/api/rbi/billing-bucket/validate-create"
-        : "/v1/dbs/api/rbi/billing-bucket/validate-update";
-
-    const body = processData({
-      listDataCriteria,
-      listDataBI,
-      bodyData: formValue,
-      id,
-      type,
-      dateFormatting,
-      flag,
-      data_detail,
-      data_detail_draft,
-      columnsTableCriteriaBillingBucket,
-    });
-
-    try {
-      await dispatch(
-        validateCreateUpdate({
-          body: body,
-          services: ratingBillingHttpService,
-          endPoint: url,
-          type: type,
-        })
-      )?.unwrap();
-      return true;
-    } catch (error) {
-      return false;
-    }
   };
 
   const lowerCaseCheckedCriteria = (name) => {
@@ -670,8 +545,8 @@ const ContentManagementForm = ({ type }) => {
     listDataCriteria?.map((item) => {
       tempNameCriteria?.forEach((criteriaName) => {
         if (
-          !item[lowerCaseCheckedCriteria(criteriaName)] || //no column
-          !hasValueCriteria(item[lowerCaseCheckedCriteria(criteriaName)]) //no value at object
+          !item[lowerCaseCheckedCriteria(criteriaName)] ||
+          !hasValueCriteria(item[lowerCaseCheckedCriteria(criteriaName)])
         ) {
           missingColumn.push(criteriaName);
         }
@@ -691,10 +566,8 @@ const ContentManagementForm = ({ type }) => {
       : false;
   };
 
-  // check has overlapping data
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
-    // if (hasValue(formHeader?.endDate)) {
     dataTable?.forEach((item) => {
       if (
         moment(item?.startDate) < moment(formHeader?.startDate) ||
@@ -709,16 +582,35 @@ const ContentManagementForm = ({ type }) => {
     } else {
       return false;
     }
-    // }
   }, []);
 
-  // Handle Save Form
   const handleSave = async (formValue) => {
+    console.log("Form Values:", formValue);
+    console.log("Subject:", formValue.subject);
+    console.log("Body:", formValue.body);
     let errorBody = {};
+    if (!subjectValue || subjectValue.trim() === "") {
+      errorBody = {
+        title: "Failed",
+        description: "Subject is required. Please input subject.",
+      };
+      dispatch(showModalError(errorBody));
+      return;
+    }
+
+    if (!bodyValue || bodyValue.trim() === "") {
+      errorBody = {
+        title: "Failed",
+        description: "Body content is required. Please input body.",
+      };
+      dispatch(showModalError(errorBody));
+      return;
+    }
     const hasOverlapping = checkOverlappingData(
       { startDate: formValue?.startDate, endDate: formValue?.endDate },
       listDataCriteria
     );
+
     if (listDataAttachment.length === 0) {
       handleMandatory(setListSectionInfo, listDataAttachment);
     } else {
@@ -756,30 +648,29 @@ const ContentManagementForm = ({ type }) => {
         };
         dispatch(showModalError(errorBody));
       } else {
-        const isDataValid = await checkDataValidity(formValue);
-
-        if (isDataValid) {
-          setBodyData({
-            ...formValue,
-          });
-          setModalConfirm(true);
-          setListSectionInfo([
-            {
-              value: "Billing Bucket",
-              paramValue: [
-                "billingBucketCode",
-                "name",
-                "priorityPeriod",
-                "criteria",
-                "startDate",
-              ],
-            },
-            { value: "Approval", paramValue: ["apphierId"] },
-            { value: "Attachment" },
-          ]);
-        } else {
-          setModalConfirm(false);
-        }
+        setBodyData({
+          ...formValue,
+          subject: subjectValue,
+          body: bodyValue,
+        });
+        setModalConfirm(true);
+        setListSectionInfo([
+          {
+            value: "Content Information",
+            paramValue: [
+              "name",
+              "format",
+              "category",
+              "media",
+              "criteria",
+              "startDate",
+              "subject",
+              "body",
+            ],
+          },
+          { value: "Approval", paramValue: ["apphierId"] },
+          { value: "Attachment" },
+        ]);
       }
     }
   };
@@ -787,104 +678,8 @@ const ContentManagementForm = ({ type }) => {
   const handleConfirm = () => {
     setModalConfirm(false);
 
-    // let dataListBI = listDataBI.map((item) => {
-    //   return {
-    //     ...item,
-    //     priority: item.priority === undefined ? false : item.priority,
-    //     startDate: item.startDate
-    //       ? moment(item.startDate).format(dateFormatting.dateFormal)
-    //       : null,
-    //     endDate: item.endDate
-    //       ? moment(item.endDate).format(dateFormatting.dateFormal)
-    //       : null,
-    //   };
-    // });
-
-    // let dataCriteriaObject = listDataCriteria.map((item) => {
-    //   return {
-    //     id: item?.id || null,
-    //     startDate: item.startDate
-    //       ? moment(item.startDate).format(dateFormatting.dateFormal)
-    //       : null,
-    //     endDate: item.endDate
-    //       ? moment(item.endDate).format(dateFormatting.dateFormal)
-    //       : null,
-    //     customer: item.customer?.value || null,
-    //     budget: item.budget?.value || null,
-    //     subDistrict: item.subDistrict?.value || null,
-    //     district: item.district?.value || null,
-    //     city: item.city?.value || null,
-    //     province: item.province?.value || null,
-    //     area: item.area?.value || null,
-    //     sor: item.sor?.value || null,
-    //     industrialSector: item.industrialSector?.value || null,
-    //     gsizes: item.gsizes?.value || null,
-    //     customerSegment: item.customerSegment?.value || null,
-    //     accountGroup: item.accountGroup?.value || null,
-    //     serviceType: item.serviceType?.value || null,
-    //     accountCategory: item.accountCategory?.value || null,
-    //   };
-    // });
-
-    // let criteriaArrayObject = bodyData.criteria.map((item) => {
-    //   let tempData =
-    //     id && data_detail_draft?.information?.id === id
-    //       ? data_detail_draft?.listCriteria || []
-    //       : data_detail?.listCriteria || [];
-    //   const temp = tempData?.filter((a) => item === a.criteria);
-    //   return {
-    //     billingBucketCriteriaId: temp[0]?.billingBucketCriteriaId || null,
-    //     criteria: item,
-    //   };
-    // });
-
-    // const filteredCriteria = columnsTableCriteriaBillingBucket().filter(
-    //   (item) =>
-    //     !bodyData.criteria.includes(item.indexValue) &&
-    //     bodyData.criteria.includes(item.indexValue) === 1
-    // );
-
-    // dataCriteriaObject = dataCriteriaObject.map((item) => {
-    //   let obj = { ...item };
-    //   filteredCriteria.forEach((criteria) => {
-    //     obj[criteria.dataIndexForm] = null;
-    //   });
-    //   return obj;
-    // });
-
-    // const includesAll = bodyData.criteria.includes(24);
-
-    // dataListBI.map((a) => {
-    //   return {
-    //     type: delete a.type,
-    //     key: delete a.key,
-    //   };
-    // });
-
-    // const body = {
-    //   id: type === "create" ? undefined : id,
-    //   billingBucketCode: bodyData.billingBucketCode,
-    //   name: bodyData.name,
-    //   priorityPeriod: bodyData.priorityPeriod,
-    //   startDate: bodyData.startDate
-    //     ? moment(bodyData?.startDate).format(dateFormatting.dateFormal)
-    //     : null,
-    //   endDate: bodyData.endDate
-    //     ? moment(bodyData?.endDate).format(dateFormatting.dateFormal)
-    //     : null,
-    //   description: bodyData.description ? bodyData.description : null,
-    //   apphierId: bodyData.apphierId,
-    //   listDetail: dataListBI,
-    //   listCriteria: criteriaArrayObject,
-    //   listCriteriaData: includesAll
-    //     ? [{ allCriteria: true }]
-    //     : dataCriteriaObject,
-    //   isSubmit: flag,
-    // };
-
     const body = processData({
       listDataCriteria,
-      listDataBI,
       bodyData,
       id,
       type,
@@ -896,30 +691,53 @@ const ContentManagementForm = ({ type }) => {
     });
 
     if (type === "create") {
-      dispatch(createBillingBucket({ body: body }))
+      dispatch(createContentManagement({ body: body }))
         .unwrap()
         .then(async (dataForm) => {
-          const billingBucketCode = dataForm?.billingBucketCode;
+          const templateId = dataForm?.createdId || dataForm?.data?.createdId;
+
+          if (!templateId) {
+            console.error("Created ID not found in response:", dataForm);
+            setModalError(true);
+            setBodyError({
+              message: "Failed to get template ID from response",
+            });
+            return;
+          }
+
+          console.log("Template created with ID:", templateId);
+
           setLoadingForm(true);
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
             const element = listDataAttachment[icon];
-            const body = {
+
+            const attachmentBody = {
               files: element.file,
-              category: element.fileCategoryId,
-              referenceId: billingBucketCode,
+              categoryId: element.fileCategoryId,
+              referenceId: templateId,
             };
-            await ratingBillingHttpService.uploadAttachment(
-              `/v1/dbs/api/rbi/billing-bucket/create-attachment`,
-              body
-            );
+
+            try {
+              await ratingBillingHttpService.uploadAttachment(
+                `/v1/dbs/api/content/create-attachment`,
+                attachmentBody
+              );
+              console.log(`Attachment ${icon + 1} uploaded successfully`);
+            } catch (uploadError) {
+              console.error(
+                `Failed to upload attachment ${icon + 1}:`,
+                uploadError
+              );
+            }
           }
+
           setLoadingForm(false);
           setModalConfirm(false);
           handleClear();
         })
         .catch((error) => {
           console.log(error);
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+          if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
             const message =
               (error.response &&
                 error.response.data &&
@@ -931,32 +749,62 @@ const ContentManagementForm = ({ type }) => {
           }
         });
     } else {
-      dispatch(updateBillingBucket({ body: body }))
+      // Di handleConfirm() - bagian UPDATE
+      dispatch(updateContentManagement({ body: body }))
         .unwrap()
         .then(async (dataForm) => {
-          const billingBucketCode = dataForm.billingBucketCode;
+          const templateId =
+            dataForm?.updatedId ||
+            dataForm?.createdId ||
+            dataForm?.data?.updatedId ||
+            dataForm?.data?.createdId ||
+            id;
+
+          if (!templateId) {
+            console.error("Template ID not found:", dataForm);
+            setModalError(true);
+            setBodyError({ message: "Failed to get template ID" });
+            return;
+          }
+
+          console.log("Template updated with ID:", templateId);
+
           const filterDataAttach = listDataAttachment.filter(
             (item) => item.dataType !== "exist"
           );
+
+          console.log("New attachments to upload:", filterDataAttach.length);
+
           setLoadingForm(true);
-          for (let icon = 0; icon < listDataAttachment.length; icon++) {
+          for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
-            const body = {
+
+            const attachmentBody = {
               files: element.file,
-              category: element.fileCategoryId,
-              referenceId: billingBucketCode,
+              categoryId: element.fileCategoryId,
+              referenceId: templateId,
             };
-            await ratingBillingHttpService.uploadAttachment(
-              `/v1/dbs/api/rbi/billing-bucket/create-attachment`,
-              body
-            );
+
+            try {
+              await ratingBillingHttpService.uploadAttachment(
+                `/v1/dbs/api/content/create-attachment`,
+                attachmentBody
+              );
+              console.log(`Attachment ${icon + 1} uploaded successfully`);
+            } catch (uploadError) {
+              console.error(
+                `Failed to upload attachment ${icon + 1}:`,
+                uploadError
+              );
+            }
           }
+
           setLoadingForm(false);
           setModalConfirm(false);
           handleClear();
         })
         .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+          if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
             const message =
               (error.response &&
                 error.response.data &&
@@ -981,12 +829,12 @@ const ContentManagementForm = ({ type }) => {
           item.value !== "Attachment"
             ? (errorFields || []).reduce(
                 (current, next) =>
-                  item.paramValue.includes(next.name[0])
+                  item.paramValue?.includes(next.name[0])
                     ? current + 1
                     : current,
                 0
               )
-            : listDataAttachment.length < 1
+            : listDataAttachment?.length < 1
             ? 1
             : 0;
         return {
@@ -1001,7 +849,7 @@ const ContentManagementForm = ({ type }) => {
 
   // Handle Error Tab Form
   const handleError = ({ values, errorFields, outOfDate }) => {
-    handleMandatory(setListSectionInfo, listDataAttachment, errorFields);
+    handleMandatory(setListSectionInfo, [], errorFields);
   };
 
   const handleClear = () => {
@@ -1014,24 +862,28 @@ const ContentManagementForm = ({ type }) => {
       setListDataCriteria([]);
       setCriteriaValues([]);
       setStoredDataInline(false);
-      setListDataBI([]);
+      setSubjectValue("");
+      setBodyValue("");
       setListSectionInfo([
         {
-          value: "Billing Bucket",
+          value: "Content Information",
           paramValue: [
-            "billingBucketCode",
             "name",
-            "priorityPeriod",
+            "format",
+            "category",
+            "media",
             "criteria",
             "startDate",
+            "subject",
+            "body",
           ],
         },
         { value: "Approval", paramValue: ["apphierId"] },
         { value: "Attachment" },
       ]);
     } else {
-      dispatch(getDetailBillingBucket(id));
-      dispatch(getDetailDraftBillingBucket(id));
+      dispatch(getDetailContentManagement(id));
+      dispatch(getDetailDraftContentManagement(id));
     }
   };
 
@@ -1046,14 +898,12 @@ const ContentManagementForm = ({ type }) => {
     setBodyError({});
   };
 
-  // Function Get Data StartDate
   const handleStartDate = (value) => {
     form.resetFields(["endDate"]);
     setStartDate(value);
     return value;
   };
 
-  // Function Get Data EndDate
   const handleEndDate = (value) => {
     setEndDate(value);
     return value;
@@ -1075,20 +925,30 @@ const ContentManagementForm = ({ type }) => {
           onFinish={handleSave}
           onFinishFailed={handleError}
         >
-          {/* Billing Bucket Section */}
-          <div className={`${valuePage !== "Billing Bucket" ? "hidden" : ""}`}>
-            <ContentSetupForm
-              form={form}
+          {/* Content Information Section */}
+          <div
+            className={`${valuePage !== "Content Information" ? "hidden" : ""}`}
+          >
+            <ContentSectionForm
               type={type}
+              form={form}
+              listDataCriteria={listDataCriteria}
+              setListDataCriteria={setListDataCriteria}
+              criteriaValues={criteriaValues}
+              setCriteriaValues={setCriteriaValues}
+              storedDataInline={storedDataInline}
+              setStoredDataInline={setStoredDataInline}
               status={status}
               statusApproval={statusApproval}
-            />
-
-            <ContentInformationForm
-              form={form}
-              type={type}
-              status={status}
-              statusApproval={statusApproval}
+              startDate={startDate}
+              endDate={endDate}
+              handleStartDate={handleStartDate}
+              handleEndDate={handleEndDate}
+              disabledDate={isDisabledDate}
+              subjectValue={subjectValue}
+              setSubjectValue={setSubjectValue}
+              bodyValue={bodyValue}
+              setBodyValue={setBodyValue}
             />
           </div>
 
@@ -1112,7 +972,7 @@ const ContentManagementForm = ({ type }) => {
                 updateData={setListDataAttachment}
                 dispatch={dispatch}
                 getAPICategory={getAttachmentCategory}
-                typeSelector="billing_bucket"
+                typeSelector="contentManagement"
                 service={ratingBillingHttpService}
                 configApplication={configApp.RATING_BILLING_SERVICE}
                 getAPIGuard={getConfigFileRBIData}
@@ -1179,17 +1039,17 @@ const ContentManagementForm = ({ type }) => {
         </Form>
 
         {/* Modal Confirmation */}
-        <ConfirmationBillingBucket
+        <ConfirmationContentManagement
           isOpen={modalConfirm}
           data={bodyData}
           selectedHierarchy={selectedHierarchy}
-          apiPriorityPeriod={data_priority_period}
+          apiFormat={data_format}
+          apiCategory={data_category}
+          apiMedia={data_media}
           apiCriteria={data_criteria}
           criteriaValues={criteriaValues}
           listDataAppHierDetail={appHierDataDetail}
-          listDataAttachment={listDataAttachment}
           listDataCriteria={listDataCriteria}
-          listDataBI={listDataBI}
           dataOption={appHierOptions}
           handleCancel={() => setModalConfirm(false)}
           handleConfirm={() => handleConfirm()}

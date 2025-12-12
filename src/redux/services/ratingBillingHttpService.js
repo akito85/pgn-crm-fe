@@ -110,12 +110,18 @@ const downloadData = async (url, customBaseUrl) => {
       responseType: "blob",
     });
     if (hasValue(response.headers?.get("content-disposition"))) {
-      const filename = response.headers
+      const rawFilename = response.headers
         .get("content-disposition")
         .split(";")
         .find((n) => n.includes("filename="))
         .replace("filename=", "")
         .trim();
+
+      // Remove quotes and trailing underscore
+      const filename = rawFilename.replace(/['"]/g, "").replace(/_+$/, "");
+
+      console.log("📥 [downloadData] Raw filename:", rawFilename);
+      console.log("📥 [downloadData] Cleaned filename:", filename);
 
       const blob = await response?.data;
       FileSaver.saveAs(blob, filename);
@@ -405,6 +411,57 @@ const downloadXlsx = async (
   }
 };
 
+const downloadFile = async (url, customBaseUrl = null) => {
+  try {
+    const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
+
+    const response = await axios.get(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
+      responseType: "blob",
+    });
+
+    const contentDisposition = response.headers["content-disposition"];
+    let filename = null;
+
+    if (contentDisposition) {
+      const utf8Match = contentDisposition.match(/filename\*=UTF-8''(.+)/i);
+      if (utf8Match) {
+        filename = decodeURIComponent(utf8Match[1]);
+      } else {
+        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/i);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+    }
+
+    if (!filename) {
+      filename = "download.pdf";
+    }
+
+    const blob = new Blob([response.data], { type: "application/pdf" });
+
+    if (blob.size === 0) {
+      throw new Error("Downloaded file is empty");
+    }
+
+    FileSaver.saveAs(blob, filename);
+
+    return response;
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 204) {
+        throw new Error("No data available for download");
+      }
+      if (error.response.status === 404) {
+        throw new Error("File not found");
+      }
+    }
+
+    throw error;
+  }
+};
+
 const ratingBillingHttpService = {
   getAll,
   getDetail,
@@ -423,6 +480,7 @@ const ratingBillingHttpService = {
   downloadRtfFile,
   previewOrDownloadData,
   downloadXlsx,
+  downloadFile,
 };
 
 export default ratingBillingHttpService;

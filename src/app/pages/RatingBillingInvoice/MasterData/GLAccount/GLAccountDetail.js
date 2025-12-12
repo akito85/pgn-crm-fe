@@ -18,19 +18,17 @@ import { dateFormatting } from "../../../../../utils";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import { configApp } from "../../../../../constants/configApp";
 import {
-  approveRejectDigitalSignature,
-  approveRejectInactiveDigitalSignature,
-  resetDigitalSignatureState,
-  getDetailDigitalSignature,
-} from "../../../../../redux/slices/rating_billing_invoice/MasterData/digitalSignature";
+  approveRejectGLAccount,
+  approveRejectInactiveGLAccount,
+  resetGLAccountState,
+  getDetailGLAccount,
+} from "../../../../../redux/slices/rating_billing_invoice/MasterData/glAccount";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import DigitalSignatureSection from "./_components/DigitalSignatureSection";
+import GLAccountSection from "./_components/GLAccountSection";
 
-const DigitalSignatureDetail = () => {
+const GLAccountDetail = () => {
   // Selector
-  const { loading, data_detail } = useSelector(
-    (state) => state.digitalSignature
-  );
+  const { loading, data_detail } = useSelector((state) => state.glAccount);
 
   // Declaration
   const navigate = useNavigate();
@@ -40,14 +38,14 @@ const DigitalSignatureDetail = () => {
   // State
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalErrorServer, setModalErrorServer] = useState(false);
-  const [valuePage, setValuePage] = useState("Digital Signature");
+  const [valuePage, setValuePage] = useState("GL Account");
   const [approveOrReject, setApproveOrReject] = useState("");
   const [dataDetail, setDataDetail] = useState({});
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [bodyError, setBodyError] = useState({});
   const [dataLogInformation, setDataLogInformation] = useState({});
   const [listSectionInfo] = useState([
-    { value: "Digital Signature" },
+    { value: "GL Account" },
     { value: "Attachment" },
   ]);
   const [bodyApproval, setBodyApproval] = useState({
@@ -63,18 +61,18 @@ const DigitalSignatureDetail = () => {
   // Use Effect
   useEffect(() => {
     if (id) {
-      dispatch(getDetailDigitalSignature(id));
+      dispatch(getDetailGLAccount(id));
     }
     return () => {
-      dispatch(resetDigitalSignatureState());
+      dispatch(resetGLAccountState());
     };
   }, [dispatch, id]);
 
   useEffect(() => {
     if (data_detail && Object.keys(data_detail).length > 0) {
-      const signature = data_detail?.digitalSignature || {};
+      const glAccount = data_detail?.glAccount || {};
       const attachments = data_detail?.attachments || [];
-      const approvalInfo = data_detail?.approvalInformation || {};
+      const approvalInfo = data_detail?.approvalInfo || {};
 
       // Data Attachment Information
       const mappedAttachment = attachments.map((item, index) => ({
@@ -86,7 +84,7 @@ const DigitalSignatureDetail = () => {
         fileCategoryId: item.fileCategoryId || null,
         fileCategoryName: item.fileCategoryName || "-",
         pathFile: item.pathFile || "",
-        urlFile1: `/v1/dbs/api/signature/download-attachment/${item.id}` || "",
+        urlFile1: `/v1/dbs/api/gl-account/download-attachment/${item.id}` || "",
         urlFile2: item.urlFile2 || "",
         createdBy: item.createdBy || "-",
         createdDate: item.createdDate
@@ -97,25 +95,22 @@ const DigitalSignatureDetail = () => {
 
       // Data History Log Information
       setDataLogInformation({
-        recordId: signature?.signatureId || "-",
-        createdDate: signature?.createdDtm || null,
-        createdBy: signature?.createdBy || "-",
-        updatedDate: signature?.updateDtm || null,
-        updatedBy: signature?.updatedBy || "-",
+        recordId: glAccount?.glAccountId || "-",
+        createdDate: glAccount?.createdDate || null,
+        createdBy: glAccount?.createdBy || "-",
+        updatedDate: glAccount?.updatedDate || null,
+        updatedBy: glAccount?.updatedBy || "-",
       });
 
-      // Set Digital Signature Data
+      // Set GL Account Data
       setDataDetail({
-        signatureId: signature?.signatureId,
-        name: signature?.name || "-",
-        employee: signature?.fullName || "-",
-        primaryPosition: signature?.positionName || "-",
-        status: signature?.status || "-",
-        statusApproval: signature?.statusApproval || "-",
-        description: signature?.description || "-",
-        signatureBase64: signature?.signatureBase64 || "-",
-        signatureMethod: signature?.signatureMethod || "-",
-        fileDetail: data_detail?.fileDetail || null,
+        glAccountId: glAccount?.glAccountId,
+        glAccount: glAccount?.glAccount || "-",
+        glAccountDesc: glAccount?.glAccountDesc || "-",
+        specialGlName: glAccount?.specialGlRef?.name || "-",
+        reference: glAccount?.reference || "-",
+        status: glAccount?.status || "-",
+        statusApproval: glAccount?.approvalStatus || "-",
       });
 
       setListDataAttachment(mappedAttachment);
@@ -140,23 +135,23 @@ const DigitalSignatureDetail = () => {
       breadcrumbName: "Master Data",
     },
     {
-      path: RBI_ROUTES.DIGITAL_SIGNATURE,
-      breadcrumbName: "Digital Signature",
+      path: RBI_ROUTES.GLACCOUNT,
+      breadcrumbName: "GL Account",
     },
     {
-      path: RBI_ROUTES.DIGITAL_SIGNATURE_DETAIL,
-      breadcrumbName: "Detail Digital Signature",
+      path: RBI_ROUTES.GLACCOUNT_DETAIL,
+      breadcrumbName: "Detail GL Account",
     },
   ];
 
   const layout = (valuePage) => {
     switch (valuePage) {
-      case "Digital Signature":
+      case "GL Account":
         return (
           <>
-            <DigitalSignatureSection
-              key={"digitalSignatureSection"}
-              dataDetailSignature={dataDetail}
+            <GLAccountSection
+              key={"glAccountSection"}
+              dataDetailGLAccount={dataDetail}
               dataHistory={dataLogInformation}
             />
           </>
@@ -168,7 +163,7 @@ const DigitalSignatureDetail = () => {
               type={"detail"}
               data={listDataAttachment}
               dispatch={dispatch}
-              typeSelector="digitalSignature"
+              typeSelector="glAccount"
               service={ratingBillingHttpService}
               configApplication={configApp.RATING_BILLING_SERVICE}
             />
@@ -203,12 +198,12 @@ const DigitalSignatureDetail = () => {
       approvalId: bodyApproval.tAppId,
     };
     dispatch(
-      bodyApproval.approvalType === "INACTIVE_DIGITAL_SIGNATURE"
-        ? approveRejectInactiveDigitalSignature({
+      bodyApproval.approvalType === "INACTIVE_GL_ACCOUNT"
+        ? approveRejectInactiveGLAccount({
             id: id,
             body: data,
           })
-        : approveRejectDigitalSignature({
+        : approveRejectGLAccount({
             id: id,
             body: data,
           })
@@ -216,7 +211,7 @@ const DigitalSignatureDetail = () => {
       .unwrap()
       .then(() => {
         if (handleClear) handleClear();
-        dispatch(getDetailDigitalSignature(id));
+        dispatch(getDetailGLAccount(id));
       })
       .catch((error) => {
         if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
@@ -244,7 +239,7 @@ const DigitalSignatureDetail = () => {
         <div className="flex flex-col w-full">
           {bodyApproval.isApprover &&
             bodyApproval.approvalType &&
-            bodyApproval.approvalType === "INACTIVE_FAKTUR_CODE" && (
+            bodyApproval.approvalType === "INACTIVE_GL_ACCOUNT" && (
               <BaseContainer header={"Inactive Request Information"}>
                 <div className="w-full grid grid-cols-4 gap-3">
                   <DetailText label={"Requested Date"}>
@@ -315,8 +310,8 @@ const DigitalSignatureDetail = () => {
           onFinish={handleConfirm}
           header={approveOrReject}
           approveOrReject={approveOrReject}
-          menu={"Digital Signature"}
-          named={dataDetail?.name}
+          menu={"GL Account"}
+          named={dataDetail?.glAccount}
         />
 
         {/* Modal Retry */}
@@ -342,4 +337,4 @@ const DigitalSignatureDetail = () => {
   );
 };
 
-export default DigitalSignatureDetail;
+export default GLAccountDetail;

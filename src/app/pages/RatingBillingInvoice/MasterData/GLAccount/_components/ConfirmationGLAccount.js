@@ -1,29 +1,26 @@
 import React, { useState } from "react";
-import DigitalSignatureInfo from "./DigitalSignatureInfo";
+import GLAccountInfo from "./GLAccountInfo";
 import ApprovalComponentGeneral from "../../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../../components/Attachment/AttachmentComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import RadioTabs from "../../../../../../components/RadioTabs";
 
-const ConfirmationDigitalSignature = ({
+const ConfirmationGLAccount = ({
   isOpen,
   data,
-  uploadedSignatureFile,
-  signatureFileId,
   selectedHierarchy,
   listDataAppHierDetail = [],
   listDataAttachment = [],
-  listAdditionalCode = [],
   handleCancel = () => {},
   handleConfirm = () => {},
   dataOption = [],
 }) => {
   // State
-  const [valuePage, setValuePage] = useState("Digital Signature");
+  const [valuePage, setValuePage] = useState("GL Account");
 
   const [tabPages, setTabPages] = useState([
-    { value: "Digital Signature" },
+    { value: "GL Account" },
     { value: "Approval" },
     { value: "Attachment" },
   ]);
@@ -31,17 +28,13 @@ const ConfirmationDigitalSignature = ({
   // Rendering Section
   const renderSection = (valuePage) => {
     switch (valuePage) {
-      case "Digital Signature":
+      case "GL Account":
         return (
           <div>
             <p className="text-primary text-xs font-bold uppercase pt-[30px]">
-              {"Digital Signature INFORMATION"}
+              {"GL ACCOUNT INFORMATION"}
             </p>
-            <DigitalSignatureInfo
-              data={data}
-              uploadedSignatureFile={uploadedSignatureFile}
-              signatureFileId={signatureFileId}
-            />
+            <GLAccountInfo data={data} />
           </div>
         );
       case "Approval":
@@ -72,7 +65,7 @@ const ConfirmationDigitalSignature = ({
             <AttachmentComponent
               type={"preview"}
               data={listDataAttachment}
-              typeSelector="masterEfakturCode"
+              typeSelector="billing_bucket"
             />
           </>
         );
@@ -80,13 +73,9 @@ const ConfirmationDigitalSignature = ({
         return (
           <div>
             <p className="text-primary text-xs font-bold uppercase pt-[30px]">
-              {"Digital Signature INFORMATION"}
+              {"GL ACCOUNT INFORMATION"}
             </p>
-            <DigitalSignatureInfo
-              data={data}
-              uploadedSignatureFile={uploadedSignatureFile}
-              signatureFileId={signatureFileId}
-            />
+            <GLAccountInfo data={data} />
           </div>
         );
     }
@@ -125,4 +114,4 @@ const ConfirmationDigitalSignature = ({
   );
 };
 
-export default ConfirmationDigitalSignature;
+export default ConfirmationGLAccount;

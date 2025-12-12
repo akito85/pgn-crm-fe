@@ -8,15 +8,15 @@ import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { useDispatch, useSelector } from "react-redux";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
-import { columnsDigitalSignature } from "./Table/TableDigitalSignature";
+import { columnsGLAccount } from "./Table/TableGLAccount";
 import {
-  getAllDigitalSignaturePaginate,
-  downloadDigitalSignature,
+  getAllGLAccountPaginate,
   getApprovalHistory,
   getApprovalHierarchyList,
   getApprovalHierarchyDetail,
-  inactiveDigitalSignature,
-} from "../../../../../redux/slices/rating_billing_invoice/MasterData/digitalSignature"; // Placeholder for future slice
+  inactiveGLAccount,
+  downloadGLAccount,
+} from "../../../../../redux/slices/rating_billing_invoice/MasterData/glAccount";
 import TableRBI from "../../../../../components/TableRBI";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
@@ -24,10 +24,11 @@ import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import CardContainer from "../../../../../components/CardContainer";
+import ModalApprovalGLAccount from "./ModalApprovalGLAccount";
 
-const DigitalSignatureView = () => {
+const GLAccountView = () => {
   const { data, loading, data_approval_history } = useSelector(
-    (state) => state.digitalSignature
+    (state) => state.glAccount
   );
 
   // Declaration
@@ -45,14 +46,15 @@ const DigitalSignatureView = () => {
 
   const [modalInactive, setModalInactive] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
+  const [modalApproval, setModalApproval] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [chooseId, setChooseId] = useState();
 
-  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
+  // State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
-    const saved = localStorage.getItem("digitalSignatureFixedColumns");
+    const saved = localStorage.getItem("glAccountFixedColumns");
     return saved
       ? JSON.parse(saved)
       : {
@@ -61,18 +63,15 @@ const DigitalSignatureView = () => {
         };
   });
 
-  // ✅ Save to localStorage when fixedColumns change
+  // Save to localStorage when fixedColumns change
   useEffect(() => {
-    localStorage.setItem(
-      "digitalSignatureFixedColumns",
-      JSON.stringify(fixedColumns)
-    );
+    localStorage.setItem("glAccountFixedColumns", JSON.stringify(fixedColumns));
   }, [fixedColumns]);
 
-  // Use Effect - Placeholder for data fetching
+  // Use Effect - Fetch data
   useEffect(() => {
     dispatch(
-      getAllDigitalSignaturePaginate({
+      getAllGLAccountPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
         page,
         pageSize,
@@ -85,16 +84,14 @@ const DigitalSignatureView = () => {
     if (data_approval_history) {
       const temp = {
         dataApprover: {
-          create: data_approval_history?.dataApprover?.DIGITAL_SIGNATURE || [],
+          create: data_approval_history?.dataApprover?.GL_ACCOUNT || [],
           inactive:
-            data_approval_history?.dataApprover?.INACTIVE_DIGITAL_SIGNATURE ||
-            [],
+            data_approval_history?.dataApprover?.INACTIVE_GL_ACCOUNT || [],
         },
         dataHistory: {
-          create: data_approval_history?.dataHistory?.DIGITAL_SIGNATURE || [],
+          create: data_approval_history?.dataHistory?.GL_ACCOUNT || [],
           inactive:
-            data_approval_history?.dataHistory?.INACTIVE_DIGITAL_SIGNATURE ||
-            [],
+            data_approval_history?.dataHistory?.INACTIVE_GL_ACCOUNT || [],
         },
       };
       setDataApprovalHistory(temp);
@@ -114,8 +111,8 @@ const DigitalSignatureView = () => {
       breadcrumbName: "Master Data",
     },
     {
-      path: RBI_ROUTES.DIGITAL_SIGNATURE,
-      breadcrumbName: "Digital Signature",
+      path: RBI_ROUTES.GLACCOUNT,
+      breadcrumbName: "GL Account",
     },
   ];
 
@@ -172,11 +169,11 @@ const DigitalSignatureView = () => {
 
   const handleOk = (res, handleClear) => {
     const dataValue = {
-      signatureId: chooseId.signatureId,
+      glAccountId: chooseId.glAccountId,
       apphierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveDigitalSignature(dataValue))
+    dispatch(inactiveGLAccount(dataValue))
       .unwrap()
       .then(() => {
         handleClear();
@@ -192,7 +189,7 @@ const DigitalSignatureView = () => {
         }
         tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
         dispatch(
-          getAllDigitalSignaturePaginate({
+          getAllGLAccountPaginate({
             search: tempSearch,
             page,
             pageSize,
@@ -244,39 +241,55 @@ const DigitalSignatureView = () => {
       }
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+
     dispatch(
-      downloadDigitalSignature({
+      downloadGLAccount({
+        search: tempSearch,
         page,
         pageSize,
         sort,
-        search: tempSearch,
+      })
+    );
+  };
+
+  // Handle Refresh after approval
+  const handleRefresh = () => {
+    dispatch(
+      getAllGLAccountPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
       })
     );
   };
 
   // Grant Access Item
   const itemGrantAccess = [
-    // {
-    //   action: "Download",
-    //   render: (
-    //     <ButtonComponent
-    //       type={"submit"}
-    //       icon={<SVGIcon name="IconButtonDownload" width={24} />}
-    //       onClick={() => handleDownload()}
-    //     >
-    //       Download List
-    //     </ButtonComponent>
-    //   ),
-    // },
+    {
+      action: "Approve",
+      render: (
+        <ButtonComponent
+          icon={
+            <SVGIcon name="IconRequestApproval" width={24} color="#0075bf" />
+          }
+          type="default"
+          className="bg-red-500"
+          onClick={() => setModalApproval(true)}
+        >
+          Bulk Approve
+        </ButtonComponent>
+      ),
+    },
     {
       action: "Create",
       render: (
-        <NavLink to={RBI_ROUTES.DIGITAL_SIGNATURE_CREATE}>
+        <NavLink to={RBI_ROUTES.GLACCOUNT_CREATE}>
           <ButtonComponent
             icon={<PlusOutlined style={{ fontSize: "24px" }} />}
             type="submit"
           >
-            Create Digital Signature
+            Create GL Account
           </ButtonComponent>
         </NavLink>
       ),
@@ -289,8 +302,8 @@ const DigitalSignatureView = () => {
       render: (record) => {
         return (
           <Link
-            to={RBI_ROUTES.DIGITAL_SIGNATURE_DETAIL}
-            state={{ id: record.signatureId }}
+            to={RBI_ROUTES.GLACCOUNT_DETAIL}
+            state={{ id: record.glAccountId }}
           >
             <Tooltip title="Detail">
               <div className="pt-1">
@@ -306,9 +319,9 @@ const DigitalSignatureView = () => {
       type: "table",
       render: (record, data) => {
         const isEditable =
-          record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          record.approvalStatus === "DRAFT" ||
+          record.approvalStatus === "REJECTED" ||
+          (record.status === "ACTIVE" && record.approvalStatus === "APPROVED");
         const linkContent =
           data > 3 ? (
             <ButtonComponent
@@ -346,11 +359,11 @@ const DigitalSignatureView = () => {
 
         return isEditable ? (
           <Link
-            to={RBI_ROUTES.DIGITAL_SIGNATURE_UPDATE}
+            to={RBI_ROUTES.GLACCOUNT_UPDATE}
             state={{
-              id: record.signatureId,
+              id: record.glAccountId,
               status: record.status,
-              statusApproval: record.statusApproval,
+              statusApproval: record.approvalStatus,
             }}
           >
             {linkContent}
@@ -365,12 +378,12 @@ const DigitalSignatureView = () => {
       type: "table",
       render: (record, data) => {
         const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
+          (record.approvalStatus === "APPROVED" &&
             record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" &&
+          (record.approvalStatus === "DRAFT" && record.status === "ACTIVE") ||
+          (record.approvalStatus === "REJECTED" &&
             record.status === "ACTIVE") ||
-          (record.statusApproval === "WAITING APPROVAL" &&
+          (record.approvalStatus === "WAITING APPROVAL" &&
             record.status === "ACTIVE");
 
         const Content =
@@ -421,7 +434,7 @@ const DigitalSignatureView = () => {
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
               border={false}
-              onClick={() => handleApprovalHistory(record.signatureId)}
+              onClick={() => handleApprovalHistory(record.glAccountId)}
             >
               <span className={"text-black ml-3"}>Approval History</span>
             </ButtonComponent>
@@ -432,7 +445,7 @@ const DigitalSignatureView = () => {
                   name="IconLogHistory"
                   color={"#0075bf"}
                   width={24}
-                  onClick={() => handleApprovalHistory(record.signatureId)}
+                  onClick={() => handleApprovalHistory(record.glAccountId)}
                 />
               </div>
             </Tooltip>
@@ -443,16 +456,16 @@ const DigitalSignatureView = () => {
     },
   ];
 
-  // ✅ Call useColumnActionPermission hook at component level
+  // Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
     itemGrantAccess
   );
 
-  // ✅ Get base columns with key property
+  // Get base columns with key property
   const baseColumns = useMemo(() => {
-    const digitalSignatureCols = [
-      ...columnsDigitalSignature(
+    const glAccountCols = [
+      ...columnsGLAccount(
         search,
         page,
         pageSize,
@@ -465,7 +478,7 @@ const DigitalSignatureView = () => {
     ];
 
     // Add 'key' property to columns that don't have it
-    const columnsWithKeys = digitalSignatureCols.map((col) => ({
+    const columnsWithKeys = glAccountCols.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
@@ -524,7 +537,7 @@ const DigitalSignatureView = () => {
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="w-full mt-[15px] font-bold text-primary">
-                DIGITAL SIGNATURE LIST
+                GL ACCOUNT LIST
               </p>
 
               <Toolbar items={itemGrantAccess} />
@@ -550,6 +563,14 @@ const DigitalSignatureView = () => {
           </div>
         </CardContainer>
 
+        {/* Modal Bulk Approval */}
+        <ModalApprovalGLAccount
+          isOpen={modalApproval}
+          handleCancel={() => setModalApproval(false)}
+          handleRefresh={handleRefresh}
+          handleOpenModal={() => setModalApproval(true)}
+        />
+
         {/* Modal Approval History */}
         <ModalHistory
           isOpen={modalApprovalHistory && dataApprovalHistory}
@@ -563,12 +584,12 @@ const DigitalSignatureView = () => {
 
         {/* Modal Inactive */}
         <ModalInactivateWithHierarchy
-          selector={"masterEfakturCode"}
+          selector={"glAccount"}
           dispatch={dispatch}
           getAPIOption={getApprovalHierarchyList}
           getAPIDetail={getApprovalHierarchyDetail}
-          alertMessage={`Are you sure you want to inactivate this Digital Signature with name ${
-            chooseId?.einvoiceCodeId || ""
+          alertMessage={`Are you sure you want to inactivate this GL Account with account number ${
+            chooseId?.glAccount || ""
           }?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
@@ -596,4 +617,4 @@ const DigitalSignatureView = () => {
   );
 };
 
-export default DigitalSignatureView;
+export default GLAccountView;

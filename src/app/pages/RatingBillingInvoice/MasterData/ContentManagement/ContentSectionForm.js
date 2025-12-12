@@ -1,21 +1,23 @@
+// path: src/pages/RatingBillingInvoice/MasterData/ContentManagement/Form/ContentSectionForm.jsx
 import React, { useState, useEffect } from "react";
 import { Form, Select } from "antd";
 import moment from "moment";
-import DateComponent from "../../../../../../components/DateComponent";
-import SelectComponent from "../../../../../../components/SelectComponent";
-import InputComponent from "../../../../../../components/InputComponent";
-import BaseContainer from "../../../../../../components/BaseContainer";
-import RadioTabs from "../../../../../../components/RadioTabs";
+import DateComponent from "../../../../../components/DateComponent";
+import SelectComponent from "../../../../../components/SelectComponent";
+import InputComponent from "../../../../../components/InputComponent";
+import BaseContainer from "../../../../../components/BaseContainer";
+import RadioTabs from "../../../../../components/RadioTabs";
 import { useDispatch, useSelector } from "react-redux";
-import BillingBucketDetailSectionForm from "../Modal/BillingBucketDetailSectionForm";
-import ContentInformationForm from "../ContentInformationForm";
-import FunctionalCriteriaBillingBucket from "./FunctionalCriteriaBillingBucket";
+import ContentInformationForm from "./ContentInformationForm";
+import FunctionalCriteriaBillingBucket from "./Form/FunctionalCriteriaBillingBucket";
 import {
-  getListPriorityPeriod,
+  getListFormat,
+  getListCategory,
+  getListMedia,
   getCriteria,
-} from "../../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
+} from "../../../../../redux/slices/rating_billing_invoice/MasterData/contentManagement";
 
-const BillingBucketSectionForm = ({
+const ContentSectionForm = ({
   type,
   form,
   listDataCriteria,
@@ -26,19 +28,20 @@ const BillingBucketSectionForm = ({
   setStoredDataInline,
   startDate,
   endDate,
-  listDataBI = [],
-  setListDataBI = () => {},
   handleStartDate = () => {},
   handleEndDate = () => {},
-  priority,
-  setPriority,
   status,
   statusApproval,
   disabledDate = false,
+  // ✅ Tambahkan props ini
+  subjectValue,
+  setSubjectValue,
+  bodyValue,
+  setBodyValue
 }) => {
   // Selector
-  const { data_priority_period, data_criteria } = useSelector(
-    (state) => state.billing_bucket
+  const { data_format, data_category, data_media, data_criteria } = useSelector(
+    (state) => state.contentManagement
   );
 
   // Declaration
@@ -47,14 +50,16 @@ const BillingBucketSectionForm = ({
   // State
   const [description, setDescription] = useState("");
   const [tabPagesEmployee, setTabPagesEmployee] = useState([
-    { value: "Detail" },
+    { value: "Content" },
     { value: "Criteria" },
   ]);
-  const [valuePage, setValuePage] = useState("Detail");
+  const [valuePage, setValuePage] = useState("Content");
 
   // Use Effect
   useEffect(() => {
-    dispatch(getListPriorityPeriod());
+    dispatch(getListFormat());
+    dispatch(getListCategory());
+    dispatch(getListMedia());
     dispatch(getCriteria());
   }, [dispatch]);
 
@@ -125,24 +130,8 @@ const BillingBucketSectionForm = ({
 
   return (
     <div>
-      <BaseContainer header={"Billing Bucket Information"}>
+      <BaseContainer header={"Content Information"}>
         <div className="w-full grid grid-cols-3 gap-3">
-          <Form.Item
-            label={"Billing Bucket Code"}
-            name={"billingBucketCode"}
-            rules={[
-              {
-                required: true,
-                message: "Please input your Billing Bucket Code!",
-              },
-            ]}
-          >
-            <InputComponent
-              disabled={status !== "DRAFT" && type === "update" ? true : false}
-              maxLength={100}
-            />
-          </Form.Item>
-
           <Form.Item
             label={"Name"}
             name={"name"}
@@ -160,19 +149,54 @@ const BillingBucketSectionForm = ({
           </Form.Item>
 
           <Form.Item
-            label={"Priority Period"}
-            name={"priorityPeriod"}
+            label={"Format"}
+            name={"format"}
             rules={[
-              { required: true, message: "Please input your Priority Period!" },
+              { required: true, message: "Please input your Format!" },
             ]}
           >
-            <SelectComponent>
-              {data_priority_period?.map((priorityPeriod) => (
-                <Select.Option
-                  key={priorityPeriod.id}
-                  value={priorityPeriod.id}
-                >
-                  {priorityPeriod.text}
+            <SelectComponent
+              disabled={status !== "DRAFT" && type === "update" ? true : false}
+            >
+              {data_format?.map((format) => (
+                <Select.Option key={format.value} value={format.value}>
+                  {format.name}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+
+          <Form.Item
+            label={"Category"}
+            name={"category"}
+            rules={[
+              { required: true, message: "Please input your Category!" },
+            ]}
+          >
+            <SelectComponent
+              disabled={status !== "DRAFT" && type === "update" ? true : false}
+            >
+              {data_category?.map((category) => (
+                <Select.Option key={category.value} value={category.value}>
+                  {category.name}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+
+          <Form.Item
+            label={"Media"}
+            name={"media"}
+            rules={[
+              { required: true, message: "Please input your Media!" },
+            ]}
+          >
+            <SelectComponent
+              disabled={status !== "DRAFT" && type === "update" ? true : false}
+            >
+              {data_media?.map((media) => (
+                <Select.Option key={media.value} value={media.value}>
+                  {media.name}
                 </Select.Option>
               ))}
             </SelectComponent>
@@ -184,7 +208,6 @@ const BillingBucketSectionForm = ({
             rules={[
               { required: true, message: "Please input your Start Date!" },
             ]}
-            // getValueFromEvent={handleStartDate}
           >
             <DateComponent
               onChange={(e) => handleStartDate(e)}
@@ -206,7 +229,7 @@ const BillingBucketSectionForm = ({
                   (value && moment(startDate) <= moment(value)) || !value
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error("End date must before Start date")
+                        new Error("End date must be after Start date")
                       ),
               },
             ]}
@@ -260,7 +283,7 @@ const BillingBucketSectionForm = ({
       </BaseContainer>
 
       <BaseContainer
-        header="BILLING BUCKET DETAIL INFORMATION"
+        header="CONTENT DETAIL INFORMATION"
         type={"tabs"}
         element={
           <RadioTabs
@@ -271,7 +294,7 @@ const BillingBucketSectionForm = ({
           />
         }
       >
-        {valuePage === "Detail" ? (
+        {valuePage === "Content" ? (
           <ContentInformationForm
             form={form}
             type={type}
@@ -284,6 +307,10 @@ const BillingBucketSectionForm = ({
             setStoredDataInline={setStoredDataInline}
             startDate={startDate}
             endDate={endDate}
+             subjectValue={subjectValue}
+            setSubjectValue={setSubjectValue}
+            bodyValue={bodyValue}
+            setBodyValue={setBodyValue}
           />
         ) : (
           <FunctionalCriteriaBillingBucket
@@ -306,4 +333,4 @@ const BillingBucketSectionForm = ({
   );
 };
 
-export default BillingBucketSectionForm;
+export default ContentSectionForm;

@@ -2,30 +2,30 @@ import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form } from "antd";
 import { RightOutlined } from "@ant-design/icons";
-import SVGIcon from "../../../../assets/Icon/index";
-import InputComponent from "../../../../components/InputComponent";
-import ButtonComponent from "../../../../components/ButtonComponent";
-import { columnsRequestBilling } from "./Table/TableRequestBilling";
-import DetailText from "../../../../components/DetailText";
+import SVGIcon from "../../../../../assets/Icon/index";
+import InputComponent from "../../../../../components/InputComponent";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import { columnsApprovalGLAccount } from "./Table/TableApprovalGLAccount";
+import DetailText from "../../../../../components/DetailText";
 import {
-  approvedBilling,
-  getAllBillingApprovePaginate,
-} from "../../../../redux/slices/rating_billing_invoice/billing";
-import { ModalError } from "../../../../components/Modal/ModalPopUp";
-import { IconModal } from "../../../../utils/Icon";
-import TableRBI from "../../../../components/TableRBI";
-import ModalCustom from "../../../../components/Modal/ModalCustom";
-import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
+  bulkApproveGLAccount,
+  getAllGLAccountApprovalList,
+} from "../../../../../redux/slices/rating_billing_invoice/MasterData/glAccount";
+import { ModalError } from "../../../../../components/Modal/ModalPopUp";
+import { IconModal } from "../../../../../utils/Icon";
+import TableRBI from "../../../../../components/TableRBI";
+import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
-const ModalApprovalBilling = ({
+const ModalApprovalGLAccount = ({
   isOpen,
   handleCancel = () => {},
   handleRefresh = () => {},
   handleOpenModal = () => {},
 }) => {
   // Selector
-  const { data_list_billing_approval, loading } = useSelector(
-    (state) => state.billing
+  const { data_approval_list, loading } = useSelector(
+    (state) => state.glAccount
   );
 
   // Declaration
@@ -33,7 +33,7 @@ const ModalApprovalBilling = ({
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSource = data_list_billing_approval;
+  const dataSource = data_approval_list;
 
   // State
   const [current, setCurrent] = useState(0);
@@ -45,7 +45,6 @@ const ModalApprovalBilling = ({
   const [fieldSort, setFieldSort] = useState("");
   const [orderSort, setOrderSort] = useState("");
   const [remark, setRemark] = useState("");
-  const [generateInvoice, setGenerateInvoice] = useState(false);
   const [action, setAction] = useState("");
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -53,15 +52,16 @@ const ModalApprovalBilling = ({
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
 
-   const [fixedColumns, setFixedColumns] = useState({
-    left: ["no"],
-    right: [] 
+  const [fixedColumns, setFixedColumns] = useState({
+    no: "left",
   });
 
-  // Use State
+  // Use Effect
   useEffect(() => {
-    dispatch(getAllBillingApprovePaginate());
-  }, [dispatch]);
+    if (isOpen) {
+      dispatch(getAllGLAccountApprovalList());
+    }
+  }, [dispatch, isOpen]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -105,7 +105,7 @@ const ModalApprovalBilling = ({
   // Step
   const steps = [
     {
-      title: "BILLING INFORMATION",
+      title: "GL ACCOUNT INFORMATION",
       disabled: dataTableSelect.length === 0 || !form.getFieldValue().remark,
     },
     {
@@ -161,7 +161,6 @@ const ModalApprovalBilling = ({
     handleCancel();
     setSelectedRowKeys([]);
     setDataTableSelect([]);
-    setGenerateInvoice(false);
     setRemark("");
     setCurrent(0);
     form.resetFields();
@@ -171,22 +170,20 @@ const ModalApprovalBilling = ({
   const handleSave = (formValue) => {
     handleCancel();
 
-    const dataBillingCodes = dataTableSelect.map((a) => {
-      return {
-        billingCode: a.billingCode,
-        approvalId: a.tappId,
-        isGenerate: a.isGenerate,
-      };
-    });
+    const glAccountItems = dataTableSelect.map((item) => ({
+      glAccountId: item.glAccountId,
+      approvalId: item.tappId,
+      category: item.category,
+    }));
 
     const body = {
-      billingCodes: dataBillingCodes,
+      glAccountItems: glAccountItems,
       action: action,
-      description: remark,
+      remark: remark,
     };
 
     dispatch(
-      approvedBilling({
+      bulkApproveGLAccount({
         body: body,
         action: action === "APPROVE" ? "approved" : "rejected",
       })
@@ -197,7 +194,6 @@ const ModalApprovalBilling = ({
         setCurrent(0);
         form.resetFields();
         setRemark("");
-        setGenerateInvoice(false);
         setAction("");
         handleCancel();
         setSelectedRowKeys([]);
@@ -237,7 +233,7 @@ const ModalApprovalBilling = ({
 
   const baseColumns = useMemo(
     () =>
-      columnsRequestBilling(
+      columnsApprovalGLAccount(
         page,
         pageSize,
         searchInput,
@@ -260,7 +256,6 @@ const ModalApprovalBilling = ({
     return applyFixedColumns(allColumns, fixedColumns);
   }, [allColumns, fixedColumns]);
 
-
   const columnDefinitions = useMemo(() => {
     return allColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
@@ -273,7 +268,7 @@ const ModalApprovalBilling = ({
       <ModalCustom
         isOpen={isOpen}
         type={"confirmation"}
-        header="Approval Billing Information"
+        header="Approval GL Account Information"
         handleCancel={handleCancelForm}
         onFinish={handleSave}
         width={1000}
@@ -351,7 +346,7 @@ const ModalApprovalBilling = ({
           </div>
         </div>
 
-        {/* STEP 1: BILLING INFORMATION */}
+        {/* STEP 1: GL ACCOUNT INFORMATION */}
         <div
           className={`steps-content my-[30px] ${current !== 0 ? "hidden" : ""}`}
         >
@@ -363,7 +358,7 @@ const ModalApprovalBilling = ({
           >
             <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
               <p className="text-primary uppercase font-bold mb-4">
-                Billing List - Ready to Approve
+                GL Account List - Ready to Approve
               </p>
               <TableRBI
                 dataSource={filterDataByPage("data")}
@@ -373,13 +368,12 @@ const ModalApprovalBilling = ({
                 onChange={handleChange}
                 onSizeChanger={handleChange}
                 totalData={filterDataByPage("length")}
-                tableScrolled={{ y: 525, x: 15000 }}
+                tableScrolled={{ y: 525, x: 2000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitions}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
                 loading={loading}
-                showExport={false}
                 rowSelection={rowSelection}
               />
               <div className="pt-[30px]">
@@ -416,7 +410,7 @@ const ModalApprovalBilling = ({
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={dataTableSelect.length || 0}
-              tableScrolled={{ y: 525, x: 15000 }}
+              tableScrolled={{ y: 525, x: 2000 }}
               onSort={onSort}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
@@ -441,9 +435,7 @@ const ModalApprovalBilling = ({
       >
         <div className="px-5 pt-5 pb-[10px] justify-center">
           <div className="w-full flex gap-[20px]">
-            {bodyError.type === "inactivate"
-              ? IconModal["icon_error_inactivate"]
-              : IconModal["icon_error_default"]}
+            {IconModal["icon_error_default"]}
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
           <p className="pl-[70px]">{`Your data was not ${
@@ -456,4 +448,4 @@ const ModalApprovalBilling = ({
   );
 };
 
-export default ModalApprovalBilling;
+export default ModalApprovalGLAccount;

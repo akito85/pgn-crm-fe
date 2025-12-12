@@ -114,6 +114,8 @@ import collectingAgentReducer from "../slices/receipt_collection/collectingAgent
 import paymentChannelReducer from "../slices/receipt_collection/paymentChannel";
 import digitalSignatureReducer from "../slices/rating_billing_invoice/MasterData/digitalSignature";
 import settingReducer from "../slices/receipt_collection/setting";
+import glAccountReducer from "../slices/rating_billing_invoice/MasterData/glAccount";
+import contentManagementReducer from "../slices/rating_billing_invoice/MasterData/contentManagement";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -215,6 +217,8 @@ const reducer = combineReducers({
   managementDeliveryInvoice: managementDeliveryInvoiceReducer,
   masterEfakturCode: masterEfakturCodeReducer,
   digitalSignature: digitalSignatureReducer,
+  glAccount: glAccountReducer,
+  contentManagement: contentManagementReducer,
 
   //receipt and collection
   receipt: receiptReducer,
