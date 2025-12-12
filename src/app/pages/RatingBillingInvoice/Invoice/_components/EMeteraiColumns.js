@@ -21,6 +21,7 @@ export const getEMeteraiColumns = ({
       title: "Invoice Number",
       dataIndex: "invoiceNumber",
       width: 180,
+      sorter: true,
       render: (text) => <span style={{ fontWeight: "600" }}>{text}</span>,
     },
     {
@@ -29,18 +30,21 @@ export const getEMeteraiColumns = ({
       dataIndex: "customerName",
       width: 220,
       ellipsis: true,
+      sorter: true,
     },
     {
       key: "customerNumber",
       title: "Customer Number",
       dataIndex: "customerNumber",
       width: 150,
+      sorter: true,
     },
     {
       key: "accountNumber",
       title: "Account Number",
       dataIndex: "accountNumber",
       width: 150,
+      sorter: true,
     },
     {
       key: "accountName",
@@ -48,42 +52,58 @@ export const getEMeteraiColumns = ({
       dataIndex: "accountName",
       width: 200,
       ellipsis: true,
+      sorter: true,
     },
     {
-      key: "issueDate",
-      title: "Issue Date",
-      dataIndex: "issueDate",
+      key: "billPeriod",
+      title: "Bill Period",
+      dataIndex: "billPeriod",
       width: 120,
       align: "center",
+      sorter: true,
+      render: (text) => text || "-",
     },
     {
-      key: "amount",
-      title: "Amount (IDR)",
-      dataIndex: "totalAmountEqvIdr",
-      width: 150,
-      align: "right",
-      render: (amount) => (
-        <span style={{ fontWeight: "600" }}>
-          {new Intl.NumberFormat("id-ID").format(amount)}
-        </span>
-      ),
+      key: "invoiceDate",
+      title: "Invoice Date",
+      dataIndex: "invoiceDate",
+      width: 120,
+      align: "center",
+      sorter: true,
+      render: (text) => text || "-",
     },
     {
-      key: "stampingStatus",
-      title: "Stamping Status",
-      dataIndex: "stampingStatus",
+      key: "sor",
+      title: "SOR",
+      dataIndex: "sor",
+      width: 250,
+      ellipsis: true,
+      render: (text) => text || "-",
+    },
+    {
+      key: "costCenterName",
+      title: "Cost Center",
+      dataIndex: "costCenterName",
+      width: 200,
+      ellipsis: true,
+      render: (text) => text || "-",
+    },
+    {
+      key: "stampStatus",
+      title: "Stamp Status",
+      dataIndex: "stampStatus",
       width: 160,
       align: "center",
+      sorter: true,
       render: (status) => {
-        const text = status
-          ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
-          : status;
-        return text ? (
+        if (!status) return "-";
+        const displayStatus = status.replace(/_/g, " ");
+        return (
           <div className="flex justify-center">
-            <StatusComponent colour={status}>{text}</StatusComponent>
+            <StatusComponent colour={status.toLowerCase()}>
+              {displayStatus}
+            </StatusComponent>
           </div>
-        ) : (
-          text
         );
       },
     },
@@ -91,39 +111,54 @@ export const getEMeteraiColumns = ({
       key: "stampType",
       title: "Stamp Type",
       dataIndex: "stampType",
-      width: 120,
+      width: 140,
       align: "center",
+      render: (type) => {
+        if (!type) return "-";
+        const displayType = type.replace(/_/g, " ");
+        return displayType;
+      },
     },
     {
       key: "stampRequestDate",
       title: "Stamp Request Date",
       dataIndex: "stampRequestDate",
-      width: 150,
+      width: 170,
       align: "center",
+      render: (text) => text || "-",
     },
     {
       key: "stampCompletionDate",
       title: "Stamp Completion Date",
       dataIndex: "stampCompletionDate",
-      width: 170,
+      width: 180,
       align: "center",
+      render: (text) => text || "-",
     },
     {
-      key: "signingStatus",
-      title: "Signing Status",
-      dataIndex: "signingStatus",
+      key: "stampRemark",
+      title: "Stamp Remark",
+      dataIndex: "stampRemark",
+      width: 200,
+      ellipsis: true,
+      render: (text) => text || "-",
+    },
+    {
+      key: "signStatus",
+      title: "Sign Status",
+      dataIndex: "signStatus",
       width: 150,
       align: "center",
+      sorter: true,
       render: (status) => {
-        const text = status
-          ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
-          : status;
-        return text ? (
+        if (!status) return "-";
+        const displayStatus = status.replace(/_/g, " ");
+        return (
           <div className="flex justify-center">
-            <StatusComponent colour={status}>{text}</StatusComponent>
+            <StatusComponent colour={status.toLowerCase()}>
+              {displayStatus}
+            </StatusComponent>
           </div>
-        ) : (
-          text
         );
       },
     },
@@ -133,20 +168,72 @@ export const getEMeteraiColumns = ({
       dataIndex: "signType",
       width: 120,
       align: "center",
+      render: (type) => {
+        if (!type || type === "NONE") return "-";
+        const displayType = type.replace(/_/g, " ");
+        return displayType;
+      },
     },
     {
       key: "signRequestDate",
       title: "Sign Request Date",
       dataIndex: "signRequestDate",
-      width: 150,
+      width: 170,
       align: "center",
+      render: (text) => text || "-",
     },
     {
       key: "signCompletionDate",
       title: "Sign Completion Date",
       dataIndex: "signCompletionDate",
+      width: 180,
+      align: "center",
+      render: (text) => text || "-",
+    },
+    {
+      key: "signRemark",
+      title: "Sign Remark",
+      dataIndex: "signRemark",
+      width: 200,
+      ellipsis: true,
+      render: (text) => text || "-",
+    },
+    {
+      key: "statusApproval",
+      title: "Approval Status",
+      dataIndex: "statusApproval",
+      width: 160,
+      align: "center",
+      sorter: true,
+      render: (status) => {
+        if (!status) return "-";
+        const displayStatus = status.replace(/_/g, " ");
+        return (
+          <div className="flex justify-center">
+            <StatusComponent colour={status.toLowerCase()}>
+              {displayStatus}
+            </StatusComponent>
+          </div>
+        );
+      },
+    },
+    {
+      key: "createdBy",
+      title: "Created By",
+      dataIndex: "createdBy",
+      width: 140,
+      align: "center",
+      sorter: true,
+      render: (text) => text || "-",
+    },
+    {
+      key: "createdDate",
+      title: "Created Date",
+      dataIndex: "createdDate",
       width: 170,
       align: "center",
+      sorter: true,
+      render: (text) => text || "-",
     },
     {
       key: "actions",
