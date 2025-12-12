@@ -14,24 +14,24 @@ const initialState = {
   data_approval_hierarchy_detail: [],
   data_approval_history: [],
   data_category_list: [],
+  data_special_gl_list: [],
+  data_approval_list: [],
   dataListAppHierId: [],
   dataListAppHierDetail: [],
-  data_list_employee: [],
-  data_position_employee: [],
   isFailed: false,
   isSuccess: false,
   message: "",
   loading: false,
 };
 
-export const getAllDigitalSignaturePaginate = createAsyncThunk(
-  "GET_ALL_DIGITAL_SIGNATURE_PAGINATE",
+export const getAllGLAccountPaginate = createAsyncThunk(
+  "GET_ALL_GL_ACCOUNT_PAGINATE",
   async ({ page, pageSize, sort, search }, thunkAPI) => {
     const searchParams = search === undefined ? "" : search;
     const sortParams =
       sort === undefined || sort === "" ? "createdDate~desc" : sort;
     try {
-      const url = `/v1/dbs/api/signature/list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/gl-account?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {
@@ -54,11 +54,11 @@ export const getAllDigitalSignaturePaginate = createAsyncThunk(
   }
 );
 
-export const getDetailDigitalSignature = createAsyncThunk(
-  "GET_DETAIL_DIGITAL_SIGNATURE",
+export const getDetailGLAccount = createAsyncThunk(
+  "GET_DETAIL_GL_ACCOUNT",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/signature/detail/${id}`;
+      const url = `/v1/dbs/api/gl-account/detail/${id}`;
       const response = await ratingBillingHttpService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -82,10 +82,10 @@ export const getDetailDigitalSignature = createAsyncThunk(
 );
 
 export const getApprovalHierarchyList = createAsyncThunk(
-  "GET_APPROVAL_HIERARCHY_LIST",
+  "GET_APPROVAL_HIERARCHY_LIST_GL_ACCOUNT",
   async (_, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/signature/approval-hierarcy-list`;
+      const url = `/v1/dbs/api/gl-account/approval-hierarcy-list`;
       const response = await ratingBillingHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -109,10 +109,10 @@ export const getApprovalHierarchyList = createAsyncThunk(
 );
 
 export const getApprovalHierarchyDetail = createAsyncThunk(
-  "GET_APPROVAL_HIERARCHY_DETAIL",
+  "GET_APPROVAL_HIERARCHY_DETAIL_GL_ACCOUNT",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/signature/apphier-detail/${id}`;
+      const url = `/v1/dbs/api/gl-account/apphier-detail/${id}`;
       const response = await ratingBillingHttpService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -136,10 +136,10 @@ export const getApprovalHierarchyDetail = createAsyncThunk(
 );
 
 export const getApprovalHistory = createAsyncThunk(
-  "GET_APPROVAL_HISTORY",
+  "GET_APPROVAL_HISTORY_GL_ACCOUNT",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/signature/approval-history/${id}`;
+      const url = `/v1/dbs/api/gl-account/approval-history/${id}`;
       const response = await ratingBillingHttpService.getDetail(url);
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
@@ -162,22 +162,46 @@ export const getApprovalHistory = createAsyncThunk(
   }
 );
 
+export const getSpecialGLList = createAsyncThunk(
+  "GET_SPECIAL_GL_LIST",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gl-account/lov/special-gl`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
 export const uploadAttachment = createAsyncThunk(
-  "UPLOAD_ATTACHMENT_DIGITAL_SIGNATURE",
+  "UPLOAD_ATTACHMENT_GL_ACCOUNT",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/signature/create-attachment`;
+      const url = `/v1/dbs/api/gl-account/create-attachment`;
       const formData = new FormData();
       formData.append("files", body.files);
       formData.append("categoryId", body.categoryId);
       formData.append("referenceId", body.referenceId);
 
       const response = await ratingBillingHttpService.createData(url, formData);
-      const successBody = {
-        title: "Successful",
-        description: "Attachment has been uploaded successfully.",
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
+      // Don't show modal success here to avoid multiple modals in loop
+      // Success will be shown from create/update GL Account action
       return response.data;
     } catch (error) {
       const message =
@@ -204,10 +228,10 @@ export const uploadAttachment = createAsyncThunk(
 );
 
 export const getCategoryList = createAsyncThunk(
-  "GET_CATEGORY_LIST",
+  "GET_CATEGORY_LIST_GL_ACCOUNT",
   async (_, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/signature/category-list`;
+      const url = `/v1/dbs/api/gl-account/category-list`;
       const response = await ratingBillingHttpService.getAll(url);
       return response.data?.map((item) => ({
         Id: item.id,
@@ -233,19 +257,13 @@ export const getCategoryList = createAsyncThunk(
   }
 );
 
-export const createDigitalSignature = createAsyncThunk(
-  "CREATE_DIGITAL_SIGNATURE",
+export const createGLAccount = createAsyncThunk(
+  "CREATE_GL_ACCOUNT",
   async ({ body }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/signature/create";
+      const url = "/v1/dbs/api/gl-account/create";
       const response = await ratingBillingHttpService.createData(url, body);
-      const successBody = {
-        title: `Successful`,
-        description: `Your data has been ${
-          body.isSubmit === false ? "created" : "submitted"
-        }.`,
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
+      // Don't show modal here, will be shown after attachment upload in component
       return response.data;
     } catch (error) {
       const message =
@@ -273,19 +291,13 @@ export const createDigitalSignature = createAsyncThunk(
   }
 );
 
-export const updateDigitalSignature = createAsyncThunk(
-  "UPDATE_DIGITAL_SIGNATURE",
-  async ({ body }, thunkApi) => {
+export const updateGLAccount = createAsyncThunk(
+  "UPDATE_GL_ACCOUNT",
+  async ({ body, id }, thunkApi) => {
     try {
-      const url = `/v1/dbs/api/signature/update`;
-      const response = await ratingBillingHttpService.createData(url, body);
-      const successMessage = {
-        title: "Successful",
-        description: `Your data has been ${
-          body.isSubmit === false ? "updated" : "submitted"
-        }.`,
-      };
-      thunkApi.dispatch(showModalSuccess(successMessage));
+      const url = `/v1/dbs/api/gl-account/update/${id}`;
+      const response = await ratingBillingHttpService.updateData(url, body);
+      // Don't show modal here, will be shown after attachment upload in component
       return response?.data;
     } catch (response) {
       const message =
@@ -313,11 +325,11 @@ export const updateDigitalSignature = createAsyncThunk(
   }
 );
 
-export const inactiveDigitalSignature = createAsyncThunk(
-  "INACTIVE_DIGITAL_SIGNATURE",
+export const inactiveGLAccount = createAsyncThunk(
+  "INACTIVE_GL_ACCOUNT",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/signature/inactive`;
+      const url = `/v1/dbs/api/gl-account/inactive`;
       const response = await ratingBillingHttpService.createData(url, body);
       const successBody = {
         title: "Successful",
@@ -350,11 +362,11 @@ export const inactiveDigitalSignature = createAsyncThunk(
   }
 );
 
-export const approveRejectDigitalSignature = createAsyncThunk(
-  "APPROVE_REJECT_DIGITAL_SIGNATURE",
+export const approveRejectGLAccount = createAsyncThunk(
+  "APPROVE_REJECT_GL_ACCOUNT",
   async ({ id, body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/signature/${id}/approve`;
+      const url = `/v1/dbs/api/gl-account/${id}/approve`;
       const response = await ratingBillingHttpService.createData(url, body);
       const successApprove = {
         title: `Successful`,
@@ -391,11 +403,11 @@ export const approveRejectDigitalSignature = createAsyncThunk(
   }
 );
 
-export const approveRejectInactiveDigitalSignature = createAsyncThunk(
-  "APPROVE_REJECT_INACTIVE_DIGITAL_SIGNATURE",
+export const approveRejectInactiveGLAccount = createAsyncThunk(
+  "APPROVE_REJECT_INACTIVE_GL_ACCOUNT",
   async ({ id, body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/signature/${id}/approval-inactive`;
+      const url = `/v1/dbs/api/gl-account/${id}/approval-inactive`;
       const response = await ratingBillingHttpService.createData(url, body);
       const successApprove = {
         title: `Successful`,
@@ -432,11 +444,11 @@ export const approveRejectInactiveDigitalSignature = createAsyncThunk(
   }
 );
 
-export const downloadDigitalSignatureAttachment = createAsyncThunk(
-  "DOWNLOAD_DIGITAL_SIGNATURE_ATTACHMENT",
+export const downloadGLAccountAttachment = createAsyncThunk(
+  "DOWNLOAD_GL_ACCOUNT_ATTACHMENT",
   async ({ id }, { rejectWithValue }) => {
     try {
-      const url = `/v1/dbs/api/signature/download-attachment/${id}`;
+      const url = `/v1/dbs/api/gl-account/download-attachment/${id}`;
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (err) {
@@ -445,21 +457,21 @@ export const downloadDigitalSignatureAttachment = createAsyncThunk(
   }
 );
 
-export const downloadDigitalSignature = createAsyncThunk(
-  "DOWNLOAD_DIGITAL_SIGNATURE",
+export const downloadGLAccount = createAsyncThunk(
+  "DOWNLOAD_GL_ACCOUNT",
   async ({ sort, page, pageSize, search }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/signature/download?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/gl-account/download?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
         validateError({
           error: error,
-          action: "DOWNLOAD_DIGITAL_SIGNATURE",
+          action: "DOWNLOAD_GL_ACCOUNT",
           back: false,
         })
       );
@@ -468,51 +480,74 @@ export const downloadDigitalSignature = createAsyncThunk(
   }
 );
 
-export const getListEmployee = createAsyncThunk(
-  "GET_LIST_EMPLOYEE",
-  async ({ search }, { rejectWithValue }) => {
+export const getAllGLAccountApprovalList = createAsyncThunk(
+  "GET_ALL_GL_ACCOUNT_APPROVAL_LIST",
+  async (_, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? "" : search;
-      const url = `/v1/dbs/api/signature/list-employee?search=${searchParams}`;
+      const url = `/v1/dbs/api/gl-account/approval-gl-account-list`;
       const response = await ratingBillingHttpService.getAll(url);
       return response.data;
-    } catch (err) {
-      return rejectWithValue(err);
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
     }
   }
 );
 
-export const getPositionEmployee = createAsyncThunk(
-  "GET_POSITION_EMPLOYEE",
-  async ({ employeeCode }, { rejectWithValue }) => {
+export const bulkApproveGLAccount = createAsyncThunk(
+  "BULK_APPROVE_GL_ACCOUNT",
+  async ({ body, action }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/signature/position/${employeeCode}`;
-      const response = await ratingBillingHttpService.getDetail(url);
+      const url = `/v1/dbs/api/gl-account/bulk-approve`;
+      const response = await ratingBillingHttpService.createData(url, body);
+      const successBody = {
+        title: "Successful",
+        description: `Your data has been ${action}.`,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
-    } catch (err) {
-      return rejectWithValue(err);
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not ${action}. ${message}.`,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error);
+      }
+      return thunkAPI.rejectWithValue(error);
     }
   }
 );
 
-export const downloadDigitalSignatureFile = createAsyncThunk(
-  "DOWNLOAD_DIGITAL_SIGNATURE_FILE",
-  async ({ id }, { rejectWithValue }) => {
-    try {
-      const url = `/v1/dbs/api/signature/download-signature/${id}`;
-      const response = await ratingBillingHttpService.downloadData(url);
-      return response.data;
-    } catch (err) {
-      rejectWithValue(err);
-    }
-  }
-);
-
-const digitalSignatureSlice = createSlice({
-  name: "digitalSignature",
+const glAccountSlice = createSlice({
+  name: "glAccount",
   initialState,
   reducers: {
-    resetDigitalSignatureState: (state) => {
+    resetGLAccountState: (state) => {
       state.data_detail = {};
       state.data_approval_hierarchy_detail = [];
       state.isFailed = false;
@@ -523,25 +558,25 @@ const digitalSignatureSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // get all
-      .addCase(getAllDigitalSignaturePaginate.pending, (state) => {
+      .addCase(getAllGLAccountPaginate.pending, (state) => {
         state.loading = true;
       })
-      .addCase(getAllDigitalSignaturePaginate.fulfilled, (state, action) => {
+      .addCase(getAllGLAccountPaginate.fulfilled, (state, action) => {
         state.data = action.payload;
         state.loading = false;
       })
-      .addCase(getAllDigitalSignaturePaginate.rejected, (state) => {
+      .addCase(getAllGLAccountPaginate.rejected, (state) => {
         state.loading = false;
       })
       // get detail
-      .addCase(getDetailDigitalSignature.pending, (state) => {
+      .addCase(getDetailGLAccount.pending, (state) => {
         state.loading = true;
       })
-      .addCase(getDetailDigitalSignature.fulfilled, (state, action) => {
+      .addCase(getDetailGLAccount.fulfilled, (state, action) => {
         state.data_detail = action.payload;
         state.loading = false;
       })
-      .addCase(getDetailDigitalSignature.rejected, (state) => {
+      .addCase(getDetailGLAccount.rejected, (state) => {
         state.loading = false;
       })
       // get approval hierarchy list
@@ -579,74 +614,82 @@ const digitalSignatureSlice = createSlice({
       .addCase(getApprovalHistory.rejected, (state) => {
         state.loading = false;
       })
-      // create
-      .addCase(createDigitalSignature.pending, (state) => {
+      // get special GL list
+      .addCase(getSpecialGLList.pending, (state) => {
         state.loading = true;
       })
-      .addCase(createDigitalSignature.fulfilled, (state) => {
+      .addCase(getSpecialGLList.fulfilled, (state, action) => {
+        state.data_special_gl_list = action.payload;
+        state.loading = false;
+      })
+      .addCase(getSpecialGLList.rejected, (state) => {
+        state.loading = false;
+      })
+      // create
+      .addCase(createGLAccount.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(createGLAccount.fulfilled, (state) => {
         state.isSuccess = true;
         state.loading = false;
       })
-      .addCase(createDigitalSignature.rejected, (state, action) => {
+      .addCase(createGLAccount.rejected, (state, action) => {
         state.isFailed = true;
         state.loading = false;
         state.message = action.payload;
       })
       // update
-      .addCase(updateDigitalSignature.pending, (state) => {
+      .addCase(updateGLAccount.pending, (state) => {
         state.loading = true;
       })
-      .addCase(updateDigitalSignature.fulfilled, (state) => {
+      .addCase(updateGLAccount.fulfilled, (state) => {
         state.isSuccess = true;
         state.loading = false;
       })
-      .addCase(updateDigitalSignature.rejected, (state, action) => {
+      .addCase(updateGLAccount.rejected, (state, action) => {
         state.isFailed = true;
         state.loading = false;
         state.message = action.payload;
       })
       // inactive
-      .addCase(inactiveDigitalSignature.pending, (state) => {
+      .addCase(inactiveGLAccount.pending, (state) => {
         state.loading = true;
       })
-      .addCase(inactiveDigitalSignature.fulfilled, (state) => {
+      .addCase(inactiveGLAccount.fulfilled, (state) => {
         state.isSuccess = true;
         state.loading = false;
       })
-      .addCase(inactiveDigitalSignature.rejected, (state, action) => {
+      .addCase(inactiveGLAccount.rejected, (state, action) => {
         state.isFailed = true;
         state.loading = false;
         state.message = action.payload;
       })
       // approve reject
-      .addCase(approveRejectDigitalSignature.pending, (state) => {
+      .addCase(approveRejectGLAccount.pending, (state) => {
         state.loading = true;
       })
-      .addCase(approveRejectDigitalSignature.fulfilled, (state) => {
+      .addCase(approveRejectGLAccount.fulfilled, (state) => {
         state.isSuccess = true;
         state.loading = false;
       })
-      .addCase(approveRejectDigitalSignature.rejected, (state, action) => {
+      .addCase(approveRejectGLAccount.rejected, (state, action) => {
         state.isFailed = true;
         state.loading = false;
         state.message = action.payload;
       })
       // approve reject inactive
-      .addCase(approveRejectInactiveDigitalSignature.pending, (state) => {
+      .addCase(approveRejectInactiveGLAccount.pending, (state) => {
         state.loading = true;
       })
-      .addCase(approveRejectInactiveDigitalSignature.fulfilled, (state) => {
+      .addCase(approveRejectInactiveGLAccount.fulfilled, (state) => {
         state.isSuccess = true;
         state.loading = false;
       })
-      .addCase(
-        approveRejectInactiveDigitalSignature.rejected,
-        (state, action) => {
-          state.isFailed = true;
-          state.loading = false;
-          state.message = action.payload;
-        }
-      )
+      .addCase(approveRejectInactiveGLAccount.rejected, (state, action) => {
+        state.isFailed = true;
+        state.loading = false;
+        state.message = action.payload;
+      })
       // upload attachment
       .addCase(uploadAttachment.pending, (state) => {
         state.loading = true;
@@ -672,67 +715,52 @@ const digitalSignatureSlice = createSlice({
         state.loading = false;
       })
       // download
-      .addCase(downloadDigitalSignature.pending, (state) => {
+      .addCase(downloadGLAccount.pending, (state) => {
         state.loading = true;
       })
-      .addCase(downloadDigitalSignature.fulfilled, (state) => {
+      .addCase(downloadGLAccount.fulfilled, (state) => {
         state.loading = false;
       })
-      .addCase(downloadDigitalSignature.rejected, (state, action) => {
+      .addCase(downloadGLAccount.rejected, (state, action) => {
         state.loading = false;
         state.message = action.payload;
       })
 
-      .addCase(downloadDigitalSignatureAttachment.pending, (state) => {
+      .addCase(downloadGLAccountAttachment.pending, (state) => {
         state.loading = true;
       })
-      .addCase(downloadDigitalSignatureAttachment.fulfilled, (state) => {
+      .addCase(downloadGLAccountAttachment.fulfilled, (state) => {
         state.loading = false;
         state.isSuccess = true;
       })
-      .addCase(downloadDigitalSignatureAttachment.rejected, (state, action) => {
+      .addCase(downloadGLAccountAttachment.rejected, (state, action) => {
         state.loading = false;
         state.isFailed = true;
         state.message = action.payload;
       })
 
-      // get list employee
-      .addCase(getListEmployee.pending, (state) => {
+      // get approval list
+      .addCase(getAllGLAccountApprovalList.pending, (state) => {
         state.loading = true;
       })
-      .addCase(getListEmployee.fulfilled, (state, action) => {
-        state.data_list_employee = action.payload;
+      .addCase(getAllGLAccountApprovalList.fulfilled, (state, action) => {
         state.loading = false;
+        state.data_approval_list = action.payload;
       })
-      .addCase(getListEmployee.rejected, (state, action) => {
+      .addCase(getAllGLAccountApprovalList.rejected, (state, action) => {
         state.loading = false;
-        state.isFailed = true;
         state.message = action.payload;
       })
 
-      // get position employee
-      .addCase(getPositionEmployee.pending, (state) => {
+      // bulk approve
+      .addCase(bulkApproveGLAccount.pending, (state) => {
         state.loading = true;
       })
-      .addCase(getPositionEmployee.fulfilled, (state, action) => {
-        state.data_position_employee = action.payload;
-        state.loading = false;
-      })
-      .addCase(getPositionEmployee.rejected, (state, action) => {
-        state.loading = false;
-        state.isFailed = true;
-        state.message = action.payload;
-      })
-
-      // download digital signature file
-      .addCase(downloadDigitalSignatureFile.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(downloadDigitalSignatureFile.fulfilled, (state) => {
+      .addCase(bulkApproveGLAccount.fulfilled, (state) => {
         state.loading = false;
         state.isSuccess = true;
       })
-      .addCase(downloadDigitalSignatureFile.rejected, (state, action) => {
+      .addCase(bulkApproveGLAccount.rejected, (state, action) => {
         state.loading = false;
         state.isFailed = true;
         state.message = action.payload;
@@ -740,6 +768,6 @@ const digitalSignatureSlice = createSlice({
   },
 });
 
-export const { resetDigitalSignatureState } = digitalSignatureSlice.actions;
-const { reducer } = digitalSignatureSlice;
+export const { resetGLAccountState } = glAccountSlice.actions;
+const { reducer } = glAccountSlice;
 export default reducer;

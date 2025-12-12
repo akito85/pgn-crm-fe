@@ -4,7 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
-import { showModalError } from "../../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  showModalSuccess,
+} from "../../../../../redux/slices/general_slice";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -19,28 +22,27 @@ import ModalBack from "../../../../../components/Modal/ModalBack";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../assets/Icon/index";
 import {
-  getDetailDigitalSignature,
+  getDetailGLAccount,
   getApprovalHierarchyList,
   getApprovalHierarchyDetail,
-  createDigitalSignature,
-  updateDigitalSignature,
+  createGLAccount,
+  updateGLAccount,
   uploadAttachment,
-} from "../../../../../redux/slices/rating_billing_invoice/MasterData/digitalSignature";
+  getSpecialGLList,
+} from "../../../../../redux/slices/rating_billing_invoice/MasterData/glAccount";
 import { getAttachmentCategory } from "../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
-import ConfirmationDigitalSignature from "./_components/ConfirmationDigitalSignature";
-import DigitalSignatureSectionForm from "./_components/DigitalSignatureSectionForm";
-import { getProfile } from "../../../../../redux/slices/user_management/profile";
+import ConfirmationGLAccount from "./_components/ConfirmationGLAccount";
+import GLAccountSectionForm from "./_components/GLAccountSectionForm";
 
-const DigitalSignatureForm = ({ type }) => {
+const GLAccountForm = ({ type }) => {
   // Selector
   const {
     data_detail,
     data_approval_hierarchy,
     data_approval_hierarchy_detail,
-    data_position_employee,
     loading,
-  } = useSelector((state) => state.digitalSignature);
+  } = useSelector((state) => state.glAccount);
 
   // Declaration
   const [form] = Form.useForm();
@@ -56,11 +58,11 @@ const DigitalSignatureForm = ({ type }) => {
   const [selectedHierarchy, setSelectedHierarchy] = useState();
 
   const [flag, setFlag] = useState(false);
-  const [valuePage, setValuePage] = useState("Digital Signature");
+  const [valuePage, setValuePage] = useState("GL Account");
   const [listSectionInfo, setListSectionInfo] = useState([
     {
-      value: "Digital Signature",
-      paramValue: ["name", "employeeCode", "signatureBase64"],
+      value: "GL Account",
+      paramValue: ["glAccount", "glAccountDesc", "specialGlValue", "reference"],
     },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
@@ -73,20 +75,18 @@ const DigitalSignatureForm = ({ type }) => {
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [bodyData, setBodyData] = useState({});
-  const [uploadedSignatureFile, setUploadedSignatureFile] = useState(null);
-  const [signatureFileId, setSignatureFileId] = useState(null);
 
   const isLoading = loading || loadingForm;
 
   // Use Effect
   useEffect(() => {
     dispatch(getApprovalHierarchyList());
-    dispatch(getProfile());
+    dispatch(getSpecialGLList());
   }, [dispatch]);
 
   useEffect(() => {
     if (id && type === "update") {
-      dispatch(getDetailDigitalSignature(id));
+      dispatch(getDetailGLAccount(id));
     }
   }, [dispatch, id, type]);
 
@@ -97,8 +97,8 @@ const DigitalSignatureForm = ({ type }) => {
       Object.keys(data_detail).length > 0 &&
       type === "update"
     ) {
-      const signature = data_detail?.digitalSignature || {};
-      const approvalInformation = data_detail?.approvalInformation || {};
+      const glAccount = data_detail?.glAccount || {};
+      const approvalInfo = data_detail?.approvalInfo || {};
       const attachments = data_detail?.attachments || [];
 
       // Data Attachment Information
@@ -120,46 +120,16 @@ const DigitalSignatureForm = ({ type }) => {
         dataType: "exist",
       }));
 
-      // Set fileId jika ada
-      if (signature?.fileId) {
-        setSignatureFileId(signature.fileId);
-      }
-
-      // Determine signature value based on method
-      // PENTING: Harus ada value agar validasi pass
-      let signatureValue = null;
-      if (signature?.signatureMethod === "UPLOAD" && signature?.fileId) {
-        signatureValue = `EXISTING_FILE_${signature.fileId}`; // Use placeholder for uploaded signatures
-      } else if (
-        signature?.signatureMethod === "DRAW" &&
-        signature?.signatureBase64
-      ) {
-        signatureValue = signature.signatureBase64; // Use base64 for drawn signatures
-      }
-
       // Set form values
       form.setFieldsValue({
-        name: signature?.name || "",
-        employeeCode: signature?.employeeCode || "",
-        primaryPosition: signature?.positionName || "",
-        description: signature?.description || "",
-        signatureBase64: signature?.signatureBase64 || "",
-        signatureMethod: signature?.signatureMethod || "DRAW",
-        signature: signatureValue, // This is the main field for validation
-        apphierId:
-          approvalInformation?.approvalHierarchy ||
-          signature?.approvalHierarchy ||
-          null,
+        glAccount: glAccount?.glAccount || "",
+        glAccountDesc: glAccount?.glAccountDesc || "",
+        specialGlValue: glAccount?.specialGl || null,
+        reference: glAccount?.reference || "",
+        apphierId: approvalInfo?.tAppId || null,
       });
 
-      // Validate signature field to clear any errors
-      setTimeout(() => {
-        form.validateFields(["signature"]).catch(() => {});
-      }, 100);
-
-      setSelectedHierarchy(
-        approvalInformation?.approvalHierarchy || signature?.approvalHierarchy
-      );
+      setSelectedHierarchy(approvalInfo?.tAppId);
       setListDataAttachment(mappedAttachment);
     }
   }, [id, type, form, data_detail]);
@@ -210,150 +180,38 @@ const DigitalSignatureForm = ({ type }) => {
       breadcrumbName: "Master Data",
     },
     {
-      path: RBI_ROUTES.DIGITAL_SIGNATURE,
-      breadcrumbName: "Digital Signature",
+      path: RBI_ROUTES.GLACCOUNT,
+      breadcrumbName: "GL Account",
     },
     {
       path:
         type === "create"
-          ? RBI_ROUTES.DIGITAL_SIGNATURE_CREATE
-          : RBI_ROUTES.DIGITAL_SIGNATURE_UPDATE,
+          ? RBI_ROUTES.GLACCOUNT_CREATE
+          : RBI_ROUTES.GLACCOUNT_UPDATE,
       breadcrumbName:
-        type === "create"
-          ? "Create Digital Signature"
-          : "Update Digital Signature",
+        type === "create" ? "Create GL Account" : "Update GL Account",
     },
   ];
-
-  // Helper function to clean base64 string
-  const cleanBase64String = (base64Data) => {
-    if (!base64Data) return "";
-    return base64Data.includes(",") ? base64Data.split(",")[1] : base64Data;
-  };
-
-  // Process Data untuk Update
-  const processDataUpdate = ({ bodyData, flag, id }) => {
-    // Gunakan positionId dari data_position_employee jika ada, jika tidak gunakan dari data_detail
-    const positionId =
-      data_position_employee?.positionId ||
-      data_detail?.digitalSignature?.positionId ||
-      null;
-    const signatureMethod = bodyData.signatureMethod || "DRAW";
-    const signatureBase64Clean = cleanBase64String(bodyData.signatureBase64);
-
-    const jsonData = {
-      id: id,
-      name: bodyData.name,
-      employeeCode: bodyData.employeeCode,
-      positionId: positionId,
-      description: bodyData.description || null,
-      signatureMethod: signatureMethod,
-      signatureBase64: signatureBase64Clean,
-      apphierId: bodyData.apphierId,
-      isSubmit: flag,
-    };
-
-    // Handle fileId berdasarkan signatureMethod
-    if (signatureMethod === "UPLOAD") {
-      // UPLOAD method: tambahkan fileId jika ada dan tidak upload file baru
-      if (signatureFileId && !uploadedSignatureFile) {
-        jsonData.fileId = signatureFileId;
-      }
-    } else if (signatureMethod === "DRAW") {
-      // DRAW method: set fileId ke null untuk menghapus file existing
-      jsonData.fileId = null;
-    }
-
-    const formData = new FormData();
-    formData.append("data", JSON.stringify(jsonData));
-
-    // Add file only for UPLOAD method with new file
-    if (signatureMethod === "UPLOAD" && uploadedSignatureFile) {
-      formData.append("file", uploadedSignatureFile);
-    }
-
-    return formData;
-  };
-
-  // Process Data untuk Create
-  const processDataCreate = ({ bodyData, flag }) => {
-    const positionId = data_position_employee?.positionId || null;
-    const signatureMethod = bodyData.signatureMethod || "DRAW";
-    const signatureBase64Clean = cleanBase64String(bodyData.signatureBase64);
-
-    const jsonData = {
-      name: bodyData.name,
-      employeeCode: bodyData.employeeCode,
-      positionId: positionId,
-      description: bodyData.description || null,
-      signatureMethod: signatureMethod,
-      signatureBase64: signatureBase64Clean,
-      apphierId: bodyData.apphierId,
-      isSubmit: flag,
-    };
-
-    const formData = new FormData();
-    formData.append("data", JSON.stringify(jsonData));
-
-    // Add file only for UPLOAD method
-    if (signatureMethod === "UPLOAD" && uploadedSignatureFile) {
-      formData.append("file", uploadedSignatureFile);
-    }
-
-    return formData;
-  };
 
   // Validate Data before Modal
   const checkDataValidity = async (formValue) => {
     const url =
       type === "create"
-        ? "/v1/dbs/api/signature/validate-create"
-        : "/v1/dbs/api/signature/validate-update";
-
-    // Gunakan positionId dari data_position_employee jika ada, jika tidak gunakan dari data_detail (untuk UPDATE)
-    const positionId =
-      data_position_employee?.positionId ||
-      (type === "update" ? data_detail?.digitalSignature?.positionId : null) ||
-      null;
-    const signatureMethod = formValue.signatureMethod || "DRAW";
-    const signatureBase64Clean = cleanBase64String(formValue.signatureBase64);
+        ? "/v1/dbs/api/gl-account/validate-create"
+        : `/v1/dbs/api/gl-account/validate-update/${id}`;
 
     const jsonData = {
-      ...(type === "update" && { id: id }),
-      name: formValue.name,
-      employeeCode: formValue.employeeCode,
-      positionId: positionId,
-      description: formValue.description || null,
-      signatureMethod: signatureMethod,
-      signatureBase64: signatureBase64Clean,
+      ...(type === "update" && { glAccountId: id }),
+      glAccount: formValue.glAccount,
+      specialGlValue: formValue.specialGlValue,
+      reference: formValue.reference,
+      glAccountDesc: formValue.glAccountDesc,
       apphierId: formValue.apphierId,
       isSubmit: flag,
     };
 
-    // Handle fileId untuk UPDATE berdasarkan signatureMethod
-    if (type === "update") {
-      if (signatureMethod === "UPLOAD") {
-        // UPLOAD method: tambahkan fileId jika ada dan tidak upload file baru
-        if (signatureFileId && !uploadedSignatureFile) {
-          jsonData.fileId = signatureFileId;
-        }
-      } else if (signatureMethod === "DRAW") {
-        // DRAW method: set fileId ke null untuk menghapus file existing
-        jsonData.fileId = null;
-      }
-    }
-
-    const formData = new FormData();
-    formData.append("data", JSON.stringify(jsonData));
-
-    // Add file only for UPLOAD method with new file
-    if (signatureMethod === "UPLOAD" && uploadedSignatureFile) {
-      formData.append("file", uploadedSignatureFile);
-    }
-
     try {
-      await ratingBillingHttpService.createData(url, formData);
-
+      await ratingBillingHttpService.createData(url, jsonData);
       return true;
     } catch (error) {
       if (error?.response?.data) {
@@ -366,11 +224,6 @@ const DigitalSignatureForm = ({ type }) => {
       }
       return false;
     }
-  };
-
-  // Handle signature file change
-  const handleSignatureFileChange = (file) => {
-    setUploadedSignatureFile(file);
   };
 
   // Handle Save Form
@@ -402,8 +255,13 @@ const DigitalSignatureForm = ({ type }) => {
           setModalConfirm(true);
           setListSectionInfo([
             {
-              value: "Digital Signature",
-              paramValue: ["name", "employeeCode", "signatureBase64"],
+              value: "GL Account",
+              paramValue: [
+                "glAccount",
+                "glAccountDesc",
+                "specialGlValue",
+                "reference",
+              ],
             },
             { value: "Approval", paramValue: ["apphierId"] },
             { value: "Attachment" },
@@ -418,25 +276,42 @@ const DigitalSignatureForm = ({ type }) => {
   const handleConfirm = () => {
     setModalConfirm(false);
 
-    if (type === "create") {
-      const body = processDataCreate({ bodyData, flag });
+    const jsonData = {
+      ...(type === "update" && { glAccountId: id }),
+      glAccount: bodyData.glAccount,
+      specialGlValue: bodyData.specialGlValue,
+      reference: bodyData.reference,
+      glAccountDesc: bodyData.glAccountDesc,
+      apphierId: bodyData.apphierId,
+      isSubmit: flag,
+    };
 
-      dispatch(createDigitalSignature({ body: body }))
+    if (type === "create") {
+      dispatch(createGLAccount({ body: jsonData }))
         .unwrap()
         .then(async (dataForm) => {
-          const signatureId = dataForm?.signatureId;
+          const glAccountId = dataForm?.glAccountId;
           setLoadingForm(true);
           for (let i = 0; i < listDataAttachment.length; i++) {
             const element = listDataAttachment[i];
             const body = {
               files: element.file,
               categoryId: element.fileCategoryId,
-              referenceId: signatureId,
+              referenceId: glAccountId,
             };
             await dispatch(uploadAttachment({ body }));
           }
           setLoadingForm(false);
           setModalConfirm(false);
+
+          // Show success modal after all attachments uploaded
+          const successBody = {
+            title: "Successful",
+            description: `Your data has been ${
+              flag ? "submitted" : "created"
+            }.`,
+          };
+          dispatch(showModalSuccess(successBody));
           handleClear();
         })
         .catch((error) => {
@@ -452,12 +327,10 @@ const DigitalSignatureForm = ({ type }) => {
           }
         });
     } else {
-      const body = processDataUpdate({ bodyData, flag, id });
-
-      dispatch(updateDigitalSignature({ body: body, id }))
+      dispatch(updateGLAccount({ body: jsonData, id }))
         .unwrap()
         .then(async (dataForm) => {
-          const signatureId = dataForm?.signatureId;
+          const glAccountId = dataForm?.glAccountId;
           const filterDataAttach = listDataAttachment.filter(
             (item) => item.dataType !== "exist"
           );
@@ -467,12 +340,21 @@ const DigitalSignatureForm = ({ type }) => {
             const body = {
               files: element.file,
               categoryId: element.fileCategoryId,
-              referenceId: signatureId,
+              referenceId: glAccountId,
             };
             await dispatch(uploadAttachment({ body }));
           }
           setLoadingForm(false);
           setModalConfirm(false);
+
+          // Show success modal after all attachments uploaded
+          const successBody = {
+            title: "Successful",
+            description: `Your data has been ${
+              flag ? "submitted" : "updated"
+            }.`,
+          };
+          dispatch(showModalSuccess(successBody));
           handleClear();
         })
         .catch((error) => {
@@ -531,20 +413,21 @@ const DigitalSignatureForm = ({ type }) => {
       setListDataAttachment([]);
       setBodyData({});
       setStoredDataInline(false);
-      setUploadedSignatureFile(null);
-      setSignatureFileId(null);
       setListSectionInfo([
         {
-          value: "Digital Signature",
-          paramValue: ["name", "employeeCode", "signatureBase64"],
+          value: "GL Account",
+          paramValue: [
+            "glAccount",
+            "glAccountDesc",
+            "specialGlValue",
+            "reference",
+          ],
         },
         { value: "Approval", paramValue: ["apphierId"] },
         { value: "Attachment" },
       ]);
     } else {
-      dispatch(getDetailDigitalSignature(id));
-      setUploadedSignatureFile(null);
-      // FileId akan di-reset dari data detail yang di-fetch ulang
+      dispatch(getDetailGLAccount(id));
     }
   };
 
@@ -575,16 +458,9 @@ const DigitalSignatureForm = ({ type }) => {
           onFinish={handleSave}
           onFinishFailed={handleError}
         >
-          {/* Digital Signature Section */}
-          <div
-            className={`${valuePage !== "Digital Signature" ? "hidden" : ""}`}
-          >
-            <DigitalSignatureSectionForm
-              type={type}
-              form={form}
-              fileId={signatureFileId}
-              onSignatureFileChange={handleSignatureFileChange}
-            />
+          {/* GL Account Section */}
+          <div className={`${valuePage !== "GL Account" ? "hidden" : ""}`}>
+            <GLAccountSectionForm type={type} form={form} />
           </div>
 
           <div className={valuePage !== "Approval" ? "hidden" : ""}>
@@ -672,11 +548,9 @@ const DigitalSignatureForm = ({ type }) => {
           </div>
         </Form>
 
-        <ConfirmationDigitalSignature
+        <ConfirmationGLAccount
           isOpen={modalConfirm}
           data={bodyData}
-          uploadedSignatureFile={uploadedSignatureFile}
-          signatureFileId={signatureFileId}
           selectedHierarchy={selectedHierarchy}
           listDataAppHierDetail={appHierDataDetail}
           listDataAttachment={listDataAttachment}
@@ -713,4 +587,4 @@ const DigitalSignatureForm = ({ type }) => {
   );
 };
 
-export default DigitalSignatureForm;
+export default GLAccountForm;

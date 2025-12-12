@@ -468,13 +468,13 @@ const ModalGenerateXML = ({
           </ButtonComponent>
 
           <ButtonComponent
-            type="primary"
-            size="large"
+            type="default"
+            className={"bg-red-500"}
             onClick={handleGenerateXML}
             loading={loading_modal}
             disabled={selectedRowKeys.length === 0}
             icon={<FileTextOutlined />}
-            fontSizeClassname="text-[18px] py-1 px-1" 
+            fontSizeClassname="text-[18px] py-1 px-1"
             style={{ width: 140 }}
           >
             Next
