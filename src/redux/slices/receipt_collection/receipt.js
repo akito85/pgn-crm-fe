@@ -110,9 +110,10 @@ export const getCollectionAgentDDL = createAsyncThunk(
   "GET_LIST_COLL_AGENT_RECEIPT",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/receipt/list-collection-agent`;
-      const data = await receiptCollectionHttpService.getAll(url);
-      return data;
+      const url = `/v1/dbs/api/collecting-agent/get-list`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      const data = response?.data?.result;
+      return { data };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -330,9 +331,13 @@ export const getPayGetwayDDL = createAsyncThunk(
   "GET_LIST_PAY_GET_RECEIPTS",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/receipt/list-payment-gateway`;
-      const data = await receiptCollectionHttpService.getAll(url);
-      return data;
+      const url = `/v1/dbs/api/partner/get-list`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      const data = response?.data?.result?.map((item) => ({
+        id: item?.id,
+        name: item?.partnerName,
+      }));
+      return { data };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -384,9 +389,10 @@ export const getPayDeliverDDL = createAsyncThunk(
   "GET_LIST_PAYMENT_DELIVERY_RECEIPTS",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/receipt/list-payment-delivery-channel`;
-      const data = await receiptCollectionHttpService.getAll(url);
-      return data;
+      const url = `/v1/dbs/api/payment-channel/get-list`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      const data = response?.data?.result;
+      return { data };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -635,9 +641,8 @@ export const approveOrRejectReceipt = createAsyncThunk(
         await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const successMessage = {
         title: "Successfull",
-        description: `Your data has been ${
-          body.action === "APPROVED" ? "Approved" : "Rejected"
-        }`,
+        description: `Your data has been ${body.action === "APPROVED" ? "Approved" : "Rejected"
+          }`,
         return: true,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
@@ -652,9 +657,8 @@ export const approveOrRejectReceipt = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.action === "APPROVED" ? "approved" : "rejected"
-          }. ${message}.`,
+          description: `Your data was not ${body.action === "APPROVED" ? "approved" : "rejected"
+            }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
