@@ -21,21 +21,21 @@ const initialState = {
   dataType: [],
 };
 
-export  const getPaginatePartner = createAsyncThunk(
-  "GET_ALL_PARTNER_CA",
+export  const getPaginatePaymentChannel = createAsyncThunk(
+  "GET_ALL_PAYMENT_CHANNEL",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/partner-ca/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/payment-channel/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
         validateError({
           error: error,
-          action: "GET_ALL_PARTNER_CA_PAGING",
+          action: "GET_ALL_PAYMENT_CHANNEL_PAGING",
           back: false,
         })
       );
@@ -48,7 +48,7 @@ export const getTypeDDL = createAsyncThunk(
   "GET_LIST_TYPE",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner-ca/list-type`;
+      const url = `/v1/dbs/api/payment-channel/list-type`;
       const data = await receiptCollectionHttpService.getAll(url);
       return data;
     } catch (error) {
@@ -71,11 +71,11 @@ export const getTypeDDL = createAsyncThunk(
   }
 );
 
-export const createValidasiPartner = createAsyncThunk(
-  "CREATE_MASTER_PARTNER_CA_VALIDASI",
+export const createValidasiPaymentChannel = createAsyncThunk(
+  "CREATE_MASTER_PAYMENT_CHANNEL_VALIDASI",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner-ca/validate-create-update`;
+      const url = `/v1/dbs/api/payment-channel/validate-create-update`;
       const data = await receiptCollectionHttpService.createData(url, body);
       return data.data;
     } catch (error) {
@@ -97,21 +97,21 @@ export const createValidasiPartner = createAsyncThunk(
   }
 );
 
-export const getDownloadPartner = createAsyncThunk(
-  "DOWNLOAD_PARTNER_CA",
+export const getDownloadPaymentChannel = createAsyncThunk(
+  "DOWNLOAD_PAYMENT_CHANNEL",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/partner-ca/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/payment-channel/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.downloadData(url);
       return response.data;
     } catch (response) {
       thunkAPI.dispatch(
         validateError({
           error: response,
-          action: "DOWNLOAD_PARTNER_CA",
+          action: "DOWNLOAD_PAYMENT_CHANNEL",
           back: false,
         })
       );
@@ -121,11 +121,11 @@ export const getDownloadPartner = createAsyncThunk(
 );
 
 
-export const createPartner = createAsyncThunk(
-  "CREATE_PARTNER_CA",
+export const createPaymentChannel = createAsyncThunk(
+  "CREATE_PAYMENT_CHANNEL",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner-ca/create-update`;
+      const url = `/v1/dbs/api/payment-channel/create-update`;
       const data = await receiptCollectionHttpService.createData(url, body);
       // const successBody = {
       //   title: "Successfull",
@@ -151,11 +151,11 @@ export const createPartner = createAsyncThunk(
   }
 );
 
-export const updatePartner = createAsyncThunk(
-  "UPDATE_PARTNER_CA",
+export const updatePaymentChannel = createAsyncThunk(
+  "UPDATE_PAYMENT_CHANNEL",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner-ca/create-update`;
+      const url = `/v1/dbs/api/payment-channel/create-update`;
       const data = await receiptCollectionHttpService.updateDataPost(url, body);
       // const successBody = {
       //   title: "Successfull",
@@ -182,11 +182,11 @@ export const updatePartner = createAsyncThunk(
   }
 );
 
-export const getDetailPartner = createAsyncThunk(
-  "GET_DETAIL_PARTNER_CA",
+export const getDetailPaymentChannel = createAsyncThunk(
+  "GET_DETAIL_PAYMENT_CHANNEL",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner-ca/detail-get/${id}`;
+      const url = `/v1/dbs/api/payment-channel/detail-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -208,6 +208,7 @@ export const getDetailPartner = createAsyncThunk(
     }
   }
 );
+
 
 
 export const getAllApprovalList = createAsyncThunk(
@@ -237,13 +238,24 @@ export const getAllApprovalList = createAsyncThunk(
   }
 );
 
-
+// export const getApprovalHistory = createAsyncThunk(
+//   "GET_APPROVAL_HISTORY_METHOD",
+//   async (id, thunkAPI) => {
+//     try {
+//       const url = `/v1/dbs/api/payment/item/approval-history-get/${id}`;
+//       const response = await receiptCollectionHttpService.getDetail(url);
+//       return response.data;
+//     } catch (error) {
+//       return thunkAPI.rejectWithValue(error?.response);
+//     }
+//   }
+// );
 
 export const getApprovalHistory = createAsyncThunk(
   "GET_APPROVAL_HISTORY_METHOD",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner-ca/approval-history-get/${id}`;
+      const url = `/v1/dbs/api/payment-channel/approval-history-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
@@ -261,11 +273,11 @@ export const getApprovalHistory = createAsyncThunk(
 
 
 
-export const approveOrRejectPartner = createAsyncThunk(
-  "APPROVE_OR_REJECT_PARTNER_CA",
+export const approveOrRejectPaymentChannel = createAsyncThunk(
+  "APPROVE_OR_REJECT_PAYMENT_CHANNEL",
   async ({ body }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/partner-ca/approve-reject";
+      const url = "/v1/dbs/api/payment-channel/approve-reject";
       const response =
         await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const message = response?.message;
@@ -356,20 +368,20 @@ export const getListCategory = createAsyncThunk(
   }
 );
 
-const partnerCaSlice = createSlice({
-  name: "partnerCa",
+const paymentChannelSlice = createSlice({
+  name: "paymentChannel",
   initialState,
   extraReducers: {
     //get all employee paginate reducer
-    [getPaginatePartner.pending]: (state, action) => {
+    [getPaginatePaymentChannel.pending]: (state, action) => {
       state.data = action.payload;
       state.loading = true;
     },
-    [getPaginatePartner.fulfilled]: (state, action) => {
+    [getPaginatePaymentChannel.fulfilled]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
     },
-    [getPaginatePartner.rejected]: (state, action) => {
+    [getPaginatePaymentChannel.rejected]: (state, action) => {
       state.data = action.payload;
       state.loading = true;
     },
@@ -406,16 +418,17 @@ const partnerCaSlice = createSlice({
     },
 
     // get detail
-    [getDetailPartner.pending]: (state) => {
+    [getDetailPaymentChannel.pending]: (state) => {
       state.loading = true;
     },
-    [getDetailPartner.fulfilled]: (state, action) => {
+    [getDetailPaymentChannel.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getDetailPartner.rejected]: (state) => {
+    [getDetailPaymentChannel.rejected]: (state) => {
       state.loading = true;
     },
+
     // Get Approve Hierarchy List
     [getAllApprovalList.pending]: (state, action) => {
       state.loading = true;
@@ -459,14 +472,14 @@ const partnerCaSlice = createSlice({
 
     
 
-    [approveOrRejectPartner.pending]: (state) => {
+    [approveOrRejectPaymentChannel.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectPartner.fulfilled]: (state) => {
+    [approveOrRejectPaymentChannel.fulfilled]: (state) => {
       state.isSuccess = true;
       state.loading = false;
     },
-    [approveOrRejectPartner.rejected]: (state, action) => {
+    [approveOrRejectPaymentChannel.rejected]: (state, action) => {
       state.isFailed = true;
       state.loading = false;
       state.message = action.payload;
@@ -475,59 +488,59 @@ const partnerCaSlice = createSlice({
     
 
     // create payment item
-    [createPartner.pending]: (state, action) => {
+    [createPaymentChannel.pending]: (state, action) => {
       state.data = action.payload;
       state.loading = true;
     },
-    [createPartner.fulfilled]: (state, action) => {
+    [createPaymentChannel.fulfilled]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
     },
-    [createPartner.rejected]: (state, action) => {
+    [createPaymentChannel.rejected]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
     },
 
     // update payment
-    [updatePartner.pending]: (state, action) => {
+    [updatePaymentChannel.pending]: (state, action) => {
       state.data = action.payload;
       state.loading = true;
     },
-    [updatePartner.fulfilled]: (state, action) => {
+    [updatePaymentChannel.fulfilled]: (state, action) => {
       state.data = action.payload;
       state.isSuccess = false;
     },
-    [updatePartner.rejected]: (state) => {
+    [updatePaymentChannel.rejected]: (state) => {
       state.isFailed = false;
     },
 
     //download
-    [getDownloadPartner.fulfilled]: (state, action) => {
+    [getDownloadPaymentChannel.fulfilled]: (state, action) => {
       state.data_download = action.payload;
       // state.isSuccess = true;
       state.loading = false;
     },
-    [getDownloadPartner.rejected]: (state, action) => {
+    [getDownloadPaymentChannel.rejected]: (state, action) => {
       state.isFailed = true;
       state.data_download = action.payload;
       state.loading = false;
     },
 
     //validasi create payment method
-    [createValidasiPartner.pending]: (state, action) => {
+    [createValidasiPaymentChannel.pending]: (state, action) => {
       state.data = action.payload;
       state.loading = true;
     },
-    [createValidasiPartner.fulfilled]: (state, action) => {
+    [createValidasiPaymentChannel.fulfilled]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
     },
-    [createValidasiPartner.rejected]: (state, action) => {
-      state.error = action.payload;
+    [createValidasiPaymentChannel.rejected]: (state, action) => {
+      state.data = action.payload;
       state.loading = false;
     },
   },
 });
 
-const { reducer } = partnerCaSlice;
+const { reducer } = paymentChannelSlice;
 export default reducer;

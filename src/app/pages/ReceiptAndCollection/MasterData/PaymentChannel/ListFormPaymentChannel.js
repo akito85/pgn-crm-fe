@@ -13,17 +13,17 @@ import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   getTypeDDL,
-  createPartner,
-  createValidasiPartner,
+  createPaymentChannel,
+  createValidasiPaymentChannel,
   getAllApprovalList,
-  getDetailPartner,
+  getDetailPaymentChannel,
   getListApprovalById,
   getListCategory,
-  updatePartner,
-} from "../../../../../redux/slices/receipt_collection/partnerCa";
+  updatePaymentChannel,
+} from "../../../../../redux/slices/receipt_collection/paymentChannel";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
-import PartnerCaForm from "./PartnerCaForm";
+import PaymentChannelForm from "./PaymentChannelForm";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -39,7 +39,7 @@ import ApprovalComponentGeneral from "../../../../../components/Approval/Approva
 import { configApp } from "../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 
-const ListFormPartnerCa = (props) => {
+const ListFormPaymentChannel = (props) => {
   const { type } = props;
   const {
     data_detail,
@@ -47,7 +47,7 @@ const ListFormPartnerCa = (props) => {
     dataListAppHierDetail,
     loading,
     dataType,
-  } = useSelector((state) => state.partnerCa);
+  } = useSelector((state) => state.paymentChannel);
 
   // Declaration
   const navigate = useNavigate();
@@ -72,7 +72,7 @@ const ListFormPartnerCa = (props) => {
 
   useEffect(() => {
     if (id && type === "update") {
-      dispatch(getDetailPartner(id));
+      dispatch(getDetailPaymentChannel(id));
     }
   }, [dispatch, id, type]);
 
@@ -93,7 +93,7 @@ const ListFormPartnerCa = (props) => {
       setAppHierOptions(tempAppHier);
     }
   }, [dataListAppHierId]);
-
+  
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
       dispatch(getListApprovalById({ id: selectedHierarchy }));
@@ -132,24 +132,22 @@ const ListFormPartnerCa = (props) => {
     if (id  && data_detail) {
 
       form.setFieldsValue({
-        id: data_detail?.partner.id,
-        partnerCode: data_detail?.partner?.partnerCode,
-        partnerName: data_detail?.partner?.partnerName,
+        id: data_detail?.peOpCi?.id,
+        ciCode: data_detail?.peOpCi?.ciCode,
+        name: data_detail?.peOpCi?.name,
         effStartDate:
-          data_detail?.partner?.effStartDate === null
+          data_detail?.peOpCi?.effStartDate === null
             ? moment()
-            : moment(data_detail?.partner?.effStartDate).clone(),
+            : moment(data_detail?.peOpCi?.effStartDate).clone(),
         effEndDate:
-          data_detail?.partner?.effEndDate === null
+          data_detail?.peOpCi?.effEndDate === null
             ? ""
-            : moment(data_detail?.partner?.effEndDate).clone(),
-        tokenExpirationTime: data_detail?.partner?.tokenExpirationTime,
-        seckeySignature: data_detail?.partner?.secKeySignature,
-        type: data_detail?.partner?.type,
-        apphierId: data_detail?.partner?.apphierId,
+            : moment(data_detail?.peOpCi?.effEndDate).clone(),
+        type: data_detail?.peOpCi?.type,
+        appHierId: data_detail?.peOpCi?.appHierId,
       });
 
-      setSelectedHierarchy(data_detail?.partner?.apphierId);
+      setSelectedHierarchy(data_detail?.peOpCi?.appHierId);
 
       setListDataAttachment(
         (data_detail?.attachmentDtoList || []).map((attachData) => ({
@@ -164,11 +162,11 @@ const ListFormPartnerCa = (props) => {
   // Define tabData before using it in useState
 
   const [tabData, setTabData] = useState([
-    { value: "Partner Ca", paramValue: ["partnerCode", 
-                                      "caCode",
+    { value: "Payment Channel", paramValue: ["ciCode", 
+                                      "name",
                                       "effStartDate",
                                       "effEndDate",
-                                      "settlementBank",
+                                      "type"
                                      ] },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
@@ -194,26 +192,24 @@ const ListFormPartnerCa = (props) => {
 
   const handleSubmitForm = (formValue) => {
       const dataValue = {
-        // partnerId: id,
-        partnerCode: formValue.partnerCode,
-        caCode: formValue.caCode,
-        settlementBank: formValue.settlementBank,
+        // id: id,
+        ciCode: formValue.ciCode,
+        name: formValue.name,
+        type: formValue.type,
         effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
         effEndDate: formValue.effEndDate
-          ? moment(formValue.endDate).format(dateFormatting.date)
+          ? moment(formValue.effEndDate).format(dateFormatting.date)
           : null,
         appHierId: formValue.apphierId,
       };
 
-      console.log("data value partner ca: ", dataValue);    
-
       setSendBody(dataValue);
       const bodyValidasiUpdate = {
         ...dataValue,
-        id: data_detail?.partner?.id,
+        id: data_detail?.peOpCi?.id,
       };
       if (type !== "update") {
-        dispatch(createValidasiPartner(dataValue))
+        dispatch(createValidasiPaymentChannel(dataValue))
           .unwrap()
           .then(async (data) => {
             const sukses = data?.success;
@@ -223,7 +219,7 @@ const ListFormPartnerCa = (props) => {
             setModalConfirm(true);
           });
       }else{
-        dispatch(createValidasiPartner(bodyValidasiUpdate))
+        dispatch(createValidasiPaymentChannel(bodyValidasiUpdate))
           .unwrap()
           .then(async (data) => {
             const sukses = data?.success;
@@ -260,7 +256,7 @@ const ListFormPartnerCa = (props) => {
       setSelectedHierarchy("");
       setListDataAttachment([]);
     } else {
-      dispatch(getDetailPartner(id));
+      dispatch(getDetailPaymentChannel(id));
     }
   };
 
@@ -296,11 +292,11 @@ const ListFormPartnerCa = (props) => {
       breadcrumbName: "Receipt & Collection",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER_CA,
-      breadcrumbName: "Partner Ca",
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_CHANNEL,
+      breadcrumbName: "Payment Channel",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_PARTNER_CA,
+      path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_PAYMENT_CHANNEL,
       breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
     },
   ];
@@ -322,10 +318,10 @@ const ListFormPartnerCa = (props) => {
     };
 
     if (type === "update") {
-      dispatch(updatePartner(sendBody))
+      dispatch(updatePaymentChannel(sendBody))
         .unwrap()
         .then(async () => {
-          const id = data_detail?.partner?.id;
+          const id = data_detail?.peOpCi?.id;
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
             (item) => item.dataType !== "exist"
@@ -333,9 +329,9 @@ const ListFormPartnerCa = (props) => {
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
             const body = {
-              referensiId: data_detail?.partner?.id,
+              referensiId: data_detail?.peOpCi?.id,
               files: element.file,
-              category: "PARTNER_CA",
+              category: "PAYMENT_CHANNEL",
               fileCategoryId: element.fileCategoryId,
             };
             const response = await receiptCollectionHttpService.uploadImage(
@@ -363,7 +359,7 @@ const ListFormPartnerCa = (props) => {
           }
         });
     } else {
-      dispatch(createPartner(sendBody))
+      dispatch(createPaymentChannel(sendBody))
         .unwrap()
         .then(async (data) => {
           let id = data.id;
@@ -375,7 +371,7 @@ const ListFormPartnerCa = (props) => {
               files: element.file,
               fileCategoryId: element.fileCategoryId,
               referensiId: id,
-              category: "PARTNER_CA",
+              category: "PAYMENT_CHANNEL",
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
@@ -421,7 +417,7 @@ const ListFormPartnerCa = (props) => {
               display: valuePage !== tabData[0].value ? "none" : undefined,
             }}
           >
-            <PartnerCaForm
+            <PaymentChannelForm
               dataType={dataType}
               form={form}
             />
@@ -450,7 +446,7 @@ const ListFormPartnerCa = (props) => {
                 type={type}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
-                typeSelector="patnerCa"
+                typeSelector="paymentChannel"
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
                 service={receiptCollectionHttpService}
@@ -547,4 +543,4 @@ const ListFormPartnerCa = (props) => {
   );
 };
 
-export default ListFormPartnerCa;
+export default ListFormPaymentChannel;

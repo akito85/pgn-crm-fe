@@ -9,17 +9,17 @@ import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOr
 import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
-  approveOrRejectPartner,
-  getDetailPartner,
-} from "../../../../../redux/slices/receipt_collection/partnerCa";
+  approveOrRejectPaymentChannel,
+  getDetailPaymentChannel,
+} from "../../../../../redux/slices/receipt_collection/paymentChannel";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
-import DetailPartnerCa from "./DetailPartnerCa";
+import DetailPaymentChannel from "./DetailPaymentChannel";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import BaseContainer from "../../../../../components/BaseContainer";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
 
-const ListDetailPartnerCa = () => {
+const ListDetailPaymentChannel = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
@@ -31,12 +31,12 @@ const ListDetailPartnerCa = () => {
 
   // Define tabData before using it in useState
   const [tabData, setTabData] = useState([
-    { value: "Partner Ca" },
+    { value: "Payment Channel" },
     { value: "Attachment" },
   ]);
 
   const { loading, data_detail } = useSelector(
-    (state) => state.partnerCa
+    (state) => state.paymentChannel
   );
   const [segmentedPage, setSegmentedPage] = useState(tabData[0].value);
 
@@ -45,7 +45,7 @@ const ListDetailPartnerCa = () => {
   };
 
   useEffect(() => {
-    dispatch(getDetailPartner(id));
+    dispatch(getDetailPaymentChannel(id));
   }, [ dispatch, id]);
 
 
@@ -53,9 +53,9 @@ const ListDetailPartnerCa = () => {
   useEffect(() => {
     if (
       id &&
-      data_detail?.partnerCa?.id &&
+      data_detail?.peOpCi?.id &&
       data_detail &&
-      data_detail?.partnerCa?.id === id
+      data_detail?.peOpCi?.id === id
     ) {
       const dataAttachment = (data_detail?.attachmentDtoList || []).map(
         (item) => {
@@ -79,7 +79,7 @@ const ListDetailPartnerCa = () => {
         }
       );
       setListDataAttachment(dataAttachment);
-      setDataHeader(data_detail?.partnerCa);
+      setDataHeader(data_detail?.peOpCi);
     }
 
     
@@ -89,9 +89,9 @@ const ListDetailPartnerCa = () => {
   
   const renderSection = (segmentedPage) => {
     switch (segmentedPage) {
-      case "Partner Ca":
+      case "Payment Channel":
         return (
-          <DetailPartnerCa
+          <DetailPaymentChannel
             key={"active"}
             data_detail={dataHeader}
             data_req={data_detail?.tApprovalDto}
@@ -99,7 +99,7 @@ const ListDetailPartnerCa = () => {
         );
       case "Draft":
         return (
-          <DetailPartnerCa
+          <DetailPaymentChannel
             key={"draft"}
             data_detail={dataHeader}
             data_req={data_detail?.tApprovalDto}
@@ -112,7 +112,7 @@ const ListDetailPartnerCa = () => {
               type={"detail"}
               data={listDataAttachment}
               updateData={setListDataAttachment}
-              typeSelector="partner"
+              typeSelector="paymentChannel"
               service={receiptCollectionHttpService}
               configApplication={configApp.PAYMENT_SERVICE}
               // getAPIGuard={getConfigFileRBIData}
@@ -133,11 +133,11 @@ const ListDetailPartnerCa = () => {
       breadcrumbName: "Receipt & Collection",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER_CA,
-      breadcrumbName: "Partner Ca",
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_CHANNEL,
+      breadcrumbName: "Payment Channel",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_PARTNER_CA,
+      path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_PAYMENT_CHANNEL,
       breadcrumbName: `Detail ${segmentedPage}`,
     },
   ];
@@ -145,12 +145,12 @@ const ListDetailPartnerCa = () => {
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
     const data = {
-      partnerCaId: id,
+      id: id,
       remark: res.remark,
       approvalId: data_detail?.tApprovalDto?.tAppId,
       action: approveOrReject.toUpperCase(),
     };
-    dispatch(approveOrRejectPartner({ body: data }));
+    dispatch(approveOrRejectPaymentChannel({ body: data }));
     handleClear();
     setModalApprove(false);
   };
@@ -175,8 +175,8 @@ const ListDetailPartnerCa = () => {
         onFinish={handleConfirm}
         header={approveOrReject}
         approveOrReject={approveOrReject}
-        menu={"Partner"}
-        named={ data_detail?.partnerCa?.caCode
+        menu={"Payment Channel"}
+        named={ data_detail?.peOpCi?.name
         }
       />
 
@@ -224,4 +224,4 @@ const ListDetailPartnerCa = () => {
   );
 };
 
-export default ListDetailPartnerCa;
+export default ListDetailPaymentChannel;

@@ -9,17 +9,18 @@ import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOr
 import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
-  approveOrRejectPartner,
-  getDetailPartner,
-} from "../../../../../redux/slices/receipt_collection/partnerCa";
+  approveOrRejectSetting,
+  approveOrRejectInactive,
+  getDetailSetting,
+} from "../../../../../redux/slices/receipt_collection/setting";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
-import DetailPartnerCa from "./DetailPartnerCa";
+import DetailSettings from "./DetailSettings";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import BaseContainer from "../../../../../components/BaseContainer";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
 
-const ListDetailPartnerCa = () => {
+const ListDetailSettings = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
@@ -31,12 +32,12 @@ const ListDetailPartnerCa = () => {
 
   // Define tabData before using it in useState
   const [tabData, setTabData] = useState([
-    { value: "Partner Ca" },
+    { value: "Setting" },
     { value: "Attachment" },
   ]);
 
   const { loading, data_detail } = useSelector(
-    (state) => state.partnerCa
+    (state) => state.receiptSetting
   );
   const [segmentedPage, setSegmentedPage] = useState(tabData[0].value);
 
@@ -45,7 +46,7 @@ const ListDetailPartnerCa = () => {
   };
 
   useEffect(() => {
-    dispatch(getDetailPartner(id));
+    dispatch(getDetailSetting(id));
   }, [ dispatch, id]);
 
 
@@ -53,9 +54,9 @@ const ListDetailPartnerCa = () => {
   useEffect(() => {
     if (
       id &&
-      data_detail?.partnerCa?.id &&
+      data_detail?.settings?.id &&
       data_detail &&
-      data_detail?.partnerCa?.id === id
+      data_detail?.settings?.id === id
     ) {
       const dataAttachment = (data_detail?.attachmentDtoList || []).map(
         (item) => {
@@ -79,7 +80,7 @@ const ListDetailPartnerCa = () => {
         }
       );
       setListDataAttachment(dataAttachment);
-      setDataHeader(data_detail?.partnerCa);
+      setDataHeader(data_detail?.settings);
     }
 
     
@@ -89,9 +90,9 @@ const ListDetailPartnerCa = () => {
   
   const renderSection = (segmentedPage) => {
     switch (segmentedPage) {
-      case "Partner Ca":
+      case "Setting":
         return (
-          <DetailPartnerCa
+          <DetailSettings
             key={"active"}
             data_detail={dataHeader}
             data_req={data_detail?.tApprovalDto}
@@ -99,7 +100,7 @@ const ListDetailPartnerCa = () => {
         );
       case "Draft":
         return (
-          <DetailPartnerCa
+          <DetailSettings
             key={"draft"}
             data_detail={dataHeader}
             data_req={data_detail?.tApprovalDto}
@@ -112,7 +113,7 @@ const ListDetailPartnerCa = () => {
               type={"detail"}
               data={listDataAttachment}
               updateData={setListDataAttachment}
-              typeSelector="partner"
+              typeSelector="receiptSetting"
               service={receiptCollectionHttpService}
               configApplication={configApp.PAYMENT_SERVICE}
               // getAPIGuard={getConfigFileRBIData}
@@ -133,26 +134,38 @@ const ListDetailPartnerCa = () => {
       breadcrumbName: "Receipt & Collection",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER_CA,
-      breadcrumbName: "Partner Ca",
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_SETTINGS,
+      breadcrumbName: "Settings",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_PARTNER_CA,
+      path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_SETTINGS,
       breadcrumbName: `Detail ${segmentedPage}`,
     },
   ];
 
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
-    const data = {
-      partnerCaId: id,
-      remark: res.remark,
-      approvalId: data_detail?.tApprovalDto?.tAppId,
-      action: approveOrReject.toUpperCase(),
-    };
-    dispatch(approveOrRejectPartner({ body: data }));
-    handleClear();
-    setModalApprove(false);
+    if (data_detail?.tApprovalDto?.approvalType === "INACTIVE_RECEIPT_SETTING") {
+      const data = {
+        id: id,
+        remark: res.remark,
+        approvalId: data_detail?.tApprovalDto?.tAppId,
+        action: approveOrReject.toUpperCase(),
+      };
+      dispatch(approveOrRejectInactive({ body: data }));
+      handleClear();
+      setModalApprove(false);
+    } else {
+      const data = {
+        id: id,
+        remark: res.remark,
+        approvalId: data_detail?.tApprovalDto?.tAppId,
+        action: approveOrReject.toUpperCase(),
+      };
+      dispatch(approveOrRejectSetting({ body: data }));
+      handleClear();
+      setModalApprove(false);
+    }
   };
 
   const handleCancel = () => {
@@ -175,8 +188,8 @@ const ListDetailPartnerCa = () => {
         onFinish={handleConfirm}
         header={approveOrReject}
         approveOrReject={approveOrReject}
-        menu={"Partner"}
-        named={ data_detail?.partnerCa?.caCode
+        menu={"Setting"}
+        named={ data_detail?.settings?.partnerCode
         }
       />
 
@@ -224,4 +237,4 @@ const ListDetailPartnerCa = () => {
   );
 };
 
-export default ListDetailPartnerCa;
+export default ListDetailSettings;

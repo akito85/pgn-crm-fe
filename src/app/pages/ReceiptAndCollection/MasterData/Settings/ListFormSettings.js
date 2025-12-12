@@ -13,17 +13,17 @@ import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   getTypeDDL,
-  createPartner,
-  createValidasiPartner,
+  createSetting,
+  createValidasiSetting,
   getAllApprovalList,
-  getDetailPartner,
+  getDetailSetting,
   getListApprovalById,
   getListCategory,
-  updatePartner,
-} from "../../../../../redux/slices/receipt_collection/partnerCa";
+  updateSetting,
+} from "../../../../../redux/slices/receipt_collection/setting";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
-import PartnerCaForm from "./PartnerCaForm";
+import SettingsForm from "./SettingsForm";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -39,7 +39,7 @@ import ApprovalComponentGeneral from "../../../../../components/Approval/Approva
 import { configApp } from "../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 
-const ListFormPartnerCa = (props) => {
+const ListFormSettings = (props) => {
   const { type } = props;
   const {
     data_detail,
@@ -47,7 +47,7 @@ const ListFormPartnerCa = (props) => {
     dataListAppHierDetail,
     loading,
     dataType,
-  } = useSelector((state) => state.partnerCa);
+  } = useSelector((state) => state.receiptSetting);
 
   // Declaration
   const navigate = useNavigate();
@@ -72,7 +72,7 @@ const ListFormPartnerCa = (props) => {
 
   useEffect(() => {
     if (id && type === "update") {
-      dispatch(getDetailPartner(id));
+      dispatch(getDetailSetting(id));
     }
   }, [dispatch, id, type]);
 
@@ -93,7 +93,7 @@ const ListFormPartnerCa = (props) => {
       setAppHierOptions(tempAppHier);
     }
   }, [dataListAppHierId]);
-
+  
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
       dispatch(getListApprovalById({ id: selectedHierarchy }));
@@ -132,24 +132,21 @@ const ListFormPartnerCa = (props) => {
     if (id  && data_detail) {
 
       form.setFieldsValue({
-        id: data_detail?.partner.id,
-        partnerCode: data_detail?.partner?.partnerCode,
-        partnerName: data_detail?.partner?.partnerName,
-        effStartDate:
-          data_detail?.partner?.effStartDate === null
-            ? moment()
-            : moment(data_detail?.partner?.effStartDate).clone(),
-        effEndDate:
-          data_detail?.partner?.effEndDate === null
-            ? ""
-            : moment(data_detail?.partner?.effEndDate).clone(),
-        tokenExpirationTime: data_detail?.partner?.tokenExpirationTime,
-        seckeySignature: data_detail?.partner?.secKeySignature,
-        type: data_detail?.partner?.type,
-        apphierId: data_detail?.partner?.apphierId,
+        id: data_detail?.settings.id,
+        dateStart: data_detail?.settings?.dateStart ?? "",
+        dateEnd: data_detail?.settings?.dateEnd ?? "",
+        hourStart: data_detail?.settings?.hourStart ?? "",
+        hourEnd: data_detail?.settings?.hourEnd ?? "",
+        minuteStart: data_detail?.settings?.minuteStart ?? "",
+        minuteEnd: data_detail?.settings?.minuteEnd ?? "",
+        caCode: data_detail?.settings?.caCode ?? "",
+        partnerCode: data_detail?.settings?.partnerCode ?? "",
+        ciCode: data_detail?.settings?.ciCode ?? "",
+        type: data_detail?.settings?.type,
+        apphierId: data_detail?.settings?.appHierId,
       });
 
-      setSelectedHierarchy(data_detail?.partner?.apphierId);
+      setSelectedHierarchy(data_detail?.settings?.appHierId);
 
       setListDataAttachment(
         (data_detail?.attachmentDtoList || []).map((attachData) => ({
@@ -164,11 +161,16 @@ const ListFormPartnerCa = (props) => {
   // Define tabData before using it in useState
 
   const [tabData, setTabData] = useState([
-    { value: "Partner Ca", paramValue: ["partnerCode", 
+    { value: "Setting", paramValue: ["dateStart",
+                                      "dateEnd",
+                                      "hourStart",
+                                      "hourEnd",
+                                      "minuteStart",
+                                      "minuteEnd",
                                       "caCode",
-                                      "effStartDate",
-                                      "effEndDate",
-                                      "settlementBank",
+                                      "partnerCode",
+                                      "ciCode",
+                                      "type"
                                      ] },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
@@ -194,26 +196,26 @@ const ListFormPartnerCa = (props) => {
 
   const handleSubmitForm = (formValue) => {
       const dataValue = {
-        // partnerId: id,
-        partnerCode: formValue.partnerCode,
+        dateStart: formValue.dateStart,
+        dateEnd: formValue.dateEnd,
+        hourStart: formValue.hourStart,
+        hourEnd: formValue.hourEnd,
+        minuteStart: formValue.minuteStart,
+        minuteEnd: formValue.minuteEnd,
         caCode: formValue.caCode,
-        settlementBank: formValue.settlementBank,
-        effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
-        effEndDate: formValue.effEndDate
-          ? moment(formValue.endDate).format(dateFormatting.date)
-          : null,
-        appHierId: formValue.apphierId,
+        partnerCode: formValue.partnerCode,
+        ciCode: formValue.ciCode,
+        type: formValue.type,
+        apphierId: formValue.apphierId,
       };
-
-      console.log("data value partner ca: ", dataValue);    
 
       setSendBody(dataValue);
       const bodyValidasiUpdate = {
         ...dataValue,
-        id: data_detail?.partner?.id,
+        id: data_detail?.settings?.id,
       };
       if (type !== "update") {
-        dispatch(createValidasiPartner(dataValue))
+        dispatch(createValidasiSetting(dataValue))
           .unwrap()
           .then(async (data) => {
             const sukses = data?.success;
@@ -223,7 +225,7 @@ const ListFormPartnerCa = (props) => {
             setModalConfirm(true);
           });
       }else{
-        dispatch(createValidasiPartner(bodyValidasiUpdate))
+        dispatch(createValidasiSetting(bodyValidasiUpdate))
           .unwrap()
           .then(async (data) => {
             const sukses = data?.success;
@@ -260,7 +262,7 @@ const ListFormPartnerCa = (props) => {
       setSelectedHierarchy("");
       setListDataAttachment([]);
     } else {
-      dispatch(getDetailPartner(id));
+      dispatch(getDetailSetting(id));
     }
   };
 
@@ -296,11 +298,11 @@ const ListFormPartnerCa = (props) => {
       breadcrumbName: "Receipt & Collection",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER_CA,
-      breadcrumbName: "Partner Ca",
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_SETTINGS,
+      breadcrumbName: "Settings",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_PARTNER_CA,
+      path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_SETTINGS,
       breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
     },
   ];
@@ -322,10 +324,10 @@ const ListFormPartnerCa = (props) => {
     };
 
     if (type === "update") {
-      dispatch(updatePartner(sendBody))
+      dispatch(updateSetting(sendBody))
         .unwrap()
         .then(async () => {
-          const id = data_detail?.partner?.id;
+          const id = data_detail?.settings?.id;
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
             (item) => item.dataType !== "exist"
@@ -333,9 +335,9 @@ const ListFormPartnerCa = (props) => {
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
             const body = {
-              referensiId: data_detail?.partner?.id,
+              referensiId: data_detail?.settings?.id,
               files: element.file,
-              category: "PARTNER_CA",
+              category: "RECEIPT_SETTING",
               fileCategoryId: element.fileCategoryId,
             };
             const response = await receiptCollectionHttpService.uploadImage(
@@ -363,7 +365,7 @@ const ListFormPartnerCa = (props) => {
           }
         });
     } else {
-      dispatch(createPartner(sendBody))
+      dispatch(createSetting(sendBody))
         .unwrap()
         .then(async (data) => {
           let id = data.id;
@@ -375,7 +377,7 @@ const ListFormPartnerCa = (props) => {
               files: element.file,
               fileCategoryId: element.fileCategoryId,
               referensiId: id,
-              category: "PARTNER_CA",
+              category: "RECEIPT_SETTING",
             };
             const response = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
@@ -421,7 +423,7 @@ const ListFormPartnerCa = (props) => {
               display: valuePage !== tabData[0].value ? "none" : undefined,
             }}
           >
-            <PartnerCaForm
+            <SettingsForm
               dataType={dataType}
               form={form}
             />
@@ -450,7 +452,7 @@ const ListFormPartnerCa = (props) => {
                 type={type}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
-                typeSelector="patnerCa"
+                typeSelector="receiptSetting"
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
                 service={receiptCollectionHttpService}
@@ -547,4 +549,4 @@ const ListFormPartnerCa = (props) => {
   );
 };
 
-export default ListFormPartnerCa;
+export default ListFormSettings;
