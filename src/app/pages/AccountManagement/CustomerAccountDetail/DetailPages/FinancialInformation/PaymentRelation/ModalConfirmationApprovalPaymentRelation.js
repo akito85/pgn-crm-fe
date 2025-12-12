@@ -72,7 +72,8 @@ const ModalConfirmationApprovalPaymentRelation = ({
           "approved": "Approved",
           "waitingApproval": "Waiting Approval",
           "pending": "Pending",
-          "rejected": "Rejected"
+          "rejected": "Rejected",
+          "WAITING_APPROVAL": "Waiting Approval"
         };
         return (
           <div className="flex justify-center">
