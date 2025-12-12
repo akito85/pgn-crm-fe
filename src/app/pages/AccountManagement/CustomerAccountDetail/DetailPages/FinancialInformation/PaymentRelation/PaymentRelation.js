@@ -1,9 +1,6 @@
 import { useEffect, useRef } from "react";
 import {
   FilterOutlined,
-  DownloadOutlined, 
-  CheckOutlined, 
-  PlusOutlined 
 } from "@ant-design/icons";
 import { DatePicker, Input, Spin } from "antd";
 import { useState } from "react";
@@ -14,10 +11,7 @@ import { approveOrRejectAllPaymentRelation, downloadPaymentRelation, getPaymentR
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { Link, useNavigate } from "react-router-dom"
 import ModalConfirmationApprovalPaymentRelation from "./ModalConfirmationApprovalPaymentRelation";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
 
@@ -32,7 +26,6 @@ const PaymentRelation = ({
   setSubmitApprovalCondition = () => {},
 }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const { data_paymentRelation, loading, data_prApprovalHistory } = useSelector(
     (state) => state.financialInformation
