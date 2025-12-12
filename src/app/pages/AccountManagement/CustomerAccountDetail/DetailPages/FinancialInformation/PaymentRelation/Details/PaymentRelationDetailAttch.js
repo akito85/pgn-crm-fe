@@ -1,7 +1,6 @@
 import { Tooltip } from "antd";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import { Fragment, useState } from "react";
-import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import TablePaginationNew from "../../../../../../../../components/TablePaginationNew";
 
@@ -12,103 +11,6 @@ const PaymentRelationDetailAttch = ({
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
-  // Dummy data
-  const dummyData = [
-    {
-      id: "1",
-      type: "PDF",
-      fileName: "Document_Report_2025.pdf",
-      fileSize: "2.5 MB"
-    },
-    {
-      id: "2",
-      type: "Excel",
-      fileName: "Sales_Data_Q4.xlsx",
-      fileSize: "1.8 MB"
-    },
-    {
-      id: "3",
-      type: "Word",
-      fileName: "Project_Proposal.docx",
-      fileSize: "850 KB"
-    },
-    {
-      id: "4",
-      type: "Image",
-      fileName: "Brand_Guidelines.png",
-      fileSize: "3.2 MB"
-    },
-    {
-      id: "5",
-      type: "PDF",
-      fileName: "Contract_Agreement.pdf",
-      fileSize: "1.2 MB"
-    },
-    {
-      id: "6",
-      type: "PDF",
-      fileName: "Document_Report_2025.pdf",
-      fileSize: "2.5 MB"
-    },
-    {
-      id: "7",
-      type: "Excel",
-      fileName: "Sales_Data_Q4.xlsx",
-      fileSize: "1.8 MB"
-    },
-    {
-      id: "8",
-      type: "Word",
-      fileName: "Project_Proposal.docx",
-      fileSize: "850 KB"
-    },
-    {
-      id: "9",
-      type: "Image",
-      fileName: "Brand_Guidelines.png",
-      fileSize: "3.2 MB"
-    },
-    {
-      id: "10",
-      type: "PDF",
-      fileName: "Contract_Agreement.pdf",
-      fileSize: "1.2 MB"
-    },
-    {
-      id: "11",
-      type: "PDF",
-      fileName: "Document_Report_2025.pdf",
-      fileSize: "2.5 MB"
-    },
-    {
-      id: "12",
-      type: "Excel",
-      fileName: "Sales_Data_Q4.xlsx",
-      fileSize: "1.8 MB"
-    },
-    {
-      id: "13",
-      type: "Word",
-      fileName: "Project_Proposal.docx",
-      fileSize: "850 KB"
-    },
-    {
-      id: "14",
-      type: "Image",
-      fileName: "Brand_Guidelines.png",
-      fileSize: "3.2 MB"
-    },
-    {
-      id: "15",
-      type: "PDF",
-      fileName: "Contract_Agreement.pdf",
-      fileSize: "1.2 MB"
-    },
-  ];
-
-  // Sanitize pagination values to prevent NaN
-  const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
 
   const handleViewFile = (fileData) => {
     // Placeholder for view file action
