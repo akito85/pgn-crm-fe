@@ -346,12 +346,12 @@ const PaymentRelation = ({
     if (data_prApprovalHistory && data_prApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: data_prApprovalHistory?.dataApprover?.PRICING || [],
-          inactive: data_prApprovalHistory?.dataApprover?.INACTIVE_PRICING || [],
+          create: data_prApprovalHistory?.dataApprover?.PAYMENT_RELATION || [],
+          inactive: data_prApprovalHistory?.dataApprover?.INACTIVE_PAYMENT_RELATION || [],
         },
         dataHistory: {
-          create: data_prApprovalHistory?.dataHistory?.PRICING || [],
-          inactive: data_prApprovalHistory?.dataHistory?.INACTIVE_PRICING || [],
+          create: data_prApprovalHistory?.dataHistory?.PAYMENT_RELATION || [],
+          inactive: data_prApprovalHistory?.dataHistory?.INACTIVE_PAYMENT_RELATION || [],
         },
       };
 
