@@ -1,15 +1,19 @@
 // EMeteraiManagement.js
 import React, { useState, useEffect } from "react";
-import { message } from "antd";
+import { message, Dropdown } from "antd";
 import { useDispatch, useSelector } from "react-redux";
+import { DownOutlined, CheckOutlined, PlusOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
+import ButtonComponent from "../../../../components/ButtonComponent";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import StampingRequestModal from "./_components/StampingRequestModal";
 import ProcessSigningModal from "./_components/ProcessingSigningModal";
 import InvoiceDetailModal from "./_components/InvoiceDetailModal";
+import ModalApprovalEMeterai from "./_components/ModalApprovalEMeterai";
+import ModalRequestApprovalEMeterai from "./_components/ModalRequestApprovalEMeterai";
 import { getEMeteraiColumns } from "./_components/EMeteraiColumns";
 import {
   getAllEMeteraiInvoices,
@@ -32,11 +36,14 @@ const EMeteraiManagement = () => {
   // Local state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [sort, setSort] = useState("billPeriod~desc");
 
   // Modal states
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [stampingModalVisible, setStampingModalVisible] = useState(false);
   const [signingModalVisible, setSigningModalVisible] = useState(false);
+  const [modalApproval, setModalApproval] = useState(false);
+  const [modalRequest, setModalRequest] = useState(false);
 
   // Selected invoice
   const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -63,7 +70,7 @@ const EMeteraiManagement = () => {
   useEffect(() => {
     fetchInvoices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize]);
+  }, [page, pageSize, sort]);
 
   const fetchInvoices = () => {
     dispatch(
@@ -71,7 +78,7 @@ const EMeteraiManagement = () => {
         page: page,
         pageSize,
         search: "",
-        sort: "billingPeriod~desc",
+        sort: sort,
       })
     );
   };
@@ -235,6 +242,36 @@ const EMeteraiManagement = () => {
     setPageSize(size);
   };
 
+  // Sort Handler
+  const onSort = (_, __, sorter) => {
+    const dataSort =
+      sorter && sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        : "billingPeriod~desc";
+    setSort(dataSort);
+  };
+
+  // Bulk Action Handlers
+  const handleBulkApproval = () => {
+    setModalApproval(true);
+  };
+
+  const handleBulkRequest = () => {
+    setModalRequest(true);
+  };
+
+  const closeModalApproval = () => {
+    setModalApproval(false);
+  };
+
+  const closeModalRequest = () => {
+    setModalRequest(false);
+  };
+
+  const handleRefresh = () => {
+    fetchInvoices();
+  };
+
   // const transformedData = getTransformedData();
 
   // Get columns with handlers
@@ -253,6 +290,34 @@ const EMeteraiManagement = () => {
         header={
           <div className="flex -my-4 justify-between items-center">
             <p className="mt-[15px] font-bold">E-Meterai Management</p>
+            <div className="mt-[15px] flex gap-2">
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: "approval",
+                      label: "Approval",
+                      icon: <CheckOutlined style={{ color: "#1890ff" }} />,
+                      onClick: handleBulkApproval,
+                    },
+                    {
+                      type: "divider",
+                    },
+                    {
+                      key: "request",
+                      label: "Request Approval",
+                      icon: <PlusOutlined style={{ color: "#52c41a" }} />,
+                      onClick: handleBulkRequest,
+                    },
+                  ],
+                }}
+                trigger={["click"]}
+              >
+                <ButtonComponent type="default">
+                  Action <DownOutlined />
+                </ButtonComponent>
+              </Dropdown>
+            </div>
           </div>
         }
       >
@@ -266,6 +331,7 @@ const EMeteraiManagement = () => {
           current={page}
           onChange={handlePageChange}
           onSizeChanger={handleSizeChange}
+          onSort={onSort}
           totalData={pageInfo.totalElements || 0}
           tableScrolled={{ x: 1500, y: 500 }}
           useSelect={true}
@@ -306,6 +372,26 @@ const EMeteraiManagement = () => {
         invoiceData={selectedInvoice}
         onSubmit={handleSigningSubmit}
         loading={stampingLoading}
+      />
+
+      {/* Modal Approval E-Meterai */}
+      <ModalApprovalEMeterai
+        isOpen={modalApproval}
+        handleClose={closeModalApproval}
+        onSuccess={() => {
+          closeModalApproval();
+          handleRefresh();
+        }}
+      />
+
+      {/* Modal Request Approval E-Meterai */}
+      <ModalRequestApprovalEMeterai
+        isOpen={modalRequest}
+        handleClose={closeModalRequest}
+        onSuccess={() => {
+          closeModalRequest();
+          handleRefresh();
+        }}
       />
     </LayoutMenu>
   );

@@ -1,8 +1,5 @@
-import React from "react";
-import moment from "moment";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import DetailText from "../../../../../../components/DetailText";
-import { dateFormatting } from "../../../../../../utils";
 
 const EFakturCodeSection = ({ dataEfakturCode = {} }) => {
   return (

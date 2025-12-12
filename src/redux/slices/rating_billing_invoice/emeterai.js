@@ -33,13 +33,23 @@ const initialState = {
     totalPages: 0,
     number: 0,
   },
+  // Approval states
+  data_ready_request: [],
+  loading_ready_request: false,
+  data_approval_hierarchy: [],
+  loading_approval_hierarchy: false,
+  data_apphier_detail: null,
+  loading_apphier_detail: false,
+  data_approval_list: [],
+  loading_approval_list: false,
+  loading_modal: false,
 };
 
 export const getAllEMeteraiInvoices = createAsyncThunk(
   "GET_ALL_EMETERAI_INVOICES",
   async ({ page, pageSize, search, sort, filters }, thunkAPI) => {
     try {
-      const sortParams = sort || "billingPeriod~asc";
+      const sortParams = sort || "billPeriod~asc";
       const searchParams = search || "";
       let url = `/v1/dbs/api/rbi/invoice/stampsign?page=${page}&size=${pageSize}&sort=${sortParams}`;
 
@@ -292,6 +302,171 @@ export const downloadSignedInvoice = createAsyncThunk(
       const errorBody = {
         title: "Failed",
         description: `Failed to download signed invoice. ${message}`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Approval-related actions
+export const getReadyForRequestList = createAsyncThunk(
+  "GET_READY_FOR_REQUEST_LIST",
+  async ({ type }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/invoice/stampsign/ready-request/${type}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      console.error("❌ GET Ready for Request List Error:");
+      console.error(
+        "Error Message:",
+        error?.response?.data?.message || error.message
+      );
+      console.error("Error Code:", error?.response?.data?.code);
+      console.error("=".repeat(80));
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getApprovalHierarchyList = createAsyncThunk(
+  "GET_APPROVAL_HIERARCHY_LIST",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/invoice/stampsign/approval-hierarchy-list`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      console.error("❌ GET Approval Hierarchy List Error:");
+      console.error(
+        "Error Message:",
+        error?.response?.data?.message || error.message
+      );
+      console.error("Error Code:", error?.response?.data?.code);
+      console.error("=".repeat(80));
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getApphierDetail = createAsyncThunk(
+  "GET_APPHIER_DETAIL",
+  async ({ id }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/invoice/stampsign/apphier-detail/${id}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      console.error("❌ GET Apphier Detail Error:");
+      console.error(
+        "Error Message:",
+        error?.response?.data?.message || error.message
+      );
+      console.error("Error Code:", error?.response?.data?.code);
+      console.error("=".repeat(80));
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getApprovalListByType = createAsyncThunk(
+  "GET_APPROVAL_LIST_BY_TYPE",
+  async ({ type }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/invoice/stampsign/approval-list?type=${type}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      console.error("❌ GET Approval List Error:");
+      console.error(
+        "Error Message:",
+        error?.response?.data?.message || error.message
+      );
+      console.error("Error Code:", error?.response?.data?.code);
+      console.error("=".repeat(80));
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const approveStampSign = createAsyncThunk(
+  "APPROVE_STAMP_SIGN",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/invoice/stampsign/approval`;
+      const response = await ratingBillingHttpService.createData(url, body);
+
+      const successMessage = {
+        title: "Successful",
+        description:
+          response?.message ||
+          `Successfully ${
+            body.action === "APPROVE" ? "approved" : "rejected"
+          } the request`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+
+      return response;
+    } catch (error) {
+      console.error("❌ POST Approval Error:");
+      console.error(
+        "Error Message:",
+        error?.response?.data?.message || error.message
+      );
+      console.error("Error Code:", error?.response?.data?.code);
+      console.error("=".repeat(80));
+
+      const message =
+        error?.response?.data?.message || error.message || error.toString();
+
+      const errorBody = {
+        title: "Failed",
+        description: `Failed to process approval. ${message}. Please try again.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const requestApprovalStampSign = createAsyncThunk(
+  "REQUEST_APPROVAL_STAMP_SIGN",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/invoice/stampsign/stamp/${body.type}`;
+      const response = await ratingBillingHttpService.createData(url, {
+        ...body,
+        type: undefined,
+      });
+
+      const successMessage = {
+        title: "Successful",
+        description:
+          response?.message || "Request approval submitted successfully",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+
+      return response;
+    } catch (error) {
+      console.error("❌ POST Request Approval Error:");
+      console.error(
+        "Error Message:",
+        error?.response?.data?.message || error.message
+      );
+      console.error("Error Code:", error?.response?.data?.code);
+      console.error("=".repeat(80));
+
+      const message =
+        error?.response?.data?.message || error.message || error.toString();
+
+      const errorBody = {
+        title: "Failed",
+        description: `Failed to request approval. ${message}. Please try again.`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
 
@@ -646,6 +821,134 @@ const emeteraiSlice = createSlice({
       state.isFailed = true;
       state.message =
         action.payload?.data?.message || "Failed to upload manual signing";
+    },
+
+    // Approval-related reducers
+    [getReadyForRequestList.pending]: (state) => {
+      state.loading_ready_request = true;
+      state.isFailed = false;
+    },
+    [getReadyForRequestList.fulfilled]: (state, action) => {
+      state.loading_ready_request = false;
+      // Handle both array and object response
+      if (Array.isArray(action.payload)) {
+        state.data_ready_request = action.payload;
+      } else {
+        state.data_ready_request =
+          action.payload?.result || action.payload?.data || [];
+      }
+      state.isSuccess = true;
+    },
+    [getReadyForRequestList.rejected]: (state, action) => {
+      state.loading_ready_request = false;
+      state.isFailed = true;
+      state.data_ready_request = [];
+      state.message =
+        action.payload?.data?.message || "Failed to fetch ready request list";
+    },
+
+    [getApprovalHierarchyList.pending]: (state) => {
+      state.loading_approval_hierarchy = true;
+      state.isFailed = false;
+    },
+    [getApprovalHierarchyList.fulfilled]: (state, action) => {
+      state.loading_approval_hierarchy = false;
+      // Handle both array and object response
+      if (Array.isArray(action.payload)) {
+        state.data_approval_hierarchy = action.payload;
+      } else {
+        state.data_approval_hierarchy =
+          action.payload?.result || action.payload?.data || [];
+      }
+      state.isSuccess = true;
+    },
+    [getApprovalHierarchyList.rejected]: (state, action) => {
+      state.loading_approval_hierarchy = false;
+      state.isFailed = true;
+      state.data_approval_hierarchy = [];
+      state.message =
+        action.payload?.data?.message ||
+        "Failed to fetch approval hierarchy list";
+    },
+
+    [getApphierDetail.pending]: (state) => {
+      state.loading_apphier_detail = true;
+      state.isFailed = false;
+    },
+    [getApphierDetail.fulfilled]: (state, action) => {
+      state.loading_apphier_detail = false;
+      // Handle both array and object response
+      if (Array.isArray(action.payload)) {
+        state.data_apphier_detail = action.payload;
+      } else {
+        state.data_apphier_detail =
+          action.payload?.result || action.payload?.data || [];
+      }
+      state.isSuccess = true;
+    },
+    [getApphierDetail.rejected]: (state, action) => {
+      state.loading_apphier_detail = false;
+      state.isFailed = true;
+      state.data_apphier_detail = [];
+      state.message =
+        action.payload?.data?.message || "Failed to fetch approval detail";
+    },
+
+    [getApprovalListByType.pending]: (state) => {
+      state.loading_approval_list = true;
+      state.isFailed = false;
+    },
+    [getApprovalListByType.fulfilled]: (state, action) => {
+      state.loading_approval_list = false;
+      // Handle both array and object response
+      if (Array.isArray(action.payload)) {
+        state.data_approval_list = action.payload;
+      } else {
+        state.data_approval_list =
+          action.payload?.result || action.payload?.data || [];
+      }
+      state.isSuccess = true;
+    },
+    [getApprovalListByType.rejected]: (state, action) => {
+      state.loading_approval_list = false;
+      state.isFailed = true;
+      state.data_approval_list = [];
+      state.message =
+        action.payload?.data?.message || "Failed to fetch approval list";
+    },
+
+    [approveStampSign.pending]: (state) => {
+      state.loading_modal = true;
+      state.isFailed = false;
+    },
+    [approveStampSign.fulfilled]: (state, action) => {
+      state.loading_modal = false;
+      state.isSuccess = true;
+      state.message =
+        action.payload?.message || "Approval processed successfully";
+    },
+    [approveStampSign.rejected]: (state, action) => {
+      state.loading_modal = false;
+      state.isFailed = true;
+      state.message =
+        action.payload?.data?.message || "Failed to process approval";
+    },
+
+    [requestApprovalStampSign.pending]: (state) => {
+      state.loading_modal = true;
+      state.isFailed = false;
+    },
+    [requestApprovalStampSign.fulfilled]: (state, action) => {
+      state.loading_modal = false;
+      state.isSuccess = true;
+      state.message =
+        action.payload?.message || "Request approval submitted successfully";
+    },
+    [requestApprovalStampSign.rejected]: (state, action) => {
+      state.loading_modal = false;
+      state.isFailed = true;
+      state.message =
+        action.payload?.data?.message || "Failed to request approval";
     },
   },
 });

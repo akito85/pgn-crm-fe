@@ -7,7 +7,14 @@ import React, {
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Tooltip, Dropdown, message, Menu } from "antd";
-import { MoreOutlined, PlusOutlined, DownOutlined, CheckOutlined, UploadOutlined, FileTextOutlined } from "@ant-design/icons";
+import {
+  MoreOutlined,
+  PlusOutlined,
+  DownOutlined,
+  CheckOutlined,
+  UploadOutlined,
+  FileTextOutlined,
+} from "@ant-design/icons";
 import moment from "moment";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -20,7 +27,7 @@ import ModalHistory from "../../../../components/Modal/ModalHistory";
 import ModalGenerateEFaktur from "./ModalEfaktur/ModalGenerateEFaktur";
 import ModalGenerateXML from "./ModalEfaktur/ModalGenerateXML";
 import ModalUploadEFaktur from "./ModalEfaktur/ModalUploadEFaktur";
-import ModalApprovalEFaktur from "./ModalEfaktur/ModalApprovalEFaktur ";
+import ModalApprovalEFaktur from "./ModalEfaktur/ModalApprovalEFaktur";
 import ModalRequestApprovalEFaktur from "./ModalEfaktur/ModalRequestApprovalEFaktur";
 import LogAktivitasEFaktur from "./LogAktivitasEFaktur";
 import Toolbar from "../../../../components/Toolbar";
@@ -239,7 +246,6 @@ const ViewFaktur = () => {
     setModalApproval(false);
     setSelectedBilling(null);
   };
-
 
   const closeModalApprovalHistory = () => {
     setModalApprovalHistory(false);
