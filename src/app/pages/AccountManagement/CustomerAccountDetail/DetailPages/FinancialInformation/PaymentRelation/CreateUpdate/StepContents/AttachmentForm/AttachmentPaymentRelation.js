@@ -16,8 +16,6 @@ import FileSaver from "file-saver";
 import { configApp } from "../../../../../../../../../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../../../../../../../../../redux/slices/product_promo/product";
 import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
-import BaseContainer from "../../../../../../../../../../components/BaseContainer";
-import { Form } from "antd";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
