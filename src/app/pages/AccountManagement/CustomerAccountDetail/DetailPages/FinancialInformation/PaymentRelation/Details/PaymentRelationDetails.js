@@ -127,7 +127,7 @@ const PaymentRelationDetails = ({
         description,
       }];
 
-      if (result.approvalType === "PAYMENT_RELATION") {
+      if (!result.approvalType) {
         dispatch(approveOrRejectPaymentRelation({
           body,
         }))
@@ -138,7 +138,7 @@ const PaymentRelationDetails = ({
           handleApprovalModal(false);
         })
         .catch(() => {});
-      } else if (result.approvalType === "INACTIVE_PAYMENT_RELATION") {
+      } else if (result.approvalType) {
         dispatch(approveOrRejectInactivePaymentRelation({
           body,
         }))
