@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Radio } from "antd";
+import { Tabs } from "antd";
 import ServiceAgreementSection from "./Detail/ServiceAgreementSection";
 import PromoSection from "./Detail/PromoSection";
 import CalculationUsageSection from "./Detail/CalculationUsageSection";
 import MuldestSection from "./Detail/MuldestSection";
 import UsageSection from "./Detail/UsageSection";
+import CardContainer from "../../../../components/CardContainer";
 
 const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
   // State
@@ -18,34 +19,52 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
   }, [ratingCodeId]);
 
   // Value Tab
-  const tabDetail = [
+  const tabItems = [
     {
+      key: "Calculation Usage",
       label: "Calculation Usage",
-      value: "Calculation Usage",
     },
     {
+      key: "Service Agreement",
       label: "Service Agreement",
-      value: "Service Agreement",
     },
     {
+      key: "Promo",
       label: "Promo",
-      value: "Promo",
       disabled: true,
     },
     {
+      key: "Usage",
       label: "Usage",
-      value: "Usage",
     },
     {
+      key: "Multi Destination",
       label: "Multi Destination",
-      value: "Multi Destination",
       disabled: true,
     },
   ];
 
+  // Get title based on active tab
+  const getContainerTitle = () => {
+    switch (tabSection) {
+      case "Calculation Usage":
+        return "CALCULATION USAGE INFORMATION";
+      case "Service Agreement":
+        return "SERVICE AGREEMENT INFORMATION";
+      case "Promo":
+        return "PROMO INFORMATION";
+      case "Usage":
+        return "USAGE INFORMATION";
+      case "Multi Destination":
+        return "MULTI DESTINATION INFORMATION";
+      default:
+        return "CALCULATION USAGE INFORMATION";
+    }
+  };
+
   // rendering section
-  const renderSection = (tabName) => {
-    switch (tabName) {
+  const renderSection = () => {
+    switch (tabSection) {
       case "Calculation Usage":
         return (
           <CalculationUsageSection
@@ -80,33 +99,36 @@ const RatingDetail = ({ ratingCodeId, SAId, calculationCode, onClose }) => {
         );
     }
   };
-  
+
   // onchang tabs
-  const onChangeTab = ({ target: { value } }) => {
-    setTabSection(value);
+  const onChangeTab = (key) => {
+    setTabSection(key);
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <Radio.Group
-          options={tabDetail}
-          onChange={onChangeTab}
-          value={tabSection}
-          optionType="button"
-          buttonStyle="solid"
-          style={{ gap: 12, display: "flex" }}
-        />
-        <button
-          onClick={onClose}
-          className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors ml-4"
-          title="Close Detail"
-        >
-          ✕
-        </button>
+    <CardContainer
+      header={
+        <div className="flex -my-4 justify-between items-center">
+          <p className="mt-[15px] font-bold">{getContainerTitle()}</p>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+            title="Close Detail"
+          >
+            ✕
+          </button>
+        </div>
+      }
+    >
+      <Tabs
+        items={tabItems}
+        onChange={onChangeTab}
+        activeKey={tabSection}
+      />
+      <div className="mt-4">
+        {renderSection()}
       </div>
-      {renderSection(tabSection)}
-    </div>
+    </CardContainer>
   );
 };
 

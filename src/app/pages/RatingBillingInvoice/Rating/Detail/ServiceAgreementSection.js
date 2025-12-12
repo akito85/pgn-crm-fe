@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Radio } from "antd";
-import CardContainer from "../../../../../components/CardContainer";
+import { Tabs } from "antd";
 import DetailSection from "./ServiceAgreement/DetailSection";
 import PricingSection from "./ServiceAgreement/PricingSection";
 import CalculationRuleSection from "./ServiceAgreement/CalculationRuleSection";
@@ -12,7 +11,9 @@ import TableRBI from "../../../../../components/TableRBI";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
-  const { data_serviceAgreement, loading } = useSelector((state) => state.rating);
+  const { data_serviceAgreement, loading } = useSelector(
+    (state) => state.rating
+  );
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -49,10 +50,10 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
   useEffect(() => {
     if (pageDetail && saDetailRef.current) {
       setTimeout(() => {
-        saDetailRef.current.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start',
-          inline: 'nearest'
+        saDetailRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "nearest",
         });
       }, 100);
     }
@@ -86,48 +87,37 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
     setSort(dataSort);
   };
 
-  const serviceSection = [
+  const serviceTabItems = [
     {
+      key: "Detail",
       label: "Detail",
-      value: "Detail",
+      children: <DetailSection SAId={ratingSaId} />,
     },
     {
+      key: "Pricing",
       label: "Pricing",
-      value: "Pricing",
+      children: <PricingSection SAId={ratingSaId} />,
     },
     {
+      key: "Calculation Rule",
       label: "Calculation Rule",
-      value: "Calculation Rule",
+      children: <CalculationRuleSection SAId={ratingSaId} />,
     },
     {
+      key: "Term Of Service",
       label: "Term Of Service",
-      value: "Term Of Service",
+      children: <TosSection SAId={ratingSaId} />,
     },
   ];
 
-  const onChangeTab = ({ target: { value } }) => {
-    setTabSection(value);
+  const onChangeTab = (key) => {
+    setTabSection(key);
   };
 
   const handleDetail = (record) => {
     setPageDetail(true);
     setRatingSaId(record.ratingSaId);
     setTabSection("Detail");
-  };
-
-  const renderServiceAgreementDetail = (tabName) => {
-    switch (tabName) {
-      case "Detail":
-        return <DetailSection SAId={ratingSaId} />;
-      case "Pricing":
-        return <PricingSection SAId={ratingSaId} />;
-      case "Calculation Rule":
-        return <CalculationRuleSection SAId={ratingSaId} />;
-      case "Term Of Service":
-        return <TosSection SAId={ratingSaId} />;
-      default:
-        return <DetailSection SAId={ratingSaId} />;
-    }
   };
 
   const baseColumns = useMemo(
@@ -165,58 +155,53 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
 
   return (
     <>
-      <CardContainer
-        header={
-          <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">SERVICE AGREEMENT INFORMATION</p>
+      <div className="mb-4">
+        <p className="text-[15px] font-medium text-blue-600 mb-3">
+          SERVICE ITEM INFORMATION
+        </p>
+        <div className="flex flex-row gap-8">
+          <div className="flex flex-col gap-1">
+            <p className="text-[15px] font-normal text-gray-700">
+              Calculation Code
+            </p>
+            <p className="text-[20px] font-medium text-blue-600">
+              {calculationCode}
+            </p>
           </div>
-        }
-      >
-        <div className="flex flex-row align-middle gap-2 mb-4">
-          <p className="text-[15px] font-semibold text-text-color-semibold">
-            Calculation Code:
-          </p>
-          <p className="text-[15px] font-semibold text-primary">
-            {calculationCode}
-          </p>
-          <p className="text-[15px] font-semibold text-text-color-semibold">
-            Rating Code:
-          </p>
-          <p className="text-[15px] font-semibold text-primary">
-            {ratingCodeId}
-          </p>
+          <div className="flex flex-col gap-1">
+            <p className="text-[15px] font-normal text-gray-700">Rating Code</p>
+            <p className="text-[20px] font-medium text-blue-600">
+              {ratingCodeId}
+            </p>
+          </div>
         </div>
-        <div className="w-full">
-          <TableRBI
-            dataSource={dataSource}
-            columns={processedColumns}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChange}
-            showExport={false}
-            onSizeChanger={handleChange}
-            totalData={data_serviceAgreement?.page?.totalElements || 0}
-            tableScrolled={{ y: 525, x: 3000 }}
-            onSort={onSortApi}
-            columnDefinitions={columnDefinitions}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            loading={loading}
-          />
-        </div>
-      </CardContainer>
+      </div>
+      <div className="w-full">
+        <TableRBI
+          dataSource={dataSource}
+          columns={processedColumns}
+          current={page}
+          pageSize={pageSize}
+          onChange={handleChange}
+          showExport={false}
+          onSizeChanger={handleChange}
+          totalData={data_serviceAgreement?.page?.totalElements || 0}
+          tableScrolled={{ y: 525, x: 3000 }}
+          onSort={onSortApi}
+          columnDefinitions={columnDefinitions}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          loading={loading}
+        />
+      </div>
 
       {pageDetail === true ? (
         <div ref={saDetailRef} className="pt-[30px]">
-          <Radio.Group
-            options={serviceSection}
+          <Tabs
+            items={serviceTabItems}
             onChange={onChangeTab}
-            value={tabSection}
-            optionType="button"
-            buttonStyle="solid"
-            style={{ gap: 12, display: "flex" }}
+            activeKey={tabSection}
           />
-          {renderServiceAgreementDetail(tabSection)}
         </div>
       ) : null}
     </>

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Radio, Tooltip } from "antd";
+import { Spin, Tabs, Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -69,15 +69,17 @@ const RatingPage = () => {
     );
   }, [search, page, pageSize, sort, dispatch]);
 
-  const tabRating = [
+  const tabItems = [
     {
+      key: "Rating Gas",
       label: "Rating Gas",
-      value: "Rating Gas",
+      children: null,
     },
     {
+      key: "Rating Non Gas",
       label: "Rating Non Gas",
-      value: "Rating Non Gas",
       disabled: true,
+      children: null,
     },
   ];
 
@@ -128,8 +130,8 @@ const RatingPage = () => {
     setSort(dataSort);
   };
 
-  const onChangeTab = ({ target: { value } }) => {
-    setValueTab(value);
+  const onChangeTab = (key) => {
+    setValueTab(key);
   };
 
   const handleDetail = (record) => {
@@ -239,13 +241,10 @@ const RatingPage = () => {
           }
         >
           <div className="mt-[0px]">
-            <Radio.Group
-              options={tabRating}
+            <Tabs
+              items={tabItems}
               onChange={onChangeTab}
-              value={valueTab}
-              optionType="button"
-              buttonStyle="solid"
-              style={{ gap: 12, display: "flex" }}
+              activeKey={valueTab}
             />
           </div>
           <div className="my-5">
