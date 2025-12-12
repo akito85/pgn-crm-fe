@@ -110,6 +110,7 @@ import partnerReducer from "../slices/receipt_collection/partner";
 import partnerCaReducer from "../slices/receipt_collection/partnerCa";
 import caPaymentChannelReducer from "../slices/receipt_collection/caPaymentChannel";
 import digitalSignatureReducer from "../slices/rating_billing_invoice/MasterData/digitalSignature";
+import settingReducer from "../slices/receipt_collection/setting";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -226,6 +227,7 @@ const reducer = combineReducers({
   partner: partnerReducer,
   partnerCa: partnerCaReducer,
   caPaymentChannel: caPaymentChannelReducer,
+  receiptSetting: settingReducer,
 
   // Attachment
   attachment: attachmentReducer,

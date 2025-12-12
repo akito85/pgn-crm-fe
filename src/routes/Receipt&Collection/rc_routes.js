@@ -80,4 +80,10 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_CA_PAYMENT_CHANNEL: "/receipt-and-collection/ca-payment-channel/view",
   CREATE_CA_PAYMENT_CHANNEL: "/receipt-and-collection/ca-payment-channel/create",
   UPDATE_CA_PAYMENT_CHANNEL: "/receipt-and-collection/ca-payment-channel/update",
+
+
+  VIEW_SETTINGS: "/receipt-and-collection/settings",
+  DETAIL_SETTINGS: "/receipt-and-collection/settings/view",
+  CREATE_SETTINGS: "/receipt-and-collection/settings/create",
+  UPDATE_SETTINGS: "/receipt-and-collection/settings/update",
 };

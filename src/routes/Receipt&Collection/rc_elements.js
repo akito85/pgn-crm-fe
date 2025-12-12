@@ -37,6 +37,10 @@ import ViewCaPaymentChannel from "../../app/pages/ReceiptAndCollection/MasterDat
 import ListDetailCaPaymentChannel from "../../app/pages/ReceiptAndCollection/MasterData/CaPaymentChannel/ListDetailCaPaymentChannel";
 import ListFormCaPaymentChannel from "../../app/pages/ReceiptAndCollection/MasterData/CaPaymentChannel/ListFormCaPaymentChannel";
 
+import ViewSettings from "../../app/pages/ReceiptAndCollection/MasterData/Settings/ViewSettings";
+import ListDetailSettings from "../../app/pages/ReceiptAndCollection/MasterData/Settings/ListDetailSettings";
+import ListFormSettings from "../../app/pages/ReceiptAndCollection/MasterData/Settings/ListFormSettings";
+
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
   VIEW_RECEIPT_PAGE: <ViewReceipt />,
@@ -117,4 +121,10 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_CA_PAYMENT_CHANNEL: <ListDetailCaPaymentChannel />,
   CREATE_CA_PAYMENT_CHANNEL: <ListFormCaPaymentChannel type={"create"} />,
   UPDATE_CA_PAYMENT_CHANNEL: <ListFormCaPaymentChannel type={"update"} />,
+
+  // settings
+  VIEW_SETTINGS: <ViewSettings />,
+  DETAIL_SETTINGS: <ListDetailSettings />,
+  CREATE_SETTINGS: <ListFormSettings type={"create"} />,
+  UPDATE_SETTINGS: <ListFormSettings type={"update"} />,
 };
