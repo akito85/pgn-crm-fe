@@ -267,6 +267,21 @@ const GLAccountView = () => {
   // Grant Access Item
   const itemGrantAccess = [
     {
+      action: "Approve",
+      render: (
+        <ButtonComponent
+          icon={
+            <SVGIcon name="IconRequestApproval" width={24} color="#0075bf" />
+          }
+          type="default"
+          className="bg-red-500"
+          onClick={() => setModalApproval(true)}
+        >
+          Bulk Approve
+        </ButtonComponent>
+      ),
+    },
+    {
       action: "Create",
       render: (
         <NavLink to={RBI_ROUTES.GLACCOUNT_CREATE}>
@@ -277,17 +292,6 @@ const GLAccountView = () => {
             Create GL Account
           </ButtonComponent>
         </NavLink>
-      ),
-    },
-    {
-      action: "Approve",
-      render: (
-        <ButtonComponent
-          type="approve"
-          onClick={() => setModalApproval(true)}
-        >
-          Bulk Approval
-        </ButtonComponent>
       ),
     },
 
