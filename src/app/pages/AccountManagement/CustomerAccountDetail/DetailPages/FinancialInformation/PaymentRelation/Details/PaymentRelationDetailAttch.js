@@ -1,8 +1,14 @@
-import { Tooltip } from "antd";
+import { Spin, Tooltip } from "antd";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import { Fragment, useState } from "react";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import TablePaginationNew from "../../../../../../../../components/TablePaginationNew";
+import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
+import axios from "axios";
+import { tokenHeader } from "../../../../../../../../utils/tokenHeader";
+import { getBase64 } from "../../../../../../../../utils/getBase64";
+import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
+import { configApp } from "../../../../../../../../constants/configApp";
 
 
 const PaymentRelationDetailAttch = ({
@@ -12,10 +18,21 @@ const PaymentRelationDetailAttch = ({
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const handleViewFile = (fileData) => {
-    // Placeholder for view file action
-    console.log("View file:", fileData);
-    // Add your file viewing logic here
+  const [loadingDownload, setLoadingDownload] = useState(false);
+
+  const handleShow = async (r) => {
+    if ((r.fileType || r.type).includes("application/vnd")) {
+      accountManagementService.downloadData(r.urlFile1);
+    } else {
+      setLoadingDownload(true);
+      const response = await axios.get(configApp.MASTER_MANAGEMENT + r.urlFile1, {
+        headers: tokenHeader(),
+        responseType: "blob",
+      });
+      const base64 = await getBase64(response.data);
+      setLoadingDownload(false);
+      previewFileAttachment(base64);
+    }
   };
 
   const columns = [
@@ -62,7 +79,7 @@ const PaymentRelationDetailAttch = ({
                   color={"#0075bf"}
                   width={24}
                   onClick={() => {
-                    handleViewFile(r);
+                    handleShow(r);
                   }}
                 />
               </div>
@@ -75,21 +92,23 @@ const PaymentRelationDetailAttch = ({
 
   return (
     <Fragment>
-      <BaseContainer header={"ATTACHMENTS"}>
-        <TablePaginationNew
-          dataSource={dataAttachment.map((item, idx) => ({
-            ...item,
-            key: item.id || idx,
-          }))}
-          tableScrolled={{ y: 525, x: 1500 }}
-          columns={columns}
-          current={page}
-          onChange={setPage}
-          onSizeChanger={setPageSize}
-          type="FE"
-        />
+      <Spin spinning={loadingDownload}>
+        <BaseContainer header={"ATTACHMENTS"}>
+          <TablePaginationNew
+            dataSource={dataAttachment.map((item, idx) => ({
+              ...item,
+              key: item.id || idx,
+            }))}
+            tableScrolled={{ y: 525, x: 1500 }}
+            columns={columns}
+            current={page}
+            onChange={setPage}
+            onSizeChanger={setPageSize}
+            type="FE"
+          />
 
-      </BaseContainer>
+        </BaseContainer>
+      </Spin>
     </Fragment>
   );
 };
