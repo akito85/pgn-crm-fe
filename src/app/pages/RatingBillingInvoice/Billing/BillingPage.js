@@ -289,7 +289,11 @@ const BillingPage = () => {
                 e.stopPropagation();
                 handleApprovalHistory(record);
               }}
-              style={{ cursor: "pointer", display: "inline-block",lineHeight: 0 }}
+              style={{
+                cursor: "pointer",
+                display: "inline-block",
+                lineHeight: 0,
+              }}
             >
               <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
             </div>
