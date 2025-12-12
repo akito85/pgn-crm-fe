@@ -10,7 +10,7 @@ import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { approveOrRejectAllPaymentRelation, getPaymentRelation, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { approveOrRejectAllPaymentRelation, downloadPaymentRelation, getPaymentRelation, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
@@ -311,6 +311,20 @@ const PaymentRelation = ({
     }
   }
 
+  const handleDownload = () => {
+    let tempSearch = "";
+    for (const dataIndex in search) {
+      if (Object.hasOwnProperty.call(search, dataIndex)) {
+        const tempSearchText = search[dataIndex];
+        if (tempSearchText) {
+          tempSearch += `${dataIndex}~${tempSearchText},`;
+        }
+      }
+    }
+    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+    dispatch(downloadPaymentRelation({ page, pageSize, sort, search: tempSearch }));
+  };
+
   // Listen to approve or reject button on the parent component
   useEffect(() => {
     if (isActive) {
@@ -387,7 +401,7 @@ const PaymentRelation = ({
                 {/* Download List Button */}
                 <ButtonComponent
                   type={"submit"}
-                  onClick={() => {}}
+                  onClick={handleDownload}
                   icon={
                     <DownloadOutlined
                       style={{

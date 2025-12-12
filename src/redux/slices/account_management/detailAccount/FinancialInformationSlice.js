@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import accountManagementService from "../../../services/account_management/accountManagementService";
-import { setBodyError, showModalError, showModalSuccess } from "../../general_slice";
+import { setBodyError, showModalError, showModalSuccess, validateError } from "../../general_slice";
 
 const initialState = {
   loading: false,
@@ -798,6 +798,21 @@ export const inactivatePaymentRelation = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const downloadPaymentRelation = createAsyncThunk(
+  "DOWNLOAD_PAYMENT_RELATION",
+  async ({ search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-relation/export-excel?search=${search}&page=
+      ${page}&size=${pageSize}&sort=${sort}`;
+      const response = await accountManagementService.downloadData(url);
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_ACCOUNT_STANDARD", back: false }));
+      return thunkAPI.rejectWithValue(response.response.data);
     }
   }
 );
