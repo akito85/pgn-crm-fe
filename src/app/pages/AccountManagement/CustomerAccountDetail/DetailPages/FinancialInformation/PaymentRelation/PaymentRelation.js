@@ -115,8 +115,16 @@ const PaymentRelation = ({
     }))
     .unwrap()
     .then(() => {
+        const body = {
+        page,
+        size: pageSize,
+        sort,
+        searches: search,
+      }
+
+      dispatch(getPaymentRelation({ id, body }));
       setShowInactiveModal(false);
-      handleClear()
+      handleClear();
     })
     .catch(() => {})
   }
