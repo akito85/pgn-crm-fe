@@ -832,7 +832,6 @@ export const getDetailPrabillingLog = createAsyncThunk(
   }
 );
 
-// customer account detail
 export const getCustomerAccountDetail = createAsyncThunk(
   "GET_CUSTOMER_ACCOUNT_DETAIL",
   async (params, thunkAPI) => {
@@ -872,7 +871,6 @@ export const getCustomerAccountDetail = createAsyncThunk(
 
       const responseData = response.data?.data || response.data;
 
-      // Validasi struktur response
       if (!responseData) {
         console.error("Invalid response structure:", responseData);
         throw new Error("Invalid data format received from server");
@@ -884,8 +882,13 @@ export const getCustomerAccountDetail = createAsyncThunk(
       const dataSaPrcrule = responseData.dataSaPrcrule || [];
       const dataSATosDet = responseData.dataSATosDet || [];
       const dataTosSubDet = responseData.dataTosSubDet || [];
+      
+      // Data baru
+      const dataBillingBucket = responseData.dataBillingBucket || [];
+      const dataBillingItem = responseData.dataBillingItem || [];
+      const dataSAPrcRuleDet = responseData.dataSAPrcRuleDet || [];
 
-      // Process Usage Data - Menampilkan semua field termasuk yang null
+      // Process Usage Data
       const usageData = dataUsage.map((item) => ({
         assetSerialNum: item.assetSerialNum,
         assetType: item.assetType,
@@ -932,7 +935,7 @@ export const getCustomerAccountDetail = createAsyncThunk(
         priceCurrency: item.priceCurrency,
       }));
 
-      // Process SA Data - Group by saNumber to avoid duplicates
+      // Process SA Data
       const saMap = new Map();
       dataDetail.forEach((item) => {
         if (!saMap.has(item.saNumber)) {
@@ -962,20 +965,52 @@ export const getCustomerAccountDetail = createAsyncThunk(
       });
       const saData = Array.from(saMap.values());
 
-      // Process SA TOS Detail - Menampilkan semua field termasuk yang null
+      // Process SA TOS Detail
       const saTosDet = dataSATosDet.map((item) => ({
         saTosName: item.saTosName,
         attributeName: item.attributeName,
         value: item.value,
       }));
 
-      // Process TOS Sub Detail - Menampilkan semua field termasuk yang null
+      // Process TOS Sub Detail
       const tosSubDet = dataTosSubDet.map((item) => ({
         tosName: item.tosName,
         attributeName: item.attributeName,
         unit: item.unit,
         value: item.value,
         fromItem: item.fromItem,
+      }));
+
+      // Process Billing Bucket Data (BARU)
+      const billingBucketData = dataBillingBucket.map((item) => ({
+        bucketCode: item.bucketCode,
+        bucketName: item.bucketName,
+        bucketPriority: item.bucketPriority,
+        validStartDate: item.validStartDate,
+        validEndDate: item.validEndDate,
+      }));
+
+      // Process Billing Item Data (BARU)
+      const billingItemData = dataBillingItem.map((item) => ({
+        bucketCode: item.bucketCode,
+        bucketName: item.bucketName,
+        itemCode: item.itemCode,
+        itemName: item.itemName,
+        billingType: item.billingType,
+        itemCategory: item.itemCategory,
+        isLateCharge: item.isLateCharge,
+        sequence: item.sequence,
+        currencyId: item.currencyId,
+        itemPriority: item.itemPriority,
+      }));
+
+      // Process SA Price Rule Detail Data (BARU)
+      const saPrcRuleDetData = dataSAPrcRuleDet.map((item) => ({
+        currencyCode: item.currencyCode,
+        fullPriceCode: item.fullPriceCode,
+        uomName: item.uomName,
+        priceValue: item.priceValue,
+        lateChargeVal: item.lateChargeVal,
       }));
 
       return {
@@ -986,6 +1021,9 @@ export const getCustomerAccountDetail = createAsyncThunk(
         saData: saData,
         saTosDet: saTosDet,
         tosSubDet: tosSubDet,
+        billingBucketData: billingBucketData,
+        billingItemData: billingItemData,
+        saPrcRuleDetData: saPrcRuleDetData,
         totalPages: 1,
         totalElements: dataUsage.length,
       };
@@ -1011,6 +1049,7 @@ export const getCustomerAccountDetail = createAsyncThunk(
     }
   }
 );
+
 // Update download function
 export const downloadPrabillingResult = createAsyncThunk(
   "DOWNLOAD_PRABILLING_RESULT",

@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import BaseContainer from "../../../../../../components/BaseContainer";
+import TableRBI from "../../../../../../components/TableRBI";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import { getAllDetailServiceAgreementPaginate } from "../../../../../../redux/slices/rating_billing_invoice/rating";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { hasValue, renderColumn } from "../../../../../../utils";
+import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
 export const columnsDetailServiceAgreement = (
   page = 1,
@@ -12,11 +12,13 @@ export const columnsDetailServiceAgreement = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { },
+  handleSearch = () => {},
   search
 ) => [
   {
     title: "NO",
+    dataIndex: "no",
+    key: "no",
     align: "center",
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
@@ -24,6 +26,7 @@ export const columnsDetailServiceAgreement = (
   {
     title: "NAME",
     dataIndex: "name",
+    key: "name",
     sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
@@ -39,6 +42,7 @@ export const columnsDetailServiceAgreement = (
   {
     title: "VALUE",
     dataIndex: "value",
+    key: "value",
     sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValue(
@@ -54,6 +58,7 @@ export const columnsDetailServiceAgreement = (
   {
     title: "UNIT",
     dataIndex: "unit",
+    key: "unit",
     sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
@@ -70,7 +75,7 @@ export const columnsDetailServiceAgreement = (
 
 const DetailSection = ({ SAId }) => {
   // Selector
-  const { data_detailServiceAgreement } = useSelector((state) => state.rating);
+  const { data_detailServiceAgreement, loading } = useSelector((state) => state.rating);
 
   // Declaration
   const dispatch = useDispatch();
@@ -84,6 +89,10 @@ const DetailSection = ({ SAId }) => {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: [],
+  }));
 
   // Use Effect
   useEffect(() => {
@@ -121,28 +130,58 @@ const DetailSection = ({ SAId }) => {
   };
 
   // Sort Table
-  const onSortApi = (_, __, sort) => {
+  const onSortApi = (_, __, sorter) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
 
+  const baseColumns = useMemo(
+    () =>
+      columnsDetailServiceAgreement(
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        search
+      ),
+    [page, pageSize, searchedColumn, searchText, search]
+  );
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
   return (
-    <BaseContainer header={"Service Agreement Detail Information"}>
+    <>
+      <div className="mb-4">
+        <p className="text-sm font-semibold text-primary uppercase">
+          SERVICE AGREEMENT DETAIL INFORMATION
+        </p>
+      </div>
       <div className="w-full">
-        <TablePaginationNew
+        <TableRBI
           dataSource={dataSource}
-          columns={columnsDetailServiceAgreement(
-            page,
-            pageSize,
-            searchInput,
-            searchedColumn,
-            searchText,
-            handleSearch,
-            search
-          )}
+          columns={processedColumns}
           current={page}
           pageSize={pageSize}
           onChange={handleChange}
@@ -150,9 +189,14 @@ const DetailSection = ({ SAId }) => {
           totalData={data_detailServiceAgreement?.page?.totalElements || 0}
           onSort={onSortApi}
           tableScrolled={{ y: 525, x: 800 }}
+          showExport={false}
+          columnDefinitions={columnDefinitions}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          loading={loading}
         />
       </div>
-    </BaseContainer>
+    </>
   );
 };
 

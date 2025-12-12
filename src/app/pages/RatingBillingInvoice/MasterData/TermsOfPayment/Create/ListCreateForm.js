@@ -410,7 +410,7 @@ const ListCreateForm = ({ type }) => {
       setIsSun(false);
       setList([]);
       setCriteriaValues([]);
-      setAppHierOptions([]);
+      // setAppHierOptions([]);
       setKirimBody({});
       setTabData([
         {
