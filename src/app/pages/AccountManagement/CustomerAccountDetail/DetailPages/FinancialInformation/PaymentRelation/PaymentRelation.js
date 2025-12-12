@@ -368,134 +368,27 @@ const PaymentRelation = ({
           {"PAYMENT RELATION LIST"}
         </div>
 
-        <div>
-          {!isApproval && (
-            <div className="flex justify-between items-center gap-5 mb-5">
-              {/* Filter Button - Left side */}
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => navigate(-1)}
-                icon={
-                  <FilterOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 20,
-                    }}
-                  />
-                }
-                style={{
-                  backgroundColor: "#0075bf",
-                  color: "#fff",
-                  borderColor: "#0075bf",
-                  border: "1px solid #0075bf",
-                  width: "128px",
-                  height: "48px",
-                  borderRadius: "5px"
-                }}
-              >
-                Filters
-              </ButtonComponent>
-              
-              {/* Right side buttons container */}
-              <div className="flex justify-end items-center gap-2.5">
-                {/* Download List Button */}
-                <ButtonComponent
-                  type={"submit"}
-                  onClick={handleDownload}
-                  icon={
-                    <DownloadOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 20,
-                      }}
-                    />
-                  }
-                  style={{
-                    backgroundColor: "#0075bf",
-                    color: "#fff",
-                    borderColor: "#0075bf",
-                    border: "1px solid #0075bf",
-                    borderRadius: "5px",
-                    height: "48px"
-                  }}
-                >
-                  Download List
-                </ButtonComponent>
-
-                {/* Approval Button */}
-                <ButtonComponent
-                  type={"submit"}
-                  onClick={() => handleIsApproval(true)}
-                  icon={
-                    <CheckOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 20,
-                      }}
-                    />
-                  }
-                  style={{
-                    backgroundColor: "#0075bf",
-                    color: "#fff",
-                    borderColor: "#0075bf",
-                    border: "1px solid #0075bf",
-                    borderRadius: "5px",
-                    height: "48px"
-                  }}
-                >
-                  Approval
-                </ButtonComponent>
-
-                {/* Create Button */}
-                <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_PAYMENT_RELATION} state={{
-                  idAccount: id,
-                  idCustomer,
-                }}>
-                  <ButtonComponent
-                    type={"submit"}
-                    icon={
-                      <PlusOutlined
-                        style={{
-                          color: "#fff",
-                          fontSize: 20,
-                        }}
-                      />
-                    }
-                    style={{
-                      backgroundColor: "#0075bf",
-                      color: "#fff",
-                      borderColor: "#0075bf",
-                      border: "1px solid #0075bf",
-                      borderRadius: "5px",
-                      height: "48px"
-                    }}
-                  >
-                    Create
-                  </ButtonComponent>
-                </Link>
-              </div>
-            </div>
-          )}
-          <PaymentRelationTable
-            data={data_paymentRelation?.result?.map((paymentRelation) => ({
-              ...paymentRelation,
-              key: `payment-relation-${paymentRelation.id}`
-            }))}
-            idAccount={id}
-            idCustomer={idCustomer}
-            handleChange={handleChange}
-            handleChangeSize={handleChangeSize}
-            totalElement={totalElement}
-            page={page}
-            pageSize={pageSize}
-            onSort={onSort}
-            getColumnSearchProps={getColumnSearchProps}
-            rowSelection={isApproval ? rowSelection : undefined}
-            isApproval={isApproval}
-            handleInactivePrModal={handleInactivePrModal}
-            handleApprovalHistoryModal={handleApprovalHistoryModal}
-          />
-        </div>
+        <PaymentRelationTable
+          data={data_paymentRelation?.result?.map((paymentRelation) => ({
+            ...paymentRelation,
+            key: `payment-relation-${paymentRelation.id}`
+          }))}
+          idAccount={id}
+          idCustomer={idCustomer}
+          handleChange={handleChange}
+          handleChangeSize={handleChangeSize}
+          totalElement={totalElement}
+          page={page}
+          pageSize={pageSize}
+          onSort={onSort}
+          getColumnSearchProps={getColumnSearchProps}
+          rowSelection={isApproval ? rowSelection : undefined}
+          isApproval={isApproval}
+          handleInactivePrModal={handleInactivePrModal}
+          handleApprovalHistoryModal={handleApprovalHistoryModal}
+          handleIsApproval={handleIsApproval}
+          handleDownload={handleDownload}
+        />
         <ModalConfirmationApprovalPaymentRelation
           dataSource={selectedRows}
           isOpen={showApprovalModal}
