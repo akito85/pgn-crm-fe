@@ -320,6 +320,23 @@ export const rating_billing = [
     path: RBI_ROUTES.DIGITAL_SIGNATURE_DETAIL,
     element: RBI_ELEMENTS.DIGITAL_SIGNATURE_DETAIL_ELEMENT,
   },
+  // gl-account
+  {
+    path: RBI_ROUTES.GLACCOUNT,
+    element: RBI_ELEMENTS.GLACCOUNT_VIEW_ELEMENT,
+  },
+  {
+    path: RBI_ROUTES.GLACCOUNT_CREATE,
+    element: RBI_ELEMENTS.GLACCOUNT_CREATE_ELEMENT,
+  },
+  {
+    path: RBI_ROUTES.GLACCOUNT_UPDATE,
+    element: RBI_ELEMENTS.GLACCOUNT_UPDATE_ELEMENT,
+  },
+  {
+    path: RBI_ROUTES.GLACCOUNT_DETAIL,
+    element: RBI_ELEMENTS.GLACCOUNT_DETAIL_ELEMENT,
+  },
 
   // Content Management
   {
