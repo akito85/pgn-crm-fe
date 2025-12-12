@@ -58,6 +58,7 @@ import DigitalSignatureDetail from "../../app/pages/RatingBillingInvoice/MasterD
 import GLAccountView from "../../app/pages/RatingBillingInvoice/MasterData/GLAccount/GLAccountView";
 import GLAccountForm from "../../app/pages/RatingBillingInvoice/MasterData/GLAccount/GLAccountForm";
 import GLAccountDetail from "../../app/pages/RatingBillingInvoice/MasterData/GLAccount/GLAccountDetail";
+import ContentManagementDetail from "../../app/pages/RatingBillingInvoice/MasterData/ContentManagement/ContentManagementDetail";
 
 export const RBI_ELEMENTS = {
   // prabilling elements render
@@ -185,5 +186,7 @@ export const RBI_ELEMENTS = {
 
   // content management
   CONTENT_MANAGEMENT_VIEW_ELEMENT: <ContentManagementView />,
-  CONTENT_MANAGEMENT_CREATE_ELEMENT: <ContentManagementForm />,
+  CONTENT_MANAGEMENT_CREATE_ELEMENT: <ContentManagementForm type={"create"} />,
+  CONTENT_MANAGEMENT_UPDATE_ELEMENT: <ContentManagementForm type={"update"} />,
+  CONTENT_MANAGEMENT_DETAIL: <ContentManagementDetail />,
 };

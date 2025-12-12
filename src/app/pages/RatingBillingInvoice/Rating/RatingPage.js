@@ -113,9 +113,17 @@ const RatingPage = () => {
   };
 
   const onSortApi = (_, __, sorter) => {
+    // Mapping untuk field yang berbeda case
+    const fieldMapping = {
+      mreadingCode: "mReadingCode",
+      // Tambahkan mapping lain jika ada field serupa
+    };
+
+    const field = fieldMapping[sorter.field] || sorter.field;
+
     const dataSort =
       sorter.order !== undefined
-        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        ? `${field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
