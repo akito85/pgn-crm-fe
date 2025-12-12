@@ -86,7 +86,7 @@ export const checkGrantedAccessDetail = createAsyncThunk('CHECK_GRANTED_ACCESS_D
   } catch (error) {
     return thunkAPI.rejectWithValue(error);
   }
-);
+});
 
 const generalSlice = createSlice({
   name: "general",
