@@ -122,4 +122,9 @@ export const RBI_ROUTES = {
   CONTENT_MANAGEMENT_CREATE: "/system-setup/content-management/create",
   CONTENT_MANAGEMENT_UPDATE: "/system-setup/content-management/update",
   CONTENT_MANAGEMENT_DETAIL: "/system-setup/content-management/view",
+
+  GLACCOUNT: "/system-setup/gl-account",
+  GLACCOUNT_CREATE: "/system-setup/gl-account/create",
+  GLACCOUNT_UPDATE: "/system-setup/gl-account/update",
+  GLACCOUNT_DETAIL: "/system-setup/gl-account/view",
 };
