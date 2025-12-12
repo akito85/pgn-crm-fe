@@ -443,22 +443,11 @@ export const createPaymentRelation = createAsyncThunk(
 
       const uploadUrl = `/v1/dbs/api/payment-relation/upload-attachment`;
 
-      const uploadPromises = attachments.map((attachment) => {
-        console.log({
-          files:  attachment.file,
-          category: attachment.fileCategoryId,
-          refId: id,
-        })
-
-        return accountManagementService.uploadAttachment(
-          uploadUrl,
-          {
-            files:  attachment.file,
-            category: attachment.fileCategoryId,
-            refId: id,
-          }
-        )
-      });
+      const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(uploadUrl, {
+        files:  attachment.file,
+        category: attachment.fileCategoryId,
+        refId: id,
+      }));
 
       await Promise.all(uploadPromises);
 
@@ -729,8 +718,16 @@ export const approveOrRejectAllPaymentRelation = createAsyncThunk(
       const inactiveUrl = "/v1/dbs/api/payment-relation/approve-inactive";
       
       await Promise.all([
-        body.length ? accountManagementService.activationWithRemark(url, body) : null,
-        inactiveBody.length ? accountManagementService.activationWithRemark(inactiveUrl, inactiveBody) : null,
+        body.length ? accountManagementService.activationWithRemark(url, body, {
+          headers: {
+            "Accept": "application/json"
+          }
+        }) : null,
+        inactiveBody.length ? accountManagementService.activationWithRemark(inactiveUrl, inactiveBody, {
+          headers: {
+            "Accept": "application/json"
+          }
+        }) : null,
       ])
 
       const successBody = {

@@ -118,10 +118,15 @@ const deleteData = async (url) => {
   }
 };
 
-const activationWithRemark = async (url, body) => {
+const activationWithRemark = async (url, body, opt = {}) => {
+  const headers = opt.headers;
+
   try {
     const response = await axios.post(configApp.ACCOUNT_SERVICE + url, body, {
-      headers: tokenHeader(),
+      headers: {
+        ...tokenHeader(),
+        ...headers,
+      },
     });
     return response?.data;
   } catch (error) {
