@@ -147,7 +147,7 @@ export const getApprovalHistory = createAsyncThunk(
   "GET_APPROVAL_HISTORY",
   async (id, thunkAPI) => {
     try {
-      const url = `v1/dbs/api/invoice-template/approval-history-get/${id}`;
+      const url = `/v1/dbs/api/invoice-template/approval-history-get/${id}`;
       const response = await ratingBillingHttpService.getDetail(url);
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {

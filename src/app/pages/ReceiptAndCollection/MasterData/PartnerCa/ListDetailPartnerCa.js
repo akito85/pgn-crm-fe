@@ -112,7 +112,7 @@ const ListDetailPartnerCa = () => {
               type={"detail"}
               data={listDataAttachment}
               updateData={setListDataAttachment}
-              typeSelector="item"
+              typeSelector="partner"
               service={receiptCollectionHttpService}
               configApplication={configApp.PAYMENT_SERVICE}
               // getAPIGuard={getConfigFileRBIData}

@@ -154,7 +154,7 @@ const TaxCodeView = () => {
     dispatch(
       downloadTaxCode({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
+        page: 1, 
         pageSize,
         sort,
       })

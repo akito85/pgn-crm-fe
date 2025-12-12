@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import CardContainer from "../../../../../components/CardContainer";
 import TableRBI from "../../../../../components/TableRBI";
 import { getAllUsageServiceAgreementPaginate } from "../../../../../redux/slices/rating_billing_invoice/rating";
 import { columnsUsage } from "./Table/TableUsage";
@@ -97,26 +96,27 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
   }, [allColumns]);
 
   return (
-    <CardContainer 
-      header={
-        <div className="flex -my-4 justify-between items-center">
-          <p className="mt-[15px] font-bold">USAGE INFORMATION</p>
+    <>
+      <div className="mb-4">
+        <p className="text-[15px] font-medium text-blue-600 mb-3">
+          USAGE ITEM INFORMATION
+        </p>
+        <div className="flex flex-row gap-8">
+          <div className="flex flex-col gap-1">
+            <p className="text-[15px] font-normal text-gray-700">
+              Calculation Code
+            </p>
+            <p className="text-[20px] font-medium text-blue-600">
+              {calculationCode}
+            </p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-[15px] font-normal text-gray-700">Rating Code</p>
+            <p className="text-[20px] font-medium text-blue-600">
+              {ratingCodeId}
+            </p>
+          </div>
         </div>
-      }
-    >
-      <div className="flex flex-row align-middle gap-2 mb-5">
-        <p className="text-[15px] font-semibold text-text-color-semibold">
-          Calculation Code:
-        </p>
-        <p className="text-[15px] font-semibold text-primary">
-          {calculationCode}
-        </p>
-        <p className="text-[15px] font-semibold text-text-color-semibold">
-          Rating Code:
-        </p>
-        <p className="text-[15px] font-semibold text-primary">
-          {ratingCodeId}
-        </p>
       </div>
       <div className="w-full">
         <TableRBI
@@ -136,7 +136,7 @@ const UsageSection = ({ ratingCodeId, calculationCode }) => {
           loading={false}
         />
       </div>
-    </CardContainer>
+    </>
   );
 };
 
