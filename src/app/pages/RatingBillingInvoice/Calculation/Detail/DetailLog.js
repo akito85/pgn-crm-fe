@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getDetailCalculationLog } from "../../../../../redux/slices/rating_billing_invoice/calculation";
-import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
-import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import BaseContainer from "../../../../../components/BaseContainer";
+import { getCalculateLogPaginate, getDetailCalculationLog } from "../../../../../redux/slices/rating_billing_invoice/calculation";
+import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
+import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
-import CardContainer from "../../../../../components/CardContainer";
+import TableCalculateLog from "./Table/TableCalculateLog";
 
 const DetailLog = ({ data, tabHeader }) => {
   const { list_calculation_result, loading } = useSelector(
@@ -304,7 +305,7 @@ const DetailLog = ({ data, tabHeader }) => {
   };
 
   return (
-    <CardContainer subHeader={"calculation log"}>
+    <BaseContainer subHeader={"calculation log"}>
       <TablePaginationNew
         columns={column}
         dataSource={list_calculation_result?.result}
@@ -315,7 +316,8 @@ const DetailLog = ({ data, tabHeader }) => {
         tableScrolled={{ x: 2000, y: 600 }}
         onSort={onSort}
       />
-    </CardContainer>
+      <TableCalculateLog calculationCode={calculationCode} />
+    </BaseContainer>
   );
 };
 
