@@ -69,7 +69,9 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_PARTNER: "/receipt-and-collection/partner/view",
   CREATE_PARTNER: "/receipt-and-collection/partner/create",
   UPDATE_PARTNER: "/receipt-and-collection/partner/update",
-
+  
+  //Payment
+  VIEW_PAYMENT: "/receipt-and-collection/payment",
   VIEW_PARTNER_CA: "/receipt-and-collection/partner-ca",
   DETAIL_PARTNER_CA: "/receipt-and-collection/partner-ca/view",
   CREATE_PARTNER_CA: "/receipt-and-collection/partner-ca/create",
@@ -86,4 +88,15 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_SETTINGS: "/receipt-and-collection/settings/view",
   CREATE_SETTINGS: "/receipt-and-collection/settings/create",
   UPDATE_SETTINGS: "/receipt-and-collection/settings/update",
+  // Collection Agent
+  VIEW_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent",
+  DETAIL_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/view",
+  CREATE_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/create",
+  UPDATE_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/update",
+  
+  // Payment Channel
+  VIEW_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel",
+  DETAIL_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel/view",
+  CREATE_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel/create",
+  UPDATE_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel/update",
 };

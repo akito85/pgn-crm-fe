@@ -106,9 +106,12 @@ import masterEfakturCodeReducer from "../slices/rating_billing_invoice/MasterDat
 import bridgeReducer from "../slices/receipt_collection/bridge";
 import transactionLogReducer from "../slices/receipt_collection/transactionLog";
 import invoiceMasterDataReducer from "../slices/receipt_collection/invoice";
+import paymentMasterDataReducer from "../slices/receipt_collection/payment";
 import partnerReducer from "../slices/receipt_collection/partner";
 import partnerCaReducer from "../slices/receipt_collection/partnerCa";
 import caPaymentChannelReducer from "../slices/receipt_collection/caPaymentChannel";
+import collectingAgentReducer from "../slices/receipt_collection/collectingAgent";
+import paymentChannelReducer from "../slices/receipt_collection/paymentChannel";
 import digitalSignatureReducer from "../slices/rating_billing_invoice/MasterData/digitalSignature";
 import settingReducer from "../slices/receipt_collection/setting";
 
@@ -224,10 +227,13 @@ const reducer = combineReducers({
   bridge: bridgeReducer,
   transactionLog: transactionLogReducer,
   invoiceMasterData: invoiceMasterDataReducer,
+  paymentMasterData: paymentMasterDataReducer,
   partner: partnerReducer,
   partnerCa: partnerCaReducer,
   caPaymentChannel: caPaymentChannelReducer,
   receiptSetting: settingReducer,
+  collectingAgent: collectingAgentReducer,
+  paymentChannel: paymentChannelReducer,
 
   // Attachment
   attachment: attachmentReducer,
