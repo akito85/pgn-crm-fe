@@ -58,14 +58,18 @@ const PaymentRelation = ({
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [tempFilters, setTempFilters] = useState([]);
 
-  const handleFinish = (values) => {
-    console.log("Filter values:", values.query);
-    // Process the filter query
+  const handleFinishFilter = (values) => {
+    setTempFilters(values.query);
+    setPage(1);
+    setSort("");
+    setSearch({});
+    setSearchText("")
+    setShowFilterModal(false);
   };
 
-  const handleCancel = () => {
+  const handleCancelFilter = () => {
     setShowFilterModal(false);
-    filterForm.resetFields();
+    filterForm.setFieldValue({ query: tempFilters });
   };
 
   const handleCancelApprovalModal = () => {
@@ -152,10 +156,11 @@ const PaymentRelation = ({
       size: pageSize,
       sort,
       searches: search,
+      inputFields: tempFilters,
     }
 
     dispatch(getPaymentRelation({ id, body }));
-  }, [page, pageSize, sort, search]);
+  }, [page, pageSize, sort, search, tempFilters]);
 
   useEffect(() => {
     if (
@@ -387,9 +392,9 @@ const PaymentRelation = ({
         </div>
 
         <PaymentRelationTable
-          data={data_paymentRelation?.result?.map((paymentRelation) => ({
+          data={data_paymentRelation?.result?.map((paymentRelation, index) => ({
             ...paymentRelation,
-            key: `payment-relation-${paymentRelation.id}`
+            key: `payment-relation-${paymentRelation.id}-${index}`
           }))}
           idAccount={id}
           idCustomer={idCustomer}
@@ -416,12 +421,12 @@ const PaymentRelation = ({
           type={"confirmation"}
           header={"QUERY"}
           width={1200}
-          handleCancel={handleCancel}
+          handleCancel={handleCancelFilter}
         >
-          <Form form={filterForm} layout="vertical" onFinish={handleFinish}>
+          <Form form={filterForm} layout="vertical" onFinish={handleFinishFilter} id={"prFilterForm"}>
             <NxFilter
               form={filterForm}
-              onCancel={handleCancel}
+              onCancel={handleCancelFilter}
               dispatch={dispatch}
               getColumnApi={getPrColumnApi}
               getConditionApi={getPrConditionApi}
@@ -429,6 +434,7 @@ const PaymentRelation = ({
               reduxState={financialInformationState}
               maxFilters={5}
               loading={loading}
+              formId="prFilterForm"
             />
           </Form>
         </ModalCustom>
