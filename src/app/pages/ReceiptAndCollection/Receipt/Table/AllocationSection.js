@@ -59,7 +59,17 @@ const AllocationSection = ({
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [typeColumn, setTypeColumn] = useState("");
-  const balance = amount - totalAllocationAmount;
+  // helper to parse formatted amount
+  const parseAmount = (val) => {
+    if (typeof val === 'number') return val;
+    if (!val) return 0;
+    // Remove dots (thousand separators) and replace comma with dot (decimal)
+    const normalized = val.toString().replace(/\./g, "").replace(/,/g, ".");
+    return parseFloat(normalized);
+  };
+
+  const parsedAmount = parseAmount(amount);
+  const balance = parsedAmount - totalAllocationAmount;
   // use effec
 
 
@@ -229,7 +239,7 @@ const AllocationSection = ({
 
   // handle close modal allocation
   const handleCancel = () => {
-    if (totalAllocationAmount > amount) {
+    if (totalAllocationAmount > parsedAmount) {
       setSelectedRowKeys([]);
       setSelectDataTable([]);
       setTotalAllocationAmount(0);
@@ -280,7 +290,7 @@ const AllocationSection = ({
 
   // handle save data table
   const handleSaveDataTable = () => {
-    if (totalAllocationAmount > amount) {
+    if (totalAllocationAmount > parsedAmount) {
     } else {
       // dispatch(setDataAllocation(selectDataTable));
       setDataTable(selectDataTable);
@@ -295,7 +305,7 @@ const AllocationSection = ({
     try {
       const { apphierId, receiptCode, refrence, isMisc, ...keys } =
         form?.getFieldsValue();
-  
+
       const checkValues = Object.values(keys).every((value) => {
         return value !== undefined && value !== null && value !== "";
       });
@@ -308,21 +318,21 @@ const AllocationSection = ({
           description: `Please input values!`,
         };
         dispatch(showModalError(errorBody));
-      } else if (hasValue(amount) === false || amount === 0) {
+      } else if (hasValue(amount) === false || parsedAmount === 0) {
         const errorBody = {
           title: "Failed",
           description: `Please input amount!`,
         };
         dispatch(showModalError(errorBody));
       } else {
-       await dispatch(
+        await dispatch(
           getAllocationRecomendationList({
             search: encodeURIComponent(JSON?.stringify(search)),
             pageChoose,
             pageSizeChoose,
             sort: sort,
             accountNumberSelected,
-            balance: amount - totalAllocationAmount,
+            balance: balance,
             currencyId: formValues?.currency,
             rateAmount: rateAmountValue,
           })
@@ -331,7 +341,7 @@ const AllocationSection = ({
       }
     } catch (error) {
       setOpenModalAllocation(false);
-      
+
     }
   };
 
@@ -398,7 +408,7 @@ const AllocationSection = ({
         />
       </div>
       <div className="w-full flex flex-col">
-        {totalAllocationAmount > amount && (
+        {totalAllocationAmount > parsedAmount && (
           <span className="text-red-800">
             Total amount of selected item has been exceeded Total available
             amount. Please select other item.
@@ -487,7 +497,7 @@ const AllocationSection = ({
           // onSort={onSort}
           />
         </Spin>
-        {totalAllocationAmount > amount && (
+        {totalAllocationAmount > parsedAmount && (
           <span className="text-red-800">
             Total amount of selected item has been exceeded Total available
             amount. Please select other item.
