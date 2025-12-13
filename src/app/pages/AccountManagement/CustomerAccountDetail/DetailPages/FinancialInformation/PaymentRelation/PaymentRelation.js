@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { approveOrRejectAllPaymentRelation, downloadPaymentRelation, getPaymentRelation, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { approveOrRejectAllPaymentRelation, downloadPaymentRelation, getPaymentRelation, getPrApprovalHistory, inactivatePaymentRelation, getPrColumnApi, getPrConditionApi, getPrOperatorApi } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
@@ -410,24 +410,28 @@ const PaymentRelation = ({
           setShowFilterModal={setShowFilterModal}
         />
 
-          <ModalCustom
-            isOpen={showFilterModal}
-            type={"confirmation"}
-            header={"QUERY"}
-            width={1200}
-            handleCancel={handleCancel}
-          >
-            <Form form={filterForm} layout="vertical" onFinish={handleFinish}>
-              <NxFilter
-                form={filterForm}
-                onCancel={handleCancel}
-                dispatch={dispatch}
-                reduxState={financialInformationState}
-                maxFilters={5}
-                loading={loading}
-              />
-            </Form>
-          </ModalCustom>
+        {/* Advanced Filter Modal */}
+        <ModalCustom
+          isOpen={showFilterModal}
+          type={"confirmation"}
+          header={"QUERY"}
+          width={1200}
+          handleCancel={handleCancel}
+        >
+          <Form form={filterForm} layout="vertical" onFinish={handleFinish}>
+            <NxFilter
+              form={filterForm}
+              onCancel={handleCancel}
+              dispatch={dispatch}
+              getColumnApi={getPrColumnApi}
+              getConditionApi={getPrConditionApi}
+              getOperatorApi={getPrOperatorApi}
+              reduxState={financialInformationState}
+              maxFilters={5}
+              loading={loading}
+            />
+          </Form>
+        </ModalCustom>
 
         <ModalConfirmationApprovalPaymentRelation
           dataSource={selectedRows}
