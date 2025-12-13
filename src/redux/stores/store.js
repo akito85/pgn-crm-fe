@@ -116,6 +116,7 @@ import digitalSignatureReducer from "../slices/rating_billing_invoice/MasterData
 import settingReducer from "../slices/receipt_collection/setting";
 import glAccountReducer from "../slices/rating_billing_invoice/MasterData/glAccount";
 import contentManagementReducer from "../slices/rating_billing_invoice/MasterData/contentManagement";
+import accountingReducer from "../slices/receipt_collection/accounting";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -238,6 +239,7 @@ const reducer = combineReducers({
   receiptSetting: settingReducer,
   collectingAgent: collectingAgentReducer,
   paymentChannel: paymentChannelReducer,
+  accounting: accountingReducer,
 
   // Attachment
   attachment: attachmentReducer,
