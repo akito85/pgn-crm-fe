@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import {
   FilterOutlined,
 } from "@ant-design/icons";
-import { DatePicker, Form, Input, Spin } from "antd";
+import { DatePicker, Form, Input, Modal, Spin } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
@@ -15,6 +15,7 @@ import ModalConfirmationApprovalPaymentRelation from "./ModalConfirmationApprova
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
 import NxFilter from "../../../../../../../components/Nx/NxFilter";
+import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 
 const PaymentRelation = ({
   id = 0,
@@ -53,7 +54,9 @@ const PaymentRelation = ({
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const [advancedQueryForm] = Form.useForm();
+  const [filterForm] = Form.useForm();
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [tempFilters, setTempFilters] = useState([]);
 
   const handleFinish = (values) => {
     console.log("Filter values:", values.query);
@@ -61,7 +64,8 @@ const PaymentRelation = ({
   };
 
   const handleCancel = () => {
-    advancedQueryForm.resetFields();
+    setShowFilterModal(false);
+    filterForm.resetFields();
   };
 
   const handleCancelApprovalModal = () => {
@@ -402,21 +406,28 @@ const PaymentRelation = ({
           handleApprovalHistoryModal={handleApprovalHistoryModal}
           handleIsApproval={handleIsApproval}
           handleDownload={handleDownload}
+          tempFilters={tempFilters}
+          setShowFilterModal={setShowFilterModal}
         />
 
-        <Form form={advancedQueryForm} layout="vertical" onFinish={handleFinish}>
-          <NxFilter
-            form={advancedQueryForm}
-            onCancel={handleCancel}
-            dispatch={dispatch}
-            getColumnApi={() => {}}
-            getOperatorApi={() => {}}
-            getConditionApi={() => {}}
-            reduxState={financialInformationState}
-            maxFilters={5}
-            loading={loading}
-          />
-        </Form>
+          <ModalCustom
+            isOpen={showFilterModal}
+            type={"confirmation"}
+            header={"QUERY"}
+            width={1200}
+            handleCancel={handleCancel}
+          >
+            <Form form={filterForm} layout="vertical" onFinish={handleFinish}>
+              <NxFilter
+                form={filterForm}
+                onCancel={handleCancel}
+                dispatch={dispatch}
+                reduxState={financialInformationState}
+                maxFilters={5}
+                loading={loading}
+              />
+            </Form>
+          </ModalCustom>
 
         <ModalConfirmationApprovalPaymentRelation
           dataSource={selectedRows}

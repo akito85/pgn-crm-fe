@@ -1,5 +1,5 @@
 import TablePagination from "../../../../../../../components/TablePagination";
-import { Checkbox, Tooltip } from "antd";
+import { Badge, Button, Checkbox, Tooltip } from "antd";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import moment from "moment";
 import { dateFormatting, toTitleCase } from "../../../../../../../utils";
@@ -28,6 +28,8 @@ const PaymentRelationTable = ({
   handleApprovalHistoryModal = () => {},
   handleIsApproval = () => {},
   handleDownload = () => {},
+  tempFilters = [],
+  setShowFilterModal = () => {},
 }) => {
   const columns = [
     {
@@ -292,30 +294,11 @@ const PaymentRelationTable = ({
     <div className="flex flex-col gap-y-6">
       {!isApproval && (
         <div className="flex justify-between items-center gap-5 mb-5">
-          {/* Filter Button - Left side */}
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => {}}
-            icon={
-              <FilterOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 20,
-                }}
-              />
-            }
-            style={{
-              backgroundColor: "#0075bf",
-              color: "#fff",
-              borderColor: "#0075bf",
-              border: "1px solid #0075bf",
-              width: "128px",
-              height: "48px",
-              borderRadius: "5px"
-            }}
-          >
-            Filters
-          </ButtonComponent>
+          <Badge count={tempFilters.length}>
+            <Button onClick={() => setShowFilterModal(true)}>
+              Advanced Filter
+            </Button>
+          </Badge>
           <Toolbar items={itemActions} type="detail" />
         </div>
       )}
