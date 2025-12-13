@@ -11,338 +11,338 @@ import {
   StopOutlined,
   HourglassOutlined,
 } from "@ant-design/icons";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const StatusComponent = ({ children, colour, type = "status" }) => {
   const [bgcolor, setBgColor] = useState("");
   const [color, setColor] = useState("");
 
-  useEffect(() => {
-    if (colour) {
-      switch (colour.toLowerCase()) {
-        case "active":
-        case "success":
-        case "completed":
-        case "complete":
-        case "open":
-        case "full payment":
-        case "true":
-        case "paid":
-        case "complete billing":
-          setBgColor("status-active");
-          setColor("text-[#14a38b]");
-          break;
-        case "inactive":
-        case "rejected":
-        case "failed":
-        case "close":
-        case "no payment":
-        case "false":
-        case "unpaid":
-        case "reject":
-        case "not paid":
-        case "failed billing":
-        case "fail":
-          setBgColor("status-inactive");
-          setColor("text-[#be3036]");
-          break;
-        case "waiting":
-        case "waiting approval":
-        case "WAITING_APPROVAL":
-        case "in pross":
-        case "inprogress":
-        case "partial payment":
-        case "waiting to release":
-          setBgColor("status-waiting");
-          break;
-        case "draft":
-          setBgColor("status-draft");
-          break;
-        case "approved":
-        case "main":
-          setBgColor("status-approved");
-          break;
-        case "expire":
-          setBgColor("status-expire");
-          break;
-        case "expire10":
-        case "need review":
-          setBgColor("status-expire10");
-          break;
-        case "expire30":
-          setBgColor("status-expire30");
-          break;
-        case "pending":
-        case "assigned":
-          setBgColor("status-pending");
-          break;
-        case "primary":
-        case "Primary":
-        case "refund":
-        case "unapplied":
-        case "hold":
-        case "rating":
-        case "standby":
-          setBgColor("bg-blue-500");
-          break;
-        case "applied":
-          setBgColor("bg-[#ACC424]");
-          break;
-        case "reverse":
-          setBgColor("bg-[#910000]");
-          break;
-        case "non-primary":
-        case "Non Primary":
-          setBgColor("bg-gray-500");
-          break;
-        case "rating and billing":
-          setBgColor("rating-billing-pils");
-          break;
-        case "billing":
-          setBgColor("billing-pils");
-          break;
-        case "pre paid":
-          setBgColor("bg-lime-600");
-          break;
-        case "registered":
-          setBgColor("bg-[#0075BF]");
-          break;
-        case "pra-active":
-          setBgColor("bg-[#4D6AFE]");
-          break;
-        case "suspended":
-          setBgColor("bg-[#F2D957]");
-          break;
-        case "terminated":
-          setBgColor("bg-[#BE3036]");
-          break;
-        case "prospect":
-          setBgColor("bg-[#8D91A0]");
-          break;
-        case "partially paid":
-          setBgColor("bg-[#C6D681]");
-          break;
-        default:
-          setBgColor("bg-slate-600");
-          break;
-      }
-    }
+  // useEffect(() => {
+  //   if (colour) {
+  //     switch (colour.toLowerCase()) {
+  //       case "active":
+  //       case "success":
+  //       case "completed":
+  //       case "complete":
+  //       case "open":
+  //       case "full payment":
+  //       case "true":
+  //       case "paid":
+  //       case "complete billing":
+  //         setBgColor("status-active");
+  //         setColor("text-[#14a38b]");
+  //         break;
+  //       case "inactive":
+  //       case "rejected":
+  //       case "failed":
+  //       case "close":
+  //       case "no payment":
+  //       case "false":
+  //       case "unpaid":
+  //       case "reject":
+  //       case "not paid":
+  //       case "failed billing":
+  //       case "fail":
+  //         setBgColor("status-inactive");
+  //         setColor("text-[#be3036]");
+  //         break;
+  //       case "waiting":
+  //       case "waiting approval":
+  //       case "WAITING_APPROVAL":
+  //       case "in pross":
+  //       case "inprogress":
+  //       case "partial payment":
+  //       case "waiting to release":
+  //         setBgColor("status-waiting");
+  //         break;
+  //       case "draft":
+  //         setBgColor("status-draft");
+  //         break;
+  //       case "approved":
+  //       case "main":
+  //         setBgColor("status-approved");
+  //         break;
+  //       case "expire":
+  //         setBgColor("status-expire");
+  //         break;
+  //       case "expire10":
+  //       case "need review":
+  //         setBgColor("status-expire10");
+  //         break;
+  //       case "expire30":
+  //         setBgColor("status-expire30");
+  //         break;
+  //       case "pending":
+  //       case "assigned":
+  //         setBgColor("status-pending");
+  //         break;
+  //       case "primary":
+  //       case "Primary":
+  //       case "refund":
+  //       case "unapplied":
+  //       case "hold":
+  //       case "rating":
+  //       case "standby":
+  //         setBgColor("bg-blue-500");
+  //         break;
+  //       case "applied":
+  //         setBgColor("bg-[#ACC424]");
+  //         break;
+  //       case "reverse":
+  //         setBgColor("bg-[#910000]");
+  //         break;
+  //       case "non-primary":
+  //       case "Non Primary":
+  //         setBgColor("bg-gray-500");
+  //         break;
+  //       case "rating and billing":
+  //         setBgColor("rating-billing-pils");
+  //         break;
+  //       case "billing":
+  //         setBgColor("billing-pils");
+  //         break;
+  //       case "pre paid":
+  //         setBgColor("bg-lime-600");
+  //         break;
+  //       case "registered":
+  //         setBgColor("bg-[#0075BF]");
+  //         break;
+  //       case "pra-active":
+  //         setBgColor("bg-[#4D6AFE]");
+  //         break;
+  //       case "suspended":
+  //         setBgColor("bg-[#F2D957]");
+  //         break;
+  //       case "terminated":
+  //         setBgColor("bg-[#BE3036]");
+  //         break;
+  //       case "prospect":
+  //         setBgColor("bg-[#8D91A0]");
+  //         break;
+  //       case "partially paid":
+  //         setBgColor("bg-[#C6D681]");
+  //         break;
+  //       default:
+  //         setBgColor("bg-slate-600");
+  //         break;
+  //     }
+  //   }
 
-    const lowerColour = colour.toLowerCase();
-    let bgColor = "bg-slate-600";
-    let tColor = "text-white";
+  //   const lowerColour = colour.toLowerCase();
+  //   let bgColor = "bg-slate-600";
+  //   let tColor = "text-white";
 
-    switch (lowerColour) {
-      // ===== SUCCESS STATUSES =====
-      case "active":
-      case "success":
-      case "completed":
-      case "complete":
-      case "full payment":
-      case "true":
-      case "paid":
-      case "complete billing":
-      case "sent":
-      case "approved":
-      case "success_upload":
-      case "standard": // ✅ E-Faktur: Generated successfully
-        bgColor = "status-active";
-        tColor = "text-white";
-        break;
+  //   switch (lowerColour) {
+  //     // ===== SUCCESS STATUSES =====
+  //     case "active":
+  //     case "success":
+  //     case "completed":
+  //     case "complete":
+  //     case "full payment":
+  //     case "true":
+  //     case "paid":
+  //     case "complete billing":
+  //     case "sent":
+  //     case "approved":
+  //     case "success_upload":
+  //     case "standard": // ✅ E-Faktur: Generated successfully
+  //       bgColor = "status-active";
+  //       tColor = "text-white";
+  //       break;
 
-      case "open":
-        bgColor = "bg-gray-600";
-        tColor = "text-white";
-        break;
+  //     case "open":
+  //       bgColor = "bg-gray-600";
+  //       tColor = "text-white";
+  //       break;
 
-      // ===== FAILED/REJECTED STATUSES =====
-      case "inactive":
-      case "rejected":
-      case "failed":
-      case "close":
-      case "no payment":
-      case "false":
-      case "unpaid":
-      case "reject":
-      case "not paid":
-      case "failed billing":
-      case "fail":
-      case "not_paid":
-      case "cancelled": 
-      case "CANCELLED":
-        bgColor = "status-inactive";
-        tColor = "text-white";
-        break;
+  //     // ===== FAILED/REJECTED STATUSES =====
+  //     case "inactive":
+  //     case "rejected":
+  //     case "failed":
+  //     case "close":
+  //     case "no payment":
+  //     case "false":
+  //     case "unpaid":
+  //     case "reject":
+  //     case "not paid":
+  //     case "failed billing":
+  //     case "fail":
+  //     case "not_paid":
+  //     case "cancelled": 
+  //     case "CANCELLED":
+  //       bgColor = "status-inactive";
+  //       tColor = "text-white";
+  //       break;
 
-      // ===== WAITING/PENDING STATUSES =====
-      case "partial payment":
-      case "waiting to release":
-      case "need review": // ✅ Billing status
+  //     // ===== WAITING/PENDING STATUSES =====
+  //     case "partial payment":
+  //     case "waiting to release":
+  //     case "need review": // ✅ Billing status
 
-        bgColor = "status-waiting";
-        tColor = "text-yellow-700";
-        break;
+  //       bgColor = "status-waiting";
+  //       tColor = "text-yellow-700";
+  //       break;
 
-      // ===== PROCESSING STATUSES =====
-      case "in progress":
-      case "inprogress":
-      case "awaiting_approval":
-      case "awaiting approval":
-      case "processing":
-      case "submitted": 
-      case "waiting":
-      case "waiting approval":
-      case "waiting_approval":
-      case "waiting_cancellation_approval":
-      case "waiting cancellation approval":
-      case "waiting_upload_approval":
-      case "waiting upload approval":
-        bgColor = "bg-[#f57c00]";
-        tColor = "text-white";
-        break;
+  //     // ===== PROCESSING STATUSES =====
+  //     case "in progress":
+  //     case "inprogress":
+  //     case "awaiting_approval":
+  //     case "awaiting approval":
+  //     case "processing":
+  //     case "submitted": 
+  //     case "waiting":
+  //     case "waiting approval":
+  //     case "waiting_approval":
+  //     case "waiting_cancellation_approval":
+  //     case "waiting cancellation approval":
+  //     case "waiting_upload_approval":
+  //     case "waiting upload approval":
+  //       bgColor = "bg-[#f57c00]";
+  //       tColor = "text-white";
+  //       break;
 
-      // ===== DRAFT STATUSES =====
-      case "draft":
-      case "not_generated":
-      case "not generated":
-        bgColor = "bg-gray-600";
-        tColor = "text-white";
-        break;
+  //     // ===== DRAFT STATUSES =====
+  //     case "draft":
+  //     case "not_generated":
+  //     case "not generated":
+  //       bgColor = "bg-gray-600";
+  //       tColor = "text-white";
+  //       break;
 
-      case "main":
-        bgColor = "status-active";
-        tColor = "text-white";
-        break;
+  //     case "main":
+  //       bgColor = "status-active";
+  //       tColor = "text-white";
+  //       break;
 
-      case "expire":
-        bgColor = "status-expire";
-        tColor = "text-red-700";
-        break;
+  //     case "expire":
+  //       bgColor = "status-expire";
+  //       tColor = "text-red-700";
+  //       break;
 
-      case "expire10":
-        bgColor = "status-expire10";
-        break;
+  //     case "expire10":
+  //       bgColor = "status-expire10";
+  //       break;
 
-      case "expire30":
-        bgColor = "status-expire30";
-        break;
+  //     case "expire30":
+  //       bgColor = "status-expire30";
+  //       break;
 
-      // ===== PENDING/ASSIGNED STATUSES =====
-      case "pending":
-      case "assigned":
-        bgColor = "status-pending";
-        tColor = "text-yellow-800";
-        break;
+  //     // ===== PENDING/ASSIGNED STATUSES =====
+  //     case "pending":
+  //     case "assigned":
+  //       bgColor = "status-pending";
+  //       tColor = "text-yellow-800";
+  //       break;
 
-      case "scheduled":
-        bgColor = "bg-[#EEEEEE]";
-        tColor = "text-[#000]";
-        break;
+  //     case "scheduled":
+  //       bgColor = "bg-[#EEEEEE]";
+  //       tColor = "text-[#000]";
+  //       break;
 
-      case "primary":
-      case "refund":
-      case "unapplied":
-      case "hold":
-      case "rating":
-      case "standby":
-        bgColor = "bg-blue-500";
-        tColor = "text-white";
-        break;
+  //     case "primary":
+  //     case "refund":
+  //     case "unapplied":
+  //     case "hold":
+  //     case "rating":
+  //     case "standby":
+  //       bgColor = "bg-blue-500";
+  //       tColor = "text-white";
+  //       break;
 
-      case "applied":
-        bgColor = "bg-[#ACC424]";
-        tColor = "text-white";
-        break;
+  //     case "applied":
+  //       bgColor = "bg-[#ACC424]";
+  //       tColor = "text-white";
+  //       break;
 
-      case "reverse":
-        bgColor = "bg-[#910000]";
-        tColor = "text-white";
-        break;
+  //     case "reverse":
+  //       bgColor = "bg-[#910000]";
+  //       tColor = "text-white";
+  //       break;
 
-      case "non-primary":
-        bgColor = "bg-gray-500";
-        tColor = "text-white";
-        break;
+  //     case "non-primary":
+  //       bgColor = "bg-gray-500";
+  //       tColor = "text-white";
+  //       break;
 
-      case "rating and billing":
-        bgColor = "rating-billing-pils";
-        break;
+  //     case "rating and billing":
+  //       bgColor = "rating-billing-pils";
+  //       break;
 
-      case "billing":
-        bgColor = "billing-pils";
-        break;
+  //     case "billing":
+  //       bgColor = "billing-pils";
+  //       break;
 
-      case "pre paid":
-        bgColor = "bg-lime-600";
-        tColor = "text-white";
-        break;
+  //     case "pre paid":
+  //       bgColor = "bg-lime-600";
+  //       tColor = "text-white";
+  //       break;
 
-      case "registered":
-        bgColor = "bg-[#0075BF]";
-        tColor = "text-white";
-        break;
+  //     case "registered":
+  //       bgColor = "bg-[#0075BF]";
+  //       tColor = "text-white";
+  //       break;
 
-      case "pra-active":
-        bgColor = "bg-[#4D6AFE]";
-        tColor = "text-white";
-        break;
+  //     case "pra-active":
+  //       bgColor = "bg-[#4D6AFE]";
+  //       tColor = "text-white";
+  //       break;
 
-      case "suspended":
-        bgColor = "bg-[#F2D957]";
-        tColor = "text-black";
-        break;
+  //     case "suspended":
+  //       bgColor = "bg-[#F2D957]";
+  //       tColor = "text-black";
+  //       break;
 
-      case "terminated":
-        bgColor = "bg-white";
-        tColor = "text-white";
-        break;
+  //     case "terminated":
+  //       bgColor = "bg-white";
+  //       tColor = "text-white";
+  //       break;
 
-      case "prospect":
-        bgColor = "bg-[#8D91A0]";
-        tColor = "text-white";
-        break;
+  //     case "prospect":
+  //       bgColor = "bg-[#8D91A0]";
+  //       tColor = "text-white";
+  //       break;
 
-      case "partially paid":
-        bgColor = "bg-[#C6D681]";
-        tColor = "text-black";
-        break;
+  //     case "partially paid":
+  //       bgColor = "bg-[#C6D681]";
+  //       tColor = "text-black";
+  //       break;
 
-      case "generating":
-        bgColor = "bg-[#F57C00]";
-        tColor = "text-white";
-        break;
+  //     case "generating":
+  //       bgColor = "bg-[#F57C00]";
+  //       tColor = "text-white";
+  //       break;
 
-      // ===== E-FAKTUR TYPE STATUSES =====
-      case "normal":
-        bgColor = "bg-blue-100";
-        tColor = "text-blue-800";
-        break;
+  //     // ===== E-FAKTUR TYPE STATUSES =====
+  //     case "normal":
+  //       bgColor = "bg-blue-100";
+  //       tColor = "text-blue-800";
+  //       break;
 
-      case "replacement":
-        bgColor = "bg-orange-100";
-        tColor = "text-orange-800";
-        break;
+  //     case "replacement":
+  //       bgColor = "bg-orange-100";
+  //       tColor = "text-orange-800";
+  //       break;
 
-      case "cancellation":
-      case "replaced":
-        bgColor = "bg-red-100";
-        tColor = "text-red-800";
-        break;
+  //     case "cancellation":
+  //     case "replaced":
+  //       bgColor = "bg-red-100";
+  //       tColor = "text-red-800";
+  //       break;
 
-      case "manual_upload": 
-      case "manual upload":
-        bgColor = "bg-purple-100";
-        tColor = "text-purple-800";
-        break;
+  //     case "manual_upload": 
+  //     case "manual upload":
+  //       bgColor = "bg-purple-100";
+  //       tColor = "text-purple-800";
+  //       break;
 
-      case "latest":
-        bgColor = "bg-green-100";
-        tColor = "text-green-800";
-        break;
-    }
+  //     case "latest":
+  //       bgColor = "bg-green-100";
+  //       tColor = "text-green-800";
+  //       break;
+  //   }
 
-    return { bgcolor: bgColor, textColor: tColor };
-  }, [colour]);
+  //   return { bgcolor: bgColor, textColor: tColor };
+  // }, [colour]);
 
   const renderIconStatus = () => {
     if (!colour || typeof colour !== "string") return null;
@@ -418,8 +418,8 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
     <div
       className={
         type === "status"
-          ? `flex gap-2 justify-center items-center ${bgcolor} ${textColor} px-3 py-0 rounded-3xl text-center w-fit`
-          : `${textColor} font-semibold`
+          ? `flex gap-2 justify-center items-center ${bgcolor} px-3 py-0 rounded-3xl text-center w-fit`
+          : `font-semibold`
       }
     >
       {renderIconStatus()}
