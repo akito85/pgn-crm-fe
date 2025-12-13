@@ -9,6 +9,9 @@ import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import TablePagination from "../../../../../components/TablePagination";
 import { Spin, Steps, Form, Input, Alert } from "antd";
 import { useDispatch, useSelector } from "react-redux";
+import RadioTabs from "../../../../../components/RadioTabs";
+import DetailText from "../../../../../components/DetailText";
+import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 import {
   getAllocationRecomendationList,
 } from "../../../../../redux/slices/receipt_collection/receipt";
@@ -69,6 +72,7 @@ const AllocationSection = ({
 
   // New States for Wizard
   const [currentStep, setCurrentStep] = useState(0);
+  const [confirmationTab, setConfirmationTab] = useState("Allocation");
   const [forceObj, setForceObj] = useState({});
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
@@ -329,6 +333,7 @@ const AllocationSection = ({
     setCurrentStep(0);
     setForceObj({});
     setListDataAttachment([]);
+    setConfirmationTab("Allocation");
   };
 
   const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
@@ -538,7 +543,7 @@ const AllocationSection = ({
         footer={
           <div className="flex justify-end gap-5">
             <ButtonComponent type={"default"} onClick={handleCancel}>
-              Cancel
+              Back
             </ButtonComponent>
             {currentStep > 0 ? (
               <ButtonComponent
@@ -548,7 +553,7 @@ const AllocationSection = ({
                   <LeftOutlined
                     style={{
                       color: "#fff",
-                      fontSize: 15,
+                      fontSize: 15, // Ubah ukuran ikon sesuai kebutuhan
                       marginRight: 10,
                     }}
                   />
@@ -573,7 +578,7 @@ const AllocationSection = ({
                   <RightOutlined
                     style={{
                       color: "#fff",
-                      fontSize: 15,
+                      fontSize: 15, // Ubah ukuran ikon sesuai kebutuhan
                       marginLeft: 10,
                     }}
                   />
@@ -593,142 +598,186 @@ const AllocationSection = ({
         }
       >
         <div className="w-full gap-5">
-          <Steps
-            current={currentStep}
-            items={[
-              { title: "Allocation Information" },
-              { title: "Approval Information" },
-              { title: "Attachment Information" },
-              { title: "Confirmation" }
-            ]}
-            labelPlacement="vertical"
-            className="mb-5"
-          />
+          <div className="overflow-x-scroll scrollStepsCstm gap-5">
+            <Steps
+              current={currentStep}
+              items={[
+                { title: "Allocation Information" },
+                { title: "Approval Information" },
+                { title: "Attachment Information" },
+                { title: "Confirmation" }
+              ]}
+              labelPlacement="vertical"
+            />
+          </div>
 
-          <Spin spinning={loading}>
-            {/* Step 1: Allocation Information */}
-            <div style={{ display: currentStep === 0 ? 'block' : 'none' }}>
-              <TablePagination
-                columns={columnRecommendation(
-                  pageChoose,
-                  pageSizeChoose,
-                  searchInput,
-                  searchedColumnChoose,
-                  searchTextChoose,
-                  handleSearchModal
-                )}
-                current={pageChoose}
-                pageSize={pageSizeChoose}
-                dataSource={updatePagination(
-                  dataRecomendation,
-                  "data",
-                  searchedColumnChoose,
-                  searchTextChoose,
-                  pageChoose,
-                  pageSizeChoose,
-                  typeColumn
-                )}
-                totalData={updatePagination(
-                  dataRecomendation,
-                  "length",
-                  searchedColumnChoose,
-                  searchTextChoose,
-                  pageChoose,
-                  pageSizeChoose,
-                  typeColumn
-                )}
-                tableScrolled={{ x: 3500, y: 500 }}
-                onChange={handleChange}
-                rowSelection={rowSelection}
-                onSizeChanger={handleChange}
-              />
-              {totalAllocationAmount > parsedAmount && (
-                <span className="text-red-800">
-                  Total amount of selected item has been exceeded Total available
-                  amount. Please select other item.
-                </span>
-              )}
-              <div className="mt-4">
-                <Form.Item
-                  label={"Remark"}
-                  required
-                  validateStatus={!forceObj.remark ? "error" : "success"}
-                  help={!forceObj.remark ? "Remark is required" : null}
-                >
-                  <InputComponent
-                    rows={3}
-                    type="textarea"
-                    value={forceObj.remark}
-                    onChange={(e) => handleForceObj(e, "remark")}
+          <Form
+            layout="vertical"
+            className="mt-3"
+          >
+            <Spin spinning={loading}>
+              {/* Step 1: Allocation Information */}
+              <div style={{ display: currentStep === 0 ? 'block' : 'none' }}>
+                <p className="text-primary text-xl font-semibold uppercase py-[20px] gap-5">
+                  RECEIPT ON BANK STATEMENT
+                </p>
+                <div className="my-5">
+                  <TablePagination
+                    columns={columnRecommendation(
+                      pageChoose,
+                      pageSizeChoose,
+                      searchInput,
+                      searchedColumnChoose,
+                      searchTextChoose,
+                      handleSearchModal
+                    )}
+                    current={pageChoose}
+                    pageSize={pageSizeChoose}
+                    dataSource={updatePagination(
+                      dataRecomendation,
+                      "data",
+                      searchedColumnChoose,
+                      searchTextChoose,
+                      pageChoose,
+                      pageSizeChoose,
+                      typeColumn
+                    )}
+                    totalData={updatePagination(
+                      dataRecomendation,
+                      "length",
+                      searchedColumnChoose,
+                      searchTextChoose,
+                      pageChoose,
+                      pageSizeChoose,
+                      typeColumn
+                    )}
+                    tableScrolled={{ x: 3500, y: 500 }}
+                    onChange={handleChange}
+                    rowSelection={rowSelection}
+                    onSizeChanger={handleChange}
                   />
-                </Form.Item>
-              </div>
-            </div>
-
-            {/* Step 2: Approval Information */}
-            <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
-              <ApprovalSectionForm
-                dataTable={appHierDataDetail}
-                dataOption={appHierOptions}
-                selectedHierarchy={forceObj.approvalHierarchy}
-                updateSelectedHierarchy={(e) =>
-                  handleForceObj(e, "approvalHierarchy")
-                }
-              />
-            </div>
-
-            {/* Step 3: Attachment Information */}
-            <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
-              <AttachmentComponent
-                data={listDataAttachment}
-                updateData={setListDataAttachment}
-                typeSelector="electronic"
-                dispatch={dispatch}
-                getAPICategory={getListCategory}
-                service={receiptCollectionHttpService}
-                configApplication={configApp.PAYMENT_SERVICE}
-                typeRBI={"data"}
-              />
-            </div>
-
-            {/* Step 4: Confirmation */}
-            <div style={{ display: currentStep === 3 ? 'block' : 'none' }}>
-              <Alert
-                message="Please review your allocation details before confirming."
-                type="info"
-                showIcon
-                className="mb-4"
-              />
-              <div className="mb-4">
-                <strong>Selected Allocations:</strong> {selectDataTable.length} items
-                <br />
-                <strong>Total Amount:</strong> {totalAllocationAmount?.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                <br />
-                <strong>Remark:</strong> {forceObj.remark}
-                <br />
-                <strong>Approval Hierarchy:</strong> {appHierOptions.find(opt => opt.value === forceObj.approvalHierarchy)?.name || "-"}
-                <br />
-                <strong>Attachments:</strong> {listDataAttachment.length} files
-              </div>
-              <TablePagination
-                columns={columnRecommendation(
-                  pageChoose,
-                  pageSizeChoose,
-                  searchInput,
-                  searchedColumnChoose,
-                  searchTextChoose,
-                  handleSearchModal
+                </div>
+                {totalAllocationAmount > parsedAmount && (
+                  <span className="text-red-800">
+                    Total amount of selected item has been exceeded Total available
+                    amount. Please select other item.
+                  </span>
                 )}
-                dataSource={selectDataTable}
-                pagination={false}
-                usePagination={false}
-                tableScrolled={{ x: 3500, y: 300 }}
-              />
-            </div>
-          </Spin>
+                <div className="mt-4">
+                  <Form.Item
+                    label={"Remark"}
+                    required
+                    validateStatus={!forceObj.remark ? "error" : "success"}
+                    help={!forceObj.remark ? "Remark is required" : null}
+                  >
+                    <InputComponent
+                      rows={5}
+                      type="textarea"
+                      value={forceObj.remark}
+                      onChange={(e) => handleForceObj(e, "remark")}
+                    />
+                  </Form.Item>
+                </div>
+              </div>
+
+              {/* Step 2: Approval Information */}
+              <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
+                <div className="my-5 gap-5">
+                  <ApprovalSectionForm
+                    dataTable={appHierDataDetail}
+                    dataOption={appHierOptions}
+                    selectedHierarchy={forceObj.approvalHierarchy}
+                    updateSelectedHierarchy={(e) =>
+                      handleForceObj(e, "approvalHierarchy")
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* Step 3: Attachment Information */}
+              <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
+                <div className="my-5 gap-5">
+                  <AttachmentComponent
+                    data={listDataAttachment}
+                    updateData={setListDataAttachment}
+                    typeSelector="electronic"
+                    dispatch={dispatch}
+                    getAPICategory={getListCategory}
+                    service={receiptCollectionHttpService}
+                    configApplication={configApp.PAYMENT_SERVICE}
+                    typeRBI={"data"}
+                  />
+                </div>
+              </div>
+
+              {/* Step 4: Confirmation */}
+              <div style={{ display: currentStep === 3 ? 'block' : 'none' }}>
+                <div className="flex flex-col gap-4">
+                  <RadioTabs
+                    data={[
+                      { value: "Allocation" },
+                      { value: "Approval" },
+                      { value: "Attachment" },
+                    ]}
+                    onChange={(e) => setConfirmationTab(e.target.value)}
+                    currentPosition={confirmationTab || "Allocation"}
+                  />
+                  <div className="flex flex-col gap-4">
+                    <div className="text-primary text-sm font-bold uppercase">
+                      {`${confirmationTab || "Allocation"} INFORMATION`}
+                    </div>
+
+                    {/* Allocation Info Tab */}
+                    {(confirmationTab === "Allocation" || !confirmationTab) && (
+                      <>
+                        <TablePagination
+                          columns={columnRecommendation(
+                            pageChoose,
+                            pageSizeChoose,
+                            searchInput,
+                            searchedColumnChoose,
+                            searchTextChoose,
+                            handleSearchModal
+                          )}
+                          dataSource={selectDataTable}
+                          usePagination={false}
+                          tableScrolled={{ x: 3500, y: 300 }}
+                        />
+                        <DetailText label={"Remark"}>{forceObj?.remark}</DetailText>
+                        <div className="mt-2">
+                          <strong>Total Amount:</strong> {totalAllocationAmount?.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        </div>
+                      </>
+                    )}
+
+                    {/* Approval Info Tab */}
+                    {confirmationTab === "Approval" && (
+                      <ApprovalSectionForm
+                        showSelect={false}
+                        disableSelect={true}
+                        approvalName={
+                          (appHierOptions || []).filter(
+                            (data) => data.value === forceObj.approvalHierarchy
+                          )?.[0]?.name || ""
+                        }
+                        dataTable={appHierDataDetail}
+                        selectedHierarchy
+                      />
+                    )}
+
+                    {/* Attachment Info Tab */}
+                    {confirmationTab === "Attachment" && (
+                      <AttachmentSectionForm type={"preview"} data={listDataAttachment} />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+            </Spin>
+          </Form>
         </div>
-      </ModalCustom>
-    </div>
+      </ModalCustom >
+    </div >
   );
 };
 
