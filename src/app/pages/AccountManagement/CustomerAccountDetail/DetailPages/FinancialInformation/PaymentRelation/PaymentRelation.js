@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import {
   FilterOutlined,
 } from "@ant-design/icons";
-import { DatePicker, Input, Spin } from "antd";
+import { DatePicker, Form, Input, Modal, Spin } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
@@ -14,6 +14,8 @@ import { dateFormatting } from "../../../../../../../utils";
 import ModalConfirmationApprovalPaymentRelation from "./ModalConfirmationApprovalPaymentRelation";
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
+import NxFilter from "../../../../../../../components/Nx/NxFilter";
+import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 
 const PaymentRelation = ({
   id = 0,
@@ -27,9 +29,11 @@ const PaymentRelation = ({
 }) => {
   const dispatch = useDispatch();
 
-  const { data_paymentRelation, loading, data_prApprovalHistory } = useSelector(
+  const financialInformationState = useSelector(
     (state) => state.financialInformation
   );
+
+  const { data_paymentRelation, loading, data_prApprovalHistory } = financialInformationState;
 
   //declare
   const searchInput = useRef(null);
@@ -50,6 +54,19 @@ const PaymentRelation = ({
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
+  const [filterForm] = Form.useForm();
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [tempFilters, setTempFilters] = useState([]);
+
+  const handleFinish = (values) => {
+    console.log("Filter values:", values.query);
+    // Process the filter query
+  };
+
+  const handleCancel = () => {
+    setShowFilterModal(false);
+    filterForm.resetFields();
+  };
 
   const handleCancelApprovalModal = () => {
     setShowApprovalModal(false);
@@ -389,7 +406,29 @@ const PaymentRelation = ({
           handleApprovalHistoryModal={handleApprovalHistoryModal}
           handleIsApproval={handleIsApproval}
           handleDownload={handleDownload}
+          tempFilters={tempFilters}
+          setShowFilterModal={setShowFilterModal}
         />
+
+          <ModalCustom
+            isOpen={showFilterModal}
+            type={"confirmation"}
+            header={"QUERY"}
+            width={1200}
+            handleCancel={handleCancel}
+          >
+            <Form form={filterForm} layout="vertical" onFinish={handleFinish}>
+              <NxFilter
+                form={filterForm}
+                onCancel={handleCancel}
+                dispatch={dispatch}
+                reduxState={financialInformationState}
+                maxFilters={5}
+                loading={loading}
+              />
+            </Form>
+          </ModalCustom>
+
         <ModalConfirmationApprovalPaymentRelation
           dataSource={selectedRows}
           isOpen={showApprovalModal}

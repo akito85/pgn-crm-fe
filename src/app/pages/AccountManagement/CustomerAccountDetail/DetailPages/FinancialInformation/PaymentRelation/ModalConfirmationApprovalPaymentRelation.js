@@ -38,10 +38,10 @@ const ModalConfirmationApprovalPaymentRelation = ({
     },
     {
       title: "PRIORITY",
-      dataIndex: "priorty",
+      dataIndex: "priority",
       width: 100,
       sorter: true,
-      ...getColumnSearchProps("priorty"),
+      ...getColumnSearchProps("priority"),
     },
     {
       title: "START DATE",

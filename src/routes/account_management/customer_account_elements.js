@@ -100,8 +100,8 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   UPDATE_ACCOUNT_CONTACT_PAGE: <FormAccountContact type={"update"} />,
 
   // Service Request Detail
-  VIEW_DETAIL_SERVICE_REQUEST_PAGE: <CustomerServiceRequestDetails />,
-  CREATE_SERVICE_REQUEST_PAGE: <CreateCustomerServiceRequest />,
+  // VIEW_DETAIL_SERVICE_REQUEST_PAGE: <CustomerServiceRequestDetails />,
+  // CREATE_SERVICE_REQUEST_PAGE: <CreateCustomerServiceRequest />,
   // UPDATE_SERVICE_REQUEST_PAGE: <UpdateCustomerServiceRequest />,
 
   // Payment Relation Detail
