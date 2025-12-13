@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import {
   FilterOutlined,
 } from "@ant-design/icons";
-import { DatePicker, Input, Spin } from "antd";
+import { DatePicker, Form, Input, Spin } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
@@ -14,6 +14,7 @@ import { dateFormatting } from "../../../../../../../utils";
 import ModalConfirmationApprovalPaymentRelation from "./ModalConfirmationApprovalPaymentRelation";
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
+import NxFilter from "../../../../../../../components/Nx/NxFilter";
 
 const PaymentRelation = ({
   id = 0,
@@ -27,9 +28,11 @@ const PaymentRelation = ({
 }) => {
   const dispatch = useDispatch();
 
-  const { data_paymentRelation, loading, data_prApprovalHistory } = useSelector(
+  const financialInformationState = useSelector(
     (state) => state.financialInformation
   );
+
+  const { data_paymentRelation, loading, data_prApprovalHistory } = financialInformationState;
 
   //declare
   const searchInput = useRef(null);
@@ -50,6 +53,16 @@ const PaymentRelation = ({
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
+  const [advancedQueryForm] = Form.useForm();
+
+  const handleFinish = (values) => {
+    console.log("Filter values:", values.query);
+    // Process the filter query
+  };
+
+  const handleCancel = () => {
+    advancedQueryForm.resetFields();
+  };
 
   const handleCancelApprovalModal = () => {
     setShowApprovalModal(false);
@@ -390,6 +403,21 @@ const PaymentRelation = ({
           handleIsApproval={handleIsApproval}
           handleDownload={handleDownload}
         />
+
+        <Form form={advancedQueryForm} layout="vertical" onFinish={handleFinish}>
+          <NxFilter
+            form={advancedQueryForm}
+            onCancel={handleCancel}
+            dispatch={dispatch}
+            getColumnApi={() => {}}
+            getOperatorApi={() => {}}
+            getConditionApi={() => {}}
+            reduxState={financialInformationState}
+            maxFilters={5}
+            loading={loading}
+          />
+        </Form>
+
         <ModalConfirmationApprovalPaymentRelation
           dataSource={selectedRows}
           isOpen={showApprovalModal}
