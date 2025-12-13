@@ -295,9 +295,29 @@ const PaymentRelationTable = ({
       {!isApproval && (
         <div className="flex justify-between items-center gap-5 mb-5">
           <Badge count={tempFilters.length}>
-            <Button onClick={() => setShowFilterModal(true)}>
-              Advanced Filter
-            </Button>
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => setShowFilterModal(true)}
+              icon={
+                <FilterOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 20,
+                  }}
+                />
+              }
+              style={{
+                backgroundColor: "#0075bf",
+                color: "#fff",
+                borderColor: "#0075bf",
+                border: "1px solid #0075bf",
+                width: "128px",
+                height: "48px",
+                borderRadius: "5px"
+              }}
+            >
+              Filters
+            </ButtonComponent>
           </Badge>
           <Toolbar items={itemActions} type="detail" />
         </div>
