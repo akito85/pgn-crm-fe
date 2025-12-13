@@ -4,10 +4,10 @@ import { columnAllocation } from "./ColumnAllocation";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 import moment from "moment";
-import { dateFormatting, hasValue } from "../../../../../utils";
+import { dateFormatting, formMessageRequired, hasValue } from "../../../../../utils";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import TablePagination from "../../../../../components/TablePagination";
-import { Spin } from "antd";
+import { Spin, Steps, Form, Input, Alert } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllocationRecomendationList,
@@ -17,6 +17,13 @@ import {
 } from "../../../../../redux/slices/general_slice";
 import { columnRecommendation } from "./ColumnRecomendation";
 import { updatePagination } from "../../../../../utils/updatePagination";
+import ApprovalSectionForm from "../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
+import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+import { getAllApprovalList, getListApprovalById, getListCategory } from "../../../../../redux/slices/receipt_collection/electrionicBank";
+import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
+import { configApp } from "../../../../../constants/configApp";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import InputComponent from "../../../../../components/InputComponent";
 
 const AllocationSection = ({
   dataTable,
@@ -59,6 +66,74 @@ const AllocationSection = ({
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [typeColumn, setTypeColumn] = useState("");
+
+  // New States for Wizard
+  const [currentStep, setCurrentStep] = useState(0);
+  const [forceObj, setForceObj] = useState({});
+  const [appHierOptions, setAppHierOptions] = useState([]);
+  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+  const [listDataAttachment, setListDataAttachment] = useState([]);
+  const {
+    dataListAppHierId,
+    dataListAppHierDetail,
+  } = useSelector((state) => state.electronic);
+
+  // Load Approval Hierarchy List
+  useEffect(() => {
+    dispatch(getAllApprovalList());
+  }, []);
+
+  // Set Approval Options
+  useEffect(() => {
+    if (dataListAppHierId && dataListAppHierId.length > 0) {
+      const tempAppHier = dataListAppHierId.map((appHier) => ({
+        name: appHier.approvalName,
+        value: appHier.appHierId,
+      }));
+      setAppHierOptions(tempAppHier);
+    }
+  }, [dataListAppHierId]);
+
+  // Load Approval Detail when hierarchy selected
+  useEffect(() => {
+    if (forceObj.approvalHierarchy) {
+      dispatch(getListApprovalById(forceObj.approvalHierarchy));
+    }
+  }, [forceObj]);
+
+  // Set Approval Detail Data
+  useEffect(() => {
+    if (dataListAppHierDetail && dataListAppHierDetail.length > 0) {
+      const data = dataListAppHierDetail.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: a.employeeDetail.map((b, index) => ({
+          ...b,
+          key: index + 1,
+        })),
+      }));
+      setAppHierDataDetail(data);
+    } else {
+      setAppHierDataDetail([]);
+    }
+  }, [dataListAppHierDetail]);
+
+  const handleForceObj = (e, type) => {
+    let result;
+    switch (type) {
+      case "remark":
+        result = e.target.value;
+        break;
+      default:
+        result = e;
+        break;
+    }
+    setForceObj((prevState) => ({
+      ...prevState,
+      [type]: result,
+    }));
+    return result;
+  };
   // helper to parse formatted amount
   const parseAmount = (val) => {
     if (typeof val === 'number') return val;
@@ -249,6 +324,11 @@ const AllocationSection = ({
     setPageSizeChoose(10);
     setSearchTextChoose("");
     setSearchedColumnChoose("");
+
+    // Reset Wizard State
+    setCurrentStep(0);
+    setForceObj({});
+    setListDataAttachment([]);
   };
 
   const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
@@ -293,11 +373,27 @@ const AllocationSection = ({
     if (totalAllocationAmount > parsedAmount) {
     } else {
       // dispatch(setDataAllocation(selectDataTable));
-      setDataTable(selectDataTable);
+      // Merge new data (Approval, Remark, Attachment) into the selected rows
+      // Note: Since these are technically "header" info for the allocation SET, 
+      // we might need to attach them to EACH row, or the backend expects them differently.
+      // Based on typical table-inline patterns, we'll attach them to the objects.
+
+      const enrichedData = selectDataTable.map(row => ({
+        ...row,
+        remark: forceObj.remark,
+        approvalHierarchyId: forceObj.approvalHierarchy,
+        attachments: listDataAttachment
+      }));
+
+      setDataTable(enrichedData);
+
       // handleCancel();
       setOpenModalAllocation(false);
       setPageChoose(1);
       setPageSizeChoose(10);
+      setCurrentStep(0);
+      setForceObj({});
+      setListDataAttachment([]);
     }
   };
 
@@ -439,70 +535,198 @@ const AllocationSection = ({
         type={"confirmation"}
         header={"Choose Allocation"}
         width={1200}
-        footer={[
-          <div className="flex gap-5 justify-end w-full">
-            <ButtonComponent
-              // type={"reject"}
-              htmlType={"submit"}
-              // form={"formApprove"}
-              onClick={handleCancel}
-            >
+        footer={
+          <div className="flex justify-end gap-5">
+            <ButtonComponent type={"default"} onClick={handleCancel}>
               Cancel
             </ButtonComponent>
-            <ButtonComponent
-              type={"submit"}
-              htmlType={"submit"}
-              // form={"formApprove"}
-              onClick={handleSaveDataTable}
-            >
-              Confirm
-            </ButtonComponent>
-          </div>,
-        ]}
+            {currentStep > 0 ? (
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => setCurrentStep(currentStep - 1)}
+                icon={
+                  <LeftOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 15,
+                      marginRight: 10,
+                    }}
+                  />
+                }
+              >
+                Previous
+              </ButtonComponent>
+            ) : null}
+
+            {currentStep < 3 && ( // 3 is index of Confirmation step
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => setCurrentStep(currentStep + 1)}
+                disabled={
+                  (currentStep === 0 && (selectDataTable.length === 0 || !forceObj.remark)) || // Step 1: Selection + Remark
+                  (currentStep === 1 && !forceObj.approvalHierarchy) // Step 2: Approval
+                  // Step 3 (Attachment) is optional? Usually yes, or check listDataAttachment.length === 0
+                }
+              >
+                <div style={{ textAlign: "center" }}>
+                  <span>Next</span>
+                  <RightOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 15,
+                      marginLeft: 10,
+                    }}
+                  />
+                </div>
+              </ButtonComponent>
+            )}
+            {currentStep === 3 && (
+              <ButtonComponent
+                type={"submit"}
+                htmlType={"submit"}
+                onClick={handleSaveDataTable}
+              >
+                Confirm
+              </ButtonComponent>
+            )}
+          </div>
+        }
       >
-        <Spin spinning={loading}>
-          <TablePagination
-            columns={columnRecommendation(
-              pageChoose,
-              pageSizeChoose,
-              searchInput,
-              searchedColumnChoose,
-              searchTextChoose,
-              handleSearchModal
-            )}
-            current={pageChoose}
-            pageSize={pageSizeChoose}
-            dataSource={updatePagination(
-              dataRecomendation,
-              "data",
-              searchedColumnChoose,
-              searchTextChoose,
-              pageChoose,
-              pageSizeChoose,
-              typeColumn
-            )}
-            totalData={updatePagination(
-              dataRecomendation,
-              "length",
-              searchedColumnChoose,
-              searchTextChoose,
-              pageChoose,
-              pageSizeChoose,
-              typeColumn
-            )}
-            tableScrolled={{ x: 3500, y: 500 }}
-            onChange={handleChange}
-            rowSelection={rowSelection}
-            onSizeChanger={handleChange}
-          // onSort={onSort}
+        <div className="w-full gap-5">
+          <Steps
+            current={currentStep}
+            items={[
+              { title: "Allocation Information" },
+              { title: "Approval Information" },
+              { title: "Attachment Information" },
+              { title: "Confirmation" }
+            ]}
+            labelPlacement="vertical"
+            className="mb-5"
           />
-        </Spin>
-        {totalAllocationAmount > parsedAmount && (
-          <span className="text-red-800">
-            Total amount of selected item has been exceeded Total available
-            amount. Please select other item.
-          </span>
-        )}
+
+          <Spin spinning={loading}>
+            {/* Step 1: Allocation Information */}
+            <div style={{ display: currentStep === 0 ? 'block' : 'none' }}>
+              <TablePagination
+                columns={columnRecommendation(
+                  pageChoose,
+                  pageSizeChoose,
+                  searchInput,
+                  searchedColumnChoose,
+                  searchTextChoose,
+                  handleSearchModal
+                )}
+                current={pageChoose}
+                pageSize={pageSizeChoose}
+                dataSource={updatePagination(
+                  dataRecomendation,
+                  "data",
+                  searchedColumnChoose,
+                  searchTextChoose,
+                  pageChoose,
+                  pageSizeChoose,
+                  typeColumn
+                )}
+                totalData={updatePagination(
+                  dataRecomendation,
+                  "length",
+                  searchedColumnChoose,
+                  searchTextChoose,
+                  pageChoose,
+                  pageSizeChoose,
+                  typeColumn
+                )}
+                tableScrolled={{ x: 3500, y: 500 }}
+                onChange={handleChange}
+                rowSelection={rowSelection}
+                onSizeChanger={handleChange}
+              />
+              {totalAllocationAmount > parsedAmount && (
+                <span className="text-red-800">
+                  Total amount of selected item has been exceeded Total available
+                  amount. Please select other item.
+                </span>
+              )}
+              <div className="mt-4">
+                <Form.Item
+                  label={"Remark"}
+                  required
+                  validateStatus={!forceObj.remark ? "error" : "success"}
+                  help={!forceObj.remark ? "Remark is required" : null}
+                >
+                  <InputComponent
+                    rows={3}
+                    type="textarea"
+                    value={forceObj.remark}
+                    onChange={(e) => handleForceObj(e, "remark")}
+                  />
+                </Form.Item>
+              </div>
+            </div>
+
+            {/* Step 2: Approval Information */}
+            <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
+              <ApprovalSectionForm
+                dataTable={appHierDataDetail}
+                dataOption={appHierOptions}
+                selectedHierarchy={forceObj.approvalHierarchy}
+                updateSelectedHierarchy={(e) =>
+                  handleForceObj(e, "approvalHierarchy")
+                }
+              />
+            </div>
+
+            {/* Step 3: Attachment Information */}
+            <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
+              <AttachmentComponent
+                data={listDataAttachment}
+                updateData={setListDataAttachment}
+                typeSelector="electronic"
+                dispatch={dispatch}
+                getAPICategory={getListCategory}
+                service={receiptCollectionHttpService}
+                configApplication={configApp.PAYMENT_SERVICE}
+                typeRBI={"data"}
+              />
+            </div>
+
+            {/* Step 4: Confirmation */}
+            <div style={{ display: currentStep === 3 ? 'block' : 'none' }}>
+              <Alert
+                message="Please review your allocation details before confirming."
+                type="info"
+                showIcon
+                className="mb-4"
+              />
+              <div className="mb-4">
+                <strong>Selected Allocations:</strong> {selectDataTable.length} items
+                <br />
+                <strong>Total Amount:</strong> {totalAllocationAmount?.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                <br />
+                <strong>Remark:</strong> {forceObj.remark}
+                <br />
+                <strong>Approval Hierarchy:</strong> {appHierOptions.find(opt => opt.value === forceObj.approvalHierarchy)?.name || "-"}
+                <br />
+                <strong>Attachments:</strong> {listDataAttachment.length} files
+              </div>
+              <TablePagination
+                columns={columnRecommendation(
+                  pageChoose,
+                  pageSizeChoose,
+                  searchInput,
+                  searchedColumnChoose,
+                  searchTextChoose,
+                  handleSearchModal
+                )}
+                dataSource={selectDataTable}
+                pagination={false}
+                usePagination={false}
+                tableScrolled={{ x: 3500, y: 300 }}
+              />
+            </div>
+          </Spin>
+        </div>
       </ModalCustom>
     </div>
   );
