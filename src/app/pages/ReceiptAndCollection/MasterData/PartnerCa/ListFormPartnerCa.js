@@ -2,9 +2,9 @@ import {
   LeftOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import { Form,Spin } from "antd";
+import { Form, Spin } from "antd";
 import moment from "moment";
-import  { useEffect,  useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -20,6 +20,8 @@ import {
   getListApprovalById,
   getListCategory,
   updatePartner,
+  getPartnerList,
+  getCollectionAgentList,
 } from "../../../../../redux/slices/receipt_collection/partnerCa";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
@@ -47,6 +49,8 @@ const ListFormPartnerCa = (props) => {
     dataListAppHierDetail,
     loading,
     dataType,
+    dataPartner,
+    dataCollectionAgent,
   } = useSelector((state) => state.partnerCa);
 
   // Declaration
@@ -64,11 +68,11 @@ const ListFormPartnerCa = (props) => {
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [loadingForm, setLoadingForm] = useState(loading);
 
-  
 
-  
 
-  
+
+
+
 
   useEffect(() => {
     if (id && type === "update") {
@@ -77,11 +81,13 @@ const ListFormPartnerCa = (props) => {
   }, [dispatch, id, type]);
 
 
- 
+
 
   useEffect(() => {
     dispatch(getAllApprovalList());
     dispatch(getTypeDDL());
+    dispatch(getPartnerList());
+    dispatch(getCollectionAgentList());
   }, [dispatch]);
 
   useEffect(() => {
@@ -129,7 +135,7 @@ const ListFormPartnerCa = (props) => {
   }, [formValue, appHierOptions, form]);
 
   useEffect(() => {
-    if (id  && data_detail) {
+    if (id && data_detail) {
 
       form.setFieldsValue({
         id: data_detail?.partner.id,
@@ -164,12 +170,14 @@ const ListFormPartnerCa = (props) => {
   // Define tabData before using it in useState
 
   const [tabData, setTabData] = useState([
-    { value: "Partner Ca", paramValue: ["partnerCode", 
-                                      "caCode",
-                                      "effStartDate",
-                                      "effEndDate",
-                                      "settlementBank",
-                                     ] },
+    {
+      value: "Partner Ca", paramValue: ["partnerCode",
+        "caCode",
+        "effStartDate",
+        "effEndDate",
+        "settlementBank",
+      ]
+    },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
   ]);
@@ -190,54 +198,54 @@ const ListFormPartnerCa = (props) => {
     }
   }, [formValue, appHierOptions, form]);
 
-  
+
 
   const handleSubmitForm = (formValue) => {
-      const dataValue = {
-        // partnerId: id,
-        partnerCode: formValue.partnerCode,
-        caCode: formValue.caCode,
-        settlementBank: formValue.settlementBank,
-        effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
-        effEndDate: formValue.effEndDate
-          ? moment(formValue.endDate).format(dateFormatting.date)
-          : null,
-        appHierId: formValue.apphierId,
-      };
+    const dataValue = {
+      // partnerId: id,
+      partnerCode: formValue.partnerCode,
+      caCode: formValue.caCode,
+      settlementBank: formValue.settlementBank,
+      effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
+      effEndDate: formValue.effEndDate
+        ? moment(formValue.endDate).format(dateFormatting.date)
+        : null,
+      appHierId: formValue.apphierId,
+    };
 
-      console.log("data value partner ca: ", dataValue);    
+    console.log("data value partner ca: ", dataValue);
 
-      setSendBody(dataValue);
-      const bodyValidasiUpdate = {
-        ...dataValue,
-        id: data_detail?.partner?.id,
-      };
-      if (type !== "update") {
-        dispatch(createValidasiPartner(dataValue))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setModalConfirm(false);
-            }
-            setModalConfirm(true);
-          });
-      }else{
-        dispatch(createValidasiPartner(bodyValidasiUpdate))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setModalConfirm(false);
-            }
-            setModalConfirm(true);
-            setSendBody(bodyValidasiUpdate)
-          });
-      }
-      
+    setSendBody(dataValue);
+    const bodyValidasiUpdate = {
+      ...dataValue,
+      id: data_detail?.partner?.id,
+    };
+    if (type !== "update") {
+      dispatch(createValidasiPartner(dataValue))
+        .unwrap()
+        .then(async (data) => {
+          const sukses = data?.success;
+          if (sukses === false) {
+            setModalConfirm(false);
+          }
+          setModalConfirm(true);
+        });
+    } else {
+      dispatch(createValidasiPartner(bodyValidasiUpdate))
+        .unwrap()
+        .then(async (data) => {
+          const sukses = data?.success;
+          if (sukses === false) {
+            setModalConfirm(false);
+          }
+          setModalConfirm(true);
+          setSendBody(bodyValidasiUpdate)
+        });
+    }
+
   };
 
-  
+
   const handleCancelModalConfirm = () => {
     setModalConfirm(false);
   };
@@ -304,7 +312,7 @@ const ListFormPartnerCa = (props) => {
       breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
     },
   ];
-  
+
 
   //kriim bodyy
   const handleSave = async () => {
@@ -424,6 +432,8 @@ const ListFormPartnerCa = (props) => {
             <PartnerCaForm
               dataType={dataType}
               form={form}
+              dataPartner={dataPartner}
+              dataCollectionAgent={dataCollectionAgent}
             />
           </div>
           <div
@@ -450,7 +460,7 @@ const ListFormPartnerCa = (props) => {
                 type={type}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
-                typeSelector="patnerCa"
+                typeSelector="partnerCa"
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
                 service={receiptCollectionHttpService}

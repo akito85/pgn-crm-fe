@@ -139,31 +139,7 @@ const ViewCollectingAgent = () => {
             render: (text, object, index) => (page - 1) * pageSize + index + 1,
         },
         {
-            title: "ID",
-            dataIndex: "id",
-            key: "id",
-            sorter: true,
-            ...getColumnSearchPropsPaging(
-                "id",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                true
-            ),
-            render: (text) =>
-                renderColumn(
-                    "id",
-                    searchedColumn,
-                    searchText,
-                    text,
-                    true,
-                    "input",
-                    search
-                ),
-        },
-        {
-            title: "CA CODE",
+            title: "CA",
             dataIndex: "caCode",
             key: "caCode",
             sorter: true,
@@ -211,7 +187,7 @@ const ViewCollectingAgent = () => {
                 ),
         },
         {
-            title: "EFFECTIVE START DATE",
+            title: "START DATE",
             dataIndex: "effStartDate",
             key: "effStartDate",
             sorter: true,
@@ -235,7 +211,7 @@ const ViewCollectingAgent = () => {
                 ),
         },
         {
-            title: "EFFECTIVE END DATE",
+            title: "END DATE",
             dataIndex: "effEndDate",
             key: "effEndDate",
             sorter: true,

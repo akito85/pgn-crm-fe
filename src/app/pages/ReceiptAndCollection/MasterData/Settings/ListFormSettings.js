@@ -2,9 +2,9 @@ import {
   LeftOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import { Form,Spin } from "antd";
+import { Form, Spin } from "antd";
 import moment from "moment";
-import  { useEffect,  useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -20,6 +20,9 @@ import {
   getListApprovalById,
   getListCategory,
   updateSetting,
+  getPartnerList,
+  getCollectionAgentList,
+  getPaymentChannelList
 } from "../../../../../redux/slices/receipt_collection/setting";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
@@ -47,6 +50,9 @@ const ListFormSettings = (props) => {
     dataListAppHierDetail,
     loading,
     dataType,
+    dataPartnerList,
+    dataCollectionAgentList,
+    dataPaymentChannelList
   } = useSelector((state) => state.receiptSetting);
 
   // Declaration
@@ -64,11 +70,11 @@ const ListFormSettings = (props) => {
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [loadingForm, setLoadingForm] = useState(loading);
 
-  
 
-  
 
-  
+
+
+
 
   useEffect(() => {
     if (id && type === "update") {
@@ -77,11 +83,14 @@ const ListFormSettings = (props) => {
   }, [dispatch, id, type]);
 
 
- 
+
 
   useEffect(() => {
     dispatch(getAllApprovalList());
     dispatch(getTypeDDL());
+    dispatch(getPartnerList());
+    dispatch(getCollectionAgentList());
+    dispatch(getPaymentChannelList());
   }, [dispatch]);
 
   useEffect(() => {
@@ -93,7 +102,7 @@ const ListFormSettings = (props) => {
       setAppHierOptions(tempAppHier);
     }
   }, [dataListAppHierId]);
-  
+
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
       dispatch(getListApprovalById({ id: selectedHierarchy }));
@@ -129,7 +138,7 @@ const ListFormSettings = (props) => {
   }, [formValue, appHierOptions, form]);
 
   useEffect(() => {
-    if (id  && data_detail) {
+    if (id && data_detail) {
 
       form.setFieldsValue({
         id: data_detail?.settings.id,
@@ -161,17 +170,19 @@ const ListFormSettings = (props) => {
   // Define tabData before using it in useState
 
   const [tabData, setTabData] = useState([
-    { value: "Setting", paramValue: ["dateStart",
-                                      "dateEnd",
-                                      "hourStart",
-                                      "hourEnd",
-                                      "minuteStart",
-                                      "minuteEnd",
-                                      "caCode",
-                                      "partnerCode",
-                                      "ciCode",
-                                      "type"
-                                     ] },
+    {
+      value: "Setting", paramValue: ["dateStart",
+        "dateEnd",
+        "hourStart",
+        "hourEnd",
+        "minuteStart",
+        "minuteEnd",
+        "caCode",
+        "partnerCode",
+        "ciCode",
+        "type"
+      ]
+    },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
   ]);
@@ -192,54 +203,54 @@ const ListFormSettings = (props) => {
     }
   }, [formValue, appHierOptions, form]);
 
-  
+
 
   const handleSubmitForm = (formValue) => {
-      const dataValue = {
-        dateStart: formValue.dateStart,
-        dateEnd: formValue.dateEnd,
-        hourStart: formValue.hourStart,
-        hourEnd: formValue.hourEnd,
-        minuteStart: formValue.minuteStart,
-        minuteEnd: formValue.minuteEnd,
-        caCode: formValue.caCode,
-        partnerCode: formValue.partnerCode,
-        ciCode: formValue.ciCode,
-        type: formValue.type,
-        apphierId: formValue.apphierId,
-      };
+    const dataValue = {
+      dateStart: formValue.dateStart,
+      dateEnd: formValue.dateEnd,
+      hourStart: formValue.hourStart,
+      hourEnd: formValue.hourEnd,
+      minuteStart: formValue.minuteStart,
+      minuteEnd: formValue.minuteEnd,
+      caCode: formValue.caCode,
+      partnerCode: formValue.partnerCode,
+      ciCode: formValue.ciCode,
+      type: formValue.type,
+      apphierId: formValue.apphierId,
+    };
 
-      setSendBody(dataValue);
-      const bodyValidasiUpdate = {
-        ...dataValue,
-        id: data_detail?.settings?.id,
-      };
-      if (type !== "update") {
-        dispatch(createValidasiSetting(dataValue))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setModalConfirm(false);
-            }
-            setModalConfirm(true);
-          });
-      }else{
-        dispatch(createValidasiSetting(bodyValidasiUpdate))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setModalConfirm(false);
-            }
-            setModalConfirm(true);
-            setSendBody(bodyValidasiUpdate)
-          });
-      }
-      
+    setSendBody(dataValue);
+    const bodyValidasiUpdate = {
+      ...dataValue,
+      id: data_detail?.settings?.id,
+    };
+    if (type !== "update") {
+      dispatch(createValidasiSetting(dataValue))
+        .unwrap()
+        .then(async (data) => {
+          const sukses = data?.success;
+          if (sukses === false) {
+            setModalConfirm(false);
+          }
+          setModalConfirm(true);
+        });
+    } else {
+      dispatch(createValidasiSetting(bodyValidasiUpdate))
+        .unwrap()
+        .then(async (data) => {
+          const sukses = data?.success;
+          if (sukses === false) {
+            setModalConfirm(false);
+          }
+          setModalConfirm(true);
+          setSendBody(bodyValidasiUpdate)
+        });
+    }
+
   };
 
-  
+
   const handleCancelModalConfirm = () => {
     setModalConfirm(false);
   };
@@ -306,7 +317,7 @@ const ListFormSettings = (props) => {
       breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
     },
   ];
-  
+
 
   //kriim bodyy
   const handleSave = async () => {
@@ -426,6 +437,9 @@ const ListFormSettings = (props) => {
             <SettingsForm
               dataType={dataType}
               form={form}
+              dataPartnerList={dataPartnerList}
+              dataCollectionAgentList={dataCollectionAgentList}
+              dataPaymentChannelList={dataPaymentChannelList}
             />
           </div>
           <div
