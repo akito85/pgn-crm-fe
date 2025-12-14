@@ -31,6 +31,7 @@ const initialState = {
   dataListAppHierId: [],
   dataListAppHierDetail: [],
   data_converted_currency: null,
+  data_customer_list: null,
 };
 
 export const getPaginateReceipt = createAsyncThunk(
@@ -81,6 +82,25 @@ export const getAllocation = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(
         validateError({ error: error, action: "DATA_ALLOCATION" })
+      );
+      return error;
+    }
+  }
+);
+
+export const getReceiptCustomerList = createAsyncThunk(
+  "GET_RECEIPT_CUSTOMER_LIST",
+  async ({ search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/receipt/customer/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_RECEIPT_CUSTOMER_LIST" })
       );
       return error;
     }
@@ -1111,6 +1131,32 @@ const receiptSlice = createSlice({
     [getRecommendationDetailAllocation.fulfilled]: (state, action) => {
       state.isFailed = false;
       state.data_recomendation_allocation = action.payload;
+      state.loading = false;
+    },
+    // Get Receipt Customer List
+    [getReceiptCustomerList.pending]: (state, action) => {
+      state.loading = true;
+      state.data_customer_list = action.payload;
+    },
+    [getReceiptCustomerList.fulfilled]: (state, action) => {
+      state.data_customer_list = action.payload;
+      state.loading = false;
+    },
+    [getReceiptCustomerList.rejected]: (state, action) => {
+      state.data_customer_list = action.payload;
+      state.loading = false;
+    },
+    // Get Receipt Customer List
+    [getReceiptCustomerList.pending]: (state, action) => {
+      state.loading = true;
+      state.data_customer_list = action.payload;
+    },
+    [getReceiptCustomerList.fulfilled]: (state, action) => {
+      state.data_customer_list = action.payload;
+      state.loading = false;
+    },
+    [getReceiptCustomerList.rejected]: (state, action) => {
+      state.data_customer_list = action.payload;
       state.loading = false;
     },
   },
