@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import accountManagementService from "../../../services/account_management/accountManagementService";
 import { setBodyError, showModalError, showModalSuccess, validateError } from "../../general_slice";
+import { m } from "framer-motion";
 
 const initialState = {
   loading: false,
@@ -34,6 +35,9 @@ const initialState = {
   data_invoiceRelationAttachment: [],
   data_prApprovalHistory: {},
   data_irApprovalHistory: {},
+  data_globalTypeCondition: [],
+  data_globalTypeOperator: [],
+  data_globalTypeColumn: [],
 };
 
 export const getGlobalTypeTaxIdentifier= createAsyncThunk(
@@ -1075,7 +1079,18 @@ export const approveOrRejectInvoiceRelation = createAsyncThunk(
       };
 
       thunkAPI.dispatch(showModalError(errorBody));
+    }
+  }
+);
 
+export const getPrColumnApi = createAsyncThunk(
+  "GET_PR_COLUMN_API",
+  async (thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-relation/list-search-column";
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -1216,6 +1231,31 @@ export const getIrApprovalHistory = createAsyncThunk(
     }
   }
 );
+export const getPrConditionApi = createAsyncThunk(
+  "GET_PR_CONDITION_API",
+  async (thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-relation/list-search-condition";
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+)
+
+export const getPrOperatorApi = createAsyncThunk(
+  "GET_PR_OPERATOR_API",
+  async (thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-relation/list-search-operator";
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+)
 
 const financialInformationSlice = createSlice({
   name: "financialInformation",
@@ -1748,6 +1788,41 @@ const financialInformationSlice = createSlice({
       state.data_irApprovalHistory = action.payload;
     },
     [getIrApprovalHistory.rejected]: (state) => {
+        state.loading = false;
+    },
+    /** Get Payment Relation Column API  */
+    [getPrColumnApi.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPrColumnApi.fulfilled]: (state, action) => {
+      state.data_globalTypeColumn = action.payload;
+      state.loading = false;
+    },
+    [getPrColumnApi.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    /** Get Payment Relation Column API  */
+    [getPrConditionApi.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPrConditionApi.fulfilled]: (state, action) => {
+      state.data_globalTypeCondition = action.payload;
+      state.loading = false;
+    },
+    [getPrConditionApi.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    /** Get Payment Relation Operator API  */
+    [getPrOperatorApi.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPrOperatorApi.fulfilled]: (state, action) => {
+      state.data_globalTypeOperator = action.payload;
+      state.loading = false;
+    },
+    [getPrOperatorApi.rejected]: (state) => {
       state.loading = false;
     },
   },

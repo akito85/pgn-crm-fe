@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { approveOrRejectAllPaymentRelation, downloadPaymentRelation, getPaymentRelation, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { approveOrRejectAllPaymentRelation, downloadPaymentRelation, getPaymentRelation, getPrApprovalHistory, inactivatePaymentRelation, getPrColumnApi, getPrConditionApi, getPrOperatorApi } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
@@ -58,14 +58,35 @@ const PaymentRelation = ({
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [tempFilters, setTempFilters] = useState([]);
 
-  const handleFinish = (values) => {
-    console.log("Filter values:", values.query);
-    // Process the filter query
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (newSelectedRowKeys, newSelectedRows) => {
+      setSelectedRowKeys([...newSelectedRowKeys]);
+      setSelectedRows(newSelectedRows.map(newSelectedRow => ({...newSelectedRow})));
+      if (!newSelectedRowKeys.length)
+        setShowApprovalButton(false);
+      else
+        setShowApprovalButton(true);
+    },
+    type: "checkbox",
+    preserveSelectedRowKeys: true,
+  }
+
+  const handleSaveFilter = (values) => {
+    setTempFilters(values.query);
+    setPage(1);
+    setSort("");
+    setSearch({});
+    setSearchText("")
+    setShowFilterModal(false);
   };
 
-  const handleCancel = () => {
+  const handleCancelFilter = () => {
     setShowFilterModal(false);
-    filterForm.resetFields();
+    filterForm.setFieldValue({ query: tempFilters });
   };
 
   const handleCancelApprovalModal = () => {
@@ -73,6 +94,11 @@ const PaymentRelation = ({
     setSubmitApprovalCondition("");
   }
 
+  /**
+   * @param {string} description 
+   * @param {"approve"|"reject"} submitApprovalCondition 
+   * @param {() => {}} handleClear 
+   */
   const handleConfirmApprovalModal = (description, submitApprovalCondition, handleClear) => {
     const action = submitApprovalCondition.toUpperCase();
 
@@ -108,7 +134,13 @@ const PaymentRelation = ({
     .catch(() => {});
   }
 
-  const handleInactivePrModal = (show, prId = 0, prAppHierId = 0) => {
+  /**
+   * Open or close inactivate modal
+   * @param {boolean} show 
+   * @param {number} prId 
+   * @param {number} prAppHierId 
+   */
+  const handleInactivateModal = (show, prId = 0, prAppHierId = 0) => {
     if (show) {
       setInactivatePrId(prId);
       setInactivatePrAppHierId(prAppHierId);
@@ -120,6 +152,10 @@ const PaymentRelation = ({
     }
   }
 
+  /**
+   * @param {string} remark 
+   * @param {() => {}} handleClear 
+   */
   const handleInactivatePr = (remark, handleClear) => {
     const body = {
       id: inactivatePrId,
@@ -146,28 +182,11 @@ const PaymentRelation = ({
     .catch(() => {})
   }
 
-  useEffect(() => {
-    const body = {
-      page,
-      size: pageSize,
-      sort,
-      searches: search,
-    }
-
-    dispatch(getPaymentRelation({ id, body }));
-  }, [page, pageSize, sort, search]);
-
-  useEffect(() => {
-    if (
-      data_paymentRelation && 
-      data_paymentRelation.result &&
-      data_paymentRelation.result.length > 0
-    ) {
-      setTotalElement(data_paymentRelation?.page?.totalElements);
-    }
-  }, [data_paymentRelation]);
-
-  //handle on-changes listener
+  /**
+   * @param {string[]} selectedKeys 
+   * @param {() => {}} confirm 
+   * @param {string} dataIndex 
+   */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -183,7 +202,11 @@ const PaymentRelation = ({
     });
   };
 
-  // Search Column Table
+  /**
+   * @param {string} dataIndex 
+   * @param {string} type 
+   * @returns
+   */
   const getColumnSearchProps = (dataIndex, type) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
       const onDataChange = (value, dateString) => {
@@ -251,40 +274,6 @@ const PaymentRelation = ({
       ),
   });
 
-  const handleChange = (page) => {
-    setPage(page);
-  };
-
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
-  const onSort = (_, __, sort) => {
-    const dataSort = sort.order
-      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-      : "";
-    setSort(dataSort);
-  };
-
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [selectedRows, setSelectedRows] = useState([]);
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (newSelectedRowKeys, newSelectedRows) => {
-      setSelectedRowKeys([...newSelectedRowKeys]);
-      setSelectedRows(newSelectedRows.map(newSelectedRow => ({...newSelectedRow})));
-      if (!newSelectedRowKeys.length)
-        setShowApprovalButton(false);
-      else
-        setShowApprovalButton(true);
-    },
-    type: "checkbox",
-    preserveSelectedRowKeys: true,
-  }
-
   const handleApprovalHistoryOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
@@ -293,6 +282,10 @@ const PaymentRelation = ({
     }));
   };
 
+  /**
+   * @param {boolean} show 
+   * @param {number} prId 
+   */
   const handleApprovalHistoryModal = (show, prId = 0) => {
     if (show) {
       dispatch(getPrApprovalHistory(prId));
@@ -302,6 +295,9 @@ const PaymentRelation = ({
     }
   }
 
+  /**
+   * @param {boolean} newIsApproval 
+   */
   const handleIsApproval = (newIsApproval) => {
     if (newIsApproval) {
       setSearchText("WAITING APPROVAL");
@@ -342,6 +338,57 @@ const PaymentRelation = ({
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(downloadPaymentRelation({ page, pageSize, sort, search: tempSearch }));
   };
+
+  /**
+   * @param {number} newPage
+   */
+  const handleChange = (newPage) => {
+    setPage(newPage);
+  };
+
+  /**
+   * @param {number} pageChange 
+   * @param {number} pageSizeChange 
+   */
+  const handleChangeSize = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
+    setPageSize(pageSizeChange);
+  };
+
+  /**
+   * @param {*} _ 
+   * @param {*} __ 
+   * @param {import("antd/lib/table/interface").SorterResult} sort
+   */
+  const onSort = (_, __, sort) => {
+    const dataSort = sort.order
+      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
+  };
+
+  useEffect(() => {
+    const body = {
+      page,
+      size: pageSize,
+      sort,
+      searches: search,
+      inputFields: tempFilters,
+    }
+
+    dispatch(getPaymentRelation({ id, body }));
+  }, [page, pageSize, sort, search, tempFilters]);
+
+  useEffect(() => {
+    if (
+      data_paymentRelation && 
+      data_paymentRelation.result &&
+      data_paymentRelation.result.length > 0
+    ) {
+      setTotalElement(data_paymentRelation?.page?.totalElements);
+    }
+  }, [data_paymentRelation]);
 
   // Listen to approve or reject button on the parent component
   useEffect(() => {
@@ -387,9 +434,9 @@ const PaymentRelation = ({
         </div>
 
         <PaymentRelationTable
-          data={data_paymentRelation?.result?.map((paymentRelation) => ({
+          data={data_paymentRelation?.result?.map((paymentRelation, index) => ({
             ...paymentRelation,
-            key: `payment-relation-${paymentRelation.id}`
+            key: `payment-relation-${paymentRelation.id}-${index}`
           }))}
           idAccount={id}
           idCustomer={idCustomer}
@@ -402,7 +449,7 @@ const PaymentRelation = ({
           getColumnSearchProps={getColumnSearchProps}
           rowSelection={isApproval ? rowSelection : undefined}
           isApproval={isApproval}
-          handleInactivePrModal={handleInactivePrModal}
+          handleInactivePrModal={handleInactivateModal}
           handleApprovalHistoryModal={handleApprovalHistoryModal}
           handleIsApproval={handleIsApproval}
           handleDownload={handleDownload}
@@ -410,24 +457,29 @@ const PaymentRelation = ({
           setShowFilterModal={setShowFilterModal}
         />
 
-          <ModalCustom
-            isOpen={showFilterModal}
-            type={"confirmation"}
-            header={"QUERY"}
-            width={1200}
-            handleCancel={handleCancel}
-          >
-            <Form form={filterForm} layout="vertical" onFinish={handleFinish}>
-              <NxFilter
-                form={filterForm}
-                onCancel={handleCancel}
-                dispatch={dispatch}
-                reduxState={financialInformationState}
-                maxFilters={5}
-                loading={loading}
-              />
-            </Form>
-          </ModalCustom>
+        {/* Advanced Filter Modal */}
+        <ModalCustom
+          isOpen={showFilterModal}
+          type={"confirmation"}
+          header={"QUERY"}
+          width={1200}
+          handleCancel={handleCancelFilter}
+        >
+          <Form form={filterForm} layout="vertical" onFinish={handleSaveFilter} id={"prFilterForm"}>
+            <NxFilter
+              form={filterForm}
+              onCancel={handleCancelFilter}
+              dispatch={dispatch}
+              getColumnApi={getPrColumnApi}
+              getConditionApi={getPrConditionApi}
+              getOperatorApi={getPrOperatorApi}
+              reduxState={financialInformationState}
+              maxFilters={5}
+              loading={loading}
+              formId="prFilterForm"
+            />
+          </Form>
+        </ModalCustom>
 
         <ModalConfirmationApprovalPaymentRelation
           dataSource={selectedRows}
@@ -442,7 +494,7 @@ const PaymentRelation = ({
         <ModalApproveOrReject
           isOpen={showInactiveModal}
           header={"INACTIVATE"}
-          handleCloseModal={() => handleInactivePrModal(false)}
+          handleCloseModal={() => handleInactivateModal(false)}
           customMessage={`Are you sure you want to inactivate payment relation - ${inactivatePrId}?`}
           onFinish={({ remark }, handleClear) => handleInactivatePr(remark, handleClear)}
         />
