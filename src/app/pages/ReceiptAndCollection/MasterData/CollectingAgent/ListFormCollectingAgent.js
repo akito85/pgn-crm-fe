@@ -131,10 +131,10 @@ const ListFormCollectingAgent = (props) => {
                     data_detail?.collectingAgent?.effEndDate === null
                         ? ""
                         : moment(data_detail?.collectingAgent?.effEndDate).clone(),
-                apphierId: data_detail?.collectingAgent?.apphierId,
+                apphierId: data_detail?.collectingAgent?.appHierId,
             });
 
-            setSelectedHierarchy(data_detail?.collectingAgent?.apphierId);
+            setSelectedHierarchy(data_detail?.collectingAgent?.appHierId);
 
             setListDataAttachment(
                 (data_detail?.attachmentDtoList || []).map((attachData) => ({
