@@ -21,6 +21,8 @@ import {
   ModalConfirm,
 } from "../../../../components/Modal/ModalPopUp";
 import ModalHoldReceipt from "./Table/ModalHoldReceipt";
+import ModalRefundReceipt from "./Table/ModalRefundReceipt";
+import ModalReleaseReceipt from "./Table/ModalReleaseReceipt";
 import { DownloadOutlined, WarningOutlined } from "@ant-design/icons";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import Toolbar from "../../../../components/Toolbar";
@@ -52,6 +54,8 @@ const ViewReceipt = () => {
   const [recordSelected, setRecordSelected] = useState({});
   const [body, setBody] = useState();
   const [openModalHold, setOpenModalHold] = useState(false);
+  const [openModalRefund, setOpenModalRefund] = useState(false);
+  const [openModalRelease, setOpenModalRelease] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedData, setSelectedData] = useState([]);
 
@@ -81,6 +85,25 @@ const ViewReceipt = () => {
     setSelectedRowKeys([]);
     setSelectedData([]);
     handleFetch(); // Refresh list
+  };
+
+  const handleRefund = () => {
+    setOpenModalRefund(true);
+  };
+
+  const handleSubmitRefund = (data) => {
+    console.log("Submit Refund Data:", data);
+    setOpenModalRefund(false);
+    // dispatch action...
+  };
+
+  const handleRelease = () => {
+    setOpenModalRelease(true);
+  };
+
+  const handleSubmitRelease = (data) => {
+    console.log("Submit Release Data:", data);
+    setOpenModalRelease(false);
   };
 
   // Breadcrumbs
@@ -253,8 +276,8 @@ const ViewReceipt = () => {
         <ButtonComponent
           icon={<SVGIcon name="IconSend" color={"#ffffff"} width={24} />}
           type="submit"
-          // onClick={handleDownload}
-          disabled={true}
+          onClick={handleRelease}
+          disabled={false}
         >
           Release
         </ButtonComponent>
@@ -278,8 +301,8 @@ const ViewReceipt = () => {
         <ButtonComponent
           icon={<SVGIcon name="IconRefund" color={"#ffffff"} width={22} />}
           type="submit"
-          // onClick={handleDownload}
-          disabled={true}
+          onClick={handleRefund}
+          disabled={false}
         >
           Refund
         </ButtonComponent>
@@ -562,6 +585,21 @@ const ViewReceipt = () => {
           selectedData={selectedData}
           dataSource={dataSource}
           onSubmit={handleSubmitHold}
+        />
+
+        {/* Refund Receipt Modal */}
+        <ModalRefundReceipt
+          isOpen={openModalRefund}
+          handleCancel={() => setOpenModalRefund(false)}
+          selectedData={selectedData}
+          onSubmit={handleSubmitRefund}
+        />
+        <ModalReleaseReceipt
+          isOpen={openModalRelease}
+          handleCancel={() => setOpenModalRelease(false)}
+          selectedData={selectedData}
+          dataSource={dataSource}
+          onSubmit={handleSubmitRelease}
         />
 
         {/* approval modal */}
