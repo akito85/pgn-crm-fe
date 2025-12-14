@@ -10,7 +10,7 @@ const HeadersTabs = ({ keys, selectedTab, onChangeTab, isModal = false }) => {
             type={selectedTab === key.value ? "submit" : "default"}
             size="small"
             fullButton
-            border={selectedTab === key.value}
+            border={true}
             onClick={() => onChangeTab(key.value)}
           >
             <span className={isModal ? "text-[14px]" : ""}>{key.label}</span>

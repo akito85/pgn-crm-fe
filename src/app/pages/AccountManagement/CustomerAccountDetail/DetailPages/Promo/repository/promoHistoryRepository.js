@@ -710,6 +710,7 @@ const promoHistoryRepository = {
       dataIndex: "no",
       key: "no",
       width: 60,
+      disableFilter: true,
     },
     {
       title: "Name",
