@@ -20,6 +20,7 @@ import ModalHistory from "../../../../components/Modal/ModalHistory";
 import {
   ModalConfirm,
 } from "../../../../components/Modal/ModalPopUp";
+import ModalHoldReceipt from "./Table/ModalHoldReceipt";
 import { DownloadOutlined, WarningOutlined } from "@ant-design/icons";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import Toolbar from "../../../../components/Toolbar";
@@ -34,7 +35,10 @@ const ViewReceipt = () => {
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  // const dataSource = data?.result;
+  const dataSource = data?.result?.map((item) => ({
+    ...item,
+    key: item.id,
+  }));
 
   // State
   const [page, setPage] = useState(1);
@@ -47,6 +51,37 @@ const ViewReceipt = () => {
   const [openModalDelete, setOpenModalDelete] = useState(false);
   const [recordSelected, setRecordSelected] = useState({});
   const [body, setBody] = useState();
+  const [openModalHold, setOpenModalHold] = useState(false);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedData, setSelectedData] = useState([]);
+
+  // Handle row selection (Removed as per user request)
+  // const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
+  //   setSelectedRowKeys(newSelectedRowKeys);
+  //   setSelectedData(newSelectedRows);
+  // };
+
+  // const rowSelection = {
+  //   selectedRowKeys,
+  //   onChange: onSelectChange,
+  // };
+
+  const handleHold = (record) => {
+    if (record) {
+      setSelectedData([record]);
+      setOpenModalHold(true);
+    }
+  };
+
+  const handleSubmitHold = (data) => {
+    console.log("Submit Hold Data:", data);
+    // Here you would dispatch an action to save the hold status
+    // dispatch(holdReceipt(data))...
+    setOpenModalHold(false);
+    setSelectedRowKeys([]);
+    setSelectedData([]);
+    handleFetch(); // Refresh list
+  };
 
   // Breadcrumbs
   const routes = [
@@ -231,8 +266,7 @@ const ViewReceipt = () => {
         <ButtonComponent
           icon={<SVGIcon name="IconHold" color={"#ffffff"} width={24} />}
           type="submit"
-          // onClick={handleDownload}
-          disabled={true}
+          onClick={handleHold}
         >
           Hold
         </ButtonComponent>
@@ -393,7 +427,8 @@ const ViewReceipt = () => {
               className="gap-5"
               icon={<SVGIcon name="IconHold" color={"#808080"} width={24} />}
               border={false}
-              disabled={true}
+              disabled={false}
+              onClick={() => handleHold(r)}
             >
               <span className={"text-black gap-2 text-xl text-center"}>
                 Hold
@@ -479,7 +514,7 @@ const ViewReceipt = () => {
         <BaseContainer header={"receipt list"}>
           <div className="w-full">
             <TablePagination
-              dataSource={data?.result}
+              dataSource={dataSource}
               columns={[
                 ...columnsReceipt(
                   search,
@@ -519,6 +554,15 @@ const ViewReceipt = () => {
             />
           </div>
         </BaseContainer>
+
+        {/* Hold Receipt Modal */}
+        <ModalHoldReceipt
+          isOpen={openModalHold}
+          handleCancel={() => setOpenModalHold(false)}
+          selectedData={selectedData}
+          dataSource={dataSource}
+          onSubmit={handleSubmitHold}
+        />
 
         {/* approval modal */}
         <ModalHistory
