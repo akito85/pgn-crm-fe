@@ -69,20 +69,35 @@ const promoRepository = {
       const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
       const response = await axios.post(`${BASE_URL}${API_PATH}/download-valid`, body, config);
 
-      if (hasValue(response.headers?.get("content-disposition"))) {
-        const filename = response.headers
-          .get("content-disposition")
+      console.log('Download response:', response);
+      console.log('Download headers:', response.headers);
+      console.log('Content-Disposition:', response.headers['content-disposition']);
+
+      const contentDisposition = response.headers['content-disposition'];
+      
+      if (contentDisposition) {
+        const filename = contentDisposition
           .split(";")
           .find((n) => n.includes("filename="))
-          .replace("filename=", "")
-          .trim();
+          ?.replace("filename=", "")
+          .trim()
+          .replace(/['"]/g, '') || 'promo_list.xlsx';
 
-        const blob = await response?.data;
+        const blob = response.data;
+        console.log('Saving file:', filename, 'Blob size:', blob.size);
         FileSaver.saveAs(blob, filename);
+      } else {
+        // Fallback jika tidak ada content-disposition
+        const blob = response.data;
+        const defaultFilename = `promo_list_${new Date().getTime()}.xlsx`;
+        console.log('No content-disposition, using default filename:', defaultFilename);
+        FileSaver.saveAs(blob, defaultFilename);
       }
 
-      return response;
+      // Return success message instead of blob response
+      return { success: true, message: 'Download completed' };
     } catch (error) {
+      console.error('Download error:', error);
       throw error;
     }
   },

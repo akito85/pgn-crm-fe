@@ -86,9 +86,25 @@ const PromoViewData = ({
     }
   }, [validPromoList]);
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (customerId) {
-      downloadValidPromo({ page: 0, size: 10, customerId });
+      try {
+        console.log('Starting download...');
+        // Download with same params as current table state
+        const params = {
+          page: pagination.current - 1, // Convert to 0-based for API
+          size: pagination.pageSize,
+          customerId: customerId,
+        };
+        
+        console.log('Download params:', params);
+        await downloadValidPromo(params);
+        console.log('Download completed');
+      } catch (error) {
+        console.error('Download failed:', error);
+      }
+    } else {
+      console.warn('Cannot download: customerId is missing');
     }
   };
 

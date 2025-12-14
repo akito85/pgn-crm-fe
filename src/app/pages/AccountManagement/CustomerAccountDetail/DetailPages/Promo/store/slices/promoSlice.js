@@ -340,6 +340,43 @@ const promoSlice = createSlice({
         state.advancedSearch.loading = false;
         state.advancedSearch.error = action.payload;
       });
+
+    // ==================== DOWNLOAD OPERATIONS (No state storage - just for tracking) ====================
+    // Download Valid Promo List
+    builder
+      .addCase(downloadValidPromoList.pending, (state) => {
+        // Track download in progress if needed
+      })
+      .addCase(downloadValidPromoList.fulfilled, (state) => {
+        // No need to store blob in state
+      })
+      .addCase(downloadValidPromoList.rejected, (state, action) => {
+        console.error('Download failed:', action.payload);
+      });
+
+    // Download Promo Criteria List
+    builder
+      .addCase(downloadPromoCriteriaList.pending, (state) => {
+        // Track download in progress if needed
+      })
+      .addCase(downloadPromoCriteriaList.fulfilled, (state) => {
+        // No need to store blob in state
+      })
+      .addCase(downloadPromoCriteriaList.rejected, (state, action) => {
+        console.error('Download criteria failed:', action.payload);
+      });
+
+    // Download Promo Condition List
+    builder
+      .addCase(downloadPromoConditionList.pending, (state) => {
+        // Track download in progress if needed
+      })
+      .addCase(downloadPromoConditionList.fulfilled, (state) => {
+        // No need to store blob in state
+      })
+      .addCase(downloadPromoConditionList.rejected, (state, action) => {
+        console.error('Download condition failed:', action.payload);
+      });
   },
 });
 
