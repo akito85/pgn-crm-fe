@@ -1,17 +1,17 @@
 import { Fragment } from "react";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { DownOutlined } from "@ant-design/icons";
+import { DownloadOutlined } from "@ant-design/icons";
 
 const ExportButton = () => {
   return (
     <Fragment>
       <ButtonComponent
-        type="default"
+        type="submit"
         size="small"
         fullButton
-        icon={<DownOutlined />}
       >
-        Export
+        <DownloadOutlined style={{ marginRight: "8px" }} />
+        Download List
       </ButtonComponent>
     </Fragment>
   );

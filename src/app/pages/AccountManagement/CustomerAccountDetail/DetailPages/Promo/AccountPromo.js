@@ -12,11 +12,12 @@ import HistoryLogInformation from "./HistoryLogInformation";
 import ModalCustomPromo from "./components/ModalCustomPromo";
 import promoCriteriaRepository from "./repository/promoCriteriaRepository";
 import promoConditionRepository from "./repository/promoConditionRepository";
+import ExportButton from "./components/ExportButton";
 
 const HeaderAccountPromo = ({ onChangeTab, isPromoHistory }) => {
   const keys = [
-    { label: "PROMO", value: "promo" },
-    { label: "PROMO HISTORY", value: "promoHistory" },
+    { label: "Promo", value: "promo" },
+    { label: "Promo History", value: "promoHistory" },
   ];
   return (
     <HeadersTabs
@@ -38,8 +39,13 @@ const PromoViewData = ({
         <Col span={4}>
           <HeaderText text="PROMO LIST" />
         </Col>
-        <Col span={2} offset={18}>
+      </Row>
+      <Row align={"middle"} style={{ marginTop: "1rem" }}>
+        <Col span={3} offset={0} style={{ textAlign: "center" }}>
           <FilterButton />
+        </Col>
+        <Col span={3} offset={18} style={{ textAlign: "center" }}>
+          <ExportButton />
         </Col>
       </Row>
 

@@ -1,18 +1,24 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { FilterOutlined } from "@ant-design/icons";
+import ModalQueryCustom from "./ModalQueryCustom";
+
 
 const FilterButton = () => {
+  const [open, setOpen] = useState(false);
+  const handleFilterClick = () => {
+    setOpen(true);
+  };
   return (
     <Fragment>
       <ButtonComponent
-        type="default"
+        type="submit"
         size="small"
         fullButton
-        icon={<FilterOutlined />}
+        onClick={handleFilterClick}
       >
         Filters
       </ButtonComponent>
+      <ModalQueryCustom isOpen={open} setIsOpen={setOpen} />
     </Fragment>
   );
 };
