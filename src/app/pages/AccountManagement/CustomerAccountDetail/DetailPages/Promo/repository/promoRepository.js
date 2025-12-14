@@ -1,738 +1,509 @@
-import { UnorderedListOutlined } from "@ant-design/icons";
-import { Col } from "antd";
-import TagStatus from "../components/TagStatus";
+/**
+ * Promo Repository
+ * Handle all API calls for promo operations under Account Management
+ */
+
+import axios from "axios";
+import { configApp } from "../../../../../../../constants/configApp";
+import { tokenHeader } from "../../../../../../../utils/tokenHeader";
+import FileSaver from "file-saver";
+import { hasValue } from "../../../../../../../utils";
+
+const BASE_URL = configApp.ACCOUNT_SERVICE;
+const API_PATH = "/v1/dbs/api/promo";
 
 const promoRepository = {
-  getPromoList: () => [
-    {
-      key: "1",
-      no: 1,
-      name: "Summer Sale",
-      type: "Percentage",
-      category: "Seasonal",
-      criteria: "Min Purchase 100k",
-      startDate: "2024-06-01",
-      endDate: "2024-06-30",
-      description: "Summer discount promotion",
-      status: "Active",
-      item: "Koleksi Musim Panas",
-    },
-    {
-      key: "2",
-      no: 2,
-      name: "Winter Discount",
-      type: "Fixed Amount",
-      category: "Seasonal",
-      criteria: "Min Purchase 200k",
-      startDate: "2024-12-01",
-      endDate: "2024-12-31",
-      description: "Winter special discount",
-      status: "Active",
-      item: "Pakaian Hangat & Jaket",
-    },
-    {
-      key: "3",
-      no: 3,
-      name: "New Year Sale",
-      type: "Percentage",
-      category: "Holiday",
-      criteria: "New Customer",
-      startDate: "2024-01-01",
-      endDate: "2024-01-15",
-      description: "New year celebration promo",
-      status: "Inactive",
-      item: "Semua Produk",
-    },
-    {
-      key: "4",
-      no: 4,
-      name: "Valentine Special",
-      type: "Buy One Get One",
-      category: "Holiday",
-      criteria: "Couple Package",
-      startDate: "2024-02-10",
-      endDate: "2024-02-14",
-      description: "Valentine's day special offer",
-      status: "Inactive",
-      item: "Paket Pasangan/Hadiah",
-    },
-    {
-      key: "5",
-      no: 5,
-      name: "Spring Flash Sale",
-      type: "Percentage",
-      category: "Flash Sale",
-      criteria: "Limited Time",
-      startDate: "2024-03-20",
-      endDate: "2024-03-22",
-      description: "3-day spring flash sale",
-      status: "Inactive",
-      item: "Item Terpilih",
-    },
-    {
-      key: "6",
-      no: 6,
-      name: "Easter Bundle",
-      type: "Bundle Discount",
-      category: "Holiday",
-      criteria: "Family Package",
-      startDate: "2024-03-25",
-      endDate: "2024-04-05",
-      description: "Easter family bundle discount",
-      status: "Inactive",
-      item: "Paket Keluarga",
-    },
-    {
-      key: "7",
-      no: 7,
-      name: "Mother's Day",
-      type: "Gift Voucher",
-      category: "Holiday",
-      criteria: "Gift Purchase",
-      startDate: "2024-05-08",
-      endDate: "2024-05-12",
-      description: "Mother's day gift voucher",
-      status: "Inactive",
-      item: "Produk Hadiah Ibu",
-    },
-    {
-      key: "8",
-      no: 8,
-      name: "Back to School",
-      type: "Student Discount",
-      category: "Education",
-      criteria: "Student ID",
-      startDate: "2024-08-01",
-      endDate: "2024-08-31",
-      description: "Back to school student discount",
-      status: "Active",
-      item: "Perlengkapan Sekolah/Edukasi",
-    },
-    {
-      key: "9",
-      no: 9,
-      name: "Independence Day",
-      type: "Percentage",
-      category: "National",
-      criteria: "All Purchase",
-      startDate: "2024-08-17",
-      endDate: "2024-08-17",
-      description: "Independence day special",
-      status: "Inactive",
-      item: "Produk Merah Putih",
-    },
-    {
-      key: "10",
-      no: 10,
-      name: "Halloween Spooky",
-      type: "Costume Discount",
-      category: "Holiday",
-      criteria: "Halloween Items",
-      startDate: "2024-10-25",
-      endDate: "2024-10-31",
-      description: "Halloween costume special",
-      status: "Active",
-      item: "Kostum & Aksesori Halloween",
-    },
-    {
-      key: "11",
-      no: 11,
-      name: "Black Friday",
-      type: "Mega Sale",
-      category: "Shopping Event",
-      criteria: "Everything",
-      startDate: "2024-11-29",
-      endDate: "2024-11-29",
-      description: "Black Friday mega sale",
-      status: "Active",
-      item: "Semua Kategori Produk",
-    },
-    {
-      key: "12",
-      no: 12,
-      name: "Cyber Monday",
-      type: "Online Exclusive",
-      category: "Shopping Event",
-      criteria: "Online Only",
-      startDate: "2024-12-02",
-      endDate: "2024-12-02",
-      description: "Cyber Monday online deals",
-      status: "Active",
-      item: "Produk Online Eksklusif",
-    },
-    {
-      key: "13",
-      no: 13,
-      name: "Christmas Joy",
-      type: "Gift Wrap Free",
-      category: "Holiday",
-      criteria: "Gift Items",
-      startDate: "2024-12-15",
-      endDate: "2024-12-25",
-      description: "Free gift wrapping service",
-      status: "Active",
-      item: "Item Kado/Hadiah Natal",
-    },
-    {
-      key: "14",
-      no: 14,
-      name: "Year End Clearance",
-      type: "Clearance Sale",
-      category: "Clearance",
-      criteria: "Old Stock",
-      startDate: "2024-12-26",
-      endDate: "2024-12-31",
-      description: "Year end clearance sale",
-      status: "Active",
-      item: "Stok Lama/Produk Cuci Gudang",
-    },
-    {
-      key: "15",
-      no: 15,
-      name: "Loyalty Reward",
-      type: "Points Multiplier",
-      category: "Loyalty",
-      criteria: "Member Points",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Loyalty member rewards",
-      status: "Active",
-      item: "Poin Member",
-    },
-    {
-      key: "16",
-      no: 16,
-      name: "Birthday Special",
-      type: "Birthday Discount",
-      category: "Personal",
-      criteria: "Birthday Month",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Birthday month special discount",
-      status: "Active",
-      item: "Produk Pilihan Pribadi",
-    },
-    {
-      key: "17",
-      no: 17,
-      name: "First Purchase",
-      type: "Welcome Bonus",
-      category: "New Customer",
-      criteria: "First Time Buyer",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "First purchase welcome bonus",
-      status: "Active",
-      item: "Pembelian Pertama",
-    },
-    {
-      key: "18",
-      no: 18,
-      name: "Referral Bonus",
-      type: "Referral Reward",
-      category: "Referral",
-      criteria: "Successful Referral",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Friend referral bonus",
-      status: "Active",
-      item: "Bonus Referensi",
-    },
-    {
-      key: "19",
-      no: 19,
-      name: "Bulk Purchase",
-      type: "Volume Discount",
-      category: "Wholesale",
-      criteria: "Min Quantity 10",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Bulk purchase discount",
-      status: "Active",
-      item: "Produk Jumlah Besar",
-    },
-    {
-      key: "20",
-      no: 20,
-      name: "Weekend Special",
-      type: "Weekend Only",
-      category: "Time Limited",
-      criteria: "Weekend Purchase",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Weekend special offers",
-      status: "Active",
-      item: "Produk Akhir Pekan",
-    },
-    {
-      key: "21",
-      no: 21,
-      name: "Morning Deal",
-      type: "Early Bird",
-      category: "Time Limited",
-      criteria: "Before 10 AM",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Early morning deals",
-      status: "Active",
-      item: "Item Pagi Hari",
-    },
-    {
-      key: "22",
-      no: 22,
-      name: "Late Night Sale",
-      type: "Night Owl",
-      category: "Time Limited",
-      criteria: "After 9 PM",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Late night special prices",
-      status: "Active",
-      item: "Item Malam Hari",
-    },
-    {
-      key: "23",
-      no: 23,
-      name: "Senior Citizen",
-      type: "Age Discount",
-      category: "Demographics",
-      criteria: "Age 60+",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Senior citizen discount",
-      status: "Active",
-      item: "Diskon Usia Lanjut",
-    },
-    {
-      key: "24",
-      no: 24,
-      name: "Military Appreciation",
-      type: "Service Discount",
-      category: "Service",
-      criteria: "Military ID",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Military service appreciation",
-      status: "Active",
-      item: "Diskon Khusus Militer",
-    },
-    {
-      key: "25",
-      no: 25,
-      name: "Teacher Discount",
-      type: "Profession Discount",
-      category: "Education",
-      criteria: "Teacher ID",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Teacher appreciation discount",
-      status: "Active",
-      item: "Diskon Khusus Guru/Pendidik",
-    },
-    {
-      key: "26",
-      no: 26,
-      name: "Healthcare Worker",
-      type: "Hero Discount",
-      category: "Service",
-      criteria: "Healthcare ID",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Healthcare worker appreciation",
-      status: "Active",
-      item: "Diskon Tenaga Kesehatan",
-    },
-    {
-      key: "27",
-      no: 27,
-      name: "Flash Mob Sale",
-      type: "Social Media",
-      category: "Social",
-      criteria: "Social Share",
-      startDate: "2024-01-15",
-      endDate: "2024-01-16",
-      description: "Social media flash sale",
-      status: "Inactive",
-      item: "Produk Terpilih Medsos",
-    },
-    {
-      key: "28",
-      no: 28,
-      name: "Review Reward",
-      type: "Review Bonus",
-      category: "Feedback",
-      criteria: "Product Review",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Product review rewards",
-      status: "Active",
-      item: "Bonus Ulasan Produk",
-    },
-    {
-      key: "29",
-      no: 29,
-      name: "App Exclusive",
-      type: "Mobile Only",
-      category: "Platform",
-      criteria: "Mobile App",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Mobile app exclusive deals",
-      status: "Active",
-      item: "Item Aplikasi Mobile",
-    },
-    {
-      key: "30",
-      no: 30,
-      name: "Email Subscriber",
-      type: "Newsletter Bonus",
-      category: "Subscription",
-      criteria: "Email Signup",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Email subscriber bonus",
-      status: "Active",
-      item: "Bonus Pelanggan Email",
-    },
-    {
-      key: "31",
-      no: 31,
-      name: "VIP Member",
-      type: "VIP Exclusive",
-      category: "Membership",
-      criteria: "VIP Status",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "VIP member exclusive offers",
-      status: "Active",
-      item: "Item Eksklusif VIP",
-    },
-    {
-      key: "32",
-      no: 32,
-      name: "Gold Member",
-      type: "Gold Tier",
-      category: "Membership",
-      criteria: "Gold Status",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Gold member benefits",
-      status: "Active",
-      item: "Item Khusus Tier Gold",
-    },
-    {
-      key: "33",
-      no: 33,
-      name: "Silver Member",
-      type: "Silver Tier",
-      category: "Membership",
-      criteria: "Silver Status",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Silver member benefits",
-      status: "Active",
-      item: "Item Khusus Tier Silver",
-    },
-    {
-      key: "34",
-      no: 34,
-      name: "Bronze Member",
-      type: "Bronze Tier",
-      category: "Membership",
-      criteria: "Bronze Status",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Bronze member benefits",
-      status: "Active",
-      item: "Item Khusus Tier Bronze",
-    },
-    {
-      key: "35",
-      no: 35,
-      name: "Group Booking",
-      type: "Group Discount",
-      category: "Group",
-      criteria: "Min 5 People",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Group booking discount",
-      status: "Active",
-      item: "Item/Jasa Pemesanan Grup",
-    },
-    {
-      key: "36",
-      no: 36,
-      name: "Corporate Deal",
-      type: "B2B Discount",
-      category: "Corporate",
-      criteria: "Company Purchase",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Corporate bulk deals",
-      status: "Active",
-      item: "Produk Pembelian Korporat",
-    },
-    {
-      key: "37",
-      no: 37,
-      name: "Eco Friendly",
-      type: "Green Discount",
-      category: "Environmental",
-      criteria: "Eco Products",
-      startDate: "2024-04-22",
-      endDate: "2024-04-30",
-      description: "Earth Day eco promotion",
-      status: "Inactive",
-      item: "Produk Ramah Lingkungan",
-    },
-    {
-      key: "38",
-      no: 38,
-      name: "Local Community",
-      type: "Community Support",
-      category: "Local",
-      criteria: "Local Resident",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Local community support",
-      status: "Active",
-      item: "Item/Jasa Lokal",
-    },
-    {
-      key: "39",
-      no: 39,
-      name: "Charity Partner",
-      type: "Donation Match",
-      category: "Charity",
-      criteria: "Charity Donation",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Charity donation matching",
-      status: "Active",
-      item: "Donasi & Produk Amal",
-    },
-    {
-      key: "40",
-      no: 40,
-      name: "Sports Team Fan",
-      type: "Fan Discount",
-      category: "Sports",
-      criteria: "Team Merchandise",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Sports team fan discount",
-      status: "Active",
-      item: "Merchandise Olahraga",
-    },
-    {
-      key: "41",
-      no: 41,
-      name: "Music Festival",
-      type: "Event Tie-in",
-      category: "Entertainment",
-      criteria: "Festival Ticket",
-      startDate: "2024-07-15",
-      endDate: "2024-07-20",
-      description: "Music festival partnership",
-      status: "Inactive",
-      item: "Produk Tiket Festival",
-    },
-    {
-      key: "42",
-      no: 42,
-      name: "Art Gallery",
-      type: "Cultural Discount",
-      category: "Culture",
-      criteria: "Art Purchase",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Art gallery collaboration",
-      status: "Active",
-      item: "Karya Seni/Aksesori Galeri",
-    },
-    {
-      key: "43",
-      no: 43,
-      name: "Food Festival",
-      type: "Culinary Event",
-      category: "Food",
-      criteria: "Food Items",
-      startDate: "2024-09-01",
-      endDate: "2024-09-30",
-      description: "Food festival special",
-      status: "Inactive",
-      item: "Produk Makanan & Minuman",
-    },
-    {
-      key: "44",
-      no: 44,
-      name: "Book Club",
-      type: "Literary Discount",
-      category: "Education",
-      criteria: "Book Purchase",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Book club member discount",
-      status: "Active",
-      item: "Buku & Alat Tulis",
-    },
-    {
-      key: "45",
-      no: 45,
-      name: "Fitness Challenge",
-      type: "Health Reward",
-      category: "Health",
-      criteria: "Fitness Goal",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Fitness challenge rewards",
-      status: "Active",
-      item: "Produk Kesehatan/Fitness",
-    },
-    {
-      key: "46",
-      no: 46,
-      name: "Travel Partner",
-      type: "Travel Discount",
-      category: "Travel",
-      criteria: "Travel Booking",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Travel partner discount",
-      status: "Active",
-      item: "Item/Jasa Travel",
-    },
-    {
-      key: "47",
-      no: 47,
-      name: "Pet Owner",
-      type: "Pet Discount",
-      category: "Pet",
-      criteria: "Pet Products",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Pet owner special deals",
-      status: "Active",
-      item: "Produk Kebutuhan Hewan Peliharaan",
-    },
-    {
-      key: "48",
-      no: 48,
-      name: "Gardening Club",
-      type: "Garden Discount",
-      category: "Hobby",
-      criteria: "Garden Supplies",
-      startDate: "2024-03-01",
-      endDate: "2024-05-31",
-      description: "Spring gardening promotion",
-      status: "Inactive",
-      item: "Peralatan & Bibit Kebun",
-    },
-    {
-      key: "49",
-      no: 49,
-      name: "Tech Enthusiast",
-      type: "Tech Discount",
-      category: "Technology",
-      criteria: "Tech Products",
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      description: "Tech enthusiast deals",
-      status: "Active",
-      item: "Gadget & Aksesori Teknologi",
-    },
-    {
-      key: "50",
-      no: 50,
-      name: "Anniversary Sale",
-      type: "Milestone Event",
-      category: "Company",
-      criteria: "All Products",
-      startDate: "2024-06-15",
-      endDate: "2024-06-22",
-      description: "Company anniversary celebration",
-      status: "Inactive",
-      item: "baju bagus",
-    },
-  ],
-  getColumns: (setIsModalPromoVisible, setDetailPromoData) => [
-    {
-      title: "No",
-      dataIndex: "no",
-      key: "no",
-      width: 60,
-      disableFilter: true,
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "Type",
-      dataIndex: "type",
-      key: "type",
-    },
-    {
-      title: "Item",
-      dataIndex: "item",
-      key: "item",
-    },
-    {
-      title: "Category",
-      dataIndex: "category",
-      key: "category",
-    },
-    {
-      title: "Criteria",
-      dataIndex: "criteria",
-      key: "criteria",
-    },
-    {
-      title: "Start Date",
-      dataIndex: "startDate",
-      key: "startDate",
-    },
-    {
-      title: "End Date",
-      dataIndex: "endDate",
-      key: "endDate",
-    },
-    {
-      title: "Description",
-      dataIndex: "description",
-      key: "description",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      align: "center",
-      render: (status) => <TagStatus status={status} />,
-    },
-    {
-      title: "Action",
-      dataIndex: "action",
-      key: "action",
-      disableFilter: true,
-      disableSorter: true,
-      render: (_, record) => (
-        <Col span={24} className="text-center">
-          <UnorderedListOutlined
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              if (setIsModalPromoVisible) {
-                setIsModalPromoVisible(true);
-                setDetailPromoData(record);
-              }
-            }}
-          />
-        </Col>
-      ),
-    },
-  ],
-  setIsModalPromoVisible: false,
-  setSelectedDataRow: null,
+  // ==================== PROMO OPERATIONS ====================
+  
+  /**
+   * Get list of valid promos with pagination and advanced search
+   * POST /v1/dbs/api/promo/valid
+   * @param {Object} params - Query parameters (page, size, sort, customerId, search, searchs)
+   * @param {Object} advancedSearch - Advanced search criteria: { inputFields: [{condition, column, operator, value}] }
+   */
+  getListValidPromo: async (params, advancedSearch = null) => {
+    try {
+      const config = {
+        params: params,
+        headers: tokenHeader(),
+      };
+
+      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const response = await axios.post(`${BASE_URL}${API_PATH}/valid`, body, config);
+      return response?.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Get detail of valid promo by ID
+   * GET /v1/dbs/api/promo/valid/{id}
+   * @param {number} promoId - Promo ID
+   */
+  getDetailValidPromoById: async (promoId) => {
+    try {
+      const response = await axios.get(`${BASE_URL}${API_PATH}/valid/${promoId}`, {
+        headers: tokenHeader(),
+      });
+      return response?.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Download list of valid promos with advanced search
+   * POST /v1/dbs/api/promo/download-valid
+   * @param {Object} params - Query parameters (page, size, sort, customerId, search, searchs)
+   * @param {Object} advancedSearch - Advanced search criteria
+   */
+  downloadListValidPromo: async (params, advancedSearch = null) => {
+    try {
+      const config = {
+        params: params,
+        headers: tokenHeader(),
+        responseType: "blob",
+      };
+
+      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const response = await axios.post(`${BASE_URL}${API_PATH}/download-valid`, body, config);
+
+      if (hasValue(response.headers?.get("content-disposition"))) {
+        const filename = response.headers
+          .get("content-disposition")
+          .split(";")
+          .find((n) => n.includes("filename="))
+          .replace("filename=", "")
+          .trim();
+
+        const blob = await response?.data;
+        FileSaver.saveAs(blob, filename);
+      }
+
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // ==================== PROMO CRITERIA OPERATIONS ====================
+
+  /**
+   * Get list of valid promo criteria by promo ID
+   * POST /v1/dbs/api/promo/criteria
+   * @param {Object} params - Query parameters (page, size, promoId, search, searchs)
+   * @param {Object} advancedSearch - Advanced search criteria
+   */
+  getListValidPromoCriteriaByPromoId: async (params, advancedSearch = null) => {
+    try {
+      const config = {
+        params: params,
+        headers: tokenHeader(),
+      };
+
+      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const response = await axios.post(`${BASE_URL}${API_PATH}/criteria`, body, config);
+      return response?.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Get detail of valid promo criteria by ID
+   * GET /v1/dbs/api/promo/criteria/{id}
+   * @param {number} criteriaId - Criteria ID
+   */
+  getDetailValidPromoCriteria: async (criteriaId) => {
+    try {
+      const response = await axios.get(`${BASE_URL}${API_PATH}/criteria/${criteriaId}`, {
+        headers: tokenHeader(),
+      });
+      return response?.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Download list of valid promo criteria by promo ID
+   * POST /v1/dbs/api/promo/download-criteria
+   * @param {Object} params - Query parameters (page, size, promoId, search, searchs)
+   * @param {Object} advancedSearch - Advanced search criteria
+   */
+  downloadListValidPromoCriteria: async (params, advancedSearch = null) => {
+    try {
+      const config = {
+        params: params,
+        headers: tokenHeader(),
+        responseType: "blob",
+      };
+
+      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const response = await axios.post(`${BASE_URL}${API_PATH}/download-criteria`, body, config);
+
+      if (hasValue(response.headers?.get("content-disposition"))) {
+        const filename = response.headers
+          .get("content-disposition")
+          .split(";")
+          .find((n) => n.includes("filename="))
+          .replace("filename=", "")
+          .trim();
+
+        const blob = await response?.data;
+        FileSaver.saveAs(blob, filename);
+      }
+
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // ==================== PROMO CONDITION OPERATIONS ====================
+
+  /**
+   * Get list of valid promo conditions by promo ID
+   * POST /v1/dbs/api/promo/condition
+   * @param {Object} params - Query parameters (page, size, promoId, search, searchs)
+   * @param {Object} advancedSearch - Advanced search criteria
+   */
+  getListValidPromoConditionByPromoId: async (params, advancedSearch = null) => {
+    try {
+      const config = {
+        params: params,
+        headers: tokenHeader(),
+      };
+
+      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const response = await axios.post(`${BASE_URL}${API_PATH}/condition`, body, config);
+      return response?.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Get detail of valid promo condition by ID
+   * GET /v1/dbs/api/promo/condition/{id}
+   * @param {number} conditionId - Condition ID
+   */
+  getDetailValidPromoCondition: async (conditionId) => {
+    try {
+      const response = await axios.get(`${BASE_URL}${API_PATH}/condition/${conditionId}`, {
+        headers: tokenHeader(),
+      });
+      return response?.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Download list of valid promo conditions by promo ID
+   * POST /v1/dbs/api/promo/download-condition
+   * @param {Object} params - Query parameters (page, size, promoId, search, searchs)
+   * @param {Object} advancedSearch - Advanced search criteria
+   */
+  downloadListValidPromoCondition: async (params, advancedSearch = null) => {
+    try {
+      const config = {
+        params: params,
+        headers: tokenHeader(),
+        responseType: "blob",
+      };
+
+      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const response = await axios.post(`${BASE_URL}${API_PATH}/download-condition`, body, config);
+
+      if (hasValue(response.headers?.get("content-disposition"))) {
+        const filename = response.headers
+          .get("content-disposition")
+          .split(";")
+          .find((n) => n.includes("filename="))
+          .replace("filename=", "")
+          .trim();
+
+        const blob = await response?.data;
+        FileSaver.saveAs(blob, filename);
+      }
+
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // ==================== ADVANCED SEARCH HELPERS ====================
+
+  /**
+   * Get advance search condition list
+   * GET /v1/dbs/api/promo/list-search-condition
+   */
+  getAdvanceSearchCondition: async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}${API_PATH}/list-search-condition`, {
+        headers: tokenHeader(),
+      });
+      return response?.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Get advance search operator list
+   * GET /v1/dbs/api/promo/list-search-operator
+   */
+  getAdvanceSearchOperator: async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}${API_PATH}/list-search-operator`, {
+        headers: tokenHeader(),
+      });
+      return response?.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Get advance search promo column list (under account)
+   * GET /v1/dbs/api/promo/list-search-promo-column
+   */
+  getAdvancePromoColumn: async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}${API_PATH}/list-search-promo-column`, {
+        headers: tokenHeader(),
+      });
+      return response?.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Get advance search promo criteria column list (under account)
+   * GET /v1/dbs/api/promo/list-search-promo-criteria-column
+   */
+  getAdvancePromoCriteriaColumn: async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}${API_PATH}/list-search-promo-criteria-column`, {
+        headers: tokenHeader(),
+      });
+      return response?.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Get advance search promo condition column list (under account)
+   * GET /v1/dbs/api/promo/list-search-promo-condition-column
+   */
+  getAdvancePromoConditionColumn: async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}${API_PATH}/list-search-promo-condition-column`, {
+        headers: tokenHeader(),
+      });
+      return response?.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Get advance search promo history column list (under account)
+   * GET /v1/dbs/api/promo/list-search-promo-history-column
+   */
+  getAdvancePromoHistoryColumn: async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}${API_PATH}/list-search-promo-history-column`, {
+        headers: tokenHeader(),
+      });
+      return response?.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // ==================== PROMO HISTORY OPERATIONS ====================
+
+  /**
+   * Get list of promo history with pagination and advanced search
+   * POST /v1/dbs/api/promo/history
+   * @param {Object} params - Query parameters (page, size, sort, customerId, search, searchs)
+   * @param {Object} advancedSearch - Advanced search criteria: { inputFields: [{condition, column, operator, value}] }
+   */
+  getListPromoHistory: async (params, advancedSearch = null) => {
+    try {
+      const config = {
+        params: params,
+        headers: tokenHeader(),
+      };
+
+      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const response = await axios.post(`${BASE_URL}${API_PATH}/history`, body, config);
+      return response?.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Get detail of promo history by invoice number
+   * GET /v1/dbs/api/promo/history/{invoiceNumber}
+   * @param {string} invoiceNumber - Invoice number
+   */
+  getDetailPromoHistoryById: async (invoiceNumber) => {
+    try {
+      const response = await axios.get(`${BASE_URL}${API_PATH}/history/${invoiceNumber}`, {
+        headers: tokenHeader(),
+      });
+      return response?.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Download list of promo history with advanced search
+   * POST /v1/dbs/api/promo/download-history
+   * @param {Object} params - Query parameters (page, size, sort, customerId, search, searchs)
+   * @param {Object} advancedSearch - Advanced search criteria
+   */
+  downloadListPromoHistory: async (params, advancedSearch = null) => {
+    try {
+      const config = {
+        params: params,
+        headers: tokenHeader(),
+        responseType: "blob",
+      };
+
+      const body = advancedSearch || { inputFields: [{ condition: "", column: "", operator: "", value: "" }] };
+      const response = await axios.post(`${BASE_URL}${API_PATH}/download-history`, body, config);
+
+      if (hasValue(response.headers?.get("content-disposition"))) {
+        const filename = response.headers
+          .get("content-disposition")
+          .split(";")
+          .find((n) => n.includes("filename="))
+          .replace("filename=", "")
+          .trim();
+
+        const blob = await response?.data;
+        FileSaver.saveAs(blob, filename);
+      }
+
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // ==================== UI HELPERS ====================
+
+  /**
+   * Get table columns configuration for Valid Promo List
+   * @param {Function} setIsModalVisible - Function to show modal
+   * @param {Function} setDetailData - Function to set detail data
+   * @returns {Array} - Array of column definitions
+   */
+  getColumns: (setIsModalVisible, setDetailData) => {
+    const { UnorderedListOutlined } = require("@ant-design/icons");
+    const { Col } = require("antd");
+    const TagStatus = require("../components/TagStatus").default;
+
+    return [
+      {
+        title: "No",
+        dataIndex: "no",
+        key: "no",
+        width: 60,
+        fixed: 'left',
+        disableFilter: true,
+        disableSorter: true,
+      },
+      {
+        title: "Name",
+        dataIndex: "name",
+        key: "name",
+        width: 200,
+        ellipsis: true,
+      },
+      {
+        title: "Promotion Type",
+        dataIndex: "promotionType",
+        key: "promotionType",
+        width: 130,
+      },
+      {
+        title: "Type Name",
+        dataIndex: "typeName",
+        key: "typeName",
+        width: 150,
+      },
+      {
+        title: "Category Name",
+        dataIndex: "categoryName",
+        key: "categoryName",
+        width: 130,
+      },
+      {
+        title: "Criteria",
+        dataIndex: "criteria",
+        key: "criteria",
+        width: 200,
+        ellipsis: true,
+      },
+      {
+        title: "Start Date",
+        dataIndex: "startDate",
+        key: "startDate",
+        width: 120,
+      },
+      {
+        title: "End Date",
+        dataIndex: "endDate",
+        key: "endDate",
+        width: 120,
+      },
+      {
+        title: "Description",
+        dataIndex: "description",
+        key: "description",
+        width: 200,
+        ellipsis: true,
+      },
+      {
+        title: "Status",
+        dataIndex: "status",
+        key: "status",
+        width: 100,
+        render: (status) => <TagStatus status={status === "ACTIVE" ? "Active" : status} />,
+      },
+      {
+        title: "Action",
+        dataIndex: "action",
+        key: "action",
+        width: 80,
+        fixed: 'right',
+        disableFilter: true,
+        disableSorter: true,
+        render: (_, record) => (
+          <Col span={24} className="text-center">
+            <UnorderedListOutlined
+              style={{ cursor: "pointer" }}
+              onClick={() => {
+                setIsModalVisible(true);
+                setDetailData(record);
+              }}
+            />
+          </Col>
+        ),
+      },
+    ];
+  },
 };
 
 export default promoRepository;

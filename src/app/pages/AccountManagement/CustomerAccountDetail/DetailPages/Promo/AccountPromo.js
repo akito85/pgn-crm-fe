@@ -1,5 +1,6 @@
-import { Fragment, useState } from "react";
-import { Col, Collapse, Divider, Modal, Row, Space } from "antd";
+import { Fragment, useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { Col, Collapse, Divider, Row, Space } from "antd";
 import { TablePaginationNew } from "poc-table-dragandrop";
 import HeaderText from "./components/HeaderText";
 import FilterButton from "./components/FilterButton";
@@ -13,6 +14,8 @@ import ModalCustomPromo from "./components/ModalCustomPromo";
 import promoCriteriaRepository from "./repository/promoCriteriaRepository";
 import promoConditionRepository from "./repository/promoConditionRepository";
 import ExportButton from "./components/ExportButton";
+import { usePromo } from "./hooks/usePromo";
+import { transformValidPromoResponse } from "./utils/promoHelpers";
 
 const HeaderAccountPromo = ({ onChangeTab, isPromoHistory }) => {
   const keys = [
@@ -32,35 +35,105 @@ const PromoViewData = ({
   isModalPromoVisible,
   setIsModalPromoVisible,
   setDetailPromoData,
+  customerId,
 }) => {
+  const {
+    validPromoList,
+    loadValidPromoList,
+    downloadValidPromo,
+  } = usePromo();
+
+  const [dataSource, setDataSource] = useState([]);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
+
+  // Get columns from repository
+  const columns = promoRepository.getColumns(setIsModalPromoVisible, setDetailPromoData);
+
+  useEffect(() => {
+    // Load promo list on mount with customerId
+    if (customerId) {
+      loadValidPromoList({ page: 0, size: 10, customerId });
+    }
+  }, [customerId, loadValidPromoList]);
+
+  useEffect(() => {
+    console.log('=== VALID PROMO LIST DEBUG ===');
+    console.log('validPromoList full:', validPromoList);
+    console.log('validPromoList.data:', validPromoList?.data);
+    console.log('validPromoList.loading:', validPromoList?.loading);
+    
+    // Transform API response using helper
+    if (validPromoList?.data && !validPromoList.loading) {
+      console.log('Attempting transform with data:', validPromoList.data);
+      
+      const { dataSource: transformedData, pagination: paginationData } = 
+        transformValidPromoResponse(validPromoList.data);
+      
+      console.log('Transformed dataSource:', transformedData);
+      console.log('Transformed dataSource length:', transformedData?.length);
+      console.log('Pagination:', paginationData);
+      
+      setDataSource(transformedData);
+      setPagination(paginationData);
+    } else if (validPromoList && !validPromoList.loading && !validPromoList.data) {
+      // Reset when no data but not loading
+      console.log('Resetting dataSource - no data');
+      setDataSource([]);
+    }
+  }, [validPromoList]);
+
+  const handleDownload = () => {
+    if (customerId) {
+      downloadValidPromo({ page: 0, size: 10, customerId });
+    }
+  };
+
+  const handleTableChange = (paginationParams) => {
+    const { current, pageSize } = paginationParams;
+    
+    if (customerId) {
+      // API uses 0-based page index
+      loadValidPromoList({ 
+        page: current - 1, 
+        size: pageSize, 
+        customerId 
+      });
+    }
+  };
+
   return (
     <Fragment>
-      <Row align={"middle"}>
+      <Row align={"middle"} style={{ marginBottom: "1rem" }}>
         <Col span={4}>
           <HeaderText text="PROMO LIST" />
         </Col>
       </Row>
-      <Row align={"middle"} style={{ marginTop: "1rem" }}>
+      <Row align={"middle"}>
         <Col span={3} offset={0} style={{ textAlign: "center" }}>
           <FilterButton />
         </Col>
         <Col span={3} offset={18} style={{ textAlign: "center" }}>
-          <ExportButton />
+          <ExportButton onClick={handleDownload} />
         </Col>
       </Row>
-
-      <div style={{ width: "100%", overflowX: "auto" }}>
+      
+      <div style={{ width: "100%", overflowX: "auto", marginTop: "1.5rem" }}>
         <TablePaginationNew
           enableDragColumn={true}
-          enableColumnSorter={true}
-          enableColumnFilter={true}
+          enableColumnSorter={dataSource.length > 0}
+          enableColumnFilter={dataSource.length > 0}
           freezeColumns={[{ key: "action", position: "right" }]}
           tableScrolled={{ x: 800 }}
-          columns={promoRepository.getColumns(
-            setIsModalPromoVisible,
-            setDetailPromoData,
-          )}
-          dataSource={promoRepository.getPromoList()}
+          columns={columns}
+          dataSource={dataSource}
+          loading={validPromoList?.loading}
+          pagination={pagination}
+          onChange={handleTableChange}
+          totalData={pagination.total}
         />
       </div>
     </Fragment>
@@ -109,6 +182,7 @@ const selectedRender = ({
   isModalHistoryVisible,
   setIsModalHistoryVisible,
   setDetailHistoryData,
+  customerId,
 }) => {
   if (tab === "promoHistory") {
     return (
@@ -116,6 +190,7 @@ const selectedRender = ({
         isModalHistoryVisible={isModalHistoryVisible}
         setIsModalHistoryVisible={setIsModalHistoryVisible}
         setDetailHistoryData={setDetailHistoryData}
+        customerId={customerId}
       />
     );
   }
@@ -124,6 +199,7 @@ const selectedRender = ({
       isModalPromoVisible={isModalPromoVisible}
       setIsModalPromoVisible={setIsModalPromoVisible}
       setDetailPromoData={setDetailPromoData}
+      customerId={customerId}
     />
   );
 };
@@ -140,14 +216,16 @@ const renderModalAccountPromo = ({
   tab,
   isModalPromoVisible,
   setIsModalPromoVisible,
-  setOnChangeDetailPromo,
   detailPromoData,
   selectedTabCriteriaAndCondition,
   setSelectedTabCriteriaAndCondition,
   isModalHistoryVisible,
   setIsModalHistoryVisible,
-  setOnChangeDetailHistory,
   detailHistoryData,
+  onChangeDetailPromo,
+  setOnChangeDetailPromo,
+  onChangeDetailHistory,
+  setOnChangeDetailHistory,
 }) => {
   switch (tab) {
     case "promo":
@@ -354,6 +432,10 @@ const renderModalAccountPromo = ({
 };
 
 const AccountPromo = () => {
+  // Get customerId from route state
+  const location = useLocation();
+  const { idCustomer } = location.state || {};
+
   const [selectedTab, setSelectedTab] = useState("promo");
   const [selectedTabCriteriaAndCondition, setSelectedTabCriteriaAndCondition] =
     useState("criteria");
@@ -363,14 +445,17 @@ const AccountPromo = () => {
   const [isModalHistoryVisible, setIsModalHistoryVisible] = useState(false);
   const [detailHistoryData, setDetailHistoryData] = useState({});
   const [onChangeDetailPromo, setOnChangeDetailPromo] = useState("criteria");
-  const [onChangeDetailHistory, setOnChangeDetailHistory] = useState(
-    "promoHistoryInformation",
-  );
+  const [onChangeDetailHistory, setOnChangeDetailHistory] = useState("promoHistoryInformation");
   const isPromoHistory = selectedTab === "promoHistory";
 
   const onChangeTab = (tab) => {
     setSelectedTab(tab);
   };
+
+  // Debug log
+  useEffect(() => {
+    console.log('Customer ID from route:', idCustomer);
+  }, [idCustomer]);
 
   return (
     <Fragment>
@@ -379,9 +464,9 @@ const AccountPromo = () => {
         isPromoHistory={isPromoHistory}
       />
       <ContainerWithTab
+      marginTop="0px"
         children={
           <Fragment>
-            <Divider style={{ margin: "2rem 0" }} />
             {selectedRender({
               tab: selectedTab,
               isModalPromoVisible,
@@ -390,6 +475,7 @@ const AccountPromo = () => {
               isModalHistoryVisible,
               setIsModalHistoryVisible,
               setDetailHistoryData,
+              customerId: idCustomer,
             })}
           </Fragment>
         }
@@ -398,14 +484,16 @@ const AccountPromo = () => {
         tab: selectedTab,
         isModalPromoVisible,
         setIsModalPromoVisible,
-        setOnChangeDetailPromo,
         detailPromoData,
         selectedTabCriteriaAndCondition,
         setSelectedTabCriteriaAndCondition,
         isModalHistoryVisible,
         setIsModalHistoryVisible,
-        setOnChangeDetailHistory,
         detailHistoryData,
+        onChangeDetailPromo,
+        setOnChangeDetailPromo,
+        onChangeDetailHistory,
+        setOnChangeDetailHistory,
       })}
     </Fragment>
   );

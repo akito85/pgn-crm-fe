@@ -1,102 +1,201 @@
 /**
  * usePromo Hook
- * Custom hook for promo operations
+ * Custom hook for promo operations under Account Management
  */
 
-import { useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  fetchPromoList,
-  fetchPromoDetail,
-  fetchPromoHistory,
-  setPromoFilters,
-  clearPromoFilters,
-  clearPromoDetail,
-  selectPromoList,
-  selectPromoDetail,
-  selectPromoHistory,
-  selectPromoFilters,
+  fetchValidPromoList,
+  fetchValidPromoDetail,
+  fetchPromoCriteriaList,
+  fetchPromoCriteriaDetail,
+  fetchPromoConditionList,
+  fetchPromoConditionDetail,
+  downloadValidPromoList,
+  downloadPromoCriteriaList,
+  downloadPromoConditionList,
+  fetchAdvancedSearchMetadata,
+  clearValidPromoDetail,
+  clearPromoCriteriaDetail,
+  clearPromoConditionDetail,
+  selectValidPromoList,
+  selectValidPromoDetail,
+  selectPromoCriteriaList,
+  selectPromoCriteriaDetail,
+  selectPromoConditionList,
+  selectPromoConditionDetail,
+  selectAdvancedSearchMetadata,
 } from '../store/slices/promoSlice';
 
 export const usePromo = () => {
   const dispatch = useDispatch();
-  const promoList = useSelector(selectPromoList);
-  const promoDetail = useSelector(selectPromoDetail);
-  const promoHistory = useSelector(selectPromoHistory);
-  const filters = useSelector(selectPromoFilters);
+  
+  // Selectors
+  const validPromoList = useSelector(selectValidPromoList);
+  const validPromoDetail = useSelector(selectValidPromoDetail);
+  const promoCriteriaList = useSelector(selectPromoCriteriaList);
+  const promoCriteriaDetail = useSelector(selectPromoCriteriaDetail);
+  const promoConditionList = useSelector(selectPromoConditionList);
+  const promoConditionDetail = useSelector(selectPromoConditionDetail);
+  const advancedSearchMetadata = useSelector(selectAdvancedSearchMetadata);
 
+  // ==================== VALID PROMO OPERATIONS ====================
+  
   /**
-   * Load promo list
+   * Load valid promo list
    */
-  const loadPromoList = useCallback(
-    (params = {}) => {
-      const queryParams = {
-        ...filters,
-        ...params,
-      };
-      dispatch(fetchPromoList(queryParams));
+  const loadValidPromoList = useCallback(
+    (params = {}, advancedSearch = null) => {
+      dispatch(fetchValidPromoList({ params, advancedSearch }));
     },
-    [dispatch, filters]
+    [dispatch]
   );
 
   /**
-   * Load promo detail
+   * Load valid promo detail
    */
-  const loadPromoDetail = useCallback(
+  const loadValidPromoDetail = useCallback(
     (promoId) => {
-      dispatch(fetchPromoDetail(promoId));
+      dispatch(fetchValidPromoDetail(promoId));
     },
     [dispatch]
   );
 
   /**
-   * Load promo history
+   * Download valid promo list
    */
-  const loadPromoHistory = useCallback(
-    (params = {}) => {
-      dispatch(fetchPromoHistory(params));
+  const downloadValidPromo = useCallback(
+    (params = {}, advancedSearch = null) => {
+      dispatch(downloadValidPromoList({ params, advancedSearch }));
     },
     [dispatch]
   );
 
   /**
-   * Update filters
+   * Clear valid promo detail
    */
-  const updateFilters = useCallback(
-    (newFilters) => {
-      dispatch(setPromoFilters(newFilters));
-    },
-    [dispatch]
-  );
-
-  /**
-   * Reset filters
-   */
-  const resetFilters = useCallback(() => {
-    dispatch(clearPromoFilters());
+  const clearValidPromo = useCallback(() => {
+    dispatch(clearValidPromoDetail());
   }, [dispatch]);
 
+  // ==================== PROMO CRITERIA OPERATIONS ====================
+
   /**
-   * Clear detail
+   * Load promo criteria list
    */
-  const clearDetail = useCallback(() => {
-    dispatch(clearPromoDetail());
+  const loadPromoCriteriaList = useCallback(
+    (params = {}, advancedSearch = null) => {
+      dispatch(fetchPromoCriteriaList({ params, advancedSearch }));
+    },
+    [dispatch]
+  );
+
+  /**
+   * Load promo criteria detail
+   */
+  const loadPromoCriteriaDetail = useCallback(
+    (criteriaId) => {
+      dispatch(fetchPromoCriteriaDetail(criteriaId));
+    },
+    [dispatch]
+  );
+
+  /**
+   * Download promo criteria list
+   */
+  const downloadPromoCriteria = useCallback(
+    (params = {}, advancedSearch = null) => {
+      dispatch(downloadPromoCriteriaList({ params, advancedSearch }));
+    },
+    [dispatch]
+  );
+
+  /**
+   * Clear promo criteria detail
+   */
+  const clearPromoCriteria = useCallback(() => {
+    dispatch(clearPromoCriteriaDetail());
+  }, [dispatch]);
+
+  // ==================== PROMO CONDITION OPERATIONS ====================
+
+  /**
+   * Load promo condition list
+   */
+  const loadPromoConditionList = useCallback(
+    (params = {}, advancedSearch = null) => {
+      dispatch(fetchPromoConditionList({ params, advancedSearch }));
+    },
+    [dispatch]
+  );
+
+  /**
+   * Load promo condition detail
+   */
+  const loadPromoConditionDetail = useCallback(
+    (conditionId) => {
+      dispatch(fetchPromoConditionDetail(conditionId));
+    },
+    [dispatch]
+  );
+
+  /**
+   * Download promo condition list
+   */
+  const downloadPromoCondition = useCallback(
+    (params = {}, advancedSearch = null) => {
+      dispatch(downloadPromoConditionList({ params, advancedSearch }));
+    },
+    [dispatch]
+  );
+
+  /**
+   * Clear promo condition detail
+   */
+  const clearPromoCondition = useCallback(() => {
+    dispatch(clearPromoConditionDetail());
+  }, [dispatch]);
+
+  // ==================== ADVANCED SEARCH ====================
+
+  /**
+   * Load advanced search metadata (conditions, operators, columns)
+   */
+  const loadAdvancedSearchMetadata = useCallback(() => {
+    dispatch(fetchAdvancedSearchMetadata());
   }, [dispatch]);
 
   return {
     // State
-    promoList,
-    promoDetail,
-    promoHistory,
-    filters,
+    validPromoList,
+    validPromoDetail,
+    promoCriteriaList,
+    promoCriteriaDetail,
+    promoConditionList,
+    promoConditionDetail,
+    advancedSearchMetadata,
 
-    // Actions
-    loadPromoList,
-    loadPromoDetail,
-    loadPromoHistory,
-    updateFilters,
-    resetFilters,
-    clearDetail,
+    // Valid Promo Actions
+    loadValidPromoList,
+    loadValidPromoDetail,
+    downloadValidPromo,
+    clearValidPromo,
+
+    // Criteria Actions
+    loadPromoCriteriaList,
+    loadPromoCriteriaDetail,
+    downloadPromoCriteria,
+    clearPromoCriteria,
+
+    // Condition Actions
+    loadPromoConditionList,
+    loadPromoConditionDetail,
+    downloadPromoCondition,
+    clearPromoCondition,
+
+    // Advanced Search Actions
+    loadAdvancedSearchMetadata,
   };
 };
 

@@ -1,91 +1,252 @@
 /**
  * Promo Service
- * Handle business logic for promo operations
+ * Handle business logic for promo operations under Account Management
  */
 
 import promoRepository from '../repository/promoRepository';
-import promoHistoryRepository from '../repository/promoHistoryRepository';
-import promoCriteriaRepository from '../repository/promoCriteriaRepository';
-import promoConditionRepository from '../repository/promoConditionRepository';
 
 export const promoService = {
+  // ==================== PROMO OPERATIONS ====================
+
   /**
-   * Get promo list
+   * Get list of valid promos with pagination and advanced search
    */
-  async getPromoList(params) {
+  async getListValidPromo(params, advancedSearch = null) {
     try {
-      const response = await promoRepository.getPromoList(params);
+      const response = await promoRepository.getListValidPromo(params, advancedSearch);
       return response;
     } catch (error) {
-      console.error('Error fetching promo list:', error);
+      console.error('Error fetching valid promo list:', error);
       throw error;
     }
   },
 
   /**
-   * Get promo detail
+   * Get detail of valid promo by ID
    */
-  async getPromoDetail(promoId) {
+  async getDetailValidPromoById(promoId) {
     try {
-      const response = await promoRepository.getPromoDetail(promoId);
+      const response = await promoRepository.getDetailValidPromoById(promoId);
       return response;
     } catch (error) {
-      console.error('Error fetching promo detail:', error);
+      console.error('Error fetching valid promo detail:', error);
       throw error;
     }
   },
 
   /**
-   * Get promo history
+   * Download list of valid promos
    */
-  async getPromoHistory(params) {
+  async downloadListValidPromo(params, advancedSearch = null) {
     try {
-      const response = await promoHistoryRepository.getPromoHistory(params);
+      const response = await promoRepository.downloadListValidPromo(params, advancedSearch);
       return response;
     } catch (error) {
-      console.error('Error fetching promo history:', error);
+      console.error('Error downloading valid promo list:', error);
+      throw error;
+    }
+  },
+
+  // ==================== PROMO CRITERIA OPERATIONS ====================
+
+  /**
+   * Get list of valid promo criteria by promo ID
+   */
+  async getListValidPromoCriteriaByPromoId(params, advancedSearch = null) {
+    try {
+      const response = await promoRepository.getListValidPromoCriteriaByPromoId(params, advancedSearch);
+      return response;
+    } catch (error) {
+      console.error('Error fetching valid promo criteria list:', error);
       throw error;
     }
   },
 
   /**
-   * Get promo criteria
+   * Get detail of valid promo criteria by ID
    */
-  async getPromoCriteria(promoId) {
+  async getDetailValidPromoCriteria(criteriaId) {
     try {
-      const response = await promoCriteriaRepository.getCriteria(promoId);
+      const response = await promoRepository.getDetailValidPromoCriteria(criteriaId);
       return response;
     } catch (error) {
-      console.error('Error fetching promo criteria:', error);
+      console.error('Error fetching valid promo criteria detail:', error);
       throw error;
     }
   },
 
   /**
-   * Get promo conditions
+   * Download list of valid promo criteria
    */
-  async getPromoConditions(promoId) {
+  async downloadListValidPromoCriteria(params, advancedSearch = null) {
     try {
-      const response = await promoConditionRepository.getConditions(promoId);
+      const response = await promoRepository.downloadListValidPromoCriteria(params, advancedSearch);
       return response;
     } catch (error) {
-      console.error('Error fetching promo conditions:', error);
+      console.error('Error downloading valid promo criteria list:', error);
+      throw error;
+    }
+  },
+
+  // ==================== PROMO CONDITION OPERATIONS ====================
+
+  /**
+   * Get list of valid promo conditions by promo ID
+   */
+  async getListValidPromoConditionByPromoId(params, advancedSearch = null) {
+    try {
+      const response = await promoRepository.getListValidPromoConditionByPromoId(params, advancedSearch);
+      return response;
+    } catch (error) {
+      console.error('Error fetching valid promo condition list:', error);
       throw error;
     }
   },
 
   /**
-   * Export promo data
+   * Get detail of valid promo condition by ID
    */
-  async exportPromoData(params) {
+  async getDetailValidPromoCondition(conditionId) {
     try {
-      const response = await promoRepository.exportPromo(params);
+      const response = await promoRepository.getDetailValidPromoCondition(conditionId);
       return response;
     } catch (error) {
-      console.error('Error exporting promo data:', error);
+      console.error('Error fetching valid promo condition detail:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Download list of valid promo conditions
+   */
+  async downloadListValidPromoCondition(params, advancedSearch = null) {
+    try {
+      const response = await promoRepository.downloadListValidPromoCondition(params, advancedSearch);
+      return response;
+    } catch (error) {
+      console.error('Error downloading valid promo condition list:', error);
+      throw error;
+    }
+  },
+
+  // ==================== ADVANCED SEARCH HELPERS ====================
+
+  /**
+   * Get advance search condition list
+   */
+  async getAdvanceSearchCondition() {
+    try {
+      const response = await promoRepository.getAdvanceSearchCondition();
+      return response;
+    } catch (error) {
+      console.error('Error fetching advance search conditions:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get advance search operator list
+   */
+  async getAdvanceSearchOperator() {
+    try {
+      const response = await promoRepository.getAdvanceSearchOperator();
+      return response;
+    } catch (error) {
+      console.error('Error fetching advance search operators:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get advance search promo column list
+   */
+  async getAdvancePromoColumn() {
+    try {
+      const response = await promoRepository.getAdvancePromoColumn();
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching advance promo columns:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get advance search promo criteria column list
+   */
+  async getAdvancePromoCriteriaColumn() {
+    try {
+      const response = await promoRepository.getAdvancePromoCriteriaColumn();
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching advance promo criteria columns:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get advance search promo condition column list
+   */
+  async getAdvancePromoConditionColumn() {
+    try {
+      const response = await promoRepository.getAdvancePromoConditionColumn();
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching advance promo condition columns:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get advance search promo history column list
+   */
+  async getAdvancePromoHistoryColumn() {
+    try {
+      const response = await promoRepository.getAdvancePromoHistoryColumn();
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching advance promo history columns:', error);
+      throw error;
+    }
+  },
+
+  // ==================== PROMO HISTORY OPERATIONS ====================
+
+  /**
+   * Get list of promo history with pagination and advanced search
+   */
+  async getListPromoHistory(params, advancedSearch = null) {
+    try {
+      const response = await promoRepository.getListPromoHistory(params, advancedSearch);
+      return response;
+    } catch (error) {
+      console.error('Error fetching promo history list:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get detail of promo history by invoice number
+   */
+  async getDetailPromoHistoryById(invoiceNumber) {
+    try {
+      const response = await promoRepository.getDetailPromoHistoryById(invoiceNumber);
+      return response;
+    } catch (error) {
+      console.error('Error fetching promo history detail:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Download list of promo history
+   */
+  async downloadListPromoHistory(params, advancedSearch = null) {
+    try {
+      const response = await promoRepository.downloadListPromoHistory(params, advancedSearch);
+      return response;
+    } catch (error) {
+      console.error('Error downloading promo history list:', error);
       throw error;
     }
   },
 };
-
-export default promoService;

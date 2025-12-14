@@ -1,6 +1,6 @@
 /**
  * Promo Slice
- * Redux slice for promo state management
+ * Redux slice for promo state management under Account Management
  */
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
@@ -8,7 +8,7 @@ import { promoService } from '../../services/promoService';
 
 // Initial state
 const initialState = {
-  promoList: {
+  validPromoList: {
     data: [],
     loading: false,
     error: null,
@@ -18,12 +18,12 @@ const initialState = {
       total: 0,
     },
   },
-  promoDetail: {
+  validPromoDetail: {
     data: null,
     loading: false,
     error: null,
   },
-  promoHistory: {
+  promoCriteriaList: {
     data: [],
     loading: false,
     error: null,
@@ -33,19 +33,45 @@ const initialState = {
       total: 0,
     },
   },
-  filters: {
-    searchText: '',
-    status: null,
-    dateRange: null,
+  promoCriteriaDetail: {
+    data: null,
+    loading: false,
+    error: null,
+  },
+  promoConditionList: {
+    data: [],
+    loading: false,
+    error: null,
+    pagination: {
+      current: 1,
+      pageSize: 10,
+      total: 0,
+    },
+  },
+  promoConditionDetail: {
+    data: null,
+    loading: false,
+    error: null,
+  },
+  advancedSearch: {
+    conditions: [],
+    operators: [],
+    promoColumns: [],
+    criteriaColumns: [],
+    conditionColumns: [],
+    loading: false,
+    error: null,
   },
 };
 
-// Async thunks
-export const fetchPromoList = createAsyncThunk(
-  'promo/fetchPromoList',
-  async (params, { rejectWithValue }) => {
+// ==================== ASYNC THUNKS ====================
+
+// Valid Promo Operations
+export const fetchValidPromoList = createAsyncThunk(
+  'promo/fetchValidPromoList',
+  async ({ params, advancedSearch }, { rejectWithValue }) => {
     try {
-      const response = await promoService.getPromoList(params);
+      const response = await promoService.getListValidPromo(params, advancedSearch);
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -53,11 +79,11 @@ export const fetchPromoList = createAsyncThunk(
   }
 );
 
-export const fetchPromoDetail = createAsyncThunk(
-  'promo/fetchPromoDetail',
+export const fetchValidPromoDetail = createAsyncThunk(
+  'promo/fetchValidPromoDetail',
   async (promoId, { rejectWithValue }) => {
     try {
-      const response = await promoService.getPromoDetail(promoId);
+      const response = await promoService.getDetailValidPromoById(promoId);
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -65,12 +91,112 @@ export const fetchPromoDetail = createAsyncThunk(
   }
 );
 
-export const fetchPromoHistory = createAsyncThunk(
-  'promo/fetchPromoHistory',
-  async (params, { rejectWithValue }) => {
+export const downloadValidPromoList = createAsyncThunk(
+  'promo/downloadValidPromoList',
+  async ({ params, advancedSearch }, { rejectWithValue }) => {
     try {
-      const response = await promoService.getPromoHistory(params);
+      const response = await promoService.downloadListValidPromo(params, advancedSearch);
       return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+// Promo Criteria Operations
+export const fetchPromoCriteriaList = createAsyncThunk(
+  'promo/fetchPromoCriteriaList',
+  async ({ params, advancedSearch }, { rejectWithValue }) => {
+    try {
+      const response = await promoService.getListValidPromoCriteriaByPromoId(params, advancedSearch);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const fetchPromoCriteriaDetail = createAsyncThunk(
+  'promo/fetchPromoCriteriaDetail',
+  async (criteriaId, { rejectWithValue }) => {
+    try {
+      const response = await promoService.getDetailValidPromoCriteria(criteriaId);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const downloadPromoCriteriaList = createAsyncThunk(
+  'promo/downloadPromoCriteriaList',
+  async ({ params, advancedSearch }, { rejectWithValue }) => {
+    try {
+      const response = await promoService.downloadListValidPromoCriteria(params, advancedSearch);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+// Promo Condition Operations
+export const fetchPromoConditionList = createAsyncThunk(
+  'promo/fetchPromoConditionList',
+  async ({ params, advancedSearch }, { rejectWithValue }) => {
+    try {
+      const response = await promoService.getListValidPromoConditionByPromoId(params, advancedSearch);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const fetchPromoConditionDetail = createAsyncThunk(
+  'promo/fetchPromoConditionDetail',
+  async (conditionId, { rejectWithValue }) => {
+    try {
+      const response = await promoService.getDetailValidPromoCondition(conditionId);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const downloadPromoConditionList = createAsyncThunk(
+  'promo/downloadPromoConditionList',
+  async ({ params, advancedSearch }, { rejectWithValue }) => {
+    try {
+      const response = await promoService.downloadListValidPromoCondition(params, advancedSearch);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+// Advanced Search Helpers
+export const fetchAdvancedSearchMetadata = createAsyncThunk(
+  'promo/fetchAdvancedSearchMetadata',
+  async (_, { rejectWithValue }) => {
+    try {
+      const [conditions, operators, promoColumns, criteriaColumns, conditionColumns] = await Promise.all([
+        promoService.getAdvanceSearchCondition(),
+        promoService.getAdvanceSearchOperator(),
+        promoService.getAdvancePromoColumn(),
+        promoService.getAdvancePromoCriteriaColumn(),
+        promoService.getAdvancePromoConditionColumn(),
+      ]);
+
+      return {
+        conditions,
+        operators,
+        promoColumns,
+        criteriaColumns,
+        conditionColumns,
+      };
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
@@ -83,88 +209,156 @@ const promoSlice = createSlice({
   initialState,
   reducers: {
     // Synchronous actions
-    setPromoFilters: (state, action) => {
-      state.filters = { ...state.filters, ...action.payload };
+    clearValidPromoDetail: (state) => {
+      state.validPromoDetail = initialState.validPromoDetail;
     },
-    clearPromoFilters: (state) => {
-      state.filters = initialState.filters;
+    clearPromoCriteriaDetail: (state) => {
+      state.promoCriteriaDetail = initialState.promoCriteriaDetail;
     },
-    clearPromoDetail: (state) => {
-      state.promoDetail = initialState.promoDetail;
+    clearPromoConditionDetail: (state) => {
+      state.promoConditionDetail = initialState.promoConditionDetail;
     },
     resetPromoState: () => initialState,
   },
   extraReducers: (builder) => {
-    // Fetch promo list
+    // ==================== VALID PROMO LIST ====================
     builder
-      .addCase(fetchPromoList.pending, (state) => {
-        state.promoList.loading = true;
-        state.promoList.error = null;
+      .addCase(fetchValidPromoList.pending, (state) => {
+        state.validPromoList.loading = true;
+        state.validPromoList.error = null;
       })
-      .addCase(fetchPromoList.fulfilled, (state, action) => {
-        state.promoList.loading = false;
-        state.promoList.data = action.payload.data || [];
-        state.promoList.pagination = {
+      .addCase(fetchValidPromoList.fulfilled, (state, action) => {
+        state.validPromoList.loading = false;
+        // Store complete response for helper transformation
+        state.validPromoList.data = action.payload;
+      })
+      .addCase(fetchValidPromoList.rejected, (state, action) => {
+        state.validPromoList.loading = false;
+        state.validPromoList.error = action.payload;
+      });
+
+    // ==================== VALID PROMO DETAIL ====================
+    builder
+      .addCase(fetchValidPromoDetail.pending, (state) => {
+        state.validPromoDetail.loading = true;
+        state.validPromoDetail.error = null;
+      })
+      .addCase(fetchValidPromoDetail.fulfilled, (state, action) => {
+        state.validPromoDetail.loading = false;
+        state.validPromoDetail.data = action.payload;
+      })
+      .addCase(fetchValidPromoDetail.rejected, (state, action) => {
+        state.validPromoDetail.loading = false;
+        state.validPromoDetail.error = action.payload;
+      });
+
+    // ==================== PROMO CRITERIA LIST ====================
+    builder
+      .addCase(fetchPromoCriteriaList.pending, (state) => {
+        state.promoCriteriaList.loading = true;
+        state.promoCriteriaList.error = null;
+      })
+      .addCase(fetchPromoCriteriaList.fulfilled, (state, action) => {
+        state.promoCriteriaList.loading = false;
+        state.promoCriteriaList.data = action.payload.data || [];
+        state.promoCriteriaList.pagination = {
           current: action.payload.currentPage || 1,
           pageSize: action.payload.pageSize || 10,
           total: action.payload.total || 0,
         };
       })
-      .addCase(fetchPromoList.rejected, (state, action) => {
-        state.promoList.loading = false;
-        state.promoList.error = action.payload;
+      .addCase(fetchPromoCriteriaList.rejected, (state, action) => {
+        state.promoCriteriaList.loading = false;
+        state.promoCriteriaList.error = action.payload;
       });
 
-    // Fetch promo detail
+    // ==================== PROMO CRITERIA DETAIL ====================
     builder
-      .addCase(fetchPromoDetail.pending, (state) => {
-        state.promoDetail.loading = true;
-        state.promoDetail.error = null;
+      .addCase(fetchPromoCriteriaDetail.pending, (state) => {
+        state.promoCriteriaDetail.loading = true;
+        state.promoCriteriaDetail.error = null;
       })
-      .addCase(fetchPromoDetail.fulfilled, (state, action) => {
-        state.promoDetail.loading = false;
-        state.promoDetail.data = action.payload;
+      .addCase(fetchPromoCriteriaDetail.fulfilled, (state, action) => {
+        state.promoCriteriaDetail.loading = false;
+        state.promoCriteriaDetail.data = action.payload;
       })
-      .addCase(fetchPromoDetail.rejected, (state, action) => {
-        state.promoDetail.loading = false;
-        state.promoDetail.error = action.payload;
+      .addCase(fetchPromoCriteriaDetail.rejected, (state, action) => {
+        state.promoCriteriaDetail.loading = false;
+        state.promoCriteriaDetail.error = action.payload;
       });
 
-    // Fetch promo history
+    // ==================== PROMO CONDITION LIST ====================
     builder
-      .addCase(fetchPromoHistory.pending, (state) => {
-        state.promoHistory.loading = true;
-        state.promoHistory.error = null;
+      .addCase(fetchPromoConditionList.pending, (state) => {
+        state.promoConditionList.loading = true;
+        state.promoConditionList.error = null;
       })
-      .addCase(fetchPromoHistory.fulfilled, (state, action) => {
-        state.promoHistory.loading = false;
-        state.promoHistory.data = action.payload.data || [];
-        state.promoHistory.pagination = {
+      .addCase(fetchPromoConditionList.fulfilled, (state, action) => {
+        state.promoConditionList.loading = false;
+        state.promoConditionList.data = action.payload.data || [];
+        state.promoConditionList.pagination = {
           current: action.payload.currentPage || 1,
           pageSize: action.payload.pageSize || 10,
           total: action.payload.total || 0,
         };
       })
-      .addCase(fetchPromoHistory.rejected, (state, action) => {
-        state.promoHistory.loading = false;
-        state.promoHistory.error = action.payload;
+      .addCase(fetchPromoConditionList.rejected, (state, action) => {
+        state.promoConditionList.loading = false;
+        state.promoConditionList.error = action.payload;
+      });
+
+    // ==================== PROMO CONDITION DETAIL ====================
+    builder
+      .addCase(fetchPromoConditionDetail.pending, (state) => {
+        state.promoConditionDetail.loading = true;
+        state.promoConditionDetail.error = null;
+      })
+      .addCase(fetchPromoConditionDetail.fulfilled, (state, action) => {
+        state.promoConditionDetail.loading = false;
+        state.promoConditionDetail.data = action.payload;
+      })
+      .addCase(fetchPromoConditionDetail.rejected, (state, action) => {
+        state.promoConditionDetail.loading = false;
+        state.promoConditionDetail.error = action.payload;
+      });
+
+    // ==================== ADVANCED SEARCH METADATA ====================
+    builder
+      .addCase(fetchAdvancedSearchMetadata.pending, (state) => {
+        state.advancedSearch.loading = true;
+        state.advancedSearch.error = null;
+      })
+      .addCase(fetchAdvancedSearchMetadata.fulfilled, (state, action) => {
+        state.advancedSearch.loading = false;
+        state.advancedSearch.conditions = action.payload.conditions || [];
+        state.advancedSearch.operators = action.payload.operators || [];
+        state.advancedSearch.promoColumns = action.payload.promoColumns || [];
+        state.advancedSearch.criteriaColumns = action.payload.criteriaColumns || [];
+        state.advancedSearch.conditionColumns = action.payload.conditionColumns || [];
+      })
+      .addCase(fetchAdvancedSearchMetadata.rejected, (state, action) => {
+        state.advancedSearch.loading = false;
+        state.advancedSearch.error = action.payload;
       });
   },
 });
 
 // Actions
 export const {
-  setPromoFilters,
-  clearPromoFilters,
-  clearPromoDetail,
+  clearValidPromoDetail,
+  clearPromoCriteriaDetail,
+  clearPromoConditionDetail,
   resetPromoState,
 } = promoSlice.actions;
 
 // Selectors
-export const selectPromoList = (state) => state.promo.promoList;
-export const selectPromoDetail = (state) => state.promo.promoDetail;
-export const selectPromoHistory = (state) => state.promo.promoHistory;
-export const selectPromoFilters = (state) => state.promo.filters;
+export const selectValidPromoList = (state) => state.accountPromo.validPromoList;
+export const selectValidPromoDetail = (state) => state.accountPromo.validPromoDetail;
+export const selectPromoCriteriaList = (state) => state.accountPromo.promoCriteriaList;
+export const selectPromoCriteriaDetail = (state) => state.accountPromo.promoCriteriaDetail;
+export const selectPromoConditionList = (state) => state.accountPromo.promoConditionList;
+export const selectPromoConditionDetail = (state) => state.accountPromo.promoConditionDetail;
+export const selectAdvancedSearchMetadata = (state) => state.accountPromo.advancedSearch;
 
 // Reducer
 export default promoSlice.reducer;
