@@ -7,11 +7,10 @@ import { useState } from "react";
 import { Fragment } from "react";
 import InvoiceRelationTable from "./InvoiceRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { approveOrRejectAllInvoiceRelation, getInvoiceRelation, getIrApprovalHistory, inactivateInvoiceRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { approveOrRejectAllInvoiceRelation, getInvoiceRelation, getIrApprovalHistory, getIrColumnApi, getIrConditionApi, getIrOperatorApi, inactivateInvoiceRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
-import { useNavigate } from "react-router-dom"
 import ModalConfirmationApprovalInvoiceRelation from "./ModalConfirmationApprovalInvoiceRelation";
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
@@ -472,6 +471,9 @@ const InvoiceRelation = ({
               onCancel={handleCancelFilter}
               dispatch={dispatch}
               reduxState={financialInformationState}
+              getColumnApi={getIrColumnApi}
+              getConditionApi={getIrConditionApi}
+              getOperatorApi={getIrOperatorApi}
               maxFilters={5}
               loading={loading}
               formId="prFilterForm"

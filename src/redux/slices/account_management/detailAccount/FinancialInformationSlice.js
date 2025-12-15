@@ -1259,6 +1259,45 @@ export const getIrApprovalHistory = createAsyncThunk(
   }
 );
 
+export const getIrColumnApi = createAsyncThunk(
+  "GET_IR_COLUMN_API",
+  async (thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/invoice-relation/list-search-column";
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+)
+
+export const getIrConditionApi = createAsyncThunk(
+  "GET_IR_CONDITION_API",
+  async (thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/invoice-relation/list-search-condition";
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+)
+
+export const getIrOperatorApi = createAsyncThunk(
+  "GET_IR_OPERATOR_API",
+  async (thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/invoice-relation/list-search-operator";
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+)
+
 const financialInformationSlice = createSlice({
   name: "financialInformation",
   initialState,
@@ -1289,7 +1328,6 @@ const financialInformationSlice = createSlice({
       state.data_withHoldingTaxFirstIndex = action.payload;
       state.loading = false;
     },
-
     
     [getTaxRelationFirstIndex.pending]: (state, action) => {
       state.data_taxRelationFirstIndex = action.payload;
@@ -1684,7 +1722,7 @@ const financialInformationSlice = createSlice({
       state.loading = false;
     },
 
-    /** Get Payment Relation Column API  */
+    /** Get Payment Relation Condition API  */
     [getPrConditionApi.pending]: (state) => {
       state.loading = true;
     },
@@ -1707,7 +1745,7 @@ const financialInformationSlice = createSlice({
     [getPrOperatorApi.rejected]: (state) => {
       state.loading = false
     },
-    
+
     /** Get Invoice Relation Approval Hierarchy */
     [getIrApprovalHierarchy.pending]: (state) => {
       state.loading = true;
@@ -1827,6 +1865,42 @@ const financialInformationSlice = createSlice({
     },
     [getIrApprovalHistory.rejected]: (state) => {
       state.loading = false;
+    },
+
+    /** Get Invoice Relation Column API  */
+    [getIrColumnApi.pending]: (state) => {
+      state.loading = true;
+    },
+    [getIrColumnApi.fulfilled]: (state, action) => {
+      state.data_globalTypeColumn = action.payload;
+      state.loading = false;
+    },
+    [getIrColumnApi.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    /** Get Invoice Relation Condition API  */
+    [getIrConditionApi.pending]: (state) => {
+      state.loading = true;
+    },
+    [getIrConditionApi.fulfilled]: (state, action) => {
+      state.data_globalTypeCondition = action.payload;
+      state.loading = false;
+    },
+    [getIrConditionApi.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    /** Get Invoice Relation Operator API  */
+    [getIrOperatorApi.pending]: (state) => {
+      state.loading = true;
+    },
+    [getIrOperatorApi.fulfilled]: (state, action) => {
+      state.data_globalTypeOperator = action.payload;
+      state.loading = false;
+    },
+    [getIrOperatorApi.rejected]: (state) => {
+      state.loading = false
     },
   },
 });
