@@ -102,14 +102,14 @@ const PaymentRelation = ({
   const handleConfirmApprovalModal = (description, submitApprovalCondition, handleClear) => {
     const action = submitApprovalCondition.toUpperCase();
 
-    const body = selectedRows.filter(row => !row.approvalType).map((row) => ({
+    const body = selectedRows.filter(row => row.approvalType === "PAYMENT_RELATION").map((row) => ({
       id: row.id,
       approvalId: row.tappId,
       action,
       description,
     }));
 
-    const inactiveBody = selectedRows.filter(row => row.approvalType).map((row) => ({
+    const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_PAYMENT_RELATION").map((row) => ({
       id: row.id,
       approvalId: row.tappId,
       action,
