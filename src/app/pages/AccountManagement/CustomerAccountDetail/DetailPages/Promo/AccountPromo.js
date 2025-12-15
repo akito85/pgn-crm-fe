@@ -15,7 +15,7 @@ import promoCriteriaRepository from "./repository/promoCriteriaRepository";
 import promoConditionRepository from "./repository/promoConditionRepository";
 import ExportButton from "./components/ExportButton";
 import { usePromo } from "./hooks/usePromo";
-import { transformValidPromoResponse } from "./utils/promoHelpers";
+import { transformValidPromoResponse, transformPromoHistoryResponse } from "./utils/promoHelpers";
 
 const HeaderAccountPromo = ({ onChangeTab, isPromoHistory }) => {
   const keys = [
@@ -56,7 +56,7 @@ const PromoViewData = ({
   useEffect(() => {
     // Load promo list on mount with customerId
     if (customerId) {
-      loadValidPromoList({ page: 0, size: 10, customerId });
+      loadValidPromoList({ page: 0, size: 10, customerId, sort: 'id~desc' });
     }
   }, [customerId, loadValidPromoList]);
 
@@ -116,7 +116,8 @@ const PromoViewData = ({
       loadValidPromoList({ 
         page: current - 1, 
         size: pageSize, 
-        customerId 
+        customerId,
+        sort: 'id~desc'
       });
     }
   };
@@ -130,7 +131,13 @@ const PromoViewData = ({
       </Row>
       <Row align={"middle"}>
         <Col span={3} offset={0} style={{ textAlign: "center" }}>
-          <FilterButton />
+          <FilterButton 
+            columnType="promo"
+            onApplyFilter={(queries) => {
+              console.log('Apply filter with queries:', queries);
+              // TODO: Implement filter logic
+            }}
+          />
         </Col>
         <Col span={3} offset={18} style={{ textAlign: "center" }}>
           <ExportButton onClick={handleDownload} />
@@ -160,30 +167,186 @@ const PromoHistoryViewData = ({
   isModalHistoryVisible,
   setIsModalHistoryVisible,
   setDetailHistoryData,
+  customerId,
 }) => {
-  return (
-    <Fragment>
-      <Row align={"middle"}>
-        <Col span={4}>
-          <HeaderText text="PROMO HISTORY" />
-        </Col>
-        <Col span={2} offset={18}>
-          <FilterButton />
-        </Col>
-      </Row>
+  const {
+    promoHistoryList,
+    loadPromoHistoryList,
+    downloadPromoHistory,
+  } = usePromo();
 
-      <div style={{ width: "100%", overflowX: "auto" }}>
+  const [dataSource, setDataSource] = useState([]);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
+
+  // Get columns from repository
+  const columns = promoHistoryRepository.getColumns(setIsModalHistoryVisible, setDetailHistoryData);
+
+  useEffect(() => {
+    // Load promo history on mount with customerId
+    if (customerId) {
+      loadPromoHistoryList({ page: 0, size: 10, customerId, sort: 'id~desc' });
+    }
+  }, [customerId, loadPromoHistoryList]);
+
+  useEffect(() => {
+    // Transform API response using helper
+    if (promoHistoryList?.data && !promoHistoryList.loading) {
+      const { dataSource: transformedData, pagination: paginationData } = 
+        transformPromoHistoryResponse(promoHistoryList.data);
+      
+      setDataSource(transformedData);
+      setPagination(paginationData);
+    } else if (promoHistoryList && !promoHistoryList.loading && !promoHistoryList.data) {
+      setDataSource([]);
+    }
+  }, [promoHistoryList]);
+
+  const handleDownload = async () => {
+    if (customerId) {
+      try {
+        const params = {
+          page: pagination.current - 1,
+          size: pagination.pageSize,
+          customerId: customerId,
+        };
+        
+        await downloadPromoHistory(params);
+      } catch (error) {
+        console.error('Download failed:', error);
+      }
+    }
+  };
+
+  const handleTableChange = (paginationParams) => {
+    const { current, pageSize } = paginationParams;
+    
+    if (customerId) {
+      loadPromoHistoryList({ 
+        page: current - 1, 
+        size: pageSize, 
+        customerId,
+        sort: 'id~desc'
+      });
+    }
+  };
+
+  const expandedRowRender = (record) => {
+    const detailColumns = [
+      {
+        title: "No",
+        dataIndex: "id",
+        key: "id",
+        width: 60,
+        render: (_, __, index) => index + 1,
+      },
+      {
+        title: "Name",
+        dataIndex: "name",
+        key: "name",
+        width: 200,
+      },
+      {
+        title: "Promotion Type",
+        dataIndex: "promotionType",
+        key: "promotionType",
+        width: 130,
+      },
+      {
+        title: "Type",
+        dataIndex: "type",
+        key: "type",
+        width: 130,
+      },
+      {
+        title: "Category",
+        dataIndex: "category",
+        key: "category",
+        width: 130,
+      },
+      {
+        title: "Criteria",
+        dataIndex: "criteria",
+        key: "criteria",
+        width: 150,
+      },
+      {
+        title: "Billing Date",
+        dataIndex: "billingDate",
+        key: "billingDate",
+        width: 120,
+      },
+      {
+        title: "Description",
+        dataIndex: "description",
+        key: "description",
+        width: 200,
+      },
+    ];
+
+    return (
+      <div>
+        <p className="text-primary text-xs font-bold uppercase mb-2 mt-4">
+          PROMO HISTORY DETAILS
+        </p>
         <TablePaginationNew
           enableDragColumn={true}
           enableColumnSorter={true}
           enableColumnFilter={true}
-          freezeColumns={[{ key: "action", position: "right" }]}
+          dataSource={record.details || []}
+          columns={detailColumns}
+          tableScrolled={{
+            x: 1000,
+          }}
+          useSelect={false}
+          usePagination={false}
+        />
+      </div>
+    );
+  };
+
+  return (
+    <Fragment>
+      <Row align={"middle"} style={{ marginBottom: "1rem" }}>
+        <Col span={4}>
+          <HeaderText text="PROMO HISTORY" />
+        </Col>
+      </Row>
+      <Row align={"middle"}>
+        <Col span={3} offset={0} style={{ textAlign: "center" }}>
+          <FilterButton 
+            columnType="history"
+            onApplyFilter={(queries) => {
+              console.log('Apply filter with queries:', queries);
+              // TODO: Implement filter logic
+            }}
+          />
+        </Col>
+        <Col span={3} offset={18} style={{ textAlign: "center" }}>
+          <ExportButton onClick={handleDownload} />
+        </Col>
+      </Row>
+
+      <div style={{ width: "100%", overflowX: "auto", marginTop: "1.5rem" }}>
+        <TablePaginationNew
+          enableDragColumn={true}
+          enableColumnSorter={dataSource.length > 0}
+          enableColumnFilter={dataSource.length > 0}
+          freezeColumns={[
+            { key: "no", position: "left" },
+            { key: "action", position: "right" }
+          ]}
           tableScrolled={{ x: 800 }}
-          columns={promoHistoryRepository.getColumns(
-            setIsModalHistoryVisible,
-            setDetailHistoryData,
-          )}
-          dataSource={promoHistoryRepository.getPromoHistoryList()}
+          columns={columns}
+          dataSource={dataSource}
+          loading={promoHistoryList?.loading}
+          pagination={pagination}
+          onChange={handleTableChange}
+          totalData={pagination.total}
+          expandable={{ expandedRowRender }}
         />
       </div>
     </Fragment>
@@ -268,23 +431,23 @@ const renderModalAccountPromo = ({
                       {renderLabelDataValue("Name", detailPromoData?.name)}
                     </Col>
                     <Col span={8}>
-                      {renderLabelDataValue("Type", detailPromoData?.type)}
+                      {renderLabelDataValue("Promotion Type", detailPromoData?.promotionType)}
                     </Col>
                     <Col span={8}>
-                      {renderLabelDataValue("Item", detailPromoData?.item)}
+                      {renderLabelDataValue("Type", detailPromoData?.typeName)}
                     </Col>
                   </Row>
                   <Row>
                     <Col span={8}>
                       {renderLabelDataValue(
                         "Category",
-                        detailPromoData?.category,
+                        detailPromoData?.categoryName,
                       )}
                     </Col>
                     <Col span={8}>
                       {renderLabelDataValue(
                         "Criteria",
-                        detailPromoData?.startDate,
+                        detailPromoData?.criteriaName,
                       )}
                     </Col>
                   </Row>
@@ -450,7 +613,7 @@ const renderModalAccountPromo = ({
 const AccountPromo = () => {
   // Get customerId from route state
   const location = useLocation();
-  const { idCustomer } = location.state || {};
+  const { idCustomer } =  location.state || {};
 
   const [selectedTab, setSelectedTab] = useState("promo");
   const [selectedTabCriteriaAndCondition, setSelectedTabCriteriaAndCondition] =

@@ -137,7 +137,7 @@ export const promoService = {
   async getAdvanceSearchCondition() {
     try {
       const response = await promoRepository.getAdvanceSearchCondition();
-      return response;
+      return response.data || [];
     } catch (error) {
       console.error('Error fetching advance search conditions:', error);
       throw error;
@@ -150,7 +150,7 @@ export const promoService = {
   async getAdvanceSearchOperator() {
     try {
       const response = await promoRepository.getAdvanceSearchOperator();
-      return response;
+      return response.data || [];
     } catch (error) {
       console.error('Error fetching advance search operators:', error);
       throw error;
@@ -163,7 +163,7 @@ export const promoService = {
   async getAdvancePromoColumn() {
     try {
       const response = await promoRepository.getAdvancePromoColumn();
-      return response.data;
+      return response.data || [];
     } catch (error) {
       console.error('Error fetching advance promo columns:', error);
       throw error;
@@ -176,7 +176,7 @@ export const promoService = {
   async getAdvancePromoCriteriaColumn() {
     try {
       const response = await promoRepository.getAdvancePromoCriteriaColumn();
-      return response.data;
+      return response.data || [];
     } catch (error) {
       console.error('Error fetching advance promo criteria columns:', error);
       throw error;
@@ -189,7 +189,7 @@ export const promoService = {
   async getAdvancePromoConditionColumn() {
     try {
       const response = await promoRepository.getAdvancePromoConditionColumn();
-      return response.data;
+      return response.data || [];
     } catch (error) {
       console.error('Error fetching advance promo condition columns:', error);
       throw error;
@@ -202,7 +202,7 @@ export const promoService = {
   async getAdvancePromoHistoryColumn() {
     try {
       const response = await promoRepository.getAdvancePromoHistoryColumn();
-      return response.data;
+      return response.data || [];
     } catch (error) {
       console.error('Error fetching advance promo history columns:', error);
       throw error;

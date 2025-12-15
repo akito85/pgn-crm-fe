@@ -12,8 +12,8 @@ const ExportButton = ({ onClick, loading = false }) => {
         onClick={onClick}
         loading={loading}
       >
-        <DownloadOutlined style={{ marginRight: "8px" }} />
-        Download List
+        <DownloadOutlined className="mr-0 sm:mr-2" />
+        <span className="hidden sm:inline text-xs sm:text-sm truncate">Download List</span>
       </ButtonComponent>
     </Fragment>
   );

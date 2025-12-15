@@ -12,19 +12,25 @@ import {
   fetchPromoCriteriaDetail,
   fetchPromoConditionList,
   fetchPromoConditionDetail,
+  fetchPromoHistoryList,
+  fetchPromoHistoryDetail,
   downloadValidPromoList,
   downloadPromoCriteriaList,
   downloadPromoConditionList,
+  downloadPromoHistoryList,
   fetchAdvancedSearchMetadata,
   clearValidPromoDetail,
   clearPromoCriteriaDetail,
   clearPromoConditionDetail,
+  clearPromoHistoryDetail,
   selectValidPromoList,
   selectValidPromoDetail,
   selectPromoCriteriaList,
   selectPromoCriteriaDetail,
   selectPromoConditionList,
   selectPromoConditionDetail,
+  selectPromoHistoryList,
+  selectPromoHistoryDetail,
   selectAdvancedSearchMetadata,
 } from '../store/slices/promoSlice';
 
@@ -38,6 +44,8 @@ export const usePromo = () => {
   const promoCriteriaDetail = useSelector(selectPromoCriteriaDetail);
   const promoConditionList = useSelector(selectPromoConditionList);
   const promoConditionDetail = useSelector(selectPromoConditionDetail);
+  const promoHistoryList = useSelector(selectPromoHistoryList);
+  const promoHistoryDetail = useSelector(selectPromoHistoryDetail);
   const advancedSearchMetadata = useSelector(selectAdvancedSearchMetadata);
 
   // ==================== VALID PROMO OPERATIONS ====================
@@ -157,6 +165,45 @@ export const usePromo = () => {
     dispatch(clearPromoConditionDetail());
   }, [dispatch]);
 
+  // ==================== PROMO HISTORY OPERATIONS ====================
+
+  /**
+   * Load promo history list
+   */
+  const loadPromoHistoryList = useCallback(
+    (params = {}, advancedSearch = null) => {
+      dispatch(fetchPromoHistoryList({ params, advancedSearch }));
+    },
+    [dispatch]
+  );
+
+  /**
+   * Load promo history detail
+   */
+  const loadPromoHistoryDetail = useCallback(
+    (invoiceNumber) => {
+      dispatch(fetchPromoHistoryDetail(invoiceNumber));
+    },
+    [dispatch]
+  );
+
+  /**
+   * Download promo history list
+   */
+  const downloadPromoHistory = useCallback(
+    (params = {}, advancedSearch = null) => {
+      dispatch(downloadPromoHistoryList({ params, advancedSearch }));
+    },
+    [dispatch]
+  );
+
+  /**
+   * Clear promo history detail
+   */
+  const clearPromoHistory = useCallback(() => {
+    dispatch(clearPromoHistoryDetail());
+  }, [dispatch]);
+
   // ==================== ADVANCED SEARCH ====================
 
   /**
@@ -174,6 +221,8 @@ export const usePromo = () => {
     promoCriteriaDetail,
     promoConditionList,
     promoConditionDetail,
+    promoHistoryList,
+    promoHistoryDetail,
     advancedSearchMetadata,
 
     // Valid Promo Actions
@@ -193,6 +242,12 @@ export const usePromo = () => {
     loadPromoConditionDetail,
     downloadPromoCondition,
     clearPromoCondition,
+
+    // History Actions
+    loadPromoHistoryList,
+    loadPromoHistoryDetail,
+    downloadPromoHistory,
+    clearPromoHistory,
 
     // Advanced Search Actions
     loadAdvancedSearchMetadata,

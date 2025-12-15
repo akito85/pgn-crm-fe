@@ -69,7 +69,7 @@ export const FILTER_OPTIONS = {
 
 // Date format
 export const DATE_FORMAT = {
-  DISPLAY: 'DD/MM/YYYY',
+  DISPLAY: 'DD MMM YYYY',
   API: 'YYYY-MM-DD',
-  DATETIME: 'DD/MM/YYYY HH:mm:ss',
+  DATETIME: 'DD MMM YYYY HH:mm:ss',
 };

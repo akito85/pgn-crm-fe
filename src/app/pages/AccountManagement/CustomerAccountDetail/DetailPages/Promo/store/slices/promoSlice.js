@@ -53,12 +53,28 @@ const initialState = {
     loading: false,
     error: null,
   },
+  promoHistoryList: {
+    data: [],
+    loading: false,
+    error: null,
+    pagination: {
+      current: 1,
+      pageSize: 10,
+      total: 0,
+    },
+  },
+  promoHistoryDetail: {
+    data: null,
+    loading: false,
+    error: null,
+  },
   advancedSearch: {
     conditions: [],
     operators: [],
     promoColumns: [],
     criteriaColumns: [],
     conditionColumns: [],
+    historyColumns: [],
     loading: false,
     error: null,
   },
@@ -177,17 +193,55 @@ export const downloadPromoConditionList = createAsyncThunk(
   }
 );
 
+// Promo History Operations
+export const fetchPromoHistoryList = createAsyncThunk(
+  'promo/fetchPromoHistoryList',
+  async ({ params, advancedSearch }, { rejectWithValue }) => {
+    try {
+      const response = await promoService.getListPromoHistory(params, advancedSearch);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const fetchPromoHistoryDetail = createAsyncThunk(
+  'promo/fetchPromoHistoryDetail',
+  async (invoiceNumber, { rejectWithValue }) => {
+    try {
+      const response = await promoService.getDetailPromoHistoryById(invoiceNumber);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const downloadPromoHistoryList = createAsyncThunk(
+  'promo/downloadPromoHistoryList',
+  async ({ params, advancedSearch }, { rejectWithValue }) => {
+    try {
+      const response = await promoService.downloadListPromoHistory(params, advancedSearch);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 // Advanced Search Helpers
 export const fetchAdvancedSearchMetadata = createAsyncThunk(
   'promo/fetchAdvancedSearchMetadata',
   async (_, { rejectWithValue }) => {
     try {
-      const [conditions, operators, promoColumns, criteriaColumns, conditionColumns] = await Promise.all([
+      const [conditions, operators, promoColumns, criteriaColumns, conditionColumns, historyColumns] = await Promise.all([
         promoService.getAdvanceSearchCondition(),
         promoService.getAdvanceSearchOperator(),
         promoService.getAdvancePromoColumn(),
         promoService.getAdvancePromoCriteriaColumn(),
         promoService.getAdvancePromoConditionColumn(),
+        promoService.getAdvancePromoHistoryColumn(),
       ]);
 
       return {
@@ -196,6 +250,7 @@ export const fetchAdvancedSearchMetadata = createAsyncThunk(
         promoColumns,
         criteriaColumns,
         conditionColumns,
+        historyColumns,
       };
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -217,6 +272,9 @@ const promoSlice = createSlice({
     },
     clearPromoConditionDetail: (state) => {
       state.promoConditionDetail = initialState.promoConditionDetail;
+    },
+    clearPromoHistoryDetail: (state) => {
+      state.promoHistoryDetail = initialState.promoHistoryDetail;
     },
     resetPromoState: () => initialState,
   },
@@ -322,6 +380,36 @@ const promoSlice = createSlice({
         state.promoConditionDetail.error = action.payload;
       });
 
+    // ==================== PROMO HISTORY LIST ====================
+    builder
+      .addCase(fetchPromoHistoryList.pending, (state) => {
+        state.promoHistoryList.loading = true;
+        state.promoHistoryList.error = null;
+      })
+      .addCase(fetchPromoHistoryList.fulfilled, (state, action) => {
+        state.promoHistoryList.loading = false;
+        state.promoHistoryList.data = action.payload;
+      })
+      .addCase(fetchPromoHistoryList.rejected, (state, action) => {
+        state.promoHistoryList.loading = false;
+        state.promoHistoryList.error = action.payload;
+      });
+
+    // ==================== PROMO HISTORY DETAIL ====================
+    builder
+      .addCase(fetchPromoHistoryDetail.pending, (state) => {
+        state.promoHistoryDetail.loading = true;
+        state.promoHistoryDetail.error = null;
+      })
+      .addCase(fetchPromoHistoryDetail.fulfilled, (state, action) => {
+        state.promoHistoryDetail.loading = false;
+        state.promoHistoryDetail.data = action.payload;
+      })
+      .addCase(fetchPromoHistoryDetail.rejected, (state, action) => {
+        state.promoHistoryDetail.loading = false;
+        state.promoHistoryDetail.error = action.payload;
+      });
+
     // ==================== ADVANCED SEARCH METADATA ====================
     builder
       .addCase(fetchAdvancedSearchMetadata.pending, (state) => {
@@ -335,6 +423,7 @@ const promoSlice = createSlice({
         state.advancedSearch.promoColumns = action.payload.promoColumns || [];
         state.advancedSearch.criteriaColumns = action.payload.criteriaColumns || [];
         state.advancedSearch.conditionColumns = action.payload.conditionColumns || [];
+        state.advancedSearch.historyColumns = action.payload.historyColumns || [];
       })
       .addCase(fetchAdvancedSearchMetadata.rejected, (state, action) => {
         state.advancedSearch.loading = false;
@@ -377,6 +466,18 @@ const promoSlice = createSlice({
       .addCase(downloadPromoConditionList.rejected, (state, action) => {
         console.error('Download condition failed:', action.payload);
       });
+
+    // Download Promo History List
+    builder
+      .addCase(downloadPromoHistoryList.pending, (state) => {
+        // Track download in progress if needed
+      })
+      .addCase(downloadPromoHistoryList.fulfilled, (state) => {
+        // No need to store blob in state
+      })
+      .addCase(downloadPromoHistoryList.rejected, (state, action) => {
+        console.error('Download promo history failed:', action.payload);
+      });
   },
 });
 
@@ -385,6 +486,7 @@ export const {
   clearValidPromoDetail,
   clearPromoCriteriaDetail,
   clearPromoConditionDetail,
+  clearPromoHistoryDetail,
   resetPromoState,
 } = promoSlice.actions;
 
@@ -395,6 +497,8 @@ export const selectPromoCriteriaList = (state) => state.accountPromo.promoCriter
 export const selectPromoCriteriaDetail = (state) => state.accountPromo.promoCriteriaDetail;
 export const selectPromoConditionList = (state) => state.accountPromo.promoConditionList;
 export const selectPromoConditionDetail = (state) => state.accountPromo.promoConditionDetail;
+export const selectPromoHistoryList = (state) => state.accountPromo.promoHistoryList;
+export const selectPromoHistoryDetail = (state) => state.accountPromo.promoHistoryDetail;
 export const selectAdvancedSearchMetadata = (state) => state.accountPromo.advancedSearch;
 
 // Reducer

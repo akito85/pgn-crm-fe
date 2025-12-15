@@ -13,7 +13,7 @@ const HeadersTabs = ({ keys, selectedTab, onChangeTab, isModal = false }) => {
             border={true}
             onClick={() => onChangeTab(key.value)}
           >
-            <span className={isModal ? "text-[14px]" : ""}>{key.label}</span>
+            <span className={`${isModal ? "text-[14px]" : ""} truncate text-xs sm:text-sm`}>{key.label}</span>
           </ButtonComponent>
         </Col>
       ))}
