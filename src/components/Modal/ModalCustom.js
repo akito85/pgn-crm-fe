@@ -10,7 +10,8 @@ const ModalCustom = (props) => {
     children,
     width,
     type,
-    footer = []
+    footer = [],
+    centered = true
   } = props;
 
   const typeModal = (type) => {
@@ -82,7 +83,7 @@ const ModalCustom = (props) => {
       onCancel={handleCancel}
       footer={footer}
       className={type === 'confirmation' ? "modal-approve-reject" : "modal-custom"}
-      centered={true}
+      centered={centered}
       width={width}
       maskClosable={false}
     >

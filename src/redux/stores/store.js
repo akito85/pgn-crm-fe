@@ -116,6 +116,7 @@ import digitalSignatureReducer from "../slices/rating_billing_invoice/MasterData
 import settingReducer from "../slices/receipt_collection/setting";
 import glAccountReducer from "../slices/rating_billing_invoice/MasterData/glAccount";
 import contentManagementReducer from "../slices/rating_billing_invoice/MasterData/contentManagement";
+import relationshipReducer from "../slices/account_management/detailAccount/relationshipSlice";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -177,6 +178,7 @@ const reducer = combineReducers({
   accountGasUtilization: accountGasUtilizationReducer,
   additionalInformation: additionalInfoReducer,
   accountEquipment: equpmentReducer,
+  relationship: relationshipReducer,
 
   //Account Management ( Customer )
   customerAccount: customerAccountReducer,
