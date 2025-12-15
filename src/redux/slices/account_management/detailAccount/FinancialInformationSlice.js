@@ -577,9 +577,8 @@ export const getInvoiceRelationAttachment = createAsyncThunk(
   async ({ id }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/invoice-relation/list-attachment/${id}`;
-      // const response = await accountManagementService.getAll(url);
-      // return response.data;
-      return [];
+      const response = await accountManagementService.getAll(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -693,9 +692,8 @@ export const getDetailInvoiceRelation = createAsyncThunk(
   async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/invoice-relation/detail/${id}`;
-      // const response = await accountManagementService.getDetail(url);
-      // return response.data;
-      return {};
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
