@@ -195,7 +195,7 @@ const ModalReleaseReceipt = ({
                 </ButtonComponent>
                 {currentStep > 0 && (
                     <ButtonComponent
-                        type="primary"
+                        type="submit"
                         onClick={handlePrev}
                         className="h-[40px]"
                         icon={
@@ -209,7 +209,7 @@ const ModalReleaseReceipt = ({
                 )}
                 {currentStep < 3 ? (
                     <ButtonComponent
-                        type="primary"
+                        type="submit"
                         onClick={handleNext}
                         className="h-[40px]"
                         disabled={isNextDisabled()}
@@ -218,7 +218,7 @@ const ModalReleaseReceipt = ({
                     </ButtonComponent>
                 ) : (
                     <ButtonComponent
-                        type="primary"
+                        type="submit"
                         className="h-[40px]"
                         onClick={() => onSubmit({
                             receipts: localSelectedData,
