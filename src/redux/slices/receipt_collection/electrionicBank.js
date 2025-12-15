@@ -27,6 +27,7 @@ const initialState = {
   bankDDL: [],
   loadingApprove: false,
   loadingModalReq: false,
+  data_type_ci: [],
 };
 
 export const getEceletricBankPaging = createAsyncThunk(
@@ -544,6 +545,34 @@ export const getTableSundrySelect = createAsyncThunk(
   }
 );
 
+
+export const getListTypeCi = createAsyncThunk(
+  "GET_LIST_TYPE_CI",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-channel/list`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
 const electronicSlice = createSlice({
   name: "Electronic_Bank_Statment",
   initialState,
@@ -802,6 +831,17 @@ const electronicSlice = createSlice({
     [requestApprove.rejected]: (state, action) => {
       state.dataApprove = action.payload;
       state.loadingModal = false;
+    },
+
+    [getListTypeCi.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListTypeCi.fulfilled]: (state, action) => {
+      state.data_type_ci = action.payload;
+      state.loading = false;
+    },
+    [getListTypeCi.rejected]: (state) => {
+      state.loading = true;
     },
   },
 });

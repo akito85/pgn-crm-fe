@@ -22,6 +22,7 @@ import {
   getBankDDLMaintain,
   getListType,
   uploadBank,
+  getListTypeCi
 } from "../../../../../redux/slices/receipt_collection/electrionicBank";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -33,8 +34,8 @@ import { formMessageRequired } from "../../../../../utils";
 const { Option } = Select;
 const MAX_FILE_SIZE = 5000000;
 
-const UploadMaintainElectronicBankStatement = (updateData = () => {}) => {
-  const { bankDDL, data_type, data, loading } = useSelector(
+const UploadMaintainElectronicBankStatement = (updateData = () => { }) => {
+  const { bankDDL, data_type_ci, data, loading } = useSelector(
     (state) => state.electronic
   );
 
@@ -67,7 +68,7 @@ const UploadMaintainElectronicBankStatement = (updateData = () => {}) => {
 
   useEffect(() => {
     dispatch(getBankDDLMaintain());
-    dispatch(getListType());
+    dispatch(getListTypeCi());
   }, [dispatch]);
 
   const handleButton = (value) => {
@@ -277,9 +278,9 @@ const UploadMaintainElectronicBankStatement = (updateData = () => {}) => {
                     onChange={handleButton}
                     labelInValue
                   >
-                    {data_type?.data?.map((a, index) => (
+                    {data_type_ci?.data?.map((a, index) => (
                       <Select.Option key={index.id} value={a.id}>
-                        {a.name}
+                        {a.ciCode} - {a.name}
                       </Select.Option>
                     ))}
                   </SelectComponent>
@@ -331,9 +332,8 @@ const UploadMaintainElectronicBankStatement = (updateData = () => {}) => {
                     {submit && (dataLink.file || !!errorMessage) ? (
                       <>
                         <p
-                          className={`mb-1 text-base${
-                            errorMessage ? " text-red-700" : ""
-                          }`}
+                          className={`mb-1 text-base${errorMessage ? " text-red-700" : ""
+                            }`}
                           style={!errorMessage ? { color: "#BBCF4B" } : null}
                         >
                           {errorMessage || "Link has been attached!"}

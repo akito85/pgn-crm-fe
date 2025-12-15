@@ -10,7 +10,7 @@ import AttachmentComponent from "../../../../../components/Attachment/Attachment
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
 // import { getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt"; // If needed
-import { getReceiptCustomerList, getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
+import { getReceiptCustomerList, getListCategoryReceipt, getPaginateReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
 import RadioTabs from "../../../../../components/RadioTabs";
 
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -24,7 +24,7 @@ const ModalRefundReceipt = ({
     onSubmit,
 }) => {
     const dispatch = useDispatch();
-    const { data_customer_list, loading } = useSelector((state) => state.receipt);
+    const { data_customer_list, data, loading } = useSelector((state) => state.receipt);
 
     const [currentStep, setCurrentStep] = useState(0);
 
@@ -99,6 +99,13 @@ const ModalRefundReceipt = ({
             dispatch(getReceiptCustomerList({ page: 1, pageSize: 10, sort: "createdDate~desc" }));
         }
     }, [isOpen, dispatch]);
+
+    // Fetch receipt list when entering Step 2
+    useEffect(() => {
+        if (currentStep === 1) {
+            dispatch(getPaginateReceipt({ page: pageReceipt, pageSize: pageSizeReceipt, sort: "createdDate~desc" }));
+        }
+    }, [currentStep, pageReceipt, pageSizeReceipt, dispatch]);
 
     const steps = [
         {
@@ -405,22 +412,28 @@ const ModalRefundReceipt = ({
                     </div>
                 );
             case 1:
+                const receiptDataSource = data?.result?.map(item => ({
+                    ...item,
+                    key: item.id
+                })) || [];
+
                 return (
                     <div className="flex flex-col gap-4">
                         <div className="flex justify-between items-center">
                             <h3 className="text-blue-500 font-bold uppercase">Receipt Information</h3>
                         </div>
                         <TablePagination
-                            dataSource={dataSource}
+                            dataSource={receiptDataSource}
                             columns={columnsStep2}
                             rowSelection={receiptRowSelection}
                             current={pageReceipt}
                             pageSize={pageSizeReceipt}
                             onChange={handleReceiptChangePage}
                             onShowSizeChange={handleReceiptChangePage}
-                            totalData={dataSource?.length}
+                            totalData={data?.page?.totalElements || 0}
                             showTotal={(total, range) => `Showing ${range[0]} to ${range[1]} of ${total} Records`}
                             tableScrolled={{ x: "max-content", y: 400 }}
+                            loading={loading}
                         />
                     </div>
                 );

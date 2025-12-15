@@ -98,9 +98,9 @@ const SettingsForm = (props) => {
             rules={formMessageRequired("Collection Agent Code")}
           >
             <SelectComponent>
-              {dataCollectionAgentList?.data?.length > 0 && (
+              {/* {dataCollectionAgentList?.data?.length > 0 && (
                 <Select.Option value={"All"}>All</Select.Option>
-              )}
+              )} */}
               {dataCollectionAgentList?.data?.map((data) => (
                 <Select.Option key={data.caCode} value={data.caCode}>
                   {data.caCode} - {data.name}
@@ -122,9 +122,9 @@ const SettingsForm = (props) => {
             rules={formMessageRequired("Payment Channel Code")}
           >
             <SelectComponent>
-              {dataPaymentChannelList?.data?.length > 0 && (
+              {/* {dataPaymentChannelList?.data?.length > 0 && (
                 <Select.Option value={"All"}>All</Select.Option>
-              )}
+              )} */}
               {dataPaymentChannelList?.data?.map((data) => (
                 <Select.Option key={data.ciCode} value={data.ciCode}>
                   {data.ciCode} - {data.name}
