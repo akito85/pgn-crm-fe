@@ -72,8 +72,8 @@ const ModalRefundReceipt = ({
     const [listDataAttachment, setListDataAttachment] = useState([]);
     const [confirmationTab, setConfirmationTab] = useState("Customer");
 
-    const handleTabChange = (value) => {
-        setConfirmationTab(value);
+    const handleTabChange = (e) => {
+        setConfirmationTab(e.target.value);
     };
 
     // Columns for Step 2
@@ -339,7 +339,6 @@ const ModalRefundReceipt = ({
             key: "refundAmount",
             width: 200,
             align: "right",
-            fixed: 'right',
             render: (_, record) => (
                 <InputNumber
                     style={{ width: '100%' }}
@@ -375,7 +374,6 @@ const ModalRefundReceipt = ({
             key: "refundAmount",
             width: 200,
             align: "right",
-            fixed: 'right',
             render: (_, record) => {
                 const val = refundReceiptAmountData[record.key];
                 return val ? val.toLocaleString('id-ID') : '-';
@@ -537,6 +535,7 @@ const ModalRefundReceipt = ({
                                             columns={columnsStep3Confirmation}
                                             pagination={false}
                                             usePagination={false}
+                                            tableScrolled={{ x: "max-content", y: 400 }}
                                         />
                                         <div className="mt-4">
                                             <p className="mb-2 font-bold">Remark</p>
@@ -554,6 +553,7 @@ const ModalRefundReceipt = ({
                                             columns={columnsStep4Confirmation}
                                             pagination={false}
                                             usePagination={false}
+                                            tableScrolled={{ x: "max-content", y: 400 }}
                                         />
                                         <div className="mt-4">
                                             <p className="mb-2 font-bold">Remark</p>
@@ -588,7 +588,7 @@ const ModalRefundReceipt = ({
                 </ButtonComponent>
                 {currentStep > 0 && (
                     <ButtonComponent
-                        type="primary"
+                        type="submit"
                         onClick={handlePrev}
                         className="w-[120px]"
                         icon={
@@ -601,11 +601,11 @@ const ModalRefundReceipt = ({
                     </ButtonComponent>
                 )}
                 {currentStep < steps.length - 1 ? (
-                    <ButtonComponent type="primary" onClick={handleNext} className="w-[120px]">
+                    <ButtonComponent type="submit" onClick={handleNext} className="w-[120px]">
                         Next
                     </ButtonComponent>
                 ) : (
-                    <ButtonComponent type="primary" onClick={() => onSubmit(localSelectedData)} className="w-[120px]">
+                    <ButtonComponent type="submit" onClick={() => onSubmit(localSelectedData)} className="w-[120px]">
                         Confirm
                     </ButtonComponent>
                 )}
@@ -618,19 +618,21 @@ const ModalRefundReceipt = ({
             isOpen={isOpen}
             handleCancel={handleCancel}
             header="RECEIPT REFUND"
+            type={"confirmation"}
             width={1200}
             footer={renderFooter()}
         >
-            <div className="overflow-x-scroll scrollStepsCstm gap-5 mb-5 p-2">
-                <Steps current={currentStep} labelPlacement="vertical">
-                    {steps.map((item) => (
-                        <Step key={item.key} title={item.title} />
-                    ))}
-                </Steps>
-            </div>
-
-            <div className="min-h-[300px] mb-6">
-                {renderContent()}
+            <div className="w-full gap-5">
+                <div className="overflow-x-scroll scrollStepsCstm gap-5">
+                    <Steps current={currentStep} labelPlacement="vertical">
+                        {steps.map((item) => (
+                            <Step key={item.key} title={item.title} />
+                        ))}
+                    </Steps>
+                </div>
+                <div className="min-h-[300px] mb-6">
+                    {renderContent()}
+                </div>
             </div>
         </ModalCustom>
     );
