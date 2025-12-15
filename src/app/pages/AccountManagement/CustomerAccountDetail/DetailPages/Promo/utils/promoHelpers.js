@@ -399,44 +399,6 @@ export const transformPromoConditionResponse = (apiResponse) => {
 };
 
 /**
- * Transform Promo History API response to table format
- * @param {Object} apiResponse - API response for history list
- * @returns {Object} - { dataSource, pagination }
- */
-export const transformPromoHistoryResponse = (apiResponse) => {
-  if (!apiResponse || !apiResponse.data) {
-    return {
-      dataSource: [],
-      pagination: {
-        current: 1,
-        pageSize: 10,
-        total: 0,
-      },
-    };
-  }
-
-  const { result = [], page = {} } = apiResponse.data;
-
-  const dataSource = result.map((item, index) => ({
-    key: item.id || index,
-    no: (page.number || 0) * (page.size || 10) + index + 1,
-    ...item,
-  }));
-
-  const pagination = {
-    current: (page.number || 0) + 1,
-    pageSize: page.size || 10,
-    total: page.totalElements || 0,
-    totalPages: page.totalPages || 0,
-  };
-
-  return {
-    dataSource,
-    pagination,
-  };
-};
-
-/**
  * Build advanced search body for API
  * @param {Object} searchCriteria - Search criteria object
  * @returns {Object} - Advanced search body
@@ -505,4 +467,71 @@ export const getPromoCategoryBadgeColor = (categoryName) => {
   };
 
   return categoryColorMap[categoryName] || 'default';
+};
+
+/**
+ * Transform Promo History API response to table format
+ * @param {Object} apiResponse - API response for promo history list
+ * @returns {Object} - { dataSource, pagination }
+ */
+export const transformPromoHistoryResponse = (apiResponse) => {
+  if (!apiResponse || !apiResponse.data) {
+    return {
+      dataSource: [],
+      pagination: {
+        current: 1,
+        pageSize: 10,
+        total: 0,
+      },
+    };
+  }
+
+  const { result = [], page = {} } = apiResponse.data;
+
+  // Transform invoice as main row with details as nested data
+  const dataSource = result.map((invoice, index) => {
+    const { invoiceNumber, billingPeriod, billingCycle, promoApplied, details = [] } = invoice;
+    
+    // Get first detail for display in main row
+    const firstDetail = details[0] || {};
+    
+    return {
+      key: invoiceNumber || index,
+      no: (page.number || 0) * (page.size || 10) + index + 1,
+      invoiceNumber: invoiceNumber || '-',
+      billingCycle: billingCycle || '-',
+      billingPeriod: billingPeriod || '-',
+      promoApplied: promoApplied || 0,
+      name: firstDetail.name || '-',
+      type: firstDetail.type || '-',
+      category: firstDetail.category || '-',
+      criteria: firstDetail.criteria || '-',
+      billingDate: formatDate(firstDetail.billingDate),
+      // Store all details for expandable row
+      details: details.map(detail => ({
+        key: detail.id,
+        id: detail.id,
+        name: detail.name || '-',
+        promotionType: detail.promotionType || '-',
+        type: detail.type || '-',
+        category: detail.category || '-',
+        criteria: detail.criteria || '-',
+        billingDate: formatDate(detail.billingDate),
+        description: detail.description || '-',
+      })),
+    };
+  });
+
+  // Transform pagination
+  const pagination = {
+    current: (page.number || 0) + 1, // API uses 0-based index
+    pageSize: page.size || 10,
+    total: page.totalElements || 0,
+    totalPages: page.totalPages || 0,
+  };
+
+  return {
+    dataSource,
+    pagination,
+  };
 };
