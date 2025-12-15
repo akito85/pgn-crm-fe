@@ -1023,7 +1023,7 @@ export const downloadPaymentRelation = createAsyncThunk(
       });
       return response.data;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_ACCOUNT_STANDARD", back: false }));
+      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_PAYMENT_RELATION", back: false }));
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
