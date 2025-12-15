@@ -168,7 +168,7 @@ const PaymentRelation = ({
     }))
     .unwrap()
     .then(() => {
-        const body = {
+      const body = {
         page,
         size: pageSize,
         sort,
