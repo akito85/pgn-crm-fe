@@ -1016,7 +1016,9 @@ export const downloadPaymentRelation = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/payment-relation/export-excel?search=${search}&page=
       ${page}&size=${pageSize}&sort=${sort}`;
-      const response = await accountManagementService.downloadData(url);
+      const response = await accountManagementService.downloadData(url, {
+        headers: { "Accept": "application/json" }
+      });
       return response.data;
     } catch (response) {
       thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_ACCOUNT_STANDARD", back: false }));
