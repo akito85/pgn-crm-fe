@@ -179,7 +179,7 @@ const InvoiceRelationTable = ({
     {
       action: "Create",
       render: (
-        <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_PAYMENT_RELATION} state={{
+        <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_INVOICE_RELATION} state={{
           idAccount,
           idCustomer,
         }}>
@@ -212,7 +212,7 @@ const InvoiceRelationTable = ({
       type: 'table',
       render: (r, data_length) => {
         return (
-          <Link to={ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION} state={{
+          <Link to={ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_INVOICE_RELATION} state={{
             idPr: r.id,
             idAccount,
             idCustomer,
@@ -235,7 +235,7 @@ const InvoiceRelationTable = ({
       type: 'table',
       render: (r, data_length) => {
         return (
-          <Link to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION} state={{
+          <Link to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION} state={{
             idPr: r.id,
             idAccount,
             idCustomer,
