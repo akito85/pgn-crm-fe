@@ -130,9 +130,9 @@ export const getCollectionAgentDDL = createAsyncThunk(
   "GET_LIST_COLL_AGENT_RECEIPT",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/collecting-agent/get-list`;
+      const url = `/v1/dbs/api/collecting-agent/list`;
       const response = await receiptCollectionHttpService.getAll(url);
-      const data = response?.data?.result;
+      const data = response?.data;
       return { data };
     } catch (error) {
       const message =
@@ -351,9 +351,9 @@ export const getPayGetwayDDL = createAsyncThunk(
   "GET_LIST_PAY_GET_RECEIPTS",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner/get-list`;
+      const url = `/v1/dbs/api/partner/list`;
       const response = await receiptCollectionHttpService.getAll(url);
-      const data = response?.data?.result?.map((item) => ({
+      const data = response?.data?.map((item) => ({
         id: item?.id,
         name: item?.partnerName,
       }));
@@ -409,9 +409,9 @@ export const getPayDeliverDDL = createAsyncThunk(
   "GET_LIST_PAYMENT_DELIVERY_RECEIPTS",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/payment-channel/get-list`;
+      const url = `/v1/dbs/api/payment-channel/list`;
       const response = await receiptCollectionHttpService.getAll(url);
-      const data = response?.data?.result;
+      const data = response?.data;
       return { data };
     } catch (error) {
       const message =
