@@ -10,7 +10,7 @@ import AttachmentComponent from "../../../../../components/Attachment/Attachment
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
 // import { getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt"; // If needed
-import { getReceiptCustomerList, getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
+import { getReceiptCustomerList, getListCategoryReceipt, getPaginateReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
 import RadioTabs from "../../../../../components/RadioTabs";
 
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -24,7 +24,7 @@ const ModalRefundReceipt = ({
     onSubmit,
 }) => {
     const dispatch = useDispatch();
-    const { data_customer_list, loading } = useSelector((state) => state.receipt);
+    const { data_customer_list, data, loading } = useSelector((state) => state.receipt);
 
     const [currentStep, setCurrentStep] = useState(0);
 
@@ -72,8 +72,8 @@ const ModalRefundReceipt = ({
     const [listDataAttachment, setListDataAttachment] = useState([]);
     const [confirmationTab, setConfirmationTab] = useState("Customer");
 
-    const handleTabChange = (value) => {
-        setConfirmationTab(value);
+    const handleTabChange = (e) => {
+        setConfirmationTab(e.target.value);
     };
 
     // Columns for Step 2
@@ -99,6 +99,13 @@ const ModalRefundReceipt = ({
             dispatch(getReceiptCustomerList({ page: 1, pageSize: 10, sort: "createdDate~desc" }));
         }
     }, [isOpen, dispatch]);
+
+    // Fetch receipt list when entering Step 2
+    useEffect(() => {
+        if (currentStep === 1) {
+            dispatch(getPaginateReceipt({ page: pageReceipt, pageSize: pageSizeReceipt, sort: "createdDate~desc" }));
+        }
+    }, [currentStep, pageReceipt, pageSizeReceipt, dispatch]);
 
     const steps = [
         {
@@ -332,7 +339,6 @@ const ModalRefundReceipt = ({
             key: "refundAmount",
             width: 200,
             align: "right",
-            fixed: 'right',
             render: (_, record) => (
                 <InputNumber
                     style={{ width: '100%' }}
@@ -368,7 +374,6 @@ const ModalRefundReceipt = ({
             key: "refundAmount",
             width: 200,
             align: "right",
-            fixed: 'right',
             render: (_, record) => {
                 const val = refundReceiptAmountData[record.key];
                 return val ? val.toLocaleString('id-ID') : '-';
@@ -405,22 +410,28 @@ const ModalRefundReceipt = ({
                     </div>
                 );
             case 1:
+                const receiptDataSource = data?.result?.map(item => ({
+                    ...item,
+                    key: item.id
+                })) || [];
+
                 return (
                     <div className="flex flex-col gap-4">
                         <div className="flex justify-between items-center">
                             <h3 className="text-blue-500 font-bold uppercase">Receipt Information</h3>
                         </div>
                         <TablePagination
-                            dataSource={dataSource}
+                            dataSource={receiptDataSource}
                             columns={columnsStep2}
                             rowSelection={receiptRowSelection}
                             current={pageReceipt}
                             pageSize={pageSizeReceipt}
                             onChange={handleReceiptChangePage}
                             onShowSizeChange={handleReceiptChangePage}
-                            totalData={dataSource?.length}
+                            totalData={data?.page?.totalElements || 0}
                             showTotal={(total, range) => `Showing ${range[0]} to ${range[1]} of ${total} Records`}
                             tableScrolled={{ x: "max-content", y: 400 }}
+                            loading={loading}
                         />
                     </div>
                 );
@@ -524,6 +535,7 @@ const ModalRefundReceipt = ({
                                             columns={columnsStep3Confirmation}
                                             pagination={false}
                                             usePagination={false}
+                                            tableScrolled={{ x: "max-content", y: 400 }}
                                         />
                                         <div className="mt-4">
                                             <p className="mb-2 font-bold">Remark</p>
@@ -541,6 +553,7 @@ const ModalRefundReceipt = ({
                                             columns={columnsStep4Confirmation}
                                             pagination={false}
                                             usePagination={false}
+                                            tableScrolled={{ x: "max-content", y: 400 }}
                                         />
                                         <div className="mt-4">
                                             <p className="mb-2 font-bold">Remark</p>
@@ -575,7 +588,7 @@ const ModalRefundReceipt = ({
                 </ButtonComponent>
                 {currentStep > 0 && (
                     <ButtonComponent
-                        type="primary"
+                        type="submit"
                         onClick={handlePrev}
                         className="w-[120px]"
                         icon={
@@ -588,11 +601,11 @@ const ModalRefundReceipt = ({
                     </ButtonComponent>
                 )}
                 {currentStep < steps.length - 1 ? (
-                    <ButtonComponent type="primary" onClick={handleNext} className="w-[120px]">
+                    <ButtonComponent type="submit" onClick={handleNext} className="w-[120px]">
                         Next
                     </ButtonComponent>
                 ) : (
-                    <ButtonComponent type="primary" onClick={() => onSubmit(localSelectedData)} className="w-[120px]">
+                    <ButtonComponent type="submit" onClick={() => onSubmit(localSelectedData)} className="w-[120px]">
                         Confirm
                     </ButtonComponent>
                 )}
@@ -605,19 +618,21 @@ const ModalRefundReceipt = ({
             isOpen={isOpen}
             handleCancel={handleCancel}
             header="RECEIPT REFUND"
+            type={"confirmation"}
             width={1200}
             footer={renderFooter()}
         >
-            <div className="overflow-x-scroll scrollStepsCstm gap-5 mb-5 p-2">
-                <Steps current={currentStep} labelPlacement="vertical">
-                    {steps.map((item) => (
-                        <Step key={item.key} title={item.title} />
-                    ))}
-                </Steps>
-            </div>
-
-            <div className="min-h-[300px] mb-6">
-                {renderContent()}
+            <div className="w-full gap-5">
+                <div className="overflow-x-scroll scrollStepsCstm gap-5">
+                    <Steps current={currentStep} labelPlacement="vertical">
+                        {steps.map((item) => (
+                            <Step key={item.key} title={item.title} />
+                        ))}
+                    </Steps>
+                </div>
+                <div className="min-h-[300px] mb-6">
+                    {renderContent()}
+                </div>
             </div>
         </ModalCustom>
     );
