@@ -575,9 +575,8 @@ const DetailForce = (props) => {
   const handleSaveApprove = () => {
     const messageSukses = {
       title: "Successfull",
-      description: `your data has been ${
-        approveOrReject === "approve" ? "approved" : "rejected"
-      }`,
+      description: `your data has been ${approveOrReject === "approve" ? "approved" : "rejected"
+        }`,
       return: false,
     };
 
@@ -660,6 +659,7 @@ const DetailForce = (props) => {
           >
             Request
           </ButtonComponent>
+
           {isApprover ? (
             <>
               <ButtonComponent
@@ -773,8 +773,8 @@ const DetailForce = (props) => {
               form={form}
               layout="vertical"
               className="mt-3"
-              // onFinish={handleSave}
-              // onFinishFailed={onFinishFailed}
+            // onFinish={handleSave}
+            // onFinishFailed={onFinishFailed}
             >
               {steps()[current].content}
             </Form>
@@ -891,8 +891,8 @@ const DetailForce = (props) => {
               form={form}
               layout="vertical"
               className="mt-3"
-              // onFinish={onFinish}
-              // onFinishFailed={onFinishFailed}
+            // onFinish={onFinish}
+            // onFinishFailed={onFinishFailed}
             >
               {steps()[current].content}
             </Form>

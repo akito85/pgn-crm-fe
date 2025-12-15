@@ -1,17 +1,19 @@
 import { Fragment } from "react";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { DownOutlined } from "@ant-design/icons";
+import { DownloadOutlined } from "@ant-design/icons";
 
-const ExportButton = () => {
+const ExportButton = ({ onClick, loading = false }) => {
   return (
     <Fragment>
       <ButtonComponent
-        type="default"
+        type="submit"
         size="small"
         fullButton
-        icon={<DownOutlined />}
+        onClick={onClick}
+        loading={loading}
       >
-        Export
+        <DownloadOutlined className="mr-0 sm:mr-2" />
+        <span className="hidden sm:inline text-xs sm:text-sm truncate">Download List</span>
       </ButtonComponent>
     </Fragment>
   );

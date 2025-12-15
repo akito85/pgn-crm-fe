@@ -24,4 +24,15 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 node_modules
-/.idea/
+
+build/
+build.zip
+logs/
+
+.cla*
+*.md
+*.MD
+*.sh
+*.txt
+*.sql
+*.zip
