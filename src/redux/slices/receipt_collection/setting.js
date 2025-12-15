@@ -19,9 +19,12 @@ const initialState = {
   dataListCategory: [],
   dataApprovalHistory: [],
   dataType: [],
+  dataPartnerList: [],
+  dataCollectionAgentList: [],
+  dataPaymentChannelList: [],
 };
 
-export  const getPaginateSetting = createAsyncThunk(
+export const getPaginateSetting = createAsyncThunk(
   "GET_ALL_SETTINGS",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
     try {
@@ -328,9 +331,8 @@ export const approveOrRejectSetting = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.action === "APPROVE" ? "approved" : "rejected"
-          }. ${message}.`,
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
@@ -423,9 +425,8 @@ export const approveOrRejectInactive = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.action === "APPROVE" ? "approved" : "rejected"
-          }. ${message}.`,
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
@@ -435,6 +436,89 @@ export const approveOrRejectInactive = createAsyncThunk(
   }
 );
 
+
+
+export const getPartnerList = createAsyncThunk(
+  "GET_LIST_PARTNER",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/partner/list`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getCollectionAgentList = createAsyncThunk(
+  "GET_LIST_COLLECTION_AGENT",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/collecting-agent/list`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+
+export const getPaymentChannelList = createAsyncThunk(
+  "GET_LIST_PAYMENT_CHANNEL",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-channel/list`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
 
 
 const settingSlice = createSlice({
@@ -539,7 +623,7 @@ const settingSlice = createSlice({
       state.loadingProduct = false;
     },
 
-    
+
 
     [approveOrRejectSetting.pending]: (state) => {
       state.loading = true;
@@ -567,7 +651,7 @@ const settingSlice = createSlice({
       state.message = action.payload;
     },
 
-    
+
 
     // create payment item
     [createSetting.pending]: (state, action) => {
@@ -622,7 +706,7 @@ const settingSlice = createSlice({
       state.loading = false;
     },
 
-    
+
 
     [inactiveSetting.pending]: (state) => {
       state.loading = true;
@@ -634,7 +718,47 @@ const settingSlice = createSlice({
     [inactiveSetting.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
-    }
+    },
+
+    [getPartnerList.pending]: (state, action) => {
+      state.loading = true;
+      state.dataPartnerList = action.payload;
+    },
+    [getPartnerList.fulfilled]: (state, action) => {
+      state.dataPartnerList = action.payload;
+      state.loading = false;
+    },
+    [getPartnerList.rejected]: (state, action) => {
+      state.dataPartnerList = action.payload;
+      state.loading = false;
+    },
+
+    [getCollectionAgentList.pending]: (state, action) => {
+      state.loading = true;
+      state.dataCollectionAgentList = action.payload;
+    },
+    [getCollectionAgentList.fulfilled]: (state, action) => {
+      state.dataCollectionAgentList = action.payload;
+      state.loading = false;
+    },
+    [getCollectionAgentList.rejected]: (state, action) => {
+      state.dataCollectionAgentList = action.payload;
+      state.loading = false;
+    },
+
+    [getPaymentChannelList.pending]: (state, action) => {
+      state.loading = true;
+      state.dataPaymentChannelList = action.payload;
+    },
+    [getPaymentChannelList.fulfilled]: (state, action) => {
+      state.dataPaymentChannelList = action.payload;
+      state.loading = false;
+    },
+    [getPaymentChannelList.rejected]: (state, action) => {
+      state.dataPaymentChannelList = action.payload;
+      state.loading = false;
+    },
+
   },
 });
 

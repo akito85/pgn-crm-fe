@@ -385,9 +385,8 @@ const DetailRevers = (props) => {
   const handleSaveApprove = () => {
     const messageSukses = {
       title: "Successfull",
-      description: `your data has been ${
-        approveOrReject === "approve" ? "approved" : "rejected"
-      }`,
+      description: `your data has been ${approveOrReject === "approve" ? "approved" : "rejected"
+        }`,
       return: false,
     };
 
@@ -816,8 +815,8 @@ const DetailRevers = (props) => {
             form={form}
             layout="vertical"
             className="mt-3"
-            // onFinish={onFinish}
-            // onFinishFailed={onFinishFailed}
+          // onFinish={onFinish}
+          // onFinishFailed={onFinishFailed}
           >
             {steps()[current].content}
           </Form>
@@ -934,8 +933,8 @@ const DetailRevers = (props) => {
             form={form}
             layout="vertical"
             className="mt-3"
-            // onFinish={onFinish}
-            // onFinishFailed={onFinishFailed}
+          // onFinish={onFinish}
+          // onFinishFailed={onFinishFailed}
           >
             {steps()[current].content}
           </Form>
