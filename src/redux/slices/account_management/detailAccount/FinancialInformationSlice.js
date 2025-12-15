@@ -422,7 +422,9 @@ export const getPaymentRelation = createAsyncThunk(
   async ({ id, body }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-relation/list/${id}`;
-      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
+          headers: { "Accept": "application/json, text/plain, */*" }
+        });
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);

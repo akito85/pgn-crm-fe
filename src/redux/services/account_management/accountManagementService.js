@@ -96,10 +96,15 @@ const updateData = async (url, data) => {
   }
 };
 
-const updateDataWithMethodPost = async (url, data) => {
+const updateDataWithMethodPost = async (url, data, options) => {
+  const { headers = {} } = options;
+
   try {
     const response = await axios.post(configApp.ACCOUNT_SERVICE + url, data, {
-      headers: tokenHeader(),
+      headers: {
+        ...headers,
+        ...tokenHeader(),
+      }
     });
     return response?.data;
   } catch (error) {
