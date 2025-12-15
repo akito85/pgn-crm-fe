@@ -1,4 +1,4 @@
-import { Select, Input,InputNumber } from "antd";
+import { Select, Input, InputNumber } from "antd";
 import { Form } from "antd";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { formMessageRequired } from "../../../../../utils";
@@ -13,6 +13,8 @@ const PartnerCaForm = (props) => {
   const {
     dataType,
     form,
+    dataPartner,
+    dataCollectionAgent,
   } = props;
 
   const dispatch = useDispatch();
@@ -47,19 +49,46 @@ const PartnerCaForm = (props) => {
     <div>
       <BaseContainer header={"PARTNER"}>
         <div className="w-full grid grid-cols-2 gap-5">
-          <Form.Item
+          {/* <Form.Item
             label={"Partner Code"}
             name={"partnerCode"}
             rules={formMessageRequired("Partner Code")}
           >
             <Input allowClear maxLength={4} />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item
+            label={"Partner Code"}
+            name={"partnerCode"}
+            rules={formMessageRequired("Partner Code")}
+          >
+            <SelectComponent>
+              {dataPartner?.data?.map((data) => (
+                <Select.Option key={data.partnerCode} value={data.partnerCode}>
+                  {data.partnerCode} - {data.partnerName}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+          {/* <Form.Item
             label={"Collection Agent Code"}
             name={"caCode"}
             rules={formMessageRequired("Ca Code")}
           >
             <InputComponent maxLength={15} />
+          </Form.Item> */}
+
+          <Form.Item
+            label={"Collection Agent Code"}
+            name={"caCode"}
+            rules={formMessageRequired("Collection Agent Code")}
+          >
+            <SelectComponent>
+              {dataCollectionAgent?.data?.map((data) => (
+                <Select.Option key={data.caCode} value={data.caCode}>
+                  {data.caCode} - {data.name}
+                </Select.Option>
+              ))}
+            </SelectComponent>
           </Form.Item>
           <Form.Item
             label={"Eff Start Date"}
@@ -76,23 +105,23 @@ const PartnerCaForm = (props) => {
               onChange={handleStartDate}
             />
           </Form.Item>
-          <Form.Item 
-            label={"Eff End Date"} 
+          <Form.Item
+            label={"Eff End Date"}
             name={"effEndDate"}
             rules={formMessageRequired("Eff End Date")}
           >
             <DateComponent dateDisable={disabledDate} />
           </Form.Item>
-          <Form.Item 
-            label={"Settlement Bank"} 
+          <Form.Item
+            label={"Settlement Bank"}
             name={"settlementBank"}
             rules={formMessageRequired("Settlement Bank")}
           >
-            <InputComponent  />
+            <InputComponent />
           </Form.Item>
-          
+
         </div>
-        
+
       </BaseContainer>
     </div>
   );
