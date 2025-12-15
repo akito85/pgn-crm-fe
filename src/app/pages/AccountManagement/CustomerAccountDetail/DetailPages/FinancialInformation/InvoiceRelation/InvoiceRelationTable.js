@@ -21,7 +21,7 @@ const InvoiceRelationTable = ({
   getColumnSearchProps = () => {},
   rowSelection,
   isApproval = false,
-  handleInactiveIrModal = () => {},
+  handleInactiveModal = () => {},
   handleApprovalHistoryModal = () => {},
 }) => {
   const columns = [
@@ -169,7 +169,7 @@ const InvoiceRelationTable = ({
                       className="inactive-check"
                       disabled={r?.status === "ACTIVE" ? false : true}
                       checked={r?.status === "ACTIVE" ? false : true}
-                      onClick={() => handleInactiveIrModal(true, r?.id, r?.appHierId)}
+                      onClick={() => handleInactiveModal(true, r?.id, r?.appHierId)}
                     />
                   </Tooltip>
                   <Link to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION} state={{

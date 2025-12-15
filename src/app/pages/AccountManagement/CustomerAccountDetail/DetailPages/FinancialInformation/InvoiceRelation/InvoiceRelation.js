@@ -88,7 +88,7 @@ const InvoiceRelation = ({
     .catch(() => {});
   }
 
-  const handleInactiveIrModal = (show, irId = 0, irAppHierId = 0) => {
+  const handleInactiveModal = (show, irId = 0, irAppHierId = 0) => {
     if (show) {
       setInactivateIrId(irId);
       setInactivateIrAppHierId(irAppHierId);
@@ -449,7 +449,7 @@ const InvoiceRelation = ({
             getColumnSearchProps={getColumnSearchProps}
             rowSelection={isApproval ? rowSelection : undefined}
             isApproval={isApproval}
-            handleInactiveIrModal={handleInactiveIrModal}
+            handleInactiveModal={handleInactiveModal}
             handleApprovalHistoryModal={handleApprovalHistoryModal}
           />
         </div>
@@ -466,7 +466,7 @@ const InvoiceRelation = ({
         <ModalApproveOrReject
           isOpen={showInactiveModal}
           header={"INACTIVATE"}
-          handleCloseModal={() => handleInactiveIrModal(false)}
+          handleCloseModal={() => handleInactiveModal(false)}
           customMessage={`Are you sure you want to inactivate invoice relation - ${inactivateIrId}?`}
           onFinish={({ remark }, handleClear) => handleInactivateIr(remark, handleClear)}
         />
