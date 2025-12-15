@@ -561,14 +561,11 @@ export const getDetailPaymentRelation = createAsyncThunk(
 
 export const getInvoiceRelation = createAsyncThunk(
   "GET_INVOICE_RELATION",
-  async ({page, pageSize, sort, search }, thunkAPI) => {
+  async ({ id, body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/invoice-relation/list?page=${page}&size=${pageSize}${
-        sort ? `&sort=${sort}` : ""
-      }${search ? `&searchs=${search}` : ""}`;
-      // const response = await accountManagementService.getPagination(url);
-      // return response.data;
-      return [];
+      const url = `/v1/dbs/api/payment-relation/list/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
