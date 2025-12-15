@@ -279,7 +279,7 @@ const CreatePaymentRelation = ({ type }) => {
       title: "Approval",
       content: (
         <ApprovalForm
-          dataTable={detail_prApprovalHierarchy.map((detail, index) => ({
+          dataTable={(detail_prApprovalHierarchy || []).map((detail, index) => ({
             ...detail,
             employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
               ...employeeDetail,
@@ -571,7 +571,7 @@ const CreatePaymentRelation = ({ type }) => {
           handleCancel={() => handleSetShowConfirmationModal(false)}
           selectedAppHierId={selectedAppHierId}
           selectedApprovalName={selectedApprovalName}
-          hierarchyTableData={detail_prApprovalHierarchy.map((detail, index) => ({
+          hierarchyTableData={(detail_prApprovalHierarchy || []).map((detail, index) => ({
             ...detail,
             employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
               ...employeeDetail,
