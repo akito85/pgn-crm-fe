@@ -176,13 +176,14 @@ export const useMonitoringList = (tabs, batchId) => {
   const columns = [
     {
       title: "NO",
-      width: 60,
+      width: 50,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "RECORD ID",
       dataIndex: "recordId",
+      width: 100,
       // sorter: true,
       sorter: (a, b) => sorter("recordId", a, b),
       filteredValue: search?.["recordId"]
@@ -203,6 +204,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "BATCH ID",
       dataIndex: "batchId",
+      width: 100,
       // sorter: true,
       sorter: (a, b) => sorter("batchId", a, b),
       filteredValue: search?.["batchId"]
@@ -244,6 +246,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "CUSTOMER NAME",
       dataIndex: "customerName",
+      width: 180,
       // sorter: true
       sorter: (a, b) => sorter("customerName", a, b),
       filteredValue: search?.["customerName"]
@@ -288,6 +291,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "ACCOUNT NAME",
       dataIndex: "accountName",
+      width: 200,
       // sorter: true,
       sorter: (a, b) => sorter("accountName", a, b),
       filteredValue: search?.["accountName"]
@@ -472,6 +476,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "METER READING CODE",
       dataIndex: "meterReadingCode",
+      width: 180,
       // sorter: true,
       sorter: (a, b) => sorter("meterReadingCode", a, b),
       filteredValue: search?.["meterReadingCode"]
@@ -494,6 +499,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "ASSET SERIAL NUMBER",
       dataIndex: "assetSerialNumber",
+      width: 180,
       // sorter: true,
       sorter: (a, b) => sorter("assetSerialNumber", a, b),
       filteredValue: search?.["assetSerialNumber"]
@@ -926,6 +932,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "DATA SOURCE",
       dataIndex: "fileSource",
+      width:280,
       // sorter: true,
       sorter: (a, b) => sorter("fileSource", a, b),
       filteredValue: search?.["fileSource"]
@@ -1064,13 +1071,14 @@ export const useMonitoringList = (tabs, batchId) => {
   const batchColumns = [
     {
       title: "NO",
-      width: 60,
+      width: 50,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "BATCHID",
       dataIndex: "batchId",
+      width: 80,
       sorter: true,
       filteredValue: [search?.batchId] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -1086,6 +1094,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "Σ USAGE",
       dataIndex: "totalUsage",
+      width: 80,
       sorter: true,
       filteredValue: [search?.totalUsage] || null,
       align: "right",
@@ -1102,6 +1111,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "Σ SUCCEED",
       dataIndex: "totalSucceed",
+      width: 80,
       sorter: true,
       filteredValue: [search?.totalSucceed] || null,
       align: "right",
@@ -1118,6 +1128,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "Σ PROGRESS",
       dataIndex: "totalProgress",
+      width: 80,
       sorter: true,
       filteredValue: [search?.totalProgress] || null,
       align: "right",
@@ -1134,6 +1145,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "Σ FAILED",
       dataIndex: "totalFailed",
+      width: 80,
       sorter: true,
       filteredValue: [search?.totalFailed] || null,
       align: "right",
@@ -1150,6 +1162,7 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "UPLOAD TYPE",
       dataIndex: "uploadType",
+      width: 90,
       sorter: true,
       filteredValue: [search?.uploadType] || null,
       align: "center",
@@ -1170,7 +1183,7 @@ export const useMonitoringList = (tabs, batchId) => {
       filteredValue: [search?.status] || null,
       align: "right",
       fixed: "right",
-      width: 150,
+      width: 90,
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "status",
