@@ -37,7 +37,7 @@ const createFixedColumnsState = (leftCols = ["no"]) => ({
   right: [],
 });
 
-// Konfigurasi tabs
+// Konfigurasi tabs untuk detailed data
 const TAB_CONFIGS = [
   { key: "1", label: "Usage", dataKey: "usageData", scrollX: 3500 },
   { key: "2", label: "Tax Implication", dataKey: "taxData", scrollX: 1000 },
@@ -49,6 +49,8 @@ const TAB_CONFIGS = [
   { key: "8", label: "Billing Item", dataKey: "billingItemData", scrollX: 1500 },
   { key: "9", label: "SA Price Rule Detail", dataKey: "saPrcRuleDetData", scrollX: 1100 },
 ];
+
+
 
 const AccountDetailPage = () => {
   const location = useLocation();
@@ -156,6 +158,8 @@ const AccountDetailPage = () => {
     "9": { data: saPrcRuleDetData, columns: processedColumns.saPrcRuleDet, defs: columnDefs.saPrcRuleDet, fixed: fixedColumnsSaPrcRuleDet, setFixed: setFixedColumnsSaPrcRuleDet },
   };
 
+
+
   const renderInfoCard = (title, children) => (
     <CardContainer
       header={
@@ -177,6 +181,8 @@ const AccountDetailPage = () => {
       ))}
     </div>
   );
+
+
 
   return (
     <Spin spinning={loading_customer_detail}>
@@ -219,74 +225,7 @@ const AccountDetailPage = () => {
           </>
         ))}
 
-        {/* Service Agreement Info */}
-        {renderInfoCard("SERVICE AGREEMENT (SA) INFORMATION", renderDetailGrid([
-          { label: "SA Number", value: renderValue(headerData.saNumber) },
-          { label: "SA Reference Number", value: renderValue(headerData.saReferenceNumber) },
-          { label: "SA Date", value: renderValue(headerData.saDate) },
-          { label: "Commitment Date", value: renderValue(headerData.commitmentDate) },
-          { label: "M Pricing Code", value: renderValue(headerData.mpricingCode) },
-          { label: "Invoice Template", value: renderValue(headerData.invoiceTemplate) },
-          { label: "PJBG Type", value: renderValue(headerData.pjbgType) },
-          { label: "SA Service Type", value: renderValue(headerData.saServiceType) },
-          { label: "SA Type", value: renderValue(headerData.saType) },
-          { label: "Term of Payment", value: renderValue(headerData.termOfPayment) },
-          { label: "Pricing Rule", value: renderValue(headerData.pricingRule) },
-          { label: "Full Price Code", value: renderValue(headerData.fullPriceCode) },
-          { label: "IDR Full Price Code", value: renderValue(headerData.idrFullPriceCode) },
-          { label: "USD Full Price Code", value: renderValue(headerData.usdFullPriceCode) },
-          { label: "IDR UOM", value: renderValue(headerData.idrUom) },
-          { label: "IDR Value", value: headerData.idrValue ? `IDR ${parseFloat(headerData.idrValue).toLocaleString()}` : <Tag color="default">-</Tag> },
-          { label: "USD UOM", value: renderValue(headerData.usdUom) },
-          { label: "USD Value", value: headerData.usdValue ? `$ ${parseFloat(headerData.usdValue).toLocaleString()}` : <Tag color="default">-</Tag> },
-          { label: "Product Name", value: renderValue(headerData.productName) },
-          { label: "Product Type", value: renderValue(headerData.productType) },
-          { label: "IDR Late Charge", value: renderValue(headerData.idrLateCharge) },
-          { label: "USD Late Charge", value: renderValue(headerData.usdLateCharge) },
-          { label: "PPN Tax Implementation", value: renderValue(headerData.ppnTaxImp) },
-          { label: "PPH Tax Implementation", value: renderValue(headerData.pphTaxImp) },
-        ]))}
 
-        {/* SA Detail & Calculation */}
-        {renderInfoCard("SA DETAIL & CALCULATION", (
-          <>
-            <div className="mb-4">
-              <h3 className="text-md font-semibold mb-3 text-gray-700 border-b pb-2">SA Detail</h3>
-              {renderDetailGrid([
-                { label: "Min Usage", value: renderValue(headerData.minUsage) },
-                { label: "Maximum Usage", value: renderValue(headerData.maxUsage) },
-                { label: "Time Unit", value: renderValue(headerData.saDetTimeUnit) },
-                { label: "Unit of Measure", value: renderValue(headerData.unitMeasure) },
-                { label: "Currency", value: renderValue(headerData.saDetCurrency) },
-                { label: "Payment Type", value: renderValue(headerData.paymentType) },
-                { label: "Charging Method", value: renderValue(headerData.chargingMethod) },
-              ])}
-            </div>
-            <div>
-              <h3 className="text-md font-semibold mb-3 text-gray-700 border-b pb-2">SA Calculation</h3>
-              {renderDetailGrid([
-                { label: "OUP Type", value: renderValue(headerData.oupType) },
-                { label: "OUP Value", value: renderValue(headerData.oupValue) },
-                { label: "Calculation Rule", value: renderValue(headerData.calculationRule) },
-                { label: "VAT Currency", value: renderValue(headerData.vatCurrency) },
-                { label: "VAT", value: renderValue(headerData.vat) },
-                { label: "Withholding Tax", value: renderValue(headerData.withholdingTax) },
-              ])}
-            </div>
-          </>
-        ))}
-
-        {/* Late Charge Info */}
-        {renderInfoCard("LATE CHARGE INFORMATION", renderDetailGrid([
-          { label: "LC Currency", value: renderValue(headerData.currency) },
-          { label: "Total Amount", value: headerData.totalAmount ? parseFloat(headerData.totalAmount).toLocaleString() : <Tag color="default">-</Tag> },
-          { label: "Bill Status", value: renderValue(headerData.billStatus) },
-          { label: "LC Bill Period", value: renderValue(headerData.lcBillPeriod) },
-          { label: "Total Period Bill", value: renderValue(headerData.totalPeriodBill) },
-          { label: "Billing Code", value: renderValue(headerData.billingCode) },
-          { label: "Constant", value: renderValue(headerData.constant) },
-          { label: "LC Time Unit", value: renderValue(headerData.timeUnit) },
-        ]))}
 
         {/* Detailed Data Tabs */}
         {renderInfoCard("DETAILED DATA", (

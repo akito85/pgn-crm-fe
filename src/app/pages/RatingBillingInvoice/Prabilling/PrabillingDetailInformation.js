@@ -141,16 +141,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           search
         ),
     },
-    // Tambahkan kolom ini jika ada di data Anda
-    // {
-    //   key: "accountRegistrationNumber",
-    //   title: "ACCOUNT REGISTRATION NUMBER",
-    //   dataIndex: "accountRegistrationNumber",
-    //   width: 200,
-    //   sorter: true,
-    //   render: (text) => text || "-",
-    // },
-    // 4. CUSTOMER NUMBER
     {
       key: "customerNumber",
       title: "CUSTOMER NUMBER",
@@ -178,15 +168,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           search
         ),
     },
-    // Tambahkan kolom ini jika ada di data Anda
-    // {
-    //   key: "customerIdentificationNumber",
-    //   title: "CUSTOMER IDENTIFICATION NUMBER",
-    //   dataIndex: "customerIdentificationNumber",
-    //   width: 200,
-    //   sorter: true,
-    //   render: (text) => text || "-",
-    // },
     {
       key: "customerName",
       title: "CUSTOMER NAME",
@@ -214,16 +195,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           search
         ),
     },
-    // Tambahkan kolom ini jika ada di data Anda
-    // {
-    //   key: "customerType",
-    //   title: "CUSTOMER TYPE",
-    //   dataIndex: "customerType",
-    //   width: 120,
-    //   align: "center",
-    //   sorter: true,
-    //   render: (text) => text || "-",
-    // },
     {
       key: "sor",
       title: "SOR",
@@ -254,15 +225,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       sorter: true,
       render: (text) => text || "-",
     },
-    // Tambahkan kolom ini jika ada di data Anda
-    // {
-    //   key: "accountSegment",
-    //   title: "ACCOUNT SEGMENT",
-    //   dataIndex: "accountSegment",
-    //   width: 150,
-    //   sorter: true,
-    //   render: (text) => text || "-",
-    // },
     {
       key: "accountGroupType",
       title: "ACCOUNT GROUP TYPE",
@@ -271,24 +233,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       sorter: true,
       render: (text) => text || "-",
     },
-    // Tambahkan kolom ini jika ada di data Anda
-    // {
-    //   key: "category",
-    //   title: "CATEGORY",
-    //   dataIndex: "category",
-    //   width: 120,
-    //   sorter: true,
-    //   render: (text) => text || "-",
-    // },
-    // Tambahkan kolom ini jika ada di data Anda
-    // {
-    //   key: "classificationType",
-    //   title: "CLASSIFICATION TYPE",
-    //   dataIndex: "classificationType",
-    //   width: 150,
-    //   sorter: true,
-    //   render: (text) => text || "-",
-    // },
     {
       key: "accountType",
       title: "ACCOUNT TYPE",
@@ -563,16 +507,39 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           <DetailText label={"Total Customer"}>
             {data?.totalCustomer || 0}
           </DetailText>
-          <DetailText label={"Created By"}>{data?.createdBy || "-"}</DetailText>
+          <DetailText label={"Status"}>{renderStatus(data?.status)}</DetailText>
+          <DetailText label={"Message"}>{data?.message || "-"}</DetailText>
+          <DetailText label={"Remark"} className="col-span-2">
+            {data?.remark || "-"}
+          </DetailText>
+        </div>
+      </CardContainer>
+
+      {/* History Log Information Section */}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">HISTORY LOG INFORMATION</p>
+          </div>
+        }
+      >
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
+          <DetailText label={"Record ID"}>
+            {data?.initId || "-"}
+          </DetailText>
           <DetailText label={"Created Date"}>
             {data?.createdDtm
               ? moment(data.createdDtm).format("DD MMM YYYY HH:mm:ss")
               : "-"}
           </DetailText>
-          <DetailText label={"Status"}>{renderStatus(data?.status)}</DetailText>
-          <DetailText label={"Message"}>{data?.message || "-"}</DetailText>
-          <DetailText label={"Remark"} className="col-span-2">
-            {data?.remark || "-"}
+          <DetailText label={"Created By"}>
+            {data?.createdBy || "-"}
+          </DetailText>
+          <DetailText label={"Updated Date"}>
+            
+          </DetailText>
+          <DetailText label={"Updated By"}>
+            
           </DetailText>
         </div>
       </CardContainer>
