@@ -20,9 +20,9 @@ import {
   getListApprovalById,
   getListCategory,
   updateSetting,
-  getPartnerList,
+  getPartnerListByCa,
   getCollectionAgentList,
-  getPaymentChannelList
+  getPaymentChannelListByCa
 } from "../../../../../redux/slices/receipt_collection/setting";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
@@ -88,9 +88,9 @@ const ListFormSettings = (props) => {
   useEffect(() => {
     dispatch(getAllApprovalList());
     dispatch(getTypeDDL());
-    dispatch(getPartnerList());
+    // dispatch(getPartnerList());
     dispatch(getCollectionAgentList());
-    dispatch(getPaymentChannelList());
+    // dispatch(getPaymentChannelList());
   }, [dispatch]);
 
   useEffect(() => {
