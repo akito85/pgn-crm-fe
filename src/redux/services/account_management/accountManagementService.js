@@ -46,10 +46,14 @@ const getDetailByIdBody = async (url, id) => {
     throw error;
   }
 };
-const downloadData = async (url) => {
+const downloadData = async (url, options) => {
+  const { headers = {} } = options;
   try {
     const response = await axios.get(configApp.ACCOUNT_SERVICE + url, {
-      headers: tokenHeader(),
+      headers: {
+        ...headers,
+        ...tokenHeader(),
+      },
       responseType: "blob",
     });
     if(hasValue(response.headers?.get("content-disposition"))){

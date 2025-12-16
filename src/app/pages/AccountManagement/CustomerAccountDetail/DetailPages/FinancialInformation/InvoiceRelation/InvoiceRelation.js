@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Fragment } from "react";
 import InvoiceRelationTable from "./InvoiceRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { approveOrRejectAllInvoiceRelation, getInvoiceRelation, getIrApprovalHistory, getIrColumnApi, getIrConditionApi, getIrOperatorApi, inactivateInvoiceRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { approveOrRejectAllInvoiceRelation, downloadInvoiceRelation, getInvoiceRelation, getIrApprovalHistory, getIrColumnApi, getIrConditionApi, getIrOperatorApi, inactivateInvoiceRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
@@ -102,19 +102,21 @@ const InvoiceRelation = ({
   const handleConfirmApprovalModal = (description, submitApprovalCondition, handleClear) => {
     const action = submitApprovalCondition.toUpperCase();
 
-    const body = selectedRows.filter(row => !row.approvalType).map((row) => ({
+    const body = selectedRows.filter(row => row.approvalType === "INVOICE_RELATION").map((row) => ({
       id: row.id,
       approvalId: row.tappId,
       action,
       description,
     }));
 
-    const inactiveBody = selectedRows.filter(row => row.approvalType).map((row) => ({
+    const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_INVOICE_RELATION").map((row) => ({
       id: row.id,
       approvalId: row.tappId,
       action,
       description,
-    }))
+    }));
+
+    console.log({body, inactiveBody})
 
     dispatch(approveOrRejectAllInvoiceRelation({ body, inactiveBody, action }))
     .unwrap()
@@ -127,6 +129,7 @@ const InvoiceRelation = ({
         size: pageSize,
         sort,
         searches: search,
+        inputFields: tempFilters,
       }
 
       dispatch(getInvoiceRelation({ id, body }))
@@ -173,6 +176,7 @@ const InvoiceRelation = ({
         size: pageSize,
         sort,
         searches: search,
+        inputFields: tempFilters,
       }
 
       dispatch(getInvoiceRelation({ id, body }));
@@ -336,7 +340,7 @@ const InvoiceRelation = ({
       }
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    // dispatch(downloadInvoiceRelation({ page, pageSize, sort, search: tempSearch }));
+    dispatch(downloadInvoiceRelation({ page, pageSize, sort, search: tempSearch }));
   };
 
   /**

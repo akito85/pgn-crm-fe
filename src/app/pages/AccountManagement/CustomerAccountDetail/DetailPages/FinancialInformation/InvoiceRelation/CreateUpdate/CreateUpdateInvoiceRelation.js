@@ -113,7 +113,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   useEffect(() => {
     if (
       type === "update" &&
-      detail_invoiceRelation?.result &&
+      detail_invoiceRelation &&
       data_irApprovalHierarchy?.length
     ) {
       const {
@@ -124,9 +124,9 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         endDate,
         description,
         appHierId,
-      } = detail_invoiceRelation.result;
+      } = detail_invoiceRelation;
 
-      const { accountNumber, accountName } = detail_invoiceRelation.result;
+      const { accountNumber, accountName } = detail_invoiceRelation;
 
       formCreate.setFieldsValue({
         subjectId,
@@ -149,11 +149,14 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
 
   useEffect(() => {
     if (type === "update" && data_invoiceRelationAttachment?.result) {
-      const result = data_invoiceRelationAttachment?.result;
-      setDataAttachment(prev => ({
-        ...prev,
+      const result = data_invoiceRelationAttachment.result?.map((item, index) => ({
+        ...item,
+        key: `invoice-relation-attachment-${item.id}`,
+        dataType: "exist"
+      }));
+      setDataAttachment(prev => ([
         ...result,
-      }))
+      ]))
     }
   }, [data_invoiceRelationAttachment])
 
@@ -304,6 +307,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           className={`${current !== 2 ? "hidden" : ""}`}
           key={`invoice-relation-tab-2`}
           getAPICategory={getIrAttachmentCategory}
+          service={accountManagementService}
         />
       ),
       disabled: false
@@ -375,7 +379,10 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       appHierId,
     } = formCreate.getFieldsValue();
 
+    console.log("startDate", startDate);
+
     const body = {
+      id: idIr,
       subjectId: data_accountDetail?.accountInformation?.accountId, 
       objectId,
       priority,
@@ -577,6 +584,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           hieararchyOptionData={data_irApprovalHierarchy}
           type={confirmationType}
           dataAttachment={dataAttachment}
+          data={formCreate.getFieldsValue()}
         />
       </div>
     </LayoutMenu>

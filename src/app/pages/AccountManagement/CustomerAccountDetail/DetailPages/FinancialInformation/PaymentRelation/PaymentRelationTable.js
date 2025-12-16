@@ -24,7 +24,7 @@ const PaymentRelationTable = ({
   getColumnSearchProps = () => {},
   rowSelection,
   isApproval = false,
-  handleInactiveModal = () => {},
+  handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
   handleIsApproval = () => {},
   handleDownload = () => {},
@@ -264,7 +264,7 @@ const PaymentRelationTable = ({
               className="inactive-check"
               disabled={r?.status === "ACTIVE" ? false : true}
               checked={r?.status === "ACTIVE" ? false : true}
-              onClick={() => handleInactiveModal(true, r?.id, r?.appHierId)}
+              onClick={() => handleInactivateModal(true, r?.id, r?.appHierId)}
             />
           </Tooltip>
         )

@@ -48,10 +48,10 @@ const InvoiceRelationTable = ({
     },
     {
       title: "PRIORITY",
-      dataIndex: "priorty",
+      dataIndex: "priority",
       width: 100,
       sorter: true,
-      ...getColumnSearchProps("priorty"),
+      ...getColumnSearchProps("priority"),
     },
     {
       title: "START DATE",
@@ -213,7 +213,7 @@ const InvoiceRelationTable = ({
       render: (r, data_length) => {
         return (
           <Link to={ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_INVOICE_RELATION} state={{
-            idPr: r.id,
+            idIr: r.id,
             idAccount,
             idCustomer,
           }}>
@@ -236,7 +236,7 @@ const InvoiceRelationTable = ({
       render: (r, data_length) => {
         return (
           <Link to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION} state={{
-            idPr: r.id,
+            idIr: r.id,
             idAccount,
             idCustomer,
           }}>
