@@ -169,6 +169,7 @@ const PromoHistoryViewData = ({
   setIsModalHistoryVisible,
   setDetailHistoryData,
   customerId,
+  accountId,
 }) => {
   const {
     promoHistoryList,
@@ -188,10 +189,10 @@ const PromoHistoryViewData = ({
 
   useEffect(() => {
     // Load promo history on mount with customerId
-    if (customerId) {
-      loadPromoHistoryList({ page: 0, size: 10, customerId, sort: 'id~desc' });
+    if (accountId) {
+      loadPromoHistoryList({ page: 0, size: 10, accountId, sort: 'id~desc' });
     }
-  }, [customerId, loadPromoHistoryList]);
+  }, [accountId, loadPromoHistoryList]);
 
   useEffect(() => {
     // Transform API response using helper
@@ -372,6 +373,7 @@ const selectedRender = ({
         setIsModalHistoryVisible={setIsModalHistoryVisible}
         setDetailHistoryData={setDetailHistoryData}
         customerId={customerId}
+        accountId={accountId}
       />
     );
   }
