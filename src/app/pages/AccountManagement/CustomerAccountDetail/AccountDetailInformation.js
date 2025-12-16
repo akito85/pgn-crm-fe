@@ -318,7 +318,7 @@ const AccountDetailInformation = ({
           <GasUtilization idAccount={id} idCustomer={idCustomer} type={type} />
         );
       case dataTabs.promo:
-        return <AccountPromo />;
+        return <AccountPromo id={id} />;
       default:
         return <></>;
     }
