@@ -34,28 +34,28 @@ const PaymentRelationTable = ({
   const columns = [
     {
       title: "NO",
-      width: 50,
+      width: 100,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
-      width: 120,
+      width: 250,
       sorter: true,
       ...getColumnSearchProps("accountNumber"),
     },
     {
       title: "PRIORITY",
       dataIndex: "priority",
-      width: 50,
+      width: 250,
       sorter: true,
       ...getColumnSearchProps("priority"),
     },
     {
       title: "START DATE",
       dataIndex: "startDate",
-      width: 90,
+      width: 250,
       align: "center",
       ...getColumnSearchProps("startDate", "date"),
       render: (startDate) => moment(startDate, "DD-MM-YYYY").format(dateFormatting.date),
@@ -63,7 +63,7 @@ const PaymentRelationTable = ({
     {
       title: "END DATE",
       dataIndex: "endDate",
-      width: 90,
+      width: 250,
       align: "center",
       ...getColumnSearchProps("endDate", "date"),
       render: (endDate) => moment(endDate, "DD-MM-YYYY").format(dateFormatting.date),
@@ -71,7 +71,7 @@ const PaymentRelationTable = ({
     {
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
-      width: 70,
+      width: 300,
       sorter: true,
       align: "center",
       fixed: "right",
@@ -99,7 +99,7 @@ const PaymentRelationTable = ({
       dataIndex: "status",
       sorter: true,
       fixed: "right",
-      width: 50,
+      width: 150,
       ...getColumnSearchProps("status"),
       render: (status) => {
         const displayText = {
