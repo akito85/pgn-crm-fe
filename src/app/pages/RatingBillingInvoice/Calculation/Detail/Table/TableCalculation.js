@@ -12,7 +12,7 @@ export const columnsCalculation = (
 ) => [
   {
     title: "NO",
-    align: "center",
+    isClassification: true,
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
@@ -143,7 +143,6 @@ export const columnsCalculation = (
   {
     title: "MESSAGE",
     dataIndex: "message",
-    align: "left",
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "message",
@@ -205,7 +204,7 @@ export const columnsCalculation = (
   {
     title: "CREATED DATE",
     dataIndex: "createdDate",
-    align: "left",
+    isClassification: true,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "message",
@@ -241,7 +240,7 @@ export const columnsCalculation = (
   {
     title: "UPDATED DATE",
     dataIndex: "updatedDate",
-    align: "left",
+    isClassification: true,
     sorter: true,
     // ...getColumnSearchPropsPaging(
     //   "message",
@@ -277,7 +276,7 @@ export const columnsCalculation = (
   {
     title: "IS TRY",
     dataIndex: "isTry",
-    align: "center",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,

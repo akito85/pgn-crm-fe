@@ -1,8 +1,23 @@
 import React from "react";
 
-const BaseContainer = ({ header, subHeader, children, type, element }) => {
+const BaseContainer = ({
+  header,
+  subHeader,
+  children,
+  type,
+  element,
+  border = false,
+}) => {
+  // Determine class based on border prop
+  const containerClass = border
+    ? "bg-white rounded-lg w-full p-[20px]"
+    : "drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]";
+
+  // Use inline style for border to ensure visibility
+  const containerStyle = border ? { border: "1px solid #BDBDBD" } : {};
+
   return (
-    <div className="drop-shadow-lg bg-white rounded-lg w-full mt-[30px] p-[20px]">
+    <div className={containerClass} style={containerStyle}>
       {type === "profile" || type === "tab" ? (
         <>
           <div className="p-4">{element}</div>

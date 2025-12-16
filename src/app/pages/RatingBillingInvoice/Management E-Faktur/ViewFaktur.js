@@ -355,7 +355,7 @@ const ViewFaktur = () => {
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">E-Faktur Management</p>
-              <div className="mt-[15px] flex gap-2">
+              <div className="flex gap-2">
                 {/* Action Dropdown - Updated */}
                 <Dropdown overlay={actionMenu} trigger={["click"]}>
                   <ButtonComponent type="default">

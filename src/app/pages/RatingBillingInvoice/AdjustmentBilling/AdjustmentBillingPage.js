@@ -24,6 +24,8 @@ import { WarningOutlined } from "@ant-design/icons";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import CardContainer from "../../../../components/CardContainer";
+import TableRBI from "../../../../components/TableRBI";
 
 const AdjustmentBillingPage = () => {
   // Selector
@@ -358,9 +360,10 @@ const AdjustmentBillingPage = () => {
           <Toolbar items={itemGrantAccess} />
         </div>
 
-        <BaseContainer header={"Adjustment Billing List"}>
+        <CardContainer header={"Adjustment Billing List"}>
           <div className="w-full">
-            <TablePaginationNew
+            <TableRBI
+              showExport={false}
               dataSource={dataSource}
               columns={[
                 ...columnsAdjustmentBilling(
@@ -389,7 +392,7 @@ const AdjustmentBillingPage = () => {
               tableScrolled={{ y: 525, x: 10100 }}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         {/* Modal Delete */}
         <ModalConfirm
