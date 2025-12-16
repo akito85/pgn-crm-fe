@@ -1,4 +1,4 @@
-import { Select, Input,InputNumber } from "antd";
+import { Select, Input, InputNumber } from "antd";
 import { Form } from "antd";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { formMessageRequired } from "../../../../../utils";
@@ -13,7 +13,14 @@ const SettingsForm = (props) => {
   const {
     dataType,
     form,
+    dataPartnerList,
+    dataCollectionAgentList,
+    dataPaymentChannelList
   } = props;
+
+  // console.log("dataCollectionAgentList", dataCollectionAgentList);
+  // console.log("dataType", dataType);
+  // console.log("dataPartnerList", dataPartnerList);
 
   const dispatch = useDispatch();
   const location = useLocation();
@@ -55,27 +62,75 @@ const SettingsForm = (props) => {
     <div>
       <BaseContainer header={"PARTNER"}>
         <div className="w-full grid grid-cols-2 gap-5">
-          <Form.Item
+          {/* <Form.Item
             label={"Partner Code"}
             name={"partnerCode"}
             rules={formMessageRequired("Partner Code")}
           >
             <Input allowClear maxLength={11} />
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item
+            label={"Partner Code"}
+            name={"partnerCode"}
+            rules={formMessageRequired("partnerCode")}
+          >
+            <SelectComponent>
+              {dataPartnerList?.data?.map((data) => (
+                <Select.Option key={data.partnerCode} value={data.partnerCode}>
+                  {data.partnerCode} - {data.partnerName}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+
+          {/* <Form.Item
             label={"Collection Agent Code"}
             name={"caCode"}
             rules={formMessageRequired("CA Code")}
           >
             <Input allowClear maxLength={10} />
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item
+            label={"Collection Agent Code"}
+            name={"caCode"}
+            rules={formMessageRequired("Collection Agent Code")}
+          >
+            <SelectComponent>
+              {/* {dataCollectionAgentList?.data?.length > 0 && (
+                <Select.Option value={"All"}>All</Select.Option>
+              )} */}
+              {dataCollectionAgentList?.data?.map((data) => (
+                <Select.Option key={data.caCode} value={data.caCode}>
+                  {data.caCode} - {data.name}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+
+          {/* <Form.Item
             label={"Payment Channel Code"}
             name={"ciCode"}
           >
             <Input allowClear maxLength={10} />
+          </Form.Item> */}
+
+          <Form.Item
+            label={"Payment Channel Code"}
+            name={"ciCode"}
+            rules={formMessageRequired("Payment Channel Code")}
+          >
+            <SelectComponent>
+              {/* {dataPaymentChannelList?.data?.length > 0 && (
+                <Select.Option value={"All"}>All</Select.Option>
+              )} */}
+              {dataPaymentChannelList?.data?.map((data) => (
+                <Select.Option key={data.ciCode} value={data.ciCode}>
+                  {data.ciCode} - {data.name}
+                </Select.Option>
+              ))}
+            </SelectComponent>
           </Form.Item>
 
           <Form.Item
@@ -172,7 +227,7 @@ const SettingsForm = (props) => {
             </SelectComponent>
           </Form.Item>
         </div>
-        
+
       </BaseContainer>
     </div>
   );

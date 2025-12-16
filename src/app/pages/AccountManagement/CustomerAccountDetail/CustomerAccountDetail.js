@@ -29,7 +29,7 @@ const data = [
   { value: "Gas Source" },
   { value: "Gas Deposit", disabled: true },
   { value: "Compensation", disabled: true },
-  { value: "Promo", disabled: true },
+  { value: "Promo", disabled: false },
   { value: "Multi Destination", disabled: true },
   { value: "Additional Information", disabled: true  },
   { value: "Gas Utilization", disabled: true  },
@@ -83,6 +83,10 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
     useState(section || data[0].value);
 
   const handleAccountInfoDetailSection = (e) => {
+    console.log("e.target.value", e.target.value);
+    console.log("typeAccountInfoDetailSection", typeAccountInfoDetailSection);
+    console.log("section", section);
+    console.log("data", data);
     setTypeAccountInfoDetailSection(e.target.value);
   };
 
@@ -206,8 +210,8 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
             </div>
           </div>
           {/* ) : (
-           <UpdatePageInformation 
-          type={type} 
+           <UpdatePageInformation
+          type={type}
           handleChangeInteraction={handleSetType}
           />
         )} */}

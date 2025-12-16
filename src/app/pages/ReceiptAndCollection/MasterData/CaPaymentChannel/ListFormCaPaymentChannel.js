@@ -19,6 +19,10 @@ import {
     getListApprovalByIdCaPaymentChannel,
     getListCategoryCaPaymentChannel,
     updateCaPaymentChannel,
+    getCollectionAgentList,
+    getPaymentChannelList,
+    getPartnerList,
+    getType,
 } from "../../../../../redux/slices/receipt_collection/caPaymentChannel";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
@@ -45,6 +49,10 @@ const ListFormCaPaymentChannel = (props) => {
         dataListAppHierId,
         dataListAppHierDetail,
         loading,
+        dataCollectionAgentList,
+        dataPaymentChannelList,
+        dataPartnerList,
+        dataTypeList,
     } = useSelector((state) => state.caPaymentChannel);
 
     // Declaration
@@ -70,6 +78,10 @@ const ListFormCaPaymentChannel = (props) => {
 
     useEffect(() => {
         dispatch(getAllApprovalListCaPaymentChannel());
+        dispatch(getCollectionAgentList());
+        dispatch(getPaymentChannelList());
+        dispatch(getPartnerList());
+        dispatch(getType());
     }, [dispatch]);
 
     useEffect(() => {
@@ -406,7 +418,7 @@ const ListFormCaPaymentChannel = (props) => {
                             display: valuePage !== tabData[0].value ? "none" : undefined,
                         }}
                     >
-                        <CaPaymentChannelForm form={form} />
+                        <CaPaymentChannelForm form={form} dataCollectionAgentList={dataCollectionAgentList} dataPaymentChannelList={dataPaymentChannelList} dataPartnerList={dataPartnerList} dataTypeList={dataTypeList} />
                     </div>
                     <div
                         style={{

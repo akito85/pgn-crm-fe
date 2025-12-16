@@ -16,12 +16,14 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 
 const data = [];
 for (let i = 0; i < 100; i++) {
+  const randomAmount = Math.floor(Math.random() * (5000000 - 500000 + 1)) + 500000;
+
   data.push({
-    syncId: `SYNCRL${i}`,
-    syncDateTime: "2023-08-30T04:01:40.892Z",
-    totalReceipt: i,
+    syncId: `SYNCRL${i.toString().padStart(3, '0')}`,
+    syncDateTime: `2025-12-21T23:11:09.892Z`,
+    totalReceipt: i + 1,
     currency: "IDR",
-    totalAmount: 1000000,
+    totalAmount: randomAmount,
   });
 }
 
@@ -136,11 +138,12 @@ const ViewSynchronizeReceipt = () => {
       ...getColumnSearchProps("syncId"),
     },
     {
-      title: "SYNCH DATE TIME",
+      title: "SYNC DATE TIME",
       dataIndex: "syncDateTime",
       align: "center",
       sorter: true,
-      render: (syncDateTime) => moment(syncDateTime).format("DD MMM YYYY"),
+      ...getColumnSearchProps("syncDateTime"),
+      render: (syncDateTime) => moment(syncDateTime).format("DD MMM YYYY HH:MM:SS"),
     },
     {
       title: "TOTAL RECEIPT",
@@ -167,8 +170,10 @@ const ViewSynchronizeReceipt = () => {
           displayType="text"
           value={totalAmount}
           className="text-right"
-          thousandSeparator={true}
+          // thousandSeparator={true}
           decimalScale={2}
+          decimalSeparator=","
+          thousandSeparator="."
           fixedDecimalScale
         />
       ),

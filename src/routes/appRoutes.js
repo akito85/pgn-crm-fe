@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import { index } from "./routes";
 import { motion } from "framer-motion";
 import { PrevLocProvider } from "../utils/usePrevLoc";
+import AccountPromo from "../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Promo/AccountPromo";
 
 const NotFound = lazy(() => import('../app/NotFound'));
 const LogIn = lazy(() => import('../app/pages/Authentication/LogIn'));
@@ -61,6 +62,7 @@ const AppRoutes = () => {
                 <Route path="/update-profile" element={<UpdateProfile />} />
                 <Route path="/change-password" element={<ChangePassword />} />
               </Route>
+              <Route path="/promo" element={<AccountPromo />} />
 
               {/* Protected Route */}
               <Route element={<PrivateRoute />}>

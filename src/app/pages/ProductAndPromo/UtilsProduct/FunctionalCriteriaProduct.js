@@ -30,6 +30,7 @@ const EditableCell = ({
   startDate,
   endDate,
   requiredDate,
+  indexValue,
   handleEditDataRecord = () => {},
   ...restProps
 }) => {

@@ -116,6 +116,8 @@ import digitalSignatureReducer from "../slices/rating_billing_invoice/MasterData
 import settingReducer from "../slices/receipt_collection/setting";
 import glAccountReducer from "../slices/rating_billing_invoice/MasterData/glAccount";
 import contentManagementReducer from "../slices/rating_billing_invoice/MasterData/contentManagement";
+import accountPromoReducer from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Promo/store/slices/promoSlice";
+import accountingReducer from "../slices/receipt_collection/accounting";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -177,6 +179,7 @@ const reducer = combineReducers({
   accountGasUtilization: accountGasUtilizationReducer,
   additionalInformation: additionalInfoReducer,
   accountEquipment: equpmentReducer,
+  accountPromo: accountPromoReducer,
 
   //Account Management ( Customer )
   customerAccount: customerAccountReducer,
@@ -238,6 +241,7 @@ const reducer = combineReducers({
   receiptSetting: settingReducer,
   collectingAgent: collectingAgentReducer,
   paymentChannel: paymentChannelReducer,
+  accounting: accountingReducer,
 
   // Attachment
   attachment: attachmentReducer,

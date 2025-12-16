@@ -16,6 +16,10 @@ const initialState = {
     dataListCategory: [],
     dataApprovalHistory: [],
     dataType: [],
+    dataCollectionAgentList: [],
+    dataPaymentChannelList: [],
+    dataPartnerList: [],
+    dataTypeList: [],
 };
 
 // Get paginated list
@@ -320,6 +324,115 @@ export const getListCategoryCaPaymentChannel = createAsyncThunk(
     }
 );
 
+export const getCollectionAgentList = createAsyncThunk(
+    "GET_LIST_COLLECTION_AGENT",
+    async (thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/collecting-agent/list`;
+            const data = await receiptCollectionHttpService.getAll(url);
+            return data
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                const errorBody = {
+                    title: "Failed",
+                    description: `${message}`,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+
+export const getPaymentChannelList = createAsyncThunk(
+    "GET_LIST_PAYMENT_CHANNEL",
+    async (thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/payment-channel/list`;
+            const data = await receiptCollectionHttpService.getAll(url);
+            return data
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                const errorBody = {
+                    title: "Failed",
+                    description: `${message}`,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const getType = createAsyncThunk(
+    "GET_LIST_TYPE",
+    async (thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/ca-payment-channel/list-type`;
+            const data = await receiptCollectionHttpService.getAll(url);
+            return data;
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                const errorBody = {
+                    title: "Failed",
+                    description: `${message}`,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const getPartnerList = createAsyncThunk(
+    "GET_LIST_PARTNER",
+    async (thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/partner/list`;
+            const data = await receiptCollectionHttpService.getAll(url);
+            return data
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                const errorBody = {
+                    title: "Failed",
+                    description: `${message}`,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
 const caPaymentChannelSlice = createSlice({
     name: "caPaymentChannel",
     initialState,
@@ -468,6 +581,46 @@ const caPaymentChannelSlice = createSlice({
             state.loading = false;
         },
         [createValidasiCaPaymentChannel.rejected]: (state, action) => {
+            state.error = action.payload;
+            state.loading = false;
+        },
+
+        // Get List Collection Agent
+        [getCollectionAgentList.fulfilled]: (state, action) => {
+            state.dataCollectionAgentList = action.payload;
+            state.loading = false;
+        },
+        [getCollectionAgentList.rejected]: (state, action) => {
+            state.error = action.payload;
+            state.loading = false;
+        },
+
+        // Get List Payment Channel
+        [getPaymentChannelList.fulfilled]: (state, action) => {
+            state.dataPaymentChannelList = action.payload;
+            state.loading = false;
+        },
+        [getPaymentChannelList.rejected]: (state, action) => {
+            state.error = action.payload;
+            state.loading = false;
+        },
+
+        // Get List Partner
+        [getPartnerList.fulfilled]: (state, action) => {
+            state.dataPartnerList = action.payload;
+            state.loading = false;
+        },
+        [getPartnerList.rejected]: (state, action) => {
+            state.error = action.payload;
+            state.loading = false;
+        },
+
+        // Get List Type
+        [getType.fulfilled]: (state, action) => {
+            state.dataTypeList = action.payload;
+            state.loading = false;
+        },
+        [getType.rejected]: (state, action) => {
             state.error = action.payload;
             state.loading = false;
         },

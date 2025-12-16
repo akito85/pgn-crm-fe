@@ -74,7 +74,7 @@ const CollectingAgentForm = (props) => {
                         />
                     </Form.Item>
                     <Form.Item
-                        label={"Eff Start Date"}
+                        label={"Start Date"}
                         name={"effStartDate"}
                         rules={[
                             {
@@ -89,9 +89,8 @@ const CollectingAgentForm = (props) => {
                         />
                     </Form.Item>
                     <Form.Item
-                        label={"Eff End Date"}
+                        label={"End Date"}
                         name={"effEndDate"}
-                        rules={formMessageRequired("Eff End Date")}
                     >
                         <DateComponent dateDisable={disabledDate} />
                     </Form.Item>

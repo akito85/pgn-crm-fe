@@ -19,9 +19,11 @@ const initialState = {
   dataListCategory: [],
   dataApprovalHistory: [],
   dataType: [],
+  dataPartner: [],
+  dataCollectionAgent: [],
 };
 
-export  const getPaginatePartner = createAsyncThunk(
+export const getPaginatePartner = createAsyncThunk(
   "GET_ALL_PARTNER_CA",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
     try {
@@ -286,9 +288,8 @@ export const approveOrRejectPartner = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.action === "APPROVE" ? "approved" : "rejected"
-          }. ${message}.`,
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
@@ -336,6 +337,60 @@ export const getListCategory = createAsyncThunk(
         text: item?.name,
       }));
       return mapsCategory;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getPartnerList = createAsyncThunk(
+  "GET_LIST_PARTNER",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/partner/list`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getCollectionAgentList = createAsyncThunk(
+  "GET_LIST_COLLECTION_AGENT",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/collecting-agent/list`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -457,7 +512,7 @@ const partnerCaSlice = createSlice({
       state.loadingProduct = false;
     },
 
-    
+
 
     [approveOrRejectPartner.pending]: (state) => {
       state.loading = true;
@@ -472,7 +527,7 @@ const partnerCaSlice = createSlice({
       state.message = action.payload;
     },
 
-    
+
 
     // create payment item
     [createPartner.pending]: (state, action) => {
@@ -525,6 +580,34 @@ const partnerCaSlice = createSlice({
     [createValidasiPartner.rejected]: (state, action) => {
       state.error = action.payload;
       state.loading = false;
+    },
+
+    //get list partner
+    [getPartnerList.pending]: (state, action) => {
+      state.dataPartner = action.payload;
+      state.loading = true;
+    },
+    [getPartnerList.fulfilled]: (state, action) => {
+      state.dataPartner = action.payload;
+      state.loading = false;
+    },
+    [getPartnerList.rejected]: (state, action) => {
+      state.dataPartner = action.payload;
+      state.loading = true;
+    },
+
+    //get list collection agent
+    [getCollectionAgentList.pending]: (state, action) => {
+      state.dataCollectionAgent = action.payload;
+      state.loading = true;
+    },
+    [getCollectionAgentList.fulfilled]: (state, action) => {
+      state.dataCollectionAgent = action.payload;
+      state.loading = false;
+    },
+    [getCollectionAgentList.rejected]: (state, action) => {
+      state.dataCollectionAgent = action.payload;
+      state.loading = true;
     },
   },
 });

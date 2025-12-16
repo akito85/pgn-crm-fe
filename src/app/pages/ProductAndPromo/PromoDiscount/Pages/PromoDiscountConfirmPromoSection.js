@@ -60,7 +60,8 @@ const PromoDiscountConfirmPromoSection = ({
         <DetailText label="Category">
           {dataConfirm?.categoryName || ""}
         </DetailText>
-        <DetailText label="Promo Type">{dataConfirm?.typeName}</DetailText>
+        <DetailText label="Type">{dataConfirm?.typeName}</DetailText>
+        <DetailText label="Promotion Type">{dataConfirm?.promotionTypeName}</DetailText>
       </div>
       <div className="w-full grid grid-cols-3 gap-3">
         <DetailText label="Start Date">
