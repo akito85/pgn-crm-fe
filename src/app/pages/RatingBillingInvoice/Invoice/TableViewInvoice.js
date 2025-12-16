@@ -6,13 +6,6 @@ import {
 } from "../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../components/StatusComponent";
-import { Popover, Button } from "antd";
-import {
-  MoreOutlined,
-  EyeOutlined,
-  ReloadOutlined,
-  DownloadOutlined,
-} from "@ant-design/icons";
 
 export const columnsInvoice = (
   search,
@@ -21,73 +14,13 @@ export const columnsInvoice = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
-  handleDetail = () => {},
-  handleReGenerate = () => {},
-  handlePreviewFile = () => {},
-  popoverVisible = {},
-  setPopoverVisible = () => {}
+  handleSearch = () => {}
 ) => {
-  const getPopoverContent = (record) => (
-    <div className="flex flex-col gap-2 w-fit">
-      <Button
-        type="text"
-        icon={<EyeOutlined />}
-        className="flex items-center justify-start w-fit"
-        onClick={() => {
-          setPopoverVisible((prev) => ({
-            ...prev,
-            [record.invoiceNumber]: false,
-          }));
-          handleDetail(record);
-          setTimeout(
-            () =>
-              window.scrollTo({
-                top: document.body.scrollHeight,
-                behavior: "smooth",
-              }),
-            100
-          );
-        }}
-      >
-        View Detail
-      </Button>
-      <Button
-        type="text"
-        icon={<ReloadOutlined />}
-        className="flex items-center justify-start w-fit"
-        onClick={() => {
-          setPopoverVisible((prev) => ({
-            ...prev,
-            [record.invoiceNumber]: false,
-          }));
-          handleReGenerate(record);
-        }}
-      >
-        Regenerate
-      </Button>
-      <Button
-        type="text"
-        icon={<DownloadOutlined />}
-        className="flex items-center justify-start w-fit"
-        onClick={() => {
-          setPopoverVisible((prev) => ({
-            ...prev,
-            [record.invoiceNumber]: false,
-          }));
-          handlePreviewFile(record);
-        }}
-      >
-        Download
-      </Button>
-    </div>
-  );
-
   return [
     {
       key: "no",
       title: "NO",
-      align: "center",
+      isClassification: true,
       width: 60,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
@@ -170,7 +103,7 @@ export const columnsInvoice = (
       key: "billingPeriodName",
       title: "BILLING PERIOD",
       sorter: true,
-      align: "center",
+      isClassification: true,
       width: 180,
       dataIndex: "billingPeriodName",
       ...getColumnSearchPropsUseFilteredValue(
@@ -323,7 +256,7 @@ export const columnsInvoice = (
       title: "ACCOUNT GROUP TYPE",
       width: 180,
       dataIndex: "accountGroupType",
-      align: "center",
+      isClassification: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -348,7 +281,7 @@ export const columnsInvoice = (
       key: "serviceType",
       title: "SERVICE TYPE",
       dataIndex: "serviceType",
-      align: "center",
+      isClassification: true,
       width: 150,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -424,7 +357,7 @@ export const columnsInvoice = (
       key: "accountSegment",
       title: "ACCOUNT SEGMENT",
       dataIndex: "accountSegment",
-      align: "center",
+      isClassification: true,
       width: 150,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -475,7 +408,7 @@ export const columnsInvoice = (
       key: "taxBasicEqvIdr",
       title: "TAX BASIS EQV IDR",
       sorter: true,
-      align: "right",
+      isNumber: true,
       width: 200,
       dataIndex: "taxBasicEqvIdr",
       ...getColumnSearchPropsUseFilteredValue(
@@ -501,7 +434,7 @@ export const columnsInvoice = (
       key: "vatEqvIdr",
       title: "VAT EQV IDR",
       sorter: true,
-      align: "right",
+      isNumber: true,
       width: 200,
       dataIndex: "vatEqvIdr",
       ...getColumnSearchPropsUseFilteredValue(
@@ -527,7 +460,7 @@ export const columnsInvoice = (
       key: "withHoldingTax",
       title: "WITHHOLDING TAX",
       sorter: true,
-      align: "right",
+      isNumber: true,
       width: 200,
       dataIndex: "withHoldingTax",
       ...getColumnSearchPropsUseFilteredValue(
@@ -554,7 +487,7 @@ export const columnsInvoice = (
       key: "taxRateType",
       title: "TAX RATE TYPE",
       dataIndex: "taxRateType",
-      align: "center",
+      isClassification: true,
       width: 150,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -580,7 +513,7 @@ export const columnsInvoice = (
       key: "taxRate",
       title: "TAX RATE",
       sorter: true,
-      align: "right",
+      isNumber: true,
       width: 150,
       dataIndex: "taxRate",
       ...getColumnSearchPropsUseFilteredValue(
@@ -606,7 +539,7 @@ export const columnsInvoice = (
       key: "taxRateDate",
       title: "TAX RATE DATE",
       sorter: true,
-      align: "center",
+      isClassification: true,
       width: 150,
       dataIndex: "taxRateDate",
       ...getColumnSearchPropsUseFilteredValue(
@@ -633,7 +566,7 @@ export const columnsInvoice = (
       key: "totalAmountIdr",
       title: "TOTAL AMOUNT IDR",
       sorter: true,
-      align: "right",
+      isNumber: true,
       width: 200,
       dataIndex: "totalAmountIdr",
       ...getColumnSearchPropsUseFilteredValue(
@@ -659,7 +592,7 @@ export const columnsInvoice = (
       key: "totalAmountUsd",
       title: "TOTAL AMOUNT USD",
       sorter: true,
-      align: "right",
+      isNumber: true,
       width: 200,
       dataIndex: "totalAmountUsd",
       ...getColumnSearchPropsUseFilteredValue(
@@ -710,7 +643,7 @@ export const columnsInvoice = (
       key: "transactionDate",
       title: "TRANSACTION DATE",
       sorter: true,
-      align: "center",
+      isClassification: true,
       width: 180,
       dataIndex: "transactionDate",
       ...getColumnSearchPropsUseFilteredValue(
@@ -737,7 +670,7 @@ export const columnsInvoice = (
       key: "invoiceDate",
       title: "INVOICE DATE",
       sorter: true,
-      align: "center",
+      isClassification: true,
       width: 180,
       dataIndex: "invoiceDate",
       ...getColumnSearchPropsUseFilteredValue(
@@ -764,7 +697,7 @@ export const columnsInvoice = (
       key: "dueDate",
       title: "DUE DATE",
       sorter: true,
-      align: "center",
+      isClassification: true,
       width: 180,
       dataIndex: "dueDate",
       ...getColumnSearchPropsUseFilteredValue(
@@ -791,7 +724,7 @@ export const columnsInvoice = (
       key: "rateType",
       title: "RATE TYPE",
       sorter: true,
-      align: "center",
+      isClassification: true,
       width: 150,
       dataIndex: "rateType",
       ...getColumnSearchPropsUseFilteredValue(
@@ -817,7 +750,7 @@ export const columnsInvoice = (
       key: "rate",
       title: "RATE",
       sorter: true,
-      align: "right",
+      isNumber: true,
       width: 180,
       dataIndex: "rate",
       ...getColumnSearchPropsUseFilteredValue(
@@ -843,7 +776,7 @@ export const columnsInvoice = (
       key: "rateDate",
       title: "RATE DATE",
       sorter: true,
-      align: "center",
+      isClassification: true,
       width: 180,
       dataIndex: "rateDate",
       ...getColumnSearchPropsUseFilteredValue(
@@ -870,7 +803,7 @@ export const columnsInvoice = (
       key: "totalAmountEqvIdr",
       title: "TOTAL AMOUNT EQV IDR",
       sorter: true,
-      align: "right",
+      isNumber: true,
       width: 200,
       dataIndex: "totalAmountEqvIdr",
       ...getColumnSearchPropsUseFilteredValue(
@@ -896,7 +829,7 @@ export const columnsInvoice = (
       key: "totalAmountEqvUsd",
       title: "TOTAL AMOUNT EQV USD",
       sorter: true,
-      align: "right",
+      isNumber: true,
       width: 200,
       dataIndex: "totalAmountEqvUsd",
       ...getColumnSearchPropsUseFilteredValue(
@@ -944,7 +877,7 @@ export const columnsInvoice = (
       title: "STATUS",
       dataIndex: "status",
       width: 150,
-      align: "center",
+      isClassification: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -968,32 +901,6 @@ export const columnsInvoice = (
               : text?.toLowerCase()
           )}
         </StatusComponent>
-      ),
-    },
-    {
-      key: "action",
-      title: "ACTION",
-      fixed: "right",
-      width: 80,
-      align: "center",
-      render: (_, record) => (
-        <Popover
-          content={getPopoverContent(record)}
-          trigger="click"
-          placement="bottomRight"
-          open={popoverVisible[record.invoiceNumber]}
-          onOpenChange={(visible) =>
-            setPopoverVisible((prev) => ({
-              ...prev,
-              [record.invoiceNumber]: visible,
-            }))
-          }
-        >
-          <MoreOutlined
-            style={{ fontSize: "20px", cursor: "pointer" }}
-            className="rotate-90"
-          />
-        </Popover>
       ),
     },
   ];

@@ -1,28 +1,31 @@
 // _components/InvoiceDetailModal.js
-import React, { useState, useMemo, useEffect } from "react";
-import { Modal, Button, Divider, Tag, Space, Table, Spin } from "antd";
+import React, { useMemo, useState, useEffect } from "react";
+import { Modal, Button, Table } from "antd";
 import {
   CloseOutlined,
+  HistoryOutlined,
   DownloadOutlined,
-  FileTextOutlined,
   ArrowLeftOutlined,
 } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
+import BaseContainer from "../../../../../components/BaseContainer";
+import ButtonComponent from "../../../../../components/ButtonComponent";
 import {
   getInvoiceActivityLogs,
-  resetLogData,
   downloadOriginalInvoice,
   downloadStampedInvoice,
   downloadSignedInvoice,
 } from "../../../../../redux/slices/rating_billing_invoice/emeterai";
 import moment from "moment";
+import CardContainer from "../../../../../components/CardContainer";
 
 const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
   const dispatch = useDispatch();
-  const [currentView, setCurrentView] = useState("details"); // 'details' or 'logs'
-  const [downloadingDoc, setDownloadingDoc] = useState(null); // Track which document is downloading
+  const [showActivityLog, setShowActivityLog] = useState(false);
+  const [logPage, setLogPage] = useState(1);
+  const [logPageSize, setLogPageSize] = useState(10);
 
-  // Redux state for logs and downloads
+  // Get log data from Redux
   const { logData, logLoading, logPageInfo, downloadLoading } = useSelector(
     (state) => state.emeterai
   );
@@ -32,760 +35,376 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
     if (!invoiceData) {
       return {
         invoiceNumber: "-",
-        customer: "-",
-        issueDate: "-",
-        dueDate: "-",
-        amount: 0,
-        stamping: {
-          status: "Not Processed",
-          method: "",
-          requested: "",
-        },
-        signing: {
-          status: "Not Processed",
-        },
-        approval: {
-          status: "",
-          by: "",
-          date: "",
-          reason: "",
-        },
-        documents: [],
+        customerName: "-",
+        accountNumber: "-",
+        accountName: "-",
+        billPeriod: "-",
+        invoiceDate: "-",
+        totalAmountEqvIdr: 0,
+        stampStatus: "Not Processed",
+        signStatus: "Not Processed",
+        recordId: "-",
+        createdDate: "-",
+        createdBy: "-",
+        updatedBy: "-",
       };
     }
 
     return {
       invoiceNumber: invoiceData.invoiceNumber || "-",
-      customer: invoiceData.customer || invoiceData.customerName || "-",
-      issueDate: invoiceData.issueDate || invoiceData.billingPeriod || "-",
-      dueDate: invoiceData.dueDate || "-",
-      amount: invoiceData.amount || invoiceData.totalAmountEqvIdr || 0,
-      stamping: {
-        status:
-          invoiceData.stampingStatus ||
-          invoiceData.stamping?.status ||
-          "Not Processed",
-        method: invoiceData.stampType || invoiceData.stamping?.method || "",
-        requested:
-          invoiceData.stampRequestDate || invoiceData.stamping?.requested || "",
-        completed:
-          invoiceData.stampCompletionDate ||
-          invoiceData.stamping?.completed ||
-          "",
-        remark: invoiceData.stampRemark || invoiceData.stamping?.remark || "",
-      },
-      signing: {
-        status:
-          invoiceData.signingStatus ||
-          invoiceData.signing?.status ||
-          "Not Processed",
-        requested:
-          invoiceData.signRequestDate || invoiceData.signing?.requested || "",
-        completed:
-          invoiceData.signCompletionDate ||
-          invoiceData.signing?.completed ||
-          "",
-        remark: invoiceData.signRemark || invoiceData.signing?.remark || "",
-      },
-      approval: invoiceData.approval || {
-        status: "",
-        by: "",
-        date: "",
-        reason: "",
-      },
-      documents: [
-        {
-          type: "original",
-          name: "Original Invoice",
-          disabled: false,
-        },
-        {
-          type: "stamped",
-          name: "Stamped Document",
-          disabled: !invoiceData.stampCompletionDate,
-        },
-        {
-          type: "signed",
-          name: "Final Document",
-          disabled: !invoiceData.signCompletionDate,
-        },
-      ],
+      customerName: invoiceData.customerName || "-",
+      accountNumber: invoiceData.accountNumber || "-",
+      accountName: invoiceData.accountName || "-",
+      billPeriod: invoiceData.billPeriod || "-",
+      invoiceDate: invoiceData.invoiceDate || "-",
+      totalAmountEqvIdr: invoiceData.totalAmountEqvIdr || 0,
+      stampStatus: invoiceData.stampStatus || "Not Processed",
+      signStatus: invoiceData.signStatus || "Not Processed",
+      recordId: invoiceData.recordId || invoiceData.id || "-",
+      createdDate: invoiceData.createdDate || "-",
+      createdBy: invoiceData.createdBy || "-",
+      updatedBy: invoiceData.updatedBy || invoiceData.modifiedBy || "-",
     };
   }, [invoiceData]);
 
-  // Fetch logs when switching to log view
-  useEffect(() => {
-    if (
-      currentView === "logs" &&
-      invoice.invoiceNumber &&
-      invoice.invoiceNumber !== "-"
-    ) {
-      dispatch(
-        getInvoiceActivityLogs({
-          invoiceNumber: invoice.invoiceNumber,
-          page: 0,
-          pageSize: 100, // Get all logs
-        })
-      );
-    }
-  }, [currentView, invoice.invoiceNumber, dispatch]);
-
-  // Clean up logs when modal closes
-  useEffect(() => {
-    if (!visible) {
-      dispatch(resetLogData());
-      setCurrentView("details");
-      setDownloadingDoc(null);
-    }
-  }, [visible, dispatch]);
-
-  // Reset downloading state when download completes
-  useEffect(() => {
-    if (!downloadLoading && downloadingDoc) {
-      setDownloadingDoc(null);
-    }
-  }, [downloadLoading, downloadingDoc]);
-
-  const getStatusColor = (status) => {
-    const statusLower = status?.toLowerCase() || "";
-    if (statusLower.includes("rejected") || statusLower.includes("failed"))
-      return "red";
-    if (statusLower.includes("approved") || statusLower.includes("success"))
-      return "green";
-    if (statusLower.includes("pending")) return "orange";
-    return "default";
-  };
-
   const formatAmount = (amount) => {
     if (typeof amount === "number") {
-      return `IDR ${new Intl.NumberFormat("id-ID").format(amount)}`;
+      return `${new Intl.NumberFormat("id-ID").format(amount)} IDR`;
     }
     return amount;
   };
 
   const formatDateTime = (dateString) => {
-    if (!dateString) return "-";
+    if (!dateString || dateString === "-") return "-";
     return moment(dateString).format("DD MMM YYYY HH:mm:ss");
   };
 
-  const handleViewLog = () => {
-    setCurrentView("logs");
-  };
-
-  const handleBackToDetails = () => {
-    setCurrentView("details");
-  };
+  // Fetch activity logs when showing activity log view
+  useEffect(() => {
+    if (showActivityLog && invoiceData?.invoiceNumber) {
+      dispatch(
+        getInvoiceActivityLogs({
+          invoiceNumber: invoiceData.invoiceNumber,
+          page: logPage,
+          pageSize: logPageSize,
+        })
+      );
+    }
+  }, [
+    showActivityLog,
+    invoiceData?.invoiceNumber,
+    logPage,
+    logPageSize,
+    dispatch,
+  ]);
 
   const handleClose = () => {
-    setCurrentView("details");
+    setShowActivityLog(false);
     onClose();
   };
 
-  // Handle document download
-  const handleDownloadDocument = async (docType) => {
-    if (!invoice.invoiceNumber || invoice.invoiceNumber === "-") {
-      console.error("❌ Invalid invoice number");
-      return;
-    }
+  const handleViewLog = () => {
+    setShowActivityLog(true);
+  };
 
-    setDownloadingDoc(docType);
+  const handleBackToDetail = () => {
+    setShowActivityLog(false);
+  };
 
-    try {
-      switch (docType) {
-        case "original":
-          await dispatch(
-            downloadOriginalInvoice({ invoiceNumber: invoice.invoiceNumber })
-          ).unwrap();
-          break;
-        case "stamped":
-          await dispatch(
-            downloadStampedInvoice({ invoiceNumber: invoice.invoiceNumber })
-          ).unwrap();
-          break;
-        case "signed":
-          await dispatch(
-            downloadSignedInvoice({ invoiceNumber: invoice.invoiceNumber })
-          ).unwrap();
-          break;
-        default:
-          console.error("❌ Unknown document type:", docType);
-      }
-    } catch (error) {
-      console.error(`❌ Error downloading ${docType} document:`, error);
-      // Error message already handled in slice
-    } finally {
-      setDownloadingDoc(null);
+  // Handle download functions
+  const handleDownloadOriginal = async () => {
+    if (invoiceData?.invoiceNumber) {
+      await dispatch(
+        downloadOriginalInvoice({
+          invoiceNumber: invoiceData.invoiceNumber,
+        })
+      );
     }
   };
 
-  // Activity Log Columns
+  const handleDownloadStamped = async () => {
+    if (invoiceData?.invoiceNumber) {
+      await dispatch(
+        downloadStampedInvoice({
+          invoiceNumber: invoiceData.invoiceNumber,
+        })
+      );
+    }
+  };
+
+  const handleDownloadSigned = async () => {
+    if (invoiceData?.invoiceNumber) {
+      await dispatch(
+        downloadSignedInvoice({
+          invoiceNumber: invoiceData.invoiceNumber,
+        })
+      );
+    }
+  };
+
+  // Handle pagination change for logs
+  const handleLogTableChange = (pagination) => {
+    setLogPage(pagination.current);
+    setLogPageSize(pagination.pageSize);
+  };
+
+  // Table columns for activity logs
   const logColumns = [
     {
       title: "Timestamp",
       dataIndex: "createdDtm",
       key: "createdDtm",
-      width: 200,
-      render: (text) => (
-        <span style={{ fontSize: "13px", color: "#262626" }}>
-          {formatDateTime(text)}
-        </span>
-      ),
+      width: 180,
+      render: (text) => formatDateTime(text),
     },
     {
       title: "User",
       dataIndex: "createdBy",
       key: "createdBy",
-      width: 180,
-      render: (text) => (
-        <span style={{ fontSize: "13px", fontWeight: "500", color: "#262626" }}>
-          {text || "-"}
-        </span>
-      ),
+      width: 150,
     },
     {
       title: "Activity",
       dataIndex: "activity",
       key: "activity",
-      render: (text, record) => (
-        <div>
-          <div
-            style={{ fontSize: "13px", color: "#595959", marginBottom: "4px" }}
-          >
-            {text}
-          </div>
-        </div>
-      ),
+      ellipsis: true,
     },
   ];
 
-  // Render Details View
-  const renderDetailsView = () => (
-    <>
-      {/* General Information & Processing Status */}
-      <div style={{ display: "flex", gap: "40px", marginBottom: "24px" }}>
-        {/* General Information */}
-        <div style={{ flex: 1 }}>
-          <h3
-            style={{
-              fontSize: "16px",
-              fontWeight: "600",
-              marginBottom: "16px",
-              color: "#262626",
-            }}
-          >
-            General Information
-          </h3>
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-          >
-            <div style={{ display: "flex" }}>
-              <span
-                style={{
-                  width: "120px",
-                  color: "#8c8c8c",
-                  fontSize: "14px",
-                }}
-              >
-                Invoice #:
-              </span>
-              <span style={{ fontWeight: "500", fontSize: "14px" }}>
-                {invoice.invoiceNumber}
-              </span>
-            </div>
-            <div style={{ display: "flex" }}>
-              <span
-                style={{
-                  width: "120px",
-                  color: "#8c8c8c",
-                  fontSize: "14px",
-                }}
-              >
-                Customer:
-              </span>
-              <span style={{ fontWeight: "500", fontSize: "14px" }}>
-                {invoice.customer}
-              </span>
-            </div>
-            <div style={{ display: "flex" }}>
-              <span
-                style={{
-                  width: "120px",
-                  color: "#8c8c8c",
-                  fontSize: "14px",
-                }}
-              >
-                Billing Period:
-              </span>
-              <span style={{ fontWeight: "500", fontSize: "14px" }}>
-                {invoice.issueDate}
-              </span>
-            </div>
-            {invoice.dueDate && invoice.dueDate !== "-" && (
-              <div style={{ display: "flex" }}>
-                <span
-                  style={{
-                    width: "120px",
-                    color: "#8c8c8c",
-                    fontSize: "14px",
-                  }}
-                >
-                  Due Date:
-                </span>
-                <span style={{ fontWeight: "500", fontSize: "14px" }}>
-                  {invoice.dueDate}
-                </span>
-              </div>
-            )}
-            <div style={{ display: "flex" }}>
-              <span
-                style={{
-                  width: "120px",
-                  color: "#8c8c8c",
-                  fontSize: "14px",
-                }}
-              >
-                Amount:
-              </span>
-              <span
-                style={{
-                  fontWeight: "600",
-                  fontSize: "14px",
-                  color: "#0175BF",
-                }}
-              >
-                {formatAmount(invoice.amount)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Processing Status */}
-        <div style={{ flex: 1 }}>
-          <h3
-            style={{
-              fontSize: "16px",
-              fontWeight: "600",
-              marginBottom: "16px",
-              color: "#262626",
-            }}
-          >
-            Processing Status
-          </h3>
-
-          {/* Stamping Status */}
-          <div style={{ marginBottom: "16px" }}>
-            <div
-              style={{
-                fontSize: "13px",
-                fontWeight: "600",
-                marginBottom: "8px",
-                color: "#595959",
-              }}
-            >
-              Stamping Status:
-            </div>
-            <div style={{ paddingLeft: "12px" }}>
-              <div style={{ marginBottom: "6px" }}>
-                <span style={{ fontSize: "12px", color: "#8c8c8c" }}>
-                  Status:{" "}
-                </span>
-                <Tag color={getStatusColor(invoice.stamping.status)}>
-                  {invoice.stamping.status}
-                </Tag>
-              </div>
-              {invoice.stamping.method && (
-                <div style={{ marginBottom: "6px" }}>
-                  <span style={{ fontSize: "12px", color: "#8c8c8c" }}>
-                    Method:{" "}
-                  </span>
-                  <span style={{ fontSize: "13px" }}>
-                    {invoice.stamping.method}
-                  </span>
-                </div>
-              )}
-              {invoice.stamping.requested && (
-                <div style={{ marginBottom: "6px" }}>
-                  <span style={{ fontSize: "12px", color: "#8c8c8c" }}>
-                    Requested:{" "}
-                  </span>
-                  <span style={{ fontSize: "13px" }}>
-                    {invoice.stamping.requested}
-                  </span>
-                </div>
-              )}
-              {invoice.stamping.completed && (
-                <div style={{ marginBottom: "6px" }}>
-                  <span style={{ fontSize: "12px", color: "#8c8c8c" }}>
-                    Completed:{" "}
-                  </span>
-                  <span style={{ fontSize: "13px" }}>
-                    {invoice.stamping.completed}
-                  </span>
-                </div>
-              )}
-              {invoice.stamping.remark && (
-                <div>
-                  <span style={{ fontSize: "12px", color: "#8c8c8c" }}>
-                    Remark:{" "}
-                  </span>
-                  <span style={{ fontSize: "13px" }}>
-                    {invoice.stamping.remark}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Signing Status */}
-          <div style={{ marginBottom: "16px" }}>
-            <div
-              style={{
-                fontSize: "13px",
-                fontWeight: "600",
-                marginBottom: "8px",
-                color: "#595959",
-              }}
-            >
-              Signing Status:
-            </div>
-            <div style={{ paddingLeft: "12px" }}>
-              <div style={{ marginBottom: "6px" }}>
-                <Tag color={getStatusColor(invoice.signing.status)}>
-                  {invoice.signing.status}
-                </Tag>
-              </div>
-              {invoice.signing.requested && (
-                <div style={{ marginBottom: "6px" }}>
-                  <span style={{ fontSize: "12px", color: "#8c8c8c" }}>
-                    Requested:{" "}
-                  </span>
-                  <span style={{ fontSize: "13px" }}>
-                    {invoice.signing.requested}
-                  </span>
-                </div>
-              )}
-              {invoice.signing.completed && (
-                <div style={{ marginBottom: "6px" }}>
-                  <span style={{ fontSize: "12px", color: "#8c8c8c" }}>
-                    Completed:{" "}
-                  </span>
-                  <span style={{ fontSize: "13px" }}>
-                    {invoice.signing.completed}
-                  </span>
-                </div>
-              )}
-              {invoice.signing.remark && (
-                <div>
-                  <span style={{ fontSize: "12px", color: "#8c8c8c" }}>
-                    Remark:{" "}
-                  </span>
-                  <span style={{ fontSize: "13px" }}>
-                    {invoice.signing.remark}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+  // Render information row
+  const InfoRow = ({ label, value, valueBold = false, valueColor }) => (
+    <div className="flex mb-2">
+      <div className="w-1/2">
+        <p className="text-sm text-gray-600">{label}</p>
       </div>
-
-      <Divider style={{ margin: "24px 0" }} />
-
-      {/* Approval Status */}
-      {invoice.approval && invoice.approval.status && (
-        <>
-          <div style={{ marginBottom: "24px" }}>
-            <h3
-              style={{
-                fontSize: "16px",
-                fontWeight: "600",
-                marginBottom: "16px",
-                color: "#262626",
-              }}
-            >
-              Approval Status
-            </h3>
-            <div
-              style={{
-                background:
-                  invoice.approval.status === "Rejected"
-                    ? "#fff1f0"
-                    : "#f6ffed",
-                border: `1px solid ${
-                  invoice.approval.status === "Rejected" ? "#ffccc7" : "#b7eb8f"
-                }`,
-                borderRadius: "8px",
-                padding: "16px",
-              }}
-            >
-              <div style={{ display: "flex", gap: "40px" }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ marginBottom: "12px" }}>
-                    <span
-                      style={{
-                        fontSize: "12px",
-                        color: "#8c8c8c",
-                        display: "block",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      Status:
-                    </span>
-                    <Tag color={getStatusColor(invoice.approval.status)}>
-                      {invoice.approval.status}
-                    </Tag>
-                    {invoice.approval.by && (
-                      <span style={{ fontSize: "13px", marginLeft: "8px" }}>
-                        by {invoice.approval.by}
-                      </span>
-                    )}
-                  </div>
-                  {invoice.approval.date && (
-                    <div>
-                      <span
-                        style={{
-                          fontSize: "12px",
-                          color: "#8c8c8c",
-                          display: "block",
-                          marginBottom: "4px",
-                        }}
-                      >
-                        Date:
-                      </span>
-                      <span style={{ fontSize: "13px" }}>
-                        {invoice.approval.date}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                {invoice.approval.reason && (
-                  <div style={{ flex: 1 }}>
-                    <span
-                      style={{
-                        fontSize: "12px",
-                        color: "#8c8c8c",
-                        display: "block",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      Rejection Reason:
-                    </span>
-                    <span
-                      style={{
-                        fontSize: "13px",
-                        color: "#cf1322",
-                        fontWeight: "500",
-                      }}
-                    >
-                      {invoice.approval.reason}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <Divider style={{ margin: "24px 0" }} />
-        </>
-      )}
-
-      {/* Documents */}
-      <div>
-        <h3
-          style={{
-            fontSize: "16px",
-            fontWeight: "600",
-            marginBottom: "16px",
-            color: "#262626",
-          }}
+      <div className="w-1/2">
+        <p
+          className={`text-sm ${valueBold ? "font-bold" : "font-normal"}`}
+          style={valueColor ? { color: valueColor } : {}}
         >
-          Documents
-        </h3>
-        {invoice.documents && invoice.documents.length > 0 ? (
-          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-            {invoice.documents.map((doc, index) => (
-              <Button
-                key={index}
-                icon={
-                  <DownloadOutlined
-                    style={{
-                      fontSize: "18px",
-                      color: doc.disabled ? "#bfbfbf" : "#0175BF",
-                    }}
-                  />
-                }
-                disabled={doc.disabled}
-                loading={downloadingDoc === doc.type}
-                onClick={() => handleDownloadDocument(doc.type)}
-                size="large"
-                block
-                style={{
-                  height: "48px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "flex-start",
-                  paddingLeft: "20px",
-                  textAlign: "left",
-                  fontSize: "14px",
-                  fontWeight: doc.disabled ? "normal" : "500",
-                  border: "1px solid #d9d9d9",
-                  borderRadius: "8px",
-                }}
-              >
-                {downloadingDoc === doc.type
-                  ? "Downloading..."
-                  : `Download ${doc.name}`}
-                {doc.disabled && (
-                  <span style={{ marginLeft: "8px", color: "#bfbfbf" }}>
-                    (Not Available)
-                  </span>
-                )}
-              </Button>
-            ))}
-          </Space>
-        ) : (
-          <div
-            style={{ padding: "20px", textAlign: "center", color: "#8c8c8c" }}
-          >
-            No documents available
-          </div>
-        )}
+          {value || "-"}
+        </p>
       </div>
-    </>
+    </div>
   );
-
-  // Render Activity Log View
-  const renderLogView = () => {
-    return (
-      <div>
-        <h3
-          style={{
-            fontSize: "16px",
-            fontWeight: "600",
-            marginBottom: "16px",
-            color: "#262626",
-          }}
-        >
-          Activity History - Invoice {invoice.invoiceNumber}
-        </h3>
-        <Spin spinning={logLoading}>
-          <Table
-            dataSource={logData}
-            columns={logColumns}
-            pagination={false}
-            rowKey={(record) => record.id}
-            bordered
-            size="middle"
-            style={{
-              background: "#ffffff",
-            }}
-            locale={{
-              emptyText: logLoading
-                ? "Loading..."
-                : "No activity logs available",
-            }}
-          />
-        </Spin>
-        {logData.length > 0 && (
-          <div
-            style={{
-              marginTop: "12px",
-              textAlign: "right",
-              color: "#8c8c8c",
-              fontSize: "12px",
-            }}
-          >
-            Total {logPageInfo.totalElements} log
-            {logPageInfo.totalElements !== 1 ? "s" : ""}
-          </div>
-        )}
-      </div>
-    );
-  };
 
   return (
     <Modal
       visible={visible}
       onCancel={handleClose}
-      width={900}
+      width={800}
       footer={null}
       closeIcon={<CloseOutlined />}
-      bodyStyle={{ padding: 0 }}
+      bodyStyle={{ padding: "16px", maxHeight: "80vh", overflowY: "auto" }}
       destroyOnClose
+      title={
+        <div className="text-xl font-bold uppercase text-primary">
+          INVOICE DETAIL
+        </div>
+      }
     >
       {!invoiceData ? (
-        // Loading state when no invoice data
         <div style={{ padding: "40px", textAlign: "center" }}>
           <p>Loading invoice details...</p>
         </div>
+      ) : showActivityLog ? (
+        // ACTIVITY LOG VIEW
+        <div className="space-y-3">
+          <div className="flex flex-col gap-1">
+            <p>Activity Logs</p>
+
+            <Table
+              columns={logColumns}
+              dataSource={logData}
+              loading={logLoading}
+              rowKey={(record, index) => record.id || index}
+              pagination={{
+                current: logPage,
+                pageSize: logPageSize,
+                total: logPageInfo?.totalElements || 0,
+                showSizeChanger: true,
+                showTotal: (total) => `Total ${total} items`,
+                pageSizeOptions: ["10", "20", "50", "100"],
+              }}
+              onChange={handleLogTableChange}
+              scroll={{ x: 800 }}
+            />
+          </div>
+
+          {/* Footer Buttons */}
+          <div className="flex justify-end gap-2 mt-3">
+            <ButtonComponent
+              type="default"
+              icon={<ArrowLeftOutlined />}
+              onClick={handleBackToDetail}
+            >
+              Back to Detail
+            </ButtonComponent>
+            <ButtonComponent type="default" onClick={handleClose}>
+              Close
+            </ButtonComponent>
+          </div>
+        </div>
       ) : (
-        <>
-          {/* Header */}
-          <div
-            style={{
-              padding: "20px 24px",
-              borderBottom: "2px solid #e8e8e8",
-              background: "#fafafa",
-            }}
-          >
-            <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "600" }}>
-              {currentView === "details"
-                ? "Invoice Details"
-                : "Activity History"}
-            </h2>
-          </div>
+        // DETAIL VIEW
+        <div className="space-y-3">
+          {/* GENERAL INFORMATION */}
+          <CardContainer header="GENERAL INFORMATION" border={true}>
+            <div className="grid grid-cols-2">
+              <div>
+                <InfoRow label="Invoice #" value={invoice.invoiceNumber} />
+                <InfoRow label="Issue Date" value={invoice.invoiceDate} />
+                <InfoRow
+                  label="Amount"
+                  value={formatAmount(invoice.totalAmountEqvIdr)}
+                  valueBold={true}
+                />
+              </div>
+              <div>
+                <InfoRow label="Customer" value={invoice.customerName} />
+                <InfoRow label="Due Date" value={invoice.invoiceDate} />
+              </div>
+            </div>
+          </CardContainer>
 
-          {/* Content */}
-          <div style={{ padding: "24px" }}>
-            {currentView === "details" ? renderDetailsView() : renderLogView()}
-          </div>
+          {/* PROCESSING STATUS */}
+          <CardContainer header="PROCESSING STATUS" border={true}>
+            <div className="grid grid-cols-2 gap-x-4">
+              <div>
+                <p className="text-sm font-semibold mb-1">Stamping Status</p>
+                <div
+                  className={`px-2 py-1 inline-block rounded text-sm ${
+                    invoice.stampStatus === "Not Processed"
+                      ? "bg-gray-100 text-gray-700"
+                      : invoice.stampStatus === "SUCCESS"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {invoice.stampStatus}
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-semibold mb-1">Signing Status</p>
+                <div
+                  className={`px-2 py-1 inline-block rounded text-sm ${
+                    invoice.signStatus === "Not Processed"
+                      ? "bg-gray-100 text-gray-700"
+                      : invoice.signStatus === "SUCCESS"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {invoice.signStatus}
+                </div>
+              </div>
+            </div>
+          </CardContainer>
 
-          {/* Footer */}
-          <div
-            style={{
-              padding: "16px 24px",
-              borderTop: "1px solid #e8e8e8",
-              background: "#fafafa",
-              display: "flex",
-              justifyContent:
-                currentView === "logs" ? "space-between" : "flex-end",
-              gap: "12px",
-            }}
-          >
-            {currentView === "logs" && (
+          {/* HISTORY LOG INFORMATION */}
+          <CardContainer header="HISTORY LOG INFORMATION" border={true}>
+            <div className="grid grid-cols-2 gap-x-4">
+              <div>
+                <InfoRow label="Record ID" value={invoice.recordId} />
+                <InfoRow label="Created By" value={invoice.createdBy} />
+                <InfoRow label="Updated By" value={invoice.updatedBy} />
+              </div>
+              <div>
+                <InfoRow
+                  label="Created Date"
+                  value={formatDateTime(invoice.createdDate)}
+                />
+                <InfoRow label="Created By" value={invoice.createdBy} />
+              </div>
+            </div>
+          </CardContainer>
+
+          {/* DOCUMENT */}
+          <CardContainer header="DOCUMENT" border={true}>
+            <div className="space-y-2">
+              {/* Download Original Document */}
               <Button
-                onClick={handleBackToDetails}
-                size="large"
-                icon={<ArrowLeftOutlined />}
+                icon={<DownloadOutlined />}
+                size="middle"
+                block
+                loading={downloadLoading}
+                onClick={handleDownloadOriginal}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  height: "36px",
+                  fontSize: "14px",
+                }}
               >
-                Back to Details
+                Download Original Document
               </Button>
-            )}
 
-            <div style={{ display: "flex", gap: "12px" }}>
-              {currentView === "details" && (
-                <>
-                  <Button onClick={handleClose} size="large">
-                    Close
-                  </Button>
-                  <Button
-                    type="primary"
-                    size="large"
-                    icon={<FileTextOutlined />}
-                    onClick={handleViewLog}
-                  >
-                    View Log
-                  </Button>
-                </>
+              {/* Download Stamped Document - only show if stamped */}
+              {invoice.stampStatus === "SUCCESS" && (
+                <Button
+                  icon={<DownloadOutlined />}
+                  size="middle"
+                  block
+                  loading={downloadLoading}
+                  onClick={handleDownloadStamped}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    height: "36px",
+                    fontSize: "14px",
+                  }}
+                >
+                  Download Stamped Document
+                </Button>
               )}
-              {currentView === "logs" && (
-                <Button onClick={handleClose} size="large" type="primary">
-                  Close
+
+              {/* Download Signed Document - only show if signed */}
+              {invoice.signStatus === "SUCCESS" && (
+                <Button
+                  icon={<DownloadOutlined />}
+                  size="middle"
+                  block
+                  loading={downloadLoading}
+                  onClick={handleDownloadSigned}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    height: "36px",
+                    fontSize: "14px",
+                  }}
+                >
+                  Download Signed Document
                 </Button>
               )}
             </div>
+          </CardContainer>
+
+          {/* Footer Buttons */}
+          <div className="flex justify-end gap-2 mt-3">
+            <ButtonComponent type="default" onClick={handleClose}>
+              Cancel
+            </ButtonComponent>
+            <ButtonComponent
+              type="default"
+              isPrimary
+              icon={
+                <HistoryOutlined
+                  style={{
+                    fontSize: "15px",
+                    paddingTop: "5px",
+                    paddingRight: "5px",
+                  }}
+                />
+              }
+              onClick={handleViewLog}
+            >
+              View Log
+            </ButtonComponent>
           </div>
-        </>
+        </div>
       )}
     </Modal>
   );

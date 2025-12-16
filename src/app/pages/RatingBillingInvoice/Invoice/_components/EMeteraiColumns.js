@@ -22,7 +22,7 @@ export const getEMeteraiColumns = ({
       dataIndex: "invoiceNumber",
       width: 180,
       sorter: true,
-      render: (text) => <span style={{ fontWeight: "600" }}>{text}</span>,
+      render: (text) => <span>{text}</span>,
     },
     {
       key: "customer",
@@ -59,7 +59,7 @@ export const getEMeteraiColumns = ({
       title: "Bill Period",
       dataIndex: "billPeriod",
       width: 120,
-      align: "center",
+      isClassification: true,
       sorter: true,
       render: (text) => text || "-",
     },
@@ -68,7 +68,7 @@ export const getEMeteraiColumns = ({
       title: "Invoice Date",
       dataIndex: "invoiceDate",
       width: 120,
-      align: "center",
+      isClassification: true,
       sorter: true,
       render: (text) => text || "-",
     },
@@ -93,7 +93,7 @@ export const getEMeteraiColumns = ({
       title: "Stamp Status",
       dataIndex: "stampStatus",
       width: 160,
-      align: "center",
+      isClassification: true,
       sorter: true,
       render: (status) => {
         if (!status) return "-";
@@ -112,7 +112,7 @@ export const getEMeteraiColumns = ({
       title: "Stamp Type",
       dataIndex: "stampType",
       width: 140,
-      align: "center",
+      isClassification: true,
       render: (type) => {
         if (!type) return "-";
         const displayType = type.replace(/_/g, " ");
@@ -124,7 +124,7 @@ export const getEMeteraiColumns = ({
       title: "Stamp Request Date",
       dataIndex: "stampRequestDate",
       width: 170,
-      align: "center",
+      isClassification: true,
       render: (text) => text || "-",
     },
     {
@@ -132,7 +132,7 @@ export const getEMeteraiColumns = ({
       title: "Stamp Completion Date",
       dataIndex: "stampCompletionDate",
       width: 180,
-      align: "center",
+      isClassification: true,
       render: (text) => text || "-",
     },
     {
@@ -148,7 +148,7 @@ export const getEMeteraiColumns = ({
       title: "Sign Status",
       dataIndex: "signStatus",
       width: 150,
-      align: "center",
+      isClassification: true,
       sorter: true,
       render: (status) => {
         if (!status) return "-";
@@ -167,7 +167,7 @@ export const getEMeteraiColumns = ({
       title: "Sign Type",
       dataIndex: "signType",
       width: 120,
-      align: "center",
+      isClassification: true,
       render: (type) => {
         if (!type || type === "NONE") return "-";
         const displayType = type.replace(/_/g, " ");
@@ -179,7 +179,7 @@ export const getEMeteraiColumns = ({
       title: "Sign Request Date",
       dataIndex: "signRequestDate",
       width: 170,
-      align: "center",
+      isClassification: true,
       render: (text) => text || "-",
     },
     {
@@ -187,7 +187,7 @@ export const getEMeteraiColumns = ({
       title: "Sign Completion Date",
       dataIndex: "signCompletionDate",
       width: 180,
-      align: "center",
+      isClassification: true,
       render: (text) => text || "-",
     },
     {
@@ -203,7 +203,7 @@ export const getEMeteraiColumns = ({
       title: "Approval Status",
       dataIndex: "statusApproval",
       width: 160,
-      align: "center",
+      isClassification: true,
       sorter: true,
       render: (status) => {
         if (!status) return "-";
@@ -222,7 +222,7 @@ export const getEMeteraiColumns = ({
       title: "Created By",
       dataIndex: "createdBy",
       width: 140,
-      align: "center",
+      isClassification: true,
       sorter: true,
       render: (text) => text || "-",
     },
@@ -231,7 +231,7 @@ export const getEMeteraiColumns = ({
       title: "Created Date",
       dataIndex: "createdDate",
       width: 170,
-      align: "center",
+      isClassification: true,
       sorter: true,
       render: (text) => text || "-",
     },
@@ -239,7 +239,7 @@ export const getEMeteraiColumns = ({
       key: "actions",
       title: "Actions",
       width: 80,
-      align: "center",
+      isClassification: true,
       render: (_, record) => {
         const menuItems = [
           {
@@ -277,7 +277,12 @@ export const getEMeteraiColumns = ({
         const menu = <Menu items={menuItems} />;
 
         return (
-          <Dropdown overlay={menu} trigger={["click"]} placement="bottomRight">
+          <Dropdown
+            overlay={menu}
+            trigger={["click"]}
+            placement="bottomRight"
+            className="p-0"
+          >
             <Button
               type="text"
               icon={<EllipsisOutlined style={{ fontSize: "18px" }} />}

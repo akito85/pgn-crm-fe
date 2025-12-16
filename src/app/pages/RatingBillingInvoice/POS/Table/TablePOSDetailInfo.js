@@ -22,14 +22,12 @@ export const columnsTablePOSDetailInfo = (
   const column = [
     {
       title: "NO",
-      align: "center",
       width: 60,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "TYPE",
       dataIndex: "type",
-      align: "center",
       // onFilter: (value, record) => onFilter("type", value, record),
       filteredValue: search?.["type"]
       ? [search?.["type"]]
@@ -102,7 +100,6 @@ export const columnsTablePOSDetailInfo = (
     {
       title: "CURRENCY",
       dataIndex: "currency",
-      align: "center",
       // onFilter: (value, record) => onFilter("currency", value, record),
       filteredValue: search?.["currency"]
       ? [search?.["currency"]]
@@ -139,7 +136,6 @@ export const columnsTablePOSDetailInfo = (
     {
       title: "QUANTITY",
       dataIndex: "quantity",
-      align: "right",
       // onFilter: (value, record) => onFilter("quantity", value, record),
       filteredValue: search?.["quantity"]
       ? [search?.["quantity"]]
@@ -197,7 +193,6 @@ export const columnsTablePOSDetailInfo = (
     {
       title: "PRICE",
       dataIndex: "price",
-      align: "right",
       // onFilter: (value, record) => onFilter("price", value, record),
       filteredValue: search?.["price"]
       ? [search?.["price"]]
@@ -270,7 +265,6 @@ export const columnsTablePOSDetailInfo = (
     {
       title: "AMOUNT",
       dataIndex: "amount",
-      align: "right",
       // onFilter: (value, record) => onFilter("amount", value, record),
       filteredValue: search?.["amount"]
       ? [search?.["amount"]]
@@ -405,7 +399,6 @@ export const columnsTablePOSDetailInfo = (
     {
       title: "UOM",
       dataIndex: "uom",
-      align: "center",
       // onFilter: (value, record) => onFilter("uom", value, record),
       filteredValue: search?.["uom"]
       ? [search?.["uom"]]
@@ -442,7 +435,6 @@ export const columnsTablePOSDetailInfo = (
     {
       title: "AMOUNT EQV IDR",
       dataIndex: "amountEqvIdr",
-      align: "right",
       // onFilter: (value, record) => onFilter("amountEqvIdr", value, record),
       sorter: (a, b) => sorter("amountEqvIdr", a, b),
       filteredValue: search?.["amountEqvIdr"]
@@ -515,7 +507,6 @@ export const columnsTablePOSDetailInfo = (
     {
       title: "AMOUNT EQV USD",
       dataIndex: "amountEqvUsd",
-      align: "right",
       // onFilter: (value, record) => onFilter("amountEqvUsd", value, record),
       filteredValue: search?.["amountEqvUsd"]
       ? [search?.["amountEqvUsd"]]
@@ -588,7 +579,6 @@ export const columnsTablePOSDetailInfo = (
     {
       title: "AMOUNT IDR (TAX PURPOSE)",
       dataIndex: "eqvIdr",
-      align: "right",
       // onFilter: (value, record) => onFilter("eqvIdr", value, record),
       filteredValue: search?.["eqvIdr"]
       ? [search?.["eqvIdr"]]
@@ -661,7 +651,6 @@ export const columnsTablePOSDetailInfo = (
     {
       title: "DISCOUNT",
       dataIndex: "discount",
-      align: "right",
       // onFilter: (value, record) => onFilter("discount", value, record),
       filteredValue: search?.["discount"]
       ? [search?.["discount"]]
@@ -734,7 +723,6 @@ export const columnsTablePOSDetailInfo = (
     {
       title: "TOTAL",
       dataIndex: "total",
-      align: "right",
       // onFilter: (value, record) => onFilter("total", value, record),
       filteredValue: search?.["total"]
       ? [search?.["total"]]
@@ -807,7 +795,6 @@ export const columnsTablePOSDetailInfo = (
     {
       title: "TOTAL EQUIVALENT IDR",
       dataIndex: "totalEqvIdr",
-      align: "right",
       // onFilter: (value, record) => onFilter("totalEqvIdr", value, record),
       filteredValue: search?.["totalEqvIdr"]
       ? [search?.["totalEqvIdr"]]
@@ -880,7 +867,6 @@ export const columnsTablePOSDetailInfo = (
     {
       title: "TOTAL EQUIVALENT USD",
       dataIndex: "totalEqvUsd",
-      align: "right",
       // onFilter: (value, record) => onFilter("totalEqvUsd", value, record),
       sorter: (a, b) => sorter("totalEqvUsd", a, b),
       filteredValue: search?.["totalEqvUsd"]
@@ -1020,7 +1006,6 @@ export const columnsTablePOSDetailInfo = (
       title: "ACTION",
       dataIndex: "action",
       fixed: "right",
-      align: "center",
       width: 100,
       render: (v, r, i) => {
         return (

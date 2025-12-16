@@ -548,13 +548,15 @@ export const createStampingRequest = createAsyncThunk(
 
 export const uploadManualStamping = createAsyncThunk(
   "UPLOAD_MANUAL_STAMPING",
-  async ({ invoiceNumber, file, remark }, thunkAPI) => {
+  async ({ invoiceNumber, file, remark, apphierId }, thunkAPI) => {
     try {
       const formData = new FormData();
-      formData.append("stampedFile", file);
+      formData.append("apphierId", apphierId);
       formData.append("remark", remark || "Manual stamping upload");
+      formData.append("data[0].invoiceNumber", invoiceNumber);
+      formData.append("data[0].file", file);
 
-      const url = `/v1/dbs/api/rbi/invoice/stampsign/${invoiceNumber}/stamp/manual`;
+      const url = `/v1/dbs/api/rbi/invoice/stampsign/stamp/manual`;
 
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
@@ -596,13 +598,15 @@ export const uploadManualStamping = createAsyncThunk(
 
 export const uploadManualSigning = createAsyncThunk(
   "UPLOAD_MANUAL_SIGNING",
-  async ({ invoiceNumber, file, remark }, thunkAPI) => {
+  async ({ invoiceNumber, file, remark, apphierId }, thunkAPI) => {
     try {
       const formData = new FormData();
-      formData.append("signFile", file);
+      formData.append("apphierId", apphierId);
       formData.append("remark", remark || "Manual signing upload");
+      formData.append("data[0].invoiceNumber", invoiceNumber);
+      formData.append("data[0].file", file);
 
-      const url = `/v1/dbs/api/rbi/invoice/stampsign/${invoiceNumber}/sign/manual`;
+      const url = `/v1/dbs/api/rbi/invoice/stampsign/sign/manual`;
 
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
