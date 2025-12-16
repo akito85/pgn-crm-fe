@@ -427,6 +427,14 @@ const CreatePaymentRelation = ({ type }) => {
         .catch((error) => {});;
   };
 
+  const handleClear = () => {
+    setDataAttachment([]);
+    setSelectedAppHierId();
+    setSelectedApprovalName();
+    formCreate.resetFields();
+    setCurrent(0);
+  }
+
   return (
     <LayoutMenu>
       <div className="flex flex-col gap-y-5">
@@ -510,7 +518,7 @@ const CreatePaymentRelation = ({ type }) => {
             </ButtonComponent>
             <div className="flex w-full justify-end gap-x-4">
               <ButtonComponent
-                onClick={() => {}}
+                onClick={handleClear}
                 type={"submit"}
                 icon={<SVGIcon name="IconButtonClear" width={24} />}
               >
