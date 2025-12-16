@@ -126,13 +126,13 @@ const CreatePaymentRelation = ({ type }) => {
         appHierId,
       } = detail_paymentRelation.result;
 
-      const { accountNumber, accountName } = detail_paymentRelation.result;
+      const { relatedAccountNumber, relatedAccountName } = detail_paymentRelation.result;
 
       formCreate.setFieldsValue({
         subjectId,
         objectId,
-        accountName,
-        accountNumber,
+        accountName: relatedAccountName,
+        accountNumber: relatedAccountNumber,
         priority,
         startDate,
         endDate,
