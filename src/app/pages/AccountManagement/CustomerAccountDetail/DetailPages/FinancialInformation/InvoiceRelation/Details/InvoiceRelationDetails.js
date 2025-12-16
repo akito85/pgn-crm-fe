@@ -117,17 +117,15 @@ const InvoiceRelationDetails = ({
    * @param {"approve"|"reject"} action 
    */
   const handleApproveOrReject = (description, action, handleClear) => {
-    if (detail_invoiceRelation?.result) {
-      const { result } = detail_invoiceRelation;
-
+    if (detail_invoiceRelation) {
       const body = [{
-        id: result.id,
-        approvalId: result.tappId,
+        id: detail_invoiceRelation.id,
+        approvalId: detail_invoiceRelation.tappId,
         action: action.toUpperCase(),
         description,
       }];
 
-      if (result.approvalType === "INVOICE_RELATION") {
+      if (detail_invoiceRelation.approvalType === "INVOICE_RELATION") {
         dispatch(approveOrRejectInvoiceRelation({
           body,
         }))
@@ -138,7 +136,7 @@ const InvoiceRelationDetails = ({
           handleApprovalModal(false);
         })
         .catch(() => {});
-      } else if (result.approvalType === "INACTIVE_INVOICE_RELATION") {
+      } else if (detail_invoiceRelation.approvalType === "INACTIVE_INVOICE_RELATION") {
         dispatch(approveOrRejectInactiveInvoiceRelation({
           body,
         }))
@@ -184,8 +182,8 @@ const InvoiceRelationDetails = ({
   }, [idIr])
 
   useEffect(() => {
-    if (detail_invoiceRelation?.result) {
-      const { statusApproval } = detail_invoiceRelation.result;
+    if (detail_invoiceRelation) {
+      const { statusApproval } = detail_invoiceRelation;
 
       if (statusApproval === "WAITING_APPROVAL")
         setIsApproval(true);
@@ -252,8 +250,8 @@ const InvoiceRelationDetails = ({
             section={typeDetailSection}
             options={tabs}
             handleChangeOption={handleDetailSection}
-            dataDetail={detail_invoiceRelation?.result}
-            dataAttachment={data_invoiceRelationAttachment}
+            dataDetail={detail_invoiceRelation}
+            dataAttachment={data_invoiceRelationAttachment.result}
           />
         </div>
 
@@ -297,7 +295,7 @@ const InvoiceRelationDetails = ({
         isOpen={showApprovalModal}
         header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
         handleCloseModal={() => handleApprovalModal(false)}
-        customMessage={`Are you sure you want to ${approveOrReject} invoice relation - ${detail_invoiceRelation?.result?.id}?`}
+        customMessage={`Are you sure you want to ${approveOrReject} invoice relation - ${detail_invoiceRelation?.id}?`}
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
       />
     </LayoutMenu>
