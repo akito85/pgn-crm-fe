@@ -186,7 +186,23 @@ const AccountDetailInformation = ({
         ))
     ) {
       setTypeAccountInfoDetailSection(dataTabs.ras);
-    } else {
+    } else if (
+      path &&
+      (
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/payment-relation/details"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/payment-relation/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/payment-relation/update"
+        ) 
+      )
+    ) {
+      setTypeAccountInfoDetailSection(dataTabs.fi);
+    }
+    else {
       setTypeAccountInfoDetailSection(dataTabs.ai);
     }
   }, [path]);
