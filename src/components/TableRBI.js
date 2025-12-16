@@ -150,7 +150,7 @@ const TableRBI = ({
       const newCol = {
         ...col,
         width: columnWidths[colKey] || col.width || 150,
-        align: "center",
+        // align: "center",
         ellipsis: {
           showTitle: true,
         },
@@ -161,7 +161,7 @@ const TableRBI = ({
         }),
         onCell: () => ({
           style: {
-            textAlign: "center",
+            // textAlign: "center",
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",

@@ -75,7 +75,7 @@ const DetailMonitoringUsage = () => {
   const [body, setBody] = useState({});
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["action"],
+    right: ["status","action"],
   }));
 
   // assert function

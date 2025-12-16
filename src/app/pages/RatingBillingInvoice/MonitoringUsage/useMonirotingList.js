@@ -1047,7 +1047,7 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "STATUS",
       dataIndex: "status",
       fixed: "right",
-      width: 180,
+      width: 100,
       // sorter: true,
       sorter: (a, b) => sorter("status", a, b),
       filteredValue: search?.["status"]
