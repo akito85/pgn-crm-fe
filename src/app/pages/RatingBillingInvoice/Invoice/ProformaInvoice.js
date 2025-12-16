@@ -1,7 +1,7 @@
 // ProformaInvoice.js
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Form, Select, Tooltip } from "antd";
+import { Spin, Form, Select, Dropdown, Button, Menu } from "antd";
 import axios from "axios";
 import DocViewer from "react-doc-viewer";
 import SelectComponent from "../../../../components/SelectComponent";
@@ -22,11 +22,11 @@ import {
 } from "../../../../redux/slices/rating_billing_invoice/invoice";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
-import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import {
   DownloadOutlined,
   EyeOutlined,
   ReloadOutlined,
+  EllipsisOutlined,
 } from "@ant-design/icons";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
@@ -68,10 +68,10 @@ const ProformaInvoice = () => {
         ? JSON.parse(saved)
         : {
             left: ["no"], // default left fixed column keys if any
-            right: ["action", "status"], // default right fixed column keys if any
+            right: ["actions"], // default right fixed column keys - actions column
           };
     } catch (e) {
-      return { left: ["no"], right: ["action", "status"] };
+      return { left: ["no"], right: ["actions"] };
     }
   });
 
@@ -302,104 +302,7 @@ const ProformaInvoice = () => {
     );
   };
 
-  const itemGrantAccess = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={handleDownload}
-        >
-          Export Data
-        </ButtonComponent>
-      ),
-    },
-    {
-      action: "Create",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonCreate" width={24} />}
-          type="submit"
-          onClick={() => {
-            // Open new page instead of modal
-            window.location.href =
-              INVOICE_ROUTES.GENERATE_PROFORMA_INVOICE_FORM;
-          }}
-        >
-          Generate Proforma Invoice
-        </ButtonComponent>
-      ),
-    },
-
-    // Column Action Table
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Detail Invoice Log">
-            <div
-              className="pt-1 cursor-pointer"
-              onClick={() => {
-                handleDetail(record);
-                setTimeout(
-                  () =>
-                    window.scrollTo({
-                      top: document.body.scrollHeight,
-                      behavior: "smooth",
-                    }),
-                  100
-                );
-              }}
-            >
-              <EyeOutlined style={{ fontSize: "20px" }} />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Regenerate",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Re-Generate">
-            <div
-              className="pt-1 cursor-pointer"
-              onClick={() => handleReGenerate(record)}
-            >
-              <ReloadOutlined style={{ fontSize: "20px" }} />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Preview",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Download">
-            <div
-              className="pt-1 cursor-pointer"
-              onClick={() => handlePreviewFile(record)}
-            >
-              <DownloadOutlined style={{ fontSize: "25px" }} />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-  ];
-
-  // ✅ Call hook at component level (not inside useMemo)
-  const actionCols = useColumnActionPermission(
-    ["view", "preview", "regenerate"],
-    itemGrantAccess
-  );
-
-  // ✅ Get base columns with key property
+  // ✅ Get base columns with key property including action column
   const baseColumns = useMemo(() => {
     const invoiceCols = columnsInvoice(
       search,
@@ -411,14 +314,66 @@ const ProformaInvoice = () => {
       handleSearch
     );
 
+    // ✅ Single action column with Dropdown menu
+    const actionColumn = {
+      key: "actions",
+      title: "Actions",
+      width: 80,
+      isClassification: true,
+      render: (_, record) => {
+        const menuItems = [
+          {
+            key: "detail",
+            label: "Detail",
+            icon: <EyeOutlined />,
+            onClick: () => {
+              handleDetail(record);
+              setTimeout(
+                () =>
+                  window.scrollTo({
+                    top: document.body.scrollHeight,
+                    behavior: "smooth",
+                  }),
+                100
+              );
+            },
+          },
+          {
+            key: "regenerate",
+            label: "Re-Generate",
+            icon: <ReloadOutlined />,
+            onClick: () => handleReGenerate(record),
+          },
+          {
+            key: "preview",
+            label: "Preview/Download",
+            icon: <DownloadOutlined />,
+            onClick: () => handlePreviewFile(record),
+          },
+        ];
+
+        const menu = <Menu items={menuItems} />;
+
+        return (
+          <Dropdown overlay={menu} trigger={["click"]} placement="bottomRight">
+            <Button
+              type="text"
+              icon={<EllipsisOutlined style={{ fontSize: "18px" }} />}
+            />
+          </Dropdown>
+        );
+      },
+    };
+
     // Add 'key' property to columns that don't have it
-    const columnsWithKeys = [...invoiceCols, ...actionCols].map((col) => ({
+    const columnsWithKeys = [...invoiceCols, actionColumn].map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title, // Fallback to dataIndex or title if no key
     }));
 
     return columnsWithKeys;
-  }, [search, page, pageSize, searchedColumn, searchText, actionCols]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, page, pageSize, searchedColumn, searchText]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({

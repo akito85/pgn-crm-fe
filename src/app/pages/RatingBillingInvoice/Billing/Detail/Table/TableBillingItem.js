@@ -17,7 +17,7 @@ export const columnsBillingItem = (
   {
     key: "no",
     title: "NO",
-    align: "center",
+    isClassification: true,
     width: 60,
     render: (text, object, index) => (pageBI - 1) * pageSizeBI + index + 1,
   },
@@ -26,7 +26,6 @@ export const columnsBillingItem = (
     title: "ITEM",
     dataIndex: "item",
     sorter: true,
-    align: "left",
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
       "item",
@@ -52,7 +51,7 @@ export const columnsBillingItem = (
     title: "QUANTITY",
     dataIndex: "quantity",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
       "quantity",
@@ -78,7 +77,7 @@ export const columnsBillingItem = (
     title: "UOM",
     dataIndex: "uom",
     sorter: true,
-    align: "center",
+    isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
       "uom",
@@ -104,7 +103,7 @@ export const columnsBillingItem = (
     title: "CURRENCY",
     dataIndex: "currency",
     sorter: true,
-    align: "center",
+    isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
       "currency",
@@ -130,6 +129,7 @@ export const columnsBillingItem = (
     title: "PRICE CODE",
     dataIndex: "priceCode",
     sorter: true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
       "priceCode",
@@ -155,7 +155,7 @@ export const columnsBillingItem = (
     title: "PRICE",
     dataIndex: "price",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
       "price",
@@ -181,7 +181,7 @@ export const columnsBillingItem = (
     title: "AMOUNT",
     dataIndex: "amount",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
       "amount",
@@ -207,7 +207,7 @@ export const columnsBillingItem = (
     title: "DISCOUNT AMOUNT",
     dataIndex: "discountAmount",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
       "discountAmount",
@@ -233,7 +233,7 @@ export const columnsBillingItem = (
     title: "TOTAL AMOUNT",
     dataIndex: "totalAmount",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
       "totalAmount",
@@ -259,7 +259,7 @@ export const columnsBillingItem = (
     title: "TOTAL AMOUNT EQV IDR",
     dataIndex: "totalAmountEqvIdr",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
       "totalAmountEqvIdr",
@@ -285,7 +285,7 @@ export const columnsBillingItem = (
     title: "TOTAL AMOUNT EQV USD",
     dataIndex: "totalAmountEqvUsd",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
       "totalAmountEqvUsd",
@@ -336,7 +336,7 @@ export const columnsBillingItem = (
     title: "TYPE BASIS",
     dataIndex: "typeBasis",
     sorter: true,
-    align: "center",
+    isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       searchBI,
       "typeBasis",

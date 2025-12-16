@@ -16,8 +16,14 @@ import InputComponent from "../../../../components/InputComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
+import TableRBI from "../../../../components/TableRBI";
 
-const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh = () => {} }) => {
+const ModalApprovalUsage = ({
+  isOpen,
+  handleCancel,
+  dataUsage,
+  handleListRefresh = () => {},
+}) => {
   // Selector
   const { data_approval } = useSelector((state) => state.monitoring_usage);
 
@@ -178,7 +184,7 @@ const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh
           setCurrent(0);
           setRemark("");
           setAction("");
-          handleListRefresh()
+          handleListRefresh();
           handleCancel();
         })
         .catch((error) => {
@@ -293,7 +299,7 @@ const ModalApprovalUsage = ({ isOpen, handleCancel, dataUsage, handleListRefresh
           >
             <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
               <p className="text-primary uppercase font-bold">Usage List</p>
-              <TablePaginationNew
+              <TableRBI
                 type="FE"
                 dataSource={dataApproval?.map((a, index) => ({
                   ...a,

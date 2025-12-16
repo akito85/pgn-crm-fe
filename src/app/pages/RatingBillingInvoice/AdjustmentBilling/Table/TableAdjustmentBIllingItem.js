@@ -20,7 +20,6 @@ export const columnsTableABI = (
 ) => [
   {
     title: "NO",
-    align: "center",
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
@@ -40,7 +39,6 @@ export const columnsTableABI = (
   {
     title: "QUANTITY",
     dataIndex: "quantity",
-    align: "right",
     onFilter: (value, record) => onFilter("quantity", value, record),
     sorter: (a, b) => sorter("quantity", a, b),
     ...getColumnSearchPropsPaging(
@@ -76,7 +74,6 @@ export const columnsTableABI = (
   {
     title: "PRICE",
     dataIndex: "price",
-    align: "right",
     onFilter: (value, record) => onFilter("price", value, record),
     sorter: (a, b) => sorter("price", a, b),
     ...getColumnSearchPropsPaging(
@@ -126,7 +123,6 @@ export const columnsTableABI = (
   {
     title: "UOM",
     dataIndex: "uom",
-    align: "center",
     onFilter: (value, record) => onFilter("uom", value, record),
     sorter: (a, b) => sorter("uom", a, b),
     ...getColumnSearchPropsPaging(
@@ -140,7 +136,6 @@ export const columnsTableABI = (
   {
     title: "CURRENCY",
     dataIndex: "currency",
-    align: "center",
     onFilter: (value, record) => onFilter("currency", value, record),
     sorter: (a, b) => sorter("currency", a, b),
     ...getColumnSearchPropsPaging(
@@ -154,7 +149,6 @@ export const columnsTableABI = (
   {
     title: "TYPE",
     dataIndex: "type",
-    align: "center",
     onFilter: (value, record) => onFilter("type", value, record),
     sorter: (a, b) => sorter("type", a, b),
     ...getColumnSearchPropsPaging(
@@ -182,7 +176,6 @@ export const columnsTableABI = (
   {
     title: "ORIGINAL AMOUNT",
     dataIndex: "amount",
-    align: "right",
     onFilter: (value, record) => onFilter("amount", value, record),
     sorter: (a, b) => sorter("amount", a, b),
     ...getColumnSearchPropsPaging(
@@ -232,7 +225,6 @@ export const columnsTableABI = (
   {
     title: "ADJUSTMENT AMOUNT",
     dataIndex: "adjustmentAmount",
-    align: "right",
     onFilter: (value, record) => onFilter("adjustmentAmount", value, record),
     sorter: (a, b) => sorter("adjustmentAmount", a, b),
     ...getColumnSearchPropsPaging(
@@ -282,7 +274,6 @@ export const columnsTableABI = (
   {
     title: "TOTAL AMOUNT",
     dataIndex: "totalAmount",
-    align: "right",
     onFilter: (value, record) => onFilter("totalAmount", value, record),
     sorter: (a, b) => sorter("totalAmount", a, b),
     ...getColumnSearchPropsPaging(
@@ -332,7 +323,6 @@ export const columnsTableABI = (
   {
     title: "TOTAL AMOUNT EQV IDR",
     dataIndex: "totalAmountEqvIdr",
-    align: "right",
     onFilter: (value, record) => onFilter("totalAmountEqvIdr", value, record),
     sorter: (a, b) => sorter("totalAmountEqvIdr", a, b),
     ...getColumnSearchPropsPaging(
@@ -382,7 +372,6 @@ export const columnsTableABI = (
   {
     title: "TOTAL AMOUNT EQV USD",
     dataIndex: "totalAmountEqvUsd",
-    align: "right",
     onFilter: (value, record) => onFilter("totalAmountEqvUsd", value, record),
     sorter: (a, b) => sorter("totalAmountEqvUsd", a, b),
     ...getColumnSearchPropsPaging(
@@ -475,7 +464,6 @@ export const columnsTableABI = (
   },
   {
     title: "ACTION",
-    align: "center",
     width: 100,
     dataIndex: "id",
     fixed: "right",

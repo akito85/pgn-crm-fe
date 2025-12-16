@@ -26,6 +26,8 @@ import {
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import CardContainer from "../../../../components/CardContainer";
+import TableRBI from "../../../../components/TableRBI";
 
 const PosPage = () => {
   // Selector
@@ -321,7 +323,7 @@ const PosPage = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Detail">
-              <div className="pt-1">
+              <div className="">
                 <SVGIcon
                   name="IconDetail"
                   width={24}
@@ -350,7 +352,7 @@ const PosPage = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Detail">
-              <div className="pt-1">
+              <div className="">
                 <SVGIcon name="IconEye" width={24} />
               </div>
             </Tooltip>
@@ -378,7 +380,7 @@ const PosPage = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
-              <div className="pt-1">
+              <div className="">
                 <SVGIcon
                   name="IconEdit"
                   width={24}
@@ -414,12 +416,12 @@ const PosPage = () => {
         return (
           <Tooltip title="Delete">
             <SVGIcon
-                name="IconDelete"
-                width={24}
-                color={isDelete ? "#D90000" : "#8D91A0"}
-                className={isDelete ? undefined : "disabled cursor-not-allowed"}
-                onClick={isDelete ? () => handleDelete(record) : undefined}
-              />
+              name="IconDelete"
+              width={24}
+              color={isDelete ? "#D90000" : "#8D91A0"}
+              className={isDelete ? undefined : "disabled cursor-not-allowed"}
+              onClick={isDelete ? () => handleDelete(record) : undefined}
+            />
           </Tooltip>
         );
       },
@@ -441,7 +443,7 @@ const PosPage = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
-              <div className="pt-1">
+              <div className="">
                 <SVGIcon
                   name="IconLogHistory"
                   color={"#0075bf"}
@@ -466,10 +468,11 @@ const PosPage = () => {
           <Toolbar items={itemGrantAccess} />
         </div>
 
-        <BaseContainer header={"point of sales list"}>
+        <CardContainer header={"point of sales list"}>
           <div className="w-full">
-            <TablePaginationNew
+            <TableRBI
               dataSource={dataSource}
+              showExport={false}
               columns={[
                 ...PosTableView(
                   page,
@@ -478,7 +481,7 @@ const PosPage = () => {
                   searchedColumn,
                   searchText,
                   handleSearch,
-                  search,
+                  search
                   // handleApprovalHistory,
                   // handleOpenDetail,
                   // handleDelete
@@ -495,10 +498,10 @@ const PosPage = () => {
               onSizeChanger={handleChange}
               totalData={data_view?.page?.totalElements || 0}
               onSort={onSort}
-              tableScrolled={{ y: 525, x: 18000 }}
+              tableScrolled={{ y: 525, x: 8000 }}
             />
           </div>
-        </BaseContainer>
+        </CardContainer>
 
         {openDetail === true ? (
           <div className="mb-5">
