@@ -31,10 +31,10 @@ const ModalConfirmationApprovalPaymentRelation = ({
     },
     {
       title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
+      dataIndex: "relatedAccountNumber",
       width: 150,
       sorter: true,
-      ...getColumnSearchProps("accountNumber"),
+      ...getColumnSearchProps("relatedAccountNumber"),
     },
     {
       title: "PRIORITY",
