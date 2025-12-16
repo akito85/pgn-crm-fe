@@ -439,7 +439,6 @@ const InvoiceRelation = ({
       <Fragment>
         <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
           {"INVOICE RELATION LIST"}
-          "isApproval" {isApproval ? "true" : "false" }
         </div>
 
         <InvoiceRelationTable
