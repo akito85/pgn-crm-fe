@@ -58,7 +58,7 @@ const PaymentRelationTable = ({
       width: 250,
       align: "center",
       ...getColumnSearchProps("startDate", "date"),
-      render: (startDate) => moment(startDate, "DD-MM-YYYY").format(dateFormatting.date),
+      render: (startDate) => startDate ? moment(startDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
     },
     {
       title: "END DATE",
@@ -66,7 +66,7 @@ const PaymentRelationTable = ({
       width: 250,
       align: "center",
       ...getColumnSearchProps("endDate", "date"),
-      render: (endDate) => moment(endDate, "DD-MM-YYYY").format(dateFormatting.date),
+      render: (endDate) => endDate ? moment(endDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
     },
     {
       title: "STATUS APPROVAL",
