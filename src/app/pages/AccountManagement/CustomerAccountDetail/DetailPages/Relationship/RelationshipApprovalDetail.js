@@ -1,14 +1,11 @@
+import { Button, Divider } from "antd";
 import { useState } from "react";
 import DetailText from "../../../../../../components/DetailText";
-import RelationshipApproval from "./RelationshipApproval";
 import RelationshipAttachment from "./RelationshipAttachment";
-import { Button, Divider } from "antd";
 
-const RelationshipConfirm = ({
+const RelationshipApprovalDetail = ({
   data = {},
-  approvalData = [],
   attachmentData = [],
-  approvalHierarchyName = "Hierarchy SA 1", // Nama approval hierarchy yang dipilih
 }) => {
   const [activeTab, setActiveTab] = useState("1");
 
@@ -22,44 +19,35 @@ const RelationshipConfirm = ({
             </div>
             <div className="w-full grid grid-cols-3 gap-4">
               <DetailText label="Direction Flag">
-                {data?.directionFlag || "Forward"}
+                {data?.directionalFlag || "-"}
               </DetailText>
               <DetailText label="Relationship Type">
-                {data?.relationshipType || "PARTNER OF"}
+                {data?.relationshipTypeName ? data.relationshipTypeName.toUpperCase() : "-"}
               </DetailText>
               <DetailText label="Relationship Category">
-                {data?.relationshipCategory || "CUSTOMER"}
+                {data?.relationshipCategoryName ? data.relationshipCategoryName.toUpperCase() : "-"}
               </DetailText>
               <DetailText label="Related Name">
-                {data?.relatedName || "PT XYZ"}
+                {data?.subjectName || data?.objectName || "-"}
               </DetailText>
               <DetailText label="Related Number">
-                {data?.relatedNumber || "00899849211"}
+                {data?.subjectValue || data?.objectValue || "-"}
               </DetailText>
               <DetailText label="Start Date">
-                {data?.startDate || "22 Aug 2022"}
+                {data?.startDate || "-"}
               </DetailText>
               <DetailText label="End Date">
-                {data?.endDate || "22 Aug 2022"}
+                {data?.endDate || "-"}
               </DetailText>
             </div>
             <div className="w-full mt-4">
               <DetailText label="Description">
-                {data?.description ||
-                  "Lorem ipsum dolor sit amet consectetur. Malesuada turpis arcu morbi elit sed lorem at adipiscing imperdiet. Aliquam quis tempus feugiat amet. Viverra metus tincidunt nibh mauris nisl. At et etiam non dignissim ultricies tellus in lacus fermentum. Sollicitudin purus viverra tincidunt proin."}
+                {data?.description || "-"}
               </DetailText>
             </div>
           </div>
         );
       case "2":
-        return (
-          <RelationshipApproval
-            dataDetailApproval={approvalData}
-            hideSelector={true}
-            approvalHierarchyLabel={approvalHierarchyName}
-          />
-        );
-      case "3":
         return (
           <RelationshipAttachment
             data={attachmentData}
@@ -74,7 +62,7 @@ const RelationshipConfirm = ({
 
   return (
     <div className="w-full">
-      {/* Custom Tab Buttons - Sesuai Design Figma */}
+      {/* Custom Tab Buttons */}
       <div className="flex gap-3 mb-6 border-b border-gray-200 pb-1">
         <Button
           onClick={() => setActiveTab("1")}
@@ -88,13 +76,6 @@ const RelationshipConfirm = ({
           size="large"
           type={activeTab === "2" ? "primary" : "default"}
         >
-          Approval
-        </Button>
-        <Button
-          onClick={() => setActiveTab("3")}
-          size="large"
-          type={activeTab === "3" ? "primary" : "default"}
-        >
           Attachment
         </Button>
       </div>
@@ -106,4 +87,6 @@ const RelationshipConfirm = ({
   );
 };
 
-export default RelationshipConfirm;
+export default RelationshipApprovalDetail;
+
+

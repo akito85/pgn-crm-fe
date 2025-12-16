@@ -118,6 +118,7 @@ import glAccountReducer from "../slices/rating_billing_invoice/MasterData/glAcco
 import contentManagementReducer from "../slices/rating_billing_invoice/MasterData/contentManagement";
 import accountPromoReducer from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Promo/store/slices/promoSlice";
 import accountingReducer from "../slices/receipt_collection/accounting";
+import relationshipReducer from "../slices/account_management/detailAccount/relationshipSlice";
 
 const reducer = combineReducers({
   job: jobSlice,
@@ -180,6 +181,7 @@ const reducer = combineReducers({
   additionalInformation: additionalInfoReducer,
   accountEquipment: equpmentReducer,
   accountPromo: accountPromoReducer,
+  relationship: relationshipReducer,
 
   //Account Management ( Customer )
   customerAccount: customerAccountReducer,

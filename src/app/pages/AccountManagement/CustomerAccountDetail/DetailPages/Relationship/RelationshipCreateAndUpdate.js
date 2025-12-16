@@ -1,22 +1,31 @@
-import React, { useEffect } from "react";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
-import { requiredMessage } from "../../../../../../utils";
-import { Form, Select } from "antd";
-import SelectComponent from "../../../../../../components/SelectComponent";
-import InputComponent from "../../../../../../components/InputComponent";
-import DateComponent from "../../../../../../components/DateComponent";
 import moment from "moment";
-import { LeftOutlined } from "@ant-design/icons";
 import RelationshipConfirm from "./RelationshipConfirm";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { useLocation, useNavigate } from "react-router-dom";
 import HeaderDetail from "../../HeaderDetail";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
+import RelationshipApproval from "./RelationshipApproval";
+import RelationshipAttachment from "./RelationshipAttachment";
+import ModalAttachment from "./RelationshipAttachment/ModalAttachment";
+import RelationshipInformation from "./RelationshipInformation";
+import {
+  createRelationship,
+  downloadAttachment,
+  getApprovalHierarchies,
+  getApprovalHierarchyDetail,
+  getAttachmentCategory,
+  getAttachmentList,
+  updateRelationship
+} from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { Button, Form, Spin, Steps } from "antd";
+import { RightOutlined } from "@ant-design/icons";
 
 const obj = {
   id: 1,
@@ -28,45 +37,276 @@ const obj = {
 
 const RelationshipCreateAndUpdate = ({
   type = {},
-  handleChangeInteraction = () => {},
 }) => {
   //declare
   const [form] = Form.useForm();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const location = useLocation();
+  const containerRef = useRef(null);
   const id = location?.state?.id;
 
   //modal
+  const idAccount = location?.state?.idAccount;
+  const idCustomer = location?.state?.idCustomer;
+  const accountType = location?.state?.type;
+
+  // Debug log untuk memastikan idCustomer dan type diterima
+  useEffect(() => {
+    console.log("DEBUG - Location State:", location?.state);
+    console.log("DEBUG - idAccount:", idAccount);
+    console.log("DEBUG - idCustomer:", idCustomer);
+    console.log("DEBUG - accountType:", accountType);
+  }, [location, idAccount, idCustomer, accountType]);
+
+  // Get Attachment Category and List from Store
+  const {
+    data_attachmentCategory,
+    data_attachmentList,
+    data_approvalHierarchies,
+    data_approvalHierarchyDetail,
+    loadingApprovalHierarchies,
+    loadingApprovalHierarchyDetail
+  } = useSelector(
+    (state) => state.relationship
+  );
+
+  // State Management
+  const [current, setCurrent] = useState(0);
   const [modalConfirm, setModalConfirm] = useState(false);
+  const [modalUpload, setModalUpload] = useState(false);
   const [dataConfirm, setDataConfirm] = useState();
 
+  const [loading, setLoading] = useState(false);
+
+  // Relationship Data States
+  const [relationshipObj, setRelationshipObj] = useState({});
+  const [approvalObj, setApprovalObj] = useState({});
+  const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [dataDetailApproval, setDataDetailApproval] = useState([]);
 
   useEffect(() => {
-    if (obj && obj.id && type.action === "update") {
+    console.log("relationshipObj => ", relationshipObj);
+  }, [relationshipObj]);
+
+  useEffect(() => {
+    console.log("approvalObj => ", approvalObj);
+  }, [approvalObj]);
+
+  useEffect(() => {
+    console.log("listDataAttachment => ", listDataAttachment);
+  }, [listDataAttachment]);
+
+  useEffect(() => {
+    console.log("dataDetailApproval => ", dataDetailApproval);
+  }, [dataDetailApproval]);
+
+  useEffect(() => {
+    if (idAccount) {
+      dispatch(getAttachmentCategory({ idAccount }));
+      dispatch(getApprovalHierarchies({ idAccount }));
+    }
+    if (type === "update" && id) {
+      dispatch(getAttachmentList({ idAccount, idRelationship: id }));
+    }
+    if (obj && obj.id && type === "update") {
       form.setFieldsValue({
-        subjectId: "23213213",
-        subjectName: obj?.accountInformation?.sor,
-        subjectTable: obj?.accountInformation?.sor,
-        objectName: obj?.accountInformation?.sor,
-        objectTable: obj?.accountInformation?.sor,
+        relationshipType: 1,
+        relationshipCategory: 1,
+        relatedName: 1,
+        relatedNumber: 1,
       });
     }
-  }, [obj]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [obj, type, idAccount, id]);
 
-  const sendData = (value) => {
-    //code dispatch
+  useEffect(() => {
+    if (data_attachmentList && type === "update") {
+      const mapped = data_attachmentList.map((item) => ({
+        key: item.id,
+        type: item.fileCategoryName,
+        fileName: item.fileName,
+        fileSize: item.fileSize,
+        dataType: "exist",
+        fileType: item.fileType,
+      }));
+      setListDataAttachment(mapped);
+    }
+  }, [data_attachmentList, type]);
+
+  // Map approval hierarchy detail data from Redux to local state
+  useEffect(() => {
+    if (data_approvalHierarchyDetail && data_approvalHierarchyDetail.length > 0) {
+      const mapped = data_approvalHierarchyDetail.map((item, index) => ({
+        key: index + 1,
+        approvalLevel: item.approvalLevel,
+        position: item.position,
+        employeeDetail: (item.employeeDetail || []).map((emp, empIndex) => ({
+          key: empIndex + 1,
+          employeeName: emp.employeeName,
+          employeeId: emp.employeeId,
+          apphierId: emp.apphierId,
+        })),
+      }));
+      setDataDetailApproval(mapped);
+    }
+  }, [data_approvalHierarchyDetail]);
+
+  // Handle Relationship Object
+  const handleRelationshipObj = (e, field) => {
+    let result;
+    switch (field) {
+      case "description":
+        result = e;
+        break;
+      case "startDate":
+      case "endDate":
+        result = e;
+        break;
+      default:
+        result = e;
+        break;
+    }
+    setRelationshipObj((prevState) => {
+      const newState = {
+        ...prevState,
+        [field]: result,
+      };
+      return newState;
+    });
+    return result;
   };
 
-  const onFinish = (value) => {
-    // console.log(moment(value.startDate).format("DD MMM YYYY"));
-    const valueForm = {
-      ...value,
-      startDate: moment(value.startDate).format("DD MMM YYYY"),
-      endDate: moment(value.endDate).format("DD MMM YYYY"),
-    };
-    setDataConfirm(valueForm);
+  // Handle Approval Object
+  const handleApprovalObj = (e, field) => {
+    let result = e;
+    setApprovalObj((prevState) => {
+      const newState = {
+        ...prevState,
+        [field]: result,
+      };
+      return newState;
+    });
+    return result;
   };
 
+  // Handle Detail Approval - Fetch from API
+  const handleDetailApproval = (appHierId) => {
+    if (idAccount && appHierId) {
+      dispatch(getApprovalHierarchyDetail({ idAccount, appHierId }));
+    }
+  };
+
+  const sendData = async (value, isDraft = false) => {
+    try {
+      setLoading(true);
+
+      const payload = {
+        ...value,
+        relationshipCategory: value?.relationshipCategory?.toString(),
+        relationshipType: value?.relationshipType?.toString(),
+        ...(type === "create" && { action: isDraft ? "DRAFT" : "SUBMIT" }),
+      };
+
+      if (type === "create") {
+        await dispatch(createRelationship({ idAccount, payload })).unwrap();
+      } else {
+        await dispatch(
+          updateRelationship({ idAccount, idRelationship: id, payload })
+        ).unwrap();
+      }
+
+      setLoading(false);
+      navigate(-1);
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAsDraft = () => {
+    if (listDataAttachment.length === 0) {
+      alert("Please upload at least one attachment");
+      return;
+    }
+    console.log("Current Form Values (Draft):", form.getFieldsValue());
+    console.log("Relationship Obj:", relationshipObj);
+    console.log("Approval Obj:", approvalObj);
+    console.log("Attachment List:", listDataAttachment);
+
+    form
+      .validateFields()
+      .then((values) => {
+        const valueForm = {
+          subjectId: idAccount,
+          relationshipType: values.relationshipType || relationshipObj.relationshipType,
+          relationshipCategory: values.relationshipCategory || relationshipObj.relationshipCategory,
+          objectId: relationshipObj.objectId,
+          objectName: relationshipObj.objectName || values.relatedName,
+          objectValue: relationshipObj.objectValue || values.relatedNumber,
+          startDate: (values.startDate || relationshipObj.startDate)
+            ? moment(values.startDate || relationshipObj.startDate).format("YYYY-MM-DD")
+            : "",
+          endDate: (values.endDate || relationshipObj.endDate)
+            ? moment(values.endDate || relationshipObj.endDate).format("YYYY-MM-DD")
+            : "",
+          description: values.description || relationshipObj.description || "",
+          appHierId: values.appHierId || approvalObj.appHierId,
+        };
+        sendData(valueForm, true);
+      })
+      .catch((error) => {
+        console.error("Validation failed:", error);
+        alert("Please fill all required fields");
+      });
+  };
+
+  const handleSaveAndSubmit = () => {
+
+    if (listDataAttachment.length === 0) {
+      alert("Please upload at least one attachment");
+      return;
+    }
+
+    console.log("Attachment validation passed");
+    console.log("Current form values:", form.getFieldsValue());
+    console.log("Relationship Obj:", relationshipObj);
+    console.log("Approval Obj:", approvalObj);
+    console.log("Attachment List:", listDataAttachment);
+
+    form
+      .validateFields()
+      .then((values) => {
+        // Convert moment objects to strings
+        const valueForm = {
+          subjectId: idAccount,
+          relationshipType: values.relationshipType || relationshipObj.relationshipType,
+          relationshipCategory: values.relationshipCategory || relationshipObj.relationshipCategory,
+          objectId: relationshipObj.objectId,
+          objectName: relationshipObj.objectName || values.relatedName,
+          objectValue: relationshipObj.objectValue || values.relatedNumber,
+          startDate: (values.startDate || relationshipObj.startDate)
+            ? moment(values.startDate || relationshipObj.startDate).format("YYYY-MM-DD")
+            : "",
+          endDate: (values.endDate || relationshipObj.endDate)
+            ? moment(values.endDate || relationshipObj.endDate).format("YYYY-MM-DD")
+            : "",
+          description: values.description || relationshipObj.description || "",
+          appHierId: values.appHierId || approvalObj.appHierId,
+        };
+
+        setDataConfirm(valueForm);
+        setModalConfirm(true);
+      })
+      .catch((error) => {
+        console.error("Validation failed:", error);
+        console.error("Error fields:", error.errorFields);
+        alert(
+          "Please fill all required fields: " +
+          JSON.stringify(error.errorFields?.map((f) => f.name[0]).join(", "))
+        );
+      });
+  };
   
   const routes = [
     {
@@ -82,342 +322,291 @@ const RelationshipCreateAndUpdate = ({
       breadcrumbName: "Detail Customer",
     },
     {
-      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
       breadcrumbName: "Detail Account",
     },
     {
-      path: type === "create" ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP : ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP,
-      breadcrumbName: type === "create" ? "Create Relationship" : "Update Relationship",
-    }
+      path:
+        type === "create"
+          ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP
+          : ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP,
+      breadcrumbName:
+        type === "create" ? "Create Relationship" : "Update Relationship",
+    },
   ];
 
+  // Navigation handlers
+  const next = () => {
+    setCurrent(current + 1);
+  };
+
+  const prev = () => {
+    setCurrent(current - 1);
+  };
+
+  const scrollRightHandler = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollLeft += 250;
+    }
+  };
+
+  const scrollLeftHandler = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollLeft -= 250;
+    }
+  };
+
+  const handleClear = () => {
+    if (current === 0) {
+      setRelationshipObj({});
+      form.resetFields();
+    } else if (current === 1) {
+      setApprovalObj({});
+      setDataDetailApproval([]);
+      form.resetFields(["appHierId"]);
+    } else {
+      setListDataAttachment([]);
+    }
+  };
+
+  const handleButtonNext = () => {
+    form
+      .validateFields()
+      .then((values) => {
+        next();
+        scrollRightHandler();
+      })
+      .catch((error) => {
+        console.error("Validation failed:", error);
+      });
+  };
+
+  // Steps Configuration
+  const steps = [
+    {
+      title: "Relationship Information",
+      content: (
+        <RelationshipInformation
+          form={form}
+          relationshipObj={relationshipObj}
+          handleRelationshipObj={handleRelationshipObj}
+        />
+      ),
+      disabled: false,
+    },
+    {
+      title: "Approval",
+      content: (
+        <RelationshipApproval
+          form={form}
+          approvalObj={approvalObj}
+          handleApprovalObj={handleApprovalObj}
+          dataApprovalList={data_approvalHierarchies || []}
+          dataDetailApproval={dataDetailApproval}
+          handleDetailApproval={handleDetailApproval}
+          loading={loadingApprovalHierarchyDetail}
+        />
+      ),
+      disabled: false,
+    },
+    {
+      title: "Attachment",
+      content: (
+        <RelationshipAttachment
+          data={listDataAttachment}
+          updateData={setListDataAttachment}
+          type={type}
+          setModalUpload={setModalUpload}
+          onDownload={(file) =>
+            dispatch(downloadAttachment({ idAccount, idFile: file.key }))
+          }
+        />
+      ),
+      disabled: false,
+    },
+  ];
+
+  const items = steps.map((item) => ({
+    key: item.title,
+    title: item.title,
+  }));
+
   return (
-    <LayoutMenu>
-      <Form
-        id={"formRelationship"}
-        layout={"vertical"}
-        form={form}
-        onFinish={onFinish}
-      >
-        <BreadCrumb routes={routes} />
-        <div className="w-full">
-          <HeaderDetail
-            data_detail={obj}
-            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-          />
-        </div>
-
-        <BaseContainer header={"CREATE RELATIONSHIP"}>
-          <div className="w-full grid grid-cols-3 gap-3">
-            {/* Create Relationship */}
-
-            <Form.Item
-              name={"directionFlag"}
-              rules={[
-                { message: requiredMessage("Direction Flag"), required: true },
-              ]}
-              className="no-margin-form"
-            >
-              <SelectComponent mandatory label={"Direction Flag"}>
-                <Select.Option
-                  key={obj?.accountInformation?.sorId}
-                  value={obj?.accountInformation?.sorId}
-                >
-                  {obj?.accountInformation?.sor}
-                </Select.Option>
-              </SelectComponent>
-            </Form.Item>
-            <Form.Item
-              name={"relationshipCategory"}
-              rules={[
-                {
-                  message: requiredMessage("Relationship Category"),
-                  required: true,
-                },
-              ]}
-              className="no-margin-form"
-            >
-              <SelectComponent mandatory label={"Relationship Category"}>
-                <Select.Option
-                  key={obj?.accountInformation?.sorId}
-                  value={obj?.accountInformation?.sorId}
-                >
-                  {obj?.accountInformation?.sor}
-                </Select.Option>
-              </SelectComponent>
-            </Form.Item>
-          </div>
-          <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-            {"RELATIONSHIP INFORMATION"}
+    <>
+      <LayoutMenu>
+        <Spin spinning={loading}>
+          <BreadCrumb routes={routes} />
+          <div className="w-full">
+            <HeaderDetail
+              data_detail={obj}
+              data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+              idAccount={idAccount}
+              idCustomer={idCustomer}
+              type={accountType}
+            />
           </div>
 
-          <div className="w-full grid grid-cols-3 gap-3">
-            {/* relationship information */}
-
-            <div className="flex items-center gap-2">
-              {/* line 1 */}
-              <Form.Item
-                name={"subjectId"}
-                rules={[
-                  { message: requiredMessage("Subject Id"), required: true },
-                ]}
-              >
-                <InputComponent
-                  label={"Subject Id"}
-                  mandatory
-                  disabled
-                  // onChange={(e) => setName(e.target.value)}
+          <Form
+            id="formRelationship"
+            form={form}
+            layout="vertical"
+            scrollToFirstError={true}
+            preserve={true}
+            onSubmit={(e) => {
+              e.preventDefault();
+              return false;
+            }}
+          >
+            {/* Steps Content */}
+            <BaseContainer>
+              <div className="flex justify-center py-4">
+                <Steps
+                  current={current}
+                  items={items.map((item, index) => ({
+                    ...item,
+                    status:
+                      index < current
+                        ? "finish"
+                        : index === current
+                          ? "process"
+                          : "wait",
+                  }))}
+                  labelPlacement="vertical"
                 />
-              </Form.Item>
+              </div>
+              <div className="steps-content my-6">{steps[current].content}</div>
+            </BaseContainer>
 
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => {
-                  // setModalConfirm(true);
-                  //   setOpenModal(true);
-                  //   setTypeModal("create");
-                  //   setDataUpdate([]);
-                }}
-                icon={<SVGIcon name="IconButtonCreate" width={24} />}
-              ></ButtonComponent>
-
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => {
-                  // setModalConfirm(true);
-                  //   setOpenModal(true);
-                  //   setTypeModal("create");
-                  //   setDataUpdate([]);
-                }}
-                icon={<SVGIcon name="IconClear" width={24} />}
-              ></ButtonComponent>
-            </div>
-
-            <Form.Item
-              name={"subjectName"}
-              rules={[
-                { message: requiredMessage("Subject Name"), required: true },
-              ]}
-              className="no-margin-form"
-            >
-              <SelectComponent mandatory disabled label={"Subject Name"}>
-                <Select.Option
-                  key={obj?.accountInformation?.sorId}
-                  value={obj?.accountInformation?.sorId}
-                >
-                  {obj?.accountInformation?.sor}
-                </Select.Option>
-              </SelectComponent>
-            </Form.Item>
-            <Form.Item
-              name={"subjectTable"}
-              rules={[
-                { message: requiredMessage("Subject Table"), required: true },
-              ]}
-              className="no-margin-form"
-            >
-              <SelectComponent mandatory disabled label={"Subject Table"}>
-                <Select.Option
-                  key={obj?.accountInformation?.sorId}
-                  value={obj?.accountInformation?.sorId}
-                >
-                  {obj?.accountInformation?.sor}
-                </Select.Option>
-              </SelectComponent>
-            </Form.Item>
-
-            <div className="flex items-center gap-2">
-              {/* line 2 */}
-              <Form.Item
-                name={"objectId"}
-                rules={[
-                  { message: requiredMessage("Object Id"), required: true },
-                ]}
-              >
-                <InputComponent
-                  label={"Object Id"}
-                  mandatory
-                  // onChange={(e) => setName(e.target.value)}
-                />
-              </Form.Item>
-
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => {
-                  // setModalConfirm(true);
-                  //   setOpenModal(true);
-                  //   setTypeModal("create");
-                  //   setDataUpdate([]);
-                }}
-                icon={<SVGIcon name="IconButtonCreate" width={24} />}
-              ></ButtonComponent>
-
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => {
-                  // setModalConfirm(true);
-                  //   setOpenModal(true);
-                  //   setTypeModal("create");
-                  //   setDataUpdate([]);
-                }}
-                icon={<SVGIcon name="IconClear" width={24} />}
-              ></ButtonComponent>
-            </div>
-
-            <Form.Item
-              name={"objectName"}
-              rules={[
-                { message: requiredMessage("Object Name"), required: true },
-              ]}
-              className="no-margin-form"
-            >
-              <SelectComponent mandatory disabled label={"Object Name"}>
-                <Select.Option
-                  key={obj?.accountInformation?.sorId}
-                  value={obj?.accountInformation?.sorId}
-                >
-                  {obj?.accountInformation?.sor}
-                </Select.Option>
-              </SelectComponent>
-            </Form.Item>
-            <Form.Item
-              name={"objectTable"}
-              rules={[
-                { message: requiredMessage("Object Table"), required: true },
-              ]}
-              className="no-margin-form"
-            >
-              <SelectComponent mandatory disabled label={"Object Table"}>
-                <Select.Option
-                  key={obj?.accountInformation?.sorId}
-                  value={obj?.accountInformation?.sorId}
-                >
-                  {obj?.accountInformation?.sor}
-                </Select.Option>
-              </SelectComponent>
-            </Form.Item>
-
-            {/* line 3 */}
-
-            <Form.Item
-              name={"relationCode"}
-              rules={[
-                { message: requiredMessage("Relation Code"), required: true },
-              ]}
-              className="no-margin-form"
-            >
-              <SelectComponent mandatory label={"Relation Code"}>
-                <Select.Option
-                  key={obj?.accountInformation?.sorId}
-                  value={obj?.accountInformation?.sorId}
-                >
-                  {obj?.accountInformation?.sor}
-                </Select.Option>
-              </SelectComponent>
-            </Form.Item>
-
-            <Form.Item
-              name={"startDate"}
-              rules={[
-                { message: requiredMessage("Start Date"), required: true },
-              ]}
-              className="no-margin-form"
-            >
-              <DateComponent
-                label="Start Date"
-                // dateDisable={handleDisableEndDate}
-                // disabled={startDate === null}
-              />
-            </Form.Item>
-
-            <Form.Item
-              name={"endDate"}
-              rules={[{ message: requiredMessage("End Date"), required: true }]}
-              className="no-margin-form"
-            >
-              <DateComponent
-                label="End Date"
-                // dateDisable={handleDisableEndDate}
-                // disabled={startDate === null}
-              />
-            </Form.Item>
-          </div>
-
-          <div className="w-full mt-5">
-            <Form.Item
-              name={"description"}
-              rules={[
-                { message: requiredMessage("Description"), required: true },
-              ]}
-            >
-              <InputComponent
-                label={"Description"}
-                type="textarea"
-                mandatory
-                // onChange={(e) => setDescription(e.target.value)}
-              />
-            </Form.Item>
-          </div>
-        </BaseContainer>
-        <div className={"w-full flex justify-between mt-10"}>
-          <div className=" flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-          </div>
-
-          <div className=" flex gap-5">
-            <Form.Item>
-              <ButtonComponent
-                icon={<SVGIcon name="IconClear" width={24} color={"#FFFFFF"} />}
-                type="submit"
-                // onClick={() => {
-                //   form.resetFields();
-                //   setData([]);
-                // }}
-              >
-                Clear
-              </ButtonComponent>
-            </Form.Item>
-            <Form.Item>
+            {/* Section Action Steps */}
+            <div className="steps-action my-8 flex w-full justify-between gap-x-2">
               <ButtonComponent
                 type="submit"
-                htmlType={"submit"}
-                form={"formRelationship"}
+                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
+                onClick={() => navigate(-1)}
+              >
+                Back
+              </ButtonComponent>
+              <div className="flex w-full justify-end gap-x-4">
+                <ButtonComponent
+                  icon={<SVGIcon name="IconButtonClear" width={24} />}
+                  type="submit"
+                  onClick={handleClear}
+                >
+                  Clear
+                </ButtonComponent>
+                {current > 0 && (
+                  <ButtonComponent
+                    onClick={() => {
+                      prev();
+                      scrollLeftHandler();
+                    }}
+                    type="submit"
+                    icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
+                  >
+                    Previous
+                  </ButtonComponent>
+                )}
+                {current < steps.length - 1 && (
+                  <Button
+                    onClick={handleButtonNext}
+                    type="primary"
+                    className="ant-btn ant-btn-submit flex w-full justify-center"
+                    disabled={steps[current].disabled}
+                  >
+                    <span className="p-1 text-[18px] text-center">Next</span>
+                    <RightOutlined
+                      style={{
+                        justifyItems: "center",
+                        fontSize: "18px",
+                        color: "#fff",
+                      }}
+                    />
+                  </Button>
+                )}
+                {current === steps.length - 1 && (
+                  <>
+                    <Button
+                      type="primary"
+                      htmlType="button"
+                      className="ant-btn ant-btn-submit flex w-full justify-center"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleSaveAsDraft();
+                      }}
+                    >
+                      <span className="p-1 text-[18px] text-center">
+                        Save as Draft
+                      </span>
+                    </Button>
+                    <Button
+                      type="primary"
+                      htmlType="button"
+                      className="ant-btn ant-btn-submit flex w-full justify-center"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleSaveAndSubmit();
+                      }}
+                    >
+                      <span className="p-1 text-[18px] text-center">
+                        Save & Submit
+                      </span>
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          </Form>
+        </Spin>
+
+        {/* create tax relation */}
+        <ModalCustom
+          isOpen={modalConfirm}
+          type={"confirmation"}
+          header="CONFIRMATION"
+          width={1200}
+          handleCancel={() => {
+            setModalConfirm(false);
+          }}
+          footer={
+            <div className={"w-full flex justify-end gap-3"}>
+              <ButtonComponent
                 onClick={() => {
-                  setModalConfirm(true);
+                  setModalConfirm(false);
+                }}
+                type="default"
+              >
+                Cancel
+              </ButtonComponent>
+              <ButtonComponent
+                type="submit"
+                onClick={() => {
+                  sendData(dataConfirm);
                 }}
               >
-                Save
+                Confirm
               </ButtonComponent>
-            </Form.Item>
-          </div>
-        </div>
-      </Form>
-
-      {/* create tax relation */}
+            </div>
+          }
+        >
+          <RelationshipConfirm data={dataConfirm} />
+        </ModalCustom>
+      </LayoutMenu>
+      
+      {/* Modal Confirmation */}
       <ModalCustom
         isOpen={modalConfirm}
-        type={"confirmation"}
-        header="CONFIRMATION"
-        width={1200}
+        type="confirmation"
+        header="CONFIRMATION RELATIONSHIP"
+        width={1000}
+        centered={false}
+        style={{ top: 20 }}
         handleCancel={() => {
           setModalConfirm(false);
         }}
         footer={
-          <div className={"w-full flex justify-end gap-3"}>
+          <div className="w-full flex justify-end gap-3">
             <ButtonComponent
               onClick={() => {
                 setModalConfirm(false);
@@ -429,17 +618,31 @@ const RelationshipCreateAndUpdate = ({
             <ButtonComponent
               type="submit"
               onClick={() => {
-                sendData(dataConfirm);
+                sendData(dataConfirm, false);
+                setModalConfirm(false);
               }}
             >
-              Confirm
+              Submit
             </ButtonComponent>
           </div>
         }
       >
-        <RelationshipConfirm data={dataConfirm} />
+        <RelationshipConfirm
+          data={dataConfirm || {}}
+          approvalData={dataDetailApproval}
+          attachmentData={listDataAttachment}
+        />
       </ModalCustom>
-    </LayoutMenu>
+
+      {/* Modal Upload Attachment */}
+      <ModalAttachment
+        openUpload={modalUpload}
+        updateData={setListDataAttachment}
+        categoryOptions={data_attachmentCategory || []}
+        handleCancel={() => setModalUpload(false)}
+        idAccount={idAccount}
+      />
+    </>
   );
 };
 

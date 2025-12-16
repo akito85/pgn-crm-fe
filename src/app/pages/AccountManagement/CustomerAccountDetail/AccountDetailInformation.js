@@ -311,7 +311,8 @@ const AccountDetailInformation = ({
         return (
           <Relationship
             id={id}
-            // handleChangeInteraction={handleChangeInteraction}
+            type={type}
+            idCustomer={idCustomer}
           />
         );
       case dataTabs.adi:

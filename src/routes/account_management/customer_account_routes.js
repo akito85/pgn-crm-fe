@@ -101,6 +101,8 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
     "/account-management/account-standard/relationship/create",
   UPDATE_RELATIONSHIP:
     "/account-management/account-standard/relationship/update",
+  DETAIL_RELATIONSHIP:
+    "/account-management/account-standard/relationship/view",
 
   //SA-Approve-Reject-TOS
   APPROVE_REJECT_TOS:
