@@ -1,25 +1,21 @@
 import { useEffect, useRef } from "react";
 import {
   FilterOutlined,
-  DownloadOutlined, 
-  CheckOutlined, 
-  PlusOutlined 
 } from "@ant-design/icons";
-import { DatePicker, Input, Spin } from "antd";
+import { DatePicker, Form, Input, Spin } from "antd";
 import { useState } from "react";
 import { Fragment } from "react";
 import InvoiceRelationTable from "./InvoiceRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { approveOrRejectAllInvoiceRelation, getInvoiceRelation, getIrApprovalHistory, inactivateInvoiceRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { approveOrRejectAllInvoiceRelation, downloadInvoiceRelation, getInvoiceRelation, getIrApprovalHistory, getIrColumnApi, getIrConditionApi, getIrOperatorApi, inactivateInvoiceRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { dateFormatting } from "../../../../../../../utils";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { Link, useNavigate } from "react-router-dom"
 import ModalConfirmationApprovalInvoiceRelation from "./ModalConfirmationApprovalInvoiceRelation";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../../../../components/Modal/ModalHistory";
+import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
+import NxFilter from "../../../../../../../components/Nx/NxFilter";
 
 const InvoiceRelation = ({
   id = 0,
@@ -32,11 +28,12 @@ const InvoiceRelation = ({
   setSubmitApprovalCondition = () => {},
 }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
-  const { data_invoiceRelation, loading, data_irApprovalHistory } = useSelector(
-    (state) => state.financialInformation
-  );
+  const financialInformationState = useSelector(
+    (state) => state.financialInformation,
+  )
+
+  const { data_invoiceRelation, loading, data_irApprovalHistory } = financialInformationState;
 
   //declare
   const searchInput = useRef(null);
@@ -48,7 +45,7 @@ const InvoiceRelation = ({
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
-  const [search, updateSearch] = useState({});
+  const [search, setSearch] = useState({});
   const [showApprovalModal, setShowApprovalModal] = useState(false);
 
   const [showInactiveModal, setShowInactiveModal] = useState(false);
@@ -57,38 +54,94 @@ const InvoiceRelation = ({
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
+  const [filterForm] = Form.useForm();
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [tempFilters, setTempFilters] = useState([]);
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (newSelectedRowKeys, newSelectedRows) => {
+      setSelectedRowKeys([...newSelectedRowKeys]);
+      setSelectedRows(newSelectedRows.map(newSelectedRow => ({...newSelectedRow})));
+      if (!newSelectedRowKeys.length)
+        setShowApprovalButton(false);
+      else
+        setShowApprovalButton(true);
+    },
+    type: "checkbox",
+    preserveSelectedRowKeys: true,
+  }
+
+  const handleSaveFilter = (values) => {
+    setTempFilters(values.query);
+    setPage(1);
+    setSort("");
+    setSearch({});
+    setSearchText("")
+    setShowFilterModal(false);
+  };
+
+  const handleCancelFilter = () => {
+    setShowFilterModal(false);
+    filterForm.setFieldValue({ query: tempFilters });
+  };
 
   const handleCancelApprovalModal = () => {
     setShowApprovalModal(false);
     setSubmitApprovalCondition("");
   }
 
+  /**
+   * @param {string} description 
+   * @param {"approve"|"reject"} submitApprovalCondition 
+   * @param {() => {}} handleClear 
+   */
   const handleConfirmApprovalModal = (description, submitApprovalCondition, handleClear) => {
+    const action = submitApprovalCondition.toUpperCase();
+
     const body = selectedRows.filter(row => row.approvalType === "INVOICE_RELATION").map((row) => ({
       id: row.id,
       approvalId: row.tappId,
-      action: submitApprovalCondition.toUpperCase(),
+      action,
       description,
     }));
 
     const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_INVOICE_RELATION").map((row) => ({
       id: row.id,
       approvalId: row.tappId,
-      action: submitApprovalCondition.toUpperCase(),
+      action,
       description,
-    }))
+    }));
 
-    dispatch(approveOrRejectAllInvoiceRelation({ body, inactiveBody }))
+    dispatch(approveOrRejectAllInvoiceRelation({ body, inactiveBody, action }))
     .unwrap()
     .then(() => {
       handleClear();
-      setShowApprovalModal(false);
-      setSubmitApprovalCondition("");
+      handleIsApproval(false)
+
+      const body = {
+        page,
+        size: pageSize,
+        sort,
+        searches: search,
+        inputFields: tempFilters,
+      }
+
+      dispatch(getInvoiceRelation({ id, body }))
     })
     .catch(() => {});
   }
 
-  const handleInactiveIrModal = (show, irId = 0, irAppHierId = 0) => {
+  /**
+   * Open or close inactivate modal
+   * @param {boolean} show 
+   * @param {number} prId 
+   * @param {number} prAppHierId 
+   */
+  const handleInactiveModal = (show, irId = 0, irAppHierId = 0) => {
     if (show) {
       setInactivateIrId(irId);
       setInactivateIrAppHierId(irAppHierId);
@@ -100,6 +153,10 @@ const InvoiceRelation = ({
     }
   }
 
+  /**
+   * @param {string} remark 
+   * @param {() => {}} handleClear 
+   */
   const handleInactivateIr = (remark, handleClear) => {
     const body = {
       id: inactivateIrId,
@@ -112,43 +169,31 @@ const InvoiceRelation = ({
     }))
     .unwrap()
     .then(() => {
+      const body = {
+        page,
+        size: pageSize,
+        sort,
+        searches: search,
+        inputFields: tempFilters,
+      }
+
+      dispatch(getInvoiceRelation({ id, body }));
       setShowInactiveModal(false);
-      handleClear()
+      handleClear();
     })
     .catch(() => {})
   }
 
-  useEffect(() => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(getInvoiceRelation({ page, pageSize, sort, search: reqSearch }));
-  }, [dispatch, page, pageSize, sort, search]);
-
-  useEffect(() => {
-    if (
-      data_invoiceRelation && 
-      data_invoiceRelation.result &&
-      data_invoiceRelation.result.length > 0
-    ) {
-      setTotalElement(data_invoiceRelation?.page?.totalElements);
-    }
-  }, [data_invoiceRelation]);
-
-  //handle on-changes listener
+  /**
+   * @param {string[]} selectedKeys 
+   * @param {() => {}} confirm 
+   * @param {string} dataIndex 
+   */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    updateSearch((prevState) => {
+    setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
       }
@@ -159,7 +204,11 @@ const InvoiceRelation = ({
     });
   };
 
-  // Search Column Table
+  /**
+   * @param {string} dataIndex 
+   * @param {string} type 
+   * @returns
+   */
   const getColumnSearchProps = (dataIndex, type) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
       const onDataChange = (value, dateString) => {
@@ -227,39 +276,6 @@ const InvoiceRelation = ({
       ),
   });
 
-  const handleChange = (page) => {
-    setPage(page);
-  };
-
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
-  const onSort = (_, __, sort) => {
-    const dataSort = sort.order
-      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-      : "";
-    setSort(dataSort);
-  };
-
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [selectedRows, setSelectedRows] = useState([]);
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (newSelectedRowKeys, newSelectedRows) => {
-      setSelectedRowKeys([...newSelectedRowKeys]);
-      setSelectedRows(newSelectedRows.map(newSelectedRow => ({...newSelectedRow})));
-      if (!newSelectedRowKeys.length)
-        setShowApprovalButton(false);
-      else
-        setShowApprovalButton(true);
-    },
-    type: "checkbox",
-  }
-
   const handleApprovalHistoryOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
@@ -268,6 +284,10 @@ const InvoiceRelation = ({
     }));
   };
 
+  /**
+   * @param {boolean} show 
+   * @param {number} prId 
+   */
   const handleApprovalHistoryModal = (show, irId = 0) => {
     if (show) {
       dispatch(getIrApprovalHistory(irId));
@@ -276,6 +296,101 @@ const InvoiceRelation = ({
       setShowApprovalHistoryModal(false);
     }
   }
+
+  /**
+   * @param {boolean} newIsApproval 
+   */
+  const handleIsApproval = (newIsApproval) => {
+    if (newIsApproval) {
+      setSearchText("WAITING APPROVAL");
+      setSearchedColumn("approvalStatus");
+      setPage(1);
+      setSearch((prevState) => ({
+        ...prevState,
+        approvalStatus: "WAITING_APPROVAL",
+      }));
+      setIsApproval(true);
+    } else {
+      setSearchText("");
+      setSearchedColumn("");
+      setPage(1)
+      setSearch((prevState) => ({
+        ...prevState,
+        approvalStatus: undefined,
+      }));
+      setIsApproval(false);
+      setSelectedRowKeys([]);
+      setSelectedRows([]);
+      setSubmitApprovalCondition("");
+      setShowApprovalButton(false);
+      setShowApprovalModal(false);
+    }
+  }
+
+  const handleDownload = () => {
+    let tempSearch = "";
+    for (const dataIndex in search) {
+      if (Object.hasOwnProperty.call(search, dataIndex)) {
+        const tempSearchText = search[dataIndex];
+        if (tempSearchText) {
+          tempSearch += `${dataIndex}~${tempSearchText},`;
+        }
+      }
+    }
+    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+    dispatch(downloadInvoiceRelation({ page, pageSize, sort, search: tempSearch }));
+  };
+
+  /**
+   * @param {number} newPage
+   */
+  const handleChange = (newPage) => {
+    setPage(newPage);
+  };
+
+  /**
+   * @param {number} pageChange 
+   * @param {number} pageSizeChange 
+   */
+  const handleChangeSize = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
+    setPageSize(pageSizeChange);
+  };
+
+  /**
+   * @param {*} _ 
+   * @param {*} __ 
+   * @param {import("antd/lib/table/interface").SorterResult} sort
+   */
+  const onSort = (_, __, sort) => {
+    const dataSort = sort.order
+      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
+  };
+
+  useEffect(() => {
+    const body = {
+      page,
+      size: pageSize,
+      sort,
+      searches: search,
+      inputFields: tempFilters,
+    }
+
+    dispatch(getInvoiceRelation({ id, body }));
+  }, [page, pageSize, sort, search, tempFilters]);
+
+  useEffect(() => {
+    if (
+      data_invoiceRelation && 
+      data_invoiceRelation.result &&
+      data_invoiceRelation.result.length > 0
+    ) {
+      setTotalElement(data_invoiceRelation?.page?.totalElements);
+    }
+  }, [data_invoiceRelation]);
 
   // Listen to approve or reject button on the parent component
   useEffect(() => {
@@ -290,25 +405,26 @@ const InvoiceRelation = ({
 
   // Reset accordian when it's not the current one that's opened
   useEffect(() => {
-    if (!isActive) {
-      setSelectedRowKeys([]);
-      setSelectedRows([]);
-      setIsApproval(false);
-      setSubmitApprovalCondition("");
-      setShowApprovalButton("");
+    if (!isActive)
+      handleIsApproval(false);
+  }, [isActive]);
+
+  useEffect(() => {
+    if (!isApproval) {
+      handleIsApproval(false);
     }
-  }, [isActive])
+  }, [isApproval]);
 
   useEffect(() => {
     if (data_irApprovalHistory && data_irApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: data_irApprovalHistory?.dataApprover?.PRICING || [],
-          inactive: data_irApprovalHistory?.dataApprover?.INACTIVE_PRICING || [],
+          create: data_irApprovalHistory?.dataApprover?.INVOICE_RELATION || [],
+          inactive: data_irApprovalHistory?.dataApprover?.INACTIVE_INVOICE_RELATION || [],
         },
         dataHistory: {
-          create: data_irApprovalHistory?.dataHistory?.PRICING || [],
-          inactive: data_irApprovalHistory?.dataHistory?.INACTIVE_PRICING || [],
+          create: data_irApprovalHistory?.dataHistory?.INVOICE_RELATION || [],
+          inactive: data_irApprovalHistory?.dataHistory?.INACTIVE_INVOICE_RELATION || [],
         },
       };
 
@@ -325,134 +441,54 @@ const InvoiceRelation = ({
           {"INVOICE RELATION LIST"}
         </div>
 
-        <div>
-          {!isApproval && (
-            <div className="flex justify-between items-center gap-5 mb-5">
-              {/* Filter Button - Left side */}
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => navigate(-1)}
-                icon={
-                  <FilterOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 20,
-                    }}
-                  />
-                }
-                style={{
-                  backgroundColor: "#0075bf",
-                  color: "#fff",
-                  borderColor: "#0075bf",
-                  border: "1px solid #0075bf",
-                  width: "128px",
-                  height: "48px",
-                  borderRadius: "5px"
-                }}
-              >
-                Filters
-              </ButtonComponent>
-              
-              {/* Right side buttons container */}
-              <div className="flex justify-end items-center gap-2.5">
-                {/* Download List Button */}
-                <ButtonComponent
-                  type={"submit"}
-                  onClick={() => {}}
-                  icon={
-                    <DownloadOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 20,
-                      }}
-                    />
-                  }
-                  style={{
-                    backgroundColor: "#0075bf",
-                    color: "#fff",
-                    borderColor: "#0075bf",
-                    border: "1px solid #0075bf",
-                    borderRadius: "5px",
-                    height: "48px"
-                  }}
-                >
-                  Download List
-                </ButtonComponent>
+        <InvoiceRelationTable
+          data={data_invoiceRelation?.result?.map((invoiceRelation, index) => ({
+            ...invoiceRelation,
+            key: `invoice-relation-${index}`
+          }))}
+          idAccount={id}
+          idCustomer={idCustomer}
+          handleChange={handleChange}
+          handleChangeSize={handleChangeSize}
+          totalElement={totalElement}
+          page={page}
+          pageSize={pageSize}
+          onSort={onSort}
+          getColumnSearchProps={getColumnSearchProps}
+          rowSelection={isApproval ? rowSelection : undefined}
+          isApproval={isApproval}
+          handleInactiveModal={handleInactiveModal}
+          handleApprovalHistoryModal={handleApprovalHistoryModal}
+          handleIsApproval={handleIsApproval}
+          handleDownload={handleDownload}
+          tempFilters={tempFilters}
+          setShowFilterModal={setShowFilterModal}
+        />
 
-                {/* Approval Button */}
-                <ButtonComponent
-                  type={"submit"}
-                  onClick={() => setIsApproval(!isApproval)}
-                  icon={
-                    <CheckOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 20,
-                      }}
-                    />
-                  }
-                  style={{
-                    backgroundColor: "#0075bf",
-                    color: "#fff",
-                    borderColor: "#0075bf",
-                    border: "1px solid #0075bf",
-                    borderRadius: "5px",
-                    height: "48px"
-                  }}
-                >
-                  Approval
-                </ButtonComponent>
+        {/* Advanced Filter Modal */}
+        <ModalCustom
+          isOpen={showFilterModal}
+          type={"confirmation"}
+          header={"QUERY"}
+          width={1200}
+          handleCancel={handleCancelFilter}
+        >
+          <Form form={filterForm} layout="vertical" onFinish={handleSaveFilter} id={"prFilterForm"}>
+            <NxFilter
+              form={filterForm}
+              onCancel={handleCancelFilter}
+              dispatch={dispatch}
+              reduxState={financialInformationState}
+              getColumnApi={getIrColumnApi}
+              getConditionApi={getIrConditionApi}
+              getOperatorApi={getIrOperatorApi}
+              maxFilters={5}
+              loading={loading}
+              formId="prFilterForm"
+            />
+          </Form>
+        </ModalCustom>
 
-                {/* Create Button */}
-                <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_INVOICE_RELATION} state={{
-                  idAccount: id,
-                  idCustomer,
-                }}>
-                  <ButtonComponent
-                    type={"submit"}
-                    icon={
-                      <PlusOutlined
-                        style={{
-                          color: "#fff",
-                          fontSize: 20,
-                        }}
-                      />
-                    }
-                    style={{
-                      backgroundColor: "#0075bf",
-                      color: "#fff",
-                      borderColor: "#0075bf",
-                      border: "1px solid #0075bf",
-                      borderRadius: "5px",
-                      height: "48px"
-                    }}
-                  >
-                    Create
-                  </ButtonComponent>
-                </Link>
-              </div>
-            </div>
-          )}
-          <InvoiceRelationTable
-            data={data_invoiceRelation?.result?.map((invoiceRelation, index) => ({
-              ...invoiceRelation,
-              key: `invoice-relation-${index}`
-            }))}
-            idAccount={id}
-            idCustomer={idCustomer}
-            handleChange={handleChange}
-            handleChangeSize={handleChangeSize}
-            totalElement={totalElement}
-            page={page}
-            pageSize={pageSize}
-            onSort={onSort}
-            getColumnSearchProps={getColumnSearchProps}
-            rowSelection={isApproval ? rowSelection : undefined}
-            isApproval={isApproval}
-            handleInactiveIrModal={handleInactiveIrModal}
-            handleApprovalHistoryModal={handleApprovalHistoryModal}
-          />
-        </div>
         <ModalConfirmationApprovalInvoiceRelation
           dataSource={selectedRows}
           isOpen={showApprovalModal}
@@ -466,7 +502,7 @@ const InvoiceRelation = ({
         <ModalApproveOrReject
           isOpen={showInactiveModal}
           header={"INACTIVATE"}
-          handleCloseModal={() => handleInactiveIrModal(false)}
+          handleCloseModal={() => handleInactiveModal(false)}
           customMessage={`Are you sure you want to inactivate invoice relation - ${inactivateIrId}?`}
           onFinish={({ remark }, handleClear) => handleInactivateIr(remark, handleClear)}
         />

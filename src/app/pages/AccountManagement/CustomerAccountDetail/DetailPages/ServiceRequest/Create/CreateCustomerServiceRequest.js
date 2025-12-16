@@ -7,7 +7,7 @@ import { LeftCircleOutlined, RightCircleOutlined, RightOutlined, WarningOutlined
 
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../../components/BreadCrumb";
-import StepContents from "./StepContents";
+// import StepContents from "./StepContents";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 
@@ -86,7 +86,8 @@ const CreateCustomerServiceRequest = ({ type }) => {
   const isLoading = loading || loadingForm || loadingAccount;
 
  
-  const { InformationForm, AttachmentForm, ApprovalForm, ContactForm, PreRequisiteForm } = StepContents;
+  // const { InformationForm, AttachmentForm, ApprovalForm, ContactForm, PreRequisiteForm } = StepContents;
+  const { InformationForm, AttachmentForm, ApprovalForm, ContactForm, PreRequisiteForm } = {};
 
   const routes = [
     {

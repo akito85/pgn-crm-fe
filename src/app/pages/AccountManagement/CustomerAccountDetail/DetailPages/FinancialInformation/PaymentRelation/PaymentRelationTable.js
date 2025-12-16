@@ -24,7 +24,7 @@ const PaymentRelationTable = ({
   getColumnSearchProps = () => {},
   rowSelection,
   isApproval = false,
-  handleInactiveModal = () => {},
+  handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
   handleIsApproval = () => {},
   handleDownload = () => {},
@@ -58,7 +58,7 @@ const PaymentRelationTable = ({
       width: 90,
       align: "center",
       ...getColumnSearchProps("startDate", "date"),
-      render: (startDate) => moment(startDate).format(dateFormatting.date),
+      render: (startDate) => moment(startDate, "DD-MM-YYYY").format(dateFormatting.date),
     },
     {
       title: "END DATE",
@@ -66,7 +66,7 @@ const PaymentRelationTable = ({
       width: 90,
       align: "center",
       ...getColumnSearchProps("endDate", "date"),
-      render: (endDate) => moment(endDate).format(dateFormatting.date),
+      render: (endDate) => moment(endDate, "DD-MM-YYYY").format(dateFormatting.date),
     },
     {
       title: "STATUS APPROVAL",
@@ -264,7 +264,7 @@ const PaymentRelationTable = ({
               className="inactive-check"
               disabled={r?.status === "ACTIVE" ? false : true}
               checked={r?.status === "ACTIVE" ? false : true}
-              onClick={() => handleInactiveModal(true, r?.id, r?.appHierId)}
+              onClick={() => handleInactivateModal(true, r?.id, r?.appHierId)}
             />
           </Tooltip>
         )

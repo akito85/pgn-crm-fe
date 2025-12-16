@@ -102,14 +102,14 @@ const PaymentRelation = ({
   const handleConfirmApprovalModal = (description, submitApprovalCondition, handleClear) => {
     const action = submitApprovalCondition.toUpperCase();
 
-    const body = selectedRows.filter(row => !row.approvalType).map((row) => ({
+    const body = selectedRows.filter(row => row.approvalType === "PAYMENT_RELATION").map((row) => ({
       id: row.id,
       approvalId: row.tappId,
       action,
       description,
     }));
 
-    const inactiveBody = selectedRows.filter(row => row.approvalType).map((row) => ({
+    const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_PAYMENT_RELATION").map((row) => ({
       id: row.id,
       approvalId: row.tappId,
       action,
@@ -127,6 +127,7 @@ const PaymentRelation = ({
         size: pageSize,
         sort,
         searches: search,
+        inputFields: tempFilters,
       }
 
       dispatch(getPaymentRelation({ id, body }))
@@ -168,11 +169,12 @@ const PaymentRelation = ({
     }))
     .unwrap()
     .then(() => {
-        const body = {
+      const body = {
         page,
         size: pageSize,
         sort,
         searches: search,
+        inputFields: tempFilters,
       }
 
       dispatch(getPaymentRelation({ id, body }));
@@ -403,9 +405,15 @@ const PaymentRelation = ({
 
   // Reset accordian when it's not the current one that's opened
   useEffect(() => {
-    if (!isActive || !isApproval)
+    if (!isActive)
       handleIsApproval(false);
-  }, [isActive, isApproval]);
+  }, [isActive]);
+
+  useEffect(() => {
+    if (!isApproval) {
+      handleIsApproval(false);
+    }
+  }, [isApproval]);
 
   useEffect(() => {
     if (data_prApprovalHistory && data_prApprovalHistory?.dataApprover) {
@@ -449,7 +457,7 @@ const PaymentRelation = ({
           getColumnSearchProps={getColumnSearchProps}
           rowSelection={isApproval ? rowSelection : undefined}
           isApproval={isApproval}
-          handleInactivePrModal={handleInactivateModal}
+          handleInactivateModal={handleInactivateModal}
           handleApprovalHistoryModal={handleApprovalHistoryModal}
           handleIsApproval={handleIsApproval}
           handleDownload={handleDownload}
