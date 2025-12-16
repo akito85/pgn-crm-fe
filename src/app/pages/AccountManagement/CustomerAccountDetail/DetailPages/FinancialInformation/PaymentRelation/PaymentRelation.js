@@ -127,6 +127,7 @@ const PaymentRelation = ({
         size: pageSize,
         sort,
         searches: search,
+        inputFields: tempFilters,
       }
 
       dispatch(getPaymentRelation({ id, body }))
@@ -173,6 +174,7 @@ const PaymentRelation = ({
         size: pageSize,
         sort,
         searches: search,
+        inputFields: tempFilters,
       }
 
       dispatch(getPaymentRelation({ id, body }));
@@ -403,9 +405,15 @@ const PaymentRelation = ({
 
   // Reset accordian when it's not the current one that's opened
   useEffect(() => {
-    if (!isActive || !isApproval)
+    if (!isActive)
       handleIsApproval(false);
-  }, [isActive, isApproval]);
+  }, [isActive]);
+
+  useEffect(() => {
+    if (!isApproval) {
+      handleIsApproval(false);
+    }
+  }, [isApproval]);
 
   useEffect(() => {
     if (data_prApprovalHistory && data_prApprovalHistory?.dataApprover) {

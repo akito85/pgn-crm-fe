@@ -116,8 +116,6 @@ const InvoiceRelation = ({
       description,
     }));
 
-    console.log({body, inactiveBody})
-
     dispatch(approveOrRejectAllInvoiceRelation({ body, inactiveBody, action }))
     .unwrap()
     .then(() => {
@@ -407,9 +405,15 @@ const InvoiceRelation = ({
 
   // Reset accordian when it's not the current one that's opened
   useEffect(() => {
-    if (!isActive || !isApproval)
-      handleIsApproval(false)
-  }, [isActive])
+    if (!isActive)
+      handleIsApproval(false);
+  }, [isActive]);
+
+  useEffect(() => {
+    if (!isApproval) {
+      handleIsApproval(false);
+    }
+  }, [isApproval]);
 
   useEffect(() => {
     if (data_irApprovalHistory && data_irApprovalHistory?.dataApprover) {
@@ -435,6 +439,7 @@ const InvoiceRelation = ({
       <Fragment>
         <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
           {"INVOICE RELATION LIST"}
+          "isApproval" {isApproval ? "true" : "false" }
         </div>
 
         <InvoiceRelationTable
