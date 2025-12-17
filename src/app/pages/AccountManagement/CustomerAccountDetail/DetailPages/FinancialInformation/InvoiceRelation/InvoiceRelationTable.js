@@ -1,11 +1,11 @@
 import TablePagination from "../../../../../../../components/TablePagination";
 import { Fragment } from "react";
-import { Badge, Checkbox, Tooltip } from "antd";
+import { Badge, Button, Checkbox, Tooltip } from "antd";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import moment from "moment";
 import { dateFormatting, toTitleCase } from "../../../../../../../utils";
 import StatusComponent from "../../../../../../../components/StatusComponent";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
@@ -32,6 +32,8 @@ const InvoiceRelationTable = ({
   tempFilters = [],
   setShowFilterModal = () => {},
 }) => {
+  const navigate = useNavigate();
+
   const columns = [
     {
       title: "NO",
@@ -235,11 +237,16 @@ const InvoiceRelationTable = ({
       type: 'table',
       render: (r, data_length) => {
         return (
-          <Link to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION} state={{
-            idIr: r.id,
-            idAccount,
-            idCustomer,
-          }}>
+          <Button
+            type="text"
+            style={{ padding: 0, height: 'auto', border: 'none' }}
+            onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION, { state: {
+              idIr: r.id,
+              idAccount,
+              idCustomer,
+            }})}
+            disabled={r.statusApproval === "WAITING_APPROVAL" || r.status === "INACTIVE"}
+          >
             <Tooltip title="Update">
               <div className="pt-1">
                 <SVGIcon
@@ -249,7 +256,7 @@ const InvoiceRelationTable = ({
                 />
               </div>
             </Tooltip>
-          </Link>
+          </Button>
         )
       }
     },
