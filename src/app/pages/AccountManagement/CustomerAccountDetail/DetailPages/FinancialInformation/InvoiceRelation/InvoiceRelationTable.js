@@ -1,5 +1,4 @@
 import TablePagination from "../../../../../../../components/TablePagination";
-import { Fragment } from "react";
 import { Badge, Button, Checkbox, Tooltip } from "antd";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import moment from "moment";
