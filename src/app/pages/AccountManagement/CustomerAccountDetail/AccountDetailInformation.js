@@ -197,6 +197,15 @@ const AccountDetailInformation = ({
         ) ||
         path.pathname.includes(
           "/account-management/account-standard/financial-information/payment-relation/update"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/invoice-relation/details"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/invoice-relation/create"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/financial-information/invoice-relation/update"
         ) 
       )
     ) {

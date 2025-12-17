@@ -504,7 +504,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
             <ButtonComponent
               type={"submit"}
               icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              onClick={()=>{navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD)}}
+              onClick={()=>{navigate(-1)}}
             >
               Back
             </ButtonComponent>
