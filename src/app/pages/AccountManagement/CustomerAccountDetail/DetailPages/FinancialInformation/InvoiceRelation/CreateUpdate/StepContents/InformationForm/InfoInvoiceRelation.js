@@ -12,7 +12,7 @@ import moment from "moment";
 import DateComponent from "../../../../../../../../../../components/DateComponent";
 import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
-import { getPrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { getIrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
 
@@ -40,7 +40,7 @@ export default function InfoInvoiceRelation({
 
   const [isOpen, setIsOpen] = useState(false);
   
-  const { data_prAccountStandard } = useSelector(
+  const { data_irAccountStandard } = useSelector(
     (state) => state.financialInformation
   );
   
@@ -153,24 +153,24 @@ export default function InfoInvoiceRelation({
 
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(getPrAccountStandard({ page, pageSize, sort, search: reqSearch }));
+    dispatch(getIrAccountStandard({ page, pageSize, sort, search: reqSearch }));
   }, [page, pageSize, sort, search]);
 
   useEffect(() => {
     if (
-      data_prAccountStandard && 
-      data_prAccountStandard.result &&
-      data_prAccountStandard.result.length > 0
+      data_irAccountStandard && 
+      data_irAccountStandard.result &&
+      data_irAccountStandard.result.length > 0
     ) {
-      setTotalElement(data_prAccountStandard?.page?.totalElements);
+      setTotalElement(data_irAccountStandard?.page?.totalElements);
     }
-  }, [data_prAccountStandard]);
+  }, [data_irAccountStandard]);
 
   // Sanitize pagination values to prevent NaN
   // Modify
   const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
   const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
-  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : (data_prAccountStandard?.result?.length || 0);
+  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : (data_irAccountStandard?.result?.length || 0);
 
   const columnMain = [
     {
@@ -503,7 +503,7 @@ export default function InfoInvoiceRelation({
         ]}
       >
         <TablePaginationNew
-          dataSource={data_prAccountStandard?.result?.map((item, idx) => ({
+          dataSource={data_irAccountStandard?.result?.map((item, idx) => ({
             ...item,
             key: item.id || idx,
           }))}
