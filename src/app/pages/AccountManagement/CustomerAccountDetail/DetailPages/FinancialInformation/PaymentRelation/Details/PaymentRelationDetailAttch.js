@@ -1,6 +1,6 @@
 import { Spin, Tooltip } from "antd";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import TablePaginationNew from "../../../../../../../../components/TablePaginationNew";
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
@@ -96,25 +96,23 @@ const PaymentRelationDetailAttch = ({
   ];
 
   return (
-    <Fragment>
-      <Spin spinning={loadingDownload}>
-        <BaseContainer header={"ATTACHMENTS"}>
-          <TablePaginationNew
-            dataSource={dataAttachment.map((item, idx) => ({
-              ...item,
-              key: item.id || idx,
-            }))}
-            tableScrolled={{ y: 525, x: 1500 }}
-            columns={columns}
-            current={page}
-            onChange={setPage}
-            onSizeChanger={setPageSize}
-            type="FE"
-          />
+    <Spin spinning={loadingDownload}>
+      <BaseContainer header={"ATTACHMENTS"}>
+        <TablePaginationNew
+          dataSource={dataAttachment.map((item, idx) => ({
+            ...item,
+            key: item.id || idx,
+          }))}
+          tableScrolled={{ y: 525, x: 1500 }}
+          columns={columns}
+          current={page}
+          onChange={setPage}
+          onSizeChanger={setPageSize}
+          type="FE"
+        />
 
-        </BaseContainer>
-      </Spin>
-    </Fragment>
+      </BaseContainer>
+    </Spin>
   );
 };
 
