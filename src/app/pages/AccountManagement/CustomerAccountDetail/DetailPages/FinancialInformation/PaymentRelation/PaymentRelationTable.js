@@ -10,6 +10,7 @@ import { useColumnActionPermission } from "../../../../../../../components/Colum
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../../../components/Toolbar";
 import { CheckOutlined, DownloadOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import { TablePaginationNew } from "poc-table-dragandrop";
 
 const PaymentRelationTable = ({
   data = [],
@@ -329,7 +330,7 @@ const PaymentRelationTable = ({
           <Toolbar items={itemActions} type="detail" />
         </div>
       )}
-      <TablePagination
+      {/* <TablePagination
         dataSource={data}
         totalData={totalElement}
         current={page}
@@ -348,6 +349,25 @@ const PaymentRelationTable = ({
           )
         ]}
         rowSelection={rowSelection}
+      /> */}
+      <TablePaginationNew
+        dataSource={data}
+        totalData={totalElement}
+        current={page}
+        pageSize={pageSize}
+        onChange={handleChangeSize}
+        tableScrolled={{ y: 400, x: 2000 }}
+        columns={[
+          ...visibleColumns,
+          ...useColumnActionPermission(
+            ["Inactivate", "View", "Update", "History"],
+            itemActions,
+            "View",
+            "detail"
+          )
+        ]}
+        rowSelection={rowSelection}
+        enableDragColumn={!isApproval}
       />
     </div>
   );
