@@ -271,7 +271,7 @@ const PaymentRelationTable = ({
               className="inactive-check"
               disabled={r?.status === "ACTIVE" ? false : true}
               checked={r?.status === "ACTIVE" ? false : true}
-              onClick={() => handleInactivateModal(true, r?.id, r?.appHierId)}
+              onClick={() => handleInactivateModal(true, r?.id, r?.appHierId, r?.relatedAccountNumber)}
             />
           </Tooltip>
         )
