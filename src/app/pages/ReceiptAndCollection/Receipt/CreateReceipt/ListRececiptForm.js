@@ -250,15 +250,15 @@ const ListRececiptForm = ({ type }) => {
   const convertToInteger = (amount) => {
     return parseInt(amount.replace(/\./g, "").replace(",", "."));
   };
-  
+
 
   // console.log(formValue, "formValue");
 
-  console.log( hasValue(formValue?.convertedCurrency)  &&
-  hasValue(formValue?.currency) &&
-  hasValue(formValue?.rateAmount), "validasi");
-  
-  
+  console.log(hasValue(formValue?.convertedCurrency) &&
+    hasValue(formValue?.currency) &&
+    hasValue(formValue?.rateAmount), "validasi");
+
+
 
   useEffect(() => {
     if (
@@ -270,7 +270,7 @@ const ListRececiptForm = ({ type }) => {
         : 0;
 
       if (
-        hasValue(formValue?.convertedCurrency)  &&
+        hasValue(formValue?.convertedCurrency) &&
         hasValue(formValue?.currency) &&
         hasValue(formValue?.rateAmount)
       ) {
@@ -282,14 +282,14 @@ const ListRececiptForm = ({ type }) => {
               "en-US",
               { minimumFractionDigits: 2, maximumFractionDigits: 2 }
             ),
-            eqAmount:eqAmountValue.toLocaleString("id-ID", {
+            eqAmount: eqAmountValue.toLocaleString("id-ID", {
               minimumFractionDigits: 2, // Tambahkan dua angka desimal
               maximumFractionDigits: 2,
             }) || "0"
           });
         } else if (formValue?.currency === 244) {
           const convertValue = convertToInteger(convertedAmount)
-          const eqAmountValue = roundToOneDecimal(convertValue /  data_converted_currency?.convertedRate)
+          const eqAmountValue = roundToOneDecimal(convertValue / data_converted_currency?.convertedRate)
 
           form.setFieldsValue({
             rateAmount: data_converted_currency?.convertedRate?.toLocaleString(
@@ -316,7 +316,7 @@ const ListRececiptForm = ({ type }) => {
     }
   }, [data_converted_currency, form, amount]);
 
-  
+
   //   if (
   //     hasValue(data_converted_currency) &&
   //     Object.keys(data_converted_currency).length !== 0
@@ -460,6 +460,15 @@ const ListRececiptForm = ({ type }) => {
     return floatNumber;
   };
 
+  // Helper to parse ID format "1.234,56" -> 1234.56
+  const parseMonetaryValue = (value) => {
+    if (typeof value === 'number') return value;
+    if (!value) return 0;
+    // Remove dots (thousands separator) and replace comma with dot (decimal separator)
+    const cleaned = value.toString().replace(/\./g, "").replace(",", ".");
+    return parseFloat(cleaned);
+  };
+
   const handleSubmitForm = (formValue) => {
     if (dataTable?.length === 0) {
       const errorBody = {
@@ -468,7 +477,7 @@ const ListRececiptForm = ({ type }) => {
       };
       dispatch(showModalError(errorBody));
     } else if (listDataAttachment?.length === 0) {
-     countBadgeFieldsErrorMandatory(setTabData, listDataAttachment)
+      countBadgeFieldsErrorMandatory(setTabData, listDataAttachment)
     } else {
       countBadgeFieldsErrorMandatory(setTabData, listDataAttachment)
       setModalConfirm(true);
@@ -484,7 +493,7 @@ const ListRececiptForm = ({ type }) => {
           dateFormatting.dateTime
         ),
         currencyId: formValue?.currency,
-        amount: formValue?.amount,
+        amount: parseMonetaryValue(formValue?.amount),
         paymentTypeId: formValue?.paymentType,
         paymentMethodId: formValue?.method,
         receiptChannelId: formValue?.receiptChannel,

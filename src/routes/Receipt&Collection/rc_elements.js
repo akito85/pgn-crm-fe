@@ -53,6 +53,8 @@ import ViewPaymentChannel from "../../app/pages/ReceiptAndCollection/MasterData/
 import ListDetailPaymentChannel from "../../app/pages/ReceiptAndCollection/MasterData/PaymentChannel/ListDetailPaymentChannel";
 import ListFormPaymentChannel from "../../app/pages/ReceiptAndCollection/MasterData/PaymentChannel/ListFormPaymentChannel";
 
+import ViewAccounting from "../../app/pages/ReceiptAndCollection/Accounting/ViewAccounting";
+
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
   VIEW_RECEIPT_PAGE: <ViewReceipt />,
@@ -153,4 +155,7 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_PAYMENT_CHANNEL: <ListDetailPaymentChannel />,
   CREATE_PAYMENT_CHANNEL: <ListFormPaymentChannel type={"create"} />,
   UPDATE_PAYMENT_CHANNEL: <ListFormPaymentChannel type={"update"} />,
+  
+  // Accounting
+  VIEW_ACCOUNTING: <ViewAccounting />,
 };

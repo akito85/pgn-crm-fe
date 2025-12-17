@@ -362,9 +362,16 @@ const ModalApprovalBilling = ({
             onFinish={handleSave}
           >
             <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-              <p className="text-primary uppercase font-bold mb-4">
-                Billing List - Ready to Approve
-              </p>
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-primary uppercase font-bold">
+                  Billing List - Ready to Approve
+                </p>
+                {selectedRowKeys.length > 0 && (
+                  <p className="text-sm font-semibold text-blue-600">
+                    {selectedRowKeys.length} {selectedRowKeys.length === 1 ? 'row' : 'rows'} selected
+                  </p>
+                )}
+              </div>
               <TableRBI
                 dataSource={filterDataByPage("data")}
                 columns={processedColumns}
@@ -408,6 +415,14 @@ const ModalApprovalBilling = ({
           className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
         >
           <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-primary uppercase font-bold">
+                Confirmation
+              </p>
+              <p className="text-sm font-semibold text-blue-600">
+                {dataTableSelect.length} {dataTableSelect.length === 1 ? 'row' : 'rows'} will be {action === 'APPROVE' ? 'approved' : action === 'REJECT' ? 'rejected' : 'processed'}
+              </p>
+            </div>
             <TableRBI
               dataSource={dataTableSelect}
               columns={processedColumns}

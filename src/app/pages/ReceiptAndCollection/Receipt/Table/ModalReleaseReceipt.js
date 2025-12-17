@@ -1,0 +1,371 @@
+import React, { useState, useEffect } from "react";
+import { Modal, Steps, Input, Form, Alert, Spin, InputNumber } from "antd";
+import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import TablePagination from "../../../../../components/TablePagination";
+import { LeftOutlined } from "@ant-design/icons";
+import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+import { useDispatch, useSelector } from "react-redux";
+import RadioTabs from "../../../../../components/RadioTabs";
+import { columnsReceipt } from "../ColumnReceiptView";
+import { getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
+import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
+import { configApp } from "../../../../../constants/configApp";
+
+const { TextArea } = Input;
+
+const ModalReleaseReceipt = ({
+    isOpen,
+    handleCancel,
+    selectedData,
+    dataSource,
+    onSubmit
+}) => {
+    const dispatch = useDispatch();
+    const [currentStep, setCurrentStep] = useState(0);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    const [localSelectedData, setLocalSelectedData] = useState([]);
+    const [releaseReason, setReleaseReason] = useState("");
+    const [releaseAmountData, setReleaseAmountData] = useState({});
+    const [listDataAttachment, setListDataAttachment] = useState([]);
+    const [confirmationTab, setConfirmationTab] = useState("Release");
+
+    const nextParams = [
+        { label: "Receipt Information" },
+        { label: "Release Information" },
+        { label: "Attachment Information" },
+        { label: "Confirmation" }
+    ];
+
+    useEffect(() => {
+        if (isOpen) {
+            // Reset state on open
+            setCurrentStep(0);
+            setReleaseReason("");
+            setListDataAttachment([]);
+            setConfirmationTab("Receipt");
+            // Fetch receipt list (filtered/unfiltered?)
+            // Usage seems to imply selecting FROM list.
+            // If selectedData is passed (from single row action), pre-select it?
+            if (selectedData && selectedData.length > 0) {
+                const keys = selectedData.map(item => item.key || item.id);
+                setSelectedRowKeys(keys);
+                setLocalSelectedData(selectedData);
+            } else {
+                setSelectedRowKeys([]);
+                setLocalSelectedData([]);
+            }
+        }
+    }, [isOpen, selectedData]);
+
+    const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
+        setSelectedRowKeys(newSelectedRowKeys);
+        setLocalSelectedData(newSelectedRows);
+    };
+
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: onSelectChange,
+    };
+
+    const handleChangePage = (p, ps) => {
+        setPage(p);
+        setPageSize(ps);
+        // Dispatch fetch logic if needed, or rely on parent?
+        // ViewReceipt passes handleFetch? No, ViewReceipt manages main list.
+        // Modal might need its own fetch if it shows ALL receipts.
+        // Assuming it uses the main state 'receipt' data for now.
+    };
+
+    // Use columnsReceipt to match the main list view
+    const columns = columnsReceipt(
+        {}, // search
+        page,
+        pageSize,
+        null, // searchInput
+        null, // searchedColumn
+        null, // searchText
+        () => { }, // handleSearch
+        () => { }, // handleModalApprovalHistory
+        () => { }  // handleDeleteReceipt
+    );
+
+    const columnsSimplified = [
+        {
+            title: "No",
+            dataIndex: "no",
+            key: "no",
+            render: (text, record, index) => (page - 1) * pageSize + index + 1,
+        },
+        {
+            title: "Receipt Code",
+            dataIndex: "receiptCode",
+            key: "receiptCode",
+        },
+        {
+            title: "Customer Number",
+            dataIndex: "customerNumber",
+            key: "customerNumber",
+            render: (_, record) => record.customerNumber || record.customerId
+        },
+        {
+            title: "Customer Name",
+            dataIndex: "customerName",
+            key: "customerName",
+        },
+        {
+            title: "Account Number",
+            dataIndex: "accountNumber",
+            key: "accountNumber",
+            render: (_, record) => record.accountNumber || record.accountId
+        },
+        {
+            title: "Receipt Date",
+            dataIndex: "receiptDate",
+            key: "receiptDate",
+        },
+    ];
+
+    const handleReleaseAmountChange = (value, key) => {
+        setReleaseAmountData(prev => ({ ...prev, [key]: value }));
+    };
+
+    const columnsStep2 = [
+        ...columnsSimplified,
+        {
+            title: "Release Amount",
+            dataIndex: "releaseAmount",
+            key: "releaseAmount",
+            render: (text, record) => (
+                <InputNumber
+                    style={{ width: "100%" }}
+                    value={releaseAmountData[record.key || record.id]}
+                    formatter={(value) =>
+                        value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""
+                    }
+                    parser={(value) => value?.replace(/\./g, "")}
+                    onChange={(value) => handleReleaseAmountChange(value, record.key || record.id)}
+                    placeholder="Input Amount"
+                    controls={false}
+                />
+            )
+        }
+    ];
+
+    // Validation for Step 2
+    const isStep2Valid = () => {
+        if (currentStep !== 1) return true;
+        // Check if all selected receipts have release amount
+        const allAmountsFilled = localSelectedData.every(item => {
+            const amount = releaseAmountData[item.key || item.id];
+            return amount !== undefined && amount !== null && amount !== '';
+        });
+        // Check if remark is filled
+        const remarkFilled = releaseReason && releaseReason.trim().length > 0;
+        return allAmountsFilled && remarkFilled;
+    };
+
+    // Get disabled state for Next button
+    const isNextDisabled = () => {
+        if (currentStep === 0) return localSelectedData.length === 0;
+        if (currentStep === 1) return !isStep2Valid();
+        return false;
+    };
+
+    const handleNext = () => {
+        setCurrentStep(currentStep + 1);
+    };
+
+    const handlePrev = () => {
+        setCurrentStep(currentStep - 1);
+    };
+
+    const handleTabChange = (e) => {
+        setConfirmationTab(e.target.value);
+    };
+
+
+    const renderFooter = () => {
+        return (
+            <div className="flex justify-end gap-5 items-center">
+                <ButtonComponent type="default" onClick={handleCancel} className="h-[40px]">
+                    Back
+                </ButtonComponent>
+                {currentStep > 0 && (
+                    <ButtonComponent
+                        type="submit"
+                        onClick={handlePrev}
+                        className="h-[40px]"
+                        icon={
+                            <LeftOutlined
+                                style={{ color: "#fff", fontSize: 12 }}
+                            />
+                        }
+                    >
+                        Previous
+                    </ButtonComponent>
+                )}
+                {currentStep < 3 ? (
+                    <ButtonComponent
+                        type="submit"
+                        onClick={handleNext}
+                        className="h-[40px]"
+                        disabled={isNextDisabled()}
+                    >
+                        Next
+                    </ButtonComponent>
+                ) : (
+                    <ButtonComponent
+                        type="submit"
+                        className="h-[40px]"
+                        onClick={() => onSubmit({
+                            receipts: localSelectedData,
+                            reason: releaseReason,
+                            attachments: listDataAttachment
+                        })}
+                    >
+                        Confirm
+                    </ButtonComponent>
+                )}
+            </div>
+        );
+    };
+
+    return (
+        <ModalCustom
+            isOpen={isOpen}
+            handleCancel={handleCancel}
+            header="RECEIPT HOLD"
+            width={1200}
+            footer={renderFooter()}
+        >
+            <div className="overflow-x-scroll scrollStepsCstm gap-5 mb-5 p-2">
+                <Steps
+                    current={currentStep}
+                    items={nextParams.map(item => ({ title: item.label }))}
+                    labelPlacement="vertical"
+                />
+            </div>
+
+            <div className="mt-4">
+                {/* Step 1: Receipt Information */}
+                {currentStep === 0 && (
+                    <div className="w-full">
+                        <p className="text-primary text-xl font-bold uppercase py-4">RECEIPT INFORMATION</p>
+                        <TablePagination
+                            dataSource={dataSource}
+                            columns={columns}
+                            rowSelection={rowSelection}
+                            current={page}
+                            pageSize={pageSize}
+                            onChange={handleChangePage}
+                            onShowSizeChange={handleChangePage}
+                            totalData={dataSource?.length}
+                            showTotal={(total, range) => `Showing ${range[0]} to ${range[1]} of ${total} records`}
+                            tableScrolled={{ x: "max-content", y: 400 }}
+                        />
+                    </div>
+                )}
+
+                {/* Step 2: Release Information */}
+                {currentStep === 1 && (
+                    <div className="w-full">
+                        <p className="text-primary text-xl font-bold uppercase py-4">RELEASE INFORMATION</p>
+
+                        <div className="mb-4">
+                            <TablePagination
+                                dataSource={localSelectedData}
+                                columns={columnsStep2}
+                                pagination={false}
+                                usePagination={false}
+                            />
+                        </div>
+
+                        <Form layout="vertical">
+                            <Form.Item label="Remark" required>
+                                <TextArea
+                                    rows={4}
+                                    value={releaseReason}
+                                    onChange={(e) => setReleaseReason(e.target.value)}
+                                    placeholder="Input release remark..."
+                                />
+                            </Form.Item>
+                        </Form>
+                        <div className="text-gray-400 text-xs mt-1">
+                            You have {255 - (releaseReason?.length || 0)} characters remaining
+                        </div>
+                    </div>
+                )}
+
+                {/* Step 3: Attachment Information */}
+                {currentStep === 2 && (
+                    <div className="w-full">
+                        <p className="text-primary text-xl font-bold uppercase py-4">ATTACHMENT INFORMATION</p>
+                        <AttachmentComponent
+                            data={listDataAttachment}
+                            updateData={setListDataAttachment}
+                            dispatch={dispatch}
+                            getAPICategory={getListCategoryReceipt}
+                            typeSelector="receipt"
+                            service={receiptCollectionHttpService}
+                            configApplication={configApp.PAYMENT_SERVICE}
+                            typeRBI={"data"}
+                        />
+                    </div>
+                )}
+
+                {/* Step 4: Confirmation */}
+                {currentStep === 3 && (
+                    <div className="w-full">
+                        <RadioTabs
+                            data={[
+                                { value: "Release", label: "Release" },
+                                { value: "Attachment", label: "Attachment" },
+                            ]}
+                            currentPosition={confirmationTab}
+                            onChange={handleTabChange}
+                        />
+
+                        <div className="mt-4">
+                            {confirmationTab === "Release" && (
+                                <>
+                                    <p className="text-primary text-xl font-bold uppercase py-4">RELEASE INFORMATION</p>
+                                    <TablePagination
+                                        dataSource={localSelectedData}
+                                        columns={columns}
+                                        current={page}
+                                        pageSize={pageSize}
+                                        onChange={handleChangePage}
+                                        onShowSizeChange={handleChangePage}
+                                        totalData={localSelectedData?.length}
+                                        showTotal={(total, range) => `Showing ${range[0]} to ${range[1]} of ${total} records`}
+                                        tableScrolled={{ x: "max-content", y: 400 }}
+                                    />
+                                    <div className="mt-4">
+                                        <p className="font-bold">Remark</p>
+                                        <div className="text-gray-700">{releaseReason || "-"}</div>
+                                    </div>
+                                </>
+                            )}
+                            {confirmationTab === "Attachment" && (
+                                <AttachmentComponent
+                                    data={listDataAttachment}
+                                    type="preview"
+                                    dispatch={dispatch}
+                                    typeSelector="receipt"
+                                    service={receiptCollectionHttpService}
+                                    configApplication={configApp.PAYMENT_SERVICE}
+                                />
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </ModalCustom>
+    );
+};
+
+export default ModalReleaseReceipt;
+

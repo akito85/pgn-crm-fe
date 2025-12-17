@@ -99,4 +99,7 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel/view",
   CREATE_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel/create",
   UPDATE_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel/update",
+  
+  // Accounting
+  VIEW_ACCOUNTING: "/receipt-and-collection/accounting",
 };

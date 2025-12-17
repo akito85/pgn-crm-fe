@@ -16,11 +16,11 @@ import { LeftOutlined } from "@ant-design/icons";
 import { dateFormat } from "../../../../../utils";
 
 const data_detail = {
-  syncId: "SYNCRL1",
-  syncDateTime: "2023-08-30T04:01:40.892Z",
-  totalReceipt: 1,
+  syncId: "SYNCRL13",
+  syncDateTime: "2021-12-21T04:01:40.892Z",
+  totalReceipt: 10,
   currency: "IDR",
-  totalAmount: 1000000,
+  totalAmount: 9139241,
   createdDate: "2023-08-30T04:01:40.892Z",
   createdBy: "Annisa",
   updatedDate: "2023-08-30T04:01:40.892Z",
@@ -29,14 +29,25 @@ const data_detail = {
 
 const data_receipt = [];
 for (let i = 0; i < 100; i++) {
+  const randomAccount = Math.floor(Math.random() * (999999 - 10000 + 1)) + 10000;
+  const randomAmountEquivalent = Math.floor(Math.random() * (2000000 - 5000 + 1)) + 5000;
+
   data_receipt.push({
     receiptCode: `RCT00${i}`,
     customerNumber: `CST${i}`,
-    accountNumber: 5787531,
     customerName: "ANUGRAH ARTACITRA SEMESTA (RESTORAN MUTIARA) PT",
-    receiptDate: "2023-08-30T04:01:40.892Z",
-    amount: 15000000000,
-    amountEquivalent: 690467,
+    accountNumber: `0000${randomAccount}`,
+    accountName: `0000${randomAccount}`,
+    syncDateTime: "2023-01-06T04:01:40.892Z",
+    accountSegment: `RT`,
+    accountGroupType: `GOLD`, 
+    meterReadingCode: `41-Jakarta`, 
+    accountType: `JRG`, 
+    accountStatus: `REGISTERED`, 
+    customerManagement: `Analyst City Gas CM and TS Area Bogor 1`, 
+    corporateCustomer: `N`, 
+    amount: 90000000, 
+    amountEquivalent: randomAmountEquivalent
   });
 }
 
@@ -144,23 +155,72 @@ const DetailSynchronizeReceipt = () => {
       ...getColumnSearchProps("customerNumber"),
     },
     {
-      title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
-      sorter: true,
-      ...getColumnSearchProps("accountNumber"),
-    },
-    {
       title: "CUSTOMER NAME",
       dataIndex: "customerName",
       sorter: true,
       ...getColumnSearchProps("customerName"),
     },
     {
+      title: "ACCOUNT NUMBER",
+      dataIndex: "accountNumber",
+      sorter: true,
+      ...getColumnSearchProps("accountNumber"),
+    },
+    {
+      title: "ACCOUNT NAME",
+      dataIndex: "accountName",
+      sorter: true,
+      ...getColumnSearchProps("accountName"),
+    },
+    {
       title: "RECEIPT DATE",
       dataIndex: "syncDateTime",
       align: "center",
       sorter: true,
+      ...getColumnSearchProps("syncDateTime"),
       render: (syncDateTime) => moment(syncDateTime).format("DD MMM YYYY"),
+    },
+    {
+      title: "ACCOUNT SEGMENT",
+      dataIndex: "accountSegment",
+      sorter: true,
+      ...getColumnSearchProps("accountSegment"),
+    },
+    {
+      title: "ACCOUNT GROUP TYPE",
+      dataIndex: "accountGroupType",
+      sorter: true,
+      ...getColumnSearchProps("accountGroupType"),
+    },
+    {
+      title: "METER READING CODE",
+      dataIndex: "meterReadingCode",
+      sorter: true,
+      ...getColumnSearchProps("meterReadingCode"),
+    },
+    {
+      title: "ACCOUNT TYPE",
+      dataIndex: "accountType",
+      sorter: true,
+      ...getColumnSearchProps("accountType"),
+    },
+    {
+      title: "ACCOUNT STATUS",
+      dataIndex: "accountStatus",
+      sorter: true,
+      ...getColumnSearchProps("accountStatus"),
+    },
+    {
+      title: "CUSTOMER MANAGEMENT",
+      dataIndex: "customerManagement",
+      sorter: true,
+      ...getColumnSearchProps("customerManagement"),
+    },
+    {
+      title: "CORPORATE CUSTOMER",
+      dataIndex: "corporateCustomer",
+      sorter: true,
+      ...getColumnSearchProps("corporateCustomer"),
     },
     {
       title: "AMOUNT",
@@ -173,8 +233,10 @@ const DetailSynchronizeReceipt = () => {
           displayType="text"
           value={amount}
           className="text-right"
-          thousandSeparator={true}
+          // thousandSeparator={true}
           decimalScale={2}
+          decimalSeparator=","
+          thousandSeparator="."
           fixedDecimalScale
         />
       ),
@@ -190,8 +252,10 @@ const DetailSynchronizeReceipt = () => {
           displayType="text"
           value={amountEquivalent}
           className="text-right"
-          thousandSeparator={true}
+          // thousandSeparator={true}
           decimalScale={2}
+          decimalSeparator=","
+          thousandSeparator="."
           fixedDecimalScale
         />
       ),
@@ -205,12 +269,12 @@ const DetailSynchronizeReceipt = () => {
       breadcrumbName: "Receipt & Collection",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_RECEIPT,
-      breadcrumbName: "Receipt",
+      path: "",
+      breadcrumbName: "Receipt Reconciliation",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_RECEIPT,
-      breadcrumbName: "Detail Receipt",
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_SYNCHRONIZE_RECEIPT,
+      breadcrumbName: "Synchronize Receipt",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_SYNCHRONIZE_RECEIPT,
@@ -233,7 +297,7 @@ const DetailSynchronizeReceipt = () => {
 
       <BaseContainer header={"SYNCHRONIZE INFORMATION"}>
         <div className="w-full grid grid-cols-3 gap-3">
-          <DetailText label="Sync Id">{data_detail?.syncId}</DetailText>
+          <DetailText label="SYNC ID">{data_detail?.syncId}</DetailText>
           <DetailText label="Sync Date Time">{data_detail?.syncDateTime
               ? moment(data_detail.syncDateTime).format(dateFormat)
               : "-"}</DetailText>
@@ -244,8 +308,10 @@ const DetailSynchronizeReceipt = () => {
               displayType="text"
               value={data_detail?.totalAmount}
               className="text-right"
-              thousandSeparator={true}
+              // thousandSeparator={true}
               decimalScale={2}
+              decimalSeparator=","
+              thousandSeparator="."
               fixedDecimalScale
             />
           </DetailText>
@@ -264,7 +330,7 @@ const DetailSynchronizeReceipt = () => {
             // totalData={data?.page?.totalElements}
             onSort={onSort}
             tableScrolled={{
-              x: 2000,
+              x: 5000,
               y: 300,
             }}
           />

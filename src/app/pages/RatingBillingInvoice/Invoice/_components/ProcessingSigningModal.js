@@ -11,6 +11,9 @@ import {
   Alert,
   Steps,
   Input,
+  Select,
+  Spin,
+  Table,
 } from "antd";
 import {
   CloseOutlined,
@@ -18,9 +21,14 @@ import {
   DownloadOutlined,
   UploadOutlined,
   InboxOutlined,
+  InfoCircleFilled,
 } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
-import { previewStampedInvoice } from "../../../../../redux/slices/rating_billing_invoice/emeterai";
+import {
+  downloadStampedInvoice,
+  getApprovalHierarchyList,
+  getApphierDetail,
+} from "../../../../../redux/slices/rating_billing_invoice/emeterai";
 
 const { Dragger } = Upload;
 const { Step } = Steps;
@@ -34,12 +42,15 @@ const ProcessSigningModal = ({
   loading: externalLoading = false,
 }) => {
   const dispatch = useDispatch();
-  const { previewLoading } = useSelector((state) => state.emeterai);
+  const { downloadLoading, data_approval_hierarchy, data_apphier_detail } =
+    useSelector((state) => state.emeterai);
 
   const [signingMethod, setSigningMethod] = useState("digital");
   const [currentStep, setCurrentStep] = useState(0);
   const [fileList, setFileList] = useState([]);
   const [remark, setRemark] = useState("");
+  const [selectedApproval, setSelectedApproval] = useState(null);
+  const [approvalDetail, setApprovalDetail] = useState([]);
 
   // Safe invoice data with proper fallback
   const invoice = React.useMemo(() => {
@@ -64,8 +75,28 @@ const ProcessSigningModal = ({
       setFileList([]);
       setCurrentStep(0);
       setRemark("");
+      setSelectedApproval(null);
+      setApprovalDetail([]);
+      // Fetch approval hierarchy list
+      dispatch(getApprovalHierarchyList());
     }
-  }, [visible]);
+  }, [visible, dispatch]);
+
+  useEffect(() => {
+    if (data_apphier_detail && Array.isArray(data_apphier_detail)) {
+      const data = data_apphier_detail.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: Array.isArray(a.employeeDetail)
+          ? a.employeeDetail.map((b, idx) => ({
+              ...b,
+              key: idx + 1,
+            }))
+          : [],
+      }));
+      setApprovalDetail(data || []);
+    }
+  }, [data_apphier_detail]);
 
   const formatAmount = (amount) => {
     if (typeof amount === "number") {
@@ -74,22 +105,14 @@ const ProcessSigningModal = ({
     return amount;
   };
 
-  const handlePreviewFile = async () => {
+  const handleDownloadFile = async () => {
     try {
-      const result = await dispatch(
-        previewStampedInvoice({ invoiceNumber: invoice.invoiceNumber })
+      await dispatch(
+        downloadStampedInvoice({ invoiceNumber: invoice.invoiceNumber })
       ).unwrap();
-
-      // Create blob and open in new tab
-      const blob = new Blob([result], { type: "application/pdf" });
-      const blobUrl = URL.createObjectURL(blob);
-      const newTab = window.open(blobUrl, "_blank");
-
-      if (newTab) {
-        newTab.document.title = `Preview - ${invoice.invoiceNumber}`;
-      }
+      // Success message already handled in slice
     } catch (error) {
-      console.error("❌ Error previewing document:", error);
+      console.error("❌ Error downloading document:", error);
       // Error message already handled in slice
     }
   };
@@ -130,14 +153,41 @@ const ProcessSigningModal = ({
       // Direct submit for digital signing
       handleSubmit();
     } else {
-      // Go to step 2 for manual
-      setCurrentStep(1);
+      // For manual, validate step before going to next
+      if (currentStep === 0) {
+        // Step 0: Select Method - no validation needed, just go to next step
+        setCurrentStep(1);
+      } else if (currentStep === 1) {
+        // Step 1: Upload Document - validate file upload and remark
+        if (fileList.length === 0) {
+          message.error("Please upload the signed invoice file!");
+          return;
+        }
+        if (!remark || remark.trim() === "") {
+          message.error("Please provide a remark!");
+          return;
+        }
+        setCurrentStep(2);
+      } else if (currentStep === 2) {
+        // Step 2: Approval - validate approval selection
+        if (!selectedApproval) {
+          message.error("Please select approval hierarchy!");
+          return;
+        }
+        setCurrentStep(3);
+      }
     }
   };
 
   const handleBack = () => {
-    setCurrentStep(0);
-    setFileList([]);
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleApprovalSelect = (value) => {
+    setSelectedApproval(value);
+    dispatch(getApphierDetail({ id: value }));
   };
 
   const handleSubmit = async () => {
@@ -148,6 +198,10 @@ const ProcessSigningModal = ({
       }
       if (!remark || remark.trim() === "") {
         message.error("Please provide a remark!");
+        return;
+      }
+      if (!selectedApproval) {
+        message.error("Please select approval hierarchy!");
         return;
       }
     }
@@ -165,6 +219,7 @@ const ProcessSigningModal = ({
               ? fileList[0].originFileObj || fileList[0]
               : null,
           remark: remark,
+          apphierId: signingMethod === "manual" ? selectedApproval : null,
           submittedAt: new Date().toISOString(),
         };
 
@@ -186,6 +241,8 @@ const ProcessSigningModal = ({
       setFileList([]);
       setCurrentStep(0);
       setRemark("");
+      setSelectedApproval(null);
+      setApprovalDetail([]);
     } catch (error) {
       console.error("❌ Error in handleSubmit:", error);
       // Error handling is done in parent component
@@ -197,6 +254,8 @@ const ProcessSigningModal = ({
     setFileList([]);
     setCurrentStep(0);
     setRemark("");
+    setSelectedApproval(null);
+    setApprovalDetail([]);
     onClose();
   };
 
@@ -206,22 +265,62 @@ const ProcessSigningModal = ({
     setFileList([]);
     setCurrentStep(0);
     setRemark("");
+    setSelectedApproval(null);
+    setApprovalDetail([]);
   };
+
+  const columnsApproval = [
+    {
+      title: "NO",
+      key: "no",
+      width: 60,
+      align: "center",
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: "HIERARCHY",
+      dataIndex: "hierarchy",
+      key: "hierarchy",
+      width: 150,
+    },
+    {
+      title: "POSITION",
+      dataIndex: "position",
+      key: "position",
+      width: 200,
+    },
+  ];
+
+  const columnsExpandApproval = [
+    {
+      title: "NO",
+      key: "no",
+      width: 60,
+      align: "center",
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: "EMPLOYEE",
+      dataIndex: "employeeName",
+      key: "employeeName",
+      width: 250,
+    },
+    {
+      title: "EMAIL",
+      dataIndex: "email",
+      key: "email",
+      width: 250,
+    },
+  ];
 
   // Render Step 1: Select Method & Invoice Info
   const renderStep1 = () => (
     <>
       {/* Invoice Information (Readonly) */}
       <div style={{ marginBottom: "32px" }}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "200px 1fr",
-            gap: "16px",
-          }}
-        >
+        <div className="flex flex-col w-full gap-2">
           {/* Invoice Number */}
-          <div>
+          <div className="w-full">
             <label
               style={{
                 display: "block",
@@ -376,23 +475,33 @@ const ProcessSigningModal = ({
 
       {/* Method Description */}
       {signingMethod === "digital" && (
-        <Alert
-          message="Digital Signing Process"
-          description="The invoice will be signed electronically using a valid digital certificate. This process is secure and legally binding."
-          type="info"
-          showIcon
-          style={{ marginTop: "16px" }}
-        />
+        <div className="flex gap-3 bg-[#F5F5F5] p-3 rounded-[10px]">
+          <InfoCircleFilled
+            style={{ paddingTop: "2px", color: "#0175BF", fontSize: "20px" }}
+          />
+          <div className="flex flex-col">
+            <p style={{ fontWeight: 600 }}>Digital Signing Process</p>
+            <p>
+              The Invoice will be signed electronically using a valid digital
+              certificate. This process is secure and legally binding.
+            </p>
+          </div>
+        </div>
       )}
 
       {signingMethod === "manual" && (
-        <Alert
-          message="Manual Signing Process"
-          description="You will need to download, print, sign with wet ink, and upload the invoice. Instructions will be provided in the next step."
-          type="warning"
-          showIcon
-          style={{ marginTop: "16px" }}
-        />
+        <div className="flex gap-3 bg-[#F5F5F5] p-3 rounded-[10px]">
+          <InfoCircleFilled
+            style={{ paddingTop: "2px", color: "#0175BF", fontSize: "20px" }}
+          />
+          <div className="flex flex-col">
+            <p style={{ fontWeight: 600 }}>Manual (Wet Ink Signature)</p>
+            <p>
+              Your invoice requires a physical signature using wet ink. Please
+              print, sign, and upload the signed document.
+            </p>
+          </div>
+        </div>
       )}
     </>
   );
@@ -442,9 +551,9 @@ const ProcessSigningModal = ({
           type="default"
           size="large"
           icon={<DownloadOutlined />}
-          onClick={handlePreviewFile}
-          loading={previewLoading}
-          disabled={previewLoading}
+          onClick={handleDownloadFile}
+          loading={downloadLoading}
+          disabled={downloadLoading}
           style={{
             width: "100%",
             height: "48px",
@@ -453,7 +562,9 @@ const ProcessSigningModal = ({
             borderWidth: "2px",
           }}
         >
-          {previewLoading ? "Loading..." : "Download Stamped Invoice (.pdf)"}
+          {downloadLoading
+            ? "Downloading..."
+            : "Download Stamped Invoice (.pdf)"}
         </Button>
       </div>
 
@@ -532,21 +643,256 @@ const ProcessSigningModal = ({
     </>
   );
 
+  // Render Step 3: Approval (Manual Only)
+  const renderStep3 = () => (
+    <>
+      <div style={{ marginBottom: "24px" }}>
+        <p
+          style={{
+            fontSize: "14px",
+            fontWeight: "600",
+            color: "#0175BF",
+            textTransform: "uppercase",
+            marginBottom: "16px",
+          }}
+        >
+          Approval Information
+        </p>
+
+        <div style={{ marginBottom: "24px" }}>
+          <label
+            style={{
+              display: "block",
+              marginBottom: "8px",
+              fontSize: "14px",
+              fontWeight: "500",
+              color: "#262626",
+            }}
+          >
+            Approval Hierarchy <span style={{ color: "red" }}>*</span>
+          </label>
+          <Select
+            value={selectedApproval}
+            onChange={handleApprovalSelect}
+            placeholder="Select approval hierarchy"
+            style={{ width: "100%" }}
+            size="large"
+            showSearch
+            filterOption={(input, option) =>
+              (option?.children ?? "")
+                .toLowerCase()
+                .includes(input.toLowerCase())
+            }
+          >
+            {data_approval_hierarchy &&
+              data_approval_hierarchy.map((data) => (
+                <Select.Option value={data.appHierId} key={data.appHierId}>
+                  {data.approvalName}
+                </Select.Option>
+              ))}
+          </Select>
+        </div>
+
+        {selectedApproval && approvalDetail.length > 0 && (
+          <Table
+            dataSource={approvalDetail}
+            columns={columnsApproval}
+            pagination={false}
+            size="small"
+            expandable={{
+              expandedRowRender: (record) => (
+                <div style={{ padding: "16px 0" }}>
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      color: "#0175BF",
+                      textTransform: "uppercase",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    Employee Information
+                  </p>
+                  <Table
+                    dataSource={record?.employeeDetail || []}
+                    columns={columnsExpandApproval}
+                    pagination={false}
+                    size="small"
+                  />
+                </div>
+              ),
+            }}
+          />
+        )}
+      </div>
+    </>
+  );
+
+  // Render Step 4: Confirmation (Manual Only)
+  const renderStep4 = () => {
+    const selectedApprovalName = data_approval_hierarchy?.find(
+      (a) => a.appHierId === selectedApproval
+    )?.approvalName;
+
+    return (
+      <>
+        <div style={{ marginBottom: "32px" }}>
+          <h3
+            style={{
+              fontSize: "16px",
+              fontWeight: "600",
+              color: "#262626",
+              marginBottom: "24px",
+            }}
+          >
+            Please review your submission
+          </h3>
+
+          <div style={{ marginBottom: "24px" }}>
+            <p
+              style={{
+                fontSize: "14px",
+                color: "#8c8c8c",
+                marginBottom: "8px",
+              }}
+            >
+              Remark
+            </p>
+            <p style={{ fontSize: "15px", color: "#262626" }}>{remark}</p>
+          </div>
+
+          <div style={{ marginBottom: "24px" }}>
+            <p
+              style={{
+                fontSize: "14px",
+                color: "#8c8c8c",
+                marginBottom: "8px",
+              }}
+            >
+              Approval Hierarchy
+            </p>
+            <p style={{ fontSize: "15px", color: "#262626" }}>
+              {selectedApprovalName || "-"}
+            </p>
+          </div>
+
+          <div style={{ marginBottom: "24px" }}>
+            <p
+              style={{
+                fontSize: "14px",
+                color: "#8c8c8c",
+                marginBottom: "12px",
+              }}
+            >
+              Approvers
+            </p>
+            <div
+              style={{
+                background: "#f5f5f5",
+                border: "1px solid #d9d9d9",
+                borderRadius: "6px",
+                padding: "16px",
+              }}
+            >
+              {approvalDetail.length > 0 ? (
+                approvalDetail.map((approval, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      marginBottom:
+                        idx < approvalDetail.length - 1 ? "16px" : "0",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        color: "#262626",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      {approval.hierarchy} - {approval.position}
+                    </p>
+                    {approval.employeeDetail &&
+                      approval.employeeDetail.length > 0 && (
+                        <div style={{ paddingLeft: "16px" }}>
+                          {approval.employeeDetail.map((emp, empIdx) => (
+                            <p
+                              key={empIdx}
+                              style={{
+                                fontSize: "14px",
+                                color: "#595959",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              • {emp.employeeName} ({emp.email})
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                  </div>
+                ))
+              ) : (
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#8c8c8c",
+                    fontStyle: "italic",
+                  }}
+                >
+                  No approvers selected
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <p
+              style={{
+                fontSize: "14px",
+                color: "#8c8c8c",
+                marginBottom: "12px",
+              }}
+            >
+              File
+            </p>
+            <div
+              style={{
+                background: "#f5f5f5",
+                border: "1px solid #d9d9d9",
+                borderRadius: "6px",
+                padding: "16px",
+              }}
+            >
+              {fileList.length > 0 && (
+                <span style={{ fontSize: "14px", color: "#262626" }}>
+                  {fileList[0].name} ({(fileList[0].size / 1024).toFixed(2)}{" "}
+                  KB)
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  };
+
   return (
     <Modal
       visible={visible}
       onCancel={handleCancel}
-      width={750}
+      width={850}
       footer={null}
       closeIcon={<CloseOutlined />}
       bodyStyle={{ padding: 0 }}
     >
-      {/* Header */}
-      <div
+      <Spin spinning={externalLoading}>
+        {/* Header */}
+        <div
         style={{
           padding: "20px 24px",
           borderBottom: "2px solid #e8e8e8",
-          background: "#0175BF",
+          background: "#efefef",
         }}
       >
         <h2
@@ -554,11 +900,15 @@ const ProcessSigningModal = ({
             margin: 0,
             fontSize: "20px",
             fontWeight: "600",
-            color: "#ffffff",
+            color: "#0175BF",
           }}
         >
           {signingMethod === "manual" && currentStep === 1
             ? "Upload Invoice with Wet Ink Signature"
+            : signingMethod === "manual" && currentStep === 2
+            ? "Select Approval"
+            : signingMethod === "manual" && currentStep === 3
+            ? "Confirmation"
             : "Process Digital Signing"}
         </h2>
       </div>
@@ -569,13 +919,18 @@ const ProcessSigningModal = ({
           <Steps current={currentStep} size="small">
             <Step title="Select Method" />
             <Step title="Upload Document" />
+            <Step title="Approval" />
+            <Step title="Confirmation" />
           </Steps>
         </div>
       )}
 
       {/* Content */}
       <div style={{ padding: "32px" }}>
-        {currentStep === 0 ? renderStep1() : renderStep2()}
+        {currentStep === 0 && renderStep1()}
+        {currentStep === 1 && signingMethod === "manual" && renderStep2()}
+        {currentStep === 2 && signingMethod === "manual" && renderStep3()}
+        {currentStep === 3 && signingMethod === "manual" && renderStep4()}
       </div>
 
       {/* Footer */}
@@ -585,11 +940,11 @@ const ProcessSigningModal = ({
           borderTop: "1px solid #e8e8e8",
           background: "#fafafa",
           display: "flex",
-          justifyContent: currentStep === 1 ? "space-between" : "flex-end",
+          justifyContent: currentStep > 0 ? "space-between" : "flex-end",
           gap: "12px",
         }}
       >
-        {currentStep === 1 && (
+        {currentStep > 0 && signingMethod === "manual" && (
           <Button
             onClick={handleBack}
             size="large"
@@ -632,16 +987,12 @@ const ProcessSigningModal = ({
             >
               {signingMethod === "digital" ? "Process Signing" : "Next"}
             </Button>
-          ) : (
+          ) : currentStep < 3 ? (
             <Button
               type="primary"
               size="large"
-              icon={<UploadOutlined />}
-              onClick={handleSubmit}
+              onClick={handleNext}
               loading={externalLoading}
-              disabled={
-                fileList.length === 0 || !remark || remark.trim() === ""
-              }
               style={{
                 minWidth: "160px",
                 height: "44px",
@@ -649,11 +1000,28 @@ const ProcessSigningModal = ({
                 fontWeight: "500",
               }}
             >
-              Submit File
+              Next
+            </Button>
+          ) : (
+            <Button
+              type="primary"
+              size="large"
+              icon={<UploadOutlined />}
+              onClick={handleSubmit}
+              loading={externalLoading}
+              style={{
+                minWidth: "160px",
+                height: "44px",
+                fontSize: "15px",
+                fontWeight: "500",
+              }}
+            >
+              Submit Request
             </Button>
           )}
         </div>
       </div>
+      </Spin>
     </Modal>
   );
 };

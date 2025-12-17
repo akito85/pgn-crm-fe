@@ -31,6 +31,7 @@ const initialState = {
   dataListAppHierId: [],
   dataListAppHierDetail: [],
   data_converted_currency: null,
+  data_customer_list: null,
 };
 
 export const getPaginateReceipt = createAsyncThunk(
@@ -87,6 +88,25 @@ export const getAllocation = createAsyncThunk(
   }
 );
 
+export const getReceiptCustomerList = createAsyncThunk(
+  "GET_RECEIPT_CUSTOMER_LIST",
+  async ({ search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/receipt/customer/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_RECEIPT_CUSTOMER_LIST" })
+      );
+      return error;
+    }
+  }
+);
+
 export const getDownloadReceipt = createAsyncThunk(
   "DOWNLOAD_RECEIPT",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
@@ -110,9 +130,10 @@ export const getCollectionAgentDDL = createAsyncThunk(
   "GET_LIST_COLL_AGENT_RECEIPT",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/receipt/list-collection-agent`;
-      const data = await receiptCollectionHttpService.getAll(url);
-      return data;
+      const url = `/v1/dbs/api/collecting-agent/list`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      const data = response?.data;
+      return { data };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -330,9 +351,13 @@ export const getPayGetwayDDL = createAsyncThunk(
   "GET_LIST_PAY_GET_RECEIPTS",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/receipt/list-payment-gateway`;
-      const data = await receiptCollectionHttpService.getAll(url);
-      return data;
+      const url = `/v1/dbs/api/partner/list`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      const data = response?.data?.map((item) => ({
+        id: item?.id,
+        name: item?.partnerName,
+      }));
+      return { data };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -384,9 +409,10 @@ export const getPayDeliverDDL = createAsyncThunk(
   "GET_LIST_PAYMENT_DELIVERY_RECEIPTS",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/receipt/list-payment-delivery-channel`;
-      const data = await receiptCollectionHttpService.getAll(url);
-      return data;
+      const url = `/v1/dbs/api/payment-channel/list`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      const data = response?.data;
+      return { data };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -635,9 +661,8 @@ export const approveOrRejectReceipt = createAsyncThunk(
         await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const successMessage = {
         title: "Successfull",
-        description: `Your data has been ${
-          body.action === "APPROVED" ? "Approved" : "Rejected"
-        }`,
+        description: `Your data has been ${body.action === "APPROVED" ? "Approved" : "Rejected"
+          }`,
         return: true,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
@@ -652,9 +677,8 @@ export const approveOrRejectReceipt = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.action === "APPROVED" ? "approved" : "rejected"
-          }. ${message}.`,
+          description: `Your data was not ${body.action === "APPROVED" ? "approved" : "rejected"
+            }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
@@ -1107,6 +1131,32 @@ const receiptSlice = createSlice({
     [getRecommendationDetailAllocation.fulfilled]: (state, action) => {
       state.isFailed = false;
       state.data_recomendation_allocation = action.payload;
+      state.loading = false;
+    },
+    // Get Receipt Customer List
+    [getReceiptCustomerList.pending]: (state, action) => {
+      state.loading = true;
+      state.data_customer_list = action.payload;
+    },
+    [getReceiptCustomerList.fulfilled]: (state, action) => {
+      state.data_customer_list = action.payload;
+      state.loading = false;
+    },
+    [getReceiptCustomerList.rejected]: (state, action) => {
+      state.data_customer_list = action.payload;
+      state.loading = false;
+    },
+    // Get Receipt Customer List
+    [getReceiptCustomerList.pending]: (state, action) => {
+      state.loading = true;
+      state.data_customer_list = action.payload;
+    },
+    [getReceiptCustomerList.fulfilled]: (state, action) => {
+      state.data_customer_list = action.payload;
+      state.loading = false;
+    },
+    [getReceiptCustomerList.rejected]: (state, action) => {
+      state.data_customer_list = action.payload;
       state.loading = false;
     },
   },

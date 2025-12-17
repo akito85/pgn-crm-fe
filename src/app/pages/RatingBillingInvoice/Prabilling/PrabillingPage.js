@@ -301,7 +301,7 @@ const PrabillingPage = () => {
         key: "totalCustomer",
         title: "TOTAL CUSTOMER",
         dataIndex: "totalCustomer",
-        align: "right",
+        isNumber: true,
         sorter: true,
         filteredValue: [search?.totalCustomer] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -450,8 +450,7 @@ const PrabillingPage = () => {
     },
   ];
 
-  const actionCols = useColumnActionPermission(["view"], 
-    itemGrantAccess).map(
+  const actionCols = useColumnActionPermission(["view"], itemGrantAccess).map(
     (col) => ({
       ...col,
       width: 80,

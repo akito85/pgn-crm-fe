@@ -305,7 +305,7 @@ const DetailLog = ({ data, tabHeader }) => {
   };
 
   return (
-    <BaseContainer header={"calculation log"}>
+    <BaseContainer subHeader={"calculation log"}>
       <TablePaginationNew
         columns={column}
         dataSource={list_calculation_result?.result}

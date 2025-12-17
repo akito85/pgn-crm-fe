@@ -26,7 +26,7 @@ const ContentModalConfirm = ({
             <DetailText label="Collection Agent Code">{data?.caCode}</DetailText>
             <DetailText label="Name">{data?.name}</DetailText>
             <DetailText label="Type">{data?.type}</DetailText>
-            <DetailText label={"Eff Start Date"}>
+            <DetailText label={"Start Date"}>
               {moment(data?.effStartDate).format(dateFormatting.date)}
             </DetailText>
             <DetailText label={"End Date"}>
