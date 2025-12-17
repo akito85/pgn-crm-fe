@@ -15,8 +15,8 @@ const InvoiceRelationDetailInfo = ({
           <DetailText label="Account Number">{dataDetail?.accountNumber}</DetailText>
           <DetailText label="Account Name">{dataDetail?.accountName}</DetailText>
           <DetailText label="Priority">{dataDetail?.priority}</DetailText>
-          <DetailText label="Start Date">{dataDetail?.startDate}</DetailText>
-          <DetailText label="End Date">{dataDetail?.endDate}</DetailText>
+          <DetailText label="Start Date">{dataDetail?.startDate ? moment(dataDetail.startDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
+          <DetailText label="End Date">{dataDetail?.endDate ? moment(dataDetail.endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
           <DetailText label="Status">{dataDetail?.status}</DetailText>
         </div>
         <div className="w-full">
