@@ -32,7 +32,6 @@ const ModalHistory = (props) => {
   const [activeKeys, setActiveKeys] = useState([]);
 
   useEffect(() => {
-    // ✅ Check if modal is open and data exists (not empty object)
     const hasValidData = dataApprover && 
                         dataHistory && 
                         Object.keys(dataApprover).length > 0 && 
@@ -47,7 +46,6 @@ const ModalHistory = (props) => {
         const tempTab = tabOptions[0].value.toLowerCase();
         setTabActive(tabOptions[0].value);
         
-        // ✅ Enhanced validation
         if (Array.isArray(dataApprover)) {
           approverData = dataApprover;
         } else if (dataApprover && typeof dataApprover === 'object') {
@@ -90,7 +88,6 @@ const ModalHistory = (props) => {
       
       setActiveKeys(['0']);
     } else {
-      // ✅ Reset all states when no data
       setDataApproverFinal([]);
       setSubmitterData(null);
       setApproverStatus("WAITING");
@@ -104,7 +101,6 @@ const ModalHistory = (props) => {
     const tempTab = value.toLowerCase();
     setTabActive(value);
     
-    // ✅ Enhanced validation
     let approverData = [];
     let historyData = [];
     
@@ -149,7 +145,6 @@ const ModalHistory = (props) => {
   };
 
   const renderApproverTable = () => {
-    // ✅ Stricter validation
     if (!dataApproverFinal || !Array.isArray(dataApproverFinal) || dataApproverFinal.length === 0) {
       return (
         <div className="p-4 text-center text-gray-500">
@@ -158,12 +153,9 @@ const ModalHistory = (props) => {
       );
     }
 
-    // ✅ Filter out SUBMIT status (already shown in submitter card)
     const approversWithoutSubmit = dataApproverFinal.filter(
       approver => approver.status !== "SUBMIT"
     );
-
-    // ✅ Check if there are any approvers after filtering
     if (approversWithoutSubmit.length === 0) {
       return (
         <div className="p-4 text-center text-gray-500">
@@ -205,12 +197,9 @@ const ModalHistory = (props) => {
       );
     };
 
-    // ✅ Add safety check and ensure we're working with arrays
-    // Filter out SUBMIT status from enrichment
     const enrichedApprovers = approversWithoutSubmit.map((approver, idx) => {
       let historyMatch = null;
       
-      // ✅ Fix: Get correct history data based on tab with strict validation
       let historyData = [];
       
       if (tabActive && dataHistory && typeof dataHistory === 'object') {
@@ -221,7 +210,6 @@ const ModalHistory = (props) => {
         historyData = dataHistory;
       }
       
-      // Find matching history only if we have valid history data
       if (Array.isArray(historyData) && historyData.length > 0) {
         historyMatch = historyData.find(
           h => h && h.name === approver.name && h.status === approver.status
@@ -233,6 +221,7 @@ const ModalHistory = (props) => {
         taskDate: historyMatch?.taskDate || submitterData?.taskDate || null,
         actionDate: historyMatch?.actionDate || null,
         hierarchy: historyMatch?.hierarchy || "-",
+        description: historyMatch?.description || "-", // TAMBAH DESCRIPTION
       };
     });
 
@@ -248,6 +237,7 @@ const ModalHistory = (props) => {
                 <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">HIERARCHY</th>
                 <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">ACTION BY</th>
                 <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">POSITION</th>
+                <th className="py-2 px-3 text-left font-semibold border-r border-blue-500">REMARK</th>
                 <th className="py-2 px-3 text-center font-semibold">STATUS</th>
               </tr>
             </thead>
@@ -272,6 +262,9 @@ const ModalHistory = (props) => {
                   </td>
                   <td className="py-2 px-3 border-b border-r border-gray-200">
                     {approver.role || "-"}
+                  </td>
+                  <td className="py-2 px-3 border-b border-r border-gray-200">
+                    {approver.description}
                   </td>
                   <td className="py-2 px-3 border-b text-center">
                     {getStatusBadge(approver.status)}
@@ -342,6 +335,12 @@ const ModalHistory = (props) => {
                   <span className="text-xs text-gray-600 w-32">Position</span>
                   <span className="text-xs font-medium">{submitterData.role || "-"}</span>
                 </div>
+
+                {/* TAMBAH DESCRIPTION DI SUBMITTER */}
+                <div className="flex">
+                  <span className="text-xs text-gray-600 w-32">Remark</span>
+                  <span className="text-xs font-medium">{submitterData.description || "-"}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -351,12 +350,10 @@ const ModalHistory = (props) => {
   };
 
   const renderApproverPanel = () => {
-    // ✅ Check if there are approvers excluding SUBMIT status
     const approversWithoutSubmit = Array.isArray(dataApproverFinal) 
       ? dataApproverFinal.filter(a => a.status !== "SUBMIT")
       : [];
 
-    // ✅ Don't render panel if no valid approvers
     if (approversWithoutSubmit.length === 0) {
       return null;
     }
@@ -419,7 +416,7 @@ const ModalHistory = (props) => {
       onCancel={handleClose}
       className={"modal-custom"}
       centered={true}
-      width={width || 700}
+      width={width || 900}
       maskClosable={false}
       footer={
         <div className="w-full flex justify-end gap-5">
@@ -448,7 +445,6 @@ const ModalHistory = (props) => {
             <RadioTabs data={tabOptions} onChange={handleTabs} />
           ) : null}
           
-          {/* Collapse Accordion - HANYA TAMPIL JIKA ADA DATA */}
           {submitterData || (dataApproverFinal && dataApproverFinal.filter(a => a.status !== "SUBMIT").length > 0) ? (
             <div className="space-y-3">
               <Collapse
@@ -466,10 +462,7 @@ const ModalHistory = (props) => {
                   border: 'none'
                 }}
               >
-                {/* ACCORDION 1: SUBMITTER DATA - Only if exists */}
                 {submitterData && renderSubmitterPanel()}
-                
-                {/* ACCORDION 2: APPROVER - Only if exists and has non-SUBMIT data */}
                 {renderApproverPanel()}
               </Collapse>
             </div>

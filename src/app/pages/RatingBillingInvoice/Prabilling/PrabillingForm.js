@@ -90,6 +90,7 @@ const PrabillingForm = ({ type }) => {
   const [searchCustomerValue, setSearchCustomerValue] = useState("");
   const [filteredCustomerList, setFilteredCustomerList] = useState([]);
   const searchTimeoutRef = useRef(null);
+  const [selectedCustomersMap, setSelectedCustomersMap] = useState({});
 
   const [openWarningPopulate, setOpenWarningPopulate] = useState(false);
   const [pendingDataFinal, setPendingDataFinal] = useState(null);
@@ -199,6 +200,35 @@ const PrabillingForm = ({ type }) => {
       }
     }, 500);
   }, []);
+
+  const handleSelectCustomer = useCallback(
+    (value, option) => {
+      // Simpan data customer yang baru dipilih
+      const customerData = filteredCustomerList.find(
+        (item) => item.accountNumber === value
+      );
+
+      if (customerData) {
+        setSelectedCustomersMap((prev) => ({
+          ...prev,
+          [value]: {
+            accountName: customerData.accountName,
+            accountNumber: customerData.accountNumber,
+          },
+        }));
+      }
+
+      // Clear search (tapi JANGAN clear selectedCustomersMap!)
+      setSearchCustomerValue("");
+      setFilteredCustomerList([]);
+      setDataSpecificCustomer((prevState) => ({
+        ...prevState,
+        search: "",
+        limit: DEFAULT_SEARCH_LIMIT,
+      }));
+    },
+    [filteredCustomerList]
+  );
 
   useEffect(() => {
     return () => {
@@ -705,9 +735,20 @@ const PrabillingForm = ({ type }) => {
                     onSearch={handleSearchCustomer}
                     searchValue={searchCustomerValue}
                     maxLength={MAX_SEARCH_LENGTH}
+                    onSelect={handleSelectCustomer}
+                    onDeselect={(value) => {
+                      setSearchCustomerValue("");
+                      setFilteredCustomerList([]);
+                      setSelectedCustomersMap((prev) => {
+                        const newMap = { ...prev };
+                        delete newMap[value];
+                        return newMap;
+                      });
+                    }}
                     onClear={() => {
                       setSearchCustomerValue("");
                       setFilteredCustomerList([]);
+                      setSelectedCustomersMap({});
                       setDataSpecificCustomer((prevState) => ({
                         ...prevState,
                         search: "",
@@ -716,6 +757,38 @@ const PrabillingForm = ({ type }) => {
                     }}
                     allowClear
                     placeholder={`Type at least 3 characters to search (max ${MAX_SEARCH_LENGTH} chars)...`}
+                    // ============ INI YANG PENTING: tagRender ============
+                    tagRender={(props) => {
+                      const { value, closable, onClose } = props;
+                      const customerData = selectedCustomersMap[value];
+
+                      const displayText = customerData
+                        ? `${customerData.accountName} - ${customerData.accountNumber}`
+                        : value; // Fallback ke account number saja
+
+                      return (
+                        <span
+                          className="ant-select-selection-item"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span className="ant-select-selection-item-content">
+                            {displayText}
+                          </span>
+                          {closable && (
+                            <span
+                              className="ant-select-selection-item-remove"
+                              onClick={onClose}
+                              style={{ cursor: "pointer" }}
+                            >
+                              ×
+                            </span>
+                          )}
+                        </span>
+                      );
+                    }}
                     notFoundContent={
                       loading_specific_customer ? (
                         <div className="flex justify-center py-4">
@@ -819,7 +892,11 @@ const PrabillingForm = ({ type }) => {
                 </Form.Item>
               )}
 
-            <Form.Item label={"Remark"} name={"remark"} rules={formMessageRequired("Remark")}>
+            <Form.Item
+              label={"Remark"}
+              name={"remark"}
+              rules={formMessageRequired("Remark")}
+            >
               <InputComponent
                 type="textarea"
                 value={remark}
