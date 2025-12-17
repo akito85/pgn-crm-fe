@@ -49,7 +49,7 @@ const ModalConfirmationApprovalInvoiceRelation = ({
       width: 150,
       align: "center",
       ...getColumnSearchProps("startDate", "date"),
-      render: (startDate) => moment(startDate).format(dateFormatting.date),
+      render: (startDate) => moment(startDate, dateFormatting.f_date).format(dateFormatting.date),
     },
     {
       title: "END DATE",
@@ -57,7 +57,7 @@ const ModalConfirmationApprovalInvoiceRelation = ({
       width: 150,
       align: "center",
       ...getColumnSearchProps("endDate", "date"),
-      render: (endDate) => moment(endDate).format(dateFormatting.date),
+      render: (endDate) => endDate ? moment(endDate, dateFormatting.f_date).format(dateFormatting.date) : "",
     },
     {
       title: "STATUS APPROVAL",
