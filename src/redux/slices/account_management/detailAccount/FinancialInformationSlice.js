@@ -845,14 +845,14 @@ export const getIrAccountStandard = createAsyncThunk(
 
 export const approveOrRejectPaymentRelation = createAsyncThunk(
   "APPROVE_OR_REJECT_PAYMENT_RELATION",
-  async ({ body }, thunkAPI) => {
+  async ({ body, action }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/payment-relation/approve";
       const response = await accountManagementService.activationWithRemark(url, body);
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${body?.action === "APPROVE" ? 'approved' : 'rejected'}.`,
+        description: `Your data has been ${action === "approve" ? "approved" : "rejected"}.`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
@@ -867,13 +867,13 @@ export const approveOrRejectPaymentRelation = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body?.action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
+          description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       } else {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body?.action === "APPROVED" ? 'approved' : 'rejected'}. An unknown error occured.`
+          description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. An unknown error occured.`
         }
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -884,14 +884,14 @@ export const approveOrRejectPaymentRelation = createAsyncThunk(
 
 export const approveOrRejectInactivePaymentRelation = createAsyncThunk(
   "APPROVE_OR_REJECT_INACTIVE_PAYMENT_RELATION",
-  async ({ body }, thunkAPI) => {
+  async ({ body, action }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/payment-relation/approve-inactive";
       const response = await accountManagementService.activationWithRemark(url, body);
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${body?.action === "APPROVE" ? 'approved' : 'rejected'}.`,
+        description: `Your data has been ${action === "approve" ? "approved" : "rejected"}.`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
@@ -906,13 +906,13 @@ export const approveOrRejectInactivePaymentRelation = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body?.action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
+          description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       } else {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body?.action === "APPROVED" ? 'approved' : 'rejected'}. An unknown error occured.`
+          description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. An unknown error occured.`
         }
         thunkAPI.dispatch(showModalError(errorBody));
       }

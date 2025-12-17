@@ -130,6 +130,7 @@ const PaymentRelationDetails = ({
       if (!result.approvalType) {
         dispatch(approveOrRejectPaymentRelation({
           body,
+          action,
         }))
         .unwrap()
         .then(() => {
@@ -141,6 +142,7 @@ const PaymentRelationDetails = ({
       } else if (result.approvalType) {
         dispatch(approveOrRejectInactivePaymentRelation({
           body,
+          action,
         }))
         .unwrap()
         .then(() => {
