@@ -16,6 +16,7 @@ import {
   downloadPrabillingResult,
 } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
+import { EyeOutlined } from "@ant-design/icons";
 
 const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const { detail_prabilling_result, loading } = useSelector(
@@ -411,8 +412,8 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       {
         key: "action",
         title: "ACTION",
-        width: 80,
-        align: "center",
+        width: 60,
+        isClassification:true,
         fixed: "right",
         render: (text, record) => (
           <Link
@@ -427,7 +428,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             style={{ lineHeight: 0 }}
           >
             <Tooltip title="View Account Detail">
-              <SVGIcon name="IconDetail" width={20} />
+              <EyeOutlined style={{ fontSize: "20px" }} />
             </Tooltip>
           </Link>
         ),
@@ -525,16 +526,16 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           {detailsData && detailsData.length > 0 && detailsData.map((detail, index) => (
             <React.Fragment key={index}>
               <DetailText label={"Cost Center"}>
-                {detail.costCenterName || detail.costCenter || "-"}
+                {detail.costCenterName || detail.costCenter || ""}
               </DetailText>
               <DetailText label={"Meter Reading Code"}>
-                {detail.meterReadingCodeName || detail.meterReadingCode || "-"}
+                {detail.meterReadingCodeName || detail.meterReadingCode || ""}
               </DetailText>
               <DetailText label={"Account Segment"}>
-                {detail.accountSegmentName || detail.accountSegment || "-"}
+                {detail.accountSegmentName || detail.accountSegment || ""}
               </DetailText>
               <DetailText label={"Account Group Type"}>
-                {detail.accountGroupTypeName || detail.accountGroupType || "-"}
+                {detail.accountGroupTypeName || detail.accountGroupType || ""}
               </DetailText>
               <DetailText label={"Account Numbers"} className="col-span-5">
                 {detail.accountNumber || ""}
