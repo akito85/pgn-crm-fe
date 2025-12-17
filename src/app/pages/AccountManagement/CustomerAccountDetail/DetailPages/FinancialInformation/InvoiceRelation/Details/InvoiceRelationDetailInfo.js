@@ -1,20 +1,12 @@
 import { Fragment } from "react";
 import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
+import moment from "moment";
+import { dateFormatting } from "../../../../../../../../utils";
 
 const InvoiceRelationDetailInfo = ({
   dataDetail = {},
 }) => {
-  const log = []
-
-  const HistoryLogDummy = {
-    recordId: "491",
-    createdDate: "21 Dec 2021 23:11:09",
-    createdBy: "Annisa",
-    updatedDate: "28 Dec 2021 23:11:09",
-    updatedBy: "Annisa"
-  };
-
   return (
     <Fragment>
       <BaseContainer header={"INVOICE RELATION"}>
@@ -35,11 +27,11 @@ const InvoiceRelationDetailInfo = ({
       <BaseContainer header={"HISTORY LOG INFORMATION"}>
         <div className="w-full grid grid-cols-5 gap-4">
           {/* History Log Information */}
-          <DetailText label="Record Id">{log?.recordId || HistoryLogDummy.recordId}</DetailText>
-          <DetailText label="Created Date">{log?.createdDate || HistoryLogDummy.createdDate}</DetailText>
-          <DetailText label="Created By">{log?.createdBy || HistoryLogDummy.createdBy}</DetailText>
-          <DetailText label="Updated Date">{log?.updatedDate || HistoryLogDummy.updatedDate}</DetailText>
-          <DetailText label="Updated By">{log?.updatedBy || HistoryLogDummy.updatedBy}</DetailText>
+          <DetailText label="Record Id">{dataDetail?.id}</DetailText>
+          <DetailText label="Created Date">{dataDetail?.createdDate ? moment(dataDetail.createdDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
+          <DetailText label="Created By">{dataDetail?.createdBy}</DetailText>
+          <DetailText label="Updated Date">{dataDetail?.updatedDate ? moment(dataDetail.updatedDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
+          <DetailText label="Updated By">{dataDetail?.updatedBy}</DetailText>
         </div>
       </BaseContainer>
     </Fragment>
