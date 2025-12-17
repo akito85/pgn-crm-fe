@@ -1,133 +1,42 @@
-import { Tooltip } from "antd";
+import { Spin, Tooltip } from "antd";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
-import { Fragment } from "react";
-import ButtonComponent from "../../../../../../../../components/ButtonComponent";
+import { useState } from "react";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
-import { 
-  FilterOutlined,
-  DownloadOutlined,
-} from "@ant-design/icons";
 import TablePaginationNew from "../../../../../../../../components/TablePaginationNew";
+import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
+import axios from "axios";
+import { tokenHeader } from "../../../../../../../../utils/tokenHeader";
+import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
+import { getBase64 } from "../../../../../../../../utils/getBase64";
+import { configApp } from "../../../../../../../../constants/configApp";
 
 const InvoiceRelationDetailAttch = ({
   dataAttachment = [],
-  handleChange = () => {},
-  handleChangeSize = () => {},
-  totalElement = 0,
-  page = 1,
-  pageSize = 10,
-  searchText = "",
-  searchedColumn = "",
-  onSort = () => {},
   getColumnSearchProps = () => {},
-  handleSearch
 }) => {
-  // Dummy data
-  const dummyData = [
-    {
-      id: "1",
-      type: "PDF",
-      fileName: "Document_Report_2025.pdf",
-      fileSize: "2.5 MB"
-    },
-    {
-      id: "2",
-      type: "Excel",
-      fileName: "Sales_Data_Q4.xlsx",
-      fileSize: "1.8 MB"
-    },
-    {
-      id: "3",
-      type: "Word",
-      fileName: "Project_Proposal.docx",
-      fileSize: "850 KB"
-    },
-    {
-      id: "4",
-      type: "Image",
-      fileName: "Brand_Guidelines.png",
-      fileSize: "3.2 MB"
-    },
-    {
-      id: "5",
-      type: "PDF",
-      fileName: "Contract_Agreement.pdf",
-      fileSize: "1.2 MB"
-    },
-    {
-      id: "6",
-      type: "PDF",
-      fileName: "Document_Report_2025.pdf",
-      fileSize: "2.5 MB"
-    },
-    {
-      id: "7",
-      type: "Excel",
-      fileName: "Sales_Data_Q4.xlsx",
-      fileSize: "1.8 MB"
-    },
-    {
-      id: "8",
-      type: "Word",
-      fileName: "Project_Proposal.docx",
-      fileSize: "850 KB"
-    },
-    {
-      id: "9",
-      type: "Image",
-      fileName: "Brand_Guidelines.png",
-      fileSize: "3.2 MB"
-    },
-    {
-      id: "10",
-      type: "PDF",
-      fileName: "Contract_Agreement.pdf",
-      fileSize: "1.2 MB"
-    },
-    {
-      id: "11",
-      type: "PDF",
-      fileName: "Document_Report_2025.pdf",
-      fileSize: "2.5 MB"
-    },
-    {
-      id: "12",
-      type: "Excel",
-      fileName: "Sales_Data_Q4.xlsx",
-      fileSize: "1.8 MB"
-    },
-    {
-      id: "13",
-      type: "Word",
-      fileName: "Project_Proposal.docx",
-      fileSize: "850 KB"
-    },
-    {
-      id: "14",
-      type: "Image",
-      fileName: "Brand_Guidelines.png",
-      fileSize: "3.2 MB"
-    },
-    {
-      id: "15",
-      type: "PDF",
-      fileName: "Contract_Agreement.pdf",
-      fileSize: "1.2 MB"
-    },
-  ];
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  // Use dummy data if no data provided
-  const tableData = (Array.isArray(dataAttachment) && dataAttachment.length > 0) ? dataAttachment : [];
-
-  // Sanitize pagination values to prevent NaN
-  const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
-  const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
-  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : tableData.length;
-
-  const handleViewFile = (fileData) => {
-    // Placeholder for view file action
-    console.log("View file:", fileData);
-    // Add your file viewing logic here
+  const [loadingDownload, setLoadingDownload] = useState(false);
+  
+  const handleShow = async (r) => {
+    if ((r.fileType || r.type).includes("application/vnd")) {
+      accountManagementService.downloadData(r.urlFile1);
+    } else {
+      setLoadingDownload(true);
+      try {
+        const response = await axios.get(configApp.ACCOUNT_SERVICE + r.urlFile1, {
+        headers: tokenHeader(),
+        responseType: "blob",
+      });
+      const base64 = await getBase64(response.data);
+      previewFileAttachment(base64);
+      } catch (error) {
+        console.error("Failed to download file", error);
+      } finally {
+        setLoadingDownload(false);
+      }
+    }
   };
 
   const columns = [
@@ -135,7 +44,7 @@ const InvoiceRelationDetailAttch = ({
       title: "NO",
       width: 80,
       align: "center",
-      render: (text, object, index) => (sanitizedPage - 1) * sanitizedPageSize + index + 1,
+      render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "TYPE",
@@ -174,7 +83,7 @@ const InvoiceRelationDetailAttch = ({
                   color={"#0075bf"}
                   width={24}
                   onClick={() => {
-                    handleViewFile(r);
+                    handleShow(r);
                   }}
                 />
               </div>
@@ -186,32 +95,8 @@ const InvoiceRelationDetailAttch = ({
   ];
 
   return (
-    <Fragment>
+    <Spin spinning={loadingDownload}>
       <BaseContainer header={"ATTACHMENTS"}>
-        <div className="mb-5 flex items-center justify-between">
-          {/* Left Side Buttons Group */}
-          <div className="flex items-center gap-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {/* trigger filter */}}
-              icon={<FilterOutlined className="text-2xl" />}
-            >
-              Filter
-            </ButtonComponent>
-          </div>
-
-          {/* Right Side Buttons Group */}
-          <div className="flex items-center gap-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {/* trigger download list */}}
-              icon={<DownloadOutlined className="text-2xl" />}
-            >
-              Download List
-            </ButtonComponent>
-          </div>
-        </div>
-
         <TablePaginationNew
           dataSource={dataAttachment.map((item, idx) => ({
             ...item,
@@ -219,11 +104,13 @@ const InvoiceRelationDetailAttch = ({
           }))}
           tableScrolled={{ y: 525, x: 1500 }}
           columns={columns}
+          current={page}
+          onChange={setPage}
+          onSizeChanger={setPageSize}
           type="FE"
         />
-
       </BaseContainer>
-    </Fragment>
+    </Spin>
   );
 };
 

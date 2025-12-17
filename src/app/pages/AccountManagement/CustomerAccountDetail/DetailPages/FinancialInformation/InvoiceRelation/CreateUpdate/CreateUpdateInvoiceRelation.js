@@ -271,6 +271,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           setAccount={setAccount}
           className={`${current !== 0 ? "hidden" : ""}`}
           key={`invoice-relation-tab-0`}
+          accountId={idAccount}
         />
       ),
       disabled: false
@@ -427,6 +428,63 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         .catch((error) => {});;
   };
 
+  const handleClear = () => {
+    if (type === "create") {
+      setDataAttachment([]);
+      setSelectedAppHierId();
+      setSelectedApprovalName();
+      formCreate.resetFields();
+      setCurrent(0);
+    } else if (type === "update") {
+      if (
+        detail_invoiceRelation?.result &&
+        data_irApprovalHierarchy?.length
+      ) {
+        const {
+          subjectId,
+          objectId,
+          priority,
+          startDate,
+          endDate,
+          description,
+          appHierId,
+        } = detail_invoiceRelation.result;
+
+        const { relatedAccountNumber, relatedAccountName } = detail_invoiceRelation.result;
+
+        formCreate.setFieldsValue({
+          subjectId,
+          objectId,
+          accountName: relatedAccountName,
+          accountNumber: relatedAccountNumber,
+          priority,
+          startDate,
+          endDate,
+          description,
+          appHierId,
+        });
+
+        const appHierOption = data_irApprovalHierarchy.find((option) => option.appHierId === appHierId)
+
+        if (appHierOption)
+          handleSelectHiararchy(appHierId, appHierOption.approvalName);
+      }
+
+      if (data_invoiceRelationAttachment?.result) {
+        const result = data_invoiceRelationAttachment.result?.map((item, index) => ({
+          ...item,
+          key: `invoice-relation-attachment-${item.id}`,
+          dataType: "exist"
+        }));
+        setDataAttachment([
+          ...result,
+        ])
+      }
+
+      setCurrent(0);
+    }
+  }
+
   return (
     <LayoutMenu>
       <div className="flex flex-col gap-y-5">
@@ -510,7 +568,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
             </ButtonComponent>
             <div className="flex w-full justify-end gap-x-4">
               <ButtonComponent
-                onClick={() => {}}
+                onClick={handleClear}
                 type={"submit"}
                 icon={<SVGIcon name="IconButtonClear" width={24} />}
               >
