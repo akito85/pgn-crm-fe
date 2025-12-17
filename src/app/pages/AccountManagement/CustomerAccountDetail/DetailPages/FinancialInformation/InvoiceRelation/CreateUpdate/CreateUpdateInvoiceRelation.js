@@ -514,6 +514,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
                 type={"submit"}
                 icon={<SVGIcon name="IconButtonClear" width={24} />}
               >
+                { type === "update" ? "Reset" : "Clear" }
               </ButtonComponent>
               {current > 0 && current !== (steps.length-1) && (
                 <ButtonComponent
