@@ -85,7 +85,7 @@ const ModalUploadEFaktur = ({
           page,
           pageSize,
           sort,
-          type: "manual_upload", // ✅ Default type untuk manual upload
+          type: "manual_upload",
           search: encodeURIComponent(JSON.stringify(search)),
         })
       );
@@ -130,7 +130,6 @@ const ModalUploadEFaktur = ({
   const next = () => setCurrent(current + 1);
   const prev = () => setCurrent(current - 1);
 
-  // ✅ Check apakah semua E-Faktur yang dipilih sudah punya nomor
   function allSelectedHaveNumbers() {
     return selectedRowKeys.every((key) => {
       const number = efakturNumbers[key];
@@ -138,7 +137,6 @@ const ModalUploadEFaktur = ({
     });
   }
 
-  // ✅ Check apakah semua E-Faktur yang dipilih sudah punya file
   function allSelectedHaveFiles() {
     return selectedRowKeys.every((key) => uploadedFiles[key]);
   }
@@ -176,7 +174,6 @@ const ModalUploadEFaktur = ({
     setSelectedRowKeys(newSelectedRowKeys);
     setSelectedRows(newSelectedRows);
     
-    // ✅ Clean up data untuk row yang di-uncheck
     const removedKeys = selectedRowKeys.filter(k => !newSelectedRowKeys.includes(k));
     removedKeys.forEach(key => {
       delete efakturNumbers[key];
@@ -198,7 +195,6 @@ const ModalUploadEFaktur = ({
     setBoolean(true);
   };
 
-  // ✅ Handle change nomor faktur
   const handleNumberChange = (efakturId, value) => {
     setEfakturNumbers(prev => ({
       ...prev,
@@ -206,7 +202,6 @@ const ModalUploadEFaktur = ({
     }));
   };
 
-  // ✅ Handle file upload
   const handleFileUpload = (efakturId, file) => {
     const isPDF = file.type === "application/pdf" || file.name.endsWith(".pdf");
     if (!isPDF) {
@@ -227,10 +222,9 @@ const ModalUploadEFaktur = ({
       [efakturId]: file
     }));
     
-    return false; // Prevent auto upload
+    return false;
   };
 
-  // ✅ Handle remove file
   const handleRemoveFile = (efakturId) => {
     setUploadedFiles(prev => {
       const newFiles = { ...prev };
@@ -239,7 +233,6 @@ const ModalUploadEFaktur = ({
     });
   };
 
-  // ✅ HANDLE SUBMIT
   const handleSubmit = async () => {
     const formValues = form.getFieldsValue();
 
@@ -280,7 +273,6 @@ const ModalUploadEFaktur = ({
       formData.append("apphierId", String(formValues.apphierId));
       formData.append("remark", remark.trim());
 
-      // ✅ Append data array
       selectedRowKeys.forEach((efakturId, index) => {
         formData.append(`data[${index}].efakturId`, String(efakturId));
         formData.append(`data[${index}].efakturNumber`, efakturNumbers[efakturId]);
@@ -324,9 +316,6 @@ const ModalUploadEFaktur = ({
     handleCancel();
   };
 
-  // ========================================
-  // COLUMNS STEP 1
-  // ========================================
   const baseColumns = useMemo(
     () => [
       {
@@ -526,10 +515,6 @@ const ModalUploadEFaktur = ({
       title: col.title,
     }));
   }, [allColumns]);
-
-  // ========================================
-  // COLUMNS STEP 2 (ATTACHMENT)
-  // ========================================
   const attachmentColumns = useMemo(
     () => [
       {
@@ -645,9 +630,6 @@ const ModalUploadEFaktur = ({
     [selectedRows, efakturNumbers, uploadedFiles]
   );
 
-  // ========================================
-  // APPROVAL TABLE COLUMNS
-  // ========================================
   const columnsApproval = [
     {
       title: "NO",

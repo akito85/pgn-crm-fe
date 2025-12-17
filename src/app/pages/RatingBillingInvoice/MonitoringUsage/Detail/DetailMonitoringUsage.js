@@ -75,7 +75,7 @@ const DetailMonitoringUsage = () => {
   const [body, setBody] = useState({});
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["action"],
+    right: ["status","action"],
   }));
 
   // assert function
@@ -360,7 +360,7 @@ const DetailMonitoringUsage = () => {
               <Tabs.TabPane tab="Upload" key="Upload">
                 <BaseContainer header={"Batch List"} className="-mt-4">
                   {/* Two Column Layout */}
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                  <div className="grid grid-cols-5 gap-x-8 gap-y-4">
                     <DetailText label="Batch ID">
                       {detail_batch?.batchInformation?.batchId}
                     </DetailText>
@@ -370,13 +370,7 @@ const DetailMonitoringUsage = () => {
                     
                     <DetailText label="Upload Date">
                       {detail_batch?.batchInformation?.uploadDate}
-                    </DetailText>
-                    <DetailText label="Status">
-                      <StatusComponent colour={detail_batch?.batchInformation?.status}>
-                        {detail_batch?.batchInformation?.status}
-                      </StatusComponent>
-                    </DetailText>
-                    
+                    </DetailText>                    
                     <DetailText label="Total Invoice">
                       {detail_batch?.batchInformation?.totalUsage}
                     </DetailText>
@@ -391,13 +385,35 @@ const DetailMonitoringUsage = () => {
                       {detail_batch?.batchInformation?.totalFailed}
                     </DetailText>
                     
-                    <DetailText label="General Date">
-                      {detail_batch?.batchInformation?.generalDate}
+                    <DetailText label="Generate Date">
+                      {detail_batch?.batchInformation?.generateDate}
                     </DetailText>
                     <DetailText label="Status">
                       <StatusComponent colour={detail_batch?.batchInformation?.status}>
                         {detail_batch?.batchInformation?.status}
                       </StatusComponent>
+                    </DetailText>
+                  </div>
+                </BaseContainer>
+
+                <BaseContainer header={"History Log Information"} className="mt-1">
+                  <div className="grid grid-cols-5 gap-x-8 gap-y-4">
+                    <DetailText label="Record ID">
+                      {detail_batch?.batchInformation?.batchId || "-"}
+                    </DetailText>
+                    <DetailText label="Created Date">
+                      {detail_batch?.batchInformation?.uploadDate || "-"}
+                    </DetailText>
+                    <DetailText label="Created By">
+                      {detail_batch?.batchInformation?.uploadBy || "-"}
+                    </DetailText>
+                    <DetailText label="Updated Date">
+                      {/* Tambahkan field updated date jika tersedia dari API */}
+                      {detail_batch?.batchInformation?.updatedDate || "-"}
+                    </DetailText>
+                    <DetailText label="Updated By">
+                      {/* Tambahkan field updated by jika tersedia dari API */}
+                      {detail_batch?.batchInformation?.updatedBy || "-"}
                     </DetailText>
                   </div>
                 </BaseContainer>
@@ -412,7 +428,7 @@ const DetailMonitoringUsage = () => {
                       onChange={handleChangePage}
                       onSizeChanger={handleChangePage}
                       totalData={dataTable?.length || 0}
-                      tableScrolled={{ x: 4000, y: 525 }}
+                      tableScrolled={{ x: 7000, y: 525 }}
                       columnDefinitions={columnDefinitions}
                       fixedColumns={fixedColumns}
                       setFixedColumns={setFixedColumns}

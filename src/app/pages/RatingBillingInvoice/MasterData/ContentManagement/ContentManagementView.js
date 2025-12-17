@@ -316,7 +316,7 @@ const ContentManagementView = () => {
       type: "table",
       render: (record, data) => {
         const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
+          (record.statusApproval === "APPROVE" &&
             record.status === "ACTIVE") ||
           (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
           (record.statusApproval === "REJECTED" &&
@@ -358,7 +358,6 @@ const ContentManagementView = () => {
     },
   ];
 
-  // ✅ PERUBAHAN UTAMA DI SINI - Manual render action columns dengan Dropdown Menu
   const baseColumns = useMemo(() => {
     const contentManagementCols = [
       ...columnsContentManagement(

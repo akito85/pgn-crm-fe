@@ -1,8 +1,3 @@
-// ==========================================
-// FIXED: ModalApprovalEFaktur Component
-// Key Changes Highlighted with ✅
-// ==========================================
-
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Select } from "antd";
@@ -41,7 +36,7 @@ const ModalApprovalEFaktur = ({
   const [searchText, setSearchText] = useState("");
   const [remark, setRemark] = useState("");
   const [action, setAction] = useState("");
-  const [filterType, setFilterType] = useState("normal"); // ✅ Default: normal
+  const [filterType, setFilterType] = useState("normal");
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [dataTableSelect, setDataTableSelect] = useState([]);
@@ -53,7 +48,7 @@ const ModalApprovalEFaktur = ({
     efakturStatus: "right",
   });
 
-  // ✅ FIX: dataSource now uses list_efaktur_approval directly (already filtered by backend)
+
   const dataSource = useMemo(() => {
     if (!list_efaktur_approval || list_efaktur_approval.length === 0) {
       return [];
@@ -61,14 +56,12 @@ const ModalApprovalEFaktur = ({
     return list_efaktur_approval;
   }, [list_efaktur_approval]);
 
-  // ✅ FIX: Fetch data with type parameter when modal opens or filterType changes
   useEffect(() => {
     if (isOpen) {
       dispatch(getAllEFakturApprovePaginate({ type: filterType }));
     }
   }, [dispatch, isOpen, filterType]);
 
-  // ✅ Reset selection when filter type changes
   useEffect(() => {
     setSelectedRowKeys([]);
     setDataTableSelect([]);
@@ -115,7 +108,6 @@ const ModalApprovalEFaktur = ({
     form.resetFields();
   };
 
-  // ✅ FIX: Updated handleSave with action parameter
   const handleSave = (actionType) => {
     if (!dataTableSelect || dataTableSelect.length === 0) {
       setBodyError({ message: "Tidak ada E-Faktur yang dipilih" });
@@ -123,7 +115,6 @@ const ModalApprovalEFaktur = ({
       return;
     }
 
-    // ✅ Validate tappId and efakturId exist
     const invalidItems = dataTableSelect.filter(
       (item) => !item.tappId || !item.efakturId
     );
@@ -142,17 +133,15 @@ const ModalApprovalEFaktur = ({
       return;
     }
 
-    // ✅ FIX: Map tappId as approvalId
     const detailApproves = dataTableSelect.map((item) => ({
-      approvalId: String(item.tappId),   // ✅ tappId from response
-      efakturId: String(item.efakturId), // ✅ efakturId from response
+      approvalId: String(item.tappId),
+      efakturId: String(item.efakturId),
     }));
 
-    // ✅ FIX: Use actionType parameter directly
     const body = {
       detailApproves: detailApproves,
-      action: actionType, // ✅ APPROVE or REJECT from parameter
-      type: filterType, // ✅ Add type: normal, replacement, cancellation, manual_upload
+      action: actionType,
+      type: filterType,
       description: remark,
     };
 
@@ -171,8 +160,6 @@ const ModalApprovalEFaktur = ({
         handleClose();
         setSelectedRowKeys([]);
         setDataTableSelect([]);
-        
-        // ✅ Refresh data after approval
         dispatch(getAllEFakturApprovePaginate({ type: filterType }));
       })
       .catch((error) => {
@@ -191,7 +178,7 @@ const ModalApprovalEFaktur = ({
   };
 
   const handleRetry = () => {
-    handleSave(action); // ✅ Pass the stored action
+    handleSave(action);
     setModalError(false);
     setBodyError({});
   };
@@ -204,7 +191,6 @@ const ModalApprovalEFaktur = ({
     return type === "data" ? result : result.length;
   };
 
-  // ✅ FIX: Updated columns to match API response
   const baseColumns = useMemo(
     () => [
       {
@@ -217,7 +203,7 @@ const ModalApprovalEFaktur = ({
       {
         key: "efakturCode",
         title: "FAKTUR CODE",
-        dataIndex: "efakturNo", // ✅ efakturNo from response
+        dataIndex: "efakturNo",
         width: 150,
         render: (text) => text || "-",
       },
@@ -405,7 +391,6 @@ const ModalApprovalEFaktur = ({
         width: 200,
         render: (text) => text || "-",
       },
-      // ✅ Add reasonCanceled and reasonReplacement columns
       {
         key: "reasonCanceled",
         title: "REASON CANCELED",
@@ -420,7 +405,6 @@ const ModalApprovalEFaktur = ({
         width: 250,
         render: (text) => text || "-",
       },
-      // ✅ Add approval detail columns
       {
         key: "requestedBy",
         title: "REQUESTED BY",
