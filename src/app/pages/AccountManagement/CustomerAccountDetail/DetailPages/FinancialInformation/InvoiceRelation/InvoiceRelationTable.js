@@ -68,7 +68,7 @@ const InvoiceRelationTable = ({
       width: 250,
       align: "center",
       ...getColumnSearchProps("endDate", "date"),
-      render: (endDate) => moment(endDate, "DD-MM-YYYY").format(dateFormatting.date),
+      render: (endDate) => endDate ? moment(endDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
     },
     {
       title: "STATUS APPROVAL",
