@@ -43,7 +43,7 @@ const ModalRequestApproval = ({
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSource = data_list_billing_request_approval;
+  const dataSource = data_list_billing_request_approval?.result || [];
 
   // State
   const [current, setCurrent] = useState(0);
@@ -52,8 +52,8 @@ const ModalRequestApproval = ({
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [fieldSort, setFieldSort] = useState("");
-  const [orderSort, setOrderSort] = useState("");
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
   const [remark, setRemark] = useState("");
 
   const [boolean, setBoolean] = useState(false);
@@ -65,15 +65,28 @@ const ModalRequestApproval = ({
   const [bodyError, setBodyError] = useState({});
 
   const [fixedColumns, setFixedColumns] = useState({
-  left: ["no"],
-  right: [] 
-});
+    left: ["no"],
+    right: [] 
+  });
 
-  // Use Effect
+  // Use Effect - Fetch approval list sekali saja
   useEffect(() => {
     dispatch(getAllApprovalList());
-    dispatch(getAllBillingRequestPaginate());
   }, [dispatch]);
+
+  // Use Effect - Fetch billing request dengan pagination setiap ada perubahan
+  useEffect(() => {
+    if (isOpen) {
+      dispatch(
+        getAllBillingRequestPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page,
+          pageSize,
+          sort,
+        })
+      );
+    }
+  }, [dispatch, isOpen, search, page, pageSize, sort]);
 
   useEffect(() => {
     if (boolean === true) {
@@ -95,28 +108,32 @@ const ModalRequestApproval = ({
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
-    setSearchedColumn(tempSearchColumn);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(1);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
   };
 
   // Handle Change Page
   const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
     setPageSize(pageSizeChange);
   };
 
   // Sort Table
-  const onSort = (_, __, sort) => {
-    if (sort.order) {
-      setFieldSort(sort.field);
-      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
-    } else {
-      setFieldSort("");
-      setOrderSort("");
-    }
+  const onSort = (_, __, sorter) => {
+    const dataSort =
+      sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
   };
 
   const onSelectChange = (newSelectedRowKeys, newSelectedRow) => {
@@ -203,6 +220,11 @@ const ModalRequestApproval = ({
     setBoolean(false);
     setRemark("");
     setCurrent(0);
+    setSearch({});
+    setPage(1);
+    setSort("");
+    setSearchText("");
+    setSearchedColumn("");
     form.resetFields();
   };
 
@@ -239,6 +261,11 @@ const ModalRequestApproval = ({
         setBoolean(false);
         setRemark("");
         setCurrent(0);
+        setSearch({});
+        setPage(1);
+        setSort("");
+        setSearchText("");
+        setSearchedColumn("");
         form.resetFields();
       })
       .catch((error) => {
@@ -251,14 +278,6 @@ const ModalRequestApproval = ({
           setModalError(true);
         }
       });
-  };
-
-  const filterDataByPage = (type = "data") => {
-    let result = [...dataSource].map((a, index) => ({
-      ...a,
-      key: index + 1,
-    }));
-    return type === "data" ? result : result.length;
   };
 
   const baseColumns = useMemo(
@@ -292,6 +311,13 @@ const ModalRequestApproval = ({
       title: col.title,
     }));
   }, [allColumns]);
+
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSource?.map((item, index) => ({
+      ...item,
+      key: index + 1,
+    }));
+  }, [dataSource]);
 
   return (
     <div>
@@ -379,13 +405,13 @@ const ModalRequestApproval = ({
                 Billing List
               </p>
               <TableRBI
-                dataSource={filterDataByPage("data")}
+                dataSource={dataSourceWithKeys}
                 columns={processedColumns}
                 current={page}
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={filterDataByPage("length")}
+                totalData={data_list_billing_request_approval?.page?.totalElements || 0}
                 tableScrolled={{ y: 525, x: 15000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitions}
@@ -486,7 +512,6 @@ const ModalRequestApproval = ({
                 }}
                 usePagination={false}
                 loading={loading}
-                // Custom Header Left - Select dengan inline styles
                 customHeaderLeft={
                   <div style={{ position: "relative" }}>
                     <style>{`
