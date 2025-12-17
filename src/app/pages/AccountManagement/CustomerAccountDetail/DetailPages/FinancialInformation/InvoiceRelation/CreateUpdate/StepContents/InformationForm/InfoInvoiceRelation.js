@@ -493,7 +493,7 @@ export default function InfoInvoiceRelation({
         isOpen={isOpen}
         handleCancel={handleCancel}
         handleOk={handleOk}
-        header={"CHOOSE SERVICE REQUEST REFERENCE"}
+        header={"CHOOSE ACCOUNT"}
         width={1100}
         type={"custom"}
         footer={[
