@@ -2155,7 +2155,7 @@ export const columnsBilling = (
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     fixed: "right",
-    width: 200,
+    width: 90,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
