@@ -239,7 +239,7 @@ const InvoiceRelationTable = ({
           <Button
             type="text"
             style={{ padding: 0, height: 'auto', border: 'none' }}
-            onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION, { state: {
+            onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION, { state: {
               idIr: r.id,
               idAccount,
               idCustomer,
