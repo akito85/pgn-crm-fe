@@ -14,7 +14,8 @@ import { FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { getPrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import { useDispatch, useSelector } from "react-redux";
-import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
+// import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
+import { TablePaginationNew } from "poc-table-dragandrop";
 
 export default function InfoPaymentRelation({
   accountId,
@@ -178,7 +179,7 @@ export default function InfoPaymentRelation({
       title: "NO",
       width: 80,
       align: "center",
-      render: (text, object, index) => (sanitizedPage - 1) * sanitizedPageSize + index + 1,
+      dataIndex: "no",
     },
     {
       title: "CUSTOMER NUMBER",
@@ -503,7 +504,7 @@ export default function InfoPaymentRelation({
           </Button>,
         ]}
       >
-        <TablePaginationNew
+        {/* <TablePaginationNew
           dataSource={data_prAccountStandard?.result?.map((item, idx) => ({
             ...item,
             key: item.id || idx,
@@ -515,6 +516,21 @@ export default function InfoPaymentRelation({
           tableScrolled={{ y: 525, x: 3000 }}
           columns={columnMain}
           onChange={handleChangeSize}
+        /> */}
+        <TablePaginationNew
+          dataSource={data_prAccountStandard?.result?.map((item, index) => ({
+            ...item,
+            key: item.id || index,
+            no: (sanitizedPage - 1) * sanitizedPageSize + index + 1,
+          }))}
+          totalData={sanitizedTotalElement}
+          current={sanitizedPage}
+          pageSize={sanitizedPageSize}
+          onChange={handleChangeSize}
+          onSort={onSort}
+          columns={columnMain}
+          tableScrolled={{ y: 525, x: 3000 }}
+          enableDragColumn={true}
         />
       </ModalCustom>
     </div>
