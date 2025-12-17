@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form } from "antd";
 import { RightOutlined } from "@ant-design/icons";
@@ -10,13 +10,13 @@ import {
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { tableApproval } from "./Table/TableApproval";
 import { formMessageRequired } from "../../../../utils";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import TableRBI from "../../../../components/TableRBI";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import SVGIcon from "../../../../assets/Icon/index";
 import InputComponent from "../../../../components/InputComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
-import TableRBI from "../../../../components/TableRBI";
 
 const ModalApprovalUsage = ({
   isOpen,
@@ -40,6 +40,7 @@ const ModalApprovalUsage = ({
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("");
 
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
@@ -49,6 +50,11 @@ const ModalApprovalUsage = ({
   const [dataTableSelect, setDataTableSelect] = useState([]);
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: [],
+    right: [],
+  }));
 
   // Use Effect
   useEffect(() => {
@@ -73,8 +79,18 @@ const ModalApprovalUsage = ({
 
   // Handle Change Page
   const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
     setPageSize(pageSizeChange);
+  };
+
+  // Function onSort
+  const onSort = (_, __, sorter) => {
+    const dataSort =
+      sorter && sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
   };
 
   const onSelectChange = (newSelectedRowKeys, newSelectedRow) => {
@@ -86,12 +102,33 @@ const ModalApprovalUsage = ({
     fixed: true,
     selectedRowKeys,
     onChange: onSelectChange,
-    // selections: [
-    //   Table.SELECTION_ALL,
-    //   Table.SELECTION_INVERT,
-    //   Table.SELECTION_NONE,
-    // ],
   };
+
+  // Base Columns dengan useMemo
+  const baseColumns = useMemo(() => {
+    return tableApproval(
+      search,
+      page,
+      pageSize,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    );
+  }, [search, page, pageSize, searchedColumn, searchText]);
+
+  // Processed Columns
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(baseColumns, fixedColumns);
+  }, [baseColumns, fixedColumns]);
+
+  // Column Definitions
+  const columnDefinitions = useMemo(() => {
+    return baseColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [baseColumns]);
 
   // Step
   const steps = [
@@ -305,22 +342,22 @@ const ModalApprovalUsage = ({
                   ...a,
                   key: index + 1,
                 }))}
-                columns={tableApproval(
-                  search,
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                )}
+                columns={processedColumns}
                 current={page}
                 pageSize={pageSize}
                 onChange={handleChange}
-                totalData={dataApproval?.length}
+                onSizeChanger={handleChange}
+                totalData={dataApproval?.length || 0}
                 tableScrolled={{ x: 8500, y: 300 }}
+                onSort={onSort}
+                showExport={false}
+                columnDefinitions={columnDefinitions}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
                 rowSelection={rowSelection}
+                loading={false}
               />
+              
               <div className="pt-[30px]">
                 <Form.Item
                   label={"Remark"}
@@ -345,24 +382,31 @@ const ModalApprovalUsage = ({
           className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
         >
           <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
-            <p className="text-primary uppercase font-bold">Usage List</p>
-            <TablePaginationNew
-              type="FE"
+            {/* TAMPILKAN INFO SELECTED RECORDS DI STEP KEDUA */}
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-primary uppercase font-bold">Usage List</p>
+              <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-md border border-blue-200">
+                <span className="text-blue-600 font-semibold">
+                  {dataTableSelect.length} record{dataTableSelect.length > 1 ? 's' : ''} selected
+                </span>
+              </div>
+            </div>
+
+            <TableRBI
               dataSource={dataTableSelect}
-              columns={tableApproval(
-                search,
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch
-              )}
+              columns={processedColumns}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
-              totalData={dataTableSelect.length}
+              onSizeChanger={handleChange}
+              totalData={dataTableSelect.length || 0}
               tableScrolled={{ x: 9000, y: 300 }}
+              onSort={onSort}
+              showExport={false}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={false}
             />
             <div className="pt-[30px]">
               <DetailText label={"Remark"}>

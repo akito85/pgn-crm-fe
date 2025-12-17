@@ -132,7 +132,7 @@ const MonitoringUsagePage = () => {
     if (tabHeader === "Usage List") {
       return { x: 8000, y: 525 };
     } else {
-      return { x: 1000, y: 525 };
+      return { x: 800, y: 525 };
     }
   };
 
