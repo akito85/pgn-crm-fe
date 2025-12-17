@@ -79,358 +79,358 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   };
 
   const baseResultColumns = useMemo(
-  () => [
-    {
-      key: "no",
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      key: "accountNumber",
-      title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
-      width: 150,
-      sorter: true,
-      filteredValue: [search?.accountNumber] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accountNumber",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+    () => [
+      {
+        key: "no",
+        title: "NO",
+        width: 60,
+        align: "center",
+        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      },
+      {
+        key: "accountNumber",
+        title: "ACCOUNT NUMBER",
+        dataIndex: "accountNumber",
+        width: 150,
+        sorter: true,
+        filteredValue: [search?.accountNumber] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "accountNumber",
-          hasValue(search["accountNumber"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text || "",
-          false,
-          "input",
-          search
+          handleSearch,
+          true
         ),
-    },
-    {
-      key: "accountName",
-      title: "ACCOUNT NAME",
-      dataIndex: "accountName",
-      width: 200,
-      sorter: true,
-      filteredValue: [search?.accountName] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accountName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderColumn(
+            "accountNumber",
+            hasValue(search["accountNumber"]),
+            searchText,
+            text || "",
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "accountName",
+        title: "ACCOUNT NAME",
+        dataIndex: "accountName",
+        width: 200,
+        sorter: true,
+        filteredValue: [search?.accountName] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "accountName",
-          hasValue(search["accountName"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text || "",
-          false,
-          "input",
-          search
+          handleSearch,
+          true
         ),
-    },
-    {
-      key: "customerNumber",
-      title: "CUSTOMER NUMBER",
-      dataIndex: "customerNumber",
-      width: 150,
-      sorter: true,
-      filteredValue: [search?.customerNumber] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "customerNumber",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderColumn(
+            "accountName",
+            hasValue(search["accountName"]),
+            searchText,
+            text || "",
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "customerNumber",
+        title: "CUSTOMER NUMBER",
+        dataIndex: "customerNumber",
+        width: 150,
+        sorter: true,
+        filteredValue: [search?.customerNumber] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "customerNumber",
-          hasValue(search["customerNumber"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text || "",
-          false,
-          "input",
-          search
+          handleSearch,
+          true
         ),
-    },
-    {
-      key: "customerName",
-      title: "CUSTOMER NAME",
-      dataIndex: "customerName",
-      width: 200,
-      sorter: true,
-      filteredValue: [search?.customerName] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "customerName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+        render: (text) =>
+          renderColumn(
+            "customerNumber",
+            hasValue(search["customerNumber"]),
+            searchText,
+            text || "",
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "customerName",
+        title: "CUSTOMER NAME",
+        dataIndex: "customerName",
+        width: 200,
+        sorter: true,
+        filteredValue: [search?.customerName] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "customerName",
-          hasValue(search["customerName"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text || "",
-          false,
-          "input",
-          search
+          handleSearch,
+          true
         ),
-    },
-    {
-      key: "sor",
-      title: "SOR",
-      dataIndex: "sor",
-      width: 200,
-      sorter: true,
-      ellipsis: {
-        showTitle: false,
+        render: (text) =>
+          renderColumn(
+            "customerName",
+            hasValue(search["customerName"]),
+            searchText,
+            text || "",
+            false,
+            "input",
+            search
+          ),
       },
-      render: (text) => <Tooltip title={text}>{text || "-"}</Tooltip>,
-    },
-    {
-      key: "costCenter",
-      title: "COST CENTER",
-      dataIndex: "costCenter",
-      width: 200,
-      sorter: true,
-      ellipsis: {
-        showTitle: false,
+      {
+        key: "sor",
+        title: "SOR",
+        dataIndex: "sor",
+        width: 200,
+        sorter: true,
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (text) => <Tooltip title={text}>{text || ""}</Tooltip>,
       },
-      render: (text) => <Tooltip title={text}>{text || "-"}</Tooltip>,
-    },
-    {
-      key: "meterReadingCode",
-      title: "METER READING CODE",
-      dataIndex: "meterReadingCode",
-      width: 150,
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "accountGroupType",
-      title: "ACCOUNT GROUP TYPE",
-      dataIndex: "accountGroupType",
-      width: 150,
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "accountType",
-      title: "ACCOUNT TYPE",
-      dataIndex: "accountType",
-      width: 100,
-      align: "center",
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "billingCycle",
-      title: "BILLING CYCLE",
-      dataIndex: "billingCycle",
-      width: 150,
-      align: "center",
-      sorter: true,
-      filteredValue: [search?.billingCycle] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "billingCycle",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
+      {
+        key: "costCenter",
+        title: "COST CENTER",
+        dataIndex: "costCenter",
+        width: 200,
+        sorter: true,
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (text) => <Tooltip title={text}>{text || ""}</Tooltip>,
+      },
+      {
+        key: "meterReadingCode",
+        title: "METER READING CODE",
+        dataIndex: "meterReadingCode",
+        width: 150,
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "accountGroupType",
+        title: "ACCOUNT GROUP TYPE",
+        dataIndex: "accountGroupType",
+        width: 150,
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "accountType",
+        title: "ACCOUNT TYPE",
+        dataIndex: "accountType",
+        width: 100,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "billingCycle",
+        title: "BILLING CYCLE",
+        dataIndex: "billingCycle",
+        width: 150,
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.billingCycle] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
           "billingCycle",
-          hasValue(search["billingCycle"]),
+          searchInput,
+          searchedColumn,
           searchText,
-          text || "",
-          false,
-          "input",
-          search
+          handleSearch,
+          true
         ),
-    },
-    {
-      key: "billPeriod",
-      title: "BILLING PERIOD",
-      dataIndex: "billPeriod",
-      width: 120,
-      align: "center",
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "accountGroup",
-      title: "ACCOUNT GROUP",
-      dataIndex: "accountGroup",
-      width: 120,
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "saNumber",
-      title: "SA NUMBER",
-      dataIndex: "saNumber",
-      width: 150,
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "pjbgType",
-      title: "PJBG TYPE",
-      dataIndex: "pjbgType",
-      width: 100,
-      align: "center",
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "saServiceType",
-      title: "SA SERVICE TYPE",
-      dataIndex: "saServiceType",
-      width: 120,
-      align: "center",
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "saType",
-      title: "SA TYPE",
-      dataIndex: "saType",
-      width: 120,
-      align: "center",
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "termOfPayment",
-      title: "TERM OF PAYMENT",
-      dataIndex: "termOfPayment",
-      width: 150,
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "fullPriceCode",
-      title: "FULL PRICE CODE",
-      dataIndex: "fullPriceCode",
-      width: 250,
-      sorter: true,
-      ellipsis: {
-        showTitle: false,
+        render: (text) =>
+          renderColumn(
+            "billingCycle",
+            hasValue(search["billingCycle"]),
+            searchText,
+            text || "",
+            false,
+            "input",
+            search
+          ),
       },
-      render: (text) => <Tooltip title={text}>{text || "-"}</Tooltip>,
-    },
-    {
-      key: "minUsage",
-      title: "MIN USAGE",
-      dataIndex: "minUsage",
-      width: 120,
-      align: "right",
-      sorter: true,
-      render: (text) => (text != null ? text.toLocaleString() : "-"),
-    },
-    {
-      key: "maxUsage",
-      title: "MAX USAGE",
-      dataIndex: "maxUsage",
-      width: 120,
-      align: "right",
-      sorter: true,
-      render: (text) => (text != null ? text.toLocaleString() : "-"),
-    },
-    {
-      key: "timeUnit",
-      title: "TIME UNIT",
-      dataIndex: "timeUnit",
-      width: 100,
-      align: "center",
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "unitMeasure",
-      title: "UNIT MEASURE",
-      dataIndex: "unitMeasure",
-      width: 120,
-      align: "center",
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "currency",
-      title: "CURRENCY",
-      dataIndex: "currency",
-      width: 100,
-      align: "center",
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "paymentType",
-      title: "PAYMENT TYPE",
-      dataIndex: "paymentType",
-      width: 120,
-      align: "center",
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "chargingMethod",
-      title: "CHARGING METHOD",
-      dataIndex: "chargingMethod",
-      width: 150,
-      align: "center",
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "action",
-      title: "ACTION",
-      width: 80,
-      align: "center",
-      fixed: "right",
-      render: (text, record) => (
-        <Link
-          to={RBI_ROUTES.PRABILLING_DETAIL_CUSTOMER}
-          state={{
-            customerNumber: record?.customerNumber,
-            billPeriod: record?.billPeriod,
-            inSor: record?.sor || data?.sor,
-            accNumber: record?.accountNumber,
-            saNumber: record?.saNumber,
-          }}
-          style={{ lineHeight: 0 }}
-        >
-          <Tooltip title="View Account Detail">
-            <SVGIcon name="IconDetail" width={20} />
-          </Tooltip>
-        </Link>
-      ),
-    },
-  ],
-  [page, pageSize, search, searchText, searchedColumn, data]
-);
+      {
+        key: "billPeriod",
+        title: "BILLING PERIOD",
+        dataIndex: "billPeriod",
+        width: 120,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "accountGroup",
+        title: "ACCOUNT GROUP",
+        dataIndex: "accountGroup",
+        width: 120,
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "saNumber",
+        title: "SA NUMBER",
+        dataIndex: "saNumber",
+        width: 150,
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "pjbgType",
+        title: "PJBG TYPE",
+        dataIndex: "pjbgType",
+        width: 100,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "saServiceType",
+        title: "SA SERVICE TYPE",
+        dataIndex: "saServiceType",
+        width: 120,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "saType",
+        title: "SA TYPE",
+        dataIndex: "saType",
+        width: 120,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "termOfPayment",
+        title: "TERM OF PAYMENT",
+        dataIndex: "termOfPayment",
+        width: 150,
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "fullPriceCode",
+        title: "FULL PRICE CODE",
+        dataIndex: "fullPriceCode",
+        width: 250,
+        sorter: true,
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (text) => <Tooltip title={text}>{text || ""}</Tooltip>,
+      },
+      {
+        key: "minUsage",
+        title: "MIN USAGE",
+        dataIndex: "minUsage",
+        width: 120,
+        align: "right",
+        sorter: true,
+        render: (text) => (text != null ? text.toLocaleString() : ""),
+      },
+      {
+        key: "maxUsage",
+        title: "MAX USAGE",
+        dataIndex: "maxUsage",
+        width: 120,
+        align: "right",
+        sorter: true,
+        render: (text) => (text != null ? text.toLocaleString() : ""),
+      },
+      {
+        key: "timeUnit",
+        title: "TIME UNIT",
+        dataIndex: "timeUnit",
+        width: 100,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "unitMeasure",
+        title: "UNIT MEASURE",
+        dataIndex: "unitMeasure",
+        width: 120,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "currency",
+        title: "CURRENCY",
+        dataIndex: "currency",
+        width: 100,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "paymentType",
+        title: "PAYMENT TYPE",
+        dataIndex: "paymentType",
+        width: 120,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "chargingMethod",
+        title: "CHARGING METHOD",
+        dataIndex: "chargingMethod",
+        width: 150,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "action",
+        title: "ACTION",
+        width: 80,
+        align: "center",
+        fixed: "right",
+        render: (text, record) => (
+          <Link
+            to={RBI_ROUTES.PRABILLING_DETAIL_CUSTOMER}
+            state={{
+              customerNumber: record?.customerNumber,
+              billPeriod: record?.billPeriod,
+              inSor: record?.sor || data?.sor,
+              accNumber: record?.accountNumber,
+              saNumber: record?.saNumber,
+            }}
+            style={{ lineHeight: 0 }}
+          >
+            <Tooltip title="View Account Detail">
+              <SVGIcon name="IconDetail" width={20} />
+            </Tooltip>
+          </Link>
+        ),
+      },
+    ],
+    [page, pageSize, search, searchText, searchedColumn, data]
+  );
 
   const allColumns = useMemo(() => {
     const columnsWithKeys = baseResultColumns.map((col) => ({
@@ -476,7 +476,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       case 3:
         return "Failed";
       default:
-        return status || "-";
+        return status || "";
     }
   };
 
@@ -493,24 +493,27 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         }
       >
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(5,auto)] gap-x-8 gap-y-2 sm:gap-y-1">
-          <DetailText label={"Init Code"}>{data?.initCode || "-"}</DetailText>
+          <DetailText label={"Init Code"}>{data?.initCode || ""}</DetailText>
           <DetailText label={"Process Name"}>
-            {data?.processName || "-"}
+            {data?.processName || ""}
           </DetailText>
           <DetailText label={"Billing Cycle"}>
-            {data?.billingCycle || "-"}
+            {data?.billingCycle || ""}
           </DetailText>
           <DetailText label={"Billing Period"}>
-            {data?.billPeriod || "-"}
+            {data?.billPeriod || ""}
           </DetailText>
-          <DetailText label={"SOR"}>{data?.sor || "-"}</DetailText>
+          <DetailText label={"SOR"}>{data?.sor || ""}</DetailText>
+          <DetailText label={"Schedule Type"}>
+            {data?.shceduleType || ""}
+          </DetailText>
           <DetailText label={"Total Customer"}>
             {data?.totalCustomer || 0}
           </DetailText>
           <DetailText label={"Status"}>{renderStatus(data?.status)}</DetailText>
-          <DetailText label={"Message"}>{data?.message || "-"}</DetailText>
+          <DetailText label={"Message"}>{data?.message || ""}</DetailText>
           <DetailText label={"Remark"} className="col-span-2">
-            {data?.remark || "-"}
+            {data?.remark || ""}
           </DetailText>
         </div>
       </CardContainer>
@@ -525,21 +528,23 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       >
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
           <DetailText label={"Record ID"}>
-            {data?.initId || "-"}
+            {data?.initId || ""}
           </DetailText>
           <DetailText label={"Created Date"}>
             {data?.createdDtm
               ? moment(data.createdDtm).format("DD MMM YYYY HH:mm:ss")
-              : "-"}
+              : ""}
           </DetailText>
           <DetailText label={"Created By"}>
-            {data?.createdBy || "-"}
+            {data?.createdBy || ""}
           </DetailText>
           <DetailText label={"Updated Date"}>
-            
+            {data?.updateDtm
+              ? moment(data.updateDtm).format("DD MMM YYYY HH:mm:ss")
+              : ""}
           </DetailText>
           <DetailText label={"Updated By"}>
-            
+            {data?.updatedBy || ""}
           </DetailText>
         </div>
       </CardContainer>
