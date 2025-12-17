@@ -11,16 +11,10 @@ import TablePaginationNew from "../../../../../../../../components/TablePaginati
 
 const InvoiceRelationDetailAttch = ({
   dataAttachment = [],
-  handleChange = () => {},
-  handleChangeSize = () => {},
   totalElement = 0,
   page = 1,
   pageSize = 10,
-  searchText = "",
-  searchedColumn = "",
-  onSort = () => {},
   getColumnSearchProps = () => {},
-  handleSearch
 }) => {
   // Dummy data
   const dummyData = [
