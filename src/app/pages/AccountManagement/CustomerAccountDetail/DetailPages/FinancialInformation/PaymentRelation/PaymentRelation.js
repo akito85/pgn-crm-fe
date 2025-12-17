@@ -447,6 +447,7 @@ const PaymentRelation = ({
         <PaymentRelationTable
           data={data_paymentRelation?.result?.map((paymentRelation, index) => ({
             ...paymentRelation,
+            no: index + 1 + ( page - 1) * pageSize,
             key: `payment-relation-${paymentRelation.id}-${index}`
           }))}
           idAccount={id}

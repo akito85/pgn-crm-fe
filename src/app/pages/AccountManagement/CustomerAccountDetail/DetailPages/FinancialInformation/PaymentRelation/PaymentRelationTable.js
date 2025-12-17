@@ -36,9 +36,9 @@ const PaymentRelationTable = ({
   const columns = [
     {
       title: "NO",
-      width: 100,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      dataIndex: "no",
+      width: 100,
     },
     {
       title: "ACCOUNT NUMBER",
