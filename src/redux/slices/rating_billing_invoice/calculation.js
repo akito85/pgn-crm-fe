@@ -88,35 +88,7 @@ export const getHistoryCalculationPaginate = createAsyncThunk(
     }
   }
 );
-// pagination Log
-export const getCalculateLogPaginate = createAsyncThunk(
-  "GET_CALCULATE_LOG_PAGINATE",
-  async ({ search, page, pageSize, sort, calCode }, thunkAPI) => {
-    try {
-      const searchParams = search || "";
-      const sortParams = sort || "logId~desc";
-      const url = `/v1/dbs/api/rbi/calculation/list-calculatelog?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}&calCode=${calCode}`;
-      const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return error;
-    }
-  }
-);
+
 
 // downlaod slice
 export const donwloadedExcel = createAsyncThunk(

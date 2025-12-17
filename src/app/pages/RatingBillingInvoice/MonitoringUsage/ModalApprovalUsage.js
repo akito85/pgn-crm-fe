@@ -17,7 +17,6 @@ import InputComponent from "../../../../components/InputComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
-import TableRBI from "../../../../components/TableRBI";
 
 const ModalApprovalUsage = ({
   isOpen,
