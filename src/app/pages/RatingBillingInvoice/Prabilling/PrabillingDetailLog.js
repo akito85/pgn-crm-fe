@@ -17,6 +17,9 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   
+  // Destructure data dengan benar - sama seperti di PrabillingDetailInformation
+  const prabillData = data?.prabillInitPopulate || {};
+  
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState("");
@@ -30,10 +33,11 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
   }));
 
   useEffect(() => {
-    if (tabHeader === "Prabilling Log" && data?.initCode) {
+    // Gunakan prabillData.initCode instead of data.initCode
+    if (tabHeader === "Prabilling Log" && prabillData?.initCode) {
       dispatch(
         getDetailPrabillingLog({
-          initCode: data.initCode,
+          initCode: prabillData.initCode,
           page: page - 1,
           size: pageSize,
           sort: sort,
@@ -41,7 +45,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         })
       );
     }
-  }, [tabHeader, dispatch, data?.initCode, page, pageSize, sort, search]);
+  }, [tabHeader, dispatch, prabillData?.initCode, page, pageSize, sort, search]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
