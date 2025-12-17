@@ -72,7 +72,7 @@ const PrabillingDetail = () => {
 
         {tabHeader === "Prabilling Information" ? (
           <PrabillingDetailInformation
-            data={detail_prabilling_init?.prabillInitPopulate}
+            data={detail_prabilling_init}
             tabHeader={tabHeader}
           />
         ) : (
