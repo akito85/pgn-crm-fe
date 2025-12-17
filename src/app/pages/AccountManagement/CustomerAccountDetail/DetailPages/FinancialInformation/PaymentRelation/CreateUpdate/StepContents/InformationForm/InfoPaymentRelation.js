@@ -224,10 +224,9 @@ export default function InfoPaymentRelation({
     {
       title: "ACCOUNT NAME",
       dataIndex: "accountName",
-      width: 150,
+      width: 250,
       sorter: true,
       ...getColumnSearchProps("accountName"),
-      render: (date) => renderDate(date) || "-",
     },
     {
       title: "CATEGORY",
