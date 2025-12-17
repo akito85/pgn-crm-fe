@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
 import moment from "moment";
-import { dateFormat, dateFormatting } from "../../../../../../../../utils";
+import { dateFormatting } from "../../../../../../../../utils";
 
 const PaymentRelationDetailInfo = ({
   dataDetail = {},
