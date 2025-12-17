@@ -113,21 +113,6 @@ const DetailInformation = ({ data, tabHeader }) => {
     }
   }, [dispatch, segmentedPage, data]);
 
-  // use Effect - Fetch Calculation Log (History Log)
-  useEffect(() => {
-    if (tabHeader === "Calculation Information" && data?.calCode) {
-      dispatch(
-        getDetailCalculationLog({
-          calCode: data?.calCode,
-          sort: "createdDate,desc",
-          page: 1,
-          pageSize: 1,
-          search: encodeURIComponent(JSON.stringify({})),
-        })
-      );
-    }
-  }, [tabHeader, data?.calCode, dispatch]);
-
   useEffect(() => {
     if (data?.calType === 621) {
       setSegmentedPage("Rating Result");
@@ -619,7 +604,7 @@ const DetailInformation = ({ data, tabHeader }) => {
   };
 
   // Get latest calculation log data
-  const latestLog = list_calculation_log?.result?.[0] || {};
+  const latestLog = list_calculation_result?.result?.[0] || {};
 
   return (
     <>
