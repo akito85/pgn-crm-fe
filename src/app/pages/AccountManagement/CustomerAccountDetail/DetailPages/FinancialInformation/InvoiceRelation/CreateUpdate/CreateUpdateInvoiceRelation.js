@@ -379,8 +379,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       appHierId,
     } = formCreate.getFieldsValue();
 
-    console.log("startDate", startDate);
-
     const body = {
       id: idIr,
       subjectId: data_accountDetail?.accountInformation?.accountId, 
