@@ -133,7 +133,6 @@ const ModalConfirmationApprovalPaymentRelation = ({
           ...data,
           no: (page - 1) * pageSize + index + 1,
         }))}
-        totalData={dataSource.length}
         onChange={handleChangeDetail}
         tableScrolled={{ y: 400, x: 2000 }}
         columns={columns}
