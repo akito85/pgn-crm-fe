@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import moment from "moment";
 import DetailText from "../../../../../components/DetailText";
 import RadioTabs from "../../../../../components/RadioTabs";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -11,6 +12,7 @@ import InputComponent from "../../../../../components/InputComponent";
 import {
   getDetailCalculationResult,
   getDetailCalculationResultNoPaging,
+  getDetailCalculationLog,
   recalculateData,
   retryData,
 } from "../../../../../redux/slices/rating_billing_invoice/calculation";
@@ -25,6 +27,7 @@ const DetailInformation = ({ data, tabHeader }) => {
   const {
     list_calculation_result,
     list_calculation_no_paging,
+    list_calculation_log,
     loading,
     loadingModal,
   } = useSelector((state) => state.rbi_calculation);
@@ -63,7 +66,7 @@ const DetailInformation = ({ data, tabHeader }) => {
     { value: "Billing Result" },
   ]);
 
-  // use Effect
+  // use Effect - Fetch Calculation Result
   useEffect(() => {
     if (
       tabHeader === "Calculation Information" &&
@@ -94,6 +97,7 @@ const DetailInformation = ({ data, tabHeader }) => {
     }
   }, [segmentedPage, dispatch, data, page, pageSize, search, sort, tabHeader]);
 
+  // use Effect - Fetch Calculation Result No Paging
   useEffect(() => {
     if (
       tabHeader === "Calculation Information" &&
@@ -599,6 +603,9 @@ const DetailInformation = ({ data, tabHeader }) => {
     }
   };
 
+  // Get latest calculation log data
+  const latestLog = list_calculation_result?.result?.[0] || {};
+
   return (
     <>
       <Spin spinning={loadingModal}>
@@ -666,6 +673,23 @@ const DetailInformation = ({ data, tabHeader }) => {
           </div>
         </CardContainer>
 
+        {/* History Log Information Section */}
+        <CardContainer subHeader={"history log information"}>
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
+            <DetailText label={"Action"}>{latestLog?.action || "-"}</DetailText>
+            <DetailText label={"Type"}>{latestLog?.calType || "-"}</DetailText>
+            <DetailText label={"Calculate At"}>
+              {latestLog?.calDate
+                ? moment(latestLog.calDate).format("DD MMM YYYY HH:mm:ss")
+                : "-"}
+            </DetailText>
+            <DetailText label={"Calculate By"}>
+              {latestLog?.createdBy || "-"}
+            </DetailText>
+            <DetailText label={"Remark"}>{latestLog?.remark || "-"}</DetailText>
+          </div>
+        </CardContainer>
+
         <CardContainer subHeader={"calculation result"}>
           {tempTabs}
 
@@ -702,7 +726,7 @@ const DetailInformation = ({ data, tabHeader }) => {
                     <LeftOutlined
                       style={{
                         color: "#fff",
-                        fontSize: 15, // Ubah ukuran ikon sesuai kebutuhan
+                        fontSize: 15,
                         marginRight: 10,
                       }}
                     />
@@ -723,7 +747,7 @@ const DetailInformation = ({ data, tabHeader }) => {
                     <RightOutlined
                       style={{
                         color: "#fff",
-                        fontSize: 15, // Ubah ukuran ikon sesuai kebutuhan
+                        fontSize: 15,
                         marginLeft: 10,
                       }}
                     />

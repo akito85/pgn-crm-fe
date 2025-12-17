@@ -13,7 +13,7 @@ export const columnsRatingResult = (
   {
     key: "no",
     title: "NO",
-    align: "center",
+    isClassification: true,
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
@@ -47,7 +47,7 @@ export const columnsRatingResult = (
     title: "VALUE",
     dataIndex: "value",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "value",
@@ -73,7 +73,7 @@ export const columnsRatingResult = (
     title: "UOM",
     dataIndex: "uom",
     sorter: true,
-    align: "center",
+    isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "uom",
@@ -99,7 +99,7 @@ export const columnsRatingResult = (
     title: "PRICE",
     dataIndex: "pricing",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "pricing",
@@ -125,7 +125,7 @@ export const columnsRatingResult = (
     title: "TOTAL AMOUNT",
     dataIndex: "totalAmount",
     sorter: true,
-    align: "right",
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmount",
@@ -151,7 +151,7 @@ export const columnsRatingResult = (
     title: "CURRENCY",
     dataIndex: "currency",
     sorter: true,
-    align: "center",
+    isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "currency",

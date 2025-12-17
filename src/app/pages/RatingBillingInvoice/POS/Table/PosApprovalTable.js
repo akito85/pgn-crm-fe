@@ -203,7 +203,6 @@ const PosApprovalTable = ({
     {
       title: "NO",
       width: 60,
-      align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -369,7 +368,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["billingPeriod"]
         ? [search?.["billingPeriod"]]
         : null,
-      align: "center",
       // sorter: (a, b) => a?.billingPeriod?.localeCompare(b?.billingPeriod),
       // ...getColumnSearchPropsPaging(
       //   "billingPeriod",
@@ -577,7 +575,6 @@ const PosApprovalTable = ({
       sorter: (a, b) => sorter("proformaInvoiceDate", a, b),
       // sorter: (a, b) =>
       //   a?.proformaInvoiceDate?.localeCompare(b?.proformaInvoiceDate),
-      align: "center",
       // ...getColumnSearchPropsPaging(
       //   "proformaInvoiceDate",
       //   searchInput,
@@ -639,7 +636,6 @@ const PosApprovalTable = ({
         : null,
       sorter: (a, b) => sorter("invoiceDate", a, b),
       // sorter: (a, b) => a?.invoiceDate?.localeCompare(b?.invoiceDate),
-      align: "center",
       // ...getColumnSearchPropsPaging(
       //   "invoiceDate",
       //   searchInput,
@@ -701,7 +697,6 @@ const PosApprovalTable = ({
         : null,
       sorter: (a, b) => sorter("transactionDate", a, b),
       // sorter: (a, b) => a?.transactionDate?.localeCompare(b?.transactionDate),
-      align: "center",
       // ...getColumnSearchPropsPaging(
       //   "transactionDate",
       //   searchInput,
@@ -761,7 +756,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["currency"] ? [search?.["currency"]] : null,
       sorter: (a, b) => sorter("currency", a, b),
       // sorter: (a, b) => a?.currency?.localeCompare(b?.currency),
-      align: "center",
       // ...getColumnSearchPropsPaging(
       //   "currency",
       //   searchInput,
@@ -803,7 +797,6 @@ const PosApprovalTable = ({
         : null,
       sorter: (a, b) => sorter("accountGroupType", a, b),
       // sorter: (a, b) => a?.accountGroupType?.localeCompare(b?.accountGroupType),
-      align: "center",
       // ...getColumnSearchPropsPaging(
       //   "accountGroupType",
       //   searchInput,
@@ -843,7 +836,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["sor"] ? [search?.["sor"]] : null,
       sorter: (a, b) => sorter("sor", a, b),
       // sorter: (a, b) => a?.sor?.localeCompare(b?.sor),
-      align: "center",
       // ...getColumnSearchPropsPaging(
       //   "sor",
       //   searchInput,
@@ -1015,7 +1007,7 @@ const PosApprovalTable = ({
     //   title: "BILLING PERIOD",
     //   dataIndex: "billingPeriod",
     //   sorter: (a, b) => a?.billingPeriod?.localeCompare(b?.billingPeriod),
-    //   align: "center",
+    //
     //   ...getColumnSearchPropsPaging(
     //     "billingPeriod",
     //     searchInput,
@@ -1033,7 +1025,7 @@ const PosApprovalTable = ({
     //   title: "CURRENCY",
     //   dataIndex: "currency",
     //   sorter: (a, b) => a?.currency?.localeCompare(b?.currency),
-    //   align: "center",
+    //
     //   ...getColumnSearchPropsPaging(
     //     "currency",
     //     searchInput,
@@ -1096,7 +1088,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["amountIdr"] ? [search?.["amountIdr"]] : null,
       sorter: (a, b) => sorter("amountIdr", a, b),
       // sorter: (a, b) => a?.amountIdr?.localeCompare(b?.amountIdr),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "amountIdr",
       //   searchInput,
@@ -1136,7 +1127,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["amountUsd"] ? [search?.["amountUsd"]] : null,
       sorter: (a, b) => sorter("amountUsd", a, b),
       // sorter: (a, b) => a?.amountUsd?.localeCompare(b?.amountUsd),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "amountUsd",
       //   searchInput,
@@ -1176,7 +1166,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["taxBasisIdr"] ? [search?.["taxBasisIdr"]] : null,
       sorter: (a, b) => sorter("taxBasisIdr", a, b),
       // sorter: (a, b) => a?.taxBasisIdr?.localeCompare(b?.taxBasisIdr),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "taxBasisIdr",
       //   searchInput,
@@ -1216,7 +1205,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["taxBasisUsd"] ? [search?.["taxBasisUsd"]] : null,
       sorter: (a, b) => sorter("taxBasisUsd", a, b),
       // sorter: (a, b) => a?.taxBasisUsd?.localeCompare(b?.taxBasisUsd),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "taxBasisUsd",
       //   searchInput,
@@ -1258,7 +1246,6 @@ const PosApprovalTable = ({
         : null,
       sorter: (a, b) => sorter("taxBasisEqvIdr", a, b),
       // sorter: (a, b) => a?.taxBasisEqvIdr?.localeCompare(b?.taxBasisEqvIdr),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "taxBasisEqvIdr",
       //   searchInput,
@@ -1298,7 +1285,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["vatIdr"] ? [search?.["vatIdr"]] : null,
       sorter: (a, b) => sorter("vatIdr", a, b),
       // sorter: (a, b) => a?.vatIdr?.localeCompare(b?.vatIdr),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "vatIdr",
       //   searchInput,
@@ -1338,7 +1324,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["vatUsd"] ? [search?.["vatUsd"]] : null,
       sorter: (a, b) => sorter("vatUsd", a, b),
       // sorter: (a, b) => a?.vatUsd?.localeCompare(b?.vatUsd),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "vatUsd",
       //   searchInput,
@@ -1378,7 +1363,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["vatEqvIdr"] ? [search?.["vatEqvIdr"]] : null,
       sorter: (a, b) => sorter("vatEqvidr", a, b),
       // sorter: (a, b) => a?.vatEqvIdr?.localeCompare(b?.vatEqvIdr),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "vatEqvIdr",
       //   searchInput,
@@ -1420,7 +1404,6 @@ const PosApprovalTable = ({
         : null,
       sorter: (a, b) => sorter("witholdingTax", a, b),
       // sorter: (a, b) => a?.withholdingTax?.localeCompare(b?.withholdingTax),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "withholdingTax",
       //   searchInput,
@@ -1460,7 +1443,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["taxRateType"] ? [search?.["taxRateType"]] : null,
       sorter: (a, b) => sorter("taxRateType", a, b),
       // sorter: (a, b) => a?.taxRateType?.localeCompare(b?.taxRateType),
-      align: "center",
       // ...getColumnSearchPropsPaging(
       //   "taxRateType",
       //   searchInput,
@@ -1500,7 +1482,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["taxRate"] ? [search?.["taxRate"]] : null,
       sorter: (a, b) => sorter("taxRate", a, b),
       // sorter: (a, b) => a?.taxRate?.localeCompare(b?.taxRate),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "taxRate",
       //   searchInput,
@@ -1540,7 +1521,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["taxRateDate"] ? [search?.["taxRateDate"]] : null,
       sorter: (a, b) => sorter("taxRateDate", a, b),
       // sorter: (a, b) => a?.taxRateDate?.localeCompare(b?.taxRateDate),
-      align: "center",
       // ...getColumnSearchPropsPaging(
       //   "taxRateDate",
       //   searchInput,
@@ -1602,7 +1582,6 @@ const PosApprovalTable = ({
         : null,
       sorter: (a, b) => sorter("discountAmount", a, b),
       // sorter: (a, b) => a?.discountAmount?.localeCompare(b?.discountAmount),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "discountAmount",
       //   searchInput,
@@ -1645,7 +1624,6 @@ const PosApprovalTable = ({
       sorter: (a, b) => sorter("discountAmountIdr", a, b),
       // sorter: (a, b) =>
       //   a?.discountAmountIdr?.localeCompare(b?.discountAmountIdr),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "discountAmountIdr",
       //   searchInput,
@@ -1688,7 +1666,6 @@ const PosApprovalTable = ({
       sorter: (a, b) => sorter("dsicountAmountUsd", a, b),
       // sorter: (a, b) =>
       //   a?.discountAmountUsd?.localeCompare(b?.discountAmountUsd),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "discountAmountUsd",
       //   searchInput,
@@ -1730,7 +1707,6 @@ const PosApprovalTable = ({
         : null,
       sorter: (a, b) => sorter("totalAmountIdr", a, b),
       // sorter: (a, b) => a?.totalAmountIdr?.localeCompare(b?.totalAmountIdr),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "totalAmountIdr",
       //   searchInput,
@@ -1772,7 +1748,6 @@ const PosApprovalTable = ({
         : null,
       sorter: (a, b) => sorter("totalAmountUsd", a, b),
       // sorter: (a, b) => a?.totalAmountUsd?.localeCompare(b?.totalAmountUsd),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "totalAmountUsd",
       //   searchInput,
@@ -1814,7 +1789,6 @@ const PosApprovalTable = ({
         : null,
       sorter: (a, b) => sorter("termsOfPayment", a, b),
       // sorter: (a, b) => a?.termsOfPayment?.localeCompare(b?.termsOfPayment),
-      align: "center",
       // ...getColumnSearchPropsPaging(
       //   "termsOfPayment",
       //   searchInput,
@@ -1856,7 +1830,6 @@ const PosApprovalTable = ({
         : null,
       sorter: (a, b) => sorter("accountingDate", a, b),
       // sorter: (a, b) => a?.accountingDate?.localeCompare(b?.accountingDate),
-      align: "center",
       // ...getColumnSearchPropsPaging(
       //   "accountingDate",
       //   searchInput,
@@ -1916,7 +1889,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["dueDate"] ? [search?.["dueDate"]] : null,
       sorter: (a, b) => sorter("dueDate", a, b),
       // sorter: (a, b) => a?.dueDate?.localeCompare(b?.dueDate),
-      align: "center",
       // ...getColumnSearchPropsPaging(
       //   "dueDate",
       //   searchInput,
@@ -1976,7 +1948,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["rateType"] ? [search?.["rateType"]] : null,
       sorter: (a, b) => sorter("rateType", a, b),
       // sorter: (a, b) => a?.rateType?.localeCompare(b?.rateType),
-      align: "center",
       // ...getColumnSearchPropsPaging(
       //   "rateType",
       //   searchInput,
@@ -2016,7 +1987,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["rate"] ? [search?.["rate"]] : null,
       sorter: (a, b) => sorter("rate", a, b),
       // sorter: (a, b) => a?.rate?.localeCompare(b?.rate),
-      align: "center",
       // ...getColumnSearchPropsPaging(
       //   "rate",
       //   searchInput,
@@ -2053,7 +2023,6 @@ const PosApprovalTable = ({
       filteredValue: search?.["rateDate"] ? [search?.["rateDate"]] : null,
       sorter: (a, b) => sorter("rateDate", a, b),
       // sorter: (a, b) => a?.rateDate?.localeCompare(b?.rateDate),
-      align: "center",
       // ...getColumnSearchPropsPaging(
       //   "rateDate",
       //   searchInput,
@@ -2117,7 +2086,6 @@ const PosApprovalTable = ({
         : null,
       // sorter: (a, b) =>
       //   a?.totalAmountEqvIdrr?.localeCompare(b?.totalAmountEqvIdrr),
-      align: "right",
       // ...getColumnSearchPropsPaging(
       //   "totalAmountEqvIdr",
       //   searchInput,
@@ -2160,7 +2128,6 @@ const PosApprovalTable = ({
       sorter: (a, b) => sorter("totalAmountEqvUsd", a, b),
       // sorter: (a, b) =>
       //   a?.totalAmountEqvUsd?.localeCompare(b?.totalAmountEqvUsd),
-      align: "right",
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "totalAmountEqvUsd",
@@ -2197,7 +2164,7 @@ const PosApprovalTable = ({
     //   title: "TERMS OF PAYMENT",
     //   dataIndex: "termsOfPayment",
     //   sorter: (a, b) => a?.termsOfPayment?.localeCompare(b?.termsOfPayment),
-    //   align: "center",
+    //
     //   ...getColumnSearchPropsPaging(
     //     "termsOfPayment",
     //     searchInput,
@@ -2215,7 +2182,7 @@ const PosApprovalTable = ({
     //   title: "TRANSACTION DATE",
     //   dataIndex: "transactionDate",
     //   sorter: (a, b) => a?.transactionDate?.localeCompare(b?.transactionDate),
-    //   align: "center",
+    //
     //   ...getColumnSearchPropsPaging(
     //     "transactionDate",
     //     searchInput,
@@ -2252,7 +2219,7 @@ const PosApprovalTable = ({
     //   title: "DUE DATE",
     //   dataIndex: "dueDate",
     //   sorter: (a, b) => a?.dueDate?.localeCompare(b?.dueDate),
-    //   align: "center",
+    //
     //   ...getColumnSearchPropsPaging(
     //     "dueDate",
     //     searchInput,
