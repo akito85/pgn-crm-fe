@@ -379,8 +379,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
       appHierId,
     } = formCreate.getFieldsValue();
 
-    console.log("startDate", startDate);
-
     const body = {
       id: idIr,
       subjectId: data_accountDetail?.accountInformation?.accountId, 
@@ -516,7 +514,6 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
                 type={"submit"}
                 icon={<SVGIcon name="IconButtonClear" width={24} />}
               >
-                Clear
               </ButtonComponent>
               {current > 0 && current !== (steps.length-1) && (
                 <ButtonComponent

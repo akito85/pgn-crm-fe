@@ -25,13 +25,18 @@ const PaymentRelationDetailAttch = ({
       accountManagementService.downloadData(r.urlFile1);
     } else {
       setLoadingDownload(true);
-      const response = await axios.get(configApp.MASTER_MANAGEMENT + r.urlFile1, {
+      try {
+        const response = await axios.get(configApp.ACCOUNT_SERVICE + r.urlFile1, {
         headers: tokenHeader(),
         responseType: "blob",
       });
       const base64 = await getBase64(response.data);
-      setLoadingDownload(false);
       previewFileAttachment(base64);
+      } catch (error) {
+        console.error("Failed to download file", error);
+      } finally {
+        setLoadingDownload(false);
+      }
     }
   };
 

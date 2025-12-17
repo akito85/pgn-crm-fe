@@ -1,20 +1,12 @@
 import { Fragment } from "react";
 import DetailText from "../../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../../components/BaseContainer";
+import moment from "moment";
+import { dateFormatting } from "../../../../../../../../utils";
 
 const PaymentRelationDetailInfo = ({
   dataDetail = {},
 }) => {
-  const log = []
-
-  const HistoryLogDummy = {
-    recordId: "491",
-    createdDate: "21 Dec 2021 23:11:09",
-    createdBy: "Annisa",
-    updatedDate: "28 Dec 2021 23:11:09",
-    updatedBy: "Annisa"
-  };
-
   return (
     <Fragment>
       <BaseContainer header={"PAYMENT RELATION"}>
@@ -23,8 +15,8 @@ const PaymentRelationDetailInfo = ({
           <DetailText label="Account Number">{dataDetail?.accountNumber}</DetailText>
           <DetailText label="Account Name">{dataDetail?.accountName}</DetailText>
           <DetailText label="Priority">{dataDetail?.priority}</DetailText>
-          <DetailText label="Start Date">{dataDetail?.startDate}</DetailText>
-          <DetailText label="End Date">{dataDetail?.endDate}</DetailText>
+          <DetailText label="Start Date">{dataDetail?.startDate ? moment(dataDetail.startDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
+          <DetailText label="End Date">{dataDetail?.endDate ? moment(dataDetail.endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
           <DetailText label="Status">{dataDetail?.status}</DetailText>
         </div>
         <div className="w-full">
@@ -35,11 +27,11 @@ const PaymentRelationDetailInfo = ({
       <BaseContainer header={"HISTORY LOG INFORMATION"}>
         <div className="w-full grid grid-cols-5 gap-4">
           {/* History Log Information */}
-          <DetailText label="Record Id">{log?.recordId || HistoryLogDummy.recordId}</DetailText>
-          <DetailText label="Created Date">{log?.createdDate || HistoryLogDummy.createdDate}</DetailText>
-          <DetailText label="Created By">{log?.createdBy || HistoryLogDummy.createdBy}</DetailText>
-          <DetailText label="Updated Date">{log?.updatedDate || HistoryLogDummy.updatedDate}</DetailText>
-          <DetailText label="Updated By">{log?.updatedBy || HistoryLogDummy.updatedBy}</DetailText>
+          <DetailText label="Record Id">{dataDetail?.id}</DetailText>
+          <DetailText label="Created Date">{dataDetail?.createdDate ? moment(dataDetail.createdDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
+          <DetailText label="Created By">{dataDetail?.createdBy}</DetailText>
+          <DetailText label="Updated Date">{dataDetail?.updatedDate}</DetailText>
+          <DetailText label="Updated By">{dataDetail?.updatedBy ? moment(dataDetail.updatedBy, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
         </div>
       </BaseContainer>
     </Fragment>
