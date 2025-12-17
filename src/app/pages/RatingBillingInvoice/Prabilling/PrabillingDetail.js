@@ -61,7 +61,7 @@ const PrabillingDetail = () => {
     <Spin spinning={loading_detail_prabilling}>
       <LayoutMenu>
         <BreadCrumb routes={routes} />
-        
+
         <div className={"w-full justify-start mt-5"}>
           <RadioTabs
             data={dataTabs}

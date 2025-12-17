@@ -1,7 +1,7 @@
+import moment from "moment";
 import {
   hasValue,
   renderColumn,
-  renderDateColumn,
 } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
@@ -146,16 +146,16 @@ export const columnsContentManagement = (
       dataIndex: "startDate",
       sorter: true,
       width: 150,
-      render: (text, record) => {
-        // ✅ Triple check untuk memastikan tidak ada undefined/null
+      render: (text) => {
         if (!text || text === null || text === undefined || text === "") {
           return <span>-</span>;
         }
         try {
-          const formatted = renderDateColumn(text, "DD/MM/YYYY");
-          return <span>{formatted}</span>;
+          // Parse ISO string and format to DD/MM/YYYY
+          const formattedDate = moment(text).format("DD/MM/YYYY");
+          return <span>{formattedDate}</span>;
         } catch (error) {
-          console.error("Error rendering startDate:", error, record);
+          console.error("Error rendering startDate:", error);
           return <span>-</span>;
         }
       },
@@ -165,16 +165,16 @@ export const columnsContentManagement = (
       dataIndex: "endDate",
       sorter: true,
       width: 150,
-      render: (text, record) => {
-        // ✅ Triple check untuk memastikan tidak ada undefined/null
+      render: (text) => {
         if (!text || text === null || text === undefined || text === "") {
           return <span>-</span>;
         }
         try {
-          const formatted = renderDateColumn(text, "DD/MM/YYYY");
-          return <span>{formatted}</span>;
+          // Parse ISO string and format to DD/MM/YYYY
+          const formattedDate = moment(text).format("DD/MM/YYYY");
+          return <span>{formattedDate}</span>;
         } catch (error) {
-          console.error("Error rendering endDate:", error, record);
+          console.error("Error rendering endDate:", error);
           return <span>-</span>;
         }
       },

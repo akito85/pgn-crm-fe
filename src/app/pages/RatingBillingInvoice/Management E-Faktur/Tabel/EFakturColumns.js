@@ -31,7 +31,7 @@ export const getEFakturColumns = ({
       key: "no",
       title: "NO",
       width: 60,
-      align: "center",
+      isClassification: true,
       render: (_, __, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -39,7 +39,6 @@ export const getEFakturColumns = ({
       title: "KODE FAKTUR",
       dataIndex: "efakturNo",
       width: 180,
-      align: "left",
       sorter: true,
       filteredValue: [search?.efakturNo] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -67,7 +66,6 @@ export const getEFakturColumns = ({
       title: "INVOICE NUMBER",
       dataIndex: "invoiceNumber",
       width: 180,
-      align: "left",
       sorter: true,
       filteredValue: [search?.invoiceNumber] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -95,7 +93,6 @@ export const getEFakturColumns = ({
       title: "BILLING CODE",
       dataIndex: "billingCode",
       width: 180,
-      align: "left",
       sorter: true,
       filteredValue: [search?.billingCode] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -123,7 +120,6 @@ export const getEFakturColumns = ({
       title: "SOR",
       dataIndex: "sor",
       width: 150,
-      align: "left",
       sorter: true,
       filteredValue: [search?.sor] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -151,7 +147,6 @@ export const getEFakturColumns = ({
       title: "COST CENTER",
       dataIndex: "costCenter",
       width: 150,
-      align: "left",
       sorter: true,
       filteredValue: [search?.costCenter] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -179,7 +174,6 @@ export const getEFakturColumns = ({
       title: "METER READING",
       dataIndex: "meterReadingCode",
       width: 150,
-      align: "left",
       sorter: true,
       filteredValue: [search?.meterReadingCode] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -207,7 +201,6 @@ export const getEFakturColumns = ({
       title: "ACCOUNT NAME",
       dataIndex: "accountName",
       width: 250,
-      align: "left",
       sorter: true,
       filteredValue: [search?.accountName] || null,
       ellipsis: { showTitle: false },
@@ -236,7 +229,7 @@ export const getEFakturColumns = ({
       title: "TYPE PPN",
       dataIndex: "typePpn",
       width: 180,
-      align: "left",
+      isClassification: true,
       sorter: true,
       filteredValue: [search?.typePpn] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -264,7 +257,6 @@ export const getEFakturColumns = ({
       title: "CUSTOMER NAME",
       dataIndex: "name",
       width: 250,
-      align: "left",
       sorter: true,
       filteredValue: [search?.name] || null,
       ellipsis: { showTitle: false },
@@ -293,7 +285,7 @@ export const getEFakturColumns = ({
       title: "SEGMENT",
       dataIndex: "accountSegment",
       width: 150,
-      align: "left",
+      isClassification: true,
       sorter: true,
       filteredValue: [search?.accountSegment] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -321,7 +313,6 @@ export const getEFakturColumns = ({
       title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
       width: 150,
-      align: "left",
       sorter: true,
       filteredValue: [search?.accountNumber] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -349,7 +340,6 @@ export const getEFakturColumns = ({
       title: "NPWP CUSTOMER",
       dataIndex: "npwpCust",
       width: 180,
-      align: "left",
       sorter: true,
       filteredValue: [search?.npwpCust] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -377,7 +367,6 @@ export const getEFakturColumns = ({
       title: "TAX ADDRESS",
       dataIndex: "fullAddress",
       width: 300,
-      align: "left",
       sorter: true,
       filteredValue: [search?.fullAddress] || null,
       ellipsis: { showTitle: false },
@@ -406,7 +395,6 @@ export const getEFakturColumns = ({
       title: "NIK/PASSPORT",
       dataIndex: "nikPasport",
       width: 180,
-      align: "left",
       sorter: true,
       filteredValue: [search?.nikPasport] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -434,7 +422,6 @@ export const getEFakturColumns = ({
       title: "TKU CODE",
       dataIndex: "tkuCode",
       width: 150,
-      align: "left",
       sorter: true,
       filteredValue: [search?.tkuCode] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -462,7 +449,7 @@ export const getEFakturColumns = ({
       title: "BILLING PERIOD",
       dataIndex: "billPeriode",
       width: 120,
-      align: "center",
+      isClassification: true,
       sorter: true,
       filteredValue: [search?.billPeriode] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -490,7 +477,7 @@ export const getEFakturColumns = ({
       title: "INVOICE DATE",
       dataIndex: "invoiceDate",
       width: 120,
-      align: "center",
+      isClassification: true,
       sorter: true,
       filteredValue: [search?.invoiceDate] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -520,7 +507,7 @@ export const getEFakturColumns = ({
       title: "TOTAL AMOUNT (IDR)",
       dataIndex: "totalAmount",
       width: 180,
-      align: "right",
+      isNumber: true,
       sorter: true,
       filteredValue: [search?.totalAmount] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -553,7 +540,7 @@ export const getEFakturColumns = ({
       title: "STATUS E-FAKTUR",
       dataIndex: "status",
       width: 180,
-      align: "center",
+      isClassification: true,
       sorter: true,
       filteredValue: [search?.status] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -583,7 +570,7 @@ export const getEFakturColumns = ({
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
       width: 300,
-      align: "center",
+      isClassification: true,
       sorter: true,
       filteredValue: [search?.statusApproval] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -627,7 +614,7 @@ export const getActionColumn = ({
         return (
           <Tooltip title="Approval History">
             <div
-              className="pt-1 cursor-pointer"
+              className="cursor-pointer"
               onClick={() => handleApprovalHistory(record)}
             >
               <SVGIcon name="IconLogHistory" color="#0075bf" width={20} />
@@ -686,7 +673,7 @@ export const getActionColumn = ({
               trigger={["click"]}
               placement="bottomRight"
             >
-              <div className="pt-1 cursor-pointer">
+              <div className="cursor-pointer">
                 <MoreOutlined style={{ fontSize: 20, color: "#595959" }} />
               </div>
             </Dropdown>

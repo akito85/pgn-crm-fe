@@ -18,7 +18,6 @@ export const columnsAdjustmentBilling = (
 ) => [
   {
     title: "NO",
-    align: "center",
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
@@ -88,7 +87,6 @@ export const columnsAdjustmentBilling = (
     title: "TYPE",
     dataIndex: "adjustmentTypeName",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "adjustmentTypeName",
@@ -150,7 +148,6 @@ export const columnsAdjustmentBilling = (
   {
     title: "BILLING PERIOD",
     sorter: true,
-    align: "center",
     dataIndex: "billingPeriodName",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -307,7 +304,6 @@ export const columnsAdjustmentBilling = (
     title: "ACCOUNT GROUP TYPE",
     dataIndex: "accountGroupType",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountGroupType",
@@ -401,7 +397,6 @@ export const columnsAdjustmentBilling = (
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountSegment",
@@ -457,7 +452,6 @@ export const columnsAdjustmentBilling = (
     title: "CURRENCY",
     dataIndex: "currency",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "currency",
@@ -482,7 +476,6 @@ export const columnsAdjustmentBilling = (
     title: "TOTAL ADJUSTMENT AMOUNT IDR",
     dataIndex: "totalAdjustmentAmountIdr",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAdjustmentAmountIdr",
@@ -507,7 +500,6 @@ export const columnsAdjustmentBilling = (
     title: "TOTAL ADJUSTMENT AMOUNT USD",
     dataIndex: "totalAdjustmentAmountUsd",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAdjustmentAmountUsd",
@@ -532,7 +524,6 @@ export const columnsAdjustmentBilling = (
     title: "TERMS OF PAYMENT",
     dataIndex: "termsOfPayment",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "termsOfPayment",
@@ -580,7 +571,6 @@ export const columnsAdjustmentBilling = (
   {
     title: "TRANSACTION DATE",
     sorter: true,
-    align: "center",
     dataIndex: "transactionDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -625,7 +615,6 @@ export const columnsAdjustmentBilling = (
   {
     title: "DOCUMENT DATE",
     sorter: true,
-    align: "center",
     dataIndex: "documentDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -671,7 +660,6 @@ export const columnsAdjustmentBilling = (
     title: "ADJUSTMENT REASON",
     dataIndex: "adjustmentReasonName",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "adjustmentReasonName",
@@ -696,7 +684,6 @@ export const columnsAdjustmentBilling = (
     title: "RATE TYPE",
     dataIndex: "rateType",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rateType",
@@ -721,7 +708,6 @@ export const columnsAdjustmentBilling = (
     title: "RATE",
     dataIndex: "rate",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rate",
@@ -745,7 +731,6 @@ export const columnsAdjustmentBilling = (
   {
     title: "RATE DATE",
     sorter: true,
-    align: "center",
     dataIndex: "rateDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -790,7 +775,6 @@ export const columnsAdjustmentBilling = (
   {
     dataIndex: "remark",
     title: "REMARK",
-    align: "left",
     sorter: true,
     ellipsis: {
       showTitle: false,
@@ -915,7 +899,7 @@ export const columnsAdjustmentBilling = (
   },
   // {
   //   title: "ACTION",
-  //   align: "center",
+  //
   //   width: 100,
   //   dataIndex: "id",
   //   fixed: "right",

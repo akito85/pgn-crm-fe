@@ -72,10 +72,9 @@ const ModalGenerateEFaktur = ({
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [listDataAttachment, setListDataAttachment] = useState([]);
-  const [saveType, setSaveType] = useState(""); // 'SUBMIT' or 'DRAFT'
+  const [saveType, setSaveType] = useState("");
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   
-  // State untuk data detail E-Faktur (NPWP, NIK, Email, Alamat)
   const [detailData, setDetailData] = useState({
     npwp: null,
     nikPasp: null,
