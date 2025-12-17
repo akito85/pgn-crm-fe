@@ -308,7 +308,7 @@ const BillingPage = () => {
     itemGrantAccess
   ).map((col) => ({
     ...col,
-    width: 80,
+    width: 30,
     align: "center",
   }));
 
