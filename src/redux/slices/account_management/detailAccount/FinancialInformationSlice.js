@@ -834,7 +834,7 @@ export const getIrAccountStandard = createAsyncThunk(
 
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/account/list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/invoice-relation/list-account?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await accountManagementService.getPagination(url);
       return response?.data;
     } catch (error) {
