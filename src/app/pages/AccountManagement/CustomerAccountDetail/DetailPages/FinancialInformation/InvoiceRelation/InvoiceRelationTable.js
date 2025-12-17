@@ -42,10 +42,10 @@ const InvoiceRelationTable = ({
     },
     {
       title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
+      dataIndex: "relatedAccountNumber",
       width: 250,
       sorter: true,
-      ...getColumnSearchProps("accountNumber"),
+      ...getColumnSearchProps("relatedAccountNumber"),
     },
     {
       title: "PRIORITY",
