@@ -1084,14 +1084,14 @@ export const getPrOperatorApi = createAsyncThunk(
 
 export const approveOrRejectInvoiceRelation = createAsyncThunk(
   "APPROVE_OR_REJECT_INVOICE_RELATION",
-  async ({ body }, thunkAPI) => {
+  async ({ body, action }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/invoice-relation/approve";
       const response = await accountManagementService.activationWithRemark(url, body);
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${body?.action === "APPROVE" ? 'approved' : 'rejected'}.`,
+        description: `Your data has been ${action === "approve" ? 'approved' : 'rejected'}.`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
@@ -1109,7 +1109,7 @@ export const approveOrRejectInvoiceRelation = createAsyncThunk(
 
       const errorBody = {
         title: "Failed",
-        description: `Your data was not ${body?.action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
+        description: `Your data was not ${action === "approve" ? 'approved' : 'rejected'}. ${message}.`,
       };
 
       thunkAPI.dispatch(showModalError(errorBody));
@@ -1121,14 +1121,14 @@ export const approveOrRejectInvoiceRelation = createAsyncThunk(
 
 export const approveOrRejectInactiveInvoiceRelation = createAsyncThunk(
   "APPROVE_OR_REJECT_INACTIVE_INVOICE_RELATION",
-  async ({ body }, thunkAPI) => {
+  async ({ body, action }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/invoice-relation/approve-inactive";
       const response = await accountManagementService.activationWithRemark(url, body);
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${body?.action === "APPROVE" ? 'approved' : 'rejected'}.`,
+        description: `Your data has been ${action === "approve" ? 'approved' : 'rejected'}.`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody))
@@ -1146,7 +1146,7 @@ export const approveOrRejectInactiveInvoiceRelation = createAsyncThunk(
 
       const errorBody = {
         title: "Failed",
-        description: `Your data was not ${body?.action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
+        description: `Your data was not ${action === "approve" ? 'approved' : 'rejected'}. ${message}.`,
       };
 
       thunkAPI.dispatch(showModalError(errorBody));

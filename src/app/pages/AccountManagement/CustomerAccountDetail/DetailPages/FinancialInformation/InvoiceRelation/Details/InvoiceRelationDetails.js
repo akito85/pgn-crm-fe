@@ -128,6 +128,7 @@ const InvoiceRelationDetails = ({
       if (detail_invoiceRelation.approvalType === "INVOICE_RELATION") {
         dispatch(approveOrRejectInvoiceRelation({
           body,
+          action,
         }))
         .unwrap()
         .then(() => {
@@ -139,6 +140,7 @@ const InvoiceRelationDetails = ({
       } else if (detail_invoiceRelation.approvalType === "INACTIVE_INVOICE_RELATION") {
         dispatch(approveOrRejectInactiveInvoiceRelation({
           body,
+          action,
         }))
         .unwrap()
         .then(() => {
