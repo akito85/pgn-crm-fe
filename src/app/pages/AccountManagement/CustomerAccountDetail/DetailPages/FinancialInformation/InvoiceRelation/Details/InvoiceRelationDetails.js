@@ -299,7 +299,7 @@ const InvoiceRelationDetails = ({
         isOpen={showApprovalModal}
         header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
         handleCloseModal={() => handleApprovalModal(false)}
-        customMessage={`Are you sure you want to ${approveOrReject} invoice relation - ${detail_invoiceRelation?.result?.id}?`}
+        customMessage={`Are you sure you want to ${approveOrReject} invoice relation - ${detail_invoiceRelation?.result?.relatedAccountNumber}?`}
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
       />
     </LayoutMenu>
