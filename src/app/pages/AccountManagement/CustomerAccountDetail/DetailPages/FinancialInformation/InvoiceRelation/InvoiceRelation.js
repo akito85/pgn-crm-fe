@@ -51,6 +51,7 @@ const InvoiceRelation = ({
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivateIrId, setInactivateIrId] = useState(0);
   const [inactivateIrAppHierId, setInactivateIrAppHierId] = useState(0);
+  const [inactivateIrAccountNumber, setInactivateIrAccountNumber] = useState(0);
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
@@ -141,14 +142,16 @@ const InvoiceRelation = ({
    * @param {number} prId 
    * @param {number} prAppHierId 
    */
-  const handleInactiveModal = (show, irId = 0, irAppHierId = 0) => {
+  const handleInactiveModal = (show, newIrId = 0, newIrAppHierId = 0, newIrAccountNumber) => {
     if (show) {
-      setInactivateIrId(irId);
-      setInactivateIrAppHierId(irAppHierId);
+      setInactivateIrId(newIrId);
+      setInactivateIrAppHierId(newIrAppHierId);
+      setInactivateIrAccountNumber(newIrAccountNumber)
       setShowInactiveModal(true);
     } else {
       setInactivateIrId(0);
       setInactivateIrAppHierId(0);
+      setInactivateIrAccountNumber("")
       setShowInactiveModal(false);
     }
   }
@@ -503,7 +506,7 @@ const InvoiceRelation = ({
           isOpen={showInactiveModal}
           header={"INACTIVATE"}
           handleCloseModal={() => handleInactiveModal(false)}
-          customMessage={`Are you sure you want to inactivate invoice relation - ${inactivateIrId}?`}
+          customMessage={`Are you sure you want to inactivate invoice relation - ${inactivateIrAccountNumber}?`}
           onFinish={({ remark }, handleClear) => handleInactivateIr(remark, handleClear)}
         />
 
