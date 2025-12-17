@@ -19,6 +19,7 @@ import TablePaginationNew from "../../../../../../../../../../components/TablePa
 export default function InfoInvoiceRelation({
   setAccount,
   className,
+  accountId,
 }) {
   const dispatch = useDispatch();
 
@@ -153,7 +154,7 @@ export default function InfoInvoiceRelation({
 
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(getIrAccountStandard({ page, pageSize, sort, search: reqSearch }));
+    dispatch(getIrAccountStandard({ page, pageSize, sort, search: reqSearch, id: accountId }));
   }, [page, pageSize, sort, search]);
 
   useEffect(() => {

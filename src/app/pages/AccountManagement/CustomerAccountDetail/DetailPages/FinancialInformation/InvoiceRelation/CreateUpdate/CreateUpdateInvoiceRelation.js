@@ -271,6 +271,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
           setAccount={setAccount}
           className={`${current !== 0 ? "hidden" : ""}`}
           key={`invoice-relation-tab-0`}
+          accountId={idAccount}
         />
       ),
       disabled: false
