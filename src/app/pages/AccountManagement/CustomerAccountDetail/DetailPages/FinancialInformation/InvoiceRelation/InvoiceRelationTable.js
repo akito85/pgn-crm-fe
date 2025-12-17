@@ -1,11 +1,10 @@
 import TablePagination from "../../../../../../../components/TablePagination";
-import { Fragment } from "react";
-import { Badge, Checkbox, Tooltip } from "antd";
+import { Badge, Button, Checkbox, Tooltip } from "antd";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import moment from "moment";
 import { dateFormatting, toTitleCase } from "../../../../../../../utils";
 import StatusComponent from "../../../../../../../components/StatusComponent";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
@@ -32,31 +31,33 @@ const InvoiceRelationTable = ({
   tempFilters = [],
   setShowFilterModal = () => {},
 }) => {
+  const navigate = useNavigate();
+
   const columns = [
     {
       title: "NO",
-      width: 50,
+      width: 100,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
-      width: 120,
+      dataIndex: "relatedAccountNumber",
+      width: 250,
       sorter: true,
-      ...getColumnSearchProps("accountNumber"),
+      ...getColumnSearchProps("relatedAccountNumber"),
     },
     {
       title: "PRIORITY",
       dataIndex: "priority",
-      width: 100,
+      width: 250,
       sorter: true,
       ...getColumnSearchProps("priority"),
     },
     {
       title: "START DATE",
       dataIndex: "startDate",
-      width: 90,
+      width: 250,
       align: "center",
       ...getColumnSearchProps("startDate", "date"),
       render: (startDate) => moment(startDate, "DD-MM-YYYY").format(dateFormatting.date),
@@ -64,7 +65,7 @@ const InvoiceRelationTable = ({
     {
       title: "END DATE",
       dataIndex: "endDate",
-      width: 90,
+      width: 250,
       align: "center",
       ...getColumnSearchProps("endDate", "date"),
       render: (endDate) => moment(endDate, "DD-MM-YYYY").format(dateFormatting.date),
@@ -72,7 +73,7 @@ const InvoiceRelationTable = ({
     {
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
-      width: 70,
+      width: 300,
       sorter: true,
       align: "center",
       fixed: "right",
@@ -100,7 +101,7 @@ const InvoiceRelationTable = ({
       dataIndex: "status",
       sorter: true,
       fixed: "right",
-      width: 50,
+      width: 150,
       ...getColumnSearchProps("status"),
       render: (status) => {
         const displayText = {
@@ -235,11 +236,16 @@ const InvoiceRelationTable = ({
       type: 'table',
       render: (r, data_length) => {
         return (
-          <Link to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION} state={{
-            idIr: r.id,
-            idAccount,
-            idCustomer,
-          }}>
+          <Button
+            type="text"
+            style={{ padding: 0, height: 'auto', border: 'none' }}
+            onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION, { state: {
+              idIr: r.id,
+              idAccount,
+              idCustomer,
+            }})}
+            disabled={r.statusApproval === "WAITING_APPROVAL" || r.status === "INACTIVE"}
+          >
             <Tooltip title="Update">
               <div className="pt-1">
                 <SVGIcon
@@ -249,7 +255,7 @@ const InvoiceRelationTable = ({
                 />
               </div>
             </Tooltip>
-          </Link>
+          </Button>
         )
       }
     },

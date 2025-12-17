@@ -270,6 +270,7 @@ const CreatePaymentRelation = ({ type }) => {
         <InformationForm
           setAccount={setAccount}
           className={`${current !== 0 ? "hidden" : ""}`}
+          accountId={idAccount}
           key={`payment-relation-tab-0`}
         />
       ),

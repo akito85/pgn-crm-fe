@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import TablePaginationNew from "../../../../../../../../../../components/TablePaginationNew";
 
 export default function InfoPaymentRelation({
+  accountId,
   setAccount,
   className,
 }) {
@@ -153,7 +154,7 @@ export default function InfoPaymentRelation({
 
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(getPrAccountStandard({ page, pageSize, sort, search: reqSearch }));
+    dispatch(getPrAccountStandard({ page, pageSize, sort, search: reqSearch, id: accountId }));
   }, [page, pageSize, sort, search]);
 
   useEffect(() => {

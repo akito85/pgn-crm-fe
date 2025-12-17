@@ -5,8 +5,8 @@ export default function InformationForm({
   className,
   page,
   pageSize,
-  
+  accountId,
 }) {
 
-  return <InfoPaymentRelation setAccount={setAccount} className={className} />;
+  return <InfoPaymentRelation setAccount={setAccount} className={className} accountId={accountId} />;
 }
