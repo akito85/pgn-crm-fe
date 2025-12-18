@@ -305,12 +305,10 @@ const PaymentRelation = ({
    */
   const handleIsApproval = (newIsApproval) => {
     if (newIsApproval) {
-      setSearchText("WAITING APPROVAL");
-      setSearchedColumn("approvalStatus");
       setPage(1);
       setSearch((prevState) => ({
         ...prevState,
-        approvalStatus: "WAITING_APPROVAL",
+        statusApproval: "WAITING_APPROVAL",
       }));
       setIsApproval(true);
     } else {
@@ -319,7 +317,7 @@ const PaymentRelation = ({
       setPage(1)
       setSearch((prevState) => ({
         ...prevState,
-        approvalStatus: undefined,
+        statusApproval: undefined,
       }));
       setIsApproval(false);
       setSelectedRowKeys([]);
