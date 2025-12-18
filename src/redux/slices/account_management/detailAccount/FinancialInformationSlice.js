@@ -614,13 +614,14 @@ export const createInvoiceRelation = createAsyncThunk(
 
       const { id } = response.data;
 
-      const uploadUrl = `v1/dbs/api/invoice-relation/upload-attachment/${id}`;
+      const uploadUrl = `/v1/dbs/api/invoice-relation/upload-attachment`;
 
       const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
         uploadUrl,
         {
           file:  attachment.file,
           category: attachment.fileCategoryId,
+          refId: id,
         }
       ));
 
