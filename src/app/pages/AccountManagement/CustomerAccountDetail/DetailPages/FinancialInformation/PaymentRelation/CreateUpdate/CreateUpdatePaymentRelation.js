@@ -587,21 +587,22 @@ const CreatePaymentRelation = ({ type }) => {
                 </ButtonComponent>
               )}
               {current < steps.length - 1 && (
-                <Button
+                <ButtonComponent
                   onClick={handleButtonNext}
-                  type="primary"
-                  className="ant-btn ant-btn-submit flex w-full justify-center"
+                  type={"submit"}
                   disabled={steps[current].disabled}
                 >
-                  <span className="p-1 text-[18px] text-center">Next</span>
-                  <RightOutlined
-                    style={{
-                      justifyItems: "center",
-                      fontSize: "18px",
-                      color: "#fff",
-                    }}
-                  />
-                </Button>
+                  <div className="flex gap-x-2 items-center">
+                    <span>Next</span>
+                    <RightOutlined
+                      style={{
+                        justifyItems: "center",
+                        fontSize: "18px",
+                        color: "#fff",
+                      }}
+                    />
+                  </div>
+                </ButtonComponent>
               )}
               {current === steps.length - 1 && (
                 <>
