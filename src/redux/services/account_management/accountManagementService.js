@@ -169,7 +169,6 @@ const uploadAttachment = async (url, body) => {
 //download advanced
 const downloadDataAdvanced = async (url, body) => {
   try {
-    console.log("masuk try");
     const response = await axios.post(configApp.ACCOUNT_SERVICE + url, body, {
       headers: {
         ...tokenHeader(),
@@ -177,9 +176,7 @@ const downloadDataAdvanced = async (url, body) => {
       },
       responseType: "blob",
     });
-    console.log("response try", response);
     if(hasValue(response.headers?.get("content-disposition"))){
-      console.log('masuk hasValue(response.headers?.get("content-disposition"))');
       const filename = response.headers
         .get("content-disposition")
         .split(";")
@@ -188,17 +185,13 @@ const downloadDataAdvanced = async (url, body) => {
         .trim();
   
       const blob = await response.data;
-      console.log("blob", blob);
   
       // Download the file
       FileSaver.saveAs(blob, filename);
     } else {
-      console.log("masuk else");
       return response
     }
   } catch (error) {
-    console.log("masuk try");
-    console.log("error catch", error);
     throw error;
   }
 };
