@@ -126,13 +126,13 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         appHierId,
       } = detail_invoiceRelation.result;
 
-      const { accountNumber, accountName } = detail_invoiceRelation.result;
+      const { relatedAccountNumber, relatedAccountName } = detail_invoiceRelation.result;
 
       formCreate.setFieldsValue({
         subjectId,
         objectId,
-        accountName,
-        accountNumber,
+        accountName: relatedAccountName,
+        accountNumber: relatedAccountNumber,
         priority,
         startDate,
         endDate,
