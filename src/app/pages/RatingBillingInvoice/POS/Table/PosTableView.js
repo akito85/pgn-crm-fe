@@ -16,7 +16,6 @@ export const PosTableView = (
   {
     title: "NO",
     width: 60,
-    align: "center",
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
@@ -119,7 +118,6 @@ export const PosTableView = (
     title: "BILLING PERIOD",
     dataIndex: "billingPeriod",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "billingPeriod",
@@ -240,7 +238,6 @@ export const PosTableView = (
     title: "PROFORMA INVOICE DATE",
     dataIndex: "proformaInvoiceDate",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "proformaInvoiceDate",
@@ -284,7 +281,6 @@ export const PosTableView = (
     title: "INVOICE DATE",
     dataIndex: "invoiceDate",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "invoiceDate",
@@ -327,7 +323,6 @@ export const PosTableView = (
     title: "TRANSACTION DATE",
     dataIndex: "transactionDate",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "transactionDate",
@@ -370,7 +365,6 @@ export const PosTableView = (
     title: "CURRENCY",
     dataIndex: "currency",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "currency",
@@ -395,7 +389,6 @@ export const PosTableView = (
     title: "ACCOUNT GROUP TYPE",
     dataIndex: "accountGroupType",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountGroupType",
@@ -468,7 +461,6 @@ export const PosTableView = (
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountSegment",
@@ -517,7 +509,7 @@ export const PosTableView = (
   //   title: "AMOUNT",
   //   dataIndex: "amount",
   //   sorter: true,
-  //   align: "right",
+  //
   //   ...getColumnSearchPropsPaging(
   //     "amount",
   //     searchInput,
@@ -530,7 +522,6 @@ export const PosTableView = (
     title: "AMOUNT IDR",
     dataIndex: "amountIdr",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "amountIdr",
@@ -555,7 +546,6 @@ export const PosTableView = (
     title: "AMOUNT USD",
     dataIndex: "amountUsd",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "amountUsd",
@@ -580,7 +570,6 @@ export const PosTableView = (
     title: "TAX BASIS IDR",
     dataIndex: "taxBasisIdr",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "taxBasisIdr",
@@ -605,7 +594,6 @@ export const PosTableView = (
     title: "TAX BASIS USD",
     dataIndex: "taxBasisUsd",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "taxBasisUsd",
@@ -630,7 +618,6 @@ export const PosTableView = (
     title: "TAX BASIS EQV IDR",
     dataIndex: "taxBasisEqvIdr",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "taxBasisEqvIdr",
@@ -655,7 +642,7 @@ export const PosTableView = (
   //   title: "TAX BASIS EQV USD",
   //   dataIndex: "taxBasisEqvUsd",
   //   sorter: true,
-  //   align: "right",
+  //
   //   ...getColumnSearchPropsPaging(
   //     "taxBasisEqvUsd",
   //     searchInput,
@@ -668,7 +655,6 @@ export const PosTableView = (
     title: "VAT IDR",
     dataIndex: "vatIdr",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "vatIdr",
@@ -693,7 +679,6 @@ export const PosTableView = (
     title: "VAT USD",
     dataIndex: "vatUsd",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "vatUsd",
@@ -718,7 +703,6 @@ export const PosTableView = (
     title: "VAT EQV IDR",
     dataIndex: "vatEqvIdr",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "vatEqvIdr",
@@ -743,7 +727,6 @@ export const PosTableView = (
     title: "WITHHOLDING TAX",
     dataIndex: "withholdingTax",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "withholdingTax",
@@ -768,7 +751,6 @@ export const PosTableView = (
     title: "TAX RATE TYPE",
     dataIndex: "taxRateType",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "taxRateType",
@@ -793,7 +775,6 @@ export const PosTableView = (
     title: "TAX RATE DATE",
     dataIndex: "taxRateDate",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "taxRateDate",
@@ -836,7 +817,6 @@ export const PosTableView = (
     title: "TAX RATE",
     dataIndex: "taxRate",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "taxRate",
@@ -861,7 +841,6 @@ export const PosTableView = (
     title: "DISCOUNT AMOUNT",
     dataIndex: "discountAmount",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "discountAmount",
@@ -886,7 +865,6 @@ export const PosTableView = (
     title: "DISCOUNT AMOUNT IDR",
     dataIndex: "discountAmountIdr",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "discountAmountIdr",
@@ -911,7 +889,6 @@ export const PosTableView = (
     title: "DISCOUNT AMOUNT USD",
     dataIndex: "discountAmountUsd",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "discountAmountUsd",
@@ -936,7 +913,7 @@ export const PosTableView = (
   //   title: "TOTAL AMOUNT",
   //   dataIndex: "totalAmount",
   //   sorter: true,
-  //   align: "right",
+  //
   //   ...getColumnSearchPropsPaging(
   //     "totalAmount",
   //     searchInput,
@@ -949,7 +926,6 @@ export const PosTableView = (
     title: "TOTAL AMOUNT IDR",
     dataIndex: "totalAmountIdr",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountIdr",
@@ -974,7 +950,6 @@ export const PosTableView = (
     title: "TOTAL AMOUNT USD",
     dataIndex: "totalAmountUsd",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountUsd",
@@ -999,7 +974,6 @@ export const PosTableView = (
     title: "TERMS OF PAYMENT",
     dataIndex: "termsOfPayment",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "termsOfPayment",
@@ -1024,7 +998,6 @@ export const PosTableView = (
     title: "ACCOUNTING DATE",
     dataIndex: "accountingDate",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountingDate",
@@ -1067,7 +1040,6 @@ export const PosTableView = (
     title: "DUE DATE",
     dataIndex: "dueDate",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "dueDate",
@@ -1110,7 +1082,6 @@ export const PosTableView = (
     title: "RATE TYPE",
     dataIndex: "rateType",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rateType",
@@ -1135,7 +1106,6 @@ export const PosTableView = (
     title: "RATE DATE",
     dataIndex: "rateDate",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rateDate",
@@ -1179,7 +1149,6 @@ export const PosTableView = (
     title: "RATE",
     dataIndex: "rate",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rate",
@@ -1204,7 +1173,6 @@ export const PosTableView = (
     title: "TOTAL AMOUNT EQV IDR",
     dataIndex: "totalAmountEqvIdr",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountEqvIdr",
@@ -1229,7 +1197,6 @@ export const PosTableView = (
     title: "TOTAL AMOUNT EQV USD",
     dataIndex: "totalAmountEqvUsd",
     sorter: true,
-    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "totalAmountEqvUsd",
@@ -1307,7 +1274,6 @@ export const PosTableView = (
     title: "PAYMENT STATUS",
     dataIndex: "statusPayment",
     sorter: true,
-    align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusPayment",
@@ -1416,7 +1382,7 @@ export const PosTableView = (
   //   title: "ACTION",
   //   dataIndex: "action",
   //   fixed: "right",
-  //   align: "center",
+  //
   //   width: 100,
   //   render: (v, r, i) => {
   //     return (

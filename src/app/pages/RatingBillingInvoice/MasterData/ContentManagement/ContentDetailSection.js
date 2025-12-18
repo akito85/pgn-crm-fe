@@ -4,6 +4,11 @@ import RadioTabs from "../../../../../components/RadioTabs";
 import DetailText from "../../../../../components/DetailText";
 import moment from "moment";
 import { dateFormatting } from "../../../../../utils";
+import { Table, Space, Tooltip } from "antd";
+import SVGIcon from "../../../../../assets/Icon/index";
+import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import CardComponent from "../../../../../components/Card/CardComponent";
 
 const ContentDetailSection = ({
   dataContentManagement,
@@ -15,6 +20,12 @@ const ContentDetailSection = ({
     { value: "Content" },
     { value: "Criteria" },
   ]);
+
+  // State for modal history
+  const [modalHistory, setModalHistory] = useState(false);
+  const [dataHistoryDetail, setDataHistoryDetail] = useState({});
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const contentTemplate = dataContentManagement?.contentTemplate || {};
 
@@ -35,6 +46,29 @@ const ContentDetailSection = ({
         break;
     }
     return text;
+  };
+
+  // Handle Detail Modal
+  const handleDetail = (record) => {
+    setModalHistory(true);
+    setDataHistoryDetail({
+      recordId: record?.id,
+      createdDate: record?.createdDate,
+      createdBy: record?.createdBy,
+      updatedDate: record?.updatedDate,
+      updatedBy: record?.updatedBy,
+    });
+  };
+
+  const closeModalHistory = () => {
+    setModalHistory(false);
+    setDataHistoryDetail({});
+  };
+
+  // Handle Change page and pageSize
+  const handleChange = (pageChange, pageSizeChange) => {
+    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+    setPageSize(pageSizeChange);
   };
 
   // Render Content Tab
@@ -90,7 +124,245 @@ const ContentDetailSection = ({
     );
   };
 
-  // Render Criteria Tab
+  // Define Table Columns
+  const getCriteriaColumns = () => {
+    const baseColumns = [
+      {
+        title: "NO",
+        width: 60,
+        dataIndex: "no",
+        align: "center",
+        fixed: "left",
+        render: (text, record, index) => (page - 1) * pageSize + index + 1,
+      },
+    ];
+
+    // Dynamically add columns based on available data
+    const dynamicColumns = [];
+
+    // Check if any record has these fields and add columns accordingly
+    const hasCustomer = dataCriteria?.some(item => item.customer);
+    const hasBudget = dataCriteria?.some(item => item.budget);
+    const hasProvince = dataCriteria?.some(item => item.province);
+    const hasCity = dataCriteria?.some(item => item.city);
+    const hasDistrict = dataCriteria?.some(item => item.district);
+    const hasSubDistrict = dataCriteria?.some(item => item.subDistrict);
+    const hasArea = dataCriteria?.some(item => item.area);
+    const hasSor = dataCriteria?.some(item => item.sor);
+    const hasIndustrialSector = dataCriteria?.some(item => item.industrialSector);
+    const hasProduct = dataCriteria?.some(item => item.product);
+    const hasGsizes = dataCriteria?.some(item => item.gsizes);
+    const hasCustomerSegment = dataCriteria?.some(item => item.customerSegment);
+    const hasAccountGroupType = dataCriteria?.some(item => item.accountGroupType);
+    const hasAccountClass = dataCriteria?.some(item => item.accountClass);
+    const hasAccountCategory = dataCriteria?.some(item => item.accountCategory);
+    const hasServiceType = dataCriteria?.some(item => item.serviceType);
+
+    if (hasCustomer) {
+      dynamicColumns.push({
+        title: "CUSTOMER",
+        dataIndex: "customer",
+        key: "customer",
+        width: 150,
+        render: (text) => text || "-",
+      });
+    }
+
+    if (hasBudget) {
+      dynamicColumns.push({
+        title: "BUDGET",
+        dataIndex: "budget",
+        key: "budget",
+        width: 120,
+        render: (text) => text || "-",
+      });
+    }
+
+    if (hasProvince) {
+      dynamicColumns.push({
+        title: "PROVINCE",
+        dataIndex: "province",
+        key: "province",
+        width: 150,
+        render: (text) => text || "-",
+      });
+    }
+
+    if (hasCity) {
+      dynamicColumns.push({
+        title: "CITY",
+        dataIndex: "city",
+        key: "city",
+        width: 150,
+        render: (text) => text || "-",
+      });
+    }
+
+    if (hasDistrict) {
+      dynamicColumns.push({
+        title: "DISTRICT",
+        dataIndex: "district",
+        key: "district",
+        width: 150,
+        render: (text) => text || "-",
+      });
+    }
+
+    if (hasSubDistrict) {
+      dynamicColumns.push({
+        title: "SUB DISTRICT",
+        dataIndex: "subDistrict",
+        key: "subDistrict",
+        width: 150,
+        render: (text) => text || "-",
+      });
+    }
+
+    if (hasArea) {
+      dynamicColumns.push({
+        title: "AREA",
+        dataIndex: "area",
+        key: "area",
+        width: 120,
+        render: (text) => text || "-",
+      });
+    }
+
+    if (hasSor) {
+      dynamicColumns.push({
+        title: "SOR",
+        dataIndex: "sor",
+        key: "sor",
+        width: 120,
+        render: (text) => text || "-",
+      });
+    }
+
+    if (hasIndustrialSector) {
+      dynamicColumns.push({
+        title: "INDUSTRIAL SECTOR",
+        dataIndex: "industrialSector",
+        key: "industrialSector",
+        width: 180,
+        render: (text) => text || "-",
+      });
+    }
+
+    if (hasProduct) {
+      dynamicColumns.push({
+        title: "PRODUCT",
+        dataIndex: "product",
+        key: "product",
+        width: 150,
+        render: (text) => text || "-",
+      });
+    }
+
+    if (hasGsizes) {
+      dynamicColumns.push({
+        title: "G-SIZES",
+        dataIndex: "gsizes",
+        key: "gsizes",
+        width: 120,
+        render: (text) => text || "-",
+      });
+    }
+
+    if (hasCustomerSegment) {
+      dynamicColumns.push({
+        title: "CUSTOMER SEGMENT",
+        dataIndex: "customerSegment",
+        key: "customerSegment",
+        width: 180,
+        render: (text) => text || "-",
+      });
+    }
+
+    if (hasAccountGroupType) {
+      dynamicColumns.push({
+        title: "ACCOUNT GROUP TYPE",
+        dataIndex: "accountGroupType",
+        key: "accountGroupType",
+        width: 180,
+        render: (text) => text || "-",
+      });
+    }
+
+    if (hasAccountClass) {
+      dynamicColumns.push({
+        title: "ACCOUNT CLASS",
+        dataIndex: "accountClass",
+        key: "accountClass",
+        width: 150,
+        render: (text) => text || "-",
+      });
+    }
+
+    if (hasAccountCategory) {
+      dynamicColumns.push({
+        title: "ACCOUNT CATEGORY",
+        dataIndex: "accountCategory",
+        key: "accountCategory",
+        width: 180,
+        render: (text) => text || "-",
+      });
+    }
+
+    if (hasServiceType) {
+      dynamicColumns.push({
+        title: "SERVICE TYPE",
+        dataIndex: "serviceType",
+        key: "serviceType",
+        width: 150,
+        render: (text) => text || "-",
+      });
+    }
+
+    // Always show start and end date
+    dynamicColumns.push(
+      {
+        title: "START DATE",
+        dataIndex: "startDate",
+        key: "startDate",
+        width: 130,
+        render: (text) => text ? moment(text).format(dateFormatting.date) : "-",
+      },
+      {
+        title: "END DATE",
+        dataIndex: "endDate",
+        key: "endDate",
+        width: 130,
+        render: (text) => text ? moment(text).format(dateFormatting.date) : "-",
+      }
+    );
+
+    // Action column
+    const actionColumn = {
+      title: "ACTION",
+      dataIndex: "operation",
+      key: "operation",
+      width: 100,
+      fixed: "right",
+      align: "center",
+      render: (_, record) => (
+        <Space className="my-3 gap-2">
+          <Tooltip title="Detail">
+            <div className="pt-1 cursor-pointer">
+              <SVGIcon
+                name="IconDetail"
+                width={24}
+                onClick={() => handleDetail(record)}
+              />
+            </div>
+          </Tooltip>
+        </Space>
+      ),
+    };
+
+    return [...baseColumns, ...dynamicColumns, actionColumn];
+  };
+
+  // Render Criteria Tab with Table
   const renderCriteriaTab = () => {
     if (!dataCriteria || dataCriteria.length === 0) {
       return (
@@ -100,75 +372,35 @@ const ContentDetailSection = ({
       );
     }
 
+    const columns = getCriteriaColumns();
+    const numColumns = columns.length;
+    const maxWidth = 10000;
+    const maxHeight = 300;
+    const x = numColumns * 150;
+    const validatedX = Math.min(x, maxWidth);
+
     return (
-      <div className="space-y-4">
-        {dataCriteria.map((criteria, index) => (
-          <div key={criteria.id || index} className="border rounded-lg p-4 bg-gray-50">
-            <h4 className="font-semibold mb-3 text-gray-700">
-              Criteria {index + 1}
-            </h4>
-            <div className="grid grid-cols-3 gap-4">
-              {criteria.customer && (
-                <DetailText label="Customer">{criteria.customer}</DetailText>
-              )}
-              {criteria.budget && (
-                <DetailText label="Budget">{criteria.budget}</DetailText>
-              )}
-              {criteria.province && (
-                <DetailText label="Province">{criteria.province}</DetailText>
-              )}
-              {criteria.city && (
-                <DetailText label="City">{criteria.city}</DetailText>
-              )}
-              {criteria.district && (
-                <DetailText label="District">{criteria.district}</DetailText>
-              )}
-              {criteria.subDistrict && (
-                <DetailText label="Sub District">{criteria.subDistrict}</DetailText>
-              )}
-              {criteria.area && (
-                <DetailText label="Area">{criteria.area}</DetailText>
-              )}
-              {criteria.sor && (
-                <DetailText label="SOR">{criteria.sor}</DetailText>
-              )}
-              {criteria.industrialSector && (
-                <DetailText label="Industrial Sector">{criteria.industrialSector}</DetailText>
-              )}
-              {criteria.product && (
-                <DetailText label="Product">{criteria.product}</DetailText>
-              )}
-              {criteria.gsizes && (
-                <DetailText label="G-Sizes">{criteria.gsizes}</DetailText>
-              )}
-              {criteria.customerSegment && (
-                <DetailText label="Customer Segment">{criteria.customerSegment}</DetailText>
-              )}
-              {criteria.accountGroupType && (
-                <DetailText label="Account Group Type">{criteria.accountGroupType}</DetailText>
-              )}
-              {criteria.accountClass && (
-                <DetailText label="Account Class">{criteria.accountClass}</DetailText>
-              )}
-              {criteria.accountCategory && (
-                <DetailText label="Account Category">{criteria.accountCategory}</DetailText>
-              )}
-              {criteria.serviceType && (
-                <DetailText label="Service Type">{criteria.serviceType}</DetailText>
-              )}
-              {criteria.startDate && (
-                <DetailText label="Start Date">
-                  {moment(criteria.startDate).format(dateFormatting.date)}
-                </DetailText>
-              )}
-              {criteria.endDate && (
-                <DetailText label="End Date">
-                  {moment(criteria.endDate).format(dateFormatting.date)}
-                </DetailText>
-              )}
-            </div>
-          </div>
-        ))}
+      <div className="relative flex flex-col w-full">
+        <Table
+          bordered
+          className="w-full"
+          dataSource={dataCriteria}
+          columns={columns}
+          pagination={{
+            position: ["topRight"],
+            current: page,
+            pageSize: pageSize,
+            onChange: handleChange,
+            showSizeChanger: true,
+            showTotal: (total, range) =>
+              `Showing ${range[0]} to ${range[1]} of ${total} records`,
+          }}
+          scroll={{
+            x: validatedX,
+            y: maxHeight,
+          }}
+          rowKey={(record) => record.key || record.id}
+        />
       </div>
     );
   };
@@ -269,6 +501,36 @@ const ContentDetailSection = ({
           </DetailText>
         </div>
       </BaseContainer>
+
+      {/* Modal History Log */}
+      <ModalCustom
+        isOpen={modalHistory}
+        handleCancel={closeModalHistory}
+        type="detail"
+        header="CRITERIA INFORMATION"
+        width={800}
+        footer={
+          <ButtonComponent type={"default"} onClick={closeModalHistory}>
+            Back
+          </ButtonComponent>
+        }
+      >
+        <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
+          <DetailText label="Record ID">{dataHistoryDetail.recordId}</DetailText>
+          <DetailText label="Created Date">
+            {dataHistoryDetail?.createdDate
+              ? moment(dataHistoryDetail.createdDate).format(dateFormatting.dateTime)
+              : ""}
+          </DetailText>
+          <DetailText label="Created By">{dataHistoryDetail?.createdBy}</DetailText>
+          <DetailText label="Updated Date">
+            {dataHistoryDetail?.updatedDate
+              ? moment(dataHistoryDetail.updatedDate).format(dateFormatting.dateTime)
+              : ""}
+          </DetailText>
+          <DetailText label="Updated By">{dataHistoryDetail?.updatedBy}</DetailText>
+        </CardComponent>
+      </ModalCustom>
 
       <style jsx>{`
         :global(.prose) {

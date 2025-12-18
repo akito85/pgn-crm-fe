@@ -596,115 +596,62 @@ export const getDetailPrabillingInit = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/prabill/${initCode}`;
       const response = await ratingBillingHttpService.getDetail(url);
+      
       const contentType = response.headers?.["content-type"];
       if (contentType && contentType.includes("text/html")) {
         throw new Error(
           "Received HTML response - Server may be in maintenance mode"
         );
       }
+
+      // Akses data sesuai struktur response
       const responseData = response.data?.data || response.data || response;
+      const prabillInitPopulate = responseData.prabillInitPopulate || {};
       const details = responseData.details || [];
 
-      const accountGroupMap = new Map();
-      const accountSegmentMap = new Map();
-      const costCenterMap = new Map();
-      const meterReadingMap = new Map();
+      // Proses details untuk mengekstrak data yang unik
+      const detailsProcessed = details.map(detail => ({
+        initCode: detail.initCode,
+        createdBy: detail.createdBy,
+        createdDtm: detail.createdDtm,
+        sorId: detail.sorId,
+        sor: detail.sor,
+        costCenter: detail.costCenter,
+        costCenterName: detail.costCenterName,
+        meterReadingCode: detail.meterReadingCode,
+        meterReadingCodeName: detail.meterReadingCodeName,
+        accountSegment: detail.accountSegment,
+        accountSegmentName: detail.accountSegmentName,
+        accountGroupType: detail.accountGroupType,
+        accountGroupTypeName: detail.accountGroupTypeName,
+        accountNumber: detail.accountNumber,
+        accoutnName: detail.accoutnName, // Typo dari backend
+      }));
 
-      details.forEach((detail) => {
-        // Account Group Type
-        if (
-          detail.accountGroupTypeId &&
-          !accountGroupMap.has(detail.accountGroupTypeId)
-        ) {
-          accountGroupMap.set(detail.accountGroupTypeId, {
-            id: detail.accountGroupTypeId,
-            accountGroupType: detail.accountGroupType,
-            initCode: detail.initCode,
-            createdBy: detail.createdBy,
-            createdDate: detail.createdDtm,
-            updatedBy: null,
-            updatedDate: null,
-          });
-        }
-
-        // Account Segment
-        if (
-          detail.accountSegmentId &&
-          !accountSegmentMap.has(detail.accountSegmentId)
-        ) {
-          accountSegmentMap.set(detail.accountSegmentId, {
-            id: detail.accountSegmentId,
-            accountSegment: detail.accountSegment,
-            initCode: detail.initCode,
-            createdBy: detail.createdBy,
-            createdDate: detail.createdDtm,
-            updatedBy: null,
-            updatedDate: null,
-          });
-        }
-
-        // Cost Center
-        if (detail.costCenterId && !costCenterMap.has(detail.costCenterId)) {
-          costCenterMap.set(detail.costCenterId, {
-            id: detail.costCenterId,
-            costCenter: detail.costCenter,
-            initCode: detail.initCode,
-            createdBy: detail.createdBy,
-            createdDate: detail.createdDtm,
-            updatedBy: null,
-            updatedDate: null,
-          });
-        }
-
-        // Meter Reading Code
-        if (
-          detail.meterReadingCodeId &&
-          !meterReadingMap.has(detail.meterReadingCodeId)
-        ) {
-          meterReadingMap.set(detail.meterReadingCodeId, {
-            id: detail.meterReadingCodeId,
-            meterReadingCode: detail.meterReadingCode,
-            initCode: detail.initCode,
-            createdBy: detail.createdBy,
-            createdDate: detail.createdDtm,
-            updatedBy: null,
-            updatedDate: null,
-          });
-        }
-      });
-
-      // Convert Maps to Arrays
-      const accountGroupTypesArray = Array.from(accountGroupMap.values());
-      const accountSegmentsArray = Array.from(accountSegmentMap.values());
-      const costCentersArray = Array.from(costCenterMap.values());
-      const meterReadingCodesArray = Array.from(meterReadingMap.values());
-
-      const transformedData = {
-        initId: responseData.prabillInitPopulate?.initId,
-        initCode: responseData.prabillInitPopulate?.initCode,
-        processName: responseData.prabillInitPopulate?.processName,
-        billingCycle: responseData.prabillInitPopulate?.billingCycle,
-        billPeriod: responseData.prabillInitPopulate?.billPeriod,
-        sor: responseData.prabillInitPopulate?.sor,
-        sorId: responseData.prabillInitPopulate?.sorId,
-        totalCustomer: responseData.prabillInitPopulate?.totalCustomer,
-        status: responseData.prabillInitPopulate?.status,
-        message: responseData.prabillInitPopulate?.message,
-        remark: responseData.prabillInitPopulate?.remark,
-        createdBy: responseData.prabillInitPopulate?.createdBy,
-        createdDtm: responseData.prabillInitPopulate?.createdDtm,
-        updateDtm: responseData.prabillInitPopulate?.updateDtm,
-        billPeriodId: responseData.prabillInitPopulate?.billPeriodId,
-        billingCycleId: responseData.prabillInitPopulate?.billingCycleId,
-        shceduleTypeId: responseData.prabillInitPopulate?.shceduleTypeId,
-
-        accountGroupType: accountGroupTypesArray,
-        accountSegment: accountSegmentsArray,
-        costCenter: costCentersArray,
-        meterReadingCode: meterReadingCodesArray,
+      // Kembalikan struktur yang lengkap
+      return {
+        prabillInitPopulate: {
+          initId: prabillInitPopulate.initId,
+          initCode: prabillInitPopulate.initCode,
+          processName: prabillInitPopulate.processName,
+          billingCycle: prabillInitPopulate.billingCycle,
+          billPeriod: prabillInitPopulate.billPeriod,
+          sor: prabillInitPopulate.sor,
+          sorId: prabillInitPopulate.sorId,
+          totalCustomer: prabillInitPopulate.totalCustomer,
+          status: prabillInitPopulate.status,
+          message: prabillInitPopulate.message,
+          remark: prabillInitPopulate.remark,
+          createdBy: prabillInitPopulate.createdBy,
+          createdDtm: prabillInitPopulate.createdDtm,
+          updateDtm: prabillInitPopulate.updateDtm,
+          billPeriodId: prabillInitPopulate.billPeriodId,
+          billingCycleId: prabillInitPopulate.billingCycleId,
+          shceduleType: prabillInitPopulate.shceduleType,
+          schedulerTime: prabillInitPopulate.schedulerTime,
+        },
+        details: detailsProcessed,
       };
-
-      return transformedData;
     } catch (error) {
       console.error("Error in getDetailPrabillingInit:", error);
 

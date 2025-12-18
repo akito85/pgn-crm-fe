@@ -36,6 +36,7 @@ const PromoViewData = ({
   setIsModalPromoVisible,
   setDetailPromoData,
   customerId,
+  accountId,
 }) => {
   const {
     validPromoList,
@@ -54,11 +55,11 @@ const PromoViewData = ({
   const columns = promoRepository.getColumns(setIsModalPromoVisible, setDetailPromoData);
 
   useEffect(() => {
-    // Load promo list on mount with customerId
-    if (customerId) {
-      loadValidPromoList({ page: 0, size: 10, customerId, sort: 'id~desc' });
+    // Load promo list on mount with accountId
+    if (accountId) {
+      loadValidPromoList({ page: 0, size: 10, accountId, sort: 'id~desc' });
     }
-  }, [customerId, loadValidPromoList]);
+  }, [accountId, loadValidPromoList]);
 
   useEffect(() => {
     console.log('=== VALID PROMO LIST DEBUG ===');
@@ -168,6 +169,7 @@ const PromoHistoryViewData = ({
   setIsModalHistoryVisible,
   setDetailHistoryData,
   customerId,
+  accountId,
 }) => {
   const {
     promoHistoryList,
@@ -187,10 +189,10 @@ const PromoHistoryViewData = ({
 
   useEffect(() => {
     // Load promo history on mount with customerId
-    if (customerId) {
-      loadPromoHistoryList({ page: 0, size: 10, customerId, sort: 'id~desc' });
+    if (accountId) {
+      loadPromoHistoryList({ page: 0, size: 10, accountId, sort: 'id~desc' });
     }
-  }, [customerId, loadPromoHistoryList]);
+  }, [accountId, loadPromoHistoryList]);
 
   useEffect(() => {
     // Transform API response using helper
@@ -362,6 +364,7 @@ const selectedRender = ({
   setIsModalHistoryVisible,
   setDetailHistoryData,
   customerId,
+  accountId,
 }) => {
   if (tab === "promoHistory") {
     return (
@@ -370,6 +373,7 @@ const selectedRender = ({
         setIsModalHistoryVisible={setIsModalHistoryVisible}
         setDetailHistoryData={setDetailHistoryData}
         customerId={customerId}
+        accountId={accountId}
       />
     );
   }
@@ -379,6 +383,7 @@ const selectedRender = ({
       setIsModalPromoVisible={setIsModalPromoVisible}
       setDetailPromoData={setDetailPromoData}
       customerId={customerId}
+      accountId={accountId}
     />
   );
 };
@@ -610,7 +615,7 @@ const renderModalAccountPromo = ({
   }
 };
 
-const AccountPromo = () => {
+const AccountPromo = ({ id }) => {
   // Get customerId from route state
   const location = useLocation();
   const { idCustomer } =  location.state || {};
@@ -655,6 +660,7 @@ const AccountPromo = () => {
               setIsModalHistoryVisible,
               setDetailHistoryData,
               customerId: idCustomer,
+              accountId: id,
             })}
           </Fragment>
         }

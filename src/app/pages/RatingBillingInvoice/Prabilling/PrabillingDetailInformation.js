@@ -16,6 +16,7 @@ import {
   downloadPrabillingResult,
 } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
+import { EyeOutlined } from "@ant-design/icons";
 
 const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const { detail_prabilling_result, loading } = useSelector(
@@ -25,6 +26,10 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
+  // Destructure data dengan benar
+  const prabillData = data?.prabillInitPopulate || {};
+  const detailsData = data?.details || [];
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState("");
@@ -33,15 +38,15 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   const [searchText, setSearchText] = useState("");
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no", "customerNumber"],
+    left: ["no"],
     right: ["action"],
   }));
 
   useEffect(() => {
-    if (tabHeader === "Prabilling Information" && data?.initCode) {
+    if (tabHeader === "Prabilling Information" && prabillData?.initCode) {
       dispatch(
         getDetailPrabillingResult({
-          initCode: data.initCode,
+          initCode: prabillData.initCode,
           page,
           pageSize,
           sort,
@@ -49,7 +54,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         })
       );
     }
-  }, [tabHeader, dispatch, data?.initCode, page, pageSize, sort, search]);
+  }, [tabHeader, dispatch, prabillData?.initCode, page, pageSize, sort, search]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -67,13 +72,13 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   };
 
   const handleDownload = () => {
-    if (!data?.initCode) {
+    if (!prabillData?.initCode) {
       return;
     }
 
     dispatch(
       downloadPrabillingResult({
-        initCode: data.initCode,
+        initCode: prabillData.initCode,
       })
     );
   };
@@ -86,97 +91,6 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         width: 60,
         align: "center",
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
-      },
-      {
-        key: "customerNumber",
-        title: "CUSTOMER NUMBER",
-        dataIndex: "customerNumber",
-        width: 150,
-        sorter: true,
-        filteredValue: [search?.customerNumber] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "customerNumber",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "customerNumber",
-            hasValue(search["customerNumber"]),
-            searchText,
-            text || "",
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "customerName",
-        title: "CUSTOMER NAME",
-        dataIndex: "customerName",
-        width: 200,
-        sorter: true,
-        filteredValue: [search?.customerName] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "customerName",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "customerName",
-            hasValue(search["customerName"]),
-            searchText,
-            text || "",
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "billingCycle",
-        title: "BILLING CYCLE",
-        dataIndex: "billingCycle",
-        width: 150,
-        align: "center",
-        sorter: true,
-        filteredValue: [search?.billingCycle] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "billingCycle",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "billingCycle",
-            hasValue(search["billingCycle"]),
-            searchText,
-            text || "",
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "billPeriod",
-        title: "BILLING PERIOD",
-        dataIndex: "billPeriod",
-        width: 120,
-        align: "center",
-        sorter: true,
-        render: (text) => text || "-",
       },
       {
         key: "accountNumber",
@@ -233,40 +147,58 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
           ),
       },
       {
-        key: "accountGroup",
-        title: "ACCOUNT GROUP",
-        dataIndex: "accountGroup",
-        width: 120,
-        sorter: true,
-        render: (text) => text || "-",
-      },
-      {
-        key: "accountType",
-        title: "ACCOUNT TYPE",
-        dataIndex: "accountType",
-        width: 100,
-        align: "center",
-        sorter: true,
-        render: (text) => text || "-",
-      },
-      {
-        key: "costCenter",
-        title: "COST CENTER",
-        dataIndex: "costCenter",
-        width: 200,
-        sorter: true,
-        ellipsis: {
-          showTitle: false,
-        },
-        render: (text) => <Tooltip title={text}>{text || "-"}</Tooltip>,
-      },
-      {
-        key: "meterReadingCode",
-        title: "METER READING CODE",
-        dataIndex: "meterReadingCode",
+        key: "customerNumber",
+        title: "CUSTOMER NUMBER",
+        dataIndex: "customerNumber",
         width: 150,
         sorter: true,
-        render: (text) => text || "-",
+        filteredValue: [search?.customerNumber] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "customerNumber",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "customerNumber",
+            hasValue(search["customerNumber"]),
+            searchText,
+            text || "",
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "customerName",
+        title: "CUSTOMER NAME",
+        dataIndex: "customerName",
+        width: 200,
+        sorter: true,
+        filteredValue: [search?.customerName] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "customerName",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "customerName",
+            hasValue(search["customerName"]),
+            searchText,
+            text || "",
+            false,
+            "input",
+            search
+          ),
       },
       {
         key: "sor",
@@ -277,7 +209,26 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         ellipsis: {
           showTitle: false,
         },
-        render: (text) => <Tooltip title={text}>{text || "-"}</Tooltip>,
+        render: (text) => <Tooltip title={text}>{text || ""}</Tooltip>,
+      },
+      {
+        key: "costCenter",
+        title: "COST CENTER",
+        dataIndex: "costCenter",
+        width: 200,
+        sorter: true,
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (text) => <Tooltip title={text}>{text || ""}</Tooltip>,
+      },
+      {
+        key: "meterReadingCode",
+        title: "METER READING CODE",
+        dataIndex: "meterReadingCode",
+        width: 150,
+        sorter: true,
+        render: (text) => text || "",
       },
       {
         key: "accountGroupType",
@@ -285,7 +236,61 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         dataIndex: "accountGroupType",
         width: 150,
         sorter: true,
-        render: (text) => text || "-",
+        render: (text) => text || "",
+      },
+      {
+        key: "accountType",
+        title: "ACCOUNT TYPE",
+        dataIndex: "accountType",
+        width: 100,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "billingCycle",
+        title: "BILLING CYCLE",
+        dataIndex: "billingCycle",
+        width: 150,
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.billingCycle] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "billingCycle",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true
+        ),
+        render: (text) =>
+          renderColumn(
+            "billingCycle",
+            hasValue(search["billingCycle"]),
+            searchText,
+            text || "",
+            false,
+            "input",
+            search
+          ),
+      },
+      {
+        key: "billPeriod",
+        title: "BILLING PERIOD",
+        dataIndex: "billPeriod",
+        width: 120,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        key: "accountGroup",
+        title: "ACCOUNT GROUP",
+        dataIndex: "accountGroup",
+        width: 120,
+        sorter: true,
+        render: (text) => text || "",
       },
       {
         key: "saNumber",
@@ -293,7 +298,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         dataIndex: "saNumber",
         width: 150,
         sorter: true,
-        render: (text) => text || "-",
+        render: (text) => text || "",
       },
       {
         key: "pjbgType",
@@ -302,7 +307,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         width: 100,
         align: "center",
         sorter: true,
-        render: (text) => text || "-",
+        render: (text) => text || "",
       },
       {
         key: "saServiceType",
@@ -311,7 +316,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         width: 120,
         align: "center",
         sorter: true,
-        render: (text) => text || "-",
+        render: (text) => text || "",
       },
       {
         key: "saType",
@@ -320,7 +325,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         width: 120,
         align: "center",
         sorter: true,
-        render: (text) => text || "-",
+        render: (text) => text || "",
       },
       {
         key: "termOfPayment",
@@ -328,7 +333,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         dataIndex: "termOfPayment",
         width: 150,
         sorter: true,
-        render: (text) => text || "-",
+        render: (text) => text || "",
       },
       {
         key: "fullPriceCode",
@@ -339,7 +344,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         ellipsis: {
           showTitle: false,
         },
-        render: (text) => <Tooltip title={text}>{text || "-"}</Tooltip>,
+        render: (text) => <Tooltip title={text}>{text || ""}</Tooltip>,
       },
       {
         key: "minUsage",
@@ -348,7 +353,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         width: 120,
         align: "right",
         sorter: true,
-        render: (text) => (text != null ? text.toLocaleString() : "-"),
+        render: (text) => (text != null ? text.toLocaleString() : ""),
       },
       {
         key: "maxUsage",
@@ -357,7 +362,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         width: 120,
         align: "right",
         sorter: true,
-        render: (text) => (text != null ? text.toLocaleString() : "-"),
+        render: (text) => (text != null ? text.toLocaleString() : ""),
       },
       {
         key: "timeUnit",
@@ -366,7 +371,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         width: 100,
         align: "center",
         sorter: true,
-        render: (text) => text || "-",
+        render: (text) => text || "",
       },
       {
         key: "unitMeasure",
@@ -375,7 +380,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         width: 120,
         align: "center",
         sorter: true,
-        render: (text) => text || "-",
+        render: (text) => text || "",
       },
       {
         key: "currency",
@@ -384,7 +389,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         width: 100,
         align: "center",
         sorter: true,
-        render: (text) => text || "-",
+        render: (text) => text || "",
       },
       {
         key: "paymentType",
@@ -393,7 +398,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         width: 120,
         align: "center",
         sorter: true,
-        render: (text) => text || "-",
+        render: (text) => text || "",
       },
       {
         key: "chargingMethod",
@@ -402,33 +407,34 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         width: 150,
         align: "center",
         sorter: true,
-        render: (text) => text || "-",
+        render: (text) => text || "",
       },
       {
         key: "action",
         title: "ACTION",
-        width: 80,
-        align: "center",
+        width: 60,
+        isClassification:true,
+        fixed: "right",
         render: (text, record) => (
           <Link
             to={RBI_ROUTES.PRABILLING_DETAIL_CUSTOMER}
             state={{
               customerNumber: record?.customerNumber,
               billPeriod: record?.billPeriod,
-              inSor: record?.sor || data?.sor,
+              inSor: record?.sor || prabillData?.sor,
               accNumber: record?.accountNumber,
               saNumber: record?.saNumber,
             }}
             style={{ lineHeight: 0 }}
           >
             <Tooltip title="View Account Detail">
-              <SVGIcon name="IconDetail" width={20} />
+              <EyeOutlined style={{ fontSize: "20px" }} />
             </Tooltip>
           </Link>
         ),
       },
     ],
-    [page, pageSize, search, searchText, searchedColumn, data]
+    [page, pageSize, search, searchText, searchedColumn, prabillData]
   );
 
   const allColumns = useMemo(() => {
@@ -475,7 +481,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
       case 3:
         return "Failed";
       default:
-        return status || "-";
+        return status || "";
     }
   };
 
@@ -484,6 +490,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
 
   return (
     <Spin spinning={loading}>
+      {/* Prabilling Information Section */}
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
@@ -492,34 +499,89 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
         }
       >
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(5,auto)] gap-x-8 gap-y-2 sm:gap-y-1">
-          <DetailText label={"Init Code"}>{data?.initCode || "-"}</DetailText>
+          <DetailText label={"Init Code"}>{prabillData?.initCode || ""}</DetailText>
           <DetailText label={"Process Name"}>
-            {data?.processName || "-"}
+            {prabillData?.processName || ""}
           </DetailText>
           <DetailText label={"Billing Cycle"}>
-            {data?.billingCycle || "-"}
+            {prabillData?.billingCycle || ""}
           </DetailText>
           <DetailText label={"Billing Period"}>
-            {data?.billPeriod || "-"}
+            {prabillData?.billPeriod || ""}
           </DetailText>
-          <DetailText label={"SOR"}>{data?.sor || "-"}</DetailText>
+          <DetailText label={"SOR"}>{prabillData?.sor || ""}</DetailText>
+          <DetailText label={"Schedule Type"}>
+            {prabillData?.shceduleType || ""}
+          </DetailText>
           <DetailText label={"Total Customer"}>
-            {data?.totalCustomer || 0}
+            {prabillData?.totalCustomer || 0}
           </DetailText>
-          <DetailText label={"Created By"}>{data?.createdBy || "-"}</DetailText>
-          <DetailText label={"Created Date"}>
-            {data?.createdDtm
-              ? moment(data.createdDtm).format("DD MMM YYYY HH:mm:ss")
-              : "-"}
-          </DetailText>
-          <DetailText label={"Status"}>{renderStatus(data?.status)}</DetailText>
-          <DetailText label={"Message"}>{data?.message || "-"}</DetailText>
+          <DetailText label={"Status"}>{renderStatus(prabillData?.status)}</DetailText>
+          <DetailText label={"Message"}>{prabillData?.message || ""}</DetailText>
           <DetailText label={"Remark"} className="col-span-2">
-            {data?.remark || "-"}
+            {prabillData?.remark || ""}
+          </DetailText>
+
+          {/* Filter Details dari details array */}
+          {detailsData && detailsData.length > 0 && detailsData.map((detail, index) => (
+            <React.Fragment key={index}>
+              <DetailText label={"Cost Center"}>
+                {detail.costCenterName || detail.costCenter || ""}
+              </DetailText>
+              <DetailText label={"Meter Reading Code"}>
+                {detail.meterReadingCodeName || detail.meterReadingCode || ""}
+              </DetailText>
+              <DetailText label={"Account Segment"}>
+                {detail.accountSegmentName || detail.accountSegment || ""}
+              </DetailText>
+              <DetailText label={"Account Group Type"}>
+                {detail.accountGroupTypeName || detail.accountGroupType || ""}
+              </DetailText>
+              <DetailText label={"Account Numbers"} className="col-span-5">
+                {detail.accountNumber || ""}
+              </DetailText>
+              <DetailText label={"Account Names"} className="col-span-5">
+                {detail.accoutnName || ""}
+              </DetailText>
+            </React.Fragment>
+          ))}
+        </div>
+      </CardContainer>
+
+      {/* History Log Information Section */}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">HISTORY LOG INFORMATION</p>
+          </div>
+        }
+      >
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
+          <DetailText label={"Record ID"}>
+            {prabillData?.initId || ""}
+          </DetailText>
+          <DetailText label={"Created Date"}>
+            {prabillData?.createdDtm
+              ? moment(prabillData.createdDtm).format("DD MMM YYYY HH:mm:ss")
+              : ""}
+          </DetailText>
+          <DetailText label={"Created By"}>
+            {prabillData?.createdBy || ""}
+          </DetailText>
+          <DetailText label={"Updated Date"}>
+            {prabillData?.updateDtm
+              ? moment(prabillData.updateDtm).format("DD MMM YYYY HH:mm:ss")
+              : ""}
+          </DetailText>
+          <DetailText label={"Updated By"}>
+            {prabillData?.updatedBy || ""}
           </DetailText>
         </div>
       </CardContainer>
 
+
+
+      {/* Prabilling Result Table Section */}
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">

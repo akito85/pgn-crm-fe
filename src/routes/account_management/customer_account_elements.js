@@ -17,6 +17,7 @@ import ServicePoint from "../../app/pages/AccountManagement/CustomerAccountDetai
 import ServicePointAssetAssign from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServicePoint/ServicePointAssetAssign";
 import UpdateAccountInformation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/AccountInformation/UpdateAccountInformation";
 import RelationshipCreateAndUpdate from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/RelationshipCreateAndUpdate";
+import RelationshipDetail from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/RelationshipDetail";
 import ApproveOrRejectTOS from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceAgreement/DetailServiceAgreement/TosSubmission/ApproveOrRejectTos/ApproveOrRejectTOS";
 import CustomerDetail from "../../app/pages/AccountManagement/Customer/CustomerDetail";
 import UpdateCustomer from "../../app/pages/AccountManagement/Customer/Update/UpdateCustomer";
@@ -134,6 +135,7 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   //RELATIONSHIP
   CREATE_RELATIONSHIP_PAGE: <RelationshipCreateAndUpdate type={"create"} />,
   UPDATE_RELATIONSHIP_PAGE: <RelationshipCreateAndUpdate type={"update"} />,
+  DETAIL_RELATIONSHIP_PAGE: <RelationshipDetail />,
 
   //SA-APPROVE-REJECT-TOS
   APPROVE_OR_REJECT_TOS_PAGE: <ApproveOrRejectTOS />,

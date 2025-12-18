@@ -320,7 +320,8 @@ const AccountDetailInformation = ({
         return (
           <Relationship
             id={id}
-            // handleChangeInteraction={handleChangeInteraction}
+            type={type}
+            idCustomer={idCustomer}
           />
         );
       case dataTabs.adi:
@@ -343,7 +344,7 @@ const AccountDetailInformation = ({
           <GasUtilization idAccount={id} idCustomer={idCustomer} type={type} />
         );
       case dataTabs.promo:
-        return <AccountPromo />;
+        return <AccountPromo id={id} />;
       default:
         return <></>;
     }

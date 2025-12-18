@@ -26,6 +26,7 @@ const data = [
   { value: "Financial Information" }, //
   { value: "Premise" },
   { value: "Service Agreement" },
+  { value: "Relationship" },
   { value: "Gas Source" },
   { value: "Gas Deposit", disabled: true },
   { value: "Compensation", disabled: true },
@@ -66,6 +67,7 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
             item.value === "Account Contact" ||
             item.value === "Distribution Media" ||
             item.value === "Financial Information" ||
+            item.value === "Relationship" ||
             item.value === "Last Activity" ||
             item.value === "Billing" ||
             item.value === "Receipt" ||

@@ -124,7 +124,6 @@ const DetailEFaktur = () => {
     setPageSizeAttachment(pageSize);
   };
 
-  // ✅ Download Handler - menggunakan downloadUrl dari backend
   const handleDownloadAttachment = async (attachment) => {
     try {
       const response = await axios.get(
@@ -155,7 +154,6 @@ const DetailEFaktur = () => {
     }
   };
 
-  // ✅ Preview Handler - menggunakan downloadUrl dari backend (sama dengan download, tapi buka di tab baru)
   const handlePreviewAttachment = async (attachment) => {
     try {
       const response = await axios.get(
@@ -178,7 +176,6 @@ const DetailEFaktur = () => {
     }
   };
 
-  // ✅ Manual Upload Download Handler - menggunakan manualUploadDoc dari backend
   const handleDownloadManualUpload = async () => {
     try {
       const response = await axios.get(
@@ -208,7 +205,6 @@ const DetailEFaktur = () => {
     }
   };
 
-  // ✅ Manual Upload Preview Handler - menggunakan manualUploadDoc dari backend
   const handlePreviewManualUpload = async () => {
     try {
       const response = await axios.get(
