@@ -1027,13 +1027,10 @@ export const inactivatePaymentRelation = createAsyncThunk(
 
 export const downloadPaymentRelation = createAsyncThunk(
   "DOWNLOAD_PAYMENT_RELATION",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ body, id, }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/payment-relation/export-excel?search=${search}&page=
-      ${page}&size=${pageSize}&sort=${sort}`;
-      const response = await accountManagementService.downloadData(url, {
-        headers: { "Accept": "application/json" }
-      });
+      const url = `/v1/dbs/api/payment-relation/export-excel/${id}`;
+      const response = await accountManagementService.downloadDataAdvanced(url, body);
       return response.data;
     } catch (response) {
       thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_PAYMENT_RELATION", back: false }));
