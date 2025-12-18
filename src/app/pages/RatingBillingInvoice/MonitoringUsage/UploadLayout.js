@@ -17,7 +17,7 @@ import {
 } from "@ant-design/icons";
 import TablePagination from "../../../../components/TablePagination";
 import {
-  addDeletedData,
+  deleteSingleUsage, 
   getFormatUsageType,
   uploadMonitoringUsage,
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
@@ -29,6 +29,7 @@ import {
   ModalAttention,
   ModalConfirm,
 } from "../../../../components/Modal/ModalPopUp";
+import * as XLSX from "xlsx";
 
 const UploadLayout = ({
   dataTable,
@@ -37,10 +38,8 @@ const UploadLayout = ({
   id,
   dataHeader,
   type,
+  refreshData = () => {}, 
 }) => {
-  // const [page, setPage] = useState(1)
-  // const [pageSize, setPageSize] = useState(10);
-  // const [sort, setSort] = useState('');
   const [format, setFormat] = useState();
   const [urlLink, setUrlLink] = useState("");
   const [fileList, setFileList] = useState([]);
@@ -49,42 +48,62 @@ const UploadLayout = ({
   const [dataSource, setDataSource] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [deletedRecord, setDeletedRecord] = useState(null);
+  const [recordId, setRecordId] = useState(""); 
   const [isFileUploadEnabled, setFileUploadEnabled] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalDelete, setModalDelete] = useState(false);
   const [loadingUpload, setLoadingUpload] = useState(false);
+  const [validationError, setValidationError] = useState(null);
+  const [modalValidationError, setModalValidationError] = useState(false);
+  const [isValidated, setIsValidated] = useState(false);
+  const [validationResult, setValidationResult] = useState(null);
   const MAX_FILE_SIZE = 5000000;
+
+  // Define expected columns based on format type
+  const EXPECTED_COLUMNS = {
+    default: [
+      "ACCOUNT_NUMBER",
+      "COST_CENTER",
+      "BILLING_PERIOD",
+      "ASSET_SERIAL_NUM",
+      "MEAS_DATE",
+      "DATE",
+      "HOUR",
+      "STREAM_ID",
+      "TEMPERATURE",
+      "PRESSURE",
+      "CORRECTION_FACTOR",
+      "CALORIE",
+      "BEGIN_STAND",
+      "END_STAND",
+      "VOL_MEASURED_27",
+      "VOL_MEASURED_60",
+      "ENG_MEASURED",
+      "GHV",
+      "DESCRIPTION",
+      "TAXATION_ROWID",
+      "VOL_MSCF",
+      "UNCORRECTED_VALUE",
+      "SOURCE",
+    ],
+  };
   const { loading } = useSelector((state) => state.monitoring_usage);
   const { columns, page, setPage, pageSize, setPageSize, onSort } =
     useMonitoringList(tabHeader, id);
   const [tableDataSource, setTableDataSource] = useState([]);
   const dispatch = useDispatch();
 
-  const { list_usage_type, updatedData, deletedData } = useSelector(
+  const { list_usage_type } = useSelector(
     (state) => state.monitoring_usage
   );
+
   useEffect(() => {
     try {
       dispatch(getFormatUsageType());
-      // setTableDataSource(data?.usageList?.result)
     } catch (error) {
       console.log("Error", error);
     }
   }, [dispatch]);
-
-  // useEffect(() => {
-  //     if (updatedData.length > 0 || deletedData.length > 0) {
-  //         const updatedTableDataSource = tableDataSource?.map((item) => {
-  //             const updatedItem = updatedData?.find((updated) => updated.recordId === item.recordId);
-  //             return updatedItem ? { ...item, ...updatedItem } : item;
-  //         });
-
-  //         const finalTableDataSource = updatedTableDataSource?.filter(
-  //             (item) => !deletedData?.some((deleted) => deleted.recordId === item.recordId)
-  //         );
-  //         setTableDataSource(finalTableDataSource);
-  //     }
-  // }, [tableDataSource, updatedData, deletedData]);
 
   // onChange Size
   const onChangeSize = (page, pageSize) => {
@@ -102,12 +121,33 @@ const UploadLayout = ({
     setSelectedRecord(null);
   };
 
-  const handleDeleteOk = (record) => {
-    setModalDelete(false);
-    dispatch(addDeletedData(deletedRecord));
+  const handleDeleteOk = async () => {
+    try {
+      if (!recordId) {
+        console.error("No recordId found");
+        return;
+      }
+
+      const resultAction = await dispatch(deleteSingleUsage(recordId));
+      
+      if (deleteSingleUsage.fulfilled.match(resultAction)) {
+        // Update local state setelah API berhasil
+        const newData = dataTable.filter((item) => item.recordId !== recordId);
+        setDataTable(newData);
+        setModalDelete(false);
+        
+        // Refresh data dari parent component jika ada
+        if (refreshData && typeof refreshData === 'function') {
+          refreshData();
+        }
+      }
+    } catch (error) {
+      console.error("Error deleting usage:", error);
+      setModalDelete(false);
+    }
   };
 
-  // column
+  // column action dengan recordId
   const action = [
     {
       title: "ACTION",
@@ -139,6 +179,7 @@ const UploadLayout = ({
                   onClick={() => {
                     setModalDelete(true);
                     setDeletedRecord(record);
+                    setRecordId(record?.recordId);
                   }}
                 />
               </div>
@@ -156,7 +197,6 @@ const UploadLayout = ({
 
   // handle format change
   const handleFormat = (value) => {
-    // console.log(value)
     setFormat(value);
     setFileUploadEnabled(!!value);
   };
@@ -170,7 +210,133 @@ const UploadLayout = ({
 
   const handleFileChange = ({ fileList }) => {
     setFileList(fileList);
-    handleUpload();
+  };
+
+  // Validate Excel columns
+  const validateExcelColumns = async (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+
+          // Get first sheet
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+
+          // Convert to JSON to get headers
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          if (jsonData.length === 0) {
+            reject({
+              isValid: false,
+              message: "File Excel kosong atau tidak memiliki data"
+            });
+            return;
+          }
+
+          // Check if file has at least header + 1 data row
+          if (jsonData.length < 2) {
+            reject({
+              isValid: false,
+              message: "File Excel hanya memiliki header tanpa data"
+            });
+            return;
+          }
+
+          // Get headers from first row
+          const fileHeaders = jsonData[0];
+
+          // Get expected columns based on format type
+          const expectedColumns = EXPECTED_COLUMNS[format?.value] || EXPECTED_COLUMNS.default;
+
+          // Check if all expected columns exist
+          const missingColumns = expectedColumns.filter(
+            col => !fileHeaders.includes(col)
+          );
+
+          if (missingColumns.length > 0) {
+            reject({
+              isValid: false,
+              message: `Kolom yang hilang: ${missingColumns.join(", ")}`,
+              missingColumns,
+            });
+            return;
+          }
+
+          // Check if ALL rows have values in ALL columns (strict validation)
+          const dataRowsToCheck = jsonData.slice(1); // All data rows
+          const columnsWithEmptyCells = [];
+          const emptyRowNumbers = [];
+
+          expectedColumns.forEach((colName) => {
+            const colIndex = fileHeaders.indexOf(colName);
+            if (colIndex !== -1) {
+              // Check if ALL rows have data in this column
+              dataRowsToCheck.forEach((row, rowIndex) => {
+                const cellValue = row[colIndex];
+                const isEmpty = cellValue === undefined || cellValue === null || cellValue === "";
+
+                if (isEmpty) {
+                  if (!columnsWithEmptyCells.includes(colName)) {
+                    columnsWithEmptyCells.push(colName);
+                  }
+                  const actualRowNumber = rowIndex + 2; // +2 because: +1 for slice, +1 for header
+                  if (!emptyRowNumbers.includes(actualRowNumber)) {
+                    emptyRowNumbers.push(actualRowNumber);
+                  }
+                }
+              });
+            }
+          });
+
+          // Strict validation: all columns must have data in all rows
+          if (columnsWithEmptyCells.length > 0) {
+            const errorMessage = columnsWithEmptyCells.length <= 5
+              ? `Kolom berikut memiliki data kosong: ${columnsWithEmptyCells.join(", ")}`
+              : `${columnsWithEmptyCells.length} kolom memiliki data kosong: ${columnsWithEmptyCells.slice(0, 5).join(", ")}...`;
+
+            reject({
+              isValid: false,
+              message: errorMessage,
+              columnsWithEmptyCells,
+              emptyRowNumbers: emptyRowNumbers.slice(0, 10),
+            });
+            return;
+          }
+
+          // Get actual data count (non-empty rows)
+          const dataRows = jsonData.slice(1).filter(row => {
+            return row.some(cell => cell !== undefined && cell !== null && cell !== "");
+          });
+
+          resolve({
+            isValid: true,
+            message: "Validasi kolom berhasil",
+            headers: fileHeaders,
+            rowCount: dataRows.length,
+            totalColumns: expectedColumns.length,
+            columnsWithEmptyCells: null // All columns have data if we reach this point
+          });
+        } catch (error) {
+          reject({
+            isValid: false,
+            message: `Error membaca file Excel: ${error.message}`
+          });
+        }
+      };
+
+      reader.onerror = () => {
+        reject({
+          isValid: false,
+          message: "Error membaca file"
+        });
+      };
+
+      reader.readAsArrayBuffer(file);
+    });
   };
 
   // properties dragger
@@ -182,7 +348,33 @@ const UploadLayout = ({
     accept: ".xlsx, .xls",
     maxCount: 1,
     beforeUpload: async (file) => {
-      setFileName(file);
+      // Reset validation error
+      setValidationError(null);
+      setIsValidated(false);
+      setValidationResult(null);
+
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        setValidationError("Ukuran file melebihi 5MB");
+        setModalValidationError(true);
+        return false;
+      }
+
+      // Validate columns
+      try {
+        const validation = await validateExcelColumns(file);
+        console.log("Validation result:", validation);
+        setFileName(file);
+        setIsValidated(true);
+        setValidationResult(validation);
+      } catch (error) {
+        console.error("Validation error:", error);
+        setValidationError(error.message);
+        setModalValidationError(true);
+        setIsValidated(false);
+        return false;
+      }
+
       return false;
     },
     onChange: handleFileChange,
@@ -208,6 +400,11 @@ const UploadLayout = ({
       };
       setLoadingUpload(true);
       await dispatch(uploadMonitoringUsage(body)).unwrap();
+      
+      // ✅ Refresh data setelah upload berhasil
+      if (refreshData && typeof refreshData === 'function') {
+        refreshData();
+      }
     } catch (error) {
       setFileList((prevFileList) =>
         prevFileList.map((file) => {
@@ -220,6 +417,7 @@ const UploadLayout = ({
     }
     setLoadingUpload(false);
   };
+
   // handle upload by link
   const handleUploadLink = async () => {
     try {
@@ -230,6 +428,11 @@ const UploadLayout = ({
         onProgress: (progress) => setFileProgress(progress),
       };
       await dispatch(uploadMonitoringUsage(body)).unwrap();
+      
+      // ✅ Refresh data setelah upload berhasil
+      if (refreshData && typeof refreshData === 'function') {
+        refreshData();
+      }
     } catch (error) {
       setFileList((prevFileList) =>
         prevFileList.map((file) => {
@@ -247,14 +450,6 @@ const UploadLayout = ({
     setPage(tempPage);
     setPageSize(pageSizeChange);
   };
-
-  // const onSort = (_, __, sort) => {
-  //     const dataSort =
-  //         sort.order !== undefined
-  //             ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-  //             : "";
-  //     setSort(dataSort);
-  // };
 
   // update link files
   const updateLink = (e) => {
@@ -280,6 +475,24 @@ const UploadLayout = ({
       updatedFileList.splice(index, 1);
       return updatedFileList;
     });
+    setIsValidated(false);
+    setValidationResult(null);
+    setFileName("");
+  };
+
+  // Handle confirm upload after validation success
+  const handleConfirmUpload = () => {
+    handleUpload();
+  };
+
+  // Handle re-upload (reset file)
+  const handleReUpload = () => {
+    setFileList([]);
+    setFileName("");
+    setIsValidated(false);
+    setValidationResult(null);
+    setValidationError(null);
+    setModalValidationError(false);
   };
 
   const renderLayout = (type) => {
@@ -335,6 +548,7 @@ const UploadLayout = ({
               onChange={handleChangePage}
               tableScrolled={{ x: 10000, y: 600 }}
               onSort={onSort}
+              loading={loading} 
             />
           </div>
         </div>
@@ -430,10 +644,30 @@ const UploadLayout = ({
                       </ButtonComponent>
                     </div>
                   ) : file.size <= MAX_FILE_SIZE ? (
-                    <Progress
-                      percent={fileProgress}
-                      format={(percent) => `${percent}%`}
-                    />
+                    loadingUpload ? (
+                      <Progress
+                        percent={fileProgress}
+                        format={(percent) => `${percent}%`}
+                      />
+                    ) : isValidated && validationResult ? (
+                      <div className="flex flex-col gap-2 mt-2">
+                        <span className={"text-green-700 font-semibold"}>
+                          ✓ Validasi berhasil - Semua kolom terisi lengkap
+                        </span>
+                        <div className="text-sm text-gray-600">
+                          <div>• {validationResult.rowCount} baris data</div>
+                          <div>• {validationResult.totalColumns} kolom tervalidasi</div>
+                        </div>
+                        <div className="flex gap-2 mt-2">
+                          <ButtonComponent
+                            type="primary"
+                            onClick={handleConfirmUpload}
+                          >
+                            <UploadOutlined /> Confirm Upload
+                          </ButtonComponent>
+                        </div>
+                      </div>
+                    ) : null
                   ) : (
                     <span className={"text-red-700"}>
                       File is bigger than 5MB
@@ -465,6 +699,7 @@ const UploadLayout = ({
       );
     }
   };
+
   return (
     <>
       {renderLayout(type)}
@@ -475,6 +710,37 @@ const UploadLayout = ({
         textList={"format usage type before uploading a file"}
         header="Failed"
       />
+      <ModalConfirm
+        isOpen={modalValidationError}
+        handleCancel={() => {
+          setModalValidationError(false);
+          handleReUpload();
+        }}
+        handleOk={() => {
+          setModalValidationError(false);
+          handleReUpload();
+        }}
+        width={500}
+        useOk={true}
+        okText="Upload Ulang"
+        cancelText="Batal"
+      >
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-center gap-[20px] mt-6">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className={"text-[18px] font-bold"}>
+              Validasi File Gagal
+            </p>
+          </div>
+          <Alert
+            message={validationError || "Validasi file gagal"}
+            type={"error"}
+          />
+          <p className="text-center">
+            Silakan upload ulang file dengan format yang sesuai
+          </p>
+        </div>
+      </ModalConfirm>
       <ModalConfirm
         isOpen={modalDelete}
         handleCancel={() => setModalDelete(false)}

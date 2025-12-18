@@ -26,6 +26,7 @@ import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
+import { EyeOutlined } from "@ant-design/icons";
 
 const CalculationPage = () => {
   const { data: data_calculation, loading } = useSelector(
@@ -1264,7 +1265,7 @@ const CalculationPage = () => {
             style={{ lineHeight: 0 }}
           >
             <Tooltip title="Detail">
-              <SVGIcon name="IconDetail" width={20} />
+              <EyeOutlined style={{ fontSize: "20px" }} />
             </Tooltip>
           </Link>
         );
