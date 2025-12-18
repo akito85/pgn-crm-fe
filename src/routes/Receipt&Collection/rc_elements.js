@@ -53,6 +53,14 @@ import ViewPaymentChannel from "../../app/pages/ReceiptAndCollection/MasterData/
 import ListDetailPaymentChannel from "../../app/pages/ReceiptAndCollection/MasterData/PaymentChannel/ListDetailPaymentChannel";
 import ListFormPaymentChannel from "../../app/pages/ReceiptAndCollection/MasterData/PaymentChannel/ListFormPaymentChannel";
 
+import ViewDeduction from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Deduction/ViewDeduction";
+import ListDetailDeduction from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Deduction/ListDetailDeduction";
+import ListFormDeduction from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Deduction/ListFormDeduction";
+
+import ViewTransferToReceipt from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToReceipt/ViewTransferToReceipt";
+import ListDetailTransferToReceipt from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToReceipt/ListDetailTransferToReceipt";
+import ListFormTransferToReceipt from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToReceipt/ListFormTransferToReceipt";
+
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
   VIEW_RECEIPT_PAGE: <ViewReceipt />,
@@ -142,6 +150,7 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_SETTINGS: <ListDetailSettings />,
   CREATE_SETTINGS: <ListFormSettings type={"create"} />,
   UPDATE_SETTINGS: <ListFormSettings type={"update"} />,
+
   // Collection Agent
   VIEW_COLLECTING_AGENT: <ViewCollectingAgent />,
   DETAIL_COLLECTING_AGENT: <ListDetailCollectingAgent />,
@@ -153,4 +162,16 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_PAYMENT_CHANNEL: <ListDetailPaymentChannel />,
   CREATE_PAYMENT_CHANNEL: <ListFormPaymentChannel type={"create"} />,
   UPDATE_PAYMENT_CHANNEL: <ListFormPaymentChannel type={"update"} />,
+
+  // Deduction
+  VIEW_DEDUCTION: <ViewDeduction />,
+  DETAIL_DEDUCTION: <ListDetailDeduction />,
+  CREATE_DEDUCTION: <ListFormDeduction type={"create"} />,
+  UPDATE_DEDUCTION: <ListFormDeduction type={"update"} />,
+  
+  // Transfer to Receipt
+  VIEW_TRANSFER_TO_RECEIPT: <ViewTransferToReceipt />,
+  DETAIL_TRANSFER_TO_RECEIPT: <ListDetailTransferToReceipt />,
+  CREATE_TRANSFER_TO_RECEIPT: <ListFormTransferToReceipt type={"create"} />,
+  UPDATE_TRANSFER_TO_RECEIPT: <ListFormTransferToReceipt type={"update"} />,
 };

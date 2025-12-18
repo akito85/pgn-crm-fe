@@ -6,12 +6,14 @@ import {
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import {
-  DownloadOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import {
   renderColumn,
@@ -324,16 +326,6 @@ const ViewPaymentChannel = () => {
     // toolbar items
     {
       action: "Download",
-      render: (
-        <ButtonComponent
-          onClick={handleDownload}
-          type={"submit"}
-          border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-        >
-          Download List
-        </ButtonComponent>
-      ),
     },
     {
       action: "Create",
@@ -365,7 +357,10 @@ const ViewPaymentChannel = () => {
                   icon={<SVGIcon name="IconDetail" width={24} />}
                   border={false}
                 /> */}
-              <SVGIcon name="IconDetail" width={24} />
+              {/* <SVGIcon name="IconDetail" width={24} /> */}
+              <EyeOutlined
+                  style={{ fontSize: "24px", color: "#0075bf" }}
+                />
             </Link>
           </Tooltip>
         );
@@ -478,15 +473,16 @@ const ViewPaymentChannel = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
-        <BaseContainer header={"PAYMENT CHANNEL LIST"}>
-          <TablePagination
+        <CardContainer header={"PAYMENT CHANNEL LIST"}>
+          <TableRBI
             dataSource={data?.result}
             pageSize={pageSize}
+            handleDownload={handleDownload}
             // columns={columns}
             columns={[
               ...columns,
               ...useColumnActionPermission(
-                ["view", "history", "update", 'activate'],
+                ["view", "update","history"],
                 itemActions
               ),
             ]}
@@ -500,9 +496,7 @@ const ViewPaymentChannel = () => {
               y: 525,
             }}
           />
-        </BaseContainer>
-
-        
+        </CardContainer>
 
         <ModalHistory
           isOpen={openModalHistory && dataApprovalHistoryFix}
