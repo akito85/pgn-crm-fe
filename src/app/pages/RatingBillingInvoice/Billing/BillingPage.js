@@ -441,7 +441,7 @@ const BillingPage = () => {
               totalData={
                 valueTab === "All" ? 3 : data?.page?.totalElements || 0
               }
-              tableScrolled={{ x: valueTab === "All" ? 1500 : 3500, y: 525 }}
+              tableScrolled={{ x: valueTab === "All" ? 1500 : 16000, y: 525 }}
               onSort={onSort}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
