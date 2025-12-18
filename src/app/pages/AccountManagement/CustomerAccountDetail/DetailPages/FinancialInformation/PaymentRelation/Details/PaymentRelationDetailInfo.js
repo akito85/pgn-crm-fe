@@ -12,8 +12,8 @@ const PaymentRelationDetailInfo = ({
       <BaseContainer header={"PAYMENT RELATION"}>
         <div className="w-full grid grid-cols-3 gap-4">
           {/* Payment Relation Information */}
-          <DetailText label="Account Number">{dataDetail?.accountNumber}</DetailText>
-          <DetailText label="Account Name">{dataDetail?.accountName}</DetailText>
+          <DetailText label="Account Number">{dataDetail?.relatedAccountNumber}</DetailText>
+          <DetailText label="Account Name">{dataDetail?.relatedAccountName}</DetailText>
           <DetailText label="Priority">{dataDetail?.priority}</DetailText>
           <DetailText label="Start Date">{dataDetail?.startDate ? moment(dataDetail.startDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
           <DetailText label="End Date">{dataDetail?.endDate ? moment(dataDetail.endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
