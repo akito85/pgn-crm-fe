@@ -364,7 +364,7 @@ export default function InfoPaymentRelation({
                   color={"#0075bf"}
                   width={20}
                   onClick={() => {
-                    setAccount(r?.accountId, r?.accountNumber, r?.customerName)
+                    setAccount(r?.accountId, r?.accountNumber, r?.accountName)
                     setIsOpen(false);
                   }}
                 />
