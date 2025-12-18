@@ -17,7 +17,7 @@ import {
 } from "@ant-design/icons";
 import TablePagination from "../../../../components/TablePagination";
 import {
-  addDeletedData,
+  deleteSingleUsage,
   getFormatUsageType,
   uploadMonitoringUsage,
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
@@ -29,6 +29,7 @@ import {
   ModalAttention,
   ModalConfirm,
 } from "../../../../components/Modal/ModalPopUp";
+import * as XLSX from "xlsx";
 
 const UploadLayout = ({
   dataTable,
@@ -37,10 +38,8 @@ const UploadLayout = ({
   id,
   dataHeader,
   type,
+  refreshData = () => {},
 }) => {
-  // const [page, setPage] = useState(1)
-  // const [pageSize, setPageSize] = useState(10);
-  // const [sort, setSort] = useState('');
   const [format, setFormat] = useState();
   const [urlLink, setUrlLink] = useState("");
   const [fileList, setFileList] = useState([]);
@@ -49,42 +48,64 @@ const UploadLayout = ({
   const [dataSource, setDataSource] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [deletedRecord, setDeletedRecord] = useState(null);
+  const [recordId, setRecordId] = useState("");
   const [isFileUploadEnabled, setFileUploadEnabled] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalDelete, setModalDelete] = useState(false);
   const [loadingUpload, setLoadingUpload] = useState(false);
+  const [validationError, setValidationError] = useState(null);
+  const [validationErrorDetails, setValidationErrorDetails] = useState(null);
+  const [modalValidationError, setModalValidationError] = useState(false);
+  const [isValidated, setIsValidated] = useState(false);
+  const [validationResult, setValidationResult] = useState(null);
   const MAX_FILE_SIZE = 5000000;
+
+  // Define expected columns based on format type
+  const EXPECTED_COLUMNS = {
+    default: [
+      "ACCOUNT_NUMBER",
+      "COST_CENTER",
+      "BILLING_PERIOD",
+      "ASSET_SERIAL_NUM",
+      "MEAS_DATE",
+      "DATE",
+      "HOUR",
+      "STREAM_ID",
+      "TEMPERATURE",
+      "PRESSURE",
+      "CORRECTION_FACTOR",
+      "CALORIE",
+      "BEGIN_STAND",
+      "END_STAND",
+      "VOL_MEASURED_27",
+      "VOL_MEASURED_60",
+      "ENG_MEASURED",
+      "GHV",
+      "DESCRIPTION",
+      "TAXATION_ROWID",
+      "VOL_MSCF",
+      "UNCORRECTED_VALUE",
+      "SOURCE",
+    ],
+  };
+
+  // Define mandatory columns that must not be empty
+  const MANDATORY_COLUMNS = ["ACCOUNT_NUMBER", "ASSET_SERIAL_NUM", "MEAS_DATE"];
   const { loading } = useSelector((state) => state.monitoring_usage);
   const { columns, page, setPage, pageSize, setPageSize, onSort } =
     useMonitoringList(tabHeader, id);
   const [tableDataSource, setTableDataSource] = useState([]);
   const dispatch = useDispatch();
 
-  const { list_usage_type, updatedData, deletedData } = useSelector(
-    (state) => state.monitoring_usage
-  );
+  const { list_usage_type } = useSelector((state) => state.monitoring_usage);
+
   useEffect(() => {
     try {
       dispatch(getFormatUsageType());
-      // setTableDataSource(data?.usageList?.result)
     } catch (error) {
       console.log("Error", error);
     }
   }, [dispatch]);
-
-  // useEffect(() => {
-  //     if (updatedData.length > 0 || deletedData.length > 0) {
-  //         const updatedTableDataSource = tableDataSource?.map((item) => {
-  //             const updatedItem = updatedData?.find((updated) => updated.recordId === item.recordId);
-  //             return updatedItem ? { ...item, ...updatedItem } : item;
-  //         });
-
-  //         const finalTableDataSource = updatedTableDataSource?.filter(
-  //             (item) => !deletedData?.some((deleted) => deleted.recordId === item.recordId)
-  //         );
-  //         setTableDataSource(finalTableDataSource);
-  //     }
-  // }, [tableDataSource, updatedData, deletedData]);
 
   // onChange Size
   const onChangeSize = (page, pageSize) => {
@@ -102,12 +123,33 @@ const UploadLayout = ({
     setSelectedRecord(null);
   };
 
-  const handleDeleteOk = (record) => {
-    setModalDelete(false);
-    dispatch(addDeletedData(deletedRecord));
+  const handleDeleteOk = async () => {
+    try {
+      if (!recordId) {
+        console.error("No recordId found");
+        return;
+      }
+
+      const resultAction = await dispatch(deleteSingleUsage(recordId));
+
+      if (deleteSingleUsage.fulfilled.match(resultAction)) {
+        // Update local state setelah API berhasil
+        const newData = dataTable.filter((item) => item.recordId !== recordId);
+        setDataTable(newData);
+        setModalDelete(false);
+
+        // Refresh data dari parent component jika ada
+        if (refreshData && typeof refreshData === "function") {
+          refreshData();
+        }
+      }
+    } catch (error) {
+      console.error("Error deleting usage:", error);
+      setModalDelete(false);
+    }
   };
 
-  // column
+  // column action dengan recordId
   const action = [
     {
       title: "ACTION",
@@ -139,6 +181,7 @@ const UploadLayout = ({
                   onClick={() => {
                     setModalDelete(true);
                     setDeletedRecord(record);
+                    setRecordId(record?.recordId);
                   }}
                 />
               </div>
@@ -156,7 +199,6 @@ const UploadLayout = ({
 
   // handle format change
   const handleFormat = (value) => {
-    // console.log(value)
     setFormat(value);
     setFileUploadEnabled(!!value);
   };
@@ -170,7 +212,209 @@ const UploadLayout = ({
 
   const handleFileChange = ({ fileList }) => {
     setFileList(fileList);
-    handleUpload();
+  };
+
+  // Validate Excel columns
+  const validateExcelColumns = async (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+
+          // Get first sheet (should be "Usage Input")
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+
+          console.log("Available sheets:", workbook.SheetNames);
+          console.log("Reading sheet:", firstSheetName);
+
+          // Convert to JSON to get headers (use raw=false to get formatted values)
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+            header: 1,
+            raw: false, // Get formatted values instead of raw values
+            defval: null, // Use null for empty cells
+          });
+
+          if (jsonData.length === 0) {
+            reject({
+              isValid: false,
+              message: "File Excel kosong atau tidak memiliki data",
+            });
+            return;
+          }
+
+          // Check if file has at least header + 1 data row
+          if (jsonData.length < 2) {
+            reject({
+              isValid: false,
+              message: "File Excel hanya memiliki header tanpa data",
+            });
+            return;
+          }
+
+          // Get headers from first row and clean them
+          const fileHeaders = jsonData[0]
+            .map((header) => {
+              if (header === null || header === undefined || header === "") {
+                return null;
+              }
+              return String(header).trim();
+            })
+            .filter((h) => h !== null);
+
+          // Get expected columns based on format type
+          const expectedColumns =
+            EXPECTED_COLUMNS[format?.value] || EXPECTED_COLUMNS.default;
+
+          // Check if all expected columns exist
+          const missingColumns = expectedColumns.filter(
+            (col) => !fileHeaders.includes(col)
+          );
+
+          if (missingColumns.length > 0) {
+            reject({
+              isValid: false,
+              message: `Kolom yang hilang: ${missingColumns.join(", ")}`,
+              missingColumns,
+            });
+            return;
+          }
+
+          // Get data rows (skip header)
+          const allDataRows = jsonData.slice(1);
+
+          // Filter out completely empty rows (rows where all cells are null/undefined/empty)
+          const dataRows = allDataRows.filter((row) => {
+            return row.some((cell) => {
+              return (
+                cell !== undefined &&
+                cell !== null &&
+                cell !== "" &&
+                !(typeof cell === "string" && cell.trim() === "")
+              );
+            });
+          });
+
+          console.log("File headers:", fileHeaders);
+          console.log("Expected columns:", expectedColumns);
+          console.log("Mandatory columns:", MANDATORY_COLUMNS);
+          console.log(
+            "Total rows in Excel (including empty):",
+            allDataRows.length
+          );
+          console.log("Rows with data (non-empty rows):", dataRows.length);
+          console.log("Sample row data:", dataRows.slice(0, 2));
+
+          const emptyCellsByColumn = {}; // Store count of empty cells per column
+
+          // Only validate mandatory columns
+          MANDATORY_COLUMNS.forEach((colName) => {
+            // Find column index in file headers
+            const colIndex = fileHeaders.indexOf(colName);
+
+            if (colIndex === -1) {
+              console.log(
+                `Mandatory column ${colName} not found in file headers`
+              );
+              return;
+            }
+
+            let emptyCount = 0;
+
+            // Count empty cells in this column (only in rows that have data)
+            dataRows.forEach((row, rowIndex) => {
+              // Get cell value at the column index
+              const cellValue = row[colIndex];
+
+              // Check if cell is truly empty
+              // IMPORTANT: Don't treat 0 (number zero) as empty!
+              const isEmpty =
+                cellValue === undefined ||
+                cellValue === null ||
+                cellValue === "" ||
+                (typeof cellValue === "string" && cellValue.trim() === "");
+
+              if (isEmpty) {
+                emptyCount++;
+                // Log first few empty cells for debugging
+                if (emptyCount <= 3) {
+                  console.log(
+                    `Empty cell - Column: ${colName} (index ${colIndex}), Row: ${
+                      rowIndex + 2
+                    }, Value:`,
+                    cellValue,
+                    `Type: ${typeof cellValue}`
+                  );
+                }
+              }
+            });
+
+            // Only add to the object if there are empty cells
+            if (emptyCount > 0) {
+              emptyCellsByColumn[colName] = emptyCount;
+              console.log(
+                `⚠️ Mandatory column ${colName} has ${emptyCount} empty cells out of ${dataRows.length} non-empty rows`
+              );
+            }
+          });
+
+          // If there are any empty cells in mandatory columns, reject with detailed information
+          if (Object.keys(emptyCellsByColumn).length > 0) {
+            // Create detailed message
+            const emptyCellsInfo = Object.entries(emptyCellsByColumn)
+              .map(([column, count]) => `${column}: ${count} cell kosong`)
+              .join(", ");
+
+            const totalEmptyCells = Object.values(emptyCellsByColumn).reduce(
+              (sum, count) => sum + count,
+              0
+            );
+            const columnNames = Object.keys(emptyCellsByColumn).join(", ");
+
+            reject({
+              isValid: false,
+              message: `Kolom wajib tidak boleh kosong. Ditemukan ${totalEmptyCells} cell kosong pada kolom: ${columnNames}`,
+              emptyCellsByColumn,
+              emptyCellsInfo,
+            });
+            return;
+          }
+
+          // Get actual data count (non-empty rows)
+          const nonEmptyRows = dataRows.filter((row) => {
+            return row.some(
+              (cell) => cell !== undefined && cell !== null && cell !== ""
+            );
+          });
+
+          resolve({
+            isValid: true,
+            message: "Validasi kolom berhasil",
+            headers: fileHeaders,
+            rowCount: nonEmptyRows.length,
+            totalColumns: expectedColumns.length,
+            columnsWithEmptyCells: null, // All columns have data if we reach this point
+          });
+        } catch (error) {
+          reject({
+            isValid: false,
+            message: `Error membaca file Excel: ${error.message}`,
+          });
+        }
+      };
+
+      reader.onerror = () => {
+        reject({
+          isValid: false,
+          message: "Error membaca file",
+        });
+      };
+
+      reader.readAsArrayBuffer(file);
+    });
   };
 
   // properties dragger
@@ -182,7 +426,36 @@ const UploadLayout = ({
     accept: ".xlsx, .xls",
     maxCount: 1,
     beforeUpload: async (file) => {
-      setFileName(file);
+      // Reset validation error
+      setValidationError(null);
+      setValidationErrorDetails(null);
+      setIsValidated(false);
+      setValidationResult(null);
+
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        setValidationError("Ukuran file melebihi 5MB");
+        setValidationErrorDetails(null);
+        setModalValidationError(true);
+        return false;
+      }
+
+      // Validate columns
+      try {
+        const validation = await validateExcelColumns(file);
+        console.log("Validation result:", validation);
+        setFileName(file);
+        setIsValidated(true);
+        setValidationResult(validation);
+      } catch (error) {
+        console.error("Validation error:", error);
+        setValidationError(error.message);
+        setValidationErrorDetails(error.emptyCellsByColumn || null);
+        setModalValidationError(true);
+        setIsValidated(false);
+        return false;
+      }
+
       return false;
     },
     onChange: handleFileChange,
@@ -208,6 +481,11 @@ const UploadLayout = ({
       };
       setLoadingUpload(true);
       await dispatch(uploadMonitoringUsage(body)).unwrap();
+
+      // ✅ Refresh data setelah upload berhasil
+      if (refreshData && typeof refreshData === "function") {
+        refreshData();
+      }
     } catch (error) {
       setFileList((prevFileList) =>
         prevFileList.map((file) => {
@@ -220,6 +498,7 @@ const UploadLayout = ({
     }
     setLoadingUpload(false);
   };
+
   // handle upload by link
   const handleUploadLink = async () => {
     try {
@@ -230,6 +509,11 @@ const UploadLayout = ({
         onProgress: (progress) => setFileProgress(progress),
       };
       await dispatch(uploadMonitoringUsage(body)).unwrap();
+
+      // ✅ Refresh data setelah upload berhasil
+      if (refreshData && typeof refreshData === "function") {
+        refreshData();
+      }
     } catch (error) {
       setFileList((prevFileList) =>
         prevFileList.map((file) => {
@@ -247,14 +531,6 @@ const UploadLayout = ({
     setPage(tempPage);
     setPageSize(pageSizeChange);
   };
-
-  // const onSort = (_, __, sort) => {
-  //     const dataSort =
-  //         sort.order !== undefined
-  //             ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-  //             : "";
-  //     setSort(dataSort);
-  // };
 
   // update link files
   const updateLink = (e) => {
@@ -280,6 +556,25 @@ const UploadLayout = ({
       updatedFileList.splice(index, 1);
       return updatedFileList;
     });
+    setIsValidated(false);
+    setValidationResult(null);
+    setFileName("");
+  };
+
+  // Handle confirm upload after validation success
+  const handleConfirmUpload = () => {
+    handleUpload();
+  };
+
+  // Handle re-upload (reset file)
+  const handleReUpload = () => {
+    setFileList([]);
+    setFileName("");
+    setIsValidated(false);
+    setValidationResult(null);
+    setValidationError(null);
+    setValidationErrorDetails(null);
+    setModalValidationError(false);
   };
 
   const renderLayout = (type) => {
@@ -335,6 +630,7 @@ const UploadLayout = ({
               onChange={handleChangePage}
               tableScrolled={{ x: 10000, y: 600 }}
               onSort={onSort}
+              loading={loading}
             />
           </div>
         </div>
@@ -430,23 +726,41 @@ const UploadLayout = ({
                       </ButtonComponent>
                     </div>
                   ) : file.size <= MAX_FILE_SIZE ? (
-                    <Progress
-                      percent={fileProgress}
-                      format={(percent) => `${percent}%`}
-                    />
+                    loadingUpload ? (
+                      <Progress
+                        percent={fileProgress}
+                        format={(percent) => `${percent}%`}
+                      />
+                    ) : isValidated && validationResult ? (
+                      <div className="flex flex-col gap-2 mt-2">
+                        <span className={"text-green-700 font-semibold"}>
+                          ✓ Validasi berhasil - Semua kolom terisi lengkap
+                        </span>
+                        <div className="text-sm text-gray-600">
+                          <div>• {validationResult.rowCount} baris data</div>
+                          <div>
+                            • {validationResult.totalColumns} kolom tervalidasi
+                          </div>
+                        </div>
+                        <div className="flex gap-2 mt-2">
+                          <ButtonComponent
+                            type="primary"
+                            size={"middle"}
+                            onClick={handleConfirmUpload}
+                          >
+                            Confirm Upload
+                          </ButtonComponent>
+                        </div>
+                      </div>
+                    ) : null
                   ) : (
                     <span className={"text-red-700"}>
                       File is bigger than 5MB
                     </span>
                   )}
                 </div>
-                <div className={"flex flex-col justify-end items-end"}>
-                  <ButtonComponent
-                    icon={<CloseOutlined style={{ color: "#58804D" }} />}
-                    border={false}
-                    onClick={() => handleRemove(index)}
-                  />
-                  {file.status === "error" && (
+                {file.status === "error" && (
+                  <div className={"flex flex-col justify-end items-end"}>
                     <ButtonComponent border={false}>
                       <span
                         className={"text-green-800 mr-2"}
@@ -456,8 +770,8 @@ const UploadLayout = ({
                       </span>
                       <UndoOutlined style={{ color: "#58804D" }} />
                     </ButtonComponent>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -465,6 +779,7 @@ const UploadLayout = ({
       );
     }
   };
+
   return (
     <>
       {renderLayout(type)}
@@ -475,6 +790,69 @@ const UploadLayout = ({
         textList={"format usage type before uploading a file"}
         header="Failed"
       />
+      <ModalConfirm
+        isOpen={modalValidationError}
+        handleCancel={() => {
+          setModalValidationError(false);
+          handleReUpload();
+        }}
+        handleOk={() => {
+          setModalValidationError(false);
+          handleReUpload();
+        }}
+        width={600}
+        useOk={true}
+        okText="Upload Ulang"
+        cancelText="Batal"
+      >
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-center gap-[20px] mt-6">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className={"text-[18px] font-bold"}>Validasi File Gagal</p>
+          </div>
+          <Alert
+            message={validationError || "Validasi file gagal"}
+            type={"error"}
+          />
+          {validationErrorDetails &&
+            Object.keys(validationErrorDetails).length > 0 && (
+              <div className="bg-gray-50 p-4 rounded-md max-h-60 overflow-y-auto">
+                <p className="font-semibold mb-3 text-sm">
+                  Detail Cell Kosong pada Kolom Wajib:
+                </p>
+                <ul className="list-none text-sm space-y-2">
+                  {Object.entries(validationErrorDetails).map(
+                    ([column, count], idx) => (
+                      <li
+                        key={idx}
+                        className="flex justify-between items-center bg-white p-2 rounded border border-gray-200"
+                      >
+                        <span className="font-medium text-gray-700">
+                          {column}
+                        </span>
+                        <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
+                          {count} cell kosong
+                        </span>
+                      </li>
+                    )
+                  )}
+                </ul>
+              </div>
+            )}
+          <div className="bg-blue-50 p-3 rounded-md mt-3">
+            <p className="text-xs text-blue-800">
+              <strong>Kolom Wajib:</strong> ACCOUNT_NUMBER, ASSET_SERIAL_NUM,
+              MEAS_DATE
+            </p>
+            <p className="text-xs text-blue-600 mt-1">
+              Kolom lainnya boleh kosong
+            </p>
+          </div>
+          <p className="text-center text-sm text-gray-600 mt-3">
+            Silakan lengkapi kolom wajib yang kosong dan upload ulang file
+          </p>
+        </div>
+      </ModalConfirm>
       <ModalConfirm
         isOpen={modalDelete}
         handleCancel={() => setModalDelete(false)}

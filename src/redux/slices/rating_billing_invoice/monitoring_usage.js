@@ -28,6 +28,66 @@ const initialState = {
   deletedData: [],
 };
 
+export const updateSingleUsage = createAsyncThunk(
+  "UPDATE_SINGLE_USAGE",
+  async ({ recordId, data }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/usage/detail-batch/${recordId}`;
+      const response = await ratingBillingHttpService.updateData(url, data);
+      const successMessage = {
+        title: "Successful",
+        description: "Your data has been updated successfully.",
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (response) {
+      const message =
+        (response.response &&
+          response.response.data &&
+          response.response.data.message) ||
+        response.message ||
+        response.toString();
+      const errorBody = {
+        title: "Failed",
+        data: response.response?.data?.data,
+        description: `Failed to update data. ${message}. Please try again.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(response.response?.data);
+    }
+  }
+);
+
+export const deleteSingleUsage = createAsyncThunk(
+  "DELETE_SINGLE_USAGE",
+  async (recordId, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/usage/detail-batch/${recordId}`;
+      const response = await ratingBillingHttpService.deleteData(url);
+      const successMessage = {
+        title: "Successful",
+        description: "Your data has been deleted successfully.",
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return { recordId, data: response.data };
+    } catch (response) {
+      const message =
+        (response.response &&
+          response.response.data &&
+          response.response.data.message) ||
+        response.message ||
+        response.toString();
+      const errorBody = {
+        title: "Failed",
+        data: response.response?.data?.data,
+        description: `Failed to delete data. ${message}. Please try again.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(response.response?.data);
+    }
+  }
+);
+
 export const getListUsagePaginate = createAsyncThunk(
   "GET_MONITORING_USAGE_PAGINATE",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
@@ -473,30 +533,6 @@ const monitoringUsageSlice = createSlice({
       state.data_upload = null;
       state.data_submit = null;
     },
-    addUpdatedData: (state, action) => {
-      const successMessage = {
-        title: "Successfull",
-        description: "Your data has been submitted",
-      };
-      const existingIndex = state.updatedData.findIndex(
-        (item) => item.recordId === action.payload.recordId
-      );
-
-      if (existingIndex !== -1) {
-        state.updatedData[existingIndex] = action.payload;
-      } else {
-        state.updatedData.push(action.payload);
-      }
-      showModalSuccess(successMessage);
-    },
-    addDeletedData: (state, action) => {
-      const successMessage = {
-        title: "Successfull",
-        description: "Your data has been deleted",
-      };
-      showModalSuccess(successMessage);
-      state.deletedData.push(action.payload);
-    },
     clearUpdated: (state) => {
       state.updatedData = [];
     },
@@ -632,6 +668,52 @@ const monitoringUsageSlice = createSlice({
         state.data_submit = action.payload;
       });
     builder
+      .addCase(updateSingleUsage.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateSingleUsage.fulfilled, (state, action) => {
+        state.loading = false;
+        // Update data di detail_batch.usageList jika ada
+        if (state.detail_batch?.usageList?.result) {
+          const index = state.detail_batch.usageList.result.findIndex(
+            (item) => item.recordId === action.meta.arg.recordId
+          );
+          if (index !== -1) {
+            state.detail_batch.usageList.result[index] = {
+              ...state.detail_batch.usageList.result[index],
+              ...action.meta.arg.data,
+              status: "SUCCESS",
+            };
+          }
+        }
+      })
+      .addCase(updateSingleUsage.rejected, (state) => {
+        state.loading = false;
+      });
+
+    // Delete single usage
+    builder
+      .addCase(deleteSingleUsage.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteSingleUsage.fulfilled, (state, action) => {
+        state.loading = false;
+        // Remove data dari detail_batch.usageList
+        if (state.detail_batch?.usageList?.result) {
+          state.detail_batch.usageList.result =
+            state.detail_batch.usageList.result.filter(
+              (item) => item.recordId !== action.payload.recordId
+            );
+          // Update total count
+          if (state.detail_batch.usageList.totalElements) {
+            state.detail_batch.usageList.totalElements -= 1;
+          }
+        }
+      })
+      .addCase(deleteSingleUsage.rejected, (state) => {
+        state.loading = false;
+      });
+    builder
       .addCase(approveRejectData.pending, (state) => {
         state.loading = true;
       })
@@ -698,8 +780,6 @@ const { reducer } = monitoringUsageSlice;
 export default reducer;
 export const {
   setClearData,
-  addUpdatedData,
-  addDeletedData,
   clearUpdated,
   clearUpdatedDeleted,
 } = monitoringUsageSlice.actions;

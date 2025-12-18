@@ -127,7 +127,7 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
   return (
     <>
      <div className="mb-4">
-        <p className="text-[15px] font-medium text-blue-600 mb-3">
+        <p className="text-[15px] font-medium text-[#0075bf] mb-3">
           CALCULATION USAGE INFORMATION
         </p>
         <div className="flex flex-row gap-8">
@@ -135,13 +135,13 @@ const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
             <p className="text-[15px] font-normal text-gray-700">
               Calculation Code
             </p>
-            <p className="text-[20px] font-medium text-blue-600">
+            <p className="text-[20px] font-medium text-[#0075bf]">
               {calculationCode}
             </p>
           </div>
           <div className="flex flex-col gap-1">
             <p className="text-[15px] font-normal text-gray-700">Rating Code</p>
-            <p className="text-[20px] font-medium text-blue-600">
+            <p className="text-[20px] font-medium text-[#0075bf]">
               {ratingCodeId}
             </p>
           </div>
