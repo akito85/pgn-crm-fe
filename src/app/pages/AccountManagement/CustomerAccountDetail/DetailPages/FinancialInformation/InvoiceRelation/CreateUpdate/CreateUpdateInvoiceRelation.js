@@ -113,7 +113,7 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
   useEffect(() => {
     if (
       type === "update" &&
-      detail_invoiceRelation &&
+      detail_invoiceRelation?.result &&
       data_irApprovalHierarchy?.length
     ) {
       const {
@@ -124,9 +124,9 @@ const CreateUpdateInvoiceRelation = ({ type }) => {
         endDate,
         description,
         appHierId,
-      } = detail_invoiceRelation;
+      } = detail_invoiceRelation.result;
 
-      const { accountNumber, accountName } = detail_invoiceRelation;
+      const { accountNumber, accountName } = detail_invoiceRelation.result;
 
       formCreate.setFieldsValue({
         subjectId,
